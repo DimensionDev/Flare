@@ -314,6 +314,11 @@
     <string name="settings_storage_app_log_description">Visualizza il registro app</string>
     <string name="settings_rss_management_title">Gestione RSS</string>
     <string name="settings_rss_management_description">Gestisci feed RSS</string>
+    <string name="settings_nostr_relays_manage">Gestisci relè</string>
+    <string name="settings_nostr_relays_add">Aggiungi relè</string>
+    <string name="settings_nostr_relays_add_dialog_title">Aggiungi relè</string>
+    <string name="settings_nostr_relays_placeholder">Inserisci URL relay</string>
+    <string name="settings_nostr_relays_empty">Nessun relè configurato</string>
     <string name="draft_box_title">Bozza Casella</string>
     <string name="draft_box_empty">Ancora nessuna bozza</string>
     <string name="draft_box_retry">Riprova</string>

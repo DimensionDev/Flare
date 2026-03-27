@@ -344,6 +344,12 @@
     <string name="bluesky_login_oauth_hint">Bluesky OAuth ei ehkä ole riittävän vakaa, käytä salasanaa jos kohtaat ongelmia.</string>
     <string name="login_button">Kirjaudu</string>
     <string name="mastodon_login_verify_message">Ole hyvä ja odota kunnes vahvistamme käyttäjätunnuksesi.</string>
+    <string name="nostr_login_title">Tuo Nostr tili</string>
+    <string name="nostr_login_hint">Liitä npub tai hex pubkey vain luku-oikeudelle tai anna nsec tuodaksesi kirjoitettavan tilin.</string>
+    <string name="nostr_login_generate_button">Luo ja kirjaudu</string>
+    <string name="nostr_login_npub_hint">npub tai hex pubkey (valinnainen, jos nsec on asetettu)</string>
+    <string name="nostr_login_nsec_hint">nsec tai hex yksityinen avain</string>
+    <string name="nostr_login_relays_hint">Synkronoi URL:t pilkulla erotettuna</string>
     <string name="service_select_instance_input_placeholder">Ilmentymän URL</string>
     <string name="service_select_next_button">Seuraava</string>
     <string name="service_select_empty_message">Esiintymiä ei löytynyt</string>

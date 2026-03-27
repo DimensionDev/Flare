@@ -344,6 +344,12 @@
     <string name="bluesky_login_oauth_hint">Bluesky OAuth er muligvis ikke stabil nok, brug venligst adgangskode login, hvis du støder på problemer.</string>
     <string name="login_button">Login</string>
     <string name="mastodon_login_verify_message">Vent venligst mens vi verificerer dine legitimationsoplysninger.</string>
+    <string name="nostr_login_title">Importér Nostr konto</string>
+    <string name="nostr_login_hint">Indsæt en npub eller hex-pubkey for skrivebeskyttet adgang, eller giv en nsec til at importere en skrivbar konto.</string>
+    <string name="nostr_login_generate_button">Generer og login</string>
+    <string name="nostr_login_npub_hint">npub eller hex-pubkey (valgfrit, hvis nsec er angivet)</string>
+    <string name="nostr_login_nsec_hint">nsec eller hex privat nøgle</string>
+    <string name="nostr_login_relays_hint">Relæ- URL\' er, adskilt af kommaer</string>
     <string name="service_select_instance_input_placeholder">Instance URL</string>
     <string name="service_select_next_button">Næste</string>
     <string name="service_select_empty_message">Ingen forekomster fundet</string>

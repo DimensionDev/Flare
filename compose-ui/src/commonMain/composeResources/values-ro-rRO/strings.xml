@@ -344,6 +344,12 @@
     <string name="bluesky_login_oauth_hint">OAuth Bluesky s-ar putea să nu fie suficient de stabil, vă rugăm să folosiți parola de conectare dacă întâmpinați probleme.</string>
     <string name="login_button">Autentificare</string>
     <string name="mastodon_login_verify_message">Te rugăm să aștepți până îți verificăm acreditările.</string>
+    <string name="nostr_login_title">Importă contul Nostr</string>
+    <string name="nostr_login_hint">Inserați un npub sau hex pubkey pentru accesul doar în citire sau furnizați un nsec pentru a importa un cont care poate fi scris.</string>
+    <string name="nostr_login_generate_button">Generează și conectează-te</string>
+    <string name="nostr_login_npub_hint">npub sau hex pubkey (opţional dacă nsec este setat)</string>
+    <string name="nostr_login_nsec_hint">cheie privată nsec sau hex</string>
+    <string name="nostr_login_relays_hint">URL-uri relay, separate prin virgulă</string>
     <string name="service_select_instance_input_placeholder">URL Instanță</string>
     <string name="service_select_next_button">Următoarea</string>
     <string name="service_select_empty_message">Nu s-au găsit instanțe</string>

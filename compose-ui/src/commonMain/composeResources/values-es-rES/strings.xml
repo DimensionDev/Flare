@@ -344,6 +344,12 @@
     <string name="bluesky_login_oauth_hint">Puede que Bluesky OAuth no sea lo suficientemente estable. Por favor, utilice el nombre de usuario de la contraseña si encuentra algún problema.</string>
     <string name="login_button">Ingresar</string>
     <string name="mastodon_login_verify_message">Por favor, espere mientras verificamos sus credenciales.</string>
+    <string name="nostr_login_title">Importar cuenta Nostr</string>
+    <string name="nostr_login_hint">Pegue un pubkey npub o hexadecimal para acceso de sólo lectura, o proporcione un nsec para importar una cuenta escribible.</string>
+    <string name="nostr_login_generate_button">Generar e iniciar sesión</string>
+    <string name="nostr_login_npub_hint">npub o hexadecimal (opcional si nsec está establecido)</string>
+    <string name="nostr_login_nsec_hint">clave privada nsec o hexadecimal</string>
+    <string name="nostr_login_relays_hint">Retransmitir URLs, separados por comas</string>
     <string name="service_select_instance_input_placeholder">URL de instancia</string>
     <string name="service_select_next_button">Siguiente</string>
     <string name="service_select_empty_message">No se encontraron instancias</string>

@@ -314,6 +314,11 @@
     <string name="settings_storage_app_log_description">Ver registro do aplicativo</string>
     <string name="settings_rss_management_title">Gerenciamento de RSS</string>
     <string name="settings_rss_management_description">Gerenciar feeds RSS</string>
+    <string name="settings_nostr_relays_manage">Gerenciar relés</string>
+    <string name="settings_nostr_relays_add">Adicionar relé</string>
+    <string name="settings_nostr_relays_add_dialog_title">Adicionar relé</string>
+    <string name="settings_nostr_relays_placeholder">Inserir URL do relé</string>
+    <string name="settings_nostr_relays_empty">Nenhum relés configurado</string>
     <string name="draft_box_title">Caixa de rascunho</string>
     <string name="draft_box_empty">Ainda não há rascunhos</string>
     <string name="draft_box_retry">Repetir</string>

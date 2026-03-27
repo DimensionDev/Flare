@@ -344,6 +344,12 @@
     <string name="bluesky_login_oauth_hint">Bluesky OAuth nemusí být dostatečně stabilní, použijte prosím heslo, pokud narazíte na nějaké problémy.</string>
     <string name="login_button">Přihlásit se</string>
     <string name="mastodon_login_verify_message">Počkejte prosím, než ověříme Vaše přihlašovací údaje.</string>
+    <string name="nostr_login_title">Importovat Nostr účet</string>
+    <string name="nostr_login_hint">Vložte npub nebo hex pubkey pro přístup pouze ke čtení, nebo poskytněte nsec pro import zapisovatelného účtu.</string>
+    <string name="nostr_login_generate_button">Vygenerovat a přihlásit</string>
+    <string name="nostr_login_npub_hint">npub nebo hex pubkey (nepovinné, pokud je nastaven nseC)</string>
+    <string name="nostr_login_nsec_hint">nsec nebo hex soukromý klíč</string>
+    <string name="nostr_login_relays_hint">Relé URL oddělené čárkami</string>
     <string name="service_select_instance_input_placeholder">URL instance</string>
     <string name="service_select_next_button">Další</string>
     <string name="service_select_empty_message">Nebyly nalezeny žádné instance</string>

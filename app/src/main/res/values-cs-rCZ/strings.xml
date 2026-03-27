@@ -99,6 +99,11 @@
     <string name="settings_language_description">Změnit jazyk aplikace</string>
     <string name="settings_rss_management_title">Správa RSS</string>
     <string name="settings_rss_management_description">Spravovat RSS kanály</string>
+    <string name="settings_nostr_relays_manage">Spravovat relé</string>
+    <string name="settings_nostr_relays_add">Přidat relé</string>
+    <string name="settings_nostr_relays_add_dialog_title">Přidat relé</string>
+    <string name="settings_nostr_relays_placeholder">Zadejte URL relé</string>
+    <string name="settings_nostr_relays_empty">Nejsou nakonfigurovány žádné relé</string>
     <string name="status_loadmore_error_retry">Opakovat</string>
     <string name="login_expired">Relace přihlášení vypršela</string>
     <string name="login_expired_message">Klikněte pro přihlášení znovu</string>

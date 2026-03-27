@@ -316,6 +316,11 @@
     <string name="settings_storage_app_log_description">Zobrazit protokol aplikace</string>
     <string name="settings_rss_management_title">Správa RSS</string>
     <string name="settings_rss_management_description">Spravovat RSS kanály</string>
+    <string name="settings_nostr_relays_manage">Spravovat relé</string>
+    <string name="settings_nostr_relays_add">Přidat relé</string>
+    <string name="settings_nostr_relays_add_dialog_title">Přidat relé</string>
+    <string name="settings_nostr_relays_placeholder">Zadejte URL relé</string>
+    <string name="settings_nostr_relays_empty">Nejsou nakonfigurovány žádné relé</string>
     <string name="draft_box_title">Koncept boxu</string>
     <string name="draft_box_empty">Zatím žádné koncepty</string>
     <string name="draft_box_retry">Opakovat</string>

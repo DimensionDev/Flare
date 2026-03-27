@@ -98,6 +98,11 @@
     <string name="settings_language_description">Schimbă limba aplicației</string>
     <string name="settings_rss_management_title">Administrare RSS</string>
     <string name="settings_rss_management_description">Gestionare fluxuri RSS</string>
+    <string name="settings_nostr_relays_manage">Gestionează releele</string>
+    <string name="settings_nostr_relays_add">Adaugă releu</string>
+    <string name="settings_nostr_relays_add_dialog_title">Adaugă releu</string>
+    <string name="settings_nostr_relays_placeholder">Introduceți releul URL</string>
+    <string name="settings_nostr_relays_empty">Niciun releu configurat</string>
     <string name="status_loadmore_error_retry">Reîncercați</string>
     <string name="login_expired">Sesiunea de autentificare a expirat</string>
     <string name="login_expired_message">Faceți clic pentru a vă reconecta</string>

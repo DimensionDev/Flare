@@ -99,6 +99,11 @@
     <string name="settings_language_description">Zmień język aplikacji</string>
     <string name="settings_rss_management_title">Zarządzanie RSS</string>
     <string name="settings_rss_management_description">Zarządzaj kanałami RSS</string>
+    <string name="settings_nostr_relays_manage">Zarządzaj przekaźnikami</string>
+    <string name="settings_nostr_relays_add">Dodaj przekaźnik</string>
+    <string name="settings_nostr_relays_add_dialog_title">Dodaj przekaźnik</string>
+    <string name="settings_nostr_relays_placeholder">Wprowadź adres URL relay</string>
+    <string name="settings_nostr_relays_empty">Brak skonfigurowanych przekaźników</string>
     <string name="status_loadmore_error_retry">Ponów próbę</string>
     <string name="login_expired">Sesja logowania wygasła</string>
     <string name="login_expired_message">Kliknij, aby zalogować się ponownie</string>

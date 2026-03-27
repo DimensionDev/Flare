@@ -97,6 +97,11 @@
     <string name="settings_language_description">Cambia la lingua dell\'app</string>
     <string name="settings_rss_management_title">Gestione RSS</string>
     <string name="settings_rss_management_description">Gestisci feed RSS</string>
+    <string name="settings_nostr_relays_manage">Gestisci relè</string>
+    <string name="settings_nostr_relays_add">Aggiungi relè</string>
+    <string name="settings_nostr_relays_add_dialog_title">Aggiungi relè</string>
+    <string name="settings_nostr_relays_placeholder">Inserisci URL relay</string>
+    <string name="settings_nostr_relays_empty">Nessun relè configurato</string>
     <string name="status_loadmore_error_retry">Riprova</string>
     <string name="login_expired">Sessione di accesso scaduta</string>
     <string name="login_expired_message">Clicca di nuovo per effettuare il login</string>

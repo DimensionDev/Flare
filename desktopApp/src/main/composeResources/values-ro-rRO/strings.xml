@@ -315,6 +315,11 @@
     <string name="settings_storage_app_log_description">Vezi jurnalul aplicațiilor</string>
     <string name="settings_rss_management_title">Administrare RSS</string>
     <string name="settings_rss_management_description">Gestionare fluxuri RSS</string>
+    <string name="settings_nostr_relays_manage">Gestionează releele</string>
+    <string name="settings_nostr_relays_add">Adaugă releu</string>
+    <string name="settings_nostr_relays_add_dialog_title">Adaugă releu</string>
+    <string name="settings_nostr_relays_placeholder">Introduceți releul URL</string>
+    <string name="settings_nostr_relays_empty">Niciun releu configurat</string>
     <string name="draft_box_title">Căsuță de Schiță</string>
     <string name="draft_box_empty">Nici o ciornă încă</string>
     <string name="draft_box_retry">Reîncercați</string>

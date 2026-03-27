@@ -342,6 +342,12 @@
     <string name="bluesky_login_oauth_hint">Το Bluesky OAuth μπορεί να μην είναι αρκετά σταθερό, παρακαλούμε χρησιμοποιήστε την σύνδεση με κωδικό πρόσβασης αν αντιμετωπίσετε οποιοδήποτε πρόβλημα.</string>
     <string name="login_button">Είσοδος</string>
     <string name="mastodon_login_verify_message">Παρακαλώ περιμένετε όσο επαληθεύουμε τα στοιχεία σας.</string>
+    <string name="nostr_login_title">Εισαγωγή λογαριασμού Nostr</string>
+    <string name="nostr_login_hint">Επικολλήστε ένα npub ή hex pubkey για πρόσβαση μόνο για ανάγνωση, ή παρέχετε ένα nsec για να εισάγετε έναν εγγράψιμο λογαριασμό.</string>
+    <string name="nostr_login_generate_button">Δημιουργία και σύνδεση</string>
+    <string name="nostr_login_npub_hint">npub ή hex pubkey (προαιρετικό εάν nsec έχει οριστεί)</string>
+    <string name="nostr_login_nsec_hint">nsec ή hex ιδιωτικό κλειδί</string>
+    <string name="nostr_login_relays_hint">Relay URLs, διαχωρισμένα με κόμματα</string>
     <string name="service_select_instance_input_placeholder">Διεύθυνση Url Παρουσίας</string>
     <string name="service_select_next_button">Επόμενο</string>
     <string name="service_select_empty_message">Δεν βρέθηκαν παρουσίες</string>

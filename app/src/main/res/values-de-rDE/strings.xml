@@ -97,6 +97,11 @@
     <string name="settings_language_description">Sprache der App ändern</string>
     <string name="settings_rss_management_title">RSS-Verwaltung</string>
     <string name="settings_rss_management_description">RSS-Feeds verwalten</string>
+    <string name="settings_nostr_relays_manage">Relais verwalten</string>
+    <string name="settings_nostr_relays_add">Relais hinzufügen</string>
+    <string name="settings_nostr_relays_add_dialog_title">Relais hinzufügen</string>
+    <string name="settings_nostr_relays_placeholder">Relay-URL eingeben</string>
+    <string name="settings_nostr_relays_empty">Keine Relais konfiguriert</string>
     <string name="status_loadmore_error_retry">Wiederholen</string>
     <string name="login_expired">Die Anmeldesitzung ist abgelaufen</string>
     <string name="login_expired_message">Zum erneuten Anmelden klicken</string>

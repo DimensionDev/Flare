@@ -314,6 +314,11 @@
     <string name="settings_storage_app_log_description">Visa apploggen</string>
     <string name="settings_rss_management_title">RSS-hantering</string>
     <string name="settings_rss_management_description">Hantera RSS-flöden</string>
+    <string name="settings_nostr_relays_manage">Hantera reläer</string>
+    <string name="settings_nostr_relays_add">Lägg till relä</string>
+    <string name="settings_nostr_relays_add_dialog_title">Lägg till relä</string>
+    <string name="settings_nostr_relays_placeholder">Ange relä URL</string>
+    <string name="settings_nostr_relays_empty">Inga reläer konfigurerade</string>
     <string name="draft_box_title">Utkast ruta</string>
     <string name="draft_box_empty">Inga utkast ännu</string>
     <string name="draft_box_retry">Försök igen</string>

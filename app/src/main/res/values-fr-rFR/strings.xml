@@ -93,6 +93,11 @@
     <string name="settings_language_description">Changer la langue de l\'application</string>
     <string name="settings_rss_management_title">Gestion des flux RSS</string>
     <string name="settings_rss_management_description">Gérer les flux RSS</string>
+    <string name="settings_nostr_relays_manage">Gérer les relais</string>
+    <string name="settings_nostr_relays_add">Ajouter un relais</string>
+    <string name="settings_nostr_relays_add_dialog_title">Ajouter un relais</string>
+    <string name="settings_nostr_relays_placeholder">Entrez l\'URL du relais</string>
+    <string name="settings_nostr_relays_empty">Aucun relais configuré</string>
     <string name="status_loadmore_error_retry">Réessayer</string>
     <string name="login_expired">Session de connexion expirée</string>
     <string name="login_expired_message">Cliquez pour vous connecter à nouveau</string>

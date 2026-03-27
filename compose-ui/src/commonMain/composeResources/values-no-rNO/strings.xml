@@ -344,6 +344,12 @@
     <string name="bluesky_login_oauth_hint">Bluesky OAuth er kanskje ikke stabil nok, vennligst bruk passordpålogging dersom du opplever problemer.</string>
     <string name="login_button">Innlogging</string>
     <string name="mastodon_login_verify_message">Vennligst vent mens vi bekrefter dine legitimasjon.</string>
+    <string name="nostr_login_title">Importer Nostr konto</string>
+    <string name="nostr_login_hint">Lim inn en npub eller hex pubkey for read-only access, or provide an nsec to import a writable account.</string>
+    <string name="nostr_login_generate_button">Generer og logg inn</string>
+    <string name="nostr_login_npub_hint">npub eller hex pubtast (valgfritt om nsek er satt)</string>
+    <string name="nostr_login_nsec_hint">nsec eller hex privat nøkkel</string>
+    <string name="nostr_login_relays_hint">Relé URLs, adskilt med komma</string>
     <string name="service_select_instance_input_placeholder">Instans URL</string>
     <string name="service_select_next_button">Neste</string>
     <string name="service_select_empty_message">Ingen instanser funnet</string>

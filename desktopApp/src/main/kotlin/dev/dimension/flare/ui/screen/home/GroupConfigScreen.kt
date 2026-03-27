@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Bars
+import compose.icons.fontawesomeicons.solid.Pen
 import compose.icons.fontawesomeicons.solid.Plus
 import compose.icons.fontawesomeicons.solid.TableList
 import compose.icons.fontawesomeicons.solid.Trash
@@ -42,10 +43,8 @@ import dev.dimension.flare.Res
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.MixedTimelineTabItem
 import dev.dimension.flare.data.model.TabItem
-import dev.dimension.flare.data.model.TabMetaData
 import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.data.model.TitleType
-import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.tab_settings_add
 import dev.dimension.flare.tab_settings_drag
@@ -69,13 +68,11 @@ import io.github.composefluent.component.SubtleButton
 import io.github.composefluent.component.Text
 import io.github.composefluent.component.TextField
 import kotlinx.collections.immutable.toImmutableList
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.stringResource
-import org.koin.compose.koinInject
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
+import dev.dimension.flare.ui.presenter.home.GroupConfigPresenter as SharedGroupConfigPresenter
 
 @Composable
 internal fun GroupConfigScreen(
@@ -84,14 +81,27 @@ internal fun GroupConfigScreen(
 ) {
     val haptics = LocalHapticFeedback.current
     val defaultGroupName = stringResource(Res.string.tab_settings_group_default_name)
-    val state by producePresenter(key = item?.key ?: "new_group") {
-        GroupConfigPresenter(item, defaultGroupName)
-    }
+    val state by producePresenter(key = item?.key ?: "new_group") { GroupConfigPresenter(item, defaultGroupName) }
 
     DisposableEffect(Unit) {
         onDispose {
             state.commit()
         }
+    }
+    state.selectedEditTab?.let {
+        EditTabDialog(
+            visible = true,
+            tabItem = it,
+            onDismissRequest = {
+                state.setEditTab(null)
+            },
+            onConfirm = { updatedTab ->
+                state.setEditTab(null)
+                if (updatedTab is TimelineTabItem) {
+                    state.updateTab(updatedTab)
+                }
+            },
+        )
     }
 
     val lazyListState = rememberLazyListState()
@@ -152,14 +162,14 @@ internal fun GroupConfigScreen(
                                 columns = GridCells.FixedSize(48.dp),
                                 modifier = Modifier.heightIn(max = 300.dp).widthIn(max = 300.dp),
                             ) {
-                                items(state.availableIcons) { icon ->
+                                items(state.availableIcons) { selectedIcon ->
                                     TabIcon(
                                         accountType = AccountType.Guest,
-                                        icon = icon,
+                                        icon = selectedIcon,
                                         title = TitleType.Text(state.name.text.toString()),
                                         modifier =
                                             Modifier.padding(4.dp).clickable {
-                                                state.setIcon(icon)
+                                                state.setIcon(selectedIcon)
                                                 state.setShowIconPicker(false)
                                             },
                                         size = 48.dp,
@@ -204,7 +214,7 @@ internal fun GroupConfigScreen(
                 }
             }
 
-            itemsIndexed(state.tabs, key = { _, item -> item.key }) { index, item ->
+            itemsIndexed(state.tabs, key = { _, item -> item.key }) { _, item ->
                 ReorderableItem(reorderableLazyColumnState, key = item.key) { isDragging ->
                     CardExpanderItem(
                         heading = {
@@ -215,6 +225,17 @@ internal fun GroupConfigScreen(
                         },
                         trailing = {
                             Row {
+                                SubtleButton(
+                                    onClick = {
+                                        state.setEditTab(item)
+                                    },
+                                    iconOnly = true,
+                                ) {
+                                    FAIcon(
+                                        FontAwesomeIcons.Solid.Pen,
+                                        contentDescription = "Edit",
+                                    )
+                                }
                                 SubtleButton(
                                     onClick = {
                                         state.deleteTab(item)
@@ -262,7 +283,7 @@ internal fun GroupConfigScreen(
                 state.addTab(tabItem)
             }
         },
-        onDeleteTab = { key -> state.deleteTab(key) },
+        onDeleteTab = state::deleteTab,
         toAddRssSource = toAddRssSource,
     )
 }
@@ -271,9 +292,8 @@ internal fun GroupConfigScreen(
 private fun GroupConfigPresenter(
     initialItem: MixedTimelineTabItem?,
     defaultGroupName: String,
-    repository: SettingsRepository = koinInject(),
-    appScope: CoroutineScope = koinInject(),
 ) = run {
+    val sharedState = remember { SharedGroupConfigPresenter() }.invoke()
     val name =
         rememberTextFieldState(
             initialItem?.metaData?.title?.let {
@@ -283,22 +303,21 @@ private fun GroupConfigPresenter(
                 }
             } ?: "",
         )
-
-    var icon by remember {
-        mutableStateOf<IconType>(
-            initialItem?.metaData?.icon ?: IconType.Material(dev.dimension.flare.ui.model.UiIcon.Rss),
-        )
+    var icon by remember(initialItem) {
+        mutableStateOf<IconType>(initialItem?.metaData?.icon ?: IconType.Material(dev.dimension.flare.ui.model.UiIcon.Rss))
     }
-
     val tabs =
-        remember {
+        remember(initialItem) {
             mutableStateListOf<TimelineTabItem>().apply {
-                initialItem?.subTimelineTabItem?.let { addAll(it) }
+                initialItem
+                    ?.subTimelineTabItem
+                    ?.distinctBy { it.key }
+                    ?.let(::addAll)
             }
         }
-
     var showAddTab by remember { mutableStateOf(false) }
     var showIconPicker by remember { mutableStateOf(false) }
+    var selectedEditTab by remember { mutableStateOf<TimelineTabItem?>(null) }
     val allTabs = remember { AllTabsPresenter(filterIsTimeline = true) }.invoke()
 
     object {
@@ -307,21 +326,24 @@ private fun GroupConfigPresenter(
         val tabs = tabs
         val showAddTab = showAddTab
         val showIconPicker = showIconPicker
+        val selectedEditTab = selectedEditTab
         val allTabs = allTabs
-        val availableIcons =
-            dev.dimension.flare.ui.model.UiIcon.entries
-                .map { IconType.Material(it) }
+        val availableIcons = sharedState.availableIcons
 
-        fun setIcon(newIcon: IconType) {
-            icon = newIcon
+        fun setIcon(value: IconType) {
+            icon = value
+        }
+
+        fun setAddTab(show: Boolean) {
+            showAddTab = show
         }
 
         fun setShowIconPicker(show: Boolean) {
             showIconPicker = show
         }
 
-        fun setAddTab(show: Boolean) {
-            showAddTab = show
+        fun setEditTab(tab: TimelineTabItem?) {
+            selectedEditTab = tab
         }
 
         fun addTab(tab: TimelineTabItem) {
@@ -338,6 +360,13 @@ private fun GroupConfigPresenter(
             tabs.removeIf { it.key == key }
         }
 
+        fun updateTab(tab: TimelineTabItem) {
+            val index = tabs.indexOfFirst { it.key == tab.key }
+            if (index != -1) {
+                tabs[index] = tab
+            }
+        }
+
         fun moveTab(
             from: Any,
             to: Any,
@@ -350,47 +379,13 @@ private fun GroupConfigPresenter(
         }
 
         fun commit() {
-            appScope.launch {
-                val groupName = name.text.toString()
-
-                if (tabs.isEmpty()) {
-                    if (initialItem != null) {
-                        repository.updateTabSettings {
-                            val currentTabs = mainTabs.toMutableList()
-                            currentTabs.removeIf { it.key == initialItem.key }
-                            copy(mainTabs = currentTabs)
-                        }
-                    } else {
-                        // New group is empty, don't create it
-                    }
-                    return@launch
-                }
-
-                val newGroup =
-                    MixedTimelineTabItem(
-                        subTimelineTabItem = tabs.toList(),
-                        metaData =
-                            TabMetaData(
-                                title = TitleType.Text(groupName.ifEmpty { defaultGroupName }),
-                                icon = icon,
-                            ),
-                    )
-
-                repository.updateTabSettings {
-                    val currentTabs = mainTabs.toMutableList()
-                    if (initialItem != null) {
-                        // Edit existing
-                        val index = currentTabs.indexOfFirst { it.key == initialItem.key }
-                        if (index != -1) {
-                            currentTabs[index] = newGroup
-                        }
-                    } else {
-                        // Create new
-                        currentTabs.add(newGroup)
-                    }
-                    copy(mainTabs = currentTabs)
-                }
-            }
+            sharedState.commit(
+                initialItem = initialItem,
+                name = name.text.toString(),
+                icon = icon,
+                tabs = tabs.toList(),
+                defaultGroupName = defaultGroupName,
+            )
         }
     }
 }

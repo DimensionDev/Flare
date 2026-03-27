@@ -6,42 +6,43 @@ struct LocalHistoryScreen: View {
     @State private var searchText = ""
     @State private var selection: HistorySelection = .status
     var body: some View {
-        VStack {
-            Picker("local_history_title", selection: $selection) {
-                Text("local_history_status").tag(HistorySelection.status)
-                Text("local_history_user").tag(HistorySelection.user)
-            }
-            .pickerStyle(.segmented)
-            .padding(.horizontal)
-            .padding(.vertical, 8)
+        List {
             if selection == .status {
-                List {
-                    if searchText.isEmpty {
-                        TimelinePagingView(data: presenter.state.history)
-                            .listRowSeparator(.hidden)
-                            .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
-                            .padding(.horizontal)
-                            .listRowBackground(Color.clear)
-                    } else if !presenter.state.data.isError {
-                        TimelinePagingView(data: presenter.state.data)
-                            .listRowSeparator(.hidden)
-                            .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
-                            .padding(.horizontal)
-                            .listRowBackground(Color.clear)
-                    }
+                if searchText.isEmpty {
+                    TimelinePagingView(data: presenter.state.history)
+                        .listRowSeparator(.hidden)
+                        .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
+                        .padding(.horizontal)
+                        .listRowBackground(Color.clear)
+                } else if !presenter.state.data.isError {
+                    TimelinePagingView(data: presenter.state.data)
+                        .listRowSeparator(.hidden)
+                        .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
+                        .padding(.horizontal)
+                        .listRowBackground(Color.clear)
                 }
+            } else {
+                if searchText.isEmpty {
+                    UserPagingView(data: presenter.state.userHistory)
+                } else if !presenter.state.searchUser.isError {
+                    UserPagingView(data: presenter.state.searchUser)
+                }
+            }
+        }
+        .if(selection == .status, transform: { view in
+            view
                 .scrollContentBackground(.hidden)
                 .listRowSpacing(2)
                 .listStyle(.plain)
                 .background(Color(.systemGroupedBackground))
-            } else {
-                List {
-                    if searchText.isEmpty {
-                        UserPagingView(data: presenter.state.userHistory)
-                    } else if !presenter.state.searchUser.isError {
-                        UserPagingView(data: presenter.state.searchUser)
-                    }
+        })
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Picker("local_history_title", selection: $selection) {
+                    Text("local_history_status").tag(HistorySelection.status)
+                    Text("local_history_user").tag(HistorySelection.user)
                 }
+                .pickerStyle(.menu)
             }
         }
         .detectScrolling()

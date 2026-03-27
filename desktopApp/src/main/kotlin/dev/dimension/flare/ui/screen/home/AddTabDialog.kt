@@ -4,25 +4,24 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
@@ -55,15 +54,17 @@ import dev.dimension.flare.ui.presenter.list.PinnableTimelineTabPresenter
 import dev.dimension.flare.ui.screen.settings.AllTabsPresenter
 import io.github.composefluent.FluentTheme
 import io.github.composefluent.component.AccentButton
+import io.github.composefluent.component.ButtonDefaults
 import io.github.composefluent.component.CardExpanderItem
 import io.github.composefluent.component.ContentDialog
 import io.github.composefluent.component.LiteFilter
 import io.github.composefluent.component.PillButton
+import io.github.composefluent.component.SubtleButton
 import io.github.composefluent.component.Text
 import kotlinx.collections.immutable.ImmutableList
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 internal fun AddTabDialog(
     visible: Boolean,
@@ -105,186 +106,215 @@ internal fun AddTabDialog(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 allTabs.accountTabs.onSuccess { tabs ->
-                    val pagerState =
-                        rememberPagerState {
-                            tabs.size + 1
-                        }
-                    val scope = rememberCoroutineScope()
-                    LiteFilter {
-                        PillButton(
-                            selected = pagerState.currentPage == 0,
-                            onSelectedChanged = {
-                                if (it) {
-                                    scope.launch {
-                                        pagerState.animateScrollToPage(0)
-                                    }
-                                }
-                            },
-                            content = {
-                                Text(text = stringResource(Res.string.rss_title))
-                            },
-                        )
-                        tabs.forEachIndexed { index, tab ->
-                            PillButton(
-                                modifier = Modifier.clip(CircleShape),
-                                selected = pagerState.currentPage == index + 1,
-                                onSelectedChanged = {
-                                    scope.launch {
-                                        pagerState.animateScrollToPage(index + 1)
-                                    }
-                                },
-                                content = {
-                                    AvatarComponent(
-                                        tab.profile.avatar,
-                                        size = 24.dp,
-                                    )
-                                    RichText(
-                                        text = tab.profile.name,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis,
-                                    )
-                                    Text(
-                                        text = tab.profile.handle.canonical,
-                                        style = FluentTheme.typography.caption,
-                                        color =
-                                            if (pagerState.currentPage == index + 1) {
-                                                FluentTheme.colors.text.onAccent.secondary
-                                            } else {
-                                                FluentTheme.colors.text.text.tertiary
-                                            },
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis,
-                                    )
-                                },
-                            )
-                        }
-                    }
-                    HorizontalPager(
-                        state = pagerState,
-                        modifier = Modifier.fillMaxHeight(),
+                    var selectedPage by remember(tabs) { mutableStateOf(0) }
+                    Row(
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .fillMaxHeight(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalAlignment = Alignment.Top,
                     ) {
-                        if (it == 0) {
-                            LazyColumn(
-                                verticalArrangement = Arrangement.spacedBy(2.dp),
-                            ) {
-                                itemsIndexed(
-                                    allTabs.rssTabs,
-                                ) { index, it ->
-                                    TabItem(
-                                        it,
-                                        modifier =
-                                            Modifier
-                                                .listCard(
-                                                    index = index,
-                                                    totalCount = allTabs.rssTabs.size,
-                                                ),
+                        LazyColumn(
+                            modifier = Modifier.width(140.dp),
+                            verticalArrangement = Arrangement.spacedBy(2.dp),
+                        ) {
+                            item {
+                                SubtleButton(
+                                    buttonColors =
+                                        if (selectedPage == 0) {
+                                            ButtonDefaults.accentButtonColors()
+                                        } else {
+                                            ButtonDefaults.subtleButtonColors()
+                                        },
+                                    onClick = {
+                                        selectedPage = 0
+                                    },
+                                    modifier = Modifier.fillMaxWidth(),
+                                ) {
+                                    Text(
+                                        text = stringResource(Res.string.rss_title),
+                                        modifier = Modifier.fillMaxWidth(),
                                     )
                                 }
-                                if (allTabs.rssTabs.isNotEmpty()) {
-                                    item {
-                                        Spacer(modifier = Modifier.height(12.dp))
-                                    }
-                                }
-                                item {
-                                    Box(
-                                        contentAlignment = Alignment.Center,
-                                        modifier = Modifier.fillMaxWidth(),
+                            }
+                            itemsIndexed(tabs) { index, tab ->
+                                SubtleButton(
+                                    buttonColors =
+                                        if (selectedPage == index + 1) {
+                                            ButtonDefaults.accentButtonColors()
+                                        } else {
+                                            ButtonDefaults.subtleButtonColors()
+                                        },
+                                    onClick = {
+                                        selectedPage = index + 1
+                                    },
+                                    modifier = Modifier.fillMaxWidth(),
+                                ) {
+                                    Column(
+                                        modifier =
+                                            Modifier
+                                                .fillMaxWidth()
+                                                .padding(vertical = 8.dp),
+                                        horizontalAlignment = Alignment.Start,
+                                        verticalArrangement = Arrangement.spacedBy(4.dp),
                                     ) {
-                                        AccentButton(
-                                            onClick = toAddRssSource,
+                                        Row(
+                                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
                                         ) {
-                                            FAIcon(
-                                                FontAwesomeIcons.Solid.Plus,
-                                                contentDescription = stringResource(Res.string.add_rss_source),
+                                            AvatarComponent(
+                                                tab.profile.avatar,
+                                                size = 24.dp,
                                             )
-                                            Text(stringResource(Res.string.add_rss_source))
+                                            RichText(
+                                                text = tab.profile.name,
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis,
+                                            )
                                         }
+                                        Text(
+                                            text = tab.profile.handle.normalizedHost,
+                                            style = FluentTheme.typography.caption,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis,
+                                        )
                                     }
                                 }
                             }
-                        } else {
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.spacedBy(8.dp),
-                                modifier = Modifier.fillMaxWidth(),
-                            ) {
-                                val tab = tabs[it - 1]
-                                var selectedIndex by remember { mutableStateOf(0) }
-                                if (tab.extraTabs.any()) {
-                                    val items =
-                                        listOf(
-                                            stringResource(Res.string.tab_settings_default),
-                                        ) +
-                                            tab.extraTabs
-                                                .map {
-                                                    when (it) {
-                                                        is PinnableTimelineTabPresenter.State.Tab.Feed ->
-                                                            Res.string.tab_settings_feed
-
-                                                        is PinnableTimelineTabPresenter.State.Tab.List ->
-                                                            Res.string.tab_settings_list
-
-                                                        is PinnableTimelineTabPresenter.State.Tab.Antenna ->
-                                                            Res.string.antenna_title
-
-                                                        is PinnableTimelineTabPresenter.State.Tab.Channel ->
-                                                            Res.string.channel_title
-                                                    }
-                                                }.map { stringResource(it) }
-                                    LiteFilter(
-                                        modifier = Modifier.fillMaxWidth(),
-                                    ) {
-                                        items.forEachIndexed { index, text ->
-                                            PillButton(
-                                                selected = selectedIndex == index,
-                                                onSelectedChanged = { selectedIndex = index },
+                        }
+                        Box(
+                            modifier =
+                                Modifier
+                                    .weight(1f)
+                                    .fillMaxHeight(),
+                        ) {
+                            if (selectedPage == 0) {
+                                LazyColumn(
+                                    verticalArrangement = Arrangement.spacedBy(2.dp),
+                                ) {
+                                    itemsIndexed(
+                                        allTabs.rssTabs,
+                                    ) { index, it ->
+                                        TabItem(
+                                            it,
+                                            modifier =
+                                                Modifier
+                                                    .listCard(
+                                                        index = index,
+                                                        totalCount = allTabs.rssTabs.size,
+                                                    ),
+                                        )
+                                    }
+                                    if (allTabs.rssTabs.isNotEmpty()) {
+                                        item {
+                                            Spacer(modifier = Modifier.height(12.dp))
+                                        }
+                                    }
+                                    item {
+                                        Box(
+                                            contentAlignment = Alignment.Center,
+                                            modifier = Modifier.fillMaxWidth(),
+                                        ) {
+                                            AccentButton(
+                                                onClick = toAddRssSource,
                                             ) {
-                                                Text(text = text)
+                                                FAIcon(
+                                                    FontAwesomeIcons.Solid.Plus,
+                                                    contentDescription = stringResource(Res.string.add_rss_source),
+                                                )
+                                                Text(stringResource(Res.string.add_rss_source))
                                             }
                                         }
                                     }
                                 }
-                                when (selectedIndex) {
-                                    0 -> {
-                                        LazyColumn(
-                                            verticalArrangement = Arrangement.spacedBy(2.dp),
+                            } else {
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.spacedBy(2.dp),
+                                    modifier = Modifier.fillMaxWidth(),
+                                ) {
+                                    val tab = tabs[selectedPage - 1]
+                                    var selectedIndex by remember(tab.profile.key) {
+                                        mutableStateOf(
+                                            0,
+                                        )
+                                    }
+                                    if (tab.extraTabs.any()) {
+                                        val items =
+                                            listOf(
+                                                stringResource(Res.string.tab_settings_default),
+                                            ) +
+                                                tab.extraTabs
+                                                    .map {
+                                                        when (it) {
+                                                            is PinnableTimelineTabPresenter.State.Tab.Feed ->
+                                                                Res.string.tab_settings_feed
+
+                                                            is PinnableTimelineTabPresenter.State.Tab.List ->
+                                                                Res.string.tab_settings_list
+
+                                                            is PinnableTimelineTabPresenter.State.Tab.Antenna ->
+                                                                Res.string.antenna_title
+
+                                                            is PinnableTimelineTabPresenter.State.Tab.Channel ->
+                                                                Res.string.channel_title
+                                                        }
+                                                    }.map { stringResource(it) }
+                                        LiteFilter(
+                                            modifier = Modifier.fillMaxWidth(),
                                         ) {
-                                            itemsIndexed(tab.tabs) { index, it ->
-                                                TabItem(
-                                                    it,
-                                                    modifier =
-                                                        Modifier
-                                                            .listCard(
-                                                                index = index,
-                                                                totalCount = tab.tabs.size,
-                                                            ),
-                                                )
+                                            items.forEachIndexed { index, text ->
+                                                PillButton(
+                                                    selected = selectedIndex == index,
+                                                    onSelectedChanged = { selectedIndex = index },
+                                                ) {
+                                                    Text(text = text)
+                                                }
                                             }
                                         }
                                     }
-
-                                    else -> {
-                                        LazyColumn(
-                                            verticalArrangement = Arrangement.spacedBy(2.dp),
-                                        ) {
-                                            val data =
-                                                tab.extraTabs.elementAtOrNull(selectedIndex - 1)?.data
-                                            if (data != null) {
-                                                itemsIndexed(data) { index, totalCount, item ->
+                                    when (selectedIndex) {
+                                        0 -> {
+                                            LazyColumn(
+                                                verticalArrangement = Arrangement.spacedBy(2.dp),
+                                            ) {
+                                                itemsIndexed(tab.tabs) { index, it ->
                                                     TabItem(
-                                                        remember(item) {
-                                                            item.toTabItem(
-                                                                accountKey = tab.profile.key,
-                                                            )
-                                                        },
+                                                        it,
                                                         modifier =
                                                             Modifier
                                                                 .listCard(
                                                                     index = index,
-                                                                    totalCount = totalCount,
+                                                                    totalCount = tab.tabs.size,
                                                                 ),
                                                     )
+                                                }
+                                            }
+                                        }
+
+                                        else -> {
+                                            LazyColumn(
+                                                verticalArrangement = Arrangement.spacedBy(2.dp),
+                                            ) {
+                                                val data =
+                                                    tab.extraTabs.elementAtOrNull(selectedIndex - 1)?.data
+                                                if (data != null) {
+                                                    itemsIndexed(data) { index, totalCount, item ->
+                                                        TabItem(
+                                                            remember(item) {
+                                                                item.toTabItem(
+                                                                    accountKey = tab.profile.key,
+                                                                )
+                                                            },
+                                                            modifier =
+                                                                Modifier
+                                                                    .listCard(
+                                                                        index = index,
+                                                                        totalCount = totalCount,
+                                                                    ),
+                                                        )
+                                                    }
                                                 }
                                             }
                                         }

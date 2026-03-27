@@ -5,18 +5,28 @@ import SwiftUIBackports
 struct GroupConfigScreen: View {
     @Environment(\.dismiss) private var dismiss
     let item: MixedTimelineTabItem?
-    
     @State private var name: String
     @State private var icon: IconType
     @State private var tabs: [TimelineTabItem]
     @State private var showAddTabSheet = false
     @State private var showIconPicker = false
-    
+    @State private var editItem: TimelineTabItem? = nil
+    @StateObject private var presenter: KotlinPresenter<GroupConfigPresenterState>
+
     init(item: MixedTimelineTabItem? = nil) {
         self.item = item
         _name = State(initialValue: item?.metaData.title.text ?? "")
         _icon = State(initialValue: item?.metaData.icon ?? IconType.Material(icon: .rss))
-        _tabs = State(initialValue: item?.subTimelineTabItem ?? [])
+        _tabs = State(initialValue: Array((item?.subTimelineTabItem ?? []).reduce(into: [TimelineTabItem]()) { result, tab in
+            if !result.contains(where: { $0.key == tab.key }) {
+                result.append(tab)
+            }
+        }))
+        _presenter = StateObject(
+            wrappedValue: KotlinPresenter(
+                presenter: GroupConfigPresenter()
+            )
+        )
     }
     
     var body: some View {
@@ -55,6 +65,12 @@ struct GroupConfigScreen: View {
                                 TabIcon(icon: tab.metaData.icon, accountType: tab.account)
                             }
                             Spacer()
+                            Button {
+                                editItem = tab
+                            } label: {
+                                Image("fa-pen")
+                            }
+                            .buttonStyle(.plain)
                         }
                     }
                     .onMove(perform: move)
@@ -69,9 +85,7 @@ struct GroupConfigScreen: View {
                     selectedTabs: tabs,
                     filterIsTimeline: true,
                     onDelete: { tab in
-                        if let index = tabs.firstIndex(where: { $0.key == tab.key }) {
-                            tabs.remove(at: index)
-                        }
+                        tabs.removeAll { $0.key == tab.key }
                     },
                     onAdd: { tab in
                         if let timelineTab = tab as? TimelineTabItem {
@@ -85,7 +99,19 @@ struct GroupConfigScreen: View {
         }
         .sheet(isPresented: $showIconPicker) {
             NavigationStack {
-                IconPicker(selectedIcon: $icon)
+                IconPicker(
+                    selectedIcon: icon,
+                    onSelect: { icon = $0 }
+                )
+            }
+        }
+        .sheet(item: $editItem) { item in
+            NavigationStack {
+                EditTabSheet(onConfirm: { updated in
+                    if let index = tabs.firstIndex(where: { $0.key == updated.key }), let updated = updated as? TimelineTabItem {
+                        tabs[index] = updated
+                    }
+                }, tabItem: item)
             }
         }
         .toolbar {
@@ -105,12 +131,18 @@ struct GroupConfigScreen: View {
             }
             ToolbarItem(placement: .confirmationAction) {
                 Button {
-                    save()
+                    presenter.state.commit(
+                        initialItem: item,
+                        name: name,
+                        icon: icon,
+                        tabs: tabs,
+                        defaultGroupName: NSLocalizedString("tab_settings_group_default_name", comment: "")
+                    )
                     dismiss()
                 } label: {
                     Image(.faCheck)
                 }
-                .disabled(tabs.isEmpty && item == nil) // Disable save if new group is empty
+                .disabled(tabs.isEmpty && item == nil)
             }
         }
     }
@@ -122,62 +154,12 @@ struct GroupConfigScreen: View {
     func delete(at offsets: IndexSet) {
         tabs.remove(atOffsets: offsets)
     }
-    
-    @StateObject private var presenter = KotlinPresenter(presenter: SettingsPresenter())
-
-    func save() {
-        let text = name
-        let currentTabs = tabs
-        let currentIcon = icon
-        let isNew = item == nil
-        let itemKey = item?.key
-        
-        presenter.state.updateTabSettings { current in
-            var mainTabs = current.mainTabs
-            
-            if isNew {
-                 if currentTabs.isEmpty { return current }
-                 let newGroup = MixedTimelineTabItem(
-                     subTimelineTabItem: currentTabs,
-                     metaData: TabMetaData(
-                         title: TitleType.Text(content: text.isEmpty ? NSLocalizedString("tab_settings_group_default_name", comment: "") : text),
-                         icon: currentIcon
-                     )
-                 )
-                 mainTabs.append(newGroup)
-            } else {
-                if currentTabs.isEmpty {
-                    // Delete group if empty
-                     if let index = mainTabs.firstIndex(where: { $0.key == itemKey }) {
-                         mainTabs.remove(at: index)
-                     }
-                } else {
-                    // Update group
-                     if let index = mainTabs.firstIndex(where: { $0.key == itemKey }) {
-                         let updatedGroup = MixedTimelineTabItem(
-                             subTimelineTabItem: currentTabs,
-                             metaData: TabMetaData(
-                                 title: TitleType.Text(content: text.isEmpty ? NSLocalizedString("tab_settings_group_default_name", comment: "") : text),
-                                 icon: currentIcon
-                             )
-                         )
-                         mainTabs[index] = updatedGroup
-                     }
-                }
-            }
-            
-            return current.doCopy(
-                secondaryItems: current.secondaryItems,
-                enableMixedTimeline: current.enableMixedTimeline,
-                mainTabs: mainTabs
-            )
-        }
-    }
 }
 
 struct IconPicker: View {
     @Environment(\.dismiss) private var dismiss
-    @Binding var selectedIcon: IconType
+    let selectedIcon: IconType
+    let onSelect: (IconType) -> Void
     
     let availableIcons: [IconType] = UiIcon.allCases.map { IconType.Material(icon: $0) }
     
@@ -188,7 +170,7 @@ struct IconPicker: View {
                     TabIcon(icon: item, accountType: AccountType.Guest.shared, size: 48)
                         .padding(4)
                         .onTapGesture {
-                            selectedIcon = item
+                            onSelect(item)
                             dismiss()
                         }
                 }

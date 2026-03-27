@@ -39,7 +39,7 @@ internal class AccountTabSyncCoordinator(
                 .first()
                 .mapTo(linkedSetOf()) { it.accountKey }
         settingsRepository.updateTabSettings {
-            cleanupForExistingAccounts(existingAccounts)
+            cleanupForExistingAccounts(existingAccounts).sanitizeDuplicateTabKeys()
         }
     }
 
@@ -52,17 +52,18 @@ internal class AccountTabSyncCoordinator(
             val newTabs =
                 (mainTabs + defaultTabs)
                     .distinctBy { it.key }
-            if (newTabs == mainTabs) {
+            val newSettings = copy(mainTabs = newTabs).sanitizeDuplicateTabKeys()
+            if (newSettings == this) {
                 this
             } else {
-                copy(mainTabs = newTabs)
+                newSettings
             }
         }
     }
 
     private suspend fun removeTabsForAccount(accountKey: MicroBlogKey) {
         settingsRepository.updateTabSettings {
-            cleanupForExistingAccounts(setOf(accountKey), retainAccounts = false)
+            cleanupForExistingAccounts(setOf(accountKey), retainAccounts = false).sanitizeDuplicateTabKeys()
         }
     }
 
@@ -74,7 +75,7 @@ internal class AccountTabSyncCoordinator(
             mainTabs
                 .mapNotNull { tab ->
                     tab.cleanup(accountKeys, retainAccounts)
-                }
+                }.distinctBy { it.key }
         return if (newTabs == mainTabs) {
             this
         } else {
@@ -92,7 +93,8 @@ internal class AccountTabSyncCoordinator(
                     subTimelineTabItem
                         .mapNotNull {
                             it.cleanup(accountKeys, retainAccounts)
-                        }.toImmutableList()
+                        }.distinctBy { it.key }
+                        .toImmutableList()
                 if (cleanedSubTabs.isEmpty()) {
                     null
                 } else if (cleanedSubTabs == subTimelineTabItem) {
@@ -113,3 +115,35 @@ internal class AccountTabSyncCoordinator(
             }
         }
 }
+
+internal fun TabSettings.sanitizeDuplicateTabKeys(): TabSettings {
+    val sanitizedTabs =
+        mainTabs
+            .mapNotNull { it.sanitizeDuplicateTabKeys() }
+            .distinctBy { it.key }
+    return if (sanitizedTabs == mainTabs) {
+        this
+    } else {
+        copy(mainTabs = sanitizedTabs)
+    }
+}
+
+private fun TimelineTabItem.sanitizeDuplicateTabKeys(): TimelineTabItem? =
+    when (this) {
+        is MixedTimelineTabItem -> {
+            val sanitizedSubTabs =
+                subTimelineTabItem
+                    .mapNotNull { it.sanitizeDuplicateTabKeys() }
+                    .distinctBy { it.key }
+                    .toImmutableList()
+            if (sanitizedSubTabs.isEmpty()) {
+                null
+            } else if (sanitizedSubTabs == subTimelineTabItem) {
+                this
+            } else {
+                copy(subTimelineTabItem = sanitizedSubTabs)
+            }
+        }
+
+        else -> this
+    }

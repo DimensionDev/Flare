@@ -30,7 +30,7 @@ struct NotificationScreen: View {
             .toolbar {
                 if presenter.state.notifications.count > 1 {
                     ToolbarItem {
-                        NotificationAccountsBar(
+                        NotificationAccountsMenu(
                             items: presenter.state.notifications,
                             selectedAccount: presenter.state.selectedAccount,
                             onSelect: { presenter.state.setAccount(profile: $0) }
@@ -140,5 +140,82 @@ struct NotificationAccountsBar: View {
             .padding(.vertical, 8)
         }
         .scrollIndicators(.hidden)
+    }
+}
+
+struct NotificationAccountsMenu: View {
+    let items: [NotificationAccountItem]
+    let selectedAccount: UiProfile?
+    let onSelect: (UiProfile) -> Void
+
+    private var unreadItems: [NotificationAccountItem] {
+        items.filter { $0.badge > 0 }
+    }
+
+    private var unreadSummary: String? {
+        guard !unreadItems.isEmpty else {
+            return nil
+        }
+
+        let visible = unreadItems.prefix(2).map { $0.profile.handle.canonical }
+        let remaining = unreadItems.count - visible.count
+        if remaining > 0 {
+            return visible.joined(separator: " · ") + " +\(remaining)"
+        } else {
+            return visible.joined(separator: " · ")
+        }
+    }
+
+    var body: some View {
+        Menu {
+            ForEach(items, id: \.stableKey) { item in
+                Toggle(isOn: Binding(get: {
+                    selectedAccount?.key == item.profile.key
+                }, set: { value in
+                    if value {
+                        onSelect(item.profile)
+                    }
+                })) {
+                    Label {
+                        Text(item.profile.handle.canonical)
+                    } icon: {
+                        AvatarView(data: item.profile.avatar)
+                            .overlay(alignment: .bottomTrailing) {
+                            }
+                    }
+                    if item.badge > 0 {
+                        Text("\(item.badge)")
+                    }
+                }
+            }
+        } label: {
+            if let selectedAccount {
+                HStack(spacing: 8) {
+                    AvatarView(data: selectedAccount.avatar)
+                        .frame(width: 24, height: 24)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(selectedAccount.handle.canonical)
+                            .lineLimit(1)
+                        if let unreadSummary {
+                            Text("New from \(unreadSummary)")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
+                        }
+                    }
+                    Image("fa-chevron-down")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                        .scaledToFit()
+                        .frame(width: 8, height: 8)
+                        .padding(8)
+                        .background(
+                            Circle()
+                                .fill(Color.secondary.opacity(0.2))
+                        )
+                        .scaleEffect(0.66)
+                }
+            }
+        }
     }
 }

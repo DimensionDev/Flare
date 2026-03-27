@@ -54,6 +54,17 @@ struct DiscoverScreen: View {
                                     AvatarView(data: selectedAccount.avatar)
                                         .frame(width: 24, height: 24)
                                     Text(selectedAccount.handle.canonical)
+                                    Image("fa-chevron-down")
+                                        .font(.footnote)
+                                        .foregroundStyle(.secondary)
+                                        .scaledToFit()
+                                        .frame(width: 8, height: 8)
+                                        .padding(8)
+                                        .background(
+                                            Circle()
+                                                .fill(Color.secondary.opacity(0.2))
+                                        )
+                                        .scaleEffect(0.66)
                                 }
                             }
                         }

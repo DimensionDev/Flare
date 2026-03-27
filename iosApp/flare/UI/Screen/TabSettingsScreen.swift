@@ -1,7 +1,5 @@
 import SwiftUI
 import KotlinSharedUI
-import SwiftUIBackports
-
 struct TabSettingsScreen: View {
     @StateObject private var presenter = KotlinPresenter(presenter: SettingsPresenter())
     @Environment(\.dismiss) private var dismiss
@@ -270,89 +268,19 @@ struct AddTabSheet: View {
     let onDelete: (TabItem) -> Void
     let onAdd: (TabItem) -> Void
     @State private var showAddRssSource = false
-    @State private var selectedIndex = 0
     @State private var importOpmlUrl: URL? = nil
+    @State private var expandedSections: Set<String> = ["rss"]
     var body: some View {
-        VStack {
-            ScrollView(.horizontal) {
-                HStack {
-                    Label {
-                        Text("rss_title")
-                    } icon: {
-                        Image("fa-square-rss")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 20, height: 20)
-                    }
-                    .onTapGesture {
-                        withAnimation {
-                            selectedIndex = 0
-                        }
-                    }
-                    .padding(.horizontal)
-                    .padding(.vertical, 8)
-                    .foregroundStyle(selectedIndex == 0 ? Color.white : .primary)
-                    .backport
-                    .glassEffect(selectedIndex == 0 ? .tinted(.accentColor) : .regular, in: .capsule, fallbackBackground: selectedIndex == 0 ? Color.accentColor : Color(.systemBackground))
-                    
-                    StateView(state: presenter.state.accountTabs) { accountTabs in
-                        let tabs = accountTabs.cast(AllTabsPresenterStateAccountTabs.self)
-                        ForEach(0..<tabs.count, id: \.self) { index in
-                            let item = tabs[index]
-                            Label {
-                                Text(item.profile.handle.canonical)
-                            } icon: {
-                                AvatarView(data: item.profile.avatar)
-                                    .frame(width: 20, height: 20)
-                            }
-                            .onTapGesture {
-                                withAnimation {
-                                    selectedIndex = (index + 1)
-                                }
-                            }
-                            .padding(.horizontal)
-                            .padding(.vertical, 8)
-                            .foregroundStyle(selectedIndex == (index + 1) ? Color.white : .primary)
-                            .backport
-                            .glassEffect(selectedIndex == (index + 1) ? .tinted(.accentColor) : .regular, in: .capsule, fallbackBackground: selectedIndex == (index + 1) ? Color.accentColor : Color(.systemBackground))
-                        }
-                    }
-                }
-                .padding(.horizontal)
-            }
-            .scrollClipDisabled()
-            .scrollIndicators(.hidden)
-            List {
-                if selectedIndex == 0 {
-                    if !presenter.state.rssTabs.isEmpty {
-                        // rss
-                        ForEach(presenter.state.rssTabs) { tabItem in
-                            HStack {
-                                Label {
-                                    TabTitle(title: tabItem.metaData.title)
-                                } icon: {
-                                    TabIcon(icon: tabItem.metaData.icon, accountType: tabItem.account)
-                                }
-                                Spacer()
-                                if selectedTabs.contains(where: { $0.key == tabItem.key }) {
-                                    Button {
-                                        onDelete(tabItem)
-                                    } label: {
-                                        Image("fa-minus")
-                                            .foregroundColor(.red)
-                                    }
-                                    .buttonStyle(.plain)
-                                } else {
-                                    Button {
-                                        onAdd(tabItem)
-                                    } label: {
-                                        Image("fa-plus")
-                                            .foregroundColor(.accentColor)
-                                    }
-                                    .buttonStyle(.plain)
-                                }
-                            }
-                        }
+        List {
+            Section {
+                DisclosureGroup(isExpanded: binding(for: "rss")) {
+                    ForEach(presenter.state.rssTabs) { tabItem in
+                        AddTabRow(
+                            tabItem: tabItem,
+                            isSelected: selectedTabs.contains(where: { $0.key == tabItem.key }),
+                            onDelete: onDelete,
+                            onAdd: onAdd
+                        )
                     }
                     Button {
                         showAddRssSource = true
@@ -364,24 +292,40 @@ struct AddTabSheet: View {
                         }
                     }
                     .buttonStyle(.plain)
-                } else {
-                    let profileIndex = selectedIndex - 1
-                    StateView(state: presenter.state.accountTabs) { accountTabs in
-                        let tabs = accountTabs.cast(AllTabsPresenterStateAccountTabs.self)
-                        if profileIndex < tabs.count {
-                            let tabItem = tabs[profileIndex]
+                } label: {
+                    Label {
+                        Text("rss_title")
+                    } icon: {
+                        Image("fa-square-rss")
+                    }
+                }
+            }
+            StateView(state: presenter.state.accountTabs) { accountTabs in
+                let tabs = accountTabs.cast(AllTabsPresenterStateAccountTabs.self)
+                Section {
+                    ForEach(0..<tabs.count, id: \.self) { index in
+                        let item = tabs[index]
+                        DisclosureGroup(isExpanded: binding(for: "account-\(item.profile.key)")) {
                             AccountTabListView(
-                                accountTabs: tabItem,
+                                accountTabs: item,
                                 selectedTabs: selectedTabs,
+                                expandedSections: $expandedSections,
                                 onDelete: onDelete,
                                 onAdd: onAdd
                             )
-                            .id(tabItem.profile.key)
+                        } label: {
+                            Label {
+                                Text(item.profile.handle.canonical)
+                            } icon: {
+                                AvatarView(data: item.profile.avatar)
+                                    .frame(width: 20, height: 20)
+                            }
                         }
                     }
                 }
             }
         }
+        .navigationTitle("tab_settings_add_tab")
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
                 Button {
@@ -408,73 +352,46 @@ struct AddTabSheet: View {
             }
         }
     }
+    
+    private func binding(for key: String) -> Binding<Bool> {
+        Binding(
+            get: { expandedSections.contains(key) },
+            set: { isExpanded in
+                if isExpanded {
+                    expandedSections.insert(key)
+                } else {
+                    expandedSections.remove(key)
+                }
+            }
+        )
+    }
 }
 
 struct AccountTabListView: View {
     let accountTabs: AllTabsPresenterStateAccountTabs
-    @State private var selectedIndex: Int = 0
     let selectedTabs: [TabItem]
+    @Binding var expandedSections: Set<String>
     let onDelete: (TabItem) -> Void
     let onAdd: (TabItem) -> Void
     var body: some View {
-        if !accountTabs.extraTabs.isEmpty {
-            Picker(selection: $selectedIndex) {
-                Text("tab_settings_section_main_tabs").tag(0)
-                ForEach(0..<accountTabs.extraTabs.count, id: \.self) { index in
-                    let tabItem = accountTabs.extraTabs[index]
-                    switch onEnum(of: tabItem) {
-                    case .antenna: Text("antenna_title")
-                            .tag(index + 1)
-                    case .feed: Text("bluesky_feeds_title")
-                            .tag(index + 1)
-                    case .list: Text("all_lists_title")
-                            .tag(index + 1)
-                    case .channel: Text("channels_title")
-                            .tag(index + 1)
-                    }
-                }
-            } label: {
-                
-            }
-            .pickerStyle(.segmented)
-        }
-        if selectedIndex == 0 {
+        if !accountTabs.tabs.isEmpty {
             ForEach(accountTabs.tabs, id: \.key) { tab in
-                HStack {
-                    Label {
-                        TabTitle(title: tab.metaData.title)
-                    } icon: {
-                        TabIcon(icon: tab.metaData.icon, accountType: tab.account)
-                    }
-                    Spacer()
-                    if selectedTabs.contains(where: { $0.key == tab.key }) {
-                        Button {
-                            onDelete(tab)
-                        } label: {
-                            Image("fa-minus")
-                                .foregroundColor(.red)
-                        }
-                        .buttonStyle(.plain)
-                    } else {
-                        Button {
-                            onAdd(tab)
-                        } label: {
-                            Image("fa-plus")
-                                .foregroundColor(.accentColor)
-                        }
-                        .buttonStyle(.plain)
-                    }
-                }
+                AddTabRow(
+                    tabItem: tab,
+                    isSelected: selectedTabs.contains(where: { $0.key == tab.key }),
+                    onDelete: onDelete,
+                    onAdd: onAdd
+                )
             }
-        } else {
-            let index = selectedIndex - 1
-            if !accountTabs.extraTabs.isEmpty, index < accountTabs.extraTabs.count {
-                let tabItem = accountTabs.extraTabs[index]
+        }
+        ForEach(0..<accountTabs.extraTabs.count, id: \.self) { index in
+            let tabItem = accountTabs.extraTabs[index]
+            DisclosureGroup(isExpanded: binding(for: "account-\(accountTabs.profile.key)-extra-\(index)")) {
                 PagingView(data: tabItem.data) { tab in
+                    let item = tab.toTabItem(accountKey: accountTabs.profile.key)
                     HStack {
                         UiListView(data: tab)
                         Spacer()
-                        let item = tab.toTabItem(accountKey: accountTabs.profile.key)
                         if selectedTabs.contains(where: { $0.key == item.key }) {
                             Button {
                                 onDelete(item)
@@ -496,6 +413,70 @@ struct AccountTabListView: View {
                 } loadingContent: {
                     UiListPlaceholder()
                 }
+            } label: {
+                Text(title(at: index))
+            }
+        }
+    }
+    
+    private func binding(for key: String) -> Binding<Bool> {
+        Binding(
+            get: { expandedSections.contains(key) },
+            set: { isExpanded in
+                if isExpanded {
+                    expandedSections.insert(key)
+                } else {
+                    expandedSections.remove(key)
+                }
+            }
+        )
+    }
+    
+    private func title(at index: Int) -> LocalizedStringKey {
+        let tabItem = accountTabs.extraTabs[index]
+        switch onEnum(of: tabItem) {
+        case .antenna:
+            return "antenna_title"
+        case .feed:
+            return "bluesky_feeds_title"
+        case .list:
+            return "all_lists_title"
+        case .channel:
+            return "channels_title"
+        }
+    }
+}
+
+private struct AddTabRow: View {
+    let tabItem: TabItem
+    let isSelected: Bool
+    let onDelete: (TabItem) -> Void
+    let onAdd: (TabItem) -> Void
+    
+    var body: some View {
+        HStack {
+            Label {
+                TabTitle(title: tabItem.metaData.title)
+            } icon: {
+                TabIcon(icon: tabItem.metaData.icon, accountType: tabItem.account)
+            }
+            Spacer()
+            if isSelected {
+                Button {
+                    onDelete(tabItem)
+                } label: {
+                    Image("fa-minus")
+                        .foregroundColor(.red)
+                }
+                .buttonStyle(.plain)
+            } else {
+                Button {
+                    onAdd(tabItem)
+                } label: {
+                    Image("fa-plus")
+                        .foregroundColor(.accentColor)
+                }
+                .buttonStyle(.plain)
             }
         }
     }

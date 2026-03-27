@@ -452,6 +452,7 @@
         <![CDATA[
             <span>Version %1$s:</span>
             <ul>
+                <li>Added Nostr support, including login, timelines, posting, notifications, and relay management.</li>
                 <li>Bug fixes and performance improvements.</li>
             </ul>
         ]]>

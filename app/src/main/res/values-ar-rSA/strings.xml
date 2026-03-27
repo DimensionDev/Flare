@@ -387,11 +387,6 @@
     <string name="import_error">فشل استيراد البيانات</string>
     <string name="import_confirmation_title">تأكيد الاستيراد</string>
     <string name="import_confirmation_message">سيتم استيراد البيانات من الملف. سيتم استبدال السجلات الموجودة مع مطابقة المعرفات. هل تريد المتابعة؟</string>
-    <string name="changelog_current"><![CDATA[            <span>الإصدار %1$s:</span>
-            <ul>
-                <li>إصلاحات الشوائب وتحسين الأداء.</li>
-            </ul>
-        ]]></string>
     <string name="tab_settings_add_group">إضافة مجموعة</string>
     <string name="tab_settings_add_tab">إضافة علامة تبويب</string>
     <string name="tab_settings_edit_group">تحرير المجموعة</string>

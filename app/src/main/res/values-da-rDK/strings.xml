@@ -385,7 +385,8 @@
     <string name="import_confirmation_message">Dette vil importere data fra filen. Eksisterende poster med matchende ID\'er vil blive erstattet. Vil du fortsætte?</string>
     <string name="changelog_current"><![CDATA[            <span>Version %1$s:</span>
             <ul>
-                <li>Fejlrettelser og ydelsesforbedringer.</li>
+                <li>Tilføjet Nostr support, herunder login, tidslinjer, udstationering, notifikationer og relæstyring.</li>
+                <li>Fejlrettelser og forbedringer af ydeevnen.</li>
             </ul>
         ]]></string>
     <string name="tab_settings_add_group">Tilføj Gruppe</string>

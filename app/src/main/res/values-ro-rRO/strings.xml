@@ -386,7 +386,8 @@
     <string name="import_confirmation_message">Acest lucru va importa date din fișier. Înregistrările existente cu ID-uri de potrivire vor fi înlocuite. Doriți să continuați?</string>
     <string name="changelog_current"><![CDATA[            <span>Versiunea %1$s:</span>
             <ul>
-                <li>Remedieri ale erorilor şi îmbunătăţiri de performanţă.</li>
+                <li>a adăugat suport Nostr inclusiv autentificare, calendare, postări, notificări și gestionarea releului.</li>
+                <li>Remedierea erorilor și îmbunătățirea performanței.</li>
             </ul>
         ]]></string>
     <string name="tab_settings_add_group">Adaugă grup</string>

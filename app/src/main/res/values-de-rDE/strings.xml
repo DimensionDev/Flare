@@ -385,6 +385,8 @@
     <string name="import_confirmation_message">Dies wird Daten aus der Datei importieren. Vorhandene Datensätze mit passenden IDs werden ersetzt. Möchten Sie fortfahren?</string>
     <string name="changelog_current"><![CDATA[            <span>Version %1$s:</span>
             <ul>
+                <li>Nostr Unterstützung hinzugefügt einschließlich Login, Timelines, Posting, Benachrichtigungen und Relaisverwaltung.</li>
+                
                 <li>Fehlerbehebungen und Leistungsverbesserungen.</li>
             </ul>
         ]]></string>

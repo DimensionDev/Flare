@@ -51,10 +51,8 @@ import dev.dimension.flare.R
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.MixedTimelineTabItem
 import dev.dimension.flare.data.model.TabItem
-import dev.dimension.flare.data.model.TabMetaData
 import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.data.model.TitleType
-import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
@@ -68,11 +66,9 @@ import dev.dimension.flare.ui.screen.settings.TabCustomItem
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import dev.dimension.flare.ui.theme.segmentedShapes2
 import kotlinx.collections.immutable.toImmutableList
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
-import org.koin.compose.koinInject
 import sh.calvin.reorderable.rememberReorderableLazyListState
+import dev.dimension.flare.ui.presenter.home.GroupConfigPresenter as SharedGroupConfigPresenter
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -167,14 +163,14 @@ internal fun GroupConfigScreen(
                                     elevation = CardDefaults.elevatedCardElevation(defaultElevation = 3.dp),
                                 ) {
                                     LazyVerticalGrid(columns = GridCells.FixedSize(48.dp)) {
-                                        items(state.availableIcons) { icon ->
+                                        items(state.availableIcons) { selectedIcon ->
                                             TabIcon(
                                                 accountType = AccountType.Guest,
-                                                icon = icon,
+                                                icon = selectedIcon,
                                                 title = TitleType.Text(state.name.text.toString()),
                                                 modifier =
                                                     Modifier.padding(4.dp).clickable {
-                                                        state.setIcon(icon)
+                                                        state.setIcon(selectedIcon)
                                                         state.setShowIconPicker(false)
                                                     },
                                                 size = 48.dp,
@@ -246,128 +242,95 @@ internal fun GroupConfigScreen(
                     state.addTab(tabItem)
                 }
             },
-            onDeleteTab = { key -> state.deleteTab(key) },
+            onDeleteTab = state::deleteTab,
             toAddRssSource = toAddRssSource,
         )
     }
 }
 
 @Composable
-private fun GroupConfigPresenter(
-    initialItem: MixedTimelineTabItem?,
-    repository: SettingsRepository = koinInject(),
-    appScope: CoroutineScope = koinInject(),
-) = run {
-    val name =
-        rememberTextFieldState(
-            initialItem?.metaData?.title?.let {
-                when (it) {
-                    is TitleType.Text -> it.content
-                    is TitleType.Localized -> "" // Or resolve string resource if possible
-                }
-            } ?: "",
-        )
-
-    var icon by remember {
-        mutableStateOf<IconType>(initialItem?.metaData?.icon ?: IconType.Material(dev.dimension.flare.ui.model.UiIcon.Rss))
-    }
-
-    val tabs =
-        remember {
-            mutableStateListOf<TimelineTabItem>().apply {
-                initialItem?.subTimelineTabItem?.let { addAll(it) }
-            }
-        }
-
-    var showAddTab by remember { mutableStateOf(false) }
-    var showIconPicker by remember { mutableStateOf(false) }
-    val allTabs = remember { AllTabsPresenter(filterIsTimeline = true) }.invoke()
-
-    object {
-        val name = name
-        val icon = icon
-        val tabs = tabs
-        val showAddTab = showAddTab
-        val showIconPicker = showIconPicker
-        val allTabs = allTabs
-        val availableIcons =
-            dev.dimension.flare.ui.model.UiIcon.entries
-                .map { IconType.Material(it) }
-
-        fun setIcon(newIcon: IconType) {
-            icon = newIcon
-        }
-
-        fun setShowIconPicker(show: Boolean) {
-            showIconPicker = show
-        }
-
-        fun setAddTab(show: Boolean) {
-            showAddTab = show
-        }
-
-        fun addTab(tab: TimelineTabItem) {
-            if (tabs.none { it.key == tab.key }) {
-                tabs.add(tab)
-            }
-        }
-
-        fun deleteTab(tab: TabItem) {
-            tabs.removeIf { it.key == tab.key }
-        }
-
-        fun deleteTab(key: String) {
-            tabs.removeIf { it.key == key }
-        }
-
-        fun moveTab(
-            from: Any,
-            to: Any,
-        ) {
-            val fromIndex = tabs.indexOfFirst { it.key == from }
-            val toIndex = tabs.indexOfFirst { it.key == to }
-            if (fromIndex != -1 && toIndex != -1) {
-                tabs.add(toIndex, tabs.removeAt(fromIndex))
-            }
-        }
-
-        fun commit() {
-            appScope.launch {
-                if (tabs.isEmpty()) {
-                    if (initialItem != null) {
-                        repository.updateTabSettings {
-                            val currentTabs = mainTabs.toMutableList()
-                            currentTabs.removeIf { it.key == initialItem.key }
-                            copy(mainTabs = currentTabs)
-                        }
+private fun GroupConfigPresenter(initialItem: MixedTimelineTabItem?) =
+    run {
+        val sharedState = remember { SharedGroupConfigPresenter() }.invoke()
+        val name =
+            rememberTextFieldState(
+                initialItem?.metaData?.title?.let {
+                    when (it) {
+                        is TitleType.Text -> it.content
+                        is TitleType.Localized -> ""
                     }
-                    return@launch
+                } ?: "",
+            )
+        var icon by remember(initialItem) {
+            mutableStateOf<IconType>(initialItem?.metaData?.icon ?: IconType.Material(dev.dimension.flare.ui.model.UiIcon.Rss))
+        }
+        val tabs =
+            remember(initialItem) {
+                mutableStateListOf<TimelineTabItem>().apply {
+                    initialItem
+                        ?.subTimelineTabItem
+                        ?.distinctBy { it.key }
+                        ?.let(::addAll)
                 }
-                val newGroup =
-                    MixedTimelineTabItem(
-                        subTimelineTabItem = tabs.toList(),
-                        metaData =
-                            TabMetaData(
-                                title = TitleType.Text(name.text.toString().ifEmpty { "Group" }),
-                                icon = icon,
-                            ),
-                    )
+            }
+        var showAddTab by remember { mutableStateOf(false) }
+        var showIconPicker by remember { mutableStateOf(false) }
+        val allTabs = remember { AllTabsPresenter(filterIsTimeline = true) }.invoke()
 
-                repository.updateTabSettings {
-                    val currentTabs = mainTabs.toMutableList()
-                    if (initialItem != null) {
-                        // Edit existing
-                        val index = currentTabs.indexOfFirst { it.key == initialItem.key }
-                        if (index != -1) {
-                            currentTabs[index] = newGroup
-                        }
-                    } else {
-                        // Create new
-                        currentTabs.add(newGroup)
-                    }
-                    copy(mainTabs = currentTabs)
+        object {
+            val name = name
+            val icon = icon
+            val tabs = tabs
+            val showAddTab = showAddTab
+            val showIconPicker = showIconPicker
+            val allTabs = allTabs
+            val availableIcons = sharedState.availableIcons
+
+            fun setIcon(value: IconType) {
+                icon = value
+            }
+
+            fun setAddTab(show: Boolean) {
+                showAddTab = show
+            }
+
+            fun setShowIconPicker(show: Boolean) {
+                showIconPicker = show
+            }
+
+            fun addTab(tab: TimelineTabItem) {
+                if (tabs.none { it.key == tab.key }) {
+                    tabs.add(tab)
                 }
+            }
+
+            fun deleteTab(tab: TabItem) {
+                tabs.removeIf { it.key == tab.key }
+            }
+
+            fun deleteTab(key: String) {
+                tabs.removeIf { it.key == key }
+            }
+
+            fun moveTab(
+                from: Any,
+                to: Any,
+            ) {
+                val fromIndex = tabs.indexOfFirst { it.key == from }
+                val toIndex = tabs.indexOfFirst { it.key == to }
+                if (fromIndex != -1 && toIndex != -1) {
+                    tabs.add(toIndex, tabs.removeAt(fromIndex))
+                }
+            }
+
+            fun commit() {
+                sharedState.commit(
+                    initialItem = initialItem,
+                    name = name.text.toString(),
+                    icon = icon,
+                    tabs = tabs.toList(),
+                    defaultGroupName = "Group",
+                )
             }
         }
     }
-}

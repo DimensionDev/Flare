@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Bars
+import compose.icons.fontawesomeicons.solid.Pen
 import compose.icons.fontawesomeicons.solid.Plus
 import compose.icons.fontawesomeicons.solid.TableList
 import compose.icons.fontawesomeicons.solid.Trash
@@ -86,6 +87,21 @@ internal fun GroupConfigScreen(
         onDispose {
             state.commit()
         }
+    }
+    state.selectedEditTab?.let {
+        EditTabDialog(
+            visible = true,
+            tabItem = it,
+            onDismissRequest = {
+                state.setEditTab(null)
+            },
+            onConfirm = { updatedTab ->
+                state.setEditTab(null)
+                if (updatedTab is TimelineTabItem) {
+                    state.updateTab(updatedTab)
+                }
+            },
+        )
     }
 
     val lazyListState = rememberLazyListState()
@@ -211,6 +227,17 @@ internal fun GroupConfigScreen(
                             Row {
                                 SubtleButton(
                                     onClick = {
+                                        state.setEditTab(item)
+                                    },
+                                    iconOnly = true,
+                                ) {
+                                    FAIcon(
+                                        FontAwesomeIcons.Solid.Pen,
+                                        contentDescription = "Edit",
+                                    )
+                                }
+                                SubtleButton(
+                                    onClick = {
                                         state.deleteTab(item)
                                     },
                                     iconOnly = true,
@@ -290,6 +317,7 @@ private fun GroupConfigPresenter(
         }
     var showAddTab by remember { mutableStateOf(false) }
     var showIconPicker by remember { mutableStateOf(false) }
+    var selectedEditTab by remember { mutableStateOf<TimelineTabItem?>(null) }
     val allTabs = remember { AllTabsPresenter(filterIsTimeline = true) }.invoke()
 
     object {
@@ -298,6 +326,7 @@ private fun GroupConfigPresenter(
         val tabs = tabs
         val showAddTab = showAddTab
         val showIconPicker = showIconPicker
+        val selectedEditTab = selectedEditTab
         val allTabs = allTabs
         val availableIcons = sharedState.availableIcons
 
@@ -313,6 +342,10 @@ private fun GroupConfigPresenter(
             showIconPicker = show
         }
 
+        fun setEditTab(tab: TimelineTabItem?) {
+            selectedEditTab = tab
+        }
+
         fun addTab(tab: TimelineTabItem) {
             if (tabs.none { it.key == tab.key }) {
                 tabs.add(tab)
@@ -325,6 +358,13 @@ private fun GroupConfigPresenter(
 
         fun deleteTab(key: String) {
             tabs.removeIf { it.key == key }
+        }
+
+        fun updateTab(tab: TimelineTabItem) {
+            val index = tabs.indexOfFirst { it.key == tab.key }
+            if (index != -1) {
+                tabs[index] = tab
+            }
         }
 
         fun moveTab(

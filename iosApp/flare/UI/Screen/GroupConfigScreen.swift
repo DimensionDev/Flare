@@ -10,6 +10,7 @@ struct GroupConfigScreen: View {
     @State private var tabs: [TimelineTabItem]
     @State private var showAddTabSheet = false
     @State private var showIconPicker = false
+    @State private var editItem: TimelineTabItem? = nil
     @StateObject private var presenter: KotlinPresenter<GroupConfigPresenterState>
 
     init(item: MixedTimelineTabItem? = nil) {
@@ -64,6 +65,12 @@ struct GroupConfigScreen: View {
                                 TabIcon(icon: tab.metaData.icon, accountType: tab.account)
                             }
                             Spacer()
+                            Button {
+                                editItem = tab
+                            } label: {
+                                Image("fa-pen")
+                            }
+                            .buttonStyle(.plain)
                         }
                     }
                     .onMove(perform: move)
@@ -96,6 +103,15 @@ struct GroupConfigScreen: View {
                     selectedIcon: icon,
                     onSelect: { icon = $0 }
                 )
+            }
+        }
+        .sheet(item: $editItem) { item in
+            NavigationStack {
+                EditTabSheet(onConfirm: { updated in
+                    if let index = tabs.firstIndex(where: { $0.key == updated.key }), let updated = updated as? TimelineTabItem {
+                        tabs[index] = updated
+                    }
+                }, tabItem: item)
             }
         }
         .toolbar {

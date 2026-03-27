@@ -61,6 +61,7 @@ import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.TabIcon
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.screen.settings.AllTabsPresenter
+import dev.dimension.flare.ui.screen.settings.EditTabDialog
 import dev.dimension.flare.ui.screen.settings.TabAddBottomSheet
 import dev.dimension.flare.ui.screen.settings.TabCustomItem
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
@@ -85,6 +86,20 @@ internal fun GroupConfigScreen(
         onDispose {
             state.commit()
         }
+    }
+    state.selectedEditTab?.let {
+        EditTabDialog(
+            tabItem = it,
+            onDismissRequest = {
+                state.setEditTab(null)
+            },
+            onConfirm = { updatedTab ->
+                state.setEditTab(null)
+                if (updatedTab is TimelineTabItem) {
+                    state.updateTab(updatedTab)
+                }
+            },
+        )
     }
 
     FlareScaffold(
@@ -221,12 +236,14 @@ internal fun GroupConfigScreen(
                     item = item,
                     shapes = ListItemDefaults.segmentedShapes2(index, state.tabs.size),
                     deleteTab = { state.deleteTab(item) },
-                    // Child tabs in a group are intentionally not editable from this screen;
-                    // only group-level configuration is supported.
-                    editTab = { },
+                    editTab = {
+                        if (it is TimelineTabItem) {
+                            state.setEditTab(it)
+                        }
+                    },
                     reorderableLazyColumnState = reorderableLazyColumnState,
                     canSwipeToDelete = true,
-                    isEditing = false,
+                    isEditing = state.selectedEditTab == item,
                 )
             }
         }
@@ -275,6 +292,7 @@ private fun GroupConfigPresenter(initialItem: MixedTimelineTabItem?) =
             }
         var showAddTab by remember { mutableStateOf(false) }
         var showIconPicker by remember { mutableStateOf(false) }
+        var selectedEditTab by remember { mutableStateOf<TimelineTabItem?>(null) }
         val allTabs = remember { AllTabsPresenter(filterIsTimeline = true) }.invoke()
 
         object {
@@ -283,6 +301,7 @@ private fun GroupConfigPresenter(initialItem: MixedTimelineTabItem?) =
             val tabs = tabs
             val showAddTab = showAddTab
             val showIconPicker = showIconPicker
+            val selectedEditTab = selectedEditTab
             val allTabs = allTabs
             val availableIcons = sharedState.availableIcons
 
@@ -298,6 +317,10 @@ private fun GroupConfigPresenter(initialItem: MixedTimelineTabItem?) =
                 showIconPicker = show
             }
 
+            fun setEditTab(tab: TimelineTabItem?) {
+                selectedEditTab = tab
+            }
+
             fun addTab(tab: TimelineTabItem) {
                 if (tabs.none { it.key == tab.key }) {
                     tabs.add(tab)
@@ -310,6 +333,13 @@ private fun GroupConfigPresenter(initialItem: MixedTimelineTabItem?) =
 
             fun deleteTab(key: String) {
                 tabs.removeIf { it.key == key }
+            }
+
+            fun updateTab(tab: TimelineTabItem) {
+                val index = tabs.indexOfFirst { it.key == tab.key }
+                if (index != -1) {
+                    tabs[index] = tab
+                }
             }
 
             fun moveTab(

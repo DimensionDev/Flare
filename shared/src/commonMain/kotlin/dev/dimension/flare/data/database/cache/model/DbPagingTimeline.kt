@@ -52,6 +52,12 @@ internal data class DbPagingTimelineWithStatus(
 internal data class DbStatusWithUser(
     @Embedded
     val data: DbStatus,
+    @Relation(
+        parentColumn = "id",
+        entityColumn = "entityKey",
+        entity = DbTranslation::class,
+    )
+    val translations: List<DbTranslation> = emptyList(),
 )
 
 internal data class DbStatusReferenceWithStatus(

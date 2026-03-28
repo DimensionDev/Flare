@@ -11,6 +11,7 @@ import androidx.paging.cachedIn
 import androidx.paging.filter
 import androidx.paging.map
 import dev.dimension.flare.common.InAppNotification
+import dev.dimension.flare.common.Locale
 import dev.dimension.flare.common.Message
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.cachePagingState
@@ -19,6 +20,7 @@ import dev.dimension.flare.common.onEmpty
 import dev.dimension.flare.common.onError
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.model.TranslationDisplayOptions
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.NotSupportRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
@@ -26,8 +28,10 @@ import dev.dimension.flare.data.datasource.microblog.paging.TimelinePagingMapper
 import dev.dimension.flare.data.datasource.microblog.paging.TimelineRemoteMediator
 import dev.dimension.flare.data.datasource.microblog.paging.toPagingSource
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
+import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.repository.LocalFilterRepository
 import dev.dimension.flare.data.repository.LoginExpiredException
+import dev.dimension.flare.data.translation.PreTranslationService
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.CoroutineScope
@@ -36,6 +40,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
@@ -48,12 +53,24 @@ public abstract class TimelinePresenter :
     PresenterBase<TimelineState>(),
     KoinComponent {
     private val database: CacheDatabase by inject()
+    private val appDataStore: AppDataStore by inject()
+    private val preTranslationService: PreTranslationService by inject()
 
     private val localFilterRepository: LocalFilterRepository by inject()
     private val inAppNotification: InAppNotification by inject()
 
     private val filterFlow by lazy {
         localFilterRepository.getFlow(forTimeline = true)
+    }
+
+    private val translationDisplayFlow by lazy {
+        appDataStore.appSettingsStore.data
+            .map { settings ->
+                TranslationDisplayOptions(
+                    enabled = settings.aiConfig.translation && settings.aiConfig.preTranslation,
+                    targetLanguage = settings.language.ifBlank { Locale.language },
+                )
+            }.distinctUntilChanged()
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -66,9 +83,13 @@ public abstract class TimelinePresenter :
                     }
 
                     is CacheableRemoteLoader<UiTimelineV2> -> {
-                        cachePager(
-                            loader = it,
-                        ).cachedIn(scope)
+                        translationDisplayFlow
+                            .flatMapLatest { translationDisplayOptions ->
+                                cachePager(
+                                    loader = it,
+                                    translationDisplayOptions = translationDisplayOptions,
+                                )
+                            }.cachedIn(scope)
                     }
 
                     else -> {
@@ -97,13 +118,17 @@ public abstract class TimelinePresenter :
             }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    private fun cachePager(loader: CacheableRemoteLoader<UiTimelineV2>): Flow<PagingData<UiTimelineV2>> =
+    private fun cachePager(
+        loader: CacheableRemoteLoader<UiTimelineV2>,
+        translationDisplayOptions: TranslationDisplayOptions,
+    ): Flow<PagingData<UiTimelineV2>> =
         Pager(
             config = pagingConfig,
             remoteMediator =
                 TimelineRemoteMediator(
                     loader = loader,
                     database = database,
+                    preTranslationService = preTranslationService,
                     notifyError = { e ->
                         if (e is LoginExpiredException) {
                             inAppNotification.onError(Message.LoginExpired, e)
@@ -118,7 +143,12 @@ public abstract class TimelinePresenter :
         ).flow.map { pagingData ->
             withContext(Dispatchers.IO) {
                 pagingData.map { item ->
-                    TimelinePagingMapper.toUi(item, loader.pagingKey, useDbKeyInItemKey)
+                    TimelinePagingMapper.toUi(
+                        item = item,
+                        pagingKey = loader.pagingKey,
+                        useDbKeyInItemKey = useDbKeyInItemKey,
+                        translationDisplayOptions = translationDisplayOptions,
+                    )
                 }
             }
         }

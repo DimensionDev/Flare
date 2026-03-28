@@ -3,11 +3,9 @@ package dev.dimension.flare.ui.presenter.server
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.produceState
 import dev.dimension.flare.common.Locale
-import dev.dimension.flare.common.OnDeviceAI
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.datastore.model.AiPromptDefaults
-import dev.dimension.flare.data.datastore.model.AppSettings
-import dev.dimension.flare.data.network.ai.OpenAIService
+import dev.dimension.flare.data.network.ai.AiCompletionService
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.flow.first
@@ -20,8 +18,7 @@ public class AiTLDRPresenter(
 ) : PresenterBase<UiState<String>>(),
     KoinComponent {
     private val appDataStore: AppDataStore by inject()
-    private val openAIService: OpenAIService by inject()
-    private val onDeviceAI: OnDeviceAI by inject()
+    private val aiCompletionService: AiCompletionService by inject()
 
     @Composable
     override fun body(): UiState<String> {
@@ -40,20 +37,12 @@ public class AiTLDRPresenter(
                             AiPromptDefaults.TLDR_PROMPT
                         }
                     val prompt = buildTldrPrompt(promptTemplate, targetLanguage, source)
-                    when (val type = aiConfig.type) {
-                        AppSettings.AiConfig.Type.OnDevice ->
-                            onDeviceAI.tldr(source, targetLanguage, prompt) ?: legacyFlareTldr()
-                        is AppSettings.AiConfig.Type.OpenAI -> {
-                            if (type.serverUrl.isBlank() || type.apiKey.isBlank() || type.model.isBlank()) {
-                                legacyFlareTldr()
-                            } else {
-                                openAIService.chatCompletion(
-                                    config = type,
-                                    prompt = prompt,
-                                )
-                            }
-                        }
-                    }
+                    aiCompletionService.tldr(
+                        config = aiConfig,
+                        source = source,
+                        targetLanguage = targetLanguage,
+                        prompt = prompt,
+                    ) ?: legacyFlareTldr()
                 }.fold(
                     onSuccess = { UiState.Success(it) },
                     onFailure = { UiState.Error(it) },

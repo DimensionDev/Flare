@@ -3,11 +3,9 @@ package dev.dimension.flare.ui.presenter.status
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.produceState
 import dev.dimension.flare.common.Locale
-import dev.dimension.flare.common.OnDeviceAI
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.datastore.model.AiPromptDefaults
-import dev.dimension.flare.data.datastore.model.AppSettings
-import dev.dimension.flare.data.network.ai.OpenAIService
+import dev.dimension.flare.data.network.ai.AiCompletionService
 import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.presenter.PresenterBase
@@ -32,9 +30,8 @@ public class TranslatePresenter(
     private val targetLanguage: String = Locale.language,
 ) : PresenterBase<UiState<UiRichText>>(),
     KoinComponent {
-    private val openAIService by inject<OpenAIService>()
+    private val aiCompletionService by inject<AiCompletionService>()
     private val appDataStore: AppDataStore by inject()
-    private val onDeviceAI: OnDeviceAI by inject()
     private val sourceText: String by lazy { source.toTranslatableText() }
     private val sourceJson: String by lazy { source.toTranslationJson(targetLanguage) }
 
@@ -55,20 +52,14 @@ public class TranslatePresenter(
                             AiPromptDefaults.TRANSLATE_PROMPT
                         }
                     val prompt = buildTranslatePrompt(promptTemplate, targetLanguage)
-                    when (val type = aiConfig.type) {
-                        AppSettings.AiConfig.Type.OnDevice ->
-                            onDeviceAI.translate(sourceText, targetLanguage, prompt) ?: legacyGoogleTranslate()
-                        is AppSettings.AiConfig.Type.OpenAI -> {
-                            if (type.serverUrl.isBlank() || type.apiKey.isBlank() || type.model.isBlank()) {
-                                legacyGoogleTranslate()
-                            } else {
-                                openAIService.chatCompletion(
-                                    config = type,
-                                    prompt = prompt,
-                                )
-                            }
-                        }
-                    }.let(::toUiRichText)
+                    (
+                        aiCompletionService.translate(
+                            config = aiConfig,
+                            source = sourceText,
+                            targetLanguage = targetLanguage,
+                            prompt = prompt,
+                        ) ?: legacyGoogleTranslate()
+                    ).let(::toUiRichText)
                 }.fold(
                     onSuccess = { UiState.Success(it) },
                     onFailure = { UiState.Error(it) },

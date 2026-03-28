@@ -138,7 +138,12 @@ public class AiConfigPresenter :
                 scope.launch {
                     withContext(Dispatchers.Main) {
                         appDataStore.appSettingsStore.updateData { current ->
-                            current.copy(aiConfig = block.invoke(current.aiConfig))
+                            current.copy(
+                                aiConfig =
+                                    block
+                                        .invoke(current.aiConfig)
+                                        .normalized(),
+                            )
                         }
                     }
                 }
@@ -166,6 +171,13 @@ public class AiConfigPresenter :
         }
     }
 }
+
+private fun AppSettings.AiConfig.normalized(): AppSettings.AiConfig =
+    if (translation) {
+        this
+    } else {
+        copy(preTranslation = false)
+    }
 
 private val SERVER_SUGGESTIONS =
     persistentListOf(

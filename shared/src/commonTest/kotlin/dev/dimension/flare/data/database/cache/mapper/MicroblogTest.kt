@@ -9,6 +9,14 @@ import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.common.TestFormatter
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
+import dev.dimension.flare.data.database.cache.model.DbTranslation
+import dev.dimension.flare.data.database.cache.model.TranslationDisplayOptions
+import dev.dimension.flare.data.database.cache.model.TranslationEntityType
+import dev.dimension.flare.data.database.cache.model.TranslationPayload
+import dev.dimension.flare.data.database.cache.model.TranslationStatus
+import dev.dimension.flare.data.database.cache.model.sourceHash
+import dev.dimension.flare.data.database.cache.model.translationEntityKey
+import dev.dimension.flare.data.database.cache.model.translationPayload
 import dev.dimension.flare.data.datasource.microblog.paging.TimelinePagingMapper
 import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.AccountType
@@ -480,6 +488,81 @@ class MicroblogTest : RobolectricTest() {
             assertEquals(1, post.parents.size)
             assertEquals("home", post.parents.first().extraKey)
             assertEquals(parentPost.statusKey, post.parents.first().statusKey)
+        }
+
+    @Test
+    fun toUiUsesCompletedTranslationForRootAndReplyReference() =
+        runTest {
+            val accountKey = MicroBlogKey(id = "account", host = "test.com")
+            val rootUser = createUser(MicroBlogKey(id = "root-user-translated", host = "test.com"), "Root User")
+            val parentUser = createUser(MicroBlogKey(id = "parent-user-translated", host = "test.com"), "Parent User")
+            val parentPost =
+                createPost(
+                    accountKey = accountKey,
+                    user = parentUser,
+                    statusKey = MicroBlogKey(id = "parent-status-translated", host = "test.com"),
+                    text = "parent original",
+                )
+            val rootPost =
+                createPost(
+                    accountKey = accountKey,
+                    user = rootUser,
+                    statusKey = MicroBlogKey(id = "root-status-translated", host = "test.com"),
+                    text = "root original",
+                    parents = listOf(parentPost),
+                )
+
+            val mapped = TimelinePagingMapper.toDb(rootPost, pagingKey = "home")
+            saveToDatabase(db, listOf(mapped))
+            val savedParentStatus = assertNotNull(db.statusDao().get(parentPost.statusKey, AccountType.Specific(accountKey)).first())
+            db.translationDao().insertAll(
+                listOf(
+                    DbTranslation(
+                        entityType = TranslationEntityType.Status,
+                        entityKey =
+                            mapped.status.status.data
+                                .translationEntityKey(),
+                        targetLanguage = "zh-CN",
+                        sourceHash = rootPost.translationPayload()!!.sourceHash(),
+                        status = TranslationStatus.Completed,
+                        payload = TranslationPayload(content = "根帖子".toUiPlainText()),
+                        updatedAt = 1L,
+                    ),
+                    DbTranslation(
+                        entityType = TranslationEntityType.Status,
+                        entityKey = savedParentStatus.translationEntityKey(),
+                        targetLanguage = "zh-CN",
+                        sourceHash = parentPost.translationPayload()!!.sourceHash(),
+                        status = TranslationStatus.Completed,
+                        payload = TranslationPayload(content = "父帖子".toUiPlainText()),
+                        updatedAt = 1L,
+                    ),
+                ),
+            )
+
+            val paging = db.pagingTimelineDao().getPagingSource("home")
+            val pager = TestPager(config = PagingConfig(pageSize = 20), paging)
+            val refreshResult = pager.refresh()
+            val page = assertIs<PagingSource.LoadResult.Page<Int, DbPagingTimelineWithStatus>>(refreshResult)
+            val dbItem = assertNotNull(page.data.firstOrNull())
+
+            val ui =
+                TimelinePagingMapper.toUi(
+                    item = dbItem,
+                    pagingKey = "home",
+                    useDbKeyInItemKey = false,
+                    translationDisplayOptions = TranslationDisplayOptions(enabled = true, targetLanguage = "zh-CN"),
+                )
+            val post = assertIs<UiTimelineV2.Post>(ui)
+
+            assertEquals("根帖子", post.content.raw)
+            assertEquals(1, post.parents.size)
+            assertEquals(
+                "父帖子",
+                post.parents
+                    .first()
+                    .content.raw,
+            )
         }
 
     @Test

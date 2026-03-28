@@ -54,6 +54,19 @@ internal class OpenAIService {
             .orEmpty()
             .trim()
 
+    suspend fun chatCompletionOrNull(
+        config: AppSettings.AiConfig.Type.OpenAI,
+        prompt: String,
+    ): String? =
+        if (config.serverUrl.isBlank() || config.apiKey.isBlank() || config.model.isBlank()) {
+            null
+        } else {
+            chatCompletion(
+                config = config,
+                prompt = prompt,
+            )
+        }
+
     private fun createClient(
         serverUrl: String,
         apiKey: String,

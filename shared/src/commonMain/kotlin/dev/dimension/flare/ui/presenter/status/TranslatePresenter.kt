@@ -12,7 +12,9 @@ import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.render.UiRichText
+import dev.dimension.flare.ui.render.applyTranslationJson
 import dev.dimension.flare.ui.render.toTranslatableText
+import dev.dimension.flare.ui.render.toTranslationJson
 import dev.dimension.flare.ui.render.toUiPlainText
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -34,6 +36,7 @@ public class TranslatePresenter(
     private val appDataStore: AppDataStore by inject()
     private val onDeviceAI: OnDeviceAI by inject()
     private val sourceText: String by lazy { source.toTranslatableText() }
+    private val sourceJson: String by lazy { source.toTranslationJson(targetLanguage) }
 
     @Composable
     override fun body(): UiState<UiRichText> {
@@ -51,7 +54,7 @@ public class TranslatePresenter(
                         aiConfig.translatePrompt.ifBlank {
                             AiPromptDefaults.TRANSLATE_PROMPT
                         }
-                    val prompt = buildTranslatePrompt(promptTemplate, targetLanguage, source)
+                    val prompt = buildTranslatePrompt(promptTemplate, targetLanguage)
                     when (val type = aiConfig.type) {
                         AppSettings.AiConfig.Type.OnDevice ->
                             onDeviceAI.translate(sourceText, targetLanguage, prompt) ?: legacyGoogleTranslate()
@@ -103,19 +106,30 @@ public class TranslatePresenter(
     private fun buildTranslatePrompt(
         template: String,
         targetLanguage: String,
-        source: UiRichText,
     ): String =
         template
             .replace("{target_language}", targetLanguage)
             .replace("{source_text}", sourceText)
-            .replace("{source_html}", sourceText)
+            .replace("{source_json}", sourceJson)
+            .replace("{source_html}", sourceJson)
+            .replace("{source_xml}", sourceJson)
+            .replace("{source_markup}", sourceJson)
 
     private fun toUiRichText(translatedContent: String): UiRichText =
         translatedContent
+            .removePrefix("```json")
             .removePrefix("```html")
+            .removePrefix("```xml")
+            .removePrefix("```markup")
             .removePrefix("```text")
             .removePrefix("```")
             .removeSuffix("```")
             .trim()
-            .toUiPlainText()
+            .let { cleaned ->
+                runCatching {
+                    source.applyTranslationJson(cleaned)
+                }.getOrElse {
+                    cleaned.toUiPlainText()
+                }
+            }
 }

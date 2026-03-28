@@ -3,16 +3,16 @@ package dev.dimension.flare.ui.presenter.status
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.produceState
 import dev.dimension.flare.common.Locale
-import dev.dimension.flare.common.OnDeviceAI
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.datastore.model.AiPromptDefaults
-import dev.dimension.flare.data.datastore.model.AppSettings
-import dev.dimension.flare.data.network.ai.OpenAIService
+import dev.dimension.flare.data.network.ai.AiCompletionService
 import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.render.UiRichText
+import dev.dimension.flare.ui.render.applyTranslationJson
 import dev.dimension.flare.ui.render.toTranslatableText
+import dev.dimension.flare.ui.render.toTranslationJson
 import dev.dimension.flare.ui.render.toUiPlainText
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -30,10 +30,10 @@ public class TranslatePresenter(
     private val targetLanguage: String = Locale.language,
 ) : PresenterBase<UiState<UiRichText>>(),
     KoinComponent {
-    private val openAIService by inject<OpenAIService>()
+    private val aiCompletionService by inject<AiCompletionService>()
     private val appDataStore: AppDataStore by inject()
-    private val onDeviceAI: OnDeviceAI by inject()
     private val sourceText: String by lazy { source.toTranslatableText() }
+    private val sourceJson: String by lazy { source.toTranslationJson(targetLanguage) }
 
     @Composable
     override fun body(): UiState<UiRichText> {
@@ -51,21 +51,15 @@ public class TranslatePresenter(
                         aiConfig.translatePrompt.ifBlank {
                             AiPromptDefaults.TRANSLATE_PROMPT
                         }
-                    val prompt = buildTranslatePrompt(promptTemplate, targetLanguage, source)
-                    when (val type = aiConfig.type) {
-                        AppSettings.AiConfig.Type.OnDevice ->
-                            onDeviceAI.translate(sourceText, targetLanguage, prompt) ?: legacyGoogleTranslate()
-                        is AppSettings.AiConfig.Type.OpenAI -> {
-                            if (type.serverUrl.isBlank() || type.apiKey.isBlank() || type.model.isBlank()) {
-                                legacyGoogleTranslate()
-                            } else {
-                                openAIService.chatCompletion(
-                                    config = type,
-                                    prompt = prompt,
-                                )
-                            }
-                        }
-                    }.let(::toUiRichText)
+                    val prompt = buildTranslatePrompt(promptTemplate, targetLanguage)
+                    (
+                        aiCompletionService.translate(
+                            config = aiConfig,
+                            source = sourceText,
+                            targetLanguage = targetLanguage,
+                            prompt = prompt,
+                        ) ?: legacyGoogleTranslate()
+                    ).let(::toUiRichText)
                 }.fold(
                     onSuccess = { UiState.Success(it) },
                     onFailure = { UiState.Error(it) },
@@ -103,19 +97,30 @@ public class TranslatePresenter(
     private fun buildTranslatePrompt(
         template: String,
         targetLanguage: String,
-        source: UiRichText,
     ): String =
         template
             .replace("{target_language}", targetLanguage)
             .replace("{source_text}", sourceText)
-            .replace("{source_html}", sourceText)
+            .replace("{source_json}", sourceJson)
+            .replace("{source_html}", sourceJson)
+            .replace("{source_xml}", sourceJson)
+            .replace("{source_markup}", sourceJson)
 
     private fun toUiRichText(translatedContent: String): UiRichText =
         translatedContent
+            .removePrefix("```json")
             .removePrefix("```html")
+            .removePrefix("```xml")
+            .removePrefix("```markup")
             .removePrefix("```text")
             .removePrefix("```")
             .removeSuffix("```")
             .trim()
-            .toUiPlainText()
+            .let { cleaned ->
+                runCatching {
+                    source.applyTranslationJson(cleaned)
+                }.getOrElse {
+                    cleaned.toUiPlainText()
+                }
+            }
 }

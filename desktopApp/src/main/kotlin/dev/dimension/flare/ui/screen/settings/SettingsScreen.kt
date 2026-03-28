@@ -86,6 +86,7 @@ import dev.dimension.flare.settings_accounts_title
 import dev.dimension.flare.settings_ai_config_api_key
 import dev.dimension.flare.settings_ai_config_api_key_hint
 import dev.dimension.flare.settings_ai_config_description
+import dev.dimension.flare.settings_ai_config_enable_pre_translation
 import dev.dimension.flare.settings_ai_config_enable_tldr
 import dev.dimension.flare.settings_ai_config_entable_translation
 import dev.dimension.flare.settings_ai_config_model
@@ -94,6 +95,7 @@ import dev.dimension.flare.settings_ai_config_model_error
 import dev.dimension.flare.settings_ai_config_model_loading
 import dev.dimension.flare.settings_ai_config_model_no_models
 import dev.dimension.flare.settings_ai_config_model_select
+import dev.dimension.flare.settings_ai_config_pre_translation_description
 import dev.dimension.flare.settings_ai_config_server
 import dev.dimension.flare.settings_ai_config_server_hint
 import dev.dimension.flare.settings_ai_config_server_url_requirement
@@ -1422,6 +1424,24 @@ internal fun SettingsScreen(
                 ExpanderItemSeparator()
                 AnimatedVisibility(state.aiConfigState.aiConfig.translation) {
                     Column {
+                        ExpanderItem(
+                            heading = {
+                                Text(stringResource(Res.string.settings_ai_config_enable_pre_translation))
+                            },
+                            caption = {
+                                Text(stringResource(Res.string.settings_ai_config_pre_translation_description))
+                            },
+                            trailing = {
+                                Switcher(
+                                    checked = state.aiConfigState.aiConfig.preTranslation,
+                                    {
+                                        state.aiConfigState.update { copy(preTranslation = it) }
+                                    },
+                                    textBefore = true,
+                                )
+                            },
+                        )
+                        ExpanderItemSeparator()
                         ExpanderItem(
                             heading = { Text(stringResource(Res.string.settings_ai_config_translate_prompt)) },
                             caption = {

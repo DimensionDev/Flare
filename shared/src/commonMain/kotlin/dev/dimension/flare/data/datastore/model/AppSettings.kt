@@ -25,6 +25,7 @@ public data class AppSettings(
         val type: Type = Type.OpenAI("", "", ""),
         val translatePrompt: String = AiPromptDefaults.TRANSLATE_PROMPT,
         val tldrPrompt: String = AiPromptDefaults.TLDR_PROMPT,
+        val preTranslation: Boolean = false,
     ) {
         @Serializable
         public sealed interface Type {

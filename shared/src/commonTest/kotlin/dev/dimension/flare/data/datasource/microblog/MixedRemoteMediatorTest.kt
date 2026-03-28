@@ -8,13 +8,27 @@ import androidx.paging.PagingState
 import androidx.room.Room
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import dev.dimension.flare.RobolectricTest
+import dev.dimension.flare.common.OnDeviceAI
 import dev.dimension.flare.common.TestFormatter
+import dev.dimension.flare.common.decodeJson
+import dev.dimension.flare.common.encodeJson
+import dev.dimension.flare.createTestRootPath
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.model.TranslationEntityType
+import dev.dimension.flare.data.database.cache.model.TranslationStatus
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.datasource.microblog.paging.TimelinePagingMapper
 import dev.dimension.flare.data.datasource.microblog.paging.TimelineRemoteMediator
+import dev.dimension.flare.data.datastore.AppDataStore
+import dev.dimension.flare.data.datastore.model.AppSettings
+import dev.dimension.flare.data.io.PlatformPathProducer
+import dev.dimension.flare.data.network.ai.AiCompletionService
+import dev.dimension.flare.data.network.ai.OpenAIService
+import dev.dimension.flare.data.translation.AiPreTranslationService
+import dev.dimension.flare.data.translation.PreTranslationService
+import dev.dimension.flare.deleteTestRootPath
 import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -24,13 +38,19 @@ import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiHandle
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.render.TranslationDocument
+import dev.dimension.flare.ui.render.TranslationTokenKind
 import dev.dimension.flare.ui.render.toUi
 import dev.dimension.flare.ui.render.toUiPlainText
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
+import okio.Path
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
@@ -47,6 +67,17 @@ import kotlin.time.Instant
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class MixedRemoteMediatorTest : RobolectricTest() {
+    private val root = createTestRootPath()
+    private val pathProducer =
+        object : PlatformPathProducer {
+            override fun dataStoreFile(fileName: String): Path = root.resolve(fileName)
+
+            override fun draftMediaFile(
+                groupId: String,
+                fileName: String,
+            ): Path = root.resolve("draft_media").resolve(groupId).resolve(fileName)
+        }
+
     private lateinit var db: CacheDatabase
 
     @BeforeTest
@@ -70,6 +101,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
     fun tearDown() {
         db.close()
         stopKoin()
+        deleteTestRootPath(root)
     }
 
     @Test
@@ -336,6 +368,108 @@ class MixedRemoteMediatorTest : RobolectricTest() {
             assertEquals(listOf(postA.statusKey, postB.statusKey), post.parents.map { it.statusKey })
         }
 
+    @OptIn(ExperimentalPagingApi::class)
+    @Test
+    fun refreshSchedulesPreTranslationForRootAndReplyReference() =
+        runTest {
+            val appDataStore = AppDataStore(pathProducer)
+            appDataStore.appSettingsStore.updateData {
+                it.copy(
+                    language = "zh-CN",
+                    aiConfig =
+                        AppSettings.AiConfig(
+                            translation = true,
+                            preTranslation = true,
+                            type = AppSettings.AiConfig.Type.OnDevice,
+                        ),
+                )
+            }
+            val preTranslationService: PreTranslationService =
+                AiPreTranslationService(
+                    database = db,
+                    appDataStore = appDataStore,
+                    aiCompletionService = AiCompletionService(OpenAIService(), TestOnDeviceAI()),
+                    coroutineScope = CoroutineScope(Dispatchers.Unconfined),
+                )
+            val accountKey = MicroBlogKey(id = "account-pretranslation", host = "test.social")
+            val accountType = AccountType.Specific(accountKey)
+            val rootUser = profile(MicroBlogKey("root-pretranslation", "test.social"), "Root")
+            val parentUser = profile(MicroBlogKey("parent-pretranslation", "test.social"), "Parent")
+            val parent =
+                createPost(
+                    user = parentUser,
+                    accountType = accountType,
+                    statusKey = MicroBlogKey(id = "parent-status-pretranslation", host = "test.social"),
+                    text = "parent source",
+                )
+            val rootPost =
+                createPost(
+                    user = rootUser,
+                    accountType = accountType,
+                    statusKey = MicroBlogKey(id = "root-status-pretranslation", host = "test.social"),
+                    text = "root source",
+                    parents = listOf(parent),
+                )
+            val loader =
+                FakeLoader("pretranslation") { request ->
+                    when (request) {
+                        PagingRequest.Refresh ->
+                            PagingResult(
+                                data = listOf(rootPost),
+                                nextKey = null,
+                            )
+
+                        is PagingRequest.Append -> error("No append expected")
+                        is PagingRequest.Prepend -> error("No prepend expected")
+                    }
+                }
+            val mediator =
+                TimelineRemoteMediator(
+                    loader = loader,
+                    database = db,
+                    preTranslationService = preTranslationService,
+                )
+
+            val mediatorResult =
+                mediator.load(
+                    loadType = LoadType.REFRESH,
+                    state =
+                        PagingState(
+                            pages = emptyList(),
+                            anchorPosition = null,
+                            config = PagingConfig(pageSize = 20),
+                            leadingPlaceholderCount = 0,
+                        ),
+                )
+            assertTrue(mediatorResult is androidx.paging.RemoteMediator.MediatorResult.Success)
+            val savedRoot = db.statusDao().get(rootPost.statusKey, accountType).first()
+            val savedParent = db.statusDao().get(parent.statusKey, accountType).first()
+            assertNotNull(savedRoot)
+            assertNotNull(savedParent)
+
+            val rootTranslation =
+                db
+                    .translationDao()
+                    .find(
+                        entityType = TranslationEntityType.Status,
+                        entityKey = savedRoot.id,
+                        targetLanguage = "zh-CN",
+                    ).filterNotNull()
+                    .first { it.status == TranslationStatus.Completed }
+            val parentTranslation =
+                db
+                    .translationDao()
+                    .find(
+                        entityType = TranslationEntityType.Status,
+                        entityKey = savedParent.id,
+                        targetLanguage = "zh-CN",
+                    ).filterNotNull()
+                    .first { it.status == TranslationStatus.Completed }
+
+            assertEquals("root source (zh-CN)", rootTranslation.payload?.content?.raw)
+            assertEquals("parent source (zh-CN)", parentTranslation.payload?.content?.raw)
+        }
+
     @Test
     fun refreshDeduplicatesSamePostReturnedByMultipleSubTimelines() =
         runTest {
@@ -528,3 +662,64 @@ class MixedRemoteMediatorTest : RobolectricTest() {
             accountType = accountType,
         )
 }
+
+private class TestOnDeviceAI : OnDeviceAI {
+    override suspend fun isAvailable(): Boolean = true
+
+    override suspend fun translate(
+        source: String,
+        targetLanguage: String,
+        prompt: String,
+    ): String? {
+        val document =
+            source.decodeJson(
+                dev.dimension.flare.data.translation.PreTranslationBatchDocument
+                    .serializer(),
+            )
+        return document
+            .copy(
+                items =
+                    document.items.map { item ->
+                        item.copy(
+                            payload = item.payload.translated(targetLanguage),
+                        )
+                    },
+            ).encodeJson(
+                dev.dimension.flare.data.translation.PreTranslationBatchDocument
+                    .serializer(),
+            )
+    }
+
+    override suspend fun tldr(
+        source: String,
+        targetLanguage: String,
+        prompt: String,
+    ): String? = null
+}
+
+private fun dev.dimension.flare.data.translation.PreTranslationBatchPayload.translated(
+    targetLanguage: String,
+): dev.dimension.flare.data.translation.PreTranslationBatchPayload =
+    dev.dimension.flare.data.translation.PreTranslationBatchPayload(
+        content = content?.translated(targetLanguage),
+        contentWarning = contentWarning?.translated(targetLanguage),
+        title = title?.translated(targetLanguage),
+        description = description?.translated(targetLanguage),
+    )
+
+private fun TranslationDocument.translated(targetLanguage: String): TranslationDocument =
+    copy(
+        blocks =
+            blocks.map { block ->
+                block.copy(
+                    tokens =
+                        block.tokens.map { token ->
+                            if (token.kind == TranslationTokenKind.Translatable) {
+                                token.copy(text = "${token.text} ($targetLanguage)")
+                            } else {
+                                token
+                            }
+                        },
+                )
+            },
+    )

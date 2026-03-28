@@ -1,1 +1,1 @@
-Browse Mastodon, Bluesky, X, Misskey, Nostr and RSS all in one app, one timeline.
+Browse Mastodon, Bluesky, X, Misskey, Nostr and RSS all in one app.

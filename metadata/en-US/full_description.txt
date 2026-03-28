@@ -1,8 +1,18 @@
-Flare is an open-source, privacy-first social client that brings together multiple decentralized and federated networks into one seamless timeline. Whether you follow people on Mastodon, Bluesky, Misskey, or prefer RSS feeds, Flare lets you see everything in one place — no need to switch between apps.
+Flare is a free and open source client for the social web. Browse, post, and
+interact across Mastodon, Bluesky, X, Misskey, and Nostr from a single app.
 
 Features:
- - Unified timeline covering Mastodon, Misskey, Bluesky, X, and RSS feeds. 
- - Crossposting: share your thoughts across multiple platforms simultaneously. 
- - Full support for features common in federated social networks (polls, lists, favourites/bookmarks, etc.) depending on the platform. 
- - AI-powered tools: translation, summaries, local history to help you catch up quickly. 
- - Strong focus on privacy and control: anonymous mode, local filtering, data transparency. 
+
+- Unified timeline: merge feeds from multiple accounts and platforms into one
+  stream
+- Cross-posting: compose once, publish to multiple platforms
+- Adaptive layout: multi-column grid and split-view panels on tablets
+- Built-in RSS/Atom reader with OPML import
+- Customizable tab bar with any timeline, list, or feed as a tab
+- Full compose: polls, content warnings, media alt text, visibility controls
+- Guest mode: browse Mastodon without an account
+- Local keyword filters
+- Dynamic theming, custom colors, adjustable fonts
+- No ads, no tracking, no telemetry
+
+Licensed under AGPL-3.0.

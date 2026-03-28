@@ -249,7 +249,7 @@ private fun String.extractTrailingMediaUrls(): Pair<String, List<String>> {
     val extracted = mutableListOf<String>()
 
     while (lines.isNotEmpty() && lines.last().isBlank()) {
-        lines.removeLast()
+        lines.removeAt(lines.lastIndex)
     }
 
     while (lines.isNotEmpty()) {
@@ -261,9 +261,9 @@ private fun String.extractTrailingMediaUrls(): Pair<String, List<String>> {
         extracted.add(0, candidate)
         val updatedLine = line.removeTrailingToken(candidate).trimEnd()
         if (updatedLine.isBlank()) {
-            lines.removeLast()
+            lines.removeAt(lines.lastIndex)
             while (lines.isNotEmpty() && lines.last().isBlank()) {
-                lines.removeLast()
+                lines.removeAt(lines.lastIndex)
             }
         } else {
             lines[lines.lastIndex] = updatedLine

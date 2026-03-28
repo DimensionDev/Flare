@@ -147,7 +147,7 @@ struct EditRssSheet: View {
                     .fileImporter(
                         isPresented: $showFileImporter,
                         allowedContentTypes: [
-                            UTType(exportedAs: "opml", conformingTo: .plainText),
+                            .opml,
                             .plainText,
                             .xml,
                             .text,

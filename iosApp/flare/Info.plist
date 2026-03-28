@@ -17,24 +17,47 @@
 			</array>
 		</dict>
 	</array>
-    <key>UTExportedTypeDeclarations</key>
-    <array>
-        <dict>
-            <key>UTTypeConformsTo</key>
-            <array>
-                <string>public.text</string>
-            </array>
-            <key>UTTypeIdentifier</key>
-            <string>opml</string>
-            <key>UTTypeTagSpecification</key>
-            <dict>
-                <key>public.filename-extension</key>
-                <array>
-                    <string>opml</string>
-                </array>
-            </dict>
-        </dict>
-    </array>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeName</key>
+			<string>OPML Document</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>LSHandlerRank</key>
+			<string>Default</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>dev.dimension.flare.opml</string>
+			</array>
+		</dict>
+	</array>
+	<key>UTExportedTypeDeclarations</key>
+	<array>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.xml</string>
+				<string>public.text</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>OPML Document</string>
+			<key>UTTypeIdentifier</key>
+			<string>dev.dimension.flare.opml</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>opml</string>
+				</array>
+				<key>public.mime-type</key>
+				<array>
+					<string>text/x-opml</string>
+					<string>application/xml</string>
+				</array>
+			</dict>
+		</dict>
+	</array>
 
 </dict>
 </plist>

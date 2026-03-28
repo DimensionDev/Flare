@@ -11,7 +11,7 @@
 ![badge-macOS](https://img.shields.io/badge/macOS-Sonoma-black)
 ![badge-Linux](https://img.shields.io/badge/Linux-AppImage-black)
 
-Flare is an open-source, privacy-first social client that brings Mastodon, Misskey, Bluesky, X, and RSS into one unified timeline. It supports cross-posting, lists, feeds, DMs, RSS management, and AI-powered features such as translation and summaries. Built with Kotlin Multiplatform, Flare shares its core logic across Android, iOS, macOS, Windows, and Linux, turning fragmented social feeds into a personal information hub.
+Flare is an open-source, privacy-first social client that brings Mastodon, Misskey, Bluesky, X, Nostr, and RSS into one unified timeline. It supports cross-posting, lists, feeds, DMs, RSS management, and AI-powered features such as translation and summaries. Built with Kotlin Multiplatform, Flare shares its core logic across Android, iOS, macOS, Windows, and Linux, turning fragmented social feeds into a personal information hub.
 
 <a href="https://apps.microsoft.com/detail/9NLRN0BKZ357?referrer=appbadge&mode=direct">
 	<img src="https://get.microsoft.com/images/en-us%20dark.svg" width="190"/>
@@ -41,56 +41,25 @@ Here're some features we're planning to implement in the future.
    - [ ] Quick reply
  - [ ] Support for Meta Threads
  - [ ] Support for Discourse forum
+ - [x] Support for Nostr
  - [x] Desktop Client
  - [ ] Web Client(?)
 
-Here're some features we've done before.
- - [x] Mixed timeline
- - [x] AI powered features
-   - [x] Translation
-   - [x] Summary
- - [x] Anonymous mode enhancement, option to change data source
- - [x] Local history
- - [x] RSS feed support
- - [x] Support for vvo platform
- - [x] Anonymous mode, no need to login
- - [x] Customizable tabs
- - [x] Local filtering
- - [x] Crossposting
- - [x] Translation
-
-### Mastodon
- - [x] Support for polls
- - [x] Support global/local timelines
- - [x] Support for lists
- - [x] Support for bookmarks/faovrites timelines
-
-### Misskey
- - [x] Support for polls
- - [x] Support for lists
- - [x] Support for antennas
- - [x] Support for faovrites timeline
-
-### Bluesky
- - [x] Support for lists
- - [x] Support for feeds
- - [x] Support DM
-
 ## Building
 ### Android
- - Make sure you have JDK(JBR) 25 installed
+ - Make sure you have JDK 25 installed
  - Run `./gradlew installDebug` to build and install the debug version of the app
  - You can open the project in Android Studio or IntelliJ IDEA if you want
 
 ### iOS
- - Make sure you have JDK(JBR) 25 installed
+ - Make sure you have JDK 25 installed
  - Make sure you have a Mac with Xcode 26 installed
  - open `iosApp/Flare.xcodeproj` in Xcode
  - Build and run the app
 
 ### Server
  - Flare Server uses Ktor with Kotlin Native, which only works on Linux X64 and MacOS X64/ARM64
- - Make sure you have JDK 25(JBR) installed
+ - Make sure you have JDK 25 installed
  - Run `./gradlew :server:runDebugExecutableMacosArm64 -PrunArgs="--config-path=path/to/server/src/commonMain/resources/application.yaml"` to build and run the server, remember to replace `path/to/server/src/commonMain/resources/application.yaml` with the path to your config file
  - The server will run on `http://localhost:8080` by default
 #### Docker
@@ -107,7 +76,7 @@ If you prefer using Docker, you can use Docker Compose to run prebuild Server Im
  - Run `docker compose up -d`
 
 ### Desktop
- - Make sure you have JDK(JBR) 25 installed
+ - Make sure you have JDK 25 installed
  - Run `./gradlew run` to build and run the debug version of the desktop app.
 
 ## Contributing

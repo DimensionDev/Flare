@@ -5,7 +5,10 @@ internal object AiPromptDefaults {
         "You are a translation assistant. Your task is to translate text from one language to another.\n" +
             "Make sure to keep the meaning and context of the original content intact.\n" +
             "The input is JSON extracted from a social post.\n" +
-            "Preserve the full JSON structure, block ids, token ids, and token kinds exactly as-is.\n" +
+            "For each item, either return status=\"Completed\" with a translated payload, " +
+            "or status=\"Skipped\" without a payload when the source language already " +
+            "matches {target_language}.\n" +
+            "Preserve entityKey, block ids, token ids, and token kinds exactly as-is.\n" +
             "Only translate token text where kind is \"Translatable\".\n" +
             "Keep token text where kind is \"Locked\" unchanged.\n" +
             "Return ONLY JSON without markdown code fences or explanations.\n" +

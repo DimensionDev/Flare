@@ -309,6 +309,7 @@ public fun CommonStatusComponent(
 
             if (isDetail && !item.content.isEmpty && appearanceSettings.showTranslateButton) {
                 TranslationComponent(
+                    item = item,
                     statusKey = item.itemKey,
                     contentWarning = item.contentWarning,
                     rawContent = item.content.innerText,
@@ -627,6 +628,7 @@ private fun StatusReactionComponent(
 
 @Composable
 private fun TranslationComponent(
+    item: UiTimelineV2.Post,
     statusKey: String,
     contentWarning: UiRichText?,
     rawContent: String,
@@ -700,6 +702,7 @@ private fun TranslationComponent(
             "translate_${contentWarning}_${rawContent}_${Locale.current.language}_${componentAppearance.aiConfig.translation}",
         ) {
             statusTranslatePresenter(
+                item = item,
                 contentWarning = contentWarning,
                 content = content,
                 targetLanguage = Locale.current.language,

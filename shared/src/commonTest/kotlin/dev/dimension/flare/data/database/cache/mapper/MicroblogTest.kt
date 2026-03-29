@@ -1043,6 +1043,71 @@ class MicroblogTest : RobolectricTest() {
             assertEquals(56, savedProfile.matrices.statusesCount)
         }
 
+    @Test
+    fun toUiDisplaysExistingLongTextTranslationInTimelineAndDetail() =
+        runTest {
+            val accountKey = MicroBlogKey(id = "account-longtext", host = "test.com")
+            val longText = buildString { repeat(520) { append('长') } }
+            val postUser = createUser(MicroBlogKey(id = "post-user-longtext", host = "test.com"), "Post User")
+            val post =
+                createPost(
+                    accountKey = accountKey,
+                    user = postUser,
+                    statusKey = MicroBlogKey(id = "post-status-longtext", host = "test.com"),
+                    text = longText,
+                )
+
+            val mapped = TimelinePagingMapper.toDb(post, pagingKey = "home")
+            saveToDatabase(db, listOf(mapped))
+            db.translationDao().insert(
+                DbTranslation(
+                    entityType = TranslationEntityType.Status,
+                    entityKey =
+                        mapped.status.status.data
+                            .translationEntityKey(),
+                    targetLanguage = "zh-CN",
+                    sourceHash = post.translationPayload()!!.sourceHash(),
+                    status = TranslationStatus.Completed,
+                    payload = TranslationPayload(content = "长文译文".toUiPlainText()),
+                    updatedAt = 1L,
+                ),
+            )
+
+            val paging = db.pagingTimelineDao().getPagingSource("home")
+            val pager = TestPager(config = PagingConfig(pageSize = 20), paging)
+            val refreshResult = pager.refresh()
+            val page = assertIs<PagingSource.LoadResult.Page<Int, DbPagingTimelineWithStatus>>(refreshResult)
+            val dbItem = assertNotNull(page.data.firstOrNull())
+
+            val timelineUi =
+                TimelinePagingMapper.toUi(
+                    item = dbItem,
+                    pagingKey = "home",
+                    useDbKeyInItemKey = false,
+                    translationDisplayOptions =
+                        TranslationDisplayOptions(
+                            enabled = true,
+                            targetLanguage = "zh-CN",
+                            allowLongText = false,
+                        ),
+                )
+            val detailUi =
+                TimelinePagingMapper.toUi(
+                    item = dbItem,
+                    pagingKey = "post_only_${post.statusKey}",
+                    useDbKeyInItemKey = false,
+                    translationDisplayOptions =
+                        TranslationDisplayOptions(
+                            enabled = true,
+                            targetLanguage = "zh-CN",
+                            allowLongText = true,
+                        ),
+                )
+
+            assertEquals("长文译文", assertIs<UiTimelineV2.Post>(timelineUi).content.raw)
+            assertEquals("长文译文", assertIs<UiTimelineV2.Post>(detailUi).content.raw)
+        }
+
     private fun createUser(
         key: MicroBlogKey,
         name: String,

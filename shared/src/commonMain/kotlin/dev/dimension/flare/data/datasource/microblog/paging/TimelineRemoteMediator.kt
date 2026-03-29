@@ -16,6 +16,7 @@ import kotlinx.collections.immutable.toImmutableList
 internal class TimelineRemoteMediator(
     private val loader: CacheableRemoteLoader<UiTimelineV2>,
     private val database: CacheDatabase,
+    private val allowLongText: Boolean,
     private val notifyError: (Throwable) -> Unit = {},
     private val preTranslationService: PreTranslationService = NoopPreTranslationService,
 ) : BasePagingRemoteMediator<DbPagingTimelineWithStatus, DbPagingTimelineWithStatus>(
@@ -116,6 +117,7 @@ internal class TimelineRemoteMediator(
                     listOfNotNull(item.status.status.data) +
                         item.status.references.mapNotNull { it.status?.data }
                 }.distinctBy { it.id },
+            allowLongText = allowLongText,
         )
     }
 }

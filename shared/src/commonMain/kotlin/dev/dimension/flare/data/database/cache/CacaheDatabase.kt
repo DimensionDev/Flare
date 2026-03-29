@@ -8,7 +8,7 @@ import androidx.room.TypeConverters
 import androidx.room.immediateTransaction
 import androidx.room.useWriterConnection
 
-internal const val CACHE_DATABASE_VERSION = 30
+internal const val CACHE_DATABASE_VERSION = 31
 
 @Database(
     entities = [

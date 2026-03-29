@@ -73,6 +73,8 @@ public abstract class TimelinePresenter :
             }.distinctUntilChanged()
     }
 
+    internal open fun allowLongTextTranslationDisplay(loader: RemoteLoader<UiTimelineV2>): Boolean = false
+
     @OptIn(ExperimentalCoroutinesApi::class)
     internal fun createPager(scope: CoroutineScope): Flow<PagingData<UiTimelineV2>> =
         loader
@@ -122,33 +124,37 @@ public abstract class TimelinePresenter :
         loader: CacheableRemoteLoader<UiTimelineV2>,
         translationDisplayOptions: TranslationDisplayOptions,
     ): Flow<PagingData<UiTimelineV2>> =
-        Pager(
-            config = pagingConfig,
-            remoteMediator =
-                TimelineRemoteMediator(
-                    loader = loader,
-                    database = database,
-                    preTranslationService = preTranslationService,
-                    notifyError = { e ->
-                        if (e is LoginExpiredException) {
-                            inAppNotification.onError(Message.LoginExpired, e)
-                        }
-                    },
-                ),
-            pagingSourceFactory = {
-                database.pagingTimelineDao().getPagingSource(
-                    pagingKey = loader.pagingKey,
-                )
-            },
-        ).flow.map { pagingData ->
-            withContext(Dispatchers.IO) {
-                pagingData.map { item ->
-                    TimelinePagingMapper.toUi(
-                        item = item,
+        run {
+            val allowLongText = allowLongTextTranslationDisplay(loader)
+            Pager(
+                config = pagingConfig,
+                remoteMediator =
+                    TimelineRemoteMediator(
+                        loader = loader,
+                        database = database,
+                        allowLongText = allowLongText,
+                        preTranslationService = preTranslationService,
+                        notifyError = { e ->
+                            if (e is LoginExpiredException) {
+                                inAppNotification.onError(Message.LoginExpired, e)
+                            }
+                        },
+                    ),
+                pagingSourceFactory = {
+                    database.pagingTimelineDao().getPagingSource(
                         pagingKey = loader.pagingKey,
-                        useDbKeyInItemKey = useDbKeyInItemKey,
-                        translationDisplayOptions = translationDisplayOptions,
                     )
+                },
+            ).flow.map { pagingData ->
+                withContext(Dispatchers.IO) {
+                    pagingData.map { item ->
+                        TimelinePagingMapper.toUi(
+                            item = item,
+                            pagingKey = loader.pagingKey,
+                            useDbKeyInItemKey = useDbKeyInItemKey,
+                            translationDisplayOptions = translationDisplayOptions,
+                        )
+                    }
                 }
             }
         }

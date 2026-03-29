@@ -60,6 +60,7 @@ import dev.dimension.flare.ui.route.toUri
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toPersistentList
 import kotlinx.collections.immutable.toPersistentMap
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
@@ -606,6 +607,7 @@ internal fun Tweet.renderStatus(
         sensitive = legacy?.possiblySensitive == true,
         contentWarning = null,
         user = user,
+        sourceLanguages = listOfNotNull(legacy?.lang).toPersistentList(),
         quote = listOfNotNull(actualQuote).toImmutableList(),
         content = content,
         actions =

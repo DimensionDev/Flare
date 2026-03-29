@@ -359,6 +359,7 @@ private fun Status.renderStatus(
         contentWarning =
             spoilerText?.takeIf { it.isNotEmpty() && it.isNotBlank() }?.toUiPlainText(),
         user = actualUser,
+        sourceLanguages = listOfNotNull(language).toPersistentList(),
         quote = listOfNotNull(quoteStatus).toImmutableList(),
         content = parseMastodonContent(this, accountKey, host),
         card =

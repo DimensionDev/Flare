@@ -4,14 +4,28 @@ import androidx.room.Room
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.common.CacheState
+import dev.dimension.flare.common.OnDeviceAI
 import dev.dimension.flare.common.TestFormatter
+import dev.dimension.flare.common.decodeJson
+import dev.dimension.flare.common.encodeJson
+import dev.dimension.flare.createTestRootPath
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.saveToDatabase
 import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
 import dev.dimension.flare.data.database.cache.model.DbStatus
 import dev.dimension.flare.data.database.cache.model.DbStatusReference
+import dev.dimension.flare.data.database.cache.model.TranslationEntityType
+import dev.dimension.flare.data.database.cache.model.TranslationStatus
 import dev.dimension.flare.data.datasource.microblog.loader.PostLoader
 import dev.dimension.flare.data.datasource.microblog.paging.TimelinePagingMapper
+import dev.dimension.flare.data.datastore.AppDataStore
+import dev.dimension.flare.data.datastore.model.AppSettings
+import dev.dimension.flare.data.io.PlatformPathProducer
+import dev.dimension.flare.data.network.ai.AiCompletionService
+import dev.dimension.flare.data.network.ai.OpenAIService
+import dev.dimension.flare.data.translation.AiPreTranslationService
+import dev.dimension.flare.data.translation.PreTranslationService
+import dev.dimension.flare.deleteTestRootPath
 import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -20,6 +34,8 @@ import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.ui.humanizer.PlatformFormatter
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.render.TranslationDocument
+import dev.dimension.flare.ui.render.TranslationTokenKind
 import dev.dimension.flare.ui.render.toUi
 import dev.dimension.flare.ui.render.toUiPlainText
 import kotlinx.collections.immutable.PersistentList
@@ -30,9 +46,11 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
+import okio.Path
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
@@ -47,8 +65,21 @@ import kotlin.uuid.Uuid
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class PostHandlerTest : RobolectricTest() {
+    private val root = createTestRootPath()
+    private val pathProducer =
+        object : PlatformPathProducer {
+            override fun dataStoreFile(fileName: String): Path = root.resolve(fileName)
+
+            override fun draftMediaFile(
+                groupId: String,
+                fileName: String,
+            ): Path = root.resolve("draft_media").resolve(groupId).resolve(fileName)
+        }
+
     private lateinit var db: CacheDatabase
+    private lateinit var appDataStore: AppDataStore
     private lateinit var fakeLoader: FakePostLoader
+    private lateinit var onDeviceAI: FakePostOnDeviceAI
 
     private val accountKey = MicroBlogKey(id = "user-1", host = "test.social")
     private val accountType = AccountType.Specific(accountKey)
@@ -63,27 +94,39 @@ class PostHandlerTest : RobolectricTest() {
                 .setQueryCoroutineContext(Dispatchers.Unconfined)
                 .build()
 
+        appDataStore = AppDataStore(pathProducer)
         fakeLoader = FakePostLoader()
+        onDeviceAI = FakePostOnDeviceAI()
     }
 
     @AfterTest
     fun tearDown() {
         db.close()
         stopKoin()
+        deleteTestRootPath(root)
+    }
+
+    private fun startTestKoin(scope: CoroutineScope) {
+        startKoin {
+            modules(
+                module {
+                    single { db }
+                    single { appDataStore }
+                    single<CoroutineScope> { scope }
+                    single<OnDeviceAI> { onDeviceAI }
+                    single { OpenAIService() }
+                    single { AiCompletionService(get(), get()) }
+                    single<PreTranslationService> { AiPreTranslationService(get(), get(), get(), get()) }
+                    single<PlatformFormatter> { TestFormatter() }
+                },
+            )
+        }
     }
 
     @Test
     fun postRefreshFetchesAndStoresInDatabase() =
         runTest {
-            startKoin {
-                modules(
-                    module {
-                        single { db }
-                        single<CoroutineScope> { this@runTest }
-                        single<PlatformFormatter> { TestFormatter() }
-                    },
-                )
-            }
+            startTestKoin(this@runTest)
 
             val expected = createPost(statusKey = postKey)
             fakeLoader.nextStatus = expected
@@ -115,15 +158,7 @@ class PostHandlerTest : RobolectricTest() {
     @Test
     fun postUsesLocalStatusCacheBeforeRefreshCreatesPagingRow() =
         runTest {
-            startKoin {
-                modules(
-                    module {
-                        single { db }
-                        single<CoroutineScope> { this@runTest }
-                        single<PlatformFormatter> { TestFormatter() }
-                    },
-                )
-            }
+            startTestKoin(this@runTest)
 
             val local = createPost(statusKey = postKey)
             db.statusDao().insert(
@@ -151,15 +186,7 @@ class PostHandlerTest : RobolectricTest() {
     @Test
     fun postUsesInnerRepostWhenOnlyLocalStatusCacheExists() =
         runTest {
-            startKoin {
-                modules(
-                    module {
-                        single { db }
-                        single<CoroutineScope> { this@runTest }
-                        single<PlatformFormatter> { TestFormatter() }
-                    },
-                )
-            }
+            startTestKoin(this@runTest)
 
             val repostKey = MicroBlogKey(id = "repost-1", host = "test.social")
             val repost = createPost(statusKey = repostKey)
@@ -201,15 +228,7 @@ class PostHandlerTest : RobolectricTest() {
     @Test
     fun postRefreshKeepsLocalParentsWhenRemoteParentsIsEmpty() =
         runTest {
-            startKoin {
-                modules(
-                    module {
-                        single { db }
-                        single<CoroutineScope> { this@runTest }
-                        single<PlatformFormatter> { TestFormatter() }
-                    },
-                )
-            }
+            startTestKoin(this@runTest)
 
             val parentKey = MicroBlogKey(id = "parent-1", host = "test.social")
             val localWithParents =
@@ -247,15 +266,7 @@ class PostHandlerTest : RobolectricTest() {
     @Test
     fun postRefreshUsesRemoteParentsWhenRemoteParentsIsNotEmpty() =
         runTest {
-            startKoin {
-                modules(
-                    module {
-                        single { db }
-                        single<CoroutineScope> { this@runTest }
-                        single<PlatformFormatter> { TestFormatter() }
-                    },
-                )
-            }
+            startTestKoin(this@runTest)
 
             val localParentKey = MicroBlogKey(id = "local-parent", host = "test.social")
             val remoteParentKey = MicroBlogKey(id = "remote-parent", host = "test.social")
@@ -294,15 +305,7 @@ class PostHandlerTest : RobolectricTest() {
     @Test
     fun deleteSuccessRemovesStatusReferencesAndPaging() =
         runTest {
-            startKoin {
-                modules(
-                    module {
-                        single { db }
-                        single<CoroutineScope> { this@runTest }
-                        single<PlatformFormatter> { TestFormatter() }
-                    },
-                )
-            }
+            startTestKoin(this@runTest)
 
             db.statusDao().insert(
                 DbStatus(
@@ -348,15 +351,7 @@ class PostHandlerTest : RobolectricTest() {
     @Test
     fun deleteFailureKeepsLocalCache() =
         runTest {
-            startKoin {
-                modules(
-                    module {
-                        single { db }
-                        single<CoroutineScope> { this@runTest }
-                        single<PlatformFormatter> { TestFormatter() }
-                    },
-                )
-            }
+            startTestKoin(this@runTest)
 
             db.statusDao().insert(
                 DbStatus(
@@ -388,9 +383,55 @@ class PostHandlerTest : RobolectricTest() {
             assertTrue(pagingExists)
         }
 
+    @Test
+    fun postRefreshPreTranslatesLongTextWhenOpenedInDetail() =
+        runTest {
+            startTestKoin(this@runTest)
+            appDataStore.appSettingsStore.updateData {
+                it.copy(
+                    language = "zh-CN",
+                    aiConfig =
+                        AppSettings.AiConfig(
+                            translation = true,
+                            preTranslation = true,
+                            type = AppSettings.AiConfig.Type.OnDevice,
+                        ),
+                )
+            }
+
+            val longText = buildString { repeat(520) { append('长') } }
+            fakeLoader.nextStatus = createPost(statusKey = postKey, text = longText)
+            val handler = PostHandler(accountType = accountType, loader = fakeLoader)
+            val cacheable = handler.post(postKey)
+
+            val refreshState = cacheable.refreshState.drop(1).first()
+            assertTrue(refreshState is androidx.paging.LoadState.NotLoading)
+
+            val savedStatus = db.statusDao().get(postKey, accountType).first()
+            assertNotNull(savedStatus)
+            val translation =
+                db
+                    .translationDao()
+                    .find(
+                        entityType = TranslationEntityType.Status,
+                        entityKey = savedStatus.id,
+                        targetLanguage = "zh-CN",
+                    ).filterNotNull()
+                    .first { it.status == TranslationStatus.Completed }
+            assertEquals("$longText (zh-CN)", translation.payload?.content?.raw)
+
+            val translated =
+                cacheable.data
+                    .filterIsInstance<CacheState.Success<UiTimelineV2>>()
+                    .first { (it.data as? UiTimelineV2.Post)?.content?.raw == "$longText (zh-CN)" }
+                    .data as UiTimelineV2.Post
+            assertEquals("$longText (zh-CN)", translated.content.raw)
+        }
+
     private fun createPost(
         statusKey: MicroBlogKey,
         parents: PersistentList<UiTimelineV2.Post> = persistentListOf(),
+        text: String = "post content",
     ): UiTimelineV2.Post =
         UiTimelineV2.Post(
             message = null,
@@ -400,7 +441,7 @@ class PostHandlerTest : RobolectricTest() {
             contentWarning = null,
             user = null,
             quote = persistentListOf(),
-            content = "post content".toUiPlainText(),
+            content = text.toUiPlainText(),
             actions = persistentListOf(),
             poll = null,
             statusKey = statusKey,
@@ -438,3 +479,66 @@ class PostHandlerTest : RobolectricTest() {
         }
     }
 }
+
+private class FakePostOnDeviceAI : OnDeviceAI {
+    override suspend fun isAvailable(): Boolean = true
+
+    override suspend fun translate(
+        source: String,
+        targetLanguage: String,
+        prompt: String,
+    ): String? {
+        val document =
+            source.decodeJson(
+                dev.dimension.flare.data.translation.PreTranslationBatchDocument
+                    .serializer(),
+            )
+        return document
+            .copy(
+                items =
+                    document.items.map { item ->
+                        item.copy(
+                            status = dev.dimension.flare.data.translation.PreTranslationBatchItemStatus.Completed,
+                            payload = requireNotNull(item.payload).translated(targetLanguage),
+                            reason = null,
+                        )
+                    },
+            ).encodeJson(
+                dev.dimension.flare.data.translation.PreTranslationBatchDocument
+                    .serializer(),
+            )
+    }
+
+    override suspend fun tldr(
+        source: String,
+        targetLanguage: String,
+        prompt: String,
+    ): String? = null
+}
+
+private fun dev.dimension.flare.data.translation.PreTranslationBatchPayload.translated(
+    targetLanguage: String,
+): dev.dimension.flare.data.translation.PreTranslationBatchPayload =
+    dev.dimension.flare.data.translation.PreTranslationBatchPayload(
+        content = content?.translated(targetLanguage),
+        contentWarning = contentWarning?.translated(targetLanguage),
+        title = title?.translated(targetLanguage),
+        description = description?.translated(targetLanguage),
+    )
+
+private fun TranslationDocument.translated(targetLanguage: String): TranslationDocument =
+    copy(
+        blocks =
+            blocks.map { block ->
+                block.copy(
+                    tokens =
+                        block.tokens.map { token ->
+                            if (token.kind == TranslationTokenKind.Translatable) {
+                                token.copy(text = "${token.text} ($targetLanguage)")
+                            } else {
+                                token
+                            }
+                        },
+                )
+            },
+    )

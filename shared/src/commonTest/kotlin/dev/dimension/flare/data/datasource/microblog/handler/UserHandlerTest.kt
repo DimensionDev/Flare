@@ -436,7 +436,9 @@ private class FakeOnDeviceAI : OnDeviceAI {
                 items =
                     document.items.map { item ->
                         item.copy(
-                            payload = item.payload.translated(targetLanguage),
+                            status = dev.dimension.flare.data.translation.PreTranslationBatchItemStatus.Completed,
+                            payload = requireNotNull(item.payload).translated(targetLanguage),
+                            reason = null,
                         )
                     },
             ).encodeJson(PreTranslationBatchDocument.serializer())

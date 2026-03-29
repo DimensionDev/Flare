@@ -865,6 +865,7 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
             description?.let {
                 parseMisskeyText(it, accountKey, emojis, remoteHost)
             },
+        sourceLanguages = listOfNotNull(lang).toPersistentList(),
         matrices =
             UiProfile.Matrices(
                 fansCount = followersCount.toLong(),

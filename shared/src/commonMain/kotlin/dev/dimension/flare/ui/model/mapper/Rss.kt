@@ -9,6 +9,7 @@ import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.render.toUi
 import io.ktor.http.Url
 import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.toPersistentList
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.Month
 import kotlinx.datetime.UtcOffset
@@ -43,6 +44,7 @@ internal fun Feed.Atom.Entry.render(
     sourceName: String,
     sourceIcon: String?,
     openInBrowser: Boolean,
+    sourceLanguage: String? = null,
 ): UiTimelineV2 {
     val descHtml =
         content?.value?.let {
@@ -55,6 +57,7 @@ internal fun Feed.Atom.Entry.render(
         title = title?.value?.takeIf { it.isNotEmpty() && it.isNotBlank() },
         description = descHtml?.text(),
         url = links.first().href.replace("http://", "https://"),
+        sourceLanguages = listOfNotNull(sourceLanguage).toPersistentList(),
         source =
             UiTimelineV2.Feed.Source(
                 name = sourceName,
@@ -83,6 +86,7 @@ internal fun Feed.Rss20.Item.render(
     sourceName: String,
     sourceIcon: String?,
     openInBrowser: Boolean,
+    sourceLanguage: String? = null,
 ): UiTimelineV2 {
     val descHtml =
         description?.let {
@@ -93,6 +97,7 @@ internal fun Feed.Rss20.Item.render(
         title = title,
         description = descHtml?.text(),
         url = link.replace("http://", "https://"),
+        sourceLanguages = listOfNotNull(sourceLanguage).toPersistentList(),
         source =
             UiTimelineV2.Feed.Source(
                 name = sourceName,
@@ -121,6 +126,7 @@ internal fun Feed.RDF.Item.render(
     sourceName: String,
     sourceIcon: String?,
     openInBrowser: Boolean,
+    sourceLanguage: String? = null,
 ): UiTimelineV2 {
     val descHtml =
         description?.let {
@@ -131,6 +137,7 @@ internal fun Feed.RDF.Item.render(
         title = title,
         description = descHtml?.text(),
         url = link.replace("http://", "https://"),
+        sourceLanguages = listOfNotNull(sourceLanguage).toPersistentList(),
         source =
             UiTimelineV2.Feed.Source(
                 name = sourceName,

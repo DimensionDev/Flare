@@ -373,6 +373,47 @@ class UserHandlerTest : RobolectricTest() {
             assertEquals("Retry profile bio (${Locale.language})", completed.payload?.description?.raw)
         }
 
+    @Test
+    fun userByIdRefreshAutoRetriesTransientPreTranslationFailure() =
+        runTest {
+            val expected =
+                createProfile(id = "auto-retry-translation", host = "test.social", handle = "@auto-retry-translation@test.social").copy(
+                    description = "Auto retry profile bio".toUiPlainText(),
+                )
+            loader.nextById = expected
+            appDataStore.appSettingsStore.updateData {
+                it.copy(
+                    language = "zh-CN",
+                    aiConfig =
+                        AppSettings.AiConfig(
+                            translation = true,
+                            preTranslation = true,
+                            type = AppSettings.AiConfig.Type.OnDevice,
+                        ),
+                )
+            }
+
+            onDeviceAI.remainingTranslationFailures = 1
+            handler
+                .userById("auto-retry-translation")
+                .refreshState
+                .drop(1)
+                .first()
+
+            val completed =
+                db
+                    .translationDao()
+                    .find(
+                        entityType = TranslationEntityType.Profile,
+                        entityKey = expected.translationEntityKey(),
+                        targetLanguage = Locale.language,
+                    ).filterNotNull()
+                    .first { it.status == TranslationStatus.Completed }
+            assertEquals(1, completed.attemptCount)
+            assertEquals(2, onDeviceAI.translationCallCount)
+            assertEquals("Auto retry profile bio (${Locale.language})", completed.payload?.description?.raw)
+        }
+
     private fun createProfile(
         id: String,
         host: String,
@@ -420,6 +461,8 @@ class UserHandlerTest : RobolectricTest() {
 
 private class FakeOnDeviceAI : OnDeviceAI {
     var failTranslation: Boolean = false
+    var remainingTranslationFailures: Int = 0
+    var translationCallCount: Int = 0
 
     override suspend fun isAvailable(): Boolean = true
 
@@ -428,6 +471,11 @@ private class FakeOnDeviceAI : OnDeviceAI {
         targetLanguage: String,
         prompt: String,
     ): String? {
+        translationCallCount++
+        if (remainingTranslationFailures > 0) {
+            remainingTranslationFailures--
+            error("translation failed")
+        }
         if (failTranslation) {
             error("translation failed")
         }

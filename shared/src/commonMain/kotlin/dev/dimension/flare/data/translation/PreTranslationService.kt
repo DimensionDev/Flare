@@ -28,12 +28,14 @@ import dev.dimension.flare.ui.render.UiRichText
 import dev.dimension.flare.ui.render.applyTranslationDocument
 import dev.dimension.flare.ui.render.toTranslationDocument
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
 import kotlinx.serialization.Serializable
 import kotlin.time.Clock
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
 
 internal interface PreTranslationService {
@@ -450,33 +452,11 @@ internal class AiPreTranslationService(
             },
         )
 
-        tryRun {
-            val sourceDocument =
-                PreTranslationBatchDocument(
-                    targetLanguage = targetLanguage,
-                    items =
-                        candidates.map { candidate ->
-                            PreTranslationBatchItem(
-                                entityKey = candidate.entityKey,
-                                payload = candidate.sourceDocument,
-                            )
-                        },
-                )
-            val sourceJson = sourceDocument.encodeJson(PreTranslationBatchDocument.serializer())
-            val prompt = buildTranslatePrompt(settings.translatePrompt, targetLanguage, sourceJson)
-            val translatedJson =
-                aiCompletionService.translate(
-                    config = settings,
-                    source = sourceJson,
-                    targetLanguage = targetLanguage,
-                    prompt = prompt,
-                ) ?: error("Pre-translation returned empty response")
-
-            applyBatchResult(
-                translatedJson = translatedJson,
-                candidates = candidates,
-            )
-        }.getOrElse { throwable ->
+        runBatchTranslationWithRetry(
+            settings = settings,
+            targetLanguage = targetLanguage,
+            candidates = candidates,
+        ).getOrElse { throwable ->
             val failedAt = Clock.System.now().toEpochMilliseconds()
             database.translationDao().insertAll(
                 candidates.map { candidate ->
@@ -495,6 +475,55 @@ internal class AiPreTranslationService(
                 },
             )
         }
+    }
+
+    private suspend fun runBatchTranslationWithRetry(
+        settings: AppSettings.AiConfig,
+        targetLanguage: String,
+        candidates: List<PreparedTranslationCandidate>,
+    ): Result<Unit> {
+        var lastFailure: Throwable? = null
+        repeat(PRE_TRANSLATION_BATCH_MAX_ATTEMPTS) { attempt ->
+            val result =
+                tryRun {
+                    val sourceDocument =
+                        PreTranslationBatchDocument(
+                            targetLanguage = targetLanguage,
+                            items =
+                                candidates.map { candidate ->
+                                    PreTranslationBatchItem(
+                                        entityKey = candidate.entityKey,
+                                        payload = candidate.sourceDocument,
+                                    )
+                                },
+                        )
+                    val sourceJson = sourceDocument.encodeJson(PreTranslationBatchDocument.serializer())
+                    val prompt = buildTranslatePrompt(settings.translatePrompt, targetLanguage, sourceJson)
+                    val translatedJson =
+                        aiCompletionService.translate(
+                            config = settings,
+                            source = sourceJson,
+                            targetLanguage = targetLanguage,
+                            prompt = prompt,
+                        ) ?: error("Pre-translation returned empty response")
+
+                    applyBatchResult(
+                        translatedJson = translatedJson,
+                        candidates = candidates,
+                    )
+                }
+            result
+                .onSuccess {
+                    return Result.success(Unit)
+                }.onFailure { throwable ->
+                    lastFailure = throwable
+                    if (attempt < PRE_TRANSLATION_BATCH_MAX_ATTEMPTS - 1) {
+                        delay(PRE_TRANSLATION_BATCH_RETRY_DELAY)
+                    }
+                }
+        }
+
+        return Result.failure(requireNotNull(lastFailure))
     }
 
     private suspend fun applyBatchResult(
@@ -677,12 +706,14 @@ private data class PreparedTranslationCandidate(
 
 private const val DEFAULT_PRE_TRANSLATION_MAX_ITEMS = 8
 private const val DEFAULT_PRE_TRANSLATION_MAX_INPUT_TOKENS = 6000
+private const val PRE_TRANSLATION_BATCH_MAX_ATTEMPTS = 2
 private const val FAILED_STALE_IN_FLIGHT_REASON = "stale_in_flight"
 private const val SKIPPED_AI_SAME_LANGUAGE_REASON = "ai_same_language"
 private const val SKIPPED_EMPTY_REASON = "empty"
 private const val SKIPPED_NON_TRANSLATABLE_ONLY_REASON = "non_translatable_only"
 private const val SKIPPED_SAME_LANGUAGE_REASON = "source_language_matches_target"
 private const val SKIPPED_UNCHANGED_REASON = "unchanged"
+private val PRE_TRANSLATION_BATCH_RETRY_DELAY = 500.milliseconds
 private val STALE_TRANSLATION_TIMEOUT = 10.minutes
 private val protectedTranslationPattern =
     Regex("""https?://\S+|@[A-Za-z0-9._-]+(?:@[A-Za-z0-9.-]+)?|#[\p{L}\p{N}_]+""")

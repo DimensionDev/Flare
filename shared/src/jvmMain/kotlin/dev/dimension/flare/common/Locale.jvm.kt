@@ -4,5 +4,5 @@ import java.util.Locale
 
 internal actual object Locale {
     actual val language: String
-        get() = Locale.getDefault().language
+        get() = Locale.getDefault().toLanguageTag()
 }

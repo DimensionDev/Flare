@@ -15,6 +15,7 @@ import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.createTestRootPath
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.model.DbTranslation
 import dev.dimension.flare.data.database.cache.model.TranslationEntityType
 import dev.dimension.flare.data.database.cache.model.TranslationStatus
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
@@ -51,10 +52,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.yield
 import okio.Path
 import org.koin.core.context.startKoin
@@ -911,25 +914,18 @@ class MixedRemoteMediatorTest : RobolectricTest() {
             started.await()
 
             preTranslationService.enqueueStatuses(listOf(secondStatus), allowLongText = false)
-            yield()
 
-            var pendingTranslation =
-                db.translationDao().get(
-                    entityType = TranslationEntityType.Status,
-                    entityKey = secondStatus.id,
-                    targetLanguage = Locale.language,
-                )
-            repeat(10) {
-                if (pendingTranslation != null) {
-                    return@repeat
+            var pendingTranslation: DbTranslation? = null
+            withTimeout(5_000) {
+                while (pendingTranslation == null) {
+                    delay(50)
+                    pendingTranslation =
+                        db.translationDao().get(
+                            entityType = TranslationEntityType.Status,
+                            entityKey = secondStatus.id,
+                            targetLanguage = Locale.language,
+                        )
                 }
-                yield()
-                pendingTranslation =
-                    db.translationDao().get(
-                        entityType = TranslationEntityType.Status,
-                        entityKey = secondStatus.id,
-                        targetLanguage = Locale.language,
-                    )
             }
             assertNotNull(pendingTranslation)
             assertEquals(TranslationStatus.Pending, pendingTranslation.status)

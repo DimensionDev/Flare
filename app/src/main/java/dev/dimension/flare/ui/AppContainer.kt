@@ -84,11 +84,11 @@ fun FlareApp(content: @Composable () -> Unit) {
                         },
                     expandMediaSize = appearanceSettings.expandMediaSize,
                     compatLinkPreview = appearanceSettings.compatLinkPreview,
-                        aiConfig =
-                            ComponentAppearance.AiConfig(
+                    aiConfig =
+                        ComponentAppearance.AiConfig(
                             translation = true,
-                                tldr = appSettings.aiConfig.tldr,
-                            ),
+                            tldr = appSettings.aiConfig.tldr,
+                        ),
                     fullWidthPost = appearanceSettings.fullWidthPost,
                     postActionStyle = appearanceSettings.postActionStyle,
                     absoluteTimestamp = appearanceSettings.absoluteTimestamp,

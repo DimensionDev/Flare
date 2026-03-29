@@ -11,10 +11,11 @@ import dev.dimension.flare.data.database.cache.model.TranslationPayload
 import dev.dimension.flare.data.database.cache.model.TranslationStatus
 import dev.dimension.flare.data.database.cache.model.sourceHash
 import dev.dimension.flare.data.datastore.AppDataStore
-import dev.dimension.flare.data.datastore.model.AiPromptDefaults
 import dev.dimension.flare.data.network.ai.AiCompletionService
 import dev.dimension.flare.data.repository.tryRun
-import dev.dimension.flare.data.translation.translateDocumentJson
+import dev.dimension.flare.data.translation.TranslationPromptFormatter
+import dev.dimension.flare.data.translation.TranslationProvider
+import dev.dimension.flare.data.translation.TranslationResponseSanitizer
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiState
@@ -52,13 +53,16 @@ public class TranslatePresenter(
                     cachedTranslation()?.let {
                         return@tryRun it
                     }
-                    val promptTemplate =
-                        settings.aiConfig.translatePrompt.ifBlank {
-                            AiPromptDefaults.TRANSLATE_PROMPT
-                        }
-                    val prompt = buildTranslatePrompt(promptTemplate, targetLanguage)
+                    val prompt =
+                        TranslationPromptFormatter.buildTranslatePrompt(
+                            settings = settings,
+                            targetLanguage = targetLanguage,
+                            sourceText = sourceText,
+                            sourceJson = sourceJson,
+                        )
                     val translatedContent =
-                        settings.translateDocumentJson(
+                        TranslationProvider.translateDocumentJson(
+                            settings = settings,
                             aiCompletionService = aiCompletionService,
                             sourceText = sourceText,
                             sourceJson = sourceJson,
@@ -78,28 +82,9 @@ public class TranslatePresenter(
         }.value
     }
 
-    private fun buildTranslatePrompt(
-        template: String,
-        targetLanguage: String,
-    ): String =
-        template
-            .replace("{target_language}", targetLanguage)
-            .replace("{source_text}", sourceText)
-            .replace("{source_json}", sourceJson)
-            .replace("{source_html}", sourceJson)
-            .replace("{source_xml}", sourceJson)
-            .replace("{source_markup}", sourceJson)
-
     private fun toUiRichText(translatedContent: String): UiRichText =
-        translatedContent
-            .removePrefix("```json")
-            .removePrefix("```html")
-            .removePrefix("```xml")
-            .removePrefix("```markup")
-            .removePrefix("```text")
-            .removePrefix("```")
-            .removeSuffix("```")
-            .trim()
+        TranslationResponseSanitizer
+            .clean(translatedContent)
             .let { cleaned ->
                 tryRun {
                     source.applyTranslationJson(cleaned)

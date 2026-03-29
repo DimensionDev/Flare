@@ -26,10 +26,11 @@ import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.io.PlatformPathProducer
 import dev.dimension.flare.data.network.ai.AiCompletionService
 import dev.dimension.flare.data.network.ai.OpenAIService
-import dev.dimension.flare.data.translation.AiPreTranslationService
+import dev.dimension.flare.data.translation.OnlinePreTranslationService
 import dev.dimension.flare.data.translation.PreTranslationBatchDocument
 import dev.dimension.flare.data.translation.PreTranslationBatchPayload
 import dev.dimension.flare.data.translation.PreTranslationService
+import dev.dimension.flare.data.translation.aiPreTranslateConfig
 import dev.dimension.flare.deleteTestRootPath
 import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.MicroBlogKey
@@ -105,7 +106,7 @@ class UserHandlerTest : RobolectricTest() {
                     single<OnDeviceAI> { onDeviceAI }
                     single { OpenAIService() }
                     single { AiCompletionService(get(), get()) }
-                    single<PreTranslationService> { AiPreTranslationService(get(), get(), get(), get()) }
+                    single<PreTranslationService> { OnlinePreTranslationService(get(), get(), get(), get()) }
                     single<PlatformFormatter> { TestFormatter() }
                 },
             )
@@ -248,10 +249,9 @@ class UserHandlerTest : RobolectricTest() {
             appDataStore.appSettingsStore.updateData {
                 it.copy(
                     language = "zh-CN",
-                    translateConfig = AppSettings.TranslateConfig(preTranslate = true),
+                    translateConfig = aiPreTranslateConfig(),
                     aiConfig =
-                        AppSettings.AiConfig(
-                        ),
+                        AppSettings.AiConfig(),
                 )
             }
             db.translationDao().insert(
@@ -288,7 +288,7 @@ class UserHandlerTest : RobolectricTest() {
             appDataStore.appSettingsStore.updateData {
                 it.copy(
                     language = "zh-CN",
-                    translateConfig = AppSettings.TranslateConfig(preTranslate = true),
+                    translateConfig = aiPreTranslateConfig(),
                     aiConfig =
                         AppSettings.AiConfig(
                             type = AppSettings.AiConfig.Type.OnDevice,
@@ -324,7 +324,7 @@ class UserHandlerTest : RobolectricTest() {
             appDataStore.appSettingsStore.updateData {
                 it.copy(
                     language = "zh-CN",
-                    translateConfig = AppSettings.TranslateConfig(preTranslate = true),
+                    translateConfig = aiPreTranslateConfig(),
                     aiConfig =
                         AppSettings.AiConfig(
                             type = AppSettings.AiConfig.Type.OnDevice,
@@ -381,7 +381,7 @@ class UserHandlerTest : RobolectricTest() {
             appDataStore.appSettingsStore.updateData {
                 it.copy(
                     language = "zh-CN",
-                    translateConfig = AppSettings.TranslateConfig(preTranslate = true),
+                    translateConfig = aiPreTranslateConfig(),
                     aiConfig =
                         AppSettings.AiConfig(
                             type = AppSettings.AiConfig.Type.OnDevice,

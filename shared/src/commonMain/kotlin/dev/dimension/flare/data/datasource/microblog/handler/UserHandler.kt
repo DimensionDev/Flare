@@ -5,13 +5,13 @@ import dev.dimension.flare.common.Locale
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.toDbUser
 import dev.dimension.flare.data.database.cache.mapper.upsertUser
-import dev.dimension.flare.data.database.cache.model.TranslationDisplayOptions
 import dev.dimension.flare.data.database.cache.model.TranslationEntityType
 import dev.dimension.flare.data.database.cache.model.applyTranslation
 import dev.dimension.flare.data.database.cache.model.translationEntityKey
 import dev.dimension.flare.data.datasource.microblog.loader.UserLoader
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.translation.PreTranslationService
+import dev.dimension.flare.data.translation.TranslationSettingsSupport
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiHandle
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -19,7 +19,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -33,13 +32,7 @@ internal class UserHandler(
     private val preTranslationService: PreTranslationService by inject()
 
     private val translationDisplayFlow by lazy {
-        appDataStore.appSettingsStore.data
-            .map { settings ->
-                TranslationDisplayOptions(
-                    translationEnabled = true,
-                    autoDisplayEnabled = settings.translateConfig.preTranslate,
-                )
-            }.distinctUntilChanged()
+        TranslationSettingsSupport.displayOptionsFlow(appDataStore)
     }
 
     fun userByHandleAndHost(uiHandle: UiHandle) =

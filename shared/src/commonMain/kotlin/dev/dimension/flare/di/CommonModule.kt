@@ -16,7 +16,7 @@ import dev.dimension.flare.data.repository.DraftSendingRecoveryCoordinator
 import dev.dimension.flare.data.repository.LocalFilterRepository
 import dev.dimension.flare.data.repository.SearchHistoryRepository
 import dev.dimension.flare.data.repository.SettingsRepository
-import dev.dimension.flare.data.translation.AiPreTranslationService
+import dev.dimension.flare.data.translation.OnlinePreTranslationService
 import dev.dimension.flare.data.translation.PreTranslationService
 import dev.dimension.flare.ui.presenter.compose.ComposeUseCase
 import dev.dimension.flare.ui.presenter.compose.RestoreDraftUseCase
@@ -63,5 +63,5 @@ internal val commonModule =
         singleOf(::Readability)
         singleOf(::OpenAIService)
         singleOf(::AiCompletionService)
-        single<PreTranslationService> { AiPreTranslationService(get(), get(), get(), get()) }
+        single<PreTranslationService> { OnlinePreTranslationService(get(), get(), get(), get()) }
     }

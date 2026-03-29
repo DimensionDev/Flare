@@ -197,8 +197,7 @@ public class AiConfigPresenter :
 
 private fun AppSettings.AiConfig.normalized(): AppSettings.AiConfig = this
 
-private fun AppSettings.TranslateConfig.normalized(): AppSettings.TranslateConfig =
-    this
+private fun AppSettings.TranslateConfig.normalized(): AppSettings.TranslateConfig = this
 
 private val SERVER_SUGGESTIONS =
     persistentListOf(

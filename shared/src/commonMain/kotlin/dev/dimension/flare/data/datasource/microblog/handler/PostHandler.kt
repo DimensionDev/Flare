@@ -6,12 +6,12 @@ import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.database.cache.mapper.saveToDatabase
 import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
-import dev.dimension.flare.data.database.cache.model.TranslationDisplayOptions
 import dev.dimension.flare.data.datasource.microblog.loader.PostLoader
 import dev.dimension.flare.data.datasource.microblog.paging.TimelinePagingMapper
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.data.translation.PreTranslationService
+import dev.dimension.flare.data.translation.TranslationSettingsSupport
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -19,7 +19,6 @@ import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
@@ -35,13 +34,7 @@ internal class PostHandler(
     private val preTranslationService: PreTranslationService by inject()
 
     private val translationDisplayFlow by lazy {
-        appDataStore.appSettingsStore.data
-            .map { settings ->
-                TranslationDisplayOptions(
-                    translationEnabled = true,
-                    autoDisplayEnabled = settings.translateConfig.preTranslate,
-                )
-            }.distinctUntilChanged()
+        TranslationSettingsSupport.displayOptionsFlow(appDataStore)
     }
 
     fun post(postKey: MicroBlogKey): Cacheable<UiTimelineV2> {

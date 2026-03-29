@@ -32,6 +32,7 @@ import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.repository.LocalFilterRepository
 import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.data.translation.PreTranslationService
+import dev.dimension.flare.data.translation.TranslationSettingsSupport
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.CoroutineScope
@@ -40,7 +41,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
@@ -64,13 +64,7 @@ public abstract class TimelinePresenter :
     }
 
     private val translationSettingsFlow: Flow<TranslationDisplayOptions> by lazy {
-        appDataStore.appSettingsStore.data
-            .map { settings ->
-                TranslationDisplayOptions(
-                    translationEnabled = true,
-                    autoDisplayEnabled = settings.translateConfig.preTranslate,
-                )
-            }.distinctUntilChanged()
+        TranslationSettingsSupport.displayOptionsFlow(appDataStore)
     }
 
     internal open fun allowLongTextTranslationDisplay(loader: RemoteLoader<UiTimelineV2>): Boolean = false

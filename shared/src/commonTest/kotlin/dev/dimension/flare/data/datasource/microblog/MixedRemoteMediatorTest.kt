@@ -15,7 +15,6 @@ import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.createTestRootPath
 import dev.dimension.flare.data.database.cache.CacheDatabase
-import dev.dimension.flare.data.database.cache.model.DbTranslation
 import dev.dimension.flare.data.database.cache.model.TranslationEntityType
 import dev.dimension.flare.data.database.cache.model.TranslationStatus
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
@@ -28,8 +27,9 @@ import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.io.PlatformPathProducer
 import dev.dimension.flare.data.network.ai.AiCompletionService
 import dev.dimension.flare.data.network.ai.OpenAIService
-import dev.dimension.flare.data.translation.AiPreTranslationService
+import dev.dimension.flare.data.translation.OnlinePreTranslationService
 import dev.dimension.flare.data.translation.PreTranslationService
+import dev.dimension.flare.data.translation.aiPreTranslateConfig
 import dev.dimension.flare.deleteTestRootPath
 import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.AccountType
@@ -52,7 +52,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -385,7 +385,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
             appDataStore.appSettingsStore.updateData {
                 it.copy(
                     language = "zh-CN",
-                    translateConfig = AppSettings.TranslateConfig(preTranslate = true),
+                    translateConfig = aiPreTranslateConfig(),
                     aiConfig =
                         AppSettings.AiConfig(
                             type = AppSettings.AiConfig.Type.OnDevice,
@@ -393,7 +393,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                 )
             }
             val preTranslationService: PreTranslationService =
-                AiPreTranslationService(
+                OnlinePreTranslationService(
                     database = db,
                     appDataStore = appDataStore,
                     aiCompletionService = AiCompletionService(OpenAIService(), TestOnDeviceAI()),
@@ -487,7 +487,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
             appDataStore.appSettingsStore.updateData {
                 it.copy(
                     language = "zh-CN",
-                    translateConfig = AppSettings.TranslateConfig(preTranslate = true),
+                    translateConfig = aiPreTranslateConfig(),
                     aiConfig =
                         AppSettings.AiConfig(
                             type = AppSettings.AiConfig.Type.OnDevice,
@@ -495,7 +495,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                 )
             }
             val preTranslationService: PreTranslationService =
-                AiPreTranslationService(
+                OnlinePreTranslationService(
                     database = db,
                     appDataStore = appDataStore,
                     aiCompletionService = AiCompletionService(OpenAIService(), TestOnDeviceAI()),
@@ -563,7 +563,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
             appDataStore.appSettingsStore.updateData {
                 it.copy(
                     language = "zh-CN",
-                    translateConfig = AppSettings.TranslateConfig(preTranslate = true),
+                    translateConfig = aiPreTranslateConfig(),
                     aiConfig =
                         AppSettings.AiConfig(
                             type = AppSettings.AiConfig.Type.OnDevice,
@@ -571,7 +571,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                 )
             }
             val preTranslationService: PreTranslationService =
-                AiPreTranslationService(
+                OnlinePreTranslationService(
                     database = db,
                     appDataStore = appDataStore,
                     aiCompletionService = AiCompletionService(OpenAIService(), TestOnDeviceAI()),
@@ -642,7 +642,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
             appDataStore.appSettingsStore.updateData {
                 it.copy(
                     language = "zh-CN",
-                    translateConfig = AppSettings.TranslateConfig(preTranslate = true),
+                    translateConfig = aiPreTranslateConfig(),
                     aiConfig =
                         AppSettings.AiConfig(
                             type = AppSettings.AiConfig.Type.OnDevice,
@@ -650,7 +650,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                 )
             }
             val preTranslationService: PreTranslationService =
-                AiPreTranslationService(
+                OnlinePreTranslationService(
                     database = db,
                     appDataStore = appDataStore,
                     aiCompletionService = AiCompletionService(OpenAIService(), SkippingOnDeviceAI()),
@@ -721,7 +721,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
             appDataStore.appSettingsStore.updateData {
                 it.copy(
                     language = "zh-CN",
-                    translateConfig = AppSettings.TranslateConfig(preTranslate = true),
+                    translateConfig = aiPreTranslateConfig(),
                     aiConfig =
                         AppSettings.AiConfig(
                             type = AppSettings.AiConfig.Type.OnDevice,
@@ -729,7 +729,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                 )
             }
             val preTranslationService: PreTranslationService =
-                AiPreTranslationService(
+                OnlinePreTranslationService(
                     database = db,
                     appDataStore = appDataStore,
                     aiCompletionService = AiCompletionService(OpenAIService(), TestOnDeviceAI()),
@@ -822,7 +822,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
             appDataStore.appSettingsStore.updateData {
                 it.copy(
                     language = "zh-CN",
-                    translateConfig = AppSettings.TranslateConfig(preTranslate = true),
+                    translateConfig = aiPreTranslateConfig(),
                     aiConfig =
                         AppSettings.AiConfig(
                             type = AppSettings.AiConfig.Type.OnDevice,
@@ -831,7 +831,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
             }
             val scope = CoroutineScope(Dispatchers.Unconfined + SupervisorJob())
 
-            AiPreTranslationService(
+            OnlinePreTranslationService(
                 database = db,
                 appDataStore = appDataStore,
                 aiCompletionService = AiCompletionService(OpenAIService(), TestOnDeviceAI()),
@@ -861,7 +861,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
             appDataStore.appSettingsStore.updateData {
                 it.copy(
                     language = "zh-CN",
-                    translateConfig = AppSettings.TranslateConfig(preTranslate = true),
+                    translateConfig = aiPreTranslateConfig(),
                     aiConfig =
                         AppSettings.AiConfig(
                             type = AppSettings.AiConfig.Type.OnDevice,
@@ -872,59 +872,61 @@ class MixedRemoteMediatorTest : RobolectricTest() {
             val release = CompletableDeferred<Unit>()
             val scope = CoroutineScope(Dispatchers.Unconfined + SupervisorJob())
             val preTranslationService: PreTranslationService =
-                AiPreTranslationService(
+                OnlinePreTranslationService(
                     database = db,
                     appDataStore = appDataStore,
                     aiCompletionService = AiCompletionService(OpenAIService(), BlockingOnDeviceAI(started, release)),
                     coroutineScope = scope,
                 )
-            val accountKey = MicroBlogKey(id = "account-pending-queue", host = "test.social")
-            val accountType = AccountType.Specific(accountKey)
-            val firstStatus =
-                TimelinePagingMapper
-                    .toDb(
-                        createPost(
-                            accountType = accountType,
-                            user = profile(MicroBlogKey("user-pending-1", "test.social"), "User"),
-                            statusKey = MicroBlogKey("status-pending-1", "test.social"),
-                            text = "first source",
-                        ),
-                        pagingKey = "home",
-                    ).status.status.data
-            val secondStatus =
-                TimelinePagingMapper
-                    .toDb(
-                        createPost(
-                            accountType = accountType,
-                            user = profile(MicroBlogKey("user-pending-2", "test.social"), "User"),
-                            statusKey = MicroBlogKey("status-pending-2", "test.social"),
-                            text = "second source",
-                        ),
-                        pagingKey = "home",
-                    ).status.status.data
+            try {
+                val accountKey = MicroBlogKey(id = "account-pending-queue", host = "test.social")
+                val accountType = AccountType.Specific(accountKey)
+                val firstStatus =
+                    TimelinePagingMapper
+                        .toDb(
+                            createPost(
+                                accountType = accountType,
+                                user = profile(MicroBlogKey("user-pending-1", "test.social"), "User"),
+                                statusKey = MicroBlogKey("status-pending-1", "test.social"),
+                                text = "first source",
+                            ),
+                            pagingKey = "home",
+                        ).status.status.data
+                val secondStatus =
+                    TimelinePagingMapper
+                        .toDb(
+                            createPost(
+                                accountType = accountType,
+                                user = profile(MicroBlogKey("user-pending-2", "test.social"), "User"),
+                                statusKey = MicroBlogKey("status-pending-2", "test.social"),
+                                text = "second source",
+                            ),
+                            pagingKey = "home",
+                        ).status.status.data
 
-            preTranslationService.enqueueStatuses(listOf(firstStatus), allowLongText = false)
-            started.await()
-
-            preTranslationService.enqueueStatuses(listOf(secondStatus), allowLongText = false)
-
-            var pendingTranslation: DbTranslation? = null
-            withTimeout(5_000) {
-                while (pendingTranslation == null) {
-                    delay(50)
-                    pendingTranslation =
-                        db.translationDao().get(
-                            entityType = TranslationEntityType.Status,
-                            entityKey = secondStatus.id,
-                            targetLanguage = Locale.language,
-                        )
+                preTranslationService.enqueueStatuses(listOf(firstStatus), allowLongText = false)
+                withTimeout(5_000) {
+                    started.await()
                 }
-            }
-            assertNotNull(pendingTranslation)
-            assertEquals(TranslationStatus.Pending, pendingTranslation.status)
 
-            release.complete(Unit)
-            scope.coroutineContext[Job]?.cancel()
+                preTranslationService.enqueueStatuses(listOf(secondStatus), allowLongText = false)
+
+                val pendingTranslation =
+                    withTimeout(5_000) {
+                        db
+                            .translationDao()
+                            .find(
+                                entityType = TranslationEntityType.Status,
+                                entityKey = secondStatus.id,
+                                targetLanguage = Locale.language,
+                            ).filterNotNull()
+                            .first { it.status == TranslationStatus.Pending }
+                    }
+                assertEquals(TranslationStatus.Pending, pendingTranslation.status)
+            } finally {
+                release.complete(Unit)
+                scope.coroutineContext[Job]?.cancelAndJoin()
+            }
         }
     }
 

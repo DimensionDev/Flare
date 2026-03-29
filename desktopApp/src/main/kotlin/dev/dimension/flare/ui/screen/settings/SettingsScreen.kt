@@ -88,7 +88,6 @@ import dev.dimension.flare.settings_ai_config_api_key_hint
 import dev.dimension.flare.settings_ai_config_description
 import dev.dimension.flare.settings_ai_config_enable_pre_translation
 import dev.dimension.flare.settings_ai_config_enable_tldr
-import dev.dimension.flare.settings_ai_config_entable_translation
 import dev.dimension.flare.settings_ai_config_model
 import dev.dimension.flare.settings_ai_config_model_description
 import dev.dimension.flare.settings_ai_config_model_error
@@ -103,7 +102,6 @@ import dev.dimension.flare.settings_ai_config_title
 import dev.dimension.flare.settings_ai_config_tldr_description
 import dev.dimension.flare.settings_ai_config_tldr_prompt
 import dev.dimension.flare.settings_ai_config_translate_prompt
-import dev.dimension.flare.settings_ai_config_translation_description
 import dev.dimension.flare.settings_ai_config_type
 import dev.dimension.flare.settings_ai_config_type_description
 import dev.dimension.flare.settings_ai_config_type_on_device
@@ -190,9 +188,9 @@ import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.AiConfigPresenter
 import dev.dimension.flare.ui.presenter.settings.AiTypeOption
-import dev.dimension.flare.ui.presenter.settings.TranslateProviderOption
 import dev.dimension.flare.ui.presenter.settings.StoragePresenter
 import dev.dimension.flare.ui.presenter.settings.StorageState
+import dev.dimension.flare.ui.presenter.settings.TranslateProviderOption
 import dev.dimension.flare.ui.theme.LocalComposeWindow
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.composefluent.ExperimentalFluentApi

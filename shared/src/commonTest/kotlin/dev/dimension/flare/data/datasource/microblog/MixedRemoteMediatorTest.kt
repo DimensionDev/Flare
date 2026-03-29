@@ -8,6 +8,7 @@ import androidx.paging.PagingState
 import androidx.room.Room
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import dev.dimension.flare.RobolectricTest
+import dev.dimension.flare.common.Locale
 import dev.dimension.flare.common.OnDeviceAI
 import dev.dimension.flare.common.TestFormatter
 import dev.dimension.flare.common.decodeJson
@@ -459,7 +460,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                     .find(
                         entityType = TranslationEntityType.Status,
                         entityKey = savedRoot.id,
-                        targetLanguage = "zh-CN",
+                        targetLanguage = Locale.language,
                     ).filterNotNull()
                     .first { it.status == TranslationStatus.Completed }
             val parentTranslation =
@@ -468,12 +469,12 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                     .find(
                         entityType = TranslationEntityType.Status,
                         entityKey = savedParent.id,
-                        targetLanguage = "zh-CN",
+                        targetLanguage = Locale.language,
                     ).filterNotNull()
                     .first { it.status == TranslationStatus.Completed }
 
-            assertEquals("root source (zh-CN)", rootTranslation.payload?.content?.raw)
-            assertEquals("parent source (zh-CN)", parentTranslation.payload?.content?.raw)
+            assertEquals("root source (${Locale.language})", rootTranslation.payload?.content?.raw)
+            assertEquals("parent source (${Locale.language})", parentTranslation.payload?.content?.raw)
         }
 
     @OptIn(ExperimentalPagingApi::class)
@@ -548,7 +549,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                 db.translationDao().get(
                     entityType = TranslationEntityType.Status,
                     entityKey = savedStatus.id,
-                    targetLanguage = "zh-CN",
+                    targetLanguage = Locale.language,
                 )
             assertNull(translation)
         }
@@ -584,7 +585,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                     statusKey = MicroBlogKey("status-same-language", "test.social"),
                     text = "已经是中文",
                 ).copy(
-                    sourceLanguages = persistentListOf("zh-CN"),
+                    sourceLanguages = persistentListOf(Locale.language),
                 )
             val loader =
                 FakeLoader("home") { request ->
@@ -626,7 +627,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                 db.translationDao().get(
                     entityType = TranslationEntityType.Status,
                     entityKey = savedStatus.id,
-                    targetLanguage = "zh-CN",
+                    targetLanguage = Locale.language,
                 )
             assertNotNull(translation)
             assertEquals(TranslationStatus.Skipped, translation.status)
@@ -706,7 +707,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                     .find(
                         entityType = TranslationEntityType.Status,
                         entityKey = savedStatus.id,
-                        targetLanguage = "zh-CN",
+                        targetLanguage = Locale.language,
                     ).filterNotNull()
                     .first()
             assertEquals(TranslationStatus.Skipped, translation.status)
@@ -786,7 +787,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                     .find(
                         entityType = TranslationEntityType.Status,
                         entityKey = savedStatus.id,
-                        targetLanguage = "zh-CN",
+                        targetLanguage = Locale.language,
                     ).filterNotNull()
                     .first()
             assertEquals(TranslationStatus.Skipped, translation.status)
@@ -812,7 +813,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                 dev.dimension.flare.data.database.cache.model.DbTranslation(
                     entityType = TranslationEntityType.Status,
                     entityKey = "status:stale-in-flight",
-                    targetLanguage = "zh-CN",
+                    targetLanguage = Locale.language,
                     sourceHash = "hash-stale",
                     status = TranslationStatus.Translating,
                     updatedAt = 1L,
@@ -846,7 +847,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                 db.translationDao().get(
                     entityType = TranslationEntityType.Status,
                     entityKey = "status:stale-in-flight",
-                    targetLanguage = "zh-CN",
+                    targetLanguage = Locale.language,
                 )
             assertNotNull(cleaned)
             assertEquals(TranslationStatus.Failed, cleaned.status)
@@ -916,7 +917,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                 db.translationDao().get(
                     entityType = TranslationEntityType.Status,
                     entityKey = secondStatus.id,
-                    targetLanguage = "zh-CN",
+                    targetLanguage = Locale.language,
                 )
             repeat(10) {
                 if (pendingTranslation != null) {
@@ -927,7 +928,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                     db.translationDao().get(
                         entityType = TranslationEntityType.Status,
                         entityKey = secondStatus.id,
-                        targetLanguage = "zh-CN",
+                        targetLanguage = Locale.language,
                     )
             }
             assertNotNull(pendingTranslation)

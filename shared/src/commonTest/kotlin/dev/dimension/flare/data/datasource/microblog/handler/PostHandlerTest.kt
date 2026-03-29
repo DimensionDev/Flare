@@ -4,6 +4,7 @@ import androidx.room.Room
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.common.CacheState
+import dev.dimension.flare.common.Locale
 import dev.dimension.flare.common.OnDeviceAI
 import dev.dimension.flare.common.TestFormatter
 import dev.dimension.flare.common.decodeJson
@@ -415,17 +416,17 @@ class PostHandlerTest : RobolectricTest() {
                     .find(
                         entityType = TranslationEntityType.Status,
                         entityKey = savedStatus.id,
-                        targetLanguage = "zh-CN",
+                        targetLanguage = Locale.language,
                     ).filterNotNull()
                     .first { it.status == TranslationStatus.Completed }
-            assertEquals("$longText (zh-CN)", translation.payload?.content?.raw)
+            assertEquals("$longText (${Locale.language})", translation.payload?.content?.raw)
 
             val translated =
                 cacheable.data
                     .filterIsInstance<CacheState.Success<UiTimelineV2>>()
-                    .first { (it.data as? UiTimelineV2.Post)?.content?.raw == "$longText (zh-CN)" }
+                    .first { (it.data as? UiTimelineV2.Post)?.content?.raw == "$longText (${Locale.language})" }
                     .data as UiTimelineV2.Post
-            assertEquals("$longText (zh-CN)", translated.content.raw)
+            assertEquals("$longText (${Locale.language})", translated.content.raw)
         }
 
     private fun createPost(

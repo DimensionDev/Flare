@@ -5,6 +5,7 @@ import androidx.room.Room
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.common.CacheState
+import dev.dimension.flare.common.Locale
 import dev.dimension.flare.common.OnDeviceAI
 import dev.dimension.flare.common.TestFormatter
 import dev.dimension.flare.common.decodeJson
@@ -258,7 +259,7 @@ class UserHandlerTest : RobolectricTest() {
                 DbTranslation(
                     entityType = TranslationEntityType.Profile,
                     entityKey = profile.translationEntityKey(),
-                    targetLanguage = "zh-CN",
+                    targetLanguage = Locale.language,
                     sourceHash = profile.translationPayload().sourceHash(),
                     status = TranslationStatus.Completed,
                     payload = TranslationPayload(description = "翻译后的简介".toUiPlainText()),
@@ -307,11 +308,11 @@ class UserHandlerTest : RobolectricTest() {
                     .find(
                         entityType = TranslationEntityType.Profile,
                         entityKey = expected.translationEntityKey(),
-                        targetLanguage = "zh-CN",
+                        targetLanguage = Locale.language,
                     ).filterNotNull()
                     .first { it.status == TranslationStatus.Completed }
 
-            assertEquals("Original profile bio (zh-CN)", saved.payload?.description?.raw)
+            assertEquals("Original profile bio (${Locale.language})", saved.payload?.description?.raw)
         }
 
     @Test
@@ -347,7 +348,7 @@ class UserHandlerTest : RobolectricTest() {
                     .find(
                         entityType = TranslationEntityType.Profile,
                         entityKey = expected.translationEntityKey(),
-                        targetLanguage = "zh-CN",
+                        targetLanguage = Locale.language,
                     ).filterNotNull()
                     .first { it.status == TranslationStatus.Failed }
             assertEquals(1, failed.attemptCount)
@@ -365,11 +366,11 @@ class UserHandlerTest : RobolectricTest() {
                     .find(
                         entityType = TranslationEntityType.Profile,
                         entityKey = expected.translationEntityKey(),
-                        targetLanguage = "zh-CN",
+                        targetLanguage = Locale.language,
                     ).filterNotNull()
                     .first { it.status == TranslationStatus.Completed }
             assertEquals(2, completed.attemptCount)
-            assertEquals("Retry profile bio (zh-CN)", completed.payload?.description?.raw)
+            assertEquals("Retry profile bio (${Locale.language})", completed.payload?.description?.raw)
         }
 
     private fun createProfile(

@@ -6,6 +6,7 @@ import androidx.paging.testing.TestPager
 import androidx.room.Room
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import dev.dimension.flare.RobolectricTest
+import dev.dimension.flare.common.Locale
 import dev.dimension.flare.common.TestFormatter
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
@@ -526,7 +527,7 @@ class MicroblogTest : RobolectricTest() {
                         entityKey =
                             mapped.status.status.data
                                 .translationEntityKey(),
-                        targetLanguage = "zh-CN",
+                        targetLanguage = Locale.language,
                         sourceHash = rootPost.translationPayload()!!.sourceHash(),
                         status = TranslationStatus.Completed,
                         payload = TranslationPayload(content = "根帖子".toUiPlainText()),
@@ -535,7 +536,7 @@ class MicroblogTest : RobolectricTest() {
                     DbTranslation(
                         entityType = TranslationEntityType.Status,
                         entityKey = savedParentStatus.translationEntityKey(),
-                        targetLanguage = "zh-CN",
+                        targetLanguage = Locale.language,
                         sourceHash = parentPost.translationPayload()!!.sourceHash(),
                         status = TranslationStatus.Completed,
                         payload = TranslationPayload(content = "父帖子".toUiPlainText()),
@@ -1073,7 +1074,7 @@ class MicroblogTest : RobolectricTest() {
                     entityKey =
                         mapped.status.status.data
                             .translationEntityKey(),
-                    targetLanguage = "zh-CN",
+                    targetLanguage = Locale.language,
                     sourceHash = post.translationPayload()!!.sourceHash(),
                     status = TranslationStatus.Completed,
                     payload = TranslationPayload(content = "长文译文".toUiPlainText()),
@@ -1135,7 +1136,7 @@ class MicroblogTest : RobolectricTest() {
                     entityKey =
                         mapped.status.status.data
                             .translationEntityKey(),
-                    targetLanguage = "zh-CN",
+                    targetLanguage = Locale.language,
                     sourceHash = post.translationPayload()!!.sourceHash(),
                     status = TranslationStatus.Pending,
                     payload = null,
@@ -1206,7 +1207,7 @@ class MicroblogTest : RobolectricTest() {
                     entityKey =
                         mapped.status.status.data
                             .translationEntityKey(),
-                    targetLanguage = "zh-CN",
+                    targetLanguage = Locale.language,
                     sourceHash = post.translationPayload()!!.sourceHash(),
                     status = TranslationStatus.Failed,
                     payload = null,
@@ -1275,7 +1276,7 @@ class MicroblogTest : RobolectricTest() {
                     entityKey =
                         mapped.status.status.data
                             .translationEntityKey(),
-                    targetLanguage = "zh-CN",
+                    targetLanguage = Locale.language,
                     sourceHash = post.translationPayload()!!.sourceHash(),
                     status = TranslationStatus.Completed,
                     payload = TranslationPayload(content = "translated content".toUiPlainText()),
@@ -1349,7 +1350,7 @@ class MicroblogTest : RobolectricTest() {
                     entityKey =
                         mapped.status.status.data
                             .translationEntityKey(),
-                    targetLanguage = "zh-CN",
+                    targetLanguage = Locale.language,
                     sourceHash = post.translationPayload()!!.sourceHash(),
                     status = TranslationStatus.Completed,
                     displayMode = TranslationDisplayMode.Original,
@@ -1423,7 +1424,7 @@ class MicroblogTest : RobolectricTest() {
                     entityKey =
                         mapped.status.status.data
                             .translationEntityKey(),
-                    targetLanguage = "zh-CN",
+                    targetLanguage = Locale.language,
                     sourceHash = post.translationPayload()!!.sourceHash(),
                     status = TranslationStatus.Completed,
                     payload = TranslationPayload(content = "translated content".toUiPlainText()),

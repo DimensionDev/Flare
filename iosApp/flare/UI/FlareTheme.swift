@@ -28,7 +28,7 @@ private struct AppearanceSettingsKey: EnvironmentKey {
     static let defaultValue = AppearanceSettings.companion.Default
 }
 private struct AiConfigKey: EnvironmentKey {
-    static let defaultValue = AppSettings.AiConfig(translation: false, tldr: true)
+    static let defaultValue = AppSettings.AiConfig.companion.default
 }
 extension EnvironmentValues {
     var appearanceSettings: AppearanceSettings {

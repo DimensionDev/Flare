@@ -5,6 +5,7 @@ import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.model.DbTranslation
+import dev.dimension.flare.data.database.cache.model.TranslationDisplayMode
 import dev.dimension.flare.data.database.cache.model.TranslationEntityType
 import dev.dimension.flare.data.database.cache.model.TranslationPayload
 import dev.dimension.flare.data.database.cache.model.TranslationStatus
@@ -146,6 +147,7 @@ class TranslationDaoTest : RobolectricTest() {
                 targetLanguage = "en",
                 sourceHash = "hash-new",
                 status = TranslationStatus.Completed,
+                displayMode = TranslationDisplayMode.Translated,
                 payload = TranslationPayload(description = "Translated profile".toUiPlainText()),
                 statusReason = null,
                 attemptCount = 2,
@@ -161,9 +163,120 @@ class TranslationDaoTest : RobolectricTest() {
 
             assertNotNull(saved)
             assertEquals("hash-new", saved.sourceHash)
+            assertEquals(TranslationDisplayMode.Translated, saved.displayMode)
             assertEquals(2, saved.attemptCount)
             assertEquals(99L, saved.updatedAt)
             assertEquals("Translated profile", saved.payload?.description?.raw)
+        }
+
+    @Test
+    fun updateDisplayMode_onlyChangesDisplayMode() =
+        runTest {
+            val entityKey = "status:display-mode"
+            db.translationDao().insert(
+                DbTranslation(
+                    entityType = TranslationEntityType.Status,
+                    entityKey = entityKey,
+                    targetLanguage = "en",
+                    sourceHash = "hash-old",
+                    status = TranslationStatus.Completed,
+                    payload = TranslationPayload(content = "Hello".toUiPlainText()),
+                    updatedAt = 1L,
+                ),
+            )
+
+            db.translationDao().updateDisplayMode(
+                entityType = TranslationEntityType.Status,
+                entityKey = entityKey,
+                targetLanguage = "en",
+                displayMode = TranslationDisplayMode.Original,
+                updatedAt = 77L,
+            )
+
+            val saved =
+                db.translationDao().get(
+                    entityType = TranslationEntityType.Status,
+                    entityKey = entityKey,
+                    targetLanguage = "en",
+                )
+
+            assertNotNull(saved)
+            assertEquals(TranslationDisplayMode.Original, saved.displayMode)
+            assertEquals(TranslationStatus.Completed, saved.status)
+            assertEquals("hash-old", saved.sourceHash)
+            assertEquals("Hello", saved.payload?.content?.raw)
+            assertEquals(77L, saved.updatedAt)
+        }
+
+    @Test
+    fun markStaleInFlightAsFailed_updatesOnlyOldPendingAndTranslating() =
+        runTest {
+            db.translationDao().insertAll(
+                listOf(
+                    DbTranslation(
+                        entityType = TranslationEntityType.Status,
+                        entityKey = "status:pending-stale",
+                        targetLanguage = "en",
+                        sourceHash = "hash-pending",
+                        status = TranslationStatus.Pending,
+                        updatedAt = 10L,
+                    ),
+                    DbTranslation(
+                        entityType = TranslationEntityType.Status,
+                        entityKey = "status:translating-stale",
+                        targetLanguage = "en",
+                        sourceHash = "hash-translating",
+                        status = TranslationStatus.Translating,
+                        updatedAt = 20L,
+                    ),
+                    DbTranslation(
+                        entityType = TranslationEntityType.Status,
+                        entityKey = "status:translating-fresh",
+                        targetLanguage = "en",
+                        sourceHash = "hash-fresh",
+                        status = TranslationStatus.Translating,
+                        updatedAt = 200L,
+                    ),
+                    DbTranslation(
+                        entityType = TranslationEntityType.Status,
+                        entityKey = "status:completed",
+                        targetLanguage = "en",
+                        sourceHash = "hash-completed",
+                        status = TranslationStatus.Completed,
+                        payload = TranslationPayload(content = "done".toUiPlainText()),
+                        updatedAt = 5L,
+                    ),
+                ),
+            )
+
+            db.translationDao().markStaleInFlightAsFailed(
+                staleBefore = 100L,
+                statusReason = "stale_in_flight",
+                updatedAt = 999L,
+            )
+
+            val pendingStale = db.translationDao().get(TranslationEntityType.Status, "status:pending-stale", "en")
+            val translatingStale = db.translationDao().get(TranslationEntityType.Status, "status:translating-stale", "en")
+            val translatingFresh = db.translationDao().get(TranslationEntityType.Status, "status:translating-fresh", "en")
+            val completed = db.translationDao().get(TranslationEntityType.Status, "status:completed", "en")
+
+            assertNotNull(pendingStale)
+            assertEquals(TranslationStatus.Failed, pendingStale.status)
+            assertEquals("stale_in_flight", pendingStale.statusReason)
+            assertEquals(999L, pendingStale.updatedAt)
+
+            assertNotNull(translatingStale)
+            assertEquals(TranslationStatus.Failed, translatingStale.status)
+            assertEquals("stale_in_flight", translatingStale.statusReason)
+            assertEquals(999L, translatingStale.updatedAt)
+
+            assertNotNull(translatingFresh)
+            assertEquals(TranslationStatus.Translating, translatingFresh.status)
+            assertEquals(200L, translatingFresh.updatedAt)
+
+            assertNotNull(completed)
+            assertEquals(TranslationStatus.Completed, completed.status)
+            assertEquals("done", completed.payload?.content?.raw)
         }
 
     @Test

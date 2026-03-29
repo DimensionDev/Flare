@@ -250,6 +250,11 @@ struct StatusView: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
+            if data.translationDisplayState != .hidden {
+                TranslateStatusComponent(data: data.translationDisplayState)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
             if showPlatformLogo {
                 switch data.platformType {
                 case .mastodon:

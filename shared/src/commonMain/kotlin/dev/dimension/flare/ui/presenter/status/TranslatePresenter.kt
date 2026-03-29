@@ -5,6 +5,7 @@ import androidx.compose.runtime.produceState
 import dev.dimension.flare.common.Locale
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.model.DbTranslation
+import dev.dimension.flare.data.database.cache.model.TranslationDisplayMode
 import dev.dimension.flare.data.database.cache.model.TranslationEntityType
 import dev.dimension.flare.data.database.cache.model.TranslationPayload
 import dev.dimension.flare.data.database.cache.model.TranslationStatus
@@ -13,6 +14,7 @@ import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.datastore.model.AiPromptDefaults
 import dev.dimension.flare.data.network.ai.AiCompletionService
 import dev.dimension.flare.data.network.ktorClient
+import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiState
@@ -50,16 +52,16 @@ public class TranslatePresenter(
     override fun body(): UiState<UiRichText> {
         return produceState<UiState<UiRichText>>(initialValue = UiState.Loading()) {
             value =
-                runCatching {
+                tryRun {
                     val aiConfig =
                         appDataStore.appSettingsStore.data
                             .first()
                             .aiConfig
                     if (!aiConfig.translation) {
-                        return@runCatching toUiRichText(legacyGoogleTranslate())
+                        return@tryRun toUiRichText(legacyGoogleTranslate())
                     }
                     cachedTranslation()?.let {
-                        return@runCatching it
+                        return@tryRun it
                     }
                     val promptTemplate =
                         aiConfig.translatePrompt.ifBlank {
@@ -76,7 +78,7 @@ public class TranslatePresenter(
                     if (aiTranslation != null) {
                         val translated = toUiRichText(aiTranslation)
                         cacheTranslation(translated)
-                        return@runCatching translated
+                        return@tryRun translated
                     }
                     toUiRichText(legacyGoogleTranslate())
                 }.fold(
@@ -136,7 +138,7 @@ public class TranslatePresenter(
             .removeSuffix("```")
             .trim()
             .let { cleaned ->
-                runCatching {
+                tryRun {
                     source.applyTranslationJson(cleaned)
                 }.getOrElse {
                     cleaned.toUiPlainText()
@@ -189,6 +191,7 @@ public class TranslatePresenter(
                 targetLanguage = targetLanguage,
                 sourceHash = sourcePayload.sourceHash(),
                 status = TranslationStatus.Completed,
+                displayMode = TranslationDisplayMode.Translated,
                 payload = mergedPayload,
                 statusReason = null,
                 attemptCount = existing?.attemptCount ?: 0,

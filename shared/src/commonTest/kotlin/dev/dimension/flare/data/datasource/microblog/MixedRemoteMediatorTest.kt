@@ -44,12 +44,17 @@ import dev.dimension.flare.ui.render.toUi
 import dev.dimension.flare.ui.render.toUiPlainText
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.yield
 import okio.Path
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
@@ -789,6 +794,151 @@ class MixedRemoteMediatorTest : RobolectricTest() {
         }
 
     @Test
+    fun preTranslationBatchDocumentAllowsMissingTargetLanguageInResponse() {
+        val document =
+            """{"version":1,"items":[]}""".decodeJson(
+                dev.dimension.flare.data.translation.PreTranslationBatchDocument
+                    .serializer(),
+            )
+
+        assertEquals("", document.targetLanguage)
+        assertTrue(document.items.isEmpty())
+    }
+
+    @Test
+    fun preTranslationServiceMarksStaleInFlightTranslationsAsFailedOnStartup() {
+        runBlocking {
+            db.translationDao().insert(
+                dev.dimension.flare.data.database.cache.model.DbTranslation(
+                    entityType = TranslationEntityType.Status,
+                    entityKey = "status:stale-in-flight",
+                    targetLanguage = "zh-CN",
+                    sourceHash = "hash-stale",
+                    status = TranslationStatus.Translating,
+                    updatedAt = 1L,
+                ),
+            )
+
+            val appDataStore = AppDataStore(pathProducer)
+            appDataStore.appSettingsStore.updateData {
+                it.copy(
+                    language = "zh-CN",
+                    aiConfig =
+                        AppSettings.AiConfig(
+                            translation = true,
+                            preTranslation = true,
+                            type = AppSettings.AiConfig.Type.OnDevice,
+                        ),
+                )
+            }
+            val scope = CoroutineScope(Dispatchers.Unconfined + SupervisorJob())
+
+            AiPreTranslationService(
+                database = db,
+                appDataStore = appDataStore,
+                aiCompletionService = AiCompletionService(OpenAIService(), TestOnDeviceAI()),
+                coroutineScope = scope,
+            )
+
+            yield()
+
+            val cleaned =
+                db.translationDao().get(
+                    entityType = TranslationEntityType.Status,
+                    entityKey = "status:stale-in-flight",
+                    targetLanguage = "zh-CN",
+                )
+            assertNotNull(cleaned)
+            assertEquals(TranslationStatus.Failed, cleaned.status)
+            assertEquals("stale_in_flight", cleaned.statusReason)
+
+            scope.coroutineContext[Job]?.cancel()
+        }
+    }
+
+    @Test
+    fun queuedPreTranslationWritesPendingBeforeExecutionStarts() {
+        runBlocking {
+            val appDataStore = AppDataStore(pathProducer)
+            appDataStore.appSettingsStore.updateData {
+                it.copy(
+                    language = "zh-CN",
+                    aiConfig =
+                        AppSettings.AiConfig(
+                            translation = true,
+                            preTranslation = true,
+                            type = AppSettings.AiConfig.Type.OnDevice,
+                        ),
+                )
+            }
+            val started = CompletableDeferred<Unit>()
+            val release = CompletableDeferred<Unit>()
+            val scope = CoroutineScope(Dispatchers.Unconfined + SupervisorJob())
+            val preTranslationService: PreTranslationService =
+                AiPreTranslationService(
+                    database = db,
+                    appDataStore = appDataStore,
+                    aiCompletionService = AiCompletionService(OpenAIService(), BlockingOnDeviceAI(started, release)),
+                    coroutineScope = scope,
+                )
+            val accountKey = MicroBlogKey(id = "account-pending-queue", host = "test.social")
+            val accountType = AccountType.Specific(accountKey)
+            val firstStatus =
+                TimelinePagingMapper
+                    .toDb(
+                        createPost(
+                            accountType = accountType,
+                            user = profile(MicroBlogKey("user-pending-1", "test.social"), "User"),
+                            statusKey = MicroBlogKey("status-pending-1", "test.social"),
+                            text = "first source",
+                        ),
+                        pagingKey = "home",
+                    ).status.status.data
+            val secondStatus =
+                TimelinePagingMapper
+                    .toDb(
+                        createPost(
+                            accountType = accountType,
+                            user = profile(MicroBlogKey("user-pending-2", "test.social"), "User"),
+                            statusKey = MicroBlogKey("status-pending-2", "test.social"),
+                            text = "second source",
+                        ),
+                        pagingKey = "home",
+                    ).status.status.data
+
+            preTranslationService.enqueueStatuses(listOf(firstStatus), allowLongText = false)
+            started.await()
+
+            preTranslationService.enqueueStatuses(listOf(secondStatus), allowLongText = false)
+            yield()
+
+            var pendingTranslation =
+                db.translationDao().get(
+                    entityType = TranslationEntityType.Status,
+                    entityKey = secondStatus.id,
+                    targetLanguage = "zh-CN",
+                )
+            repeat(10) {
+                if (pendingTranslation != null) {
+                    return@repeat
+                }
+                yield()
+                pendingTranslation =
+                    db.translationDao().get(
+                        entityType = TranslationEntityType.Status,
+                        entityKey = secondStatus.id,
+                        targetLanguage = "zh-CN",
+                    )
+            }
+            assertNotNull(pendingTranslation)
+            assertEquals(TranslationStatus.Pending, pendingTranslation.status)
+
+            release.complete(Unit)
+            scope.coroutineContext[Job]?.cancel()
+        }
+    }
+
+    @Test
     fun refreshDeduplicatesSamePostReturnedByMultipleSubTimelines() =
         runTest {
             val accountKey = MicroBlogKey("timeline", "mastodon.example")
@@ -989,6 +1139,47 @@ private class TestOnDeviceAI : OnDeviceAI {
         targetLanguage: String,
         prompt: String,
     ): String? {
+        val document =
+            source.decodeJson(
+                dev.dimension.flare.data.translation.PreTranslationBatchDocument
+                    .serializer(),
+            )
+        return document
+            .copy(
+                items =
+                    document.items.map { item ->
+                        item.copy(
+                            status = dev.dimension.flare.data.translation.PreTranslationBatchItemStatus.Completed,
+                            payload = requireNotNull(item.payload).translated(targetLanguage),
+                            reason = null,
+                        )
+                    },
+            ).encodeJson(
+                dev.dimension.flare.data.translation.PreTranslationBatchDocument
+                    .serializer(),
+            )
+    }
+
+    override suspend fun tldr(
+        source: String,
+        targetLanguage: String,
+        prompt: String,
+    ): String? = null
+}
+
+private class BlockingOnDeviceAI(
+    private val started: CompletableDeferred<Unit>,
+    private val release: CompletableDeferred<Unit>,
+) : OnDeviceAI {
+    override suspend fun isAvailable(): Boolean = true
+
+    override suspend fun translate(
+        source: String,
+        targetLanguage: String,
+        prompt: String,
+    ): String? {
+        started.complete(Unit)
+        release.await()
         val document =
             source.decodeJson(
                 dev.dimension.flare.data.translation.PreTranslationBatchDocument

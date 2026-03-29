@@ -24,7 +24,6 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -78,31 +77,6 @@ public class AiConfigPresenter :
                 }.toImmutableList()
         }
 
-        LaunchedEffect(Unit) {
-            snapshotFlow { aiConfig.type as? AppSettings.AiConfig.Type.OpenAI }
-                .map { (it?.serverUrl ?: "") to (it?.apiKey ?: "") }
-                .distinctUntilChanged()
-                .drop(1)
-                .collectLatest {
-                    withContext(Dispatchers.Main) {
-                        appDataStore.appSettingsStore.updateData {
-                            it.copy(
-                                aiConfig =
-                                    it.aiConfig.copy(
-                                        type =
-                                            if (it.aiConfig.type is AppSettings.AiConfig.Type.OpenAI) {
-                                                it.aiConfig.type.copy(
-                                                    model = "",
-                                                )
-                                            } else {
-                                                it.aiConfig.type
-                                            },
-                                    ),
-                            )
-                        }
-                    }
-                }
-        }
         LaunchedEffect(Unit) {
             snapshotFlow { aiConfig.type as? AppSettings.AiConfig.Type.OpenAI }
                 .map { (it?.serverUrl ?: "") to (it?.apiKey ?: "") }

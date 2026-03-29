@@ -27,6 +27,11 @@ public data class AppSettings(
         val tldrPrompt: String = AiPromptDefaults.TLDR_PROMPT,
         val preTranslation: Boolean = false,
     ) {
+        public companion object {
+            // for iOS
+            public val default: AiConfig = AiConfig()
+        }
+
         @Serializable
         public sealed interface Type {
             @Serializable

@@ -7,9 +7,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import dev.dimension.flare.common.deeplink.DeepLinkMapping
+import dev.dimension.flare.data.database.cache.model.TranslationDisplayMode
 import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceFlow
+import dev.dimension.flare.data.translation.PreTranslationService
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.spec
 import dev.dimension.flare.ui.model.DeeplinkEvent
@@ -32,6 +34,7 @@ public class DeepLinkPresenter(
 ) : PresenterBase<DeepLinkPresenter.State>(),
     KoinComponent {
     private val accountRepository: AccountRepository by inject()
+    private val preTranslationService: PreTranslationService by inject()
 
     @androidx.compose.runtime.Immutable
     public interface State {
@@ -55,26 +58,64 @@ public class DeepLinkPresenter(
                 if (DeeplinkEvent.isDeeplinkEvent(url)) {
                     val event = DeeplinkEvent.parse(url)
                     if (event != null) {
-                        accountServiceFlow(
-                            accountType = AccountType.Specific(event.accountKey),
-                            repository = accountRepository,
-                        ).firstOrNull()?.let { service ->
-                            if (service is PostDataSource) {
-                                service.postEventHandler.handleEvent(event.postEvent)
-                            }
+                        when {
+                            event.postEvent != null ->
+                                accountServiceFlow(
+                                    accountType = AccountType.Specific(event.accountKey),
+                                    repository = accountRepository,
+                                ).firstOrNull()?.let { service ->
+                                    if (service is PostDataSource) {
+                                        service.postEventHandler.handleEvent(event.postEvent)
+                                    }
+                                }
+
+                            event.translationEvent is DeeplinkEvent.TranslationEvent.RetryTranslation ->
+                                with(event.translationEvent) {
+                                    preTranslationService.setStatusDisplayMode(
+                                        accountType = AccountType.Specific(event.accountKey),
+                                        statusKey = statusKey,
+                                        mode = TranslationDisplayMode.Translated,
+                                    )
+                                    preTranslationService.retryStatus(
+                                        accountType = AccountType.Specific(event.accountKey),
+                                        statusKey = statusKey,
+                                    )
+                                }
+
+                            event.translationEvent is DeeplinkEvent.TranslationEvent.Translate ->
+                                with(event.translationEvent) {
+                                    preTranslationService.setStatusDisplayMode(
+                                        accountType = AccountType.Specific(event.accountKey),
+                                        statusKey = statusKey,
+                                        mode = TranslationDisplayMode.Translated,
+                                    )
+                                    preTranslationService.retryStatus(
+                                        accountType = AccountType.Specific(event.accountKey),
+                                        statusKey = statusKey,
+                                    )
+                                }
+
+                            event.translationEvent is DeeplinkEvent.TranslationEvent.ShowOriginal ->
+                                preTranslationService.setStatusDisplayMode(
+                                    accountType = AccountType.Specific(event.accountKey),
+                                    statusKey = event.translationEvent.statusKey,
+                                    mode = TranslationDisplayMode.Original,
+                                )
                         }
                     }
                     pendingUrl = null
                 } else if (DeeplinkRoute.isDeeplink(url)) {
                     DeeplinkRoute.parse(url)?.let {
-                        if (it is DeeplinkRoute.OpenLinkDirectly) {
-                            withContext(Dispatchers.Main) {
-                                onLink(it.url)
-                            }
-                        } else {
-                            withContext(Dispatchers.Main) {
-                                onRoute(it)
-                            }
+                        when (it) {
+                            is DeeplinkRoute.OpenLinkDirectly ->
+                                withContext(Dispatchers.Main) {
+                                    onLink(it.url)
+                                }
+
+                            else ->
+                                withContext(Dispatchers.Main) {
+                                    onRoute(it)
+                                }
                         }
                     }
                     pendingUrl = null

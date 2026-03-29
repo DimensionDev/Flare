@@ -222,6 +222,9 @@ extension ActionMenuItemText {
             case .muteWithHandleParameter: return "mute_user_with_handle \(localized.parameters.first ?? "")"
             case .acceptFollowRequest: return "accept_follow_request"
             case .rejectFollowRequest: return "reject_follow_request"
+            case .retryTranslation: return LocalizedStringResource(stringLiteral: "Retry translation")
+            case .translate: return LocalizedStringResource(stringLiteral: "Translate")
+            case .showOriginal: return LocalizedStringResource(stringLiteral: "Show original")
             }
         }
     }

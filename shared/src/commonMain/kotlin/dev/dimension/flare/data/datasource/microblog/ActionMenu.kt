@@ -105,6 +105,9 @@ public sealed class ActionMenu {
                     MuteWithHandleParameter,
                     AcceptFollowRequest,
                     RejectFollowRequest,
+                    RetryTranslation,
+                    Translate,
+                    ShowOriginal,
                 }
             }
         }

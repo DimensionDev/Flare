@@ -5,5 +5,6 @@ import platform.Foundation.currentLocale
 import platform.Foundation.languageCode
 
 internal actual object Locale {
-    actual val language: String = NSLocale.currentLocale.languageCode
+    actual val language: String
+        get() = NSLocale.currentLocale.languageCode
 }

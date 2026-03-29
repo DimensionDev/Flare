@@ -36,8 +36,8 @@ internal class UserHandler(
         appDataStore.appSettingsStore.data
             .map { settings ->
                 TranslationDisplayOptions(
-                    enabled = settings.aiConfig.translation && settings.aiConfig.preTranslation,
-                    targetLanguage = settings.language.ifBlank { Locale.language },
+                    translationEnabled = settings.aiConfig.translation,
+                    autoDisplayEnabled = settings.aiConfig.translation && settings.aiConfig.preTranslation,
                 )
             }.distinctUntilChanged()
     }
@@ -93,7 +93,7 @@ internal class UserHandler(
         combine(userFlow, translationDisplayFlow) { user, translationDisplayOptions ->
             user to translationDisplayOptions
         }.flatMapLatest { (user, translationDisplayOptions) ->
-            if (user == null || !translationDisplayOptions.enabled) {
+            if (user == null || !translationDisplayOptions.autoDisplayEnabled) {
                 flowOf(user?.content)
             } else {
                 combine(
@@ -103,7 +103,7 @@ internal class UserHandler(
                         .find(
                             entityType = TranslationEntityType.Profile,
                             entityKey = user.translationEntityKey(),
-                            targetLanguage = translationDisplayOptions.targetLanguage,
+                            targetLanguage = Locale.language,
                         ),
                 ) { dbUser, translation ->
                     dbUser.content.applyTranslation(

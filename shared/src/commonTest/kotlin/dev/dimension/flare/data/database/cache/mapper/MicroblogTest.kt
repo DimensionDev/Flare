@@ -10,6 +10,7 @@ import dev.dimension.flare.common.TestFormatter
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.database.cache.model.DbTranslation
+import dev.dimension.flare.data.database.cache.model.TranslationDisplayMode
 import dev.dimension.flare.data.database.cache.model.TranslationDisplayOptions
 import dev.dimension.flare.data.database.cache.model.TranslationEntityType
 import dev.dimension.flare.data.database.cache.model.TranslationPayload
@@ -17,6 +18,7 @@ import dev.dimension.flare.data.database.cache.model.TranslationStatus
 import dev.dimension.flare.data.database.cache.model.sourceHash
 import dev.dimension.flare.data.database.cache.model.translationEntityKey
 import dev.dimension.flare.data.database.cache.model.translationPayload
+import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.paging.TimelinePagingMapper
 import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.AccountType
@@ -24,6 +26,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.ui.humanizer.PlatformFormatter
 import dev.dimension.flare.ui.model.ClickEvent
+import dev.dimension.flare.ui.model.TranslationDisplayState
 import dev.dimension.flare.ui.model.UiHandle
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
@@ -44,6 +47,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlin.time.Clock
 
@@ -551,7 +555,11 @@ class MicroblogTest : RobolectricTest() {
                     item = dbItem,
                     pagingKey = "home",
                     useDbKeyInItemKey = false,
-                    translationDisplayOptions = TranslationDisplayOptions(enabled = true, targetLanguage = "zh-CN"),
+                    translationDisplayOptions =
+                        TranslationDisplayOptions(
+                            translationEnabled = true,
+                            autoDisplayEnabled = true,
+                        ),
                 )
             val post = assertIs<UiTimelineV2.Post>(ui)
 
@@ -1086,9 +1094,8 @@ class MicroblogTest : RobolectricTest() {
                     useDbKeyInItemKey = false,
                     translationDisplayOptions =
                         TranslationDisplayOptions(
-                            enabled = true,
-                            targetLanguage = "zh-CN",
-                            allowLongText = false,
+                            translationEnabled = true,
+                            autoDisplayEnabled = true,
                         ),
                 )
             val detailUi =
@@ -1098,14 +1105,362 @@ class MicroblogTest : RobolectricTest() {
                     useDbKeyInItemKey = false,
                     translationDisplayOptions =
                         TranslationDisplayOptions(
-                            enabled = true,
-                            targetLanguage = "zh-CN",
-                            allowLongText = true,
+                            translationEnabled = true,
+                            autoDisplayEnabled = true,
                         ),
                 )
 
             assertEquals("长文译文", assertIs<UiTimelineV2.Post>(timelineUi).content.raw)
             assertEquals("长文译文", assertIs<UiTimelineV2.Post>(detailUi).content.raw)
+        }
+
+    @Test
+    fun toUiMarksPendingTranslationAsTranslating() =
+        runTest {
+            val accountKey = MicroBlogKey(id = "account-pending", host = "test.com")
+            val postUser = createUser(MicroBlogKey(id = "post-user-pending", host = "test.com"), "Post User")
+            val post =
+                createPost(
+                    accountKey = accountKey,
+                    user = postUser,
+                    statusKey = MicroBlogKey(id = "post-status-pending", host = "test.com"),
+                    text = "pending source",
+                )
+
+            val mapped = TimelinePagingMapper.toDb(post, pagingKey = "home")
+            saveToDatabase(db, listOf(mapped))
+            db.translationDao().insert(
+                DbTranslation(
+                    entityType = TranslationEntityType.Status,
+                    entityKey =
+                        mapped.status.status.data
+                            .translationEntityKey(),
+                    targetLanguage = "zh-CN",
+                    sourceHash = post.translationPayload()!!.sourceHash(),
+                    status = TranslationStatus.Pending,
+                    payload = null,
+                    updatedAt = Clock.System.now().toEpochMilliseconds(),
+                ),
+            )
+
+            val paging = db.pagingTimelineDao().getPagingSource("home")
+            val pager = TestPager(config = PagingConfig(pageSize = 20), paging)
+            val refreshResult = pager.refresh()
+            val page = assertIs<PagingSource.LoadResult.Page<Int, DbPagingTimelineWithStatus>>(refreshResult)
+            val dbItem = assertNotNull(page.data.firstOrNull())
+
+            val timelineUi =
+                assertIs<UiTimelineV2.Post>(
+                    TimelinePagingMapper.toUi(
+                        item = dbItem,
+                        pagingKey = "home",
+                        useDbKeyInItemKey = false,
+                        translationDisplayOptions =
+                            TranslationDisplayOptions(
+                                translationEnabled = true,
+                                autoDisplayEnabled = true,
+                            ),
+                    ),
+                )
+
+            assertEquals("pending source", timelineUi.content.raw)
+            assertEquals(TranslationDisplayState.Translating, timelineUi.translationDisplayState)
+        }
+
+    @Test
+    fun toUiPrependsRetryTranslationToMoreMenuWhenTranslationFailed() =
+        runTest {
+            val accountKey = MicroBlogKey(id = "account-failed", host = "test.com")
+            val postUser = createUser(MicroBlogKey(id = "post-user-failed", host = "test.com"), "Post User")
+            val post =
+                createPost(
+                    accountKey = accountKey,
+                    user = postUser,
+                    statusKey = MicroBlogKey(id = "post-status-failed", host = "test.com"),
+                    text = "failed source",
+                ).copy(
+                    actions =
+                        persistentListOf(
+                            ActionMenu.Group(
+                                displayItem =
+                                    ActionMenu.Item(
+                                        text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.More),
+                                        clickEvent = ClickEvent.Noop,
+                                    ),
+                                actions =
+                                    persistentListOf(
+                                        ActionMenu.Item(
+                                            text = ActionMenu.Item.Text.Raw("Existing action"),
+                                            clickEvent = ClickEvent.Noop,
+                                        ),
+                                    ),
+                            ),
+                        ),
+                )
+
+            val mapped = TimelinePagingMapper.toDb(post, pagingKey = "home")
+            saveToDatabase(db, listOf(mapped))
+            db.translationDao().insert(
+                DbTranslation(
+                    entityType = TranslationEntityType.Status,
+                    entityKey =
+                        mapped.status.status.data
+                            .translationEntityKey(),
+                    targetLanguage = "zh-CN",
+                    sourceHash = post.translationPayload()!!.sourceHash(),
+                    status = TranslationStatus.Failed,
+                    payload = null,
+                    updatedAt = 1L,
+                ),
+            )
+
+            val paging = db.pagingTimelineDao().getPagingSource("home")
+            val pager = TestPager(config = PagingConfig(pageSize = 20), paging)
+            val refreshResult = pager.refresh()
+            val page = assertIs<PagingSource.LoadResult.Page<Int, DbPagingTimelineWithStatus>>(refreshResult)
+            val dbItem = assertNotNull(page.data.firstOrNull())
+
+            val timelineUi =
+                assertIs<UiTimelineV2.Post>(
+                    TimelinePagingMapper.toUi(
+                        item = dbItem,
+                        pagingKey = "home",
+                        useDbKeyInItemKey = false,
+                        translationDisplayOptions =
+                            TranslationDisplayOptions(
+                                translationEnabled = true,
+                                autoDisplayEnabled = true,
+                            ),
+                    ),
+                )
+
+            assertEquals(TranslationDisplayState.Failed, timelineUi.translationDisplayState)
+            val moreAction = assertIs<ActionMenu.Group>(timelineUi.actions.first())
+            val retryAction = assertIs<ActionMenu.Item>(moreAction.actions.first())
+            val retryText = assertIs<ActionMenu.Item.Text.Localized>(retryAction.text)
+            assertEquals(ActionMenu.Item.Text.Localized.Type.RetryTranslation, retryText.type)
+            assertNull(retryAction.icon)
+        }
+
+    @Test
+    fun toUiPrependsShowOriginalWhenTranslatedContentIsDisplayed() =
+        runTest {
+            val accountKey = MicroBlogKey(id = "account-translated", host = "test.com")
+            val postUser = createUser(MicroBlogKey(id = "post-user-translated", host = "test.com"), "Post User")
+            val post =
+                createPost(
+                    accountKey = accountKey,
+                    user = postUser,
+                    statusKey = MicroBlogKey(id = "post-status-translated", host = "test.com"),
+                    text = "source content",
+                ).copy(
+                    actions =
+                        persistentListOf(
+                            ActionMenu.Group(
+                                displayItem =
+                                    ActionMenu.Item(
+                                        text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.More),
+                                        clickEvent = ClickEvent.Noop,
+                                    ),
+                                actions = persistentListOf(),
+                            ),
+                        ),
+                )
+
+            val mapped = TimelinePagingMapper.toDb(post, pagingKey = "home")
+            saveToDatabase(db, listOf(mapped))
+            db.translationDao().insert(
+                DbTranslation(
+                    entityType = TranslationEntityType.Status,
+                    entityKey =
+                        mapped.status.status.data
+                            .translationEntityKey(),
+                    targetLanguage = "zh-CN",
+                    sourceHash = post.translationPayload()!!.sourceHash(),
+                    status = TranslationStatus.Completed,
+                    payload = TranslationPayload(content = "translated content".toUiPlainText()),
+                    updatedAt = 1L,
+                ),
+            )
+
+            val dbItem =
+                assertNotNull(
+                    (
+                        assertIs<PagingSource.LoadResult.Page<Int, DbPagingTimelineWithStatus>>(
+                            TestPager(config = PagingConfig(pageSize = 20), db.pagingTimelineDao().getPagingSource("home")).refresh(),
+                        )
+                    ).data.firstOrNull(),
+                )
+
+            val timelineUi =
+                assertIs<UiTimelineV2.Post>(
+                    TimelinePagingMapper.toUi(
+                        item = dbItem,
+                        pagingKey = "home",
+                        useDbKeyInItemKey = false,
+                        translationDisplayOptions =
+                            TranslationDisplayOptions(
+                                translationEnabled = true,
+                                autoDisplayEnabled = true,
+                            ),
+                    ),
+                )
+
+            assertEquals("translated content", timelineUi.content.raw)
+            val moreAction = assertIs<ActionMenu.Group>(timelineUi.actions.first())
+            val firstAction = assertIs<ActionMenu.Item>(moreAction.actions.first())
+            assertEquals(
+                ActionMenu.Item.Text.Localized.Type.ShowOriginal,
+                assertIs<ActionMenu.Item.Text.Localized>(firstAction.text).type,
+            )
+        }
+
+    @Test
+    fun toUiPrependsTranslateWhenOriginalModeIsForced() =
+        runTest {
+            val accountKey = MicroBlogKey(id = "account-original", host = "test.com")
+            val postUser = createUser(MicroBlogKey(id = "post-user-original", host = "test.com"), "Post User")
+            val statusKey = MicroBlogKey(id = "post-status-original", host = "test.com")
+            val post =
+                createPost(
+                    accountKey = accountKey,
+                    user = postUser,
+                    statusKey = statusKey,
+                    text = "source content",
+                ).copy(
+                    actions =
+                        persistentListOf(
+                            ActionMenu.Group(
+                                displayItem =
+                                    ActionMenu.Item(
+                                        text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.More),
+                                        clickEvent = ClickEvent.Noop,
+                                    ),
+                                actions = persistentListOf(),
+                            ),
+                        ),
+                )
+
+            val mapped = TimelinePagingMapper.toDb(post, pagingKey = "home")
+            saveToDatabase(db, listOf(mapped))
+            db.translationDao().insert(
+                DbTranslation(
+                    entityType = TranslationEntityType.Status,
+                    entityKey =
+                        mapped.status.status.data
+                            .translationEntityKey(),
+                    targetLanguage = "zh-CN",
+                    sourceHash = post.translationPayload()!!.sourceHash(),
+                    status = TranslationStatus.Completed,
+                    displayMode = TranslationDisplayMode.Original,
+                    payload = TranslationPayload(content = "translated content".toUiPlainText()),
+                    updatedAt = 1L,
+                ),
+            )
+
+            val dbItem =
+                assertNotNull(
+                    (
+                        assertIs<PagingSource.LoadResult.Page<Int, DbPagingTimelineWithStatus>>(
+                            TestPager(config = PagingConfig(pageSize = 20), db.pagingTimelineDao().getPagingSource("home")).refresh(),
+                        )
+                    ).data.firstOrNull(),
+                )
+
+            val timelineUi =
+                assertIs<UiTimelineV2.Post>(
+                    TimelinePagingMapper.toUi(
+                        item = dbItem,
+                        pagingKey = "home",
+                        useDbKeyInItemKey = false,
+                        translationDisplayOptions =
+                            TranslationDisplayOptions(
+                                translationEnabled = true,
+                                autoDisplayEnabled = true,
+                            ),
+                    ),
+                )
+
+            assertEquals("source content", timelineUi.content.raw)
+            val moreAction = assertIs<ActionMenu.Group>(timelineUi.actions.first())
+            val firstAction = assertIs<ActionMenu.Item>(moreAction.actions.first())
+            assertEquals(
+                ActionMenu.Item.Text.Localized.Type.Translate,
+                assertIs<ActionMenu.Item.Text.Localized>(firstAction.text).type,
+            )
+        }
+
+    @Test
+    fun toUiStillPrependsTranslateWhenPreTranslationDisplayIsDisabled() =
+        runTest {
+            val accountKey = MicroBlogKey(id = "account-pretranslation-off", host = "test.com")
+            val postUser = createUser(MicroBlogKey(id = "post-user-pretranslation-off", host = "test.com"), "Post User")
+            val post =
+                createPost(
+                    accountKey = accountKey,
+                    user = postUser,
+                    statusKey = MicroBlogKey(id = "post-status-pretranslation-off", host = "test.com"),
+                    text = "source content",
+                ).copy(
+                    actions =
+                        persistentListOf(
+                            ActionMenu.Group(
+                                displayItem =
+                                    ActionMenu.Item(
+                                        text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.More),
+                                        clickEvent = ClickEvent.Noop,
+                                    ),
+                                actions = persistentListOf(),
+                            ),
+                        ),
+                )
+
+            val mapped = TimelinePagingMapper.toDb(post, pagingKey = "home")
+            saveToDatabase(db, listOf(mapped))
+            db.translationDao().insert(
+                DbTranslation(
+                    entityType = TranslationEntityType.Status,
+                    entityKey =
+                        mapped.status.status.data
+                            .translationEntityKey(),
+                    targetLanguage = "zh-CN",
+                    sourceHash = post.translationPayload()!!.sourceHash(),
+                    status = TranslationStatus.Completed,
+                    payload = TranslationPayload(content = "translated content".toUiPlainText()),
+                    updatedAt = 1L,
+                ),
+            )
+
+            val dbItem =
+                assertNotNull(
+                    (
+                        assertIs<PagingSource.LoadResult.Page<Int, DbPagingTimelineWithStatus>>(
+                            TestPager(config = PagingConfig(pageSize = 20), db.pagingTimelineDao().getPagingSource("home")).refresh(),
+                        )
+                    ).data.firstOrNull(),
+                )
+
+            val timelineUi =
+                assertIs<UiTimelineV2.Post>(
+                    TimelinePagingMapper.toUi(
+                        item = dbItem,
+                        pagingKey = "home",
+                        useDbKeyInItemKey = false,
+                        translationDisplayOptions =
+                            TranslationDisplayOptions(
+                                translationEnabled = true,
+                                autoDisplayEnabled = false,
+                            ),
+                    ),
+                )
+
+            assertEquals("source content", timelineUi.content.raw)
+            val moreAction = assertIs<ActionMenu.Group>(timelineUi.actions.first())
+            val firstAction = assertIs<ActionMenu.Item>(moreAction.actions.first())
+            assertEquals(
+                ActionMenu.Item.Text.Localized.Type.Translate,
+                assertIs<ActionMenu.Item.Text.Localized>(firstAction.text).type,
+            )
         }
 
     private fun createUser(

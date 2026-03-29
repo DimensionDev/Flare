@@ -116,6 +116,11 @@
     <string name="reply_to">回复 %1$s</string>
     <string name="status_detail_translate">翻译帖子</string>
     <string name="status_detail_tldr">摘要帖子</string>
+    <string name="translation_badge_translated">已翻译</string>
+    <string name="translation_badge_translating">翻译中</string>
+    <string name="translation_badge_failed">翻译失败</string>
+    <string name="translation_retry">重试翻译</string>
+    <string name="translation_show_original">显示原文</string>
     <string name="date_format_year_month_day">yyyy年MMMdd日</string>
     <string name="date_format_month_day">MMMdd日</string>
     <string name="date_format_full">yyyy年MMMdd日 HH:mm</string>

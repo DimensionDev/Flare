@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.component
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
@@ -46,12 +47,13 @@ import dev.dimension.flare.compose.ui.profile_header_button_following
 import dev.dimension.flare.compose.ui.profile_header_button_is_fans
 import dev.dimension.flare.compose.ui.profile_header_button_requested
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.component.placeholder
 import dev.dimension.flare.ui.component.platform.PlatformErrorButton
 import dev.dimension.flare.ui.component.platform.PlatformFilledTonalButton
 import dev.dimension.flare.ui.component.platform.PlatformOutlinedButton
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.component.platform.isBigScreen
+import dev.dimension.flare.ui.component.status.TranslationDisplayBadge
+import dev.dimension.flare.ui.model.TranslationDisplayState
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
@@ -270,6 +272,11 @@ private fun ProfileHeaderSuccess(
                                     .size(12.dp),
                         )
                 }
+            }
+            AnimatedVisibility(user.translationDisplayState != TranslationDisplayState.Hidden) {
+                TranslationDisplayBadge(
+                    state = user.translationDisplayState,
+                )
             }
         },
         content = {

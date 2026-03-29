@@ -11,6 +11,7 @@ import dev.dimension.flare.ui.render.toUiPlainText
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 
 @Serializable
 @Immutable
@@ -24,6 +25,8 @@ public data class UiProfile internal constructor(
     public val banner: String?,
     public val description: UiRichText?,
     internal val sourceLanguages: SerializableImmutableList<String> = persistentListOf(),
+    @Transient
+    public val translationDisplayState: TranslationDisplayState = TranslationDisplayState.Hidden,
     public val matrices: Matrices,
     public val mark: SerializableImmutableList<Mark>,
     public val bottomContent: BottomContent?,

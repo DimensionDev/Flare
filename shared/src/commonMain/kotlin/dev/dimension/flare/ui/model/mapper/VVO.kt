@@ -28,6 +28,7 @@ import dev.dimension.flare.ui.render.toUiPlainText
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import dev.dimension.flare.ui.route.toUri
 import io.ktor.http.decodeURLPart
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
 import kotlin.time.Clock
@@ -191,6 +192,7 @@ private fun Status.renderStatusV2(accountKey: MicroBlogKey): UiTimelineV2.Post {
         user = displayUser,
         quote = listOfNotNull(retweetedStatus?.renderStatusV2(accountKey)).toImmutableList(),
         content = renderVVOText(text.orEmpty(), accountKey),
+        sourceLanguages = persistentListOf("zh-CN"),
         actions =
             listOfNotNull(
                 if (canReblog) {
@@ -354,6 +356,7 @@ private fun Comment.renderStatusV2(accountKey: MicroBlogKey): UiTimelineV2.Post 
         user = user,
         quote = quote,
         content = renderVVOText(text.orEmpty(), accountKey),
+        sourceLanguages = persistentListOf("zh-CN"),
         actions =
             listOfNotNull(
                 statusMid?.let {
@@ -455,6 +458,7 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
         nameInternal = screenName.toString().toUiPlainText(),
         description = description?.toUiPlainText(),
         banner = coverImagePhone,
+        sourceLanguages = persistentListOf("zh-CN"),
         matrices =
             UiProfile.Matrices(
                 followsCount = followCount ?: 0,

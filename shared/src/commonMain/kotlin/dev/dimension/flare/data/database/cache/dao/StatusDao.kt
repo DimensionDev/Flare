@@ -33,6 +33,13 @@ internal interface StatusDao {
         accountType: DbAccountType,
     ): Flow<DbStatusWithReference?>
 
+    @Transaction
+    @Query("SELECT * FROM DbStatus WHERE statusKey = :statusKey AND accountType = :accountType")
+    suspend fun getWithReferencesSync(
+        statusKey: MicroBlogKey,
+        accountType: DbAccountType,
+    ): DbStatusWithReference?
+
     @Query("SELECT * FROM DbStatus WHERE accountType = :accountType AND statusKey IN (:statusKeys)")
     suspend fun getByKeys(
         statusKeys: List<MicroBlogKey>,

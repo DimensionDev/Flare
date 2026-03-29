@@ -7,6 +7,7 @@ import androidx.room.PrimaryKey
 import androidx.room.TypeConverter
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.common.encodeJson
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.render.UiRichText
@@ -26,6 +27,7 @@ internal data class DbTranslation(
     val targetLanguage: String,
     val sourceHash: String,
     val status: TranslationStatus,
+    val displayMode: TranslationDisplayMode = TranslationDisplayMode.Auto,
     @ColumnInfo(typeAffinity = ColumnInfo.TEXT)
     val payload: TranslationPayload? = null,
     val statusReason: String? = null,
@@ -51,6 +53,13 @@ internal enum class TranslationStatus {
 }
 
 @Serializable
+internal enum class TranslationDisplayMode {
+    Auto,
+    Original,
+    Translated,
+}
+
+@Serializable
 internal data class TranslationPayload(
     val content: UiRichText? = null,
     val contentWarning: UiRichText? = null,
@@ -72,6 +81,12 @@ internal class TranslationConverters {
     fun toStatus(value: String): TranslationStatus = TranslationStatus.valueOf(value)
 
     @TypeConverter
+    fun fromDisplayMode(value: TranslationDisplayMode): String = value.name
+
+    @TypeConverter
+    fun toDisplayMode(value: String): TranslationDisplayMode = TranslationDisplayMode.valueOf(value)
+
+    @TypeConverter
     fun fromPayload(value: TranslationPayload?): String? = value?.encodeJson(TranslationPayload.serializer())
 
     @TypeConverter
@@ -79,6 +94,11 @@ internal class TranslationConverters {
 }
 
 internal fun DbStatus.translationEntityKey(): String = id
+
+internal fun statusTranslationEntityKey(
+    accountType: AccountType,
+    statusKey: MicroBlogKey,
+): String = "${accountType}_$statusKey"
 
 internal fun DbUser.translationEntityKey(): String = profileTranslationEntityKey(userKey)
 

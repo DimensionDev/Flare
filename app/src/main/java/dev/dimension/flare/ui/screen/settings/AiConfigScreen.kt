@@ -366,6 +366,36 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
             )
             AnimatedVisibility(visible = state.aiConfig.translation) {
                 SegmentedListItem(
+                    onClick = {
+                        state.update {
+                            copy(preTranslation = !state.aiConfig.preTranslation)
+                        }
+                    },
+                    shapes = ListItemDefaults.item(),
+                    content = {
+                        Text(
+                            text = stringResource(id = R.string.settings_ai_config_enable_pre_translation),
+                        )
+                    },
+                    supportingContent = {
+                        Text(
+                            text = stringResource(id = R.string.settings_ai_config_pre_translation_description),
+                        )
+                    },
+                    trailingContent = {
+                        Switch(
+                            checked = state.aiConfig.preTranslation,
+                            onCheckedChange = {
+                                state.update {
+                                    copy(preTranslation = it)
+                                }
+                            },
+                        )
+                    },
+                )
+            }
+            AnimatedVisibility(visible = state.aiConfig.translation) {
+                SegmentedListItem(
                     checked = state.textEditDialog?.field == AiConfigEditField.TranslatePrompt,
                     onCheckedChange = { checked ->
                         if (checked) {

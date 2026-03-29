@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import dev.dimension.flare.data.database.cache.model.DbTranslation
+import dev.dimension.flare.data.database.cache.model.TranslationDisplayMode
 import dev.dimension.flare.data.database.cache.model.TranslationEntityType
 import dev.dimension.flare.data.database.cache.model.TranslationPayload
 import dev.dimension.flare.data.database.cache.model.TranslationStatus
@@ -54,6 +55,7 @@ internal interface TranslationDao {
         "UPDATE DbTranslation SET " +
             "sourceHash = :sourceHash, " +
             "status = :status, " +
+            "displayMode = :displayMode, " +
             "payload = :payload, " +
             "statusReason = :statusReason, " +
             "attemptCount = :attemptCount, " +
@@ -66,10 +68,42 @@ internal interface TranslationDao {
         targetLanguage: String,
         sourceHash: String,
         status: TranslationStatus,
+        displayMode: TranslationDisplayMode,
         payload: TranslationPayload?,
         statusReason: String?,
         attemptCount: Int,
         updatedAt: Long,
+    )
+
+    @Query(
+        "UPDATE DbTranslation SET " +
+            "displayMode = :displayMode, " +
+            "updatedAt = :updatedAt " +
+            "WHERE entityType = :entityType AND entityKey = :entityKey AND targetLanguage = :targetLanguage",
+    )
+    suspend fun updateDisplayMode(
+        entityType: TranslationEntityType,
+        entityKey: String,
+        targetLanguage: String,
+        displayMode: TranslationDisplayMode,
+        updatedAt: Long,
+    )
+
+    @Query(
+        "UPDATE DbTranslation SET " +
+            "status = :failedStatus, " +
+            "payload = NULL, " +
+            "statusReason = :statusReason, " +
+            "updatedAt = :updatedAt " +
+            "WHERE (status = :pendingStatus OR status = :translatingStatus) AND updatedAt < :staleBefore",
+    )
+    suspend fun markStaleInFlightAsFailed(
+        staleBefore: Long,
+        statusReason: String,
+        updatedAt: Long,
+        failedStatus: TranslationStatus = TranslationStatus.Failed,
+        pendingStatus: TranslationStatus = TranslationStatus.Pending,
+        translatingStatus: TranslationStatus = TranslationStatus.Translating,
     )
 
     @Query(

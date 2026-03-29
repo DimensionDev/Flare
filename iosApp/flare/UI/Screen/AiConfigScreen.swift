@@ -74,7 +74,7 @@ struct AiConfigScreen: View {
                     let selectedModel = openAIValue(presenter.state.aiConfig.type).model
                     Picker(
                         selection: Binding(
-                            get: { String(selectedModel) },
+                            get: { selectedModel },
                             set: { model in
                                 if model.hasPrefix("__meta__") {
                                     return
@@ -93,7 +93,8 @@ struct AiConfigScreen: View {
                                                 model: model
                                             ),
                                             translatePrompt: current.translatePrompt,
-                                            tldrPrompt: current.tldrPrompt
+                                            tldrPrompt: current.tldrPrompt,
+                                            preTranslation: current.preTranslation
                                         )
                                     }
                                 }
@@ -137,7 +138,8 @@ struct AiConfigScreen: View {
                                     tldr: current.tldr,
                                     type: current.type,
                                     translatePrompt: current.translatePrompt,
-                                    tldrPrompt: current.tldrPrompt
+                                    tldrPrompt: current.tldrPrompt,
+                                    preTranslation: current.preTranslation
                                 )
                             }
                         }
@@ -145,6 +147,30 @@ struct AiConfigScreen: View {
                 ) {
                     Text("ai_config_translate")
                     Text("Translate text with AI")
+                }
+
+                if presenter.state.aiConfig.translation {
+                    Toggle(
+                        isOn: Binding(
+                            get: { presenter.state.aiConfig.preTranslation },
+                            set: { newValue in
+                                presenter.state.update { current in
+                                    current.doCopy(
+                                        translation: current.translation,
+                                        tldr: current.tldr,
+                                        type: current.type,
+                                        translatePrompt: current.translatePrompt,
+                                        tldrPrompt: current.tldrPrompt,
+                                        preTranslation: newValue
+                                    )
+                                }
+                            }
+                        )
+                    ) {
+                        Text("ai_config_pre_translate")
+                        Text("ai_config_pre_translate_description")
+                    }
+                    .transition(.opacity.combined(with: .move(edge: .top)))
                 }
 
                 if presenter.state.aiConfig.translation {
@@ -175,7 +201,8 @@ struct AiConfigScreen: View {
                                     tldr: newValue,
                                     type: current.type,
                                     translatePrompt: current.translatePrompt,
-                                    tldrPrompt: current.tldrPrompt
+                                    tldrPrompt: current.tldrPrompt,
+                                    preTranslation: current.preTranslation,
                                 )
                             }
                         }
@@ -206,6 +233,7 @@ struct AiConfigScreen: View {
         }
         .animation(.easeInOut(duration: 0.2), value: isOpenAIType(presenter.state.aiConfig.type))
         .animation(.easeInOut(duration: 0.2), value: presenter.state.aiConfig.translation)
+        .animation(.easeInOut(duration: 0.2), value: presenter.state.aiConfig.preTranslation)
         .animation(.easeInOut(duration: 0.2), value: presenter.state.aiConfig.tldr)
         .sheet(item: $editingField) { field in
             NavigationStack {
@@ -373,7 +401,8 @@ struct AiConfigScreen: View {
                         tldr: current.tldr,
                         type: openAI.doCopy(serverUrl: value, apiKey: openAI.apiKey, model: openAI.model),
                         translatePrompt: current.translatePrompt,
-                        tldrPrompt: current.tldrPrompt
+                        tldrPrompt: current.tldrPrompt,
+                        preTranslation: current.preTranslation
                     )
                 }
             case .apiKey:
@@ -386,7 +415,8 @@ struct AiConfigScreen: View {
                         tldr: current.tldr,
                         type: openAI.doCopy(serverUrl: openAI.serverUrl, apiKey: value, model: openAI.model),
                         translatePrompt: current.translatePrompt,
-                        tldrPrompt: current.tldrPrompt
+                        tldrPrompt: current.tldrPrompt,
+                        preTranslation: current.preTranslation
                     )
                 }
             case .translatePrompt:
@@ -395,7 +425,8 @@ struct AiConfigScreen: View {
                     tldr: current.tldr,
                     type: current.type,
                     translatePrompt: value,
-                    tldrPrompt: current.tldrPrompt
+                    tldrPrompt: current.tldrPrompt,
+                    preTranslation: current.preTranslation
                 )
             case .tldrPrompt:
                 return current.doCopy(
@@ -403,7 +434,8 @@ struct AiConfigScreen: View {
                     tldr: current.tldr,
                     type: current.type,
                     translatePrompt: current.translatePrompt,
-                    tldrPrompt: value
+                    tldrPrompt: value,
+                    preTranslation: current.preTranslation
                 )
             }
         }

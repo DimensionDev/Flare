@@ -22,6 +22,11 @@ struct FeedView: View {
                     .font(.footnote)
                     .fixedSize(horizontal: false, vertical: true)
                 Spacer()
+                if data.translationDisplayState != .hidden {
+                    TranslateStatusComponent(data: data.translationDisplayState)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
                 if let date = data.actualCreatedAt {
                     DateTimeText(data: date)
                         .font(.footnote)

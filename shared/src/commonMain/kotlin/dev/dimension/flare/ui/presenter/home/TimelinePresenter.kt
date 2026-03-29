@@ -11,7 +11,6 @@ import androidx.paging.cachedIn
 import androidx.paging.filter
 import androidx.paging.map
 import dev.dimension.flare.common.InAppNotification
-import dev.dimension.flare.common.Locale
 import dev.dimension.flare.common.Message
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.cachePagingState
@@ -20,6 +19,7 @@ import dev.dimension.flare.common.onEmpty
 import dev.dimension.flare.common.onError
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.database.cache.model.TranslationDisplayOptions
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.NotSupportRemoteLoader
@@ -59,16 +59,16 @@ public abstract class TimelinePresenter :
     private val localFilterRepository: LocalFilterRepository by inject()
     private val inAppNotification: InAppNotification by inject()
 
-    private val filterFlow by lazy {
+    private val filterFlow: Flow<List<String>> by lazy {
         localFilterRepository.getFlow(forTimeline = true)
     }
 
-    private val translationDisplayFlow by lazy {
+    private val translationSettingsFlow: Flow<TranslationDisplayOptions> by lazy {
         appDataStore.appSettingsStore.data
             .map { settings ->
                 TranslationDisplayOptions(
-                    enabled = settings.aiConfig.translation && settings.aiConfig.preTranslation,
-                    targetLanguage = settings.language.ifBlank { Locale.language },
+                    translationEnabled = settings.aiConfig.translation,
+                    autoDisplayEnabled = settings.aiConfig.translation && settings.aiConfig.preTranslation,
                 )
             }.distinctUntilChanged()
     }
@@ -78,25 +78,35 @@ public abstract class TimelinePresenter :
     @OptIn(ExperimentalCoroutinesApi::class)
     internal fun createPager(scope: CoroutineScope): Flow<PagingData<UiTimelineV2>> =
         loader
-            .flatMapLatest {
-                when (it) {
+            .flatMapLatest { remoteLoader ->
+                when (remoteLoader) {
                     is NotSupportRemoteLoader<UiTimelineV2> -> {
                         PagingData.emptyFlow(isError = false)
                     }
 
                     is CacheableRemoteLoader<UiTimelineV2> -> {
-                        translationDisplayFlow
-                            .flatMapLatest { translationDisplayOptions ->
-                                cachePager(
-                                    loader = it,
-                                    translationDisplayOptions = translationDisplayOptions,
-                                )
-                            }.cachedIn(scope)
+                        cachePager(
+                            loader = remoteLoader,
+                        ).cachedIn(scope).flatMapLatest { pagingData ->
+                            translationSettingsFlow
+                                .map { translationDisplayOptions ->
+                                    withContext(Dispatchers.IO) {
+                                        pagingData.map { item ->
+                                            TimelinePagingMapper.toUi(
+                                                item = item,
+                                                pagingKey = remoteLoader.pagingKey,
+                                                useDbKeyInItemKey = useDbKeyInItemKey,
+                                                translationDisplayOptions = translationDisplayOptions,
+                                            )
+                                        }
+                                    }
+                                }
+                        }
                     }
 
                     else -> {
                         networkPager(
-                            loader = it,
+                            loader = remoteLoader,
                         ).cachedIn(scope)
                     }
                 }.flatMapLatest { pager ->
@@ -107,7 +117,9 @@ public abstract class TimelinePresenter :
                                     true
                                 } else {
                                     !filterList.any { filter ->
-                                        item.searchText.orEmpty().contains(filter, ignoreCase = true)
+                                        item.searchText
+                                            .orEmpty()
+                                            .contains(filter, ignoreCase = true)
                                     }
                                 }
                             }.map {
@@ -119,11 +131,7 @@ public abstract class TimelinePresenter :
                 emitAll(PagingData.emptyFlow(isError = true))
             }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    private fun cachePager(
-        loader: CacheableRemoteLoader<UiTimelineV2>,
-        translationDisplayOptions: TranslationDisplayOptions,
-    ): Flow<PagingData<UiTimelineV2>> =
+    private fun cachePager(loader: CacheableRemoteLoader<UiTimelineV2>): Flow<PagingData<DbPagingTimelineWithStatus>> =
         run {
             val allowLongText = allowLongTextTranslationDisplay(loader)
             Pager(
@@ -145,18 +153,7 @@ public abstract class TimelinePresenter :
                         pagingKey = loader.pagingKey,
                     )
                 },
-            ).flow.map { pagingData ->
-                withContext(Dispatchers.IO) {
-                    pagingData.map { item ->
-                        TimelinePagingMapper.toUi(
-                            item = item,
-                            pagingKey = loader.pagingKey,
-                            useDbKeyInItemKey = useDbKeyInItemKey,
-                            translationDisplayOptions = translationDisplayOptions,
-                        )
-                    }
-                }
-            }
+            ).flow
         }
 
     protected open suspend fun transform(data: UiTimelineV2): UiTimelineV2 = data

@@ -7,16 +7,19 @@ import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.model.DbStatus
 import dev.dimension.flare.data.database.cache.model.DbTranslation
 import dev.dimension.flare.data.database.cache.model.DbUser
+import dev.dimension.flare.data.database.cache.model.TranslationDisplayMode
 import dev.dimension.flare.data.database.cache.model.TranslationEntityType
 import dev.dimension.flare.data.database.cache.model.TranslationPayload
 import dev.dimension.flare.data.database.cache.model.TranslationStatus
 import dev.dimension.flare.data.database.cache.model.sourceHash
+import dev.dimension.flare.data.database.cache.model.statusTranslationEntityKey
 import dev.dimension.flare.data.database.cache.model.translationEntityKey
 import dev.dimension.flare.data.database.cache.model.translationPayload
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.datastore.model.AiPromptDefaults
 import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.network.ai.AiCompletionService
+import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.ui.render.RenderContent
 import dev.dimension.flare.ui.render.RenderRun
 import dev.dimension.flare.ui.render.RenderTextStyle
@@ -40,6 +43,17 @@ internal interface PreTranslationService {
     )
 
     fun enqueueProfile(user: DbUser)
+
+    fun retryStatus(
+        accountType: dev.dimension.flare.model.AccountType,
+        statusKey: dev.dimension.flare.model.MicroBlogKey,
+    )
+
+    fun setStatusDisplayMode(
+        accountType: dev.dimension.flare.model.AccountType,
+        statusKey: dev.dimension.flare.model.MicroBlogKey,
+        mode: TranslationDisplayMode,
+    )
 }
 
 internal data object NoopPreTranslationService : PreTranslationService {
@@ -49,6 +63,17 @@ internal data object NoopPreTranslationService : PreTranslationService {
     ) = Unit
 
     override fun enqueueProfile(user: DbUser) = Unit
+
+    override fun retryStatus(
+        accountType: dev.dimension.flare.model.AccountType,
+        statusKey: dev.dimension.flare.model.MicroBlogKey,
+    ) = Unit
+
+    override fun setStatusDisplayMode(
+        accountType: dev.dimension.flare.model.AccountType,
+        statusKey: dev.dimension.flare.model.MicroBlogKey,
+        mode: TranslationDisplayMode,
+    ) = Unit
 }
 
 internal class AiPreTranslationService(
@@ -59,6 +84,12 @@ internal class AiPreTranslationService(
 ) : PreTranslationService {
     private val semaphore = Semaphore(permits = 1)
 
+    init {
+        coroutineScope.launch {
+            cleanupStaleInFlightTranslations()
+        }
+    }
+
     override fun enqueueStatuses(
         statuses: List<DbStatus>,
         allowLongText: Boolean,
@@ -68,62 +99,110 @@ internal class AiPreTranslationService(
             return
         }
         coroutineScope.launch {
+            val settings = activeTranslationSettings(requirePreTranslation = true) ?: return@launch
+            val candidates =
+                prepareStatusCandidates(
+                    statuses = snapshot,
+                    targetLanguage = settings.targetLanguage,
+                    allowLongText = allowLongText,
+                )
+            if (candidates.isEmpty()) {
+                return@launch
+            }
+            markPending(candidates)
             semaphore.withPermit {
-                processStatusSnapshot(snapshot, allowLongText = allowLongText)
+                translatePreparedCandidates(
+                    settings = settings.aiConfig,
+                    targetLanguage = settings.targetLanguage,
+                    candidates = candidates,
+                )
             }
         }
     }
 
     override fun enqueueProfile(user: DbUser) {
         coroutineScope.launch {
+            val settings = activeTranslationSettings(requirePreTranslation = true) ?: return@launch
+            val candidate =
+                prepareProfileCandidate(
+                    user = user,
+                    targetLanguage = settings.targetLanguage,
+                ) ?: return@launch
+            markPending(listOf(candidate))
             semaphore.withPermit {
-                processProfile(user)
+                translatePreparedCandidates(
+                    settings = settings.aiConfig,
+                    targetLanguage = settings.targetLanguage,
+                    candidates = listOf(candidate),
+                )
             }
         }
     }
 
-    private suspend fun processStatusSnapshot(
-        statuses: List<DbStatus>,
-        allowLongText: Boolean,
+    override fun retryStatus(
+        accountType: dev.dimension.flare.model.AccountType,
+        statusKey: dev.dimension.flare.model.MicroBlogKey,
     ) {
-        val settings = preTranslationSettings() ?: return
-        val candidates =
-            prepareStatusCandidates(
-                statuses = statuses,
-                targetLanguage = settings.targetLanguage,
-                allowLongText = allowLongText,
+        coroutineScope.launch {
+            val settings = activeTranslationSettings(requirePreTranslation = false) ?: return@launch
+            setStatusDisplayMode(
+                accountType = accountType,
+                statusKey = statusKey,
+                mode = TranslationDisplayMode.Translated,
             )
-        if (candidates.isEmpty()) {
-            return
-        }
-        candidates.chunkedForBatching().forEach { batch ->
-            translateBatch(
-                settings = settings.aiConfig,
-                targetLanguage = settings.targetLanguage,
-                candidates = batch,
-            )
+            val dbAccountType = accountType as? dev.dimension.flare.model.DbAccountType ?: return@launch
+            val status =
+                database
+                    .statusDao()
+                    .getWithReferencesSync(
+                        statusKey = statusKey,
+                        accountType = dbAccountType,
+                    ) ?: return@launch
+            val candidates =
+                prepareStatusCandidates(
+                    statuses = listOfNotNull(status.status.data) + status.references.mapNotNull { it.status?.data },
+                    targetLanguage = settings.targetLanguage,
+                    allowLongText = true,
+                    preferredDisplayMode = TranslationDisplayMode.Translated,
+                )
+            if (candidates.isEmpty()) {
+                return@launch
+            }
+            markPending(candidates)
+            semaphore.withPermit {
+                translatePreparedCandidates(
+                    settings = settings.aiConfig,
+                    targetLanguage = settings.targetLanguage,
+                    candidates = candidates,
+                )
+            }
         }
     }
 
-    private suspend fun processProfile(user: DbUser) {
-        val settings = preTranslationSettings() ?: return
-        val candidate =
-            prepareProfileCandidate(
-                user = user,
-                targetLanguage = settings.targetLanguage,
-            ) ?: return
-        translateBatch(
-            settings = settings.aiConfig,
-            targetLanguage = settings.targetLanguage,
-            candidates = listOf(candidate),
-        )
+    override fun setStatusDisplayMode(
+        accountType: dev.dimension.flare.model.AccountType,
+        statusKey: dev.dimension.flare.model.MicroBlogKey,
+        mode: TranslationDisplayMode,
+    ) {
+        coroutineScope.launch {
+            val targetLanguage = currentTargetLanguage()
+            database
+                .translationDao()
+                .updateDisplayMode(
+                    entityType = TranslationEntityType.Status,
+                    entityKey = statusTranslationEntityKey(accountType, statusKey),
+                    targetLanguage = targetLanguage,
+                    displayMode = mode,
+                    updatedAt = Clock.System.now().toEpochMilliseconds(),
+                )
+        }
     }
 
-    private suspend fun preTranslationSettings(): ActivePreTranslationSettings? {
+    private suspend fun activeTranslationSettings(requirePreTranslation: Boolean): ActivePreTranslationSettings? {
         val appSettings = appDataStore.appSettingsStore.data.first()
-        val targetLanguage = appSettings.language.ifBlank { Locale.language }
+        val targetLanguage = currentTargetLanguage()
         val aiConfig = appSettings.aiConfig
-        if (!aiConfig.translation || !aiConfig.preTranslation || targetLanguage.isBlank()) {
+        if (!aiConfig.translation || (requirePreTranslation && !aiConfig.preTranslation) || targetLanguage.isBlank()) {
             return null
         }
         return ActivePreTranslationSettings(
@@ -132,10 +211,22 @@ internal class AiPreTranslationService(
         )
     }
 
+    private fun currentTargetLanguage(): String = Locale.language
+
+    private suspend fun cleanupStaleInFlightTranslations() {
+        val updatedAt = Clock.System.now().toEpochMilliseconds()
+        database.translationDao().markStaleInFlightAsFailed(
+            staleBefore = updatedAt - STALE_TRANSLATION_TIMEOUT.inWholeMilliseconds,
+            statusReason = FAILED_STALE_IN_FLIGHT_REASON,
+            updatedAt = updatedAt,
+        )
+    }
+
     private suspend fun prepareStatusCandidates(
         statuses: List<DbStatus>,
         targetLanguage: String,
         allowLongText: Boolean,
+        preferredDisplayMode: TranslationDisplayMode? = null,
     ): List<PreparedTranslationCandidate> {
         val deduplicated = statuses.distinctBy { it.translationEntityKey() }
         if (deduplicated.isEmpty()) {
@@ -161,6 +252,7 @@ internal class AiPreTranslationService(
                     targetLanguage = targetLanguage,
                     now = now,
                     allowLongText = allowLongText,
+                    preferredDisplayMode = preferredDisplayMode,
                 )?.let(::add)
             }
         }
@@ -197,6 +289,7 @@ internal class AiPreTranslationService(
         targetLanguage: String,
         now: Long,
         allowLongText: Boolean,
+        preferredDisplayMode: TranslationDisplayMode? = null,
     ): PreparedTranslationCandidate? {
         if (payload == null) {
             return null
@@ -205,6 +298,7 @@ internal class AiPreTranslationService(
             return null
         }
         val sourceHash = payload.sourceHash()
+        val displayMode = preferredDisplayMode ?: existing?.displayMode ?: TranslationDisplayMode.Auto
         if (payload.isNonTranslatableOnly()) {
             if (
                 existing == null ||
@@ -219,6 +313,7 @@ internal class AiPreTranslationService(
                         targetLanguage = targetLanguage,
                         sourceHash = sourceHash,
                         status = TranslationStatus.Skipped,
+                        displayMode = displayMode,
                         payload = null,
                         statusReason = SKIPPED_NON_TRANSLATABLE_ONLY_REASON,
                         attemptCount = existing?.attemptCount ?: 0,
@@ -243,6 +338,7 @@ internal class AiPreTranslationService(
                         targetLanguage = targetLanguage,
                         sourceHash = sourceHash,
                         status = TranslationStatus.Skipped,
+                        displayMode = displayMode,
                         payload = null,
                         statusReason = SKIPPED_SAME_LANGUAGE_REASON,
                         attemptCount = existing?.attemptCount ?: 0,
@@ -266,6 +362,7 @@ internal class AiPreTranslationService(
                         targetLanguage = targetLanguage,
                         sourceHash = sourceHash,
                         status = TranslationStatus.Skipped,
+                        displayMode = displayMode,
                         payload = null,
                         statusReason = SKIPPED_EMPTY_REASON,
                         attemptCount = existing?.attemptCount ?: 0,
@@ -286,7 +383,45 @@ internal class AiPreTranslationService(
             sourcePayload = payload,
             sourceDocument = sourceDocument,
             attemptCount = (existing?.attemptCount ?: 0) + 1,
+            displayMode = displayMode,
         )
+    }
+
+    private suspend fun markPending(candidates: List<PreparedTranslationCandidate>) {
+        if (candidates.isEmpty()) {
+            return
+        }
+        val updatedAt = Clock.System.now().toEpochMilliseconds()
+        database.translationDao().insertAll(
+            candidates.map { candidate ->
+                DbTranslation(
+                    entityType = candidate.entityType,
+                    entityKey = candidate.entityKey,
+                    targetLanguage = candidate.targetLanguage,
+                    sourceHash = candidate.sourceHash,
+                    status = TranslationStatus.Pending,
+                    displayMode = candidate.displayMode,
+                    payload = null,
+                    statusReason = null,
+                    attemptCount = candidate.attemptCount,
+                    updatedAt = updatedAt,
+                )
+            },
+        )
+    }
+
+    private suspend fun translatePreparedCandidates(
+        settings: AppSettings.AiConfig,
+        targetLanguage: String,
+        candidates: List<PreparedTranslationCandidate>,
+    ) {
+        candidates.chunkedForBatching().forEach { batch ->
+            translateBatch(
+                settings = settings,
+                targetLanguage = targetLanguage,
+                candidates = batch,
+            )
+        }
     }
 
     private suspend fun translateBatch(
@@ -306,6 +441,7 @@ internal class AiPreTranslationService(
                     targetLanguage = candidate.targetLanguage,
                     sourceHash = candidate.sourceHash,
                     status = TranslationStatus.Translating,
+                    displayMode = candidate.displayMode,
                     payload = null,
                     statusReason = null,
                     attemptCount = candidate.attemptCount,
@@ -314,7 +450,7 @@ internal class AiPreTranslationService(
             },
         )
 
-        runCatching {
+        tryRun {
             val sourceDocument =
                 PreTranslationBatchDocument(
                     targetLanguage = targetLanguage,
@@ -350,6 +486,7 @@ internal class AiPreTranslationService(
                         targetLanguage = candidate.targetLanguage,
                         sourceHash = candidate.sourceHash,
                         status = TranslationStatus.Failed,
+                        displayMode = candidate.displayMode,
                         payload = null,
                         statusReason = throwable.message,
                         attemptCount = candidate.attemptCount,
@@ -370,7 +507,7 @@ internal class AiPreTranslationService(
         val updatedAt = Clock.System.now().toEpochMilliseconds()
         database.translationDao().insertAll(
             candidates.map { candidate ->
-                runCatching {
+                tryRun {
                     val translatedItem =
                         translatedItems[candidate.entityKey]
                             ?: throw IllegalArgumentException("Missing translated item for ${candidate.entityKey}")
@@ -389,6 +526,7 @@ internal class AiPreTranslationService(
                                     targetLanguage = candidate.targetLanguage,
                                     sourceHash = candidate.sourceHash,
                                     status = TranslationStatus.Skipped,
+                                    displayMode = candidate.displayMode,
                                     payload = null,
                                     statusReason = SKIPPED_UNCHANGED_REASON,
                                     attemptCount = candidate.attemptCount,
@@ -401,6 +539,7 @@ internal class AiPreTranslationService(
                                     targetLanguage = candidate.targetLanguage,
                                     sourceHash = candidate.sourceHash,
                                     status = TranslationStatus.Completed,
+                                    displayMode = candidate.displayMode,
                                     payload = translatedPayload,
                                     statusReason = null,
                                     attemptCount = candidate.attemptCount,
@@ -416,6 +555,7 @@ internal class AiPreTranslationService(
                                 targetLanguage = candidate.targetLanguage,
                                 sourceHash = candidate.sourceHash,
                                 status = TranslationStatus.Skipped,
+                                displayMode = candidate.displayMode,
                                 payload = null,
                                 statusReason = translatedItem.reason ?: SKIPPED_AI_SAME_LANGUAGE_REASON,
                                 attemptCount = candidate.attemptCount,
@@ -429,6 +569,7 @@ internal class AiPreTranslationService(
                         targetLanguage = candidate.targetLanguage,
                         sourceHash = candidate.sourceHash,
                         status = TranslationStatus.Failed,
+                        displayMode = candidate.displayMode,
                         payload = null,
                         statusReason = throwable.message,
                         attemptCount = candidate.attemptCount,
@@ -484,7 +625,7 @@ internal class AiPreTranslationService(
             TranslationStatus.Failed -> true
             TranslationStatus.Pending,
             TranslationStatus.Translating,
-            -> now - existing.updatedAt >= STALE_TRANSLATION_TIMEOUT.inWholeMilliseconds
+            -> false
         }
     }
 }
@@ -492,7 +633,7 @@ internal class AiPreTranslationService(
 @Serializable
 internal data class PreTranslationBatchDocument(
     val version: Int = 1,
-    val targetLanguage: String,
+    val targetLanguage: String = "",
     val items: List<PreTranslationBatchItem>,
 )
 
@@ -531,10 +672,12 @@ private data class PreparedTranslationCandidate(
     val sourcePayload: TranslationPayload,
     val sourceDocument: PreTranslationBatchPayload,
     val attemptCount: Int,
+    val displayMode: TranslationDisplayMode,
 )
 
 private const val DEFAULT_PRE_TRANSLATION_MAX_ITEMS = 8
 private const val DEFAULT_PRE_TRANSLATION_MAX_INPUT_TOKENS = 6000
+private const val FAILED_STALE_IN_FLIGHT_REASON = "stale_in_flight"
 private const val SKIPPED_AI_SAME_LANGUAGE_REASON = "ai_same_language"
 private const val SKIPPED_EMPTY_REASON = "empty"
 private const val SKIPPED_NON_TRANSLATABLE_ONLY_REASON = "non_translatable_only"

@@ -59,7 +59,11 @@ internal object TimelinePagingMapper {
         item: DbPagingTimelineWithStatus,
         pagingKey: String,
         useDbKeyInItemKey: Boolean,
-        translationDisplayOptions: TranslationDisplayOptions = TranslationDisplayOptions(enabled = false, targetLanguage = ""),
+        translationDisplayOptions: TranslationDisplayOptions =
+            TranslationDisplayOptions(
+                translationEnabled = false,
+                autoDisplayEnabled = false,
+            ),
     ): UiTimelineV2 {
         val root =
             dbStatusWithUserToUiTimeline(

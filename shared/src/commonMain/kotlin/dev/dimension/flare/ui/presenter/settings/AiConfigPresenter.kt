@@ -35,6 +35,11 @@ public enum class AiTypeOption {
     OpenAI,
 }
 
+public enum class TranslateProviderOption {
+    AI,
+    Google,
+}
+
 public class AiConfigPresenter :
     PresenterBase<AiConfigPresenter.State>(),
     KoinComponent {
@@ -45,27 +50,42 @@ public class AiConfigPresenter :
     @Immutable
     public interface State {
         public val aiConfig: AppSettings.AiConfig
+        public val translateConfig: AppSettings.TranslateConfig
         public val openAIModels: UiState<ImmutableList<String>>
         public val supportedTypes: ImmutableList<AiTypeOption>
+        public val supportedTranslateProviders: ImmutableList<TranslateProviderOption>
         public val serverSuggestions: ImmutableList<String>
 
         public fun update(block: AppSettings.AiConfig.() -> AppSettings.AiConfig)
 
+        public fun updateTranslateConfig(block: AppSettings.TranslateConfig.() -> AppSettings.TranslateConfig)
+
         public fun selectType(type: AiTypeOption)
+
+        public fun selectTranslateProvider(type: TranslateProviderOption)
     }
 
     @OptIn(FlowPreview::class)
     @Composable
     override fun body(): State {
         val scope = rememberCoroutineScope()
-        val aiConfig by remember { appDataStore.appSettingsStore.data.map { it.aiConfig } }
-            .collectAsState(AppSettings.AiConfig())
+        val appSettings by remember { appDataStore.appSettingsStore.data }
+            .collectAsState(AppSettings(version = ""))
+        val aiConfig = appSettings.aiConfig
+        val translateConfig = appSettings.translateConfig
         var openAIModels by remember {
             mutableStateOf<UiState<ImmutableList<String>>>(UiState.Success(persistentListOf()))
         }
         var supportedTypes by remember {
             mutableStateOf<ImmutableList<AiTypeOption>>(persistentListOf(AiTypeOption.OpenAI))
         }
+        val supportedTranslateProviders =
+            remember {
+                persistentListOf(
+                    TranslateProviderOption.AI,
+                    TranslateProviderOption.Google,
+                )
+            }
 
         LaunchedEffect(Unit) {
             supportedTypes =
@@ -104,8 +124,10 @@ public class AiConfigPresenter :
         }
         return object : State {
             override val aiConfig: AppSettings.AiConfig = aiConfig
+            override val translateConfig: AppSettings.TranslateConfig = translateConfig
             override val openAIModels: UiState<ImmutableList<String>> = openAIModels
             override val supportedTypes: ImmutableList<AiTypeOption> = supportedTypes
+            override val supportedTranslateProviders: ImmutableList<TranslateProviderOption> = supportedTranslateProviders
             override val serverSuggestions: ImmutableList<String> = SERVER_SUGGESTIONS
 
             override fun update(block: AppSettings.AiConfig.() -> AppSettings.AiConfig) {
@@ -116,6 +138,21 @@ public class AiConfigPresenter :
                                 aiConfig =
                                     block
                                         .invoke(current.aiConfig)
+                                        .normalized(),
+                            )
+                        }
+                    }
+                }
+            }
+
+            override fun updateTranslateConfig(block: AppSettings.TranslateConfig.() -> AppSettings.TranslateConfig) {
+                scope.launch {
+                    withContext(Dispatchers.Main) {
+                        appDataStore.appSettingsStore.updateData { current ->
+                            current.copy(
+                                translateConfig =
+                                    block
+                                        .invoke(current.translateConfig)
                                         .normalized(),
                             )
                         }
@@ -142,16 +179,26 @@ public class AiConfigPresenter :
                     }
                 }
             }
+
+            override fun selectTranslateProvider(type: TranslateProviderOption) {
+                updateTranslateConfig {
+                    copy(
+                        provider =
+                            when (type) {
+                                TranslateProviderOption.AI -> AppSettings.TranslateConfig.Provider.AI
+                                TranslateProviderOption.Google -> AppSettings.TranslateConfig.Provider.Google
+                            },
+                    )
+                }
+            }
         }
     }
 }
 
-private fun AppSettings.AiConfig.normalized(): AppSettings.AiConfig =
-    if (translation) {
-        this
-    } else {
-        copy(preTranslation = false)
-    }
+private fun AppSettings.AiConfig.normalized(): AppSettings.AiConfig = this
+
+private fun AppSettings.TranslateConfig.normalized(): AppSettings.TranslateConfig =
+    this
 
 private val SERVER_SUGGESTIONS =
     persistentListOf(

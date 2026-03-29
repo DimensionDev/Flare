@@ -190,6 +190,7 @@ import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.AiConfigPresenter
 import dev.dimension.flare.ui.presenter.settings.AiTypeOption
+import dev.dimension.flare.ui.presenter.settings.TranslateProviderOption
 import dev.dimension.flare.ui.presenter.settings.StoragePresenter
 import dev.dimension.flare.ui.presenter.settings.StorageState
 import dev.dimension.flare.ui.theme.LocalComposeWindow
@@ -1206,6 +1207,11 @@ internal fun SettingsScreen(
                 val apiKeyHint = stringResource(Res.string.settings_ai_config_api_key_hint)
                 val translatePromptTitle = stringResource(Res.string.settings_ai_config_translate_prompt)
                 val tldrPromptTitle = stringResource(Res.string.settings_ai_config_tldr_prompt)
+                val selectedTranslateProvider =
+                    when (state.aiConfigState.translateConfig.provider) {
+                        AppSettings.TranslateConfig.Provider.AI -> TranslateProviderOption.AI
+                        AppSettings.TranslateConfig.Provider.Google -> TranslateProviderOption.Google
+                    }
                 val selectedType =
                     when (state.aiConfigState.aiConfig.type) {
                         is AppSettings.AiConfig.Type.OpenAI -> AiTypeOption.OpenAI
@@ -1404,26 +1410,54 @@ internal fun SettingsScreen(
                         ExpanderItemSeparator()
                     }
                 }
-                ExpanderItem(
-                    heading = {
-                        Text(stringResource(Res.string.settings_ai_config_entable_translation))
-                    },
-                    caption = {
-                        Text(stringResource(Res.string.settings_ai_config_translation_description))
-                    },
-                    trailing = {
-                        Switcher(
-                            checked = state.aiConfigState.aiConfig.translation,
-                            {
-                                state.aiConfigState.update { copy(translation = it) }
-                            },
-                            textBefore = true,
-                        )
-                    },
-                )
-                ExpanderItemSeparator()
-                AnimatedVisibility(state.aiConfigState.aiConfig.translation) {
+                AnimatedVisibility(true) {
                     Column {
+                        ExpanderItem(
+                            heading = {
+                                Text("Translation Provider")
+                            },
+                            caption = {
+                                Text("Choose which service handles translation")
+                            },
+                            trailing = {
+                                DropDownButton(
+                                    onClick = {
+                                        state.aiConfigState.setShowProviderDropdown(!state.aiConfigState.showProviderDropdown)
+                                    },
+                                ) {
+                                    Text(
+                                        when (selectedTranslateProvider) {
+                                            TranslateProviderOption.AI -> "AI"
+                                            TranslateProviderOption.Google -> "Google Translate"
+                                        },
+                                    )
+                                }
+                                MenuFlyout(
+                                    visible = state.aiConfigState.showProviderDropdown,
+                                    onDismissRequest = { state.aiConfigState.setShowProviderDropdown(false) },
+                                    placement = FlyoutPlacement.BottomAlignedEnd,
+                                    modifier = Modifier.heightIn(max = 200.dp),
+                                ) {
+                                    state.aiConfigState.supportedTranslateProviders.forEach { provider ->
+                                        MenuFlyoutItem(
+                                            text = {
+                                                Text(
+                                                    when (provider) {
+                                                        TranslateProviderOption.AI -> "AI"
+                                                        TranslateProviderOption.Google -> "Google Translate"
+                                                    },
+                                                )
+                                            },
+                                            onClick = {
+                                                state.aiConfigState.selectTranslateProvider(provider)
+                                                state.aiConfigState.setShowProviderDropdown(false)
+                                            },
+                                        )
+                                    }
+                                }
+                            },
+                        )
+                        ExpanderItemSeparator()
                         ExpanderItem(
                             heading = {
                                 Text(stringResource(Res.string.settings_ai_config_enable_pre_translation))
@@ -1433,15 +1467,19 @@ internal fun SettingsScreen(
                             },
                             trailing = {
                                 Switcher(
-                                    checked = state.aiConfigState.aiConfig.preTranslation,
+                                    checked = state.aiConfigState.translateConfig.preTranslate,
                                     {
-                                        state.aiConfigState.update { copy(preTranslation = it) }
+                                        state.aiConfigState.updateTranslateConfig { copy(preTranslate = it) }
                                     },
                                     textBefore = true,
                                 )
                             },
                         )
                         ExpanderItemSeparator()
+                    }
+                }
+                AnimatedVisibility(selectedTranslateProvider == TranslateProviderOption.AI) {
+                    Column {
                         ExpanderItem(
                             heading = { Text(stringResource(Res.string.settings_ai_config_translate_prompt)) },
                             caption = {
@@ -1872,15 +1910,19 @@ private fun aiConfigPresenter() =
         val state = remember { AiConfigPresenter() }.invoke()
         var showTypeDropdown by remember { mutableStateOf(false) }
         var showModelDropdown by remember { mutableStateOf(false) }
+        var showProviderDropdown by remember { mutableStateOf(false) }
         var textEditDialog by remember { mutableStateOf<TextEditDialogState?>(null) }
         object {
             val aiConfig = state.aiConfig
+            val translateConfig = state.translateConfig
             val openAIModels = state.openAIModels
             val supportedTypes = state.supportedTypes
+            val supportedTranslateProviders = state.supportedTranslateProviders
             val serverSuggestions = state.serverSuggestions
             val expanded = expanded
             val showTypeDropdown = showTypeDropdown
             val showModelDropdown = showModelDropdown
+            val showProviderDropdown = showProviderDropdown
             val textEditDialog = textEditDialog
 
             fun setExpanded(value: Boolean) {
@@ -1891,8 +1933,16 @@ private fun aiConfigPresenter() =
                 state.update(block)
             }
 
+            fun updateTranslateConfig(block: AppSettings.TranslateConfig.() -> AppSettings.TranslateConfig) {
+                state.updateTranslateConfig(block)
+            }
+
             fun selectType(type: AiTypeOption) {
                 state.selectType(type)
+            }
+
+            fun selectTranslateProvider(type: TranslateProviderOption) {
+                state.selectTranslateProvider(type)
             }
 
             fun setShowTypeDropdown(value: Boolean) {
@@ -1901,6 +1951,10 @@ private fun aiConfigPresenter() =
 
             fun setShowModelDropdown(value: Boolean) {
                 showModelDropdown = value
+            }
+
+            fun setShowProviderDropdown(value: Boolean) {
+                showProviderDropdown = value
             }
 
             fun setTextEditDialog(value: TextEditDialogState?) {

@@ -13,8 +13,8 @@ import dev.dimension.flare.data.database.cache.model.sourceHash
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.datastore.model.AiPromptDefaults
 import dev.dimension.flare.data.network.ai.AiCompletionService
-import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.data.repository.tryRun
+import dev.dimension.flare.data.translation.translateDocumentJson
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiState
@@ -24,14 +24,7 @@ import dev.dimension.flare.ui.render.applyTranslationJson
 import dev.dimension.flare.ui.render.toTranslatableText
 import dev.dimension.flare.ui.render.toTranslationJson
 import dev.dimension.flare.ui.render.toUiPlainText
-import io.ktor.client.call.body
-import io.ktor.client.request.get
-import io.ktor.client.request.parameter
-import io.ktor.client.request.url
 import kotlinx.coroutines.flow.first
-import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.jsonArray
-import kotlinx.serialization.json.jsonPrimitive
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import kotlin.time.Clock
@@ -53,66 +46,36 @@ public class TranslatePresenter(
         return produceState<UiState<UiRichText>>(initialValue = UiState.Loading()) {
             value =
                 tryRun {
-                    val aiConfig =
+                    val settings =
                         appDataStore.appSettingsStore.data
                             .first()
-                            .aiConfig
-                    if (!aiConfig.translation) {
-                        return@tryRun toUiRichText(legacyGoogleTranslate())
-                    }
                     cachedTranslation()?.let {
                         return@tryRun it
                     }
                     val promptTemplate =
-                        aiConfig.translatePrompt.ifBlank {
+                        settings.aiConfig.translatePrompt.ifBlank {
                             AiPromptDefaults.TRANSLATE_PROMPT
                         }
                     val prompt = buildTranslatePrompt(promptTemplate, targetLanguage)
-                    val aiTranslation =
-                        aiCompletionService.translate(
-                            config = aiConfig,
-                            source = sourceText,
+                    val translatedContent =
+                        settings.translateDocumentJson(
+                            aiCompletionService = aiCompletionService,
+                            sourceText = sourceText,
+                            sourceJson = sourceJson,
                             targetLanguage = targetLanguage,
                             prompt = prompt,
                         )
-                    if (aiTranslation != null) {
-                        val translated = toUiRichText(aiTranslation)
+                    if (translatedContent != null) {
+                        val translated = toUiRichText(translatedContent)
                         cacheTranslation(translated)
                         return@tryRun translated
                     }
-                    toUiRichText(legacyGoogleTranslate())
+                    error("Translation returned empty response")
                 }.fold(
                     onSuccess = { UiState.Success(it) },
                     onFailure = { UiState.Error(it) },
                 )
         }.value
-    }
-
-    private suspend fun legacyGoogleTranslate(): String {
-        val baseUrl = "https://translate.google.com/translate_a/single"
-        val response =
-            ktorClient()
-                .get {
-                    url(baseUrl)
-                    parameter("client", "gtx")
-                    parameter("sl", "auto")
-                    parameter("tl", targetLanguage)
-                    parameter("dt", "t")
-                    parameter("q", sourceText)
-                    parameter("ie", "UTF-8")
-                    parameter("oe", "UTF-8")
-                }.body<JsonArray>()
-        return buildString {
-            response.firstOrNull()?.jsonArray?.forEach {
-                it.jsonArray.firstOrNull()?.let {
-                    val content = it.jsonPrimitive.content
-                    if (content.isNotEmpty()) {
-                        append(content)
-                        append("\n")
-                    }
-                }
-            }
-        }
     }
 
     private fun buildTranslatePrompt(

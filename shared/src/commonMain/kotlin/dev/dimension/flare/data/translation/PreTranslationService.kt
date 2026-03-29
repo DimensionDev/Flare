@@ -114,7 +114,7 @@ internal class AiPreTranslationService(
             markPending(candidates)
             semaphore.withPermit {
                 translatePreparedCandidates(
-                    settings = settings.aiConfig,
+                    settings = settings.appSettings,
                     targetLanguage = settings.targetLanguage,
                     candidates = candidates,
                 )
@@ -133,7 +133,7 @@ internal class AiPreTranslationService(
             markPending(listOf(candidate))
             semaphore.withPermit {
                 translatePreparedCandidates(
-                    settings = settings.aiConfig,
+                    settings = settings.appSettings,
                     targetLanguage = settings.targetLanguage,
                     candidates = listOf(candidate),
                 )
@@ -173,7 +173,7 @@ internal class AiPreTranslationService(
             markPending(candidates)
             semaphore.withPermit {
                 translatePreparedCandidates(
-                    settings = settings.aiConfig,
+                    settings = settings.appSettings,
                     targetLanguage = settings.targetLanguage,
                     candidates = candidates,
                 )
@@ -203,13 +203,19 @@ internal class AiPreTranslationService(
     private suspend fun activeTranslationSettings(requirePreTranslation: Boolean): ActivePreTranslationSettings? {
         val appSettings = appDataStore.appSettingsStore.data.first()
         val targetLanguage = currentTargetLanguage()
-        val aiConfig = appSettings.aiConfig
-        if (!aiConfig.translation || (requirePreTranslation && !aiConfig.preTranslation) || targetLanguage.isBlank()) {
+        val translateConfig = appSettings.translateConfig
+        val canTranslate =
+            if (requirePreTranslation) {
+                translateConfig.preTranslate
+            } else {
+                true
+            }
+        if (!canTranslate || targetLanguage.isBlank()) {
             return null
         }
         return ActivePreTranslationSettings(
             targetLanguage = targetLanguage,
-            aiConfig = aiConfig,
+            appSettings = appSettings,
         )
     }
 
@@ -413,7 +419,7 @@ internal class AiPreTranslationService(
     }
 
     private suspend fun translatePreparedCandidates(
-        settings: AppSettings.AiConfig,
+        settings: AppSettings,
         targetLanguage: String,
         candidates: List<PreparedTranslationCandidate>,
     ) {
@@ -427,7 +433,7 @@ internal class AiPreTranslationService(
     }
 
     private suspend fun translateBatch(
-        settings: AppSettings.AiConfig,
+        settings: AppSettings,
         targetLanguage: String,
         candidates: List<PreparedTranslationCandidate>,
     ) {
@@ -478,7 +484,7 @@ internal class AiPreTranslationService(
     }
 
     private suspend fun runBatchTranslationWithRetry(
-        settings: AppSettings.AiConfig,
+        settings: AppSettings,
         targetLanguage: String,
         candidates: List<PreparedTranslationCandidate>,
     ): Result<Unit> {
@@ -498,11 +504,12 @@ internal class AiPreTranslationService(
                                 },
                         )
                     val sourceJson = sourceDocument.encodeJson(PreTranslationBatchDocument.serializer())
-                    val prompt = buildTranslatePrompt(settings.translatePrompt, targetLanguage, sourceJson)
+                    val prompt = buildTranslatePrompt(settings.aiConfig.translatePrompt, targetLanguage, sourceJson)
                     val translatedJson =
-                        aiCompletionService.translate(
-                            config = settings,
-                            source = sourceJson,
+                        settings.translateBatchDocumentJson(
+                            aiCompletionService = aiCompletionService,
+                            sourceJson = sourceJson,
+                            sourceDocument = sourceDocument,
                             targetLanguage = targetLanguage,
                             prompt = prompt,
                         ) ?: error("Pre-translation returned empty response")
@@ -690,7 +697,7 @@ internal data class PreTranslationBatchPayload(
 
 private data class ActivePreTranslationSettings(
     val targetLanguage: String,
-    val aiConfig: AppSettings.AiConfig,
+    val appSettings: AppSettings,
 )
 
 private data class PreparedTranslationCandidate(

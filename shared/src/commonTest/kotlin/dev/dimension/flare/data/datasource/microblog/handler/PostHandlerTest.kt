@@ -391,10 +391,9 @@ class PostHandlerTest : RobolectricTest() {
             appDataStore.appSettingsStore.updateData {
                 it.copy(
                     language = "zh-CN",
+                    translateConfig = AppSettings.TranslateConfig(preTranslate = true),
                     aiConfig =
                         AppSettings.AiConfig(
-                            translation = true,
-                            preTranslation = true,
                             type = AppSettings.AiConfig.Type.OnDevice,
                         ),
                 )

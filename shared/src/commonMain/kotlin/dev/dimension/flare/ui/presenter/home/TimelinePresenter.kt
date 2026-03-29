@@ -67,8 +67,8 @@ public abstract class TimelinePresenter :
         appDataStore.appSettingsStore.data
             .map { settings ->
                 TranslationDisplayOptions(
-                    translationEnabled = settings.aiConfig.translation,
-                    autoDisplayEnabled = settings.aiConfig.translation && settings.aiConfig.preTranslation,
+                    translationEnabled = true,
+                    autoDisplayEnabled = settings.translateConfig.preTranslate,
                 )
             }.distinctUntilChanged()
     }

@@ -64,7 +64,7 @@ fun FlareApp(content: @Composable () -> Unit) {
         LocalUriHandler provides uriHandler,
         LocalAppearanceSettings provides appearanceSettings,
         LocalComponentAppearance provides
-            remember(appearanceSettings, appSettings.aiConfig) {
+            remember(appearanceSettings, appSettings.translateConfig, appSettings.aiConfig.tldr) {
                 ComponentAppearance(
                     dynamicTheme = appearanceSettings.dynamicTheme,
                     avatarShape =
@@ -84,11 +84,11 @@ fun FlareApp(content: @Composable () -> Unit) {
                         },
                     expandMediaSize = appearanceSettings.expandMediaSize,
                     compatLinkPreview = appearanceSettings.compatLinkPreview,
-                    aiConfig =
-                        ComponentAppearance.AiConfig(
-                            translation = appSettings.aiConfig.translation,
-                            tldr = appSettings.aiConfig.tldr,
-                        ),
+                        aiConfig =
+                            ComponentAppearance.AiConfig(
+                            translation = true,
+                                tldr = appSettings.aiConfig.tldr,
+                            ),
                     fullWidthPost = appearanceSettings.fullWidthPost,
                     postActionStyle = appearanceSettings.postActionStyle,
                     absoluteTimestamp = appearanceSettings.absoluteTimestamp,

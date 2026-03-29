@@ -128,52 +128,41 @@ struct AiConfigScreen: View {
             }
 
             Section {
+                Picker(
+                    selection: Binding(
+                        get: { translateProviderOption(provider: presenter.state.translateConfig.provider) },
+                        set: { provider in
+                            presenter.state.selectTranslateProvider(type: provider)
+                        }
+                    )
+                ) {
+                    ForEach(presenter.state.supportedTranslateProviders, id: \.name) { provider in
+                        Text(translateProviderOptionTitle(option: provider)).tag(provider)
+                    }
+                } label: {
+                    Text("Translation Provider")
+                    Text("Choose which service handles translation")
+                }
+
                 Toggle(
                     isOn: Binding(
-                        get: { presenter.state.aiConfig.translation },
+                        get: { presenter.state.translateConfig.preTranslate },
                         set: { newValue in
-                            presenter.state.update { current in
+                            presenter.state.updateTranslateConfig { current in
                                 current.doCopy(
-                                    translation: newValue,
-                                    tldr: current.tldr,
-                                    type: current.type,
-                                    translatePrompt: current.translatePrompt,
-                                    tldrPrompt: current.tldrPrompt,
-                                    preTranslation: current.preTranslation
+                                    preTranslate: newValue,
+                                    provider: current.provider
                                 )
                             }
                         }
                     )
                 ) {
-                    Text("ai_config_translate")
-                    Text("Translate text with AI")
+                    Text("ai_config_pre_translate")
+                    Text("ai_config_pre_translate_description")
                 }
+                .transition(.opacity.combined(with: .move(edge: .top)))
 
-                if presenter.state.aiConfig.translation {
-                    Toggle(
-                        isOn: Binding(
-                            get: { presenter.state.aiConfig.preTranslation },
-                            set: { newValue in
-                                presenter.state.update { current in
-                                    current.doCopy(
-                                        translation: current.translation,
-                                        tldr: current.tldr,
-                                        type: current.type,
-                                        translatePrompt: current.translatePrompt,
-                                        tldrPrompt: current.tldrPrompt,
-                                        preTranslation: newValue
-                                    )
-                                }
-                            }
-                        )
-                    ) {
-                        Text("ai_config_pre_translate")
-                        Text("ai_config_pre_translate_description")
-                    }
-                    .transition(.opacity.combined(with: .move(edge: .top)))
-                }
-
-                if presenter.state.aiConfig.translation {
+                if translateProviderOption(provider: presenter.state.translateConfig.provider) == .ai {
                     Button {
                         beginEditing(
                             field: .translatePrompt,
@@ -232,8 +221,7 @@ struct AiConfigScreen: View {
             }
         }
         .animation(.easeInOut(duration: 0.2), value: isOpenAIType(presenter.state.aiConfig.type))
-        .animation(.easeInOut(duration: 0.2), value: presenter.state.aiConfig.translation)
-        .animation(.easeInOut(duration: 0.2), value: presenter.state.aiConfig.preTranslation)
+        .animation(.easeInOut(duration: 0.2), value: presenter.state.translateConfig.preTranslate)
         .animation(.easeInOut(duration: 0.2), value: presenter.state.aiConfig.tldr)
         .sheet(item: $editingField) { field in
             NavigationStack {
@@ -323,12 +311,32 @@ struct AiConfigScreen: View {
         }
     }
 
+    private func translateProviderOption(provider: any AppSettingsTranslateConfigProvider) -> TranslateProviderOption {
+        switch onEnum(of: provider) {
+        case .ai:
+            return .ai
+        case .google:
+            return .google
+        }
+    }
+
     private func aiTypeOptionTitle(option: AiTypeOption) -> LocalizedStringResource {
         switch option {
         case .onDevice:
             return "On Device"
         case .openAi:
             return "OpenAI Compatible"
+        }
+    }
+
+    private func translateProviderOptionTitle(option: TranslateProviderOption) -> LocalizedStringResource {
+        switch option {
+        case .ai:
+            return "AI"
+        case .google:
+            return "Google Translate"
+        default:
+            return "AI"
         }
     }
 

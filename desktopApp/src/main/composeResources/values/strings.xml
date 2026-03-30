@@ -195,6 +195,10 @@
     <string name="settings_ai_config_pre_translation_description">Translate and cache newly loaded timeline and profile content in the background. This can consume a large amount of tokens.</string>
     <string name="settings_ai_config_enable_tldr">Enable AI Summarization</string>
     <string name="settings_ai_config_tldr_description">Enable AI summarization for long posts, only available in post that longer than 500 characters</string>
+    <string name="settings_ai_config_translate_provider">Translation Provider</string>
+    <string name="settings_ai_config_translate_provider_description">Choose which service handles translation</string>
+    <string name="settings_ai_config_translate_provider_ai">AI</string>
+    <string name="settings_ai_config_translate_provider_google">Google Translate</string>
 
 
     <string name="settings_appearance_generic">Generic</string>

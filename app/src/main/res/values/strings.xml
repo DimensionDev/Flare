@@ -102,6 +102,10 @@
     <string name="settings_ai_config_pre_translation_description">Translate and cache newly loaded timeline and profile content in the background. This can consume a large amount of tokens.</string>
     <string name="settings_ai_config_translate_prompt">Translation Prompt</string>
     <string name="settings_ai_config_tldr_prompt">Summary Prompt</string>
+    <string name="settings_ai_config_translate_provider">Translation Provider</string>
+    <string name="settings_ai_config_translate_provider_description">Choose which service handles translation</string>
+    <string name="settings_ai_config_translate_provider_ai">AI</string>
+    <string name="settings_ai_config_translate_provider_google">Google Translate</string>
     <string name="settings_language_title">Language</string>
     <string name="settings_language_description">Change the language of the app</string>
     <string name="settings_rss_management_title">RSS Management</string>

@@ -175,6 +175,10 @@
     <string name="settings_ai_config_pre_translation_description">在后台翻译并缓存新加载的时间线和个人资料内容。这会消耗大量 token。</string>
     <string name="settings_ai_config_enable_tldr">启用 AI 摘要</string>
     <string name="settings_ai_config_tldr_description">对长篇文章启用 AI 摘要，仅在超过 500 个字符的帖子中可用</string>
+    <string name="settings_ai_config_translate_provider">翻译服务提供商</string>
+    <string name="settings_ai_config_translate_provider_description">选择处理翻译的服务提供商</string>
+    <string name="settings_ai_config_translate_provider_ai">AI</string>
+    <string name="settings_ai_config_translate_provider_google">谷歌翻译</string>
     <string name="settings_appearance_generic">通用</string>
     <string name="settings_appearance_show_compose_in_home_timeline">在首页时间轴顶部显示撰写框</string>
     <string name="settings_appearance_show_compose_in_home_timeline_description">在首页时间轴顶部显示撰写框</string>

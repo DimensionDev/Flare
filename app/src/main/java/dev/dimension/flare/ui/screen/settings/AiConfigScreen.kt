@@ -35,7 +35,6 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.R
-import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FlareDropdownMenu
 import dev.dimension.flare.ui.component.FlareLargeFlexibleTopAppBar
@@ -92,23 +91,13 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
             val apiKeyHint = stringResource(id = R.string.settings_ai_config_api_key_hint)
             val translatePromptTitle = stringResource(id = R.string.settings_ai_config_translate_prompt)
             val tldrPromptTitle = stringResource(id = R.string.settings_ai_config_tldr_prompt)
-            val selectedTranslateProvider =
-                when (state.translateConfig.provider) {
-                    AppSettings.TranslateConfig.Provider.AI -> TranslateProviderOption.AI
-                    AppSettings.TranslateConfig.Provider.Google -> TranslateProviderOption.Google
-                }
-            val selectedType =
-                when (state.aiConfig.type) {
-                    is AppSettings.AiConfig.Type.OpenAI -> AiTypeOption.OpenAI
-                    AppSettings.AiConfig.Type.OnDevice -> AiTypeOption.OnDevice
-                }
             SegmentedListItem(
                 checked = state.showTypeDropdown,
                 onCheckedChange = {
                     state.setShowTypeDropdown(it)
                 },
                 shapes =
-                    if (selectedType == AiTypeOption.OpenAI) {
+                    if (state.aiType == AiTypeOption.OpenAI) {
                         ListItemDefaults.first()
                     } else {
                         ListItemDefaults.single()
@@ -135,7 +124,7 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
                                 text =
                                     stringResource(
                                         id =
-                                            when (selectedType) {
+                                            when (state.aiType) {
                                                 AiTypeOption.OnDevice -> R.string.settings_ai_config_type_on_device
                                                 AiTypeOption.OpenAI -> R.string.settings_ai_config_type_openai
                                             },
@@ -173,9 +162,7 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
                     }
                 },
             )
-            val openAIType = state.aiConfig.type as? AppSettings.AiConfig.Type.OpenAI
-            val openAITypeForDisplay = openAIType ?: AppSettings.AiConfig.Type.OpenAI("", "", "")
-            AnimatedVisibility(visible = openAIType != null) {
+            AnimatedVisibility(visible = state.aiType == AiTypeOption.OpenAI) {
                 SegmentedListItem(
                     checked = state.textEditDialog?.field == AiConfigEditField.ServerUrl,
                     onCheckedChange = { checked ->
@@ -185,18 +172,11 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
                                     field = AiConfigEditField.ServerUrl,
                                     title = serverTitle,
                                     placeholder = serverHint,
-                                    value = openAITypeForDisplay.serverUrl,
+                                    value = state.openAIServerUrl,
                                     suggestions = state.serverSuggestions,
                                     hint = serverRequirementHint,
                                     onConfirm = { newValue ->
-                                        state.update {
-                                            val currentType = type as? AppSettings.AiConfig.Type.OpenAI
-                                            copy(
-                                                type =
-                                                    (currentType ?: AppSettings.AiConfig.Type.OpenAI("", "", ""))
-                                                        .copy(serverUrl = newValue),
-                                            )
-                                        }
+                                        state.setOpenAIServerUrl(newValue)
                                     },
                                 ),
                             )
@@ -211,7 +191,7 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
                     supportingContent = {
                         Text(
                             text =
-                                openAITypeForDisplay.serverUrl.ifBlank {
+                                state.openAIServerUrl.ifBlank {
                                     stringResource(id = R.string.settings_ai_config_value_empty_placeholder)
                                 },
                             style = MaterialTheme.typography.bodySmall,
@@ -219,7 +199,7 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
                     },
                 )
             }
-            AnimatedVisibility(visible = openAIType != null) {
+            AnimatedVisibility(visible = state.aiType == AiTypeOption.OpenAI) {
                 SegmentedListItem(
                     checked = state.textEditDialog?.field == AiConfigEditField.ApiKey,
                     onCheckedChange = { checked ->
@@ -229,16 +209,9 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
                                     field = AiConfigEditField.ApiKey,
                                     title = apiKeyTitle,
                                     placeholder = apiKeyHint,
-                                    value = openAITypeForDisplay.apiKey,
+                                    value = state.openAIApiKey,
                                     onConfirm = { newValue ->
-                                        state.update {
-                                            val currentType = type as? AppSettings.AiConfig.Type.OpenAI
-                                            copy(
-                                                type =
-                                                    (currentType ?: AppSettings.AiConfig.Type.OpenAI("", "", ""))
-                                                        .copy(apiKey = newValue),
-                                            )
-                                        }
+                                        state.setOpenAIApiKey(newValue)
                                     },
                                 ),
                             )
@@ -253,7 +226,7 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
                     supportingContent = {
                         Text(
                             text =
-                                openAITypeForDisplay.apiKey.ifBlank {
+                                state.openAIApiKey.ifBlank {
                                     stringResource(id = R.string.settings_ai_config_value_empty_placeholder)
                                 },
                             style = MaterialTheme.typography.bodySmall,
@@ -261,7 +234,7 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
                     },
                 )
             }
-            AnimatedVisibility(visible = openAIType != null) {
+            AnimatedVisibility(visible = state.aiType == AiTypeOption.OpenAI) {
                 SegmentedListItem(
                     checked = state.showModelDropdown,
                     onCheckedChange = { checked ->
@@ -286,7 +259,7 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
                             ) {
                                 Text(
                                     text =
-                                        openAITypeForDisplay.model.ifBlank {
+                                        state.openAIModel.ifBlank {
                                             stringResource(id = R.string.settings_ai_config_model_select)
                                         },
                                 )
@@ -323,14 +296,7 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
                                                     text = { Text(model) },
                                                     onClick = {
                                                         state.setShowModelDropdown(false)
-                                                        state.update {
-                                                            val currentType = type as? AppSettings.AiConfig.Type.OpenAI
-                                                            copy(
-                                                                type =
-                                                                    (currentType ?: AppSettings.AiConfig.Type.OpenAI("", "", ""))
-                                                                        .copy(model = model),
-                                                            )
-                                                        }
+                                                        state.setOpenAIModel(model)
                                                     },
                                                 )
                                             }
@@ -350,11 +316,11 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
                     },
                     shapes = ListItemDefaults.first(),
                     content = {
-                        Text(text = "Translation Provider")
+                        Text(text = stringResource(id = R.string.settings_ai_config_translate_provider))
                     },
                     supportingContent = {
                         Text(
-                            text = "Choose which service handles translation",
+                            text = stringResource(id = R.string.settings_ai_config_translate_provider_description),
                             style = MaterialTheme.typography.bodySmall,
                         )
                     },
@@ -367,9 +333,15 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
                             ) {
                                 Text(
                                     text =
-                                        when (selectedTranslateProvider) {
-                                            TranslateProviderOption.AI -> "AI"
-                                            TranslateProviderOption.Google -> "Google Translate"
+                                        when (state.translateProvider) {
+                                            TranslateProviderOption.AI ->
+                                                stringResource(
+                                                    id = R.string.settings_ai_config_translate_provider_ai,
+                                                )
+                                            TranslateProviderOption.Google ->
+                                                stringResource(
+                                                    id = R.string.settings_ai_config_translate_provider_google,
+                                                )
                                         },
                                 )
                             }
@@ -385,8 +357,14 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
                                             Text(
                                                 text =
                                                     when (provider) {
-                                                        TranslateProviderOption.AI -> "AI"
-                                                        TranslateProviderOption.Google -> "Google Translate"
+                                                        TranslateProviderOption.AI ->
+                                                            stringResource(
+                                                                id = R.string.settings_ai_config_translate_provider_ai,
+                                                            )
+                                                        TranslateProviderOption.Google ->
+                                                            stringResource(
+                                                                id = R.string.settings_ai_config_translate_provider_google,
+                                                            )
                                                     },
                                             )
                                         },
@@ -404,9 +382,7 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
             AnimatedVisibility(visible = true) {
                 SegmentedListItem(
                     onClick = {
-                        state.updateTranslateConfig {
-                            copy(preTranslate = !state.translateConfig.preTranslate)
-                        }
+                        state.setPreTranslate(!state.preTranslate)
                     },
                     shapes = ListItemDefaults.item(),
                     content = {
@@ -421,11 +397,9 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
                     },
                     trailingContent = {
                         Switch(
-                            checked = state.translateConfig.preTranslate,
+                            checked = state.preTranslate,
                             onCheckedChange = {
-                                state.updateTranslateConfig {
-                                    copy(preTranslate = it)
-                                }
+                                state.setPreTranslate(it)
                             },
                         )
                     },
@@ -433,7 +407,7 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
             }
             AnimatedVisibility(
                 visible =
-                    selectedTranslateProvider == TranslateProviderOption.AI,
+                    state.translateProvider == TranslateProviderOption.AI,
             ) {
                 SegmentedListItem(
                     checked = state.textEditDialog?.field == AiConfigEditField.TranslatePrompt,
@@ -444,11 +418,9 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
                                     field = AiConfigEditField.TranslatePrompt,
                                     title = translatePromptTitle,
                                     placeholder = "",
-                                    value = state.aiConfig.translatePrompt,
+                                    value = state.translatePrompt,
                                     onConfirm = { newValue ->
-                                        state.update {
-                                            copy(translatePrompt = newValue)
-                                        }
+                                        state.setTranslatePrompt(newValue)
                                     },
                                 ),
                             )
@@ -463,7 +435,7 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
                     supportingContent = {
                         Text(
                             text =
-                                state.aiConfig.translatePrompt.ifBlank {
+                                state.translatePrompt.ifBlank {
                                     stringResource(id = R.string.settings_ai_config_value_empty_placeholder)
                                 },
                             style = MaterialTheme.typography.bodySmall,
@@ -473,12 +445,10 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
             }
             SegmentedListItem(
                 onClick = {
-                    state.update {
-                        copy(tldr = !state.aiConfig.tldr)
-                    }
+                    state.setAITldr(!state.aiTldr)
                 },
                 shapes =
-                    if (state.aiConfig.tldr) {
+                    if (state.aiTldr) {
                         ListItemDefaults.item()
                     } else {
                         ListItemDefaults.last()
@@ -495,16 +465,14 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
                 },
                 trailingContent = {
                     Switch(
-                        checked = state.aiConfig.tldr,
+                        checked = state.aiTldr,
                         onCheckedChange = {
-                            state.update {
-                                copy(tldr = it)
-                            }
+                            state.setAITldr(it)
                         },
                     )
                 },
             )
-            AnimatedVisibility(visible = state.aiConfig.tldr) {
+            AnimatedVisibility(visible = state.aiTldr) {
                 SegmentedListItem(
                     checked = state.textEditDialog?.field == AiConfigEditField.TldrPrompt,
                     onCheckedChange = { checked ->
@@ -514,11 +482,9 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
                                     field = AiConfigEditField.TldrPrompt,
                                     title = tldrPromptTitle,
                                     placeholder = "",
-                                    value = state.aiConfig.tldrPrompt,
+                                    value = state.tldrPrompt,
                                     onConfirm = { newValue ->
-                                        state.update {
-                                            copy(tldrPrompt = newValue)
-                                        }
+                                        state.setTldrPrompt(newValue)
                                     },
                                 ),
                             )
@@ -533,7 +499,7 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
                     supportingContent = {
                         Text(
                             text =
-                                state.aiConfig.tldrPrompt.ifBlank {
+                                state.tldrPrompt.ifBlank {
                                     stringResource(id = R.string.settings_ai_config_value_empty_placeholder)
                                 },
                             style = MaterialTheme.typography.bodySmall,
@@ -570,33 +536,11 @@ private fun presenter() =
         var showProviderDropdown by remember { mutableStateOf(false) }
         var textEditDialog by remember { mutableStateOf<TextEditDialogState?>(null) }
 
-        object {
-            val aiConfig = businessState.aiConfig
-            val translateConfig = businessState.translateConfig
-            val openAIModels = businessState.openAIModels
-            val supportedTypes = businessState.supportedTypes
-            val supportedTranslateProviders = businessState.supportedTranslateProviders
-            val serverSuggestions = businessState.serverSuggestions
+        object : AiConfigPresenter.State by businessState {
             val showTypeDropdown = showTypeDropdown
             val showModelDropdown = showModelDropdown
             val showProviderDropdown = showProviderDropdown
             val textEditDialog = textEditDialog
-
-            fun update(block: AppSettings.AiConfig.() -> AppSettings.AiConfig) {
-                businessState.update(block)
-            }
-
-            fun updateTranslateConfig(block: AppSettings.TranslateConfig.() -> AppSettings.TranslateConfig) {
-                businessState.updateTranslateConfig(block)
-            }
-
-            fun selectType(type: AiTypeOption) {
-                businessState.selectType(type)
-            }
-
-            fun selectTranslateProvider(type: TranslateProviderOption) {
-                businessState.selectTranslateProvider(type)
-            }
 
             fun setShowTypeDropdown(value: Boolean) {
                 showTypeDropdown = value

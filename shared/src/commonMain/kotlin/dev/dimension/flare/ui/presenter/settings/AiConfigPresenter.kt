@@ -49,20 +49,41 @@ public class AiConfigPresenter :
 
     @Immutable
     public interface State {
-        public val aiConfig: AppSettings.AiConfig
-        public val translateConfig: AppSettings.TranslateConfig
+        public val aiType: AiTypeOption
+        public val openAIServerUrl: String
+        public val openAIApiKey: String
+        public val openAIModel: String
+        public val translateProvider: TranslateProviderOption
         public val openAIModels: UiState<ImmutableList<String>>
         public val supportedTypes: ImmutableList<AiTypeOption>
         public val supportedTranslateProviders: ImmutableList<TranslateProviderOption>
         public val serverSuggestions: ImmutableList<String>
-
-        public fun update(block: AppSettings.AiConfig.() -> AppSettings.AiConfig)
-
-        public fun updateTranslateConfig(block: AppSettings.TranslateConfig.() -> AppSettings.TranslateConfig)
+        public val aiTldr: Boolean
+        public val translatePrompt: String
+        public val tldrPrompt: String
+        public val preTranslate: Boolean
 
         public fun selectType(type: AiTypeOption)
 
         public fun selectTranslateProvider(type: TranslateProviderOption)
+
+        public fun setAIType(value: AiTypeOption)
+
+        public fun setTranslateProvider(value: TranslateProviderOption)
+
+        public fun setOpenAIServerUrl(value: String)
+
+        public fun setOpenAIApiKey(value: String)
+
+        public fun setOpenAIModel(value: String)
+
+        public fun setAITldr(value: Boolean)
+
+        public fun setTranslatePrompt(value: String)
+
+        public fun setTldrPrompt(value: String)
+
+        public fun setPreTranslate(value: Boolean)
     }
 
     @OptIn(FlowPreview::class)
@@ -71,8 +92,6 @@ public class AiConfigPresenter :
         val scope = rememberCoroutineScope()
         val appSettings by remember { appDataStore.appSettingsStore.data }
             .collectAsState(AppSettings(version = ""))
-        val aiConfig = appSettings.aiConfig
-        val translateConfig = appSettings.translateConfig
         var openAIModels by remember {
             mutableStateOf<UiState<ImmutableList<String>>>(UiState.Success(persistentListOf()))
         }
@@ -98,7 +117,7 @@ public class AiConfigPresenter :
         }
 
         LaunchedEffect(Unit) {
-            snapshotFlow { aiConfig.type as? AppSettings.AiConfig.Type.OpenAI }
+            snapshotFlow { appSettings.aiConfig.type as? AppSettings.AiConfig.Type.OpenAI }
                 .map { (it?.serverUrl ?: "") to (it?.apiKey ?: "") }
                 .distinctUntilChanged()
                 .debounce(666L)
@@ -122,41 +141,165 @@ public class AiConfigPresenter :
                     }
                 }
         }
-        return object : State {
-            override val aiConfig: AppSettings.AiConfig = aiConfig
-            override val translateConfig: AppSettings.TranslateConfig = translateConfig
-            override val openAIModels: UiState<ImmutableList<String>> = openAIModels
-            override val supportedTypes: ImmutableList<AiTypeOption> = supportedTypes
-            override val supportedTranslateProviders: ImmutableList<TranslateProviderOption> = supportedTranslateProviders
-            override val serverSuggestions: ImmutableList<String> = SERVER_SUGGESTIONS
 
-            override fun update(block: AppSettings.AiConfig.() -> AppSettings.AiConfig) {
-                scope.launch {
-                    withContext(Dispatchers.Main) {
-                        appDataStore.appSettingsStore.updateData { current ->
-                            current.copy(
-                                aiConfig =
-                                    block
-                                        .invoke(current.aiConfig)
-                                        .normalized(),
-                            )
-                        }
+        fun update(block: AppSettings.AiConfig.() -> AppSettings.AiConfig) {
+            scope.launch {
+                withContext(Dispatchers.Main) {
+                    appDataStore.appSettingsStore.updateData { current ->
+                        current.copy(
+                            aiConfig =
+                                block
+                                    .invoke(current.aiConfig)
+                                    .normalized(),
+                        )
                     }
                 }
             }
+        }
 
-            override fun updateTranslateConfig(block: AppSettings.TranslateConfig.() -> AppSettings.TranslateConfig) {
-                scope.launch {
-                    withContext(Dispatchers.Main) {
-                        appDataStore.appSettingsStore.updateData { current ->
-                            current.copy(
-                                translateConfig =
-                                    block
-                                        .invoke(current.translateConfig)
-                                        .normalized(),
-                            )
-                        }
+        fun updateTranslateConfig(block: AppSettings.TranslateConfig.() -> AppSettings.TranslateConfig) {
+            scope.launch {
+                withContext(Dispatchers.Main) {
+                    appDataStore.appSettingsStore.updateData { current ->
+                        current.copy(
+                            translateConfig =
+                                block
+                                    .invoke(current.translateConfig)
+                                    .normalized(),
+                        )
                     }
+                }
+            }
+        }
+
+        return object : State {
+            override val openAIModels: UiState<ImmutableList<String>> = openAIModels
+            override val supportedTypes: ImmutableList<AiTypeOption> = supportedTypes
+            override val supportedTranslateProviders: ImmutableList<TranslateProviderOption> =
+                supportedTranslateProviders
+            override val serverSuggestions: ImmutableList<String> = SERVER_SUGGESTIONS
+            override val aiType: AiTypeOption =
+                when (appSettings.aiConfig.type) {
+                    AppSettings.AiConfig.Type.OnDevice -> AiTypeOption.OnDevice
+                    is AppSettings.AiConfig.Type.OpenAI -> AiTypeOption.OpenAI
+                }
+            override val translateProvider: TranslateProviderOption =
+                when (appSettings.translateConfig.provider) {
+                    AppSettings.TranslateConfig.Provider.AI -> TranslateProviderOption.AI
+                    AppSettings.TranslateConfig.Provider.Google -> TranslateProviderOption.Google
+                }
+
+            override val openAIServerUrl: String =
+                (appSettings.aiConfig.type as? AppSettings.AiConfig.Type.OpenAI)?.serverUrl ?: ""
+
+            override val openAIApiKey: String =
+                (appSettings.aiConfig.type as? AppSettings.AiConfig.Type.OpenAI)?.apiKey ?: ""
+
+            override val openAIModel: String =
+                (appSettings.aiConfig.type as? AppSettings.AiConfig.Type.OpenAI)?.model ?: ""
+
+            override val aiTldr: Boolean = appSettings.aiConfig.tldr
+            override val translatePrompt: String = appSettings.aiConfig.translatePrompt
+            override val tldrPrompt: String = appSettings.aiConfig.tldrPrompt
+            override val preTranslate: Boolean = appSettings.translateConfig.preTranslate
+
+            override fun setAITldr(value: Boolean) {
+                update {
+                    copy(
+                        tldr = value,
+                    )
+                }
+            }
+
+            override fun setTranslatePrompt(value: String) {
+                update {
+                    copy(
+                        translatePrompt = value,
+                    )
+                }
+            }
+
+            override fun setTldrPrompt(value: String) {
+                update {
+                    copy(
+                        tldrPrompt = value,
+                    )
+                }
+            }
+
+            override fun setPreTranslate(value: Boolean) {
+                updateTranslateConfig {
+                    copy(
+                        preTranslate = value,
+                    )
+                }
+            }
+
+            override fun setAIType(value: AiTypeOption) {
+                update {
+                    copy(
+                        type =
+                            when (value) {
+                                AiTypeOption.OnDevice -> AppSettings.AiConfig.Type.OnDevice
+                                AiTypeOption.OpenAI ->
+                                    AppSettings.AiConfig.Type.OpenAI(
+                                        serverUrl = "",
+                                        apiKey = "",
+                                        model = "",
+                                    )
+                            },
+                    )
+                }
+            }
+
+            override fun setOpenAIServerUrl(value: String) {
+                update {
+                    copy(
+                        type =
+                            AppSettings.AiConfig.Type.OpenAI(
+                                serverUrl = value,
+                                apiKey = openAIApiKey,
+                                model = openAIModel,
+                            ),
+                    )
+                }
+            }
+
+            override fun setOpenAIApiKey(value: String) {
+                update {
+                    copy(
+                        type =
+                            AppSettings.AiConfig.Type.OpenAI(
+                                serverUrl = openAIServerUrl,
+                                apiKey = value,
+                                model = openAIModel,
+                            ),
+                    )
+                }
+            }
+
+            override fun setOpenAIModel(value: String) {
+                update {
+                    copy(
+                        type =
+                            AppSettings.AiConfig.Type.OpenAI(
+                                serverUrl = openAIServerUrl,
+                                apiKey = openAIApiKey,
+                                model = value,
+                            ),
+                    )
+                }
+            }
+
+            override fun setTranslateProvider(value: TranslateProviderOption) {
+                updateTranslateConfig {
+                    copy(
+                        provider =
+                            when (value) {
+                                TranslateProviderOption.AI -> AppSettings.TranslateConfig.Provider.AI
+                                TranslateProviderOption.Google -> AppSettings.TranslateConfig.Provider.Google
+                            },
+                    )
                 }
             }
 

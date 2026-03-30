@@ -53,7 +53,6 @@ import dev.dimension.flare.action_import
 import dev.dimension.flare.add_account
 import dev.dimension.flare.app_name
 import dev.dimension.flare.cancel
-import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.model.AppearanceSettings
 import dev.dimension.flare.data.model.AvatarShape
 import dev.dimension.flare.data.model.LocalAppearanceSettings
@@ -102,6 +101,10 @@ import dev.dimension.flare.settings_ai_config_title
 import dev.dimension.flare.settings_ai_config_tldr_description
 import dev.dimension.flare.settings_ai_config_tldr_prompt
 import dev.dimension.flare.settings_ai_config_translate_prompt
+import dev.dimension.flare.settings_ai_config_translate_provider
+import dev.dimension.flare.settings_ai_config_translate_provider_ai
+import dev.dimension.flare.settings_ai_config_translate_provider_description
+import dev.dimension.flare.settings_ai_config_translate_provider_google
 import dev.dimension.flare.settings_ai_config_type
 import dev.dimension.flare.settings_ai_config_type_description
 import dev.dimension.flare.settings_ai_config_type_on_device
@@ -1205,16 +1208,6 @@ internal fun SettingsScreen(
                 val apiKeyHint = stringResource(Res.string.settings_ai_config_api_key_hint)
                 val translatePromptTitle = stringResource(Res.string.settings_ai_config_translate_prompt)
                 val tldrPromptTitle = stringResource(Res.string.settings_ai_config_tldr_prompt)
-                val selectedTranslateProvider =
-                    when (state.aiConfigState.translateConfig.provider) {
-                        AppSettings.TranslateConfig.Provider.AI -> TranslateProviderOption.AI
-                        AppSettings.TranslateConfig.Provider.Google -> TranslateProviderOption.Google
-                    }
-                val selectedType =
-                    when (state.aiConfigState.aiConfig.type) {
-                        is AppSettings.AiConfig.Type.OpenAI -> AiTypeOption.OpenAI
-                        AppSettings.AiConfig.Type.OnDevice -> AiTypeOption.OnDevice
-                    }
                 ExpanderItem(
                     heading = {
                         Text(stringResource(Res.string.settings_ai_config_type))
@@ -1230,7 +1223,7 @@ internal fun SettingsScreen(
                         ) {
                             Text(
                                 stringResource(
-                                    when (selectedType) {
+                                    when (state.aiConfigState.aiType) {
                                         AiTypeOption.OnDevice -> Res.string.settings_ai_config_type_on_device
                                         AiTypeOption.OpenAI -> Res.string.settings_ai_config_type_openai
                                     },
@@ -1265,15 +1258,13 @@ internal fun SettingsScreen(
                     },
                 )
                 ExpanderItemSeparator()
-                val openAIType = state.aiConfigState.aiConfig.type as? AppSettings.AiConfig.Type.OpenAI
-                val openAITypeForDisplay = openAIType ?: AppSettings.AiConfig.Type.OpenAI("", "", "")
-                AnimatedVisibility(openAIType != null) {
+                AnimatedVisibility(state.aiConfigState.aiType == AiTypeOption.OpenAI) {
                     Column {
                         ExpanderItem(
                             heading = { Text(stringResource(Res.string.settings_ai_config_server)) },
                             caption = {
                                 Text(
-                                    openAITypeForDisplay.serverUrl.ifBlank {
+                                    state.aiConfigState.openAIServerUrl.ifBlank {
                                         stringResource(Res.string.settings_ai_config_value_empty_placeholder)
                                     },
                                 )
@@ -1285,18 +1276,11 @@ internal fun SettingsScreen(
                                             TextEditDialogState(
                                                 title = serverTitle,
                                                 placeholder = serverHint,
-                                                value = openAITypeForDisplay.serverUrl,
+                                                value = state.aiConfigState.openAIServerUrl,
                                                 suggestions = state.aiConfigState.serverSuggestions,
                                                 hint = serverRequirementHint,
                                                 onConfirm = { newValue ->
-                                                    state.aiConfigState.update {
-                                                        val currentType = type as? AppSettings.AiConfig.Type.OpenAI
-                                                        copy(
-                                                            type =
-                                                                (currentType ?: AppSettings.AiConfig.Type.OpenAI("", "", ""))
-                                                                    .copy(serverUrl = newValue),
-                                                        )
-                                                    }
+                                                    state.aiConfigState.setOpenAIServerUrl(newValue)
                                                 },
                                             ),
                                         )
@@ -1311,7 +1295,7 @@ internal fun SettingsScreen(
                             heading = { Text(stringResource(Res.string.settings_ai_config_api_key)) },
                             caption = {
                                 Text(
-                                    openAITypeForDisplay.apiKey.ifBlank {
+                                    state.aiConfigState.openAIApiKey.ifBlank {
                                         stringResource(Res.string.settings_ai_config_value_empty_placeholder)
                                     },
                                 )
@@ -1323,16 +1307,9 @@ internal fun SettingsScreen(
                                             TextEditDialogState(
                                                 title = apiKeyTitle,
                                                 placeholder = apiKeyHint,
-                                                value = openAITypeForDisplay.apiKey,
+                                                value = state.aiConfigState.openAIApiKey,
                                                 onConfirm = { newValue ->
-                                                    state.aiConfigState.update {
-                                                        val currentType = type as? AppSettings.AiConfig.Type.OpenAI
-                                                        copy(
-                                                            type =
-                                                                (currentType ?: AppSettings.AiConfig.Type.OpenAI("", "", ""))
-                                                                    .copy(apiKey = newValue),
-                                                        )
-                                                    }
+                                                    state.aiConfigState.setOpenAIApiKey(newValue)
                                                 },
                                             ),
                                         )
@@ -1353,7 +1330,7 @@ internal fun SettingsScreen(
                                     },
                                 ) {
                                     Text(
-                                        openAITypeForDisplay.model.ifBlank {
+                                        state.aiConfigState.openAIModel.ifBlank {
                                             stringResource(Res.string.settings_ai_config_model_select)
                                         },
                                     )
@@ -1386,16 +1363,7 @@ internal fun SettingsScreen(
                                                     MenuFlyoutItem(
                                                         text = { Text(model) },
                                                         onClick = {
-                                                            state.aiConfigState.update {
-                                                                val currentType = type as? AppSettings.AiConfig.Type.OpenAI
-                                                                copy(
-                                                                    type =
-                                                                        (
-                                                                            currentType
-                                                                                ?: AppSettings.AiConfig.Type.OpenAI("", "", "")
-                                                                        ).copy(model = model),
-                                                                )
-                                                            }
+                                                            state.aiConfigState.setOpenAIModel(model)
                                                             state.aiConfigState.setShowModelDropdown(false)
                                                         },
                                                     )
@@ -1412,10 +1380,10 @@ internal fun SettingsScreen(
                     Column {
                         ExpanderItem(
                             heading = {
-                                Text("Translation Provider")
+                                Text(stringResource(Res.string.settings_ai_config_translate_provider))
                             },
                             caption = {
-                                Text("Choose which service handles translation")
+                                Text(stringResource(Res.string.settings_ai_config_translate_provider_description))
                             },
                             trailing = {
                                 DropDownButton(
@@ -1424,9 +1392,15 @@ internal fun SettingsScreen(
                                     },
                                 ) {
                                     Text(
-                                        when (selectedTranslateProvider) {
-                                            TranslateProviderOption.AI -> "AI"
-                                            TranslateProviderOption.Google -> "Google Translate"
+                                        when (state.aiConfigState.translateProvider) {
+                                            TranslateProviderOption.AI ->
+                                                stringResource(
+                                                    Res.string.settings_ai_config_translate_provider_ai,
+                                                )
+                                            TranslateProviderOption.Google ->
+                                                stringResource(
+                                                    Res.string.settings_ai_config_translate_provider_google,
+                                                )
                                         },
                                     )
                                 }
@@ -1441,8 +1415,14 @@ internal fun SettingsScreen(
                                             text = {
                                                 Text(
                                                     when (provider) {
-                                                        TranslateProviderOption.AI -> "AI"
-                                                        TranslateProviderOption.Google -> "Google Translate"
+                                                        TranslateProviderOption.AI ->
+                                                            stringResource(
+                                                                Res.string.settings_ai_config_translate_provider_ai,
+                                                            )
+                                                        TranslateProviderOption.Google ->
+                                                            stringResource(
+                                                                Res.string.settings_ai_config_translate_provider_google,
+                                                            )
                                                     },
                                                 )
                                             },
@@ -1465,9 +1445,9 @@ internal fun SettingsScreen(
                             },
                             trailing = {
                                 Switcher(
-                                    checked = state.aiConfigState.translateConfig.preTranslate,
+                                    checked = state.aiConfigState.preTranslate,
                                     {
-                                        state.aiConfigState.updateTranslateConfig { copy(preTranslate = it) }
+                                        state.aiConfigState.setPreTranslate(it)
                                     },
                                     textBefore = true,
                                 )
@@ -1476,13 +1456,13 @@ internal fun SettingsScreen(
                         ExpanderItemSeparator()
                     }
                 }
-                AnimatedVisibility(selectedTranslateProvider == TranslateProviderOption.AI) {
+                AnimatedVisibility(state.aiConfigState.translateProvider == TranslateProviderOption.AI) {
                     Column {
                         ExpanderItem(
                             heading = { Text(stringResource(Res.string.settings_ai_config_translate_prompt)) },
                             caption = {
                                 Text(
-                                    state.aiConfigState.aiConfig.translatePrompt.ifBlank {
+                                    state.aiConfigState.translatePrompt.ifBlank {
                                         stringResource(Res.string.settings_ai_config_value_empty_placeholder)
                                     },
                                 )
@@ -1494,11 +1474,9 @@ internal fun SettingsScreen(
                                             TextEditDialogState(
                                                 title = translatePromptTitle,
                                                 placeholder = "",
-                                                value = state.aiConfigState.aiConfig.translatePrompt,
+                                                value = state.aiConfigState.translatePrompt,
                                                 onConfirm = { newValue ->
-                                                    state.aiConfigState.update {
-                                                        copy(translatePrompt = newValue)
-                                                    }
+                                                    state.aiConfigState.setTranslatePrompt(newValue)
                                                 },
                                             ),
                                         )
@@ -1520,22 +1498,22 @@ internal fun SettingsScreen(
                     },
                     trailing = {
                         Switcher(
-                            checked = state.aiConfigState.aiConfig.tldr,
+                            checked = state.aiConfigState.aiTldr,
                             {
-                                state.aiConfigState.update { copy(tldr = it) }
+                                state.aiConfigState.setAITldr(it)
                             },
                             textBefore = true,
                         )
                     },
                 )
-                AnimatedVisibility(state.aiConfigState.aiConfig.tldr) {
+                AnimatedVisibility(state.aiConfigState.aiTldr) {
                     Column {
                         ExpanderItemSeparator()
                         ExpanderItem(
                             heading = { Text(stringResource(Res.string.settings_ai_config_tldr_prompt)) },
                             caption = {
                                 Text(
-                                    state.aiConfigState.aiConfig.tldrPrompt.ifBlank {
+                                    state.aiConfigState.tldrPrompt.ifBlank {
                                         stringResource(Res.string.settings_ai_config_value_empty_placeholder)
                                     },
                                 )
@@ -1547,11 +1525,9 @@ internal fun SettingsScreen(
                                             TextEditDialogState(
                                                 title = tldrPromptTitle,
                                                 placeholder = "",
-                                                value = state.aiConfigState.aiConfig.tldrPrompt,
+                                                value = state.aiConfigState.tldrPrompt,
                                                 onConfirm = { newValue ->
-                                                    state.aiConfigState.update {
-                                                        copy(tldrPrompt = newValue)
-                                                    }
+                                                    state.aiConfigState.setTldrPrompt(newValue)
                                                 },
                                             ),
                                         )
@@ -1910,13 +1886,7 @@ private fun aiConfigPresenter() =
         var showModelDropdown by remember { mutableStateOf(false) }
         var showProviderDropdown by remember { mutableStateOf(false) }
         var textEditDialog by remember { mutableStateOf<TextEditDialogState?>(null) }
-        object {
-            val aiConfig = state.aiConfig
-            val translateConfig = state.translateConfig
-            val openAIModels = state.openAIModels
-            val supportedTypes = state.supportedTypes
-            val supportedTranslateProviders = state.supportedTranslateProviders
-            val serverSuggestions = state.serverSuggestions
+        object : AiConfigPresenter.State by state {
             val expanded = expanded
             val showTypeDropdown = showTypeDropdown
             val showModelDropdown = showModelDropdown
@@ -1925,22 +1895,6 @@ private fun aiConfigPresenter() =
 
             fun setExpanded(value: Boolean) {
                 expanded = value
-            }
-
-            fun update(block: AppSettings.AiConfig.() -> AppSettings.AiConfig) {
-                state.update(block)
-            }
-
-            fun updateTranslateConfig(block: AppSettings.TranslateConfig.() -> AppSettings.TranslateConfig) {
-                state.updateTranslateConfig(block)
-            }
-
-            fun selectType(type: AiTypeOption) {
-                state.selectType(type)
-            }
-
-            fun selectTranslateProvider(type: TranslateProviderOption) {
-                state.selectTranslateProvider(type)
             }
 
             fun setShowTypeDropdown(value: Boolean) {

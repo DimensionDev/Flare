@@ -31,6 +31,7 @@ import dev.dimension.flare.data.translation.PreTranslationBatchDocument
 import dev.dimension.flare.data.translation.PreTranslationBatchPayload
 import dev.dimension.flare.data.translation.PreTranslationService
 import dev.dimension.flare.data.translation.aiPreTranslateConfig
+import dev.dimension.flare.data.translation.cacheKey
 import dev.dimension.flare.deleteTestRootPath
 import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.MicroBlogKey
@@ -83,6 +84,9 @@ class UserHandlerTest : RobolectricTest() {
     private lateinit var onDeviceAI: FakeOnDeviceAI
 
     private val accountKey = MicroBlogKey(id = "account-1", host = "test.social")
+    private val aiTranslationProviderCacheKey =
+        AppSettings.TranslateConfig.Provider.AI
+            .cacheKey()
 
     @BeforeTest
     fun setup() {
@@ -259,7 +263,7 @@ class UserHandlerTest : RobolectricTest() {
                     entityType = TranslationEntityType.Profile,
                     entityKey = profile.translationEntityKey(),
                     targetLanguage = Locale.language,
-                    sourceHash = profile.translationPayload().sourceHash(),
+                    sourceHash = profile.translationPayload().sourceHash(aiTranslationProviderCacheKey),
                     status = TranslationStatus.Completed,
                     payload = TranslationPayload(description = "翻译后的简介".toUiPlainText()),
                     updatedAt = 1L,

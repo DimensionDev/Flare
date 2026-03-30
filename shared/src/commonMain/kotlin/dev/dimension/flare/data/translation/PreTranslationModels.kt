@@ -39,6 +39,7 @@ internal data class PreTranslationBatchPayload(
 internal data class ActivePreTranslationSettings(
     val targetLanguage: String,
     val appSettings: AppSettings,
+    val providerCacheKey: String,
 )
 
 internal data class PreparedTranslationCandidate(

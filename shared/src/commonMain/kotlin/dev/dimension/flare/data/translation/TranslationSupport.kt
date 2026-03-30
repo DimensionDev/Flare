@@ -18,6 +18,7 @@ internal object TranslationSettingsSupport {
         TranslationDisplayOptions(
             translationEnabled = true,
             autoDisplayEnabled = settings.translateConfig.preTranslate,
+            providerCacheKey = settings.translationProviderCacheKey(),
         )
 }
 

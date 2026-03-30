@@ -15,6 +15,7 @@ import kotlinx.collections.immutable.toPersistentList
 internal data class TranslationDisplayOptions(
     val translationEnabled: Boolean,
     val autoDisplayEnabled: Boolean,
+    val providerCacheKey: String,
 )
 
 internal fun UiTimelineV2.applyTranslation(
@@ -28,7 +29,7 @@ internal fun UiTimelineV2.applyTranslation(
     val translation =
         translations.firstOrNull {
             it.targetLanguage == Locale.language &&
-                it.sourceHash == payload.sourceHash()
+                it.sourceHash == payload.sourceHash(options.providerCacheKey)
         }
 
     return when (this) {
@@ -99,7 +100,7 @@ internal fun UiProfile.applyTranslation(
     val matchedTranslation =
         translation?.takeIf {
             it.targetLanguage == Locale.language &&
-                it.sourceHash == payload.sourceHash()
+                it.sourceHash == payload.sourceHash(options.providerCacheKey)
         }
     val displayState = matchedTranslation.toDisplayState()
     return copy(
@@ -132,7 +133,12 @@ internal fun UiProfile.translationPayload(): TranslationPayload =
         description = description,
     )
 
-internal fun TranslationPayload.sourceHash(): String = encodeJson(TranslationPayload.serializer()).stableTranslationHash()
+internal fun TranslationPayload.sourceHash(providerCacheKey: String): String =
+    buildString {
+        append(providerCacheKey)
+        append('\u0000')
+        append(encodeJson(TranslationPayload.serializer()))
+    }.stableTranslationHash()
 
 private fun DbTranslation?.toDisplayState(): TranslationDisplayState =
     when (this?.status) {

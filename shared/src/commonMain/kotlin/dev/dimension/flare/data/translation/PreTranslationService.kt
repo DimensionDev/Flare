@@ -93,6 +93,7 @@ internal class OnlinePreTranslationService(
                 prepareStatusCandidates(
                     statuses = snapshot,
                     targetLanguage = settings.targetLanguage,
+                    providerCacheKey = settings.providerCacheKey,
                     allowLongText = allowLongText,
                 )
             }
@@ -106,6 +107,7 @@ internal class OnlinePreTranslationService(
                     prepareProfileCandidate(
                         user = user,
                         targetLanguage = settings.targetLanguage,
+                        providerCacheKey = settings.providerCacheKey,
                     ),
                 )
             }
@@ -128,6 +130,7 @@ internal class OnlinePreTranslationService(
                     accountType = accountType,
                     statusKey = statusKey,
                     targetLanguage = settings.targetLanguage,
+                    providerCacheKey = settings.providerCacheKey,
                 )
             processPreparedCandidates(
                 settings = settings,
@@ -195,6 +198,7 @@ internal class OnlinePreTranslationService(
         return ActivePreTranslationSettings(
             targetLanguage = targetLanguage,
             appSettings = appSettings,
+            providerCacheKey = appSettings.translationProviderCacheKey(),
         )
     }
 
@@ -213,6 +217,7 @@ internal class OnlinePreTranslationService(
         accountType: dev.dimension.flare.model.AccountType,
         statusKey: dev.dimension.flare.model.MicroBlogKey,
         targetLanguage: String,
+        providerCacheKey: String,
     ): List<PreparedTranslationCandidate> {
         val dbAccountType = accountType as? dev.dimension.flare.model.DbAccountType ?: return emptyList()
         val status =
@@ -225,6 +230,7 @@ internal class OnlinePreTranslationService(
         return prepareStatusCandidates(
             statuses = listOfNotNull(status.status.data) + status.references.mapNotNull { it.status?.data },
             targetLanguage = targetLanguage,
+            providerCacheKey = providerCacheKey,
             allowLongText = true,
             preferredDisplayMode = TranslationDisplayMode.Translated,
         )
@@ -233,6 +239,7 @@ internal class OnlinePreTranslationService(
     private suspend fun prepareStatusCandidates(
         statuses: List<DbStatus>,
         targetLanguage: String,
+        providerCacheKey: String,
         allowLongText: Boolean,
         preferredDisplayMode: TranslationDisplayMode? = null,
     ): List<PreparedTranslationCandidate> {
@@ -259,6 +266,7 @@ internal class OnlinePreTranslationService(
                     sourceLanguages = PreTranslationContentRules.sourceLanguages(status.content),
                     existing = existingByKey[entityKey],
                     targetLanguage = targetLanguage,
+                    providerCacheKey = providerCacheKey,
                     now = now,
                     allowLongText = allowLongText,
                     preferredDisplayMode = preferredDisplayMode,
@@ -270,6 +278,7 @@ internal class OnlinePreTranslationService(
     private suspend fun prepareProfileCandidate(
         user: DbUser,
         targetLanguage: String,
+        providerCacheKey: String,
     ): PreparedTranslationCandidate? =
         prepareCandidate(
             entityType = TranslationEntityType.Profile,
@@ -285,6 +294,7 @@ internal class OnlinePreTranslationService(
                         targetLanguage = targetLanguage,
                     ),
             targetLanguage = targetLanguage,
+            providerCacheKey = providerCacheKey,
             now = Clock.System.now().toEpochMilliseconds(),
             allowLongText = true,
         )
@@ -296,6 +306,7 @@ internal class OnlinePreTranslationService(
         sourceLanguages: List<String>,
         existing: DbTranslation?,
         targetLanguage: String,
+        providerCacheKey: String,
         now: Long,
         allowLongText: Boolean,
         preferredDisplayMode: TranslationDisplayMode? = null,
@@ -306,7 +317,7 @@ internal class OnlinePreTranslationService(
         if (!allowLongText && payload.content?.isLongText == true) {
             return null
         }
-        val sourceHash = payload.sourceHash()
+        val sourceHash = payload.sourceHash(providerCacheKey)
         val displayMode = preferredDisplayMode ?: existing?.displayMode ?: TranslationDisplayMode.Auto
         val sourceDocument = PreTranslationPayloadSupport.toBatchPayload(payload, targetLanguage)
         val skipReason =

@@ -16,6 +16,7 @@ import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.data.translation.TranslationPromptFormatter
 import dev.dimension.flare.data.translation.TranslationProvider
 import dev.dimension.flare.data.translation.TranslationResponseSanitizer
+import dev.dimension.flare.data.translation.translationProviderCacheKey
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiState
@@ -50,7 +51,8 @@ public class TranslatePresenter(
                     val settings =
                         appDataStore.appSettingsStore.data
                             .first()
-                    cachedTranslation()?.let {
+                    val providerCacheKey = settings.translationProviderCacheKey()
+                    cachedTranslation(providerCacheKey)?.let {
                         return@tryRun it
                     }
                     val prompt =
@@ -71,7 +73,7 @@ public class TranslatePresenter(
                         )
                     if (translatedContent != null) {
                         val translated = toUiRichText(translatedContent)
-                        cacheTranslation(translated)
+                        cacheTranslation(translated, providerCacheKey)
                         return@tryRun translated
                     }
                     error("Translation returned empty response")
@@ -93,7 +95,7 @@ public class TranslatePresenter(
                 }
             }
 
-    private suspend fun cachedTranslation(): UiRichText? {
+    private suspend fun cachedTranslation(providerCacheKey: String): UiRichText? {
         val target = cacheTarget ?: return null
         val translation =
             database
@@ -103,7 +105,7 @@ public class TranslatePresenter(
                     entityKey = target.entityKey(),
                     targetLanguage = targetLanguage,
                 ) ?: return null
-        if (translation.sourceHash != target.sourcePayload().sourceHash()) {
+        if (translation.sourceHash != target.sourcePayload().sourceHash(providerCacheKey)) {
             return null
         }
         return when (translation.status) {
@@ -116,7 +118,10 @@ public class TranslatePresenter(
         }
     }
 
-    private suspend fun cacheTranslation(translated: UiRichText) {
+    private suspend fun cacheTranslation(
+        translated: UiRichText,
+        providerCacheKey: String,
+    ) {
         val target = cacheTarget ?: return
         val sourcePayload = target.sourcePayload()
         val existing =
@@ -129,7 +134,7 @@ public class TranslatePresenter(
                 )
         val mergedPayload =
             target.mergePayload(
-                existing = existing?.takeIf { it.sourceHash == sourcePayload.sourceHash() }?.payload,
+                existing = existing?.takeIf { it.sourceHash == sourcePayload.sourceHash(providerCacheKey) }?.payload,
                 translated = translated,
             )
         database.translationDao().insert(
@@ -137,7 +142,7 @@ public class TranslatePresenter(
                 entityType = TranslationEntityType.Status,
                 entityKey = target.entityKey(),
                 targetLanguage = targetLanguage,
-                sourceHash = sourcePayload.sourceHash(),
+                sourceHash = sourcePayload.sourceHash(providerCacheKey),
                 status = TranslationStatus.Completed,
                 displayMode = TranslationDisplayMode.Translated,
                 payload = mergedPayload,

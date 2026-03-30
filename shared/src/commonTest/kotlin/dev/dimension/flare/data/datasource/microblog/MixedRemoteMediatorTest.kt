@@ -15,6 +15,7 @@ import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.createTestRootPath
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.model.TranslationDisplayOptions
 import dev.dimension.flare.data.database.cache.model.TranslationEntityType
 import dev.dimension.flare.data.database.cache.model.TranslationStatus
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
@@ -371,6 +372,12 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                         item = page.data.single(),
                         pagingKey = mediator.pagingKey,
                         useDbKeyInItemKey = false,
+                        translationDisplayOptions =
+                            TranslationDisplayOptions(
+                                translationEnabled = false,
+                                autoDisplayEnabled = false,
+                                providerCacheKey = "",
+                            ),
                     ),
                 )
             assertEquals(postC.statusKey, post.statusKey)
@@ -624,12 +631,16 @@ class MixedRemoteMediatorTest : RobolectricTest() {
             val savedStatus = db.statusDao().get(post.statusKey, AccountType.Specific(accountKey)).first()
             assertNotNull(savedStatus)
             val translation =
-                db.translationDao().get(
-                    entityType = TranslationEntityType.Status,
-                    entityKey = savedStatus.id,
-                    targetLanguage = Locale.language,
-                )
-            assertNotNull(translation)
+                withTimeout(5_000) {
+                    db
+                        .translationDao()
+                        .find(
+                            entityType = TranslationEntityType.Status,
+                            entityKey = savedStatus.id,
+                            targetLanguage = Locale.language,
+                        ).filterNotNull()
+                        .first()
+                }
             assertEquals(TranslationStatus.Skipped, translation.status)
             assertEquals("source_language_matches_target", translation.statusReason)
         }

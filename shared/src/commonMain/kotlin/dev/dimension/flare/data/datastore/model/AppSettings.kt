@@ -17,15 +17,45 @@ public data class AppSettings(
     val version: String,
     val aiConfig: AiConfig = AiConfig(),
     val language: String = "",
+    val translateConfig: TranslateConfig = TranslateConfig(),
 ) {
     @Serializable
+    public data class TranslateConfig(
+        val preTranslate: Boolean = false,
+        val provider: Provider = Provider.Google,
+    ) {
+        @Serializable
+        public sealed interface Provider {
+            @Serializable
+            public data object AI : Provider
+
+            @Serializable
+            public data object Google : Provider
+        }
+    }
+
+    @Serializable
     public data class AiConfig(
+        @Deprecated(
+            message = "Translation is always enabled.",
+            level = DeprecationLevel.ERROR,
+        )
         val translation: Boolean = false,
         val tldr: Boolean = false,
         val type: Type = Type.OpenAI("", "", ""),
         val translatePrompt: String = AiPromptDefaults.TRANSLATE_PROMPT,
         val tldrPrompt: String = AiPromptDefaults.TLDR_PROMPT,
+        @Deprecated(
+            message = "Use AppSettings.translateConfig.preTranslate instead.",
+            level = DeprecationLevel.ERROR,
+        )
+        val preTranslation: Boolean = false,
     ) {
+        public companion object {
+            // for iOS
+            public val default: AiConfig = AiConfig()
+        }
+
         @Serializable
         public sealed interface Type {
             @Serializable

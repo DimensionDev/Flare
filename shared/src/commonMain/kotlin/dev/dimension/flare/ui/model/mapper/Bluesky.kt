@@ -144,6 +144,17 @@ internal fun parseBlueskyJson(
     }
 }
 
+private fun JsonContent.sourceLanguages(): PersistentList<String> {
+    val jsonObject = runCatching { decodeAs<JsonObject>() }.getOrNull() ?: return persistentListOf()
+    return jsonObject["langs"]
+        ?.jsonArray
+        ?.mapNotNull { it.jsonPrimitive.contentOrNull }
+        ?.filter { it.isNotBlank() }
+        ?.distinct()
+        ?.toPersistentList()
+        ?: persistentListOf()
+}
+
 internal suspend fun parseBskyFacets(
     content: String,
     resolveMentionDid: suspend (handle: String) -> String,
@@ -744,6 +755,7 @@ internal fun PostView.render(accountKey: MicroBlogKey): UiTimelineV2.Post {
         images = findMedias(this),
         card = findCard(this),
         statusKey = statusKey,
+        sourceLanguages = record.sourceLanguages(),
         content = parseBlueskyJson(record, accountKey),
         poll = null,
         quote = listOfNotNull(findQuote(accountKey, this)).toImmutableList(),
@@ -1454,6 +1466,7 @@ private fun render(
                         }
                     },
                 statusKey = statusKey,
+                sourceLanguages = record.value.value.sourceLanguages(),
                 content = parseBlueskyJson(record.value.value, accountKey),
                 actions =
                     listOfNotNull(

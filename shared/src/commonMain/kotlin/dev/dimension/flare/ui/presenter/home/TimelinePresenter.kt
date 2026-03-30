@@ -19,6 +19,8 @@ import dev.dimension.flare.common.onEmpty
 import dev.dimension.flare.common.onError
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
+import dev.dimension.flare.data.database.cache.model.TranslationDisplayOptions
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.NotSupportRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
@@ -26,8 +28,11 @@ import dev.dimension.flare.data.datasource.microblog.paging.TimelinePagingMapper
 import dev.dimension.flare.data.datasource.microblog.paging.TimelineRemoteMediator
 import dev.dimension.flare.data.datasource.microblog.paging.toPagingSource
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
+import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.repository.LocalFilterRepository
 import dev.dimension.flare.data.repository.LoginExpiredException
+import dev.dimension.flare.data.translation.PreTranslationService
+import dev.dimension.flare.data.translation.TranslationSettingsSupport
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.CoroutineScope
@@ -48,32 +53,54 @@ public abstract class TimelinePresenter :
     PresenterBase<TimelineState>(),
     KoinComponent {
     private val database: CacheDatabase by inject()
+    private val appDataStore: AppDataStore by inject()
+    private val preTranslationService: PreTranslationService by inject()
 
     private val localFilterRepository: LocalFilterRepository by inject()
     private val inAppNotification: InAppNotification by inject()
 
-    private val filterFlow by lazy {
+    private val filterFlow: Flow<List<String>> by lazy {
         localFilterRepository.getFlow(forTimeline = true)
     }
+
+    private val translationSettingsFlow: Flow<TranslationDisplayOptions> by lazy {
+        TranslationSettingsSupport.displayOptionsFlow(appDataStore)
+    }
+
+    internal open fun allowLongTextTranslationDisplay(loader: RemoteLoader<UiTimelineV2>): Boolean = false
 
     @OptIn(ExperimentalCoroutinesApi::class)
     internal fun createPager(scope: CoroutineScope): Flow<PagingData<UiTimelineV2>> =
         loader
-            .flatMapLatest {
-                when (it) {
+            .flatMapLatest { remoteLoader ->
+                when (remoteLoader) {
                     is NotSupportRemoteLoader<UiTimelineV2> -> {
                         PagingData.emptyFlow(isError = false)
                     }
 
                     is CacheableRemoteLoader<UiTimelineV2> -> {
                         cachePager(
-                            loader = it,
-                        ).cachedIn(scope)
+                            loader = remoteLoader,
+                        ).cachedIn(scope).flatMapLatest { pagingData ->
+                            translationSettingsFlow
+                                .map { translationDisplayOptions ->
+                                    withContext(Dispatchers.IO) {
+                                        pagingData.map { item ->
+                                            TimelinePagingMapper.toUi(
+                                                item = item,
+                                                pagingKey = remoteLoader.pagingKey,
+                                                useDbKeyInItemKey = useDbKeyInItemKey,
+                                                translationDisplayOptions = translationDisplayOptions,
+                                            )
+                                        }
+                                    }
+                                }
+                        }
                     }
 
                     else -> {
                         networkPager(
-                            loader = it,
+                            loader = remoteLoader,
                         ).cachedIn(scope)
                     }
                 }.flatMapLatest { pager ->
@@ -84,7 +111,9 @@ public abstract class TimelinePresenter :
                                     true
                                 } else {
                                     !filterList.any { filter ->
-                                        item.searchText.orEmpty().contains(filter, ignoreCase = true)
+                                        item.searchText
+                                            .orEmpty()
+                                            .contains(filter, ignoreCase = true)
                                     }
                                 }
                             }.map {
@@ -96,31 +125,29 @@ public abstract class TimelinePresenter :
                 emitAll(PagingData.emptyFlow(isError = true))
             }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    private fun cachePager(loader: CacheableRemoteLoader<UiTimelineV2>): Flow<PagingData<UiTimelineV2>> =
-        Pager(
-            config = pagingConfig,
-            remoteMediator =
-                TimelineRemoteMediator(
-                    loader = loader,
-                    database = database,
-                    notifyError = { e ->
-                        if (e is LoginExpiredException) {
-                            inAppNotification.onError(Message.LoginExpired, e)
-                        }
-                    },
-                ),
-            pagingSourceFactory = {
-                database.pagingTimelineDao().getPagingSource(
-                    pagingKey = loader.pagingKey,
-                )
-            },
-        ).flow.map { pagingData ->
-            withContext(Dispatchers.IO) {
-                pagingData.map { item ->
-                    TimelinePagingMapper.toUi(item, loader.pagingKey, useDbKeyInItemKey)
-                }
-            }
+    private fun cachePager(loader: CacheableRemoteLoader<UiTimelineV2>): Flow<PagingData<DbPagingTimelineWithStatus>> =
+        run {
+            val allowLongText = allowLongTextTranslationDisplay(loader)
+            Pager(
+                config = pagingConfig,
+                remoteMediator =
+                    TimelineRemoteMediator(
+                        loader = loader,
+                        database = database,
+                        allowLongText = allowLongText,
+                        preTranslationService = preTranslationService,
+                        notifyError = { e ->
+                            if (e is LoginExpiredException) {
+                                inAppNotification.onError(Message.LoginExpired, e)
+                            }
+                        },
+                    ),
+                pagingSourceFactory = {
+                    database.pagingTimelineDao().getPagingSource(
+                        pagingKey = loader.pagingKey,
+                    )
+                },
+            ).flow
         }
 
     protected open suspend fun transform(data: UiTimelineV2): UiTimelineV2 = data

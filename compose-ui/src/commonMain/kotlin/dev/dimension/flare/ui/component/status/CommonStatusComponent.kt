@@ -1,5 +1,6 @@
 package dev.dimension.flare.ui.component.status
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
@@ -46,16 +47,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
-import compose.icons.fontawesomeicons.regular.Bookmark
 import compose.icons.fontawesomeicons.solid.At
-import compose.icons.fontawesomeicons.solid.Bookmark
 import compose.icons.fontawesomeicons.solid.Ellipsis
 import compose.icons.fontawesomeicons.solid.Globe
 import compose.icons.fontawesomeicons.solid.Image
+import compose.icons.fontawesomeicons.solid.Language
 import compose.icons.fontawesomeicons.solid.Lock
 import compose.icons.fontawesomeicons.solid.LockOpen
 import compose.icons.fontawesomeicons.solid.Reply
-import compose.icons.fontawesomeicons.solid.Retweet
+import compose.icons.fontawesomeicons.solid.TriangleExclamation
 import compose.icons.fontawesomeicons.solid.Tv
 import dev.dimension.flare.compose.ui.Res
 import dev.dimension.flare.compose.ui.bookmark_add
@@ -88,6 +88,8 @@ import dev.dimension.flare.compose.ui.share
 import dev.dimension.flare.compose.ui.show_media
 import dev.dimension.flare.compose.ui.status_detail_tldr
 import dev.dimension.flare.compose.ui.status_detail_translate
+import dev.dimension.flare.compose.ui.translation_retry
+import dev.dimension.flare.compose.ui.translation_show_original
 import dev.dimension.flare.compose.ui.unlike
 import dev.dimension.flare.compose.ui.user_block
 import dev.dimension.flare.compose.ui.user_block_with_parameter
@@ -112,6 +114,7 @@ import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.component.placeholder
 import dev.dimension.flare.ui.component.platform.PlatformCard
 import dev.dimension.flare.ui.component.platform.PlatformCheckbox
+import dev.dimension.flare.ui.component.platform.PlatformCircularProgressIndicator
 import dev.dimension.flare.ui.component.platform.PlatformDropdownMenuDivider
 import dev.dimension.flare.ui.component.platform.PlatformDropdownMenuItem
 import dev.dimension.flare.ui.component.platform.PlatformDropdownMenuScope
@@ -122,6 +125,7 @@ import dev.dimension.flare.ui.component.platform.PlatformTextButton
 import dev.dimension.flare.ui.component.platform.PlatformTextStyle
 import dev.dimension.flare.ui.component.toImageVector
 import dev.dimension.flare.ui.model.ClickContext
+import dev.dimension.flare.ui.model.TranslationDisplayState
 import dev.dimension.flare.ui.model.UiCard
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiPoll
@@ -206,6 +210,13 @@ public fun CommonStatusComponent(
                                     Modifier
                                         .size(PlatformTheme.typography.caption.fontSize.value.dp),
                                 tint = PlatformTheme.colorScheme.caption,
+                            )
+                        }
+                        AnimatedVisibility(
+                            visible = item.translationDisplayState != TranslationDisplayState.Hidden,
+                        ) {
+                            TranslationDisplayBadge(
+                                state = item.translationDisplayState,
                             )
                         }
                         if (appearanceSettings.showPlatformLogo) {
@@ -309,6 +320,7 @@ public fun CommonStatusComponent(
 
             if (isDetail && !item.content.isEmpty && appearanceSettings.showTranslateButton) {
                 TranslationComponent(
+                    item = item,
                     statusKey = item.itemKey,
                     contentWarning = item.contentWarning,
                     rawContent = item.content.innerText,
@@ -626,7 +638,44 @@ private fun StatusReactionComponent(
 }
 
 @Composable
+internal fun TranslationDisplayBadge(
+    state: TranslationDisplayState,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        FAIcon(
+            FontAwesomeIcons.Solid.Language,
+            contentDescription = null,
+            tint = PlatformTheme.colorScheme.caption,
+        )
+        AnimatedContent(state) { state ->
+            when (state) {
+                TranslationDisplayState.Translating ->
+                    PlatformCircularProgressIndicator(
+                        modifier = Modifier.size(12.dp),
+                        color = PlatformTheme.colorScheme.caption,
+                    )
+
+                TranslationDisplayState.Translated -> Unit
+                TranslationDisplayState.Failed ->
+                    FAIcon(
+                        FontAwesomeIcons.Solid.TriangleExclamation,
+                        contentDescription = null,
+                        tint = PlatformTheme.colorScheme.caption,
+                        modifier = Modifier.size(12.dp),
+                    )
+                TranslationDisplayState.Hidden -> Unit
+            }
+        }
+    }
+}
+
+@Composable
 private fun TranslationComponent(
+    item: UiTimelineV2.Post,
     statusKey: String,
     contentWarning: UiRichText?,
     rawContent: String,
@@ -700,6 +749,7 @@ private fun TranslationComponent(
             "translate_${contentWarning}_${rawContent}_${Locale.current.language}_${componentAppearance.aiConfig.translation}",
         ) {
             statusTranslatePresenter(
+                item = item,
                 contentWarning = contentWarning,
                 content = content,
                 targetLanguage = Locale.current.language,
@@ -813,9 +863,13 @@ internal fun StatusActions(
             when (action) {
                 is ActionMenu.Group -> {
                     StatusActionGroup(
-                        icon = action.displayItem.icon?.toImageVector() ?: FontAwesomeIcons.Solid.Ellipsis,
+                        icon =
+                            action.displayItem.icon?.toImageVector()
+                                ?: FontAwesomeIcons.Solid.Ellipsis,
                         number = action.displayItem.count,
-                        color = action.displayItem.color?.toComposeColor() ?: PlatformContentColor.current,
+                        color =
+                            action.displayItem.color?.toComposeColor()
+                                ?: PlatformContentColor.current,
                         withTextMinWidth = index != items.lastIndex,
                     ) { closeMenu, isMenuShown ->
                         action.actions.fastForEach { subActions ->
@@ -834,7 +888,10 @@ internal fun StatusActions(
 
                 is ActionMenu.Item -> {
                     StatusActionButton(
-                        icon = action.icon?.toImageVector() ?: FontAwesomeIcons.Solid.Ellipsis, // Fallback or handle null
+                        icon =
+                            action.icon?.toImageVector()
+                                ?: FontAwesomeIcons.Solid.Ellipsis,
+                        // Fallback or handle null
                         number = action.count,
                         color = action.color?.toComposeColor() ?: PlatformContentColor.current,
                         withTextMinWidth = index != items.lastIndex,
@@ -931,6 +988,9 @@ private fun ActionMenu.Item.Text.asString(): String =
                     ActionMenu.Item.Text.Localized.Type.MuteWithHandleParameter -> Res.string.user_mute_with_parameter
                     ActionMenu.Item.Text.Localized.Type.AcceptFollowRequest -> Res.string.more
                     ActionMenu.Item.Text.Localized.Type.RejectFollowRequest -> Res.string.more
+                    ActionMenu.Item.Text.Localized.Type.RetryTranslation -> Res.string.translation_retry
+                    ActionMenu.Item.Text.Localized.Type.Translate -> Res.string.status_detail_translate
+                    ActionMenu.Item.Text.Localized.Type.ShowOriginal -> Res.string.translation_show_original
                 }
             stringResource(resource, *parameters.toTypedArray())
         }

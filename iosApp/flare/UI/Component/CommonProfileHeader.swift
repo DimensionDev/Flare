@@ -176,6 +176,11 @@ struct CommonProfileHeader: View {
                     case .bot:      Image("fa-robot")
                     }
                 }
+                if user.translationDisplayState != .hidden {
+                    TranslateStatusComponent(data: user.translationDisplayState)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
             }
             if let desc = user.description_ {
                 RichText(text: desc)

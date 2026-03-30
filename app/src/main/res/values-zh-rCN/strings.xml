@@ -92,6 +92,10 @@
     <string name="settings_ai_config_tldr_description">对长篇文章启用 AI 摘要，仅在超过 500 个字符的帖子中可用</string>
     <string name="settings_ai_config_translate_prompt">翻译提示</string>
     <string name="settings_ai_config_tldr_prompt">摘要提示</string>
+    <string name="settings_ai_config_translate_provider">翻译服务提供商</string>
+    <string name="settings_ai_config_translate_provider_description">选择处理翻译的服务提供商</string>
+    <string name="settings_ai_config_translate_provider_ai">AI</string>
+    <string name="settings_ai_config_translate_provider_google">谷歌翻译</string>
     <string name="settings_language_title">语言</string>
     <string name="settings_language_description">更改应用程序的语言</string>
     <string name="settings_rss_management_title">RSS 管理</string>

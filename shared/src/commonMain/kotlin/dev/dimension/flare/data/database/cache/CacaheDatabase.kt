@@ -8,7 +8,7 @@ import androidx.room.TypeConverters
 import androidx.room.immediateTransaction
 import androidx.room.useWriterConnection
 
-internal const val CACHE_DATABASE_VERSION = 29
+internal const val CACHE_DATABASE_VERSION = 32
 
 @Database(
     entities = [
@@ -28,6 +28,7 @@ internal const val CACHE_DATABASE_VERSION = 29
         dev.dimension.flare.data.database.cache.model.DbListPaging::class,
         dev.dimension.flare.data.database.cache.model.DbListMember::class,
         dev.dimension.flare.data.database.cache.model.DbUserRelation::class,
+        dev.dimension.flare.data.database.cache.model.DbTranslation::class,
     ],
     version = CACHE_DATABASE_VERSION,
     exportSchema = false,
@@ -40,6 +41,7 @@ internal const val CACHE_DATABASE_VERSION = 29
     dev.dimension.flare.data.database.cache.model.StatusConverter::class,
     dev.dimension.flare.data.database.cache.model.MessageContentConverters::class,
     dev.dimension.flare.data.database.cache.model.ListContentConverters::class,
+    dev.dimension.flare.data.database.cache.model.TranslationConverters::class,
 )
 @ConstructedBy(CacheDatabaseConstructor::class)
 internal abstract class CacheDatabase : RoomDatabase() {
@@ -56,6 +58,8 @@ internal abstract class CacheDatabase : RoomDatabase() {
     abstract fun messageDao(): dev.dimension.flare.data.database.cache.dao.MessageDao
 
     abstract fun listDao(): dev.dimension.flare.data.database.cache.dao.ListDao
+
+    abstract fun translationDao(): dev.dimension.flare.data.database.cache.dao.TranslationDao
 }
 
 // The Room compiler generates the `actual` implementations.

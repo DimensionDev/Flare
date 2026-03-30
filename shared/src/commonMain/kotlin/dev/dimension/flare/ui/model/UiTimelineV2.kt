@@ -125,6 +125,9 @@ public sealed class UiTimelineV2 {
         val title: String?,
         val description: String?,
         val url: String,
+        internal val sourceLanguages: SerializableImmutableList<String> = persistentListOf(),
+        @Transient
+        public val translationDisplayState: TranslationDisplayState = TranslationDisplayState.Hidden,
         override val createdAt: UiDateTime,
         val source: Source,
         val openInBrowser: Boolean,
@@ -190,6 +193,9 @@ public sealed class UiTimelineV2 {
         val sensitive: Boolean,
         val contentWarning: UiRichText?,
         val user: UiProfile?,
+        internal val sourceLanguages: SerializableImmutableList<String> = persistentListOf(),
+        @Transient
+        public val translationDisplayState: TranslationDisplayState = TranslationDisplayState.Hidden,
         @Transient
         val quote: SerializableImmutableList<Post> = persistentListOf(),
         val content: UiRichText,

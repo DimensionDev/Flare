@@ -12,8 +12,15 @@ import kotlinx.serialization.protobuf.ProtoBuf
 @OptIn(ExperimentalSerializationApi::class)
 internal data class DeeplinkEvent(
     val accountKey: MicroBlogKey,
-    val postEvent: PostEvent,
+    val translationEvent: TranslationEvent? = null,
+    val postEvent: PostEvent? = null,
 ) {
+    init {
+        require((translationEvent == null) xor (postEvent == null)) {
+            "Exactly one deeplink event payload must be provided"
+        }
+    }
+
     companion object {
         const val SCHEME = "flare-event"
 
@@ -26,4 +33,22 @@ internal data class DeeplinkEvent(
     }
 
     fun toUri(): String = "$SCHEME://${ProtoBuf.encodeToHexString(this)}"
+
+    @Serializable
+    sealed interface TranslationEvent {
+        @Serializable
+        data class RetryTranslation(
+            val statusKey: MicroBlogKey,
+        ) : TranslationEvent
+
+        @Serializable
+        data class Translate(
+            val statusKey: MicroBlogKey,
+        ) : TranslationEvent
+
+        @Serializable
+        data class ShowOriginal(
+            val statusKey: MicroBlogKey,
+        ) : TranslationEvent
+    }
 }

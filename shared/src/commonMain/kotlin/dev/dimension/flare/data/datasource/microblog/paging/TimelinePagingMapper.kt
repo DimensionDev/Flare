@@ -8,6 +8,8 @@ import dev.dimension.flare.data.database.cache.model.DbStatusReference
 import dev.dimension.flare.data.database.cache.model.DbStatusReferenceWithStatus
 import dev.dimension.flare.data.database.cache.model.DbStatusWithReference
 import dev.dimension.flare.data.database.cache.model.DbStatusWithUser
+import dev.dimension.flare.data.database.cache.model.TranslationDisplayOptions
+import dev.dimension.flare.data.database.cache.model.applyTranslation
 import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.ReferenceType
@@ -57,16 +59,24 @@ internal object TimelinePagingMapper {
         item: DbPagingTimelineWithStatus,
         pagingKey: String,
         useDbKeyInItemKey: Boolean,
+        translationDisplayOptions: TranslationDisplayOptions,
     ): UiTimelineV2 {
-        val root = dbStatusWithUserToUiTimeline(item.status.status, pagingKey, useDbKeyInItemKey)
+        val root =
+            dbStatusWithUserToUiTimeline(
+                data = item.status.status,
+                pagingKey = pagingKey,
+                useDbKeyInItemKey = useDbKeyInItemKey,
+                translationDisplayOptions = translationDisplayOptions,
+            )
         val references =
             item.status.references.mapNotNull { reference ->
                 reference.status?.let {
                     reference.reference.referenceType to
                         dbStatusWithUserToUiTimeline(
-                            it,
-                            pagingKey,
-                            useDbKeyInItemKey,
+                            data = it,
+                            pagingKey = pagingKey,
+                            useDbKeyInItemKey = useDbKeyInItemKey,
+                            translationDisplayOptions = translationDisplayOptions,
                         )
                 }
             }
@@ -245,8 +255,13 @@ internal object TimelinePagingMapper {
         data: DbStatusWithUser,
         pagingKey: String,
         useDbKeyInItemKey: Boolean,
+        translationDisplayOptions: TranslationDisplayOptions,
     ): UiTimelineV2 {
-        val root = data.data.content
+        val root =
+            data.data.content.applyTranslation(
+                options = translationDisplayOptions,
+                translations = data.translations,
+            )
         return when (root) {
             is UiTimelineV2.Feed -> root
             is UiTimelineV2.Message ->

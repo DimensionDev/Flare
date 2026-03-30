@@ -1,5 +1,6 @@
 package dev.dimension.flare.ui.component.status
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -16,6 +17,7 @@ import dev.dimension.flare.ui.component.DateTimeText
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.model.ClickContext
+import dev.dimension.flare.ui.model.TranslationDisplayState
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.theme.PlatformTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
@@ -56,6 +58,11 @@ internal fun FeedComponent(
                 modifier = Modifier.weight(1f),
                 maxLines = 1,
             )
+            AnimatedVisibility(data.translationDisplayState != TranslationDisplayState.Hidden) {
+                TranslationDisplayBadge(
+                    state = data.translationDisplayState,
+                )
+            }
             data.actualCreatedAt?.let {
                 DateTimeText(
                     it,

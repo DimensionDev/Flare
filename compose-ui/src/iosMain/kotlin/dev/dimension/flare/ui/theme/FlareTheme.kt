@@ -34,7 +34,7 @@ internal fun ProvideThemeSettings(content: @Composable () -> Unit) {
     CompositionLocalProvider(
         LocalAppearanceSettings provides appearanceSettings,
         LocalComponentAppearance provides
-            remember(appearanceSettings, appSettings.aiConfig) {
+            remember(appearanceSettings, appSettings.translateConfig, appSettings.aiConfig.tldr) {
                 ComponentAppearance(
                     dynamicTheme = appearanceSettings.dynamicTheme,
                     avatarShape =
@@ -51,7 +51,7 @@ internal fun ProvideThemeSettings(content: @Composable () -> Unit) {
                     compatLinkPreview = appearanceSettings.compatLinkPreview,
                     aiConfig =
                         ComponentAppearance.AiConfig(
-                            translation = appSettings.aiConfig.translation,
+                            translation = true,
                             tldr = appSettings.aiConfig.tldr,
                         ),
                     fullWidthPost = appearanceSettings.fullWidthPost,

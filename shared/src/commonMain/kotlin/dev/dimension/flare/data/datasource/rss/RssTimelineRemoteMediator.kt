@@ -39,6 +39,7 @@ internal class RssTimelineRemoteMediator(
                             sourceName = title,
                             sourceIcon = icon,
                             openInBrowser = rssSource?.openInBrowser ?: false,
+                            sourceLanguage = null,
                         )
                     }
 
@@ -48,6 +49,7 @@ internal class RssTimelineRemoteMediator(
                             sourceName = title,
                             sourceIcon = icon,
                             openInBrowser = rssSource?.openInBrowser ?: false,
+                            sourceLanguage = null,
                         )
                     }
 
@@ -57,6 +59,7 @@ internal class RssTimelineRemoteMediator(
                             sourceName = title,
                             sourceIcon = icon,
                             openInBrowser = rssSource?.openInBrowser ?: false,
+                            sourceLanguage = response.channel.language,
                         )
                     }
             }

@@ -20,7 +20,7 @@ struct AiConfigScreen: View {
             Section {
                 Picker(
                     selection: Binding(
-                        get: { aiTypeOption(type: presenter.state.aiConfig.type) },
+                        get: { presenter.state.aiType },
                         set: { type in
                             presenter.state.selectType(type: type)
                         }
@@ -34,16 +34,16 @@ struct AiConfigScreen: View {
                     Text("Select AI provider")
                 }
 
-                if isOpenAIType(presenter.state.aiConfig.type) {
+                if presenter.state.aiType == .openAi {
                     Button {
                         beginEditing(
                             field: .serverUrl,
-                            value: openAIValue(presenter.state.aiConfig.type).serverUrl
+                            value: presenter.state.openAIServerUrl
                         )
                     } label: {
                         VStack(alignment: .leading, spacing: 2) {
                             Text("Server URL")
-                            Text(displayText(openAIValue(presenter.state.aiConfig.type).serverUrl))
+                            Text(displayText(presenter.state.openAIServerUrl))
                                 .foregroundStyle(.secondary)
                                 .font(.subheadline)
                         }
@@ -52,16 +52,16 @@ struct AiConfigScreen: View {
                     .transition(.opacity.combined(with: .move(edge: .top)))
                 }
 
-                if isOpenAIType(presenter.state.aiConfig.type) {
+                if presenter.state.aiType == .openAi {
                     Button {
                         beginEditing(
                             field: .apiKey,
-                            value: openAIValue(presenter.state.aiConfig.type).apiKey
+                            value: presenter.state.openAIApiKey
                         )
                     } label: {
                         VStack(alignment: .leading, spacing: 2) {
                             Text("API Key")
-                            Text(displayText(openAIValue(presenter.state.aiConfig.type).apiKey))
+                            Text(displayText(presenter.state.openAIApiKey))
                                 .foregroundStyle(.secondary)
                                 .font(.subheadline)
                         }
@@ -70,33 +70,16 @@ struct AiConfigScreen: View {
                     .transition(.opacity.combined(with: .move(edge: .top)))
                 }
 
-                if isOpenAIType(presenter.state.aiConfig.type) {
-                    let selectedModel = openAIValue(presenter.state.aiConfig.type).model
+                if presenter.state.aiType == .openAi {
+                    let selectedModel = presenter.state.openAIModel
                     Picker(
                         selection: Binding(
-                            get: { String(selectedModel) },
+                            get: { selectedModel },
                             set: { model in
                                 if model.hasPrefix("__meta__") {
                                     return
                                 }
-                                presenter.state.update { current in
-                                    switch onEnum(of: current.type) {
-                                    case .onDevice:
-                                        return current
-                                    case .openAI(let openAI):
-                                        return current.doCopy(
-                                            translation: current.translation,
-                                            tldr: current.tldr,
-                                            type: openAI.doCopy(
-                                                serverUrl: openAI.serverUrl,
-                                                apiKey: openAI.apiKey,
-                                                model: model
-                                            ),
-                                            translatePrompt: current.translatePrompt,
-                                            tldrPrompt: current.tldrPrompt
-                                        )
-                                    }
-                                }
+                                presenter.state.setOpenAIModel(value: model)
                             }
                         )
                     ) {
@@ -127,36 +110,45 @@ struct AiConfigScreen: View {
             }
 
             Section {
-                Toggle(
-                    isOn: Binding(
-                        get: { presenter.state.aiConfig.translation },
-                        set: { newValue in
-                            presenter.state.update { current in
-                                current.doCopy(
-                                    translation: newValue,
-                                    tldr: current.tldr,
-                                    type: current.type,
-                                    translatePrompt: current.translatePrompt,
-                                    tldrPrompt: current.tldrPrompt
-                                )
-                            }
+                Picker(
+                    selection: Binding(
+                        get: { presenter.state.translateProvider },
+                        set: { provider in
+                            presenter.state.selectTranslateProvider(type: provider)
                         }
                     )
                 ) {
-                    Text("ai_config_translate")
-                    Text("Translate text with AI")
+                    ForEach(presenter.state.supportedTranslateProviders, id: \.name) { provider in
+                        Text(translateProviderOptionTitle(option: provider)).tag(provider)
+                    }
+                } label: {
+                    Text("Translation Provider")
+                    Text("Choose which service handles translation")
                 }
 
-                if presenter.state.aiConfig.translation {
+                Toggle(
+                    isOn: Binding(
+                        get: { presenter.state.preTranslate },
+                        set: { newValue in
+                            presenter.state.setPreTranslate(value: newValue)
+                        }
+                    )
+                ) {
+                    Text("ai_config_pre_translate")
+                    Text("ai_config_pre_translate_description")
+                }
+                .transition(.opacity.combined(with: .move(edge: .top)))
+
+                if presenter.state.translateProvider == .ai {
                     Button {
                         beginEditing(
                             field: .translatePrompt,
-                            value: String(presenter.state.aiConfig.translatePrompt)
+                            value: presenter.state.translatePrompt
                         )
                     } label: {
                         VStack(alignment: .leading, spacing: 2) {
                             Text("Translate Prompt")
-                            Text(displayText(String(presenter.state.aiConfig.translatePrompt)))
+                            Text(displayText(presenter.state.translatePrompt))
                                 .foregroundStyle(.secondary)
                                 .font(.subheadline)
                         }
@@ -167,17 +159,9 @@ struct AiConfigScreen: View {
 
                 Toggle(
                     isOn: Binding(
-                        get: { presenter.state.aiConfig.tldr },
+                        get: { presenter.state.aiTldr },
                         set: { newValue in
-                            presenter.state.update { current in
-                                current.doCopy(
-                                    translation: current.translation,
-                                    tldr: newValue,
-                                    type: current.type,
-                                    translatePrompt: current.translatePrompt,
-                                    tldrPrompt: current.tldrPrompt
-                                )
-                            }
+                            presenter.state.setAITldr(value: newValue)
                         }
                     )
                 ) {
@@ -185,16 +169,16 @@ struct AiConfigScreen: View {
                     Text("Summarize long text with AI")
                 }
 
-                if presenter.state.aiConfig.tldr {
+                if presenter.state.aiTldr {
                     Button {
                         beginEditing(
                             field: .tldrPrompt,
-                            value: String(presenter.state.aiConfig.tldrPrompt)
+                            value: presenter.state.tldrPrompt
                         )
                     } label: {
                         VStack(alignment: .leading, spacing: 2) {
                             Text("Summary Prompt")
-                            Text(displayText(String(presenter.state.aiConfig.tldrPrompt)))
+                            Text(displayText(presenter.state.tldrPrompt))
                                 .foregroundStyle(.secondary)
                                 .font(.subheadline)
                         }
@@ -204,9 +188,9 @@ struct AiConfigScreen: View {
                 }
             }
         }
-        .animation(.easeInOut(duration: 0.2), value: isOpenAIType(presenter.state.aiConfig.type))
-        .animation(.easeInOut(duration: 0.2), value: presenter.state.aiConfig.translation)
-        .animation(.easeInOut(duration: 0.2), value: presenter.state.aiConfig.tldr)
+        .animation(.easeInOut(duration: 0.2), value: presenter.state.aiType == .openAi)
+        .animation(.easeInOut(duration: 0.2), value: presenter.state.preTranslate)
+        .animation(.easeInOut(duration: 0.2), value: presenter.state.aiTldr)
         .sheet(item: $editingField) { field in
             NavigationStack {
                 Form {
@@ -264,43 +248,23 @@ struct AiConfigScreen: View {
         .navigationTitle("ai_config_title")
     }
 
-    private func isOpenAIType(_ type: any AppSettingsAiConfigType) -> Bool {
-        switch onEnum(of: type) {
-        case .onDevice:
-            return false
-        case .openAI:
-            return true
-        }
-    }
-
-    private func openAIValue(_ type: any AppSettingsAiConfigType) -> (serverUrl: String, apiKey: String, model: String) {
-        switch onEnum(of: type) {
-        case .onDevice:
-            return ("", "", "")
-        case .openAI(let openAI):
-            return (String(openAI.serverUrl), String(openAI.apiKey), String(openAI.model))
-        }
-    }
-
-    private func aiTypeTitle(type: any AppSettingsAiConfigType) -> LocalizedStringResource {
-        aiTypeOptionTitle(option: aiTypeOption(type: type))
-    }
-
-    private func aiTypeOption(type: any AppSettingsAiConfigType) -> AiTypeOption {
-        switch onEnum(of: type) {
-        case .onDevice:
-            return .onDevice
-        case .openAI:
-            return .openAi
-        }
-    }
-
     private func aiTypeOptionTitle(option: AiTypeOption) -> LocalizedStringResource {
         switch option {
         case .onDevice:
             return "On Device"
         case .openAi:
             return "OpenAI Compatible"
+        }
+    }
+
+    private func translateProviderOptionTitle(option: TranslateProviderOption) -> LocalizedStringResource {
+        switch option {
+        case .ai:
+            return "AI"
+        case .google:
+            return "Google Translate"
+        default:
+            return "AI"
         }
     }
 
@@ -361,51 +325,15 @@ struct AiConfigScreen: View {
     }
 
     private func applyEdit(field: EditableField, value: String) {
-        presenter.state.update { current in
-            switch field {
-            case .serverUrl:
-                switch onEnum(of: current.type) {
-                case .onDevice:
-                    return current
-                case .openAI(let openAI):
-                    return current.doCopy(
-                        translation: current.translation,
-                        tldr: current.tldr,
-                        type: openAI.doCopy(serverUrl: value, apiKey: openAI.apiKey, model: openAI.model),
-                        translatePrompt: current.translatePrompt,
-                        tldrPrompt: current.tldrPrompt
-                    )
-                }
-            case .apiKey:
-                switch onEnum(of: current.type) {
-                case .onDevice:
-                    return current
-                case .openAI(let openAI):
-                    return current.doCopy(
-                        translation: current.translation,
-                        tldr: current.tldr,
-                        type: openAI.doCopy(serverUrl: openAI.serverUrl, apiKey: value, model: openAI.model),
-                        translatePrompt: current.translatePrompt,
-                        tldrPrompt: current.tldrPrompt
-                    )
-                }
-            case .translatePrompt:
-                return current.doCopy(
-                    translation: current.translation,
-                    tldr: current.tldr,
-                    type: current.type,
-                    translatePrompt: value,
-                    tldrPrompt: current.tldrPrompt
-                )
-            case .tldrPrompt:
-                return current.doCopy(
-                    translation: current.translation,
-                    tldr: current.tldr,
-                    type: current.type,
-                    translatePrompt: current.translatePrompt,
-                    tldrPrompt: value
-                )
-            }
+        switch field {
+        case .serverUrl:
+            presenter.state.setOpenAIServerUrl(value: value)
+        case .apiKey:
+            presenter.state.setOpenAIApiKey(value: value)
+        case .translatePrompt:
+            presenter.state.setTranslatePrompt(value: value)
+        case .tldrPrompt:
+            presenter.state.setTldrPrompt(value: value)
         }
     }
 }

@@ -8,13 +8,30 @@ import androidx.paging.PagingState
 import androidx.room.Room
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import dev.dimension.flare.RobolectricTest
+import dev.dimension.flare.common.Locale
+import dev.dimension.flare.common.OnDeviceAI
 import dev.dimension.flare.common.TestFormatter
+import dev.dimension.flare.common.decodeJson
+import dev.dimension.flare.common.encodeJson
+import dev.dimension.flare.createTestRootPath
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.model.TranslationDisplayOptions
+import dev.dimension.flare.data.database.cache.model.TranslationEntityType
+import dev.dimension.flare.data.database.cache.model.TranslationStatus
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.datasource.microblog.paging.TimelinePagingMapper
 import dev.dimension.flare.data.datasource.microblog.paging.TimelineRemoteMediator
+import dev.dimension.flare.data.datastore.AppDataStore
+import dev.dimension.flare.data.datastore.model.AppSettings
+import dev.dimension.flare.data.io.PlatformPathProducer
+import dev.dimension.flare.data.network.ai.AiCompletionService
+import dev.dimension.flare.data.network.ai.OpenAIService
+import dev.dimension.flare.data.translation.OnlinePreTranslationService
+import dev.dimension.flare.data.translation.PreTranslationService
+import dev.dimension.flare.data.translation.aiPreTranslateConfig
+import dev.dimension.flare.deleteTestRootPath
 import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -24,13 +41,26 @@ import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiHandle
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.render.TranslationDocument
+import dev.dimension.flare.ui.render.TranslationTokenKind
 import dev.dimension.flare.ui.render.toUi
 import dev.dimension.flare.ui.render.toUiPlainText
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.yield
+import okio.Path
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
@@ -47,6 +77,17 @@ import kotlin.time.Instant
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class MixedRemoteMediatorTest : RobolectricTest() {
+    private val root = createTestRootPath()
+    private val pathProducer =
+        object : PlatformPathProducer {
+            override fun dataStoreFile(fileName: String): Path = root.resolve(fileName)
+
+            override fun draftMediaFile(
+                groupId: String,
+                fileName: String,
+            ): Path = root.resolve("draft_media").resolve(groupId).resolve(fileName)
+        }
+
     private lateinit var db: CacheDatabase
 
     @BeforeTest
@@ -70,6 +111,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
     fun tearDown() {
         db.close()
         stopKoin()
+        deleteTestRootPath(root)
     }
 
     @Test
@@ -214,7 +256,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                 }
 
             val mixed = MixedRemoteMediator(db, listOf(first, second))
-            val timelineRemoteMediator = TimelineRemoteMediator(loader = mixed, database = db)
+            val timelineRemoteMediator = TimelineRemoteMediator(loader = mixed, database = db, allowLongText = false)
 
             val mediatorResult =
                 timelineRemoteMediator.load(
@@ -298,7 +340,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                     }
                 }
 
-            val mediator = TimelineRemoteMediator(loader = loader, database = db)
+            val mediator = TimelineRemoteMediator(loader = loader, database = db, allowLongText = false)
             val mediatorResult =
                 mediator.load(
                     loadType = LoadType.REFRESH,
@@ -330,11 +372,574 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                         item = page.data.single(),
                         pagingKey = mediator.pagingKey,
                         useDbKeyInItemKey = false,
+                        translationDisplayOptions =
+                            TranslationDisplayOptions(
+                                translationEnabled = false,
+                                autoDisplayEnabled = false,
+                                providerCacheKey = "",
+                            ),
                     ),
                 )
             assertEquals(postC.statusKey, post.statusKey)
             assertEquals(listOf(postA.statusKey, postB.statusKey), post.parents.map { it.statusKey })
         }
+
+    @OptIn(ExperimentalPagingApi::class)
+    @Test
+    fun refreshSchedulesPreTranslationForRootAndReplyReference() =
+        runTest {
+            val appDataStore = AppDataStore(pathProducer)
+            appDataStore.appSettingsStore.updateData {
+                it.copy(
+                    language = Locale.language,
+                    translateConfig = aiPreTranslateConfig(),
+                    aiConfig =
+                        AppSettings.AiConfig(
+                            type = AppSettings.AiConfig.Type.OnDevice,
+                        ),
+                )
+            }
+            val preTranslationService: PreTranslationService =
+                OnlinePreTranslationService(
+                    database = db,
+                    appDataStore = appDataStore,
+                    aiCompletionService = AiCompletionService(OpenAIService(), TestOnDeviceAI()),
+                    coroutineScope = CoroutineScope(Dispatchers.Unconfined),
+                )
+            val accountKey = MicroBlogKey(id = "account-pretranslation", host = "test.social")
+            val accountType = AccountType.Specific(accountKey)
+            val rootUser = profile(MicroBlogKey("root-pretranslation", "test.social"), "Root")
+            val parentUser = profile(MicroBlogKey("parent-pretranslation", "test.social"), "Parent")
+            val parent =
+                createPost(
+                    user = parentUser,
+                    accountType = accountType,
+                    statusKey = MicroBlogKey(id = "parent-status-pretranslation", host = "test.social"),
+                    text = "parent source",
+                )
+            val rootPost =
+                createPost(
+                    user = rootUser,
+                    accountType = accountType,
+                    statusKey = MicroBlogKey(id = "root-status-pretranslation", host = "test.social"),
+                    text = "root source",
+                    parents = listOf(parent),
+                )
+            val loader =
+                FakeLoader("pretranslation") { request ->
+                    when (request) {
+                        PagingRequest.Refresh ->
+                            PagingResult(
+                                data = listOf(rootPost),
+                                nextKey = null,
+                            )
+
+                        is PagingRequest.Append -> error("No append expected")
+                        is PagingRequest.Prepend -> error("No prepend expected")
+                    }
+                }
+            val mediator =
+                TimelineRemoteMediator(
+                    loader = loader,
+                    database = db,
+                    allowLongText = false,
+                    preTranslationService = preTranslationService,
+                )
+
+            val mediatorResult =
+                mediator.load(
+                    loadType = LoadType.REFRESH,
+                    state =
+                        PagingState(
+                            pages = emptyList(),
+                            anchorPosition = null,
+                            config = PagingConfig(pageSize = 20),
+                            leadingPlaceholderCount = 0,
+                        ),
+                )
+            assertTrue(mediatorResult is androidx.paging.RemoteMediator.MediatorResult.Success)
+            val savedRoot = db.statusDao().get(rootPost.statusKey, accountType).first()
+            val savedParent = db.statusDao().get(parent.statusKey, accountType).first()
+            assertNotNull(savedRoot)
+            assertNotNull(savedParent)
+
+            val rootTranslation =
+                db
+                    .translationDao()
+                    .find(
+                        entityType = TranslationEntityType.Status,
+                        entityKey = savedRoot.id,
+                        targetLanguage = Locale.language,
+                    ).filterNotNull()
+                    .first { it.status == TranslationStatus.Completed }
+            val parentTranslation =
+                db
+                    .translationDao()
+                    .find(
+                        entityType = TranslationEntityType.Status,
+                        entityKey = savedParent.id,
+                        targetLanguage = Locale.language,
+                    ).filterNotNull()
+                    .first { it.status == TranslationStatus.Completed }
+
+            assertEquals("root source (${Locale.language})", rootTranslation.payload?.content?.raw)
+            assertEquals("parent source (${Locale.language})", parentTranslation.payload?.content?.raw)
+        }
+
+    @OptIn(ExperimentalPagingApi::class)
+    @Test
+    fun homeTimelineSkipsPreTranslationForLongTextPosts() =
+        runTest {
+            val appDataStore = AppDataStore(pathProducer)
+            appDataStore.appSettingsStore.updateData {
+                it.copy(
+                    language = Locale.language,
+                    translateConfig = aiPreTranslateConfig(),
+                    aiConfig =
+                        AppSettings.AiConfig(
+                            type = AppSettings.AiConfig.Type.OnDevice,
+                        ),
+                )
+            }
+            val preTranslationService: PreTranslationService =
+                OnlinePreTranslationService(
+                    database = db,
+                    appDataStore = appDataStore,
+                    aiCompletionService = AiCompletionService(OpenAIService(), TestOnDeviceAI()),
+                    coroutineScope = CoroutineScope(Dispatchers.Unconfined),
+                )
+            val accountKey = MicroBlogKey(id = "account-longtext-home", host = "test.social")
+            val longText = buildString { repeat(520) { append('长') } }
+            val post =
+                createPost(
+                    accountType = AccountType.Specific(accountKey),
+                    user = profile(MicroBlogKey("user-longtext-home", "test.social"), "User"),
+                    statusKey = MicroBlogKey("status-longtext-home", "test.social"),
+                    text = longText,
+                )
+            val loader =
+                FakeLoader("home") { request ->
+                    when (request) {
+                        PagingRequest.Refresh ->
+                            PagingResult(
+                                data = listOf(post),
+                                nextKey = null,
+                            )
+
+                        is PagingRequest.Append -> error("No append expected")
+                        is PagingRequest.Prepend -> error("No prepend expected")
+                    }
+                }
+            val mediator =
+                TimelineRemoteMediator(
+                    loader = loader,
+                    database = db,
+                    allowLongText = false,
+                    preTranslationService = preTranslationService,
+                )
+
+            val mediatorResult =
+                mediator.load(
+                    loadType = LoadType.REFRESH,
+                    state =
+                        PagingState(
+                            pages = emptyList(),
+                            anchorPosition = null,
+                            config = PagingConfig(pageSize = 20),
+                            leadingPlaceholderCount = 0,
+                        ),
+                )
+            assertTrue(mediatorResult is androidx.paging.RemoteMediator.MediatorResult.Success)
+
+            val savedStatus = db.statusDao().get(post.statusKey, AccountType.Specific(accountKey)).first()
+            assertNotNull(savedStatus)
+            val translation =
+                db.translationDao().get(
+                    entityType = TranslationEntityType.Status,
+                    entityKey = savedStatus.id,
+                    targetLanguage = Locale.language,
+                )
+            assertNull(translation)
+        }
+
+    @OptIn(ExperimentalPagingApi::class)
+    @Test
+    fun homeTimelineSkipsAiTranslationWhenSourceLanguageMatchesTargetLanguage() =
+        runTest {
+            val appDataStore = AppDataStore(pathProducer)
+            appDataStore.appSettingsStore.updateData {
+                it.copy(
+                    language = Locale.language,
+                    translateConfig = aiPreTranslateConfig(),
+                    aiConfig =
+                        AppSettings.AiConfig(
+                            type = AppSettings.AiConfig.Type.OnDevice,
+                        ),
+                )
+            }
+            val preTranslationService: PreTranslationService =
+                OnlinePreTranslationService(
+                    database = db,
+                    appDataStore = appDataStore,
+                    aiCompletionService = AiCompletionService(OpenAIService(), TestOnDeviceAI()),
+                    coroutineScope = CoroutineScope(Dispatchers.Unconfined),
+                )
+            val accountKey = MicroBlogKey(id = "account-same-language", host = "test.social")
+            val post =
+                createPost(
+                    accountType = AccountType.Specific(accountKey),
+                    user = profile(MicroBlogKey("user-same-language", "test.social"), "User"),
+                    statusKey = MicroBlogKey("status-same-language", "test.social"),
+                    text = "已经是中文",
+                ).copy(
+                    sourceLanguages = persistentListOf(Locale.language),
+                )
+            val loader =
+                FakeLoader("home") { request ->
+                    when (request) {
+                        PagingRequest.Refresh ->
+                            PagingResult(
+                                data = listOf(post),
+                                nextKey = null,
+                            )
+
+                        is PagingRequest.Append -> error("No append expected")
+                        is PagingRequest.Prepend -> error("No prepend expected")
+                    }
+                }
+            val mediator =
+                TimelineRemoteMediator(
+                    loader = loader,
+                    database = db,
+                    allowLongText = false,
+                    preTranslationService = preTranslationService,
+                )
+
+            val mediatorResult =
+                mediator.load(
+                    loadType = LoadType.REFRESH,
+                    state =
+                        PagingState(
+                            pages = emptyList(),
+                            anchorPosition = null,
+                            config = PagingConfig(pageSize = 20),
+                            leadingPlaceholderCount = 0,
+                        ),
+                )
+            assertTrue(mediatorResult is androidx.paging.RemoteMediator.MediatorResult.Success)
+
+            val savedStatus = db.statusDao().get(post.statusKey, AccountType.Specific(accountKey)).first()
+            assertNotNull(savedStatus)
+            val translation =
+                withTimeout(5_000) {
+                    db
+                        .translationDao()
+                        .find(
+                            entityType = TranslationEntityType.Status,
+                            entityKey = savedStatus.id,
+                            targetLanguage = Locale.language,
+                        ).filterNotNull()
+                        .first()
+                }
+            assertEquals(TranslationStatus.Skipped, translation.status)
+            assertEquals("source_language_matches_target", translation.statusReason)
+        }
+
+    @OptIn(ExperimentalPagingApi::class)
+    @Test
+    fun homeTimelineAcceptsAiSkippedTranslationResult() =
+        runTest {
+            val appDataStore = AppDataStore(pathProducer)
+            appDataStore.appSettingsStore.updateData {
+                it.copy(
+                    language = Locale.language,
+                    translateConfig = aiPreTranslateConfig(),
+                    aiConfig =
+                        AppSettings.AiConfig(
+                            type = AppSettings.AiConfig.Type.OnDevice,
+                        ),
+                )
+            }
+            val preTranslationService: PreTranslationService =
+                OnlinePreTranslationService(
+                    database = db,
+                    appDataStore = appDataStore,
+                    aiCompletionService = AiCompletionService(OpenAIService(), SkippingOnDeviceAI()),
+                    coroutineScope = CoroutineScope(Dispatchers.Unconfined),
+                )
+            val accountKey = MicroBlogKey(id = "account-ai-skipped", host = "test.social")
+            val post =
+                createPost(
+                    accountType = AccountType.Specific(accountKey),
+                    user = profile(MicroBlogKey("user-ai-skipped", "test.social"), "User"),
+                    statusKey = MicroBlogKey("status-ai-skipped", "test.social"),
+                    text = "already target language",
+                )
+            val loader =
+                FakeLoader("home") { request ->
+                    when (request) {
+                        PagingRequest.Refresh ->
+                            PagingResult(
+                                data = listOf(post),
+                                nextKey = null,
+                            )
+
+                        is PagingRequest.Append -> error("No append expected")
+                        is PagingRequest.Prepend -> error("No prepend expected")
+                    }
+                }
+            val mediator =
+                TimelineRemoteMediator(
+                    loader = loader,
+                    database = db,
+                    allowLongText = false,
+                    preTranslationService = preTranslationService,
+                )
+
+            val mediatorResult =
+                mediator.load(
+                    loadType = LoadType.REFRESH,
+                    state =
+                        PagingState(
+                            pages = emptyList(),
+                            anchorPosition = null,
+                            config = PagingConfig(pageSize = 20),
+                            leadingPlaceholderCount = 0,
+                        ),
+                )
+            assertTrue(mediatorResult is androidx.paging.RemoteMediator.MediatorResult.Success)
+
+            val savedStatus = db.statusDao().get(post.statusKey, AccountType.Specific(accountKey)).first()
+            assertNotNull(savedStatus)
+            val translation =
+                db
+                    .translationDao()
+                    .find(
+                        entityType = TranslationEntityType.Status,
+                        entityKey = savedStatus.id,
+                        targetLanguage = Locale.language,
+                    ).filterNotNull()
+                    .first()
+            assertEquals(TranslationStatus.Skipped, translation.status)
+            assertEquals("same_language", translation.statusReason)
+        }
+
+    @OptIn(ExperimentalPagingApi::class)
+    @Test
+    fun homeTimelineSkipsPreTranslationForNonTranslatableOnlyPosts() =
+        runTest {
+            val appDataStore = AppDataStore(pathProducer)
+            appDataStore.appSettingsStore.updateData {
+                it.copy(
+                    language = Locale.language,
+                    translateConfig = aiPreTranslateConfig(),
+                    aiConfig =
+                        AppSettings.AiConfig(
+                            type = AppSettings.AiConfig.Type.OnDevice,
+                        ),
+                )
+            }
+            val preTranslationService: PreTranslationService =
+                OnlinePreTranslationService(
+                    database = db,
+                    appDataStore = appDataStore,
+                    aiCompletionService = AiCompletionService(OpenAIService(), TestOnDeviceAI()),
+                    coroutineScope = CoroutineScope(Dispatchers.Unconfined),
+                )
+            val accountKey = MicroBlogKey(id = "account-emoji-only", host = "test.social")
+            val post =
+                createPost(
+                    accountType = AccountType.Specific(accountKey),
+                    user = profile(MicroBlogKey("user-emoji-only", "test.social"), "User"),
+                    statusKey = MicroBlogKey("status-emoji-only", "test.social"),
+                    text = "😀🎉✨   #tag https://example.com",
+                )
+            val loader =
+                FakeLoader("home") { request ->
+                    when (request) {
+                        PagingRequest.Refresh ->
+                            PagingResult(
+                                data = listOf(post),
+                                nextKey = null,
+                            )
+
+                        is PagingRequest.Append -> error("No append expected")
+                        is PagingRequest.Prepend -> error("No prepend expected")
+                    }
+                }
+            val mediator =
+                TimelineRemoteMediator(
+                    loader = loader,
+                    database = db,
+                    allowLongText = false,
+                    preTranslationService = preTranslationService,
+                )
+
+            val mediatorResult =
+                mediator.load(
+                    loadType = LoadType.REFRESH,
+                    state =
+                        PagingState(
+                            pages = emptyList(),
+                            anchorPosition = null,
+                            config = PagingConfig(pageSize = 20),
+                            leadingPlaceholderCount = 0,
+                        ),
+                )
+            assertTrue(mediatorResult is androidx.paging.RemoteMediator.MediatorResult.Success)
+
+            val savedStatus = db.statusDao().get(post.statusKey, AccountType.Specific(accountKey)).first()
+            assertNotNull(savedStatus)
+            val translation =
+                db
+                    .translationDao()
+                    .find(
+                        entityType = TranslationEntityType.Status,
+                        entityKey = savedStatus.id,
+                        targetLanguage = Locale.language,
+                    ).filterNotNull()
+                    .first()
+            assertEquals(TranslationStatus.Skipped, translation.status)
+            assertEquals("non_translatable_only", translation.statusReason)
+        }
+
+    @Test
+    fun preTranslationBatchDocumentAllowsMissingTargetLanguageInResponse() {
+        val document =
+            """{"version":1,"items":[]}""".decodeJson(
+                dev.dimension.flare.data.translation.PreTranslationBatchDocument
+                    .serializer(),
+            )
+
+        assertEquals("", document.targetLanguage)
+        assertTrue(document.items.isEmpty())
+    }
+
+    @Test
+    fun preTranslationServiceMarksStaleInFlightTranslationsAsFailedOnStartup() {
+        runBlocking {
+            db.translationDao().insert(
+                dev.dimension.flare.data.database.cache.model.DbTranslation(
+                    entityType = TranslationEntityType.Status,
+                    entityKey = "status:stale-in-flight",
+                    targetLanguage = Locale.language,
+                    sourceHash = "hash-stale",
+                    status = TranslationStatus.Translating,
+                    updatedAt = 1L,
+                ),
+            )
+
+            val appDataStore = AppDataStore(pathProducer)
+            appDataStore.appSettingsStore.updateData {
+                it.copy(
+                    language = Locale.language,
+                    translateConfig = aiPreTranslateConfig(),
+                    aiConfig =
+                        AppSettings.AiConfig(
+                            type = AppSettings.AiConfig.Type.OnDevice,
+                        ),
+                )
+            }
+            val scope = CoroutineScope(Dispatchers.Unconfined + SupervisorJob())
+
+            OnlinePreTranslationService(
+                database = db,
+                appDataStore = appDataStore,
+                aiCompletionService = AiCompletionService(OpenAIService(), TestOnDeviceAI()),
+                coroutineScope = scope,
+            )
+
+            yield()
+
+            val cleaned =
+                db.translationDao().get(
+                    entityType = TranslationEntityType.Status,
+                    entityKey = "status:stale-in-flight",
+                    targetLanguage = Locale.language,
+                )
+            assertNotNull(cleaned)
+            assertEquals(TranslationStatus.Failed, cleaned.status)
+            assertEquals("stale_in_flight", cleaned.statusReason)
+
+            scope.coroutineContext[Job]?.cancel()
+        }
+    }
+
+    @Test
+    fun queuedPreTranslationWritesPendingBeforeExecutionStarts() {
+        runBlocking {
+            val appDataStore = AppDataStore(pathProducer)
+            appDataStore.appSettingsStore.updateData {
+                it.copy(
+                    language = Locale.language,
+                    translateConfig = aiPreTranslateConfig(),
+                    aiConfig =
+                        AppSettings.AiConfig(
+                            type = AppSettings.AiConfig.Type.OnDevice,
+                        ),
+                )
+            }
+            val started = CompletableDeferred<Unit>()
+            val release = CompletableDeferred<Unit>()
+            val scope = CoroutineScope(Dispatchers.Unconfined + SupervisorJob())
+            val preTranslationService: PreTranslationService =
+                OnlinePreTranslationService(
+                    database = db,
+                    appDataStore = appDataStore,
+                    aiCompletionService = AiCompletionService(OpenAIService(), BlockingOnDeviceAI(started, release)),
+                    coroutineScope = scope,
+                )
+            try {
+                val accountKey = MicroBlogKey(id = "account-pending-queue", host = "test.social")
+                val accountType = AccountType.Specific(accountKey)
+                val firstStatus =
+                    TimelinePagingMapper
+                        .toDb(
+                            createPost(
+                                accountType = accountType,
+                                user = profile(MicroBlogKey("user-pending-1", "test.social"), "User"),
+                                statusKey = MicroBlogKey("status-pending-1", "test.social"),
+                                text = "first source",
+                            ),
+                            pagingKey = "home",
+                        ).status.status.data
+                val secondStatus =
+                    TimelinePagingMapper
+                        .toDb(
+                            createPost(
+                                accountType = accountType,
+                                user = profile(MicroBlogKey("user-pending-2", "test.social"), "User"),
+                                statusKey = MicroBlogKey("status-pending-2", "test.social"),
+                                text = "second source",
+                            ),
+                            pagingKey = "home",
+                        ).status.status.data
+
+                preTranslationService.enqueueStatuses(listOf(firstStatus), allowLongText = false)
+                withTimeout(5_000) {
+                    started.await()
+                }
+
+                preTranslationService.enqueueStatuses(listOf(secondStatus), allowLongText = false)
+
+                val pendingTranslation =
+                    withTimeout(5_000) {
+                        db
+                            .translationDao()
+                            .find(
+                                entityType = TranslationEntityType.Status,
+                                entityKey = secondStatus.id,
+                                targetLanguage = Locale.language,
+                            ).filterNotNull()
+                            .first { it.status == TranslationStatus.Pending }
+                    }
+                assertEquals(TranslationStatus.Pending, pendingTranslation.status)
+            } finally {
+                release.complete(Unit)
+                scope.coroutineContext[Job]?.cancelAndJoin()
+            }
+        }
+    }
 
     @Test
     fun refreshDeduplicatesSamePostReturnedByMultipleSubTimelines() =
@@ -528,3 +1133,143 @@ class MixedRemoteMediatorTest : RobolectricTest() {
             accountType = accountType,
         )
 }
+
+private class TestOnDeviceAI : OnDeviceAI {
+    override suspend fun isAvailable(): Boolean = true
+
+    override suspend fun translate(
+        source: String,
+        targetLanguage: String,
+        prompt: String,
+    ): String? {
+        val document =
+            source.decodeJson(
+                dev.dimension.flare.data.translation.PreTranslationBatchDocument
+                    .serializer(),
+            )
+        return document
+            .copy(
+                items =
+                    document.items.map { item ->
+                        item.copy(
+                            status = dev.dimension.flare.data.translation.PreTranslationBatchItemStatus.Completed,
+                            payload = requireNotNull(item.payload).translated(targetLanguage),
+                            reason = null,
+                        )
+                    },
+            ).encodeJson(
+                dev.dimension.flare.data.translation.PreTranslationBatchDocument
+                    .serializer(),
+            )
+    }
+
+    override suspend fun tldr(
+        source: String,
+        targetLanguage: String,
+        prompt: String,
+    ): String? = null
+}
+
+private class BlockingOnDeviceAI(
+    private val started: CompletableDeferred<Unit>,
+    private val release: CompletableDeferred<Unit>,
+) : OnDeviceAI {
+    override suspend fun isAvailable(): Boolean = true
+
+    override suspend fun translate(
+        source: String,
+        targetLanguage: String,
+        prompt: String,
+    ): String? {
+        started.complete(Unit)
+        release.await()
+        val document =
+            source.decodeJson(
+                dev.dimension.flare.data.translation.PreTranslationBatchDocument
+                    .serializer(),
+            )
+        return document
+            .copy(
+                items =
+                    document.items.map { item ->
+                        item.copy(
+                            status = dev.dimension.flare.data.translation.PreTranslationBatchItemStatus.Completed,
+                            payload = requireNotNull(item.payload).translated(targetLanguage),
+                            reason = null,
+                        )
+                    },
+            ).encodeJson(
+                dev.dimension.flare.data.translation.PreTranslationBatchDocument
+                    .serializer(),
+            )
+    }
+
+    override suspend fun tldr(
+        source: String,
+        targetLanguage: String,
+        prompt: String,
+    ): String? = null
+}
+
+private class SkippingOnDeviceAI : OnDeviceAI {
+    override suspend fun isAvailable(): Boolean = true
+
+    override suspend fun translate(
+        source: String,
+        targetLanguage: String,
+        prompt: String,
+    ): String? {
+        val document =
+            source.decodeJson(
+                dev.dimension.flare.data.translation.PreTranslationBatchDocument
+                    .serializer(),
+            )
+        return document
+            .copy(
+                items =
+                    document.items.map { item ->
+                        item.copy(
+                            status = dev.dimension.flare.data.translation.PreTranslationBatchItemStatus.Skipped,
+                            payload = null,
+                            reason = "same_language",
+                        )
+                    },
+            ).encodeJson(
+                dev.dimension.flare.data.translation.PreTranslationBatchDocument
+                    .serializer(),
+            )
+    }
+
+    override suspend fun tldr(
+        source: String,
+        targetLanguage: String,
+        prompt: String,
+    ): String? = null
+}
+
+private fun dev.dimension.flare.data.translation.PreTranslationBatchPayload.translated(
+    targetLanguage: String,
+): dev.dimension.flare.data.translation.PreTranslationBatchPayload =
+    dev.dimension.flare.data.translation.PreTranslationBatchPayload(
+        content = content?.translated(targetLanguage),
+        contentWarning = contentWarning?.translated(targetLanguage),
+        title = title?.translated(targetLanguage),
+        description = description?.translated(targetLanguage),
+    )
+
+private fun TranslationDocument.translated(targetLanguage: String): TranslationDocument =
+    copy(
+        blocks =
+            blocks.map { block ->
+                block.copy(
+                    tokens =
+                        block.tokens.map { token ->
+                            if (token.kind == TranslationTokenKind.Translatable) {
+                                token.copy(text = "${token.text} ($targetLanguage)")
+                            } else {
+                                token
+                            }
+                        },
+                )
+            },
+    )

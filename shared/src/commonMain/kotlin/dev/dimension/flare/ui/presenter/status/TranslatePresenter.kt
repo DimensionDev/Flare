@@ -3,69 +3,80 @@ package dev.dimension.flare.ui.presenter.status
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.produceState
 import dev.dimension.flare.common.Locale
-import dev.dimension.flare.common.OnDeviceAI
+import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.model.DbTranslation
+import dev.dimension.flare.data.database.cache.model.TranslationDisplayMode
+import dev.dimension.flare.data.database.cache.model.TranslationEntityType
+import dev.dimension.flare.data.database.cache.model.TranslationPayload
+import dev.dimension.flare.data.database.cache.model.TranslationStatus
+import dev.dimension.flare.data.database.cache.model.sourceHash
 import dev.dimension.flare.data.datastore.AppDataStore
-import dev.dimension.flare.data.datastore.model.AiPromptDefaults
-import dev.dimension.flare.data.datastore.model.AppSettings
-import dev.dimension.flare.data.network.ai.OpenAIService
-import dev.dimension.flare.data.network.ktorClient
+import dev.dimension.flare.data.network.ai.AiCompletionService
+import dev.dimension.flare.data.repository.tryRun
+import dev.dimension.flare.data.translation.TranslationPromptFormatter
+import dev.dimension.flare.data.translation.TranslationProvider
+import dev.dimension.flare.data.translation.TranslationResponseSanitizer
+import dev.dimension.flare.data.translation.translationProviderCacheKey
+import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.render.UiRichText
+import dev.dimension.flare.ui.render.applyTranslationJson
 import dev.dimension.flare.ui.render.toTranslatableText
+import dev.dimension.flare.ui.render.toTranslationJson
 import dev.dimension.flare.ui.render.toUiPlainText
-import io.ktor.client.call.body
-import io.ktor.client.request.get
-import io.ktor.client.request.parameter
-import io.ktor.client.request.url
 import kotlinx.coroutines.flow.first
-import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.jsonArray
-import kotlinx.serialization.json.jsonPrimitive
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import kotlin.time.Clock
 
 public class TranslatePresenter(
     private val source: UiRichText,
     private val targetLanguage: String = Locale.language,
+    private val cacheTarget: TranslateCacheTarget? = null,
 ) : PresenterBase<UiState<UiRichText>>(),
     KoinComponent {
-    private val openAIService by inject<OpenAIService>()
+    private val aiCompletionService by inject<AiCompletionService>()
     private val appDataStore: AppDataStore by inject()
-    private val onDeviceAI: OnDeviceAI by inject()
+    private val database: CacheDatabase by inject()
     private val sourceText: String by lazy { source.toTranslatableText() }
+    private val sourceJson: String by lazy { source.toTranslationJson(targetLanguage) }
 
     @Composable
     override fun body(): UiState<UiRichText> {
         return produceState<UiState<UiRichText>>(initialValue = UiState.Loading()) {
             value =
-                runCatching {
-                    val aiConfig =
+                tryRun {
+                    val settings =
                         appDataStore.appSettingsStore.data
                             .first()
-                            .aiConfig
-                    if (!aiConfig.translation) {
-                        return@runCatching toUiRichText(legacyGoogleTranslate())
+                    val providerCacheKey = settings.translationProviderCacheKey()
+                    cachedTranslation(providerCacheKey)?.let {
+                        return@tryRun it
                     }
-                    val promptTemplate =
-                        aiConfig.translatePrompt.ifBlank {
-                            AiPromptDefaults.TRANSLATE_PROMPT
-                        }
-                    val prompt = buildTranslatePrompt(promptTemplate, targetLanguage, source)
-                    when (val type = aiConfig.type) {
-                        AppSettings.AiConfig.Type.OnDevice ->
-                            onDeviceAI.translate(sourceText, targetLanguage, prompt) ?: legacyGoogleTranslate()
-                        is AppSettings.AiConfig.Type.OpenAI -> {
-                            if (type.serverUrl.isBlank() || type.apiKey.isBlank() || type.model.isBlank()) {
-                                legacyGoogleTranslate()
-                            } else {
-                                openAIService.chatCompletion(
-                                    config = type,
-                                    prompt = prompt,
-                                )
-                            }
-                        }
-                    }.let(::toUiRichText)
+                    val prompt =
+                        TranslationPromptFormatter.buildTranslatePrompt(
+                            settings = settings,
+                            targetLanguage = targetLanguage,
+                            sourceText = sourceText,
+                            sourceJson = sourceJson,
+                        )
+                    val translatedContent =
+                        TranslationProvider.translateDocumentJson(
+                            settings = settings,
+                            aiCompletionService = aiCompletionService,
+                            sourceText = sourceText,
+                            sourceJson = sourceJson,
+                            targetLanguage = targetLanguage,
+                            prompt = prompt,
+                        )
+                    if (translatedContent != null) {
+                        val translated = toUiRichText(translatedContent)
+                        cacheTranslation(translated, providerCacheKey)
+                        return@tryRun translated
+                    }
+                    error("Translation returned empty response")
                 }.fold(
                     onSuccess = { UiState.Success(it) },
                     onFailure = { UiState.Error(it) },
@@ -73,49 +84,121 @@ public class TranslatePresenter(
         }.value
     }
 
-    private suspend fun legacyGoogleTranslate(): String {
-        val baseUrl = "https://translate.google.com/translate_a/single"
-        val response =
-            ktorClient()
-                .get {
-                    url(baseUrl)
-                    parameter("client", "gtx")
-                    parameter("sl", "auto")
-                    parameter("tl", targetLanguage)
-                    parameter("dt", "t")
-                    parameter("q", sourceText)
-                    parameter("ie", "UTF-8")
-                    parameter("oe", "UTF-8")
-                }.body<JsonArray>()
-        return buildString {
-            response.firstOrNull()?.jsonArray?.forEach {
-                it.jsonArray.firstOrNull()?.let {
-                    val content = it.jsonPrimitive.content
-                    if (content.isNotEmpty()) {
-                        append(content)
-                        append("\n")
-                    }
+    private fun toUiRichText(translatedContent: String): UiRichText =
+        TranslationResponseSanitizer
+            .clean(translatedContent)
+            .let { cleaned ->
+                tryRun {
+                    source.applyTranslationJson(cleaned)
+                }.getOrElse {
+                    cleaned.toUiPlainText()
                 }
             }
+
+    private suspend fun cachedTranslation(providerCacheKey: String): UiRichText? {
+        val target = cacheTarget ?: return null
+        val translation =
+            database
+                .translationDao()
+                .get(
+                    entityType = TranslationEntityType.Status,
+                    entityKey = target.entityKey(),
+                    targetLanguage = targetLanguage,
+                ) ?: return null
+        if (translation.sourceHash != target.sourcePayload().sourceHash(providerCacheKey)) {
+            return null
+        }
+        return when (translation.status) {
+            TranslationStatus.Completed -> target.readField(translation.payload)
+            TranslationStatus.Skipped -> source
+            TranslationStatus.Pending,
+            TranslationStatus.Translating,
+            TranslationStatus.Failed,
+            -> null
         }
     }
 
-    private fun buildTranslatePrompt(
-        template: String,
-        targetLanguage: String,
-        source: UiRichText,
-    ): String =
-        template
-            .replace("{target_language}", targetLanguage)
-            .replace("{source_text}", sourceText)
-            .replace("{source_html}", sourceText)
-
-    private fun toUiRichText(translatedContent: String): UiRichText =
-        translatedContent
-            .removePrefix("```html")
-            .removePrefix("```text")
-            .removePrefix("```")
-            .removeSuffix("```")
-            .trim()
-            .toUiPlainText()
+    private suspend fun cacheTranslation(
+        translated: UiRichText,
+        providerCacheKey: String,
+    ) {
+        val target = cacheTarget ?: return
+        val sourcePayload = target.sourcePayload()
+        val existing =
+            database
+                .translationDao()
+                .get(
+                    entityType = TranslationEntityType.Status,
+                    entityKey = target.entityKey(),
+                    targetLanguage = targetLanguage,
+                )
+        val mergedPayload =
+            target.mergePayload(
+                existing = existing?.takeIf { it.sourceHash == sourcePayload.sourceHash(providerCacheKey) }?.payload,
+                translated = translated,
+            )
+        database.translationDao().insert(
+            DbTranslation(
+                entityType = TranslationEntityType.Status,
+                entityKey = target.entityKey(),
+                targetLanguage = targetLanguage,
+                sourceHash = sourcePayload.sourceHash(providerCacheKey),
+                status = TranslationStatus.Completed,
+                displayMode = TranslationDisplayMode.Translated,
+                payload = mergedPayload,
+                statusReason = null,
+                attemptCount = existing?.attemptCount ?: 0,
+                updatedAt = Clock.System.now().toEpochMilliseconds(),
+            ),
+        )
+    }
 }
+
+public data class TranslateCacheTarget(
+    val accountType: AccountType,
+    val statusKey: MicroBlogKey,
+    val payload: StatusTranslationPayload,
+    val field: Field,
+) {
+    public enum class Field {
+        Content,
+        ContentWarning,
+    }
+}
+
+public data class StatusTranslationPayload(
+    val content: UiRichText,
+    val contentWarning: UiRichText?,
+)
+
+private fun TranslateCacheTarget.entityKey(): String = "${accountType}_$statusKey"
+
+private fun TranslateCacheTarget.sourcePayload(): TranslationPayload =
+    TranslationPayload(
+        content = payload.content,
+        contentWarning = payload.contentWarning,
+    )
+
+private fun TranslateCacheTarget.readField(payload: TranslationPayload?): UiRichText? =
+    when (field) {
+        TranslateCacheTarget.Field.Content -> payload?.content
+        TranslateCacheTarget.Field.ContentWarning -> payload?.contentWarning
+    }
+
+private fun TranslateCacheTarget.mergePayload(
+    existing: TranslationPayload?,
+    translated: UiRichText,
+): TranslationPayload =
+    when (field) {
+        TranslateCacheTarget.Field.Content ->
+            TranslationPayload(
+                content = translated,
+                contentWarning = existing?.contentWarning,
+            )
+
+        TranslateCacheTarget.Field.ContentWarning ->
+            TranslationPayload(
+                content = existing?.content,
+                contentWarning = translated,
+            )
+    }

@@ -4,6 +4,7 @@ import dev.dimension.flare.data.database.provideAppDatabase
 import dev.dimension.flare.data.database.provideCacheDatabase
 import dev.dimension.flare.data.datasource.nostr.DatabaseNostrCache
 import dev.dimension.flare.data.datasource.nostr.NostrCache
+import dev.dimension.flare.data.network.ai.AiCompletionService
 import dev.dimension.flare.data.network.ai.OpenAIService
 import dev.dimension.flare.data.network.rss.Readability
 import dev.dimension.flare.data.repository.AccountRepository
@@ -15,6 +16,8 @@ import dev.dimension.flare.data.repository.DraftSendingRecoveryCoordinator
 import dev.dimension.flare.data.repository.LocalFilterRepository
 import dev.dimension.flare.data.repository.SearchHistoryRepository
 import dev.dimension.flare.data.repository.SettingsRepository
+import dev.dimension.flare.data.translation.OnlinePreTranslationService
+import dev.dimension.flare.data.translation.PreTranslationService
 import dev.dimension.flare.ui.presenter.compose.ComposeUseCase
 import dev.dimension.flare.ui.presenter.compose.RestoreDraftUseCase
 import dev.dimension.flare.ui.presenter.compose.SaveDraftUseCase
@@ -59,4 +62,6 @@ internal val commonModule =
         singleOf(::SettingsRepository)
         singleOf(::Readability)
         singleOf(::OpenAIService)
+        singleOf(::AiCompletionService)
+        single<PreTranslationService> { OnlinePreTranslationService(get(), get(), get(), get()) }
     }

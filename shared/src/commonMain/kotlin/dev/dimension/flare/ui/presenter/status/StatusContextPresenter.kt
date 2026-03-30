@@ -69,6 +69,8 @@ public class StatusContextPresenter(
 
     private val timelinePresenter by lazy {
         object : TimelinePresenter() {
+            override fun allowLongTextTranslationDisplay(loader: RemoteLoader<UiTimelineV2>): Boolean = true
+
             override val loader: Flow<RemoteLoader<UiTimelineV2>> by lazy {
                 currentStatusFlow
                     .map { statusKey }

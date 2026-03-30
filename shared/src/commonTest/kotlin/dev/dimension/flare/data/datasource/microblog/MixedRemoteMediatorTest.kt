@@ -391,7 +391,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
             val appDataStore = AppDataStore(pathProducer)
             appDataStore.appSettingsStore.updateData {
                 it.copy(
-                    language = "zh-CN",
+                    language = Locale.language,
                     translateConfig = aiPreTranslateConfig(),
                     aiConfig =
                         AppSettings.AiConfig(
@@ -493,7 +493,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
             val appDataStore = AppDataStore(pathProducer)
             appDataStore.appSettingsStore.updateData {
                 it.copy(
-                    language = "zh-CN",
+                    language = Locale.language,
                     translateConfig = aiPreTranslateConfig(),
                     aiConfig =
                         AppSettings.AiConfig(
@@ -569,7 +569,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
             val appDataStore = AppDataStore(pathProducer)
             appDataStore.appSettingsStore.updateData {
                 it.copy(
-                    language = "zh-CN",
+                    language = Locale.language,
                     translateConfig = aiPreTranslateConfig(),
                     aiConfig =
                         AppSettings.AiConfig(
@@ -652,7 +652,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
             val appDataStore = AppDataStore(pathProducer)
             appDataStore.appSettingsStore.updateData {
                 it.copy(
-                    language = "zh-CN",
+                    language = Locale.language,
                     translateConfig = aiPreTranslateConfig(),
                     aiConfig =
                         AppSettings.AiConfig(
@@ -731,7 +731,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
             val appDataStore = AppDataStore(pathProducer)
             appDataStore.appSettingsStore.updateData {
                 it.copy(
-                    language = "zh-CN",
+                    language = Locale.language,
                     translateConfig = aiPreTranslateConfig(),
                     aiConfig =
                         AppSettings.AiConfig(
@@ -832,7 +832,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
             val appDataStore = AppDataStore(pathProducer)
             appDataStore.appSettingsStore.updateData {
                 it.copy(
-                    language = "zh-CN",
+                    language = Locale.language,
                     translateConfig = aiPreTranslateConfig(),
                     aiConfig =
                         AppSettings.AiConfig(
@@ -871,7 +871,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
             val appDataStore = AppDataStore(pathProducer)
             appDataStore.appSettingsStore.updateData {
                 it.copy(
-                    language = "zh-CN",
+                    language = Locale.language,
                     translateConfig = aiPreTranslateConfig(),
                     aiConfig =
                         AppSettings.AiConfig(

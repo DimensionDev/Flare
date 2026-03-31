@@ -5,7 +5,7 @@
 [![Telegram](https://img.shields.io/badge/-telegram-blue?logo=telegram&color=white)](https://t.me/+0UtcP6_qcDoyOWE1)
 [![Discord](https://img.shields.io/badge/-discord-blue?logo=discord&color=white)](https://discord.gg/De9NhXBryT)
 
-![badge-Android](https://img.shields.io/badge/Android-6.0-3DDC84)
+![badge-Android](https://img.shields.io/badge/Android-8.0-3DDC84)
 ![badge-iOS](https://img.shields.io/badge/iOS-17.0-black)
 ![badge-Windows](https://img.shields.io/badge/Windows_10-1809-blue)
 ![badge-macOS](https://img.shields.io/badge/macOS-Sonoma-black)

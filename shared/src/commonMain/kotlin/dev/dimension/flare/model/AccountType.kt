@@ -24,11 +24,27 @@ public sealed class AccountType {
     public data object Guest : AccountType(), DbAccountType {
         override fun toString(): String = "guest"
     }
+
+    @Serializable
+    @Immutable
+    public data class GuestHost(
+        val host: String,
+    ) : AccountType(),
+        DbAccountType {
+        override fun toString(): String = "guest_$host"
+    }
 }
 
 internal fun MicroBlogKey?.toAccountType(): AccountType =
     if (this == null) {
         AccountType.Guest
+    } else {
+        AccountType.Specific(this)
+    }
+
+internal fun MicroBlogKey?.toAccountType(guestHost: String): AccountType =
+    if (this == null) {
+        AccountType.GuestHost(guestHost)
     } else {
         AccountType.Specific(this)
     }

@@ -230,7 +230,9 @@ internal fun accountProvider(
         key1 = accountType,
     ) {
         when (accountType) {
-            AccountType.Guest ->
+            AccountType.Guest,
+            is AccountType.GuestHost,
+            ->
                 flowOf(
                     UiState.Error(
                         NoActiveAccountException,
@@ -267,6 +269,15 @@ internal fun accountServiceFlow(
             flowOf(
                 PlatformType.Mastodon.spec.guestDataSource(
                     host = "mastodon.social",
+                    locale = Locale.language,
+                ),
+            )
+        }
+
+        is AccountType.GuestHost -> {
+            flowOf(
+                PlatformType.Mastodon.spec.guestDataSource(
+                    host = accountType.host,
                     locale = Locale.language,
                 ),
             )

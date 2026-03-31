@@ -59,20 +59,20 @@ internal class GuestMastodonDataSource(
     override val relationHandler by lazy {
         RelationHandler(
             dataSource = loader,
-            accountType = AccountType.Guest,
+            accountType = AccountType.GuestHost(host),
         )
     }
 
     override val postHandler by lazy {
         PostHandler(
-            accountType = AccountType.Guest,
+            accountType = AccountType.GuestHost(host),
             loader = loader,
         )
     }
 
     override val postEventHandler by lazy {
         PostEventHandler(
-            accountType = AccountType.Guest,
+            accountType = AccountType.GuestHost(host),
             handler = this,
         )
     }

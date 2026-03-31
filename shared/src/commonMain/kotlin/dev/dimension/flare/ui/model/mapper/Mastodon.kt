@@ -555,7 +555,7 @@ private fun Status.renderStatus(
                                                             if (accountKey != null) {
                                                                 AccountType.Specific(accountKey)
                                                             } else {
-                                                                AccountType.Guest
+                                                                AccountType.GuestHost(host)
                                                             },
                                                         shareUrl = postUrl,
                                                     ),
@@ -607,7 +607,7 @@ private fun Status.renderStatus(
                                                                 if (accountKey != null) {
                                                                     AccountType.Specific(accountKey)
                                                                 } else {
-                                                                    AccountType.Guest
+                                                                    AccountType.GuestHost(host)
                                                                 },
                                                         ),
                                                 ),
@@ -682,12 +682,12 @@ private fun Status.renderStatus(
                         statusKey = statusKey,
                         accountType =
                             accountKey?.let { AccountType.Specific(it) }
-                                ?: AccountType.Guest,
+                                ?: AccountType.GuestHost(host),
                     ),
             ),
         platformType = PlatformType.Mastodon,
         emojiReactions = reactions,
-        accountType = accountKey.toAccountType(),
+        accountType = accountKey.toAccountType(guestHost = host),
     )
 }
 
@@ -920,6 +920,7 @@ internal fun Account.render(
             parseNote(
                 this,
                 accountKey = accountKey,
+                host = host,
             ),
         matrices =
             UiProfile.Matrices(
@@ -968,7 +969,7 @@ internal fun Account.render(
                                 AccountType.Specific(
                                     it,
                                 )
-                            } ?: AccountType.Guest,
+                            } ?: AccountType.GuestHost(host),
                         userKey = userKey,
                     ),
             ),
@@ -978,6 +979,7 @@ internal fun Account.render(
 private fun parseNote(
     account: Account,
     accountKey: MicroBlogKey?,
+    host: String,
 ): UiRichText {
     val emoji = account.emojis.orEmpty()
     var content = account.note.orEmpty()
@@ -989,7 +991,7 @@ private fun parseNote(
             )
     }
     return parseHtml(content).let {
-        updateHtmlTagToken(it, accountKey)
+        updateHtmlTagToken(it, accountKey, host)
         it.toUi()
     }
 }
@@ -997,6 +999,7 @@ private fun parseNote(
 private fun updateHtmlTagToken(
     node: Node,
     accountKey: MicroBlogKey?,
+    host: String,
 ) {
     if (node is Element && node.nameIs("a")) {
         val text = node.text()
@@ -1012,7 +1015,7 @@ private fun updateHtmlTagToken(
                         .Search(
                             accountType =
                                 accountKey?.let { AccountType.Specific(it) }
-                                    ?: AccountType.Guest,
+                                    ?: AccountType.GuestHost(host),
                             query = "#${token.value.trim('#')}",
                         ).toUri(),
                 )
@@ -1029,7 +1032,7 @@ private fun updateHtmlTagToken(
                         .UserNameWithHost(
                             accountType =
                                 accountKey?.let { AccountType.Specific(it) }
-                                    ?: AccountType.Guest,
+                                    ?: AccountType.GuestHost(host),
                             userName = name,
                             host = actualHost,
                         ).toUri(),
@@ -1043,6 +1046,7 @@ private fun updateHtmlTagToken(
         updateHtmlTagToken(
             it,
             accountKey = accountKey,
+            host = host,
         )
     }
 }
@@ -1114,7 +1118,7 @@ private fun replaceMentionAndHashtag(
                             .User(
                                 accountType =
                                     accountKey?.let { AccountType.Specific(it) }
-                                        ?: AccountType.Guest,
+                                        ?: AccountType.GuestHost(host),
                                 userKey = MicroBlogKey(id, host),
                             ).toUri(),
                     )
@@ -1125,24 +1129,24 @@ private fun replaceMentionAndHashtag(
                     DeeplinkRoute
                         .Search(
                             accountKey?.let { AccountType.Specific(it) }
-                                ?: AccountType.Guest,
+                                ?: AccountType.GuestHost(host),
                             node.text(),
                         ).toUri(),
                 )
             } else if (!href.isNullOrEmpty() && c != null && c.contains("mention")) {
                 val url = Url(href)
-                val host = url.host
+                val mentionHost = url.host
                 val name = url.segments.getOrNull(1)?.removePrefix("@")
-                if (!name.isNullOrEmpty() && host.isNotEmpty()) {
+                if (!name.isNullOrEmpty() && mentionHost.isNotEmpty()) {
                     node.attributes().put(
                         "href",
                         DeeplinkRoute.Profile
                             .UserNameWithHost(
                                 accountType =
                                     accountKey?.let { AccountType.Specific(it) }
-                                        ?: AccountType.Guest,
+                                        ?: AccountType.GuestHost(host),
                                 userName = name,
-                                host = host,
+                                host = mentionHost,
                             ).toUri(),
                     )
                 }

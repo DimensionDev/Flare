@@ -11,7 +11,11 @@ struct RssScreen: View {
     var body: some View {
         List {
             ForEach(presenter.state.sources, id: \.id) { item in
-                NavigationLink(value: Route.timeline(RssTimelineTabItem(data: item))) {
+                NavigationLink(value: Route.timeline(
+                    item.type == SubscriptionType.rss
+                        ? RssTimelineTabItem(data: item) as TimelineTabItem
+                        : SubscriptionTimelineTabItem(data: item) as TimelineTabItem
+                )) {
                     HStack {
                         UiRssView(data: item)
                         Spacer()
@@ -25,6 +29,7 @@ struct RssScreen: View {
                 }
                 .swipeActions {
                     Button(role: .destructive) {
+                        presenter.state.delete(id: Int32(item.id))
                     } label: {
                         Label {
                             Text("delete")
@@ -111,6 +116,7 @@ struct EditRssSheet: View {
     @State private var rssHubHost: String = ""
     @State private var openInApp: Bool = true
     @State private var selectedRssSources: [UiRssSource] = []
+    @State private var selectedMastodonTypes: [SubscriptionType] = []
     @State private var showFileImporter = false
     var body: some View {
         Form {
@@ -127,6 +133,8 @@ struct EditRssSheet: View {
                                 Image("fa-circle-chevron-down").foregroundColor(.secondary)
                             case .rssSources:
                                 Image("fa-circle-chevron-down").foregroundColor(.secondary)
+                            case .mastodonInstance:
+                                Image("fa-circle-check").foregroundColor(.green)
                             }
                         } errorContent: { _ in
                             Image("fa-circle-exclamation").foregroundColor(.red)
@@ -140,6 +148,7 @@ struct EditRssSheet: View {
             } header: {
                 Text("rss_url_header")
             } footer: {
+                Text("subscription_url_hint")
                 if url.isEmpty && id == nil {
                     Button("opml_import") {
                         showFileImporter = true
@@ -262,18 +271,52 @@ struct EditRssSheet: View {
                     } header: {
                         Text("rss_hub_server_header")
                     }
+                case .mastodonInstance(let mastodonInstance):
+                    Section {
+                        ForEach(mastodonInstance.availableTimelines, id: \.self) { type in
+                            HStack {
+                                if let icon = mastodonInstance.icon, !icon.isEmpty {
+                                    NetworkImage(data: icon)
+                                        .frame(width: 24, height: 24)
+                                }
+                                Text(labelForSubscriptionType(type))
+                                Spacer()
+                                if selectedMastodonTypes.contains(type) {
+                                    Image(systemName: "checkmark.circle.fill")
+                                        .foregroundColor(.blue)
+                                } else {
+                                    Image(systemName: "circle")
+                                        .foregroundColor(.blue)
+                                }
+                            }
+                            .onTapGesture {
+                                if let index = selectedMastodonTypes.firstIndex(of: type) {
+                                    selectedMastodonTypes.remove(at: index)
+                                } else {
+                                    selectedMastodonTypes.append(type)
+                                }
+                            }
+                        }
+                    } header: {
+                        Text("mastodon_available_timelines")
+                    }
                 }
                 
-                Section {
-                    Picker("rss_open_in", selection: $openInApp) {
-                        Text("rss_open_in_app").tag(true)
-                        Text("rss_open_in_browser").tag(false)
+                if case .mastodonInstance = onEnum(of: state) {
+                    // No open-in picker for Mastodon instance subscriptions
+                } else {
+                    Section {
+                        Picker("rss_open_in", selection: $openInApp) {
+                            Text("rss_open_in_app").tag(true)
+                            Text("rss_open_in_browser").tag(false)
+                        }
                     }
                 }
             }
          }
         .onChange(of: presenter.state.checkState, { oldValue, newValue in
             selectedRssSources = []
+            selectedMastodonTypes = []
             rssHubHost = ""
             if case .success(let success) = onEnum(of: newValue), case .rssFeed(let feed) = onEnum(of: success.data) {
                 if title.isEmpty {
@@ -313,6 +356,13 @@ struct EditRssSheet: View {
                             rssHub.save(title: title, openInBrowser: !openInApp)
                         case .rssSources(let rssSources):
                             rssSources.save(sources: selectedRssSources, openInBrowser: !openInApp)
+                        case .mastodonInstance(let mastodonInstance):
+                            let typeNames: [SubscriptionType: String] = [
+                                SubscriptionType.mastodonTrends: String(localized: "mastodon_trending_statuses"),
+                                SubscriptionType.mastodonPublic: String(localized: "mastodon_federated_timeline"),
+                                SubscriptionType.mastodonLocal: String(localized: "mastodon_local_timeline"),
+                            ]
+                            let _ = mastodonInstance.save(selectedTypes: selectedMastodonTypes, typeNames: typeNames)
                         }
                     }
                     dismiss()
@@ -348,4 +398,16 @@ extension UiRssSource: Identifiable {
 
 extension URL: Identifiable {
     public var id: String { absoluteString }
+}
+
+private func labelForSubscriptionType(_ type: SubscriptionType) -> String {
+    if type == SubscriptionType.mastodonTrends {
+        return String(localized: "mastodon_trending_statuses")
+    } else if type == SubscriptionType.mastodonPublic {
+        return String(localized: "mastodon_federated_timeline")
+    } else if type == SubscriptionType.mastodonLocal {
+        return String(localized: "mastodon_local_timeline")
+    } else {
+        return type.name
+    }
 }

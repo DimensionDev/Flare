@@ -406,6 +406,8 @@
     <string name="rss_detail_tldr_title">Summary</string>
     <string name="rss_detail_tldr_error">Failed to summarize</string>
     <string name="rss_detail_tldr_loading">Summarizing…</string>
+    <string name="rss_detail_translate">Translate</string>
+    <string name="rss_detail_translate_error">Failed to translate</string>
 
     <string name="emoji_picker_recent">Recent</string>
     <string name="emoji_picker_search">Search</string>

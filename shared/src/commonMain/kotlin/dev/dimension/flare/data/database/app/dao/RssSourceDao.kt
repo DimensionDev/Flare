@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import dev.dimension.flare.data.database.app.model.DbRssSources
+import dev.dimension.flare.data.database.app.model.SubscriptionType
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -25,4 +26,10 @@ internal interface RssSourceDao {
 
     @Query("SELECT * FROM DbRssSources WHERE url = :url")
     suspend fun getByUrl(url: String): List<DbRssSources>
+
+    @Query("SELECT * FROM DbRssSources WHERE url = :url AND type = :type")
+    suspend fun getByUrlAndType(
+        url: String,
+        type: SubscriptionType,
+    ): List<DbRssSources>
 }

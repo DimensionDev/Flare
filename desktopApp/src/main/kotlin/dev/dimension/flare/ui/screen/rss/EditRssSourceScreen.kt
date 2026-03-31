@@ -33,9 +33,15 @@ import compose.icons.fontawesomeicons.solid.CircleXmark
 import dev.dimension.flare.Res
 import dev.dimension.flare.add_rss_source
 import dev.dimension.flare.cancel
+import dev.dimension.flare.data.database.app.model.SubscriptionType
 import dev.dimension.flare.data.model.RssTimelineTabItem
+import dev.dimension.flare.data.model.SubscriptionTimelineTabItem
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.edit_rss_source
+import dev.dimension.flare.mastodon_available_timelines
+import dev.dimension.flare.mastodon_federated_timeline
+import dev.dimension.flare.mastodon_local_timeline
+import dev.dimension.flare.mastodon_trending_statuses
 import dev.dimension.flare.ok
 import dev.dimension.flare.opml_import
 import dev.dimension.flare.rss_sources_discovered_rss_sources
@@ -44,6 +50,7 @@ import dev.dimension.flare.rss_sources_rss_hub_host_hint
 import dev.dimension.flare.rss_sources_rss_hub_host_label
 import dev.dimension.flare.rss_sources_title_label
 import dev.dimension.flare.rss_sources_url_label
+import dev.dimension.flare.subscription_url_hint
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.listCard
@@ -85,6 +92,12 @@ fun EditRssSourceScreen(
     initialUrl: String? = null,
     onImport: (String) -> Unit,
 ) {
+    val mastodonTypeNames =
+        mapOf(
+            SubscriptionType.MASTODON_TRENDS to stringResource(Res.string.mastodon_trending_statuses),
+            SubscriptionType.MASTODON_PUBLIC to stringResource(Res.string.mastodon_federated_timeline),
+            SubscriptionType.MASTODON_LOCAL to stringResource(Res.string.mastodon_local_timeline),
+        )
     val composeWindow = LocalComposeWindow.current
     val state by producePresenter("rss_source_edit_${id}_$initialUrl") { presenter(id, initialUrl) }
 
@@ -149,6 +162,18 @@ fun EditRssSourceScreen(
                                     onDismissRequest.invoke()
                                 }
                             }
+
+                            is EditRssSourcePresenter.State.RssInputState.MastodonInstance -> {
+                                if (state.selectedMastodonTypes.isNotEmpty()) {
+                                    val savedSources =
+                                        inputState.save(
+                                            state.selectedMastodonTypes,
+                                            mastodonTypeNames,
+                                        )
+                                    state.save(sources = savedSources)
+                                    onDismissRequest.invoke()
+                                }
+                            }
                         }
                     }
                 }
@@ -195,6 +220,7 @@ fun EditRssSourceScreen(
                             .focusRequester(focusRequester),
                     header = { Text(text = stringResource(Res.string.rss_sources_url_label)) },
                     lineLimits = TextFieldLineLimits.SingleLine,
+                    placeholder = { Text(text = stringResource(Res.string.subscription_url_hint)) },
                     trailing = {
                         state.checkState
                             .onSuccess {
@@ -216,6 +242,13 @@ fun EditRssSourceScreen(
                                     is CheckRssSourcePresenter.State.RssState.RssSources ->
                                         FAIcon(
                                             FontAwesomeIcons.Solid.CircleChevronDown,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(24.dp),
+                                        )
+
+                                    is CheckRssSourcePresenter.State.RssState.MastodonInstance ->
+                                        FAIcon(
+                                            FontAwesomeIcons.Solid.CircleCheck,
                                             contentDescription = null,
                                             modifier = Modifier.size(24.dp),
                                         )
@@ -299,6 +332,13 @@ fun EditRssSourceScreen(
                                                                 contentDescription = null,
                                                                 modifier = Modifier.size(24.dp),
                                                             )
+
+                                                        is CheckRssSourcePresenter.State.RssState.MastodonInstance ->
+                                                            FAIcon(
+                                                                FontAwesomeIcons.Solid.CircleCheck,
+                                                                contentDescription = null,
+                                                                modifier = Modifier.size(24.dp),
+                                                            )
                                                     }
                                                 }.onError {
                                                     FAIcon(
@@ -377,6 +417,50 @@ fun EditRssSourceScreen(
                                 )
                             }
                         }
+
+                        is CheckRssSourcePresenter.State.RssState.MastodonInstance -> {
+                            Text(stringResource(Res.string.mastodon_available_timelines))
+                            rssState.availableTimelines.forEachIndexed { index, type ->
+                                val label =
+                                    when (type) {
+                                        SubscriptionType.MASTODON_TRENDS -> stringResource(Res.string.mastodon_trending_statuses)
+                                        SubscriptionType.MASTODON_PUBLIC -> stringResource(Res.string.mastodon_federated_timeline)
+                                        SubscriptionType.MASTODON_LOCAL -> stringResource(Res.string.mastodon_local_timeline)
+                                        else -> type.name
+                                    }
+                                CardExpanderItem(
+                                    icon =
+                                        rssState.icon?.let {
+                                            {
+                                                NetworkImage(
+                                                    it,
+                                                    contentDescription = null,
+                                                    modifier = Modifier.size(24.dp),
+                                                )
+                                            }
+                                        },
+                                    heading = {
+                                        Text(text = label)
+                                    },
+                                    trailing = {
+                                        CheckBox(
+                                            checked = state.selectedMastodonTypes.contains(type),
+                                            onCheckStateChange = {
+                                                state.toggleMastodonType(type)
+                                            },
+                                        )
+                                    },
+                                    modifier =
+                                        Modifier
+                                            .listCard(
+                                                index = index,
+                                                totalCount = rssState.availableTimelines.size,
+                                            ).clickable {
+                                                state.toggleMastodonType(type)
+                                            },
+                                )
+                            }
+                        }
                     }
                 }
                 state.inputState.onSuccess { inputState ->
@@ -444,6 +528,7 @@ private fun presenter(
     val urlText = rememberTextFieldState(initialText = initialUrl.orEmpty())
     val rssHubHostText = rememberTextFieldState()
     val selectedSource = remember { mutableStateListOf<UiRssSource>() }
+    val selectedMastodonTypes = remember { mutableStateListOf<SubscriptionType>() }
     var pinnedInTabs by remember { mutableStateOf(false) }
     state.data.onSuccess {
         LaunchedEffect(Unit) {
@@ -460,10 +545,18 @@ private fun presenter(
         remember(state.data, tabSettings) {
             state.data.flatMap { rssSource ->
                 tabSettings.map {
-                    it.mainTabs
-                        .filterIsInstance<RssTimelineTabItem>()
-                        .filter { tab -> tab.feedUrl == rssSource.url }
-                        .toImmutableList()
+                    val rssMatches =
+                        it.mainTabs
+                            .filterIsInstance<RssTimelineTabItem>()
+                            .filter { tab -> tab.feedUrl == rssSource.url }
+                    val subscriptionMatches =
+                        it.mainTabs
+                            .filterIsInstance<SubscriptionTimelineTabItem>()
+                            .filter { tab ->
+                                tab.subscriptionUrl == rssSource.url &&
+                                    tab.subscriptionType == rssSource.type
+                            }
+                    (rssMatches + subscriptionMatches).toImmutableList()
                 }
             }
         }
@@ -500,6 +593,7 @@ private fun presenter(
     object : EditRssSourcePresenter.State by state {
         val pinnedInTabs = pinnedInTabs
         val selectedSource = selectedSource
+        val selectedMastodonTypes: List<SubscriptionType> = selectedMastodonTypes
         val rssHubHostText = rssHubHostText
 
         fun setPinnedInTabs(value: Boolean) {
@@ -514,6 +608,14 @@ private fun presenter(
             }
         }
 
+        fun toggleMastodonType(type: SubscriptionType) {
+            if (selectedMastodonTypes.contains(type)) {
+                selectedMastodonTypes.remove(type)
+            } else {
+                selectedMastodonTypes.add(type)
+            }
+        }
+
         fun save(sources: List<UiRssSource>) {
             appScope.launch {
                 settingsRepository.updateTabSettings {
@@ -522,10 +624,20 @@ private fun presenter(
                             mainTabs =
                                 mainTabs
                                     .filterNot { tab ->
-                                        tab is RssTimelineTabItem && sources.any { it.url == tab.feedUrl }
+                                        (tab is RssTimelineTabItem && sources.any { it.url == tab.feedUrl }) ||
+                                            (
+                                                tab is SubscriptionTimelineTabItem &&
+                                                    sources.any {
+                                                        it.url == tab.subscriptionUrl && it.type == tab.subscriptionType
+                                                    }
+                                            )
                                     } +
                                     sources.map { source ->
-                                        RssTimelineTabItem(source)
+                                        if (source.type == SubscriptionType.RSS) {
+                                            RssTimelineTabItem(source)
+                                        } else {
+                                            SubscriptionTimelineTabItem(source)
+                                        }
                                     },
                         )
                     } else {
@@ -533,7 +645,13 @@ private fun presenter(
                             mainTabs =
                                 mainTabs
                                     .filterNot { tab ->
-                                        tab is RssTimelineTabItem && sources.any { it.url == tab.feedUrl }
+                                        (tab is RssTimelineTabItem && sources.any { it.url == tab.feedUrl }) ||
+                                            (
+                                                tab is SubscriptionTimelineTabItem &&
+                                                    sources.any {
+                                                        it.url == tab.subscriptionUrl && it.type == tab.subscriptionType
+                                                    }
+                                            )
                                     },
                         )
                     }

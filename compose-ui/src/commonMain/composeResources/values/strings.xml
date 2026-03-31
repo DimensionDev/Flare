@@ -437,15 +437,18 @@
     <string name="list_edit">Edit list</string>
     <string name="list_delete">Delete list</string>
 
-    <string name="rss_sources_title">Rss Sources</string>
-    <string name="add_rss_source">Add Rss Source</string>
-    <string name="edit_rss_source">Edit Rss Source</string>
-    <string name="delete_rss_source">Delete Rss Source</string>
+    <string name="rss_sources_title">Subscriptions</string>
+    <string name="add_rss_source">Add Subscription</string>
+    <string name="edit_rss_source">Edit Subscription</string>
+    <string name="delete_rss_source">Delete Subscription</string>
 
     <string name="rss_sources_title_label">Title</string>
     <string name="rss_sources_url_label">Url</string>
-    <string name="rss_title">Rss</string>
-    <string name="empty_rss_sources">No rss sources</string>
+    <string name="rss_title">Subscriptions</string>
+    <string name="empty_rss_sources">No subscriptions</string>
+    <string name="mastodon_trending_statuses">Trending statuses</string>
+    <string name="mastodon_federated_timeline">Federated timeline</string>
+    <string name="mastodon_local_timeline">Local timeline</string>
 
     <string name="service_select_welcome_title">Welcome to Flare</string>
     <string name="service_select_welcome_message">Please input the server to get started.</string>
@@ -489,7 +492,7 @@
     <string name="antenna_title">Antenna</string>
     <string name="mixed_timeline_title">Mixed</string>
     <string name="liked_title">Liked</string>
-    <string name="all_rss_feeds_title">All Rss Feeds</string>
+    <string name="all_rss_feeds_title">All Subscriptions</string>
     <string name="posts_title">Posts</string>
     <string name="settings_appearance_absolute_timestamp">Absolute timestamp</string>
     <string name="settings_appearance_absolute_timestamp_description">Display absolute timestamps on posts</string>

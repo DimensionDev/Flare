@@ -1,8 +1,8 @@
 package dev.dimension.flare.data.datasource.guest.mastodon
 
+import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
-import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.network.mastodon.api.TimelineResources
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
@@ -14,7 +14,19 @@ internal class GuestUserTimelinePagingSource(
     private val withReply: Boolean = false,
     private val onlyMedia: Boolean = false,
     private val withPinned: Boolean = false,
-) : RemoteLoader<UiTimelineV2> {
+) : CacheableRemoteLoader<UiTimelineV2> {
+    override val pagingKey: String
+        get() =
+            buildString {
+                append("mastodon_guest")
+                append("_user_timeline")
+                append("_$host")
+                append("_$userId")
+                append("_$withReply")
+                append("_$onlyMedia")
+                append("_$withPinned")
+            }
+
     override suspend fun load(
         pageSize: Int,
         request: PagingRequest,

@@ -39,9 +39,6 @@ internal fun EntryProviderScope<NavKey>.settingsSelectEntryBuilder(
             toLocalFilter = {
                 navigate(Route.Settings.LocalFilter)
             },
-            toGuestSettings = {
-                navigate(Route.Settings.GuestSetting)
-            },
             toLocalHistory = {
                 navigate(Route.Settings.LocalHistory)
             },
@@ -139,14 +136,6 @@ internal fun EntryProviderScope<NavKey>.settingsSelectEntryBuilder(
             add = {
                 navigate(Route.Settings.LocalFilterEdit(null))
             }
-        )
-    }
-
-    entry<Route.Settings.GuestSetting>(
-        metadata = DialogSceneStrategy.dialog()
-    ) {
-        GuestSettingScreen(
-            onBack = onBack
         )
     }
 

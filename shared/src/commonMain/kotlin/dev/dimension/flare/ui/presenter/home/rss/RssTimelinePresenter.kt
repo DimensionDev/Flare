@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import dev.dimension.flare.data.database.app.AppDatabase
+import dev.dimension.flare.data.database.app.model.SubscriptionType
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.datasource.microblog.MixedRemoteMediator
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
@@ -31,6 +32,32 @@ public class RssTimelinePresenter(
     }
 }
 
+public class SubscriptionTimelinePresenter(
+    private val type: SubscriptionType,
+    private val url: String,
+) : TimelinePresenter(),
+    KoinComponent {
+    private val appDatabase by inject<AppDatabase>()
+
+    override val loader: Flow<RemoteLoader<UiTimelineV2>> by lazy {
+        when (type) {
+            SubscriptionType.RSS -> flowOf(RssDataSource.fetchLoader(url))
+            else ->
+                flowOf(
+                    RssDataSource.fetchLoader(
+                        dev.dimension.flare.data.database.app.model.DbRssSources(
+                            url = url,
+                            title = null,
+                            icon = null,
+                            lastUpdate = 0,
+                            type = type,
+                        ),
+                    ),
+                )
+        }
+    }
+}
+
 public class AllRssTimelinePresenter :
     TimelinePresenter(),
     KoinComponent {
@@ -46,7 +73,7 @@ public class AllRssTimelinePresenter :
                     database = database,
                     mediators =
                         items.map {
-                            RssDataSource.fetchLoader(it.url)
+                            RssDataSource.fetchLoader(it)
                         },
                 )
             }
@@ -77,8 +104,8 @@ public class RssSourcePresenter(
         }.collectAsUiState()
         val timelineState =
             data.map {
-                remember(it.url) {
-                    RssTimelinePresenter(it.url)
+                remember(it.url, it.type) {
+                    SubscriptionTimelinePresenter(it.type, it.url)
                 }.body()
             }
         return object : State {

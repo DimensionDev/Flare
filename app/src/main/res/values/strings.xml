@@ -108,8 +108,8 @@
     <string name="settings_ai_config_translate_provider_google">Google Translate</string>
     <string name="settings_language_title">Language</string>
     <string name="settings_language_description">Change the language of the app</string>
-    <string name="settings_rss_management_title">RSS Management</string>
-    <string name="settings_rss_management_description">Manage RSS feeds</string>
+    <string name="settings_rss_management_title">Subscription Management</string>
+    <string name="settings_rss_management_description">Manage subscriptions</string>
     <string name="settings_nostr_relays_manage">Manage relays</string>
     <string name="settings_nostr_relays_add">Add relay</string>
     <string name="settings_nostr_relays_add_dialog_title">Add relay</string>
@@ -374,24 +374,29 @@
     <string name="local_history_search_status_title">Post</string>
     <string name="local_history_search_user_title">User</string>
 
-    <string name="rss_sources_title">RSS Sources</string>
-    <string name="add_rss_source">Add RSS Source</string>
-    <string name="edit_rss_source">Edit RSS Source</string>
-    <string name="delete_rss_source">Delete RSS Source</string>
+    <string name="rss_sources_title">Subscriptions</string>
+    <string name="add_rss_source">Add Subscription</string>
+    <string name="edit_rss_source">Edit Subscription</string>
+    <string name="delete_rss_source">Delete Subscription</string>
     <string name="opml_import">Import from OPML</string>
     <string name="opml_export">Export to OPML</string>
     <string name="export_completed">Export completed</string>
 
     <string name="rss_sources_title_label">Title</string>
     <string name="rss_sources_url_label">Url</string>
-    <string name="rss_title">RSS</string>
-    <string name="empty_rss_sources">No RSS sources</string>
+    <string name="rss_title">Subscriptions</string>
+    <string name="empty_rss_sources">No subscriptions</string>
     <string name="rss_sources_rss_hub_host_label">RSSHub Host</string>
     <string name="rss_sources_rss_hub_host_hint">You need to set the RSSHub host if you want to use RSSHub, or select the public RSSHub server</string>
     <string name="rss_sources_discovered_rss_sources">Discovered RSS Sources</string>
     <string name="rss_sources_pinned_in_tabs">Pin to home tabs</string>
     <string name="rss_sources_open_in_browser">Open in browser</string>
     <string name="rss_sources_open_in_app">Open in app</string>
+    <string name="mastodon_available_timelines">Available timelines</string>
+    <string name="mastodon_trending_statuses">Trending statuses</string>
+    <string name="mastodon_federated_timeline">Federated timeline</string>
+    <string name="mastodon_local_timeline">Local timeline</string>
+    <string name="subscription_url_hint">Supports RSS feeds and Mastodon instances</string>
 
     <string name="rss_detail_open_in_browser">Open in browser</string>
     <string name="rss_detail_share">Share link</string>

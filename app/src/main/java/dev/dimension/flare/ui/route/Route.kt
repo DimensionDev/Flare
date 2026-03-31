@@ -119,9 +119,6 @@ internal sealed interface Route : NavKey {
         data object LocalFilter : Settings
 
         @Serializable
-        data object GuestSetting : Settings
-
-        @Serializable
         data object LocalHistory : Settings
 
         @Serializable

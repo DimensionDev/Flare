@@ -3,8 +3,10 @@ package dev.dimension.flare.ui.screen.settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
+import dev.dimension.flare.data.database.app.model.SubscriptionType
 import dev.dimension.flare.data.model.AllRssTimelineTabItem
 import dev.dimension.flare.data.model.RssTimelineTabItem
+import dev.dimension.flare.data.model.SubscriptionTimelineTabItem
 import dev.dimension.flare.data.model.TabItem
 import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.model.AccountType
@@ -72,8 +74,12 @@ public class AllTabsPresenter(
                             null
                         },
                     ) +
-                        rssSources.sources.map {
-                            RssTimelineTabItem(it)
+                        rssSources.sources.map { source ->
+                            if (source.type == SubscriptionType.RSS) {
+                                RssTimelineTabItem(source)
+                            } else {
+                                SubscriptionTimelineTabItem(source)
+                            }
                         }
                 ).toImmutableList()
             }

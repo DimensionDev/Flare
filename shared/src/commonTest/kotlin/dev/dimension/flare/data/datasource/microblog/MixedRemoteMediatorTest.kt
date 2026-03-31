@@ -57,6 +57,7 @@ import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.yield
@@ -665,7 +666,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                     database = db,
                     appDataStore = appDataStore,
                     aiCompletionService = AiCompletionService(OpenAIService(), SkippingOnDeviceAI()),
-                    coroutineScope = CoroutineScope(Dispatchers.Unconfined),
+                    coroutineScope = backgroundScope,
                 )
             val accountKey = MicroBlogKey(id = "account-ai-skipped", host = "test.social")
             val post =
@@ -708,18 +709,17 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                         ),
                 )
             assertTrue(mediatorResult is androidx.paging.RemoteMediator.MediatorResult.Success)
+            advanceUntilIdle()
 
             val savedStatus = db.statusDao().get(post.statusKey, AccountType.Specific(accountKey)).first()
             assertNotNull(savedStatus)
             val translation =
-                db
-                    .translationDao()
-                    .find(
-                        entityType = TranslationEntityType.Status,
-                        entityKey = savedStatus.id,
-                        targetLanguage = Locale.language,
-                    ).filterNotNull()
-                    .first()
+                db.translationDao().get(
+                    entityType = TranslationEntityType.Status,
+                    entityKey = savedStatus.id,
+                    targetLanguage = Locale.language,
+                )
+            assertNotNull(translation)
             assertEquals(TranslationStatus.Skipped, translation.status)
             assertEquals("same_language", translation.statusReason)
         }

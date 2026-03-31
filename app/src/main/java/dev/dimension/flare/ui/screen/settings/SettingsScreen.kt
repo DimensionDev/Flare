@@ -33,7 +33,6 @@ import compose.icons.fontawesomeicons.solid.ClockRotateLeft
 import compose.icons.fontawesomeicons.solid.Database
 import compose.icons.fontawesomeicons.solid.Filter
 import compose.icons.fontawesomeicons.solid.Gear
-import compose.icons.fontawesomeicons.solid.Globe
 import compose.icons.fontawesomeicons.solid.Language
 import compose.icons.fontawesomeicons.solid.Palette
 import compose.icons.fontawesomeicons.solid.PenToSquare
@@ -97,7 +96,6 @@ internal fun SettingsScreen(
     toColorSpace: () -> Unit,
     toTabCustomization: () -> Unit,
     toLocalFilter: () -> Unit,
-    toGuestSettings: () -> Unit,
     toLocalHistory: () -> Unit,
     toDraftBox: () -> Unit,
     toAiConfig: () -> Unit,
@@ -165,29 +163,6 @@ internal fun SettingsScreen(
                         },
                         supportingContent = {
                             Text(text = stringResource(id = R.string.settings_accounts_title))
-                        },
-                    )
-                }
-
-            state.user
-                .onError {
-                    SegmentedListItem(
-                        onClick = {
-                            toGuestSettings.invoke()
-                        },
-                        shapes = ListItemDefaults.single(),
-                        content = {
-                            Text(text = stringResource(id = R.string.settings_guest_setting_title))
-                        },
-                        leadingContent = {
-                            ThemedIcon(
-                                imageVector = FontAwesomeIcons.Solid.Globe,
-                                contentDescription = stringResource(id = R.string.settings_guest_setting_title),
-                                color = ThemeIconData.Color.SapphireBlue,
-                            )
-                        },
-                        supportingContent = {
-                            Text(text = stringResource(id = R.string.settings_guest_setting_description))
                         },
                     )
                 }

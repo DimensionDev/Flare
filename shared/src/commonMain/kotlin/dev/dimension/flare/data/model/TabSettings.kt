@@ -2,6 +2,7 @@ package dev.dimension.flare.data.model
 
 import androidx.compose.runtime.Immutable
 import androidx.datastore.core.okio.OkioSerializer
+import dev.dimension.flare.data.database.app.model.SubscriptionType
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
@@ -25,6 +26,7 @@ import dev.dimension.flare.ui.presenter.home.misskey.MisskeyFavouriteTimelinePre
 import dev.dimension.flare.ui.presenter.home.misskey.MisskeyHybridTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.rss.AllRssTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.rss.RssTimelinePresenter
+import dev.dimension.flare.ui.presenter.home.rss.SubscriptionTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.vvo.VVOFavouriteTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.vvo.VVOLikeTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.xqt.XQTBookmarkTimelinePresenter
@@ -767,6 +769,39 @@ public data class AllRssTimelineTabItem(
     override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
 
     override fun createPresenter(): TimelinePresenter = AllRssTimelinePresenter()
+}
+
+@Immutable
+@Serializable
+public data class SubscriptionTimelineTabItem(
+    val subscriptionUrl: String,
+    val subscriptionType: SubscriptionType,
+    override val metaData: TabMetaData,
+    val favIcon: String? = null,
+) : TimelineTabItem() {
+    override val account: AccountType = AccountType.Guest
+    override val key: String = "subscription_${subscriptionType.name}_$subscriptionUrl"
+
+    override fun createPresenter(): TimelinePresenter = SubscriptionTimelinePresenter(subscriptionType, subscriptionUrl)
+
+    override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
+
+    public constructor(data: UiRssSource) : this(
+        subscriptionUrl = data.url,
+        subscriptionType = data.type,
+        favIcon = data.favIcon,
+        metaData =
+            TabMetaData(
+                title = TitleType.Text(data.title ?: data.url),
+                icon =
+                    data.favIcon?.let {
+                        IconType.Url(it)
+                    } ?: when (data.type) {
+                        SubscriptionType.RSS -> IconType.Material(dev.dimension.flare.ui.model.UiIcon.Rss)
+                        else -> IconType.FavIcon(data.host)
+                    },
+            ),
+    )
 }
 
 @Immutable

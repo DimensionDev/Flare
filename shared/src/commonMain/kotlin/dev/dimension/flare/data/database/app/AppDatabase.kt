@@ -24,7 +24,7 @@ import dev.dimension.flare.data.database.app.dao.SearchHistoryDao
         dev.dimension.flare.data.database.app.model.DbSearchHistory::class,
         dev.dimension.flare.data.database.app.model.DbRssSources::class,
     ],
-    version = 7,
+    version = 8,
     autoMigrations = [
         AutoMigration(
             from = 3,
@@ -42,6 +42,10 @@ import dev.dimension.flare.data.database.app.dao.SearchHistoryDao
             from = 6,
             to = 7,
         ),
+        AutoMigration(
+            from = 7,
+            to = 8,
+        ),
     ],
     exportSchema = true,
 )
@@ -49,6 +53,7 @@ import dev.dimension.flare.data.database.app.dao.SearchHistoryDao
     dev.dimension.flare.data.database.adapter.MicroBlogKeyConverter::class,
     dev.dimension.flare.data.database.adapter.PlatformTypeConverter::class,
     dev.dimension.flare.data.database.app.model.DraftConverters::class,
+    dev.dimension.flare.data.database.adapter.SubscriptionTypeConverter::class,
 )
 @ConstructedBy(AppDatabaseConstructor::class)
 internal abstract class AppDatabase : RoomDatabase() {

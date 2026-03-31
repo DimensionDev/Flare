@@ -8,6 +8,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.app.model.DbRssSources
+import dev.dimension.flare.data.database.app.model.SubscriptionType
 import dev.dimension.flare.ui.model.UiRssSource
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
@@ -17,6 +18,7 @@ import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.presenter.home.rss.CheckRssSourcePresenter.State.RssState
 import io.ktor.http.buildUrl
 import io.ktor.http.set
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -62,6 +64,19 @@ public class EditRssSourcePresenter(
                 ): UiRssSource
 
                 public val actualUrl: String
+            }
+
+            @Immutable
+            public interface MastodonInstance : RssInputState {
+                public val host: String
+                public val instanceName: String?
+                public val icon: String?
+                public val availableTimelines: ImmutableList<SubscriptionType>
+
+                public fun save(
+                    selectedTypes: List<SubscriptionType>,
+                    typeNames: Map<SubscriptionType, String>,
+                ): List<UiRssSource>
             }
         }
 
@@ -212,6 +227,39 @@ public class EditRssSourcePresenter(
                                 }
                             }
                         }
+
+                    is RssState.MastodonInstance ->
+                        object : State.RssInputState.MastodonInstance {
+                            override val host = it.host
+                            override val instanceName = it.instanceName
+                            override val icon = it.icon
+                            override val availableTimelines = it.availableTimelines
+
+                            override fun save(
+                                selectedTypes: List<SubscriptionType>,
+                                typeNames: Map<SubscriptionType, String>,
+                            ): List<UiRssSource> {
+                                val subscriptions =
+                                    selectedTypes.map { type ->
+                                        val typeName = typeNames[type] ?: type.name
+                                        DbRssSources(
+                                            id = 0,
+                                            url = it.host,
+                                            title = "${it.instanceName ?: it.host} - $typeName",
+                                            lastUpdate = 0,
+                                            openInBrowser = false,
+                                            icon = it.icon,
+                                            type = type,
+                                        )
+                                    }
+                                scope.launch {
+                                    appDatabase
+                                        .rssSourceDao()
+                                        .insertAll(subscriptions)
+                                }
+                                return subscriptions.map { it.render() }
+                            }
+                        }
                 }
             }
         val canSave =
@@ -228,6 +276,7 @@ public class EditRssSourcePresenter(
                             }
 
                         is RssState.RssSources -> state.data.sources.isNotEmpty()
+                        is RssState.MastodonInstance -> state.data.availableTimelines.isNotEmpty()
                     }
 
                 else -> false

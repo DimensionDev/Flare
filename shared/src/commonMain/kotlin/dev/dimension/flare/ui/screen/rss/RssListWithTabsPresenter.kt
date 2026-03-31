@@ -3,7 +3,9 @@ package dev.dimension.flare.ui.screen.rss
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
+import dev.dimension.flare.data.database.app.model.SubscriptionType
 import dev.dimension.flare.data.model.RssTimelineTabItem
+import dev.dimension.flare.data.model.SubscriptionTimelineTabItem
 import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.ui.model.UiRssSource
 import dev.dimension.flare.ui.presenter.PinTabsPresenter
@@ -14,14 +16,30 @@ import dev.dimension.flare.ui.presenter.invoke
 public class RssListWithTabsPresenter : PresenterBase<RssListWithTabsPresenter.State>() {
     private val pinTabsPresenter by lazy {
         object : PinTabsPresenter<UiRssSource>() {
-            override fun List<TimelineTabItem>.filterPinned(): List<String> =
-                filterIsInstance<RssTimelineTabItem>()
-                    .map { it.feedUrl }
+            override fun List<TimelineTabItem>.filterPinned(): List<String> {
+                val rssKeys = filterIsInstance<RssTimelineTabItem>().map { it.feedUrl }
+                val subscriptionKeys =
+                    filterIsInstance<SubscriptionTimelineTabItem>()
+                        .map { "${it.subscriptionType.name}:${it.subscriptionUrl}" }
+                return rssKeys + subscriptionKeys
+            }
 
-            override fun getTimelineTabItem(item: UiRssSource): TimelineTabItem = RssTimelineTabItem(item)
+            override fun getTimelineTabItem(item: UiRssSource): TimelineTabItem =
+                if (item.type == SubscriptionType.RSS) {
+                    RssTimelineTabItem(item)
+                } else {
+                    SubscriptionTimelineTabItem(item)
+                }
 
             override fun List<TimelineTabItem>.filter(item: UiRssSource): List<TimelineTabItem> =
-                filterNot { it is RssTimelineTabItem && it.feedUrl == item.url }
+                filterNot {
+                    (it is RssTimelineTabItem && it.feedUrl == item.url) ||
+                        (
+                            it is SubscriptionTimelineTabItem &&
+                                it.subscriptionUrl == item.url &&
+                                it.subscriptionType == item.type
+                        )
+                }
         }
     }
 

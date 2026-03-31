@@ -201,4 +201,5 @@ internal fun DbRssSources.render() =
         id = id,
         favIcon = icon,
         openInBrowser = openInBrowser,
+        type = type,
     )

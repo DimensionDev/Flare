@@ -44,6 +44,7 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
@@ -85,7 +86,9 @@ public class ProfilePresenter(
                     service.accountKey
                 } else {
                     null
-                } ?: throw NoActiveAccountException
+                } ?: run {
+                    throw NoActiveAccountException
+                }
             (service as RelationDataSource).relationHandler.relation(actualUserKey).toUi()
         }
     }
@@ -136,7 +139,9 @@ public class ProfilePresenter(
                         service.accountKey
                     } else {
                         null
-                    } ?: throw NoActiveAccountException
+                    } ?: run {
+                    throw NoActiveAccountException
+                }
 
             service
                 .profileTabs(actualUserKey)
@@ -195,7 +200,7 @@ public class ProfilePresenter(
             combine(
                 isListDataSourceFlow,
                 userStateFlow.map { it.takeSuccess() },
-                myAccountKeyFlow,
+                myAccountKeyFlow.map { it as MicroBlogKey? }.catch { emit(null) },
             ) { isListDataSource, user, myAccountKey ->
                 Pair(
                     isListDataSource,
@@ -214,10 +219,6 @@ public class ProfilePresenter(
                 userKey = userKey,
             )
         }
-    }
-
-    private val isGuestMode by lazy {
-        accountType == AccountType.Guest
     }
 
     @Composable

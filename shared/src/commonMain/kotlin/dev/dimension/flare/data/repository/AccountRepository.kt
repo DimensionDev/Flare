@@ -230,7 +230,9 @@ internal fun accountProvider(
         key1 = accountType,
     ) {
         when (accountType) {
-            AccountType.Guest ->
+            AccountType.Guest,
+            is AccountType.GuestHost,
+            ->
                 flowOf(
                     UiState.Error(
                         NoActiveAccountException,
@@ -264,13 +266,21 @@ internal fun accountServiceFlow(
 ): Flow<MicroblogDataSource> =
     when (accountType) {
         AccountType.Guest -> {
-            val guestData = repository.appDataStore.guestDataStore.data
-            guestData.map {
-                it.platformType.spec.guestDataSource(
-                    host = it.host,
+            flowOf(
+                PlatformType.Mastodon.spec.guestDataSource(
+                    host = "mastodon.social",
                     locale = Locale.language,
-                )
-            }
+                ),
+            )
+        }
+
+        is AccountType.GuestHost -> {
+            flowOf(
+                PlatformType.Mastodon.spec.guestDataSource(
+                    host = accountType.host,
+                    locale = Locale.language,
+                ),
+            )
         }
 
         is AccountType.Specific -> {

@@ -8,7 +8,6 @@ import kotlin.io.encoding.Base64
 @Immutable
 @Serializable
 public enum class PlatformType {
-    Nostr,
     Mastodon,
     Misskey,
     Bluesky,
@@ -17,6 +16,7 @@ public enum class PlatformType {
     xQt,
 
     VVo,
+    Nostr,
 }
 
 @Immutable

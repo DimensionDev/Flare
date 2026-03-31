@@ -27,9 +27,13 @@ import dev.dimension.flare.compose.ui.Res
 import dev.dimension.flare.compose.ui.delete_rss_source
 import dev.dimension.flare.compose.ui.edit_rss_source
 import dev.dimension.flare.compose.ui.empty_rss_sources
+import dev.dimension.flare.compose.ui.mastodon_federated_timeline
+import dev.dimension.flare.compose.ui.mastodon_local_timeline
+import dev.dimension.flare.compose.ui.mastodon_trending_statuses
 import dev.dimension.flare.compose.ui.more
 import dev.dimension.flare.compose.ui.tab_settings_add
 import dev.dimension.flare.compose.ui.tab_settings_remove
+import dev.dimension.flare.data.database.app.model.SubscriptionType
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.platform.PlatformDropdownMenu
@@ -89,7 +93,14 @@ public fun LazyListScope.rssListWithTabs(
                     }
                 },
                 supportingContent = {
-                    PlatformText(it.url)
+                    val displayUrl =
+                        when (it.type) {
+                            SubscriptionType.RSS -> it.url
+                            SubscriptionType.MASTODON_TRENDS -> "${it.url} - ${stringResource(Res.string.mastodon_trending_statuses)}"
+                            SubscriptionType.MASTODON_PUBLIC -> "${it.url} - ${stringResource(Res.string.mastodon_federated_timeline)}"
+                            SubscriptionType.MASTODON_LOCAL -> "${it.url} - ${stringResource(Res.string.mastodon_local_timeline)}"
+                        }
+                    PlatformText(displayUrl)
                 },
                 leadingContent = {
                     NetworkImage(
@@ -104,12 +115,18 @@ public fun LazyListScope.rssListWithTabs(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         state.currentTabs.onSuccess { currentTabs ->
+                            val pinKey =
+                                if (it.type == SubscriptionType.RSS) {
+                                    it.url
+                                } else {
+                                    "${it.type.name}:${it.url}"
+                                }
                             val isPinned =
                                 remember(
                                     it,
                                     currentTabs,
                                 ) {
-                                    currentTabs.contains(it.url)
+                                    currentTabs.contains(pinKey)
                                 }
                             PlatformIconButton(
                                 onClick = {

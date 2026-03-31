@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import dev.dimension.flare.data.database.app.AppDatabase
+import dev.dimension.flare.data.database.app.model.SubscriptionType
 import dev.dimension.flare.data.network.rss.model.Opml
 import dev.dimension.flare.data.network.rss.model.OpmlBody
 import dev.dimension.flare.data.network.rss.model.OpmlHead
@@ -40,7 +41,12 @@ public class ExportOPMLPresenter :
     }
 
     public suspend fun export(): String {
-        val sources = appDatabase.rssSourceDao().getAll().first()
+        val sources =
+            appDatabase
+                .rssSourceDao()
+                .getAll()
+                .first()
+                .filter { it.type == SubscriptionType.RSS }
 
         val outlines =
             sources.map { source ->

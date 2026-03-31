@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.model
 
 import androidx.compose.runtime.Immutable
+import dev.dimension.flare.data.database.app.model.SubscriptionType
 import dev.dimension.flare.model.vvo
 import dev.dimension.flare.model.vvoHost
 import dev.dimension.flare.model.vvoHostLong
@@ -17,13 +18,14 @@ public data class UiRssSource internal constructor(
     val lastUpdate: UiDateTime,
     val favIcon: String?,
     val openInBrowser: Boolean,
+    val type: SubscriptionType = SubscriptionType.RSS,
 ) {
     val host: String by lazy {
-        Url(url).host
+        when (type) {
+            SubscriptionType.RSS -> Url(url).host
+            else -> url // For Mastodon types, url is already the host
+        }
     }
-//    val favIcon: String by lazy {
-//        favIconUrl(url)
-//    }
 
     public companion object {
         public fun favIconUrl(url: String): String {

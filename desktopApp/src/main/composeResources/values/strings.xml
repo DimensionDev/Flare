@@ -296,19 +296,24 @@
     <string name="misskey_visibility_specified_description">Only mentioned users can see this post</string>
 
 
-    <string name="rss_sources_title">Rss Sources</string>
-    <string name="add_rss_source">Add Rss Source</string>
-    <string name="edit_rss_source">Edit Rss Source</string>
-    <string name="delete_rss_source">Delete Rss Source</string>
+    <string name="rss_sources_title">Subscriptions</string>
+    <string name="add_rss_source">Add Subscription</string>
+    <string name="edit_rss_source">Edit Subscription</string>
+    <string name="delete_rss_source">Delete Subscription</string>
 
     <string name="rss_sources_title_label">Title</string>
     <string name="rss_sources_url_label">Url</string>
-    <string name="rss_title">Rss</string>
-    <string name="empty_rss_sources">No rss sources</string>
+    <string name="rss_title">Subscriptions</string>
+    <string name="empty_rss_sources">No subscriptions</string>
     <string name="rss_sources_rss_hub_host_label">RssHub Host</string>
     <string name="rss_sources_rss_hub_host_hint">You need to set the RssHub host if you want to use RssHub, or select the public RssHub server</string>
     <string name="rss_sources_discovered_rss_sources">Discovered Rss Sources</string>
     <string name="rss_sources_pinned_in_tabs">Pin to home tabs</string>
+    <string name="mastodon_available_timelines">Available timelines</string>
+    <string name="mastodon_trending_statuses">Trending statuses</string>
+    <string name="mastodon_federated_timeline">Federated timeline</string>
+    <string name="mastodon_local_timeline">Local timeline</string>
+    <string name="subscription_url_hint">Supports RSS feeds and Mastodon instances</string>
 
     <string name="tab_settings_add">Add</string>
     <string name="tab_settings_drag">Drag</string>
@@ -357,8 +362,8 @@
     <string name="settings_storage_clear_database_description">%1$s users, %2$s posts will be removed</string>
     <string name="settings_storage_app_log">Open app log</string>
     <string name="settings_storage_app_log_description">View the app log</string>
-    <string name="settings_rss_management_title">RSS Management</string>
-    <string name="settings_rss_management_description">Manage RSS feeds</string>
+    <string name="settings_rss_management_title">Subscription Management</string>
+    <string name="settings_rss_management_description">Manage subscriptions</string>
     <string name="settings_nostr_relays_manage">Manage relays</string>
     <string name="settings_nostr_relays_add">Add relay</string>
     <string name="settings_nostr_relays_add_dialog_title">Add relay</string>

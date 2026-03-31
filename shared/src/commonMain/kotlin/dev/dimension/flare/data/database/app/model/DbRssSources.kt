@@ -6,6 +6,14 @@ import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
 
 @Serializable
+public enum class SubscriptionType {
+    RSS,
+    MASTODON_TRENDS,
+    MASTODON_PUBLIC,
+    MASTODON_LOCAL,
+}
+
+@Serializable
 @Entity
 internal data class DbRssSources(
     @PrimaryKey(autoGenerate = true)
@@ -16,4 +24,6 @@ internal data class DbRssSources(
     @ColumnInfo(defaultValue = "0")
     val openInBrowser: Boolean = false,
     val lastUpdate: Long,
+    @ColumnInfo(defaultValue = "RSS")
+    val type: SubscriptionType = SubscriptionType.RSS,
 )

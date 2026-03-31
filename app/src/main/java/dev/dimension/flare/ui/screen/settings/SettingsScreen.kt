@@ -99,6 +99,7 @@ internal fun SettingsScreen(
     toLocalHistory: () -> Unit,
     toDraftBox: () -> Unit,
     toAiConfig: () -> Unit,
+    toTranslationConfig: () -> Unit,
     toRSSManagement: () -> Unit,
     onBack: () -> Unit,
 ) {
@@ -432,25 +433,48 @@ internal fun SettingsScreen(
                         )
                     }
                 }
-            SegmentedListItem(
-                onClick = {
-                    toAiConfig.invoke()
-                },
-                shapes = ListItemDefaults.single(),
-                content = {
-                    Text(text = stringResource(id = R.string.settings_ai_config_title))
-                },
-                leadingContent = {
-                    ThemedIcon(
-                        imageVector = FontAwesomeIcons.Solid.Robot,
-                        contentDescription = stringResource(id = R.string.settings_ai_config_title),
-                        color = ThemeIconData.Color.ForestGreen,
-                    )
-                },
-                supportingContent = {
-                    Text(text = stringResource(id = R.string.settings_ai_config_description))
-                },
-            )
+            Column(
+                verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
+            ) {
+                SegmentedListItem(
+                    onClick = {
+                        toAiConfig.invoke()
+                    },
+                    shapes = ListItemDefaults.first(),
+                    content = {
+                        Text(text = stringResource(id = R.string.settings_ai_config_title))
+                    },
+                    leadingContent = {
+                        ThemedIcon(
+                            imageVector = FontAwesomeIcons.Solid.Robot,
+                            contentDescription = stringResource(id = R.string.settings_ai_config_title),
+                            color = ThemeIconData.Color.ForestGreen,
+                        )
+                    },
+                    supportingContent = {
+                        Text(text = stringResource(id = R.string.settings_ai_config_description))
+                    },
+                )
+                SegmentedListItem(
+                    onClick = {
+                        toTranslationConfig.invoke()
+                    },
+                    shapes = ListItemDefaults.last(),
+                    content = {
+                        Text(text = stringResource(id = R.string.settings_translation_title))
+                    },
+                    leadingContent = {
+                        ThemedIcon(
+                            imageVector = FontAwesomeIcons.Solid.Language,
+                            contentDescription = stringResource(id = R.string.settings_translation_title),
+                            color = ThemeIconData.Color.SapphireBlue,
+                        )
+                    },
+                    supportingContent = {
+                        Text(text = stringResource(id = R.string.settings_translation_description))
+                    },
+                )
+            }
             Column(
                 verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
             ) {

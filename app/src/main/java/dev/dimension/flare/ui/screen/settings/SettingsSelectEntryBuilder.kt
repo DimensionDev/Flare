@@ -54,6 +54,9 @@ internal fun EntryProviderScope<NavKey>.settingsSelectEntryBuilder(
             toRSSManagement = {
                 navigate(Route.Rss.Sources)
             },
+            toTranslationConfig = {
+                navigate(Route.Settings.TranslationConfig)
+            },
             onBack = onBack,
         )
     }
@@ -155,6 +158,16 @@ internal fun EntryProviderScope<NavKey>.settingsSelectEntryBuilder(
         )
     ) {
         AiConfigScreen(
+            onBack = onBack
+        )
+    }
+
+    entry<Route.Settings.TranslationConfig>(
+        metadata = ListDetailSceneStrategy.detailPane(
+            sceneKey = "Settings"
+        )
+    ) {
+        TranslationConfigScreen(
             onBack = onBack
         )
     }

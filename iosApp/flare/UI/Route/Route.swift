@@ -67,6 +67,8 @@ enum Route: Hashable, Identifiable {
             LocalFilterScreen()
         case .aiConfig:
             AiConfigScreen()
+        case .translationConfig:
+            TranslationConfigScreen()
         case .tabSettings:
             TabSettingsScreen()
         case .tabGroupConfig(let item):
@@ -148,6 +150,7 @@ enum Route: Hashable, Identifiable {
     case localHostory
     case moreMenuCustomize
     case aiConfig
+    case translationConfig
     case storage
     case appearance
     case settings

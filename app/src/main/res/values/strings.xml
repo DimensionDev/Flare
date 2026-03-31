@@ -72,7 +72,7 @@
     <string name="settings_app_logging_clear">Clear log</string>
     <string name="settings_app_logging_enable_network_logging">Enable network logging</string>
     <string name="settings_ai_config_title">AI Configuration</string>
-    <string name="settings_ai_config_description">Configure AI settings</string>
+    <string name="settings_ai_config_description">Configure AI backend and features</string>
     <string name="settings_ai_config_server">Server URL</string>
     <string name="settings_ai_config_server_hint">Enter the server URL</string>
     <string name="settings_ai_config_server_url_requirement">Server URL must end with a trailing slash and support the OpenAI-compatible v1/chat/completions API.</string>
@@ -98,14 +98,16 @@
     <string name="settings_ai_config_translation_description">Replace Google Translate with AI translation, might take longer time</string>
     <string name="settings_ai_config_enable_tldr">Enable AI Summarization</string>
     <string name="settings_ai_config_tldr_description">Enable AI summarization for long posts, only available in post that longer than 500 characters</string>
-    <string name="settings_ai_config_enable_pre_translation">Enable pre-translation</string>
-    <string name="settings_ai_config_pre_translation_description">Translate and cache newly loaded timeline and profile content in the background. This can consume a large amount of tokens.</string>
+    <string name="settings_ai_config_enable_pre_translation">Enable auto translate</string>
+    <string name="settings_ai_config_pre_translation_description">Automatically translate and cache newly loaded timeline and profile content in the background. This can consume a large amount of tokens.</string>
     <string name="settings_ai_config_translate_prompt">Translation Prompt</string>
     <string name="settings_ai_config_tldr_prompt">Summary Prompt</string>
     <string name="settings_ai_config_translate_provider">Translation Provider</string>
     <string name="settings_ai_config_translate_provider_description">Choose which service handles translation</string>
     <string name="settings_ai_config_translate_provider_ai">AI</string>
     <string name="settings_ai_config_translate_provider_google">Google Translate</string>
+    <string name="settings_translation_title">Translation</string>
+    <string name="settings_translation_description">Configure translation provider and behavior</string>
     <string name="settings_language_title">Language</string>
     <string name="settings_language_description">Change the language of the app</string>
     <string name="settings_rss_management_title">Subscription Management</string>

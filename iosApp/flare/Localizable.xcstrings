@@ -4349,7 +4349,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "All RSS Feeds"
+            "value": "All Subscriptions"
           }
         },
         "es": {
@@ -84953,7 +84953,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "RSS Source name"
+            "value": "Subscription Source name"
           }
         },
         "es": {
@@ -88709,7 +88709,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Manage your RSS sources"
+            "value": "Manage your subscriptions"
           }
         },
         "es": {
@@ -88839,7 +88839,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "RSS Management"
+            "value": "Subscription Management"
           }
         },
         "es": {

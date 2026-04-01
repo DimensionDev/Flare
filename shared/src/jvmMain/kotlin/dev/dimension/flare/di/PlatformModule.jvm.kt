@@ -6,6 +6,8 @@ import dev.dimension.flare.data.database.DriverFactory
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.io.JvmPlatformPathProducer
 import dev.dimension.flare.data.io.PlatformPathProducer
+import dev.dimension.flare.data.network.nostr.AmberSignerBridge
+import dev.dimension.flare.data.network.nostr.JvmAmberSignerBridge
 import dev.dimension.flare.shared.image.ImageCompressor
 import dev.dimension.flare.shared.image.JvmImageCompressor
 import dev.dimension.flare.ui.humanizer.JVMFormatter
@@ -23,4 +25,5 @@ internal actual val platformModule: Module =
         singleOf(::JVMFormatter) bind PlatformFormatter::class
         singleOf(::JvmImageCompressor) bind ImageCompressor::class
         singleOf(::JvmOnDeviceAI) bind OnDeviceAI::class
+        singleOf(::JvmAmberSignerBridge) bind AmberSignerBridge::class
     }

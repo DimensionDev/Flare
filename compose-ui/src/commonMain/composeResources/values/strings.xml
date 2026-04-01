@@ -464,6 +464,10 @@
     <string name="mastodon_login_verify_message">Please wait while we verify your credentials.</string>
     <string name="nostr_login_title">Import Nostr account</string>
     <string name="nostr_login_hint">Paste an npub or hex pubkey for read-only access, or provide an nsec to import a writable account.</string>
+    <string name="nostr_login_account_hint">npub, nsec, or hex key</string>
+    <string name="nostr_login_bunker_hint">bunker:// or nostrconnect:// URI</string>
+    <string name="nostr_login_bunker_button">Connect bunker</string>
+    <string name="nostr_login_amber_button">Connect Amber</string>
     <string name="nostr_login_generate_button">Generate and login</string>
     <string name="nostr_login_npub_hint">npub or hex pubkey (optional if nsec is set)</string>
     <string name="nostr_login_nsec_hint">nsec or hex private key</string>

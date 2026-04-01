@@ -18,6 +18,47 @@ import kotlinx.serialization.Serializable
 import sh.christian.ozone.oauth.OAuthToken
 
 @Immutable
+@Serializable
+internal sealed interface NostrSignerCredential {
+    val stableId: String
+
+    @Immutable
+    @Serializable
+    @SerialName("NostrSignerLocalKey")
+    data class LocalKey(
+        val nsec: String,
+    ) : NostrSignerCredential {
+        override val stableId: String
+            get() = "local:$nsec"
+    }
+
+    @Immutable
+    @Serializable
+    @SerialName("NostrSignerBunker")
+    data class Bunker(
+        val uri: String,
+        val userPubkeyHex: String? = null,
+        val signerRelay: String? = null,
+        val secret: String? = null,
+    ) : NostrSignerCredential {
+        override val stableId: String
+            get() = "bunker:$uri"
+    }
+
+    @Immutable
+    @Serializable
+    @SerialName("NostrSignerAmber")
+    data class Amber(
+        val userPubkeyHex: String,
+        val packageName: String? = null,
+        val approvedSignerPubkey: String? = null,
+    ) : NostrSignerCredential {
+        override val stableId: String
+            get() = "amber:$userPubkeyHex:${packageName.orEmpty()}:${approvedSignerPubkey.orEmpty()}"
+    }
+}
+
+@Immutable
 public sealed class UiAccount {
     public abstract val accountKey: MicroBlogKey
     public abstract val platformType: PlatformType
@@ -37,10 +78,12 @@ public sealed class UiAccount {
         @Serializable
         @SerialName("NostrCredential")
         data class Credential(
-//            val pubkey: String,
-            val nsec: String,
+            val pubkeyHex: String = "",
             val relays: List<String> = emptyList(),
             val mediaServerUrl: String = "https://blossom.nostr.build/",
+            val signer: NostrSignerCredential? = null,
+            @SerialName("nsec")
+            internal val legacyNsec: String? = null,
         ) : UiAccount.Credential
     }
 
@@ -270,3 +313,17 @@ public sealed class UiAccount {
             }
     }
 }
+
+internal val UiAccount.Nostr.Credential.effectiveSigner: NostrSignerCredential?
+    get() = signer ?: legacyNsec?.let(NostrSignerCredential::LocalKey)
+
+internal fun UiAccount.Nostr.Credential.effectivePubkeyHex(accountKey: MicroBlogKey): String = pubkeyHex.ifBlank { accountKey.id }
+
+internal fun UiAccount.Nostr.Credential.normalized(accountKey: MicroBlogKey): UiAccount.Nostr.Credential =
+    copy(
+        pubkeyHex = effectivePubkeyHex(accountKey),
+        signer = effectiveSigner,
+    )
+
+internal fun UiAccount.Nostr.Credential.signerStableId(accountKey: MicroBlogKey): String =
+    effectiveSigner?.stableId ?: "readonly:${effectivePubkeyHex(accountKey)}"

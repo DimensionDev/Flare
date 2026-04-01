@@ -1,6 +1,8 @@
 package dev.dimension.flare.data.network.nostr
 
 import dev.dimension.flare.common.FileType
+import dev.dimension.flare.common.JSON
+import dev.dimension.flare.common.jsonObjectOrNull
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.userActionsMenu
 import dev.dimension.flare.data.datasource.nostr.NostrCache
@@ -9,6 +11,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.ui.model.ClickEvent
+import dev.dimension.flare.ui.model.NostrSignerCredential
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiHandle
 import dev.dimension.flare.ui.model.UiIcon
@@ -16,8 +19,11 @@ import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiNumber
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.effectivePubkeyHex
+import dev.dimension.flare.ui.model.effectiveSigner
 import dev.dimension.flare.ui.model.mapper.nostrLike
 import dev.dimension.flare.ui.model.mapper.nostrRepost
+import dev.dimension.flare.ui.model.normalized
 import dev.dimension.flare.ui.render.RenderContent
 import dev.dimension.flare.ui.render.RenderRun
 import dev.dimension.flare.ui.render.RenderTextStyle
@@ -36,8 +42,11 @@ import kotlinx.coroutines.sync.withLock
 import rust.nostr.sdk.Client
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
 import kotlin.time.Instant
 import rust.nostr.sdk.Contact as RustContact
+import rust.nostr.sdk.CustomNostrSigner as RustCustomNostrSigner
+import rust.nostr.sdk.Event as RustSignedEvent
 import rust.nostr.sdk.EventBuilder as RustEventBuilder
 import rust.nostr.sdk.EventDeletionRequest as RustEventDeletionRequest
 import rust.nostr.sdk.EventId as RustEventId
@@ -45,15 +54,19 @@ import rust.nostr.sdk.Keys as RustKeys
 import rust.nostr.sdk.Kind as RustKind
 import rust.nostr.sdk.MuteList as RustMuteList
 import rust.nostr.sdk.Nip19Enum as RustNip19Enum
+import rust.nostr.sdk.NostrConnect as RustNostrConnect
+import rust.nostr.sdk.NostrConnectUri as RustNostrConnectUri
 import rust.nostr.sdk.NostrSigner as RustNostrSigner
 import rust.nostr.sdk.PublicKey as RustPublicKey
 import rust.nostr.sdk.RelayUrl as RustRelayUrl
 import rust.nostr.sdk.Report as RustReport
 import rust.nostr.sdk.SecretKey as RustSecretKey
 import rust.nostr.sdk.SendEventOutput as RustSendEventOutput
+import rust.nostr.sdk.SignerBackend as RustSignerBackend
 import rust.nostr.sdk.Tag as RustTag
 import rust.nostr.sdk.TagKind as RustTagKind
 import rust.nostr.sdk.Timestamp as RustTimestamp
+import rust.nostr.sdk.UnsignedEvent as RustUnsignedEvent
 
 public val defaultNostrRelays: List<String> =
     listOf(
@@ -66,13 +79,15 @@ public val defaultNostrRelays: List<String> =
 internal class NostrService(
     private val cache: NostrCache,
     private val accountKey: MicroBlogKey,
-    nsec: String,
+    credential: UiAccount.Nostr.Credential,
+    private val amberSignerBridge: AmberSignerBridge,
     initialRelays: List<String> = emptyList(),
 ) : AutoCloseable {
     companion object {
         private val HEX_KEY_REGEX = Regex("^[0-9a-fA-F]{64}\$")
         private val HEX_DIGITS = "0123456789abcdef".toCharArray()
         internal const val NOSTR_HOST: String = "nostr"
+        private const val RELAY_LIST_METADATA_KIND = 10_002
         private const val MIN_EARLY_RETURN_EVENTS = 4
         private const val PUBLISH_SUCCESS_QUORUM = 3
         private const val RELAY_PUBLISH_TIMEOUT_MILLIS = 1_500L
@@ -84,42 +99,115 @@ internal class NostrService(
         private const val MAX_HOME_AUTHORS = 250
         private const val MIN_METADATA_EVENT_LIMIT = 50
 
-        internal fun importAccount(secretKeyInput: String): ImportedAccount {
-            val normalizedSecret =
-                secretKeyInput.trim().takeIf { it.isNotEmpty() }?.let(::normalizeSecret)
-            return normalizedSecret?.use { secretKey ->
+        internal suspend fun importAccount(input: String): ImportedAccount {
+            val value = input.removePrefix("nostr:").trim()
+            require(value.isNotEmpty()) { "A public key, private key, or bunker URI is required" }
+
+            parseSecret(value)?.use { secretKey ->
                 val pubkeyHex =
                     RustKeys(secretKey).use { keys ->
                         keys.publicKey().use { it.toHex() }
                     }
-                ImportedAccount(
+                return ImportedAccount.LocalKey(
                     pubkeyHex = pubkeyHex,
                     npub = bech32PublicKey(pubkeyHex),
                     nsec = secretKey.toBech32(),
                 )
-            } ?: error("A public key or secret key is required")
+            }
+
+            parsePublicKeyHex(value)?.let { pubkeyHex ->
+                return ImportedAccount.ReadOnly(
+                    pubkeyHex = pubkeyHex,
+                    npub = bech32PublicKey(pubkeyHex),
+                )
+            }
+
+            if (value.startsWith("bunker://", ignoreCase = true) || value.startsWith("nostrconnect://", ignoreCase = true)) {
+                return importBunkerAccount(value)
+            }
+
+            error("Unsupported Nostr account input")
         }
 
-        internal fun generateAccount(): ImportedAccount =
+        internal fun generateAccount(): ImportedAccount.LocalKey =
             RustKeys.Companion.generate().use { keys ->
-                ImportedAccount(
+                ImportedAccount.LocalKey(
                     pubkeyHex = keys.publicKey().use { it.toHex() },
                     npub = keys.publicKey().use { it.toBech32() },
                     nsec = keys.secretKey().use { it.toBech32() },
                 )
             }
 
-        internal fun exportAccount(credential: UiAccount.Nostr.Credential): ImportedAccount {
-            val secretKey =
-                requireNotNull(credential.nsec) {
-                    "Nostr account does not have an exportable private key"
+        internal suspend fun resolvePublicRelays(
+            pubkeyHex: String,
+            bootstrapRelays: List<String> = defaultNostrRelays,
+        ): List<String> {
+            val normalizedBootstrap = normalizeRelayUrls(bootstrapRelays)
+            val client = Client(null)
+            val relayUrls = mutableListOf<RustRelayUrl>()
+            return try {
+                normalizedBootstrap.forEach { relay ->
+                    val relayUrl = RustRelayUrl.parse(relay)
+                    relayUrls += relayUrl
+                    client.addRelay(relayUrl)
                 }
-            return importAccount(
-                secretKeyInput = secretKey,
+                client.connect()
+                val events =
+                    client
+                        .fetchEvents(
+                            Filter(
+                                authors = listOf(pubkeyHex),
+                                kinds = listOf(RELAY_LIST_METADATA_KIND, ContactListEvent.KIND),
+                                limit = 10,
+                            ).toRust(),
+                            timeout = 10.seconds,
+                        ).toVec()
+                        .map { it.use { event -> event.toCompatEvent() } }
+                extractRelayUrls(events).ifEmpty { normalizedBootstrap }
+            } finally {
+                client.close()
+                relayUrls.forEach { it.close() }
+            }
+        }
+
+        internal fun exportAccount(credential: UiAccount.Nostr.Credential): ImportedAccount {
+            val secretKey = (credential.effectiveSigner as? NostrSignerCredential.LocalKey)?.nsec
+            requireNotNull(secretKey) {
+                "Nostr account does not have an exportable private key"
+            }
+            val normalizedSecret = parseSecret(secretKey)?.use { it.toBech32() }
+            return ImportedAccount.LocalKey(
+                pubkeyHex = credential.pubkeyHex.ifBlank { error("Nostr account is missing a public key") },
+                npub = bech32PublicKey(credential.pubkeyHex.ifBlank { error("Nostr account is missing a public key") }),
+                nsec = normalizedSecret ?: error("Failed to normalize exported secret"),
             )
         }
 
-        private fun normalizeSecret(raw: String): RustSecretKey {
+        private suspend fun importBunkerAccount(uri: String): ImportedAccount.RemoteSigner {
+            val parsedUri = RustNostrConnectUri.parse(uri)
+            val generatedKeys = RustKeys.Companion.generate()
+            val appSecret = generatedKeys.secretKey().use { it.toBech32() }
+            val connect = RustNostrConnect(parsedUri, generatedKeys, 10.seconds, null)
+            return try {
+                val pubkeyHex = connect.getPublicKey().use { it.toHex() }
+                ImportedAccount.RemoteSigner(
+                    pubkeyHex = pubkeyHex,
+                    npub = bech32PublicKey(pubkeyHex),
+                    signerCredential =
+                        NostrSignerCredential.Bunker(
+                            uri = uri,
+                            userPubkeyHex = pubkeyHex,
+                            secret = appSecret,
+                        ),
+                )
+            } finally {
+                connect.close()
+                generatedKeys.close()
+                parsedUri.close()
+            }
+        }
+
+        private fun parseSecret(raw: String): RustSecretKey? {
             val value = raw.removePrefix("nostr:").trim()
             return when {
                 value.startsWith("nsec1", ignoreCase = true) ->
@@ -127,34 +215,73 @@ internal class NostrService(
 
                 HEX_KEY_REGEX.matches(value) -> RustSecretKey.Companion.parse(value.lowercase())
 
-                else -> error("Unsupported secret key format")
+                else -> null
             }
         }
+
+        private fun extractRelayUrls(events: List<Event>): List<String> {
+            val relayListEvent =
+                events
+                    .filter { it.kind == RELAY_LIST_METADATA_KIND }
+                    .maxByOrNull { it.createdAt }
+            relayListEvent?.let { event ->
+                relayUrlsFromTags(event.tags).takeIf { it.isNotEmpty() }?.let { return it }
+            }
+
+            val contactListEvent = events.filterIsInstance<ContactListEvent>().maxByOrNull { it.createdAt }
+            contactListEvent?.let { event ->
+                relayUrlsFromTags(event.tags).takeIf { it.isNotEmpty() }?.let { return it }
+                runCatching {
+                    JSON
+                        .parseToJsonElement(event.content)
+                        .jsonObjectOrNull
+                        ?.keys
+                        ?.toList()
+                        .orEmpty()
+                }.getOrDefault(emptyList())
+                    .let(::normalizeRelayUrls)
+                    .takeIf { it.isNotEmpty() }
+                    ?.let { return it }
+            }
+
+            return emptyList()
+        }
+
+        private fun relayUrlsFromTags(tags: Array<Array<String>>): List<String> =
+            normalizeRelayUrls(
+                tags.mapNotNull { tag ->
+                    tag
+                        .takeIf { it.size > 1 && it[0] == "r" }
+                        ?.get(1)
+                },
+            )
+
+        private fun normalizeRelayUrls(relays: List<String>): List<String> =
+            relays
+                .ifEmpty { defaultNostrRelays }
+                .map(String::trim)
+                .filter(String::isNotEmpty)
+                .distinct()
     }
 
     private var connected = false
     private val relayMutex = Mutex()
     private val currentRelays = linkedMapOf<String, RustRelayUrl>()
     private val initialRelays = initialRelays.normalizeRelayUrls()
-
-    private val secretKey by lazy {
-        RustSecretKey.parse(nsec)
+    private val credential = credential.normalized(accountKey)
+    private val signerHandle by lazy {
+        signerHandleOf(credential.effectiveSigner)
     }
-
-    private val keys by lazy {
-        RustKeys(secretKey)
-    }
-
+    internal val canSign: Boolean
+        get() = signerHandle.canSign
     private val pubKey by lazy {
-        keys.publicKey()
+        publicKey(credential.effectivePubkeyHex(accountKey))
     }
-
     private val pubKeyHex by lazy {
-        pubKey.toHex()
+        credential.effectivePubkeyHex(accountKey)
     }
-
     private val client by lazy {
-        Client(RustNostrSigner.keys(keys))
+        Client(signerHandle.rustSigner)
     }
     private val blossomUploader by lazy {
         NostrBlossomUploader(
@@ -171,8 +298,7 @@ internal class NostrService(
         currentRelays.values.forEach { it.close() }
         currentRelays.clear()
         pubKey.close()
-        keys.close()
-        secretKey.close()
+        signerHandle.close()
     }
 
     suspend fun ensureConnection() {
@@ -216,17 +342,135 @@ internal class NostrService(
         }
     }
 
-    internal data class ImportedAccount(
-        val pubkeyHex: String,
-        val npub: String,
-        val nsec: String,
-    )
+    internal sealed interface ImportedAccount {
+        val pubkeyHex: String
+        val npub: String
+        val signerCredential: NostrSignerCredential?
 
-    private fun List<String>.normalizeRelayUrls(): List<String> =
-        ifEmpty { defaultNostrRelays }
-            .map(String::trim)
-            .filter(String::isNotEmpty)
-            .distinct()
+        data class ReadOnly(
+            override val pubkeyHex: String,
+            override val npub: String,
+        ) : ImportedAccount {
+            override val signerCredential: NostrSignerCredential? = null
+        }
+
+        data class LocalKey(
+            override val pubkeyHex: String,
+            override val npub: String,
+            val nsec: String,
+        ) : ImportedAccount {
+            override val signerCredential: NostrSignerCredential = NostrSignerCredential.LocalKey(nsec)
+        }
+
+        data class RemoteSigner(
+            override val pubkeyHex: String,
+            override val npub: String,
+            override val signerCredential: NostrSignerCredential,
+        ) : ImportedAccount
+    }
+
+    private sealed interface SignerHandle : AutoCloseable {
+        val rustSigner: RustNostrSigner?
+        val canSign: Boolean
+
+        data object ReadOnly : SignerHandle {
+            override val rustSigner: RustNostrSigner? = null
+            override val canSign: Boolean = false
+
+            override fun close() = Unit
+        }
+
+        class LocalKey(
+            nsec: String,
+        ) : SignerHandle {
+            private val secretKey = RustSecretKey.parse(nsec)
+            private val keys = RustKeys(secretKey)
+            override val rustSigner: RustNostrSigner = RustNostrSigner.keys(keys)
+            override val canSign: Boolean = true
+
+            override fun close() {
+                rustSigner.close()
+                keys.close()
+                secretKey.close()
+            }
+        }
+
+        class Bunker(
+            credential: NostrSignerCredential.Bunker,
+        ) : SignerHandle {
+            private val appKeys =
+                RustKeys.parse(
+                    credential.secret ?: error("Bunker signer requires an app secret"),
+                )
+            private val uri = RustNostrConnectUri.parse(credential.uri)
+            private val connect = RustNostrConnect(uri, appKeys, 10.seconds, null)
+            override val rustSigner: RustNostrSigner = RustNostrSigner.nostrConnect(connect)
+            override val canSign: Boolean = true
+
+            override fun close() {
+                rustSigner.close()
+                connect.close()
+                uri.close()
+                appKeys.close()
+            }
+        }
+
+        class Amber(
+            private val credential: NostrSignerCredential.Amber,
+            private val amberSignerBridge: AmberSignerBridge,
+        ) : SignerHandle {
+            private val customSigner =
+                object : RustCustomNostrSigner {
+                    override fun backend(): RustSignerBackend = RustSignerBackend.Custom("amber")
+
+                    override suspend fun getPublicKey(): RustPublicKey = RustPublicKey.parse(amberSignerBridge.getPublicKey(credential))
+
+                    override suspend fun signEvent(unsignedEvent: RustUnsignedEvent): RustSignedEvent =
+                        RustSignedEvent.fromJson(
+                            amberSignerBridge.signEvent(
+                                credential = credential,
+                                unsignedEventJson = unsignedEvent.asJson(),
+                            ),
+                        )
+
+                    override suspend fun nip04Encrypt(
+                        publicKey: RustPublicKey,
+                        content: String,
+                    ): String = error("Amber NIP-04 encrypt is not supported")
+
+                    override suspend fun nip04Decrypt(
+                        publicKey: RustPublicKey,
+                        encryptedContent: String,
+                    ): String = error("Amber NIP-04 decrypt is not supported")
+
+                    override suspend fun nip44Encrypt(
+                        publicKey: RustPublicKey,
+                        content: String,
+                    ): String = error("Amber NIP-44 encrypt is not supported")
+
+                    override suspend fun nip44Decrypt(
+                        publicKey: RustPublicKey,
+                        payload: String,
+                    ): String = error("Amber NIP-44 decrypt is not supported")
+                }
+            override val rustSigner: RustNostrSigner = RustNostrSigner.custom(customSigner)
+            override val canSign: Boolean = amberSignerBridge.isAvailable()
+
+            override fun close() {
+                rustSigner.close()
+            }
+        }
+    }
+
+    private fun signerHandleOf(credential: NostrSignerCredential?): SignerHandle =
+        when (credential) {
+            null -> SignerHandle.ReadOnly
+            is NostrSignerCredential.LocalKey -> SignerHandle.LocalKey(credential.nsec)
+            is NostrSignerCredential.Bunker -> SignerHandle.Bunker(credential)
+            is NostrSignerCredential.Amber -> SignerHandle.Amber(credential, amberSignerBridge)
+        }
+
+    private fun List<String>.normalizeRelayUrls(): List<String> = normalizeRelayUrls(this)
 
     internal suspend fun loadHomeTimeline(
         pageSize: Int,
@@ -942,6 +1186,7 @@ internal class NostrService(
         }
 
     private suspend fun sendEventBuilder(builder: RustEventBuilder): String {
+        requireWritable()
         val requiredSuccessCount =
             relayMutex.withLock {
                 minOf(PUBLISH_SUCCESS_QUORUM, currentRelays.size)
@@ -977,6 +1222,12 @@ internal class NostrService(
     ) : Exception(
             "Failed to publish event to enough relays: $successCount/$requiredSuccessCount succeeded.",
         )
+
+    private fun requireWritable() {
+        check(canSign) {
+            "This Nostr account is read-only. Connect a signer to publish events."
+        }
+    }
 
     private fun parseSearchProfilePubkey(raw: String): String? {
         val value = raw.removePrefix("nostr:").trim()
@@ -1076,6 +1327,7 @@ internal class NostrService(
             .tags(tags.map { RustTag.Companion.parse(it.toList()) })
 
     private suspend fun buildBlossomUploadAuthEvent(sha256: String): String {
+        requireWritable()
         val expirationSeconds =
             (Clock.System.now().toEpochMilliseconds() / 1000L).toULong() +
                 5.minutes.inWholeSeconds.toULong()
@@ -1420,59 +1672,61 @@ internal class NostrService(
             content = parseNostrRichText(actualRenderContext, accountKey = accountKey, profiles = profiles),
             actions =
                 buildList {
-                    add(
-                        ActionMenu.Item(
-                            icon = UiIcon.Reply,
-                            text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Reply),
-                            clickEvent =
-                                ClickEvent.Deeplink(
-                                    DeeplinkRoute.Compose.Reply(
-                                        accountKey = accountKey,
-                                        statusKey = statusKey,
+                    if (canSign) {
+                        add(
+                            ActionMenu.Item(
+                                icon = UiIcon.Reply,
+                                text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Reply),
+                                clickEvent =
+                                    ClickEvent.Deeplink(
+                                        DeeplinkRoute.Compose.Reply(
+                                            accountKey = accountKey,
+                                            statusKey = statusKey,
+                                        ),
                                     ),
-                                ),
-                            count = UiNumber(0L),
-                        ),
-                    )
-                    add(
-                        ActionMenu.Group(
-                            displayItem =
-                                ActionMenu.nostrRepost(
-                                    statusKey = statusKey,
-                                    repostEventId = stats.myRepostEventId,
-                                    count = stats.repostCount,
-                                    accountKey = accountKey,
-                                ),
-                            actions =
-                                listOf(
+                                count = UiNumber(0L),
+                            ),
+                        )
+                        add(
+                            ActionMenu.Group(
+                                displayItem =
                                     ActionMenu.nostrRepost(
                                         statusKey = statusKey,
                                         repostEventId = stats.myRepostEventId,
                                         count = stats.repostCount,
                                         accountKey = accountKey,
                                     ),
-                                    ActionMenu.Item(
-                                        icon = UiIcon.Quote,
-                                        text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Quote),
-                                        clickEvent =
-                                            ClickEvent.Deeplink(
-                                                DeeplinkRoute.Compose.Quote(
-                                                    accountKey = accountKey,
-                                                    statusKey = statusKey,
+                                actions =
+                                    listOf(
+                                        ActionMenu.nostrRepost(
+                                            statusKey = statusKey,
+                                            repostEventId = stats.myRepostEventId,
+                                            count = stats.repostCount,
+                                            accountKey = accountKey,
+                                        ),
+                                        ActionMenu.Item(
+                                            icon = UiIcon.Quote,
+                                            text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Quote),
+                                            clickEvent =
+                                                ClickEvent.Deeplink(
+                                                    DeeplinkRoute.Compose.Quote(
+                                                        accountKey = accountKey,
+                                                        statusKey = statusKey,
+                                                    ),
                                                 ),
-                                            ),
-                                    ),
-                                ).toImmutableList(),
-                        ),
-                    )
-                    add(
-                        ActionMenu.nostrLike(
-                            statusKey = statusKey,
-                            reactionEventId = stats.myReactionEventId,
-                            count = stats.reactionCount,
-                            accountKey = accountKey,
-                        ),
-                    )
+                                        ),
+                                    ).toImmutableList(),
+                            ),
+                        )
+                        add(
+                            ActionMenu.nostrLike(
+                                statusKey = statusKey,
+                                reactionEventId = stats.myReactionEventId,
+                                count = stats.reactionCount,
+                                accountKey = accountKey,
+                            ),
+                        )
+                    }
                     add(
                         ActionMenu.Group(
                             displayItem =
@@ -1496,7 +1750,7 @@ internal class NostrService(
                                                 ),
                                         ),
                                     )
-                                    if (pubKey == accountKey.id) {
+                                    if (canSign && pubKey == accountKey.id) {
                                         add(
                                             ActionMenu.Item(
                                                 icon = UiIcon.Delete,

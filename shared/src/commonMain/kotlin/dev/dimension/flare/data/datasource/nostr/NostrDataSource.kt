@@ -24,6 +24,7 @@ import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.notSupported
+import dev.dimension.flare.data.network.nostr.AmberSignerBridge
 import dev.dimension.flare.data.network.nostr.NostrService
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.model.MicroBlogKey
@@ -33,6 +34,8 @@ import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.nostrLike
 import dev.dimension.flare.ui.model.mapper.nostrRepost
+import dev.dimension.flare.ui.model.normalized
+import dev.dimension.flare.ui.model.signerStableId
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -57,6 +60,7 @@ internal class NostrDataSource(
     private val accountRepository: AccountRepository by inject()
     private val ioScope: CoroutineScope by inject()
     private val nostrCache: NostrCache by inject()
+    private val amberSignerBridge: AmberSignerBridge by inject()
     private val credentialFlow by lazy {
         accountRepository.credentialFlow<UiAccount.Nostr.Credential>(accountKey)
     }
@@ -69,13 +73,14 @@ internal class NostrDataSource(
 
     private val serviceManager by lazy {
         SwitchingServiceManager(
-            credentialFlow.distinctUntilChangedBy { it.nsec },
+            credentialFlow.distinctUntilChangedBy { it.signerStableId(accountKey) },
             ioScope,
             {
                 NostrService(
                     nostrCache,
                     accountKey,
-                    nsec = it.nsec,
+                    credential = it.normalized(accountKey),
+                    amberSignerBridge = amberSignerBridge,
                     initialRelays = it.relays,
                 ).also {
                     it.ensureConnection()

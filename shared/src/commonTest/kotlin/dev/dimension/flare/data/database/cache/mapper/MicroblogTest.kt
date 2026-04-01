@@ -22,6 +22,8 @@ import dev.dimension.flare.data.database.cache.model.translationPayload
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.paging.TimelinePagingMapper
 import dev.dimension.flare.data.datastore.model.AppSettings
+import dev.dimension.flare.data.network.nostr.NostrService
+import dev.dimension.flare.data.network.nostr.bech32PublicKey
 import dev.dimension.flare.data.translation.cacheKey
 import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.AccountType
@@ -1665,6 +1667,83 @@ class MicroblogTest : RobolectricTest() {
                 ActionMenu.Item.Text.Localized.Type.Translate,
                 assertIs<ActionMenu.Item.Text.Localized>(firstAction.text).type,
             )
+        }
+
+    @Test
+    fun saveToDatabaseKeepsExistingNostrProfileWhenIncomingUsesFallbackNpub() =
+        runTest {
+            val accountKey = MicroBlogKey(id = "nostr-account", host = NostrService.NOSTR_HOST)
+            val userKey =
+                MicroBlogKey(
+                    id = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+                    host = NostrService.NOSTR_HOST,
+                )
+            val detailedUser =
+                UiProfile(
+                    key = userKey,
+                    handle = UiHandle(raw = "alice", host = NostrService.NOSTR_HOST),
+                    avatar = "https://example.com/alice.png",
+                    nameInternal = "Alice".toUiPlainText(),
+                    platformType = dev.dimension.flare.model.PlatformType.Nostr,
+                    clickEvent = ClickEvent.Noop,
+                    banner = "https://example.com/banner.png",
+                    description = "hello".toUiPlainText(),
+                    matrices = UiProfile.Matrices(0, 0, 0),
+                    mark = persistentListOf(),
+                    bottomContent = null,
+                )
+            val fallback = bech32PublicKey(userKey.id).take(16)
+            val fallbackUser =
+                UiProfile(
+                    key = userKey,
+                    handle = UiHandle(raw = fallback, host = NostrService.NOSTR_HOST),
+                    avatar = "",
+                    nameInternal = fallback.toUiPlainText(),
+                    platformType = dev.dimension.flare.model.PlatformType.Nostr,
+                    clickEvent = ClickEvent.Noop,
+                    banner = null,
+                    description = null,
+                    matrices = UiProfile.Matrices(0, 0, 0),
+                    mark = persistentListOf(),
+                    bottomContent = null,
+                )
+
+            saveToDatabase(
+                db,
+                listOf(
+                    TimelinePagingMapper.toDb(
+                        createPost(
+                            accountKey = accountKey,
+                            user = detailedUser,
+                            statusKey = MicroBlogKey(id = "status-detailed", host = NostrService.NOSTR_HOST),
+                            text = "detailed",
+                        ),
+                        pagingKey = "home",
+                    ),
+                ),
+            )
+            saveToDatabase(
+                db,
+                listOf(
+                    TimelinePagingMapper.toDb(
+                        createPost(
+                            accountKey = accountKey,
+                            user = fallbackUser,
+                            statusKey = MicroBlogKey(id = "status-fallback", host = NostrService.NOSTR_HOST),
+                            text = "fallback",
+                        ),
+                        pagingKey = "home",
+                    ),
+                ),
+            )
+
+            val savedUser = db.userDao().findByKey(userKey).first()
+            val savedProfile = assertNotNull(savedUser).content
+            assertEquals("alice", savedProfile.handle.raw)
+            assertEquals("Alice", savedProfile.name.raw)
+            assertEquals("https://example.com/alice.png", savedProfile.avatar)
+            assertEquals("https://example.com/banner.png", savedProfile.banner)
+            assertEquals("hello", savedProfile.description?.raw)
         }
 
     private fun createUser(

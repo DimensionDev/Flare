@@ -19,6 +19,7 @@ import dev.dimension.flare.data.model.AvatarShape
 import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.data.model.VideoAutoplay
 import dev.dimension.flare.data.repository.SettingsRepository
+import dev.dimension.flare.ui.common.BindAmberSignerLauncher
 import dev.dimension.flare.ui.component.ComponentAppearance
 import dev.dimension.flare.ui.component.LocalComponentAppearance
 import dev.dimension.flare.ui.screen.home.HomeScreen
@@ -38,6 +39,7 @@ fun AppContainer(afterInit: () -> Unit) {
 
 @Composable
 fun FlareApp(content: @Composable () -> Unit) {
+    BindAmberSignerLauncher()
     val settingsRepository = koinInject<SettingsRepository>()
     val appearanceSettings by settingsRepository.appearanceSettings.collectAsState(
         AppearanceSettings(),

@@ -14,6 +14,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
@@ -89,7 +90,6 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
             val serverRequirementHint = stringResource(id = R.string.settings_ai_config_server_url_requirement)
             val apiKeyTitle = stringResource(id = R.string.settings_ai_config_api_key)
             val apiKeyHint = stringResource(id = R.string.settings_ai_config_api_key_hint)
-            val translatePromptTitle = stringResource(id = R.string.settings_ai_config_translate_prompt)
             val tldrPromptTitle = stringResource(id = R.string.settings_ai_config_tldr_prompt)
             SegmentedListItem(
                 checked = state.showTypeDropdown,
@@ -308,150 +308,15 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
                 )
             }
             Spacer(modifier = Modifier.height(12.dp))
-            AnimatedVisibility(visible = true) {
-                SegmentedListItem(
-                    checked = state.showProviderDropdown,
-                    onCheckedChange = { checked ->
-                        state.setShowProviderDropdown(checked)
-                    },
-                    shapes = ListItemDefaults.first(),
-                    content = {
-                        Text(text = stringResource(id = R.string.settings_ai_config_translate_provider))
-                    },
-                    supportingContent = {
-                        Text(
-                            text = stringResource(id = R.string.settings_ai_config_translate_provider_description),
-                            style = MaterialTheme.typography.bodySmall,
-                        )
-                    },
-                    trailingContent = {
-                        Box {
-                            TextButton(
-                                onClick = {
-                                    state.setShowProviderDropdown(true)
-                                },
-                            ) {
-                                Text(
-                                    text =
-                                        when (state.translateProvider) {
-                                            TranslateProviderOption.AI ->
-                                                stringResource(
-                                                    id = R.string.settings_ai_config_translate_provider_ai,
-                                                )
-                                            TranslateProviderOption.Google ->
-                                                stringResource(
-                                                    id = R.string.settings_ai_config_translate_provider_google,
-                                                )
-                                        },
-                                )
-                            }
-                            FlareDropdownMenu(
-                                expanded = state.showProviderDropdown,
-                                onDismissRequest = {
-                                    state.setShowProviderDropdown(false)
-                                },
-                            ) {
-                                state.supportedTranslateProviders.forEach { provider ->
-                                    DropdownMenuItem(
-                                        text = {
-                                            Text(
-                                                text =
-                                                    when (provider) {
-                                                        TranslateProviderOption.AI ->
-                                                            stringResource(
-                                                                id = R.string.settings_ai_config_translate_provider_ai,
-                                                            )
-                                                        TranslateProviderOption.Google ->
-                                                            stringResource(
-                                                                id = R.string.settings_ai_config_translate_provider_google,
-                                                            )
-                                                    },
-                                            )
-                                        },
-                                        onClick = {
-                                            state.setShowProviderDropdown(false)
-                                            state.selectTranslateProvider(provider)
-                                        },
-                                    )
-                                }
-                            }
-                        }
-                    },
-                )
-            }
-            AnimatedVisibility(visible = true) {
-                SegmentedListItem(
-                    onClick = {
-                        state.setPreTranslate(!state.preTranslate)
-                    },
-                    shapes = ListItemDefaults.item(),
-                    content = {
-                        Text(
-                            text = stringResource(id = R.string.settings_ai_config_enable_pre_translation),
-                        )
-                    },
-                    supportingContent = {
-                        Text(
-                            text = stringResource(id = R.string.settings_ai_config_pre_translation_description),
-                        )
-                    },
-                    trailingContent = {
-                        Switch(
-                            checked = state.preTranslate,
-                            onCheckedChange = {
-                                state.setPreTranslate(it)
-                            },
-                        )
-                    },
-                )
-            }
-            AnimatedVisibility(
-                visible =
-                    state.translateProvider == TranslateProviderOption.AI,
-            ) {
-                SegmentedListItem(
-                    checked = state.textEditDialog?.field == AiConfigEditField.TranslatePrompt,
-                    onCheckedChange = { checked ->
-                        if (checked) {
-                            state.setTextEditDialog(
-                                TextEditDialogState(
-                                    field = AiConfigEditField.TranslatePrompt,
-                                    title = translatePromptTitle,
-                                    placeholder = "",
-                                    value = state.translatePrompt,
-                                    onConfirm = { newValue ->
-                                        state.setTranslatePrompt(newValue)
-                                    },
-                                ),
-                            )
-                        } else if (state.textEditDialog?.field == AiConfigEditField.TranslatePrompt) {
-                            state.setTextEditDialog(null)
-                        }
-                    },
-                    shapes = ListItemDefaults.item(),
-                    content = {
-                        Text(text = translatePromptTitle)
-                    },
-                    supportingContent = {
-                        Text(
-                            text =
-                                state.translatePrompt.ifBlank {
-                                    stringResource(id = R.string.settings_ai_config_value_empty_placeholder)
-                                },
-                            style = MaterialTheme.typography.bodySmall,
-                        )
-                    },
-                )
-            }
             SegmentedListItem(
                 onClick = {
                     state.setAITldr(!state.aiTldr)
                 },
                 shapes =
                     if (state.aiTldr) {
-                        ListItemDefaults.item()
+                        ListItemDefaults.first()
                     } else {
-                        ListItemDefaults.last()
+                        ListItemDefaults.single()
                     },
                 content = {
                     Text(
@@ -533,13 +398,11 @@ private fun presenter() =
         val businessState = remember { AiConfigPresenter() }.invoke()
         var showTypeDropdown by remember { mutableStateOf(false) }
         var showModelDropdown by remember { mutableStateOf(false) }
-        var showProviderDropdown by remember { mutableStateOf(false) }
         var textEditDialog by remember { mutableStateOf<TextEditDialogState?>(null) }
 
         object : AiConfigPresenter.State by businessState {
             val showTypeDropdown = showTypeDropdown
             val showModelDropdown = showModelDropdown
-            val showProviderDropdown = showProviderDropdown
             val textEditDialog = textEditDialog
 
             fun setShowTypeDropdown(value: Boolean) {
@@ -548,10 +411,6 @@ private fun presenter() =
 
             fun setShowModelDropdown(value: Boolean) {
                 showModelDropdown = value
-            }
-
-            fun setShowProviderDropdown(value: Boolean) {
-                showProviderDropdown = value
             }
 
             fun setTextEditDialog(value: TextEditDialogState?) {
@@ -573,7 +432,6 @@ private data class TextEditDialogState(
 private enum class AiConfigEditField {
     ServerUrl,
     ApiKey,
-    TranslatePrompt,
     TldrPrompt,
 }
 
@@ -680,4 +538,224 @@ private fun TextEditDialog(
             }
         },
     )
+}
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+internal fun TranslationConfigScreen(onBack: () -> Unit) {
+    val topAppBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    val state by producePresenter { translationPresenter() }
+    FlareScaffold(
+        topBar = {
+            FlareLargeFlexibleTopAppBar(
+                title = {
+                    Text(text = stringResource(id = R.string.settings_translation_title))
+                },
+                navigationIcon = {
+                    BackButton(onBack = onBack)
+                },
+                scrollBehavior = topAppBarScrollBehavior,
+            )
+        },
+        modifier =
+            Modifier
+                .nestedScroll(topAppBarScrollBehavior.nestedScrollConnection),
+    ) {
+        Column(
+            modifier =
+                Modifier
+                    .verticalScroll(rememberScrollState())
+                    .padding(it)
+                    .padding(horizontal = screenHorizontalPadding),
+            verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
+        ) {
+            val translatePromptTitle = stringResource(id = R.string.settings_ai_config_translate_prompt)
+            SegmentedListItem(
+                checked = state.showProviderDropdown,
+                onCheckedChange = { checked ->
+                    state.setShowProviderDropdown(checked)
+                },
+                shapes = ListItemDefaults.first(),
+                content = {
+                    Text(text = stringResource(id = R.string.settings_ai_config_translate_provider))
+                },
+                supportingContent = {
+                    Text(
+                        text = stringResource(id = R.string.settings_ai_config_translate_provider_description),
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                },
+                trailingContent = {
+                    Box {
+                        TextButton(
+                            onClick = {
+                                state.setShowProviderDropdown(true)
+                            },
+                        ) {
+                            Text(
+                                text =
+                                    when (state.translateProvider) {
+                                        TranslateProviderOption.AI ->
+                                            stringResource(
+                                                id = R.string.settings_ai_config_translate_provider_ai,
+                                            )
+                                        TranslateProviderOption.Google ->
+                                            stringResource(
+                                                id = R.string.settings_ai_config_translate_provider_google,
+                                            )
+                                    },
+                            )
+                        }
+                        FlareDropdownMenu(
+                            expanded = state.showProviderDropdown,
+                            onDismissRequest = {
+                                state.setShowProviderDropdown(false)
+                            },
+                        ) {
+                            state.supportedTranslateProviders.forEach { provider ->
+                                DropdownMenuItem(
+                                    text = {
+                                        Text(
+                                            text =
+                                                when (provider) {
+                                                    TranslateProviderOption.AI ->
+                                                        stringResource(
+                                                            id = R.string.settings_ai_config_translate_provider_ai,
+                                                        )
+                                                    TranslateProviderOption.Google ->
+                                                        stringResource(
+                                                            id = R.string.settings_ai_config_translate_provider_google,
+                                                        )
+                                                },
+                                        )
+                                    },
+                                    onClick = {
+                                        state.setShowProviderDropdown(false)
+                                        state.selectTranslateProvider(provider)
+                                    },
+                                )
+                            }
+                        }
+                    }
+                },
+            )
+            SegmentedListItem(
+                onClick = {
+                    state.setPreTranslate(!state.preTranslate)
+                },
+                shapes =
+                    if (state.translateProvider == TranslateProviderOption.AI) {
+                        ListItemDefaults.item()
+                    } else {
+                        ListItemDefaults.last()
+                    },
+                content = {
+                    Text(
+                        text = stringResource(id = R.string.settings_ai_config_enable_pre_translation),
+                    )
+                },
+                supportingContent = {
+                    Text(
+                        text = stringResource(id = R.string.settings_ai_config_pre_translation_description),
+                    )
+                },
+                trailingContent = {
+                    Switch(
+                        checked = state.preTranslate,
+                        onCheckedChange = {
+                            state.setPreTranslate(it)
+                        },
+                    )
+                },
+            )
+            AnimatedVisibility(
+                visible = state.translateProvider == TranslateProviderOption.AI,
+            ) {
+                SegmentedListItem(
+                    checked = state.textEditDialog?.field == TranslationEditField.TranslatePrompt,
+                    onCheckedChange = { checked ->
+                        if (checked) {
+                            state.setTextEditDialog(
+                                TranslationTextEditDialogState(
+                                    field = TranslationEditField.TranslatePrompt,
+                                    title = translatePromptTitle,
+                                    placeholder = "",
+                                    value = state.translatePrompt,
+                                    onConfirm = { newValue ->
+                                        state.setTranslatePrompt(newValue)
+                                    },
+                                ),
+                            )
+                        } else if (state.textEditDialog?.field == TranslationEditField.TranslatePrompt) {
+                            state.setTextEditDialog(null)
+                        }
+                    },
+                    shapes = ListItemDefaults.last(),
+                    content = {
+                        Text(text = translatePromptTitle)
+                    },
+                    supportingContent = {
+                        Text(
+                            text =
+                                state.translatePrompt.ifBlank {
+                                    stringResource(id = R.string.settings_ai_config_value_empty_placeholder)
+                                },
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                    },
+                )
+            }
+        }
+    }
+    state.textEditDialog?.let { dialog ->
+        TextEditDialog(
+            title = dialog.title,
+            placeholder = dialog.placeholder,
+            value = dialog.value,
+            suggestions = dialog.suggestions,
+            hint = dialog.hint,
+            onDismiss = {
+                state.setTextEditDialog(null)
+            },
+            onConfirm = { newValue ->
+                dialog.onConfirm(newValue)
+                state.setTextEditDialog(null)
+            },
+        )
+    }
+}
+
+@Composable
+private fun translationPresenter() =
+    run {
+        val businessState = remember { AiConfigPresenter() }.invoke()
+        var showProviderDropdown by remember { mutableStateOf(false) }
+        var textEditDialog by remember { mutableStateOf<TranslationTextEditDialogState?>(null) }
+
+        object : AiConfigPresenter.State by businessState {
+            val showProviderDropdown = showProviderDropdown
+            val textEditDialog = textEditDialog
+
+            fun setShowProviderDropdown(value: Boolean) {
+                showProviderDropdown = value
+            }
+
+            fun setTextEditDialog(value: TranslationTextEditDialogState?) {
+                textEditDialog = value
+            }
+        }
+    }
+
+private data class TranslationTextEditDialogState(
+    val field: TranslationEditField,
+    val title: String,
+    val placeholder: String,
+    val value: String,
+    val suggestions: ImmutableList<String> = persistentListOf(),
+    val hint: String = "",
+    val onConfirm: (String) -> Unit,
+)
+
+private enum class TranslationEditField {
+    TranslatePrompt,
 }

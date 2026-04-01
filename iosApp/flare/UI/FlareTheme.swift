@@ -14,6 +14,7 @@ struct FlareTheme<Content: View>: View {
                 content()
                     .networkStatus()
                     .environment(\.aiConfig, appSettings.aiConfig)
+                    .environment(\.translateConfig, appSettings.translateConfig)
                     .environment(\.appearanceSettings, appearance)
                     .preferredColorScheme(
                         appearance.theme == .system ? nil : (appearance.theme == .dark ? .dark : .light)
@@ -30,6 +31,9 @@ private struct AppearanceSettingsKey: EnvironmentKey {
 private struct AiConfigKey: EnvironmentKey {
     static let defaultValue = AppSettings.AiConfig.companion.default
 }
+private struct TranslateConfigKey: EnvironmentKey {
+    static let defaultValue = AppSettings.TranslateConfig()
+}
 extension EnvironmentValues {
     var appearanceSettings: AppearanceSettings {
         get { self[AppearanceSettingsKey.self] }
@@ -38,5 +42,9 @@ extension EnvironmentValues {
     var aiConfig: AppSettings.AiConfig {
         get { self[AiConfigKey.self] }
         set { self[AiConfigKey.self] = newValue }
+    }
+    var translateConfig: AppSettings.TranslateConfig {
+        get { self[TranslateConfigKey.self] }
+        set { self[TranslateConfigKey.self] = newValue }
     }
 }

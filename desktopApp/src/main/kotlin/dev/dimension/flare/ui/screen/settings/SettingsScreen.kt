@@ -172,6 +172,8 @@ import dev.dimension.flare.settings_storage_import_data
 import dev.dimension.flare.settings_storage_import_data_description
 import dev.dimension.flare.settings_storage_subtitle
 import dev.dimension.flare.settings_storage_title
+import dev.dimension.flare.settings_translation_description
+import dev.dimension.flare.settings_translation_title
 import dev.dimension.flare.tab_settings_drag
 import dev.dimension.flare.ui.component.AccountItem
 import dev.dimension.flare.ui.component.AvatarComponent
@@ -1206,7 +1208,6 @@ internal fun SettingsScreen(
                 val serverRequirementHint = stringResource(Res.string.settings_ai_config_server_url_requirement)
                 val apiKeyTitle = stringResource(Res.string.settings_ai_config_api_key)
                 val apiKeyHint = stringResource(Res.string.settings_ai_config_api_key_hint)
-                val translatePromptTitle = stringResource(Res.string.settings_ai_config_translate_prompt)
                 val tldrPromptTitle = stringResource(Res.string.settings_ai_config_tldr_prompt)
                 ExpanderItem(
                     heading = {
@@ -1376,119 +1377,6 @@ internal fun SettingsScreen(
                         ExpanderItemSeparator()
                     }
                 }
-                AnimatedVisibility(true) {
-                    Column {
-                        ExpanderItem(
-                            heading = {
-                                Text(stringResource(Res.string.settings_ai_config_translate_provider))
-                            },
-                            caption = {
-                                Text(stringResource(Res.string.settings_ai_config_translate_provider_description))
-                            },
-                            trailing = {
-                                DropDownButton(
-                                    onClick = {
-                                        state.aiConfigState.setShowProviderDropdown(!state.aiConfigState.showProviderDropdown)
-                                    },
-                                ) {
-                                    Text(
-                                        when (state.aiConfigState.translateProvider) {
-                                            TranslateProviderOption.AI ->
-                                                stringResource(
-                                                    Res.string.settings_ai_config_translate_provider_ai,
-                                                )
-                                            TranslateProviderOption.Google ->
-                                                stringResource(
-                                                    Res.string.settings_ai_config_translate_provider_google,
-                                                )
-                                        },
-                                    )
-                                }
-                                MenuFlyout(
-                                    visible = state.aiConfigState.showProviderDropdown,
-                                    onDismissRequest = { state.aiConfigState.setShowProviderDropdown(false) },
-                                    placement = FlyoutPlacement.BottomAlignedEnd,
-                                    modifier = Modifier.heightIn(max = 200.dp),
-                                ) {
-                                    state.aiConfigState.supportedTranslateProviders.forEach { provider ->
-                                        MenuFlyoutItem(
-                                            text = {
-                                                Text(
-                                                    when (provider) {
-                                                        TranslateProviderOption.AI ->
-                                                            stringResource(
-                                                                Res.string.settings_ai_config_translate_provider_ai,
-                                                            )
-                                                        TranslateProviderOption.Google ->
-                                                            stringResource(
-                                                                Res.string.settings_ai_config_translate_provider_google,
-                                                            )
-                                                    },
-                                                )
-                                            },
-                                            onClick = {
-                                                state.aiConfigState.selectTranslateProvider(provider)
-                                                state.aiConfigState.setShowProviderDropdown(false)
-                                            },
-                                        )
-                                    }
-                                }
-                            },
-                        )
-                        ExpanderItemSeparator()
-                        ExpanderItem(
-                            heading = {
-                                Text(stringResource(Res.string.settings_ai_config_enable_pre_translation))
-                            },
-                            caption = {
-                                Text(stringResource(Res.string.settings_ai_config_pre_translation_description))
-                            },
-                            trailing = {
-                                Switcher(
-                                    checked = state.aiConfigState.preTranslate,
-                                    {
-                                        state.aiConfigState.setPreTranslate(it)
-                                    },
-                                    textBefore = true,
-                                )
-                            },
-                        )
-                        ExpanderItemSeparator()
-                    }
-                }
-                AnimatedVisibility(state.aiConfigState.translateProvider == TranslateProviderOption.AI) {
-                    Column {
-                        ExpanderItem(
-                            heading = { Text(stringResource(Res.string.settings_ai_config_translate_prompt)) },
-                            caption = {
-                                Text(
-                                    state.aiConfigState.translatePrompt.ifBlank {
-                                        stringResource(Res.string.settings_ai_config_value_empty_placeholder)
-                                    },
-                                )
-                            },
-                            trailing = {
-                                Button(
-                                    onClick = {
-                                        state.aiConfigState.setTextEditDialog(
-                                            TextEditDialogState(
-                                                title = translatePromptTitle,
-                                                placeholder = "",
-                                                value = state.aiConfigState.translatePrompt,
-                                                onConfirm = { newValue ->
-                                                    state.aiConfigState.setTranslatePrompt(newValue)
-                                                },
-                                            ),
-                                        )
-                                    },
-                                ) {
-                                    Text(stringResource(Res.string.edit))
-                                }
-                            },
-                        )
-                        ExpanderItemSeparator()
-                    }
-                }
                 ExpanderItem(
                     heading = {
                         Text(stringResource(Res.string.settings_ai_config_enable_tldr))
@@ -1528,6 +1416,129 @@ internal fun SettingsScreen(
                                                 value = state.aiConfigState.tldrPrompt,
                                                 onConfirm = { newValue ->
                                                     state.aiConfigState.setTldrPrompt(newValue)
+                                                },
+                                            ),
+                                        )
+                                    },
+                                ) {
+                                    Text(stringResource(Res.string.edit))
+                                }
+                            },
+                        )
+                    }
+                }
+            }
+
+            Header(stringResource(Res.string.settings_translation_title))
+            Expander(
+                state.aiConfigState.translationExpanded,
+                onExpandedChanged = state.aiConfigState::setTranslationExpanded,
+                heading = {
+                    Text(stringResource(Res.string.settings_translation_title))
+                },
+                caption = {
+                    Text(stringResource(Res.string.settings_translation_description))
+                },
+                icon = null,
+            ) {
+                val translatePromptTitle = stringResource(Res.string.settings_ai_config_translate_prompt)
+                ExpanderItem(
+                    heading = {
+                        Text(stringResource(Res.string.settings_ai_config_translate_provider))
+                    },
+                    caption = {
+                        Text(stringResource(Res.string.settings_ai_config_translate_provider_description))
+                    },
+                    trailing = {
+                        DropDownButton(
+                            onClick = {
+                                state.aiConfigState.setShowProviderDropdown(!state.aiConfigState.showProviderDropdown)
+                            },
+                        ) {
+                            Text(
+                                when (state.aiConfigState.translateProvider) {
+                                    TranslateProviderOption.AI ->
+                                        stringResource(
+                                            Res.string.settings_ai_config_translate_provider_ai,
+                                        )
+                                    TranslateProviderOption.Google ->
+                                        stringResource(
+                                            Res.string.settings_ai_config_translate_provider_google,
+                                        )
+                                },
+                            )
+                        }
+                        MenuFlyout(
+                            visible = state.aiConfigState.showProviderDropdown,
+                            onDismissRequest = { state.aiConfigState.setShowProviderDropdown(false) },
+                            placement = FlyoutPlacement.BottomAlignedEnd,
+                            modifier = Modifier.heightIn(max = 200.dp),
+                        ) {
+                            state.aiConfigState.supportedTranslateProviders.forEach { provider ->
+                                MenuFlyoutItem(
+                                    text = {
+                                        Text(
+                                            when (provider) {
+                                                TranslateProviderOption.AI ->
+                                                    stringResource(
+                                                        Res.string.settings_ai_config_translate_provider_ai,
+                                                    )
+                                                TranslateProviderOption.Google ->
+                                                    stringResource(
+                                                        Res.string.settings_ai_config_translate_provider_google,
+                                                    )
+                                            },
+                                        )
+                                    },
+                                    onClick = {
+                                        state.aiConfigState.selectTranslateProvider(provider)
+                                        state.aiConfigState.setShowProviderDropdown(false)
+                                    },
+                                )
+                            }
+                        }
+                    },
+                )
+                ExpanderItemSeparator()
+                ExpanderItem(
+                    heading = {
+                        Text(stringResource(Res.string.settings_ai_config_enable_pre_translation))
+                    },
+                    caption = {
+                        Text(stringResource(Res.string.settings_ai_config_pre_translation_description))
+                    },
+                    trailing = {
+                        Switcher(
+                            checked = state.aiConfigState.preTranslate,
+                            {
+                                state.aiConfigState.setPreTranslate(it)
+                            },
+                            textBefore = true,
+                        )
+                    },
+                )
+                AnimatedVisibility(state.aiConfigState.translateProvider == TranslateProviderOption.AI) {
+                    Column {
+                        ExpanderItemSeparator()
+                        ExpanderItem(
+                            heading = { Text(stringResource(Res.string.settings_ai_config_translate_prompt)) },
+                            caption = {
+                                Text(
+                                    state.aiConfigState.translatePrompt.ifBlank {
+                                        stringResource(Res.string.settings_ai_config_value_empty_placeholder)
+                                    },
+                                )
+                            },
+                            trailing = {
+                                Button(
+                                    onClick = {
+                                        state.aiConfigState.setTextEditDialog(
+                                            TextEditDialogState(
+                                                title = translatePromptTitle,
+                                                placeholder = "",
+                                                value = state.aiConfigState.translatePrompt,
+                                                onConfirm = { newValue ->
+                                                    state.aiConfigState.setTranslatePrompt(newValue)
                                                 },
                                             ),
                                         )
@@ -1881,6 +1892,7 @@ private fun accountsPresenter() =
 private fun aiConfigPresenter() =
     run {
         var expanded by remember { mutableStateOf(false) }
+        var translationExpanded by remember { mutableStateOf(false) }
         val state = remember { AiConfigPresenter() }.invoke()
         var showTypeDropdown by remember { mutableStateOf(false) }
         var showModelDropdown by remember { mutableStateOf(false) }
@@ -1888,6 +1900,7 @@ private fun aiConfigPresenter() =
         var textEditDialog by remember { mutableStateOf<TextEditDialogState?>(null) }
         object : AiConfigPresenter.State by state {
             val expanded = expanded
+            val translationExpanded = translationExpanded
             val showTypeDropdown = showTypeDropdown
             val showModelDropdown = showModelDropdown
             val showProviderDropdown = showProviderDropdown
@@ -1895,6 +1908,10 @@ private fun aiConfigPresenter() =
 
             fun setExpanded(value: Boolean) {
                 expanded = value
+            }
+
+            fun setTranslationExpanded(value: Boolean) {
+                translationExpanded = value
             }
 
             fun setShowTypeDropdown(value: Boolean) {

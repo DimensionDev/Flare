@@ -20,50 +20,43 @@ Maecenas fringilla vitae leo sit amet lacinia. Donec in dui a ex hendrerit volut
 """
     
     @StateObject private var presenter: KotlinPresenter<RssDetailPresenterState>
+    @Environment(\.translateConfig) private var translateConfig
     let url: String
     @State private var showTLDR = false
+    @State private var showTranslate = false
+    
+    private var shouldTranslate: Bool {
+        translateConfig.preTranslate || showTranslate
+    }
     
     var body: some View {
         StateView(state: presenter.state.data) { document in
-            ScrollView {
-                VStack(
-                    alignment: .trailing,
-                    spacing: 16,
-                ) {
-                    Text(document.title)
-                        .font(.title)
-                        .bold()
-                        .frame(maxWidth: .infinity, alignment: .center)
-                    
-                    Button {
-                        showTLDR = true
-                    } label: {
-                        Text("Summarize this article")
-                    }
-                    .backport
-                    .glassProminentButtonStyle()
-                    
-                    if showTLDR {
-                        ListCardView {
-                            TLDRTextView(text: document.textContent)
-                                .padding()
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                        }
-                    }
-                    
-                    ListCardView {
-                        HtmlWebView(
-                            dynamicHeight: $webViewHeight,
-                            htmlString: document.content,
-                            baseURL: .init(string: url)
-                        )
-                        .frame(height: webViewHeight)
-                        .padding()
-//                        RichText(text: document.richText, expandImageSize: true)
-//                            .padding()
-                    }
+            if shouldTranslate {
+                RssTranslateProvider(document: document) { translatedTitle, translatedHtml, isTranslating in
+                    RssArticleContentView(
+                        document: document,
+                        url: url,
+                        showTLDR: $showTLDR,
+                        showTranslate: $showTranslate,
+                        webViewHeight: $webViewHeight,
+                        translatedTitle: translatedTitle,
+                        translatedHtml: translatedHtml,
+                        isTranslating: isTranslating,
+                        showTranslateButton: false
+                    )
                 }
-                .padding()
+            } else {
+                RssArticleContentView(
+                    document: document,
+                    url: url,
+                    showTLDR: $showTLDR,
+                    showTranslate: $showTranslate,
+                    webViewHeight: $webViewHeight,
+                    translatedTitle: nil,
+                    translatedHtml: nil,
+                    isTranslating: false,
+                    showTranslateButton: true
+                )
             }
         } errorContent: { error in
             Text(error.message ?? "Unknown error")
@@ -98,6 +91,124 @@ Maecenas fringilla vitae leo sit amet lacinia. Donec in dui a ex hendrerit volut
                     }
                 }
             }
+        }
+    }
+}
+
+// MARK: - Thin wrapper that owns the translate presenter and passes results to content
+private struct RssTranslateProvider<Content: View>: View {
+    @StateObject private var translatePresenter: KotlinPresenter<RssDetailTranslatePresenterState>
+    let document: DocumentData
+    let content: (_ translatedTitle: String?, _ translatedHtml: String?, _ isTranslating: Bool) -> Content
+    
+    init(
+        document: DocumentData,
+        @ViewBuilder content: @escaping (_ translatedTitle: String?, _ translatedHtml: String?, _ isTranslating: Bool) -> Content
+    ) {
+        self.document = document
+        self.content = content
+        self._translatePresenter = .init(wrappedValue: .init(
+            presenter: RssDetailTranslatePresenter(
+                htmlContent: document.content,
+                title: document.title,
+                targetLanguage: Locale.current.language.languageCode?.identifier ?? "en"
+            )
+        ))
+    }
+    
+    private var translatedTitle: String? {
+        switch onEnum(of: translatePresenter.state.translatedTitle) {
+        case .success(let data): return String(data.data)
+        case .loading, .error: return nil
+        }
+    }
+    
+    private var translatedHtml: String? {
+        switch onEnum(of: translatePresenter.state.translatedHtml) {
+        case .success(let data): return String(data.data)
+        case .loading, .error: return nil
+        }
+    }
+    
+    private var isTranslating: Bool {
+        switch onEnum(of: translatePresenter.state.translatedHtml) {
+        case .loading: return true
+        case .success, .error: return false
+        }
+    }
+    
+    var body: some View {
+        content(translatedTitle, translatedHtml, isTranslating)
+    }
+}
+
+// MARK: - Single article content view used in both translated and untranslated modes
+private struct RssArticleContentView: View {
+    let document: DocumentData
+    let url: String
+    @Binding var showTLDR: Bool
+    @Binding var showTranslate: Bool
+    @Binding var webViewHeight: CGFloat
+    let translatedTitle: String?
+    let translatedHtml: String?
+    let isTranslating: Bool
+    let showTranslateButton: Bool
+    
+    var body: some View {
+        ScrollView {
+            VStack(
+                alignment: .trailing,
+                spacing: 16
+            ) {
+                Text(translatedTitle ?? document.title)
+                    .font(.title)
+                    .bold()
+                    .frame(maxWidth: .infinity, alignment: .center)
+                
+                HStack {
+                    if showTranslateButton {
+                        Button {
+                            showTranslate = true
+                        } label: {
+                            Text("Translate")
+                        }
+                        .backport
+                        .glassProminentButtonStyle()
+                    }
+                    
+                    Button {
+                        showTLDR = true
+                    } label: {
+                        Text("Summarize this article")
+                    }
+                    .backport
+                    .glassProminentButtonStyle()
+                }
+                
+                if showTLDR {
+                    ListCardView {
+                        TLDRTextView(text: document.textContent)
+                            .padding()
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                }
+                
+                if isTranslating {
+                    ProgressView()
+                        .padding(.vertical, 4)
+                }
+                
+                ListCardView {
+                    HtmlWebView(
+                        dynamicHeight: $webViewHeight,
+                        htmlString: translatedHtml ?? document.content,
+                        baseURL: .init(string: url)
+                    )
+                    .frame(height: webViewHeight)
+                    .padding()
+                }
+            }
+            .padding()
         }
     }
 }

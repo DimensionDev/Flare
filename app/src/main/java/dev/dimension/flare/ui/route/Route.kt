@@ -125,6 +125,9 @@ internal sealed interface Route : NavKey {
         data object AiConfig : Settings
 
         @Serializable
+        data object TranslationConfig : Settings
+
+        @Serializable
         data object ColorPicker : Settings
 
         @Serializable

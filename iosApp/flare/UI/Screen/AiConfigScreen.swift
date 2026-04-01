@@ -9,7 +9,6 @@ struct AiConfigScreen: View {
     private enum EditableField: String, Identifiable {
         case serverUrl
         case apiKey
-        case translatePrompt
         case tldrPrompt
 
         var id: String { rawValue }
@@ -110,53 +109,6 @@ struct AiConfigScreen: View {
             }
 
             Section {
-                Picker(
-                    selection: Binding(
-                        get: { presenter.state.translateProvider },
-                        set: { provider in
-                            presenter.state.selectTranslateProvider(type: provider)
-                        }
-                    )
-                ) {
-                    ForEach(presenter.state.supportedTranslateProviders, id: \.name) { provider in
-                        Text(translateProviderOptionTitle(option: provider)).tag(provider)
-                    }
-                } label: {
-                    Text("Translation Provider")
-                    Text("Choose which service handles translation")
-                }
-
-                Toggle(
-                    isOn: Binding(
-                        get: { presenter.state.preTranslate },
-                        set: { newValue in
-                            presenter.state.setPreTranslate(value: newValue)
-                        }
-                    )
-                ) {
-                    Text("ai_config_pre_translate")
-                    Text("ai_config_pre_translate_description")
-                }
-                .transition(.opacity.combined(with: .move(edge: .top)))
-
-                if presenter.state.translateProvider == .ai {
-                    Button {
-                        beginEditing(
-                            field: .translatePrompt,
-                            value: presenter.state.translatePrompt
-                        )
-                    } label: {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Translate Prompt")
-                            Text(displayText(presenter.state.translatePrompt))
-                                .foregroundStyle(.secondary)
-                                .font(.subheadline)
-                        }
-                    }
-                    .buttonStyle(.plain)
-                    .transition(.opacity.combined(with: .move(edge: .top)))
-                }
-
                 Toggle(
                     isOn: Binding(
                         get: { presenter.state.aiTldr },
@@ -189,13 +141,12 @@ struct AiConfigScreen: View {
             }
         }
         .animation(.easeInOut(duration: 0.2), value: presenter.state.aiType == .openAi)
-        .animation(.easeInOut(duration: 0.2), value: presenter.state.preTranslate)
         .animation(.easeInOut(duration: 0.2), value: presenter.state.aiTldr)
         .sheet(item: $editingField) { field in
             NavigationStack {
                 Form {
                     Section {
-                        if field == .translatePrompt || field == .tldrPrompt {
+                        if field == .tldrPrompt {
                             TextEditor(text: $editingText)
                                 .frame(minHeight: 180)
                         } else {
@@ -257,17 +208,6 @@ struct AiConfigScreen: View {
         }
     }
 
-    private func translateProviderOptionTitle(option: TranslateProviderOption) -> LocalizedStringResource {
-        switch option {
-        case .ai:
-            return "AI"
-        case .google:
-            return "Google Translate"
-        default:
-            return "AI"
-        }
-    }
-
     private func displayText(_ value: String) -> String {
         value.isEmpty ? String(localized: "Not set") : value
     }
@@ -304,8 +244,6 @@ struct AiConfigScreen: View {
             return "Server URL"
         case .apiKey:
             return "API Key"
-        case .translatePrompt:
-            return "Translate Prompt"
         case .tldrPrompt:
             return "Summary Prompt"
         }
@@ -317,8 +255,6 @@ struct AiConfigScreen: View {
             return "https://api.openai.com/v1/"
         case .apiKey:
             return "sk-..."
-        case .translatePrompt:
-            return ""
         case .tldrPrompt:
             return ""
         }
@@ -330,10 +266,124 @@ struct AiConfigScreen: View {
             presenter.state.setOpenAIServerUrl(value: value)
         case .apiKey:
             presenter.state.setOpenAIApiKey(value: value)
-        case .translatePrompt:
-            presenter.state.setTranslatePrompt(value: value)
         case .tldrPrompt:
             presenter.state.setTldrPrompt(value: value)
         }
+    }
+}
+
+struct TranslationConfigScreen: View {
+    @StateObject private var presenter = KotlinPresenter(presenter: AiConfigPresenter())
+    @State private var editingField: TranslationEditableField?
+    @State private var editingText: String = ""
+
+    private enum TranslationEditableField: String, Identifiable {
+        case translatePrompt
+
+        var id: String { rawValue }
+    }
+
+    var body: some View {
+        List {
+            Section {
+                Picker(
+                    selection: Binding(
+                        get: { presenter.state.translateProvider },
+                        set: { provider in
+                            presenter.state.selectTranslateProvider(type: provider)
+                        }
+                    )
+                ) {
+                    ForEach(presenter.state.supportedTranslateProviders, id: \.name) { provider in
+                        Text(translateProviderOptionTitle(option: provider)).tag(provider)
+                    }
+                } label: {
+                    Text("Translation Provider")
+                    Text("Choose which service handles translation")
+                }
+
+                Toggle(
+                    isOn: Binding(
+                        get: { presenter.state.preTranslate },
+                        set: { newValue in
+                            presenter.state.setPreTranslate(value: newValue)
+                        }
+                    )
+                ) {
+                    Text("ai_config_pre_translate")
+                    Text("ai_config_pre_translate_description")
+                }
+                .transition(.opacity.combined(with: .move(edge: .top)))
+
+                if presenter.state.translateProvider == .ai {
+                    Button {
+                        beginEditing(
+                            field: .translatePrompt,
+                            value: presenter.state.translatePrompt
+                        )
+                    } label: {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Translate Prompt")
+                            Text(displayText(presenter.state.translatePrompt))
+                                .foregroundStyle(.secondary)
+                                .font(.subheadline)
+                        }
+                    }
+                    .buttonStyle(.plain)
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+                }
+            }
+        }
+        .animation(.easeInOut(duration: 0.2), value: presenter.state.translateProvider == .ai)
+        .animation(.easeInOut(duration: 0.2), value: presenter.state.preTranslate)
+        .sheet(item: $editingField) { field in
+            NavigationStack {
+                Form {
+                    Section {
+                        TextEditor(text: $editingText)
+                            .frame(minHeight: 180)
+                    }
+                }
+                .navigationTitle("Translate Prompt")
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button {
+                            editingField = nil
+                        } label: {
+                            Image("fa-xmark")
+                        }
+                    }
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button {
+                            presenter.state.setTranslatePrompt(value: editingText)
+                            editingField = nil
+                        } label: {
+                            Image("fa-check")
+                        }
+                    }
+                }
+            }
+        }
+        .navigationTitle("settings_translation_title")
+    }
+
+    private func translateProviderOptionTitle(option: TranslateProviderOption) -> LocalizedStringResource {
+        switch option {
+        case .ai:
+            return "AI"
+        case .google:
+            return "Google Translate"
+        default:
+            return "AI"
+        }
+    }
+
+    private func displayText(_ value: String) -> String {
+        value.isEmpty ? String(localized: "Not set") : value
+    }
+
+    private func beginEditing(field: TranslationEditableField, value: String) {
+        editingText = value
+        editingField = field
     }
 }

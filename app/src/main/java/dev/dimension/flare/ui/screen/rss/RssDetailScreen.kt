@@ -57,12 +57,14 @@ import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.component.RssRichText
 import dev.dimension.flare.ui.component.listCard
 import dev.dimension.flare.ui.component.placeholder
+import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.rss.RssDetailPresenter
+import dev.dimension.flare.ui.presenter.home.rss.RssDetailTranslatePresenter
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.server.AiTLDRPresenter
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
@@ -139,8 +141,16 @@ internal fun RssDetailScreen(
         ) {
             state.data
                 .onSuccess {
+                    // Show translated title if available, otherwise original
+                    val displayTitle =
+                        state.translateState?.translatedTitle?.let { titleState ->
+                            when (titleState) {
+                                is UiState.Success -> titleState.data
+                                else -> it.title
+                            }
+                        } ?: it.title
                     Text(
-                        text = it.title,
+                        text = displayTitle,
                         style = MaterialTheme.typography.titleLarge,
                         modifier =
                             Modifier
@@ -148,11 +158,22 @@ internal fun RssDetailScreen(
                     )
                     Row(
                         verticalAlignment = Alignment.Bottom,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
                         modifier =
                             Modifier
+                                .fillMaxWidth()
                                 .padding(horizontal = screenHorizontalPadding),
                     ) {
-                        Spacer(modifier = Modifier.weight(1f))
+                        // Show translate button only when auto-translate is off
+                        if (!state.isAutoTranslate && !state.enableTranslate) {
+                            FilledTonalButton(
+                                onClick = {
+                                    state.setEnableTranslate(true)
+                                },
+                            ) {
+                                Text(stringResource(R.string.rss_detail_translate))
+                            }
+                        }
                         state.enableTldr.onSuccess {
                             if (it) {
                                 FilledTonalButton(
@@ -232,6 +253,15 @@ internal fun RssDetailScreen(
                             }
                         }
                     }
+                    // Show translation loading indicator
+                    state.translateState?.translatedHtml?.onLoading {
+                        LinearWavyProgressIndicator(
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = screenHorizontalPadding),
+                        )
+                    }
                     SelectionContainer(
                         modifier =
                             Modifier
@@ -239,9 +269,30 @@ internal fun RssDetailScreen(
                                 .background(MaterialTheme.colorScheme.surface)
                                 .padding(horizontal = screenHorizontalPadding, vertical = 8.dp),
                     ) {
+                        // Use translated content if available by creating a new DocumentData
+                        // whose lazy .element will re-parse the translated HTML
+                        val displayData =
+                            state.translateState?.translatedHtml?.let { htmlState ->
+                                when (htmlState) {
+                                    is UiState.Success -> data.copy(content = htmlState.data)
+                                    else -> data
+                                }
+                            } ?: data
                         RssRichText(
-                            element = data.element,
+                            element = displayData.element,
                             imageHeader = state.headers,
+                        )
+                    }
+                    // Show translation error if any
+                    state.translateState?.translatedHtml?.onError {
+                        Text(
+                            text = stringResource(R.string.rss_detail_translate_error),
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier =
+                                Modifier
+                                    .padding(horizontal = screenHorizontalPadding)
+                                    .clickable { state.refreshTranslate() },
                         )
                     }
                 }.onLoading {
@@ -279,8 +330,13 @@ private fun presenter(
     val enableTldr by remember {
         settingsRepository.appSettings.map { it.aiConfig.tldr }
     }.collectAsUiState()
+    val preTranslate by remember {
+        settingsRepository.appSettings.map { it.translateConfig.preTranslate }
+    }.collectAsUiState()
     var showTldr by remember { mutableStateOf(false) }
     var tldrRefreshKey by remember { mutableIntStateOf(0) }
+    var enableTranslate by remember { mutableStateOf(false) }
+    var translateRefreshKey by remember { mutableIntStateOf(0) }
     val tldrState =
         if (showTldr) {
             key(tldrRefreshKey, state.data) {
@@ -294,11 +350,38 @@ private fun presenter(
         } else {
             null
         }
+    // Determine if translation should be active:
+    // auto-translate (preTranslate=true) or manually triggered
+    val isAutoTranslate = preTranslate is UiState.Success && (preTranslate as UiState.Success<Boolean>).data
+    val shouldTranslate = isAutoTranslate || enableTranslate
+    val translateState: RssDetailTranslatePresenter.State? =
+        if (shouldTranslate) {
+            when (val dataState = state.data) {
+                is UiState.Success -> {
+                    key(translateRefreshKey) {
+                        remember(dataState.data.content, dataState.data.title) {
+                            RssDetailTranslatePresenter(
+                                htmlContent = dataState.data.content,
+                                title = dataState.data.title,
+                                targetLanguage = Locale.current.toLanguageTag(),
+                            )
+                        }.invoke()
+                    }
+                }
+                else -> null
+            }
+        } else {
+            null
+        }
     object : RssDetailPresenter.State by state {
         val headers = headers
         val enableTldr = enableTldr
+        val preTranslate = preTranslate
+        val isAutoTranslate = isAutoTranslate
         val tldrState = tldrState
         val showTldr = showTldr
+        val translateState = translateState
+        val enableTranslate = enableTranslate
 
         fun setShowTldr(value: Boolean) {
             showTldr = value
@@ -306,6 +389,14 @@ private fun presenter(
 
         fun refreshTldr() {
             tldrRefreshKey++
+        }
+
+        fun setEnableTranslate(value: Boolean) {
+            enableTranslate = value
+        }
+
+        fun refreshTranslate() {
+            translateRefreshKey++
         }
     }
 }

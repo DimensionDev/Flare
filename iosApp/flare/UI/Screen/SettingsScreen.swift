@@ -93,6 +93,14 @@ struct SettingsScreen: View {
                     }
 
                 }
+                NavigationLink(value: Route.translationConfig) {
+                    Label {
+                        Text("settings_translation_title")
+                        Text("settings_translation_description")
+                    } icon: {
+                        Image("fa-language")
+                    }
+                }
             }
 
             Section {

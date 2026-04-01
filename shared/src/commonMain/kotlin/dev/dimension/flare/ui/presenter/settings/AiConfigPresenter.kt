@@ -37,7 +37,10 @@ public enum class AiTypeOption {
 
 public enum class TranslateProviderOption {
     AI,
-    Google,
+    GoogleWeb,
+    DeepL,
+    GoogleCloud,
+    LibreTranslate,
 }
 
 public class AiConfigPresenter :
@@ -54,6 +57,11 @@ public class AiConfigPresenter :
         public val openAIApiKey: String
         public val openAIModel: String
         public val translateProvider: TranslateProviderOption
+        public val deepLApiKey: String
+        public val deepLUsePro: Boolean
+        public val googleCloudApiKey: String
+        public val libreTranslateBaseUrl: String
+        public val libreTranslateApiKey: String
         public val openAIModels: UiState<ImmutableList<String>>
         public val supportedTypes: ImmutableList<AiTypeOption>
         public val supportedTranslateProviders: ImmutableList<TranslateProviderOption>
@@ -76,6 +84,16 @@ public class AiConfigPresenter :
         public fun setOpenAIApiKey(value: String)
 
         public fun setOpenAIModel(value: String)
+
+        public fun setDeepLApiKey(value: String)
+
+        public fun setDeepLUsePro(value: Boolean)
+
+        public fun setGoogleCloudApiKey(value: String)
+
+        public fun setLibreTranslateBaseUrl(value: String)
+
+        public fun setLibreTranslateApiKey(value: String)
 
         public fun setAITldr(value: Boolean)
 
@@ -102,7 +120,10 @@ public class AiConfigPresenter :
             remember {
                 persistentListOf(
                     TranslateProviderOption.AI,
-                    TranslateProviderOption.Google,
+                    TranslateProviderOption.GoogleWeb,
+                    TranslateProviderOption.DeepL,
+                    TranslateProviderOption.GoogleCloud,
+                    TranslateProviderOption.LibreTranslate,
                 )
             }
 
@@ -186,8 +207,21 @@ public class AiConfigPresenter :
             override val translateProvider: TranslateProviderOption =
                 when (appSettings.translateConfig.provider) {
                     AppSettings.TranslateConfig.Provider.AI -> TranslateProviderOption.AI
-                    AppSettings.TranslateConfig.Provider.Google -> TranslateProviderOption.Google
+                    AppSettings.TranslateConfig.Provider.GoogleWeb -> TranslateProviderOption.GoogleWeb
+                    is AppSettings.TranslateConfig.Provider.DeepL -> TranslateProviderOption.DeepL
+                    is AppSettings.TranslateConfig.Provider.GoogleCloud -> TranslateProviderOption.GoogleCloud
+                    is AppSettings.TranslateConfig.Provider.LibreTranslate -> TranslateProviderOption.LibreTranslate
                 }
+            override val deepLApiKey: String =
+                (appSettings.translateConfig.provider as? AppSettings.TranslateConfig.Provider.DeepL)?.apiKey ?: ""
+            override val deepLUsePro: Boolean =
+                (appSettings.translateConfig.provider as? AppSettings.TranslateConfig.Provider.DeepL)?.usePro ?: false
+            override val googleCloudApiKey: String =
+                (appSettings.translateConfig.provider as? AppSettings.TranslateConfig.Provider.GoogleCloud)?.apiKey ?: ""
+            override val libreTranslateBaseUrl: String =
+                (appSettings.translateConfig.provider as? AppSettings.TranslateConfig.Provider.LibreTranslate)?.baseUrl ?: ""
+            override val libreTranslateApiKey: String =
+                (appSettings.translateConfig.provider as? AppSettings.TranslateConfig.Provider.LibreTranslate)?.apiKey ?: ""
 
             override val openAIServerUrl: String =
                 (appSettings.aiConfig.type as? AppSettings.AiConfig.Type.OpenAI)?.serverUrl ?: ""
@@ -291,13 +325,72 @@ public class AiConfigPresenter :
                 }
             }
 
+            override fun setDeepLApiKey(value: String) {
+                updateTranslateConfig {
+                    copy(
+                        provider =
+                            (provider as? AppSettings.TranslateConfig.Provider.DeepL)?.copy(apiKey = value)
+                                ?: AppSettings.TranslateConfig.Provider.DeepL(apiKey = value),
+                    )
+                }
+            }
+
+            override fun setDeepLUsePro(value: Boolean) {
+                updateTranslateConfig {
+                    copy(
+                        provider =
+                            (provider as? AppSettings.TranslateConfig.Provider.DeepL)?.copy(usePro = value)
+                                ?: AppSettings.TranslateConfig.Provider.DeepL(usePro = value),
+                    )
+                }
+            }
+
+            override fun setGoogleCloudApiKey(value: String) {
+                updateTranslateConfig {
+                    copy(
+                        provider =
+                            (provider as? AppSettings.TranslateConfig.Provider.GoogleCloud)?.copy(apiKey = value)
+                                ?: AppSettings.TranslateConfig.Provider.GoogleCloud(apiKey = value),
+                    )
+                }
+            }
+
+            override fun setLibreTranslateBaseUrl(value: String) {
+                updateTranslateConfig {
+                    copy(
+                        provider =
+                            (provider as? AppSettings.TranslateConfig.Provider.LibreTranslate)?.copy(baseUrl = value)
+                                ?: AppSettings.TranslateConfig.Provider.LibreTranslate(baseUrl = value),
+                    )
+                }
+            }
+
+            override fun setLibreTranslateApiKey(value: String) {
+                updateTranslateConfig {
+                    copy(
+                        provider =
+                            (provider as? AppSettings.TranslateConfig.Provider.LibreTranslate)?.copy(apiKey = value)
+                                ?: AppSettings.TranslateConfig.Provider.LibreTranslate(apiKey = value),
+                    )
+                }
+            }
+
             override fun setTranslateProvider(value: TranslateProviderOption) {
                 updateTranslateConfig {
                     copy(
                         provider =
                             when (value) {
                                 TranslateProviderOption.AI -> AppSettings.TranslateConfig.Provider.AI
-                                TranslateProviderOption.Google -> AppSettings.TranslateConfig.Provider.Google
+                                TranslateProviderOption.GoogleWeb -> AppSettings.TranslateConfig.Provider.GoogleWeb
+                                TranslateProviderOption.DeepL ->
+                                    (provider as? AppSettings.TranslateConfig.Provider.DeepL)
+                                        ?: AppSettings.TranslateConfig.Provider.DeepL()
+                                TranslateProviderOption.GoogleCloud ->
+                                    (provider as? AppSettings.TranslateConfig.Provider.GoogleCloud)
+                                        ?: AppSettings.TranslateConfig.Provider.GoogleCloud()
+                                TranslateProviderOption.LibreTranslate ->
+                                    (provider as? AppSettings.TranslateConfig.Provider.LibreTranslate)
+                                        ?: AppSettings.TranslateConfig.Provider.LibreTranslate()
                             },
                     )
                 }
@@ -329,7 +422,16 @@ public class AiConfigPresenter :
                         provider =
                             when (type) {
                                 TranslateProviderOption.AI -> AppSettings.TranslateConfig.Provider.AI
-                                TranslateProviderOption.Google -> AppSettings.TranslateConfig.Provider.Google
+                                TranslateProviderOption.GoogleWeb -> AppSettings.TranslateConfig.Provider.GoogleWeb
+                                TranslateProviderOption.DeepL ->
+                                    (provider as? AppSettings.TranslateConfig.Provider.DeepL)
+                                        ?: AppSettings.TranslateConfig.Provider.DeepL()
+                                TranslateProviderOption.GoogleCloud ->
+                                    (provider as? AppSettings.TranslateConfig.Provider.GoogleCloud)
+                                        ?: AppSettings.TranslateConfig.Provider.GoogleCloud()
+                                TranslateProviderOption.LibreTranslate ->
+                                    (provider as? AppSettings.TranslateConfig.Provider.LibreTranslate)
+                                        ?: AppSettings.TranslateConfig.Provider.LibreTranslate()
                             },
                     )
                 }
@@ -340,7 +442,18 @@ public class AiConfigPresenter :
 
 private fun AppSettings.AiConfig.normalized(): AppSettings.AiConfig = this
 
-private fun AppSettings.TranslateConfig.normalized(): AppSettings.TranslateConfig = this
+private fun AppSettings.TranslateConfig.normalized(): AppSettings.TranslateConfig =
+    copy(
+        provider =
+            when (val provider = provider) {
+                is AppSettings.TranslateConfig.Provider.LibreTranslate ->
+                    provider.copy(
+                        baseUrl = provider.baseUrl.trim(),
+                    )
+
+                else -> provider
+            },
+    )
 
 private val SERVER_SUGGESTIONS =
     persistentListOf(

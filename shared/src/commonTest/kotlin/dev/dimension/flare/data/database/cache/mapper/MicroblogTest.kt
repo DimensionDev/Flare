@@ -58,7 +58,7 @@ import kotlin.time.Clock
 class MicroblogTest : RobolectricTest() {
     private lateinit var db: CacheDatabase
     private val googleTranslationProviderCacheKey =
-        AppSettings.TranslateConfig.Provider.Google
+        AppSettings.TranslateConfig.Provider.GoogleWeb
             .cacheKey()
     private val aiTranslationProviderCacheKey =
         AppSettings.TranslateConfig.Provider.AI

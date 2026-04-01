@@ -5,6 +5,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromByteArray
 import kotlinx.serialization.encodeToByteArray
@@ -22,15 +23,34 @@ public data class AppSettings(
     @Serializable
     public data class TranslateConfig(
         val preTranslate: Boolean = false,
-        val provider: Provider = Provider.Google,
+        val provider: Provider = Provider.GoogleWeb,
     ) {
         @Serializable
         public sealed interface Provider {
             @Serializable
+            @SerialName("AI")
             public data object AI : Provider
 
             @Serializable
-            public data object Google : Provider
+            @SerialName("Google")
+            public data object GoogleWeb : Provider
+
+            @Serializable
+            public data class DeepL(
+                val apiKey: String = "",
+                val usePro: Boolean = false,
+            ) : Provider
+
+            @Serializable
+            public data class GoogleCloud(
+                val apiKey: String = "",
+            ) : Provider
+
+            @Serializable
+            public data class LibreTranslate(
+                val baseUrl: String = "",
+                val apiKey: String = "",
+            ) : Provider
         }
     }
 

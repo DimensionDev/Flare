@@ -103,8 +103,17 @@ import dev.dimension.flare.settings_ai_config_tldr_prompt
 import dev.dimension.flare.settings_ai_config_translate_prompt
 import dev.dimension.flare.settings_ai_config_translate_provider
 import dev.dimension.flare.settings_ai_config_translate_provider_ai
+import dev.dimension.flare.settings_ai_config_translate_provider_deepl
+import dev.dimension.flare.settings_ai_config_translate_provider_deepl_api_key
+import dev.dimension.flare.settings_ai_config_translate_provider_deepl_use_pro
+import dev.dimension.flare.settings_ai_config_translate_provider_deepl_use_pro_description
 import dev.dimension.flare.settings_ai_config_translate_provider_description
-import dev.dimension.flare.settings_ai_config_translate_provider_google
+import dev.dimension.flare.settings_ai_config_translate_provider_google_cloud
+import dev.dimension.flare.settings_ai_config_translate_provider_google_cloud_api_key
+import dev.dimension.flare.settings_ai_config_translate_provider_google_web
+import dev.dimension.flare.settings_ai_config_translate_provider_libretranslate
+import dev.dimension.flare.settings_ai_config_translate_provider_libretranslate_api_key
+import dev.dimension.flare.settings_ai_config_translate_provider_libretranslate_base_url
 import dev.dimension.flare.settings_ai_config_type
 import dev.dimension.flare.settings_ai_config_type_description
 import dev.dimension.flare.settings_ai_config_type_on_device
@@ -1111,7 +1120,7 @@ internal fun SettingsScreen(
                             if (dialog.suggestions.isEmpty()) {
                                 TextField(
                                     state = textState,
-                                    modifier = Modifier.fillMaxWidth(),
+                                    modifier = Modifier.fillMaxWidth().heightIn(max = 480.dp),
                                 )
                             } else {
                                 AutoSuggestionBox(
@@ -1121,7 +1130,7 @@ internal fun SettingsScreen(
                                     TextField(
                                         state = textState,
                                         shape = AutoSuggestBoxDefaults.textFieldShape(isSuggestionExpanded),
-                                        modifier = Modifier.fillMaxWidth().flyoutAnchor(),
+                                        modifier = Modifier.fillMaxWidth().flyoutAnchor().heightIn(max = 480.dp),
                                         lineLimits = TextFieldLineLimits.SingleLine,
                                     )
                                     AutoSuggestBoxDefaults.suggestFlyout(
@@ -1442,6 +1451,11 @@ internal fun SettingsScreen(
                 icon = null,
             ) {
                 val translatePromptTitle = stringResource(Res.string.settings_ai_config_translate_prompt)
+                val deepLApiKeyTitle = stringResource(Res.string.settings_ai_config_translate_provider_deepl_api_key)
+                val googleCloudApiKeyTitle = stringResource(Res.string.settings_ai_config_translate_provider_google_cloud_api_key)
+                val libreTranslateBaseUrlTitle = stringResource(Res.string.settings_ai_config_translate_provider_libretranslate_base_url)
+                val libreTranslateApiKeyTitle = stringResource(Res.string.settings_ai_config_translate_provider_libretranslate_api_key)
+                val hasProviderSettings = state.aiConfigState.translateProvider != TranslateProviderOption.GoogleWeb
                 ExpanderItem(
                     heading = {
                         Text(stringResource(Res.string.settings_ai_config_translate_provider))
@@ -1456,16 +1470,7 @@ internal fun SettingsScreen(
                             },
                         ) {
                             Text(
-                                when (state.aiConfigState.translateProvider) {
-                                    TranslateProviderOption.AI ->
-                                        stringResource(
-                                            Res.string.settings_ai_config_translate_provider_ai,
-                                        )
-                                    TranslateProviderOption.Google ->
-                                        stringResource(
-                                            Res.string.settings_ai_config_translate_provider_google,
-                                        )
-                                },
+                                translateProviderOptionLabel(state.aiConfigState.translateProvider),
                             )
                         }
                         MenuFlyout(
@@ -1477,18 +1482,7 @@ internal fun SettingsScreen(
                             state.aiConfigState.supportedTranslateProviders.forEach { provider ->
                                 MenuFlyoutItem(
                                     text = {
-                                        Text(
-                                            when (provider) {
-                                                TranslateProviderOption.AI ->
-                                                    stringResource(
-                                                        Res.string.settings_ai_config_translate_provider_ai,
-                                                    )
-                                                TranslateProviderOption.Google ->
-                                                    stringResource(
-                                                        Res.string.settings_ai_config_translate_provider_google,
-                                                    )
-                                            },
-                                        )
+                                        Text(translateProviderOptionLabel(provider))
                                     },
                                     onClick = {
                                         state.aiConfigState.selectTranslateProvider(provider)
@@ -1517,37 +1511,180 @@ internal fun SettingsScreen(
                         )
                     },
                 )
-                AnimatedVisibility(state.aiConfigState.translateProvider == TranslateProviderOption.AI) {
+                AnimatedVisibility(hasProviderSettings) {
                     Column {
                         ExpanderItemSeparator()
-                        ExpanderItem(
-                            heading = { Text(stringResource(Res.string.settings_ai_config_translate_prompt)) },
-                            caption = {
-                                Text(
-                                    state.aiConfigState.translatePrompt.ifBlank {
-                                        stringResource(Res.string.settings_ai_config_value_empty_placeholder)
-                                    },
-                                )
-                            },
-                            trailing = {
-                                Button(
-                                    onClick = {
-                                        state.aiConfigState.setTextEditDialog(
-                                            TextEditDialogState(
-                                                title = translatePromptTitle,
-                                                placeholder = "",
-                                                value = state.aiConfigState.translatePrompt,
-                                                onConfirm = { newValue ->
-                                                    state.aiConfigState.setTranslatePrompt(newValue)
-                                                },
-                                            ),
+                        when (state.aiConfigState.translateProvider) {
+                            TranslateProviderOption.AI ->
+                                ExpanderItem(
+                                    heading = { Text(stringResource(Res.string.settings_ai_config_translate_prompt)) },
+                                    caption = {
+                                        Text(
+                                            state.aiConfigState.translatePrompt.ifBlank {
+                                                stringResource(Res.string.settings_ai_config_value_empty_placeholder)
+                                            },
                                         )
                                     },
-                                ) {
-                                    Text(stringResource(Res.string.edit))
-                                }
-                            },
-                        )
+                                    trailing = {
+                                        Button(
+                                            onClick = {
+                                                state.aiConfigState.setTextEditDialog(
+                                                    TextEditDialogState(
+                                                        title = translatePromptTitle,
+                                                        placeholder = "",
+                                                        value = state.aiConfigState.translatePrompt,
+                                                        onConfirm = { newValue ->
+                                                            state.aiConfigState.setTranslatePrompt(newValue)
+                                                        },
+                                                    ),
+                                                )
+                                            },
+                                        ) {
+                                            Text(stringResource(Res.string.edit))
+                                        }
+                                    },
+                                )
+
+                            TranslateProviderOption.DeepL -> {
+                                ExpanderItem(
+                                    heading = { Text(deepLApiKeyTitle) },
+                                    caption = {
+                                        Text(
+                                            state.aiConfigState.deepLApiKey.ifBlank {
+                                                stringResource(Res.string.settings_ai_config_value_empty_placeholder)
+                                            },
+                                        )
+                                    },
+                                    trailing = {
+                                        Button(
+                                            onClick = {
+                                                state.aiConfigState.setTextEditDialog(
+                                                    TextEditDialogState(
+                                                        title = deepLApiKeyTitle,
+                                                        placeholder = "",
+                                                        value = state.aiConfigState.deepLApiKey,
+                                                        onConfirm = { newValue ->
+                                                            state.aiConfigState.setDeepLApiKey(newValue)
+                                                        },
+                                                    ),
+                                                )
+                                            },
+                                        ) {
+                                            Text(stringResource(Res.string.edit))
+                                        }
+                                    },
+                                )
+                                ExpanderItemSeparator()
+                                ExpanderItem(
+                                    heading = { Text(stringResource(Res.string.settings_ai_config_translate_provider_deepl_use_pro)) },
+                                    caption = {
+                                        Text(stringResource(Res.string.settings_ai_config_translate_provider_deepl_use_pro_description))
+                                    },
+                                    trailing = {
+                                        Switcher(
+                                            checked = state.aiConfigState.deepLUsePro,
+                                            {
+                                                state.aiConfigState.setDeepLUsePro(it)
+                                            },
+                                            textBefore = true,
+                                        )
+                                    },
+                                )
+                            }
+
+                            TranslateProviderOption.GoogleCloud -> {
+                                ExpanderItem(
+                                    heading = { Text(googleCloudApiKeyTitle) },
+                                    caption = {
+                                        Text(
+                                            state.aiConfigState.googleCloudApiKey.ifBlank {
+                                                stringResource(Res.string.settings_ai_config_value_empty_placeholder)
+                                            },
+                                        )
+                                    },
+                                    trailing = {
+                                        Button(
+                                            onClick = {
+                                                state.aiConfigState.setTextEditDialog(
+                                                    TextEditDialogState(
+                                                        title = googleCloudApiKeyTitle,
+                                                        placeholder = "",
+                                                        value = state.aiConfigState.googleCloudApiKey,
+                                                        onConfirm = { newValue ->
+                                                            state.aiConfigState.setGoogleCloudApiKey(newValue)
+                                                        },
+                                                    ),
+                                                )
+                                            },
+                                        ) {
+                                            Text(stringResource(Res.string.edit))
+                                        }
+                                    },
+                                )
+                            }
+
+                            TranslateProviderOption.LibreTranslate -> {
+                                ExpanderItem(
+                                    heading = { Text(libreTranslateBaseUrlTitle) },
+                                    caption = {
+                                        Text(
+                                            state.aiConfigState.libreTranslateBaseUrl.ifBlank {
+                                                stringResource(Res.string.settings_ai_config_value_empty_placeholder)
+                                            },
+                                        )
+                                    },
+                                    trailing = {
+                                        Button(
+                                            onClick = {
+                                                state.aiConfigState.setTextEditDialog(
+                                                    TextEditDialogState(
+                                                        title = libreTranslateBaseUrlTitle,
+                                                        placeholder = "https://libretranslate.example.com",
+                                                        value = state.aiConfigState.libreTranslateBaseUrl,
+                                                        onConfirm = { newValue ->
+                                                            state.aiConfigState.setLibreTranslateBaseUrl(newValue)
+                                                        },
+                                                    ),
+                                                )
+                                            },
+                                        ) {
+                                            Text(stringResource(Res.string.edit))
+                                        }
+                                    },
+                                )
+                                ExpanderItemSeparator()
+                                ExpanderItem(
+                                    heading = { Text(libreTranslateApiKeyTitle) },
+                                    caption = {
+                                        Text(
+                                            state.aiConfigState.libreTranslateApiKey.ifBlank {
+                                                stringResource(Res.string.settings_ai_config_value_empty_placeholder)
+                                            },
+                                        )
+                                    },
+                                    trailing = {
+                                        Button(
+                                            onClick = {
+                                                state.aiConfigState.setTextEditDialog(
+                                                    TextEditDialogState(
+                                                        title = libreTranslateApiKeyTitle,
+                                                        placeholder = "",
+                                                        value = state.aiConfigState.libreTranslateApiKey,
+                                                        onConfirm = { newValue ->
+                                                            state.aiConfigState.setLibreTranslateApiKey(newValue)
+                                                        },
+                                                    ),
+                                                )
+                                            },
+                                        ) {
+                                            Text(stringResource(Res.string.edit))
+                                        }
+                                    },
+                                )
+                            }
+
+                            TranslateProviderOption.GoogleWeb -> Unit
+                        }
                     }
                 }
             }
@@ -1930,6 +2067,16 @@ private fun aiConfigPresenter() =
                 textEditDialog = value
             }
         }
+    }
+
+@Composable
+private fun translateProviderOptionLabel(provider: TranslateProviderOption): String =
+    when (provider) {
+        TranslateProviderOption.AI -> stringResource(Res.string.settings_ai_config_translate_provider_ai)
+        TranslateProviderOption.GoogleWeb -> stringResource(Res.string.settings_ai_config_translate_provider_google_web)
+        TranslateProviderOption.DeepL -> stringResource(Res.string.settings_ai_config_translate_provider_deepl)
+        TranslateProviderOption.GoogleCloud -> stringResource(Res.string.settings_ai_config_translate_provider_google_cloud)
+        TranslateProviderOption.LibreTranslate -> stringResource(Res.string.settings_ai_config_translate_provider_libretranslate)
     }
 
 private data class TextEditDialogState(

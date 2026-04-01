@@ -279,6 +279,10 @@ struct TranslationConfigScreen: View {
 
     private enum TranslationEditableField: String, Identifiable {
         case translatePrompt
+        case deepLApiKey
+        case googleCloudApiKey
+        case libreTranslateBaseUrl
+        case libreTranslateApiKey
 
         var id: String { rawValue }
     }
@@ -315,7 +319,8 @@ struct TranslationConfigScreen: View {
                 }
                 .transition(.opacity.combined(with: .move(edge: .top)))
 
-                if presenter.state.translateProvider == .ai {
+                switch presenter.state.translateProvider {
+                case .ai:
                     Button {
                         beginEditing(
                             field: .translatePrompt,
@@ -331,10 +336,92 @@ struct TranslationConfigScreen: View {
                     }
                     .buttonStyle(.plain)
                     .transition(.opacity.combined(with: .move(edge: .top)))
+
+                case .deepL:
+                    Button {
+                        beginEditing(
+                            field: .deepLApiKey,
+                            value: presenter.state.deepLApiKey
+                        )
+                    } label: {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("DeepL API Key")
+                            Text(displayText(presenter.state.deepLApiKey))
+                                .foregroundStyle(.secondary)
+                                .font(.subheadline)
+                        }
+                    }
+                    .buttonStyle(.plain)
+
+                    Toggle(
+                        isOn: Binding(
+                            get: { presenter.state.deepLUsePro },
+                            set: { newValue in
+                                presenter.state.setDeepLUsePro(value: newValue)
+                            }
+                        )
+                    ) {
+                        Text("DeepL Pro Endpoint")
+                        Text("Use api.deepl.com instead of the free endpoint")
+                    }
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+
+                case .googleCloud:
+                    Button {
+                        beginEditing(
+                            field: .googleCloudApiKey,
+                            value: presenter.state.googleCloudApiKey
+                        )
+                    } label: {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Google Cloud API Key")
+                            Text(displayText(presenter.state.googleCloudApiKey))
+                                .foregroundStyle(.secondary)
+                                .font(.subheadline)
+                        }
+                    }
+                    .buttonStyle(.plain)
+
+                case .libreTranslate:
+                    Button {
+                        beginEditing(
+                            field: .libreTranslateBaseUrl,
+                            value: presenter.state.libreTranslateBaseUrl
+                        )
+                    } label: {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("LibreTranslate Base URL")
+                            Text(displayText(presenter.state.libreTranslateBaseUrl))
+                                .foregroundStyle(.secondary)
+                                .font(.subheadline)
+                        }
+                    }
+                    .buttonStyle(.plain)
+
+                    Button {
+                        beginEditing(
+                            field: .libreTranslateApiKey,
+                            value: presenter.state.libreTranslateApiKey
+                        )
+                    } label: {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("LibreTranslate API Key")
+                            Text(displayText(presenter.state.libreTranslateApiKey))
+                                .foregroundStyle(.secondary)
+                                .font(.subheadline)
+                        }
+                    }
+                    .buttonStyle(.plain)
+
+                case .googleWeb:
+                    EmptyView()
+
+                default:
+                    EmptyView()
                 }
             }
         }
-        .animation(.easeInOut(duration: 0.2), value: presenter.state.translateProvider == .ai)
+        .animation(.easeInOut(duration: 0.2), value: presenter.state.translateProvider.name)
         .animation(.easeInOut(duration: 0.2), value: presenter.state.preTranslate)
         .sheet(item: $editingField) { field in
             NavigationStack {
@@ -344,7 +431,7 @@ struct TranslationConfigScreen: View {
                             .frame(minHeight: 180)
                     }
                 }
-                .navigationTitle("Translate Prompt")
+                .navigationTitle(translationEditTitle(field))
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) {
                         Button {
@@ -355,7 +442,7 @@ struct TranslationConfigScreen: View {
                     }
                     ToolbarItem(placement: .confirmationAction) {
                         Button {
-                            presenter.state.setTranslatePrompt(value: editingText)
+                            applyTranslationEdit(field: field, value: editingText)
                             editingField = nil
                         } label: {
                             Image("fa-check")
@@ -371,19 +458,55 @@ struct TranslationConfigScreen: View {
         switch option {
         case .ai:
             return "AI"
-        case .google:
-            return "Google Translate"
+        case .googleWeb:
+            return "Google Translate (Web)"
+        case .deepL:
+            return "DeepL"
+        case .googleCloud:
+            return "Google Cloud Translate"
+        case .libreTranslate:
+            return "LibreTranslate"
         default:
             return "AI"
         }
     }
 
-    private func displayText(_ value: String) -> String {
-        value.isEmpty ? String(localized: "Not set") : value
+    private func displayText(_ value: String, fallback: LocalizedStringResource = "Not set") -> String {
+        value.isEmpty ? String(localized: fallback) : value
     }
 
     private func beginEditing(field: TranslationEditableField, value: String) {
         editingText = value
         editingField = field
+    }
+
+    private func translationEditTitle(_ field: TranslationEditableField) -> LocalizedStringResource {
+        switch field {
+        case .translatePrompt:
+            return "Translate Prompt"
+        case .deepLApiKey:
+            return "DeepL API Key"
+        case .googleCloudApiKey:
+            return "Google Cloud API Key"
+        case .libreTranslateBaseUrl:
+            return "LibreTranslate Base URL"
+        case .libreTranslateApiKey:
+            return "LibreTranslate API Key"
+        }
+    }
+
+    private func applyTranslationEdit(field: TranslationEditableField, value: String) {
+        switch field {
+        case .translatePrompt:
+            presenter.state.setTranslatePrompt(value: value)
+        case .deepLApiKey:
+            presenter.state.setDeepLApiKey(value: value)
+        case .googleCloudApiKey:
+            presenter.state.setGoogleCloudApiKey(value: value)
+        case .libreTranslateBaseUrl:
+            presenter.state.setLibreTranslateBaseUrl(value: value)
+        case .libreTranslateApiKey:
+            presenter.state.setLibreTranslateApiKey(value: value)
+        }
     }
 }

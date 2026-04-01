@@ -178,7 +178,16 @@
     <string name="settings_ai_config_translate_provider">翻译服务提供商</string>
     <string name="settings_ai_config_translate_provider_description">选择处理翻译的服务提供商</string>
     <string name="settings_ai_config_translate_provider_ai">AI</string>
-    <string name="settings_ai_config_translate_provider_google">谷歌翻译</string>
+    <string name="settings_ai_config_translate_provider_google_web">谷歌翻译（网页）</string>
+    <string name="settings_ai_config_translate_provider_deepl">DeepL</string>
+    <string name="settings_ai_config_translate_provider_deepl_api_key">DeepL API 密钥</string>
+    <string name="settings_ai_config_translate_provider_deepl_use_pro">使用 DeepL Pro 端点</string>
+    <string name="settings_ai_config_translate_provider_deepl_use_pro_description">使用 api.deepl.com，而不是免费端点 api-free.deepl.com。</string>
+    <string name="settings_ai_config_translate_provider_google_cloud">Google Cloud Translate</string>
+    <string name="settings_ai_config_translate_provider_google_cloud_api_key">Google Cloud API 密钥</string>
+    <string name="settings_ai_config_translate_provider_libretranslate">LibreTranslate</string>
+    <string name="settings_ai_config_translate_provider_libretranslate_base_url">LibreTranslate 服务地址</string>
+    <string name="settings_ai_config_translate_provider_libretranslate_api_key">LibreTranslate API 密钥</string>
     <string name="settings_appearance_generic">通用</string>
     <string name="settings_appearance_show_compose_in_home_timeline">在首页时间轴顶部显示撰写框</string>
     <string name="settings_appearance_show_compose_in_home_timeline_description">在首页时间轴顶部显示撰写框</string>

@@ -7,5 +7,8 @@ internal fun AppSettings.translationProviderCacheKey(): String = translateConfig
 internal fun AppSettings.TranslateConfig.Provider.cacheKey(): String =
     when (this) {
         AppSettings.TranslateConfig.Provider.AI -> "ai"
-        AppSettings.TranslateConfig.Provider.Google -> "google"
+        AppSettings.TranslateConfig.Provider.GoogleWeb -> "google-web"
+        is AppSettings.TranslateConfig.Provider.DeepL -> "deepl:${if (usePro) "pro" else "free"}"
+        is AppSettings.TranslateConfig.Provider.GoogleCloud -> "google-cloud:v2"
+        is AppSettings.TranslateConfig.Provider.LibreTranslate -> "libretranslate:${baseUrl.trimEnd('/').lowercase()}"
     }

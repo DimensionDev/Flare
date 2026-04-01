@@ -570,6 +570,12 @@ internal fun TranslationConfigScreen(onBack: () -> Unit) {
             verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
         ) {
             val translatePromptTitle = stringResource(id = R.string.settings_ai_config_translate_prompt)
+            val deepLApiKeyTitle = stringResource(id = R.string.settings_ai_config_translate_provider_deepl_api_key)
+            val googleCloudApiKeyTitle = stringResource(id = R.string.settings_ai_config_translate_provider_google_cloud_api_key)
+            val libreTranslateBaseUrlTitle = stringResource(id = R.string.settings_ai_config_translate_provider_libretranslate_base_url)
+            val libreTranslateApiKeyTitle = stringResource(id = R.string.settings_ai_config_translate_provider_libretranslate_api_key)
+            val emptyPlaceholder = stringResource(id = R.string.settings_ai_config_value_empty_placeholder)
+            val hasProviderSettings = state.translateProvider != TranslateProviderOption.GoogleWeb
             SegmentedListItem(
                 checked = state.showProviderDropdown,
                 onCheckedChange = { checked ->
@@ -593,17 +599,7 @@ internal fun TranslationConfigScreen(onBack: () -> Unit) {
                             },
                         ) {
                             Text(
-                                text =
-                                    when (state.translateProvider) {
-                                        TranslateProviderOption.AI ->
-                                            stringResource(
-                                                id = R.string.settings_ai_config_translate_provider_ai,
-                                            )
-                                        TranslateProviderOption.Google ->
-                                            stringResource(
-                                                id = R.string.settings_ai_config_translate_provider_google,
-                                            )
-                                    },
+                                text = translateProviderOptionLabel(state.translateProvider),
                             )
                         }
                         FlareDropdownMenu(
@@ -615,19 +611,7 @@ internal fun TranslationConfigScreen(onBack: () -> Unit) {
                             state.supportedTranslateProviders.forEach { provider ->
                                 DropdownMenuItem(
                                     text = {
-                                        Text(
-                                            text =
-                                                when (provider) {
-                                                    TranslateProviderOption.AI ->
-                                                        stringResource(
-                                                            id = R.string.settings_ai_config_translate_provider_ai,
-                                                        )
-                                                    TranslateProviderOption.Google ->
-                                                        stringResource(
-                                                            id = R.string.settings_ai_config_translate_provider_google,
-                                                        )
-                                                },
-                                        )
+                                        Text(text = translateProviderOptionLabel(provider))
                                     },
                                     onClick = {
                                         state.setShowProviderDropdown(false)
@@ -644,7 +628,7 @@ internal fun TranslationConfigScreen(onBack: () -> Unit) {
                     state.setPreTranslate(!state.preTranslate)
                 },
                 shapes =
-                    if (state.translateProvider == TranslateProviderOption.AI) {
+                    if (hasProviderSettings) {
                         ListItemDefaults.item()
                     } else {
                         ListItemDefaults.last()
@@ -669,41 +653,200 @@ internal fun TranslationConfigScreen(onBack: () -> Unit) {
                 },
             )
             AnimatedVisibility(
-                visible = state.translateProvider == TranslateProviderOption.AI,
+                visible = hasProviderSettings,
             ) {
-                SegmentedListItem(
-                    checked = state.textEditDialog?.field == TranslationEditField.TranslatePrompt,
-                    onCheckedChange = { checked ->
-                        if (checked) {
-                            state.setTextEditDialog(
-                                TranslationTextEditDialogState(
-                                    field = TranslationEditField.TranslatePrompt,
-                                    title = translatePromptTitle,
-                                    placeholder = "",
-                                    value = state.translatePrompt,
-                                    onConfirm = { newValue ->
-                                        state.setTranslatePrompt(newValue)
-                                    },
-                                ),
-                            )
-                        } else if (state.textEditDialog?.field == TranslationEditField.TranslatePrompt) {
-                            state.setTextEditDialog(null)
-                        }
-                    },
-                    shapes = ListItemDefaults.last(),
-                    content = {
-                        Text(text = translatePromptTitle)
-                    },
-                    supportingContent = {
-                        Text(
-                            text =
-                                state.translatePrompt.ifBlank {
-                                    stringResource(id = R.string.settings_ai_config_value_empty_placeholder)
+                Column(verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap)) {
+                    when (state.translateProvider) {
+                        TranslateProviderOption.AI ->
+                            SegmentedListItem(
+                                checked = state.textEditDialog?.field == TranslationEditField.TranslatePrompt,
+                                onCheckedChange = { checked ->
+                                    if (checked) {
+                                        state.setTextEditDialog(
+                                            TranslationTextEditDialogState(
+                                                field = TranslationEditField.TranslatePrompt,
+                                                title = translatePromptTitle,
+                                                placeholder = "",
+                                                value = state.translatePrompt,
+                                                onConfirm = { newValue ->
+                                                    state.setTranslatePrompt(newValue)
+                                                },
+                                            ),
+                                        )
+                                    } else if (state.textEditDialog?.field == TranslationEditField.TranslatePrompt) {
+                                        state.setTextEditDialog(null)
+                                    }
                                 },
-                            style = MaterialTheme.typography.bodySmall,
-                        )
-                    },
-                )
+                                shapes = ListItemDefaults.last(),
+                                content = {
+                                    Text(text = translatePromptTitle)
+                                },
+                                supportingContent = {
+                                    Text(
+                                        text = state.translatePrompt.ifBlank { emptyPlaceholder },
+                                        style = MaterialTheme.typography.bodySmall,
+                                    )
+                                },
+                            )
+
+                        TranslateProviderOption.DeepL -> {
+                            SegmentedListItem(
+                                checked = state.textEditDialog?.field == TranslationEditField.DeepLApiKey,
+                                onCheckedChange = { checked ->
+                                    if (checked) {
+                                        state.setTextEditDialog(
+                                            TranslationTextEditDialogState(
+                                                field = TranslationEditField.DeepLApiKey,
+                                                title = deepLApiKeyTitle,
+                                                placeholder = "",
+                                                value = state.deepLApiKey,
+                                                onConfirm = { newValue ->
+                                                    state.setDeepLApiKey(newValue)
+                                                },
+                                            ),
+                                        )
+                                    } else if (state.textEditDialog?.field == TranslationEditField.DeepLApiKey) {
+                                        state.setTextEditDialog(null)
+                                    }
+                                },
+                                shapes = ListItemDefaults.item(),
+                                content = {
+                                    Text(text = deepLApiKeyTitle)
+                                },
+                                supportingContent = {
+                                    Text(
+                                        text = state.deepLApiKey.ifBlank { emptyPlaceholder },
+                                        style = MaterialTheme.typography.bodySmall,
+                                    )
+                                },
+                            )
+                            SegmentedListItem(
+                                onClick = {
+                                    state.setDeepLUsePro(!state.deepLUsePro)
+                                },
+                                shapes = ListItemDefaults.last(),
+                                content = {
+                                    Text(text = stringResource(id = R.string.settings_ai_config_translate_provider_deepl_use_pro))
+                                },
+                                supportingContent = {
+                                    Text(
+                                        text =
+                                            stringResource(
+                                                id = R.string.settings_ai_config_translate_provider_deepl_use_pro_description,
+                                            ),
+                                        style = MaterialTheme.typography.bodySmall,
+                                    )
+                                },
+                                trailingContent = {
+                                    Switch(
+                                        checked = state.deepLUsePro,
+                                        onCheckedChange = {
+                                            state.setDeepLUsePro(it)
+                                        },
+                                    )
+                                },
+                            )
+                        }
+
+                        TranslateProviderOption.GoogleCloud -> {
+                            SegmentedListItem(
+                                checked = state.textEditDialog?.field == TranslationEditField.GoogleCloudApiKey,
+                                onCheckedChange = { checked ->
+                                    if (checked) {
+                                        state.setTextEditDialog(
+                                            TranslationTextEditDialogState(
+                                                field = TranslationEditField.GoogleCloudApiKey,
+                                                title = googleCloudApiKeyTitle,
+                                                placeholder = "",
+                                                value = state.googleCloudApiKey,
+                                                onConfirm = { newValue ->
+                                                    state.setGoogleCloudApiKey(newValue)
+                                                },
+                                            ),
+                                        )
+                                    } else if (state.textEditDialog?.field == TranslationEditField.GoogleCloudApiKey) {
+                                        state.setTextEditDialog(null)
+                                    }
+                                },
+                                content = {
+                                    Text(text = googleCloudApiKeyTitle)
+                                },
+                                supportingContent = {
+                                    Text(
+                                        text = state.googleCloudApiKey.ifBlank { emptyPlaceholder },
+                                        style = MaterialTheme.typography.bodySmall,
+                                    )
+                                },
+                                shapes = ListItemDefaults.last(),
+                            )
+                        }
+
+                        TranslateProviderOption.LibreTranslate -> {
+                            SegmentedListItem(
+                                checked = state.textEditDialog?.field == TranslationEditField.LibreTranslateBaseUrl,
+                                onCheckedChange = { checked ->
+                                    if (checked) {
+                                        state.setTextEditDialog(
+                                            TranslationTextEditDialogState(
+                                                field = TranslationEditField.LibreTranslateBaseUrl,
+                                                title = libreTranslateBaseUrlTitle,
+                                                placeholder = "https://libretranslate.example.com",
+                                                value = state.libreTranslateBaseUrl,
+                                                onConfirm = { newValue ->
+                                                    state.setLibreTranslateBaseUrl(newValue)
+                                                },
+                                            ),
+                                        )
+                                    } else if (state.textEditDialog?.field == TranslationEditField.LibreTranslateBaseUrl) {
+                                        state.setTextEditDialog(null)
+                                    }
+                                },
+                                shapes = ListItemDefaults.item(),
+                                content = {
+                                    Text(text = libreTranslateBaseUrlTitle)
+                                },
+                                supportingContent = {
+                                    Text(
+                                        text = state.libreTranslateBaseUrl.ifBlank { emptyPlaceholder },
+                                        style = MaterialTheme.typography.bodySmall,
+                                    )
+                                },
+                            )
+                            SegmentedListItem(
+                                checked = state.textEditDialog?.field == TranslationEditField.LibreTranslateApiKey,
+                                onCheckedChange = { checked ->
+                                    if (checked) {
+                                        state.setTextEditDialog(
+                                            TranslationTextEditDialogState(
+                                                field = TranslationEditField.LibreTranslateApiKey,
+                                                title = libreTranslateApiKeyTitle,
+                                                placeholder = "",
+                                                value = state.libreTranslateApiKey,
+                                                onConfirm = { newValue ->
+                                                    state.setLibreTranslateApiKey(newValue)
+                                                },
+                                            ),
+                                        )
+                                    } else if (state.textEditDialog?.field == TranslationEditField.LibreTranslateApiKey) {
+                                        state.setTextEditDialog(null)
+                                    }
+                                },
+                                shapes = ListItemDefaults.last(),
+                                content = {
+                                    Text(text = libreTranslateApiKeyTitle)
+                                },
+                                supportingContent = {
+                                    Text(
+                                        text = state.libreTranslateApiKey.ifBlank { emptyPlaceholder },
+                                        style = MaterialTheme.typography.bodySmall,
+                                    )
+                                },
+                            )
+                        }
+
+                        TranslateProviderOption.GoogleWeb -> Unit
+                    }
+                }
             }
         }
     }
@@ -758,4 +901,18 @@ private data class TranslationTextEditDialogState(
 
 private enum class TranslationEditField {
     TranslatePrompt,
+    DeepLApiKey,
+    GoogleCloudApiKey,
+    LibreTranslateBaseUrl,
+    LibreTranslateApiKey,
 }
+
+@Composable
+private fun translateProviderOptionLabel(provider: TranslateProviderOption): String =
+    when (provider) {
+        TranslateProviderOption.AI -> stringResource(id = R.string.settings_ai_config_translate_provider_ai)
+        TranslateProviderOption.GoogleWeb -> stringResource(id = R.string.settings_ai_config_translate_provider_google_web)
+        TranslateProviderOption.DeepL -> stringResource(id = R.string.settings_ai_config_translate_provider_deepl)
+        TranslateProviderOption.GoogleCloud -> stringResource(id = R.string.settings_ai_config_translate_provider_google_cloud)
+        TranslateProviderOption.LibreTranslate -> stringResource(id = R.string.settings_ai_config_translate_provider_libretranslate)
+    }

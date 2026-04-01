@@ -554,7 +554,7 @@ private fun presenter(uriHandler: UriHandler) =
         val topLevelRoutes =
             remember(tabs.tabs) {
                 tabs.tabs.map { state ->
-                    state.all.map { getDirection(it) }.toSet()
+                    state.all.map { getDirection(it) }.toSet() + setOf(Route.Settings.Main)
                 }
             }
         val scope = rememberCoroutineScope()

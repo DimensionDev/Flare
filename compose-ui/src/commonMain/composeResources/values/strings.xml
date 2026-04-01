@@ -452,7 +452,7 @@
 
     <string name="service_select_welcome_title">Welcome to Flare</string>
     <string name="service_select_welcome_message">Please input the server to get started.</string>
-    <string name="service_select_welcome_hint">Flare supports Mastodon, Misskey, Bluesky and X.</string>
+    <string name="service_select_welcome_hint">Flare supports Mastodon, Misskey, Bluesky, Nostr and X.</string>
     <string name="service_select_welcome_list_hint">Or pick from these servers</string>
     <string name="bluesky_login_username_hint">Username</string>
     <string name="bluesky_login_password_hint">Password</string>

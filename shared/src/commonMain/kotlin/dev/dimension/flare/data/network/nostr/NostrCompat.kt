@@ -692,6 +692,27 @@ internal fun Array<Array<String>>.mutedUserIdSet(): Set<String> = userIdSet()
 
 internal fun bech32PublicKey(hex: String): String = RustPublicKey.Companion.parse(hex).use { it.toBech32() }
 
+internal fun parsePublicKeyHex(raw: String): String? {
+    val value = raw.removePrefix("nostr:").trim()
+    return when {
+        value.startsWith("npub1", ignoreCase = true) ->
+            withNip19(value) { nip19 ->
+                (nip19 as? RustNip19Enum.Pubkey)?.npub?.use { it.toHex() }
+            }
+
+        value.startsWith("nprofile1", ignoreCase = true) ->
+            withNip19(value) { nip19 ->
+                (nip19 as? RustNip19Enum.Profile)?.nprofile?.use { profile ->
+                    profile.publicKey().use { it.toHex() }
+                }
+            }
+
+        isHexKey(value) -> value.lowercase()
+
+        else -> null
+    }
+}
+
 internal inline fun <T> withNip19(
     value: String,
     block: (RustNip19Enum) -> T,

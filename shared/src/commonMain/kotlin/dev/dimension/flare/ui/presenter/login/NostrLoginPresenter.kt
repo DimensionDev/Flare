@@ -7,7 +7,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import dev.dimension.flare.data.network.nostr.AmberSignerBridge
 import dev.dimension.flare.data.network.nostr.NostrService
+import dev.dimension.flare.data.network.nostr.defaultNostrRelays
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiAccount
@@ -21,6 +23,7 @@ public class NostrLoginPresenter(
 ) : PresenterBase<NostrLoginState>(),
     KoinComponent {
     private val accountRepository: AccountRepository by inject()
+    private val amberSignerBridge: AmberSignerBridge by inject()
 
     @Composable
     override fun body(): NostrLoginState {
@@ -30,15 +33,16 @@ public class NostrLoginPresenter(
         return object : NostrLoginState {
             override val loading: Boolean = loading
             override val error: Throwable? = error
+            override val amberAvailable: Boolean = amberSignerBridge.isAvailable()
 
-            override fun login(secretKey: String) {
+            override fun login(input: String) {
                 scope.launch {
                     loading = true
                     error = null
                     runCatching {
                         loginWith(
                             NostrService.importAccount(
-                                secretKeyInput = secretKey,
+                                input = input,
                             ),
                         )
                     }.onFailure {
@@ -48,7 +52,45 @@ public class NostrLoginPresenter(
                 }
             }
 
-            private fun loginWith(imported: NostrService.ImportedAccount) {
+            override fun connectAmber() {
+                scope.launch {
+                    loading = true
+                    error = null
+                    runCatching {
+                        val connection = amberSignerBridge.connect()
+                        val relays =
+                            runCatching {
+                                NostrService.resolvePublicRelays(connection.pubkeyHex)
+                            }.getOrDefault(defaultNostrRelays)
+                        accountRepository.addAccount(
+                            account =
+                                UiAccount.Nostr(
+                                    accountKey =
+                                        MicroBlogKey(
+                                            id = connection.pubkeyHex,
+                                            host = NostrService.NOSTR_HOST,
+                                        ),
+                                ),
+                            credential =
+                                UiAccount.Nostr.Credential(
+                                    pubkeyHex = connection.pubkeyHex,
+                                    relays = relays,
+                                    signer = connection.credential,
+                                ),
+                        )
+                        toHome.invoke()
+                    }.onFailure {
+                        error = it
+                    }
+                    loading = false
+                }
+            }
+
+            private suspend fun loginWith(imported: NostrService.ImportedAccount) {
+                val relays =
+                    runCatching {
+                        NostrService.resolvePublicRelays(imported.pubkeyHex)
+                    }.getOrDefault(defaultNostrRelays)
                 accountRepository.addAccount(
                     account =
                         UiAccount.Nostr(
@@ -60,8 +102,9 @@ public class NostrLoginPresenter(
                         ),
                     credential =
                         UiAccount.Nostr.Credential(
-                            nsec = imported.nsec,
-                            relays = dev.dimension.flare.data.network.nostr.defaultNostrRelays,
+                            pubkeyHex = imported.pubkeyHex,
+                            relays = relays,
+                            signer = imported.signerCredential,
                         ),
                 )
                 toHome.invoke()
@@ -74,6 +117,9 @@ public class NostrLoginPresenter(
 public interface NostrLoginState {
     public val loading: Boolean
     public val error: Throwable?
+    public val amberAvailable: Boolean
 
-    public fun login(secretKey: String)
+    public fun login(input: String)
+
+    public fun connectAmber()
 }

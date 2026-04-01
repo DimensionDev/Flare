@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.model
 import androidx.compose.runtime.Immutable
 import dev.dimension.flare.common.SerializableImmutableList
 import dev.dimension.flare.common.SerializableImmutableMap
+import dev.dimension.flare.data.network.nostr.bech32PublicKey
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.humanizer.Formatter.humanize
@@ -48,17 +49,17 @@ public data class UiProfile internal constructor(
         UiProfile(
             key = key,
             handle =
-                if (handle.raw.isBlank()) {
+                if (handle.raw.isBlank() || (isNostrFallbackHandle() && !existing.isNostrFallbackHandle())) {
                     existing.handle
                 } else {
                     handle
                 },
             avatar = avatar.ifBlank { existing.avatar },
             nameInternal =
-                if (name.raw.isBlank()) {
-                    existing.name
+                if (nameInternal.raw.isBlank() || (isNostrFallbackName() && !existing.isNostrFallbackName())) {
+                    existing.nameInternal
                 } else {
-                    name
+                    nameInternal
                 },
             platformType = platformType,
             clickEvent = clickEvent,
@@ -69,6 +70,16 @@ public data class UiProfile internal constructor(
             mark = (existing.mark + mark).distinct().toPersistentList(),
             bottomContent = bottomContent ?: existing.bottomContent,
         )
+
+    private fun isNostrFallbackHandle(): Boolean =
+        platformType == PlatformType.Nostr &&
+            handle.raw == derivedNostrFallbackName()
+
+    private fun isNostrFallbackName(): Boolean =
+        platformType == PlatformType.Nostr &&
+            nameInternal.raw == derivedNostrFallbackName()
+
+    private fun derivedNostrFallbackName(): String? = runCatching { bech32PublicKey(key.id).take(16) }.getOrNull()
 
     @Serializable
     @Immutable

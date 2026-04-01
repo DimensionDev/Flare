@@ -57,7 +57,11 @@ import dev.dimension.flare.compose.ui.eula_privacy_policy
 import dev.dimension.flare.compose.ui.login_agreement
 import dev.dimension.flare.compose.ui.login_button
 import dev.dimension.flare.compose.ui.mastodon_login_verify_message
-import dev.dimension.flare.compose.ui.nostr_login_nsec_hint
+import dev.dimension.flare.compose.ui.nostr_login_account_hint
+import dev.dimension.flare.compose.ui.nostr_login_amber_button
+import dev.dimension.flare.compose.ui.nostr_login_bunker_button
+import dev.dimension.flare.compose.ui.nostr_login_bunker_hint
+import dev.dimension.flare.compose.ui.nostr_login_hint
 import dev.dimension.flare.compose.ui.service_select_compatibility_warning
 import dev.dimension.flare.compose.ui.service_select_empty_message
 import dev.dimension.flare.compose.ui.service_select_instance_input_placeholder
@@ -617,24 +621,29 @@ private fun NostrLoginContent(state: SelectionPresenter.State) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        PlatformSecureTextField(
-            state = state.nostrInputState.secretKey,
+        PlatformText(
+            text = stringResource(Res.string.nostr_login_hint),
+            textAlign = TextAlign.Center,
+            modifier = Modifier.width(300.dp),
+        )
+        PlatformTextField(
+            state = state.nostrInputState.accountInput,
             label = {
-                PlatformText(text = stringResource(Res.string.nostr_login_nsec_hint))
+                PlatformText(text = stringResource(Res.string.nostr_login_account_hint))
             },
             enabled = !state.nostrLoginState.loading,
             modifier = Modifier.width(300.dp),
             keyboardOptions =
                 KeyboardOptions(
-                    keyboardType = KeyboardType.Password,
+                    keyboardType = KeyboardType.Text,
                     imeAction = ImeAction.Done,
                     autoCorrectEnabled = false,
                 ),
             onKeyboardAction = {
-                if (state.nostrInputState.canLogin) {
+                if (state.nostrInputState.canLoginAccount) {
                     state.nostrLoginState.login(
-                        secretKey =
-                            state.nostrInputState.secretKey.text
+                        input =
+                            state.nostrInputState.accountInput.text
                                 .toString(),
                     )
                 }
@@ -643,15 +652,60 @@ private fun NostrLoginContent(state: SelectionPresenter.State) {
         PlatformFilledTonalButton(
             onClick = {
                 state.nostrLoginState.login(
-                    secretKey =
-                        state.nostrInputState.secretKey.text
+                    input =
+                        state.nostrInputState.accountInput.text
                             .toString(),
                 )
             },
             modifier = Modifier.width(300.dp),
-            enabled = state.nostrInputState.canLogin && !state.nostrLoginState.loading,
+            enabled = state.nostrInputState.canLoginAccount && !state.nostrLoginState.loading,
         ) {
             PlatformText(text = stringResource(Res.string.login_button))
+        }
+        PlatformTextField(
+            state = state.nostrInputState.bunkerInput,
+            label = {
+                PlatformText(text = stringResource(Res.string.nostr_login_bunker_hint))
+            },
+            enabled = !state.nostrLoginState.loading,
+            modifier = Modifier.width(300.dp),
+            keyboardOptions =
+                KeyboardOptions(
+                    keyboardType = KeyboardType.Uri,
+                    imeAction = ImeAction.Done,
+                    autoCorrectEnabled = false,
+                ),
+            onKeyboardAction = {
+                if (state.nostrInputState.canLoginBunker) {
+                    state.nostrLoginState.login(
+                        input =
+                            state.nostrInputState.bunkerInput.text
+                                .toString(),
+                    )
+                }
+            },
+        )
+        PlatformFilledTonalButton(
+            onClick = {
+                state.nostrLoginState.login(
+                    input =
+                        state.nostrInputState.bunkerInput.text
+                            .toString(),
+                )
+            },
+            modifier = Modifier.width(300.dp),
+            enabled = state.nostrInputState.canLoginBunker && !state.nostrLoginState.loading,
+        ) {
+            PlatformText(text = stringResource(Res.string.nostr_login_bunker_button))
+        }
+        if (state.nostrLoginState.amberAvailable) {
+            PlatformFilledTonalButton(
+                onClick = state.nostrLoginState::connectAmber,
+                modifier = Modifier.width(300.dp),
+                enabled = !state.nostrLoginState.loading,
+            ) {
+                PlatformText(text = stringResource(Res.string.nostr_login_amber_button))
+            }
         }
         state.nostrLoginState.error?.let {
             PlatformText(

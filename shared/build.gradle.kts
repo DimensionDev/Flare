@@ -106,6 +106,8 @@ kotlin {
             dependencies {
                 implementation(libs.core.ktx)
                 implementation(libs.koin.android)
+                implementation(libs.koin.compose)
+                implementation(libs.activity.compose)
             }
         }
         val androidDeviceTest by getting {

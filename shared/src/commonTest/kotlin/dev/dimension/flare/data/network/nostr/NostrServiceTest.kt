@@ -5,10 +5,12 @@ import dev.dimension.flare.data.datasource.nostr.NostrCache
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.ui.humanizer.PlatformFormatter
+import dev.dimension.flare.ui.model.NostrSignerCredential
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
+import kotlinx.coroutines.test.runTest
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
@@ -17,6 +19,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
@@ -40,39 +43,101 @@ class NostrServiceTest {
     }
 
     @Test
-    fun exportAccountKeepsPrivateAndPublicKeysConsistent() {
-        val generated = NostrService.generateAccount()
-        val exported =
-            NostrService.exportAccount(
-                UiAccount.Nostr.Credential(
-                    nsec = generated.nsec,
-                ),
-            )
+    fun exportAccountKeepsPrivateAndPublicKeysConsistent() =
+        runTest {
+            val generated = NostrService.generateAccount()
+            val exported =
+                NostrService.exportAccount(
+                    UiAccount.Nostr.Credential(
+                        pubkeyHex = generated.pubkeyHex,
+                        signer = NostrSignerCredential.LocalKey(generated.nsec),
+                    ),
+                )
 
-        assertMatchesKeyPair(exported)
-        assertEquals(generated.pubkeyHex, exported.pubkeyHex)
-        assertEquals(generated.npub, exported.npub)
+            assertMatchesKeyPair(exported)
+            assertEquals(generated.pubkeyHex, exported.pubkeyHex)
+            assertEquals(generated.npub, exported.npub)
+        }
+
+    @Test
+    fun importAccountAcceptsSecretOnly() =
+        runTest {
+            val imported =
+                NostrService.importAccount(
+                    input = SECRET_KEY_HEX,
+                )
+
+            assertMatchesKeyPair(imported)
+        }
+
+    @Test
+    fun importAccountAcceptsReadOnlyNpub() =
+        runTest {
+            val generated = NostrService.generateAccount()
+
+            val imported =
+                NostrService.importAccount(
+                    input = generated.npub,
+                )
+
+            assertIs<NostrService.ImportedAccount.ReadOnly>(imported)
+            assertEquals(generated.pubkeyHex, imported.pubkeyHex)
+            assertEquals(generated.npub, imported.npub)
+        }
+
+    @Test
+    fun parsePublicKeyHexNormalizesNpubToHex() {
+        val generated = NostrService.generateAccount()
+
+        val parsed = parsePublicKeyHex(generated.npub)
+
+        assertEquals(generated.pubkeyHex, parsed)
     }
 
     @Test
-    fun importAccountAcceptsSecretOnly() {
-        val imported =
-            NostrService.importAccount(
-                secretKeyInput = SECRET_KEY_HEX,
-            )
+    fun readOnlyAccountRejectsPublishing() =
+        runTest {
+            val service =
+                NostrService(
+                    cache =
+                        object : NostrCache {
+                            override suspend fun getProfiles(pubKeys: List<String>): Map<String, UiProfile> = emptyMap()
 
-        assertMatchesKeyPair(imported)
-    }
+                            override suspend fun getPost(
+                                accountKey: MicroBlogKey,
+                                statusKey: MicroBlogKey,
+                            ): UiTimelineV2.Post? = null
+                        },
+                    accountKey = MicroBlogKey(ROOT_EVENT_PUBKEY, NostrService.NOSTR_HOST),
+                    credential =
+                        UiAccount.Nostr.Credential(
+                            pubkeyHex = ROOT_EVENT_PUBKEY,
+                        ),
+                    amberSignerBridge = UnsupportedAmberSignerBridge("Amber signer is unavailable in tests."),
+                )
 
-    private fun assertMatchesKeyPair(account: NostrService.ImportedAccount) {
+            try {
+                val error =
+                    assertFailsWith<IllegalStateException> {
+                        service.composeNote(
+                            content = "read only",
+                        )
+                    }
+                assertTrue(error.message?.contains("read-only") == true)
+            } finally {
+                service.close()
+            }
+        }
+
+    private suspend fun assertMatchesKeyPair(account: NostrService.ImportedAccount) {
         assertEquals(64, account.pubkeyHex.length)
         assertTrue(account.npub.startsWith("npub1"))
-        val normalizedSecret = assertNotNull(account.nsec)
+        val normalizedSecret = assertNotNull((account as? NostrService.ImportedAccount.LocalKey)?.nsec)
         assertTrue(normalizedSecret.isNotBlank())
 
         val reImported =
             NostrService.importAccount(
-                secretKeyInput = normalizedSecret,
+                input = normalizedSecret,
             )
         assertEquals(account.pubkeyHex, reImported.pubkeyHex)
         assertEquals(account.npub, bech32PublicKey(account.pubkeyHex))
@@ -202,8 +267,9 @@ class NostrServiceTest {
     }
 
     private companion object {
-        fun createService(): NostrService =
-            NostrService(
+        fun createService(): NostrService {
+            val generated = NostrService.generateAccount()
+            return NostrService(
                 cache =
                     object : NostrCache {
                         override suspend fun getProfiles(pubKeys: List<String>): Map<String, UiProfile> = emptyMap()
@@ -214,8 +280,14 @@ class NostrServiceTest {
                         ): UiTimelineV2.Post? = null
                     },
                 accountKey = MicroBlogKey("nostr-test", NostrService.NOSTR_HOST),
-                nsec = NostrService.generateAccount().nsec,
+                credential =
+                    UiAccount.Nostr.Credential(
+                        pubkeyHex = generated.pubkeyHex,
+                        signer = NostrSignerCredential.LocalKey(generated.nsec),
+                    ),
+                amberSignerBridge = UnsupportedAmberSignerBridge("Amber signer is unavailable in tests."),
             )
+        }
 
         const val SECRET_KEY_HEX = "1111111111111111111111111111111111111111111111111111111111111111"
         const val ROOT_EVENT_ID = "1b14014e85b5a3f554dc92198ce118d83562147ca08a98e4bb07b00d003108f7"

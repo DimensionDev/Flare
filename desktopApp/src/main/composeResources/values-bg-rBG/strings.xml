@@ -99,7 +99,6 @@
     <string name="settings_local_history_title">Тукашна история</string>
     <string name="settings_local_history_description">Преглед или търсене в историята на сърфиране</string>
     <string name="settings_ai_config_title">Конфигурация на ИИ</string>
-    <string name="settings_ai_config_description">Конфигуриране на настройките за ИИ</string>
     <string name="settings_ai_config_server">Адрес на сървъра</string>
     <string name="settings_ai_config_server_hint">Въведете URL адреса на сървъра</string>
     <string name="settings_ai_config_entable_translation">Включване на превеждането с ИИ</string>
@@ -158,10 +157,8 @@
     <string name="misskey_visibility_home">Начало</string>
     <string name="misskey_visibility_followers">Последователи</string>
     <string name="misskey_visibility_specified">Определени</string>
-    <string name="rss_sources_title">Източници на Rss</string>
     <string name="rss_sources_title_label">Заглавие</string>
     <string name="rss_sources_url_label">Url</string>
-    <string name="empty_rss_sources">Няма източници на rss</string>
     <string name="rss_sources_discovered_rss_sources">Открити източници на Rss</string>
     <string name="tab_settings_add">Добавяне</string>
     <string name="tab_settings_edit">Редактиране</string>

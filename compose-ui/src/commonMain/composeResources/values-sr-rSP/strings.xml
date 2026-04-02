@@ -299,14 +299,8 @@
     <string name="list_add">Додај листу</string>
     <string name="list_edit">Уреди листу</string>
     <string name="list_delete">Обриши листу</string>
-    <string name="rss_sources_title">Rss Извори</string>
-    <string name="add_rss_source">Додај Rss Извор</string>
-    <string name="edit_rss_source">Уреди Rss Извор</string>
-    <string name="delete_rss_source">Обриши Rss Извор</string>
     <string name="rss_sources_title_label">Наслов</string>
     <string name="rss_sources_url_label">Урл</string>
-    <string name="rss_title">Rss</string>
-    <string name="empty_rss_sources">Нема rss извора</string>
     <string name="service_select_welcome_title">Добродошли у Flare</string>
     <string name="bluesky_login_username_hint">Корисничко име</string>
     <string name="bluesky_login_password_hint">Лозинка</string>

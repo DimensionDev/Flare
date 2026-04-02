@@ -127,7 +127,6 @@
     <string name="settings_app_logging_clear">נקה יומן</string>
     <string name="settings_app_logging_enable_network_logging">הפעל רישום רשת</string>
     <string name="settings_ai_config_title">הגדרת AI</string>
-    <string name="settings_ai_config_description">הגדר את הגדרות ה-AI</string>
     <string name="settings_ai_config_server">כתובת URL של השרת</string>
     <string name="settings_ai_config_server_hint">הכנס את כתובת ה-URL של השרת</string>
     <string name="settings_ai_config_server_self_host_description">תוכל להשתמש בשרת הרשמי או לארח את השרת שלך</string>
@@ -189,14 +188,8 @@
     <string name="misskey_visibility_home">בית</string>
     <string name="misskey_visibility_followers">עוקבים</string>
     <string name="misskey_visibility_specified">נבחרים</string>
-    <string name="rss_sources_title">מקורות Rss</string>
-    <string name="add_rss_source">הוסף מקור Rss</string>
-    <string name="edit_rss_source">ערוך מקור Rss</string>
-    <string name="delete_rss_source">מחק מקור Rss</string>
     <string name="rss_sources_title_label">כותרת</string>
     <string name="rss_sources_url_label">כתובת URL</string>
-    <string name="rss_title">Rss</string>
-    <string name="empty_rss_sources">אין מקורות rss</string>
     <string name="tab_settings_add">הוסף</string>
     <string name="tab_settings_drag">גרור</string>
     <string name="tab_settings_edit">ערוך</string>

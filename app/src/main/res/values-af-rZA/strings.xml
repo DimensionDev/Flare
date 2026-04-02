@@ -54,7 +54,6 @@
     <string name="settings_app_logging_clear">Maak log skoon</string>
     <string name="settings_app_logging_enable_network_logging">Aktiveer netwerk logging</string>
     <string name="settings_ai_config_title">AI Konfigurasie</string>
-    <string name="settings_ai_config_description">Konfigureer AI instellings</string>
     <string name="settings_ai_config_server">Bediener URL</string>
     <string name="settings_ai_config_server_hint">Voer die bediener URL in</string>
     <string name="settings_ai_config_server_self_host_description">Jy kan die amptelike bediener gebruik of jou eie bediener self aanloop</string>

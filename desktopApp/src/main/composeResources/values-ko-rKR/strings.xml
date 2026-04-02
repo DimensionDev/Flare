@@ -128,7 +128,6 @@
     <string name="settings_app_logging_clear">로그 지우기</string>
     <string name="settings_app_logging_enable_network_logging">네트워크 로깅 활성화</string>
     <string name="settings_ai_config_title">AI 구성</string>
-    <string name="settings_ai_config_description">AI 설정 구성</string>
     <string name="settings_ai_config_server">서버 URL</string>
     <string name="settings_ai_config_server_hint">서버 URL을 입력하세요</string>
     <string name="settings_ai_config_server_self_host_description">공식 서버를 사용하거나 자체 서버를 호스팅할 수 있습니다</string>
@@ -190,14 +189,8 @@
     <string name="misskey_visibility_home">홈</string>
     <string name="misskey_visibility_followers">팔로워</string>
     <string name="misskey_visibility_specified">명시된 사람만</string>
-    <string name="rss_sources_title">피드를 공유하세요</string>
-    <string name="add_rss_source">RSS 소스 추가</string>
-    <string name="edit_rss_source">RSS 소스 편집</string>
-    <string name="delete_rss_source">RSS 소스 삭제</string>
     <string name="rss_sources_title_label">제목</string>
     <string name="rss_sources_url_label">URL</string>
-    <string name="rss_title">RSS</string>
-    <string name="empty_rss_sources">RSS 소스가 없습니다</string>
     <string name="rss_sources_rss_hub_host_label">RssHub 호스트</string>
     <string name="rss_sources_rss_hub_host_hint">RssHub를 사용하려면 RssHub 호스트를 설정하거나 공개 RssHub 서버를 선택해야 합니다.</string>
     <string name="rss_sources_discovered_rss_sources">검색된 RSS 소스</string>

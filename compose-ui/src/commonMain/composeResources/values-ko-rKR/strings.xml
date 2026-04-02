@@ -299,14 +299,8 @@
     <string name="list_add">목록 추가</string>
     <string name="list_edit">목록 편집</string>
     <string name="list_delete">목록 삭제</string>
-    <string name="rss_sources_title">피드를 공유하세요</string>
-    <string name="add_rss_source">RSS 소스 추가</string>
-    <string name="edit_rss_source">RSS 소스 편집</string>
-    <string name="delete_rss_source">RSS 소스 삭제</string>
     <string name="rss_sources_title_label">제목</string>
     <string name="rss_sources_url_label">URL</string>
-    <string name="rss_title">RSS</string>
-    <string name="empty_rss_sources">RSS 소스가 없습니다</string>
     <string name="service_select_welcome_title">Flare에 오신 것을 환영합니다</string>
     <string name="bluesky_login_username_hint">사용자 이름</string>
     <string name="bluesky_login_password_hint">비밀번호</string>

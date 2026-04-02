@@ -54,7 +54,6 @@
     <string name="settings_app_logging_clear">로그 지우기</string>
     <string name="settings_app_logging_enable_network_logging">네트워크 로깅 활성화</string>
     <string name="settings_ai_config_title">AI 구성</string>
-    <string name="settings_ai_config_description">AI 설정 구성</string>
     <string name="settings_ai_config_server">서버 URL</string>
     <string name="settings_ai_config_server_hint">서버 URL을 입력하세요</string>
     <string name="settings_ai_config_server_self_host_description">공식 서버를 사용하거나 자체 서버를 호스팅할 수 있습니다</string>

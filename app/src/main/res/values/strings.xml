@@ -270,6 +270,7 @@
     <string name="media_viewer_title">Media viewer</string>
 
     <string name="settings_accounts_remove">Remove</string>
+    <string name="settings_accounts_remove_confirm">Are you sure you want to remove account %1$s from this device?</string>
 
     <string name="media_menu_save">Save screenshot</string>
     <string name="media_menu_share_image">Share screenshot</string>

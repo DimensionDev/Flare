@@ -81,6 +81,7 @@ import dev.dimension.flare.settings_about_source_code
 import dev.dimension.flare.settings_about_telegram
 import dev.dimension.flare.settings_about_telegram_description
 import dev.dimension.flare.settings_about_title
+import dev.dimension.flare.settings_accounts_remove_confirm
 import dev.dimension.flare.settings_accounts_title
 import dev.dimension.flare.settings_ai_config_api_key
 import dev.dimension.flare.settings_ai_config_api_key_hint
@@ -284,6 +285,8 @@ internal fun SettingsScreen(
             },
         )
     }
+    var pendingDeleteAccountKey by remember { mutableStateOf<MicroBlogKey?>(null) }
+    var pendingDeleteAccountLabel by remember { mutableStateOf<String?>(null) }
 
     val scrollState = rememberScrollState()
     FlareScrollBar(
@@ -344,7 +347,8 @@ internal fun SettingsScreen(
                                                         if (user == null) {
                                                             SubtleButton(
                                                                 onClick = {
-                                                                    state.accountState.deleteItem(account.account.accountKey)
+                                                                    pendingDeleteAccountKey = account.account.accountKey
+                                                                    pendingDeleteAccountLabel = account.account.accountKey.toString()
                                                                 },
                                                             ) {
                                                                 FAIcon(
@@ -401,7 +405,8 @@ internal fun SettingsScreen(
                                                                             )
                                                                         },
                                                                         onClick = {
-                                                                            state.accountState.deleteItem(user.key)
+                                                                            pendingDeleteAccountKey = user.key
+                                                                            pendingDeleteAccountLabel = user.handle.canonical
                                                                         },
                                                                         icon = {
                                                                             FAIcon(
@@ -462,6 +467,36 @@ internal fun SettingsScreen(
                         },
                     )
                 }
+
+            ContentDialog(
+                title = stringResource(Res.string.remove_account),
+                visible = pendingDeleteAccountKey != null,
+                content = {
+                    Text(
+                        text =
+                            stringResource(
+                                Res.string.settings_accounts_remove_confirm,
+                                pendingDeleteAccountLabel ?: pendingDeleteAccountKey.toString(),
+                            ),
+                        modifier = Modifier.padding(16.dp),
+                    )
+                },
+                primaryButtonText = stringResource(Res.string.delete),
+                closeButtonText = stringResource(Res.string.cancel),
+                onButtonClick = {
+                    when (it) {
+                        ContentDialogButton.Primary -> {
+                            pendingDeleteAccountKey?.let(state.accountState::deleteItem)
+                            pendingDeleteAccountKey = null
+                            pendingDeleteAccountLabel = null
+                        }
+                        else -> {
+                            pendingDeleteAccountKey = null
+                            pendingDeleteAccountLabel = null
+                        }
+                    }
+                },
+            )
 
             Header(stringResource(Res.string.settings_appearance_title))
 

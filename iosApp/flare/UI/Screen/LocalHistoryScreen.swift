@@ -43,6 +43,7 @@ struct LocalHistoryScreen: View {
                     Text("local_history_user").tag(HistorySelection.user)
                 }
                 .pickerStyle(.menu)
+                .fixedSize()
             }
         }
         .detectScrolling()

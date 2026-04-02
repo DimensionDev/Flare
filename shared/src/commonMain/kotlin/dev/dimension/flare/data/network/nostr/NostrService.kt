@@ -31,6 +31,7 @@ import dev.dimension.flare.ui.render.toUi
 import dev.dimension.flare.ui.render.toUiPlainText
 import dev.dimension.flare.ui.render.uiRichTextOf
 import dev.dimension.flare.ui.route.DeeplinkRoute
+import io.ktor.http.encodeURLParameter
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
@@ -39,6 +40,8 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 import rust.nostr.sdk.Client
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.minutes
@@ -137,6 +140,15 @@ internal class NostrService(
                     nsec = keys.secretKey().use { it.toBech32() },
                 )
             }
+
+        internal interface PendingQrLogin : AutoCloseable {
+            val connectUri: String
+
+            suspend fun awaitAccount(): ImportedAccount.RemoteSigner
+        }
+
+        internal fun beginQrLogin(relays: List<String> = defaultNostrRelays): PendingQrLogin =
+            PendingQrLoginSession(normalizeRelayUrls(relays))
 
         internal suspend fun resolvePublicRelays(
             pubkeyHex: String,
@@ -262,6 +274,61 @@ internal class NostrService(
                 .map(String::trim)
                 .filter(String::isNotEmpty)
                 .distinct()
+
+        private class PendingQrLoginSession(
+            relays: List<String>,
+        ) : PendingQrLogin {
+            private val appKeys = RustKeys.Companion.generate()
+            private val appSecret = appKeys.secretKey().use { it.toBech32() }
+            private val clientPubkeyHex = appKeys.publicKey().use { it.toHex() }
+            override val connectUri: String =
+                buildString {
+                    append("nostrconnect://")
+                    append(clientPubkeyHex)
+                    append("?")
+                    append(
+                        relays.joinToString("&") {
+                            "relay=${it.encodeURLParameter()}"
+                        },
+                    )
+                    append(
+                        "&metadata=${
+                            buildJsonObject {
+                                put("name", "Flare")
+                            }.toString().encodeURLParameter()
+                        }",
+                    )
+                }
+            private val uri = RustNostrConnectUri.parse(connectUri)
+            private val connect = RustNostrConnect(uri, appKeys, 2.minutes, null)
+
+            override suspend fun awaitAccount(): ImportedAccount.RemoteSigner {
+                val pubkeyHex = connect.getPublicKey().use { it.toHex() }
+                val bunkerUri =
+                    runCatching {
+                        connect.bunkerUri().use { it.toString() }
+                    }.getOrDefault(connectUri)
+                val signerRelay =
+                    connect.relays().firstOrNull()?.use { it.toString() }
+                return ImportedAccount.RemoteSigner(
+                    pubkeyHex = pubkeyHex,
+                    npub = bech32PublicKey(pubkeyHex),
+                    signerCredential =
+                        NostrSignerCredential.Bunker(
+                            uri = bunkerUri,
+                            userPubkeyHex = pubkeyHex,
+                            signerRelay = signerRelay,
+                            secret = appSecret,
+                        ),
+                )
+            }
+
+            override fun close() {
+                connect.close()
+                uri.close()
+                appKeys.close()
+            }
+        }
     }
 
     private var connected = false

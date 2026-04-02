@@ -144,6 +144,7 @@
     <string name="account_item_error_message">Failed to load account</string>
     <string name="add_account">Add account</string>
     <string name="remove_account">Remove account</string>
+    <string name="settings_accounts_remove_confirm">Are you sure you want to remove account %1$s from this device?</string>
 
     <string name="settings_accounts_title">Account Management</string>
     <string name="settings_appearance_title">Appearance</string>

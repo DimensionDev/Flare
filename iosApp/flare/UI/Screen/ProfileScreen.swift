@@ -11,6 +11,9 @@ struct ProfileScreen: View {
     let onFansClick: (MicroBlogKey) -> Void
     @StateObject private var presenter: KotlinPresenter<ProfileState>
     @State private var selectedTab: Int = 0
+    @State private var showToolbarTabPicker = false
+    @State private var isProfileHeaderVisible = true
+    @State private var isInlineTabPickerVisible = true
     
     var body: some View {
         ZStack {
@@ -23,42 +26,41 @@ struct ProfileScreen: View {
         }
         .background(Color(.systemGroupedBackground))
         .toolbar {
+            if horizontalSizeClass == .compact && showToolbarTabPicker, case .success(let userState) = onEnum(of: presenter.state.userState) {
+                ToolbarItem(placement: .principal) {
+                    RichText(text: userState.data.name)
+                }
+            }
+            
             if horizontalSizeClass == .regular, case .success(let tabState) = onEnum(of: presenter.state.tabs) {
                 let tabs = tabState.data.cast(ProfileState.Tab.self)
                 if tabs.count > 1 {
                     ToolbarItemGroup {
                         ForEach(0..<tabs.count, id: \.self) { index in
                             let tab = tabs[index]
-                            let text = switch onEnum(of: tab) {
-                            case .media: LocalizedStringResource(stringLiteral: "profile_tab_media")
-                            case .timeline(let timeline):
-                                switch timeline.type {
-                                case .likes: LocalizedStringResource(stringLiteral: "profile_tab_likes")
-                                case .status: LocalizedStringResource(stringLiteral: "profile_tab_status")
-                                case .statusWithReplies: LocalizedStringResource(stringLiteral: "profile_tab_replies")
-                                }
-                            }
                             Button {
                                 withAnimation(.spring) {
                                     selectedTab = index
                                 }
                             } label: {
-                                Text(text)
+                                Text(profileTabTitle(for: tab))
                                     .foregroundStyle(selectedTab == index ? Color.accentColor : .primary)
                                     .fontWeight(selectedTab == index ? .bold : .regular)
                             }
-//                            .onTapGesture {
-//                            }
-//                            .padding(.horizontal)
-//                            .padding(.vertical, 8)
-//                            .foregroundStyle(selectedTab == index ? Color.white : .primary)
-//                            .backport
-//                            .glassEffect(selectedTab == index ? .tinted(.accentColor) : .regular, in: .capsule, fallbackBackground: selectedTab == index ? Color.accentColor : Color(.systemBackground))
                         }
                     }
                 }
                 if #available(iOS 26.0, *) {
                     ToolbarSpacer()
+                }
+            } else if horizontalSizeClass == .compact, case .success(let tabState) = onEnum(of: presenter.state.tabs) {
+                let tabs = tabState.data.cast(ProfileState.Tab.self)
+                if tabs.count > 1 && showToolbarTabPicker {
+                    ToolbarItem(placement: .primaryAction) {
+                        profileTabPicker(tabs: tabs)
+                            .pickerStyle(.menu)
+                            .fixedSize()
+                    }
                 }
             }
             if !presenter.state.actions.isEmpty {
@@ -120,34 +122,45 @@ struct ProfileScreen: View {
                 onFollowingClick: onFollowingClick,
                 onFansClick: onFansClick
             )
+            .onAppear {
+                isProfileHeaderVisible = true
+                updateToolbarTabPickerVisibility()
+            }
+            .onDisappear {
+                isProfileHeaderVisible = false
+                updateToolbarTabPickerVisibility()
+            }
             .listRowBackground(Color.clear)
             .listRowSeparator(.hidden)
             .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
             StateView(state: presenter.state.tabs) { tabsArray in
                 let tabs = tabsArray.cast(ProfileState.Tab.self)
-                Picker(selection: $selectedTab) {
-                    ForEach(0..<tabs.count, id: \.self) { index in
-                        let tab = tabs[index]
-                        let text = switch onEnum(of: tab) {
-                        case .media: LocalizedStringResource(stringLiteral: "profile_tab_media")
-                        case .timeline(let timeline):
-                            switch timeline.type {
-                            case .likes: LocalizedStringResource(stringLiteral: "profile_tab_likes")
-                            case .status: LocalizedStringResource(stringLiteral: "profile_tab_status")
-                            case .statusWithReplies: LocalizedStringResource(stringLiteral: "profile_tab_replies")
-                            }
+                if tabs.count > 1 {
+                    profileTabPicker(tabs: tabs)
+                        .pickerStyle(.segmented)
+                        .onAppear {
+                            isInlineTabPickerVisible = true
+                            updateToolbarTabPickerVisibility()
                         }
-                        Text(text)
-                            .tag(index)
-                    }
-                } label: {
-                    
+                        .onDisappear {
+                            isInlineTabPickerVisible = false
+                            updateToolbarTabPickerVisibility()
+                        }
+                        .listRowSeparator(.hidden)
+                        .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
+                        .padding()
+                        .listRowBackground(Color.clear)
+                } else {
+                    Color.clear
+                        .frame(height: 0)
+                        .onAppear {
+                            isInlineTabPickerVisible = false
+                            updateToolbarTabPickerVisibility()
+                        }
+                        .listRowSeparator(.hidden)
+                        .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
+                        .listRowBackground(Color.clear)
                 }
-                .pickerStyle(.segmented)
-                .listRowSeparator(.hidden)
-                .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
-                .padding()
-                .listRowBackground(Color.clear)
                 let selectedTabItem = tabs[selectedTab]
                 switch onEnum(of: selectedTabItem) {
                 case .timeline(let timeline):
@@ -164,6 +177,43 @@ struct ProfileScreen: View {
         .listRowSpacing(2)
         .listStyle(.plain)
         .edgesIgnoringSafeArea(.top)
+    }
+
+    private func profileTabTitle(for tab: ProfileState.Tab) -> LocalizedStringResource {
+        switch onEnum(of: tab) {
+        case .media:
+            LocalizedStringResource(stringLiteral: "profile_tab_media")
+        case .timeline(let timeline):
+            switch timeline.type {
+            case .likes:
+                LocalizedStringResource(stringLiteral: "profile_tab_likes")
+            case .status:
+                LocalizedStringResource(stringLiteral: "profile_tab_status")
+            case .statusWithReplies:
+                LocalizedStringResource(stringLiteral: "profile_tab_replies")
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func profileTabPicker(tabs: [ProfileState.Tab]) -> some View {
+        Picker(selection: $selectedTab) {
+            ForEach(0..<tabs.count, id: \.self) { index in
+                Text(profileTabTitle(for: tabs[index]))
+                    .tag(index)
+            }
+        } label: {
+            EmptyView()
+        }
+    }
+
+    private func updateToolbarTabPickerVisibility() {
+        let shouldShowToolbarPicker = !isProfileHeaderVisible && !isInlineTabPickerVisible
+        if showToolbarTabPicker != shouldShowToolbarPicker {
+            withAnimation {
+                showToolbarTabPicker = shouldShowToolbarPicker
+            }
+        }
     }
 
     private func handleFollowAction(user: UiProfile, relation: UiRelation) {

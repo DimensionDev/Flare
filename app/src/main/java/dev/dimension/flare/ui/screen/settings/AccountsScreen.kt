@@ -11,6 +11,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -94,6 +96,8 @@ internal fun AccountsScreen(
     val state by producePresenter {
         accountsPresenter()
     }
+    var pendingDeleteAccountKey by remember { mutableStateOf<MicroBlogKey?>(null) }
+    var pendingDeleteAccountLabel by remember { mutableStateOf<String?>(null) }
     val lazyListState = rememberLazyListState()
     val haptics = LocalHapticFeedback.current
     val reorderableLazyColumnState =
@@ -144,7 +148,13 @@ internal fun AccountsScreen(
                 LaunchedEffect(swipeState.settledValue) {
                     if (swipeState.settledValue != SwipeToDismissBoxValue.Settled) {
                         delay(AnimationConstants.DefaultDurationMillis.toLong())
-                        state.deleteItem(account.accountKey)
+                        pendingDeleteAccountKey = account.accountKey
+                        pendingDeleteAccountLabel =
+                            when (val profile = data) {
+                                is UiState.Success -> profile.data.handle.canonical
+                                is UiState.Error, is UiState.Loading -> account.accountKey.toString()
+                            }
+                        swipeState.snapTo(SwipeToDismissBoxValue.Settled)
                     }
                 }
                 ReorderableItem(
@@ -268,7 +278,12 @@ internal fun AccountsScreen(
                                                 },
                                                 onClick = {
                                                     showMenu = false
-                                                    state.deleteItem(account.accountKey)
+                                                    pendingDeleteAccountKey = account.accountKey
+                                                    pendingDeleteAccountLabel =
+                                                        when (val profile = data) {
+                                                            is UiState.Success -> profile.data.handle.canonical
+                                                            is UiState.Error, is UiState.Loading -> account.accountKey.toString()
+                                                        }
                                                 },
                                                 leadingIcon = {
                                                     FAIcon(
@@ -290,6 +305,48 @@ internal fun AccountsScreen(
                 }
             }
         }
+    }
+    pendingDeleteAccountKey?.let { accountKey ->
+        AlertDialog(
+            onDismissRequest = {
+                pendingDeleteAccountKey = null
+                pendingDeleteAccountLabel = null
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        state.deleteItem(accountKey)
+                        pendingDeleteAccountKey = null
+                        pendingDeleteAccountLabel = null
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
+                ) {
+                    Text(text = stringResource(id = R.string.delete))
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        pendingDeleteAccountKey = null
+                        pendingDeleteAccountLabel = null
+                    },
+                ) {
+                    Text(text = stringResource(id = android.R.string.cancel))
+                }
+            },
+            title = {
+                Text(text = stringResource(id = R.string.settings_accounts_remove))
+            },
+            text = {
+                Text(
+                    text =
+                        stringResource(
+                            id = R.string.settings_accounts_remove_confirm,
+                            pendingDeleteAccountLabel ?: accountKey.toString(),
+                        ),
+                )
+            },
+        )
     }
 }
 

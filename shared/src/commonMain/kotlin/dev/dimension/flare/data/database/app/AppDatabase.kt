@@ -1,11 +1,11 @@
 package dev.dimension.flare.data.database.app
 
-import androidx.room.AutoMigration
-import androidx.room.ConstructedBy
-import androidx.room.Database
-import androidx.room.RoomDatabase
-import androidx.room.RoomDatabaseConstructor
-import androidx.room.TypeConverters
+import androidx.room3.AutoMigration
+import androidx.room3.ConstructedBy
+import androidx.room3.Database
+import androidx.room3.RoomDatabase
+import androidx.room3.RoomDatabaseConstructor
+import androidx.room3.TypeConverters
 import dev.dimension.flare.data.database.app.dao.AccountDao
 import dev.dimension.flare.data.database.app.dao.ApplicationDao
 import dev.dimension.flare.data.database.app.dao.DraftDao

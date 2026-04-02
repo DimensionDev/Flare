@@ -4,8 +4,6 @@ import dev.dimension.flare.common.Cacheable
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.database.cache.mapper.saveToDatabase
-import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
-import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.datasource.microblog.loader.PostLoader
 import dev.dimension.flare.data.datasource.microblog.paging.TimelinePagingMapper
 import dev.dimension.flare.data.datastore.AppDataStore
@@ -75,17 +73,9 @@ internal class PostHandler(
 
                         status != null ->
                             TimelinePagingMapper.toUi(
-                                DbPagingTimelineWithStatus(
-                                    timeline =
-                                        DbPagingTimeline(
-                                            pagingKey = pagingKey,
-                                            statusKey = postKey,
-                                            sortId = 0,
-                                        ),
-                                    status = status,
-                                ),
-                                pagingKey,
-                                false,
+                                item = status,
+                                pagingKey = pagingKey,
+                                useDbKeyInItemKey = false,
                                 translationDisplayOptions = translationDisplayOptions,
                             )
 

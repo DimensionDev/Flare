@@ -18,7 +18,7 @@
 -keep class de.jensklingenberg.ktorfit.** { *; }
 -keepclassmembers class de.jensklingenberg.ktorfit.** { *; }
 
--keep class * extends androidx.room.RoomDatabase { <init>(); }
+-keep class * extends androidx.room3.RoomDatabase { <init>(); }
 
 -keepnames class io.ktor.serialization.kotlinx.KotlinxSerializationExtensionProvider {}
 -keep class * implements io.ktor.serialization.kotlinx.KotlinxSerializationExtensionProvider {

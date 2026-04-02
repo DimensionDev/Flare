@@ -1,7 +1,7 @@
 package dev.dimension.flare.data.database
 
-import androidx.room.Room
-import androidx.room.RoomDatabase
+import androidx.room3.Room
+import androidx.room3.RoomDatabase
 import dev.dimension.flare.common.FileSystemUtilsExt
 import java.io.File
 

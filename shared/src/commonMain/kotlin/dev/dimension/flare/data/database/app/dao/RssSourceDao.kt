@@ -1,18 +1,18 @@
 package dev.dimension.flare.data.database.app.dao
 
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.Query
+import androidx.room3.Dao
+import androidx.room3.Insert
+import androidx.room3.Query
 import dev.dimension.flare.data.database.app.model.DbRssSources
 import dev.dimension.flare.data.database.app.model.SubscriptionType
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 internal interface RssSourceDao {
-    @Insert(onConflict = androidx.room.OnConflictStrategy.REPLACE)
+    @Insert(onConflict = androidx.room3.OnConflictStrategy.REPLACE)
     suspend fun insert(data: DbRssSources)
 
-    @Insert(onConflict = androidx.room.OnConflictStrategy.REPLACE)
+    @Insert(onConflict = androidx.room3.OnConflictStrategy.REPLACE)
     suspend fun insertAll(data: List<DbRssSources>)
 
     @Query("SELECT * FROM DbRssSources")

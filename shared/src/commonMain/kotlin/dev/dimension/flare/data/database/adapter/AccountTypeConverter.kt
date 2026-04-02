@@ -1,6 +1,6 @@
 package dev.dimension.flare.data.database.adapter
 
-import androidx.room.TypeConverter
+import androidx.room3.TypeConverter
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.common.decodeProtobuf
 import dev.dimension.flare.common.encodeJson

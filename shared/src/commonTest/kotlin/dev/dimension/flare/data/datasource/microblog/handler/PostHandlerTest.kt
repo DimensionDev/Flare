@@ -1,6 +1,6 @@
 package dev.dimension.flare.data.datasource.microblog.handler
 
-import androidx.room.Room
+import androidx.room3.Room
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.common.CacheState

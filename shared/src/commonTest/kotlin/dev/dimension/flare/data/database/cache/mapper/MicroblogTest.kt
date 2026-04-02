@@ -3,13 +3,13 @@ package dev.dimension.flare.data.database.cache.mapper
 import androidx.paging.PagingConfig
 import androidx.paging.PagingSource
 import androidx.paging.testing.TestPager
-import androidx.room.Room
+import androidx.room3.Room
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.common.Locale
 import dev.dimension.flare.common.TestFormatter
 import dev.dimension.flare.data.database.cache.CacheDatabase
-import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
+import dev.dimension.flare.data.database.cache.model.DbStatusWithReference
 import dev.dimension.flare.data.database.cache.model.DbTranslation
 import dev.dimension.flare.data.database.cache.model.TranslationDisplayMode
 import dev.dimension.flare.data.database.cache.model.TranslationDisplayOptions
@@ -358,7 +358,7 @@ class MicroblogTest : RobolectricTest() {
             val paging = db.pagingTimelineDao().getPagingSource("home")
             val pager = TestPager(config = PagingConfig(pageSize = 20), paging)
             val refreshResult = pager.refresh()
-            assertIs<PagingSource.LoadResult.Page<Int, DbPagingTimelineWithStatus>>(refreshResult)
+            assertIs<PagingSource.LoadResult.Page<Int, DbStatusWithReference>>(refreshResult)
         }
 
     @Test
@@ -621,7 +621,7 @@ class MicroblogTest : RobolectricTest() {
             val pager = TestPager(config = PagingConfig(pageSize = 20), paging)
             val refreshResult = pager.refresh()
             val page =
-                assertIs<PagingSource.LoadResult.Page<Int, DbPagingTimelineWithStatus>>(
+                assertIs<PagingSource.LoadResult.Page<Int, DbStatusWithReference>>(
                     refreshResult,
                 )
             val dbItem = assertNotNull(page.data.firstOrNull())
@@ -710,13 +710,13 @@ class MicroblogTest : RobolectricTest() {
             val pager = TestPager(config = PagingConfig(pageSize = 20), paging)
             val refreshResult = pager.refresh()
             val page =
-                assertIs<PagingSource.LoadResult.Page<Int, DbPagingTimelineWithStatus>>(
+                assertIs<PagingSource.LoadResult.Page<Int, DbStatusWithReference>>(
                     refreshResult,
                 )
             val dbItem =
                 assertNotNull(
                     page.data.firstOrNull {
-                        it.status.status.data.statusKey == post.statusKey
+                        it.status.data.statusKey == post.statusKey
                     },
                 )
 
@@ -953,13 +953,13 @@ class MicroblogTest : RobolectricTest() {
             val pager = TestPager(config = PagingConfig(pageSize = 20), paging)
             val refreshResult = pager.refresh()
             val page =
-                assertIs<PagingSource.LoadResult.Page<Int, DbPagingTimelineWithStatus>>(
+                assertIs<PagingSource.LoadResult.Page<Int, DbStatusWithReference>>(
                     refreshResult,
                 )
             val dbItem =
                 assertNotNull(
                     page.data.firstOrNull {
-                        it.status.status.data.statusKey == wrapperPost.statusKey
+                        it.status.data.statusKey == wrapperPost.statusKey
                     },
                 )
             val rendered =
@@ -1209,7 +1209,7 @@ class MicroblogTest : RobolectricTest() {
             val pager = TestPager(config = PagingConfig(pageSize = 20), paging)
             val refreshResult = pager.refresh()
             val page =
-                assertIs<PagingSource.LoadResult.Page<Int, DbPagingTimelineWithStatus>>(
+                assertIs<PagingSource.LoadResult.Page<Int, DbStatusWithReference>>(
                     refreshResult,
                 )
             val dbItem = assertNotNull(page.data.firstOrNull())
@@ -1272,7 +1272,7 @@ class MicroblogTest : RobolectricTest() {
             val dbItem =
                 assertNotNull(
                     (
-                        assertIs<PagingSource.LoadResult.Page<Int, DbPagingTimelineWithStatus>>(
+                        assertIs<PagingSource.LoadResult.Page<Int, DbStatusWithReference>>(
                             TestPager(
                                 config = PagingConfig(pageSize = 20),
                                 db.pagingTimelineDao().getPagingSource("home"),
@@ -1332,7 +1332,7 @@ class MicroblogTest : RobolectricTest() {
             val pager = TestPager(config = PagingConfig(pageSize = 20), paging)
             val refreshResult = pager.refresh()
             val page =
-                assertIs<PagingSource.LoadResult.Page<Int, DbPagingTimelineWithStatus>>(
+                assertIs<PagingSource.LoadResult.Page<Int, DbStatusWithReference>>(
                     refreshResult,
                 )
             val dbItem = assertNotNull(page.data.firstOrNull())
@@ -1406,7 +1406,7 @@ class MicroblogTest : RobolectricTest() {
             val pager = TestPager(config = PagingConfig(pageSize = 20), paging)
             val refreshResult = pager.refresh()
             val page =
-                assertIs<PagingSource.LoadResult.Page<Int, DbPagingTimelineWithStatus>>(
+                assertIs<PagingSource.LoadResult.Page<Int, DbStatusWithReference>>(
                     refreshResult,
                 )
             val dbItem = assertNotNull(page.data.firstOrNull())
@@ -1480,7 +1480,7 @@ class MicroblogTest : RobolectricTest() {
             val dbItem =
                 assertNotNull(
                     (
-                        assertIs<PagingSource.LoadResult.Page<Int, DbPagingTimelineWithStatus>>(
+                        assertIs<PagingSource.LoadResult.Page<Int, DbStatusWithReference>>(
                             TestPager(
                                 config = PagingConfig(pageSize = 20),
                                 db.pagingTimelineDao().getPagingSource("home"),
@@ -1558,7 +1558,7 @@ class MicroblogTest : RobolectricTest() {
             val dbItem =
                 assertNotNull(
                     (
-                        assertIs<PagingSource.LoadResult.Page<Int, DbPagingTimelineWithStatus>>(
+                        assertIs<PagingSource.LoadResult.Page<Int, DbStatusWithReference>>(
                             TestPager(
                                 config = PagingConfig(pageSize = 20),
                                 db.pagingTimelineDao().getPagingSource("home"),
@@ -1641,7 +1641,7 @@ class MicroblogTest : RobolectricTest() {
             val dbItem =
                 assertNotNull(
                     (
-                        assertIs<PagingSource.LoadResult.Page<Int, DbPagingTimelineWithStatus>>(
+                        assertIs<PagingSource.LoadResult.Page<Int, DbStatusWithReference>>(
                             TestPager(
                                 config = PagingConfig(pageSize = 20),
                                 db.pagingTimelineDao().getPagingSource("home"),

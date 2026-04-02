@@ -5,6 +5,7 @@ import dev.dimension.flare.common.SnowflakeIdGenerator
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.saveToDatabase
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
+import dev.dimension.flare.data.database.cache.model.DbStatusWithReference
 import dev.dimension.flare.data.translation.NoopPreTranslationService
 import dev.dimension.flare.data.translation.PreTranslationService
 import dev.dimension.flare.model.AccountType
@@ -19,7 +20,7 @@ internal class TimelineRemoteMediator(
     private val allowLongText: Boolean,
     private val notifyError: (Throwable) -> Unit = {},
     private val preTranslationService: PreTranslationService = NoopPreTranslationService,
-) : BasePagingRemoteMediator<DbPagingTimelineWithStatus, DbPagingTimelineWithStatus>(
+) : BasePagingRemoteMediator<DbStatusWithReference, DbPagingTimelineWithStatus>(
         database = database,
     ),
     RemoteLoader<DbPagingTimelineWithStatus> {

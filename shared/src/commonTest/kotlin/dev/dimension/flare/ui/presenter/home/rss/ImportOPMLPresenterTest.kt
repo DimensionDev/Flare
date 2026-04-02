@@ -1,6 +1,6 @@
 package dev.dimension.flare.ui.presenter.home.rss
 
-import androidx.room.Room
+import androidx.room3.Room
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import app.cash.molecule.RecompositionMode
 import app.cash.molecule.moleculeFlow

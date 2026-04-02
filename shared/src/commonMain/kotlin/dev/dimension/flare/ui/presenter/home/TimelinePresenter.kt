@@ -19,7 +19,7 @@ import dev.dimension.flare.common.onEmpty
 import dev.dimension.flare.common.onError
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.data.database.cache.CacheDatabase
-import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
+import dev.dimension.flare.data.database.cache.model.DbStatusWithReference
 import dev.dimension.flare.data.database.cache.model.TranslationDisplayOptions
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.NotSupportRemoteLoader
@@ -125,7 +125,7 @@ public abstract class TimelinePresenter :
                 emitAll(PagingData.emptyFlow(isError = true))
             }
 
-    private fun cachePager(loader: CacheableRemoteLoader<UiTimelineV2>): Flow<PagingData<DbPagingTimelineWithStatus>> =
+    private fun cachePager(loader: CacheableRemoteLoader<UiTimelineV2>): Flow<PagingData<DbStatusWithReference>> =
         run {
             val allowLongText = allowLongTextTranslationDisplay(loader)
             Pager(

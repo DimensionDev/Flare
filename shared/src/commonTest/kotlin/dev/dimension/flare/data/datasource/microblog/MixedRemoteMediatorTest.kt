@@ -5,7 +5,7 @@ import androidx.paging.LoadType
 import androidx.paging.PagingConfig
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
-import androidx.room.Room
+import androidx.room3.Room
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.common.Locale
@@ -284,7 +284,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
             assertTrue(page is PagingSource.LoadResult.Page)
             val urls =
                 page.data.mapNotNull {
-                    (it.status.status.data.content as? UiTimelineV2.Feed)?.url
+                    (it.status.data.content as? UiTimelineV2.Feed)?.url
                 }
             assertEquals(
                 listOf(

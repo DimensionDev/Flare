@@ -395,7 +395,16 @@ private class GoogleCloudTranslationEngine(
                                 ),
                             )
                         }.body<GoogleCloudTranslateV2Response>()
-                response.data.translations.map { it.translatedText.trim() }
+                require(response.data.translations.size == requestTexts.size) {
+                    "Google Cloud Translation provider returned ${response.data.translations.size} results for ${requestTexts.size} inputs"
+                }
+                requestTexts.zip(response.data.translations).map { (sourceText, translation) ->
+                    GoogleWebTranslationWhitespaceSupport
+                        .normalizeExpandedInternalNewlines(
+                            sourceText = sourceText,
+                            translatedText = translation.translatedText,
+                        ).trim()
+                }
             },
         )
 }
@@ -717,6 +726,16 @@ internal object GoogleWebTranslationDocumentSupport {
 
 internal object GoogleWebTranslationWhitespaceSupport {
     fun trimBoundaryWhitespace(text: String): String = text.trim { it.isWhitespace() }
+
+    fun normalizeExpandedInternalNewlines(
+        sourceText: String,
+        translatedText: String,
+    ): String {
+        if (!sourceText.contains('\n') || sourceText.contains("\n\n")) {
+            return translatedText
+        }
+        return translatedText.replace(Regex("\\n{2,}"), "\n")
+    }
 
     fun preserveSourceBoundaryWhitespace(
         sourceText: String,

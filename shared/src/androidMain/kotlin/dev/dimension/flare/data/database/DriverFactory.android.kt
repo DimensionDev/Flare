@@ -1,8 +1,8 @@
 package dev.dimension.flare.data.database
 
 import android.content.Context
-import androidx.room.Room
-import androidx.room.RoomDatabase
+import androidx.room3.Room
+import androidx.room3.RoomDatabase
 import java.io.File
 
 internal actual class DriverFactory(

@@ -60,16 +60,29 @@ internal object TimelinePagingMapper {
         pagingKey: String,
         useDbKeyInItemKey: Boolean,
         translationDisplayOptions: TranslationDisplayOptions,
+    ): UiTimelineV2 =
+        toUi(
+            item = item.status,
+            pagingKey = pagingKey,
+            useDbKeyInItemKey = useDbKeyInItemKey,
+            translationDisplayOptions = translationDisplayOptions,
+        )
+
+    fun toUi(
+        item: DbStatusWithReference,
+        pagingKey: String,
+        useDbKeyInItemKey: Boolean,
+        translationDisplayOptions: TranslationDisplayOptions,
     ): UiTimelineV2 {
         val root =
             dbStatusWithUserToUiTimeline(
-                data = item.status.status,
+                data = item.status,
                 pagingKey = pagingKey,
                 useDbKeyInItemKey = useDbKeyInItemKey,
                 translationDisplayOptions = translationDisplayOptions,
             )
         val references =
-            item.status.references.mapNotNull { reference ->
+            item.references.mapNotNull { reference ->
                 reference.status?.let {
                     reference.reference.referenceType to
                         dbStatusWithUserToUiTimeline(

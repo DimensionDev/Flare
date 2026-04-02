@@ -1,10 +1,12 @@
 package dev.dimension.flare.data.database.cache.dao
 
 import androidx.paging.PagingSource
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.Query
-import androidx.room.Transaction
+import androidx.room3.Dao
+import androidx.room3.DaoReturnTypeConverters
+import androidx.room3.Insert
+import androidx.room3.Query
+import androidx.room3.Transaction
+import androidx.room3.paging.PagingSourceDaoReturnTypeConverter
 import dev.dimension.flare.data.database.cache.model.DbDirectMessageTimeline
 import dev.dimension.flare.data.database.cache.model.DbDirectMessageTimelineWithRoom
 import dev.dimension.flare.data.database.cache.model.DbMessageItem
@@ -16,6 +18,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import kotlinx.coroutines.flow.Flow
 
 @Dao
+@DaoReturnTypeConverters(PagingSourceDaoReturnTypeConverter::class)
 internal interface MessageDao {
     @Transaction
     @Query("SELECT * FROM DbDirectMessageTimeline WHERE accountType = :accountType ORDER BY sortId DESC")
@@ -36,16 +39,16 @@ internal interface MessageDao {
         accountType: DbAccountType,
     ): Flow<DbDirectMessageTimelineWithRoom?>
 
-    @Insert(onConflict = androidx.room.OnConflictStrategy.REPLACE)
+    @Insert(onConflict = androidx.room3.OnConflictStrategy.REPLACE)
     suspend fun insert(items: List<DbMessageRoom>)
 
-    @Insert(onConflict = androidx.room.OnConflictStrategy.REPLACE)
+    @Insert(onConflict = androidx.room3.OnConflictStrategy.REPLACE)
     suspend fun insertReferences(items: List<DbMessageRoomReference>)
 
-    @Insert(onConflict = androidx.room.OnConflictStrategy.REPLACE)
+    @Insert(onConflict = androidx.room3.OnConflictStrategy.REPLACE)
     suspend fun insertMessages(items: List<DbMessageItem>)
 
-    @Insert(onConflict = androidx.room.OnConflictStrategy.REPLACE)
+    @Insert(onConflict = androidx.room3.OnConflictStrategy.REPLACE)
     suspend fun insertTimeline(items: List<DbDirectMessageTimeline>)
 
     @Query("DELETE FROM DbMessageItem WHERE roomKey = :roomKey")

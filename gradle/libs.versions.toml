@@ -56,7 +56,7 @@ firebase-bom = "34.11.0"
 google-services = "4.4.4"
 firebase-crashlytics = "3.0.6"
 materialKolor = "4.1.1"
-room = "2.8.3"
+room = "3.0.0-alpha02"
 sqlite = "2.6.2"
 compose-multiplatform = "1.10.3"
 logback = "1.5.32"
@@ -125,9 +125,9 @@ datastore = { group = "androidx.datastore", name = "datastore", version = "1.2.1
 desugar_jdk_libs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugar_jdk_libs" }
 androidx-window = { group = "androidx.window", name = "window-core", version = "1.5.1" }
 androidx-splash = { group = "androidx.core", name = "core-splashscreen", version = "1.2.0" }
-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
-room-paging = { group = "androidx.room", name = "room-paging", version.ref = "room" }
-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+room-runtime = { group = "androidx.room3", name = "room3-runtime", version.ref = "room" }
+room-paging = { group = "androidx.room3", name = "room3-paging", version.ref = "room" }
+room-compiler = { group = "androidx.room3", name = "room3-compiler", version.ref = "room" }
 sqlite-bundled = { group = "androidx.sqlite", name = "sqlite-bundled", version.ref = "sqlite" }
 nestedScrollView = { group = "com.github.Tlaster", name = "NestedScrollView", version = "1.0.3" }
 webkit = { group = "androidx.webkit", name = "webkit", version = "1.15.0" }
@@ -283,6 +283,6 @@ ben-manes-versions = { id = "com.github.ben-manes.versions", version.ref = "vers
 google-services = { id = "com.google.gms.google-services", version.ref = "google-services" }
 firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "firebase-crashlytics" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-room = { id = "androidx.room", version.ref = "room" }
+room = { id = "androidx.room3", version.ref = "room" }
 composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "compose-multiplatform" }
 nucleus = { id = "io.github.kdroidfilter.nucleus", version.ref = "nucleus" }

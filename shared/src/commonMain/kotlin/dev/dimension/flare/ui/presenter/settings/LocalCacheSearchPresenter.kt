@@ -72,7 +72,7 @@ public class LocalCacheSearchPresenter :
                             .getStatusHistoryPagingSource(pagingKey = LogStatusHistoryPresenter.PAGING_KEY)
                     }.flow.map {
                         it.map {
-                            it.status.status.data.content
+                            it.status.data.content
                         }
                     }
                 }

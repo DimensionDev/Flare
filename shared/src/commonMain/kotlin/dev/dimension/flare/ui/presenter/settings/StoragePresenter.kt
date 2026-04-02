@@ -6,9 +6,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.room.execSQL
-import androidx.room.immediateTransaction
-import androidx.room.useWriterConnection
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.launch
@@ -19,21 +16,6 @@ public class StoragePresenter :
     PresenterBase<StorageState>(),
     KoinComponent {
     private val cacheDatabase by inject<CacheDatabase>()
-    private val tablesToDelete =
-        listOf(
-            "DbEmoji",
-            "status_reference",
-            "DbStatus",
-            "DbUser",
-            "DbPagingTimeline",
-            "DbMessageRoom",
-            "DbMessageItem",
-            "DbDirectMessageTimeline",
-            "DbMessageRoomReference",
-            "DbUserHistory",
-            "DbEmojiHistory",
-            "DbPagingKey",
-        )
 
     @Composable
     override fun body(): StorageState {
@@ -54,13 +36,7 @@ public class StoragePresenter :
 
             override fun clearCache() {
                 scope.launch {
-                    cacheDatabase.useWriterConnection {
-                        it.immediateTransaction {
-                            tablesToDelete.forEach { tableName ->
-                                it.execSQL("DELETE FROM $tableName")
-                            }
-                        }
-                    }
+                    cacheDatabase.clearAllTables()
                 }
             }
         }

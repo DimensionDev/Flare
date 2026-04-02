@@ -26,7 +26,7 @@ import kotlinx.serialization.json.JsonElement
  * @param typename
  * @param id
  * @param legacy
- * @param profilemodules
+// * @param profilemodules
  * @param restId
  */
 @Serializable
@@ -37,8 +37,8 @@ internal data class UserResultByScreenNameResult(
     val id: kotlin.String,
     @SerialName(value = "legacy")
     val legacy: UserResultByScreenNameLegacy,
-    @Contextual @SerialName(value = "profilemodules")
-    val profilemodules: JsonElement,
+//    @Contextual @SerialName(value = "profilemodules")
+//    val profilemodules: JsonElement,
     @SerialName(value = "rest_id")
     val restId: kotlin.String,
 )

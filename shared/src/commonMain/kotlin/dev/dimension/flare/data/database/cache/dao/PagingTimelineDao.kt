@@ -1,16 +1,17 @@
 package dev.dimension.flare.data.database.cache.dao
 
 import androidx.paging.PagingSource
-import androidx.room.Dao
-import androidx.room.Delete
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
-import androidx.room.RewriteQueriesToDropUnusedColumns
-import androidx.room.Transaction
+import androidx.room3.Dao
+import androidx.room3.DaoReturnTypeConverters
+import androidx.room3.Delete
+import androidx.room3.Insert
+import androidx.room3.OnConflictStrategy
+import androidx.room3.Query
+import androidx.room3.RewriteQueriesToDropUnusedColumns
+import androidx.room3.Transaction
+import androidx.room3.paging.PagingSourceDaoReturnTypeConverter
 import dev.dimension.flare.data.database.cache.model.DbPagingKey
 import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
-import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.database.cache.model.DbStatusWithReference
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.DbAccountType
@@ -18,24 +19,28 @@ import dev.dimension.flare.model.MicroBlogKey
 import kotlinx.coroutines.flow.Flow
 
 @Dao
+@DaoReturnTypeConverters(PagingSourceDaoReturnTypeConverter::class)
 internal interface PagingTimelineDao {
     @Transaction
     @Query(
-        "SELECT DbPagingTimeline.* FROM DbPagingTimeline " +
-            "INNER JOIN DbStatus ON DbStatus.statusKey = DbPagingTimeline.statusKey " +
+        "SELECT DbStatus.* FROM DbStatus " +
+            "INNER JOIN DbPagingTimeline ON DbStatus.statusKey = DbPagingTimeline.statusKey " +
             "WHERE DbPagingTimeline.pagingKey = :pagingKey AND DbStatus.accountType = :accountType " +
             "ORDER BY DbPagingTimeline.sortId",
     )
     fun getPagingSource(
         pagingKey: String,
         accountType: DbAccountType,
-    ): PagingSource<Int, DbPagingTimelineWithStatus>
+    ): PagingSource<Int, DbStatusWithReference>
 
     @Transaction
     @Query(
-        "SELECT * FROM DbPagingTimeline WHERE pagingKey = :pagingKey ORDER BY sortId",
+        "SELECT DbStatus.* FROM DbStatus " +
+            "INNER JOIN DbPagingTimeline ON DbStatus.statusKey = DbPagingTimeline.statusKey " +
+            "WHERE DbPagingTimeline.pagingKey = :pagingKey " +
+            "ORDER BY DbPagingTimeline.sortId",
     )
-    fun getPagingSource(pagingKey: String): PagingSource<Int, DbPagingTimelineWithStatus>
+    fun getPagingSource(pagingKey: String): PagingSource<Int, DbStatusWithReference>
 
     @Transaction
     @RewriteQueriesToDropUnusedColumns
@@ -47,19 +52,28 @@ internal interface PagingTimelineDao {
 
     @Transaction
     @Query(
-        "SELECT DbPagingTimeline.* FROM DbPagingTimeline " +
-            "INNER JOIN DbStatus ON DbStatus.statusKey = DbPagingTimeline.statusKey " +
-            "WHERE DbPagingTimeline.pagingKey = :pagingKey AND DbStatus.accountType = :accountType " +
+        "SELECT DbStatus.* FROM DbStatus " +
+            "WHERE DbStatus.accountType = :accountType " +
+            "AND EXISTS(" +
+            "SELECT 1 FROM DbPagingTimeline " +
+            "WHERE DbPagingTimeline.pagingKey = :pagingKey " +
+            "AND DbPagingTimeline.statusKey = DbStatus.statusKey" +
+            ") " +
             "LIMIT 1",
     )
     fun get(
         pagingKey: String,
         accountType: DbAccountType,
-    ): Flow<DbPagingTimelineWithStatus?>
+    ): Flow<DbStatusWithReference?>
 
     @Transaction
-    @Query("SELECT * FROM DbPagingTimeline WHERE pagingKey = :pagingKey ORDER BY sortId DESC")
-    fun getStatusHistoryPagingSource(pagingKey: String): PagingSource<Int, DbPagingTimelineWithStatus>
+    @Query(
+        "SELECT DbStatus.* FROM DbStatus " +
+            "INNER JOIN DbPagingTimeline ON DbStatus.statusKey = DbPagingTimeline.statusKey " +
+            "WHERE DbPagingTimeline.pagingKey = :pagingKey " +
+            "ORDER BY DbPagingTimeline.sortId DESC",
+    )
+    fun getStatusHistoryPagingSource(pagingKey: String): PagingSource<Int, DbStatusWithReference>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(timeline: List<DbPagingTimeline>)

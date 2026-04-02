@@ -3,9 +3,9 @@ package dev.dimension.flare.data.database.adapter
 import dev.dimension.flare.model.PlatformType
 
 internal class PlatformTypeConverter {
-    @androidx.room.TypeConverter
+    @androidx.room3.TypeConverter
     fun fromString(value: String): PlatformType = PlatformType.valueOf(value)
 
-    @androidx.room.TypeConverter
+    @androidx.room3.TypeConverter
     fun fromEnum(value: PlatformType): String = value.name
 }

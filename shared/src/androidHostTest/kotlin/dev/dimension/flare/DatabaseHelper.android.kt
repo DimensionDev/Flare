@@ -1,7 +1,7 @@
 package dev.dimension.flare
 
-import androidx.room.Room
-import androidx.room.RoomDatabase
+import androidx.room3.Room
+import androidx.room3.RoomDatabase
 import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner

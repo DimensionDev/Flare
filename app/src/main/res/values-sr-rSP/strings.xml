@@ -54,7 +54,6 @@
     <string name="settings_app_logging_clear">Очистите лог</string>
     <string name="settings_app_logging_enable_network_logging">Омогућите логовање мреже</string>
     <string name="settings_ai_config_title">AI Конфигурација</string>
-    <string name="settings_ai_config_description">Поставите AI подешавања</string>
     <string name="settings_ai_config_server">URL сервера</string>
     <string name="settings_ai_config_server_hint">Унесите URL сервера</string>
     <string name="settings_ai_config_server_self_host_description">Можете користити службени сервер или угостити свој сервер</string>

@@ -127,7 +127,6 @@
     <string name="settings_app_logging_clear">Esborrar registre</string>
     <string name="settings_app_logging_enable_network_logging">Activar registre de xarxa</string>
     <string name="settings_ai_config_title">Configuració d\'IA</string>
-    <string name="settings_ai_config_description">Configureu la configuració d\'IA</string>
     <string name="settings_ai_config_server">URL del servidor</string>
     <string name="settings_ai_config_server_hint">Introdueix la URL del servidor</string>
     <string name="settings_ai_config_server_self_host_description">Podeu utilitzar el servidor oficial o allotjar el vostre propi servidor</string>
@@ -189,14 +188,8 @@
     <string name="misskey_visibility_home">Inici</string>
     <string name="misskey_visibility_followers">Seguidors</string>
     <string name="misskey_visibility_specified">Especificat</string>
-    <string name="rss_sources_title">Fonts Rss</string>
-    <string name="add_rss_source">Afegir font Rss</string>
-    <string name="edit_rss_source">Editar font Rss</string>
-    <string name="delete_rss_source">Esborrar font Rss</string>
     <string name="rss_sources_title_label">Títol</string>
     <string name="rss_sources_url_label">Url</string>
-    <string name="rss_title">Rss</string>
-    <string name="empty_rss_sources">No hi ha fonts rss</string>
     <string name="tab_settings_add">Afegir</string>
     <string name="tab_settings_drag">Arrossegueu</string>
     <string name="tab_settings_edit">Editar</string>

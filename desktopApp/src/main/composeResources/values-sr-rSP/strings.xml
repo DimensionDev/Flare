@@ -127,7 +127,6 @@
     <string name="settings_app_logging_clear">Очистите лог</string>
     <string name="settings_app_logging_enable_network_logging">Омогућите логовање мреже</string>
     <string name="settings_ai_config_title">AI Конфигурација</string>
-    <string name="settings_ai_config_description">Поставите AI подешавања</string>
     <string name="settings_ai_config_server">URL сервера</string>
     <string name="settings_ai_config_server_hint">Унесите URL сервера</string>
     <string name="settings_ai_config_server_self_host_description">Можете користити службени сервер или угостити свој сервер</string>
@@ -189,14 +188,8 @@
     <string name="misskey_visibility_home">Почетна</string>
     <string name="misskey_visibility_followers">Пратиоци</string>
     <string name="misskey_visibility_specified">Одређени</string>
-    <string name="rss_sources_title">Rss Извори</string>
-    <string name="add_rss_source">Додај Rss Извор</string>
-    <string name="edit_rss_source">Уреди Rss Извор</string>
-    <string name="delete_rss_source">Обриши Rss Извор</string>
     <string name="rss_sources_title_label">Наслов</string>
     <string name="rss_sources_url_label">Урл</string>
-    <string name="rss_title">Rss</string>
-    <string name="empty_rss_sources">Нема rss извора</string>
     <string name="tab_settings_add">Додај</string>
     <string name="tab_settings_drag">Повучите</string>
     <string name="tab_settings_edit">Уреди</string>

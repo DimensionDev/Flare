@@ -299,14 +299,8 @@
     <string name="list_add">Afegir llista</string>
     <string name="list_edit">Editar llista</string>
     <string name="list_delete">Esborrar llista</string>
-    <string name="rss_sources_title">Fonts Rss</string>
-    <string name="add_rss_source">Afegir font Rss</string>
-    <string name="edit_rss_source">Editar font Rss</string>
-    <string name="delete_rss_source">Esborrar font Rss</string>
     <string name="rss_sources_title_label">Títol</string>
     <string name="rss_sources_url_label">Url</string>
-    <string name="rss_title">Rss</string>
-    <string name="empty_rss_sources">No hi ha fonts rss</string>
     <string name="service_select_welcome_title">Benvingut a Flare</string>
     <string name="bluesky_login_username_hint">Nom d\'usuari</string>
     <string name="bluesky_login_password_hint">Contrasenya</string>

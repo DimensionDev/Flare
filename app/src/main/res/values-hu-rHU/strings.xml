@@ -54,7 +54,6 @@
     <string name="settings_app_logging_clear">Napló törlése</string>
     <string name="settings_app_logging_enable_network_logging">Hálózati naplózás engedélyezése</string>
     <string name="settings_ai_config_title">AI beállítások</string>
-    <string name="settings_ai_config_description">AI beállítások konfigurálása</string>
     <string name="settings_ai_config_server">Szerver URL</string>
     <string name="settings_ai_config_server_hint">Adja meg a szerver URL-jét</string>
     <string name="settings_ai_config_server_self_host_description">Használhatja a hivatalos szervert vagy saját szerverét is üzemeltetheti</string>

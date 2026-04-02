@@ -54,7 +54,6 @@
     <string name="settings_app_logging_clear">Esborrar registre</string>
     <string name="settings_app_logging_enable_network_logging">Activar registre de xarxa</string>
     <string name="settings_ai_config_title">Configuració d\'IA</string>
-    <string name="settings_ai_config_description">Configureu la configuració d\'IA</string>
     <string name="settings_ai_config_server">URL del servidor</string>
     <string name="settings_ai_config_server_hint">Introdueix la URL del servidor</string>
     <string name="settings_ai_config_server_self_host_description">Podeu utilitzar el servidor oficial o allotjar el vostre propi servidor</string>

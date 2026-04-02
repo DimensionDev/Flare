@@ -49,7 +49,6 @@
     <string name="settings_local_history_title">Тукашна история</string>
     <string name="settings_local_history_description">Преглед или търсене в историята на сърфиране</string>
     <string name="settings_ai_config_title">Конфигурация на ИИ</string>
-    <string name="settings_ai_config_description">Конфигуриране на настройките за ИИ</string>
     <string name="settings_ai_config_server">Адрес на сървъра</string>
     <string name="settings_ai_config_server_hint">Въведете URL адреса на сървъра</string>
     <string name="settings_ai_config_entable_translation">Включване на превеждането с ИИ</string>
@@ -202,14 +201,8 @@
     <string name="fans_title">Последовател</string>
     <string name="local_history_search_placeholder">Търсене в локалния кеш</string>
     <string name="local_history_search_user_title">Потребител</string>
-    <string name="rss_sources_title">Източници на RSS</string>
-    <string name="add_rss_source">Добавяне на източник на RSS</string>
-    <string name="edit_rss_source">Редактиране на източника на RSS</string>
-    <string name="delete_rss_source">Изтриване на източника на RSS</string>
     <string name="rss_sources_title_label">Заглавие</string>
     <string name="rss_sources_url_label">Url</string>
-    <string name="rss_title">RSS</string>
-    <string name="empty_rss_sources">Няма източници на RSS</string>
     <string name="rss_sources_rss_hub_host_label">Хост на RSSHub</string>
     <string name="rss_sources_rss_hub_host_hint">Трябва да зададете хоста на RSSHub, ако искате да използвате RSSHub, или да изберете обществения сървър на RSSHub</string>
     <string name="rss_sources_discovered_rss_sources">Открити източници на RSS</string>

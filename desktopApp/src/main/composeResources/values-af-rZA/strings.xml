@@ -127,7 +127,6 @@
     <string name="settings_app_logging_clear">Maak log skoon</string>
     <string name="settings_app_logging_enable_network_logging">Aktiveer netwerk logging</string>
     <string name="settings_ai_config_title">AI Konfigurasie</string>
-    <string name="settings_ai_config_description">Konfigureer AI instellings</string>
     <string name="settings_ai_config_server">Bediener URL</string>
     <string name="settings_ai_config_server_hint">Voer die bediener URL in</string>
     <string name="settings_ai_config_server_self_host_description">Jy kan die amptelike bediener gebruik of jou eie bediener self aanloop</string>
@@ -189,14 +188,8 @@
     <string name="misskey_visibility_home">Tuis</string>
     <string name="misskey_visibility_followers">Volgers</string>
     <string name="misskey_visibility_specified">Geselekteerde</string>
-    <string name="rss_sources_title">Rss Bronne</string>
-    <string name="add_rss_source">Voeg Rss Bron by</string>
-    <string name="edit_rss_source">Bewerk Rss Bron</string>
-    <string name="delete_rss_source">Verwyder Rss Bron</string>
     <string name="rss_sources_title_label">Titel</string>
     <string name="rss_sources_url_label">Url</string>
-    <string name="rss_title">Rss</string>
-    <string name="empty_rss_sources">Geen rss bronne</string>
     <string name="tab_settings_add">Voeg by</string>
     <string name="tab_settings_drag">Sleep</string>
     <string name="tab_settings_edit">Bewerk</string>

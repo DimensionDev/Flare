@@ -55,7 +55,6 @@
     <string name="settings_app_logging_clear">清除日誌</string>
     <string name="settings_app_logging_enable_network_logging">啟用網路日誌</string>
     <string name="settings_ai_config_title">AI配置</string>
-    <string name="settings_ai_config_description">配置AI設置</string>
     <string name="settings_ai_config_server">伺服器網址</string>
     <string name="settings_ai_config_server_hint">輸入伺服器網址</string>
     <string name="settings_ai_config_server_self_host_description">您可以使用官方伺服器或自行架設伺服器</string>

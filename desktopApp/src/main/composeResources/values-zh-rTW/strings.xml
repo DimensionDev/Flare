@@ -132,7 +132,6 @@
     <string name="settings_app_logging_clear">清除日誌</string>
     <string name="settings_app_logging_enable_network_logging">啟用網路日誌</string>
     <string name="settings_ai_config_title">AI配置</string>
-    <string name="settings_ai_config_description">配置AI設置</string>
     <string name="settings_ai_config_server">伺服器網址</string>
     <string name="settings_ai_config_server_hint">輸入伺服器網址</string>
     <string name="settings_ai_config_server_self_host_description">您可以使用官方伺服器或自行架設伺服器</string>
@@ -199,14 +198,8 @@
     <string name="misskey_visibility_home">首頁</string>
     <string name="misskey_visibility_followers">追隨者</string>
     <string name="misskey_visibility_specified">指定</string>
-    <string name="rss_sources_title">Rss來源</string>
-    <string name="add_rss_source">添加Rss來源</string>
-    <string name="edit_rss_source">編輯Rss來源</string>
-    <string name="delete_rss_source">刪除Rss來源</string>
     <string name="rss_sources_title_label">標題</string>
     <string name="rss_sources_url_label">網址</string>
-    <string name="rss_title">Rss</string>
-    <string name="empty_rss_sources">沒有Rss來源</string>
     <string name="rss_sources_rss_hub_host_label">RssHub 主機</string>
     <string name="rss_sources_rss_hub_host_hint">如果要使用 RssHub，您需要設定 RssHub 主機，或選擇公共 RssHub 伺服器</string>
     <string name="rss_sources_discovered_rss_sources">發現的 Rss 來源</string>

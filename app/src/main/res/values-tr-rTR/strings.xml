@@ -59,7 +59,6 @@
     <string name="settings_app_logging_clear">Günlüğü temizle</string>
     <string name="settings_app_logging_enable_network_logging">Ağ günlük kaydını etkinleştir</string>
     <string name="settings_ai_config_title">Yapay Zeka Yapılandırması</string>
-    <string name="settings_ai_config_description">Yapay zeka ayarlarını yapılandır</string>
     <string name="settings_ai_config_server">Sunucu URL\'si</string>
     <string name="settings_ai_config_server_hint">Sunucu URL\'sini girin</string>
     <string name="settings_ai_config_server_self_host_description">Resmi sunucuyu kullanabilir veya kendi sunucunuzu barındırabilirsiniz</string>
@@ -88,8 +87,6 @@
     <string name="settings_ai_config_tldr_prompt">Özet Promptu</string>
     <string name="settings_language_title">Dil</string>
     <string name="settings_language_description">Uygulamanın dilini değiştirin</string>
-    <string name="settings_rss_management_title">RSS Yönetimi</string>
-    <string name="settings_rss_management_description">RSS akışlarını yönetin</string>
     <string name="status_loadmore_error_retry">Yeniden dene</string>
     <string name="login_expired">Giriş oturumu süresi doldu</string>
     <string name="login_expired_message">Yeniden giriş yapmak için tıklayın</string>
@@ -303,17 +300,11 @@
     <string name="local_history_search_placeholder">Yerel önbellekte ara</string>
     <string name="local_history_search_status_title">Gönderi</string>
     <string name="local_history_search_user_title">Kullanıcı</string>
-    <string name="rss_sources_title">RSS Kaynakları</string>
-    <string name="add_rss_source">RSS Kaynağı Ekle</string>
-    <string name="edit_rss_source">RSS Kaynağını Düzenle</string>
-    <string name="delete_rss_source">RSS Kaynağını Sil</string>
     <string name="opml_import">OPML\'den içe aktar</string>
     <string name="opml_export">OPML\'ye aktar</string>
     <string name="export_completed">Dışa aktarma tamamlandı</string>
     <string name="rss_sources_title_label">Başlık</string>
     <string name="rss_sources_url_label">Url</string>
-    <string name="rss_title">RSS</string>
-    <string name="empty_rss_sources">RSS kaynağı yok</string>
     <string name="rss_sources_rss_hub_host_label">RSSHub Sunucusu</string>
     <string name="rss_sources_rss_hub_host_hint">RSSHub kullanmak istiyorsanız RSSHub sunucusunu ayarlamanız veya genel RSSHub sunucusunu seçmeniz gerekir</string>
     <string name="rss_sources_discovered_rss_sources">Keşfedilen RSS Kaynakları</string>

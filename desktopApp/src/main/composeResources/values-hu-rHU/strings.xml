@@ -128,7 +128,6 @@
     <string name="settings_app_logging_clear">Napló törlése</string>
     <string name="settings_app_logging_enable_network_logging">Hálózati naplózás engedélyezése</string>
     <string name="settings_ai_config_title">AI beállítások</string>
-    <string name="settings_ai_config_description">AI beállítások konfigurálása</string>
     <string name="settings_ai_config_server">Szerver URL</string>
     <string name="settings_ai_config_server_hint">Adja meg a szerver URL-jét</string>
     <string name="settings_ai_config_server_self_host_description">Használhatja a hivatalos szervert vagy saját szerverét is üzemeltetheti</string>
@@ -190,14 +189,8 @@
     <string name="misskey_visibility_home">Főoldal</string>
     <string name="misskey_visibility_followers">Követők</string>
     <string name="misskey_visibility_specified">Megadott</string>
-    <string name="rss_sources_title">Rss források</string>
-    <string name="add_rss_source">Rss forrás hozzáadása</string>
-    <string name="edit_rss_source">Rss forrás szerkesztése</string>
-    <string name="delete_rss_source">Rss forrás törlése</string>
     <string name="rss_sources_title_label">Cím</string>
     <string name="rss_sources_url_label">URL</string>
-    <string name="rss_title">Rss</string>
-    <string name="empty_rss_sources">Nincsenek rss források</string>
     <string name="rss_sources_rss_hub_host_label">RssHub Host</string>
     <string name="rss_sources_rss_hub_host_hint">Be kell állítania az RssHub hosztot, ha az RssHubot szeretné használni, vagy ki kell választania a nyilvános RssHub szervert.</string>
     <string name="rss_sources_discovered_rss_sources">Felfedezett Rss források</string>

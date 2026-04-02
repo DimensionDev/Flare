@@ -54,7 +54,6 @@
     <string name="settings_app_logging_clear">Xóa nhật ký</string>
     <string name="settings_app_logging_enable_network_logging">Bật ghi nhật ký mạng</string>
     <string name="settings_ai_config_title">Cấu hình AI</string>
-    <string name="settings_ai_config_description">Cấu hình cài đặt AI</string>
     <string name="settings_ai_config_server">URL máy chủ</string>
     <string name="settings_ai_config_server_hint">Nhập URL máy chủ</string>
     <string name="settings_ai_config_server_self_host_description">Bạn có thể sử dụng máy chủ chính thức hoặc tự host máy chủ của riêng bạn</string>

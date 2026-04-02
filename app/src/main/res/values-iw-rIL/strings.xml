@@ -54,7 +54,6 @@
     <string name="settings_app_logging_clear">נקה יומן</string>
     <string name="settings_app_logging_enable_network_logging">הפעל רישום רשת</string>
     <string name="settings_ai_config_title">הגדרת AI</string>
-    <string name="settings_ai_config_description">הגדר את הגדרות ה-AI</string>
     <string name="settings_ai_config_server">כתובת URL של השרת</string>
     <string name="settings_ai_config_server_hint">הכנס את כתובת ה-URL של השרת</string>
     <string name="settings_ai_config_server_self_host_description">תוכל להשתמש בשרת הרשמי או לארח את השרת שלך</string>

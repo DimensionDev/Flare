@@ -299,14 +299,8 @@
     <string name="list_add">Voeg lys by</string>
     <string name="list_edit">Bewerk lys</string>
     <string name="list_delete">Verwyder lys</string>
-    <string name="rss_sources_title">Rss Bronne</string>
-    <string name="add_rss_source">Voeg Rss Bron by</string>
-    <string name="edit_rss_source">Bewerk Rss Bron</string>
-    <string name="delete_rss_source">Verwyder Rss Bron</string>
     <string name="rss_sources_title_label">Titel</string>
     <string name="rss_sources_url_label">Url</string>
-    <string name="rss_title">Rss</string>
-    <string name="empty_rss_sources">Geen rss bronne</string>
     <string name="service_select_welcome_title">Welkom by Flare</string>
     <string name="bluesky_login_username_hint">Gebruikernaam</string>
     <string name="bluesky_login_password_hint">Wagwoord</string>

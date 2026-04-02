@@ -477,7 +477,9 @@
         <![CDATA[
             <span>Version %1$s:</span>
             <ul>
-                <li>Added Nostr support, including login, timelines, posting, notifications, and relay management.</li>
+                <li>Added automatic translation and multiple translation provider options.</li>
+                <li>Nostr login now supports QR sign-in and Amber signer integration on Android.</li>
+                <li>Subscriptions now supports Mastodon public, local, and trending timelines.</li>
                 <li>Bug fixes and performance improvements.</li>
             </ul>
         ]]>

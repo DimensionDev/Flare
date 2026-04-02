@@ -270,7 +270,6 @@ public sealed class TimelineTabItem : TabItem() {
                             icon = IconType.Material(dev.dimension.flare.ui.model.UiIcon.Search),
                         ),
                 ),
-                SettingsTabItem,
             )
 
         internal fun secondaryFor(

@@ -168,6 +168,7 @@ import dev.dimension.flare.settings_nostr_relays_manage
 import dev.dimension.flare.settings_privacy_policy
 import dev.dimension.flare.settings_rss_management_description
 import dev.dimension.flare.settings_rss_management_title
+import dev.dimension.flare.settings_services_title
 import dev.dimension.flare.settings_status_appearance_subtitle
 import dev.dimension.flare.settings_status_appearance_title
 import dev.dimension.flare.settings_storage_app_log
@@ -1135,7 +1136,7 @@ internal fun SettingsScreen(
                 )
             }
 
-            Header(stringResource(Res.string.settings_ai_config_title))
+            Header(stringResource(Res.string.settings_services_title))
             state.aiConfigState.textEditDialog?.let { dialog ->
                 val textState = rememberTextFieldState()
                 var isSuggestionExpanded by remember(dialog) { mutableStateOf(false) }
@@ -1485,8 +1486,6 @@ internal fun SettingsScreen(
                     }
                 }
             }
-
-            Header(stringResource(Res.string.settings_translation_title))
             Expander(
                 state.aiConfigState.translationExpanded,
                 onExpandedChanged = state.aiConfigState::setTranslationExpanded,

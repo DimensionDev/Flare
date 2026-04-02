@@ -12,15 +12,25 @@ import kotlin.native.HiddenFromObjC
 
 @HiddenFromObjC
 public class NostrInputPresenter : PresenterBase<NostrInputPresenter.State>() {
+    public enum class Mode {
+        Key,
+        Qr,
+        Amber,
+    }
+
     @Immutable
     public interface State {
         public val credentialInput: TextFieldState
         public val canLogin: Boolean
+        public val mode: Mode
+
+        public fun setMode(value: Mode)
     }
 
     @Composable
     override fun body(): State {
         val credentialInput = rememberTextFieldState()
+        val mode = remember { androidx.compose.runtime.mutableStateOf(Mode.Key) }
 
         val canLogin by remember(credentialInput) {
             derivedStateOf {
@@ -31,6 +41,11 @@ public class NostrInputPresenter : PresenterBase<NostrInputPresenter.State>() {
         return object : State {
             override val credentialInput: TextFieldState = credentialInput
             override val canLogin: Boolean = canLogin
+            override val mode: Mode = mode.value
+
+            override fun setMode(value: Mode) {
+                mode.value = value
+            }
         }
     }
 }

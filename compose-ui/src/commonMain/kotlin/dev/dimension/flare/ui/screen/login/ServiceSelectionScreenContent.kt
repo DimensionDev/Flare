@@ -1,5 +1,6 @@
 package dev.dimension.flare.ui.screen.login
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -62,7 +63,6 @@ import dev.dimension.flare.compose.ui.login_button
 import dev.dimension.flare.compose.ui.mastodon_login_verify_message
 import dev.dimension.flare.compose.ui.nostr_login_account_hint
 import dev.dimension.flare.compose.ui.nostr_login_amber_button
-import dev.dimension.flare.compose.ui.nostr_login_hint
 import dev.dimension.flare.compose.ui.nostr_login_qr_button
 import dev.dimension.flare.compose.ui.nostr_login_qr_hint
 import dev.dimension.flare.compose.ui.nostr_login_qr_link_label
@@ -619,6 +619,14 @@ public fun ServiceSelectionScreenContent(
 
 @Composable
 private fun NostrLoginContent(state: SelectionPresenter.State) {
+    val options =
+        remember(state.nostrLoginState.amberAvailable) {
+            if (state.nostrLoginState.amberAvailable) {
+                persistentListOf("Key", "QR", "Amber")
+            } else {
+                persistentListOf("Key", "QR")
+            }
+        }
     Column(
         modifier =
             Modifier
@@ -627,108 +635,135 @@ private fun NostrLoginContent(state: SelectionPresenter.State) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        PlatformText(
-            text = stringResource(Res.string.nostr_login_hint),
-            textAlign = TextAlign.Center,
-            modifier = Modifier.width(300.dp),
-        )
-        PlatformTextField(
-            state = state.nostrInputState.credentialInput,
-            label = {
-                PlatformText(text = stringResource(Res.string.nostr_login_account_hint))
-            },
-            enabled = !state.nostrLoginState.loading,
-            modifier = Modifier.width(300.dp),
-            keyboardOptions =
-                KeyboardOptions(
-                    keyboardType = KeyboardType.Text,
-                    imeAction = ImeAction.Done,
-                    autoCorrectEnabled = false,
-                ),
-            onKeyboardAction = {
-                if (state.nostrInputState.canLogin) {
-                    state.nostrLoginState.login(
-                        input =
-                            state.nostrInputState.credentialInput.text
-                                .toString(),
-                    )
-                }
-            },
-        )
-        PlatformFilledTonalButton(
-            onClick = {
-                state.nostrLoginState.login(
-                    input =
-                        state.nostrInputState.credentialInput.text
-                            .toString(),
+        PlatformPicker(
+            options = options,
+            onSelected = { index ->
+                val selected = options.getOrNull(index) ?: return@PlatformPicker
+                state.nostrInputState.setMode(
+                    when (selected) {
+                        "QR" -> NostrInputPresenter.Mode.Qr
+                        "Amber" -> NostrInputPresenter.Mode.Amber
+                        else -> NostrInputPresenter.Mode.Key
+                    },
                 )
             },
-            modifier = Modifier.width(300.dp),
-            enabled = state.nostrInputState.canLogin && !state.nostrLoginState.loading,
-        ) {
-            PlatformText(text = stringResource(Res.string.login_button))
-        }
-        if (state.nostrLoginState.amberAvailable) {
-            PlatformFilledTonalButton(
-                onClick = state.nostrLoginState::connectAmber,
-                modifier = Modifier.width(300.dp),
-                enabled = !state.nostrLoginState.loading,
+        )
+        AnimatedContent(
+            state.nostrInputState.mode,
+        ) { mode ->
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                PlatformText(text = stringResource(Res.string.nostr_login_amber_button))
-            }
-        }
-        PlatformFilledTonalButton(
-            onClick = state.nostrLoginState::startQrLogin,
-            modifier = Modifier.width(300.dp),
-            enabled = !state.nostrLoginState.loading && state.nostrLoginState.qrConnectUri == null,
-        ) {
-            PlatformText(text = stringResource(Res.string.nostr_login_qr_button))
-        }
-        AnimatedVisibility(
-            state.nostrLoginState.qrConnectUri != null,
-        ) {
-            state.nostrLoginState.qrConnectUri?.let { connectUri ->
-                Column(
-                    modifier = Modifier.width(300.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                ) {
-                    PlatformText(
-                        text = stringResource(Res.string.nostr_login_qr_hint),
-                        textAlign = TextAlign.Center,
-                        style = PlatformTheme.typography.caption,
-                    )
-                    Image(
-                        painter = rememberQrCodePainter(connectUri),
-                        contentDescription = stringResource(Res.string.nostr_login_qr_button),
-                        modifier = Modifier.size(220.dp),
-                    )
-                    PlatformText(
-                        text = stringResource(Res.string.nostr_login_qr_waiting),
-                        textAlign = TextAlign.Center,
-                    )
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(6.dp),
-                    ) {
-                        PlatformText(
-                            text = stringResource(Res.string.nostr_login_qr_link_label),
-                            style = PlatformTheme.typography.caption,
+                when (mode) {
+                    NostrInputPresenter.Mode.Key -> {
+                        PlatformTextField(
+                            state = state.nostrInputState.credentialInput,
+                            label = {
+                                PlatformText(text = stringResource(Res.string.nostr_login_account_hint))
+                            },
+                            enabled = !state.nostrLoginState.loading,
+                            modifier = Modifier.width(300.dp),
+                            keyboardOptions =
+                                KeyboardOptions(
+                                    keyboardType = KeyboardType.Text,
+                                    imeAction = ImeAction.Done,
+                                    autoCorrectEnabled = false,
+                                ),
+                            onKeyboardAction = {
+                                if (state.nostrInputState.canLogin) {
+                                    state.nostrLoginState.login(
+                                        input =
+                                            state.nostrInputState.credentialInput.text
+                                                .toString(),
+                                    )
+                                }
+                            },
                         )
-                        SelectionContainer {
-                            PlatformText(
-                                text = connectUri,
-                                textAlign = TextAlign.Center,
-                                style = PlatformTheme.typography.caption,
-                            )
+                        PlatformFilledTonalButton(
+                            onClick = {
+                                state.nostrLoginState.login(
+                                    input =
+                                        state.nostrInputState.credentialInput.text
+                                            .toString(),
+                                )
+                            },
+                            modifier = Modifier.width(300.dp),
+                            enabled = state.nostrInputState.canLogin && !state.nostrLoginState.loading,
+                        ) {
+                            PlatformText(text = stringResource(Res.string.login_button))
                         }
                     }
-                    PlatformFilledTonalButton(
-                        onClick = state.nostrLoginState::cancelQrLogin,
-                        modifier = Modifier.width(300.dp),
-                        enabled = !state.nostrLoginState.loading,
-                    ) {
-                        PlatformText(text = stringResource(Res.string.cancel_button))
+
+                    NostrInputPresenter.Mode.Qr -> {
+                        PlatformFilledTonalButton(
+                            onClick = state.nostrLoginState::startQrLogin,
+                            modifier = Modifier.width(300.dp),
+                            enabled = !state.nostrLoginState.loading && state.nostrLoginState.qrConnectUri == null,
+                        ) {
+                            PlatformText(text = stringResource(Res.string.nostr_login_qr_button))
+                        }
+                        AnimatedVisibility(
+                            state.nostrLoginState.qrConnectUri != null,
+                        ) {
+                            state.nostrLoginState.qrConnectUri?.let { connectUri ->
+                                Column(
+                                    modifier = Modifier.width(300.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                                ) {
+                                    PlatformText(
+                                        text = stringResource(Res.string.nostr_login_qr_hint),
+                                        textAlign = TextAlign.Center,
+                                        style = PlatformTheme.typography.caption,
+                                    )
+                                    Image(
+                                        painter = rememberQrCodePainter(connectUri),
+                                        contentDescription = stringResource(Res.string.nostr_login_qr_button),
+                                        modifier = Modifier.size(220.dp),
+                                    )
+                                    PlatformText(
+                                        text = stringResource(Res.string.nostr_login_qr_waiting),
+                                        textAlign = TextAlign.Center,
+                                    )
+                                    Column(
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                                    ) {
+                                        PlatformText(
+                                            text = stringResource(Res.string.nostr_login_qr_link_label),
+                                            style = PlatformTheme.typography.caption,
+                                        )
+                                        SelectionContainer {
+                                            PlatformText(
+                                                text = connectUri,
+                                                textAlign = TextAlign.Center,
+                                                style = PlatformTheme.typography.caption,
+                                            )
+                                        }
+                                    }
+                                    PlatformFilledTonalButton(
+                                        onClick = state.nostrLoginState::cancelQrLogin,
+                                        modifier = Modifier.width(300.dp),
+                                        enabled = !state.nostrLoginState.loading,
+                                    ) {
+                                        PlatformText(text = stringResource(Res.string.cancel_button))
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    NostrInputPresenter.Mode.Amber -> {
+                        if (state.nostrLoginState.amberAvailable) {
+                            PlatformFilledTonalButton(
+                                onClick = state.nostrLoginState::connectAmber,
+                                modifier = Modifier.width(300.dp),
+                                enabled = !state.nostrLoginState.loading,
+                            ) {
+                                PlatformText(text = stringResource(Res.string.nostr_login_amber_button))
+                            }
+                        }
                     }
                 }
             }

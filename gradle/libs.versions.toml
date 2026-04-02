@@ -66,6 +66,7 @@ bouncycastle = "1.83"
 cupertino = "2.3.1"
 robolectric = "4.16.1"
 nostrSdkKmp = "0.44.3"
+qrose = "1.1.2"
 
 
 [libraries]
@@ -222,6 +223,7 @@ fluent-ui = { module = "io.github.compose-fluent:fluent", version = "0.2.0-SNAPS
 commons-lang3 = { module = "org.apache.commons:commons-lang3", version = "3.20.0" }
 
 nostr-sdk-kmp = { module = "org.rust-nostr:nostr-sdk-kmp", version.ref = "nostrSdkKmp" }
+qrose = { module = "io.github.alexzhirkevich:qrose", version.ref = "qrose" }
 
 jSystemThemeDetector = { module = "com.github.Dansoftowner:jSystemThemeDetector", version = "3.9.1" }
 

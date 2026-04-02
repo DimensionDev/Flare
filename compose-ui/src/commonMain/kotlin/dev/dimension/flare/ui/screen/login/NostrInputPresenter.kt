@@ -14,33 +14,23 @@ import kotlin.native.HiddenFromObjC
 public class NostrInputPresenter : PresenterBase<NostrInputPresenter.State>() {
     @Immutable
     public interface State {
-        public val accountInput: TextFieldState
-        public val bunkerInput: TextFieldState
-        public val canLoginAccount: Boolean
-        public val canLoginBunker: Boolean
+        public val credentialInput: TextFieldState
+        public val canLogin: Boolean
     }
 
     @Composable
     override fun body(): State {
-        val accountInput = rememberTextFieldState()
-        val bunkerInput = rememberTextFieldState()
+        val credentialInput = rememberTextFieldState()
 
-        val canLoginAccount by remember(accountInput) {
+        val canLogin by remember(credentialInput) {
             derivedStateOf {
-                accountInput.text.isNotEmpty()
-            }
-        }
-        val canLoginBunker by remember(bunkerInput) {
-            derivedStateOf {
-                bunkerInput.text.isNotEmpty()
+                credentialInput.text.isNotEmpty()
             }
         }
 
         return object : State {
-            override val accountInput: TextFieldState = accountInput
-            override val bunkerInput: TextFieldState = bunkerInput
-            override val canLoginAccount: Boolean = canLoginAccount
-            override val canLoginBunker: Boolean = canLoginBunker
+            override val credentialInput: TextFieldState = credentialInput
+            override val canLogin: Boolean = canLogin
         }
     }
 }

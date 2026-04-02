@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.screen.login
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -20,6 +21,7 @@ import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -53,15 +55,18 @@ import dev.dimension.flare.compose.ui.bluesky_login_oauth_hint
 import dev.dimension.flare.compose.ui.bluesky_login_password_hint
 import dev.dimension.flare.compose.ui.bluesky_login_use_password_button
 import dev.dimension.flare.compose.ui.bluesky_login_username_hint
+import dev.dimension.flare.compose.ui.cancel_button
 import dev.dimension.flare.compose.ui.eula_privacy_policy
 import dev.dimension.flare.compose.ui.login_agreement
 import dev.dimension.flare.compose.ui.login_button
 import dev.dimension.flare.compose.ui.mastodon_login_verify_message
 import dev.dimension.flare.compose.ui.nostr_login_account_hint
 import dev.dimension.flare.compose.ui.nostr_login_amber_button
-import dev.dimension.flare.compose.ui.nostr_login_bunker_button
-import dev.dimension.flare.compose.ui.nostr_login_bunker_hint
 import dev.dimension.flare.compose.ui.nostr_login_hint
+import dev.dimension.flare.compose.ui.nostr_login_qr_button
+import dev.dimension.flare.compose.ui.nostr_login_qr_hint
+import dev.dimension.flare.compose.ui.nostr_login_qr_link_label
+import dev.dimension.flare.compose.ui.nostr_login_qr_waiting
 import dev.dimension.flare.compose.ui.service_select_compatibility_warning
 import dev.dimension.flare.compose.ui.service_select_empty_message
 import dev.dimension.flare.compose.ui.service_select_instance_input_placeholder
@@ -95,6 +100,7 @@ import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.theme.PlatformTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
+import io.github.alexzhirkevich.qrose.rememberQrCodePainter
 import kotlinx.collections.immutable.persistentListOf
 import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.stringResource
@@ -627,7 +633,7 @@ private fun NostrLoginContent(state: SelectionPresenter.State) {
             modifier = Modifier.width(300.dp),
         )
         PlatformTextField(
-            state = state.nostrInputState.accountInput,
+            state = state.nostrInputState.credentialInput,
             label = {
                 PlatformText(text = stringResource(Res.string.nostr_login_account_hint))
             },
@@ -640,10 +646,10 @@ private fun NostrLoginContent(state: SelectionPresenter.State) {
                     autoCorrectEnabled = false,
                 ),
             onKeyboardAction = {
-                if (state.nostrInputState.canLoginAccount) {
+                if (state.nostrInputState.canLogin) {
                     state.nostrLoginState.login(
                         input =
-                            state.nostrInputState.accountInput.text
+                            state.nostrInputState.credentialInput.text
                                 .toString(),
                     )
                 }
@@ -653,50 +659,14 @@ private fun NostrLoginContent(state: SelectionPresenter.State) {
             onClick = {
                 state.nostrLoginState.login(
                     input =
-                        state.nostrInputState.accountInput.text
+                        state.nostrInputState.credentialInput.text
                             .toString(),
                 )
             },
             modifier = Modifier.width(300.dp),
-            enabled = state.nostrInputState.canLoginAccount && !state.nostrLoginState.loading,
+            enabled = state.nostrInputState.canLogin && !state.nostrLoginState.loading,
         ) {
             PlatformText(text = stringResource(Res.string.login_button))
-        }
-        PlatformTextField(
-            state = state.nostrInputState.bunkerInput,
-            label = {
-                PlatformText(text = stringResource(Res.string.nostr_login_bunker_hint))
-            },
-            enabled = !state.nostrLoginState.loading,
-            modifier = Modifier.width(300.dp),
-            keyboardOptions =
-                KeyboardOptions(
-                    keyboardType = KeyboardType.Uri,
-                    imeAction = ImeAction.Done,
-                    autoCorrectEnabled = false,
-                ),
-            onKeyboardAction = {
-                if (state.nostrInputState.canLoginBunker) {
-                    state.nostrLoginState.login(
-                        input =
-                            state.nostrInputState.bunkerInput.text
-                                .toString(),
-                    )
-                }
-            },
-        )
-        PlatformFilledTonalButton(
-            onClick = {
-                state.nostrLoginState.login(
-                    input =
-                        state.nostrInputState.bunkerInput.text
-                            .toString(),
-                )
-            },
-            modifier = Modifier.width(300.dp),
-            enabled = state.nostrInputState.canLoginBunker && !state.nostrLoginState.loading,
-        ) {
-            PlatformText(text = stringResource(Res.string.nostr_login_bunker_button))
         }
         if (state.nostrLoginState.amberAvailable) {
             PlatformFilledTonalButton(
@@ -705,6 +675,62 @@ private fun NostrLoginContent(state: SelectionPresenter.State) {
                 enabled = !state.nostrLoginState.loading,
             ) {
                 PlatformText(text = stringResource(Res.string.nostr_login_amber_button))
+            }
+        }
+        PlatformFilledTonalButton(
+            onClick = state.nostrLoginState::startQrLogin,
+            modifier = Modifier.width(300.dp),
+            enabled = !state.nostrLoginState.loading && state.nostrLoginState.qrConnectUri == null,
+        ) {
+            PlatformText(text = stringResource(Res.string.nostr_login_qr_button))
+        }
+        AnimatedVisibility(
+            state.nostrLoginState.qrConnectUri != null,
+        ) {
+            state.nostrLoginState.qrConnectUri?.let { connectUri ->
+                Column(
+                    modifier = Modifier.width(300.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    PlatformText(
+                        text = stringResource(Res.string.nostr_login_qr_hint),
+                        textAlign = TextAlign.Center,
+                        style = PlatformTheme.typography.caption,
+                    )
+                    Image(
+                        painter = rememberQrCodePainter(connectUri),
+                        contentDescription = stringResource(Res.string.nostr_login_qr_button),
+                        modifier = Modifier.size(220.dp),
+                    )
+                    PlatformText(
+                        text = stringResource(Res.string.nostr_login_qr_waiting),
+                        textAlign = TextAlign.Center,
+                    )
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                    ) {
+                        PlatformText(
+                            text = stringResource(Res.string.nostr_login_qr_link_label),
+                            style = PlatformTheme.typography.caption,
+                        )
+                        SelectionContainer {
+                            PlatformText(
+                                text = connectUri,
+                                textAlign = TextAlign.Center,
+                                style = PlatformTheme.typography.caption,
+                            )
+                        }
+                    }
+                    PlatformFilledTonalButton(
+                        onClick = state.nostrLoginState::cancelQrLogin,
+                        modifier = Modifier.width(300.dp),
+                        enabled = !state.nostrLoginState.loading,
+                    ) {
+                        PlatformText(text = stringResource(Res.string.cancel_button))
+                    }
+                }
             }
         }
         state.nostrLoginState.error?.let {

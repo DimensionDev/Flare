@@ -4,6 +4,8 @@ import KotlinSharedUI
 struct AccountManagementScreen: View {
     @StateObject private var presenter = KotlinPresenter(presenter: AccountManagementPresenter())
     @State private var tabItems: [AccountsStateAccountItem] = []
+    @State private var pendingLogoutAccountKey: MicroBlogKey? = nil
+    @State private var pendingLogoutAccountName: String? = nil
 
     var body: some View {
         List {
@@ -34,8 +36,10 @@ struct AccountManagementScreen: View {
                                 }
                             }
                             Button(role: .destructive) {
-                                tabItems.removeAll(where: { item in item.account.accountKey == user.key })
-                                presenter.state.logout(accountKey: user.key)
+                                requestLogoutConfirmation(
+                                    accountKey: user.key,
+                                    accountName: user.handle.canonical
+                                )
                             } label: {
                                 Label {
                                     Text("logout_title")
@@ -56,8 +60,10 @@ struct AccountManagementScreen: View {
                                 .tint(.accentColor)
                             }
                             Button(role: .destructive) {
-                                tabItems.removeAll(where: { item in item.account.accountKey == user.key })
-                                presenter.state.logout(accountKey: user.key)
+                                requestLogoutConfirmation(
+                                    accountKey: user.key,
+                                    accountName: user.handle.canonical
+                                )
                             } label: {
                                 Label {
                                     Text("logout_title")
@@ -79,8 +85,10 @@ struct AccountManagementScreen: View {
                                     }
                                 }
                                 Button(role: .destructive) {
-                                    tabItems.removeAll(where: { item in item.account.accountKey == account.account.accountKey })
-                                    presenter.state.logout(accountKey: account.account.accountKey)
+                                    requestLogoutConfirmation(
+                                        accountKey: account.account.accountKey,
+                                        accountName: account.account.accountKey.id
+                                    )
                                 } label: {
                                     Label {
                                         Text("logout_title")
@@ -101,8 +109,10 @@ struct AccountManagementScreen: View {
                                     .tint(.accentColor)
                                 }
                                 Button(role: .destructive) {
-                                    tabItems.removeAll(where: { item in item.account.accountKey == account.account.accountKey })
-                                    presenter.state.logout(accountKey: account.account.accountKey)
+                                    requestLogoutConfirmation(
+                                        accountKey: account.account.accountKey,
+                                        accountName: account.account.accountKey.id
+                                    )
                                 } label: {
                                     Label {
                                         Text("logout_title")
@@ -124,6 +134,25 @@ struct AccountManagementScreen: View {
         .onChange(of: tabItems, { oldValue, newValue in
             presenter.state.setOrder(value: newValue.map { item in item.account.accountKey })
         })
+        .alert("logout_title", isPresented: Binding(get: {
+            pendingLogoutAccountKey != nil
+        }, set: { value in
+            if !value {
+                clearPendingLogout()
+            }
+        })) {
+            Button("Cancel", role: .cancel) {
+                clearPendingLogout()
+            }
+            Button("Delete", role: .destructive) {
+                confirmLogout()
+            }
+        } message: {
+            Text(
+                pendingLogoutAccountName.map { "Are you sure you want to remove \($0) from this device?" } ??
+                    "Are you sure you want to remove this account from this device?"
+            )
+        }
         .navigationTitle("account_management_title")
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
@@ -141,5 +170,22 @@ struct AccountManagementScreen: View {
     
     func move(from source: IndexSet, to destination: Int) {
         tabItems.move(fromOffsets: source, toOffset: destination)
+    }
+
+    private func requestLogoutConfirmation(accountKey: MicroBlogKey, accountName: String?) {
+        pendingLogoutAccountKey = accountKey
+        pendingLogoutAccountName = accountName
+    }
+
+    private func confirmLogout() {
+        guard let accountKey = pendingLogoutAccountKey else { return }
+        tabItems.removeAll(where: { item in item.account.accountKey == accountKey })
+        presenter.state.logout(accountKey: accountKey)
+        clearPendingLogout()
+    }
+
+    private func clearPendingLogout() {
+        pendingLogoutAccountKey = nil
+        pendingLogoutAccountName = nil
     }
 }

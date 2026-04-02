@@ -3,12 +3,18 @@ package dev.dimension.flare.ui.screen.settings
 import android.content.Context
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.SegmentedListItem
@@ -23,7 +29,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -110,166 +118,185 @@ internal fun StorageScreen(
         )
     }
 
-    FlareScaffold(
-        topBar = {
-            FlareLargeFlexibleTopAppBar(
-                title = {
-                    Text(text = stringResource(id = R.string.settings_storage_title))
-                },
-                navigationIcon = {
-                    BackButton(onBack = onBack)
-                },
-                scrollBehavior = topAppBarScrollBehavior,
-            )
-        },
-        modifier = Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection),
+    Box(
+        modifier = Modifier.fillMaxSize(),
     ) {
-        Column(
-            modifier =
-                Modifier
-                    .verticalScroll(rememberScrollState())
-                    .padding(it)
-                    .padding(horizontal = screenHorizontalPadding),
-            verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
+        FlareScaffold(
+            topBar = {
+                FlareLargeFlexibleTopAppBar(
+                    title = {
+                        Text(text = stringResource(id = R.string.settings_storage_title))
+                    },
+                    navigationIcon = {
+                        BackButton(onBack = onBack)
+                    },
+                    scrollBehavior = topAppBarScrollBehavior,
+                )
+            },
+            modifier = Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection),
         ) {
-            SegmentedListItem(
-                onClick = {
-                    state.clearImageCache()
-                },
-                shapes = ListItemDefaults.first(),
-                content = {
-                    Text(text = stringResource(id = R.string.settings_storage_clear_image_cache))
-                },
-                supportingContent = {
-                    Text(
-                        text =
-                            stringResource(
-                                id = R.string.settings_storage_clear_image_cache_description,
-                                state.imageCacheSize,
-                            ),
-                    )
-                },
-                leadingContent = {
-                    ThemedIcon(
-                        FontAwesomeIcons.Solid.Images,
-                        contentDescription = stringResource(id = R.string.settings_storage_clear_image_cache),
-                        color = ThemeIconData.Color.ForestGreen,
-                    )
-                },
-            )
-            SegmentedListItem(
-                onClick = {
-                    state.clearCacheDatabase()
-                },
-                shapes = ListItemDefaults.item(),
-                content = {
-                    Text(text = stringResource(id = R.string.settings_storage_clear_database))
-                },
-                supportingContent = {
-                    Text(
-                        text =
-                            stringResource(
-                                id = R.string.settings_storage_clear_database_description,
-                                state.userCount,
-                                state.statusCount,
-                            ),
-                    )
-                },
-                leadingContent = {
-                    ThemedIcon(
-                        FontAwesomeIcons.Solid.Database,
-                        contentDescription = stringResource(id = R.string.settings_storage_clear_database),
-                        color = ThemeIconData.Color.ImperialMagenta,
-                    )
-                },
-            )
-            SegmentedListItem(
-                onClick = {
-                    toAppLog.invoke()
-                },
-                shapes = ListItemDefaults.item(),
-                content = {
-                    Text(text = stringResource(id = R.string.settings_storage_app_log))
-                },
-                supportingContent = {
-                    Text(
-                        text =
-                            stringResource(id = R.string.settings_storage_app_log_description),
-                    )
-                },
-                leadingContent = {
-                    ThemedIcon(
-                        FontAwesomeIcons.Solid.Envelope,
-                        contentDescription = stringResource(id = R.string.settings_storage_app_log),
-                        color = ThemeIconData.Color.DeepTeal,
-                    )
-                },
-            )
-
-            val exportLauncher =
-                rememberLauncherForActivityResult(
-                    contract = ActivityResultContracts.CreateDocument("application/json"),
-                    onResult = { uri ->
-                        uri?.let { state.export(it) }
+            Column(
+                modifier =
+                    Modifier
+                        .verticalScroll(rememberScrollState())
+                        .padding(it)
+                        .padding(horizontal = screenHorizontalPadding),
+                verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
+            ) {
+                SegmentedListItem(
+                    onClick = {
+                        state.clearImageCache()
+                    },
+                    shapes = ListItemDefaults.first(),
+                    content = {
+                        Text(text = stringResource(id = R.string.settings_storage_clear_image_cache))
+                    },
+                    supportingContent = {
+                        Text(
+                            text =
+                                stringResource(
+                                    id = R.string.settings_storage_clear_image_cache_description,
+                                    state.imageCacheSize,
+                                ),
+                        )
+                    },
+                    leadingContent = {
+                        ThemedIcon(
+                            FontAwesomeIcons.Solid.Images,
+                            contentDescription = stringResource(id = R.string.settings_storage_clear_image_cache),
+                            color = ThemeIconData.Color.ForestGreen,
+                        )
+                    },
+                )
+                SegmentedListItem(
+                    onClick = {
+                        state.clearCacheDatabase()
+                    },
+                    shapes = ListItemDefaults.item(),
+                    content = {
+                        Text(text = stringResource(id = R.string.settings_storage_clear_database))
+                    },
+                    supportingContent = {
+                        Text(
+                            text =
+                                stringResource(
+                                    id = R.string.settings_storage_clear_database_description,
+                                    state.userCount,
+                                    state.statusCount,
+                                ),
+                        )
+                    },
+                    leadingContent = {
+                        ThemedIcon(
+                            FontAwesomeIcons.Solid.Database,
+                            contentDescription = stringResource(id = R.string.settings_storage_clear_database),
+                            color = ThemeIconData.Color.ImperialMagenta,
+                        )
+                    },
+                )
+                SegmentedListItem(
+                    onClick = {
+                        toAppLog.invoke()
+                    },
+                    shapes = ListItemDefaults.item(),
+                    content = {
+                        Text(text = stringResource(id = R.string.settings_storage_app_log))
+                    },
+                    supportingContent = {
+                        Text(
+                            text =
+                                stringResource(id = R.string.settings_storage_app_log_description),
+                        )
+                    },
+                    leadingContent = {
+                        ThemedIcon(
+                            FontAwesomeIcons.Solid.Envelope,
+                            contentDescription = stringResource(id = R.string.settings_storage_app_log),
+                            color = ThemeIconData.Color.DeepTeal,
+                        )
                     },
                 )
 
-            SegmentedListItem(
-                onClick = {
-                    exportLauncher.launch("flare_data_export.json")
-                },
-                shapes = ListItemDefaults.item(),
-                content = {
-                    Text(text = stringResource(id = R.string.settings_storage_export_data))
-                },
-                supportingContent = {
-                    Text(
-                        text =
-                            stringResource(id = R.string.settings_storage_export_data_description),
+                val exportLauncher =
+                    rememberLauncherForActivityResult(
+                        contract = ActivityResultContracts.CreateDocument("application/json"),
+                        onResult = { uri ->
+                            uri?.let { state.export(it) }
+                        },
                     )
-                },
-                leadingContent = {
-                    ThemedIcon(
-                        FontAwesomeIcons.Solid.FileExport,
-                        contentDescription = stringResource(id = R.string.settings_storage_export_data),
-                        color = ThemeIconData.Color.DarkAmber,
-                    )
-                },
-            )
 
-            val importLauncher =
-                rememberLauncherForActivityResult(
-                    contract = ActivityResultContracts.OpenDocument(),
-                    onResult = { uri ->
-                        uri?.let {
-                            pendingImportUri = it
-                            showImportConfirmation = true
-                        }
+                SegmentedListItem(
+                    onClick = {
+                        exportLauncher.launch("flare_data_export.json")
+                    },
+                    shapes = ListItemDefaults.item(),
+                    content = {
+                        Text(text = stringResource(id = R.string.settings_storage_export_data))
+                    },
+                    supportingContent = {
+                        Text(
+                            text =
+                                stringResource(id = R.string.settings_storage_export_data_description),
+                        )
+                    },
+                    leadingContent = {
+                        ThemedIcon(
+                            FontAwesomeIcons.Solid.FileExport,
+                            contentDescription = stringResource(id = R.string.settings_storage_export_data),
+                            color = ThemeIconData.Color.DarkAmber,
+                        )
                     },
                 )
 
-            SegmentedListItem(
-                onClick = {
-                    importLauncher.launch(arrayOf("*/*"))
-                },
-                shapes = ListItemDefaults.last(),
-                content = {
-                    Text(text = stringResource(id = R.string.settings_storage_import_data))
-                },
-                supportingContent = {
-                    Text(
-                        text =
-                            stringResource(id = R.string.settings_storage_import_data_description),
+                val importLauncher =
+                    rememberLauncherForActivityResult(
+                        contract = ActivityResultContracts.OpenDocument(),
+                        onResult = { uri ->
+                            uri?.let {
+                                pendingImportUri = it
+                                showImportConfirmation = true
+                            }
+                        },
                     )
-                },
-                leadingContent = {
-                    ThemedIcon(
-                        FontAwesomeIcons.Solid.FileImport,
-                        contentDescription = stringResource(id = R.string.settings_storage_import_data),
-                        color = ThemeIconData.Color.SapphireBlue,
-                    )
-                },
-            )
+
+                SegmentedListItem(
+                    onClick = {
+                        importLauncher.launch(arrayOf("*/*"))
+                    },
+                    shapes = ListItemDefaults.last(),
+                    content = {
+                        Text(text = stringResource(id = R.string.settings_storage_import_data))
+                    },
+                    supportingContent = {
+                        Text(
+                            text =
+                                stringResource(id = R.string.settings_storage_import_data_description),
+                        )
+                    },
+                    leadingContent = {
+                        ThemedIcon(
+                            FontAwesomeIcons.Solid.FileImport,
+                            contentDescription = stringResource(id = R.string.settings_storage_import_data),
+                            color = ThemeIconData.Color.SapphireBlue,
+                        )
+                    },
+                )
+            }
+        }
+        if (state.isClearingStorage) {
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.2f))
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null,
+                        ) {},
+                contentAlignment = Alignment.Center,
+            ) {
+                CircularProgressIndicator()
+            }
         }
     }
 }
@@ -277,12 +304,15 @@ internal fun StorageScreen(
 @Composable
 private fun storagePresenter(context: Context) =
     run {
-        val state = remember { StoragePresenter() }.invoke()
+        val presenter = remember { StoragePresenter() }
+        val state = presenter.invoke()
 
         val notification = koinInject<ComposeInAppNotification>()
         val exportPresenter = remember { ExportDataPresenter() }
         val exportState = exportPresenter.body()
         val scope = rememberCoroutineScope()
+        var isClearingImageCache by remember { mutableStateOf(false) }
+        var isClearingDatabaseCache by remember { mutableStateOf(false) }
 
         var importJson by remember { mutableStateOf<String?>(null) }
         val importPresenter = remember(importJson) { importJson?.let { ImportDataPresenter(it) } }
@@ -311,14 +341,39 @@ private fun storagePresenter(context: Context) =
 
         object : StorageState by state {
             val imageCacheSize: Long = imageCacheSize
+            val isClearingImageCache: Boolean = isClearingImageCache
+            val isClearingDatabaseCache: Boolean = isClearingDatabaseCache
+            val isClearingStorage: Boolean = isClearingImageCache || isClearingDatabaseCache
 
             fun clearImageCache() {
-                context.imageLoader.diskCache?.clear()
-                imageCacheSize = 0L
+                if (isClearingStorage) {
+                    return
+                }
+                scope.launch {
+                    isClearingImageCache = true
+                    try {
+                        withContext(Dispatchers.IO) {
+                            context.imageLoader.diskCache?.clear()
+                        }
+                        imageCacheSize = 0L
+                    } finally {
+                        isClearingImageCache = false
+                    }
+                }
             }
 
             fun clearCacheDatabase() {
-                state.clearCache()
+                if (isClearingStorage) {
+                    return
+                }
+                scope.launch {
+                    isClearingDatabaseCache = true
+                    try {
+                        presenter.clearCacheSuspend()
+                    } finally {
+                        isClearingDatabaseCache = false
+                    }
+                }
             }
 
             fun export(uri: android.net.Uri) {

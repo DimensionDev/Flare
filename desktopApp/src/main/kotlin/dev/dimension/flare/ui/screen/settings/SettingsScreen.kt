@@ -226,6 +226,7 @@ import io.github.composefluent.component.ListItem
 import io.github.composefluent.component.MenuFlyout
 import io.github.composefluent.component.MenuFlyoutContainer
 import io.github.composefluent.component.MenuFlyoutItem
+import io.github.composefluent.component.ProgressBar
 import io.github.composefluent.component.RadioButton
 import io.github.composefluent.component.SubtleButton
 import io.github.composefluent.component.Switcher
@@ -234,8 +235,10 @@ import io.github.composefluent.component.TextField
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
@@ -1057,6 +1060,11 @@ internal fun SettingsScreen(
                         }
                     },
                 )
+                AnimatedVisibility(state.storageState.isClearingImageCache) {
+                    ProgressBar(
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
 
                 ExpanderItem(
                     heading = {
@@ -1082,6 +1090,11 @@ internal fun SettingsScreen(
                         }
                     },
                 )
+                AnimatedVisibility(state.storageState.isClearingDatabaseCache) {
+                    ProgressBar(
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
 
                 ExpanderItemSeparator()
 
@@ -1904,12 +1917,15 @@ private fun storagePresenter(
     onImportFilePicker: () -> File?,
 ) = run {
     var refreshKey by remember { mutableStateOf(0) }
-    val state = remember { StoragePresenter() }.invoke()
+    val presenter = remember { StoragePresenter() }
+    val state = presenter.invoke()
 
     val notification = koinInject<ComposeInAppNotification>()
     val exportPresenter = remember { ExportDataPresenter() }
     val exportState = exportPresenter.body()
     val scope = rememberCoroutineScope()
+    var isClearingImageCache by remember { mutableStateOf(false) }
+    var isClearingDatabaseCache by remember { mutableStateOf(false) }
 
     var importJson by remember { mutableStateOf<String?>(null) }
     val importPresenter = remember(importJson) { importJson?.let { ImportDataPresenter(it) } }
@@ -1946,14 +1962,40 @@ private fun storagePresenter(
         val expanded = expanded
         val imageCacheSize = imageCacheSize
         val showImportConfirmation = showImportConfirmation
+        val isClearingImageCache = isClearingImageCache
+        val isClearingDatabaseCache = isClearingDatabaseCache
+        val isClearingStorage = isClearingImageCache || isClearingDatabaseCache
 
         fun clearImageCache() {
-            SingletonImageLoader.get(PlatformContext.INSTANCE).diskCache?.clear()
-            refreshKey++
+            if (isClearingStorage) {
+                return
+            }
+            scope.launch {
+                isClearingImageCache = true
+                try {
+                    withContext(Dispatchers.IO) {
+                        SingletonImageLoader.get(PlatformContext.INSTANCE).diskCache?.clear()
+                    }
+                    refreshKey++
+                } finally {
+                    isClearingImageCache = false
+                }
+            }
         }
 
         fun clearCacheDatabase() {
-            state.clearCache()
+            if (isClearingStorage) {
+                return
+            }
+            scope.launch {
+                isClearingDatabaseCache = true
+                try {
+                    presenter.clearCacheSuspend()
+                    refreshKey++
+                } finally {
+                    isClearingDatabaseCache = false
+                }
+            }
         }
 
         fun export() {

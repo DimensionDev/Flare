@@ -17,6 +17,10 @@ public class StoragePresenter :
     KoinComponent {
     private val cacheDatabase by inject<CacheDatabase>()
 
+    public suspend fun clearCacheSuspend() {
+        cacheDatabase.clearAllTables()
+    }
+
     @Composable
     override fun body(): StorageState {
         val scope = rememberCoroutineScope()
@@ -36,7 +40,7 @@ public class StoragePresenter :
 
             override fun clearCache() {
                 scope.launch {
-                    cacheDatabase.clearAllTables()
+                    clearCacheSuspend()
                 }
             }
         }

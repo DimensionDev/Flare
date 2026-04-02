@@ -238,40 +238,37 @@ internal fun WindowScope.FlareApp(backButtonState: NavigationBackButtonState) {
                         buildMenuItem(tab)
                     }
                 }
-
-                state.user.onSuccess {
-                    val selected = currentRoute == Route.Settings
-                    val color by animateColorAsState(
-                        targetValue =
-                            if (selected) {
-                                FluentTheme.colors.fillAccent.secondary
-                            } else {
-                                FluentTheme.colors.system.neutral
-                            },
-                    )
-                    Spacer(modifier = Modifier.weight(1f))
-                    NavigationItem(
-                        icon = {
-                            Icon(
-                                FontAwesomeIcons.Solid.Gear,
-                                contentDescription = stringResource(Res.string.home_settings),
-                                modifier = Modifier.size(24.dp),
-                                tint = color,
-                            )
+                val selected = currentRoute == Route.Settings
+                val color by animateColorAsState(
+                    targetValue =
+                        if (selected) {
+                            FluentTheme.colors.fillAccent.secondary
+                        } else {
+                            FluentTheme.colors.system.neutral
                         },
-                        text = {
-                            Text(
-                                stringResource(Res.string.home_settings),
-                                maxLines = 1,
-                                style = FluentTheme.typography.caption,
-                                color = color,
-                            )
-                        },
-                        onClick = {
-                            state.navigate(Route.Settings)
-                        },
-                    )
-                }
+                )
+                Spacer(modifier = Modifier.weight(1f))
+                NavigationItem(
+                    icon = {
+                        Icon(
+                            FontAwesomeIcons.Solid.Gear,
+                            contentDescription = stringResource(Res.string.home_settings),
+                            modifier = Modifier.size(24.dp),
+                            tint = color,
+                        )
+                    },
+                    text = {
+                        Text(
+                            stringResource(Res.string.home_settings),
+                            maxLines = 1,
+                            style = FluentTheme.typography.caption,
+                            color = color,
+                        )
+                    },
+                    onClick = {
+                        state.navigate(Route.Settings)
+                    },
+                )
             }
             CompositionLocalProvider(
                 LocalUriHandler provides

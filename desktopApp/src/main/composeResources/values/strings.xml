@@ -170,6 +170,7 @@
     <string name="settings_app_logging_clear">Clear log</string>
     <string name="settings_app_logging_enable_network_logging">Enable network logging</string>
     <string name="settings_ai_config_title">AI Configuration</string>
+    <string name="settings_services_title">Services</string>
     <string name="settings_ai_config_description">Configure AI backend and features</string>
     <string name="settings_ai_config_server">Server URL</string>
     <string name="settings_ai_config_server_hint">Enter the server URL</string>

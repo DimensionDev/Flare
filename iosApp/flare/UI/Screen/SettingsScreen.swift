@@ -2,31 +2,25 @@ import SwiftUI
 import KotlinSharedUI
 
 struct SettingsScreen: View {
-    @StateObject private var presenter = KotlinPresenter(presenter: ActiveAccountPresenter())
-
     var body: some View {
         List {
-            StateView(state: presenter.state.user) { user in
-                if #available(iOS 26.0, *) {
-                    NavigationLink(value: Route.accountManagement) {
-                        Label {
-                            Text("account_management_title")
-                            Text("account_management_description")
-                        } icon: {
-                            AvatarView(data: user.avatar)
-                                .frame(width: 44, height: 44)
-                        }
-                        .labelReservedIconWidth(44)
+            if #available(iOS 26.0, *) {
+                NavigationLink(value: Route.accountManagement) {
+                    Label {
+                        Text("account_management_title")
+                        Text("account_management_description")
+                    } icon: {
+                        Image(.faCircleUser)
                     }
-                } else {
-                    NavigationLink(value: Route.accountManagement) {
-                        Label {
-                            Text("account_management_title")
-                            Text("account_management_description")
-                        } icon: {
-                            AvatarView(data: user.avatar)
-                                .frame(width: 20, height: 20)
-                        }
+                    .labelReservedIconWidth(44)
+                }
+            } else {
+                NavigationLink(value: Route.accountManagement) {
+                    Label {
+                        Text("account_management_title")
+                        Text("account_management_description")
+                    } icon: {
+                        Image(.faCircleUser)
                     }
                 }
             }
@@ -63,14 +57,12 @@ struct SettingsScreen: View {
             }
 
             Section {
-                StateView(state: presenter.state.user) { _ in
-                    NavigationLink(value: Route.localFilter) {
-                        Label {
-                            Text("local_filter_title")
-                            Text("local_filter_description")
-                        } icon: {
-                            Image("fa-filter")
-                        }
+                NavigationLink(value: Route.localFilter) {
+                    Label {
+                        Text("local_filter_title")
+                        Text("local_filter_description")
+                    } icon: {
+                        Image("fa-filter")
                     }
                 }
                 NavigationLink(value: Route.storage) {

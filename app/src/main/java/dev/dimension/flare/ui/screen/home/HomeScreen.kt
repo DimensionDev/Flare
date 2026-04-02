@@ -247,23 +247,21 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                         }
                     },
                     footerItems = {
-                        if (!state.userState.isError) {
-                            item(
-                                selected = currentRoute is Route.Settings.Main,
-                                onClick = {
-                                    state.navigate(Route.Settings.Main)
-                                },
-                                icon = {
-                                    FAIcon(
-                                        imageVector = FontAwesomeIcons.Solid.Gear,
-                                        contentDescription = stringResource(id = R.string.settings_title),
-                                    )
-                                },
-                                label = {
-                                    Text(text = stringResource(id = R.string.settings_title))
-                                },
-                            )
-                        }
+                        item(
+                            selected = currentRoute is Route.Settings.Main,
+                            onClick = {
+                                state.navigate(Route.Settings.Main)
+                            },
+                            icon = {
+                                FAIcon(
+                                    imageVector = FontAwesomeIcons.Solid.Gear,
+                                    contentDescription = stringResource(id = R.string.settings_title),
+                                )
+                            },
+                            label = {
+                                Text(text = stringResource(id = R.string.settings_title))
+                            },
+                        )
                     },
                 ) {
                     CompositionLocalProvider(

@@ -10,26 +10,30 @@ struct SecondaryTabsScreen: View {
             List {
                 StateView(state: presenter.state.items) { data in
                     let items = data.cast(SecondaryTabsPresenter.Item.self)
-                    Section {
-                        ForEach(items, id: \.self) { item in
-                            DisclosureGroup {
-                                ForEach(item.tabs) { tab in
-                                    Button {
-                                        onTabSelected(tab)
-                                    } label: {
-                                        Label {
-                                            TabTitle(title: tab.metaData.title)
-                                        } icon: {
-                                            TabIcon(icon: tab.metaData.icon, accountType: tab.account, iconOnly: true)
+                    if !items.isEmpty {
+                        Section {
+                            ForEach(items, id: \.self) { item in
+                                DisclosureGroup {
+                                    ForEach(item.tabs) { tab in
+                                        Button {
+                                            onTabSelected(tab)
+                                        } label: {
+                                            Label {
+                                                TabTitle(title: tab.metaData.title)
+                                            } icon: {
+                                                TabIcon(icon: tab.metaData.icon, accountType: tab.account, iconOnly: true)
+                                            }
                                         }
+                                        .buttonStyle(.plain)
                                     }
-                                    .buttonStyle(.plain)
-                                }
-                            } label: {
-                                StateView(state: item.user) { user in
-                                    UserCompatView(data: user)
+                                } label: {
+                                    StateView(state: item.user) { user in
+                                        UserCompatView(data: user)
+                                    }
                                 }
                             }
+                        } header: {
+                            Text("Accounts")
                         }
                     }
                 }
@@ -66,7 +70,6 @@ struct SecondaryTabsScreen: View {
                 }
             }
         }
-        .navigationTitle("Accounts")
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button {

@@ -20,6 +20,7 @@ import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -49,25 +50,23 @@ public class SecondaryTabsPresenter :
                                 .userById(service.accountKey.id)
                                 .toUi()
                                 .map { userState ->
-                                    Item(
-                                        user = userState,
-                                        tabs =
-                                            userState
-                                                .takeSuccess()
-                                                ?.let {
-                                                    listOf(
-                                                        ProfileTabItem(
-                                                            accountKey = service.accountKey,
-                                                            userKey = service.accountKey,
-                                                        ),
-                                                    ) +
-                                                        TimelineTabItem.secondaryFor(
-                                                            it.platformType,
-                                                            service.accountKey,
-                                                        )
-                                                }.orEmpty()
-                                                .toImmutableList(),
-                                    )
+                                    userState.takeSuccess()?.let { user ->
+                                        Item(
+                                            user = userState,
+                                            tabs =
+                                                listOf(
+                                                    ProfileTabItem(
+                                                        accountKey = service.accountKey,
+                                                        userKey = service.accountKey,
+                                                    ),
+                                                ).plus(
+                                                    TimelineTabItem.secondaryFor(
+                                                        user.platformType,
+                                                        service.accountKey,
+                                                    ),
+                                                ).toImmutableList(),
+                                        )
+                                    }
                                 }
                         } else {
                             null
@@ -75,7 +74,7 @@ public class SecondaryTabsPresenter :
                     }
             }.combineLatestFlowLists()
             .map {
-                it.toImmutableList()
+                it.filterNotNull().toImmutableList()
             }
     }
 

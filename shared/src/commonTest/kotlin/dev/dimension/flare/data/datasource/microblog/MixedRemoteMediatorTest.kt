@@ -57,7 +57,6 @@ import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.yield
@@ -709,18 +708,20 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                         ),
                 )
             assertTrue(mediatorResult is androidx.paging.RemoteMediator.MediatorResult.Success)
-            advanceUntilIdle()
 
             val savedStatus = db.statusDao().get(post.statusKey, AccountType.Specific(accountKey)).first()
             assertNotNull(savedStatus)
             val translation =
-                db.translationDao().get(
-                    entityType = TranslationEntityType.Status,
-                    entityKey = savedStatus.id,
-                    targetLanguage = Locale.language,
-                )
-            assertNotNull(translation)
-            assertEquals(TranslationStatus.Skipped, translation.status)
+                withTimeout(5_000) {
+                    db
+                        .translationDao()
+                        .find(
+                            entityType = TranslationEntityType.Status,
+                            entityKey = savedStatus.id,
+                            targetLanguage = Locale.language,
+                        ).filterNotNull()
+                        .first { it.status == TranslationStatus.Skipped }
+                }
             assertEquals("same_language", translation.statusReason)
         }
 

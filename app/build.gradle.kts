@@ -75,6 +75,8 @@ android {
 
     buildTypes {
         debug {
+            resValue("string", "app_name", "Flare debug")
+            applicationIdSuffix = ".debug"
             if (hasSigningProps) {
                 signingConfig = signingConfigs.getByName("flare")
             }
@@ -118,7 +120,7 @@ android {
         sourceSets.getByName("main").java.srcDirs("src/play/java")
     }
     // END Non-FOSS component
-    if (!project.file("google-services.json").exists()){
+    if (!project.file("google-services.json").exists()) {
         sourceSets.getByName("main").java.srcDirs("src/foss/java")
     }
 }

@@ -536,7 +536,7 @@ private fun StatusContent(
             }
             CommonStatusComponent(
                 item = data,
-                isDetail = detailStatusKey?.toString()?.let(data.itemKey::contains) == true,
+                isDetail = data.statusKey == detailStatusKey,
                 modifier =
                     Modifier
                         .padding(

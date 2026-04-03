@@ -64,8 +64,8 @@ internal data class DbStatusReferenceWithStatus(
     @Embedded
     val reference: DbStatusReference,
     @Relation(
-        parentColumn = "referenceStatusKey",
-        entityColumn = "statusKey",
+        parentColumn = "referenceStatusId",
+        entityColumn = "id",
         entity = DbStatus::class,
     )
     val status: DbStatusWithUser?,
@@ -75,8 +75,8 @@ internal data class DbStatusWithReference(
     @Embedded
     val status: DbStatusWithUser,
     @Relation(
-        parentColumn = "statusKey",
-        entityColumn = "statusKey",
+        parentColumn = "id",
+        entityColumn = "statusId",
         entity = DbStatusReference::class,
     )
     val references: List<DbStatusReferenceWithStatus>,

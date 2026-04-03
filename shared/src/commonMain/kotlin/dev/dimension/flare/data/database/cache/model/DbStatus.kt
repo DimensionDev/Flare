@@ -18,5 +18,12 @@ internal data class DbStatus(
     val content: UiTimelineV2,
     val text: String?, // For Searching
     @PrimaryKey
-    val id: String = "${accountType}_$statusKey",
-)
+    val id: String = createId(accountType = accountType, statusKey = statusKey),
+) {
+    companion object {
+        fun createId(
+            accountType: DbAccountType,
+            statusKey: MicroBlogKey,
+        ): String = "${accountType}_$statusKey"
+    }
+}

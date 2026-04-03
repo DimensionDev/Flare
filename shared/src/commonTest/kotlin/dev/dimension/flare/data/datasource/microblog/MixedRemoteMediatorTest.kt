@@ -371,7 +371,6 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                     TimelinePagingMapper.toUi(
                         item = page.data.single(),
                         pagingKey = mediator.pagingKey,
-                        useDbKeyInItemKey = false,
                         translationDisplayOptions =
                             TranslationDisplayOptions(
                                 translationEnabled = false,
@@ -381,6 +380,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                     ),
                 )
             assertEquals(postC.statusKey, post.statusKey)
+            assertEquals("${mediator.pagingKey}_${page.data.single().status.data.id}", post.itemKey)
             assertEquals(listOf(postA.statusKey, postB.statusKey), post.parents.map { it.statusKey })
         }
 

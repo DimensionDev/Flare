@@ -3,7 +3,6 @@ package dev.dimension.flare.data.database.cache.model
 import androidx.room3.Entity
 import androidx.room3.Index
 import androidx.room3.PrimaryKey
-import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.ReferenceType
 
 @Entity(
@@ -11,14 +10,14 @@ import dev.dimension.flare.model.ReferenceType
     indices = [
         Index(
             value = [
-                "statusKey",
+                "statusId",
             ],
         ),
         Index(
             value = [
                 "referenceType",
-                "statusKey",
-                "referenceStatusKey",
+                "statusId",
+                "referenceStatusId",
             ],
             unique = true,
         ),
@@ -31,6 +30,6 @@ internal data class DbStatusReference(
     @PrimaryKey
     val _id: String,
     val referenceType: ReferenceType,
-    val statusKey: MicroBlogKey,
-    val referenceStatusKey: MicroBlogKey,
+    val statusId: String,
+    val referenceStatusId: String,
 )

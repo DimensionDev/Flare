@@ -15,7 +15,6 @@ public class MixedTimelinePresenter(
 ) : TimelinePresenter(),
     KoinComponent {
     private val database: CacheDatabase by inject()
-    override val useDbKeyInItemKey: Boolean = true
     override val loader: Flow<RemoteLoader<UiTimelineV2>>
         get() =
             combine(subTimelinePresenter.map { it.loader }) {

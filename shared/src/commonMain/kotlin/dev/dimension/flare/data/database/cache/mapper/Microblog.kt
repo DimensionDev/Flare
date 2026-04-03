@@ -16,13 +16,13 @@ internal suspend fun saveToDatabase(
     database: CacheDatabase,
     items: List<DbPagingTimelineWithStatus>,
 ) {
-    val rootStatusKeys = items.map { it.status.status.data.statusKey }.distinct()
+    val rootStatusIds = items.map { it.status.status.data.id }.distinct()
     val rootsWithIncomingReplyReferences =
         items
             .asSequence()
             .filter { item ->
                 item.status.references.any { it.reference.referenceType == ReferenceType.Reply }
-            }.map { it.status.status.data.statusKey }
+            }.map { it.status.status.data.id }
             .distinct()
             .toList()
     val statuses =
@@ -37,9 +37,9 @@ internal suspend fun saveToDatabase(
     if (changedStatuses.isNotEmpty()) {
         database.statusDao().insertAll(changedStatuses)
     }
-    if (rootStatusKeys.isNotEmpty()) {
+    if (rootStatusIds.isNotEmpty()) {
         database.statusReferenceDao().delete(
-            rootStatusKeys,
+            rootStatusIds,
             ReferenceType.entries.filterNot { it == ReferenceType.Reply },
         )
     }

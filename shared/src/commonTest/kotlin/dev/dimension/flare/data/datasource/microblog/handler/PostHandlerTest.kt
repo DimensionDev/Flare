@@ -331,8 +331,8 @@ class PostHandlerTest : RobolectricTest() {
                     DbStatusReference(
                         _id = Uuid.random().toString(),
                         referenceType = dev.dimension.flare.model.ReferenceType.Reply,
-                        statusKey = postKey,
-                        referenceStatusKey = MicroBlogKey("ref-1", postKey.host),
+                        statusId = DbStatus.createId(accountType, postKey),
+                        referenceStatusId = DbStatus.createId(accountType, MicroBlogKey("ref-1", postKey.host)),
                     ),
                 ),
             )
@@ -344,7 +344,7 @@ class PostHandlerTest : RobolectricTest() {
             assertEquals(1, fakeLoader.deleteCallCount)
             val savedStatus = db.statusDao().get(postKey, accountType).first()
             assertNull(savedStatus)
-            val refs = db.statusReferenceDao().getByStatusKey(postKey)
+            val refs = db.statusReferenceDao().getByStatusId(DbStatus.createId(accountType, postKey))
             assertTrue(refs.isEmpty())
             val pagingRows = db.pagingTimelineDao().getByPagingKeyAndStatusKeys("post_only_$postKey", listOf(postKey))
             assertTrue(pagingRows.isEmpty())

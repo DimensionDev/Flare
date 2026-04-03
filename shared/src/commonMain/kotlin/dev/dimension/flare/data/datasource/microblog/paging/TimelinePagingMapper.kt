@@ -14,6 +14,7 @@ import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.withItemKey
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlin.uuid.Uuid
@@ -22,8 +23,9 @@ internal object TimelinePagingMapper {
     suspend fun toDb(
         data: UiTimelineV2,
         pagingKey: String,
-    ): DbPagingTimelineWithStatus =
-        DbPagingTimelineWithStatus(
+    ): DbPagingTimelineWithStatus {
+        val rootStatus = uiTimelineToDbStatusWithUser(data, sanitizePostReferences = true)
+        return DbPagingTimelineWithStatus(
             timeline =
                 DbPagingTimeline(
                     pagingKey = pagingKey,
@@ -32,12 +34,12 @@ internal object TimelinePagingMapper {
                 ),
             status =
                 DbStatusWithReference(
-                    status = uiTimelineToDbStatusWithUser(data, sanitizePostReferences = true),
+                    status = rootStatus,
                     references =
                         when (data) {
                             is UiTimelineV2.Feed -> emptyList()
                             is UiTimelineV2.Message -> emptyList()
-                            is UiTimelineV2.Post -> collectPostReferences(data, data.statusKey)
+                            is UiTimelineV2.Post -> collectPostReferences(data, rootStatus.data.id)
 
                             is UiTimelineV2.User -> emptyList()
                             is UiTimelineV2.UserList ->
@@ -47,38 +49,35 @@ internal object TimelinePagingMapper {
                                             uiTimelineToDbStatusReferenceWithStatus(
                                                 data = it,
                                                 referenceType = ReferenceType.Quote,
-                                                rootStatusKey = data.statusKey,
+                                                rootStatusId = rootStatus.data.id,
                                             ),
-                                        ) + collectPostReferences(it, data.statusKey)
+                                        ) + collectPostReferences(it, rootStatus.data.id)
                                     }.orEmpty()
                         },
                 ),
         )
+    }
 
     fun toUi(
         item: DbPagingTimelineWithStatus,
         pagingKey: String,
-        useDbKeyInItemKey: Boolean,
         translationDisplayOptions: TranslationDisplayOptions,
     ): UiTimelineV2 =
         toUi(
             item = item.status,
             pagingKey = pagingKey,
-            useDbKeyInItemKey = useDbKeyInItemKey,
             translationDisplayOptions = translationDisplayOptions,
         )
 
     fun toUi(
         item: DbStatusWithReference,
         pagingKey: String,
-        useDbKeyInItemKey: Boolean,
         translationDisplayOptions: TranslationDisplayOptions,
     ): UiTimelineV2 {
         val root =
             dbStatusWithUserToUiTimeline(
                 data = item.status,
                 pagingKey = pagingKey,
-                useDbKeyInItemKey = useDbKeyInItemKey,
                 translationDisplayOptions = translationDisplayOptions,
             )
         val references =
@@ -88,7 +87,6 @@ internal object TimelinePagingMapper {
                         dbStatusWithUserToUiTimeline(
                             data = it,
                             pagingKey = pagingKey,
-                            useDbKeyInItemKey = useDbKeyInItemKey,
                             translationDisplayOptions = translationDisplayOptions,
                         )
                 }
@@ -167,13 +165,13 @@ internal object TimelinePagingMapper {
     private fun uiTimelineToDbStatusReferenceWithStatus(
         data: UiTimelineV2,
         referenceType: ReferenceType,
-        rootStatusKey: MicroBlogKey,
+        rootStatusId: String,
     ) = DbStatusReferenceWithStatus(
         reference =
             DbStatusReference(
                 referenceType = referenceType,
-                statusKey = rootStatusKey,
-                referenceStatusKey = data.statusKey,
+                statusId = rootStatusId,
+                referenceStatusId = DbStatus.createId(data.accountType as DbAccountType, data.statusKey),
                 _id = Uuid.random().toString(),
             ),
         status = uiTimelineToDbStatusWithUser(data, sanitizePostReferences = true),
@@ -181,7 +179,7 @@ internal object TimelinePagingMapper {
 
     private fun collectPostReferences(
         data: UiTimelineV2.Post,
-        rootStatusKey: MicroBlogKey,
+        rootStatusId: String,
     ): List<DbStatusReferenceWithStatus> {
         val visited = mutableSetOf<MicroBlogKey>()
 
@@ -191,7 +189,7 @@ internal object TimelinePagingMapper {
                     uiTimelineToDbStatusReferenceWithStatus(
                         data = referencedPost,
                         referenceType = referenceType,
-                        rootStatusKey = rootStatusKey,
+                        rootStatusId = rootStatusId,
                     ),
                 ) +
                     if (visited.add(referencedPost.statusKey)) {
@@ -203,7 +201,7 @@ internal object TimelinePagingMapper {
 
         return visit(data)
             .distinctBy {
-                it.reference.referenceType to it.reference.referenceStatusKey
+                it.reference.referenceType to it.reference.referenceStatusId
             }
     }
 
@@ -267,32 +265,14 @@ internal object TimelinePagingMapper {
     private fun dbStatusWithUserToUiTimeline(
         data: DbStatusWithUser,
         pagingKey: String,
-        useDbKeyInItemKey: Boolean,
         translationDisplayOptions: TranslationDisplayOptions,
     ): UiTimelineV2 {
+        val rootItemKey = "${pagingKey}_${data.data.id}"
         val root =
             data.data.content.applyTranslation(
                 options = translationDisplayOptions,
                 translations = data.translations,
             )
-        return when (root) {
-            is UiTimelineV2.Feed -> root
-            is UiTimelineV2.Message ->
-                root.copy(
-                    extraKey = if (useDbKeyInItemKey) pagingKey else null,
-                )
-            is UiTimelineV2.Post ->
-                root.copy(
-                    extraKey = if (useDbKeyInItemKey) pagingKey else null,
-                )
-            is UiTimelineV2.User ->
-                root.copy(
-                    extraKey = if (useDbKeyInItemKey) pagingKey else null,
-                )
-            is UiTimelineV2.UserList ->
-                root.copy(
-                    extraKey = if (useDbKeyInItemKey) pagingKey else null,
-                )
-        }
+        return root.withItemKey(rootItemKey)
     }
 }

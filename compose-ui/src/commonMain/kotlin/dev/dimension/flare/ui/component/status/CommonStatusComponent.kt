@@ -321,7 +321,7 @@ public fun CommonStatusComponent(
             if (isDetail && !item.content.isEmpty && appearanceSettings.showTranslateButton) {
                 TranslationComponent(
                     item = item,
-                    statusKey = item.itemKey,
+                    statusKey = item.itemKey ?: item.hashCode().toString(),
                     contentWarning = item.contentWarning,
                     rawContent = item.content.innerText,
                     content = item.content,

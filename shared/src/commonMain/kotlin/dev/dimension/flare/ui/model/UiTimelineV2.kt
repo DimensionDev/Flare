@@ -11,27 +11,25 @@ import dev.dimension.flare.ui.model.mapper.fromRss
 import dev.dimension.flare.ui.render.UiDateTime
 import dev.dimension.flare.ui.render.UiRichText
 import dev.dimension.flare.ui.route.DeeplinkRoute
+import kotlin.time.Instant
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
-import kotlin.time.Instant
 
 @Serializable
 @Immutable
 public sealed class UiTimelineV2 {
-    public val id: String by lazy {
+    public val id: String? by lazy {
         itemKey
     }
-
-    internal abstract val extraKey: String?
 
     internal abstract val searchText: String?
     internal abstract val statusKey: MicroBlogKey
     public abstract val createdAt: UiDateTime
     internal abstract val accountType: AccountType
 
-    public abstract val itemKey: String
+    public abstract val itemKey: String?
 
     @Transient
     public val itemType: String =
@@ -53,26 +51,14 @@ public sealed class UiTimelineV2 {
         val type: Type,
         override val createdAt: UiDateTime,
         private val clickEvent: ClickEvent,
-        override val extraKey: String? = null,
         override val accountType: AccountType,
+        @Transient
+        override val itemKey: String? = null,
     ) : UiTimelineV2() {
         override val searchText: String? = null
         val onClicked: ClickContext.() -> Unit by lazy {
             clickEvent.onClicked
         }
-
-        @Transient
-        override val itemKey: String =
-            buildString {
-                append("Message_")
-                append(accountType)
-                append("_")
-                append(statusKey)
-                if (extraKey != null) {
-                    append("_")
-                    append(extraKey)
-                }
-            }
 
         @Serializable
         @Immutable
@@ -138,8 +124,9 @@ public sealed class UiTimelineV2 {
             } else {
                 ClickEvent.Deeplink(DeeplinkRoute.Rss.Detail(url))
             },
-        override val extraKey: String? = null,
         override val accountType: AccountType,
+        @Transient
+        override val itemKey: String? = null,
     ) : UiTimelineV2() {
         val actualCreatedAt: UiDateTime? by lazy {
             if (createdAt.value == Instant.fromEpochMilliseconds(0L)) {
@@ -162,19 +149,6 @@ public sealed class UiTimelineV2 {
         val onClicked: ClickContext.() -> Unit by lazy {
             clickEvent.onClicked
         }
-
-        @Transient
-        override val itemKey: String =
-            buildString {
-                append("Feed_")
-                append(accountType)
-                append("_")
-                append(url)
-                if (extraKey != null) {
-                    append("_")
-                    append(extraKey)
-                }
-            }
 
         @Serializable
         @Immutable
@@ -214,8 +188,9 @@ public sealed class UiTimelineV2 {
         @Transient
         internal val internalRepost: Post? = null,
         internal val clickEvent: ClickEvent,
-        override val extraKey: String? = null,
         public override val accountType: AccountType,
+        @Transient
+        override val itemKey: String? = null,
     ) : UiTimelineV2() {
         override val searchText: String =
             buildString {
@@ -241,24 +216,6 @@ public sealed class UiTimelineV2 {
         val onClicked: ClickContext.() -> Unit by lazy {
             clickEvent.onClicked
         }
-
-        @Transient
-        override val itemKey: String =
-            buildString {
-                append(platformType.name)
-                append("_")
-                append(accountType)
-                append("_")
-                append(statusKey)
-                message?.let {
-                    append("_")
-                    append(it.itemKey)
-                }
-                if (extraKey != null) {
-                    append("_")
-                    append(extraKey)
-                }
-            }
 
         val shouldExpandTextByDefault: Boolean by lazy {
             (contentWarning == null || contentWarning.isEmpty) && !content.isLongText
@@ -314,27 +271,11 @@ public sealed class UiTimelineV2 {
         override val createdAt: UiDateTime,
         override val statusKey: MicroBlogKey,
         val button: SerializableImmutableList<ActionMenu.Item> = persistentListOf(),
-        override val extraKey: String? = null,
         override val accountType: AccountType,
+        @Transient
+        override val itemKey: String? = null,
     ) : UiTimelineV2() {
         override val searchText: String? = null
-
-        @Transient
-        override val itemKey: String =
-            buildString {
-                append("User_")
-                append(accountType)
-                append("_")
-                append(value.key)
-                message?.let {
-                    append("_")
-                    append(it.itemKey)
-                }
-                if (extraKey != null) {
-                    append("_")
-                    append(extraKey)
-                }
-            }
     }
 
     @Serializable
@@ -345,30 +286,19 @@ public sealed class UiTimelineV2 {
         override val createdAt: UiDateTime,
         override val statusKey: MicroBlogKey,
         val post: Post?,
-        override val extraKey: String? = null,
         override val accountType: AccountType,
+        @Transient
+        override val itemKey: String? = null,
     ) : UiTimelineV2() {
         override val searchText: String? = null
-
-        @Transient
-        override val itemKey: String =
-            buildString {
-                append("UserList_")
-                append(accountType)
-                append("_")
-                append(users.hashCode())
-                post?.let {
-                    append("_")
-                    append(it.itemKey)
-                }
-                message?.let {
-                    append("_")
-                    append(it.itemKey)
-                }
-                if (extraKey != null) {
-                    append("_")
-                    append(extraKey)
-                }
-            }
     }
 }
+
+internal fun UiTimelineV2.withItemKey(itemKey: String?): UiTimelineV2 =
+    when (this) {
+        is UiTimelineV2.Feed -> copy(itemKey = itemKey)
+        is UiTimelineV2.Message -> copy(itemKey = itemKey)
+        is UiTimelineV2.Post -> copy(itemKey = itemKey)
+        is UiTimelineV2.User -> copy(itemKey = itemKey)
+        is UiTimelineV2.UserList -> copy(itemKey = itemKey)
+    }

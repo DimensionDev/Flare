@@ -89,7 +89,6 @@ public abstract class TimelinePresenter :
                                             TimelinePagingMapper.toUi(
                                                 item = item,
                                                 pagingKey = remoteLoader.pagingKey,
-                                                useDbKeyInItemKey = useDbKeyInItemKey,
                                                 translationDisplayOptions = translationDisplayOptions,
                                             )
                                         }
@@ -184,7 +183,6 @@ public abstract class TimelinePresenter :
     }
 
     internal abstract val loader: Flow<RemoteLoader<UiTimelineV2>>
-    protected open val useDbKeyInItemKey: Boolean = false
 }
 
 @Immutable

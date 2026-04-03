@@ -9,6 +9,7 @@ import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.common.Locale
 import dev.dimension.flare.common.TestFormatter
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.model.DbStatus
 import dev.dimension.flare.data.database.cache.model.DbStatusWithReference
 import dev.dimension.flare.data.database.cache.model.DbTranslation
 import dev.dimension.flare.data.database.cache.model.TranslationDisplayMode
@@ -262,9 +263,15 @@ class MicroblogTest : RobolectricTest() {
                 db.statusDao().get(refPost.statusKey, AccountType.Specific(accountKey)).first()
             assertNotNull(savedRefStatus)
 
-            val savedReferences = db.statusReferenceDao().getByStatusKey(mainPost.statusKey)
+            val savedReferences =
+                db.statusReferenceDao().getByStatusId(
+                    DbStatus.createId(AccountType.Specific(accountKey), mainPost.statusKey),
+                )
             assertEquals(1, savedReferences.size)
-            assertEquals(refPost.statusKey, savedReferences.first().referenceStatusKey)
+            assertEquals(
+                DbStatus.createId(AccountType.Specific(accountKey), refPost.statusKey),
+                savedReferences.first().referenceStatusId,
+            )
         }
 
     @Test
@@ -347,12 +354,20 @@ class MicroblogTest : RobolectricTest() {
                 )
 
             saveToDatabase(db, listOf(TimelinePagingMapper.toDb(withRef, pagingKey = "home")))
-            assertEquals(1, db.statusReferenceDao().getByStatusKey(withRef.statusKey).size)
+            assertEquals(
+                1,
+                db.statusReferenceDao()
+                    .getByStatusId(DbStatus.createId(AccountType.Specific(accountKey), withRef.statusKey))
+                    .size,
+            )
 
             val withoutRef = withRef.copy(parents = persistentListOf())
             saveToDatabase(db, listOf(TimelinePagingMapper.toDb(withoutRef, pagingKey = "home")))
 
-            val refsAfter = db.statusReferenceDao().getByStatusKey(withRef.statusKey)
+            val refsAfter =
+                db.statusReferenceDao().getByStatusId(
+                    DbStatus.createId(AccountType.Specific(accountKey), withRef.statusKey),
+                )
             assertEquals(1, refsAfter.size)
 
             val paging = db.pagingTimelineDao().getPagingSource("home")
@@ -388,12 +403,20 @@ class MicroblogTest : RobolectricTest() {
                 )
 
             saveToDatabase(db, listOf(TimelinePagingMapper.toDb(withQuote, pagingKey = "home")))
-            assertEquals(1, db.statusReferenceDao().getByStatusKey(withQuote.statusKey).size)
+            assertEquals(
+                1,
+                db.statusReferenceDao()
+                    .getByStatusId(DbStatus.createId(AccountType.Specific(accountKey), withQuote.statusKey))
+                    .size,
+            )
 
             val withoutQuote = withQuote.copy(quote = persistentListOf())
             saveToDatabase(db, listOf(TimelinePagingMapper.toDb(withoutQuote, pagingKey = "home")))
 
-            val refsAfter = db.statusReferenceDao().getByStatusKey(withQuote.statusKey)
+            val refsAfter =
+                db.statusReferenceDao().getByStatusId(
+                    DbStatus.createId(AccountType.Specific(accountKey), withQuote.statusKey),
+                )
             assertEquals(0, refsAfter.size)
         }
 
@@ -474,8 +497,14 @@ class MicroblogTest : RobolectricTest() {
                     .first()
                     .reference
             assertEquals(ReferenceType.Reply, reference.referenceType)
-            assertEquals(rootPost.statusKey, reference.statusKey)
-            assertEquals(parentPost.statusKey, reference.referenceStatusKey)
+            assertEquals(
+                DbStatus.createId(AccountType.Specific(accountKey), rootPost.statusKey),
+                reference.statusId,
+            )
+            assertEquals(
+                DbStatus.createId(AccountType.Specific(accountKey), parentPost.statusKey),
+                reference.referenceStatusId,
+            )
         }
 
     @Test
@@ -507,8 +536,14 @@ class MicroblogTest : RobolectricTest() {
             val retweetReference =
                 mapped.status.references.find { it.reference.referenceType == ReferenceType.Retweet }
             assertNotNull(retweetReference)
-            assertEquals(wrapperPost.statusKey, retweetReference.reference.statusKey)
-            assertEquals(repostPost.statusKey, retweetReference.reference.referenceStatusKey)
+            assertEquals(
+                DbStatus.createId(AccountType.Specific(accountKey), wrapperPost.statusKey),
+                retweetReference.reference.statusId,
+            )
+            assertEquals(
+                DbStatus.createId(AccountType.Specific(accountKey), repostPost.statusKey),
+                retweetReference.reference.referenceStatusId,
+            )
         }
 
     @Test
@@ -540,13 +575,12 @@ class MicroblogTest : RobolectricTest() {
                 TimelinePagingMapper.toUi(
                     mapped,
                     pagingKey = "home",
-                    useDbKeyInItemKey = true,
                     translationDisplayOptions = translationDisplayOptions(),
                 )
             val post = assertIs<UiTimelineV2.Post>(ui)
-            assertEquals("home", post.extraKey)
+            assertEquals("home_${mapped.status.status.data.id}", post.itemKey)
             assertEquals(1, post.parents.size)
-            assertEquals("home", post.parents.first().extraKey)
+            assertEquals("home_${mapped.status.references.first().status?.data?.id}", post.parents.first().itemKey)
             assertEquals(parentPost.statusKey, post.parents.first().statusKey)
         }
 
@@ -630,7 +664,6 @@ class MicroblogTest : RobolectricTest() {
                 TimelinePagingMapper.toUi(
                     item = dbItem,
                     pagingKey = "home",
-                    useDbKeyInItemKey = false,
                     translationDisplayOptions = translationDisplayOptions(),
                 )
             val post = assertIs<UiTimelineV2.Post>(ui)
@@ -675,7 +708,7 @@ class MicroblogTest : RobolectricTest() {
 
             val mapped = TimelinePagingMapper.toDb(post, pagingKey = "home")
             val roundTrip =
-                TimelinePagingMapper.toUi(mapped, pagingKey = "home", useDbKeyInItemKey = false, translationDisplayOptions())
+                TimelinePagingMapper.toUi(mapped, pagingKey = "home", translationDisplayOptions())
             val rendered = assertIs<UiTimelineV2.Post>(roundTrip)
             val message = assertNotNull(rendered.message)
             val type = assertIs<UiTimelineV2.Message.Type.Localized>(message.type)
@@ -725,7 +758,6 @@ class MicroblogTest : RobolectricTest() {
                     TimelinePagingMapper.toUi(
                         dbItem,
                         pagingKey = "home",
-                        useDbKeyInItemKey = false,
                         translationDisplayOptions(),
                     ),
                 )
@@ -788,7 +820,7 @@ class MicroblogTest : RobolectricTest() {
             assertEquals(ReferenceType.Retweet, savedWrapperPost.references.first().type)
 
             val roundTrip =
-                TimelinePagingMapper.toUi(mapped, pagingKey = "home", useDbKeyInItemKey = false, translationDisplayOptions())
+                TimelinePagingMapper.toUi(mapped, pagingKey = "home", translationDisplayOptions())
             val rendered = assertIs<UiTimelineV2.Post>(roundTrip)
             val internalRepost = assertNotNull(rendered.internalRepost)
 
@@ -855,9 +887,15 @@ class MicroblogTest : RobolectricTest() {
             val quoteRefs =
                 mapped.status.references.filter { it.reference.referenceType == ReferenceType.Quote }
             assertEquals(1, retweetRefs.size)
-            assertEquals(postB.statusKey, retweetRefs.first().reference.referenceStatusKey)
+            assertEquals(
+                DbStatus.createId(AccountType.Specific(accountKey), postB.statusKey),
+                retweetRefs.first().reference.referenceStatusId,
+            )
             assertEquals(1, quoteRefs.size)
-            assertEquals(postC.statusKey, quoteRefs.first().reference.referenceStatusKey)
+            assertEquals(
+                DbStatus.createId(AccountType.Specific(accountKey), postC.statusKey),
+                quoteRefs.first().reference.referenceStatusId,
+            )
 
             saveToDatabase(db, listOf(mapped))
             val savedA =
@@ -868,7 +906,7 @@ class MicroblogTest : RobolectricTest() {
             assertNotNull(savedB)
 
             val ui =
-                TimelinePagingMapper.toUi(mapped, pagingKey = "home", useDbKeyInItemKey = false, translationDisplayOptions())
+                TimelinePagingMapper.toUi(mapped, pagingKey = "home", translationDisplayOptions())
             val rendered = assertIs<UiTimelineV2.Post>(ui)
             val repost = assertNotNull(rendered.internalRepost)
 
@@ -967,7 +1005,6 @@ class MicroblogTest : RobolectricTest() {
                     TimelinePagingMapper.toUi(
                         dbItem,
                         pagingKey = "home",
-                        useDbKeyInItemKey = false,
                         translationDisplayOptions(),
                     ),
                 )
@@ -1218,14 +1255,12 @@ class MicroblogTest : RobolectricTest() {
                 TimelinePagingMapper.toUi(
                     item = dbItem,
                     pagingKey = "home",
-                    useDbKeyInItemKey = false,
                     translationDisplayOptions = translationDisplayOptions(),
                 )
             val detailUi =
                 TimelinePagingMapper.toUi(
                     item = dbItem,
                     pagingKey = "post_only_${post.statusKey}",
-                    useDbKeyInItemKey = false,
                     translationDisplayOptions = translationDisplayOptions(),
                 )
 
@@ -1286,7 +1321,6 @@ class MicroblogTest : RobolectricTest() {
                     TimelinePagingMapper.toUi(
                         item = dbItem,
                         pagingKey = "home",
-                        useDbKeyInItemKey = false,
                         translationDisplayOptions = translationDisplayOptions(providerCacheKey = aiTranslationProviderCacheKey),
                     ),
                 )
@@ -1342,7 +1376,6 @@ class MicroblogTest : RobolectricTest() {
                     TimelinePagingMapper.toUi(
                         item = dbItem,
                         pagingKey = "home",
-                        useDbKeyInItemKey = false,
                         translationDisplayOptions = translationDisplayOptions(),
                     ),
                 )
@@ -1416,7 +1449,6 @@ class MicroblogTest : RobolectricTest() {
                     TimelinePagingMapper.toUi(
                         item = dbItem,
                         pagingKey = "home",
-                        useDbKeyInItemKey = false,
                         translationDisplayOptions = translationDisplayOptions(),
                     ),
                 )
@@ -1494,7 +1526,6 @@ class MicroblogTest : RobolectricTest() {
                     TimelinePagingMapper.toUi(
                         item = dbItem,
                         pagingKey = "home",
-                        useDbKeyInItemKey = false,
                         translationDisplayOptions = translationDisplayOptions(),
                     ),
                 )
@@ -1572,7 +1603,6 @@ class MicroblogTest : RobolectricTest() {
                     TimelinePagingMapper.toUi(
                         item = dbItem,
                         pagingKey = "home",
-                        useDbKeyInItemKey = false,
                         translationDisplayOptions = translationDisplayOptions(),
                     ),
                 )
@@ -1655,7 +1685,6 @@ class MicroblogTest : RobolectricTest() {
                     TimelinePagingMapper.toUi(
                         item = dbItem,
                         pagingKey = "home",
-                        useDbKeyInItemKey = false,
                         translationDisplayOptions = translationDisplayOptions(autoDisplayEnabled = false),
                     ),
                 )

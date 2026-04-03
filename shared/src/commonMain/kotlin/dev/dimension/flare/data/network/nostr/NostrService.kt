@@ -1925,7 +1925,6 @@ internal class NostrService(
                         accountType = AccountType.Specific(accountKey),
                     ),
                 ),
-            extraKey = null,
             accountType = AccountType.Specific(accountKey),
         )
     }
@@ -2256,7 +2255,6 @@ internal class NostrService(
                                     UiTimelineV2.Message.Type.Localized.MessageId.Favourite,
                                 ),
                         ),
-                    extraKey = id,
                 )
             }
 
@@ -2281,7 +2279,6 @@ internal class NostrService(
                         ),
                     statusKey = MicroBlogKey(id, NOSTR_HOST),
                     internalRepost = boosted,
-                    extraKey = id,
                 )
             }
 
@@ -2306,7 +2303,6 @@ internal class NostrService(
                         ),
                     statusKey = MicroBlogKey(id, NOSTR_HOST),
                     internalRepost = boosted,
-                    extraKey = id,
                 )
             }
 

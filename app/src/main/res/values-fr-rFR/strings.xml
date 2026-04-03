@@ -405,7 +405,7 @@
     <string name="import_confirmation_message">Cela va importer des données à partir du fichier. Les enregistrements existants avec des identifiants correspondants seront remplacés. Voulez-vous continuer ?</string>
     <string name="changelog_current"><![CDATA[            <span>Version %1$s:</span>
             <ul>
-                <li>Ajout d'une traduction automatique et d'options de fournisseur de traduction multiple.</li>
+                <li>Ajout d\'une traduction automatique et d\'options de fournisseur de traduction multiple.</li>
                 <li>La connexion Nostr prend maintenant en charge la connexion QR et l’intégration du signataire Amber sur Android.</li>
                 <li>Les abonnements prennent désormais en charge Mastodon public, des échéanciers locaux et tendances.</li>
                 <li>Corrections de bugs et améliorations des performances.</li>

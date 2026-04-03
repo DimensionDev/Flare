@@ -410,7 +410,7 @@
     <string name="changelog_current"><![CDATA[            <span>Versione %1$s:</span>
             <ul>
                 <li>Aggiunta traduzione automatica e più opzioni di provider di traduzione.</li>
-                <li>Il login Nostr ora supporta l'integrazione di firme QR e Amber su Android.</li>
+                <li>Il login Nostr ora supporta l\'integrazione di firme QR e Amber su Android.</li>
                 <li>Le sottoscrizioni ora supportano il pubblico Mastodon, timeline locali e di tendenza.</li>
                 <li>Correzioni di bug e miglioramenti delle prestazioni.</li>
             </ul>

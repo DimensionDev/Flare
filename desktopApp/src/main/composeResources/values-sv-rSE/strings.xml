@@ -126,6 +126,7 @@
     <string name="account_item_error_message">Det gick inte att ladda kontot</string>
     <string name="add_account">Lägg till konto</string>
     <string name="remove_account">Ta bort konto</string>
+    <string name="settings_accounts_remove_confirm">Är du säker på att du vill ta bort kontot %1$s från denna enhet?</string>
     <string name="settings_accounts_title">Hantering av konto</string>
     <string name="settings_appearance_title">Utseende</string>
     <string name="settings_status_appearance_title">Posta utseende</string>
@@ -150,6 +151,7 @@
     <string name="settings_app_logging_clear">Rensa logg</string>
     <string name="settings_app_logging_enable_network_logging">Aktivera nätverksloggning</string>
     <string name="settings_ai_config_title">AI konfiguration</string>
+    <string name="settings_services_title">Tjänster</string>
     <string name="settings_ai_config_description">Konfigurera AI backend och funktioner</string>
     <string name="settings_ai_config_server">Server URL</string>
     <string name="settings_ai_config_server_hint">Ange serverns URL</string>

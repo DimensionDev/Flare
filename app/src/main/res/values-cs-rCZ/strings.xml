@@ -241,6 +241,7 @@
     <string name="service_select_empty_message">Nebyly nalezeny žádné instance</string>
     <string name="media_viewer_title">Prohlížeč médií</string>
     <string name="settings_accounts_remove">Odebrat</string>
+    <string name="settings_accounts_remove_confirm">Jste si jisti, že chcete odstranit účet %1$s z tohoto zařízení?</string>
     <string name="media_menu_save">Uložit snímek obrazovky</string>
     <string name="media_menu_share_image">Sdílet snímek obrazovky</string>
     <string name="status_menu_share_via_fxembed">Sdílet přes FxEmbed</string>
@@ -408,6 +409,14 @@
     <string name="import_error">Import dat se nezdařil</string>
     <string name="import_confirmation_title">Potvrdit import</string>
     <string name="import_confirmation_message">Toto importuje data ze souboru. Existující záznamy s odpovídajícími ID budou nahrazeny. Chcete pokračovat?</string>
+    <string name="changelog_current"><![CDATA[            <span>Verze %1$s:</span>
+            <ul>
+                <li>Přidána možnost automatického překladu a více možností poskytovatele překladu. Přihlášení</li>
+                <li>Nostr nyní podporuje integraci QR přihlášení a Amber signer na Androidu.</li>
+                <li>Odběry nyní podporují publikaci Mastodon, místní a populární časové plány.</li>
+                <li>Opravy chyb a zlepšení výkonu.</li>
+            </ul>
+        ]]></string>
     <string name="tab_settings_add_group">Přidat skupinu</string>
     <string name="tab_settings_add_tab">Přidat záložku</string>
     <string name="tab_settings_edit_group">Upravit skupinu</string>

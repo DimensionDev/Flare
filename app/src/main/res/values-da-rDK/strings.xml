@@ -239,6 +239,7 @@
     <string name="service_select_empty_message">Ingen forekomster fundet</string>
     <string name="media_viewer_title">Medieviser</string>
     <string name="settings_accounts_remove">Fjern</string>
+    <string name="settings_accounts_remove_confirm">Er du sikker på, at du vil fjerne konto %1$s fra denne enhed?</string>
     <string name="media_menu_save">Gem skærmbillede</string>
     <string name="media_menu_share_image">Del skærmbillede</string>
     <string name="status_menu_share_via_fxembed">Del via FxEmbed</string>
@@ -408,7 +409,9 @@
     <string name="import_confirmation_message">Dette vil importere data fra filen. Eksisterende poster med matchende ID\'er vil blive erstattet. Vil du fortsætte?</string>
     <string name="changelog_current"><![CDATA[            <span>Version %1$s:</span>
             <ul>
-                <li>Tilføjet Nostr support, herunder login, tidslinjer, udstationering, notifikationer og relæstyring.</li>
+                <li>Tilføjet automatisk oversættelse og flere oversættelsesudbyder muligheder.</li>
+                <li>Nostr login understøtter nu QR-login og Amber signer-integration på Android.</li>
+                <li>Abonnementer understøtter nu Mastodon offentlige, lokale, og tendentiøse tidslinjer.</li>
                 <li>Fejlrettelser og forbedringer af ydeevnen.</li>
             </ul>
         ]]></string>

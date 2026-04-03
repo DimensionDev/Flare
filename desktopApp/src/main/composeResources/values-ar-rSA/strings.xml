@@ -130,6 +130,7 @@
     <string name="account_item_error_message">فشل في تحميل الحساب</string>
     <string name="add_account">إضافة حساب</string>
     <string name="remove_account">إزالة الحساب</string>
+    <string name="settings_accounts_remove_confirm">هل أنت متأكد من أنك تريد إزالة الحساب %1$s من هذا الجهاز؟</string>
     <string name="settings_accounts_title">إدارة الحساب</string>
     <string name="settings_appearance_title">المظهر</string>
     <string name="settings_status_appearance_title">مظهر لاحق</string>
@@ -154,6 +155,7 @@
     <string name="settings_app_logging_clear">مسح السجل</string>
     <string name="settings_app_logging_enable_network_logging">تمكين تسجيل الشبكة</string>
     <string name="settings_ai_config_title">إعدادات الذكاء الاصطناعي</string>
+    <string name="settings_services_title">الخدمات</string>
     <string name="settings_ai_config_description">تكوين خلفية الذكاء الاصطناعي والميزات</string>
     <string name="settings_ai_config_server">رابط الخادم</string>
     <string name="settings_ai_config_server_hint">أدخل رابط الخادم</string>

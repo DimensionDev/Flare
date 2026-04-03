@@ -126,6 +126,7 @@
     <string name="account_item_error_message">Account laden mislukt</string>
     <string name="add_account">Account toevoegen</string>
     <string name="remove_account">Account verwijderen</string>
+    <string name="settings_accounts_remove_confirm">Weet u zeker dat u account %1$s wilt verwijderen van dit apparaat?</string>
     <string name="settings_accounts_title">Account beheer</string>
     <string name="settings_appearance_title">Uiterlijk</string>
     <string name="settings_status_appearance_title">Post uiterlijk</string>
@@ -150,6 +151,7 @@
     <string name="settings_app_logging_clear">Logboek wissen</string>
     <string name="settings_app_logging_enable_network_logging">Netwerk loggen inschakelen</string>
     <string name="settings_ai_config_title">AI configuratie</string>
+    <string name="settings_services_title">Voorzieningen</string>
     <string name="settings_ai_config_description">Configureer AI backend en functies</string>
     <string name="settings_ai_config_server">Server URL</string>
     <string name="settings_ai_config_server_hint">Voer de server-URL in</string>

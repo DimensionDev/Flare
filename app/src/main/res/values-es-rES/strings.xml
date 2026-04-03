@@ -239,6 +239,7 @@
     <string name="service_select_empty_message">No se encontraron instancias</string>
     <string name="media_viewer_title">Visor de medios</string>
     <string name="settings_accounts_remove">Eliminar</string>
+    <string name="settings_accounts_remove_confirm">¿Está seguro que desea eliminar la cuenta %1$s de este dispositivo?</string>
     <string name="media_menu_save">Guardar captura de pantalla</string>
     <string name="media_menu_share_image">Compartir captura de pantalla</string>
     <string name="status_menu_share_via_fxembed">Compartir vía FxEmbed</string>
@@ -408,7 +409,9 @@
     <string name="import_confirmation_message">Esto importará datos del archivo. Los registros existentes con IDs coincidentes serán reemplazados. ¿Desea continuar?</string>
     <string name="changelog_current"><![CDATA[            <span>Versión %1$s:</span>
             <ul>
-                <li>Añadido soporte para Nostr. incluyendo login, timelines, publicaciones, notificaciones y administración de repetidores.</li>
+                <li>Se añadieron traducciones automáticas y múltiples opciones de proveedor de traducción.</li>
+                <li>Nostr login ahora es compatible con la integración de inicio de sesión QR y firmante de Amber en Android.</li>
+                <li>Suscripciones ahora soporta Mastodon public líneas de tiempo locales y de tendencia.</li>
                 <li>correcciones de errores y mejoras de rendimiento.</li>
             </ul>
         ]]></string>

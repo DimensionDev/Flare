@@ -353,11 +353,15 @@
     <string name="login_button">Логін</string>
     <string name="mastodon_login_verify_message">Будь ласка, зачекайте, поки ми перевіряємо ваші облікові дані.</string>
     <string name="nostr_login_title">Імпорт облікового запису Nostr</string>
-    <string name="nostr_login_hint">Вставте Npub або публічний ключ для доступу тільки для читання або введіть nsec для імпорту доступного для запису облікового запису.</string>
-    <string name="nostr_login_account_hint">npub, nsec, або hex-ключ</string>
+    <string name="nostr_login_hint">Вставте пустий ключ від npub або hex-ключ для доступу тільки для читання, встановіть nsec для локального підпису, використовувати bunker URI для віддаленого підпису, або підключити Amber та QR-сигнали Nostr Connect</string>
+    <string name="nostr_login_account_hint">npub, nsec, hex ключ, bunker://, або nostrconnect://</string>
     <string name="nostr_login_bunker_hint">bunker:// або nostrconnect:// URI</string>
     <string name="nostr_login_bunker_button">Підключіть бункер</string>
     <string name="nostr_login_amber_button">З’єднання Amber</string>
+    <string name="nostr_login_qr_button">З\'єднати з QR-кодом</string>
+    <string name="nostr_login_qr_hint">Сканувати за допомогою Amber, Alby, чи іншого підписника підключення Nostr.</string>
+    <string name="nostr_login_qr_link_label">Посилання на підключення Nostr</string>
+    <string name="cancel_button">Скасувати</string>
     <string name="nostr_login_generate_button">Генерувати і увійти</string>
     <string name="nostr_login_npub_hint">npub або hex-публічний ключ (необов\'язково, якщо встановлено nse)</string>
     <string name="nostr_login_nsec_hint">nsec або hex-приватний ключ</string>

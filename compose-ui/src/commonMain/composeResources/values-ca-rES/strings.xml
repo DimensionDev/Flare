@@ -306,6 +306,7 @@
     <string name="bluesky_login_password_hint">Contrasenya</string>
     <string name="login_button">Iniciar sessió</string>
     <string name="mastodon_login_verify_message">Si us plau, espereu mentre verifiquem les vostres credencials.</string>
+    <string name="cancel_button">Cancel·la</string>
     <string name="service_select_instance_input_placeholder">URL de la instància</string>
     <string name="service_select_next_button">Següent</string>
     <string name="service_select_empty_message">No s\'han trobat instàncies</string>

@@ -239,6 +239,7 @@
     <string name="service_select_empty_message">Nenhuma instância encontrada</string>
     <string name="media_viewer_title">Visualizador de mídia</string>
     <string name="settings_accounts_remove">Excluir</string>
+    <string name="settings_accounts_remove_confirm">Tem certeza que deseja remover a conta %1$s deste dispositivo?</string>
     <string name="media_menu_save">Salvar imagem</string>
     <string name="media_menu_share_image">Compartilhar imagem</string>
     <string name="status_menu_share_via_fxembed">Compartilhar via FxEmbed</string>

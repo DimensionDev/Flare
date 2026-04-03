@@ -239,6 +239,7 @@
     <string name="service_select_empty_message">Nessuna istanza trovata</string>
     <string name="media_viewer_title">Visualizzatore multimediale</string>
     <string name="settings_accounts_remove">Rimuovi</string>
+    <string name="settings_accounts_remove_confirm">Sei sicuro di voler rimuovere l\'account %1$s da questo dispositivo?</string>
     <string name="media_menu_save">Salva screenshot</string>
     <string name="media_menu_share_image">Condividi screenshot</string>
     <string name="status_menu_share_via_fxembed">Condividi via FxEmbed</string>
@@ -408,7 +409,9 @@
     <string name="import_confirmation_message">Questo importerà i dati dal file. I record esistenti con gli ID corrispondenti saranno sostituiti. Vuoi continuare?</string>
     <string name="changelog_current"><![CDATA[            <span>Versione %1$s:</span>
             <ul>
-                <li>Aggiunto il supporto Nostr, inclusi login, tempistica, pubblicazione, notifiche e gestione relè.</li>
+                <li>Aggiunta traduzione automatica e più opzioni di provider di traduzione.</li>
+                <li>Il login Nostr ora supporta l'integrazione di firme QR e Amber su Android.</li>
+                <li>Le sottoscrizioni ora supportano il pubblico Mastodon, timeline locali e di tendenza.</li>
                 <li>Correzioni di bug e miglioramenti delle prestazioni.</li>
             </ul>
         ]]></string>

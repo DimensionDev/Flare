@@ -313,6 +313,7 @@
     <string name="bluesky_login_use_password_button">使用密碼</string>
     <string name="login_button">登入</string>
     <string name="mastodon_login_verify_message">請稍候，正在驗證您的憑證。</string>
+    <string name="cancel_button">取消</string>
     <string name="service_select_instance_input_placeholder">實例網址</string>
     <string name="service_select_next_button">下一步</string>
     <string name="service_select_empty_message">未找到任何實例</string>

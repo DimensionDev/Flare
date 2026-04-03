@@ -128,6 +128,7 @@
     <string name="account_item_error_message">Nie udało się załadować konta</string>
     <string name="add_account">Dodaj konto</string>
     <string name="remove_account">Usuń konto</string>
+    <string name="settings_accounts_remove_confirm">Czy na pewno chcesz usunąć konto %1$s z tego urządzenia?</string>
     <string name="settings_accounts_title">Zarządzanie kontem</string>
     <string name="settings_appearance_title">Wygląd</string>
     <string name="settings_status_appearance_title">Wygląd postu</string>
@@ -152,6 +153,7 @@
     <string name="settings_app_logging_clear">Wyczyść log</string>
     <string name="settings_app_logging_enable_network_logging">Włącz rejestrowanie w sieci</string>
     <string name="settings_ai_config_title">Konfiguracja SI</string>
+    <string name="settings_services_title">Usługi</string>
     <string name="settings_ai_config_description">Skonfiguruj backendy i funkcje AI</string>
     <string name="settings_ai_config_server">Adres URL serwera</string>
     <string name="settings_ai_config_server_hint">Wprowadź adres URL serwera</string>

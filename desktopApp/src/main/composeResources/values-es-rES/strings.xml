@@ -126,6 +126,7 @@
     <string name="account_item_error_message">Error al cargar la cuenta</string>
     <string name="add_account">Añadir cuenta</string>
     <string name="remove_account">Eliminar cuenta</string>
+    <string name="settings_accounts_remove_confirm">¿Está seguro que desea eliminar la cuenta %1$s de este dispositivo?</string>
     <string name="settings_accounts_title">Gestión de cuentas</string>
     <string name="settings_appearance_title">Apariencia</string>
     <string name="settings_status_appearance_title">Apariencia Post</string>
@@ -150,6 +151,7 @@
     <string name="settings_app_logging_clear">Limpiar registro</string>
     <string name="settings_app_logging_enable_network_logging">Habilitar registro de red</string>
     <string name="settings_ai_config_title">Configuración IA</string>
+    <string name="settings_services_title">Servicios</string>
     <string name="settings_ai_config_description">Configurar funciones y backend de IA</string>
     <string name="settings_ai_config_server">URL del servidor</string>
     <string name="settings_ai_config_server_hint">Introduzca la URL del servidor</string>

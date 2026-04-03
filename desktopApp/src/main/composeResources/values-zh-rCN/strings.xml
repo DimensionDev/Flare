@@ -125,6 +125,7 @@
     <string name="account_item_error_message">无法加载账户</string>
     <string name="add_account">添加账户</string>
     <string name="remove_account">移除帐户</string>
+    <string name="settings_accounts_remove_confirm">您确定要从此设备中删除帐户 %1$s 吗？</string>
     <string name="settings_accounts_title">账号管理</string>
     <string name="settings_appearance_title">外观</string>
     <string name="settings_status_appearance_title">帖子外观</string>
@@ -149,6 +150,7 @@
     <string name="settings_app_logging_clear">清除日志</string>
     <string name="settings_app_logging_enable_network_logging">启用网络日志</string>
     <string name="settings_ai_config_title">AI 配置</string>
+    <string name="settings_services_title">服务</string>
     <string name="settings_ai_config_description">配置 AI 后端和功能</string>
     <string name="settings_ai_config_server">服务器 URL</string>
     <string name="settings_ai_config_server_hint">输入服务器 URL</string>

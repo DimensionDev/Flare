@@ -241,6 +241,7 @@
     <string name="service_select_empty_message">Экземпляров не найдено</string>
     <string name="media_viewer_title">Просмотрщик медиа</string>
     <string name="settings_accounts_remove">Удалить</string>
+    <string name="settings_accounts_remove_confirm">Вы уверены, что хотите удалить учетную запись %1$s с этого устройства?</string>
     <string name="media_menu_save">Сохранить скриншот</string>
     <string name="media_menu_share_image">Поделиться скриншотом</string>
     <string name="status_menu_share_via_fxembed">Поделиться через FxEmbed</string>
@@ -410,7 +411,9 @@
     <string name="import_confirmation_message">Это импортирует данные из файла. Существующие записи с соответствующими идентификаторами будут заменены. Вы хотите продолжить?</string>
     <string name="changelog_current"><![CDATA[            <span>Версия %1$s:</span>
             <ul>
-                <li>Добавлена поддержка Nostr, включая логин, сроки, рассылку, уведомления и управление релем.</li>
+                <li>Добавлен автоматический перевод и опции поставщика переводов.</li>
+                <li>Nostr логин теперь поддерживает QR-вход и интеграцию Amber подписчиков на Android.</li>
+                <li>Подписки теперь поддерживают публику Mastodon, локальные и трендовые времена.</li>
                 <li>Исправления ошибок и улучшения производительности.</li>
             </ul>
         ]]></string>

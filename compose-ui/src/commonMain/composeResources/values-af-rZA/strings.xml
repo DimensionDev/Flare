@@ -306,6 +306,7 @@
     <string name="bluesky_login_password_hint">Wagwoord</string>
     <string name="login_button">Teken in</string>
     <string name="mastodon_login_verify_message">Wag asseblief terwyl ons jou akrediteer.</string>
+    <string name="cancel_button">Kanselleer</string>
     <string name="service_select_instance_input_placeholder">Instansie URL</string>
     <string name="service_select_next_button">Volgende</string>
     <string name="service_select_empty_message">Geen instansies gevind nie</string>

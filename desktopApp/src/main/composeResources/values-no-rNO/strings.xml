@@ -126,6 +126,7 @@
     <string name="account_item_error_message">Kunne ikke laste inn konto</string>
     <string name="add_account">Legg til konto</string>
     <string name="remove_account">Fjern konto</string>
+    <string name="settings_accounts_remove_confirm">Er du sikker på at du vil fjerne kontoen %1$s fra denne enheten?</string>
     <string name="settings_accounts_title">Konto administrasjon</string>
     <string name="settings_appearance_title">Utseende</string>
     <string name="settings_status_appearance_title">Legg ut utseende</string>
@@ -150,6 +151,7 @@
     <string name="settings_app_logging_clear">Tøm logg</string>
     <string name="settings_app_logging_enable_network_logging">Aktiver nettverkslogging</string>
     <string name="settings_ai_config_title">AI Konfigurasjon</string>
+    <string name="settings_services_title">Tjenester</string>
     <string name="settings_ai_config_description">Konfigurer AI backend og funksjoner</string>
     <string name="settings_ai_config_server">URL til server</string>
     <string name="settings_ai_config_server_hint">Skriv inn nettadressen til serveren</string>

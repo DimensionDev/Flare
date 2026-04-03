@@ -238,6 +238,7 @@
     <string name="service_select_empty_message">Geen instanties gevonden</string>
     <string name="media_viewer_title">Media viewer</string>
     <string name="settings_accounts_remove">Verwijderen</string>
+    <string name="settings_accounts_remove_confirm">Weet u zeker dat u account %1$s wilt verwijderen van dit apparaat?</string>
     <string name="media_menu_save">Schermafdruk opslaan</string>
     <string name="media_menu_share_image">Schermafdruk delen</string>
     <string name="status_menu_share_via_fxembed">Delen via FxEmbed</string>
@@ -407,7 +408,9 @@
     <string name="import_confirmation_message">Dit zal gegevens uit het bestand importeren. Bestaande records met bijpassende IDs zullen worden vervangen. Wilt u doorgaan?</string>
     <string name="changelog_current"><![CDATA[            <span>Versie %1$s:</span>
             <ul>
-                <li>ondersteuning toegevoegd, inclusief inloggen, tijdlijnen, berichten, meldingen en relaybeheer.</li>
+                <li>Automatische vertaling en meerdere vertaalprovider opties toegevoegd.</li>
+                <li>Nostr login ondersteunt nu QR in- en Amber signer integratie op Android.</li>
+                <li>abonnementen ondersteunen nu Mastodon openbaar. lokale, en trending tijdlijnen.</li>
                 <li>bugfixes en prestatieverbeteringen.</li>
             </ul>
         ]]></string>

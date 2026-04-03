@@ -239,6 +239,7 @@
     <string name="service_select_empty_message">Esiintymiä ei löytynyt</string>
     <string name="media_viewer_title">Median katselin</string>
     <string name="settings_accounts_remove">Poista</string>
+    <string name="settings_accounts_remove_confirm">Oletko varma, että haluat poistaa tilin %1$s tästä laitteesta?</string>
     <string name="media_menu_save">Tallenna kuvakaappaus</string>
     <string name="media_menu_share_image">Jaa kuvakaappaus</string>
     <string name="status_menu_share_via_fxembed">Jaa FxEmbedin kautta</string>
@@ -408,7 +409,9 @@
     <string name="import_confirmation_message">Tämä tuo tiedostosta tietoja. Olemassa olevat tietueet ja vastaavat ID:t korvataan. Haluatko jatkaa?</string>
     <string name="changelog_current"><![CDATA[            <span>Versio %1$s:</span>
             <ul>
-                <li>Lisätty NosTR-tuki, sisältäen kirjautumisen, aikajanat, lähettämisen, ilmoitukset, ja releiden hallinnan.</li>
+                <li>Lisätty automaattinen kääntäminen ja useita kääntäjän vaihtoehtoja.</li>
+                <li>Nostr kirjautuminen tukee nyt QR kirjautumis- ja Amber signer -integraatiota Androidissa.</li>
+                <li>Tilaukset tukevat nyt Mastodon publicia, paikalliset, ja trendikkäät aikajanat.</li>
                 <li>Virheenkorjauksia ja suorituskyvyn parannuksia.</li>
             </ul>
         ]]></string>

@@ -239,6 +239,7 @@
     <string name="service_select_empty_message">Inga instanser hittades</string>
     <string name="media_viewer_title">Media visare</string>
     <string name="settings_accounts_remove">Radera</string>
+    <string name="settings_accounts_remove_confirm">Är du säker på att du vill ta bort kontot %1$s från denna enhet?</string>
     <string name="media_menu_save">Spara skärmdump</string>
     <string name="media_menu_share_image">Dela skärmdump</string>
     <string name="status_menu_share_via_fxembed">Dela via FxEmbed</string>
@@ -408,7 +409,9 @@
     <string name="import_confirmation_message">Detta kommer att importera data från filen. Befintliga poster med matchande ID kommer att ersättas. Vill du fortsätta?</string>
     <string name="changelog_current"><![CDATA[            <span>Version %1$s:</span>
             <ul>
-                <li>Stöd för Nostr inklusive inloggning, tidslinjer, inlägg, meddelanden och relähantering.</li>
+                <li>Tillagd automatisk översättning och flera alternativ översättningsleverantör.</li>
+                <li>Nostr inloggning stöder nu QR-inloggning och Amber signer-integration på Android.</li>
+                <li>Abonnemang stöder nu Mastodon-publik, lokalt, och trendiga tidslinjer.</li>
                 <li>Felrättelser och prestandaförbättringar.</li>
             </ul>
         ]]></string>

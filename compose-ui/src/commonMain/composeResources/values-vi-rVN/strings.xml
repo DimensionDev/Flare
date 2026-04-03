@@ -306,6 +306,7 @@
     <string name="bluesky_login_password_hint">Mật khẩu</string>
     <string name="login_button">Đăng nhập</string>
     <string name="mastodon_login_verify_message">Vui lòng chờ trong khi chúng tôi xác minh thông tin đăng nhập của bạn.</string>
+    <string name="cancel_button">Hủy</string>
     <string name="service_select_instance_input_placeholder">URL phiên bản</string>
     <string name="service_select_next_button">Tiếp theo</string>
     <string name="service_select_empty_message">Không tìm thấy phiên bản nào</string>

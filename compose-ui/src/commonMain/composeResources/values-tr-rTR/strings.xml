@@ -311,6 +311,7 @@
     <string name="bluesky_login_oauth_hint">Bluesky OAuth yeterince kararlı olmayabilir, herhangi bir sorunla karşılaşırsanız lütfen şifre ile giriş yapın.</string>
     <string name="login_button">Giriş</string>
     <string name="mastodon_login_verify_message">Kimlik bilgilerinizi doğrularken lütfen bekleyin.</string>
+    <string name="cancel_button">İptal</string>
     <string name="service_select_instance_input_placeholder">Örnek URL\'si</string>
     <string name="service_select_next_button">İleri</string>
     <string name="service_select_empty_message">Hiçbir örnek bulunamadı</string>

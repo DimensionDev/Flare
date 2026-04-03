@@ -126,6 +126,7 @@
     <string name="account_item_error_message">Αποτυχία φόρτωσης λογαριασμού</string>
     <string name="add_account">Προσθήκη λογαριασμού</string>
     <string name="remove_account">Κατάργηση λογαριασμού</string>
+    <string name="settings_accounts_remove_confirm">Είστε βέβαιοι ότι θέλετε να καταργήσετε τον λογαριασμό %1$s από αυτήν τη συσκευή?</string>
     <string name="settings_accounts_title">Διαχείριση Λογαριασμού</string>
     <string name="settings_appearance_title">Εμφάνιση</string>
     <string name="settings_status_appearance_title">Εμφάνιση Ανάρτησης</string>
@@ -150,6 +151,7 @@
     <string name="settings_app_logging_clear">Εκκαθάριση καταγραφής</string>
     <string name="settings_app_logging_enable_network_logging">Ενεργοποίηση καταγραφής δικτύου</string>
     <string name="settings_ai_config_title">Ρύθμιση Τεχνητής Νοημοσύνης</string>
+    <string name="settings_services_title">Υπηρεσίες</string>
     <string name="settings_ai_config_description">Ρύθμιση συστήματος υποστήριξης τεχνητής νοημοσύνης και χαρακτηριστικών</string>
     <string name="settings_ai_config_server">Url Διακομιστή</string>
     <string name="settings_ai_config_server_hint">Εισάγετε το URL του διακομιστή</string>

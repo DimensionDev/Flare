@@ -306,6 +306,7 @@
     <string name="bluesky_login_password_hint">סיסמה</string>
     <string name="login_button">התחברות</string>
     <string name="mastodon_login_verify_message">אנא המתן בזמן שאנו מאשרים את האישורים שלך.</string>
+    <string name="cancel_button">ביטול</string>
     <string name="service_select_instance_input_placeholder">כתובת URL של מופע</string>
     <string name="service_select_next_button">הבא</string>
     <string name="service_select_empty_message">לא נמצאו מופעים</string>

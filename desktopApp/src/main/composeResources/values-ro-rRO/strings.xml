@@ -127,6 +127,7 @@
     <string name="account_item_error_message">Încărcarea contului a eșuat</string>
     <string name="add_account">Adăugare cont</string>
     <string name="remove_account">Elimină contul</string>
+    <string name="settings_accounts_remove_confirm">Ești sigur că vrei să ștergi contul %1$s de pe acest dispozitiv?</string>
     <string name="settings_accounts_title">Administrare cont</string>
     <string name="settings_appearance_title">Aspectul</string>
     <string name="settings_status_appearance_title">Aspectul postării</string>
@@ -151,6 +152,7 @@
     <string name="settings_app_logging_clear">Curăță jurnalul</string>
     <string name="settings_app_logging_enable_network_logging">Activați înregistrarea în rețea</string>
     <string name="settings_ai_config_title">Configurare AI</string>
+    <string name="settings_services_title">Servicii</string>
     <string name="settings_ai_config_description">Configurați AI backend și caracteristici</string>
     <string name="settings_ai_config_server">URL Server</string>
     <string name="settings_ai_config_server_hint">Introduceți URL-ul serverului</string>

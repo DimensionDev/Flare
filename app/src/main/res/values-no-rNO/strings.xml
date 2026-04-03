@@ -239,6 +239,7 @@
     <string name="service_select_empty_message">Ingen instanser funnet</string>
     <string name="media_viewer_title">Forhåndsvisning av media</string>
     <string name="settings_accounts_remove">Fjern</string>
+    <string name="settings_accounts_remove_confirm">Er du sikker på at du vil fjerne kontoen %1$s fra denne enheten?</string>
     <string name="media_menu_save">Lagre skjermbilde</string>
     <string name="media_menu_share_image">Del skjermbilde</string>
     <string name="status_menu_share_via_fxembed">Del via FxEmbed</string>
@@ -408,8 +409,10 @@
     <string name="import_confirmation_message">Dette vil importere data fra filen. Eksisterende poster med samsvarende ID-er vil bli erstattet. Vil du fortsette?</string>
     <string name="changelog_current"><![CDATA[            <span>Versjon %1$s:</span>
             <ul>
-                <li>Lagt til Nostr støtte, inkludert pålogging, tidslinjer, posting, meldinger og relay styring.</li>
-                <li>feilrettinger og ytelsesforbedringer.</li>
+                <li>La til automatisk oversettelse og flere oversettelse tilbyderalternativ.</li>
+                <li>Nostr innlogging støtter nå QR-pålogging og Amber-signer-integrasjon på Android.</li>
+                <li>Abonnementer støtter nå offentligheten i Mastodon, lokale og trendende tidslinjer.</li>
+                <li>Feilrettinger og ytelsesforbedringer.</li>
             </ul>
         ]]></string>
     <string name="tab_settings_add_group">Legg til gruppe</string>

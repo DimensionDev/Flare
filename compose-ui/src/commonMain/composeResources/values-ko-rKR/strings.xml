@@ -306,6 +306,7 @@
     <string name="bluesky_login_password_hint">비밀번호</string>
     <string name="login_button">로그인</string>
     <string name="mastodon_login_verify_message">귀하의 자격 증명을 확인하는 동안 잠시 기다려 주세요.</string>
+    <string name="cancel_button">취소</string>
     <string name="service_select_instance_input_placeholder">인스턴스 URL</string>
     <string name="service_select_next_button">다음</string>
     <string name="service_select_empty_message">인스턴스가 없습니다</string>

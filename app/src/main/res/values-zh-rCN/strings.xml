@@ -238,6 +238,7 @@
     <string name="service_select_empty_message">没有找到实例</string>
     <string name="media_viewer_title">媒体查看器</string>
     <string name="settings_accounts_remove">删除账户</string>
+    <string name="settings_accounts_remove_confirm">您确定要从此设备中删除帐户 %1$s 吗？</string>
     <string name="media_menu_save">保存截图</string>
     <string name="media_menu_share_image">共享屏幕截图</string>
     <string name="status_menu_share_via_fxembed">通过FxEmbed分享</string>
@@ -405,9 +406,11 @@
     <string name="import_error">导入数据失败</string>
     <string name="import_confirmation_title">确认导入</string>
     <string name="import_confirmation_message">这将从文件中导入数据。将替换匹配ID的现有记录。您确定要继续吗？</string>
-    <string name="changelog_current"><![CDATA[            <span> %1$s版本:</span>
+    <string name="changelog_current"><![CDATA[            <span> %1$s版本：</span>
             <ul>
-                <li>添加的Nostr 支持 包括登录、时间表、张贴、通知和中继管理。</li>
+                <li>添加了自动翻译和多个翻译提供选项。</li>
+                <li>Nostr 登录现在支持 QR 登录和 Android 上的 Amber 签名集成。</li>
+                <li>订阅现在支持Mastodon公开。 地方和热门的时间安排。</li>
                 <li>Bug 修复和性能改进。</li>
             </ul>
         ]]></string>

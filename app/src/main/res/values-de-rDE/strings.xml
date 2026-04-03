@@ -239,6 +239,7 @@
     <string name="service_select_empty_message">Keine Instanzen gefunden</string>
     <string name="media_viewer_title">Medienbetrachter</string>
     <string name="settings_accounts_remove">Entfernen</string>
+    <string name="settings_accounts_remove_confirm">Sind Sie sicher, dass Sie das Konto %1$s von diesem Gerät entfernen möchten?</string>
     <string name="media_menu_save">Screenshot speichern</string>
     <string name="media_menu_share_image">Screenshot teilen</string>
     <string name="status_menu_share_via_fxembed">Über FxEmbed teilen</string>
@@ -408,8 +409,10 @@
     <string name="import_confirmation_message">Dies wird Daten aus der Datei importieren. Vorhandene Datensätze mit passenden IDs werden ersetzt. Möchten Sie fortfahren?</string>
     <string name="changelog_current"><![CDATA[            <span>Version %1$s:</span>
             <ul>
-                <li>Nostr Unterstützung hinzugefügt einschließlich Login, Timelines, Posting, Benachrichtigungen und Relaisverwaltung.</li>
+                <li>Automatische Übersetzung und mehrere Übersetzungsanbieter Optionen hinzugefügt.</li>
                 
+                <li>Nostr Login unterstützt nun QR Anmelde- und Bernsteinsignier-Integration auf Android.</li>
+                <li>Abonnements unterstützen nun Mastodon public lokale, und angesagte Zeitachsen.</li>
                 <li>Fehlerbehebungen und Leistungsverbesserungen.</li>
             </ul>
         ]]></string>

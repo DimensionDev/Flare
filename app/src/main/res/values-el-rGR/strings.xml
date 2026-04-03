@@ -239,6 +239,7 @@
     <string name="service_select_empty_message">Δεν βρέθηκαν παρουσίες</string>
     <string name="media_viewer_title">Προβολέας μέσων</string>
     <string name="settings_accounts_remove">Αφαίρεση</string>
+    <string name="settings_accounts_remove_confirm">Είστε βέβαιοι ότι θέλετε να καταργήσετε τον λογαριασμό %1$s από αυτήν τη συσκευή?</string>
     <string name="media_menu_save">Αποθήκευση στιγμιότυπου</string>
     <string name="media_menu_share_image">Κοινοποίηση στιγμιότυπου οθόνης</string>
     <string name="status_menu_share_via_fxembed">Κοινοποίηση μέσω FxEmbed</string>
@@ -408,7 +409,9 @@
     <string name="import_confirmation_message">Αυτό θα εισάγει δεδομένα από το αρχείο. Οι υπάρχουσες εγγραφές με ταυτότητες που ταιριάζουν θα αντικατασταθούν. Θέλετε να συνεχίσετε?</string>
     <string name="changelog_current"><![CDATA[            <span>Έκδοση %1$s:</span>
             <ul>
-                <li>Προστέθηκε υποστήριξη Nostr, συμπεριλαμβανομένης της σύνδεσης, των χρονοδιαγραμμάτων, των δημοσιεύσεων, των κοινοποιήσεων και της διαχείρισης ρελέ.</li>
+                <li>Προστέθηκε αυτόματη μετάφραση και πολλαπλές επιλογές παρόχου μετάφρασης.</li>
+                <li>Η σύνδεση Nostr τώρα υποστηρίζει την είσοδο στο QR και την ενσωμάτωση του υποψηφίου Amber στο Android.</li>
+                <li>Οι συνδρομές τώρα υποστηρίζουν το Mastodon δημόσια, τοπικά, και trending χρονοδιαγράμματα.</li>
                 <li>Διορθώσεις σφαλμάτων και βελτιώσεις απόδοσης.</li>
             </ul>
         ]]></string>

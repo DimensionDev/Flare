@@ -126,6 +126,7 @@
     <string name="account_item_error_message">Impossibile caricare l\'account</string>
     <string name="add_account">Aggiungi account</string>
     <string name="remove_account">Rimuovi account</string>
+    <string name="settings_accounts_remove_confirm">Sei sicuro di voler rimuovere l\'account %1$s da questo dispositivo?</string>
     <string name="settings_accounts_title">Gestione Account</string>
     <string name="settings_appearance_title">Aspetto</string>
     <string name="settings_status_appearance_title">Aspetto dei post</string>
@@ -150,6 +151,7 @@
     <string name="settings_app_logging_clear">Cancella registro</string>
     <string name="settings_app_logging_enable_network_logging">Abilita registro di rete</string>
     <string name="settings_ai_config_title">Configurazione IA</string>
+    <string name="settings_services_title">Servizi</string>
     <string name="settings_ai_config_description">Configura il backend AI e le funzioni</string>
     <string name="settings_ai_config_server">URL del server</string>
     <string name="settings_ai_config_server_hint">Inserisci l\'URL del server</string>

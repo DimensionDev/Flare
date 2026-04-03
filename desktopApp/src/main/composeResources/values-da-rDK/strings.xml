@@ -126,6 +126,7 @@
     <string name="account_item_error_message">Kunne ikke indlæse konto</string>
     <string name="add_account">Tilføj konto</string>
     <string name="remove_account">Fjern konto</string>
+    <string name="settings_accounts_remove_confirm">Er du sikker på, at du vil fjerne konto %1$s fra denne enhed?</string>
     <string name="settings_accounts_title">Konto Administration</string>
     <string name="settings_appearance_title">Udseende</string>
     <string name="settings_status_appearance_title">Indlæg Udseende</string>
@@ -150,6 +151,7 @@
     <string name="settings_app_logging_clear">Ryd log</string>
     <string name="settings_app_logging_enable_network_logging">Aktiver logning af netværk</string>
     <string name="settings_ai_config_title">Ai Konfiguration</string>
+    <string name="settings_services_title">Tjenester</string>
     <string name="settings_ai_config_description">Konfigurer AI-motor og funktioner</string>
     <string name="settings_ai_config_server">Server URL</string>
     <string name="settings_ai_config_server_hint">Angiv serverens URL</string>

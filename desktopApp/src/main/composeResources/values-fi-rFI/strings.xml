@@ -126,6 +126,7 @@
     <string name="account_item_error_message">Tilin lataaminen epäonnistui</string>
     <string name="add_account">Lisää tili</string>
     <string name="remove_account">Poista tili</string>
+    <string name="settings_accounts_remove_confirm">Oletko varma, että haluat poistaa tilin %1$s tästä laitteesta?</string>
     <string name="settings_accounts_title">Tilin Hallinta</string>
     <string name="settings_appearance_title">Ulkoasu</string>
     <string name="settings_status_appearance_title">Julkaisun Ulkonäkö</string>
@@ -150,6 +151,7 @@
     <string name="settings_app_logging_clear">Tyhjennä loki</string>
     <string name="settings_app_logging_enable_network_logging">Salli verkon kirjaaminen</string>
     <string name="settings_ai_config_title">AI Asetukset</string>
+    <string name="settings_services_title">Palvelut</string>
     <string name="settings_ai_config_description">Muokkaa käyttöliittymän taustaosaa ja ominaisuuksia</string>
     <string name="settings_ai_config_server">Palvelimen URL</string>
     <string name="settings_ai_config_server_hint">Syötä palvelimen URL</string>

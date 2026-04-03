@@ -235,6 +235,7 @@
     <string name="service_select_empty_message">Екземплярів не знайдено</string>
     <string name="media_viewer_title">Переглядач мультимедіа</string>
     <string name="settings_accounts_remove">Видалити</string>
+    <string name="settings_accounts_remove_confirm">Ви дійсно бажаєте видалити обліковий запис %1$s з цього пристрою?</string>
     <string name="media_menu_save">Зберегти знімок екрану</string>
     <string name="media_menu_share_image">Поділитися скріншотом</string>
     <string name="status_menu_share_via_fxembed">Поділитись через FxEmbed</string>

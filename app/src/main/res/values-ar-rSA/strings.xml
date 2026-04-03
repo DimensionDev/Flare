@@ -243,6 +243,7 @@
     <string name="service_select_empty_message">لا يوجد مثيلات</string>
     <string name="media_viewer_title">مشاهدة الوسائط</string>
     <string name="settings_accounts_remove">إزالة</string>
+    <string name="settings_accounts_remove_confirm">هل أنت متأكد من أنك تريد إزالة الحساب %1$s من هذا الجهاز؟</string>
     <string name="media_menu_save">حفظ لقطة الشاشة</string>
     <string name="media_menu_share_image">مشاركة لقطة الشاشة</string>
     <string name="status_menu_share_via_fxembed">مشاركة عبر FxEmbed</string>
@@ -410,6 +411,14 @@
     <string name="import_error">فشل استيراد البيانات</string>
     <string name="import_confirmation_title">تأكيد الاستيراد</string>
     <string name="import_confirmation_message">سيتم استيراد البيانات من الملف. سيتم استبدال السجلات الموجودة مع مطابقة المعرفات. هل تريد المتابعة؟</string>
+    <string name="changelog_current"><![CDATA[            <span>الإصدار %1$s:</span>
+            <ul>
+                <li>أضاف الترجمة التلقائية وخيارات متعددة موفر الترجمة.</li>
+                <li>تسجيل الدخول Nostr الآن يدعم تكامل تسجيل الدخول QR وتوقيع الأمبير على Android.</li>
+                <li>الاشتراكات الآن تدعم ماستدون العام، الجدول الزمني المحلي والناشئ.</li>
+                <li>إصلاحات الشوائب وتحسينات الأداء.</li>
+            </ul>
+        ]]></string>
     <string name="tab_settings_add_group">إضافة مجموعة</string>
     <string name="tab_settings_add_tab">إضافة علامة تبويب</string>
     <string name="tab_settings_edit_group">تحرير المجموعة</string>

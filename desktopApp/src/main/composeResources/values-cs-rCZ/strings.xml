@@ -128,6 +128,7 @@
     <string name="account_item_error_message">Nepodařilo se načíst účet</string>
     <string name="add_account">Přidat účet</string>
     <string name="remove_account">Odebrat účet</string>
+    <string name="settings_accounts_remove_confirm">Jste si jisti, že chcete odstranit účet %1$s z tohoto zařízení?</string>
     <string name="settings_accounts_title">Správa účtů</string>
     <string name="settings_appearance_title">Vzhled</string>
     <string name="settings_status_appearance_title">Vzhled příspěvku</string>
@@ -152,6 +153,7 @@
     <string name="settings_app_logging_clear">Vymazat záznam</string>
     <string name="settings_app_logging_enable_network_logging">Povolit protokolování do sítě</string>
     <string name="settings_ai_config_title">Nastavení AI</string>
+    <string name="settings_services_title">Služby</string>
     <string name="settings_ai_config_description">Konfigurovat AI backend a funkce</string>
     <string name="settings_ai_config_server">URL serveru</string>
     <string name="settings_ai_config_server_hint">Zadejte URL serveru</string>

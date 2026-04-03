@@ -306,6 +306,7 @@
     <string name="bluesky_login_password_hint">Лозинка</string>
     <string name="login_button">Пријава</string>
     <string name="mastodon_login_verify_message">Молим сачекајте док оверимо ваше податке.</string>
+    <string name="cancel_button">Отказати</string>
     <string name="service_select_instance_input_placeholder">URL инстанце</string>
     <string name="service_select_next_button">Следеће</string>
     <string name="service_select_empty_message">Нема пронађених инстанци</string>

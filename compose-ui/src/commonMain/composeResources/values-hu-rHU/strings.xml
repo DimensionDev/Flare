@@ -306,6 +306,7 @@
     <string name="bluesky_login_password_hint">Jelszó</string>
     <string name="login_button">Bejelentkezés</string>
     <string name="mastodon_login_verify_message">Kérjük, várjon, miközben ellenőrizzük a hitelesítő adatait.</string>
+    <string name="cancel_button">Mégse</string>
     <string name="service_select_instance_input_placeholder">Példány URL</string>
     <string name="service_select_next_button">Következő</string>
     <string name="service_select_empty_message">Nincs példány</string>

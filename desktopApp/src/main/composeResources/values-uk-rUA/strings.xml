@@ -122,6 +122,7 @@
     <string name="account_item_error_message">Не вдалося завантажити обліковий запис</string>
     <string name="add_account">Додати обліковий запис</string>
     <string name="remove_account">Видалити обліковий запис</string>
+    <string name="settings_accounts_remove_confirm">Ви дійсно бажаєте видалити обліковий запис %1$s з цього пристрою?</string>
     <string name="settings_accounts_title">Особистий кабінет</string>
     <string name="settings_appearance_title">Зовнішній вигляд</string>
     <string name="settings_status_appearance_title">Зовнішній вигляд повідомлення</string>
@@ -146,6 +147,7 @@
     <string name="settings_app_logging_clear">Очистити журнал</string>
     <string name="settings_app_logging_enable_network_logging">Увімкнути ведення журналу мережі</string>
     <string name="settings_ai_config_title">Конфігурація ШІ</string>
+    <string name="settings_services_title">Послуги</string>
     <string name="settings_ai_config_description">Налаштувати AI Бекенд і функції</string>
     <string name="settings_ai_config_server">URL-адреса сервера</string>
     <string name="settings_ai_config_server_hint">Введіть URL-адресу сервера</string>

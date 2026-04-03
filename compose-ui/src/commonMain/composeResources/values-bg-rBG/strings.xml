@@ -184,6 +184,7 @@
     <string name="bluesky_login_use_password_button">Използване на парола</string>
     <string name="login_button">Вписване</string>
     <string name="mastodon_login_verify_message">Моля, изчакайте, докато проверяваме вашите идентификационни данни.</string>
+    <string name="cancel_button">Отказ</string>
     <string name="service_select_instance_input_placeholder">URL адрес на инстанция</string>
     <string name="service_select_next_button">Напред</string>
     <string name="service_select_empty_message">Не са намерени инстанции</string>

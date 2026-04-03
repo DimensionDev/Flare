@@ -240,6 +240,7 @@
     <string name="service_select_empty_message">Nu s-au găsit instanțe</string>
     <string name="media_viewer_title">Vizualizare media</string>
     <string name="settings_accounts_remove">Elimină</string>
+    <string name="settings_accounts_remove_confirm">Ești sigur că vrei să ștergi contul %1$s de pe acest dispozitiv?</string>
     <string name="media_menu_save">Salvare captură ecran</string>
     <string name="media_menu_share_image">Distribuie captură ecran</string>
     <string name="status_menu_share_via_fxembed">Distribuie prin FxEmbed</string>
@@ -409,8 +410,10 @@
     <string name="import_confirmation_message">Acest lucru va importa date din fișier. Înregistrările existente cu ID-uri de potrivire vor fi înlocuite. Doriți să continuați?</string>
     <string name="changelog_current"><![CDATA[            <span>Versiunea %1$s:</span>
             <ul>
-                <li>a adăugat suport Nostr inclusiv autentificare, calendare, postări, notificări și gestionarea releului.</li>
-                <li>Remedierea erorilor și îmbunătățirea performanței.</li>
+                <li>S-a adăugat traducerea automată şi opţiunile furnizorilor multipli de traducere. Autentificarea</li>
+                <li>Nostr suportă acum integrarea cu siglă QR și cu semnatura Chihlimbară pe Android.</li>
+                <li>Subscripții acceptă acum Mastodon public, cronologii locale şi curente.</li>
+                <li>Remedierea erorilor şi îmbunătăţirea performanţei.</li>
             </ul>
         ]]></string>
     <string name="tab_settings_add_group">Adaugă grup</string>

@@ -126,6 +126,7 @@
     <string name="account_item_error_message">Fehler beim Laden des Kontos</string>
     <string name="add_account">Konto hinzufügen</string>
     <string name="remove_account">Konto entfernen</string>
+    <string name="settings_accounts_remove_confirm">Sind Sie sicher, dass Sie das Konto %1$s von diesem Gerät entfernen möchten?</string>
     <string name="settings_accounts_title">Kontoverwaltung</string>
     <string name="settings_appearance_title">Erscheinungsbild</string>
     <string name="settings_status_appearance_title">Post-Darstellung</string>
@@ -150,6 +151,7 @@
     <string name="settings_app_logging_clear">Log löschen</string>
     <string name="settings_app_logging_enable_network_logging">Netzwerkprotokollierung aktivieren</string>
     <string name="settings_ai_config_title">KI Konfiguration</string>
+    <string name="settings_services_title">Dienste</string>
     <string name="settings_ai_config_description">KI Backend und Funktionen konfigurieren</string>
     <string name="settings_ai_config_server">Server-URL</string>
     <string name="settings_ai_config_server_hint">Server-URL eingeben</string>

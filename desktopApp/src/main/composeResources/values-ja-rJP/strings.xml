@@ -125,6 +125,7 @@
     <string name="account_item_error_message">アカウントの読み込みに失敗しました</string>
     <string name="add_account">アカウントを追加</string>
     <string name="remove_account">アカウントを削除</string>
+    <string name="settings_accounts_remove_confirm">このデバイスからアカウント %1$s を削除してもよろしいですか？</string>
     <string name="settings_accounts_title">アカウント管理</string>
     <string name="settings_appearance_title">外観</string>
     <string name="settings_status_appearance_title">投稿の外観</string>
@@ -149,6 +150,7 @@
     <string name="settings_app_logging_clear">ログをクリア</string>
     <string name="settings_app_logging_enable_network_logging">ネットワークログを有効にする</string>
     <string name="settings_ai_config_title">AI設定</string>
+    <string name="settings_services_title">サービス</string>
     <string name="settings_ai_config_description">AIバックエンドと機能を設定する</string>
     <string name="settings_ai_config_server">サーバー URL</string>
     <string name="settings_ai_config_server_hint">サーバー URL を入力してください</string>

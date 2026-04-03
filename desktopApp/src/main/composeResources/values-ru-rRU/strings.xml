@@ -128,6 +128,7 @@
     <string name="account_item_error_message">Не удалось загрузить аккаунт</string>
     <string name="add_account">Добавить аккаунт</string>
     <string name="remove_account">Удалить аккаунт</string>
+    <string name="settings_accounts_remove_confirm">Вы уверены, что хотите удалить учетную запись %1$s с этого устройства?</string>
     <string name="settings_accounts_title">Управление аккаунтом</string>
     <string name="settings_appearance_title">Внешний вид</string>
     <string name="settings_status_appearance_title">Внешний вид записи</string>
@@ -152,6 +153,7 @@
     <string name="settings_app_logging_clear">Очистить журнал</string>
     <string name="settings_app_logging_enable_network_logging">Включить журнал сетевой активности</string>
     <string name="settings_ai_config_title">Конфигурация ИИ</string>
+    <string name="settings_services_title">Услуги</string>
     <string name="settings_ai_config_description">Настройка AI бэкэнда и функций</string>
     <string name="settings_ai_config_server">URL сервера</string>
     <string name="settings_ai_config_server_hint">Введите URL сервера</string>

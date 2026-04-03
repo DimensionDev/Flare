@@ -237,6 +237,7 @@
     <string name="service_select_empty_message">インスタンスが見つかりません</string>
     <string name="media_viewer_title">メディアビューアー</string>
     <string name="settings_accounts_remove">削除</string>
+    <string name="settings_accounts_remove_confirm">このデバイスからアカウント %1$s を削除してもよろしいですか？</string>
     <string name="media_menu_save">スクリーンショットを保存</string>
     <string name="media_menu_share_image">スクリーンショットを共有</string>
     <string name="status_menu_share_via_fxembed">FxEmbedで共有</string>

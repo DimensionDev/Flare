@@ -8,7 +8,6 @@ import dev.dimension.flare.data.io.ApplePlatformPathProducer
 import dev.dimension.flare.data.io.PlatformPathProducer
 import dev.dimension.flare.data.network.nostr.AmberSignerBridge
 import dev.dimension.flare.data.network.nostr.AppleAmberSignerBridge
-import dev.dimension.flare.data.network.rss.NativeWebScraper
 import dev.dimension.flare.shared.image.ImageCompressor
 import dev.dimension.flare.shared.image.IosImageCompressor
 import dev.dimension.flare.ui.humanizer.AppleFormatter
@@ -25,7 +24,6 @@ internal actual val platformModule: Module =
         singleOf(::AppDataStore)
         singleOf(::DriverFactory)
         singleOf(::ApplePlatformPathProducer) bind PlatformPathProducer::class
-        singleOf(::NativeWebScraper)
         singleOf(::AppleFormatter) bind PlatformFormatter::class
         singleOf(::ApplePlatformTextRenderer) bind PlatformTextRendering::class
         singleOf(::IosImageCompressor) bind ImageCompressor::class

@@ -7,7 +7,6 @@ import dev.dimension.flare.data.io.PlatformPathProducer
 import dev.dimension.flare.data.network.nostr.AmberIntentLauncherRegistry
 import dev.dimension.flare.data.network.nostr.AmberSignerBridge
 import dev.dimension.flare.data.network.nostr.AndroidAmberSignerBridge
-import dev.dimension.flare.data.network.rss.NativeWebScraper
 import dev.dimension.flare.shared.image.AndroidImageCompressor
 import dev.dimension.flare.shared.image.ImageCompressor
 import dev.dimension.flare.ui.humanizer.AndroidFormatter
@@ -22,7 +21,6 @@ internal actual val platformModule: Module =
     module {
         singleOf(::AppDataStore)
         singleOf(::DriverFactory)
-        singleOf(::NativeWebScraper)
         singleOf(::AmberIntentLauncherRegistry)
         single<AmberSignerBridge> { AndroidAmberSignerBridge(androidContext(), get()) }
         singleOf(::AndroidPlatformPathProducer) bind PlatformPathProducer::class

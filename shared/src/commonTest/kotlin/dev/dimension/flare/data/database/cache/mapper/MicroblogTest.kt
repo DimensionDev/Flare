@@ -52,6 +52,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
+import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -833,6 +834,97 @@ class MicroblogTest : RobolectricTest() {
             val message = assertNotNull(rendered.message)
             val type = assertIs<UiTimelineV2.Message.Type.Localized>(message.type)
             assertEquals(UiTimelineV2.Message.Type.Localized.MessageId.Repost, type.data)
+        }
+
+    @Test
+    fun toUiKeepsDistinctItemKeysForOriginalAndRepostWrapper() =
+        runTest {
+            val accountKey = MicroBlogKey(id = "account", host = "test.com")
+            val originalUser =
+                createUser(MicroBlogKey(id = "original-user", host = "test.com"), "Original User")
+            val wrapperUser =
+                createUser(MicroBlogKey(id = "wrapper-user", host = "test.com"), "Wrapper User")
+
+            val originalPost =
+                createPost(
+                    accountKey = accountKey,
+                    user = originalUser,
+                    statusKey = MicroBlogKey(id = "original-status", host = "test.com"),
+                    text = "original content",
+                )
+            val repostMessage =
+                UiTimelineV2.Message(
+                    user = wrapperUser,
+                    statusKey = MicroBlogKey(id = "wrapper-status", host = "test.com"),
+                    icon = dev.dimension.flare.ui.model.UiIcon.Retweet,
+                    type =
+                        UiTimelineV2.Message.Type.Localized(
+                            UiTimelineV2.Message.Type.Localized.MessageId.Repost,
+                        ),
+                    createdAt = Clock.System.now().toUi(),
+                    clickEvent = ClickEvent.Noop,
+                    accountType = AccountType.Specific(accountKey),
+                )
+            val wrapperPost =
+                createPost(
+                    accountKey = accountKey,
+                    user = wrapperUser,
+                    statusKey = MicroBlogKey(id = "wrapper-status", host = "test.com"),
+                    text = "wrapper content",
+                ).copy(
+                    message = repostMessage,
+                    internalRepost = originalPost,
+                )
+
+            saveToDatabase(
+                db,
+                listOf(
+                    TimelinePagingMapper.toDb(originalPost, pagingKey = "home"),
+                    TimelinePagingMapper.toDb(wrapperPost, pagingKey = "home"),
+                ),
+            )
+
+            val paging = db.pagingTimelineDao().getPagingSource("home")
+            val pager = TestPager(config = PagingConfig(pageSize = 20), paging)
+            val refreshResult = pager.refresh()
+            val page =
+                assertIs<PagingSource.LoadResult.Page<Int, DbStatusWithReference>>(
+                    refreshResult,
+                )
+
+            val originalDbItem =
+                assertNotNull(
+                    page.data.firstOrNull {
+                        it.status.data.statusKey == originalPost.statusKey
+                    },
+                )
+            val wrapperDbItem =
+                assertNotNull(
+                    page.data.firstOrNull {
+                        it.status.data.statusKey == wrapperPost.statusKey
+                    },
+                )
+
+            val renderedOriginal =
+                assertIs<UiTimelineV2.Post>(
+                    TimelinePagingMapper.toUi(
+                        item = originalDbItem,
+                        pagingKey = "home",
+                        translationDisplayOptions = translationDisplayOptions(),
+                    ),
+                )
+            val renderedWrapper =
+                assertIs<UiTimelineV2.Post>(
+                    TimelinePagingMapper.toUi(
+                        item = wrapperDbItem,
+                        pagingKey = "home",
+                        translationDisplayOptions = translationDisplayOptions(),
+                    ),
+                )
+
+            assertEquals(originalPost.statusKey, renderedOriginal.statusKey)
+            assertEquals(wrapperPost.statusKey, renderedWrapper.statusKey)
+            assertNotEquals(renderedOriginal.itemKey, renderedWrapper.itemKey)
         }
 
     @Test

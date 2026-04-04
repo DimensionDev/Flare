@@ -105,7 +105,9 @@ public class Readability(
     }
 
     // ── instance state ───────────────────────────────────────────────────
-    private val doc: Document = Ksoup.parse(html, url)
+    // Normalize \r\n and \r to \n before parsing, matching the HTML spec's
+    // input-stream preprocessing step (browsers do this automatically).
+    private val doc: Document = Ksoup.parse(html.replace("\r\n", "\n").replace("\r", "\n"), url)
     private var articleTitle: String = ""
     private var articleByline: String? = null
     private var articleDir: String? = null

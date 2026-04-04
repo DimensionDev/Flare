@@ -111,6 +111,7 @@ internal object TimelinePagingMapper {
                         internalRepost = resolvedRepost,
                         statusKey = resolvedRoot.statusKey,
                         message = resolvedRoot.message,
+                        itemKey = resolvedRoot.itemKey,
                     )
                 } else {
                     resolvedRoot

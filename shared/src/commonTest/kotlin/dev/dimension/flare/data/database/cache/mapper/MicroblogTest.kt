@@ -357,7 +357,8 @@ class MicroblogTest : RobolectricTest() {
             saveToDatabase(db, listOf(TimelinePagingMapper.toDb(withRef, pagingKey = "home")))
             assertEquals(
                 1,
-                db.statusReferenceDao()
+                db
+                    .statusReferenceDao()
                     .getByStatusId(DbStatus.createId(AccountType.Specific(accountKey), withRef.statusKey))
                     .size,
             )
@@ -406,7 +407,8 @@ class MicroblogTest : RobolectricTest() {
             saveToDatabase(db, listOf(TimelinePagingMapper.toDb(withQuote, pagingKey = "home")))
             assertEquals(
                 1,
-                db.statusReferenceDao()
+                db
+                    .statusReferenceDao()
                     .getByStatusId(DbStatus.createId(AccountType.Specific(accountKey), withQuote.statusKey))
                     .size,
             )

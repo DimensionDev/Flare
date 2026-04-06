@@ -665,7 +665,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                     database = db,
                     appDataStore = appDataStore,
                     aiCompletionService = AiCompletionService(OpenAIService(), SkippingOnDeviceAI()),
-                    coroutineScope = backgroundScope,
+                    coroutineScope = CoroutineScope(Dispatchers.Unconfined),
                 )
             val accountKey = MicroBlogKey(id = "account-ai-skipped", host = "test.social")
             val post =
@@ -712,16 +712,15 @@ class MixedRemoteMediatorTest : RobolectricTest() {
             val savedStatus = db.statusDao().get(post.statusKey, AccountType.Specific(accountKey)).first()
             assertNotNull(savedStatus)
             val translation =
-                withTimeout(5_000) {
-                    db
-                        .translationDao()
-                        .find(
-                            entityType = TranslationEntityType.Status,
-                            entityKey = savedStatus.id,
-                            targetLanguage = Locale.language,
-                        ).filterNotNull()
-                        .first { it.status == TranslationStatus.Skipped }
-                }
+                db
+                    .translationDao()
+                    .find(
+                        entityType = TranslationEntityType.Status,
+                        entityKey = savedStatus.id,
+                        targetLanguage = Locale.language,
+                    ).filterNotNull()
+                    .first()
+            assertEquals(TranslationStatus.Skipped, translation.status)
             assertEquals("same_language", translation.statusReason)
         }
 

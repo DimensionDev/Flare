@@ -2,40 +2,49 @@ package dev.dimension.flare.data.network.rss
 
 import androidx.compose.runtime.Immutable
 import com.fleeksoft.ksoup.nodes.Element
-import dev.dimension.flare.common.decodeJson
+import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.data.repository.tryRun
+import dev.dimension.flare.readability.Readability
 import dev.dimension.flare.ui.render.UiDateTime
 import dev.dimension.flare.ui.render.parseHtml
 import dev.dimension.flare.ui.render.toUi
-import kotlinx.coroutines.channels.awaitClose
+import io.ktor.client.request.get
+import io.ktor.client.statement.bodyAsText
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.flow
 import kotlinx.serialization.Serializable
 import kotlin.experimental.ExperimentalObjCRefinement
 import kotlin.native.HiddenFromObjC
 import kotlin.time.Instant
 
-internal class Readability(
-    private val scraper: NativeWebScraper,
-) {
+internal class Readability {
+    private val client = ktorClient()
+
     fun parse(url: String): Flow<Result<DocumentData>> =
-        callbackFlow {
-            try {
-                scraper.parse(
-                    url = url,
-                    scriptToInject = ReadabilityJS,
-                    callback = {
-                        try {
-                            trySend(Result.success(it.decodeJson()))
-                        } catch (e: Exception) {
-                            trySend(Result.failure(e))
-                        }
-                    },
+        flow {
+            runCatching {
+                val response = client.get(url).bodyAsText()
+                val article = Readability(response, url).parse() ?: throw Exception("Failed to parse the article")
+                DocumentData(
+                    title = article.title,
+                    content = article.content,
+                    textContent = article.textContent,
+                    length = article.length,
+                    excerpt = article.excerpt,
+                    byline = article.byline,
+                    dir = article.dir,
+                    siteName = article.siteName,
+                    lang = article.lang,
+                    publishedTime = article.publishedTime,
                 )
-            } catch (e: Exception) {
-                trySend(Result.failure(e))
-            }
-            awaitClose { }
+            }.fold(
+                onSuccess = {
+                    emit(Result.success(it))
+                },
+                onFailure = {
+                    emit(Result.failure(it))
+                },
+            )
         }
 }
 

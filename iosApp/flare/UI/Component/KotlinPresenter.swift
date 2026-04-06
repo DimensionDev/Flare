@@ -15,7 +15,8 @@ final class KotlinPresenter<T: AnyObject>: ObservableObject {
         self.presenter = presenter
         self.state = presenter.models.value
         self.presenter.models.toPublisher().receive(on: DispatchQueue.main).sink { [weak self] newState in
-            self?.state = newState
+            guard let self, self.state !== newState else { return }
+            self.state = newState
         }.store(in: &subscribers)
     }
 

@@ -68,7 +68,10 @@ class TranslationProviderAiPlaceholderTest {
                 assertNotNull(translatedJson).decodeJson(TranslationDocument.serializer())
             assertEquals(
                 listOf("你好 ", " @alice https://x.com ", "来自东京"),
-                translatedDocument.blocks.single().tokens.map { it.text },
+                translatedDocument.blocks
+                    .single()
+                    .tokens
+                    .map { it.text },
             )
             assertTrue(assertNotNull(onDeviceAI.prompt).contains("<<<B0>>>"))
             assertFalse(assertNotNull(onDeviceAI.prompt).contains("Translate the following JSON"))

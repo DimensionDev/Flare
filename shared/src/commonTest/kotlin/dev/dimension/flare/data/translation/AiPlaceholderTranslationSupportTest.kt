@@ -37,7 +37,10 @@ class AiPlaceholderTranslationSupportTest {
         assertEquals("zh-CN", translated.targetLanguage)
         assertEquals(
             listOf("你好 ", " @alice https://x.com ", "来自东京"),
-            translated.blocks.single().tokens.map { it.text },
+            translated.blocks
+                .single()
+                .tokens
+                .map { it.text },
         )
     }
 
@@ -73,7 +76,11 @@ class AiPlaceholderTranslationSupportTest {
         assertEquals(PreTranslationBatchItemStatus.Completed, statusItem.status)
         assertEquals(
             listOf("你好 ", " @alice https://x.com ", "来自东京"),
-            requireNotNull(requireNotNull(statusItem.payload).content).blocks.single().tokens.map { it.text },
+            requireNotNull(requireNotNull(statusItem.payload).content)
+                .blocks
+                .single()
+                .tokens
+                .map { it.text },
         )
         val profileItem = translated.items.first { it.entityKey == "profile:1" }
         assertEquals(PreTranslationBatchItemStatus.Skipped, profileItem.status)

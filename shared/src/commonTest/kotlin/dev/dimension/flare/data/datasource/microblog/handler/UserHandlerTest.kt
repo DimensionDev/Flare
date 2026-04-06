@@ -489,7 +489,7 @@ private class FakeOnDeviceAI : OnDeviceAI {
                                 payload = requireNotNull(item.payload).translated(targetLanguage),
                                 reason = null,
                             )
-                    },
+                        },
                 ),
             )
     }

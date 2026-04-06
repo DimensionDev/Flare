@@ -1357,7 +1357,8 @@ private fun completedTranslationJson(
                     )
                 },
         ).encodeJson(
-            dev.dimension.flare.data.translation.PreTranslationBatchDocument.serializer(),
+            dev.dimension.flare.data.translation.PreTranslationBatchDocument
+                .serializer(),
         )
 
 private fun completedTranslationTemplate(

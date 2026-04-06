@@ -510,7 +510,7 @@ private class FakePostOnDeviceAI : OnDeviceAI {
                                 payload = requireNotNull(item.payload).translated(targetLanguage),
                                 reason = null,
                             )
-                    },
+                        },
                 ),
             )
     }

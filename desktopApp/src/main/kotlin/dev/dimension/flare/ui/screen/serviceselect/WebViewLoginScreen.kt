@@ -16,9 +16,11 @@ internal fun WebViewLoginScreen(
     callback: (String) -> Boolean,
     onBack: () -> Unit,
 ) {
-    val state = rememberWebViewState(url)
+    val state =
+        rememberWebViewState(url) {
+            desktopWebSettings.incognito = true
+        }
     LaunchedEffect(Unit) {
-        state.cookieManager.removeAllCookies()
         val urlData = Url(url)
         val actualUrl =
             urlData.protocol.name

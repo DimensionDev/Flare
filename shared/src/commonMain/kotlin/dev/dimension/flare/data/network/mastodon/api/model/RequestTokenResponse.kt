@@ -10,6 +10,4 @@ internal data class RequestTokenResponse(
     @SerialName("token_type")
     val tokenType: String? = null,
     val scope: String? = null,
-    @SerialName("created_at")
-    val createdAt: Long? = null,
 )

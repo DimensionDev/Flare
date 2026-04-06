@@ -183,6 +183,7 @@ struct VideoControlView: View {
     let videoState: VideoState
     @State private var sliderValue: Double = 0
     @State private var isSeeking = false
+    @State private var wasPlayingBeforeSeek = false
     
     var duration: Double {
         switch videoState {
@@ -209,8 +210,14 @@ struct VideoControlView: View {
                 
                 Slider(value: $sliderValue, in: 0...max(duration, 0.1)) { editing in
                     isSeeking = editing
-                    if !editing {
+                    if editing {
+                        wasPlayingBeforeSeek = isPlaying
+                        isPlaying = false
+                    } else {
                         currentTime = CMTime(seconds: sliderValue, preferredTimescale: 600)
+                        if wasPlayingBeforeSeek {
+                            isPlaying = true
+                        }
                     }
                 }
                 

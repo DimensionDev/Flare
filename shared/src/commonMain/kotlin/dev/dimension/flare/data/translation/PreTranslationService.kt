@@ -16,13 +16,25 @@ import dev.dimension.flare.data.database.cache.model.statusTranslationEntityKey
 import dev.dimension.flare.data.database.cache.model.translationEntityKey
 import dev.dimension.flare.data.database.cache.model.translationPayload
 import dev.dimension.flare.data.datastore.AppDataStore
+import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.network.ai.AiCompletionService
 import dev.dimension.flare.data.repository.tryRun
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.sync.withPermit
 import kotlin.time.Clock
 
@@ -71,12 +83,37 @@ internal class OnlinePreTranslationService(
     private val appDataStore: AppDataStore,
     private val aiCompletionService: AiCompletionService,
     private val coroutineScope: CoroutineScope,
+    private val batchTranslator: suspend (
+        AppSettings,
+        AiCompletionService,
+        String,
+        PreTranslationBatchDocument,
+        String,
+        String,
+    ) -> String? = TranslationProvider::translateBatchDocumentJson,
 ) : PreTranslationService {
-    private val semaphore = Semaphore(permits = 1)
+    private val sessionMutex = Mutex()
+    private val executionSession =
+        MutableStateFlow(
+            PreTranslationExecutionSession(
+                generation = 0L,
+                providerCacheKey = "",
+                scope = createExecutionScope(),
+            ),
+        )
+    private var nextGeneration: Long = 0L
 
     init {
         coroutineScope.launch {
             cleanupStaleInFlightTranslations()
+        }
+        coroutineScope.launch {
+            appDataStore.appSettingsStore.data
+                .map { it.translationProviderCacheKey() }
+                .distinctUntilChanged()
+                .collect { providerCacheKey ->
+                    rotateExecutionSession(providerCacheKey)
+                }
         }
     }
 
@@ -88,29 +125,25 @@ internal class OnlinePreTranslationService(
         if (snapshot.isEmpty()) {
             return
         }
-        coroutineScope.launch {
-            enqueuePreparedCandidates(requirePreTranslation = true) { settings ->
-                prepareStatusCandidates(
-                    statuses = snapshot,
-                    targetLanguage = settings.targetLanguage,
-                    providerCacheKey = settings.providerCacheKey,
-                    allowLongText = allowLongText,
-                )
-            }
+        launchPreparedCandidates(requirePreTranslation = true) { settings ->
+            prepareStatusCandidates(
+                statuses = snapshot,
+                targetLanguage = settings.targetLanguage,
+                providerCacheKey = settings.providerCacheKey,
+                allowLongText = allowLongText,
+            )
         }
     }
 
     override fun enqueueProfile(user: DbUser) {
-        coroutineScope.launch {
-            enqueuePreparedCandidates(requirePreTranslation = true) { settings ->
-                listOfNotNull(
-                    prepareProfileCandidate(
-                        user = user,
-                        targetLanguage = settings.targetLanguage,
-                        providerCacheKey = settings.providerCacheKey,
-                    ),
-                )
-            }
+        launchPreparedCandidates(requirePreTranslation = true) { settings ->
+            listOfNotNull(
+                prepareProfileCandidate(
+                    user = user,
+                    targetLanguage = settings.targetLanguage,
+                    providerCacheKey = settings.providerCacheKey,
+                ),
+            )
         }
     }
 
@@ -118,23 +151,17 @@ internal class OnlinePreTranslationService(
         accountType: dev.dimension.flare.model.AccountType,
         statusKey: dev.dimension.flare.model.MicroBlogKey,
     ) {
-        coroutineScope.launch {
-            val settings = activeTranslationSettings(requirePreTranslation = false) ?: return@launch
-            setStatusDisplayMode(
+        launchPreparedCandidates(requirePreTranslation = false) { settings ->
+            updateStatusDisplayMode(
                 accountType = accountType,
                 statusKey = statusKey,
                 mode = TranslationDisplayMode.Translated,
             )
-            val candidates =
-                prepareRetryCandidates(
-                    accountType = accountType,
-                    statusKey = statusKey,
-                    targetLanguage = settings.targetLanguage,
-                    providerCacheKey = settings.providerCacheKey,
-                )
-            processPreparedCandidates(
-                settings = settings,
-                candidates = candidates,
+            prepareRetryCandidates(
+                accountType = accountType,
+                statusKey = statusKey,
+                targetLanguage = settings.targetLanguage,
+                providerCacheKey = settings.providerCacheKey,
             )
         }
     }
@@ -145,38 +172,116 @@ internal class OnlinePreTranslationService(
         mode: TranslationDisplayMode,
     ) {
         coroutineScope.launch {
-            database.translationDao().updateDisplayMode(
-                entityType = TranslationEntityType.Status,
-                entityKey = statusTranslationEntityKey(accountType, statusKey),
-                targetLanguage = currentTargetLanguage(),
-                displayMode = mode,
-                updatedAt = Clock.System.now().toEpochMilliseconds(),
+            updateStatusDisplayMode(
+                accountType = accountType,
+                statusKey = statusKey,
+                mode = mode,
             )
         }
     }
 
-    private suspend fun enqueuePreparedCandidates(
+    private fun launchPreparedCandidates(
         requirePreTranslation: Boolean,
         prepareCandidates: suspend (ActivePreTranslationSettings) -> List<PreparedTranslationCandidate>,
     ) {
-        val settings = activeTranslationSettings(requirePreTranslation = requirePreTranslation) ?: return
-        val candidates = prepareCandidates(settings)
-        processPreparedCandidates(
-            settings = settings,
-            candidates = candidates,
+        coroutineScope.launch {
+            val settings = activeTranslationSettings(requirePreTranslation = requirePreTranslation) ?: return@launch
+            val session = executionSessionFor(settings) ?: return@launch
+            session.scope.launch {
+                val candidates = prepareCandidates(settings)
+                processPreparedCandidates(
+                    session = session,
+                    settings = settings,
+                    candidates = candidates,
+                )
+            }
+        }
+    }
+
+    private suspend fun updateStatusDisplayMode(
+        accountType: dev.dimension.flare.model.AccountType,
+        statusKey: dev.dimension.flare.model.MicroBlogKey,
+        mode: TranslationDisplayMode,
+    ) {
+        database.translationDao().updateDisplayMode(
+            entityType = TranslationEntityType.Status,
+            entityKey = statusTranslationEntityKey(accountType, statusKey),
+            targetLanguage = currentTargetLanguage(),
+            displayMode = mode,
+            updatedAt = Clock.System.now().toEpochMilliseconds(),
         )
     }
 
+    private suspend fun rotateExecutionSession(providerCacheKey: String): PreTranslationExecutionSession =
+        sessionMutex.withLock {
+            val current = executionSession.value
+            if (current.providerCacheKey == providerCacheKey) {
+                return@withLock current
+            }
+            current.scope.coroutineContext[Job]?.cancel()
+            if (current.providerCacheKey.isNotEmpty()) {
+                database.translationDao().deleteInFlight()
+            }
+            createExecutionSession(providerCacheKey).also {
+                executionSession.value = it
+            }
+        }
+
+    private suspend fun executionSessionFor(settings: ActivePreTranslationSettings): PreTranslationExecutionSession? {
+        executionSession.value
+            .takeIf { it.providerCacheKey == settings.providerCacheKey }
+            ?.let {
+                return it
+            }
+        val latestProviderCacheKey =
+            appDataStore.appSettingsStore.data
+                .first()
+                .translationProviderCacheKey()
+        if (latestProviderCacheKey != settings.providerCacheKey) {
+            return null
+        }
+        return rotateExecutionSession(latestProviderCacheKey)
+    }
+
+    private fun createExecutionSession(providerCacheKey: String): PreTranslationExecutionSession {
+        nextGeneration += 1
+        return PreTranslationExecutionSession(
+            generation = nextGeneration,
+            providerCacheKey = providerCacheKey,
+            scope = createExecutionScope(),
+        )
+    }
+
+    private fun createExecutionScope(): CoroutineScope =
+        CoroutineScope(
+            coroutineScope.coroutineContext +
+                SupervisorJob(coroutineScope.coroutineContext[Job]),
+        )
+
+    private suspend fun ensureCurrentExecutionSession(session: PreTranslationExecutionSession) {
+        currentCoroutineContext().ensureActive()
+        if (
+            executionSession.value.generation != session.generation ||
+            executionSession.value.providerCacheKey != session.providerCacheKey
+        ) {
+            throw CancellationException("Pre-translation session rotated")
+        }
+    }
+
     private suspend fun processPreparedCandidates(
+        session: PreTranslationExecutionSession,
         settings: ActivePreTranslationSettings,
         candidates: List<PreparedTranslationCandidate>,
     ) {
         if (candidates.isEmpty()) {
             return
         }
+        ensureCurrentExecutionSession(session)
         markPending(candidates)
-        semaphore.withPermit {
+        session.semaphore.withPermit {
+            ensureCurrentExecutionSession(session)
             translatePreparedCandidates(
+                session = session,
                 settings = settings,
                 candidates = candidates,
             )
@@ -381,6 +486,7 @@ internal class OnlinePreTranslationService(
     }
 
     private suspend fun translatePreparedCandidates(
+        session: PreTranslationExecutionSession,
         settings: ActivePreTranslationSettings,
         candidates: List<PreparedTranslationCandidate>,
     ) {
@@ -388,6 +494,7 @@ internal class OnlinePreTranslationService(
             .chunkCandidatesForBatching(candidates)
             .forEach { batch ->
                 translateBatch(
+                    session = session,
                     settings = settings,
                     candidates = batch,
                 )
@@ -395,12 +502,14 @@ internal class OnlinePreTranslationService(
     }
 
     private suspend fun translateBatch(
+        session: PreTranslationExecutionSession,
         settings: ActivePreTranslationSettings,
         candidates: List<PreparedTranslationCandidate>,
     ) {
         if (candidates.isEmpty()) {
             return
         }
+        ensureCurrentExecutionSession(session)
         val startedAt = Clock.System.now().toEpochMilliseconds()
         database.translationDao().insertAll(
             candidates.map { candidate ->
@@ -412,10 +521,14 @@ internal class OnlinePreTranslationService(
             },
         )
 
-        runBatchTranslationWithRetry(
-            settings = settings,
-            candidates = candidates,
-        ).getOrElse { throwable ->
+        val failure =
+            runBatchTranslationWithRetry(
+                session = session,
+                settings = settings,
+                candidates = candidates,
+            ).exceptionOrNull()
+        if (failure != null) {
+            ensureCurrentExecutionSession(session)
             val failedAt = Clock.System.now().toEpochMilliseconds()
             database.translationDao().insertAll(
                 candidates.map { candidate ->
@@ -423,7 +536,7 @@ internal class OnlinePreTranslationService(
                         candidate = candidate,
                         status = TranslationStatus.Failed,
                         updatedAt = failedAt,
-                        statusReason = throwable.message,
+                        statusReason = failure.message,
                     )
                 },
             )
@@ -431,61 +544,65 @@ internal class OnlinePreTranslationService(
     }
 
     private suspend fun runBatchTranslationWithRetry(
+        session: PreTranslationExecutionSession,
         settings: ActivePreTranslationSettings,
         candidates: List<PreparedTranslationCandidate>,
     ): Result<Unit> {
         var lastFailure: Throwable? = null
         repeat(PreTranslationStoreSupport.PRE_TRANSLATION_BATCH_MAX_ATTEMPTS) { attempt ->
-            val result =
-                tryRun {
-                    val sourceDocument =
-                        PreTranslationBatchDocument(
-                            targetLanguage = settings.targetLanguage,
-                            items = candidates.map(PreTranslationStoreSupport::toBatchItem),
-                        )
-                    val sourceJson =
-                        sourceDocument.encodeJson(
-                            PreTranslationBatchDocument.serializer(),
-                        )
-                    val prompt =
-                        TranslationPromptFormatter.buildTranslatePrompt(
-                            settings = settings.appSettings,
-                            targetLanguage = settings.targetLanguage,
-                            sourceText = sourceJson,
-                            sourceJson = sourceJson,
-                        )
-                    val translatedJson =
-                        TranslationProvider.translateBatchDocumentJson(
-                            settings = settings.appSettings,
-                            aiCompletionService = aiCompletionService,
-                            sourceJson = sourceJson,
-                            sourceDocument = sourceDocument,
-                            targetLanguage = settings.targetLanguage,
-                            prompt = prompt,
-                        ) ?: error("Pre-translation returned empty response")
-
-                    applyBatchResult(
-                        translatedJson = translatedJson,
-                        candidates = candidates,
+            try {
+                ensureCurrentExecutionSession(session)
+                val sourceDocument =
+                    PreTranslationBatchDocument(
+                        targetLanguage = settings.targetLanguage,
+                        items = candidates.map(PreTranslationStoreSupport::toBatchItem),
                     )
+                val sourceJson =
+                    sourceDocument.encodeJson(
+                        PreTranslationBatchDocument.serializer(),
+                    )
+                val prompt =
+                    TranslationPromptFormatter.buildTranslatePrompt(
+                        settings = settings.appSettings,
+                        targetLanguage = settings.targetLanguage,
+                        sourceText = sourceJson,
+                        sourceJson = sourceJson,
+                    )
+                val translatedJson =
+                    batchTranslator(
+                        settings.appSettings,
+                        aiCompletionService,
+                        sourceJson,
+                        sourceDocument,
+                        settings.targetLanguage,
+                        prompt,
+                    ) ?: error("Pre-translation returned empty response")
+                ensureCurrentExecutionSession(session)
+                applyBatchResult(
+                    session = session,
+                    translatedJson = translatedJson,
+                    candidates = candidates,
+                )
+                return Result.success(Unit)
+            } catch (throwable: Throwable) {
+                if (throwable is CancellationException) {
+                    throw throwable
                 }
-            result
-                .onSuccess {
-                    return Result.success(Unit)
-                }.onFailure { throwable ->
-                    lastFailure = throwable
-                    if (attempt < PreTranslationStoreSupport.PRE_TRANSLATION_BATCH_MAX_ATTEMPTS - 1) {
-                        delay(PreTranslationStoreSupport.PRE_TRANSLATION_BATCH_RETRY_DELAY)
-                    }
+                lastFailure = throwable
+                if (attempt < PreTranslationStoreSupport.PRE_TRANSLATION_BATCH_MAX_ATTEMPTS - 1) {
+                    delay(PreTranslationStoreSupport.PRE_TRANSLATION_BATCH_RETRY_DELAY)
                 }
+            }
         }
         return Result.failure(requireNotNull(lastFailure))
     }
 
     private suspend fun applyBatchResult(
+        session: PreTranslationExecutionSession,
         translatedJson: String,
         candidates: List<PreparedTranslationCandidate>,
     ) {
+        ensureCurrentExecutionSession(session)
         val translatedDocument =
             TranslationResponseSanitizer
                 .clean(translatedJson)
@@ -555,3 +672,10 @@ internal class OnlinePreTranslationService(
                 )
         }
 }
+
+private data class PreTranslationExecutionSession(
+    val generation: Long,
+    val providerCacheKey: String,
+    val scope: CoroutineScope,
+    val semaphore: Semaphore = Semaphore(permits = 1),
+)

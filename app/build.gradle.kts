@@ -171,8 +171,8 @@ dependencies {
         implementation(libs.firebase.crashlytics.ktx)
         implementation(libs.firebase.analytics.ktx)
         implementation(libs.kotlinx.coroutines.play.services)
-        implementation("com.google.mlkit:genai-prompt:1.0.0-beta1")
-        implementation("com.google.mlkit:genai-summarization:1.0.0-beta1")
+        implementation("com.google.mlkit:genai-prompt:1.0.0-beta2")
+        implementation("com.google.mlkit:genai-summarization:1.0.0-beta2")
     }
     // END Non-FOSS component
 

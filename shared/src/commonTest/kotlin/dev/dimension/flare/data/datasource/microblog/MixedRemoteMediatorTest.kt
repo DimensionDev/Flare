@@ -29,6 +29,7 @@ import dev.dimension.flare.data.io.PlatformPathProducer
 import dev.dimension.flare.data.network.ai.AiCompletionService
 import dev.dimension.flare.data.network.ai.OpenAIService
 import dev.dimension.flare.data.translation.OnlinePreTranslationService
+import dev.dimension.flare.data.translation.PreTranslationBatchDocument
 import dev.dimension.flare.data.translation.PreTranslationService
 import dev.dimension.flare.data.translation.aiPreTranslateConfig
 import dev.dimension.flare.deleteTestRootPath
@@ -52,12 +53,14 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.yield
 import okio.Path
@@ -942,6 +945,138 @@ class MixedRemoteMediatorTest : RobolectricTest() {
     }
 
     @Test
+    fun providerSwitchCancelsOldQueueAndLetsNewProviderCompleteImmediately() {
+        runBlocking {
+            val appDataStore = AppDataStore(pathProducer)
+            appDataStore.appSettingsStore.updateData {
+                it.copy(
+                    language = Locale.language,
+                    translateConfig = aiPreTranslateConfig(),
+                    aiConfig =
+                        AppSettings.AiConfig(
+                            type = AppSettings.AiConfig.Type.OnDevice,
+                        ),
+                )
+            }
+            val started = CompletableDeferred<Unit>()
+            val release = CompletableDeferred<Unit>()
+            val finished = CompletableDeferred<Unit>()
+            val scope = CoroutineScope(Dispatchers.Unconfined + SupervisorJob())
+            val preTranslationService: PreTranslationService =
+                OnlinePreTranslationService(
+                    database = db,
+                    appDataStore = appDataStore,
+                    aiCompletionService = AiCompletionService(OpenAIService(), TestOnDeviceAI()),
+                    coroutineScope = scope,
+                    batchTranslator = { settings, _, _, sourceDocument, targetLanguage, _ ->
+                        when (settings.translateConfig.provider) {
+                            AppSettings.TranslateConfig.Provider.AI -> {
+                                started.complete(Unit)
+                                withContext(NonCancellable) {
+                                    release.await()
+                                }
+                                finished.complete(Unit)
+                                completedTranslationJson(
+                                    document = sourceDocument,
+                                    targetLanguage = targetLanguage,
+                                )
+                            }
+
+                            AppSettings.TranslateConfig.Provider.GoogleWeb ->
+                                completedTranslationJson(
+                                    document = sourceDocument,
+                                    targetLanguage = targetLanguage,
+                                )
+
+                            else -> error("Unexpected provider in provider switch test")
+                        }
+                    },
+                )
+            try {
+                val accountKey = MicroBlogKey(id = "account-provider-switch", host = "test.social")
+                val accountType = AccountType.Specific(accountKey)
+                val firstStatus =
+                    TimelinePagingMapper
+                        .toDb(
+                            createPost(
+                                accountType = accountType,
+                                user = profile(MicroBlogKey("user-provider-switch-1", "test.social"), "User"),
+                                statusKey = MicroBlogKey("status-provider-switch-1", "test.social"),
+                                text = "first source",
+                            ),
+                            pagingKey = "home",
+                        ).status.status.data
+                val secondStatus =
+                    TimelinePagingMapper
+                        .toDb(
+                            createPost(
+                                accountType = accountType,
+                                user = profile(MicroBlogKey("user-provider-switch-2", "test.social"), "User"),
+                                statusKey = MicroBlogKey("status-provider-switch-2", "test.social"),
+                                text = "second source",
+                            ),
+                            pagingKey = "home",
+                        ).status.status.data
+
+                preTranslationService.enqueueStatuses(listOf(firstStatus), allowLongText = false)
+                withTimeout(5_000) {
+                    started.await()
+                }
+
+                appDataStore.appSettingsStore.updateData {
+                    it.copy(
+                        translateConfig =
+                            it.translateConfig.copy(
+                                provider = AppSettings.TranslateConfig.Provider.GoogleWeb,
+                            ),
+                    )
+                }
+                withTimeout(5_000) {
+                    db
+                        .translationDao()
+                        .find(
+                            entityType = TranslationEntityType.Status,
+                            entityKey = firstStatus.id,
+                            targetLanguage = Locale.language,
+                        ).first { it == null }
+                }
+
+                preTranslationService.enqueueStatuses(listOf(secondStatus), allowLongText = false)
+
+                val secondTranslation =
+                    withTimeout(5_000) {
+                        db
+                            .translationDao()
+                            .find(
+                                entityType = TranslationEntityType.Status,
+                                entityKey = secondStatus.id,
+                                targetLanguage = Locale.language,
+                            ).filterNotNull()
+                            .first { it.status == TranslationStatus.Completed }
+                    }
+                assertEquals("second source (${Locale.language})", secondTranslation.payload?.content?.raw)
+
+                release.complete(Unit)
+                withTimeout(5_000) {
+                    finished.await()
+                }
+                yield()
+
+                val firstTranslation =
+                    db.translationDao().get(
+                        entityType = TranslationEntityType.Status,
+                        entityKey = firstStatus.id,
+                        targetLanguage = Locale.language,
+                    )
+                assertNull(firstTranslation)
+            } finally {
+                release.complete(Unit)
+                scope.coroutineContext[Job]?.cancelAndJoin()
+            }
+        }
+    }
+
+    @Test
     fun refreshDeduplicatesSamePostReturnedByMultipleSubTimelines() =
         runTest {
             val accountKey = MicroBlogKey("timeline", "mastodon.example")
@@ -1247,6 +1382,22 @@ private class SkippingOnDeviceAI : OnDeviceAI {
     ): String? = null
 }
 
+private fun completedTranslationJson(
+    document: dev.dimension.flare.data.translation.PreTranslationBatchDocument,
+    targetLanguage: String,
+): String =
+    document
+        .copy(
+            items =
+                document.items.map { item ->
+                    item.copy(
+                        status = dev.dimension.flare.data.translation.PreTranslationBatchItemStatus.Completed,
+                        payload = requireNotNull(item.payload).translated(targetLanguage),
+                        reason = null,
+                    )
+                },
+        ).encodeJson(preTranslationBatchDocumentSerializer)
+
 private fun dev.dimension.flare.data.translation.PreTranslationBatchPayload.translated(
     targetLanguage: String,
 ): dev.dimension.flare.data.translation.PreTranslationBatchPayload =
@@ -1273,3 +1424,6 @@ private fun TranslationDocument.translated(targetLanguage: String): TranslationD
                 )
             },
     )
+
+private val preTranslationBatchDocumentSerializer =
+    PreTranslationBatchDocument.serializer()

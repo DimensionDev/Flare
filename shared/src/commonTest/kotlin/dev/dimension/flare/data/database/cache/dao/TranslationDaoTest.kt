@@ -280,6 +280,64 @@ class TranslationDaoTest : RobolectricTest() {
         }
 
     @Test
+    fun deleteInFlight_removesOnlyPendingAndTranslating() =
+        runTest {
+            db.translationDao().insertAll(
+                listOf(
+                    DbTranslation(
+                        entityType = TranslationEntityType.Status,
+                        entityKey = "status:pending",
+                        targetLanguage = "en",
+                        sourceHash = "hash-pending",
+                        status = TranslationStatus.Pending,
+                        updatedAt = 1L,
+                    ),
+                    DbTranslation(
+                        entityType = TranslationEntityType.Status,
+                        entityKey = "status:translating",
+                        targetLanguage = "en",
+                        sourceHash = "hash-translating",
+                        status = TranslationStatus.Translating,
+                        updatedAt = 1L,
+                    ),
+                    DbTranslation(
+                        entityType = TranslationEntityType.Status,
+                        entityKey = "status:completed",
+                        targetLanguage = "en",
+                        sourceHash = "hash-completed",
+                        status = TranslationStatus.Completed,
+                        payload = TranslationPayload(content = "done".toUiPlainText()),
+                        updatedAt = 1L,
+                    ),
+                    DbTranslation(
+                        entityType = TranslationEntityType.Profile,
+                        entityKey = "profile:skipped",
+                        targetLanguage = "en",
+                        sourceHash = "hash-skipped",
+                        status = TranslationStatus.Skipped,
+                        statusReason = "same_language",
+                        updatedAt = 1L,
+                    ),
+                ),
+            )
+
+            db.translationDao().deleteInFlight()
+
+            assertNull(db.translationDao().get(TranslationEntityType.Status, "status:pending", "en"))
+            assertNull(db.translationDao().get(TranslationEntityType.Status, "status:translating", "en"))
+
+            val completed = db.translationDao().get(TranslationEntityType.Status, "status:completed", "en")
+            val skipped = db.translationDao().get(TranslationEntityType.Profile, "profile:skipped", "en")
+
+            assertNotNull(completed)
+            assertEquals(TranslationStatus.Completed, completed.status)
+            assertEquals("done", completed.payload?.content?.raw)
+            assertNotNull(skipped)
+            assertEquals(TranslationStatus.Skipped, skipped.status)
+            assertEquals("same_language", skipped.statusReason)
+        }
+
+    @Test
     fun deleteByLanguage_removesOnlyMatchingRows() =
         runTest {
             db.translationDao().insertAll(

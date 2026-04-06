@@ -108,6 +108,15 @@ internal interface TranslationDao {
 
     @Query(
         "DELETE FROM DbTranslation " +
+            "WHERE status = :pendingStatus OR status = :translatingStatus",
+    )
+    suspend fun deleteInFlight(
+        pendingStatus: TranslationStatus = TranslationStatus.Pending,
+        translatingStatus: TranslationStatus = TranslationStatus.Translating,
+    )
+
+    @Query(
+        "DELETE FROM DbTranslation " +
             "WHERE entityType = :entityType AND entityKey = :entityKey AND targetLanguage = :targetLanguage",
     )
     suspend fun delete(

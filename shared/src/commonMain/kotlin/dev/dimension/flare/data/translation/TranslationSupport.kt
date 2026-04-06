@@ -26,18 +26,13 @@ internal object TranslationPromptFormatter {
     fun buildTranslatePrompt(
         settings: AppSettings,
         targetLanguage: String,
-        sourceText: String,
-        sourceJson: String,
+        sourceTemplate: String,
     ): String =
         settings.aiConfig.translatePrompt
             .ifBlank {
                 AiPromptDefaults.TRANSLATE_PROMPT
             }.replace("{target_language}", targetLanguage)
-            .replace("{source_text}", sourceText)
-            .replace("{source_json}", sourceJson)
-            .replace("{source_html}", sourceJson)
-            .replace("{source_xml}", sourceJson)
-            .replace("{source_markup}", sourceJson)
+            .replace("{source_text}", sourceTemplate)
 }
 
 internal object TranslationResponseSanitizer {

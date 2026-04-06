@@ -12,6 +12,7 @@ import dev.dimension.flare.data.network.ai.AiCompletionService
 import dev.dimension.flare.data.translation.TranslationPromptFormatter
 import dev.dimension.flare.data.translation.TranslationProvider
 import dev.dimension.flare.data.translation.TranslationResponseSanitizer
+import dev.dimension.flare.data.translation.AiPlaceholderTranslationSupport
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.render.TranslationBlock
@@ -84,19 +85,18 @@ public class RssDetailTranslatePresenter(
         runCatching {
             val doc = buildSingleTextDocument(text)
             val sourceJson = translationJson.encodeToString(doc)
-            val sourceText = text
+            val promptTemplate = AiPlaceholderTranslationSupport.buildPromptTemplate(doc)
             val prompt =
                 TranslationPromptFormatter.buildTranslatePrompt(
                     settings = settings,
                     targetLanguage = targetLanguage,
-                    sourceText = sourceText,
-                    sourceJson = sourceJson,
+                    sourceTemplate = promptTemplate,
                 )
             val result =
                 TranslationProvider.translateDocumentJson(
                     settings = settings,
                     aiCompletionService = aiCompletionService,
-                    sourceText = sourceText,
+                    sourceTemplate = promptTemplate,
                     sourceJson = sourceJson,
                     targetLanguage = targetLanguage,
                     prompt = prompt,
@@ -149,20 +149,19 @@ public class RssDetailTranslatePresenter(
             // Build a TranslationDocument from the unique texts
             val doc = buildTranslationDocument(uniqueTexts)
             val sourceJson = translationJson.encodeToString(doc)
-            val sourceText = uniqueTexts.joinToString("\n")
+            val promptTemplate = AiPlaceholderTranslationSupport.buildPromptTemplate(doc)
             val prompt =
                 TranslationPromptFormatter.buildTranslatePrompt(
                     settings = settings,
                     targetLanguage = targetLanguage,
-                    sourceText = sourceText,
-                    sourceJson = sourceJson,
+                    sourceTemplate = promptTemplate,
                 )
 
             val result =
                 TranslationProvider.translateDocumentJson(
                     settings = settings,
                     aiCompletionService = aiCompletionService,
-                    sourceText = sourceText,
+                    sourceTemplate = promptTemplate,
                     sourceJson = sourceJson,
                     targetLanguage = targetLanguage,
                     prompt = prompt,

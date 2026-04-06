@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.presenter.status
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.produceState
 import dev.dimension.flare.common.Locale
+import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.model.DbTranslation
 import dev.dimension.flare.data.database.cache.model.TranslationDisplayMode
@@ -13,6 +14,7 @@ import dev.dimension.flare.data.database.cache.model.sourceHash
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.network.ai.AiCompletionService
 import dev.dimension.flare.data.repository.tryRun
+import dev.dimension.flare.data.translation.AiPlaceholderTranslationSupport
 import dev.dimension.flare.data.translation.TranslationPromptFormatter
 import dev.dimension.flare.data.translation.TranslationProvider
 import dev.dimension.flare.data.translation.TranslationResponseSanitizer
@@ -21,9 +23,9 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.presenter.PresenterBase
+import dev.dimension.flare.ui.render.TranslationDocument
 import dev.dimension.flare.ui.render.UiRichText
 import dev.dimension.flare.ui.render.applyTranslationJson
-import dev.dimension.flare.ui.render.toTranslatableText
 import dev.dimension.flare.ui.render.toTranslationJson
 import dev.dimension.flare.ui.render.toUiPlainText
 import kotlinx.coroutines.flow.first
@@ -40,8 +42,12 @@ public class TranslatePresenter(
     private val aiCompletionService by inject<AiCompletionService>()
     private val appDataStore: AppDataStore by inject()
     private val database: CacheDatabase by inject()
-    private val sourceText: String by lazy { source.toTranslatableText() }
     private val sourceJson: String by lazy { source.toTranslationJson(targetLanguage) }
+    private val promptTemplate by lazy {
+        AiPlaceholderTranslationSupport.buildPromptTemplate(
+            sourceJson.decodeJson(TranslationDocument.serializer()),
+        )
+    }
 
     @Composable
     override fun body(): UiState<UiRichText> {
@@ -59,14 +65,13 @@ public class TranslatePresenter(
                         TranslationPromptFormatter.buildTranslatePrompt(
                             settings = settings,
                             targetLanguage = targetLanguage,
-                            sourceText = sourceText,
-                            sourceJson = sourceJson,
+                            sourceTemplate = promptTemplate,
                         )
                     val translatedContent =
                         TranslationProvider.translateDocumentJson(
                             settings = settings,
                             aiCompletionService = aiCompletionService,
-                            sourceText = sourceText,
+                            sourceTemplate = promptTemplate,
                             sourceJson = sourceJson,
                             targetLanguage = targetLanguage,
                             prompt = prompt,

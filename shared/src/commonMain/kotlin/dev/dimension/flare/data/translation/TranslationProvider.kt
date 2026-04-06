@@ -35,7 +35,7 @@ internal object TranslationProvider {
     suspend fun translateDocumentJson(
         settings: AppSettings,
         aiCompletionService: AiCompletionService,
-        sourceText: String,
+        sourceTemplate: String,
         sourceJson: String,
         targetLanguage: String,
         prompt: String,
@@ -44,7 +44,7 @@ internal object TranslationProvider {
             settings = settings,
             aiCompletionService = aiCompletionService,
         ).translateDocumentJson(
-            sourceText = sourceText,
+            sourceTemplate = sourceTemplate,
             sourceJson = sourceJson,
             targetLanguage = targetLanguage,
             prompt = prompt,
@@ -88,7 +88,7 @@ internal object TranslationProvider {
 
 internal interface TranslationEngine {
     suspend fun translateDocumentJson(
-        sourceText: String,
+        sourceTemplate: String,
         sourceJson: String,
         targetLanguage: String,
         prompt: String,
@@ -107,30 +107,47 @@ private class AiTranslationEngine(
     private val aiCompletionService: AiCompletionService,
 ) : TranslationEngine {
     override suspend fun translateDocumentJson(
-        sourceText: String,
+        sourceTemplate: String,
         sourceJson: String,
         targetLanguage: String,
         prompt: String,
-    ): String? =
-        aiCompletionService.translate(
-            config = config,
-            source = sourceText,
-            targetLanguage = targetLanguage,
-            prompt = prompt,
-        )
+    ): String? {
+        val sourceDocument = sourceJson.decodeJson(TranslationDocument.serializer())
+        val translated =
+            aiCompletionService.translate(
+                config = config,
+                source = sourceTemplate,
+                targetLanguage = targetLanguage,
+                prompt = prompt,
+            ) ?: return null
+        return AiPlaceholderTranslationSupport
+            .reconstructDocument(
+                sourceDocument = sourceDocument,
+                translatedTemplate = TranslationResponseSanitizer.clean(translated),
+                targetLanguage = targetLanguage,
+            ).encodeJson(TranslationDocument.serializer())
+    }
 
     override suspend fun translateBatchDocumentJson(
         sourceJson: String,
         sourceDocument: PreTranslationBatchDocument,
         targetLanguage: String,
         prompt: String,
-    ): String? =
-        aiCompletionService.translate(
-            config = config,
-            source = sourceJson,
-            targetLanguage = targetLanguage,
-            prompt = prompt,
-        )
+    ): String? {
+        val translated =
+            aiCompletionService.translate(
+                config = config,
+                source = sourceJson,
+                targetLanguage = targetLanguage,
+                prompt = prompt,
+            ) ?: return null
+        return AiPlaceholderTranslationSupport
+            .reconstructBatchDocument(
+                sourceDocument = sourceDocument,
+                translatedTemplate = TranslationResponseSanitizer.clean(translated),
+                targetLanguage = targetLanguage,
+            ).encodeJson(PreTranslationBatchDocument.serializer())
+    }
 }
 
 private object GoogleWebTranslationEngine : TranslationEngine {
@@ -141,7 +158,7 @@ private object GoogleWebTranslationEngine : TranslationEngine {
     }
 
     override suspend fun translateDocumentJson(
-        sourceText: String,
+        sourceTemplate: String,
         sourceJson: String,
         targetLanguage: String,
         prompt: String,
@@ -247,7 +264,7 @@ private class DeepLTranslationEngine(
     }
 
     override suspend fun translateDocumentJson(
-        sourceText: String,
+        sourceTemplate: String,
         sourceJson: String,
         targetLanguage: String,
         prompt: String,
@@ -332,7 +349,7 @@ private class GoogleCloudTranslationEngine(
     }
 
     override suspend fun translateDocumentJson(
-        sourceText: String,
+        sourceTemplate: String,
         sourceJson: String,
         targetLanguage: String,
         prompt: String,
@@ -417,7 +434,7 @@ private class LibreTranslateEngine(
     }
 
     override suspend fun translateDocumentJson(
-        sourceText: String,
+        sourceTemplate: String,
         sourceJson: String,
         targetLanguage: String,
         prompt: String,

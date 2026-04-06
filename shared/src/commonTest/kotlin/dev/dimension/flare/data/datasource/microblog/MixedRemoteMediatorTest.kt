@@ -29,7 +29,6 @@ import dev.dimension.flare.data.io.PlatformPathProducer
 import dev.dimension.flare.data.network.ai.AiCompletionService
 import dev.dimension.flare.data.network.ai.OpenAIService
 import dev.dimension.flare.data.translation.OnlinePreTranslationService
-import dev.dimension.flare.data.translation.PreTranslationBatchDocument
 import dev.dimension.flare.data.translation.PreTranslationService
 import dev.dimension.flare.data.translation.aiPreTranslateConfig
 import dev.dimension.flare.deleteTestRootPath
@@ -1283,20 +1282,7 @@ private class TestOnDeviceAI : OnDeviceAI {
                 dev.dimension.flare.data.translation.PreTranslationBatchDocument
                     .serializer(),
             )
-        return document
-            .copy(
-                items =
-                    document.items.map { item ->
-                        item.copy(
-                            status = dev.dimension.flare.data.translation.PreTranslationBatchItemStatus.Completed,
-                            payload = requireNotNull(item.payload).translated(targetLanguage),
-                            reason = null,
-                        )
-                    },
-            ).encodeJson(
-                dev.dimension.flare.data.translation.PreTranslationBatchDocument
-                    .serializer(),
-            )
+        return completedTranslationTemplate(document, targetLanguage)
     }
 
     override suspend fun tldr(
@@ -1324,20 +1310,7 @@ private class BlockingOnDeviceAI(
                 dev.dimension.flare.data.translation.PreTranslationBatchDocument
                     .serializer(),
             )
-        return document
-            .copy(
-                items =
-                    document.items.map { item ->
-                        item.copy(
-                            status = dev.dimension.flare.data.translation.PreTranslationBatchItemStatus.Completed,
-                            payload = requireNotNull(item.payload).translated(targetLanguage),
-                            reason = null,
-                        )
-                    },
-            ).encodeJson(
-                dev.dimension.flare.data.translation.PreTranslationBatchDocument
-                    .serializer(),
-            )
+        return completedTranslationTemplate(document, targetLanguage)
     }
 
     override suspend fun tldr(
@@ -1360,20 +1333,7 @@ private class SkippingOnDeviceAI : OnDeviceAI {
                 dev.dimension.flare.data.translation.PreTranslationBatchDocument
                     .serializer(),
             )
-        return document
-            .copy(
-                items =
-                    document.items.map { item ->
-                        item.copy(
-                            status = dev.dimension.flare.data.translation.PreTranslationBatchItemStatus.Skipped,
-                            payload = null,
-                            reason = "same_language",
-                        )
-                    },
-            ).encodeJson(
-                dev.dimension.flare.data.translation.PreTranslationBatchDocument
-                    .serializer(),
-            )
+        return skippedTranslationTemplate(document, "same_language")
     }
 
     override suspend fun tldr(
@@ -1397,7 +1357,45 @@ private fun completedTranslationJson(
                         reason = null,
                     )
                 },
-        ).encodeJson(preTranslationBatchDocumentSerializer)
+        ).encodeJson(
+            dev.dimension.flare.data.translation.PreTranslationBatchDocument.serializer(),
+        )
+
+private fun completedTranslationTemplate(
+    document: dev.dimension.flare.data.translation.PreTranslationBatchDocument,
+    targetLanguage: String,
+): String =
+    dev.dimension.flare.data.translation.AiPlaceholderTranslationSupport
+        .buildPromptTemplate(
+            document.copy(
+                items =
+                    document.items.map { item ->
+                        item.copy(
+                            status = dev.dimension.flare.data.translation.PreTranslationBatchItemStatus.Completed,
+                            payload = requireNotNull(item.payload).translated(targetLanguage),
+                            reason = null,
+                        )
+                    },
+            ),
+        )
+
+private fun skippedTranslationTemplate(
+    document: dev.dimension.flare.data.translation.PreTranslationBatchDocument,
+    reason: String,
+): String =
+    dev.dimension.flare.data.translation.AiPlaceholderTranslationSupport
+        .buildPromptTemplate(
+            document.copy(
+                items =
+                    document.items.map { item ->
+                        item.copy(
+                            status = dev.dimension.flare.data.translation.PreTranslationBatchItemStatus.Skipped,
+                            payload = null,
+                            reason = reason,
+                        )
+                    },
+            ),
+        )
 
 private fun dev.dimension.flare.data.translation.PreTranslationBatchPayload.translated(
     targetLanguage: String,
@@ -1425,6 +1423,3 @@ private fun TranslationDocument.translated(targetLanguage: String): TranslationD
                 )
             },
     )
-
-private val preTranslationBatchDocumentSerializer =
-    PreTranslationBatchDocument.serializer()

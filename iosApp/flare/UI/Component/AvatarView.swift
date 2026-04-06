@@ -6,10 +6,6 @@ struct AvatarView: View {
     let data: String
     var body: some View {
         NetworkImage(data: data)
-            .if(avatarShape == .circle, if: { view in
-                view.clipShape(.circle)
-            }, else: { view in
-                view.clipShape(.rect(cornerRadius: 8))
-            })
+            .clipShape(avatarShape == .circle ? AnyShape(.circle) : AnyShape(.rect(cornerRadius: 8)))
     }
 }

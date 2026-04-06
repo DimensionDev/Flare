@@ -5,81 +5,186 @@ import SwiftUIBackports
 struct NotificationScreen: View {
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @StateObject private var presenter: KotlinPresenter<AllNotificationPresenterState> = .init(presenter: AllNotificationPresenter())
-    @State private var showTopBar = true
+    @State private var selectedAccountStableKey: String?
+    @State private var selectedFilter: NotificationFilter?
+
+    private var notificationItems: [NotificationAccountItem] {
+        presenter.state.notifications
+    }
+
+    private var supportedFilters: [NotificationFilter] {
+        switch onEnum(of: presenter.state.supportedNotificationFilters) {
+        case .success(let data):
+            data.data.cast(NotificationFilter.self)
+        case .loading, .error:
+            []
+        }
+    }
+
+    private var presenterSelectedAccountStableKey: String? {
+        let selectedStableKey =
+            presenter.state.selectedAccount.flatMap { profile in
+                let stableKey = "\(profile.key.host):\(profile.key.id)"
+                return notificationItems.contains(where: { $0.stableKey == stableKey }) ? stableKey : nil
+            }
+        return selectedStableKey ?? notificationItems.first?.stableKey
+    }
+
+    private var presenterSelectedFilterStableKey: String? {
+        presenter.state.selectedFilter?.stableKey
+    }
+
+    private var notificationItemsSignature: String {
+        notificationItems.map(\.stableKey).joined(separator: "|")
+    }
+
+    private var supportedFiltersSignature: String {
+        supportedFilters.map(\.stableKey).joined(separator: "|")
+    }
+
+    private var isSyncingAccountSelection: Bool {
+        selectedAccountStableKey != presenterSelectedAccountStableKey
+    }
+
+    private var timelineKey: String {
+        [
+            presenter.key,
+            presenterSelectedAccountStableKey ?? "none",
+            presenterSelectedFilterStableKey ?? "none",
+        ].joined(separator: "::")
+    }
+
+    private var filterSegments: some View {
+        NotificationFilterSegments(
+            allTypes: supportedFilters,
+            selected: $selectedFilter
+        )
+        .padding(.horizontal)
+    }
 
     var body: some View {
-        TimelinePagingContent(data: presenter.state.timeline, detailStatusKey: nil, key: presenter.key)
+        TimelinePagingContent(data: presenter.state.timeline, detailStatusKey: nil, key: timelineKey)
+            .id(timelineKey)
             .refreshable {
                 try? await presenter.state.refreshSuspend()
             }
             .detectScrolling()
-            .if(presenter.state.notifications.count >= 1 && horizontalSizeClass == .compact) { view in
+            .if(!notificationItems.isEmpty && horizontalSizeClass == .compact && !isSyncingAccountSelection) { view in
                 view
                     .safeAreaInset(edge: .top) {
-                        StateView(state: presenter.state.supportedNotificationFilters) { allTypesAny in
-                            let allTypes = allTypesAny.cast(NotificationFilter.self)
-                            NotificationFilterSegments(
-                                allTypes: allTypes,
-                                selected: presenter.state.selectedFilter,
-                                onSelect: { presenter.state.setFilter(filter: $0) }
-                            )
-                            .padding(.horizontal)
-                        }
+                        filterSegments
                     }
             }
             .toolbar {
-                if presenter.state.notifications.count > 1 {
+                if notificationItems.count > 1 {
                     ToolbarItem {
                         NotificationAccountsMenu(
-                            items: presenter.state.notifications,
-                            selectedAccount: presenter.state.selectedAccount,
-                            onSelect: { presenter.state.setAccount(profile: $0) }
+                            items: notificationItems,
+                            selectedStableKey: $selectedAccountStableKey
                         )
                     }
-                    if horizontalSizeClass == .regular {
+                    if horizontalSizeClass == .regular && !isSyncingAccountSelection {
                         if #available(iOS 26.0, *) {
                             ToolbarSpacer()
                         }
                         ToolbarItem {
-                            StateView(state: presenter.state.supportedNotificationFilters) { allTypesAny in
-                                let allTypes = allTypesAny.cast(NotificationFilter.self)
-                                NotificationFilterSegments(
-                                    allTypes: allTypes,
-                                    selected: presenter.state.selectedFilter,
-                                    onSelect: { presenter.state.setFilter(filter: $0) }
-                                )
-                                .padding(.horizontal)
-                            }
+                            filterSegments
                         }
                     }
-                    
-                } else {
+
+                } else if !isSyncingAccountSelection {
                     ToolbarItem(placement: .title) {
-                        StateView(state: presenter.state.supportedNotificationFilters) { allTypesAny in
-                            let allTypes = allTypesAny.cast(NotificationFilter.self)
-                            NotificationFilterSegments(
-                                allTypes: allTypes,
-                                selected: presenter.state.selectedFilter,
-                                onSelect: { presenter.state.setFilter(filter: $0) }
-                            )
-                            .padding(.horizontal)
-                        }
+                        filterSegments
                     }
                 }
             }
+            .onAppear {
+                syncSelectedAccountFromPresenter()
+                syncSelectedFilterFromPresenter()
+            }
+            .onChange(of: presenterSelectedAccountStableKey) { _ in
+                syncSelectedAccountFromPresenter()
+                syncSelectedFilterFromPresenter()
+            }
+            .onChange(of: notificationItemsSignature) { _ in
+                syncSelectedAccountFromPresenter()
+            }
+            .onChange(of: selectedAccountStableKey) { _ in
+                syncSelectedAccountToPresenter()
+            }
+            .onChange(of: presenterSelectedFilterStableKey) { _ in
+                syncSelectedFilterFromPresenter()
+            }
+            .onChange(of: supportedFiltersSignature) { _ in
+                syncSelectedFilterFromPresenter()
+            }
+            .onChange(of: selectedFilter?.stableKey) { _ in
+                syncSelectedFilterToPresenter()
+            }
+    }
+
+    private func syncSelectedAccountFromPresenter() {
+        if selectedAccountStableKey != presenterSelectedAccountStableKey {
+            selectedAccountStableKey = presenterSelectedAccountStableKey
+        }
+    }
+
+    private func syncSelectedAccountToPresenter() {
+        guard
+            let selectedAccountStableKey,
+            selectedAccountStableKey != presenterSelectedAccountStableKey,
+            let profile = notificationItems.first(where: { $0.stableKey == selectedAccountStableKey })?.profile
+        else {
+            return
+        }
+        presenter.state.setAccount(profile: profile)
+    }
+
+    private func syncSelectedFilterFromPresenter() {
+        let resolvedFilter: NotificationFilter?
+        if supportedFilters.isEmpty {
+            resolvedFilter = presenter.state.selectedFilter
+        } else if let presenterFilter = presenter.state.selectedFilter {
+            resolvedFilter =
+                supportedFilters.first(where: { $0.stableKey == presenterFilter.stableKey }) ??
+                supportedFilters.first
+        } else {
+            resolvedFilter = supportedFilters.first
+        }
+
+        if selectedFilter?.stableKey != resolvedFilter?.stableKey {
+            selectedFilter = resolvedFilter
+        }
+    }
+
+    private func syncSelectedFilterToPresenter() {
+        guard
+            let selectedFilter,
+            selectedFilter.stableKey != presenterSelectedFilterStableKey
+        else {
+            return
+        }
+        presenter.state.setFilter(filter: selectedFilter)
     }
 }
 
 struct NotificationFilterSegments: View {
     let allTypes: [NotificationFilter]
-    let selected: NotificationFilter?
-    let onSelect: (NotificationFilter) -> Void
+    @Binding var selected: NotificationFilter?
+
+    private var resolvedSelection: NotificationFilter {
+        if let selected = selected,
+           let matchingFilter = allTypes.first(where: { $0.stableKey == selected.stableKey }) {
+            return matchingFilter
+        }
+        return allTypes.first ?? .all
+    }
 
     var body: some View {
         if allTypes.count > 1 {
             Picker("notification_type_title", selection: Binding<NotificationFilter>(
-                get: { selected ?? allTypes.first ?? .all },
-                set: { value in onSelect(value) }
+                get: { resolvedSelection },
+                set: { value in selected = value }
             )) {
                 ForEach(allTypes, id: \.self) { type in
                     switch type {
@@ -99,123 +204,107 @@ struct NotificationFilterSegments: View {
     }
 }
 
-struct NotificationAccountsBar: View {
-    let items: [NotificationAccountItem]
-    let selectedAccount: UiProfile?
-    let onSelect: (UiProfile) -> Void
-
-    var body: some View {
-        ScrollView(.horizontal) {
-            HStack(spacing: 8) {
-                ForEach(items, id: \.stableKey) { item in
-                    let key = item.profile
-                    let value = item.badge
-                    HStack {
-                        ZStack(alignment: .bottomTrailing) {
-                            AvatarView(data: key.avatar)
-                            if value > 0 {
-                                Text("\(value)")
-                                    .font(.caption2)
-                                    .padding(2)
-                                    .background(
-                                        Circle()
-                                            .fill(Color.red)
-                                    )
-                                    .foregroundStyle(.white)
-                                    .frame(width: 12, height: 12)
-                            }
-                        }
-                        Text(key.handle.canonical)
-                    }
-                    .onTapGesture {
-                        onSelect(key)
-                    }
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 8)
-                    .foregroundStyle(selectedAccount?.key == key.key ? Color.white : .primary)
-                    .backport
-                    .glassEffect(selectedAccount?.key == key.key ? .tinted(.accentColor) : .regular, in: .capsule, fallbackBackground: selectedAccount?.key == key.key ? Color.accentColor : Color(.systemBackground))
-                }
-            }
-            .padding(.vertical, 8)
-        }
-        .scrollIndicators(.hidden)
-    }
-}
-
 struct NotificationAccountsMenu: View {
     let items: [NotificationAccountItem]
-    let selectedAccount: UiProfile?
-    let onSelect: (UiProfile) -> Void
+    @Binding var selectedStableKey: String?
+
+    private var resolvedSelectedStableKey: String? {
+        if let selectedStableKey,
+           items.contains(where: { $0.stableKey == selectedStableKey }) {
+            return selectedStableKey
+        }
+        return items.first?.stableKey
+    }
 
     private var unreadItems: [NotificationAccountItem] {
         items.filter { $0.badge > 0 }
     }
 
-    private var unreadSummary: String? {
-        guard !unreadItems.isEmpty else {
-            return nil
-        }
-
-        let visible = unreadItems.prefix(2).map { $0.profile.handle.canonical }
-        let remaining = unreadItems.count - visible.count
-        if remaining > 0 {
-            return visible.joined(separator: " · ") + " +\(remaining)"
-        } else {
-            return visible.joined(separator: " · ")
+    private var totalUnreadCount: Int {
+        unreadItems.reduce(0) { partialResult, item in
+            partialResult + Int(item.badge)
         }
     }
 
+    private var selectedItem: NotificationAccountItem? {
+        items.first(where: { $0.stableKey == resolvedSelectedStableKey }) ?? items.first
+    }
+
+    private func unreadText(for count: Int) -> String? {
+        guard count > 0 else {
+            return nil
+        }
+        return "(\(count)) unread"
+    }
+
     var body: some View {
-        Menu {
-            ForEach(items, id: \.stableKey) { item in
-                Toggle(isOn: Binding(get: {
-                    selectedAccount?.key == item.profile.key
-                }, set: { value in
-                    if value {
-                        onSelect(item.profile)
-                    }
-                })) {
-                    Label {
-                        Text(item.profile.handle.canonical)
-                    } icon: {
-                        AvatarView(data: item.profile.avatar)
-                            .overlay(alignment: .bottomTrailing) {
+        if items.count > 1 {
+            Menu {
+                ForEach(items, id: \.stableKey) { item in
+                    Toggle(isOn: Binding(
+                        get: { resolvedSelectedStableKey == item.stableKey },
+                        set: { isSelected in
+                            if isSelected {
+                                selectedStableKey = item.stableKey
                             }
-                    }
-                    if item.badge > 0 {
-                        Text("\(item.badge)")
-                    }
-                }
-            }
-        } label: {
-            if let selectedAccount {
-                HStack(spacing: 8) {
-                    AvatarView(data: selectedAccount.avatar)
-                        .frame(width: 24, height: 24)
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(selectedAccount.handle.canonical)
-                            .lineLimit(1)
-                        if let unreadSummary {
-                            Text("New from \(unreadSummary)")
-                                .font(.caption2)
-                                .foregroundStyle(.secondary)
-                                .lineLimit(1)
+                        }
+                    )) {
+                        Label {
+                            Text(item.profile.handle.canonical)
+                            if let unreadText = unreadText(for: Int(item.badge)) {
+                                Text(unreadText)
+                            }
+                        } icon: {
+                            AvatarView(data: item.profile.avatar)
+                                .frame(width: 24, height: 24)
                         }
                     }
-                    Image("fa-chevron-down")
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
-                        .scaledToFit()
-                        .frame(width: 8, height: 8)
-                        .padding(8)
-                        .background(
-                            Circle()
-                                .fill(Color.secondary.opacity(0.2))
-                        )
-                        .scaleEffect(0.66)
+                }
+            } label: {
+                if let selectedItem {
+                    let selectedAccount = selectedItem.profile
+                    HStack(spacing: 8) {
+                        AvatarView(data: selectedAccount.avatar)
+                            .frame(width: 24, height: 24)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(selectedAccount.handle.canonical)
+                                .lineLimit(1)
+                            if let unreadText = unreadText(for: totalUnreadCount) {
+                                Text(unreadText)
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                                    .lineLimit(1)
+                            }
+                        }
+                        Image("fa-chevron-down")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                            .scaledToFit()
+                            .frame(width: 8, height: 8)
+                            .padding(8)
+                            .background(
+                                Circle()
+                                    .fill(Color.secondary.opacity(0.2))
+                            )
+                            .scaleEffect(0.66)
+                    }
                 }
             }
+        }
+    }
+}
+
+private extension NotificationFilter {
+    var stableKey: String {
+        switch self {
+        case .all:
+            "all"
+        case .comment:
+            "comment"
+        case .like:
+            "like"
+        case .mention:
+            "mention"
         }
     }
 }

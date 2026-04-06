@@ -18,8 +18,6 @@ enum NetworkKind: Equatable {
 @MainActor
 final class NetworkMonitor: ObservableObject {
     @Published private(set) var kind: NetworkKind = .cellular
-    @Published private(set) var isExpensive: Bool = false
-    @Published private(set) var isConstrained: Bool = false
 
     private let monitor = NWPathMonitor()
     private let queue = DispatchQueue(label: "net.monitor.queue")
@@ -34,20 +32,22 @@ final class NetworkMonitor: ObservableObject {
         monitor.pathUpdateHandler = { [weak self] path in
             Task { @MainActor in
                 guard let self else { return }
-                self.kind = self.map(path)
-                self.isExpensive = path.isExpensive
-                if #available(iOS 13.0, *) {
-                    self.isConstrained = path.isConstrained
-                } else {
-                    self.isConstrained = false
-                }
+                let nextKind = self.map(path)
+                guard self.kind != nextKind else { return }
+                self.kind = nextKind
             }
         }
         monitor.start(queue: queue)
     }
 
     private func map(_ path: NWPath) -> NetworkKind {
-        if isExpensive || isConstrained { return .cellular }
+        let isConstrained: Bool
+        if #available(iOS 13.0, *) {
+            isConstrained = path.isConstrained
+        } else {
+            isConstrained = false
+        }
+        if path.isExpensive || isConstrained { return .cellular }
         guard path.status == .satisfied else { return .cellular }
         if path.usesInterfaceType(.wifi)    { return .wifi }
         if path.usesInterfaceType(.wiredEthernet) { return .wifi }

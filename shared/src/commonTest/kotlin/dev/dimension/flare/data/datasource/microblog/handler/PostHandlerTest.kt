@@ -45,7 +45,9 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNotNull
@@ -82,6 +84,7 @@ class PostHandlerTest : RobolectricTest() {
     private lateinit var appDataStore: AppDataStore
     private lateinit var fakeLoader: FakePostLoader
     private lateinit var onDeviceAI: FakePostOnDeviceAI
+    private var injectedScope: CoroutineScope? = null
 
     private val accountKey = MicroBlogKey(id = "user-1", host = "test.social")
     private val accountType = AccountType.Specific(accountKey)
@@ -103,18 +106,22 @@ class PostHandlerTest : RobolectricTest() {
 
     @AfterTest
     fun tearDown() {
+        injectedScope?.cancel()
+        injectedScope = null
         db.close()
         stopKoin()
         deleteTestRootPath(root)
     }
 
     private fun startTestKoin(scope: CoroutineScope) {
+        val detachedScope = CoroutineScope(scope.coroutineContext + SupervisorJob())
+        injectedScope = detachedScope
         startKoin {
             modules(
                 module {
                     single { db }
                     single { appDataStore }
-                    single<CoroutineScope> { scope }
+                    single<CoroutineScope> { detachedScope }
                     single<OnDeviceAI> { onDeviceAI }
                     single { OpenAIService() }
                     single { AiCompletionService(get(), get()) }

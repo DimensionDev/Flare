@@ -1,6 +1,7 @@
 import SwiftUI
 import KotlinSharedUI
 import SwiftUIBackports
+import UIKit
 
 // MARK: - Top-level container
 // Hoists @ScaledMetric, @Environment reads to a single place
@@ -146,8 +147,15 @@ struct StatusActionItemView: View {
         return nil
     }
 
+    private func triggerHapticFeedback() {
+        let generator = UIImpactFeedbackGenerator(style: .medium)
+        generator.prepare()
+        generator.impactOccurred()
+    }
+
     var body: some View {
         Button(role: data.color?.role) {
+            triggerHapticFeedback()
             data.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
         } label: {
             if let text = resolvedText {

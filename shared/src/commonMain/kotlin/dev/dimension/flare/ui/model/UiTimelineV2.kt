@@ -30,6 +30,7 @@ public sealed class UiTimelineV2 {
     internal abstract val accountType: AccountType
 
     public abstract val itemKey: String?
+    public abstract val renderHash: Int
 
     @Transient
     public val itemType: String =
@@ -58,6 +59,17 @@ public sealed class UiTimelineV2 {
         override val searchText: String? = null
         val onClicked: ClickContext.() -> Unit by lazy {
             clickEvent.onClicked
+        }
+        override val renderHash: Int by lazy {
+            renderHashBuilder()
+                .add(itemKey)
+                .add(user?.renderSummaryHash())
+                .add(statusKey)
+                .add(icon)
+                .add(type.renderSummaryHash())
+                .add(createdAt.value)
+                .add(accountType)
+                .build()
         }
 
         @Serializable
@@ -149,6 +161,22 @@ public sealed class UiTimelineV2 {
         val onClicked: ClickContext.() -> Unit by lazy {
             clickEvent.onClicked
         }
+        override val renderHash: Int by lazy {
+            renderHashBuilder()
+                .add(itemKey)
+                .add(title)
+                .add(description)
+                .add(url)
+                .add(sourceLanguages)
+                .add(translationDisplayState)
+                .add(createdAt.value)
+                .add(source.name)
+                .add(source.icon)
+                .add(openInBrowser)
+                .add(media?.renderSummaryHash())
+                .add(accountType)
+                .build()
+        }
 
         @Serializable
         @Immutable
@@ -220,6 +248,34 @@ public sealed class UiTimelineV2 {
         val shouldExpandTextByDefault: Boolean by lazy {
             (contentWarning == null || contentWarning.isEmpty) && !content.isLongText
         }
+        override val renderHash: Int by lazy {
+            renderHashBuilder()
+                .add(itemKey)
+                .add(message?.renderHash)
+                .add(platformType)
+                .add(images.renderSummaryHash { it.renderSummaryHash() })
+                .add(sensitive)
+                .add(contentWarning?.renderSummaryHash())
+                .add(sourceLanguages)
+                .add(translationDisplayState)
+                .add(quote.renderSummaryHash { it.renderSummaryHash() })
+                .add(content.renderSummaryHash())
+                .add(actions.renderSummaryHash { it.renderSummaryHash() })
+                .add(poll?.renderSummaryHash())
+                .add(statusKey)
+                .add(card?.renderSummaryHash())
+                .add(createdAt.value)
+                .add(emojiReactions.renderSummaryHash { it.renderSummaryHash() })
+                .add(sourceChannel?.id)
+                .add(sourceChannel?.name)
+                .add(visibility)
+                .add(replyToHandle)
+                .add(references.renderSummaryHash { it.renderSummaryHash() })
+                .add(parents.renderSummaryHash { it.renderSummaryHash() })
+                .add(internalRepost?.renderSummaryHash())
+                .add(accountType)
+                .build()
+        }
 
         @Serializable
         @Immutable
@@ -276,6 +332,17 @@ public sealed class UiTimelineV2 {
         override val itemKey: String? = null,
     ) : UiTimelineV2() {
         override val searchText: String? = null
+        override val renderHash: Int by lazy {
+            renderHashBuilder()
+                .add(itemKey)
+                .add(message?.renderHash)
+                .add(value.renderSummaryHash())
+                .add(createdAt.value)
+                .add(statusKey)
+                .add(button.renderSummaryHash { it.renderSummaryHash() })
+                .add(accountType)
+                .build()
+        }
     }
 
     @Serializable
@@ -291,6 +358,17 @@ public sealed class UiTimelineV2 {
         override val itemKey: String? = null,
     ) : UiTimelineV2() {
         override val searchText: String? = null
+        override val renderHash: Int by lazy {
+            renderHashBuilder()
+                .add(itemKey)
+                .add(message?.renderHash)
+                .add(users.renderSummaryHash { it.renderSummaryHash() })
+                .add(createdAt.value)
+                .add(statusKey)
+                .add(post?.renderSummaryHash())
+                .add(accountType)
+                .build()
+        }
     }
 }
 
@@ -302,3 +380,220 @@ internal fun UiTimelineV2.withItemKey(itemKey: String?): UiTimelineV2 =
         is UiTimelineV2.User -> copy(itemKey = itemKey)
         is UiTimelineV2.UserList -> copy(itemKey = itemKey)
     }
+
+private fun renderHashBuilder(): RenderHashBuilder = RenderHashBuilder()
+
+private class RenderHashBuilder {
+    private var result: Int = 17
+
+    fun add(value: Any?): RenderHashBuilder {
+        result = 31 * result + (value?.hashCode() ?: 0)
+        return this
+    }
+
+    fun build(): Int = result
+}
+
+private fun UiTimelineV2.Message.Type.renderSummaryHash(): Int =
+    when (this) {
+        is UiTimelineV2.Message.Type.Localized ->
+            renderHashBuilder()
+                .add(data)
+                .add(args)
+                .build()
+        is UiTimelineV2.Message.Type.Raw ->
+            renderHashBuilder()
+                .add(content)
+                .build()
+        is UiTimelineV2.Message.Type.Unknown ->
+            renderHashBuilder()
+                .add(rawType)
+                .build()
+    }
+
+private fun UiTimelineV2.Post.renderSummaryHash(): Int =
+    renderHashBuilder()
+        .add(itemKey)
+        .add(message?.renderHash)
+        .add(platformType)
+        .add(user?.renderSummaryHash())
+        .add(contentWarning?.renderSummaryHash())
+        .add(content.renderSummaryHash())
+        .add(images.renderSummaryHash { it.renderSummaryHash() })
+        .add(sensitive)
+        .add(poll?.renderSummaryHash())
+        .add(card?.renderSummaryHash())
+        .add(emojiReactions.renderSummaryHash { it.renderSummaryHash() })
+        .add(replyToHandle)
+        .add(sourceChannel?.id)
+        .add(sourceChannel?.name)
+        .add(visibility)
+        .add(translationDisplayState)
+        .add(actions.renderSummaryHash { it.renderSummaryHash() })
+        .add(createdAt.value)
+        .build()
+
+private fun UiProfile.renderSummaryHash(): Int =
+    renderHashBuilder()
+        .add(key)
+        .add(handle.raw)
+        .add(handle.host)
+        .add(avatar)
+        .add(name.raw)
+        .add(platformType)
+        .add(banner)
+        .add(description?.renderSummaryHash())
+        .add(translationDisplayState)
+        .add(matrices.fansCount)
+        .add(matrices.followsCount)
+        .add(matrices.statusesCount)
+        .add(matrices.platformFansCount)
+        .add(mark)
+        .add(bottomContent?.renderSummaryHash())
+        .build()
+
+private fun UiProfile.BottomContent.renderSummaryHash(): Int =
+    when (this) {
+        is UiProfile.BottomContent.Fields ->
+            fields.entries
+                .sortedBy { it.key }
+                .fold(renderHashBuilder()) { builder, entry ->
+                    builder
+                        .add(entry.key)
+                        .add(entry.value.renderSummaryHash())
+                }.build()
+        is UiProfile.BottomContent.Iconify ->
+            items.entries
+                .sortedBy { it.key.name }
+                .fold(renderHashBuilder()) { builder, entry ->
+                    builder
+                        .add(entry.key)
+                        .add(entry.value.renderSummaryHash())
+                }.build()
+    }
+
+private fun UiPoll.renderSummaryHash(): Int =
+    renderHashBuilder()
+        .add(id)
+        .add(options.renderSummaryHash { it.renderSummaryHash() })
+        .add(multiple)
+        .add(ownVotes)
+        .add(expired)
+        .add(voted)
+        .add(canVote)
+        .build()
+
+private fun UiPoll.Option.renderSummaryHash(): Int =
+    renderHashBuilder()
+        .add(title)
+        .add(votesCount)
+        .add(percentage.toBits())
+        .build()
+
+private fun UiCard.renderSummaryHash(): Int =
+    renderHashBuilder()
+        .add(title)
+        .add(description)
+        .add(media?.renderSummaryHash())
+        .add(url)
+        .build()
+
+private fun UiMedia.renderSummaryHash(): Int =
+    when (this) {
+        is UiMedia.Audio ->
+            renderHashBuilder()
+                .add(url)
+                .add(description)
+                .add(previewUrl)
+                .build()
+        is UiMedia.Gif ->
+            renderHashBuilder()
+                .add(url)
+                .add(previewUrl)
+                .add(description)
+                .add(height.toBits())
+                .add(width.toBits())
+                .build()
+        is UiMedia.Image ->
+            renderHashBuilder()
+                .add(url)
+                .add(previewUrl)
+                .add(description)
+                .add(height.toBits())
+                .add(width.toBits())
+                .add(sensitive)
+                .build()
+        is UiMedia.Video ->
+            renderHashBuilder()
+                .add(url)
+                .add(thumbnailUrl)
+                .add(description)
+                .add(height.toBits())
+                .add(width.toBits())
+                .build()
+    }
+
+private fun UiRichText.renderSummaryHash(): Int =
+    renderHashBuilder()
+        .add(raw)
+        .add(innerText)
+        .add(imageUrls)
+        .build()
+
+private fun UiTimelineV2.Post.EmojiReaction.renderSummaryHash(): Int =
+    renderHashBuilder()
+        .add(name)
+        .add(url)
+        .add(count)
+        .add(isUnicode)
+        .add(me)
+        .build()
+
+private fun UiTimelineV2.Post.Reference.renderSummaryHash(): Int =
+    renderHashBuilder()
+        .add(statusKey)
+        .add(type)
+        .build()
+
+private fun ActionMenu.renderSummaryHash(): Int =
+    when (this) {
+        ActionMenu.Divider ->
+            renderHashBuilder()
+                .add("divider")
+                .build()
+        is ActionMenu.Group ->
+            renderHashBuilder()
+                .add(displayItem.renderSummaryHash())
+                .add(actions.renderSummaryHash { it.renderSummaryHash() })
+                .build()
+        is ActionMenu.Item ->
+            renderSummaryHash()
+    }
+
+private fun ActionMenu.Item.renderSummaryHash(): Int =
+    renderHashBuilder()
+        .add(updateKey)
+        .add(icon)
+        .add(text.renderSummaryHash())
+        .add(count)
+        .add(color)
+        .build()
+
+private fun ActionMenu.Item.Text?.renderSummaryHash(): Int =
+    when (this) {
+        null -> 0
+        is ActionMenu.Item.Text.Localized ->
+            renderHashBuilder()
+                .add(type)
+                .add(parameters)
+                .build()
+        is ActionMenu.Item.Text.Raw ->
+            renderHashBuilder()
+                .add(text)
+                .build()
+    }
+
+private inline fun <T> Iterable<T>.renderSummaryHash(hash: (T) -> Int): Int =
+    fold(renderHashBuilder()) { builder, item ->
+        builder.add(hash(item))
+    }.build()

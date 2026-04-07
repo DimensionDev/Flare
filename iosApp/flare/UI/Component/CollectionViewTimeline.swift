@@ -64,9 +64,16 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
     private var isUserRefreshing = false
     private var shouldRevealRefreshControl = false
     private var scrollingState = ScrollingState()
+    private var lastAppliedSignature: SnapshotSignature?
+    private var lastRenderHashMap: [String: Int32] = [:]
 
     // Maps item identifier → index for timeline cells
     private var itemIndexMap: [String: Int] = [:]
+
+    private struct SnapshotSignature: Equatable {
+        let itemIDs: [String]
+        let footerIDs: [String]
+    }
 
     @Observable
     final class ScrollingState {
@@ -159,7 +166,7 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
     private func updateContentInsets() {
         guard collectionView != nil else { return }
         collectionView.contentInset.top = topContentInset
-        collectionView.scrollIndicatorInsets.top = topContentInset
+        collectionView.verticalScrollIndicatorInsets.top = topContentInset
     }
 
     // MARK: - Cell Configuration
@@ -360,20 +367,26 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
     private func applySnapshot(data: PagingState<UiTimelineV2>) {
         var snapshot = NSDiffableDataSourceSnapshot<Int, String>()
         var newIndexMap: [String: Int] = [:]
+        var newRenderHashMap: [String: Int32] = [:]
+        var itemIDs: [String] = []
+        var footerIDs: [String] = []
 
         switch onEnum(of: data) {
         case .loading:
             snapshot.appendSections([Self.sectionMain])
             let items = (0..<5).map { "\(Self.placeholderPrefix)\($0)" }
+            itemIDs = items
             snapshot.appendItems(items, toSection: Self.sectionMain)
 
         case .error:
             snapshot.appendSections([Self.sectionMain])
-            snapshot.appendItems([Self.errorID], toSection: Self.sectionMain)
+            itemIDs = [Self.errorID]
+            snapshot.appendItems(itemIDs, toSection: Self.sectionMain)
 
         case .empty:
             snapshot.appendSections([Self.sectionMain])
-            snapshot.appendItems([Self.emptyID], toSection: Self.sectionMain)
+            itemIDs = [Self.emptyID]
+            snapshot.appendItems(itemIDs, toSection: Self.sectionMain)
 
         case .success(let success):
             snapshot.appendSections([Self.sectionMain])
@@ -385,11 +398,16 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
                 let id = "\(Self.timelinePrefix)\(peeked?.itemKey ?? "idx_\(i)")"
                 items.append(id)
                 newIndexMap[id] = i
+                if let peeked {
+                    newRenderHashMap[id] = peeked.renderHash
+                }
             }
+            itemIDs = items
             snapshot.appendItems(items, toSection: Self.sectionMain)
 
             // Footer
             let footer = footerItemIDs(for: success)
+            footerIDs = footer
             if !footer.isEmpty {
                 snapshot.appendSections([Self.sectionFooter])
                 snapshot.appendItems(footer, toSection: Self.sectionFooter)
@@ -397,6 +415,24 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
         }
 
         itemIndexMap = newIndexMap
+        let newSignature = SnapshotSignature(itemIDs: itemIDs, footerIDs: footerIDs)
+        let previousSignature = lastAppliedSignature
+
+        if previousSignature?.itemIDs == newSignature.itemIDs,
+           previousSignature?.footerIDs == newSignature.footerIDs {
+            let changedIDs = itemIDs.filter { lastRenderHashMap[$0] != newRenderHashMap[$0] }
+            lastRenderHashMap = newRenderHashMap
+            reconfigureItems(changedIDs)
+            return
+        }
+
+        if previousSignature?.itemIDs == newSignature.itemIDs {
+            let changedIDs = itemIDs.filter { lastRenderHashMap[$0] != newRenderHashMap[$0] }
+            applyFooterSnapshot(footerIDs: footerIDs, reconfigureIDs: changedIDs, data: data)
+            lastAppliedSignature = newSignature
+            lastRenderHashMap = newRenderHashMap
+            return
+        }
 
         // Reconfigure existing items so cells pick up data changes (e.g. like count)
         let existing = dataSource.snapshot().itemIdentifiers
@@ -406,6 +442,45 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
             snapshot.reconfigureItems(toReconfigure)
         }
         
+        let shouldAnimateDifferences =
+                    !pagingIsRefreshing(data) &&
+                    !refreshControl.isRefreshing &&
+                    !collectionView.isDragging &&
+                    !collectionView.isDecelerating
+        dataSource.apply(snapshot, animatingDifferences: shouldAnimateDifferences)
+        lastAppliedSignature = newSignature
+        lastRenderHashMap = newRenderHashMap
+    }
+
+    private func reconfigureItems(_ itemIDs: [String]) {
+        guard !itemIDs.isEmpty else { return }
+        var snapshot = dataSource.snapshot()
+        let existingItems = Set(snapshot.itemIdentifiers)
+        let reconfigureIDs = itemIDs.filter { existingItems.contains($0) }
+        guard !reconfigureIDs.isEmpty else { return }
+        snapshot.reconfigureItems(reconfigureIDs)
+        dataSource.apply(snapshot, animatingDifferences: false)
+    }
+
+    private func applyFooterSnapshot(footerIDs: [String], reconfigureIDs: [String], data: PagingState<UiTimelineV2>) {
+        var snapshot = dataSource.snapshot()
+        let hasFooterSection = snapshot.sectionIdentifiers.contains(Self.sectionFooter)
+
+        if hasFooterSection {
+            snapshot.deleteSections([Self.sectionFooter])
+        }
+
+        if !footerIDs.isEmpty {
+            snapshot.appendSections([Self.sectionFooter])
+            snapshot.appendItems(footerIDs, toSection: Self.sectionFooter)
+        }
+
+        let existingItems = Set(snapshot.itemIdentifiers)
+        let intersectedReconfigureIDs = reconfigureIDs.filter { existingItems.contains($0) }
+        if !intersectedReconfigureIDs.isEmpty {
+            snapshot.reconfigureItems(intersectedReconfigureIDs)
+        }
+
         let shouldAnimateDifferences =
                     !pagingIsRefreshing(data) &&
                     !refreshControl.isRefreshing &&

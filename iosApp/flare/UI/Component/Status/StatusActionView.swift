@@ -2,8 +2,15 @@ import SwiftUI
 import KotlinSharedUI
 import SwiftUIBackports
 
+// MARK: - Top-level container
+// Hoists @ScaledMetric, @Environment reads to a single place
+// instead of duplicating them in every child view instance.
+
 struct StatusActionsView: View {
     @Environment(\.appearanceSettings.postActionStyle) private var postActionStyle
+    @Environment(\.appearanceSettings.showNumbers) private var showNumbers
+    @Environment(\.openURL) private var openURL
+    @ScaledMetric(relativeTo: .footnote) var fontSize = 13
     let data: [ActionMenu]
     let useText: Bool
     var allowSpacer: Bool = true
@@ -11,8 +18,14 @@ struct StatusActionsView: View {
     var body: some View {
         if useText {
             ForEach(0..<data.count, id: \.self) { index in
-                let item = data[index]
-                StatusActionView(data: item, useText: true, isFixedWidth: false)
+                StatusActionView(
+                    data: data[index],
+                    useText: true,
+                    isFixedWidth: false,
+                    fontSize: fontSize,
+                    showNumbers: showNumbers,
+                    openURL: openURL
+                )
             }
         } else {
             HStack {
@@ -25,7 +38,14 @@ struct StatusActionsView: View {
                             Spacer()
                         }
                     }
-                    StatusActionView(data: item, useText: useText, isFixedWidth: index != data.count - 1)
+                    StatusActionView(
+                        data: item,
+                        useText: useText,
+                        isFixedWidth: index != data.count - 1,
+                        fontSize: fontSize,
+                        showNumbers: showNumbers,
+                        openURL: openURL
+                    )
                 }
             }
             .backport
@@ -34,64 +54,70 @@ struct StatusActionsView: View {
     }
 }
 
+// MARK: - Single action (sealed class switch)
+// No @Environment or @ScaledMetric — values passed from parent.
+
 struct StatusActionView: View {
-    @Environment(\.appearanceSettings.showNumbers) private var showNumbers
-    @ScaledMetric(relativeTo: .footnote) var fontSize = 13
     let data: ActionMenu
     let useText: Bool
     let isFixedWidth: Bool
+    let fontSize: CGFloat
+    let showNumbers: Bool
+    let openURL: OpenURLAction
+
     var body: some View {
         switch onEnum(of: data) {
         case .item(let item):
-            StatusActionItemView(data: item, useText: useText, isFixedWidth: isFixedWidth)
+            StatusActionItemView(
+                data: item,
+                useText: useText,
+                isFixedWidth: isFixedWidth,
+                fontSize: fontSize,
+                showNumbers: showNumbers,
+                openURL: openURL
+            )
         case .group(let group):
             if useText {
                 Divider()
                 ForEach(0..<group.actions.count, id: \.self) { index in
-                    let item = group.actions[index]
-                    StatusActionView(data: item, useText: true, isFixedWidth: false)
+                    StatusActionView(
+                        data: group.actions[index],
+                        useText: true,
+                        isFixedWidth: false,
+                        fontSize: fontSize,
+                        showNumbers: showNumbers,
+                        openURL: openURL
+                    )
                 }
                 Divider()
             } else {
                 Menu {
                     ForEach(0..<group.actions.count, id: \.self) { index in
-                        let item = group.actions[index]
-                        StatusActionView(data: item, useText: true, isFixedWidth: false)
+                        StatusActionView(
+                            data: group.actions[index],
+                            useText: true,
+                            isFixedWidth: false,
+                            fontSize: fontSize,
+                            showNumbers: showNumbers,
+                            openURL: openURL
+                        )
                     }
                 } label: {
                     if let text = group.displayItem.count?.humanized, showNumbers {
                         Label {
-                            if let color = group.displayItem.color?.swiftColor {
-                                Text(text)
-                                    .foregroundStyle(color)
-                                    .lineLimit(1)
-                                    .frame(minWidth: isFixedWidth ? fontSize * 2.5 : nil, alignment: .leading)
-                            } else {
-                                Text(text)
-                                    .lineLimit(1)
-                                    .frame(minWidth: isFixedWidth ? fontSize * 2.5 : nil, alignment: .leading)
-                            }
+                            Text(text)
+                                .lineLimit(1)
+                                .frame(minWidth: isFixedWidth ? fontSize * 2.5 : nil, alignment: .leading)
                         } icon: {
-                            if let color = group.displayItem.color?.swiftColor {
-                                StatusActionIcon(icon: group.displayItem.icon)
-                                    .foregroundStyle(color)
-                            } else {
-                                StatusActionIcon(icon: group.displayItem.icon)
-                            }
+                            StatusActionIcon(icon: group.displayItem.icon)
                         }
                     } else {
-                        if let color = group.displayItem.color?.swiftColor {
-                            StatusActionIcon(icon: group.displayItem.icon)
-                                .foregroundStyle(color)
-                                .frame(minWidth: fontSize * 1.5, minHeight: fontSize * 1.5)
-                                .contentShape(Rectangle())
-                        } else {
-                            StatusActionIcon(icon: group.displayItem.icon)
-                                .frame(minWidth: fontSize * 1.5, minHeight: fontSize * 1.5)
-                                .contentShape(Rectangle())
-                        }
+                        StatusActionIcon(icon: group.displayItem.icon)
+                            .frame(minWidth: fontSize * 1.5, minHeight: fontSize * 1.5)
+                            .contentShape(Rectangle())
                     }
                 }
+                .optionalForegroundStyle(group.displayItem.color?.swiftColor)
                 .buttonStyle(.plain)
             }
         case .divider:
@@ -100,66 +126,55 @@ struct StatusActionView: View {
     }
 }
 
+// MARK: - Leaf action item (Button)
+// Computes display text once to avoid nested _ConditionalContent branches.
+
 struct StatusActionItemView: View {
-    @Environment(\.appearanceSettings.showNumbers) private var showNumbers
-    @Environment(\.openURL) private var openURL
-    @ScaledMetric(relativeTo: .footnote) var fontSize = 13
     let data: ActionMenu.Item
     let useText: Bool
     let isFixedWidth: Bool
+    let fontSize: CGFloat
+    let showNumbers: Bool
+    let openURL: OpenURLAction
+
+    private var resolvedText: Text? {
+        if useText, let text = data.text?.resolvedString {
+            return Text(text)
+        } else if showNumbers, let count = data.count?.humanized {
+            return Text(count)
+        }
+        return nil
+    }
+
     var body: some View {
-        Button(
-            role: data.color?.role
-        ) {
+        Button(role: data.color?.role) {
             data.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
         } label: {
-            if useText, let text = data.text?.resolvedString {
+            if let text = resolvedText {
                 Label {
-                    if let color = data.color?.swiftColor {
-                        Text(text)
-                            .foregroundStyle(color)
-                            .frame(minWidth: isFixedWidth ? fontSize * 2.5 : nil, alignment: .leading)
-                    } else {
-                        Text(text)
-                            .frame(minWidth: isFixedWidth ? fontSize * 2.5 : nil, alignment: .leading)
-                    }
+                    text.frame(minWidth: isFixedWidth ? fontSize * 2.5 : nil, alignment: .leading)
                 } icon: {
-                    if let color = data.color?.swiftColor {
-                        StatusActionIcon(icon: data.icon)
-                            .foregroundStyle(color)
-                    } else {
-                        StatusActionIcon(icon: data.icon)
-                    }
-                }
-            } else if let text = data.count?.humanized, showNumbers {
-                Label {
-                    if let color = data.color?.swiftColor {
-                        Text(text)
-                            .foregroundStyle(color)
-                            .frame(minWidth: isFixedWidth ? fontSize * 2.5 : nil, alignment: .leading)
-                    } else {
-                        Text(text)
-                            .frame(minWidth: isFixedWidth ? fontSize * 2.5 : nil, alignment: .leading)
-                    }
-                } icon: {
-                    if let color = data.color?.swiftColor {
-                        StatusActionIcon(icon: data.icon)
-                            .foregroundStyle(color)
-                    } else {
-                        StatusActionIcon(icon: data.icon)
-                    }
+                    StatusActionIcon(icon: data.icon)
                 }
             } else {
-                if let color = data.color?.swiftColor {
-                    StatusActionIcon(icon: data.icon)
-                        .foregroundStyle(color)
-                } else {
-                    StatusActionIcon(icon: data.icon)
-                }
+                StatusActionIcon(icon: data.icon)
             }
         }
-        .sensoryFeedback(.success, trigger: data.color?.swiftColor)
+        .optionalForegroundStyle(data.color?.swiftColor)
         .buttonStyle(.plain)
+    }
+}
+
+// MARK: - Helpers
+
+private extension View {
+    @ViewBuilder
+    func optionalForegroundStyle(_ color: Color?) -> some View {
+        if let color {
+            self.foregroundStyle(color)
+        } else {
+            self
+        }
     }
 }
 

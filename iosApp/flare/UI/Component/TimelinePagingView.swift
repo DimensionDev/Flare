@@ -67,6 +67,20 @@ struct TimelinePagingContent: View {
     let data: PagingState<UiTimelineV2>
     let detailStatusKey: MicroBlogKey?
     let key: String
+    let topContentInset: CGFloat
+
+    init(
+        data: PagingState<UiTimelineV2>,
+        detailStatusKey: MicroBlogKey?,
+        key: String,
+        topContentInset: CGFloat = 0
+    ) {
+        self.data = data
+        self.detailStatusKey = detailStatusKey
+        self.key = key
+        self.topContentInset = topContentInset
+    }
+
     var body: some View {
         if useComposeView {
             ComposeTimelineView(
@@ -106,21 +120,12 @@ struct TimelinePagingContent: View {
     }
     
     var singleListView: some View {
-        List {
-            TimelinePagingView(data: data, detailStatusKey: detailStatusKey)
-                .listRowSeparator(.hidden)
-                .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
-                .padding(.horizontal)
-                .listRowBackground(Color.clear)
-        }
-        .detectScrolling()
-        .scrollContentBackground(.hidden)
-        .listRowSpacing(2)
-        .listStyle(.plain)
-//        .refreshable {
-//            try? await presenter.state.refreshSuspend()
-//        }
-        .background(Color(.systemGroupedBackground))
+        CollectionViewTimelineView(
+            data: data,
+            detailStatusKey: detailStatusKey,
+            topContentInset: topContentInset
+        )
+        .ignoresSafeArea()
     }
 }
 

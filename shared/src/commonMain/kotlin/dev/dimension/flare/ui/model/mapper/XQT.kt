@@ -25,6 +25,11 @@ import dev.dimension.flare.data.network.xqt.model.TweetCardLegacyBindingValueDat
 import dev.dimension.flare.data.network.xqt.model.TweetTombstone
 import dev.dimension.flare.data.network.xqt.model.TweetUnion
 import dev.dimension.flare.data.network.xqt.model.TweetWithVisibilityResults
+import dev.dimension.flare.data.network.xqt.model.TwitterArticleBlock
+import dev.dimension.flare.data.network.xqt.model.TwitterArticleEntity
+import dev.dimension.flare.data.network.xqt.model.TwitterArticleInlineStyleRange
+import dev.dimension.flare.data.network.xqt.model.TwitterArticleMedia
+import dev.dimension.flare.data.network.xqt.model.TwitterArticleResult
 import dev.dimension.flare.data.network.xqt.model.TwitterList
 import dev.dimension.flare.data.network.xqt.model.User
 import dev.dimension.flare.data.network.xqt.model.UserResultCore
@@ -48,6 +53,8 @@ import dev.dimension.flare.ui.model.UiPoll
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.UiTwitterArticle
+import dev.dimension.flare.ui.render.RenderBlockStyle
 import dev.dimension.flare.ui.render.RenderContent
 import dev.dimension.flare.ui.render.RenderRun
 import dev.dimension.flare.ui.render.RenderTextStyle
@@ -417,7 +424,31 @@ internal fun Tweet.renderStatus(
                 }
             }?.render(accountKey = accountKey)
     val uiCard =
-        card?.legacy?.let {
+        articleResult
+            ?.let { article ->
+                val title =
+                    article.title?.takeIf { it.isNotBlank() }
+                        ?: article.previewText
+                            ?.lineSequence()
+                            ?.firstOrNull()
+                            ?.trim()
+                            ?.takeIf { it.isNotBlank() }
+                val tweetId = legacy?.idStr ?: restId
+                title?.let {
+                    UiCard(
+                        title = it,
+                        media = article.coverMedia.toUiCardImage(),
+                        description = article.previewText?.trim()?.takeIf { preview -> preview.isNotEmpty() },
+                        url =
+                            DeeplinkRoute
+                                .TwitterArticle(
+                                    accountType = AccountType.Specific(accountKey),
+                                    tweetId = tweetId,
+                                    articleId = article.restId,
+                                ).toUri(),
+                    )
+                }
+            } ?: card?.legacy?.let {
             val title = it.get("title")?.stringValue
             val image = it.get("photo_image_full_size_original")?.imageValue
             val description = it.get("description")?.stringValue
@@ -1248,6 +1279,87 @@ internal val User.avatarUrl: String
             ?: avatar?.imageUrl?.replaceWithOriginImageUrl()
             ?: "https://abs.twimg.com/sticky/default_profile_images/default_profile_normal.png"
 
+private val Tweet.articleResult: TwitterArticleResult?
+    get() = article?.articleResults?.result
+
+private fun TwitterArticleMedia?.toUiCardImage(): UiMedia.Image? {
+    val media = this ?: return null
+    val imageUrl = media.displayImageUrl() ?: return null
+    return UiMedia.Image(
+        url = imageUrl,
+        previewUrl = imageUrl,
+        height = media.mediaInfo?.displayHeight()?.toFloat() ?: 0f,
+        width = media.mediaInfo?.displayWidth()?.toFloat() ?: 0f,
+        sensitive = false,
+        description = null,
+    )
+}
+
+private fun TwitterArticleMedia.displayImageUrl(): String? = mediaInfo?.displayImageUrl()
+
+private fun dev.dimension.flare.data.network.xqt.model.TwitterArticleMediaInfo.displayImageUrl(): String? =
+    originalImgUrl ?: previewImage?.originalImgUrl
+
+private fun dev.dimension.flare.data.network.xqt.model.TwitterArticleMediaInfo.displayWidth(): Int? =
+    originalImgWidth ?: previewImage?.originalImgWidth
+
+private fun dev.dimension.flare.data.network.xqt.model.TwitterArticleMediaInfo.displayHeight(): Int? =
+    originalImgHeight ?: previewImage?.originalImgHeight
+
+private fun TwitterArticleMedia.href(): String? =
+    mediaInfo
+        ?.variants
+        ?.filter { it.contentType?.startsWith("video/") == true }
+        ?.maxByOrNull { it.bitRate ?: 0 }
+        ?.url
+        ?: displayImageUrl()?.let {
+            DeeplinkRoute.Media
+                .Image(
+                    uri = it,
+                    previewUrl = it,
+                ).toUri()
+        }
+
+internal fun TweetUnion.renderArticle(
+    accountKey: MicroBlogKey,
+    expectedArticleId: String? = null,
+): UiTwitterArticle? = toTweetOrNull()?.renderArticle(accountKey, expectedArticleId)
+
+internal fun Tweet.renderArticle(
+    accountKey: MicroBlogKey,
+    expectedArticleId: String? = null,
+): UiTwitterArticle? {
+    val article = articleResult ?: return null
+    if (expectedArticleId != null && article.restId != expectedArticleId) {
+        return null
+    }
+    val profile =
+        core
+            ?.userResults
+            ?.result
+            ?.let {
+                when (it) {
+                    is User -> it.render(accountKey)
+                    is UserUnavailable -> null
+                }
+            } ?: return null
+    val title =
+        article.title
+            ?.takeIf { it.isNotBlank() }
+            ?: article.previewText
+                ?.lineSequence()
+                ?.firstOrNull()
+                ?.trim()
+                ?.takeIf { it.isNotBlank() }
+            ?: return null
+    return UiTwitterArticle(
+        profile = profile,
+        image = article.coverMedia?.displayImageUrl(),
+        title = title,
+        content = article.renderContent(accountKey),
+    )
+}
+
 internal fun Tweet.renderContent(accountKey: MicroBlogKey): UiRichText {
     if (noteTweet == null) {
         val text =
@@ -1608,3 +1720,168 @@ private fun renderRichText(
                 token
             }
         }.toUiRichText(accountKey)
+
+private fun TwitterArticleResult.renderContent(accountKey: MicroBlogKey): UiRichText {
+    val blocks = contentState?.blocks.orEmpty()
+    if (blocks.isEmpty()) {
+        val fallback = previewText?.trim().orEmpty()
+        return fallback.toUiPlainText()
+    }
+    val entities = contentState?.entityMap.orEmpty()
+    val mediaMap = mediaEntities.associateBy { it.mediaId }
+    val contents = mutableListOf<RenderContent>()
+    val rawBlocks = mutableListOf<String>()
+    var orderedListIndex = 0
+
+    blocks.forEach { block ->
+        val normalizedType = block.type.lowercase()
+        if (normalizedType == "ordered-list-item") {
+            orderedListIndex += 1
+        } else {
+            orderedListIndex = 0
+        }
+        val renderContents =
+            block.toRenderContents(
+                entities = entities,
+                mediaMap = mediaMap,
+                accountKey = accountKey,
+                orderedListIndex = orderedListIndex,
+            )
+        if (renderContents.isNotEmpty()) {
+            contents += renderContents
+        }
+        if (block.text.isNotBlank()) {
+            rawBlocks += block.text
+        }
+    }
+    val innerText = rawBlocks.joinToString("\n")
+    return uiRichTextOf(
+        renderRuns = contents,
+        raw = innerText,
+        innerText = innerText,
+    )
+}
+
+private fun TwitterArticleBlock.toRenderContents(
+    entities: List<dev.dimension.flare.data.network.xqt.model.TwitterArticleEntityEntry>,
+    mediaMap: Map<String?, TwitterArticleMedia>,
+    accountKey: MicroBlogKey,
+    orderedListIndex: Int,
+): List<RenderContent> {
+    if (type.equals("atomic", ignoreCase = true)) {
+        val entityKey = entityRanges.firstOrNull()?.key ?: return emptyList()
+        val entity = entities.entityValue(entityKey) ?: return emptyList()
+        if (entity.type.equals("MEDIA", ignoreCase = true)) {
+            val media =
+                entity.data.mediaItems
+                    .firstNotNullOfOrNull { mediaItem ->
+                        mediaMap[mediaItem.mediaId]
+                    } ?: return emptyList()
+            val imageUrl = media.displayImageUrl() ?: return emptyList()
+            return listOf(
+                RenderContent.BlockImage(
+                    url = imageUrl,
+                    href = media.href(),
+                ),
+            )
+        }
+        return emptyList()
+    }
+
+    val blockStyle =
+        when (type.lowercase()) {
+            "header-one" -> RenderBlockStyle(headingLevel = 1)
+            "header-two" -> RenderBlockStyle(headingLevel = 2)
+            "header-three" -> RenderBlockStyle(headingLevel = 3)
+            "header-four" -> RenderBlockStyle(headingLevel = 4)
+            "header-five" -> RenderBlockStyle(headingLevel = 5)
+            "header-six" -> RenderBlockStyle(headingLevel = 6)
+            "blockquote" -> RenderBlockStyle(isBlockQuote = true)
+            "unordered-list-item", "ordered-list-item" -> RenderBlockStyle(isListItem = true)
+            else -> RenderBlockStyle()
+        }
+
+    val runs = mutableListOf<RenderRun>()
+    if (type.equals("unordered-list-item", ignoreCase = true)) {
+        runs += RenderRun.Text("\u2022 ")
+    } else if (type.equals("ordered-list-item", ignoreCase = true)) {
+        runs += RenderRun.Text("$orderedListIndex. ")
+    }
+
+    val boundaries = mutableSetOf(0, text.length)
+    entityRanges.forEach {
+        boundaries += it.offset
+        boundaries += (it.offset + it.length).coerceAtMost(text.length)
+    }
+    inlineStyleRanges.forEach {
+        boundaries += it.offset
+        boundaries += (it.offset + it.length).coerceAtMost(text.length)
+    }
+    data.urls.forEach {
+        it.fromIndex?.let(boundaries::add)
+        it.toIndex?.let { end -> boundaries += end.coerceAtMost(text.length) }
+    }
+
+    boundaries
+        .filter { it in 0..text.length }
+        .sorted()
+        .zipWithNext()
+        .forEach { (start, end) ->
+            if (start >= end) return@forEach
+            val rawSegment = text.substring(start, end)
+            if (rawSegment.isEmpty()) return@forEach
+            val entity =
+                entityRanges.firstOrNull { start >= it.offset && start < it.offset + it.length }?.let { range ->
+                    entities.entityValue(range.key)
+                }
+            val link =
+                when {
+                    entity?.type.equals("LINK", ignoreCase = true) -> entity?.data?.url
+                    else ->
+                        data.urls
+                            .firstOrNull { url ->
+                                val from = url.fromIndex ?: return@firstOrNull false
+                                val to = url.toIndex ?: return@firstOrNull false
+                                start >= from && start < to
+                            }?.text
+                }
+            runs +=
+                RenderRun.Text(
+                    text = rawSegment,
+                    style =
+                        RenderTextStyle(
+                            link = link,
+                            bold = inlineStyleRanges.hasStyle(start, "bold"),
+                            italic = inlineStyleRanges.hasStyle(start, "italic"),
+                            underline = inlineStyleRanges.hasStyle(start, "underline"),
+                            monospace = inlineStyleRanges.hasStyle(start, "code"),
+                            code = inlineStyleRanges.hasStyle(start, "code"),
+                            strikethrough = inlineStyleRanges.hasStyle(start, "strikethrough"),
+                        ),
+                )
+        }
+
+    return if (runs.isEmpty()) {
+        emptyList()
+    } else {
+        listOf(
+            RenderContent.Text(
+                runs = runs.toImmutableList(),
+                block = blockStyle,
+            ),
+        )
+    }
+}
+
+private fun List<TwitterArticleInlineStyleRange>.hasStyle(
+    offset: Int,
+    style: String,
+): Boolean =
+    any {
+        offset >= it.offset &&
+            offset < it.offset + it.length &&
+            it.style.equals(style, ignoreCase = true)
+    }
+
+private fun List<dev.dimension.flare.data.network.xqt.model.TwitterArticleEntityEntry>.entityValue(key: Int): TwitterArticleEntity? =
+    getOrNull(key)?.value ?: firstOrNull { it.key == key.toString() }?.value

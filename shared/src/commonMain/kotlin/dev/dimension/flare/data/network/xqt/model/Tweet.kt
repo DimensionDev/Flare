@@ -58,6 +58,8 @@ internal data class Tweet(
     val core: UserResultCore? = null,
 //    @SerialName(value = "edit_prespective")
 //    val editPrespective: TweetEditPrespective? = null,
+    @SerialName(value = "article")
+    val article: TwitterArticle? = null,
     @SerialName(value = "legacy")
     val legacy: TweetLegacy? = null,
     @SerialName(value = "note_tweet")

@@ -10,6 +10,7 @@ import dev.dimension.flare.common.Cacheable
 import dev.dimension.flare.common.FileType
 import dev.dimension.flare.common.MemCacheable
 import dev.dimension.flare.common.decodeJson
+import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.XQT
 import dev.dimension.flare.data.database.cache.model.DbMessageItem
@@ -60,6 +61,7 @@ import dev.dimension.flare.data.network.xqt.model.PostDmNew2Request
 import dev.dimension.flare.data.network.xqt.model.PostFavoriteTweetRequest
 import dev.dimension.flare.data.network.xqt.model.PostMediaMetadataCreateRequest
 import dev.dimension.flare.data.network.xqt.model.PostUnfavoriteTweetRequest
+import dev.dimension.flare.data.network.xqt.model.TweetUnion
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.model.AccountType
@@ -137,6 +139,26 @@ internal class XQTDataSource(
     private val listLoader = XQTListLoader(service, accountKey)
 
     private val listMemberLoader = XQTListMemberLoader(service, accountKey)
+
+    internal suspend fun getTweetResultByRestId(tweetId: String): TweetUnion? =
+        service
+            .getTweetResultByRestId(
+                variables =
+                    TweetDetailWithRestIdRequest(
+                        tweetID = tweetId,
+                        withCommunity = true,
+                        includePromotedContent = true,
+                        withVoice = true,
+                        withBirdwatchNotes = true,
+                    ).encodeJson(),
+                features =
+                    PostCreateTweetRequestFeatures(
+                        responsiveWebTwitterArticleTweetConsumptionEnabled = true,
+                    ).encodeJson(),
+            ).body()
+            ?.data
+            ?.tweetResult
+            ?.result
 
     override val notificationHandler by lazy {
         NotificationHandler(

@@ -185,6 +185,12 @@ internal sealed interface Route : NavKey {
         override val url: String,
     ) : UrlRoute
 
+    data class TwitterArticle(
+        val accountType: AccountType,
+        val tweetId: String,
+        val articleId: String? = null,
+    ) : ScreenRoute
+
     data class DmList(
         val accountType: AccountType,
     ) : ScreenRoute
@@ -347,6 +353,14 @@ internal sealed interface Route : NavKey {
                     )
 
                 is DeeplinkRoute.Rss.Detail -> RssDetail(url = deeplinkRoute.url)
+
+                is DeeplinkRoute.TwitterArticle ->
+                    TwitterArticle(
+                        accountType = deeplinkRoute.accountType,
+                        tweetId = deeplinkRoute.tweetId,
+                        articleId = deeplinkRoute.articleId,
+                    )
+
                 is DeeplinkRoute.Search ->
                     Search(
                         accountType = deeplinkRoute.accountType,

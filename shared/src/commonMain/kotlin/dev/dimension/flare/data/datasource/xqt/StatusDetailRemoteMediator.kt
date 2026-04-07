@@ -156,6 +156,8 @@ internal data class TweetDetailWithRestIdRequest(
     val includePromotedContent: Boolean = false,
     @Required
     val withVoice: Boolean = false,
+    @Required
+    val withBirdwatchNotes: Boolean = true,
 )
 
 @Serializable

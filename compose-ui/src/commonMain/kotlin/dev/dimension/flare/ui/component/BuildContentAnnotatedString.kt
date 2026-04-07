@@ -299,7 +299,7 @@ private fun ContentBuilder.renderRuns(
         when (run) {
             is RenderRun.Image -> {
                 val imageId = context.appendImageInlineContent(run.url)
-                appendInlineContent(imageId, run.alt.ifEmpty { run.url })
+                appendInlineContent(imageId, if (allowLinkAnnotation) "\uFFFC" else run.alt.ifEmpty { run.url })
             }
             is RenderRun.Text -> renderTextRun(run, block, styleData, blockTextStyle)
         }

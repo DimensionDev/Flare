@@ -581,11 +581,25 @@ internal fun renderVVOText(
     accountKey: MicroBlogKey,
 ): UiRichText {
     val element = parseHtml(text)
-
+    extractImagesFromLinks(element)
     element.childNodes().forEach {
         replaceMentionAndHashtag(element, it, accountKey)
     }
     return element.toUi()
+}
+
+private fun extractImagesFromLinks(element: Element) {
+    element.select("a:has(img)").forEach { anchor ->
+        anchor
+            .children()
+            .filter { it.tagName() == "img" || it.select("img").isNotEmpty() }
+            .toList()
+            .forEach { imgChild ->
+                val html = imgChild.outerHtml()
+                imgChild.remove()
+                anchor.before(html)
+            }
+    }
 }
 
 private fun replaceMentionAndHashtag(
@@ -632,7 +646,22 @@ private fun replaceMentionAndHashtag(
                         "href",
                         DeeplinkRoute.Media.Image(uri = url, previewUrl = null).toUri(),
                     )
+                } else {
+                    node.attributes().put(
+                        "href",
+                        url,
+                    )
                 }
+            } else if (href.startsWith("/status/")) {
+                // open the post
+                node.attributes().put(
+                    "href",
+                    DeeplinkRoute.Status
+                        .VVOStatus(
+                            statusKey = MicroBlogKey(href.removePrefix("/status/"), accountKey.host),
+                            accountType = AccountType.Specific(accountKey),
+                        ).toUri(),
+                )
             }
         }
         node.childNodes().forEach {

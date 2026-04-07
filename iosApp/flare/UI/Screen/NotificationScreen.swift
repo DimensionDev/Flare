@@ -7,6 +7,7 @@ struct NotificationScreen: View {
     @StateObject private var presenter: KotlinPresenter<AllNotificationPresenterState> = .init(presenter: AllNotificationPresenter())
     @State private var selectedAccountStableKey: String?
     @State private var selectedFilter: NotificationFilter?
+    @State private var filterSegmentsHeight: CGFloat = 0
 
     private var notificationItems: [NotificationAccountItem] {
         presenter.state.notifications
@@ -60,10 +61,26 @@ struct NotificationScreen: View {
             selected: $selectedFilter
         )
         .padding(.horizontal)
+        .background {
+            GeometryReader { proxy in
+                Color.clear
+                    .onAppear {
+                        filterSegmentsHeight = proxy.size.height
+                    }
+                    .onChange(of: proxy.size.height) { height in
+                        filterSegmentsHeight = height
+                    }
+            }
+        }
     }
 
     var body: some View {
-        TimelinePagingContent(data: presenter.state.timeline, detailStatusKey: nil, key: timelineKey)
+        TimelinePagingContent(
+            data: presenter.state.timeline,
+            detailStatusKey: nil,
+            key: timelineKey,
+            topContentInset: horizontalSizeClass == .compact && !isSyncingAccountSelection ? filterSegmentsHeight + 8 : 0
+        )
             .id(timelineKey)
             .refreshable {
                 try? await presenter.state.refreshSuspend()

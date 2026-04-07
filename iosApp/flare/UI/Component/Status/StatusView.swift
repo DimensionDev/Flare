@@ -187,7 +187,8 @@ struct StatusView: View {
 
                         if !data.quote.isEmpty, !isQuote {
                             VStack {
-                                ForEach(data.quote, id: \.itemKey) { quote in
+                                ForEach(0..<data.quote.count, id: \.self) { index in
+                                    let quote = data.quote[index]
                                     StatusView(data: quote, isQuote: true, forceHideActions: true)
                                     if data.quote.last != quote {
                                         Divider()

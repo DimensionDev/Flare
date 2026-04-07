@@ -9,7 +9,6 @@ import dev.dimension.flare.common.Locale
 import dev.dimension.flare.common.OnDeviceAI
 import dev.dimension.flare.common.TestFormatter
 import dev.dimension.flare.common.decodeJson
-import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.createTestRootPath
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.model.DbTranslation
@@ -480,17 +479,19 @@ private class FakeOnDeviceAI : OnDeviceAI {
             error("translation failed")
         }
         val document = source.decodeJson(PreTranslationBatchDocument.serializer())
-        return document
-            .copy(
-                items =
-                    document.items.map { item ->
-                        item.copy(
-                            status = dev.dimension.flare.data.translation.PreTranslationBatchItemStatus.Completed,
-                            payload = requireNotNull(item.payload).translated(targetLanguage),
-                            reason = null,
-                        )
-                    },
-            ).encodeJson(PreTranslationBatchDocument.serializer())
+        return dev.dimension.flare.data.translation.AiPlaceholderTranslationSupport
+            .buildPromptTemplate(
+                document.copy(
+                    items =
+                        document.items.map { item ->
+                            item.copy(
+                                status = dev.dimension.flare.data.translation.PreTranslationBatchItemStatus.Completed,
+                                payload = requireNotNull(item.payload).translated(targetLanguage),
+                                reason = null,
+                            )
+                        },
+                ),
+            )
     }
 
     override suspend fun tldr(

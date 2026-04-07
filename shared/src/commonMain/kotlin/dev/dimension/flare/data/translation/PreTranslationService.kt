@@ -561,12 +561,12 @@ internal class OnlinePreTranslationService(
                     sourceDocument.encodeJson(
                         PreTranslationBatchDocument.serializer(),
                     )
+                val promptTemplate = AiPlaceholderTranslationSupport.buildPromptTemplate(sourceDocument)
                 val prompt =
                     TranslationPromptFormatter.buildTranslatePrompt(
                         settings = settings.appSettings,
                         targetLanguage = settings.targetLanguage,
-                        sourceText = sourceJson,
-                        sourceJson = sourceJson,
+                        sourceTemplate = promptTemplate,
                     )
                 val translatedJson =
                     batchTranslator(

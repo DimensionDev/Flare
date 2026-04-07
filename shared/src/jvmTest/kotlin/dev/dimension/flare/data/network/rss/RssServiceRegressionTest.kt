@@ -35,8 +35,18 @@ class RssServiceRegressionTest {
         assertIs<Feed.Rss20>(feed)
         assertEquals("测试订阅", feed.channel.title)
         assertEquals("https://example.com/forum.php", feed.channel.link)
-        assertEquals("第一条", feed.channel.items.first().title)
-        assertTrue(feed.channel.items.first().description?.contains("本地数据") == true)
+        assertEquals(
+            "第一条",
+            feed.channel.items
+                .first()
+                .title,
+        )
+        assertTrue(
+            feed.channel.items
+                .first()
+                .description
+                ?.contains("本地数据") == true,
+        )
     }
 
     @Test

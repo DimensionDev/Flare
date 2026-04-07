@@ -4,8 +4,8 @@ import com.fleeksoft.ksoup.Ksoup
 import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.data.network.rss.model.Feed
 import dev.dimension.flare.data.repository.tryRun
-import io.ktor.client.call.body
 import dev.dimension.flare.ui.model.mapper.link
+import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpHeaders
@@ -170,8 +170,7 @@ private fun detectXmlCharset(bytes: ByteArray): String? =
 private fun detectHtmlCharset(bytes: ByteArray): String? =
     HTML_META_CHARSET_REGEX.find(asciiPrefix(bytes, limit = 4096))?.groupValues?.getOrNull(1)
 
-private fun detectHeaderCharset(contentType: String): String? =
-    HEADER_CHARSET_REGEX.find(contentType)?.groupValues?.getOrNull(1)
+private fun detectHeaderCharset(contentType: String): String? = HEADER_CHARSET_REGEX.find(contentType)?.groupValues?.getOrNull(1)
 
 private fun asciiPrefix(
     bytes: ByteArray,

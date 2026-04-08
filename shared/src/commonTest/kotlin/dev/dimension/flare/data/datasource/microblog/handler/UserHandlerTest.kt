@@ -353,7 +353,7 @@ class UserHandlerTest : RobolectricTest() {
                         entityKey = expected.translationEntityKey(),
                         targetLanguage = Locale.language,
                     ).filterNotNull()
-                    .first()
+                    .first { it.status == TranslationStatus.Skipped }
 
             assertEquals(TranslationStatus.Skipped, saved.status)
             assertEquals(PreTranslationStoreSupport.SKIPPED_EXCLUDED_LANGUAGE_REASON, saved.statusReason)

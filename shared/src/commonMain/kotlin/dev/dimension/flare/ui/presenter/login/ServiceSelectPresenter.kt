@@ -28,13 +28,16 @@ public class ServiceSelectPresenter(
         val blueskyOauthLoginState = remember { BlueskyOAuthLoginPresenter(toHome) }.body()
         val mastodonLoginState = mastodonLoginPresenter(toHome)
         val misskeyLoginState = misskeyLoginPresenter(toHome)
+        val tumblrLoginState = tumblrLoginPresenter(toHome)
         val loading =
             nostrLoginState.loading ||
                 blueskyLoginState.loading ||
                 mastodonLoginState.loading ||
                 mastodonLoginState.resumedState is UiState.Loading ||
                 misskeyLoginState.loading ||
-                misskeyLoginState.resumedState is UiState.Loading
+                misskeyLoginState.resumedState is UiState.Loading ||
+                tumblrLoginState.loading ||
+                tumblrLoginState.resumedState is UiState.Loading
 
         return object : ServiceSelectState, NodeInfoState by nodeInfoState {
             override val nostrLoginState = nostrLoginState
@@ -42,7 +45,53 @@ public class ServiceSelectPresenter(
             override val blueskyOauthLoginState = blueskyOauthLoginState
             override val mastodonLoginState = mastodonLoginState
             override val misskeyLoginState = misskeyLoginState
+            override val tumblrLoginState = tumblrLoginState
             override val loading = loading
+        }
+    }
+
+    @Composable
+    private fun tumblrLoginPresenter(onBack: (() -> Unit)?): TumblrLoginState {
+        var loading by remember { mutableStateOf(false) }
+        var error by remember { mutableStateOf<String?>(null) }
+        val scope = rememberCoroutineScope()
+        var callbackUrl by remember { mutableStateOf<String?>(null) }
+        val resumedState =
+            callbackUrl?.let {
+                remember {
+                    TumblrCallbackPresenter(
+                        callbackUrl = callbackUrl,
+                        toHome = {
+                            callbackUrl = null
+                            loading = false
+                            error = null
+                            onBack?.invoke()
+                        },
+                    )
+                }.body()
+            }
+        return object : TumblrLoginState {
+            override val loading = loading
+            override val error = error
+            override val resumedState = resumedState
+
+            override fun login(launchUrl: (String) -> Unit) {
+                scope.launch {
+                    loading = true
+                    error = null
+                    tumblrLoginUseCase(
+                        applicationRepository = applicationRepository,
+                        launchOAuth = launchUrl,
+                    ).onFailure {
+                        error = it.message
+                        loading = false
+                    }
+                }
+            }
+
+            override fun resume(url: String) {
+                callbackUrl = url
+            }
         }
     }
 
@@ -152,6 +201,7 @@ public interface ServiceSelectState : NodeInfoState {
     public val blueskyOauthLoginState: BlueskyOAuthLoginPresenter.State
     public val mastodonLoginState: MastodonLoginState
     public val misskeyLoginState: MisskeyLoginState
+    public val tumblrLoginState: TumblrLoginState
     public val loading: Boolean
 }
 
@@ -179,6 +229,17 @@ public interface MisskeyLoginState {
         host: String,
         launchUrl: (String) -> Unit,
     )
+
+    public fun resume(url: String)
+}
+
+@Immutable
+public interface TumblrLoginState {
+    public val loading: Boolean
+    public val error: String?
+    public val resumedState: UiState<Nothing>?
+
+    public fun login(launchUrl: (String) -> Unit)
 
     public fun resume(url: String)
 }

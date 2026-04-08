@@ -18,7 +18,11 @@ internal object InitialTextResolver {
             PlatformType.VVo -> resolveVVo(post, composeStatus)
             PlatformType.Mastodon, PlatformType.Misskey ->
                 resolveMastodonMisskey(post, composeStatus, currentUserHandle, selectedAccountKey)
-            else -> null
+            PlatformType.Tumblr,
+            PlatformType.Bluesky,
+            PlatformType.Nostr,
+            PlatformType.xQt,
+            -> null
         }
 
     private fun resolveVVo(

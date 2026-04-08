@@ -13,6 +13,8 @@ import dev.dimension.flare.ui.model.mapper.misskeyReact
 import dev.dimension.flare.ui.model.mapper.misskeyRenote
 import dev.dimension.flare.ui.model.mapper.nostrLike
 import dev.dimension.flare.ui.model.mapper.nostrRepost
+import dev.dimension.flare.ui.model.mapper.tumblrLike
+import dev.dimension.flare.ui.model.mapper.tumblrReblog
 import dev.dimension.flare.ui.model.mapper.vvoFavorite
 import dev.dimension.flare.ui.model.mapper.vvoLike
 import dev.dimension.flare.ui.model.mapper.vvoLikeComment
@@ -428,6 +430,38 @@ internal sealed interface PostEvent {
             override val postKey: MicroBlogKey,
             val accountKey: MicroBlogKey,
         ) : Nostr
+    }
+
+    @Serializable
+    sealed interface Tumblr : PostEvent {
+        @Serializable
+        data class Like(
+            override val postKey: MicroBlogKey,
+            val liked: Boolean,
+            val accountKey: MicroBlogKey,
+        ) : Tumblr,
+            UpdatePostActionMenuEvent {
+            override fun nextActionMenu(): ActionMenu.Item =
+                ActionMenu.tumblrLike(
+                    statusKey = postKey,
+                    liked = !liked,
+                    accountKey = accountKey,
+                )
+        }
+
+        @Serializable
+        data class Reblog(
+            override val postKey: MicroBlogKey,
+            val canReblog: Boolean,
+            val accountKey: MicroBlogKey,
+        ) : Tumblr {
+            fun nextActionMenu(): ActionMenu.Item =
+                ActionMenu.tumblrReblog(
+                    statusKey = postKey,
+                    canReblog = false,
+                    accountKey = accountKey,
+                )
+        }
     }
 }
 

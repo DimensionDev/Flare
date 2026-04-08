@@ -11,6 +11,7 @@ public enum class PlatformType {
     Mastodon,
     Misskey,
     Bluesky,
+    Tumblr,
 
     @Suppress("EnumEntryName") // nothing wrong with this name :)
     xQt,

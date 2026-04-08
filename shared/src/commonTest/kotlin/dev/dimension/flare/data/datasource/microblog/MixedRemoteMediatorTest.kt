@@ -15,12 +15,14 @@ import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.createTestRootPath
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.model.DbStatusWithReference
 import dev.dimension.flare.data.database.cache.model.TranslationDisplayOptions
 import dev.dimension.flare.data.database.cache.model.TranslationEntityType
 import dev.dimension.flare.data.database.cache.model.TranslationStatus
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
+import dev.dimension.flare.data.datasource.microblog.paging.RefreshBehavior
 import dev.dimension.flare.data.datasource.microblog.paging.TimelinePagingMapper
 import dev.dimension.flare.data.datasource.microblog.paging.TimelineRemoteMediator
 import dev.dimension.flare.data.datastore.AppDataStore
@@ -130,6 +132,97 @@ class MixedRemoteMediatorTest : RobolectricTest() {
             assertEquals(0, second.requests.size)
         }
 
+    @OptIn(ExperimentalPagingApi::class)
+    @Test
+    fun mergeTopRefreshUsesPrependAndKeepsExistingItems() =
+        runTest {
+            val loader =
+                FakeLoader(
+                    pagingKey = "home",
+                    supportPrepend = true,
+                    refreshBehavior = RefreshBehavior.MergeTop,
+                ) { request ->
+                    when (request) {
+                        PagingRequest.Refresh ->
+                            PagingResult(
+                                data = listOf(feed("https://example.com/old", 1_000L)),
+                                previousKey = "old",
+                            )
+
+                        is PagingRequest.Prepend -> {
+                            assertEquals("old", request.previousKey)
+                            PagingResult(
+                                data = listOf(feed("https://example.com/new", 2_000L)),
+                                previousKey = "new",
+                            )
+                        }
+
+                        is PagingRequest.Append -> error("No append expected")
+                    }
+                }
+            val mediator = TimelineRemoteMediator(loader = loader, database = db, allowLongText = false)
+
+            mediator.load(
+                loadType = LoadType.REFRESH,
+                state = testPagingState(),
+            )
+            mediator.load(
+                loadType = LoadType.REFRESH,
+                state = testPagingState(),
+            )
+
+            assertEquals(
+                listOf(PagingRequest.Refresh, PagingRequest.Prepend("old")),
+                loader.requests,
+            )
+            assertEquals(
+                listOf(
+                    feed("https://example.com/new", 2_000L).statusKey,
+                    feed("https://example.com/old", 1_000L).statusKey,
+                ),
+                db.pagingTimelineDao().getByPagingKey("home").map { it.statusKey },
+            )
+            assertEquals(feed("https://example.com/new", 2_000L).statusKey.id, db.pagingTimelineDao().getPagingKey("home")?.prevKey)
+        }
+
+    @OptIn(ExperimentalPagingApi::class)
+    @Test
+    fun invalidMergeTopResponseDisablesLaterPrependForCurrentMediator() =
+        runTest {
+            val loader =
+                FakeLoader(
+                    pagingKey = "home",
+                    supportPrepend = true,
+                    refreshBehavior = RefreshBehavior.MergeTop,
+                ) { request ->
+                    when (request) {
+                        PagingRequest.Refresh ->
+                            PagingResult(
+                                data = listOf(feed("https://example.com/old", 1_000L)),
+                                previousKey = "old",
+                            )
+
+                        is PagingRequest.Prepend ->
+                            PagingResult(
+                                data = listOf(feed("https://example.com/old", 1_000L)),
+                                previousKey = "old",
+                            )
+
+                        is PagingRequest.Append -> error("No append expected")
+                    }
+                }
+            val mediator = TimelineRemoteMediator(loader = loader, database = db, allowLongText = false)
+
+            mediator.load(loadType = LoadType.REFRESH, state = testPagingState())
+            mediator.load(loadType = LoadType.REFRESH, state = testPagingState())
+            mediator.load(loadType = LoadType.PREPEND, state = testPagingState())
+
+            assertEquals(
+                listOf(PagingRequest.Refresh, PagingRequest.Prepend("old"), PagingRequest.Refresh),
+                loader.requests,
+            )
+        }
+
     @Test
     fun appendUsesRemainingMediatorsAndRefreshResetsMediatorSet() =
         runTest {
@@ -216,6 +309,64 @@ class MixedRemoteMediatorTest : RobolectricTest() {
             assertEquals("https://example.com/healthy", (result.data.first() as UiTimelineV2.Feed).url)
             assertNotNull(db.pagingTimelineDao().getPagingKey("mixed_failing"))
             assertNotNull(db.pagingTimelineDao().getPagingKey("mixed_healthy"))
+        }
+
+    @Test
+    fun mixedRefreshUsesSubTimelinePrevKeyForMergeTopLoaders() =
+        runTest {
+            val mergeTop =
+                FakeLoader(
+                    pagingKey = "merge_top",
+                    supportPrepend = true,
+                    refreshBehavior = RefreshBehavior.MergeTop,
+                ) { request ->
+                    when (request) {
+                        PagingRequest.Refresh ->
+                            PagingResult(
+                                data = listOf(feed("https://example.com/merge_refresh", 1_000L)),
+                                previousKey = "merge_prev",
+                                nextKey = "merge_next",
+                            )
+
+                        is PagingRequest.Prepend -> {
+                            assertEquals("merge_prev", request.previousKey)
+                            PagingResult(
+                                data = listOf(feed("https://example.com/merge_prepend", 2_000L)),
+                                previousKey = "merge_new_prev",
+                                nextKey = "merge_next",
+                            )
+                        }
+
+                        is PagingRequest.Append -> error("No append expected")
+                    }
+                }
+            val replace =
+                FakeLoader("replace") { request ->
+                    when (request) {
+                        PagingRequest.Refresh ->
+                            PagingResult(
+                                data = listOf(feed("https://example.com/replace_refresh", 500L)),
+                                nextKey = null,
+                            )
+
+                        is PagingRequest.Append -> error("No append expected")
+                        is PagingRequest.Prepend -> error("Replace loader should not prepend on refresh")
+                    }
+                }
+            val mediator = MixedRemoteMediator(db, listOf(mergeTop, replace))
+
+            mediator.load(pageSize = 20, request = PagingRequest.Refresh)
+            mediator.load(pageSize = 20, request = PagingRequest.Refresh)
+
+            assertEquals(
+                listOf(PagingRequest.Refresh, PagingRequest.Prepend("merge_prev")),
+                mergeTop.requests,
+            )
+            assertEquals(
+                listOf<PagingRequest>(PagingRequest.Refresh, PagingRequest.Refresh),
+                replace.requests,
+            )
+            assertEquals("merge_new_prev", db.pagingTimelineDao().getPagingKey("mixed_merge_top")?.prevKey)
         }
 
     @OptIn(ExperimentalPagingApi::class)
@@ -1184,6 +1335,8 @@ class MixedRemoteMediatorTest : RobolectricTest() {
 
     private class FakeLoader(
         override val pagingKey: String,
+        override val supportPrepend: Boolean = false,
+        override val refreshBehavior: RefreshBehavior = RefreshBehavior.Replace,
         private val onLoad: suspend (PagingRequest) -> PagingResult<UiTimelineV2>,
     ) : CacheableRemoteLoader<UiTimelineV2> {
         val requests = mutableListOf<PagingRequest>()
@@ -1196,6 +1349,14 @@ class MixedRemoteMediatorTest : RobolectricTest() {
             return onLoad(request)
         }
     }
+
+    private fun testPagingState() =
+        PagingState<Int, DbStatusWithReference>(
+            pages = emptyList(),
+            anchorPosition = null,
+            config = PagingConfig(pageSize = 20),
+            leadingPlaceholderCount = 0,
+        )
 
     private fun feed(
         url: String,

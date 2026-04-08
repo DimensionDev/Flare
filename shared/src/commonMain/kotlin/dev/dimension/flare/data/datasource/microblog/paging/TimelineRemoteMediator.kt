@@ -1,9 +1,11 @@
 package dev.dimension.flare.data.datasource.microblog.paging
 
 import androidx.paging.ExperimentalPagingApi
+import androidx.paging.LoadType
 import dev.dimension.flare.common.SnowflakeIdGenerator
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.saveToDatabase
+import dev.dimension.flare.data.database.cache.model.DbPagingKey
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.database.cache.model.DbStatusWithReference
 import dev.dimension.flare.data.translation.NoopPreTranslationService
@@ -26,6 +28,14 @@ internal class TimelineRemoteMediator(
     RemoteLoader<DbPagingTimelineWithStatus> {
     override val pagingKey: String
         get() = loader.pagingKey
+
+    private var prependCapabilityState =
+        when {
+            !loader.supportPrepend -> PrependCapabilityState.Unsupported
+            loader.refreshBehavior == RefreshBehavior.MergeTop -> PrependCapabilityState.Unknown
+            else -> PrependCapabilityState.Supported
+        }
+    private var lastSaveMode: SaveMode = SaveMode.Replace
 
     init {
         if (loader is ReportableRemoteLoader) {
@@ -53,10 +63,17 @@ internal class TimelineRemoteMediator(
         request: PagingRequest,
     ): PagingResult<DbPagingTimelineWithStatus> {
         val result =
-            timeline(
-                pageSize = pageSize,
-                request = request,
-            )
+            when (request) {
+                PagingRequest.Refresh -> refreshTimeline(pageSize)
+                is PagingRequest.Prepend -> prependTimeline(pageSize, request.previousKey)
+                is PagingRequest.Append -> {
+                    lastSaveMode = SaveMode.AppendBottom
+                    timeline(
+                        pageSize = pageSize,
+                        request = request,
+                    )
+                }
+            }
         val data =
             result.data.map {
                 TimelinePagingMapper.toDb(
@@ -69,6 +86,36 @@ internal class TimelineRemoteMediator(
             nextKey = result.nextKey,
             previousKey = result.previousKey,
         )
+    }
+
+    override suspend fun updatePagingKeys(
+        loadType: LoadType,
+        request: PagingRequest,
+        result: PagingResult<DbPagingTimelineWithStatus>,
+    ) {
+        when {
+            loadType == LoadType.REFRESH && lastSaveMode == SaveMode.MergeTop -> {
+                val existing = database.pagingTimelineDao().getPagingKey(pagingKey)
+                if (existing == null) {
+                    database.pagingTimelineDao().insertPagingKey(
+                        DbPagingKey(
+                            pagingKey = pagingKey,
+                            nextKey = result.nextKey,
+                            prevKey = result.previousKey,
+                        ),
+                    )
+                } else {
+                    result.previousKey?.let {
+                        database.pagingTimelineDao().updatePagingKeyPrevKey(
+                            pagingKey = pagingKey,
+                            prevKey = it,
+                        )
+                    }
+                }
+            }
+
+            else -> super.updatePagingKeys(loadType, request, result)
+        }
     }
 
     suspend fun timeline(
@@ -89,14 +136,14 @@ internal class TimelineRemoteMediator(
         request: PagingRequest,
         data: List<DbPagingTimelineWithStatus>,
     ) {
-        if (request is PagingRequest.Refresh) {
+        if (lastSaveMode == SaveMode.Replace && request is PagingRequest.Refresh) {
             data.groupBy { it.timeline.pagingKey }.keys.forEach { key ->
                 database
                     .pagingTimelineDao()
                     .delete(pagingKey = key)
             }
         }
-        if (request is PagingRequest.Prepend && loader.supportPrepend) {
+        if (lastSaveMode == SaveMode.MergeTop && data.isNotEmpty()) {
             // load current timeline caches
             val currentCaches =
                 database
@@ -121,7 +168,153 @@ internal class TimelineRemoteMediator(
             allowLongText = allowLongText,
         )
     }
+
+    private suspend fun refreshTimeline(pageSize: Int): PagingResult<UiTimelineV2> {
+        val existingPagingKey = database.pagingTimelineDao().getPagingKey(pagingKey)
+        if (loader.refreshBehavior != RefreshBehavior.MergeTop || existingPagingKey?.prevKey == null) {
+            lastSaveMode = SaveMode.Replace
+            return timeline(
+                pageSize = pageSize,
+                request = PagingRequest.Refresh,
+            )
+        }
+        val mergeResult = runTopMerge(pageSize = pageSize, startKey = existingPagingKey.prevKey)
+        return when (mergeResult) {
+            is TopMergeResult.Success -> {
+                lastSaveMode = SaveMode.MergeTop
+                prependCapabilityState = PrependCapabilityState.Supported
+                mergeResult.result
+            }
+
+            TopMergeResult.Failure -> {
+                prependCapabilityState = PrependCapabilityState.Unsupported
+                lastSaveMode = SaveMode.Replace
+                timeline(
+                    pageSize = pageSize,
+                    request = PagingRequest.Refresh,
+                )
+            }
+        }
+    }
+
+    private suspend fun prependTimeline(
+        pageSize: Int,
+        previousKey: String,
+    ): PagingResult<UiTimelineV2> {
+        if (!loader.supportPrepend || prependCapabilityState != PrependCapabilityState.Supported) {
+            lastSaveMode = SaveMode.MergeTop
+            return PagingResult(endOfPaginationReached = true)
+        }
+        return when (val mergeResult = runTopMerge(pageSize = pageSize, startKey = previousKey)) {
+            is TopMergeResult.Success -> {
+                lastSaveMode = SaveMode.MergeTop
+                mergeResult.result
+            }
+
+            TopMergeResult.Failure -> {
+                prependCapabilityState = PrependCapabilityState.Unsupported
+                lastSaveMode = SaveMode.MergeTop
+                PagingResult(endOfPaginationReached = true)
+            }
+        }
+    }
+
+    private suspend fun runTopMerge(
+        pageSize: Int,
+        startKey: String,
+    ): TopMergeResult {
+        val existingKeys =
+            database
+                .pagingTimelineDao()
+                .getByPagingKey(pagingKey)
+                .mapTo(mutableSetOf()) { it.statusKey.toString() }
+        val merged = mutableListOf<UiTimelineV2>()
+        val seenNewKeys = mutableSetOf<String>()
+        var currentKey = startKey
+        var newTopKey: String? = null
+        val mergePageSize = pageSize.coerceAtLeast(MIN_TOP_MERGE_PAGE_SIZE).coerceAtMost(MAX_TOP_MERGE_PAGE_SIZE)
+        repeat(MAX_TOP_MERGE_PAGES) {
+            val response =
+                timeline(
+                    pageSize = mergePageSize,
+                    request = PagingRequest.Prepend(currentKey),
+                )
+            if (!response.data.isSortedDescendingByCreatedAt()) {
+                return TopMergeResult.Failure
+            }
+            val filtered =
+                response.data.filterNot { item ->
+                    val key = item.toStableTimelineKey()
+                    item.statusKey.id == currentKey || item.statusKey.toString() in existingKeys || !seenNewKeys.add(key)
+                }
+            if (response.data.isNotEmpty() && filtered.isEmpty()) {
+                return TopMergeResult.Failure
+            }
+            if (newTopKey == null) {
+                newTopKey = filtered.firstOrNull()?.statusKey?.id
+            }
+            merged += filtered
+            if (
+                response.previousKey == null ||
+                response.previousKey == currentKey ||
+                response.data.size < mergePageSize ||
+                merged.size >= MAX_TOP_MERGE_ITEMS
+            ) {
+                return TopMergeResult.Success(
+                    PagingResult(
+                        data = merged,
+                        nextKey = response.nextKey,
+                        previousKey = newTopKey ?: startKey,
+                        endOfPaginationReached = response.previousKey == null,
+                    ),
+                )
+            }
+            currentKey = response.previousKey
+        }
+        return if (merged.isEmpty()) {
+            TopMergeResult.Failure
+        } else {
+            TopMergeResult.Success(
+                PagingResult(
+                    data = merged,
+                    previousKey = newTopKey ?: startKey,
+                ),
+            )
+        }
+    }
 }
+
+private const val MIN_TOP_MERGE_PAGE_SIZE = 60
+private const val MAX_TOP_MERGE_PAGE_SIZE = 80
+private const val MAX_TOP_MERGE_PAGES = 5
+private const val MAX_TOP_MERGE_ITEMS = 200
+
+private enum class SaveMode {
+    Replace,
+    MergeTop,
+    AppendBottom,
+}
+
+private enum class PrependCapabilityState {
+    Unknown,
+    Supported,
+    Unsupported,
+}
+
+private sealed interface TopMergeResult {
+    data class Success(
+        val result: PagingResult<UiTimelineV2>,
+    ) : TopMergeResult
+
+    data object Failure : TopMergeResult
+}
+
+private fun UiTimelineV2.toStableTimelineKey(): String = itemKey ?: "${accountType}_$statusKey"
+
+private fun List<UiTimelineV2>.isSortedDescendingByCreatedAt(): Boolean =
+    zipWithNext().all { (left, right) ->
+        left.createdAt.value >= right.createdAt.value
+    }
 
 private fun List<UiTimelineV2>.collapseReplyChains(): List<UiTimelineV2> {
     val rootPosts =

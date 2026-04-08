@@ -118,4 +118,13 @@ internal fun EntryProviderScope<NavKey>.statusEntryBuilder(
             onBack = onBack
         )
     }
+
+    entry<Route.TwitterArticle> { args ->
+        TwitterArticleScreen(
+            accountType = args.accountType,
+            tweetId = args.tweetId,
+            articleId = args.articleId,
+            onBack = onBack
+        )
+    }
 }

@@ -453,7 +453,15 @@ internal sealed interface Route : NavKey {
     ) : Route
 
     @Serializable
-    public data class BlockUser(
+    data class TwitterArticle(
+        override val accountType: AccountType,
+        val tweetId: String,
+        val articleId: String? = null,
+    ) : Route,
+        WithAccountType
+
+    @Serializable
+    data class BlockUser(
         val accountType: AccountType?,
         val userKey: MicroBlogKey,
     ) : Route
@@ -570,6 +578,13 @@ internal sealed interface Route : NavKey {
                 is DeeplinkRoute.Rss.Detail ->
                     Rss.Detail(
                         url = deeplinkRoute.url,
+                    )
+
+                is DeeplinkRoute.TwitterArticle ->
+                    TwitterArticle(
+                        accountType = deeplinkRoute.accountType,
+                        tweetId = deeplinkRoute.tweetId,
+                        articleId = deeplinkRoute.articleId,
                     )
 
                 is DeeplinkRoute.Search ->

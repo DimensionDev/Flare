@@ -44,6 +44,7 @@ import dev.dimension.flare.ui.route.Route.Profile
 import dev.dimension.flare.ui.route.Route.RssTimeline
 import dev.dimension.flare.ui.route.Route.Search
 import dev.dimension.flare.ui.route.Route.Timeline
+import dev.dimension.flare.ui.route.Route.TwitterArticle
 import dev.dimension.flare.ui.route.WindowSceneStrategy.Companion.window
 import dev.dimension.flare.ui.screen.compose.ComposeDialog
 import dev.dimension.flare.ui.screen.compose.DraftBoxScreen
@@ -91,6 +92,7 @@ import dev.dimension.flare.ui.screen.status.action.DeleteStatusConfirmDialog
 import dev.dimension.flare.ui.screen.status.action.MastodonReportDialog
 import dev.dimension.flare.ui.screen.status.action.MisskeyReportDialog
 import dev.dimension.flare.ui.screen.status.action.StatusShareSheet
+import dev.dimension.flare.ui.screen.xqt.TwitterArticleScreen
 import io.github.composefluent.FluentTheme
 import io.github.composefluent.component.FluentDialog
 import io.github.composefluent.component.Flyout
@@ -216,6 +218,14 @@ internal fun WindowScope.Router(
                         data = args.data,
                         onNavigate = navigate,
                         onDismissRequest = onBack,
+                    )
+                }
+                entry<Route.TwitterArticle> { args ->
+                    TwitterArticleScreen(
+                        accountType = args.accountType,
+                        tweetId = args.tweetId,
+                        articleId = args.articleId,
+                        onBack = onBack,
                     )
                 }
                 entry<Route.RssDetail> { }

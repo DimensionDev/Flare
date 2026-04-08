@@ -75,6 +75,8 @@ enum Route: Hashable, Identifiable {
             GroupConfigScreen(item: item)
         case .rssDetail(let url):
             RssDetailScreen(url: url)
+        case .twitterArticle(let accountType, let tweetId, let articleId):
+            TwitterArticleScreen(accountType: accountType, tweetId: tweetId, articleId: articleId)
         case .statusVVOStatus(let accountType, let statusKey):
             VVOStatusScreen(accountType: accountType, statusKey: statusKey)
         case .statusShareSheet(let accountType, let statusKey, let shareUrl, let fxShareUrl, let fixvxShareUrl):
@@ -132,6 +134,7 @@ enum Route: Hashable, Identifiable {
     case profileUser(AccountType, MicroBlogKey)
     case profileUserNameWithHost(AccountType, String, String)
     case rssDetail(String)
+    case twitterArticle(AccountType, String, String?)
     case search(AccountType, String)
     case statusAddReaction(AccountType, MicroBlogKey)
     case statusAltText(String)
@@ -253,6 +256,8 @@ enum Route: Hashable, Identifiable {
             case .detail(let data):
                 return Route.rssDetail(data.url)
             }
+        case .twitterArticle(let data):
+            return Route.twitterArticle(data.accountType, data.tweetId, data.articleId)
         case .search(let search):
             return Route.search(search.accountType, search.query)
         case .status(let status):

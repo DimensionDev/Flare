@@ -43,7 +43,12 @@ struct HomeTimelineScreen: View {
                             if user.avatar.isEmpty {
                                 Image(.faGear)
                             } else {
-                                AvatarView(data: user.avatar)
+                                if #available(iOS 26.0, *) {
+                                    AvatarView(data: user.avatar)
+                                } else {
+                                    AvatarView(data: user.avatar)
+                                        .frame(width: 24, height: 24)
+                                }
                             }
                         } errorContent: { _ in
                             Image(.faGear)

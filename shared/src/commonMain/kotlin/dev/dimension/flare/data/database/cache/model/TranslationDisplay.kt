@@ -7,6 +7,7 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.DeeplinkEvent
 import dev.dimension.flare.ui.model.TranslationDisplayState
+import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.render.toUiPlainText
@@ -201,6 +202,7 @@ private fun ActionMenu.prependTranslationAction(
                                         },
                                 ),
                             ),
+                        icon = UiIcon.Translate,
                     )
                 copy(
                     actions =

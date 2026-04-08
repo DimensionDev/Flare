@@ -57,4 +57,5 @@ public enum class UiIcon {
     Check,
     Nostr,
     X,
+    Translate,
 }

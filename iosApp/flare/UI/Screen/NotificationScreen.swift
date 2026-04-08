@@ -109,10 +109,6 @@ struct NotificationScreen: View {
                         }
                     }
 
-                } else if !isSyncingAccountSelection {
-                    ToolbarItem(placement: .title) {
-                        filterSegments
-                    }
                 }
             }
             .onAppear {

@@ -142,6 +142,7 @@ internal class OnlinePreTranslationService(
                 prepareProfileCandidate(
                     user = user,
                     targetLanguage = settings.targetLanguage,
+                    autoTranslateExcludedLanguages = settings.autoTranslateExcludedLanguages,
                     providerCacheKey = settings.providerCacheKey,
                 ),
             )
@@ -388,6 +389,7 @@ internal class OnlinePreTranslationService(
     private suspend fun prepareProfileCandidate(
         user: DbUser,
         targetLanguage: String,
+        autoTranslateExcludedLanguages: List<String>,
         providerCacheKey: String,
     ): PreparedTranslationCandidate? =
         prepareCandidate(
@@ -404,7 +406,7 @@ internal class OnlinePreTranslationService(
                         targetLanguage = targetLanguage,
                     ),
             targetLanguage = targetLanguage,
-            autoTranslateExcludedLanguages = emptyList(),
+            autoTranslateExcludedLanguages = autoTranslateExcludedLanguages,
             providerCacheKey = providerCacheKey,
             now = Clock.System.now().toEpochMilliseconds(),
             allowLongText = true,

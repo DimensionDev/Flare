@@ -23,7 +23,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import kotlin.uuid.Uuid
 
-public class TumblrCallbackPresenter(
+internal class TumblrCallbackPresenter(
     private val callbackUrl: String?,
     private val toHome: () -> Unit,
 ) : PresenterBase<UiState<Nothing>>(),

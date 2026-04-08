@@ -18,7 +18,7 @@ internal data class TumblrMeta(
 )
 
 @Serializable
-public data class TumblrConsumerCredential(
+internal data class TumblrConsumerCredential(
     @SerialName("consumer_key")
     val consumerKey: String,
     @SerialName("consumer_secret")
@@ -26,7 +26,7 @@ public data class TumblrConsumerCredential(
 )
 
 @Serializable
-public data class TumblrApplicationCredential(
+internal data class TumblrApplicationCredential(
     @SerialName("consumer_key")
     val consumerKey: String,
     @SerialName("consumer_secret")

@@ -38,7 +38,7 @@ public sealed interface UiApplication {
     @Immutable
     public data class Tumblr internal constructor(
         override val host: String,
-        val credential: TumblrApplicationCredential,
+        internal val credential: TumblrApplicationCredential,
     ) : UiApplication
 
     @Immutable

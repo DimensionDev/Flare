@@ -93,6 +93,7 @@
     <string name="settings_ai_config_model_loading">Loading models…</string>
     <string name="settings_ai_config_model_error">Failed to load models</string>
     <string name="settings_ai_config_model_no_models">No models</string>
+    <string name="settings_ai_config_model_manual_input">Enter model manually</string>
     <string name="settings_ai_config_tap_to_edit">Tap to edit</string>
     <string name="settings_ai_config_entable_translation">Enable AI translation</string>
     <string name="settings_ai_config_translation_description">Replace Google Translate with AI translation, might take longer time</string>
@@ -117,6 +118,12 @@
     <string name="settings_ai_config_translate_provider_libretranslate_api_key">LibreTranslate API Key</string>
     <string name="settings_translation_title">Translation</string>
     <string name="settings_translation_description">Configure translation provider and behavior</string>
+    <string name="settings_translation_auto_excluded_languages">Auto-translate excluded languages</string>
+    <string name="settings_translation_ai_test_title">AI translation test</string>
+    <string name="settings_translation_ai_test_description">Run a short rich-text sample through the current AI translation setup.</string>
+    <string name="settings_translation_ai_test_action">Test translation</string>
+    <string name="settings_translation_ai_test_original">Sample text</string>
+    <string name="settings_translation_ai_test_result">Translated text</string>
     <string name="settings_language_title">Language</string>
     <string name="settings_language_description">Change the language of the app</string>
     <string name="settings_rss_management_title">Subscription Management</string>

@@ -9,6 +9,7 @@ struct AiConfigScreen: View {
     private enum EditableField: String, Identifiable {
         case serverUrl
         case apiKey
+        case model
         case tldrPrompt
 
         var id: String { rawValue }
@@ -104,6 +105,22 @@ struct AiConfigScreen: View {
                         Text("Model")
                         Text("OpenAI model used for translation and summary")
                     }
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+
+                    Button {
+                        beginEditing(
+                            field: .model,
+                            value: presenter.state.openAIModel
+                        )
+                    } label: {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Manual Model")
+                            Text(displayModelText(presenter.state.openAIModel))
+                                .foregroundStyle(.secondary)
+                                .font(.subheadline)
+                        }
+                    }
+                    .buttonStyle(.plain)
                     .transition(.opacity.combined(with: .move(edge: .top)))
                 }
             }
@@ -244,6 +261,8 @@ struct AiConfigScreen: View {
             return "Server URL"
         case .apiKey:
             return "API Key"
+        case .model:
+            return "Manual Model"
         case .tldrPrompt:
             return "Summary Prompt"
         }
@@ -255,6 +274,8 @@ struct AiConfigScreen: View {
             return "https://api.openai.com/v1/"
         case .apiKey:
             return "sk-..."
+        case .model:
+            return "gpt-4.1-mini"
         case .tldrPrompt:
             return ""
         }
@@ -266,6 +287,8 @@ struct AiConfigScreen: View {
             presenter.state.setOpenAIServerUrl(value: value)
         case .apiKey:
             presenter.state.setOpenAIApiKey(value: value)
+        case .model:
+            presenter.state.setOpenAIModel(value: value)
         case .tldrPrompt:
             presenter.state.setTldrPrompt(value: value)
         }
@@ -274,8 +297,12 @@ struct AiConfigScreen: View {
 
 struct TranslationConfigScreen: View {
     @StateObject private var presenter = KotlinPresenter(presenter: AiConfigPresenter())
+    @StateObject private var aiTranslationTestPresenter = KotlinPresenter(presenter: AiTranslationTestPresenter())
     @State private var editingField: TranslationEditableField?
     @State private var editingText: String = ""
+    @State private var showExcludedLanguagesPicker = false
+    @State private var pendingExcludedLanguages: Set<String> = []
+    @State private var excludedLanguagesQuery: String = ""
 
     private enum TranslationEditableField: String, Identifiable {
         case translatePrompt
@@ -285,6 +312,13 @@ struct TranslationConfigScreen: View {
         case libreTranslateApiKey
 
         var id: String { rawValue }
+    }
+
+    private struct LanguageOption: Identifiable {
+        let tag: String
+        let title: String
+
+        var id: String { tag }
     }
 
     var body: some View {
@@ -318,6 +352,23 @@ struct TranslationConfigScreen: View {
                     Text("ai_config_pre_translate_description")
                 }
                 .transition(.opacity.combined(with: .move(edge: .top)))
+                
+                if presenter.state.preTranslate {
+                    Button {
+                        pendingExcludedLanguages = Set(excludedLanguages)
+                        excludedLanguagesQuery = ""
+                        showExcludedLanguagesPicker = true
+                    } label: {
+                        Label {
+                            Text("Auto-translate excluded languages")
+                            Text(displayExcludedLanguages)
+                        } icon: {
+                            
+                        }
+                    }
+                    .buttonStyle(.plain)
+                }
+                
 
                 switch presenter.state.translateProvider {
                 case .ai:
@@ -336,6 +387,35 @@ struct TranslationConfigScreen: View {
                     }
                     .buttonStyle(.plain)
                     .transition(.opacity.combined(with: .move(edge: .top)))
+
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("AI translation test")
+                        Text("Run a short rich-text sample through the current AI translation setup.")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                        Text("Sample text")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        RichText(text: aiTranslationTestPresenter.state.sampleText)
+                        Button("Test translation") {
+                            aiTranslationTestPresenter.state.runTest()
+                        }
+                        if aiTranslationTestPresenter.state.isLoading {
+                            ProgressView()
+                        }
+                        if let errorMessage = aiTranslationTestPresenter.state.errorMessage {
+                            Text(errorMessage)
+                                .foregroundStyle(.red)
+                                .font(.footnote)
+                        }
+                        if let translatedText = aiTranslationTestPresenter.state.translatedText {
+                            Text("Translated text")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            RichText(text: translatedText)
+                        }
+                    }
+                    .padding(.vertical, 4)
 
                 case .deepL:
                     Button {
@@ -451,6 +531,60 @@ struct TranslationConfigScreen: View {
                 }
             }
         }
+        .sheet(isPresented: $showExcludedLanguagesPicker) {
+            NavigationStack {
+                List {
+                    ForEach(filteredLanguageOptions) { option in
+                        Button {
+                            if pendingExcludedLanguages.contains(option.tag) {
+                                pendingExcludedLanguages.remove(option.tag)
+                            } else {
+                                pendingExcludedLanguages.insert(option.tag)
+                            }
+                        } label: {
+                            HStack {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(option.title)
+                                    if option.title != option.tag {
+                                        Text(option.tag)
+                                            .font(.caption)
+                                            .foregroundStyle(.secondary)
+                                    }
+                                }
+                                Spacer()
+                                if pendingExcludedLanguages.contains(option.tag) {
+                                    Image(systemName: "checkmark")
+                                }
+                            }
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .searchable(text: $excludedLanguagesQuery, prompt: "Search language")
+                .navigationTitle("Auto-translate excluded languages")
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button {
+                            showExcludedLanguagesPicker = false
+                        } label: {
+                            Image("fa-xmark")
+                        }
+                    }
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button {
+                            presenter.state.setAutoTranslateExcludedLanguages(
+                                value: languageOptions
+                                    .map(\.tag)
+                                    .filter { pendingExcludedLanguages.contains($0) }
+                            )
+                            showExcludedLanguagesPicker = false
+                        } label: {
+                            Image("fa-check")
+                        }
+                    }
+                }
+            }
+        }
         .navigationTitle("settings_translation_title")
     }
 
@@ -473,6 +607,50 @@ struct TranslationConfigScreen: View {
 
     private func displayText(_ value: String, fallback: LocalizedStringResource = "Not set") -> String {
         value.isEmpty ? String(localized: fallback) : value
+    }
+
+    private var excludedLanguages: [String] {
+        (presenter.state.autoTranslateExcludedLanguages as NSArray).cast(NSString.self).map(String.init)
+    }
+
+    private var languageOptions: [LanguageOption] {
+        let current = Locale.current
+        let baseOptions = Locale.isoLanguageCodes.map { code in
+            LanguageOption(
+                tag: code,
+                title: current.localizedString(forLanguageCode: code) ?? code
+            )
+        }
+        let specialOptions = [
+            LanguageOption(tag: "zh-CN", title: current.localizedString(forIdentifier: "zh-Hans") ?? "Chinese (Simplified)"),
+            LanguageOption(tag: "zh-TW", title: current.localizedString(forIdentifier: "zh-Hant") ?? "Chinese (Traditional)")
+        ]
+        let knownTags = Set((specialOptions + baseOptions).map(\.tag))
+        let customOptions = excludedLanguages.filter { !knownTags.contains($0) }.map { LanguageOption(tag: $0, title: $0) }
+        return (specialOptions + baseOptions + customOptions)
+            .reduce(into: [String: LanguageOption]()) { result, option in
+                result[option.tag] = result[option.tag] ?? option
+            }
+            .values
+            .sorted { $0.title.localizedCaseInsensitiveCompare($1.title) == .orderedAscending }
+    }
+
+    private var displayExcludedLanguages: String {
+        if excludedLanguages.isEmpty {
+            return String(localized: "Not set")
+        }
+        let titles = Dictionary(uniqueKeysWithValues: languageOptions.map { ($0.tag, $0.title) })
+        return excludedLanguages.map { titles[$0] ?? $0 }.joined(separator: ", ")
+    }
+
+    private var filteredLanguageOptions: [LanguageOption] {
+        if excludedLanguagesQuery.isEmpty {
+            return languageOptions
+        }
+        return languageOptions.filter { option in
+            option.title.localizedCaseInsensitiveContains(excludedLanguagesQuery) ||
+            option.tag.localizedCaseInsensitiveContains(excludedLanguagesQuery)
+        }
     }
 
     private func beginEditing(field: TranslationEditableField, value: String) {

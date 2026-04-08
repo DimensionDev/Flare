@@ -14,6 +14,7 @@ import dev.dimension.flare.common.OnDeviceAI
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.network.ai.OpenAIService
+import dev.dimension.flare.data.translation.PreTranslationContentRules
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.collections.immutable.ImmutableList
@@ -70,6 +71,7 @@ public class AiConfigPresenter :
         public val translatePrompt: String
         public val tldrPrompt: String
         public val preTranslate: Boolean
+        public val autoTranslateExcludedLanguages: ImmutableList<String>
 
         public fun selectType(type: AiTypeOption)
 
@@ -102,6 +104,8 @@ public class AiConfigPresenter :
         public fun setTldrPrompt(value: String)
 
         public fun setPreTranslate(value: Boolean)
+
+        public fun setAutoTranslateExcludedLanguages(value: List<String>)
     }
 
     @OptIn(FlowPreview::class)
@@ -236,6 +240,8 @@ public class AiConfigPresenter :
             override val translatePrompt: String = appSettings.aiConfig.translatePrompt
             override val tldrPrompt: String = appSettings.aiConfig.tldrPrompt
             override val preTranslate: Boolean = appSettings.translateConfig.preTranslate
+            override val autoTranslateExcludedLanguages: ImmutableList<String> =
+                appSettings.translateConfig.autoTranslateExcludedLanguages.toImmutableList()
 
             override fun setAITldr(value: Boolean) {
                 update {
@@ -265,6 +271,14 @@ public class AiConfigPresenter :
                 updateTranslateConfig {
                     copy(
                         preTranslate = value,
+                    )
+                }
+            }
+
+            override fun setAutoTranslateExcludedLanguages(value: List<String>) {
+                updateTranslateConfig {
+                    copy(
+                        autoTranslateExcludedLanguages = value,
                     )
                 }
             }
@@ -444,6 +458,7 @@ private fun AppSettings.AiConfig.normalized(): AppSettings.AiConfig = this
 
 private fun AppSettings.TranslateConfig.normalized(): AppSettings.TranslateConfig =
     copy(
+        autoTranslateExcludedLanguages = normalizeExcludedLanguages(autoTranslateExcludedLanguages),
         provider =
             when (val provider = provider) {
                 is AppSettings.TranslateConfig.Provider.LibreTranslate ->
@@ -454,6 +469,18 @@ private fun AppSettings.TranslateConfig.normalized(): AppSettings.TranslateConfi
                 else -> provider
             },
     )
+
+internal fun normalizeExcludedLanguages(languages: List<String>): List<String> =
+    languages
+        .asSequence()
+        .flatMap { entry ->
+            entry
+                .split(',', '\n')
+                .asSequence()
+        }.map { it.trim() }
+        .filter { it.isNotBlank() }
+        .distinctBy { PreTranslationContentRules.canonicalTranslationLanguage(it) ?: it.lowercase() }
+        .toList()
 
 private val SERVER_SUGGESTIONS =
     persistentListOf(

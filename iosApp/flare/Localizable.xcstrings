@@ -2326,6 +2326,9 @@
         }
       }
     },
+    "AI translation test" : {
+
+    },
     "AI Type" : {
       "localizations" : {
         "ar" : {
@@ -13069,6 +13072,9 @@
           }
         }
       }
+    },
+    "Auto-translate excluded languages" : {
+
     },
     "block" : {
       "localizations" : {
@@ -37753,6 +37759,9 @@
           }
         }
       }
+    },
+    "Manual Model" : {
+
     },
     "mastodon_available_timelines" : {
       "localizations" : {
@@ -88593,6 +88602,12 @@
         }
       }
     },
+    "Run a short rich-text sample through the current AI translation setup." : {
+
+    },
+    "Sample text" : {
+
+    },
     "Save Draft" : {
       "localizations" : {
         "ar" : {
@@ -89426,6 +89441,9 @@
           }
         }
       }
+    },
+    "Search language" : {
+
     },
     "search_status" : {
       "localizations" : {
@@ -100219,6 +100237,9 @@
         }
       }
     },
+    "Test translation" : {
+
+    },
     "Theme" : {
       "localizations" : {
         "af" : {
@@ -100793,6 +100814,9 @@
           }
         }
       }
+    },
+    "Translated text" : {
+
     },
     "Translation Provider" : {
       "localizations" : {

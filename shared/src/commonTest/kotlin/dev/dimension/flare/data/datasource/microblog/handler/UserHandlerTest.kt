@@ -28,7 +28,9 @@ import dev.dimension.flare.data.network.ai.OpenAIService
 import dev.dimension.flare.data.translation.OnlinePreTranslationService
 import dev.dimension.flare.data.translation.PreTranslationBatchDocument
 import dev.dimension.flare.data.translation.PreTranslationBatchPayload
+import dev.dimension.flare.data.translation.PreTranslationContentRules
 import dev.dimension.flare.data.translation.PreTranslationService
+import dev.dimension.flare.data.translation.PreTranslationStoreSupport
 import dev.dimension.flare.data.translation.aiPreTranslateConfig
 import dev.dimension.flare.data.translation.cacheKey
 import dev.dimension.flare.deleteTestRootPath
@@ -61,6 +63,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -317,6 +320,49 @@ class UserHandlerTest : RobolectricTest() {
         }
 
     @Test
+    fun userByIdRefreshSkipsProfilePreTranslationForExcludedLanguage() =
+        runTest {
+            val excludedLanguage = nonTargetLanguageTag()
+            val expected =
+                createProfile(id = "excluded-pretranslate", host = "test.social", handle = "@excluded-pretranslate@test.social").copy(
+                    description = "Original profile bio".toUiPlainText(),
+                    sourceLanguages = persistentListOf(excludedLanguage),
+                )
+            loader.nextById = expected
+            appDataStore.appSettingsStore.updateData {
+                it.copy(
+                    language = "zh-CN",
+                    translateConfig =
+                        aiPreTranslateConfig().copy(
+                            autoTranslateExcludedLanguages = listOf(excludedLanguage),
+                        ),
+                    aiConfig =
+                        AppSettings.AiConfig(
+                            type = AppSettings.AiConfig.Type.OnDevice,
+                        ),
+                )
+            }
+
+            val cacheable = handler.userById("excluded-pretranslate")
+            val refreshState = cacheable.refreshState.drop(1).first()
+            assertTrue(refreshState is LoadState.NotLoading)
+
+            val saved =
+                db
+                    .translationDao()
+                    .find(
+                        entityType = TranslationEntityType.Profile,
+                        entityKey = expected.translationEntityKey(),
+                        targetLanguage = Locale.language,
+                    ).filterNotNull()
+                    .first { it.status == TranslationStatus.Skipped }
+
+            assertEquals(TranslationStatus.Skipped, saved.status)
+            assertEquals(PreTranslationStoreSupport.SKIPPED_EXCLUDED_LANGUAGE_REASON, saved.statusReason)
+            assertNull(saved.payload)
+        }
+
+    @Test
     fun userByIdRefreshRetriesFailedPreTranslationOnNextLoad() =
         runTest {
             val expected =
@@ -525,3 +571,11 @@ private fun TranslationDocument.translated(targetLanguage: String): TranslationD
                 )
             },
     )
+
+private fun nonTargetLanguageTag(): String {
+    val target = requireNotNull(PreTranslationContentRules.canonicalTranslationLanguage(Locale.language))
+    return listOf("fr-FR", "de-DE", "es-ES", "ja-JP", "zh-CN")
+        .first { candidate ->
+            PreTranslationContentRules.canonicalTranslationLanguage(candidate) != target
+        }
+}

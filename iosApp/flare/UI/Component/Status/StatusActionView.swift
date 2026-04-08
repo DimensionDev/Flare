@@ -320,6 +320,7 @@ extension UiIcon {
         case .twitter: return "fa-x-twitter"
         case .x: return "fa-x-twitter"
         case .weibo: return "fa-weibo"
+        case .translate: return "fa-language"
         }
     }
 }

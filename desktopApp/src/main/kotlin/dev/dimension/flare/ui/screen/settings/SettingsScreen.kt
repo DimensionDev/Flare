@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,7 +12,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.rememberTextFieldState
@@ -92,6 +95,7 @@ import dev.dimension.flare.settings_ai_config_model
 import dev.dimension.flare.settings_ai_config_model_description
 import dev.dimension.flare.settings_ai_config_model_error
 import dev.dimension.flare.settings_ai_config_model_loading
+import dev.dimension.flare.settings_ai_config_model_manual_input
 import dev.dimension.flare.settings_ai_config_model_no_models
 import dev.dimension.flare.settings_ai_config_model_select
 import dev.dimension.flare.settings_ai_config_pre_translation_description
@@ -183,6 +187,12 @@ import dev.dimension.flare.settings_storage_import_data
 import dev.dimension.flare.settings_storage_import_data_description
 import dev.dimension.flare.settings_storage_subtitle
 import dev.dimension.flare.settings_storage_title
+import dev.dimension.flare.settings_translation_ai_test_action
+import dev.dimension.flare.settings_translation_ai_test_description
+import dev.dimension.flare.settings_translation_ai_test_original
+import dev.dimension.flare.settings_translation_ai_test_result
+import dev.dimension.flare.settings_translation_ai_test_title
+import dev.dimension.flare.settings_translation_auto_excluded_languages
 import dev.dimension.flare.settings_translation_description
 import dev.dimension.flare.settings_translation_title
 import dev.dimension.flare.tab_settings_drag
@@ -203,6 +213,7 @@ import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
 import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.AiConfigPresenter
+import dev.dimension.flare.ui.presenter.settings.AiTranslationTestPresenter
 import dev.dimension.flare.ui.presenter.settings.AiTypeOption
 import dev.dimension.flare.ui.presenter.settings.StoragePresenter
 import dev.dimension.flare.ui.presenter.settings.StorageState
@@ -215,6 +226,7 @@ import io.github.composefluent.component.AutoSuggestBoxDefaults
 import io.github.composefluent.component.AutoSuggestionBox
 import io.github.composefluent.component.Button
 import io.github.composefluent.component.CardExpanderItem
+import io.github.composefluent.component.CheckBox
 import io.github.composefluent.component.ContentDialog
 import io.github.composefluent.component.ContentDialogButton
 import io.github.composefluent.component.DropDownButton
@@ -236,6 +248,7 @@ import io.github.composefluent.component.TextField
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -1226,6 +1239,19 @@ internal fun SettingsScreen(
                     },
                 )
             }
+            if (state.aiConfigState.showExcludedLanguagesDialog) {
+                ExcludedLanguagesDialog(
+                    title = stringResource(Res.string.settings_translation_auto_excluded_languages),
+                    selectedLanguages = state.aiConfigState.autoTranslateExcludedLanguages,
+                    onDismiss = {
+                        state.aiConfigState.setExcludedLanguagesDialog(false)
+                    },
+                    onConfirm = { selectedLanguages ->
+                        state.aiConfigState.setAutoTranslateExcludedLanguages(selectedLanguages)
+                        state.aiConfigState.setExcludedLanguagesDialog(false)
+                    },
+                )
+            }
 
             ContentDialog(
                 title = stringResource(Res.string.import_confirmation_title),
@@ -1266,6 +1292,8 @@ internal fun SettingsScreen(
                 val serverRequirementHint = stringResource(Res.string.settings_ai_config_server_url_requirement)
                 val apiKeyTitle = stringResource(Res.string.settings_ai_config_api_key)
                 val apiKeyHint = stringResource(Res.string.settings_ai_config_api_key_hint)
+                val modelTitle = stringResource(Res.string.settings_ai_config_model)
+                val modelPlaceholder = stringResource(Res.string.settings_ai_config_model_select)
                 val tldrPromptTitle = stringResource(Res.string.settings_ai_config_tldr_prompt)
                 ExpanderItem(
                     heading = {
@@ -1433,6 +1461,33 @@ internal fun SettingsScreen(
                             },
                         )
                         ExpanderItemSeparator()
+                        ExpanderItem(
+                            heading = { Text(stringResource(Res.string.settings_ai_config_model_manual_input)) },
+                            caption = {
+                                Text(
+                                    state.aiConfigState.openAIModel.ifBlank {
+                                        stringResource(Res.string.settings_ai_config_value_empty_placeholder)
+                                    },
+                                )
+                            },
+                            trailing = {
+                                Button(
+                                    onClick = {
+                                        state.aiConfigState.setTextEditDialog(
+                                            TextEditDialogState(
+                                                title = modelTitle,
+                                                placeholder = modelPlaceholder,
+                                                value = state.aiConfigState.openAIModel,
+                                                onConfirm = state.aiConfigState::setOpenAIModel,
+                                            ),
+                                        )
+                                    },
+                                ) {
+                                    Text(stringResource(Res.string.edit))
+                                }
+                            },
+                        )
+                        ExpanderItemSeparator()
                     }
                 }
                 ExpanderItem(
@@ -1502,6 +1557,7 @@ internal fun SettingsScreen(
                 val googleCloudApiKeyTitle = stringResource(Res.string.settings_ai_config_translate_provider_google_cloud_api_key)
                 val libreTranslateBaseUrlTitle = stringResource(Res.string.settings_ai_config_translate_provider_libretranslate_base_url)
                 val libreTranslateApiKeyTitle = stringResource(Res.string.settings_ai_config_translate_provider_libretranslate_api_key)
+                val excludedLanguagesTitle = stringResource(Res.string.settings_translation_auto_excluded_languages)
                 val hasProviderSettings = state.aiConfigState.translateProvider != TranslateProviderOption.GoogleWeb
                 ExpanderItem(
                     heading = {
@@ -1558,11 +1614,38 @@ internal fun SettingsScreen(
                         )
                     },
                 )
+                AnimatedVisibility(state.aiConfigState.preTranslate) {
+                    Column {
+                        ExpanderItemSeparator()
+                        ExpanderItem(
+                            heading = {
+                                Text(stringResource(Res.string.settings_translation_auto_excluded_languages))
+                            },
+                            caption = {
+                                Text(
+                                    excludedLanguageSummary(
+                                        selectedLanguages = state.aiConfigState.autoTranslateExcludedLanguages,
+                                        emptyPlaceholder = stringResource(Res.string.settings_ai_config_value_empty_placeholder),
+                                    ),
+                                )
+                            },
+                            trailing = {
+                                Button(
+                                    onClick = {
+                                        state.aiConfigState.setExcludedLanguagesDialog(true)
+                                    },
+                                ) {
+                                    Text(stringResource(Res.string.edit))
+                                }
+                            },
+                        )
+                    }
+                }
                 AnimatedVisibility(hasProviderSettings) {
                     Column {
                         ExpanderItemSeparator()
                         when (state.aiConfigState.translateProvider) {
-                            TranslateProviderOption.AI ->
+                            TranslateProviderOption.AI -> {
                                 ExpanderItem(
                                     heading = { Text(stringResource(Res.string.settings_ai_config_translate_prompt)) },
                                     caption = {
@@ -1591,6 +1674,38 @@ internal fun SettingsScreen(
                                         }
                                     },
                                 )
+                                ExpanderItemSeparator()
+                                ExpanderItem(
+                                    heading = { Text(stringResource(Res.string.settings_translation_ai_test_title)) },
+                                    caption = {
+                                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                            Text(stringResource(Res.string.settings_translation_ai_test_description))
+                                            Text(stringResource(Res.string.settings_translation_ai_test_original))
+                                            RichText(state.aiConfigState.aiTranslationTestState.sampleText)
+                                            Button(
+                                                onClick = {
+                                                    state.aiConfigState.aiTranslationTestState.runTest()
+                                                },
+                                            ) {
+                                                Text(stringResource(Res.string.settings_translation_ai_test_action))
+                                            }
+                                            if (state.aiConfigState.aiTranslationTestState.isLoading) {
+                                                Text(stringResource(Res.string.settings_ai_config_model_loading))
+                                            }
+                                            state.aiConfigState.aiTranslationTestState.errorMessage?.let { message ->
+                                                Text(
+                                                    message,
+                                                    color = FluentTheme.colors.system.critical,
+                                                )
+                                            }
+                                            state.aiConfigState.aiTranslationTestState.translatedText?.let { translated ->
+                                                Text(stringResource(Res.string.settings_translation_ai_test_result))
+                                                RichText(translated)
+                                            }
+                                        }
+                                    },
+                                )
+                            }
 
                             TranslateProviderOption.DeepL -> {
                                 ExpanderItem(
@@ -2107,16 +2222,20 @@ private fun aiConfigPresenter() =
         var expanded by remember { mutableStateOf(false) }
         var translationExpanded by remember { mutableStateOf(false) }
         val state = remember { AiConfigPresenter() }.invoke()
+        val aiTranslationTestState = remember { AiTranslationTestPresenter() }.invoke()
         var showTypeDropdown by remember { mutableStateOf(false) }
         var showModelDropdown by remember { mutableStateOf(false) }
         var showProviderDropdown by remember { mutableStateOf(false) }
+        var showExcludedLanguagesDialog by remember { mutableStateOf(false) }
         var textEditDialog by remember { mutableStateOf<TextEditDialogState?>(null) }
         object : AiConfigPresenter.State by state {
+            val aiTranslationTestState = aiTranslationTestState
             val expanded = expanded
             val translationExpanded = translationExpanded
             val showTypeDropdown = showTypeDropdown
             val showModelDropdown = showModelDropdown
             val showProviderDropdown = showProviderDropdown
+            val showExcludedLanguagesDialog = showExcludedLanguagesDialog
             val textEditDialog = textEditDialog
 
             fun setExpanded(value: Boolean) {
@@ -2137,6 +2256,10 @@ private fun aiConfigPresenter() =
 
             fun setShowProviderDropdown(value: Boolean) {
                 showProviderDropdown = value
+            }
+
+            fun setExcludedLanguagesDialog(value: Boolean) {
+                showExcludedLanguagesDialog = value
             }
 
             fun setTextEditDialog(value: TextEditDialogState?) {
@@ -2163,3 +2286,119 @@ private data class TextEditDialogState(
     val hint: String = "",
     val onConfirm: (String) -> Unit,
 )
+
+private data class LanguageOption(
+    val tag: String,
+    val label: String,
+)
+
+private fun translationLanguageOptions(selectedLanguages: ImmutableList<String>): ImmutableList<LanguageOption> {
+    val displayLocale = Locale.getDefault()
+    val baseOptions =
+        Locale
+            .getISOLanguages()
+            .map { code ->
+                @Suppress("DEPRECATION")
+                LanguageOption(tag = code, label = Locale(code).getDisplayLanguage(displayLocale))
+            }.filter { it.label.isNotBlank() }
+    val specialOptions =
+        listOf(
+            LanguageOption("zh-CN", Locale.forLanguageTag("zh-CN").getDisplayName(displayLocale)),
+            LanguageOption("zh-TW", Locale.forLanguageTag("zh-TW").getDisplayName(displayLocale)),
+        )
+    val knownTags = (specialOptions + baseOptions).map(LanguageOption::tag).toSet()
+    val customOptions = selectedLanguages.filterNot(knownTags::contains).map { LanguageOption(tag = it, label = it) }
+    return (specialOptions + baseOptions + customOptions)
+        .distinctBy(LanguageOption::tag)
+        .sortedBy(LanguageOption::label)
+        .toImmutableList()
+}
+
+private fun excludedLanguageSummary(
+    selectedLanguages: ImmutableList<String>,
+    emptyPlaceholder: String,
+): String {
+    if (selectedLanguages.isEmpty()) {
+        return emptyPlaceholder
+    }
+    val labels = translationLanguageOptions(selectedLanguages).associate { it.tag to it.label }
+    return selectedLanguages.joinToString { tag -> labels[tag] ?: tag }
+}
+
+@Composable
+private fun ExcludedLanguagesDialog(
+    title: String,
+    selectedLanguages: ImmutableList<String>,
+    onDismiss: () -> Unit,
+    onConfirm: (ImmutableList<String>) -> Unit,
+) {
+    val options = remember(selectedLanguages) { translationLanguageOptions(selectedLanguages) }
+    var selectedTags by remember(selectedLanguages) { mutableStateOf(selectedLanguages.toSet()) }
+    ContentDialog(
+        title = title,
+        visible = true,
+        content = {
+            val scrollState = rememberLazyListState()
+            FlareScrollBar(state = scrollState) {
+                LazyColumn(
+                    state = scrollState,
+                    modifier =
+                        Modifier
+                            .heightIn(max = 360.dp),
+                    contentPadding = PaddingValues(vertical = 8.dp, horizontal = 16.dp),
+                ) {
+                    items(options, key = { it.tag }) { option ->
+                        Row(
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        selectedTags =
+                                            if (option.tag in selectedTags) {
+                                                selectedTags - option.tag
+                                            } else {
+                                                selectedTags + option.tag
+                                            }
+                                    }.padding(vertical = 6.dp),
+                        ) {
+                            Column(
+                                modifier = Modifier.weight(1f),
+                                verticalArrangement = Arrangement.spacedBy(2.dp),
+                            ) {
+                                Text(option.label)
+                                if (option.label != option.tag) {
+                                    Text(
+                                        option.tag,
+                                        color = FluentTheme.colors.text.text.secondary,
+                                        style = FluentTheme.typography.caption,
+                                    )
+                                }
+                            }
+                            CheckBox(
+                                checked = option.tag in selectedTags,
+                                onCheckStateChange = { checked ->
+                                    selectedTags =
+                                        if (checked) {
+                                            selectedTags + option.tag
+                                        } else {
+                                            selectedTags - option.tag
+                                        }
+                                },
+                            )
+                        }
+                    }
+                }
+            }
+        },
+        primaryButtonText = stringResource(Res.string.ok),
+        closeButtonText = stringResource(Res.string.cancel),
+        onButtonClick = {
+            when (it) {
+                ContentDialogButton.Primary ->
+                    onConfirm(options.map(LanguageOption::tag).filter { tag -> tag in selectedTags }.toImmutableList())
+
+                else -> onDismiss()
+            }
+        },
+    )
+}

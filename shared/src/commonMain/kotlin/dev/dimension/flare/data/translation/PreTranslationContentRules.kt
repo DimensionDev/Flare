@@ -31,12 +31,32 @@ internal object PreTranslationContentRules {
             .any { it == canonicalTargetLanguage }
     }
 
+    fun shouldSkipForExcludedSourceLanguage(
+        sourceLanguages: List<String>,
+        excludedLanguages: List<String>,
+    ): Boolean {
+        val canonicalExcludedLanguages = canonicalExcludedLanguages(excludedLanguages)
+        if (canonicalExcludedLanguages.isEmpty()) {
+            return false
+        }
+        return sourceLanguages
+            .asSequence()
+            .mapNotNull(::canonicalTranslationLanguage)
+            .any { it in canonicalExcludedLanguages }
+    }
+
+    fun canonicalExcludedLanguages(languages: List<String>): Set<String> =
+        languages
+            .asSequence()
+            .mapNotNull(::canonicalTranslationLanguage)
+            .toSet()
+
     fun isNonTranslatableOnly(payload: TranslationPayload): Boolean {
         val fields = listOfNotNull(payload.content, payload.contentWarning, payload.title, payload.description)
         return fields.isNotEmpty() && fields.all(::isNonTranslatableOnly)
     }
 
-    private fun canonicalTranslationLanguage(language: String): String? {
+    internal fun canonicalTranslationLanguage(language: String): String? {
         val normalized = language.trim().lowercase().replace('_', '-')
         if (normalized.isBlank()) {
             return null

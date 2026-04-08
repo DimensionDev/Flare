@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.screen.settings
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,9 +10,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -40,21 +46,26 @@ import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FlareDropdownMenu
 import dev.dimension.flare.ui.component.FlareLargeFlexibleTopAppBar
 import dev.dimension.flare.ui.component.FlareScaffold
+import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.AiConfigPresenter
+import dev.dimension.flare.ui.presenter.settings.AiTranslationTestPresenter
 import dev.dimension.flare.ui.presenter.settings.AiTypeOption
 import dev.dimension.flare.ui.presenter.settings.TranslateProviderOption
 import dev.dimension.flare.ui.theme.first
 import dev.dimension.flare.ui.theme.item
 import dev.dimension.flare.ui.theme.last
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
+import dev.dimension.flare.ui.theme.segmentedShapes2
 import dev.dimension.flare.ui.theme.single
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 import moe.tlaster.precompose.molecule.producePresenter
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -90,6 +101,8 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
             val serverRequirementHint = stringResource(id = R.string.settings_ai_config_server_url_requirement)
             val apiKeyTitle = stringResource(id = R.string.settings_ai_config_api_key)
             val apiKeyHint = stringResource(id = R.string.settings_ai_config_api_key_hint)
+            val modelTitle = stringResource(id = R.string.settings_ai_config_model)
+            val modelPlaceholder = stringResource(id = R.string.settings_ai_config_model_select)
             val tldrPromptTitle = stringResource(id = R.string.settings_ai_config_tldr_prompt)
             SegmentedListItem(
                 checked = state.showTypeDropdown,
@@ -240,7 +253,7 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
                     onCheckedChange = { checked ->
                         state.setShowModelDropdown(checked)
                     },
-                    shapes = ListItemDefaults.last(),
+                    shapes = ListItemDefaults.item(),
                     content = {
                         Text(text = stringResource(id = R.string.settings_ai_config_model))
                     },
@@ -304,6 +317,41 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
                                     }
                             }
                         }
+                    },
+                )
+            }
+            AnimatedVisibility(visible = state.aiType == AiTypeOption.OpenAI) {
+                SegmentedListItem(
+                    checked = state.textEditDialog?.field == AiConfigEditField.Model,
+                    onCheckedChange = { checked ->
+                        if (checked) {
+                            state.setTextEditDialog(
+                                TextEditDialogState(
+                                    field = AiConfigEditField.Model,
+                                    title = modelTitle,
+                                    placeholder = modelPlaceholder,
+                                    value = state.openAIModel,
+                                    onConfirm = { newValue ->
+                                        state.setOpenAIModel(newValue)
+                                    },
+                                ),
+                            )
+                        } else if (state.textEditDialog?.field == AiConfigEditField.Model) {
+                            state.setTextEditDialog(null)
+                        }
+                    },
+                    shapes = ListItemDefaults.last(),
+                    content = {
+                        Text(text = stringResource(id = R.string.settings_ai_config_model_manual_input))
+                    },
+                    supportingContent = {
+                        Text(
+                            text =
+                                state.openAIModel.ifBlank {
+                                    stringResource(id = R.string.settings_ai_config_value_empty_placeholder)
+                                },
+                            style = MaterialTheme.typography.bodySmall,
+                        )
                     },
                 )
             }
@@ -432,6 +480,7 @@ private data class TextEditDialogState(
 private enum class AiConfigEditField {
     ServerUrl,
     ApiKey,
+    Model,
     TldrPrompt,
 }
 
@@ -574,6 +623,7 @@ internal fun TranslationConfigScreen(onBack: () -> Unit) {
             val googleCloudApiKeyTitle = stringResource(id = R.string.settings_ai_config_translate_provider_google_cloud_api_key)
             val libreTranslateBaseUrlTitle = stringResource(id = R.string.settings_ai_config_translate_provider_libretranslate_base_url)
             val libreTranslateApiKeyTitle = stringResource(id = R.string.settings_ai_config_translate_provider_libretranslate_api_key)
+            val excludedLanguagesTitle = stringResource(id = R.string.settings_translation_auto_excluded_languages)
             val emptyPlaceholder = stringResource(id = R.string.settings_ai_config_value_empty_placeholder)
             val hasProviderSettings = state.translateProvider != TranslateProviderOption.GoogleWeb
             SegmentedListItem(
@@ -628,7 +678,7 @@ internal fun TranslationConfigScreen(onBack: () -> Unit) {
                     state.setPreTranslate(!state.preTranslate)
                 },
                 shapes =
-                    if (hasProviderSettings) {
+                    if (state.preTranslate) {
                         ListItemDefaults.item()
                     } else {
                         ListItemDefaults.last()
@@ -652,42 +702,116 @@ internal fun TranslationConfigScreen(onBack: () -> Unit) {
                     )
                 },
             )
+            AnimatedVisibility(state.preTranslate) {
+                SegmentedListItem(
+                    checked = state.showExcludedLanguagesDialog,
+                    onCheckedChange = { checked ->
+                        state.setShowExcludedLanguagesDialog(checked)
+                    },
+                    shapes =
+                        if (hasProviderSettings) {
+                            ListItemDefaults.item()
+                        } else {
+                            ListItemDefaults.last()
+                        },
+                    content = {
+                        Text(text = excludedLanguagesTitle)
+                    },
+                    supportingContent = {
+                        Text(
+                            text =
+                                state.autoTranslateExcludedLanguages
+                                    .takeIf { it.isNotEmpty() }
+                                    ?.joinToString()
+                                    ?: emptyPlaceholder,
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                    },
+                )
+            }
             AnimatedVisibility(
                 visible = hasProviderSettings,
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap)) {
                     when (state.translateProvider) {
                         TranslateProviderOption.AI ->
-                            SegmentedListItem(
-                                checked = state.textEditDialog?.field == TranslationEditField.TranslatePrompt,
-                                onCheckedChange = { checked ->
-                                    if (checked) {
-                                        state.setTextEditDialog(
-                                            TranslationTextEditDialogState(
-                                                field = TranslationEditField.TranslatePrompt,
-                                                title = translatePromptTitle,
-                                                placeholder = "",
-                                                value = state.translatePrompt,
-                                                onConfirm = { newValue ->
-                                                    state.setTranslatePrompt(newValue)
-                                                },
-                                            ),
+                            Column(verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap)) {
+                                SegmentedListItem(
+                                    checked = state.textEditDialog?.field == TranslationEditField.TranslatePrompt,
+                                    onCheckedChange = { checked ->
+                                        if (checked) {
+                                            state.setTextEditDialog(
+                                                TranslationTextEditDialogState(
+                                                    field = TranslationEditField.TranslatePrompt,
+                                                    title = translatePromptTitle,
+                                                    placeholder = "",
+                                                    value = state.translatePrompt,
+                                                    onConfirm = { newValue ->
+                                                        state.setTranslatePrompt(newValue)
+                                                    },
+                                                ),
+                                            )
+                                        } else if (state.textEditDialog?.field == TranslationEditField.TranslatePrompt) {
+                                            state.setTextEditDialog(null)
+                                        }
+                                    },
+                                    shapes = ListItemDefaults.item(),
+                                    content = {
+                                        Text(text = translatePromptTitle)
+                                    },
+                                    supportingContent = {
+                                        Text(
+                                            text = state.translatePrompt.ifBlank { emptyPlaceholder },
+                                            style = MaterialTheme.typography.bodySmall,
                                         )
-                                    } else if (state.textEditDialog?.field == TranslationEditField.TranslatePrompt) {
-                                        state.setTextEditDialog(null)
-                                    }
-                                },
-                                shapes = ListItemDefaults.last(),
-                                content = {
-                                    Text(text = translatePromptTitle)
-                                },
-                                supportingContent = {
-                                    Text(
-                                        text = state.translatePrompt.ifBlank { emptyPlaceholder },
-                                        style = MaterialTheme.typography.bodySmall,
-                                    )
-                                },
-                            )
+                                    },
+                                )
+                                SegmentedListItem(
+                                    onClick = {},
+                                    shapes = ListItemDefaults.last(),
+                                    content = {
+                                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                            Text(text = stringResource(id = R.string.settings_translation_ai_test_title))
+                                            Text(
+                                                text = stringResource(id = R.string.settings_translation_ai_test_description),
+                                                style = MaterialTheme.typography.bodySmall,
+                                            )
+                                            Text(
+                                                text = stringResource(id = R.string.settings_translation_ai_test_original),
+                                                style = MaterialTheme.typography.labelMedium,
+                                            )
+                                            RichText(text = state.aiTranslationTestState.sampleText)
+                                            Button(
+                                                onClick = {
+                                                    state.aiTranslationTestState.runTest()
+                                                },
+                                            ) {
+                                                Text(text = stringResource(id = R.string.settings_translation_ai_test_action))
+                                            }
+                                            if (state.aiTranslationTestState.isLoading) {
+                                                Text(
+                                                    text = stringResource(id = R.string.settings_ai_config_model_loading),
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                )
+                                            }
+                                            state.aiTranslationTestState.errorMessage?.let { message ->
+                                                Text(
+                                                    text = message,
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    color = MaterialTheme.colorScheme.error,
+                                                )
+                                            }
+                                            state.aiTranslationTestState.translatedText?.let { translated ->
+                                                Text(
+                                                    text = stringResource(id = R.string.settings_translation_ai_test_result),
+                                                    style = MaterialTheme.typography.labelMedium,
+                                                )
+                                                RichText(text = translated)
+                                            }
+                                        }
+                                    },
+                                )
+                            }
 
                         TranslateProviderOption.DeepL -> {
                             SegmentedListItem(
@@ -850,6 +974,20 @@ internal fun TranslationConfigScreen(onBack: () -> Unit) {
             }
         }
     }
+    if (state.showExcludedLanguagesDialog) {
+        ExcludedLanguagesDialog(
+            title = stringResource(id = R.string.settings_translation_auto_excluded_languages),
+            options = remember(state.autoTranslateExcludedLanguages) { translationLanguageOptions(state.autoTranslateExcludedLanguages) },
+            selectedLanguages = state.autoTranslateExcludedLanguages,
+            onDismiss = {
+                state.setShowExcludedLanguagesDialog(false)
+            },
+            onConfirm = { selectedLanguages ->
+                state.setAutoTranslateExcludedLanguages(selectedLanguages)
+                state.setShowExcludedLanguagesDialog(false)
+            },
+        )
+    }
     state.textEditDialog?.let { dialog ->
         TextEditDialog(
             title = dialog.title,
@@ -872,15 +1010,23 @@ internal fun TranslationConfigScreen(onBack: () -> Unit) {
 private fun translationPresenter() =
     run {
         val businessState = remember { AiConfigPresenter() }.invoke()
+        val aiTranslationTestState = remember { AiTranslationTestPresenter() }.invoke()
         var showProviderDropdown by remember { mutableStateOf(false) }
+        var showExcludedLanguagesDialog by remember { mutableStateOf(false) }
         var textEditDialog by remember { mutableStateOf<TranslationTextEditDialogState?>(null) }
 
         object : AiConfigPresenter.State by businessState {
+            val aiTranslationTestState = aiTranslationTestState
             val showProviderDropdown = showProviderDropdown
+            val showExcludedLanguagesDialog = showExcludedLanguagesDialog
             val textEditDialog = textEditDialog
 
             fun setShowProviderDropdown(value: Boolean) {
                 showProviderDropdown = value
+            }
+
+            fun setShowExcludedLanguagesDialog(value: Boolean) {
+                showExcludedLanguagesDialog = value
             }
 
             fun setTextEditDialog(value: TranslationTextEditDialogState?) {
@@ -916,3 +1062,163 @@ private fun translateProviderOptionLabel(provider: TranslateProviderOption): Str
         TranslateProviderOption.GoogleCloud -> stringResource(id = R.string.settings_ai_config_translate_provider_google_cloud)
         TranslateProviderOption.LibreTranslate -> stringResource(id = R.string.settings_ai_config_translate_provider_libretranslate)
     }
+
+private data class LanguageOption(
+    val tag: String,
+    val label: String,
+)
+
+private fun translationLanguageOptions(selectedLanguages: ImmutableList<String>): ImmutableList<LanguageOption> {
+    val displayLocale = Locale.getDefault()
+    val baseOptions =
+        Locale
+            .getISOLanguages()
+            .map { code ->
+                @Suppress("DEPRECATION")
+                LanguageOption(tag = code, label = Locale(code).getDisplayLanguage(displayLocale))
+            }
+    val specialOptions =
+        listOf(
+            LanguageOption("zh-CN", Locale.forLanguageTag("zh-CN").getDisplayName(displayLocale)),
+            LanguageOption("zh-TW", Locale.forLanguageTag("zh-TW").getDisplayName(displayLocale)),
+        )
+    val customOptions =
+        selectedLanguages
+            .filterNot { selected ->
+                selected in specialOptions.map(LanguageOption::tag) || selected in baseOptions.map(LanguageOption::tag)
+            }.map { LanguageOption(tag = it, label = it) }
+    return (specialOptions + baseOptions + customOptions)
+        .distinctBy(LanguageOption::tag)
+        .sortedBy(LanguageOption::label)
+        .filter { it.label.isNotBlank() && it.label.isNotEmpty() }
+        .toImmutableList()
+}
+
+private fun excludedLanguageSummary(
+    selectedLanguages: ImmutableList<String>,
+    emptyPlaceholder: String,
+): String {
+    if (selectedLanguages.isEmpty()) {
+        return emptyPlaceholder
+    }
+    val labels = translationLanguageOptions(selectedLanguages).associate { it.tag to it.label }
+    return selectedLanguages.joinToString { tag -> labels[tag] ?: tag }
+}
+
+@Composable
+private fun ExcludedLanguagesDialog(
+    title: String,
+    options: ImmutableList<LanguageOption>,
+    selectedLanguages: ImmutableList<String>,
+    onDismiss: () -> Unit,
+    onConfirm: (ImmutableList<String>) -> Unit,
+) {
+    var selected by remember(selectedLanguages) { mutableStateOf(selectedLanguages.toSet()) }
+    var query by remember { mutableStateOf("") }
+    val filteredOptions =
+        remember(options, query) {
+            if (query.isBlank()) {
+                options
+            } else {
+                options
+                    .filter { option ->
+                        option.label.contains(query, ignoreCase = true) ||
+                            option.tag.contains(query, ignoreCase = true)
+                    }.toImmutableList()
+            }
+        }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(text = title)
+        },
+        text = {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                OutlinedTextField(
+                    value = query,
+                    onValueChange = { query = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    placeholder = {
+                        Text(text = "Search language")
+                    },
+                    singleLine = true,
+                )
+                LazyColumn(
+                    modifier = Modifier.heightIn(max = 360.dp),
+                    state = rememberLazyListState(),
+                    verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
+                ) {
+                    items(
+                        items = filteredOptions,
+                        key = { it.tag },
+                    ) { option ->
+                        val index = filteredOptions.indexOf(option)
+                        SegmentedListItem(
+                            checked = option.tag in selected,
+                            onCheckedChange = { checked ->
+                                selected =
+                                    if (checked) {
+                                        selected + option.tag
+                                    } else {
+                                        selected - option.tag
+                                    }
+                            },
+                            shapes = ListItemDefaults.segmentedShapes2(index, filteredOptions.size),
+                            content = {
+                                Text(text = option.label)
+                            },
+                            supportingContent = {
+                                if (option.label != option.tag) {
+                                    Text(text = option.tag)
+                                }
+                            },
+                            trailingContent = {
+                                Checkbox(
+                                    checked = option.tag in selected,
+                                    onCheckedChange = { checked ->
+                                        selected =
+                                            if (checked) {
+                                                selected + option.tag
+                                            } else {
+                                                selected - option.tag
+                                            }
+                                    },
+                                )
+                            },
+                            modifier =
+                                Modifier.clickable {
+                                    selected =
+                                        if (option.tag in selected) {
+                                            selected - option.tag
+                                        } else {
+                                            selected + option.tag
+                                        }
+                                },
+                        )
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    onConfirm(
+                        options
+                            .map(LanguageOption::tag)
+                            .filter { it in selected }
+                            .toImmutableList(),
+                    )
+                },
+            ) {
+                Text(text = stringResource(id = android.R.string.ok))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(text = stringResource(id = android.R.string.cancel))
+            }
+        },
+    )
+}

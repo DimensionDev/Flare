@@ -129,6 +129,7 @@ internal class OnlinePreTranslationService(
             prepareStatusCandidates(
                 statuses = snapshot,
                 targetLanguage = settings.targetLanguage,
+                autoTranslateExcludedLanguages = settings.autoTranslateExcludedLanguages,
                 providerCacheKey = settings.providerCacheKey,
                 allowLongText = allowLongText,
             )
@@ -141,6 +142,7 @@ internal class OnlinePreTranslationService(
                 prepareProfileCandidate(
                     user = user,
                     targetLanguage = settings.targetLanguage,
+                    autoTranslateExcludedLanguages = settings.autoTranslateExcludedLanguages,
                     providerCacheKey = settings.providerCacheKey,
                 ),
             )
@@ -302,6 +304,7 @@ internal class OnlinePreTranslationService(
         }
         return ActivePreTranslationSettings(
             targetLanguage = targetLanguage,
+            autoTranslateExcludedLanguages = appSettings.translateConfig.autoTranslateExcludedLanguages,
             appSettings = appSettings,
             providerCacheKey = appSettings.translationProviderCacheKey(),
         )
@@ -335,6 +338,7 @@ internal class OnlinePreTranslationService(
         return prepareStatusCandidates(
             statuses = listOfNotNull(status.status.data) + status.references.mapNotNull { it.status?.data },
             targetLanguage = targetLanguage,
+            autoTranslateExcludedLanguages = emptyList(),
             providerCacheKey = providerCacheKey,
             allowLongText = true,
             preferredDisplayMode = TranslationDisplayMode.Translated,
@@ -344,6 +348,7 @@ internal class OnlinePreTranslationService(
     private suspend fun prepareStatusCandidates(
         statuses: List<DbStatus>,
         targetLanguage: String,
+        autoTranslateExcludedLanguages: List<String>,
         providerCacheKey: String,
         allowLongText: Boolean,
         preferredDisplayMode: TranslationDisplayMode? = null,
@@ -371,6 +376,7 @@ internal class OnlinePreTranslationService(
                     sourceLanguages = PreTranslationContentRules.sourceLanguages(status.content),
                     existing = existingByKey[entityKey],
                     targetLanguage = targetLanguage,
+                    autoTranslateExcludedLanguages = autoTranslateExcludedLanguages,
                     providerCacheKey = providerCacheKey,
                     now = now,
                     allowLongText = allowLongText,
@@ -383,6 +389,7 @@ internal class OnlinePreTranslationService(
     private suspend fun prepareProfileCandidate(
         user: DbUser,
         targetLanguage: String,
+        autoTranslateExcludedLanguages: List<String>,
         providerCacheKey: String,
     ): PreparedTranslationCandidate? =
         prepareCandidate(
@@ -399,6 +406,7 @@ internal class OnlinePreTranslationService(
                         targetLanguage = targetLanguage,
                     ),
             targetLanguage = targetLanguage,
+            autoTranslateExcludedLanguages = autoTranslateExcludedLanguages,
             providerCacheKey = providerCacheKey,
             now = Clock.System.now().toEpochMilliseconds(),
             allowLongText = true,
@@ -411,6 +419,7 @@ internal class OnlinePreTranslationService(
         sourceLanguages: List<String>,
         existing: DbTranslation?,
         targetLanguage: String,
+        autoTranslateExcludedLanguages: List<String>,
         providerCacheKey: String,
         now: Long,
         allowLongText: Boolean,
@@ -434,6 +443,11 @@ internal class OnlinePreTranslationService(
                     sourceLanguages = sourceLanguages,
                     targetLanguage = targetLanguage,
                 ) -> PreTranslationStoreSupport.SKIPPED_SAME_LANGUAGE_REASON
+
+                PreTranslationContentRules.shouldSkipForExcludedSourceLanguage(
+                    sourceLanguages = sourceLanguages,
+                    excludedLanguages = autoTranslateExcludedLanguages,
+                ) -> PreTranslationStoreSupport.SKIPPED_EXCLUDED_LANGUAGE_REASON
 
                 PreTranslationPayloadSupport.isEmpty(sourceDocument) ->
                     PreTranslationStoreSupport.SKIPPED_EMPTY_REASON

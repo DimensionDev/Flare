@@ -28,6 +28,7 @@ class TranslateConfigSerializationTest {
         val decoded = ProtoBuf.decodeFromByteArray(AppSettings.serializer(), bytes)
 
         assertEquals(true, decoded.translateConfig.preTranslate)
+        assertEquals(emptyList(), decoded.translateConfig.autoTranslateExcludedLanguages)
         assertIs<AppSettings.TranslateConfig.Provider.GoogleWeb>(decoded.translateConfig.provider)
     }
 
@@ -62,6 +63,7 @@ class TranslateConfigSerializationTest {
                 version = "1",
                 translateConfig =
                     AppSettings.TranslateConfig(
+                        autoTranslateExcludedLanguages = listOf("en", "ja-JP"),
                         provider =
                             AppSettings.TranslateConfig.Provider.LibreTranslate(
                                 baseUrl = "https://translate.example.com",
@@ -98,6 +100,10 @@ class TranslateConfigSerializationTest {
                 apiKey = "gcp-key",
             ),
             googleCloudRoundTrip.translateConfig.provider,
+        )
+        assertEquals(
+            listOf("en", "ja-JP"),
+            libreTranslateRoundTrip.translateConfig.autoTranslateExcludedLanguages,
         )
         assertEquals(
             AppSettings.TranslateConfig.Provider.LibreTranslate(

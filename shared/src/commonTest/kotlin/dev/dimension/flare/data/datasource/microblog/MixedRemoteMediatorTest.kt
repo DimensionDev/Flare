@@ -29,7 +29,9 @@ import dev.dimension.flare.data.io.PlatformPathProducer
 import dev.dimension.flare.data.network.ai.AiCompletionService
 import dev.dimension.flare.data.network.ai.OpenAIService
 import dev.dimension.flare.data.translation.OnlinePreTranslationService
+import dev.dimension.flare.data.translation.PreTranslationContentRules
 import dev.dimension.flare.data.translation.PreTranslationService
+import dev.dimension.flare.data.translation.PreTranslationStoreSupport
 import dev.dimension.flare.data.translation.aiPreTranslateConfig
 import dev.dimension.flare.deleteTestRootPath
 import dev.dimension.flare.memoryDatabaseBuilder
@@ -645,6 +647,91 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                 }
             assertEquals(TranslationStatus.Skipped, translation.status)
             assertEquals("source_language_matches_target", translation.statusReason)
+        }
+
+    @OptIn(ExperimentalPagingApi::class)
+    @Test
+    fun homeTimelineRequeuesExcludedLanguageSkippedTranslationAfterExclusionRemoved() =
+        runBlocking {
+            val excludedLanguage = nonTargetLanguageTag()
+            val appDataStore = AppDataStore(pathProducer)
+            appDataStore.appSettingsStore.updateData {
+                it.copy(
+                    language = Locale.language,
+                    translateConfig =
+                        aiPreTranslateConfig().copy(
+                            autoTranslateExcludedLanguages = listOf(excludedLanguage),
+                        ),
+                    aiConfig =
+                        AppSettings.AiConfig(
+                            type = AppSettings.AiConfig.Type.OnDevice,
+                        ),
+                )
+            }
+            val scope = CoroutineScope(Dispatchers.Unconfined + SupervisorJob())
+            val preTranslationService: PreTranslationService =
+                OnlinePreTranslationService(
+                    database = db,
+                    appDataStore = appDataStore,
+                    aiCompletionService = AiCompletionService(OpenAIService(), TestOnDeviceAI()),
+                    coroutineScope = scope,
+                )
+            try {
+                val accountKey = MicroBlogKey(id = "account-excluded-requeue", host = "test.social")
+                val post =
+                    createPost(
+                        accountType = AccountType.Specific(accountKey),
+                        user = profile(MicroBlogKey("user-excluded-requeue", "test.social"), "User"),
+                        statusKey = MicroBlogKey("status-excluded-requeue", "test.social"),
+                        text = "requeue source",
+                    ).copy(sourceLanguages = persistentListOf(excludedLanguage))
+                val savedStatus =
+                    TimelinePagingMapper
+                        .toDb(post, pagingKey = "home")
+                        .status.status.data
+                db.statusDao().insertAll(listOf(savedStatus))
+
+                preTranslationService.enqueueStatuses(listOf(savedStatus), allowLongText = false)
+
+                val skippedTranslation =
+                    withTimeout(5_000) {
+                        db
+                            .translationDao()
+                            .find(
+                                entityType = TranslationEntityType.Status,
+                                entityKey = savedStatus.id,
+                                targetLanguage = Locale.language,
+                            ).filterNotNull()
+                            .first { it.status == TranslationStatus.Skipped }
+                    }
+                assertEquals(PreTranslationStoreSupport.SKIPPED_EXCLUDED_LANGUAGE_REASON, skippedTranslation.statusReason)
+
+                appDataStore.appSettingsStore.updateData {
+                    it.copy(
+                        translateConfig =
+                            it.translateConfig.copy(
+                                autoTranslateExcludedLanguages = emptyList(),
+                            ),
+                    )
+                }
+
+                preTranslationService.enqueueStatuses(listOf(savedStatus), allowLongText = false)
+
+                val completedTranslation =
+                    withTimeout(5_000) {
+                        db
+                            .translationDao()
+                            .find(
+                                entityType = TranslationEntityType.Status,
+                                entityKey = savedStatus.id,
+                                targetLanguage = Locale.language,
+                            ).filterNotNull()
+                            .first { it.status == TranslationStatus.Completed }
+                    }
+                assertEquals("requeue source (${Locale.language})", completedTranslation.payload?.content?.raw)
+            } finally {
+                scope.coroutineContext[Job]?.cancelAndJoin()
+            }
         }
 
     @OptIn(ExperimentalPagingApi::class)
@@ -1423,3 +1510,11 @@ private fun TranslationDocument.translated(targetLanguage: String): TranslationD
                 )
             },
     )
+
+private fun nonTargetLanguageTag(): String {
+    val target = requireNotNull(PreTranslationContentRules.canonicalTranslationLanguage(Locale.language))
+    return listOf("fr-FR", "de-DE", "es-ES", "ja-JP", "zh-CN")
+        .first { candidate ->
+            PreTranslationContentRules.canonicalTranslationLanguage(candidate) != target
+        }
+}

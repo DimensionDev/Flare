@@ -247,7 +247,7 @@ struct NotificationAccountsMenu: View {
         guard count > 0 else {
             return nil
         }
-        return "(\(count)) unread"
+        return "\(count) unread"
     }
 
     var body: some View {
@@ -264,12 +264,11 @@ struct NotificationAccountsMenu: View {
                     )) {
                         Label {
                             Text(item.profile.handle.canonical)
-                            if let unreadText = unreadText(for: Int(item.badge)) {
-                                Text(unreadText)
-                            }
                         } icon: {
                             AvatarView(data: item.profile.avatar)
-                                .frame(width: 24, height: 24)
+                        }
+                        if let unreadText = unreadText(for: Int(item.badge)) {
+                            Text(unreadText)
                         }
                     }
                 }

@@ -25,6 +25,7 @@ import dev.dimension.flare.data.datasource.microblog.paging.TimelinePagingMapper
 import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.network.nostr.NostrService
 import dev.dimension.flare.data.network.nostr.bech32PublicKey
+import dev.dimension.flare.data.translation.PreTranslationStoreSupport
 import dev.dimension.flare.data.translation.cacheKey
 import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.AccountType
@@ -1553,6 +1554,78 @@ class MicroblogTest : RobolectricTest() {
             val retryText = assertIs<ActionMenu.Item.Text.Localized>(retryAction.text)
             assertEquals(ActionMenu.Item.Text.Localized.Type.RetryTranslation, retryText.type)
             assertEquals(UiIcon.Translate, retryAction.icon)
+        }
+
+    @Test
+    fun toUiPrependsTranslateWhenTranslationSkippedForExcludedLanguage() =
+        runTest {
+            val accountKey = MicroBlogKey(id = "account-skipped-excluded", host = "test.com")
+            val postUser =
+                createUser(MicroBlogKey(id = "post-user-skipped-excluded", host = "test.com"), "Post User")
+            val post =
+                createPost(
+                    accountKey = accountKey,
+                    user = postUser,
+                    statusKey = MicroBlogKey(id = "post-status-skipped-excluded", host = "test.com"),
+                    text = "excluded source",
+                ).copy(
+                    actions =
+                        persistentListOf(
+                            ActionMenu.Group(
+                                displayItem =
+                                    ActionMenu.Item(
+                                        text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.More),
+                                        clickEvent = ClickEvent.Noop,
+                                    ),
+                                actions = persistentListOf(),
+                            ),
+                        ),
+                )
+
+            val mapped = TimelinePagingMapper.toDb(post, pagingKey = "home")
+            saveToDatabase(db, listOf(mapped))
+            db.translationDao().insert(
+                DbTranslation(
+                    entityType = TranslationEntityType.Status,
+                    entityKey =
+                        mapped.status.status.data
+                            .translationEntityKey(),
+                    targetLanguage = Locale.language,
+                    sourceHash = post.translationPayload()!!.sourceHash(googleTranslationProviderCacheKey),
+                    status = TranslationStatus.Skipped,
+                    statusReason = PreTranslationStoreSupport.SKIPPED_EXCLUDED_LANGUAGE_REASON,
+                    payload = null,
+                    updatedAt = 1L,
+                ),
+            )
+
+            val dbItem =
+                assertNotNull(
+                    (
+                        assertIs<PagingSource.LoadResult.Page<Int, DbStatusWithReference>>(
+                            TestPager(
+                                config = PagingConfig(pageSize = 20),
+                                db.pagingTimelineDao().getPagingSource("home"),
+                            ).refresh(),
+                        )
+                    ).data.firstOrNull(),
+                )
+
+            val timelineUi =
+                assertIs<UiTimelineV2.Post>(
+                    TimelinePagingMapper.toUi(
+                        item = dbItem,
+                        pagingKey = "home",
+                        translationDisplayOptions = translationDisplayOptions(),
+                    ),
+                )
+
+            val moreAction = assertIs<ActionMenu.Group>(timelineUi.actions.first())
+            val firstAction = assertIs<ActionMenu.Item>(moreAction.actions.first())
+            assertEquals(
+                ActionMenu.Item.Text.Localized.Type.Translate,
+                assertIs<ActionMenu.Item.Text.Localized>(firstAction.text).type,
+            )
         }
 
     @Test

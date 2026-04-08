@@ -3,6 +3,7 @@ package dev.dimension.flare.data.database.cache.model
 import dev.dimension.flare.common.Locale
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
+import dev.dimension.flare.data.translation.PreTranslationStoreSupport
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.DeeplinkEvent
@@ -73,6 +74,7 @@ internal fun UiTimelineV2.applyTranslation(
                         translation?.status == TranslationStatus.Failed -> TranslationMenuAction.Retry
                         shouldShowTranslated -> TranslationMenuAction.ShowOriginal
                         translation?.status == TranslationStatus.Pending || translation?.status == TranslationStatus.Translating -> null
+                        PreTranslationStoreSupport.canRetrySkippedManually(translation) -> TranslationMenuAction.Translate
                         translation?.status == TranslationStatus.Skipped -> null
                         else -> TranslationMenuAction.Translate
                     }

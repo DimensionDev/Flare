@@ -113,8 +113,10 @@ internal object PreTranslationStoreSupport {
         }
         return when (existing.status) {
             TranslationStatus.Completed,
-            TranslationStatus.Skipped,
             -> false
+
+            TranslationStatus.Skipped ->
+                existing.statusReason == SKIPPED_EXCLUDED_LANGUAGE_REASON
 
             TranslationStatus.Failed -> true
             TranslationStatus.Pending,
@@ -122,6 +124,10 @@ internal object PreTranslationStoreSupport {
             -> false
         }
     }
+
+    fun canRetrySkippedManually(existing: DbTranslation?): Boolean =
+        existing?.status == TranslationStatus.Skipped &&
+            existing.statusReason == SKIPPED_EXCLUDED_LANGUAGE_REASON
 
     private fun matchesSkipped(
         existing: DbTranslation?,

@@ -3,7 +3,6 @@ package dev.dimension.flare.ui.screen.compose
 import android.content.Context
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
@@ -189,7 +188,7 @@ internal fun ComposeScreen(
     var showCloseConfirmDialog by remember { mutableStateOf(false) }
     val photoPickerLauncher =
         rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.PickMultipleVisualMedia(4),
+            contract = ActivityResultContracts.OpenMultipleDocuments(),
             onResult = { uris ->
                 state.mediaState.onSuccess {
                     it.addMedia(uris)
@@ -730,8 +729,9 @@ internal fun ComposeScreen(
                         IconButton(
                             onClick = {
                                 photoPickerLauncher.launch(
-                                    PickVisualMediaRequest(
-                                        ActivityResultContracts.PickVisualMedia.ImageAndVideo,
+                                    arrayOf(
+                                        "image/*",
+                                        "video/*",
                                     ),
                                 )
                             },

@@ -28,6 +28,7 @@ import dev.dimension.flare.data.network.ai.OpenAIService
 import dev.dimension.flare.data.translation.OnlinePreTranslationService
 import dev.dimension.flare.data.translation.PreTranslationBatchDocument
 import dev.dimension.flare.data.translation.PreTranslationBatchPayload
+import dev.dimension.flare.data.translation.PreTranslationContentRules
 import dev.dimension.flare.data.translation.PreTranslationService
 import dev.dimension.flare.data.translation.PreTranslationStoreSupport
 import dev.dimension.flare.data.translation.aiPreTranslateConfig
@@ -321,10 +322,11 @@ class UserHandlerTest : RobolectricTest() {
     @Test
     fun userByIdRefreshSkipsProfilePreTranslationForExcludedLanguage() =
         runTest {
+            val excludedLanguage = nonTargetLanguageTag()
             val expected =
                 createProfile(id = "excluded-pretranslate", host = "test.social", handle = "@excluded-pretranslate@test.social").copy(
                     description = "Original profile bio".toUiPlainText(),
-                    sourceLanguages = persistentListOf("en-US"),
+                    sourceLanguages = persistentListOf(excludedLanguage),
                 )
             loader.nextById = expected
             appDataStore.appSettingsStore.updateData {
@@ -332,7 +334,7 @@ class UserHandlerTest : RobolectricTest() {
                     language = "zh-CN",
                     translateConfig =
                         aiPreTranslateConfig().copy(
-                            autoTranslateExcludedLanguages = listOf("en"),
+                            autoTranslateExcludedLanguages = listOf(excludedLanguage),
                         ),
                     aiConfig =
                         AppSettings.AiConfig(
@@ -569,3 +571,11 @@ private fun TranslationDocument.translated(targetLanguage: String): TranslationD
                 )
             },
     )
+
+private fun nonTargetLanguageTag(): String {
+    val target = requireNotNull(PreTranslationContentRules.canonicalTranslationLanguage(Locale.language))
+    return listOf("fr-FR", "de-DE", "es-ES", "ja-JP", "zh-CN")
+        .first { candidate ->
+            PreTranslationContentRules.canonicalTranslationLanguage(candidate) != target
+        }
+}

@@ -34,6 +34,7 @@ import dev.dimension.flare.ui.humanizer.PlatformFormatter
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.TranslationDisplayState
 import dev.dimension.flare.ui.model.UiHandle
+import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.render.toUi
@@ -54,7 +55,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
-import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlin.time.Clock
 
@@ -1552,7 +1552,7 @@ class MicroblogTest : RobolectricTest() {
             val retryAction = assertIs<ActionMenu.Item>(moreAction.actions.first())
             val retryText = assertIs<ActionMenu.Item.Text.Localized>(retryAction.text)
             assertEquals(ActionMenu.Item.Text.Localized.Type.RetryTranslation, retryText.type)
-            assertNull(retryAction.icon)
+            assertEquals(UiIcon.Translate, retryAction.icon)
         }
 
     @Test

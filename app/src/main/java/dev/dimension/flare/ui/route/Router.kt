@@ -51,12 +51,14 @@ internal fun Router(
     val listDetailStrategy = rememberListDetailSceneStrategy<NavKey>()
     val uriHandler = LocalUriHandler.current
     val isBigScreen = isBigScreen()
-    NavDisplay<NavKey>(
-        sceneStrategy =
-            remember(listDetailStrategy) {
-                DialogSceneStrategy<NavKey>()
-                    .then(BottomSheetSceneStrategy())
-                    .then(listDetailStrategy)
+    NavDisplay(
+        sceneStrategies =
+            remember {
+                listOf(
+                    DialogSceneStrategy(),
+                    BottomSheetSceneStrategy(),
+                    listDetailStrategy,
+                )
             },
         entryDecorators =
             listOf(

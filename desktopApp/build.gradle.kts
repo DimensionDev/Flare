@@ -131,10 +131,8 @@ nucleus.application {
 
         macOS {
             val hasSigningProps = project.file("embedded.provisionprofile").exists() && project.file("runtime.provisionprofile").exists()
-            packageBuildVersion = desktopVersionCode.toString()
             bundleID = "dev.dimension.flare"
             minimumSystemVersion = "14.0"
-            appStore = hasSigningProps
             appCategory = "public.app-category.social-networking"
 
             jvmArgs(

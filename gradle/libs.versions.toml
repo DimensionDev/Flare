@@ -74,7 +74,7 @@ adaptive-navigation3 = { module = "org.jetbrains.compose.material3.adaptive:adap
 androidx-collection = { module = "androidx.collection:collection", version.ref = "collection" }
 bluesky = { module = "moe.tlaster.ozone:bluesky", version.ref = "bluesky" }
 bluesky-oauth = { module = "moe.tlaster.ozone:oauth", version.ref = "bluesky" }
-clikt = { module = "com.github.ajalt.clikt:clikt", version.ref = "clikt" }
+clikt = { module = "com.github.ajalt.clikt:clikt-core", version.ref = "clikt" }
 composemediaplayer = { module = "io.github.kdroidfilter:composemediaplayer", version.ref = "composemediaplayer" }
 composewebview = { module = "io.github.kdroidfilter:composewebview", version.ref = "composewebview" }
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }

@@ -1,6 +1,6 @@
 package dev.dimension.flare.server
 
-import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.core.CoreCliktCommand
 import com.github.ajalt.clikt.core.main
 import com.github.ajalt.clikt.parameters.options.help
 import com.github.ajalt.clikt.parameters.options.option
@@ -15,7 +15,7 @@ public fun main(args: Array<String>) {
     Server().main(args)
 }
 
-internal class Server : CliktCommand() {
+internal class Server : CoreCliktCommand() {
     val configPath: String by option().required().help("Path to the configuration file")
 
     override fun run() {

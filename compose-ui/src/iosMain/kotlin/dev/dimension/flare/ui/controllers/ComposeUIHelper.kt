@@ -1,5 +1,7 @@
 package dev.dimension.flare.ui.controllers
 
+import co.touchlab.crashkios.crashlytics.enableCrashlytics
+import co.touchlab.crashkios.crashlytics.setCrashlyticsUnhandledExceptionHook
 import coil3.ImageLoader
 import coil3.SingletonImageLoader
 import coil3.annotation.ExperimentalCoilApi
@@ -28,6 +30,8 @@ public object ComposeUIHelper {
         swiftPlatformTextRenderer: SwiftPlatformTextRenderer,
         swiftOnDeviceAI: SwiftOnDeviceAI,
     ) {
+        enableCrashlytics()
+        setCrashlyticsUnhandledExceptionHook()
         startKoin {
             modules(KoinHelper.modules())
             modules(

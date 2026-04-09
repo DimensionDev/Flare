@@ -6,7 +6,6 @@ import java.util.Properties
 
 plugins {
     id("com.android.application")
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.ksp)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ktorfit)
@@ -115,11 +114,11 @@ android {
 
     // START Non-FOSS component
     if (project.file("google-services.json").exists()) {
-        sourceSets.getByName("main").java.srcDirs("src/play/java")
+        sourceSets.getByName("main").kotlin.directories.add("src/play/java")
     }
     // END Non-FOSS component
     if (!project.file("google-services.json").exists()){
-        sourceSets.getByName("main").java.srcDirs("src/foss/java")
+        sourceSets.getByName("main").kotlin.directories.add("src/foss/java")
     }
 }
 

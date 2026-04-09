@@ -15,7 +15,7 @@ kotlin {
     jvmToolchain(libs.versions.java.get().toInt())
     explicitApi()
     applyDefaultHierarchyTemplate()
-    androidLibrary {
+    android {
         compileSdk = libs.versions.compileSdk.get().toInt()
         namespace = "dev.dimension.flare.compose.ui"
         minSdk = libs.versions.minSdk.get().toInt()
@@ -96,6 +96,7 @@ kotlin {
                 implementation(libs.cupertino)
                 api(compose("org.jetbrains.compose.ui:ui-util"))
                 implementation(libs.lifecycle.viewmodel.compose)
+                implementation("co.touchlab.crashkios:crashlytics:0.8.6")
             }
         }
     }

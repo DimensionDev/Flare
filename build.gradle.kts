@@ -24,13 +24,12 @@ plugins {
 subprojects {
     val commonOptIn = listOf(
         "kotlin.time.ExperimentalTime",
-        "kotlin.experimental.ExperimentalObjCRefinement"
+        "kotlin.experimental.ExperimentalObjCRefinement",
     )
 
     val freeArgs = listOf(
         "-Xexpect-actual-classes",
         "-Xconsistent-data-class-copy-visibility",
-        "-Xmulti-dollar-interpolation",
     )
 
     plugins.withId("org.jetbrains.kotlin.multiplatform") {
@@ -45,12 +44,16 @@ subprojects {
             }
         }
     }
-    plugins.withId("org.jetbrains.kotlin.android") {
+    plugins.withId("com.android.application") {
         extensions.configure<KotlinAndroidProjectExtension> {
             compilerOptions {
                 allWarningsAsErrors.set(true)
                 freeCompilerArgs.addAll(freeArgs)
-                optIn.addAll(commonOptIn)
+                optIn.addAll(
+                    commonOptIn + listOf(
+                        "androidx.compose.material3.ExperimentalMaterial3ExpressiveApi"
+                    )
+                )
                 jvmTarget.set(JvmTarget.fromTarget(libs.versions.java.get()))
             }
             jvmToolchain {

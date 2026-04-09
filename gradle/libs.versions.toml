@@ -11,15 +11,15 @@ junique = "1.0.4"
 lifecycleViewmodelComposeVersion = "2.10.0-beta01"
 minSdk = "26"
 java = "25"
-agp = "8.13.2"
-kotlin = "2.3.10"
+agp = "9.1.0"
+kotlin = "2.3.20"
 core-ktx = "1.18.0"
 junit = "4.13.2"
 androidx-test-ext-junit = "1.3.0"
 espresso-core = "3.7.0"
 lifecycle-runtime-ktx = "2.10.0"
 activity-compose = "1.13.0"
-compose-bom = "2026.03.01"
+compose-bom = "2026.04.00"
 ksp = "2.3.6"
 nucleus = "1.8.8"
 openaiClient = "4.1.0"
@@ -28,7 +28,7 @@ kotlinx-datetime = "0.7.1"
 kotlinx-collections-immutable = "0.4.0"
 kotlinx-serialization = "1.10.0"
 coil3 = "3.4.0"
-ktorfit = "2.7.2"
+ktorfit = "2.7.3-SNAPSHOT"
 ktor = "3.4.2"
 platformtoolsDarkmodedetector = "0.7.5"
 prettytime = "5.0.9.Final"
@@ -88,7 +88,7 @@ ksoup = { group = "com.fleeksoft.ksoup", name = "ksoup-lite", version.ref = "kso
 lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle-runtime-ktx" }
 lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycle-runtime-ktx" }
 activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activity-compose" }
-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "compose-bom" }
+compose-bom = { group = "androidx.compose", name = "compose-bom-beta", version.ref = "compose-bom" }
 lifecycle-viewmodel-compose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleViewmodelComposeVersion" }
 lifecycle-viewmodel-navigation3 = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-navigation3", version.ref = "lifecycleViewmodelComposeVersion" }
 nucleus-aot-runtime = { module = "io.github.kdroidfilter:nucleus.aot-runtime", version.ref = "nucleus" }
@@ -276,7 +276,7 @@ kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref 
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
-ktorfit = { id = "de.jensklingenberg.ktorfit", version.ref = "ktorfit" }
+ktorfit = { id = "de.jensklingenberg.ktorfit", version = "2.7.2" }
 ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlintPlugin" }
 skie = { id = "co.touchlab.skie", version.ref = "skie" }
 ben-manes-versions = { id = "com.github.ben-manes.versions", version.ref = "versionUpdate" }

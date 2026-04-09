@@ -6,14 +6,12 @@ import com.fleeksoft.ksoup.nodes.Document
 import com.fleeksoft.ksoup.nodes.Element
 import com.fleeksoft.ksoup.nodes.Node
 import com.fleeksoft.ksoup.nodes.TextNode
-import com.fleeksoft.ksoup.select.Elements
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
 
 /**
  * Readability — extracts the main content from an HTML document.
@@ -1713,6 +1711,11 @@ public class Readability(
             var shouldRemoveTitleHeader = true
 
             while (node != null) {
+                val tagName = node.tagName()
+                if (tagName.isNullOrEmpty()) {
+                    node = getNextNode(node)
+                    continue
+                }
                 val tag = node.tagName().uppercase()
 
                 if (tag == "HTML") {

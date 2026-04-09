@@ -61,7 +61,10 @@ val fdroidProp = Properties().apply {
     load(fdroid.inputStream())
 }
 val desktopVersionName =
-    System.getenv("BUILD_VERSION") ?: fdroidProp.getProperty("versionName") ?: "1.0.0"
+    System.getenv("BUILD_VERSION")?.takeIf {
+        // match semantic versioning
+        Regex("""\d+\.\d+\.\d+(-\S+)?""").matches(it)
+    } ?: fdroidProp.getProperty("versionName") ?: "1.0.0"
 val desktopVersionCode =
     System.getenv("BUILD_NUMBER")?.toIntOrNull() ?: fdroidProp.getProperty("versionCode")?.toIntOrNull() ?: 1
 

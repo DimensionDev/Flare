@@ -3,7 +3,6 @@ import io.github.kdroidfilter.nucleus.desktop.application.dsl.AppImageCategory
 import io.github.kdroidfilter.nucleus.desktop.application.dsl.CompressionLevel
 import java.util.Properties
 import org.jetbrains.compose.compose
-import org.gradle.language.jvm.tasks.ProcessResources
 
 plugins {
     alias(libs.plugins.kotlin.jvm)
@@ -12,6 +11,7 @@ plugins {
     alias(libs.plugins.ktlint)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.nucleus)
+    id("com.github.gmazzo.buildconfig") version "6.0.9"
 }
 
 dependencies {
@@ -53,6 +53,51 @@ dependencies {
         exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-coroutines-test")
     }
     implementation(libs.systemColor)
+    implementation(libs.sentry)
+}
+
+val fdroid = rootProject.file("fdroid.properties")
+val fdroidProp = Properties().apply {
+    load(fdroid.inputStream())
+}
+val desktopVersionName =
+    System.getenv("BUILD_VERSION")?.takeIf {
+        // match semantic versioning
+        Regex("""\d+\.\d+\.\d+(-\S+)?""").matches(it)
+    } ?: fdroidProp.getProperty("versionName") ?: "1.0.0"
+val desktopVersionCode =
+    System.getenv("BUILD_NUMBER")?.toIntOrNull() ?: fdroidProp.getProperty("versionCode")?.toIntOrNull() ?: 1
+
+buildConfig {
+    packageName("dev.dimension.flare")
+    useKotlinOutput()
+    buildConfigField("dsn") {
+        type("kotlin.String?")
+        value(provider { System.getenv("SENTRY_DSN") })
+    }
+    buildConfigField("versionName", desktopVersionName)
+    buildConfigField("versionCode", desktopVersionCode)
+    buildConfigField("supportedLocaleTags") {
+        type("kotlin.collections.List<kotlin.String>")
+        expression(
+            provider {
+                val resRoot = project.file("src/main/composeResources")
+                val locales = resRoot.listFiles()
+                    ?.filter { it.isDirectory && it.name.startsWith("values-") }
+                    ?.map { it.name.removePrefix("values-") }
+                    ?.distinct()
+                    ?.sorted()
+                    ?.map { it.replace("-r", "-") }
+                    ?: emptyList()
+                (listOf("en-US") + locales)
+                    .joinToString(
+                        prefix = "listOf(",
+                        postfix = ")",
+                        transform = { "\"$it\"" },
+                    )
+            },
+        )
+    }
 }
 
 nucleus.application {
@@ -82,25 +127,15 @@ nucleus.application {
             io.github.kdroidfilter.nucleus.desktop.application.dsl.TargetFormat.AppX,
         )
         packageName = "Flare"
-        val fdroidProp = Properties()
-        val fdroid = rootProject.file("fdroid.properties")
-        fdroidProp.load(fdroid.inputStream())
-        val buildVersion = System.getenv("BUILD_VERSION")?.takeIf {
-            // match semantic versioning
-            Regex("""\d+\.\d+\.\d+(-\S+)?""").matches(it)
-        } ?: fdroidProp.getProperty("versionName") ?: "1.0.0"
-        packageVersion = buildVersion
-        artifactName = $$"Flare-$${buildVersion}.${ext}"
+        packageVersion = desktopVersionName
+        artifactName = $$"Flare-$${desktopVersionName}.${ext}"
 
         protocol("Flare", "flare")
 
         macOS {
             val hasSigningProps = project.file("embedded.provisionprofile").exists() && project.file("runtime.provisionprofile").exists()
-            packageBuildVersion = System.getenv("BUILD_NUMBER") ?: fdroidProp.getProperty("versionCode")
-                ?.toIntOrNull()?.toString() ?: "1"
             bundleID = "dev.dimension.flare"
             minimumSystemVersion = "14.0"
-            appStore = hasSigningProps
             appCategory = "public.app-category.social-networking"
 
             jvmArgs(
@@ -258,56 +293,4 @@ ktlint {
     filter {
         exclude { element -> element.file.path.contains("build", ignoreCase = true) }
     }
-}
-
-abstract class GenerateSupportedLocales : DefaultTask() {
-
-    @get:OutputDirectory
-    abstract val outputDir: DirectoryProperty
-
-    @TaskAction
-    fun run() {
-        val resRoot = project.file("src/main/composeResources")
-
-        val locales = resRoot.listFiles()
-            ?.filter { it.isDirectory && it.name.startsWith("values-") }
-            ?.map { it.name.removePrefix("values-") } // e.g. "ja", "zh", "zh-rCN"
-            ?.distinct()
-            ?.sorted()
-            ?.map { it.replace("-r", "-") }
-            ?: emptyList()
-
-        val pkg = "dev.dimension.flare"
-        val outDir = outputDir.get().asFile
-        val outFile = File(outDir, "SupportedLocales.kt")
-
-        outDir.mkdirs()
-        outFile.writeText(
-            """
-            package $pkg
-
-            object SupportedLocales {
-                val tags: List<String> = listOf(
-                    "en-US",
-                    ${locales.joinToString(",\n                    ") { "\"$it\"" }}
-                )
-            }
-            """.trimIndent()
-        )
-    }
-}
-
-val generateSupportedLocales = tasks.register<GenerateSupportedLocales>("generateSupportedLocales") {
-    outputDir.set(layout.buildDirectory.dir("generated/supportedLocales"))
-}
-kotlin {
-    sourceSets {
-        val main by getting {
-            kotlin.srcDir(generateSupportedLocales.map { it.outputDir })
-        }
-    }
-}
-
-tasks.named("compileKotlin") {
-    dependsOn(generateSupportedLocales)
 }

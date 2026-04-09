@@ -32,6 +32,7 @@ import io.github.composefluent.component.NavigationDefaults
 import io.github.kdroidfilter.nucleus.aot.runtime.AotRuntime
 import io.github.kdroidfilter.nucleus.core.runtime.DeepLinkHandler
 import io.github.kdroidfilter.nucleus.core.runtime.SingleInstanceManager
+import io.sentry.Sentry
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.apache.commons.lang3.SystemUtils
 import org.jetbrains.compose.resources.painterResource
@@ -50,6 +51,13 @@ fun main(args: Array<String>) {
         }, "aot-timer").apply {
             isDaemon = false
             start()
+        }
+    } else {
+        BuildConfig.dsn?.let { dsn ->
+            Sentry.init { options ->
+                options.dsn = dsn
+                options.release = "${BuildConfig.versionName} (${BuildConfig.versionCode})"
+            }
         }
     }
     val restoreRequestFlow = MutableStateFlow(0)

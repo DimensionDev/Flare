@@ -8,7 +8,7 @@ kotlin {
     jvmToolchain(libs.versions.java.get().toInt())
     explicitApi()
     applyDefaultHierarchyTemplate()
-    androidLibrary {
+    android {
         compileSdk = libs.versions.compileSdk.get().toInt()
         namespace = "dev.dimension.flare.shared.api"
         minSdk = libs.versions.minSdk.get().toInt()

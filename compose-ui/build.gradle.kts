@@ -15,7 +15,7 @@ kotlin {
     jvmToolchain(libs.versions.java.get().toInt())
     explicitApi()
     applyDefaultHierarchyTemplate()
-    androidLibrary {
+    android {
         compileSdk = libs.versions.compileSdk.get().toInt()
         namespace = "dev.dimension.flare.compose.ui"
         minSdk = libs.versions.minSdk.get().toInt()

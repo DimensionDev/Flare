@@ -1,4 +1,5 @@
-import com.android.build.api.dsl.KotlinMultiplatformAndroidCompilation
+
+import com.android.build.api.withAndroid
 import java.util.Locale
 
 plugins {
@@ -19,15 +20,14 @@ kotlin {
                 withIos()
             }
             group("androidJvm") {
-                // TODO: https://youtrack.jetbrains.com/issue/KT-80409
-                withCompilations { it is KotlinMultiplatformAndroidCompilation }
+                withAndroid()
                 withJvm()
             }
         }
     }
     jvmToolchain(libs.versions.java.get().toInt())
     explicitApi()
-    androidLibrary {
+    android {
         compileSdk = libs.versions.compileSdk.get().toInt()
         namespace = "dev.dimension.flare.shared"
         minSdk = libs.versions.minSdk.get().toInt()

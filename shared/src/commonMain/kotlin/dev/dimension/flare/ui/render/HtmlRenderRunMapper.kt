@@ -84,12 +84,14 @@ private class RenderRunBuilder {
             "h4" -> renderBlock(element, style, block.copy(headingLevel = 4))
             "h5" -> renderBlock(element, style, block.copy(headingLevel = 5))
             "h6" -> renderBlock(element, style, block.copy(headingLevel = 6))
-            "emoji" ->
+            "emoji" -> {
                 appendImage(
                     url = element.attr("target"),
                     alt = element.attr("alt"),
                     block = block,
                 )
+                renderChildren(element, style, block)
+            }
             "figure" -> {
                 val previousBlockState = isInBlockImageState
                 isInBlockImageState = true

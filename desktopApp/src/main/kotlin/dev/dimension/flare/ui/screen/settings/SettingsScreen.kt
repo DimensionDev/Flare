@@ -48,9 +48,9 @@ import compose.icons.fontawesomeicons.solid.List
 import compose.icons.fontawesomeicons.solid.Lock
 import compose.icons.fontawesomeicons.solid.Plus
 import compose.icons.fontawesomeicons.solid.Trash
+import dev.dimension.flare.BuildConfig
 import dev.dimension.flare.LocalWindowPadding
 import dev.dimension.flare.Res
-import dev.dimension.flare.SupportedLocales
 import dev.dimension.flare.action_export
 import dev.dimension.flare.action_import
 import dev.dimension.flare.add_account
@@ -598,7 +598,7 @@ internal fun SettingsScreen(
                         modifier = Modifier.heightIn(max = 200.dp),
                         placement = FlyoutPlacement.BottomAlignedEnd,
                     ) {
-                        SupportedLocales.tags.forEach {
+                        BuildConfig.supportedLocaleTags.forEach {
                             MenuFlyoutItem(
                                 text = {
                                     Text(
@@ -1858,7 +1858,7 @@ internal fun SettingsScreen(
                     Text(stringResource(Res.string.app_name))
                 },
                 caption = {
-                    Text(System.getProperty("jpackage.app-version", "1.0.0"))
+                    Text("${BuildConfig.versionName} (${BuildConfig.versionCode})")
                 },
                 expanded = state.aboutExpanded,
                 onExpandedChanged = { state.setAboutExpanded(it) },

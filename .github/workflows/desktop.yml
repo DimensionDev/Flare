@@ -68,11 +68,13 @@ jobs:
         env:
           BUILD_NUMBER: ${{github.run_number}}
           BUILD_VERSION: ${{github.ref_name}}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
         run: ./gradlew :desktop:check :desktop:build --stacktrace
       - name: Package with Gradle
         env:
           BUILD_NUMBER: ${{github.run_number}}
           BUILD_VERSION: ${{github.ref_name}}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
         run: ./gradlew :desktop:packageReleasePkg --stacktrace
       - name: Archive macOS artifacts Product
         if: startsWith(github.ref, 'refs/tags/')
@@ -104,11 +106,13 @@ jobs:
         env:
           BUILD_NUMBER: ${{github.run_number}}
           BUILD_VERSION: ${{github.ref_name}}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
         run: ./gradlew :desktop:check :desktop:build --stacktrace
       - name: Package with Gradle
         env:
           BUILD_NUMBER: ${{github.run_number}}
           BUILD_VERSION: ${{github.ref_name}}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
         run: ./gradlew :desktop:packageReleaseAppx --stacktrace
       - name: Build appxbundle with same version as appx
         shell: pwsh
@@ -203,11 +207,13 @@ jobs:
         env:
           BUILD_NUMBER: ${{github.run_number}}
           BUILD_VERSION: ${{github.ref_name}}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
         run: ./gradlew :desktop:check :desktop:build --stacktrace
       - name: Package with Gradle
         env:
           BUILD_NUMBER: ${{github.run_number}}
           BUILD_VERSION: ${{github.ref_name}}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
         run: ./gradlew :desktop:packageReleaseAppImage --stacktrace
       - name: Upload AppImage package
         if: startsWith(github.ref, 'refs/tags/')

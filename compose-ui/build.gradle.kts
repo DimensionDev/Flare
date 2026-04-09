@@ -96,7 +96,6 @@ kotlin {
                 implementation(libs.cupertino)
                 api(compose("org.jetbrains.compose.ui:ui-util"))
                 implementation(libs.lifecycle.viewmodel.compose)
-                implementation("co.touchlab.crashkios:crashlytics:0.8.6")
             }
         }
     }

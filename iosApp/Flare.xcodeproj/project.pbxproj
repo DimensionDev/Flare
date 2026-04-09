@@ -440,7 +440,7 @@
 			repositoryURL = "https://github.com/onevcat/Kingfisher.git";
 			requirement = {
 				kind = exactVersion;
-				version = 8.6.2;
+				version = 8.8.1;
 			};
 		};
 		0672EE102E8689C70092AD1F /* XCRemoteSwiftPackageReference "Drops" */ = {
@@ -480,7 +480,7 @@
 			repositoryURL = "https://github.com/siteline/swiftui-introspect";
 			requirement = {
 				kind = exactVersion;
-				version = 26.0.0;
+				version = 26.0.1;
 			};
 		};
 		06C7FC152E7D474900A0D01A /* XCRemoteSwiftPackageReference "LazyPager" */ = {

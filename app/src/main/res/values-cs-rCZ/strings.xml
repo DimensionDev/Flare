@@ -87,6 +87,7 @@
     <string name="settings_ai_config_model_loading">Načítání modelů…</string>
     <string name="settings_ai_config_model_error">Nepodařilo se načíst modely</string>
     <string name="settings_ai_config_model_no_models">Žádné modely</string>
+    <string name="settings_ai_config_model_manual_input">Zadejte model ručně</string>
     <string name="settings_ai_config_tap_to_edit">Klepnutím upravíte</string>
     <string name="settings_ai_config_entable_translation">Povolit překlad AI</string>
     <string name="settings_ai_config_translation_description">Nahradit Google překlad AI překladem, může trvat déle</string>
@@ -111,6 +112,12 @@
     <string name="settings_ai_config_translate_provider_libretranslate_api_key">LibreTranslate API klíč</string>
     <string name="settings_translation_title">Překlad</string>
     <string name="settings_translation_description">Konfigurovat poskytovatele překladu a chování</string>
+    <string name="settings_translation_auto_excluded_languages">Automaticky přeložit vyloučené jazyky</string>
+    <string name="settings_translation_ai_test_title">Test překladu AI</string>
+    <string name="settings_translation_ai_test_description">Pomocí současného překladového nastavení AI spustit krátký vzorek bohatého textu.</string>
+    <string name="settings_translation_ai_test_action">Testovat překlad</string>
+    <string name="settings_translation_ai_test_original">Ukázkový text</string>
+    <string name="settings_translation_ai_test_result">Přeložený text</string>
     <string name="settings_language_title">Jazyk</string>
     <string name="settings_language_description">Změnit jazyk aplikace</string>
     <string name="settings_rss_management_title">Správa předplatného</string>
@@ -411,9 +418,9 @@
     <string name="import_confirmation_message">Toto importuje data ze souboru. Existující záznamy s odpovídajícími ID budou nahrazeny. Chcete pokračovat?</string>
     <string name="changelog_current"><![CDATA[            <span>Verze %1$s:</span>
             <ul>
-                <li>Přidána možnost automatického překladu a více možností poskytovatele překladu. Přihlášení</li>
-                <li>Nostr nyní podporuje integraci QR přihlášení a Amber signer na Androidu.</li>
-                <li>Odběry nyní podporují publikaci Mastodon, místní a populární časové plány.</li>
+                <li>Přidána podpora pro X články se zážitkem pro čtení.</li>
+                <li>Vyčistit automatický překlad s vyloučením jazyků a testování rychlého překladu.</li>
+                <li>RSS analýza je nyní mnohem rychlejší, s rychlejším načítáním článku a lepší kompatibilitou krmiva.</li>
                 <li>Opravy chyb a zlepšení výkonu.</li>
             </ul>
         ]]></string>

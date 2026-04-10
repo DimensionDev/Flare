@@ -169,6 +169,7 @@
     <string name="settings_ai_config_model_loading">Cargando modelos…</string>
     <string name="settings_ai_config_model_error">Error al cargar los modelos</string>
     <string name="settings_ai_config_model_no_models">No hay modelos disponibles</string>
+    <string name="settings_ai_config_model_manual_input">Introducir modelo manualmente</string>
     <string name="settings_ai_config_translate_prompt">Traducir Prompt</string>
     <string name="settings_ai_config_tldr_prompt">Resumen</string>
     <string name="settings_ai_config_value_empty_placeholder">Toca para editar</string>
@@ -193,6 +194,12 @@
     <string name="settings_ai_config_translate_provider_libretranslate_api_key">Clave API LibreTranslate</string>
     <string name="settings_translation_title">Traducción</string>
     <string name="settings_translation_description">Configurar el comportamiento y el proveedor de traducción</string>
+    <string name="settings_translation_auto_excluded_languages">Auto-traducir idiomas excluidos</string>
+    <string name="settings_translation_ai_test_title">Prueba de traducción de IA</string>
+    <string name="settings_translation_ai_test_description">Ejecute una breve muestra de texto a través de la configuración de traducción de IA.</string>
+    <string name="settings_translation_ai_test_action">Prueba de traducción</string>
+    <string name="settings_translation_ai_test_original">Texto de ejemplo</string>
+    <string name="settings_translation_ai_test_result">Texto traducido</string>
     <string name="settings_appearance_generic">Generic</string>
     <string name="settings_appearance_show_compose_in_home_timeline">Mostrar cuadro de composición en la línea de tiempo de inicio</string>
     <string name="settings_appearance_show_compose_in_home_timeline_description">Mostrar cuadro de composición en la parte superior de la línea de tiempo</string>

@@ -15,7 +15,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
@@ -75,7 +75,7 @@ internal fun VVOStatusScreen(
             accountType = accountType,
         )
     }
-    val windowInfo = currentWindowAdaptiveInfo()
+    val windowInfo = currentWindowAdaptiveInfoV2()
     val windowSize =
         with(LocalDensity.current) {
             LocalWindowInfo.current.containerSize

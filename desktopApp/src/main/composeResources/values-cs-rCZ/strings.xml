@@ -171,6 +171,7 @@
     <string name="settings_ai_config_model_loading">Načítání modelů…</string>
     <string name="settings_ai_config_model_error">Nepodařilo se načíst modely</string>
     <string name="settings_ai_config_model_no_models">Žádné dostupné modely</string>
+    <string name="settings_ai_config_model_manual_input">Zadejte model ručně</string>
     <string name="settings_ai_config_translate_prompt">Přeložit výzvu</string>
     <string name="settings_ai_config_tldr_prompt">Souhrnný požadavek</string>
     <string name="settings_ai_config_value_empty_placeholder">Klepnutím upravíte</string>
@@ -195,6 +196,12 @@
     <string name="settings_ai_config_translate_provider_libretranslate_api_key">LibreTranslate API klíč</string>
     <string name="settings_translation_title">Překlad</string>
     <string name="settings_translation_description">Konfigurovat poskytovatele překladu a chování</string>
+    <string name="settings_translation_auto_excluded_languages">Automaticky přeložit vyloučené jazyky</string>
+    <string name="settings_translation_ai_test_title">Test překladu AI</string>
+    <string name="settings_translation_ai_test_description">Pomocí současného překladového nastavení AI spustit krátký vzorek bohatého textu.</string>
+    <string name="settings_translation_ai_test_action">Testovat překlad</string>
+    <string name="settings_translation_ai_test_original">Ukázkový text</string>
+    <string name="settings_translation_ai_test_result">Přeložený text</string>
     <string name="settings_appearance_generic">Generic</string>
     <string name="settings_appearance_show_compose_in_home_timeline">Zobrazit složené pole v domácí časové ose</string>
     <string name="settings_appearance_show_compose_in_home_timeline_description">Zobrazit složené pole v horní části domácí časové osy</string>

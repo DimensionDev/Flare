@@ -84,6 +84,7 @@
     <string name="settings_ai_config_model_loading">正在加载模型…</string>
     <string name="settings_ai_config_model_error">加载模型失败</string>
     <string name="settings_ai_config_model_no_models">没有模型</string>
+    <string name="settings_ai_config_model_manual_input">手动输入模型</string>
     <string name="settings_ai_config_tap_to_edit">点击编辑</string>
     <string name="settings_ai_config_entable_translation">启用 AI 翻译</string>
     <string name="settings_ai_config_translation_description">将 Google 翻译替换为 AI 翻译，可能需要更长的时间</string>
@@ -108,6 +109,12 @@
     <string name="settings_ai_config_translate_provider_libretranslate_api_key">LibreTranslate API 密钥</string>
     <string name="settings_translation_title">翻译</string>
     <string name="settings_translation_description">配置翻译提供者和行为</string>
+    <string name="settings_translation_auto_excluded_languages">自动翻译排除的语言</string>
+    <string name="settings_translation_ai_test_title">AI 翻译测试</string>
+    <string name="settings_translation_ai_test_description">通过当前的 AI 翻译设置运行一个简短的文本样本。</string>
+    <string name="settings_translation_ai_test_action">测试翻译</string>
+    <string name="settings_translation_ai_test_original">示例文本</string>
+    <string name="settings_translation_ai_test_result">翻译文本</string>
     <string name="settings_language_title">语言</string>
     <string name="settings_language_description">更改应用程序的语言</string>
     <string name="settings_rss_management_title">订阅管理</string>
@@ -408,9 +415,9 @@
     <string name="import_confirmation_message">这将从文件中导入数据。将替换匹配ID的现有记录。您确定要继续吗？</string>
     <string name="changelog_current"><![CDATA[            <span> %1$s版本：</span>
             <ul>
-                <li>添加了自动翻译和多个翻译提供选项。</li>
-                <li>Nostr 登录现在支持 QR 登录和 Android 上的 Amber 签名集成。</li>
-                <li>订阅现在支持Mastodon公开。 地方和热门的时间安排。</li>
+                <li>添加支持具有专用阅读经验的 X篇文章。</li>
+                <li>使用排除语言和快速翻译测试的微调自动翻译。</li>
+                <li>RSS 解析现在快得多， 使用更快的文章加载和更好的订阅兼容性。</li>
                 <li>Bug 修复和性能改进。</li>
             </ul>
         ]]></string>

@@ -221,6 +221,7 @@
     <string name="settings_storage_clear_database">Xóa cơ sở dữ liệu bộ nhớ cache</string>
     <string name="settings_storage_app_log">Mở nhật ký ứng dụng</string>
     <string name="settings_storage_app_log_description">Xem nhật ký ứng dụng</string>
+    <string name="draft_box_empty">Chưa có bản nháp nào</string>
     <string name="draft_box_retry">Thử lại</string>
     <string name="draft_box_edit">Chỉnh sửa</string>
     <string name="draft_box_send">Gửi</string>

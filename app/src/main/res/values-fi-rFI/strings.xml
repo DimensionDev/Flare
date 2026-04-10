@@ -85,6 +85,7 @@
     <string name="settings_ai_config_model_loading">Ladataan malleja…</string>
     <string name="settings_ai_config_model_error">Mallien lataaminen epäonnistui</string>
     <string name="settings_ai_config_model_no_models">Ei malleja</string>
+    <string name="settings_ai_config_model_manual_input">Syötä malli käsin</string>
     <string name="settings_ai_config_tap_to_edit">Napauta muokataksesi</string>
     <string name="settings_ai_config_entable_translation">Ota käyttöön tekoälyn käännös</string>
     <string name="settings_ai_config_translation_description">Korvaa Google Translate kanssa AI käännös, saattaa kestää pidempään aikaa</string>
@@ -109,6 +110,12 @@
     <string name="settings_ai_config_translate_provider_libretranslate_api_key">LibreTranslate API-avain</string>
     <string name="settings_translation_title">Käännös</string>
     <string name="settings_translation_description">Muokkaa käännöstarjoajaa ja -käyttäytymistä</string>
+    <string name="settings_translation_auto_excluded_languages">Käännä pois jätetyt kielet automaattisesti</string>
+    <string name="settings_translation_ai_test_title">tekoälyn käännöstesti</string>
+    <string name="settings_translation_ai_test_description">Suorita lyhyt rikas teksti näyte läpi nykyisen tekoäly käännös asetukset.</string>
+    <string name="settings_translation_ai_test_action">Testaa käännös</string>
+    <string name="settings_translation_ai_test_original">Mallin teksti</string>
+    <string name="settings_translation_ai_test_result">Käännetty teksti</string>
     <string name="settings_language_title">Kieli</string>
     <string name="settings_language_description">Vaihda sovelluksen kieli</string>
     <string name="settings_rss_management_title">Tilauksen Hallinta</string>
@@ -409,9 +416,9 @@
     <string name="import_confirmation_message">Tämä tuo tiedostosta tietoja. Olemassa olevat tietueet ja vastaavat ID:t korvataan. Haluatko jatkaa?</string>
     <string name="changelog_current"><![CDATA[            <span>Versio %1$s:</span>
             <ul>
-                <li>Lisätty automaattinen kääntäminen ja useita kääntäjän vaihtoehtoja.</li>
-                <li>Nostr kirjautuminen tukee nyt QR kirjautumis- ja Amber signer -integraatiota Androidissa.</li>
-                <li>Tilaukset tukevat nyt Mastodon publicia, paikalliset, ja trendikkäät aikajanat.</li>
+                <li>Lisätty tuki X artikkeleille, joilla on oma lukukokemus.</li>
+                <li>Hienosäädä automaattikäännös, jossa on poistetut kielet ja nopea käännöstestaus.</li>
+                <li>RSS-jäsennys on nyt paljon nopeampi, nopeampi artikkelien lastaus ja parempi rehun yhteensopivuus.</li>
                 <li>Virheenkorjauksia ja suorituskyvyn parannuksia.</li>
             </ul>
         ]]></string>

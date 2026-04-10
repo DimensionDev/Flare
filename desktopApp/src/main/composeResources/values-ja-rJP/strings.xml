@@ -167,6 +167,7 @@
     <string name="settings_ai_config_model_select">モデルを選択</string>
     <string name="settings_ai_config_model_error">モデルの読み込みに失敗しました</string>
     <string name="settings_ai_config_model_no_models">利用可能なモデルがありません</string>
+    <string name="settings_ai_config_model_manual_input">モデルを手動で入力してください</string>
     <string name="settings_ai_config_translate_prompt">翻訳プロンプトの翻訳</string>
     <string name="settings_ai_config_tldr_prompt">概要のプロンプト表示</string>
     <string name="settings_ai_config_value_empty_placeholder">タップして編集</string>
@@ -191,6 +192,12 @@
     <string name="settings_ai_config_translate_provider_libretranslate_api_key">LibreTranslate APIキー</string>
     <string name="settings_translation_title">翻訳</string>
     <string name="settings_translation_description">翻訳プロバイダと動作を設定</string>
+    <string name="settings_translation_auto_excluded_languages">除外言語の自動翻訳</string>
+    <string name="settings_translation_ai_test_title">AI翻訳テスト</string>
+    <string name="settings_translation_ai_test_description">現在のAI翻訳セットアップで、短いリッチテキストサンプルを実行します。</string>
+    <string name="settings_translation_ai_test_action">翻訳をテスト</string>
+    <string name="settings_translation_ai_test_original">サンプルテキスト</string>
+    <string name="settings_translation_ai_test_result">翻訳されたテキスト</string>
     <string name="settings_appearance_generic">全般</string>
     <string name="settings_appearance_show_compose_in_home_timeline">ホームタイムラインに作成ボックスを表示</string>
     <string name="settings_appearance_show_compose_in_home_timeline_description">ホームタイムライン上部にメッセージ作成ボックスを表示</string>

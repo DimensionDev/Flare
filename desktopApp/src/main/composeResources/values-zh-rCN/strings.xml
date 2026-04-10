@@ -168,6 +168,7 @@
     <string name="settings_ai_config_model_loading">正在加载模型…</string>
     <string name="settings_ai_config_model_error">加载模型失败</string>
     <string name="settings_ai_config_model_no_models">没有可用的模型</string>
+    <string name="settings_ai_config_model_manual_input">手动输入模型</string>
     <string name="settings_ai_config_translate_prompt">翻译提示</string>
     <string name="settings_ai_config_tldr_prompt">摘要提示</string>
     <string name="settings_ai_config_value_empty_placeholder">点击编辑</string>
@@ -192,6 +193,12 @@
     <string name="settings_ai_config_translate_provider_libretranslate_api_key">LibreTranslate API 密钥</string>
     <string name="settings_translation_title">翻译</string>
     <string name="settings_translation_description">配置翻译提供者和行为</string>
+    <string name="settings_translation_auto_excluded_languages">自动翻译排除的语言</string>
+    <string name="settings_translation_ai_test_title">AI 翻译测试</string>
+    <string name="settings_translation_ai_test_description">通过当前的 AI 翻译设置运行一个简短的文本样本。</string>
+    <string name="settings_translation_ai_test_action">测试翻译</string>
+    <string name="settings_translation_ai_test_original">示例文本</string>
+    <string name="settings_translation_ai_test_result">翻译文本</string>
     <string name="settings_appearance_generic">通用</string>
     <string name="settings_appearance_show_compose_in_home_timeline">在首页时间轴顶部显示撰写框</string>
     <string name="settings_appearance_show_compose_in_home_timeline_description">在首页时间轴顶部显示撰写框</string>

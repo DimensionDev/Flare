@@ -85,6 +85,7 @@
     <string name="settings_ai_config_model_loading">Cargando modelos…</string>
     <string name="settings_ai_config_model_error">Error al cargar los modelos</string>
     <string name="settings_ai_config_model_no_models">No hay modelos</string>
+    <string name="settings_ai_config_model_manual_input">Introducir modelo manualmente</string>
     <string name="settings_ai_config_tap_to_edit">Toca para editar</string>
     <string name="settings_ai_config_entable_translation">Activar traducción IA</string>
     <string name="settings_ai_config_translation_description">Reemplazar Google Translate con una traducción de IA, puede llevar más tiempo</string>
@@ -109,6 +110,12 @@
     <string name="settings_ai_config_translate_provider_libretranslate_api_key">Clave API LibreTranslate</string>
     <string name="settings_translation_title">Traducción</string>
     <string name="settings_translation_description">Configurar el comportamiento y el proveedor de traducción</string>
+    <string name="settings_translation_auto_excluded_languages">Auto-traducir idiomas excluidos</string>
+    <string name="settings_translation_ai_test_title">Prueba de traducción de IA</string>
+    <string name="settings_translation_ai_test_description">Ejecute una breve muestra de texto a través de la configuración de traducción de IA.</string>
+    <string name="settings_translation_ai_test_action">Prueba de traducción</string>
+    <string name="settings_translation_ai_test_original">Texto de ejemplo</string>
+    <string name="settings_translation_ai_test_result">Texto traducido</string>
     <string name="settings_language_title">Idioma</string>
     <string name="settings_language_description">Cambiar el idioma de la aplicación</string>
     <string name="settings_rss_management_title">Gestión de suscripciones</string>
@@ -407,14 +414,6 @@
     <string name="import_error">Error al importar datos</string>
     <string name="import_confirmation_title">Confirmar importación</string>
     <string name="import_confirmation_message">Esto importará datos del archivo. Los registros existentes con IDs coincidentes serán reemplazados. ¿Desea continuar?</string>
-    <string name="changelog_current"><![CDATA[            <span>Versión %1$s:</span>
-            <ul>
-                <li>Se añadieron traducciones automáticas y múltiples opciones de proveedor de traducción.</li>
-                <li>Nostr login ahora es compatible con la integración de inicio de sesión QR y firmante de Amber en Android.</li>
-                <li>Suscripciones ahora soporta Mastodon public líneas de tiempo locales y de tendencia.</li>
-                <li>correcciones de errores y mejoras de rendimiento.</li>
-            </ul>
-        ]]></string>
     <string name="tab_settings_add_group">Añadir grupo</string>
     <string name="tab_settings_add_tab">Añadir pestaña</string>
     <string name="tab_settings_edit_group">Editar grupo</string>

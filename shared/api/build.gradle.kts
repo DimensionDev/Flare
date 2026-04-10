@@ -1,35 +1,25 @@
+import dev.dimension.flare.gradle.FlarePlatform.Android
+import dev.dimension.flare.gradle.FlarePlatform.Desktop
+import dev.dimension.flare.gradle.FlarePlatform.Ios
+import dev.dimension.flare.gradle.FlarePlatform.Linux
+import dev.dimension.flare.gradle.FlarePlatform.Macos
+import dev.dimension.flare.gradle.FlarePlatform.Windows
+
 plugins {
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.multiplatform)
-    alias(libs.plugins.kotlin.serialization)
+    id("flare.kmp")
+}
+
+flare {
+    namespace = "dev.dimension.flare.shared.api"
+    platforms(Android, Desktop, Ios, Macos, Linux, Windows)
 }
 
 kotlin {
-    jvmToolchain(libs.versions.java.get().toInt())
-    explicitApi()
-    applyDefaultHierarchyTemplate()
-    android {
-        compileSdk = libs.versions.compileSdk.get().toInt()
-        namespace = "dev.dimension.flare.shared.api"
-        minSdk = libs.versions.minSdk.get().toInt()
-    }
-    jvm()
-    macosArm64()
-    linuxX64()
-    mingwX64()
-    iosArm64()
-    iosSimulatorArm64()
-
     sourceSets {
         val commonMain by getting {
             dependencies {
                 implementation(libs.ktor.resources)
             }
         }
-        val commonTest by getting {
-            dependencies {
-            }
-        }
     }
 }
-

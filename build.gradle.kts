@@ -21,65 +21,65 @@ plugins {
     alias(libs.plugins.nucleus) apply false
 }
 
-subprojects {
-    val commonOptIn = listOf(
-        "kotlin.time.ExperimentalTime",
-        "kotlin.experimental.ExperimentalObjCRefinement",
-    )
-
-    val freeArgs = listOf(
-        "-Xexpect-actual-classes",
-        "-Xconsistent-data-class-copy-visibility",
-    )
-
-    plugins.withId("org.jetbrains.kotlin.multiplatform") {
-        extensions.configure<KotlinMultiplatformExtension> {
-            compilerOptions {
-                allWarningsAsErrors.set(true)
-                freeCompilerArgs.addAll(freeArgs)
-                optIn.addAll(commonOptIn)
-            }
-            jvmToolchain {
-                languageVersion = JavaLanguageVersion.of(libs.versions.java.get().toInt())
-            }
-        }
-    }
-    plugins.withId("com.android.application") {
-        extensions.configure<KotlinAndroidProjectExtension> {
-            compilerOptions {
-                allWarningsAsErrors.set(true)
-                freeCompilerArgs.addAll(freeArgs)
-                optIn.addAll(
-                    commonOptIn + listOf(
-                        "androidx.compose.material3.ExperimentalMaterial3ExpressiveApi"
-                    )
-                )
-                jvmTarget.set(JvmTarget.fromTarget(libs.versions.java.get()))
-            }
-            jvmToolchain {
-                languageVersion = JavaLanguageVersion.of(libs.versions.java.get().toInt())
-            }
-        }
-    }
-    plugins.withId("org.jetbrains.kotlin.jvm") {
-        extensions.configure<KotlinJvmExtension> {
-            compilerOptions {
-                allWarningsAsErrors.set(true)
-                freeCompilerArgs.addAll(freeArgs)
-                optIn.addAll(commonOptIn)
-            }
-            jvmToolchain {
-                languageVersion = JavaLanguageVersion.of(libs.versions.java.get().toInt())
-            }
-        }
-    }
-
-    plugins.withId("com.android.library") {
-        extensions.configure<LibraryExtension> {
-            compileSdk = libs.versions.compileSdk.get().toInt()
-            defaultConfig {
-                minSdk = libs.versions.minSdk.get().toInt()
-            }
-        }
-    }
-}
+//subprojects {
+//    val commonOptIn = listOf(
+//        "kotlin.time.ExperimentalTime",
+//        "kotlin.experimental.ExperimentalObjCRefinement",
+//    )
+//
+//    val freeArgs = listOf(
+//        "-Xexpect-actual-classes",
+//        "-Xconsistent-data-class-copy-visibility",
+//    )
+//
+//    plugins.withId("org.jetbrains.kotlin.multiplatform") {
+//        extensions.configure<KotlinMultiplatformExtension> {
+//            compilerOptions {
+//                allWarningsAsErrors.set(true)
+//                freeCompilerArgs.addAll(freeArgs)
+//                optIn.addAll(commonOptIn)
+//            }
+//            jvmToolchain {
+//                languageVersion = JavaLanguageVersion.of(libs.versions.java.get().toInt())
+//            }
+//        }
+//    }
+//    plugins.withId("com.android.application") {
+//        extensions.configure<KotlinAndroidProjectExtension> {
+//            compilerOptions {
+//                allWarningsAsErrors.set(true)
+//                freeCompilerArgs.addAll(freeArgs)
+//                optIn.addAll(
+//                    commonOptIn + listOf(
+//                        "androidx.compose.material3.ExperimentalMaterial3ExpressiveApi"
+//                    )
+//                )
+//                jvmTarget.set(JvmTarget.fromTarget(libs.versions.java.get()))
+//            }
+//            jvmToolchain {
+//                languageVersion = JavaLanguageVersion.of(libs.versions.java.get().toInt())
+//            }
+//        }
+//    }
+//    plugins.withId("org.jetbrains.kotlin.jvm") {
+//        extensions.configure<KotlinJvmExtension> {
+//            compilerOptions {
+//                allWarningsAsErrors.set(true)
+//                freeCompilerArgs.addAll(freeArgs)
+//                optIn.addAll(commonOptIn)
+//            }
+//            jvmToolchain {
+//                languageVersion = JavaLanguageVersion.of(libs.versions.java.get().toInt())
+//            }
+//        }
+//    }
+//
+//    plugins.withId("com.android.library") {
+//        extensions.configure<LibraryExtension> {
+//            compileSdk = libs.versions.compileSdk.get().toInt()
+//            defaultConfig {
+//                minSdk = libs.versions.minSdk.get().toInt()
+//            }
+//        }
+//    }
+//}

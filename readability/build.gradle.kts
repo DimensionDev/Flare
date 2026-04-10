@@ -1,25 +1,22 @@
+import dev.dimension.flare.gradle.FlarePlatform
+
 plugins {
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.multiplatform)
-    alias(libs.plugins.kotlin.serialization)
+    id("flare.kmp")
+}
+
+flare {
+    namespace = "dev.dimension.flare.readability"
+    platforms(
+        FlarePlatform.Android,
+        FlarePlatform.Desktop,
+        FlarePlatform.Ios,
+        FlarePlatform.Macos,
+        FlarePlatform.Linux,
+        FlarePlatform.Windows
+    )
 }
 
 kotlin {
-    jvmToolchain(libs.versions.java.get().toInt())
-    explicitApi()
-    applyDefaultHierarchyTemplate()
-    android {
-        compileSdk = libs.versions.compileSdk.get().toInt()
-        namespace = "dev.dimension.flare.readability"
-        minSdk = libs.versions.minSdk.get().toInt()
-    }
-    jvm()
-    macosArm64()
-    linuxX64()
-    mingwX64()
-    iosArm64()
-    iosSimulatorArm64()
-
     sourceSets {
         val commonMain by getting {
             dependencies {

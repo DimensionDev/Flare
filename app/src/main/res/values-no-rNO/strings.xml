@@ -85,6 +85,7 @@
     <string name="settings_ai_config_model_loading">Laster inn modeller…</string>
     <string name="settings_ai_config_model_error">Kan ikke laste inn modeller</string>
     <string name="settings_ai_config_model_no_models">Ingen modeller</string>
+    <string name="settings_ai_config_model_manual_input">Legg inn modell manuelt</string>
     <string name="settings_ai_config_tap_to_edit">Trykk for å redigere</string>
     <string name="settings_ai_config_entable_translation">Aktiver AI oversettelse</string>
     <string name="settings_ai_config_translation_description">Erstatt Google Translate med AI oversettelse, kan det ta lengre tid</string>
@@ -109,6 +110,12 @@
     <string name="settings_ai_config_translate_provider_libretranslate_api_key">LibreTranslate API Key</string>
     <string name="settings_translation_title">Oversettelse</string>
     <string name="settings_translation_description">Konfigurer oversettelsesleverandør og atferd</string>
+    <string name="settings_translation_auto_excluded_languages">Auto-oversett ekskluderte språk</string>
+    <string name="settings_translation_ai_test_title">AI oversettelsestest</string>
+    <string name="settings_translation_ai_test_description">Kjør et kort bukk-tekst-utvalg gjennom det gjeldende AI oversettelsesoppsettet.</string>
+    <string name="settings_translation_ai_test_action">Test oversettelse</string>
+    <string name="settings_translation_ai_test_original">Eksempel tekst</string>
+    <string name="settings_translation_ai_test_result">Oversatt tekst</string>
     <string name="settings_language_title">Språk</string>
     <string name="settings_language_description">Endre språket til appen</string>
     <string name="settings_rss_management_title">Abonnement Management</string>
@@ -409,9 +416,9 @@
     <string name="import_confirmation_message">Dette vil importere data fra filen. Eksisterende poster med samsvarende ID-er vil bli erstattet. Vil du fortsette?</string>
     <string name="changelog_current"><![CDATA[            <span>Versjon %1$s:</span>
             <ul>
-                <li>La til automatisk oversettelse og flere oversettelse tilbyderalternativ.</li>
-                <li>Nostr innlogging støtter nå QR-pålogging og Amber-signer-integrasjon på Android.</li>
-                <li>Abonnementer støtter nå offentligheten i Mastodon, lokale og trendende tidslinjer.</li>
+                <li>Lagt til støtte for X artikler med en dedikert leseopplevelse.</li>
+                <li>Fine-tune auto-oversettelse med ekskluderte språk og raske oversettelsestester.</li>
+                <li>RSS-parsing er nå mye raskere, med raskere artikkel lastes og bedre fôrkompatibilitet.</li>
                 <li>Feilrettinger og ytelsesforbedringer.</li>
             </ul>
         ]]></string>

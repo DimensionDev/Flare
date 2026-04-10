@@ -169,6 +169,7 @@
     <string name="settings_ai_config_model_loading">Laster inn modeller…</string>
     <string name="settings_ai_config_model_error">Kan ikke laste inn modeller</string>
     <string name="settings_ai_config_model_no_models">Ingen modeller tilgjengelig</string>
+    <string name="settings_ai_config_model_manual_input">Legg inn modell manuelt</string>
     <string name="settings_ai_config_translate_prompt">Oversett prompt</string>
     <string name="settings_ai_config_tldr_prompt">Ledetekst i sammendrag</string>
     <string name="settings_ai_config_value_empty_placeholder">Trykk for å redigere</string>
@@ -193,6 +194,12 @@
     <string name="settings_ai_config_translate_provider_libretranslate_api_key">LibreTranslate API Key</string>
     <string name="settings_translation_title">Oversettelse</string>
     <string name="settings_translation_description">Konfigurer oversettelsesleverandør og atferd</string>
+    <string name="settings_translation_auto_excluded_languages">Auto-oversett ekskluderte språk</string>
+    <string name="settings_translation_ai_test_title">AI oversettelsestest</string>
+    <string name="settings_translation_ai_test_description">Kjør et kort bukk-tekst-utvalg gjennom det gjeldende AI oversettelsesoppsettet.</string>
+    <string name="settings_translation_ai_test_action">Test oversettelse</string>
+    <string name="settings_translation_ai_test_original">Eksempel tekst</string>
+    <string name="settings_translation_ai_test_result">Oversatt tekst</string>
     <string name="settings_appearance_generic">Generic</string>
     <string name="settings_appearance_show_compose_in_home_timeline">Vis pose boks i hjemmetidslinjen</string>
     <string name="settings_appearance_show_compose_in_home_timeline_description">Vis pose boksen i toppen av hjemme tidslinjen</string>

@@ -165,6 +165,7 @@
     <string name="settings_ai_config_model_loading">Chargement des modèles…</string>
     <string name="settings_ai_config_model_error">Impossible de charger les modèles</string>
     <string name="settings_ai_config_model_no_models">Aucun modèle disponible</string>
+    <string name="settings_ai_config_model_manual_input">Entrez le modèle manuellement</string>
     <string name="settings_ai_config_translate_prompt">Traduire l\'invitation</string>
     <string name="settings_ai_config_tldr_prompt">Récapitulatif</string>
     <string name="settings_ai_config_value_empty_placeholder">Appuyer pour modifier</string>
@@ -189,6 +190,12 @@
     <string name="settings_ai_config_translate_provider_libretranslate_api_key">Clé API LibreTranslate</string>
     <string name="settings_translation_title">Traduction</string>
     <string name="settings_translation_description">Configurer le fournisseur de traduction et le comportement</string>
+    <string name="settings_translation_auto_excluded_languages">Traduction automatique des langues exclues</string>
+    <string name="settings_translation_ai_test_title">Test de traduction IA</string>
+    <string name="settings_translation_ai_test_description">Exécutez un court exemple de texte riche à travers la configuration actuelle de la traduction de l\'IA.</string>
+    <string name="settings_translation_ai_test_action">Tester la traduction</string>
+    <string name="settings_translation_ai_test_original">Exemple de texte</string>
+    <string name="settings_translation_ai_test_result">Texte traduit</string>
     <string name="settings_appearance_generic">Generic</string>
     <string name="settings_appearance_show_compose_in_home_timeline">Afficher la zone de composition dans le fil d\'accueil</string>
     <string name="settings_appearance_show_compose_in_home_timeline_description">Afficher la zone de composition en haut de la page d\'accueil</string>

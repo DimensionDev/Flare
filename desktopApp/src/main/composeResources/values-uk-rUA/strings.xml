@@ -165,6 +165,7 @@
     <string name="settings_ai_config_model_loading">Завантаження моделей…</string>
     <string name="settings_ai_config_model_error">Не вдалося завантажити моделі</string>
     <string name="settings_ai_config_model_no_models">Немає доступних моделей</string>
+    <string name="settings_ai_config_model_manual_input">Задайте модель вручну</string>
     <string name="settings_ai_config_translate_prompt">Перекласти підказку</string>
     <string name="settings_ai_config_tldr_prompt">Підсумок</string>
     <string name="settings_ai_config_value_empty_placeholder">Натисніть для редагування</string>
@@ -189,6 +190,12 @@
     <string name="settings_ai_config_translate_provider_libretranslate_api_key">Ключ API LibreTranslate</string>
     <string name="settings_translation_title">Переклад</string>
     <string name="settings_translation_description">Налаштувати постачальника та поведінку перекладу</string>
+    <string name="settings_translation_auto_excluded_languages">Авто-переклад мов</string>
+    <string name="settings_translation_ai_test_title">Тест AI перекладу</string>
+    <string name="settings_translation_ai_test_description">Запустіть короткий приклад насиченого тексту через поточні налаштування перекладу AI.</string>
+    <string name="settings_translation_ai_test_action">Перевірка перекладу</string>
+    <string name="settings_translation_ai_test_original">Зразок тексту</string>
+    <string name="settings_translation_ai_test_result">Перекладений текст</string>
     <string name="settings_appearance_generic">Generic</string>
     <string name="settings_appearance_show_compose_in_home_timeline">Показувати композицію на домашній стрічці</string>
     <string name="settings_appearance_show_compose_in_home_timeline_description">Показати композицію у верхній частині домашньої часової шкали</string>

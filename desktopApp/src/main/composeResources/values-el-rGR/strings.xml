@@ -169,6 +169,7 @@
     <string name="settings_ai_config_model_loading">Φόρτωση μοντέλων…</string>
     <string name="settings_ai_config_model_error">Αποτυχία φόρτωσης μοντέλων</string>
     <string name="settings_ai_config_model_no_models">Δεν υπάρχουν διαθέσιμα μοντέλα</string>
+    <string name="settings_ai_config_model_manual_input">Χειροκίνητη εισαγωγή μοντέλου</string>
     <string name="settings_ai_config_translate_prompt">Μετάφραση Προώθησης</string>
     <string name="settings_ai_config_tldr_prompt">Ερώτηση Περίληψης</string>
     <string name="settings_ai_config_value_empty_placeholder">Πατήστε για επεξεργασία</string>
@@ -193,6 +194,12 @@
     <string name="settings_ai_config_translate_provider_libretranslate_api_key">LibreTranslate Api Κλειδί</string>
     <string name="settings_translation_title">Μετάφραση</string>
     <string name="settings_translation_description">Ρύθμιση παρόχου μετάφρασης και συμπεριφοράς</string>
+    <string name="settings_translation_auto_excluded_languages">Αυτόματη μετάφραση εξαιρουμένων γλωσσών</string>
+    <string name="settings_translation_ai_test_title">Δοκιμή μετάφρασης τεχνητής νοημοσύνης</string>
+    <string name="settings_translation_ai_test_description">Εκτελέστε ένα σύντομο δείγμα πλούσιου κειμένου μέσω της τρέχουσας εγκατάστασης μετάφρασης τεχνητής νοημοσύνης.</string>
+    <string name="settings_translation_ai_test_action">Δοκιμή μετάφρασης</string>
+    <string name="settings_translation_ai_test_original">Δείγμα κειμένου</string>
+    <string name="settings_translation_ai_test_result">Μεταφρασμένο κείμενο</string>
     <string name="settings_appearance_generic">Generic</string>
     <string name="settings_appearance_show_compose_in_home_timeline">Εμφάνιση πλαισίου σύνθεσης στην αρχική χρονολογική γραμμή</string>
     <string name="settings_appearance_show_compose_in_home_timeline_description">Εμφάνιση πλαισίου σύνθεσης στην κορυφή του αρχικού χρονολογίου</string>

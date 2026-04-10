@@ -169,6 +169,7 @@
     <string name="settings_ai_config_model_loading">Indlæser modeller…</string>
     <string name="settings_ai_config_model_error">Kunne ikke indlæse modeller</string>
     <string name="settings_ai_config_model_no_models">Ingen tilgængelige modeller</string>
+    <string name="settings_ai_config_model_manual_input">Indtast model manuelt</string>
     <string name="settings_ai_config_translate_prompt">Oversæt Spørg</string>
     <string name="settings_ai_config_tldr_prompt">Resumé Spørg</string>
     <string name="settings_ai_config_value_empty_placeholder">Tryk for at redigere</string>
@@ -193,6 +194,12 @@
     <string name="settings_ai_config_translate_provider_libretranslate_api_key">LibreTranslate API-nøgle</string>
     <string name="settings_translation_title">Oversættelse</string>
     <string name="settings_translation_description">Konfigurér oversættelsesudbyder og -adfærd</string>
+    <string name="settings_translation_auto_excluded_languages">Auto-oversæt udelukkede sprog</string>
+    <string name="settings_translation_ai_test_title">AI oversættelse test</string>
+    <string name="settings_translation_ai_test_description">Kør en kort rich-tekst prøve gennem den aktuelle AI oversættelse opsætning.</string>
+    <string name="settings_translation_ai_test_action">Test oversættelse</string>
+    <string name="settings_translation_ai_test_original">Eksempel tekst</string>
+    <string name="settings_translation_ai_test_result">Oversat tekst</string>
     <string name="settings_appearance_generic">Generic</string>
     <string name="settings_appearance_show_compose_in_home_timeline">Vis kompositfelt i starttidslinjen</string>
     <string name="settings_appearance_show_compose_in_home_timeline_description">Vis kompositfelt i toppen af starttidslinjen</string>

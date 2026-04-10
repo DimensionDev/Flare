@@ -169,6 +169,7 @@
     <string name="settings_ai_config_model_loading">Ladataan malleja…</string>
     <string name="settings_ai_config_model_error">Mallien lataaminen epäonnistui</string>
     <string name="settings_ai_config_model_no_models">Ei malleja saatavilla</string>
+    <string name="settings_ai_config_model_manual_input">Syötä malli käsin</string>
     <string name="settings_ai_config_translate_prompt">Käännä Prompt</string>
     <string name="settings_ai_config_tldr_prompt">Tiivistelmä</string>
     <string name="settings_ai_config_value_empty_placeholder">Napauta muokataksesi</string>
@@ -193,6 +194,12 @@
     <string name="settings_ai_config_translate_provider_libretranslate_api_key">LibreTranslate API-avain</string>
     <string name="settings_translation_title">Käännös</string>
     <string name="settings_translation_description">Muokkaa käännöstarjoajaa ja -käyttäytymistä</string>
+    <string name="settings_translation_auto_excluded_languages">Käännä pois jätetyt kielet automaattisesti</string>
+    <string name="settings_translation_ai_test_title">tekoälyn käännöstesti</string>
+    <string name="settings_translation_ai_test_description">Suorita lyhyt rikas teksti näyte läpi nykyisen tekoäly käännös asetukset.</string>
+    <string name="settings_translation_ai_test_action">Testaa käännös</string>
+    <string name="settings_translation_ai_test_original">Mallin teksti</string>
+    <string name="settings_translation_ai_test_result">Käännetty teksti</string>
     <string name="settings_appearance_generic">Generic</string>
     <string name="settings_appearance_show_compose_in_home_timeline">Näytä säveltää laatikko kotona aikajanalla</string>
     <string name="settings_appearance_show_compose_in_home_timeline_description">Näytä säveltää laatikko yläreunassa kodin aikajanalla</string>

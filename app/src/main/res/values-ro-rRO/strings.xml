@@ -86,6 +86,7 @@
     <string name="settings_ai_config_model_loading">Se încarcă modelele…</string>
     <string name="settings_ai_config_model_error">Încărcarea modelelor a eșuat</string>
     <string name="settings_ai_config_model_no_models">Nu există modele</string>
+    <string name="settings_ai_config_model_manual_input">Introduceți modelul manual</string>
     <string name="settings_ai_config_tap_to_edit">Atingeți pentru a edita</string>
     <string name="settings_ai_config_entable_translation">Activează traducerea AI</string>
     <string name="settings_ai_config_translation_description">Înlocuiți traducerea Google cu AI traducere, ar putea dura mai mult timp</string>
@@ -110,6 +111,12 @@
     <string name="settings_ai_config_translate_provider_libretranslate_api_key">LibreTranslate API Key</string>
     <string name="settings_translation_title">Traducere</string>
     <string name="settings_translation_description">Configurați furnizorul și comportamentul de traducere</string>
+    <string name="settings_translation_auto_excluded_languages">Traducere automată limbi excluse</string>
+    <string name="settings_translation_ai_test_title">Test de traducere AI</string>
+    <string name="settings_translation_ai_test_description">Rulează un scurt eșantion de text bogat prin configurarea curentă a traducerii AI.</string>
+    <string name="settings_translation_ai_test_action">Testează traducerea</string>
+    <string name="settings_translation_ai_test_original">Text exemplu</string>
+    <string name="settings_translation_ai_test_result">Text tradus</string>
     <string name="settings_language_title">Limba</string>
     <string name="settings_language_description">Schimbă limba aplicației</string>
     <string name="settings_rss_management_title">Administrare abonament</string>
@@ -410,9 +417,9 @@
     <string name="import_confirmation_message">Acest lucru va importa date din fișier. Înregistrările existente cu ID-uri de potrivire vor fi înlocuite. Doriți să continuați?</string>
     <string name="changelog_current"><![CDATA[            <span>Versiunea %1$s:</span>
             <ul>
-                <li>S-a adăugat traducerea automată şi opţiunile furnizorilor multipli de traducere. Autentificarea</li>
-                <li>Nostr suportă acum integrarea cu siglă QR și cu semnatura Chihlimbară pe Android.</li>
-                <li>Subscripții acceptă acum Mastodon public, cronologii locale şi curente.</li>
+                <li>a adăugat suport pentru X articole cu experiență de lectură dedicată.</li>
+                <li>Auto Traducere Fin-Tune cu limbi excluse și teste de traducere rapidă.</li>
+                <li>Parsarea RSS este acum mult mai rapidă, cu încărcarea mai rapidă a articolului și o mai bună compatibilitate a hranei pentru animale.</li>
                 <li>Remedierea erorilor şi îmbunătăţirea performanţei.</li>
             </ul>
         ]]></string>

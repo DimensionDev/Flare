@@ -410,14 +410,7 @@
     <string name="import_error">Impossible d\'importer les données</string>
     <string name="import_confirmation_title">Confirmer l\'importation</string>
     <string name="import_confirmation_message">Cela va importer des données à partir du fichier. Les enregistrements existants avec des identifiants correspondants seront remplacés. Voulez-vous continuer ?</string>
-    <string name="changelog_current"><![CDATA[            <span>Version %1$s:</span>
-            <ul>
-                <li>Ajout du support des articles X avec une expérience de lecture dédiée.</li>
-                <li>Améliorer la traduction automatique avec des langues exclues et des tests de traduction rapide.</li>
-                <li>L'analyse RSS est maintenant beaucoup plus rapide, avec un chargement plus rapide des articles et une meilleure compatibilité des flux.</li>
-                <li>Corrections de bugs et améliorations des performances.</li>
-            </ul>
-        ]]></string>
+    <string name="changelog_current"></string>
     <string name="tab_settings_add_group">Ajouter un groupe</string>
     <string name="tab_settings_add_tab">Ajouter un onglet</string>
     <string name="tab_settings_edit_group">Modifier le groupe</string>

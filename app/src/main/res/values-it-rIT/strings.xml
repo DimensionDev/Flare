@@ -414,14 +414,7 @@
     <string name="import_error">Importazione dati non riuscita</string>
     <string name="import_confirmation_title">Conferma Importazione</string>
     <string name="import_confirmation_message">Questo importerà i dati dal file. I record esistenti con gli ID corrispondenti saranno sostituiti. Vuoi continuare?</string>
-    <string name="changelog_current"><![CDATA[            <span>Versione %1$s:</span>
-            <ul>
-                <li>Aggiunto il supporto per gli articoli X con un'esperienza di lettura dedicata.</li>
-                <li>Ottimizza la traduzione automatica con le lingue escluse e test rapidi di traduzione.</li>
-                <li>L'analisi RSS è ora molto più veloce, con caricamento articoli più veloce e migliore compatibilità di alimentazione.</li>
-                <li>Correzioni di bug e miglioramenti delle prestazioni.</li>
-            </ul>
-        ]]></string>
+    <string name="changelog_current"></string>
     <string name="tab_settings_add_group">Aggiungi Gruppo</string>
     <string name="tab_settings_add_tab">Aggiungi Scheda</string>
     <string name="tab_settings_edit_group">Modifica Gruppo</string>

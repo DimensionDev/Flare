@@ -43,11 +43,16 @@ struct MediaVideoView: View {
     @Environment(\.appearanceSettings.videoAutoplay) private var videoAutoplay
     @Environment(\.networkKind) private var networkKind
     @Environment(\.isScrolling) private var isScrolling
+    @Environment(\.isScrollingState) private var isScrollingState
     @State private var play: Bool = false
     @State private var videoState: VideoState = .idle
     @State private var time: CMTime = .zero
     @State private var isAppeared: Bool = false
     let data: UiMediaVideo
+
+    private var effectiveIsScrolling: Bool {
+        isScrollingState?.isScrolling ?? isScrolling
+    }
     
     func canPlay() -> Bool {
         switch videoAutoplay {
@@ -81,14 +86,14 @@ struct MediaVideoView: View {
                     }
                 }
                 .contentMode(.scaleAspectFill)
-                .onChange(of: isScrolling, { oldValue, newValue in
+                .onChange(of: effectiveIsScrolling, { oldValue, newValue in
                     if !newValue, !play, isAppeared, canPlay() {
                         play = true
                     }
                 })
                 .onAppear {
                     isAppeared = true
-                    if !isScrolling, canPlay() {
+                    if !effectiveIsScrolling, canPlay() {
                         play = true
                     }
                 }

@@ -4,10 +4,24 @@ private struct IsScrollingKey: EnvironmentKey {
     static let defaultValue: Bool = false
 }
 
+@Observable
+final class IsScrollingState {
+    var isScrolling = false
+}
+
+private struct IsScrollingStateKey: EnvironmentKey {
+    static let defaultValue: IsScrollingState? = nil
+}
+
 extension EnvironmentValues {
     var isScrolling: Bool {
         get { self[IsScrollingKey.self] }
         set { self[IsScrollingKey.self] = newValue }
+    }
+
+    var isScrollingState: IsScrollingState? {
+        get { self[IsScrollingStateKey.self] }
+        set { self[IsScrollingStateKey.self] = newValue }
     }
 }
 

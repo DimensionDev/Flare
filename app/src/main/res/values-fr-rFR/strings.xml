@@ -410,7 +410,6 @@
     <string name="import_error">Impossible d\'importer les données</string>
     <string name="import_confirmation_title">Confirmer l\'importation</string>
     <string name="import_confirmation_message">Cela va importer des données à partir du fichier. Les enregistrements existants avec des identifiants correspondants seront remplacés. Voulez-vous continuer ?</string>
-    <string name="changelog_current"></string>
     <string name="tab_settings_add_group">Ajouter un groupe</string>
     <string name="tab_settings_add_tab">Ajouter un onglet</string>
     <string name="tab_settings_edit_group">Modifier le groupe</string>

@@ -414,7 +414,6 @@
     <string name="import_error">Importazione dati non riuscita</string>
     <string name="import_confirmation_title">Conferma Importazione</string>
     <string name="import_confirmation_message">Questo importerà i dati dal file. I record esistenti con gli ID corrispondenti saranno sostituiti. Vuoi continuare?</string>
-    <string name="changelog_current"></string>
     <string name="tab_settings_add_group">Aggiungi Gruppo</string>
     <string name="tab_settings_add_tab">Aggiungi Scheda</string>
     <string name="tab_settings_edit_group">Modifica Gruppo</string>

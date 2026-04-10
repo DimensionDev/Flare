@@ -1811,11 +1811,11 @@ public class Readability(
 
                             // Trim leading whitespace
                             while (phrasingNodes.isNotEmpty() && isWhitespace(phrasingNodes.first())) {
-                                phrasingNodes.removeFirst().remove()
+                                phrasingNodes.removeAt(0).remove()
                             }
                             // Trim trailing whitespace
                             while (phrasingNodes.isNotEmpty() && isWhitespace(phrasingNodes.last())) {
-                                phrasingNodes.removeLast().remove()
+                                phrasingNodes.removeAt(phrasingNodes.lastIndex).remove()
                             }
 
                             if (phrasingNodes.isNotEmpty()) {

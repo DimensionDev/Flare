@@ -63,7 +63,7 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
     private var refreshControl = UIRefreshControl()
     private var isUserRefreshing = false
     private var shouldRevealRefreshControl = false
-    private var scrollingState = ScrollingState()
+    private var scrollingState = IsScrollingState()
     private var lastAppliedSignature: SnapshotSignature?
     private var lastRenderHashMap: [String: Int32] = [:]
 
@@ -73,11 +73,6 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
     private struct SnapshotSignature: Equatable {
         let itemIDs: [String]
         let footerIDs: [String]
-    }
-
-    @Observable
-    final class ScrollingState {
-        var isScrolling = false
     }
 
     // Item ID prefixes / constants
@@ -217,7 +212,7 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
                         .padding(.horizontal)
                 }
                 .padding(.horizontal)
-                .environment(\.isScrolling, scrollState.isScrolling)
+                .environment(\.isScrollingState, scrollState)
             }
             .margins(.all, 0)
             .minSize(width: 0, height: 0)

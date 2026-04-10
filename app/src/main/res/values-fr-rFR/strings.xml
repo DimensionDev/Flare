@@ -81,6 +81,7 @@
     <string name="settings_ai_config_model_loading">Chargement des modèles…</string>
     <string name="settings_ai_config_model_error">Impossible de charger les modèles</string>
     <string name="settings_ai_config_model_no_models">Aucun modèle</string>
+    <string name="settings_ai_config_model_manual_input">Entrez le modèle manuellement</string>
     <string name="settings_ai_config_tap_to_edit">Appuyer pour modifier</string>
     <string name="settings_ai_config_entable_translation">Activer la traduction IA</string>
     <string name="settings_ai_config_translation_description">Remplacer Google Translate par la traduction IA, peut prendre plus de temps</string>
@@ -105,6 +106,12 @@
     <string name="settings_ai_config_translate_provider_libretranslate_api_key">Clé API LibreTranslate</string>
     <string name="settings_translation_title">Traduction</string>
     <string name="settings_translation_description">Configurer le fournisseur de traduction et le comportement</string>
+    <string name="settings_translation_auto_excluded_languages">Traduction automatique des langues exclues</string>
+    <string name="settings_translation_ai_test_title">Test de traduction IA</string>
+    <string name="settings_translation_ai_test_description">Exécutez un court exemple de texte riche à travers la configuration actuelle de la traduction de l\'IA.</string>
+    <string name="settings_translation_ai_test_action">Tester la traduction</string>
+    <string name="settings_translation_ai_test_original">Exemple de texte</string>
+    <string name="settings_translation_ai_test_result">Texte traduit</string>
     <string name="settings_language_title">Langue</string>
     <string name="settings_language_description">Changer la langue de l\'application</string>
     <string name="settings_rss_management_title">Gestion des abonnements</string>
@@ -405,9 +412,9 @@
     <string name="import_confirmation_message">Cela va importer des données à partir du fichier. Les enregistrements existants avec des identifiants correspondants seront remplacés. Voulez-vous continuer ?</string>
     <string name="changelog_current"><![CDATA[            <span>Version %1$s:</span>
             <ul>
-                <li>Ajout d\'une traduction automatique et d\'options de fournisseur de traduction multiple.</li>
-                <li>La connexion Nostr prend maintenant en charge la connexion QR et l’intégration du signataire Amber sur Android.</li>
-                <li>Les abonnements prennent désormais en charge Mastodon public, des échéanciers locaux et tendances.</li>
+                <li>Ajout du support des articles X avec une expérience de lecture dédiée.</li>
+                <li>Améliorer la traduction automatique avec des langues exclues et des tests de traduction rapide.</li>
+                <li>L'analyse RSS est maintenant beaucoup plus rapide, avec un chargement plus rapide des articles et une meilleure compatibilité des flux.</li>
                 <li>Corrections de bugs et améliorations des performances.</li>
             </ul>
         ]]></string>

@@ -168,6 +168,7 @@
     <string name="settings_ai_config_model_select">Selecteer model</string>
     <string name="settings_ai_config_model_error">modellen laden mislukt</string>
     <string name="settings_ai_config_model_no_models">Geen modellen beschikbaar</string>
+    <string name="settings_ai_config_model_manual_input">Voer model handmatig in</string>
     <string name="settings_ai_config_translate_prompt">Prompt vertalen</string>
     <string name="settings_ai_config_tldr_prompt">Samenvatting Prompt</string>
     <string name="settings_ai_config_value_empty_placeholder">Tik om te bewerken</string>
@@ -192,6 +193,12 @@
     <string name="settings_ai_config_translate_provider_libretranslate_api_key">LibreTranslate API-sleutel</string>
     <string name="settings_translation_title">Vertaling</string>
     <string name="settings_translation_description">Configureer vertaalprovider en gedrag</string>
+    <string name="settings_translation_auto_excluded_languages">Uitgesloten talen automatisch vertalen</string>
+    <string name="settings_translation_ai_test_title">AI vertaaltest</string>
+    <string name="settings_translation_ai_test_description">Voer een kort voorbeeld van rij-tekst uit door de huidige AI-vertaling.</string>
+    <string name="settings_translation_ai_test_action">Test vertaling</string>
+    <string name="settings_translation_ai_test_original">Voorbeeld tekst</string>
+    <string name="settings_translation_ai_test_result">Vertaalde tekst</string>
     <string name="settings_appearance_generic">Generic</string>
     <string name="settings_appearance_show_compose_in_home_timeline">Toon opstelveld in de home tijdlijn</string>
     <string name="settings_appearance_show_compose_in_home_timeline_description">Toon opstelveld boven de thuistijdlijn</string>

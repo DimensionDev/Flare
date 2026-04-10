@@ -169,6 +169,7 @@
     <string name="settings_ai_config_model_loading">Caricamento modelli…</string>
     <string name="settings_ai_config_model_error">Impossibile caricare i modelli</string>
     <string name="settings_ai_config_model_no_models">Nessun modello disponibile</string>
+    <string name="settings_ai_config_model_manual_input">Inserisci il modello manualmente</string>
     <string name="settings_ai_config_translate_prompt">Traduci Prompt</string>
     <string name="settings_ai_config_tldr_prompt">Prompt Del Riepilogo</string>
     <string name="settings_ai_config_value_empty_placeholder">Tocca per modificare</string>
@@ -193,6 +194,12 @@
     <string name="settings_ai_config_translate_provider_libretranslate_api_key">LibreTranslate API Key</string>
     <string name="settings_translation_title">Traduzione</string>
     <string name="settings_translation_description">Configura il provider di traduzione e il comportamento</string>
+    <string name="settings_translation_auto_excluded_languages">Traduci automaticamente le lingue escluse</string>
+    <string name="settings_translation_ai_test_title">Test di traduzione AI</string>
+    <string name="settings_translation_ai_test_description">Esegue un breve esempio di ricchezza-testo attraverso l\'attuale configurazione di traduzione AI.</string>
+    <string name="settings_translation_ai_test_action">Prova traduzione</string>
+    <string name="settings_translation_ai_test_original">Testo di esempio</string>
+    <string name="settings_translation_ai_test_result">Testo tradotto</string>
     <string name="settings_appearance_generic">Generico</string>
     <string name="settings_appearance_show_compose_in_home_timeline">Mostra la casella di composizione nella timeline home</string>
     <string name="settings_appearance_show_compose_in_home_timeline_description">Mostra la casella di composizione nella parte superiore della timeline home</string>

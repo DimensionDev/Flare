@@ -173,6 +173,7 @@
     <string name="settings_ai_config_model_loading">تحميل النماذج…</string>
     <string name="settings_ai_config_model_error">فشل في تحميل النماذج</string>
     <string name="settings_ai_config_model_no_models">لا توجد نماذج متاحة</string>
+    <string name="settings_ai_config_model_manual_input">أدخل النموذج يدوياً</string>
     <string name="settings_ai_config_translate_prompt">ترجمة الطلب</string>
     <string name="settings_ai_config_tldr_prompt">ملخص الطلب</string>
     <string name="settings_ai_config_value_empty_placeholder">انقر للتحرير</string>
@@ -197,6 +198,12 @@
     <string name="settings_ai_config_translate_provider_libretranslate_api_key">مفتاح API لترجمة LibreTranslate</string>
     <string name="settings_translation_title">الترجمة</string>
     <string name="settings_translation_description">تكوين موفر الترجمة والسلوك</string>
+    <string name="settings_translation_auto_excluded_languages">الترجمة التلقائية للغات المستبعدة</string>
+    <string name="settings_translation_ai_test_title">اختبار ترجمة الذاكرة</string>
+    <string name="settings_translation_ai_test_description">تشغيل عينة قصيرة من النص الغني من خلال إعداد ترجمة الذاكرة الحالي.</string>
+    <string name="settings_translation_ai_test_action">اختبار الترجمة</string>
+    <string name="settings_translation_ai_test_original">نص عينة</string>
+    <string name="settings_translation_ai_test_result">النص المترجم</string>
     <string name="settings_appearance_generic">Generic</string>
     <string name="settings_appearance_show_compose_in_home_timeline">إظهار مربع تكوين في الخيط الزمني الرئيسي</string>
     <string name="settings_appearance_show_compose_in_home_timeline_description">إظهار مربع تكوين في الجزء العلوي من الخيط الزمني الرئيسي</string>

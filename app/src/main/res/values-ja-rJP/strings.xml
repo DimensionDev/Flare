@@ -83,6 +83,7 @@
     <string name="settings_ai_config_model_select">モデルを選択</string>
     <string name="settings_ai_config_model_error">モデルの読み込みに失敗しました</string>
     <string name="settings_ai_config_model_no_models">モデルがありません</string>
+    <string name="settings_ai_config_model_manual_input">モデルを手動で入力してください</string>
     <string name="settings_ai_config_tap_to_edit">タップして編集</string>
     <string name="settings_ai_config_entable_translation">AI 翻訳を有効にする</string>
     <string name="settings_ai_config_translation_description">Google 翻訳を AI 翻訳に置き換えるには時間がかかる場合があります</string>
@@ -107,6 +108,12 @@
     <string name="settings_ai_config_translate_provider_libretranslate_api_key">LibreTranslate APIキー</string>
     <string name="settings_translation_title">翻訳</string>
     <string name="settings_translation_description">翻訳プロバイダと動作を設定</string>
+    <string name="settings_translation_auto_excluded_languages">除外言語の自動翻訳</string>
+    <string name="settings_translation_ai_test_title">AI翻訳テスト</string>
+    <string name="settings_translation_ai_test_description">現在のAI翻訳セットアップで、短いリッチテキストサンプルを実行します。</string>
+    <string name="settings_translation_ai_test_action">翻訳をテスト</string>
+    <string name="settings_translation_ai_test_original">サンプルテキスト</string>
+    <string name="settings_translation_ai_test_result">翻訳されたテキスト</string>
     <string name="settings_language_title">言語</string>
     <string name="settings_language_description">アプリの言語を変更する</string>
     <string name="settings_rss_management_title">サブスクリプション管理</string>

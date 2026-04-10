@@ -9,7 +9,7 @@
     <string name="profile_header_toots_count">%1$s Beiträge</string>
     <string name="profile_misskey_header_status_count">%1$s Beiträge</string>
     <string name="profile_header_button_follow">Folgen</string>
-    <string name="profile_header_button_following">Folgt</string>
+    <string name="profile_header_button_following">Entfolgen</string>
     <string name="profile_header_button_requested">Angefragt</string>
     <string name="profile_header_button_blocked">Blockiert</string>
     <string name="profile_header_button_is_fans">Folgt dir</string>

@@ -87,6 +87,7 @@
     <string name="settings_ai_config_model_loading">Ładowanie modeli…</string>
     <string name="settings_ai_config_model_error">Nie udało się załadować modeli</string>
     <string name="settings_ai_config_model_no_models">Brak modeli</string>
+    <string name="settings_ai_config_model_manual_input">Wprowadź model ręcznie</string>
     <string name="settings_ai_config_tap_to_edit">Dotknij, aby edytować</string>
     <string name="settings_ai_config_entable_translation">Włącz tłumaczenie AI</string>
     <string name="settings_ai_config_translation_description">Zastąp Google Translate tłumaczeniem AI może zająć więcej czasu</string>
@@ -111,6 +112,12 @@
     <string name="settings_ai_config_translate_provider_libretranslate_api_key">Klucz API LibreTranslate</string>
     <string name="settings_translation_title">Tłumaczenie</string>
     <string name="settings_translation_description">Skonfiguruj dostawcę tłumaczenia i zachowanie</string>
+    <string name="settings_translation_auto_excluded_languages">Automatyczne tłumaczenie wykluczonych języków</string>
+    <string name="settings_translation_ai_test_title">Test tłumaczenia AI</string>
+    <string name="settings_translation_ai_test_description">Wykonaj krótką próbkę bogatego tekstu przez bieżącą konfigurację tłumaczenia AI.</string>
+    <string name="settings_translation_ai_test_action">Testowe tłumaczenie</string>
+    <string name="settings_translation_ai_test_original">Przykładowy tekst</string>
+    <string name="settings_translation_ai_test_result">Przetłumaczony tekst</string>
     <string name="settings_language_title">Język</string>
     <string name="settings_language_description">Zmień język aplikacji</string>
     <string name="settings_rss_management_title">Zarządzanie subskrypcją</string>
@@ -411,9 +418,9 @@
     <string name="import_confirmation_message">Spowoduje to zaimportowanie danych z pliku. Istniejące rekordy z pasującymi identyfikatorami zostaną zastąpione. Czy chcesz kontynuować?</string>
     <string name="changelog_current"><![CDATA[            <span>Wersja %1$s:</span>
             <ul>
-                <li>Dodano automatyczne tłumaczenie i opcje wielu tłumaczeń.</li>
-                <li>Logowanie Nostr obsługuje teraz logowanie QR i integrację podpisującego Amber na Androida.</li>
-                <li>Subskrypcje teraz obsługują Mastodon publiczny, lokalne i trendowe harmonogramy.</li>
+                <li>Dodano wsparcie dla artykułów X ze specjalnym doświadczeniem w czytaniu.</li>
+                <li>Dopasuj automatyczne tłumaczenie z wykluczonymi językami i sprawdzenie szybkiego tłumaczenia.</li>
+                <li>Parsowanie RSS jest teraz znacznie szybsze, szybsze ładowanie artykułów i lepsza kompatybilność pasz.</li>
                 <li>Poprawki błędów i ulepszenia wydajności.</li>
             </ul>
         ]]></string>

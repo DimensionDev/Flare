@@ -169,6 +169,7 @@
     <string name="settings_ai_config_model_loading">Laddar modeller…</string>
     <string name="settings_ai_config_model_error">Det gick inte att ladda modeller</string>
     <string name="settings_ai_config_model_no_models">Inga modeller tillgängliga</string>
+    <string name="settings_ai_config_model_manual_input">Ange modell manuellt</string>
     <string name="settings_ai_config_translate_prompt">Översätt prompt</string>
     <string name="settings_ai_config_tldr_prompt">Sammanfattning Fråga</string>
     <string name="settings_ai_config_value_empty_placeholder">Tryck för att redigera</string>
@@ -193,6 +194,12 @@
     <string name="settings_ai_config_translate_provider_libretranslate_api_key">LibreTranslate API-nyckel</string>
     <string name="settings_translation_title">Översättning</string>
     <string name="settings_translation_description">Konfigurera översättningsleverantör och beteende</string>
+    <string name="settings_translation_auto_excluded_languages">Auto-översätta exkluderade språk</string>
+    <string name="settings_translation_ai_test_title">AI översättningstest</string>
+    <string name="settings_translation_ai_test_description">Kör en kort rich-text prov genom den aktuella AI översättning setup.</string>
+    <string name="settings_translation_ai_test_action">Testa översättning</string>
+    <string name="settings_translation_ai_test_original">Exempel på text</string>
+    <string name="settings_translation_ai_test_result">Översatt text</string>
     <string name="settings_appearance_generic">Generic</string>
     <string name="settings_appearance_show_compose_in_home_timeline">Visa komponera rutan i hemtidslinjen</string>
     <string name="settings_appearance_show_compose_in_home_timeline_description">Visa komponera rutan i toppen av hemtidslinjen</string>

@@ -87,6 +87,7 @@
     <string name="settings_ai_config_model_loading">Загрузка моделей…</string>
     <string name="settings_ai_config_model_error">Не удалось загрузить модели</string>
     <string name="settings_ai_config_model_no_models">Нет моделей</string>
+    <string name="settings_ai_config_model_manual_input">Введите модель вручную</string>
     <string name="settings_ai_config_tap_to_edit">Нажмите, чтобы изменить</string>
     <string name="settings_ai_config_entable_translation">Включить перевод ИИ</string>
     <string name="settings_ai_config_translation_description">Замена перевода Google с помощью ИИ перевода, может занять больше времени</string>
@@ -111,6 +112,12 @@
     <string name="settings_ai_config_translate_provider_libretranslate_api_key">LibreTranslate API ключ</string>
     <string name="settings_translation_title">Перевод</string>
     <string name="settings_translation_description">Настроить поставщика и поведение перевода</string>
+    <string name="settings_translation_auto_excluded_languages">Автоперевод исключенных языков</string>
+    <string name="settings_translation_ai_test_title">Тестирование AI перевода</string>
+    <string name="settings_translation_ai_test_description">Запустите краткий пример текста через текущую настройку ИИ переводов.</string>
+    <string name="settings_translation_ai_test_action">Тестовый перевод</string>
+    <string name="settings_translation_ai_test_original">Образец текста</string>
+    <string name="settings_translation_ai_test_result">Переведенный текст</string>
     <string name="settings_language_title">Язык</string>
     <string name="settings_language_description">Изменить язык приложения</string>
     <string name="settings_rss_management_title">Управление подписками</string>
@@ -411,9 +418,9 @@
     <string name="import_confirmation_message">Это импортирует данные из файла. Существующие записи с соответствующими идентификаторами будут заменены. Вы хотите продолжить?</string>
     <string name="changelog_current"><![CDATA[            <span>Версия %1$s:</span>
             <ul>
-                <li>Добавлен автоматический перевод и опции поставщика переводов.</li>
-                <li>Nostr логин теперь поддерживает QR-вход и интеграцию Amber подписчиков на Android.</li>
-                <li>Подписки теперь поддерживают публику Mastodon, локальные и трендовые времена.</li>
+                <li>Добавлена поддержка для X статей с особым опытом чтения.</li>
+                <li>Автоматический перевод с исключенными языками и быстрым тестированием.</li>
+                <li>RSS разбор теперь намного быстрее, с более быстрой загрузкой статьи и лучшей совместимостью с кормом.</li>
                 <li>Исправления ошибок и улучшения производительности.</li>
             </ul>
         ]]></string>

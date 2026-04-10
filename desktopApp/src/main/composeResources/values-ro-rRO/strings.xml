@@ -170,6 +170,7 @@
     <string name="settings_ai_config_model_loading">Se încarcă modelele…</string>
     <string name="settings_ai_config_model_error">Încărcarea modelelor a eșuat</string>
     <string name="settings_ai_config_model_no_models">Nu există modele disponibile</string>
+    <string name="settings_ai_config_model_manual_input">Introduceți modelul manual</string>
     <string name="settings_ai_config_translate_prompt">Traducere promptă</string>
     <string name="settings_ai_config_tldr_prompt">Sumar Prompt</string>
     <string name="settings_ai_config_value_empty_placeholder">Atingeți pentru a edita</string>
@@ -194,6 +195,12 @@
     <string name="settings_ai_config_translate_provider_libretranslate_api_key">LibreTranslate API Key</string>
     <string name="settings_translation_title">Traducere</string>
     <string name="settings_translation_description">Configurați furnizorul și comportamentul de traducere</string>
+    <string name="settings_translation_auto_excluded_languages">Traducere automată limbi excluse</string>
+    <string name="settings_translation_ai_test_title">Test de traducere AI</string>
+    <string name="settings_translation_ai_test_description">Rulează un scurt eșantion de text bogat prin configurarea curentă a traducerii AI.</string>
+    <string name="settings_translation_ai_test_action">Testează traducerea</string>
+    <string name="settings_translation_ai_test_original">Text exemplu</string>
+    <string name="settings_translation_ai_test_result">Text tradus</string>
     <string name="settings_appearance_generic">Generic</string>
     <string name="settings_appearance_show_compose_in_home_timeline">Arată caseta de compunere în cronologia principală</string>
     <string name="settings_appearance_show_compose_in_home_timeline_description">Arată caseta de compunere în partea de sus a cronologiei principale</string>

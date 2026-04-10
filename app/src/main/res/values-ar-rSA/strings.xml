@@ -89,6 +89,7 @@
     <string name="settings_ai_config_model_loading">تحميل النماذج…</string>
     <string name="settings_ai_config_model_error">فشل في تحميل النماذج</string>
     <string name="settings_ai_config_model_no_models">لا توجد نماذج</string>
+    <string name="settings_ai_config_model_manual_input">أدخل النموذج يدوياً</string>
     <string name="settings_ai_config_tap_to_edit">انقر للتحرير</string>
     <string name="settings_ai_config_entable_translation">تمكين ترجمة الذاكرة</string>
     <string name="settings_ai_config_translation_description">استبدال ترجمة جوجل بترجمة الذكاء الاصطناعي، قد يستغرق وقتاً أطول</string>
@@ -113,6 +114,12 @@
     <string name="settings_ai_config_translate_provider_libretranslate_api_key">مفتاح API لترجمة LibreTranslate</string>
     <string name="settings_translation_title">الترجمة</string>
     <string name="settings_translation_description">تكوين موفر الترجمة والسلوك</string>
+    <string name="settings_translation_auto_excluded_languages">الترجمة التلقائية للغات المستبعدة</string>
+    <string name="settings_translation_ai_test_title">اختبار ترجمة الذاكرة</string>
+    <string name="settings_translation_ai_test_description">تشغيل عينة قصيرة من النص الغني من خلال إعداد ترجمة الذاكرة الحالي.</string>
+    <string name="settings_translation_ai_test_action">اختبار الترجمة</string>
+    <string name="settings_translation_ai_test_original">نص عينة</string>
+    <string name="settings_translation_ai_test_result">النص المترجم</string>
     <string name="settings_language_title">اللغة</string>
     <string name="settings_language_description">تغيير لغة التطبيق</string>
     <string name="settings_rss_management_title">إدارة الاشتراك</string>
@@ -413,9 +420,9 @@
     <string name="import_confirmation_message">سيتم استيراد البيانات من الملف. سيتم استبدال السجلات الموجودة مع مطابقة المعرفات. هل تريد المتابعة؟</string>
     <string name="changelog_current"><![CDATA[            <span>الإصدار %1$s:</span>
             <ul>
-                <li>أضاف الترجمة التلقائية وخيارات متعددة موفر الترجمة.</li>
-                <li>تسجيل الدخول Nostr الآن يدعم تكامل تسجيل الدخول QR وتوقيع الأمبير على Android.</li>
-                <li>الاشتراكات الآن تدعم ماستدون العام، الجدول الزمني المحلي والناشئ.</li>
+                <li>إضافة دعم للمقالات X مع تكريس تجربة للقراءة.</li>
+                <li>جودة الترجمة التلقائية مع اللغات المستبعدة واختبار الترجمة السريعة.</li>
+                <li>تحليل RSS أسرع بكثير، مع تحميل أسرع للمقالة وتوافق أفضل للتغذية.</li>
                 <li>إصلاحات الشوائب وتحسينات الأداء.</li>
             </ul>
         ]]></string>

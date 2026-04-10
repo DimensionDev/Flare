@@ -85,6 +85,7 @@
     <string name="settings_ai_config_model_loading">Carregando modelos…</string>
     <string name="settings_ai_config_model_error">Falha ao carregar modelos</string>
     <string name="settings_ai_config_model_no_models">Nenhum modelo</string>
+    <string name="settings_ai_config_model_manual_input">Digite o modelo manualmente</string>
     <string name="settings_ai_config_tap_to_edit">Toque para editar</string>
     <string name="settings_ai_config_entable_translation">Habilitar tradução AI</string>
     <string name="settings_ai_config_translation_description">Substituir o Google Tradutor pela tradução IA pode demorar mais tempo</string>
@@ -109,6 +110,12 @@
     <string name="settings_ai_config_translate_provider_libretranslate_api_key">Chave API do LibreTranslate</string>
     <string name="settings_translation_title">Tradução</string>
     <string name="settings_translation_description">Configurar provedor de tradução e comportamento</string>
+    <string name="settings_translation_auto_excluded_languages">Auto-traduzir idiomas excluídos</string>
+    <string name="settings_translation_ai_test_title">Teste de tradução IA</string>
+    <string name="settings_translation_ai_test_description">Execute uma pequena amostra de texto rico através da configuração atual de tradução AI.</string>
+    <string name="settings_translation_ai_test_action">Tradução de teste</string>
+    <string name="settings_translation_ai_test_original">Exemplo de texto</string>
+    <string name="settings_translation_ai_test_result">Texto traduzido</string>
     <string name="settings_language_title">IDIOMA</string>
     <string name="settings_language_description">Alterar o idioma do aplicativo</string>
     <string name="settings_rss_management_title">Gerenciamento de assinaturas</string>

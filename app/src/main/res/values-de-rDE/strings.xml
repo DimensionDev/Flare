@@ -65,11 +65,12 @@
     <string name="settings_app_logging_clear">Log löschen</string>
     <string name="settings_app_logging_enable_network_logging">Netzwerkprotokollierung aktivieren</string>
     <string name="settings_ai_config_title">KI Konfiguration</string>
+    <string name="settings_ai_config_description">KI-Backend und Funktionen konfigurieren</string>
     <string name="settings_ai_config_server">Server-URL</string>
     <string name="settings_ai_config_server_hint">Server-URL eingeben</string>
     <string name="settings_ai_config_server_url_requirement">Server-URL muss mit einem abschließenden Schrägstrich enden und die OpenAI-kompatible v1/chat/completions API unterstützen.</string>
     <string name="settings_ai_config_server_self_host_description">Du kannst den offiziellen Server oder einen eigenen Server verwenden</string>
-    <string name="settings_ai_config_type">AI Type</string>
+    <string name="settings_ai_config_type">KI-Typ</string>
     <string name="settings_ai_config_type_description">Tippen um den KI-Backend-Typ auszuwählen</string>
     <string name="settings_ai_config_type_select">Auswählen</string>
     <string name="settings_ai_config_type_on_device">Geräte KI</string>
@@ -85,6 +86,7 @@
     <string name="settings_ai_config_model_loading">Lade Modelle…</string>
     <string name="settings_ai_config_model_error">Fehler beim Laden der Modelle</string>
     <string name="settings_ai_config_model_no_models">Keine Modelle</string>
+    <string name="settings_ai_config_model_manual_input">Modell manuell eingeben</string>
     <string name="settings_ai_config_tap_to_edit">Zum Bearbeiten tippen</string>
     <string name="settings_ai_config_entable_translation">KI Übersetzung aktivieren</string>
     <string name="settings_ai_config_translation_description">Ersetzen Sie Google Translate durch KI Übersetzung, dies kann länger dauern</string>
@@ -95,20 +97,26 @@
     <string name="settings_ai_config_translate_prompt">Übersetzungsaufforderung</string>
     <string name="settings_ai_config_tldr_prompt">Zusammenfassung-Aufforderung</string>
     <string name="settings_ai_config_translate_provider">Übersetzungsanbieter</string>
-    <string name="settings_ai_config_translate_provider_description">Wählen Sie den Übersetzungsdienst aus</string>
-    <string name="settings_ai_config_translate_provider_ai">AI</string>
+    <string name="settings_ai_config_translate_provider_description">Wählen Sie den Übersetzungsanbieter aus</string>
+    <string name="settings_ai_config_translate_provider_ai">KI</string>
     <string name="settings_ai_config_translate_provider_google_web">Google Translate (Web)</string>
-    <string name="settings_ai_config_translate_provider_deepl">Tiefe</string>
+    <string name="settings_ai_config_translate_provider_deepl">DeepL</string>
     <string name="settings_ai_config_translate_provider_deepl_api_key">DeepL API-Schlüssel</string>
     <string name="settings_ai_config_translate_provider_deepl_use_pro">DeepL Pro endpoint</string>
     <string name="settings_ai_config_translate_provider_deepl_use_pro_description">Verwenden Sie api.deepl.com anstelle des kostenlosen Endpunktes api-free.deepl.com.</string>
-    <string name="settings_ai_config_translate_provider_google_cloud">Google Cloud übersetzen</string>
+    <string name="settings_ai_config_translate_provider_google_cloud">Google Cloud Translate</string>
     <string name="settings_ai_config_translate_provider_google_cloud_api_key">Google Cloud API Schlüssel</string>
-    <string name="settings_ai_config_translate_provider_libretranslate">Libreübersetzen</string>
+    <string name="settings_ai_config_translate_provider_libretranslate">LibreTranslate</string>
     <string name="settings_ai_config_translate_provider_libretranslate_base_url">LibreTranslate Basis-URL</string>
     <string name="settings_ai_config_translate_provider_libretranslate_api_key">LibreTranslate API-Schlüssel</string>
     <string name="settings_translation_title">Übersetzung</string>
     <string name="settings_translation_description">Übersetzungsanbieter und -verhalten konfigurieren</string>
+    <string name="settings_translation_auto_excluded_languages">Ausgeschlossene Sprachen automatisch übersetzen</string>
+    <string name="settings_translation_ai_test_title">KI-Übersetzungstest</string>
+    <string name="settings_translation_ai_test_description">Führen Sie ein kurzes Rich-Text-Beispiel durch das aktuelle KI-Übersetzungs-Setup aus.</string>
+    <string name="settings_translation_ai_test_action">Testübersetzung</string>
+    <string name="settings_translation_ai_test_original">Beispieltext</string>
+    <string name="settings_translation_ai_test_result">Übersetzter Text</string>
     <string name="settings_language_title">Sprache</string>
     <string name="settings_language_description">Sprache der App ändern</string>
     <string name="settings_rss_management_title">Abonnement-Management</string>
@@ -327,7 +335,7 @@
     <string name="dm_leave">Gespräch verlassen</string>
     <string name="dm_to_profile">Profil anzeigen</string>
     <string name="notification_login_expired">Login abgelaufen für %1$s</string>
-    <string name="following_title">Folgt</string>
+    <string name="following_title">Entfolgen</string>
     <string name="fans_title">Follower</string>
     <string name="local_history_search_placeholder">Lokalen Cache durchsuchen</string>
     <string name="local_history_search_status_title">Posten</string>
@@ -375,7 +383,7 @@
     <string name="podcast_living">Podcast live</string>
     <string name="home_tab_antennas_title">Antenne</string>
     <string name="home_tab_channels_title">Kanäle</string>
-    <string name="misskey_channel_tab_following">Folgt</string>
+    <string name="misskey_channel_tab_following">Entfolgen</string>
     <string name="misskey_channel_tab_favorites">Favoriten</string>
     <string name="misskey_channel_tab_owned">Besitzt</string>
     <string name="misskey_channel_tab_featured">Empfohlen</string>
@@ -409,10 +417,9 @@
     <string name="import_confirmation_message">Dies wird Daten aus der Datei importieren. Vorhandene Datensätze mit passenden IDs werden ersetzt. Möchten Sie fortfahren?</string>
     <string name="changelog_current"><![CDATA[            <span>Version %1$s:</span>
             <ul>
-                <li>Automatische Übersetzung und mehrere Übersetzungsanbieter Optionen hinzugefügt.</li>
-                
-                <li>Nostr Login unterstützt nun QR Anmelde- und Bernsteinsignier-Integration auf Android.</li>
-                <li>Abonnements unterstützen nun Mastodon public lokale, und angesagte Zeitachsen.</li>
+                <li>Unterstützung für X Artikel mit einer speziellen Leseerfahrung hinzugefügt.</li>
+                <li>Feineinstellung der automatischen Übersetzung mit ausgeschlossenen Sprachen und Schnellübersetzung.</li>
+                <li>RSS-Parsing ist jetzt viel schneller, mit schnellerem Laden von Artikeln und besserer Feed-Kompatibilität.</li>
                 <li>Fehlerbehebungen und Leistungsverbesserungen.</li>
             </ul>
         ]]></string>

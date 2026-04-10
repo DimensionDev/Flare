@@ -14,6 +14,28 @@ plugins {
 }
 
 kotlin {
+    val freeCompilerArgsFromProperties =
+        providers.gradleProperty("flare.kotlin.freeCompilerArgs")
+            .map { value ->
+                value.split(",")
+                    .map { it.trim() }
+                    .filter { it.isNotEmpty() }
+            }
+            .getOrElse(emptyList())
+    val optInsFromProperties =
+        providers.gradleProperty("flare.kotlin.optIns")
+            .map { value ->
+                value.split(",")
+                    .map { it.trim() }
+                    .filter { it.isNotEmpty() }
+            }
+            .getOrElse(emptyList())
+
+    compilerOptions {
+        freeCompilerArgs.addAll(freeCompilerArgsFromProperties)
+        optIn.addAll(optInsFromProperties)
+    }
+
     applyDefaultHierarchyTemplate {
         common {
             group("apple") {
@@ -87,6 +109,9 @@ kotlin {
                 implementation(libs.cryptography.provider.optimal)
                 implementation(libs.openai.client)
                 implementation(libs.nostr.sdk.kmp)
+                api(projects.core.common)
+                api(projects.core.deeplink)
+                api(projects.core.model)
                 implementation(projects.readability)
             }
         }

@@ -19,4 +19,4 @@ public data class ImmutableListWrapper<T : Any>(
     public fun toImmutableList(): ImmutableList<T> = data
 }
 
-internal fun <T : Any> ImmutableList<T>.toImmutableListWrapper(): ImmutableListWrapper<T> = ImmutableListWrapper(this)
+public fun <T : Any> ImmutableList<T>.toImmutableListWrapper(): ImmutableListWrapper<T> = ImmutableListWrapper(this)

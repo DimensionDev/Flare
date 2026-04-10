@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 
 @Immutable
 @Serializable
-internal sealed interface DbAccountType
+public sealed interface DbAccountType
 
 @Immutable
 @Serializable
@@ -35,14 +35,14 @@ public sealed class AccountType {
     }
 }
 
-internal fun MicroBlogKey?.toAccountType(): AccountType =
+public fun MicroBlogKey?.toAccountType(): AccountType =
     if (this == null) {
         AccountType.Guest
     } else {
         AccountType.Specific(this)
     }
 
-internal fun MicroBlogKey?.toAccountType(guestHost: String): AccountType =
+public fun MicroBlogKey?.toAccountType(guestHost: String): AccountType =
     if (this == null) {
         AccountType.GuestHost(guestHost)
     } else {

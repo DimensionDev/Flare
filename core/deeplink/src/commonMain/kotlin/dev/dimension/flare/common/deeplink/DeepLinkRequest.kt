@@ -8,18 +8,18 @@ import io.ktor.util.toMap
  *
  * @param uri the target deeplink uri to link to
  */
-internal class DeepLinkRequest(
-    val uri: Url,
+public class DeepLinkRequest(
+    public val uri: Url,
 ) {
     /**
      * A list of path segments
      */
-    val pathSegments: List<String> = uri.rawSegments
+    public val pathSegments: List<String> = uri.rawSegments
 
     /**
      * A map of query name to query value
      */
-    val queries = uri.parameters.toMap()
+    public val queries: Map<String, List<String>> = uri.parameters.toMap()
 
     // TODO add parsing for other Uri components, i.e. fragments, mimeType, action
 }

@@ -34,9 +34,9 @@ import kotlinx.serialization.descriptors.SerialKind
  * @param serializer the serializer of [T]
  * @param uriPattern the supported deeplink's uri pattern, i.e. "abc.com/home/{pathArg}"
  */
-internal class DeepLinkPattern<T>(
-    val serializer: KSerializer<T>,
-    val uriPattern: Url,
+public class DeepLinkPattern<T>(
+    public val serializer: KSerializer<T>,
+    public val uriPattern: Url,
 ) {
     /**
      * Help differentiate if a path segment is an argument or a static value
@@ -49,7 +49,7 @@ internal class DeepLinkPattern<T>(
      * order matters here - path segments need to match in value and order when matching
      * requested deeplink to supported deeplink
      */
-    val pathSegments: List<PathSegment> =
+    public val pathSegments: List<PathSegment> =
         buildList {
             uriPattern.rawSegments.forEach { segment ->
                 // first, check if it is a path arg
@@ -79,7 +79,7 @@ internal class DeepLinkPattern<T>(
      *
      * This will be used later on to parse a provided query value into the correct KType
      */
-    val queryValueParsers: Map<String, TypeParser> =
+    public val queryValueParsers: Map<String, TypeParser> =
         buildMap {
             uriPattern.parameters.forEach { paramName, _ ->
                 val elementIndex = serializer.descriptor.getElementIndex(paramName)
@@ -91,19 +91,19 @@ internal class DeepLinkPattern<T>(
     /**
      * Metadata about a supported path segment
      */
-    class PathSegment(
-        val stringValue: String,
-        val isParamArg: Boolean,
-        val typeParser: TypeParser,
-        val prefix: String = "",
-        val suffix: String = "",
+    public class PathSegment(
+        public val stringValue: String,
+        public val isParamArg: Boolean,
+        public val typeParser: TypeParser,
+        public val prefix: String = "",
+        public val suffix: String = "",
     )
 }
 
 /**
  * Parses a String into a Serializable Primitive
  */
-private typealias TypeParser = (String) -> Any
+public typealias TypeParser = (String) -> Any
 
 private fun getTypeParser(kind: SerialKind): TypeParser =
     when (kind) {

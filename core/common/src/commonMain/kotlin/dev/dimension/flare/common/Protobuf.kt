@@ -6,7 +6,7 @@ import kotlinx.serialization.encodeToByteArray
 import kotlinx.serialization.protobuf.ProtoBuf
 
 @OptIn(ExperimentalSerializationApi::class)
-internal inline fun <reified T> T.encodeProtobuf(): ByteArray = ProtoBuf.encodeToByteArray(this)
+public inline fun <reified T> T.encodeProtobuf(): ByteArray = ProtoBuf.encodeToByteArray(this)
 
 @OptIn(ExperimentalSerializationApi::class)
-internal inline fun <reified T> ByteArray.decodeProtobuf(): T = ProtoBuf.decodeFromByteArray(this)
+public inline fun <reified T> ByteArray.decodeProtobuf(): T = ProtoBuf.decodeFromByteArray(this)

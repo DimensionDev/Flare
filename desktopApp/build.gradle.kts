@@ -137,6 +137,7 @@ nucleus.application {
             bundleID = "dev.dimension.flare"
             minimumSystemVersion = "14.0"
             appCategory = "public.app-category.social-networking"
+            packageBuildVersion = desktopVersionCode.toString()
 
             jvmArgs(
                 "-Dapple.awt.application.appearance=system",

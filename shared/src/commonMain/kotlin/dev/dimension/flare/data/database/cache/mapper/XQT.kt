@@ -7,6 +7,7 @@ import dev.dimension.flare.data.database.cache.model.DbMessageRoom
 import dev.dimension.flare.data.database.cache.model.DbMessageRoomReference
 import dev.dimension.flare.data.database.cache.model.DbUser
 import dev.dimension.flare.data.database.cache.model.MessageContent
+import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.network.xqt.model.CursorType
 import dev.dimension.flare.data.network.xqt.model.InboxConversation
 import dev.dimension.flare.data.network.xqt.model.InboxTimelineEntry
@@ -172,7 +173,7 @@ private fun InboxTimelineEntry.toDbMessageItem(
     return DbMessageItem(
         messageKey = MicroBlogKey(message.id ?: return null, accountKey.host),
         roomKey = MicroBlogKey(message.conversationId ?: return null, accountKey.host),
-        content = MessageContent.XQT.Message(message.messageData ?: return null),
+        content = MessageContent.XQT.Message(message.messageData?.encodeJson() ?: return null),
         timestamp = message.time?.toLongOrNull() ?: 0L,
         userKey = MicroBlogKey(message.messageData.senderId ?: return null, accountKey.host),
         showSender = showSender,

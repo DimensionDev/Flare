@@ -922,12 +922,13 @@ internal class BlueskyDataSource(
     override fun retrySendDirectMessage(messageKey: MicroBlogKey) {
         coroutineScope.launch {
             val current = database.messageDao().getMessage(messageKey)
-            if (current != null && current.content is MessageContent.Local) {
+            val content = current?.content
+            if (current != null && content is MessageContent.Local) {
                 database.messageDao().insertMessages(
                     listOf(
                         current.copy(
                             content =
-                                current.content.copy(
+                                content.copy(
                                     state = MessageContent.Local.State.SENDING,
                                 ),
                         ),
@@ -939,7 +940,7 @@ internal class BlueskyDataSource(
                         request =
                             SendMessageRequest(
                                 convoId = current.roomKey.id,
-                                message = MessageInput(current.content.text),
+                                message = MessageInput(content.text),
                             ),
                     )
                 }.onSuccess {
@@ -955,7 +956,7 @@ internal class BlueskyDataSource(
                         listOf(
                             current.copy(
                                 content =
-                                    current.content.copy(
+                                    content.copy(
                                         state = MessageContent.Local.State.FAILED,
                                     ),
                             ),

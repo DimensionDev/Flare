@@ -12,6 +12,7 @@ import dev.dimension.flare.data.network.xqt.model.Admin
 import dev.dimension.flare.data.network.xqt.model.AudioSpace
 import dev.dimension.flare.data.network.xqt.model.Entities
 import dev.dimension.flare.data.network.xqt.model.GetProfileSpotlightsQuery200Response
+import dev.dimension.flare.data.network.xqt.model.InboxMessageData
 import dev.dimension.flare.data.network.xqt.model.InstructionUnion
 import dev.dimension.flare.data.network.xqt.model.Media
 import dev.dimension.flare.data.network.xqt.model.NoteTweetResultRichTextTag
@@ -847,24 +848,29 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
                 },
             ).toImmutableList(),
         bottomContent =
-            if (legacy.location != null || legacy.url != null) {
+            run {
+                val location = legacy.location
+                val profileUrl = legacy.url
+                if (location == null && profileUrl == null) {
+                    return@run null
+                }
                 UiProfile.BottomContent.Iconify(
                     items =
                         listOfNotNull(
-                            if (!legacy.location.isNullOrEmpty()) {
+                            if (!location.isNullOrEmpty()) {
                                 UiProfile.BottomContent.Iconify.Icon.Location to
-                                    legacy.location.toUiPlainText()
+                                    location.toUiPlainText()
                             } else {
                                 null
                             },
-                            if (!legacy.url.isNullOrEmpty()) {
+                            if (!profileUrl.isNullOrEmpty()) {
                                 val actualUrl =
                                     legacy.entities
                                         ?.url
                                         ?.urls
-                                        ?.firstOrNull { it.url == legacy.url }
-                                val displayUrl = actualUrl?.displayUrl ?: legacy.url
-                                val url = actualUrl?.expandedUrl ?: legacy.url
+                                        ?.firstOrNull { it.url == profileUrl }
+                                val displayUrl = actualUrl?.displayUrl ?: profileUrl
+                                val url = actualUrl?.expandedUrl ?: profileUrl
                                 UiProfile.BottomContent.Iconify.Icon.Url to
                                     uiRichTextOf(
                                         renderRuns =
@@ -890,8 +896,6 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
                             },
                         ).toMap().toPersistentMap(),
                 )
-            } else {
-                null
             },
         platformType = PlatformType.xQt,
         clickEvent =
@@ -972,11 +976,11 @@ internal fun List<InstructionUnion>.list(accountKey: MicroBlogKey): List<UiList.
         when (it) {
             is TimelineAddEntries ->
                 it.propertyEntries.flatMap {
-                    when (it.content) {
+                    when (val content = it.content) {
                         is TimelineTimelineModule ->
-                            it.content.items.orEmpty().mapNotNull {
-                                when (it.item.itemContent) {
-                                    is TimelineTwitterList -> it.item.itemContent.list
+                            content.items.orEmpty().mapNotNull {
+                                when (val itemContent = it.item.itemContent) {
+                                    is TimelineTwitterList -> itemContent.list
                                     else -> null
                                 }
                             }
@@ -987,8 +991,8 @@ internal fun List<InstructionUnion>.list(accountKey: MicroBlogKey): List<UiList.
 
             is TimelineAddToModule ->
                 it.moduleItems.flatMap {
-                    when (it.item.itemContent) {
-                        is TimelineTwitterList -> listOfNotNull(it.item.itemContent.list)
+                    when (val itemContent = it.item.itemContent) {
+                        is TimelineTwitterList -> listOfNotNull(itemContent.list)
                         else -> emptyList()
                     }
                 }
@@ -1033,31 +1037,36 @@ private fun MessageContent.XQT.Message.render(
     accountKey: MicroBlogKey,
     credential: UiAccount.Credential,
 ): UiDMItem.Message {
-    if (!data.attachment
-            ?.photo
+    val data = data.decodeJson<InboxMessageData>()
+    val attachment = data.attachment
+    val photo = attachment?.photo
+    val animatedGif = attachment?.animatedGif
+    val video = attachment?.video
+    val tweet = attachment?.tweet
+    if (!photo
             ?.url
             .isNullOrEmpty() &&
         data.text
             .orEmpty()
-            .endsWith(data.attachment.photo.url) &&
-        !data.attachment.photo.mediaUrlHttps
+            .endsWith(photo.url) &&
+        !photo.mediaUrlHttps
             .isNullOrEmpty() &&
         credential is UiAccount.XQT.Credential
     ) {
         return UiDMItem.Message.Media(
             UiMedia.Image(
-                url = data.attachment.photo.mediaUrlHttps,
-                previewUrl = data.attachment.photo.mediaUrlHttps,
+                url = photo.mediaUrlHttps,
+                previewUrl = photo.mediaUrlHttps,
                 height =
-                    data.attachment.photo.originalInfo
+                    photo.originalInfo
                         ?.height
                         ?.toFloat() ?: 0f,
                 width =
-                    data.attachment.photo.originalInfo
+                    photo.originalInfo
                         ?.width
                         ?.toFloat() ?: 0f,
                 sensitive = false,
-                description = data.attachment.photo.extAltText,
+                description = photo.extAltText,
                 customHeaders =
                     persistentMapOf(
                         "Cookie" to credential.chocolate,
@@ -1065,30 +1074,29 @@ private fun MessageContent.XQT.Message.render(
                     ),
             ),
         )
-    } else if (!data.attachment
-            ?.animatedGif
+    } else if (!animatedGif
             ?.url
             .isNullOrEmpty() &&
         data.text
             .orEmpty()
-            .endsWith(data.attachment.animatedGif.url) &&
-        !data.attachment.animatedGif.mediaUrlHttps
+            .endsWith(animatedGif.url) &&
+        !animatedGif.mediaUrlHttps
             .isNullOrEmpty() &&
         credential is UiAccount.XQT.Credential
     ) {
         return UiDMItem.Message.Media(
             UiMedia.Gif(
-                url = data.attachment.animatedGif.mediaUrlHttps,
-                previewUrl = data.attachment.animatedGif.mediaUrlHttps,
+                url = animatedGif.mediaUrlHttps,
+                previewUrl = animatedGif.mediaUrlHttps,
                 height =
-                    data.attachment.animatedGif.originalInfo
+                    animatedGif.originalInfo
                         ?.height
                         ?.toFloat() ?: 0f,
                 width =
-                    data.attachment.animatedGif.originalInfo
+                    animatedGif.originalInfo
                         ?.width
                         ?.toFloat() ?: 0f,
-                description = data.attachment.animatedGif.extAltText,
+                description = animatedGif.extAltText,
                 customHeaders =
                     persistentMapOf(
                         "Cookie" to credential.chocolate,
@@ -1096,29 +1104,28 @@ private fun MessageContent.XQT.Message.render(
                     ),
             ),
         )
-    } else if (!data.attachment
-            ?.video
+    } else if (!video
             ?.url
             .isNullOrEmpty() &&
         data.text
             .orEmpty()
-            .endsWith(data.attachment.video.url) &&
-        !data.attachment.video.mediaUrlHttps
+            .endsWith(video.url) &&
+        !video.mediaUrlHttps
             .isNullOrEmpty() &&
         credential is UiAccount.XQT.Credential
     ) {
         val url =
-            data.attachment.video.videoInfo
+            video.videoInfo
                 ?.variants
                 ?.firstOrNull()
                 ?.url
         if (url != null) {
-            if (data.attachment.video.audioOnly == true) {
+            if (video.audioOnly == true) {
                 return UiDMItem.Message.Media(
                     UiMedia.Audio(
                         url = url,
-                        previewUrl = data.attachment.video.url,
-                        description = data.attachment.video.extAltText,
+                        previewUrl = video.url,
+                        description = video.extAltText,
                         customHeaders =
                             persistentMapOf(
                                 "Cookie" to credential.chocolate,
@@ -1130,16 +1137,16 @@ private fun MessageContent.XQT.Message.render(
                 return UiDMItem.Message.Media(
                     UiMedia.Video(
                         url = url,
-                        thumbnailUrl = data.attachment.video.mediaUrlHttps,
+                        thumbnailUrl = video.mediaUrlHttps,
                         height =
-                            data.attachment.video.originalInfo
+                            video.originalInfo
                                 ?.height
                                 ?.toFloat() ?: 0f,
                         width =
-                            data.attachment.video.originalInfo
+                            video.originalInfo
                                 ?.width
                                 ?.toFloat() ?: 0f,
-                        description = data.attachment.video.extAltText,
+                        description = video.extAltText,
                         customHeaders =
                             persistentMapOf(
                                 "Cookie" to credential.chocolate,
@@ -1150,19 +1157,18 @@ private fun MessageContent.XQT.Message.render(
             }
         } else {
             return UiDMItem.Message.Text(
-                twitterParser.parse(this.data.text.orEmpty()).toUiRichText(accountKey),
+                twitterParser.parse(data.text.orEmpty()).toUiRichText(accountKey),
             )
         }
-    } else if (!data.attachment
-            ?.tweet
+    } else if (!tweet
             ?.url
             .isNullOrEmpty() &&
         data.text
             .orEmpty()
-            .endsWith(data.attachment.tweet.url) &&
-        data.attachment.tweet.status != null
+            .endsWith(tweet.url) &&
+        tweet.status != null
     ) {
-        val tweetLegacy = data.attachment.tweet.status
+        val tweetLegacy = tweet.status
         val status =
             Tweet(
                 restId = tweetLegacy.idStr,
@@ -1187,13 +1193,13 @@ private fun MessageContent.XQT.Message.render(
         )
     } else {
         return UiDMItem.Message.Text(
-            twitterParser.parse(this.data.text.orEmpty()).toUiRichText(accountKey),
+            twitterParser.parse(data.text.orEmpty()).toUiRichText(accountKey),
         )
     }
 }
 
 internal fun UserResults.render(accountKey: MicroBlogKey): UiProfile? =
-    when (result) {
+    when (val result = result) {
         is User -> result.render(accountKey)
         is UserUnavailable -> null
         null -> null
@@ -1202,36 +1208,39 @@ internal fun UserResults.render(accountKey: MicroBlogKey): UiProfile? =
 internal fun AudioSpace.render(
     accountKey: MicroBlogKey,
     url: String?,
-) = UiPodcast(
-    id = metadata?.restID ?: throw Exception("No ID"),
-    title = metadata.title.orEmpty(),
-    playbackUrl = url,
-    creator =
-        metadata.creatorResults
-            ?.render(accountKey) ?: throw Exception("No creator"),
-    hosts =
-        participants
-            ?.admins
-            ?.map {
-                it.render(accountKey)
-            }.orEmpty()
-            .toImmutableList(),
-    speakers =
-        participants
-            ?.speakers
-            ?.map {
-                it.render(accountKey)
-            }.orEmpty()
-            .toImmutableList(),
-    listeners =
-        participants
-            ?.listeners
-            ?.map {
-                it.render(accountKey)
-            }.orEmpty()
-            .toImmutableList(),
-    ended = metadata.state == "Ended" || metadata.endedAt != null,
-)
+): UiPodcast {
+    val metadata = metadata ?: throw Exception("No ID")
+    return UiPodcast(
+        id = metadata.restID ?: throw Exception("No ID"),
+        title = metadata.title.orEmpty(),
+        playbackUrl = url,
+        creator =
+            metadata.creatorResults
+                ?.render(accountKey) ?: throw Exception("No creator"),
+        hosts =
+            participants
+                ?.admins
+                ?.map {
+                    it.render(accountKey)
+                }.orEmpty()
+                .toImmutableList(),
+        speakers =
+            participants
+                ?.speakers
+                ?.map {
+                    it.render(accountKey)
+                }.orEmpty()
+                .toImmutableList(),
+        listeners =
+            participants
+                ?.listeners
+                ?.map {
+                    it.render(accountKey)
+                }.orEmpty()
+                .toImmutableList(),
+        ended = metadata.state == "Ended" || metadata.endedAt != null,
+    )
+}
 
 private fun Admin.render(accountKey: MicroBlogKey): UiProfile {
     val key =
@@ -1361,7 +1370,9 @@ internal fun Tweet.renderArticle(
 }
 
 internal fun Tweet.renderContent(accountKey: MicroBlogKey): UiRichText {
+    val noteTweet = noteTweet
     if (noteTweet == null) {
+        val legacy = legacy
         val text =
             legacy
                 ?.fullText

@@ -1,0 +1,40 @@
+package dev.dimension.flare.data.database.cache.model
+
+import androidx.room3.ColumnInfo
+import androidx.room3.Entity
+import androidx.room3.PrimaryKey
+import androidx.room3.TypeConverter
+import dev.dimension.flare.common.decodeProtobuf
+import dev.dimension.flare.common.encodeProtobuf
+import dev.dimension.flare.model.DbAccountType
+
+@Entity
+public data class DbEmoji(
+    @PrimaryKey
+    @ColumnInfo(name = "host")
+    val host: String,
+    @ColumnInfo(name = "content", typeAffinity = ColumnInfo.BLOB)
+    val content: EmojiContent,
+)
+
+public class EmojiContentConverter {
+    @TypeConverter
+    fun fromEmojiContent(emojiContent: EmojiContent): ByteArray = emojiContent.encodeProtobuf()
+
+    @TypeConverter
+    fun toEmojiContent(data: ByteArray): EmojiContent =
+        if (data.isEmpty()) {
+            EmojiContent()
+        } else {
+            data.decodeProtobuf()
+        }
+}
+
+@Entity
+public data class DbEmojiHistory(
+    val accountType: DbAccountType,
+    val shortCode: String,
+    val lastUse: Long,
+    @PrimaryKey
+    val _id: String = "$accountType-$shortCode",
+)

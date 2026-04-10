@@ -1,12 +1,11 @@
 package dev.dimension.flare.gradle
 
 import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryTarget
-import org.gradle.api.Action
+import com.android.build.api.withAndroid
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.VersionCatalog
 import org.gradle.api.artifacts.VersionCatalogsExtension
-import org.gradle.api.tasks.util.PatternFilterable
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.getByType
 import org.jlleitschuh.gradle.ktlint.KtlintExtension
@@ -76,7 +75,18 @@ private fun Project.configureKtlintDefaults() {
 @OptIn(ExperimentalWasmDsl::class)
 private fun Project.configureKmpPlatforms(platforms: Set<FlarePlatform>) {
     extensions.configure<KotlinMultiplatformExtension> {
-        applyDefaultHierarchyTemplate()
+        applyDefaultHierarchyTemplate {
+            withCompilations { true }
+            common {
+                group("nonWeb") {
+                    group("androidJvm") {
+                        withJvm()
+                        withAndroid()
+                    }
+                    withNative()
+                }
+            }
+        }
 
         if (FlarePlatform.Android in platforms) {
             pluginManager.apply("com.android.kotlin.multiplatform.library")
@@ -161,8 +171,12 @@ private fun Project.configureAndroidLibraryDefaults(namespace: String) {
 
     extensions.configure<KotlinMultiplatformExtension> {
         targets.withType(KotlinMultiplatformAndroidLibraryTarget::class.java).configureEach {
-            compileSdk = versions.compileSdk
-            minSdk = versions.minSdk
+            compileSdk {
+                version = release(versions.compileSdk)
+            }
+            minSdk {
+                version = release(versions.minSdk)
+            }
             this.namespace = namespace
         }
     }

@@ -58,7 +58,7 @@ google-services = "4.4.4"
 firebase-crashlytics = "3.0.6"
 materialKolor = "4.1.1"
 room = "3.0.0-alpha03"
-sqlite = "2.6.2"
+sqlite = "2.7.0-alpha03"
 compose-multiplatform = "1.10.3"
 logback = "1.5.32"
 navigation3 = "1.1.0"
@@ -68,7 +68,7 @@ cupertino = "2.3.1"
 robolectric = "4.16.1"
 nostrSdkKmp = "0.44.3"
 qrose = "1.1.2"
-
+datastore = "1.3.0-alpha07"
 
 [libraries]
 adaptive-navigation3 = { module = "org.jetbrains.compose.material3.adaptive:adaptive-navigation3", version.ref = "adaptiveNavigation3" }
@@ -123,7 +123,8 @@ paging-common = { group = "androidx.paging", name = "paging-common", version.ref
 paging-compose = { group = "androidx.paging", name = "paging-compose", version.ref = "paging" }
 paging-testing = { group = "androidx.paging", name = "paging-testing", version.ref = "paging" }
 composeIcons-fontAwesome = { module = "moe.tlaster.compose.icons:font-awesome", version.ref = "composeIcons" }
-datastore = { group = "androidx.datastore", name = "datastore", version = "1.2.1" }
+#datastore = { group = "androidx.datastore", name = "datastore", version.ref = "datastore" }
+datastore-core = { group = "androidx.datastore", name = "datastore-core-okio", version.ref = "datastore" }
 desugar_jdk_libs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugar_jdk_libs" }
 androidx-window = { group = "androidx.window", name = "window-core", version = "1.5.1" }
 androidx-splash = { group = "androidx.core", name = "core-splashscreen", version = "1.2.0" }
@@ -131,6 +132,7 @@ room-runtime = { group = "androidx.room3", name = "room3-runtime", version.ref =
 room-paging = { group = "androidx.room3", name = "room3-paging", version.ref = "room" }
 room-compiler = { group = "androidx.room3", name = "room3-compiler", version.ref = "room" }
 sqlite-bundled = { group = "androidx.sqlite", name = "sqlite-bundled", version.ref = "sqlite" }
+sqlite-web = { group = "androidx.sqlite", name = "sqlite-web", version.ref = "sqlite" }
 nestedScrollView = { group = "com.github.Tlaster", name = "NestedScrollView", version = "1.0.3" }
 webkit = { group = "androidx.webkit", name = "webkit", version = "1.15.0" }
 androidx-browser = { group = "androidx.browser", name = "browser", version = "1.10.0" }
@@ -150,6 +152,7 @@ kotlinx-coroutines-swing = { group = "org.jetbrains.kotlinx", name = "kotlinx-co
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
 kotlinx-coroutines-slf4j = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-slf4j", version.ref = "kotlinx-coroutines" }
 kotlinx-coroutines-play-services = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-play-services", version.ref = "kotlinx-coroutines" }
+kotlinx-browser = { module = "org.jetbrains.kotlinx:kotlinx-browser", version = "0.5.0" }
 
 koin-bom = { group = "io.insert-koin", name = "koin-bom", version.ref = "koin" }
 koin-core = { group = "io.insert-koin", name = "koin-core" }

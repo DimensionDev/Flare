@@ -53,7 +53,7 @@ kotlin {
                 implementation(libs.kotlinx.immutable)
                 implementation(libs.precompose.molecule)
                 implementation(libs.kotlinx.datetime)
-                implementation(libs.datastore)
+                implementation(libs.datastore.core)
                 implementation(libs.kotlinx.serialization.protobuf)
                 implementation(project.dependencies.platform(libs.koin.bom))
                 implementation(libs.koin.core)

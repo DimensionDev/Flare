@@ -94,14 +94,14 @@ class BlueskyNotificationRenderTest {
         val repostResult = listOf(repostNotification).render(accountKey, references).single()
         val repostUserList = assertIs<UiTimelineV2.UserList>(repostResult)
         assertNotNull(repostUserList.message)
-        assertNotNull(repostUserList.post)
-        assertEquals("reposted content", repostUserList.post.content.innerText)
+        val repostPost = assertNotNull(repostUserList.post)
+        assertEquals("reposted content", repostPost.content.innerText)
 
         val likeResult = listOf(likeNotification).render(accountKey, references).single()
         val likeUserList = assertIs<UiTimelineV2.UserList>(likeResult)
         assertNotNull(likeUserList.message)
-        assertNotNull(likeUserList.post)
-        assertEquals("reposted content", likeUserList.post.content.innerText)
+        val likedPost = assertNotNull(likeUserList.post)
+        assertEquals("reposted content", likedPost.content.innerText)
     }
 
     @Test
@@ -161,10 +161,10 @@ class BlueskyNotificationRenderTest {
                 )
             val renderedPost = assertIs<UiTimelineV2.Post>(result.single())
             assertEquals("post-$index", renderedPost.content.innerText)
-            assertNotNull(renderedPost.message)
+            val message = assertNotNull(renderedPost.message)
             assertEquals(
                 "did:plc:author$index",
-                renderedPost.message.user
+                message.user
                     ?.key
                     ?.id,
             )
@@ -190,11 +190,11 @@ class BlueskyNotificationRenderTest {
                 )
             val result = listOf(notification).render(accountKey, references = persistentMapOf())
             val user = assertIs<UiTimelineV2.User>(result.single())
-            assertNotNull(user.message)
+            val message = assertNotNull(user.message)
             assertEquals("did:plc:user$index", user.value.key.id)
             assertEquals(
                 "did:plc:user$index",
-                user.message.user
+                message.user
                     ?.key
                     ?.id,
             )

@@ -1,0 +1,13 @@
+package dev.dimension.flare.ui.model
+
+import androidx.compose.runtime.Immutable
+import kotlinx.serialization.Serializable
+
+@Serializable
+@Immutable
+public data class UiCard public constructor(
+    val title: String,
+    val description: String?,
+    val media: UiMedia?,
+    val url: String,
+)

@@ -5,7 +5,7 @@ import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.DatabaseUpdater
 import dev.dimension.flare.data.datasource.microblog.PostEvent
-import dev.dimension.flare.data.datasource.microblog.UpdatePostActionMenuEvent
+import dev.dimension.flare.data.datasource.microblog.nextActionMenu
 import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.DbAccountType
@@ -45,13 +45,14 @@ internal class PostEventHandler(
                         accountType = dbAccountType,
                     ).firstOrNull()
                     ?.content
-            if (event is UpdatePostActionMenuEvent && originalData is UiTimelineV2.Post) {
+            val nextActionMenu = event.nextActionMenu()
+            if (nextActionMenu != null && originalData is UiTimelineV2.Post) {
                 val updatedData =
                     originalData.copy(
                         actions =
                             findAndReplaceActionMenu(
                                 actions = originalData.actions,
-                                newActionMenu = event.nextActionMenu(),
+                                newActionMenu = nextActionMenu,
                             ),
                     )
                 database.statusDao().update(
@@ -61,13 +62,14 @@ internal class PostEventHandler(
                 )
             }
             if (event is PostEvent.PollEvent && originalData is UiTimelineV2.Post) {
+                val poll = originalData.poll
                 val updatedData =
                     originalData.copy(
                         poll =
-                            originalData.poll?.copy(
+                            poll?.copy(
                                 ownVotes = event.options,
                                 options =
-                                    originalData.poll.options
+                                    poll.options
                                         .mapIndexed { index, option ->
                                             if (event.options.contains(index)) {
                                                 option.copy(

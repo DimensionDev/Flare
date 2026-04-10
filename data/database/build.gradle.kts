@@ -1,0 +1,68 @@
+import dev.dimension.flare.gradle.FlarePlatform
+import java.util.Locale
+
+plugins {
+    id("flare.kmp")
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.room)
+}
+
+flare {
+    namespace = "dev.dimension.flare.data.database"
+    platforms(FlarePlatform.Android, FlarePlatform.Desktop, FlarePlatform.Ios, FlarePlatform.WasmJs)
+}
+
+kotlin {
+    targets.forEach { target ->
+        target.name.takeIf {
+            it != "metadata"
+        }?.let {
+            "ksp${it.replaceFirstChar { char -> if (char.isLowerCase()) char.titlecase(Locale.getDefault()) else char.toString() }}"
+        }?.let {
+            dependencies.add(it, libs.room.compiler)
+        }
+    }
+
+    sourceSets {
+        val commonMain by getting {
+            dependencies {
+                implementation(projects.core.common)
+                api(projects.data.model)
+                api(libs.room.runtime)
+                api(libs.room.paging)
+                api(libs.paging.common)
+                implementation(libs.bluesky)
+                implementation(libs.kotlinx.coroutines.core)
+                implementation(libs.kotlinx.serialization.json)
+                implementation(libs.kotlinx.serialization.protobuf)
+                implementation(libs.kotlinx.immutable)
+            }
+        }
+        val nonWebMain by getting {
+            dependencies {
+                implementation(libs.sqlite.bundled)
+            }
+        }
+        val webMain by getting {
+            dependencies {
+                implementation(libs.sqlite.web)
+                implementation(libs.kotlinx.browser)
+            }
+        }
+        val commonTest by getting {
+            dependencies {
+                implementation(kotlin("test"))
+                implementation(libs.kotlinx.coroutines.test)
+            }
+        }
+        val androidMain by getting {
+            dependencies {
+                implementation(libs.core.ktx)
+            }
+        }
+    }
+}
+
+room3 {
+    schemaDirectory("${projectDir}/schemas")
+}

@@ -142,7 +142,7 @@ dependencies {
     implementation(libs.bundles.accompanist)
     lintChecks(libs.compose.lint.checks)
     implementation(libs.composeIcons.fontAwesome)
-    implementation(libs.datastore)
+    implementation(libs.datastore.core)
     implementation(libs.kotlinx.serialization.protobuf)
     implementation(libs.bundles.media3)
     implementation(libs.swiper)

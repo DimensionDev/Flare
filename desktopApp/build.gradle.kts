@@ -41,7 +41,7 @@ dependencies {
     implementation(libs.koin.compose)
     implementation(libs.commons.lang3)
     implementation(libs.zoomable)
-    implementation(libs.datastore)
+    implementation(libs.datastore.core)
     implementation(libs.reorderable)
     implementation(libs.jna)
     implementation(libs.nucleus.darkmode.detector)

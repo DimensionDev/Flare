@@ -12,10 +12,6 @@ open class FlareExtension internal constructor(
         configurePlatforms(platforms.toSet())
     }
 
-    fun platforms(platforms: Iterable<FlarePlatform>) {
-        configurePlatforms(platforms.toSet())
-    }
-
     internal fun requireNamespace(): String =
         requireNotNull(namespace) {
             "flare.namespace is required when ${project.path} enables ${FlarePlatform.Android}."

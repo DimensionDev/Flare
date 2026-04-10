@@ -98,10 +98,7 @@ kotlin {
                 implementation(libs.molecule.runtime)
                 api(libs.bluesky)
                 api(libs.bluesky.oauth)
-                implementation(libs.room.runtime)
-                implementation(libs.room.paging)
-                implementation(libs.sqlite.bundled)
-                implementation(libs.datastore)
+                implementation(libs.datastore.core)
                 implementation(libs.kotlinx.serialization.protobuf)
                 implementation(libs.xmlUtil)
                 implementation(projects.shared.api)
@@ -111,7 +108,9 @@ kotlin {
                 implementation(libs.nostr.sdk.kmp)
                 api(projects.core.common)
                 api(projects.core.deeplink)
-                api(projects.core.model)
+                api(projects.data.model)
+                api(projects.data.datastore)
+                api(projects.data.database)
                 implementation(projects.readability)
             }
         }

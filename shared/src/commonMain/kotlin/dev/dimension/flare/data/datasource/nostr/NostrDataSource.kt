@@ -374,10 +374,11 @@ internal class NostrDataSource(
         require(event is PostEvent.Nostr)
         when (event) {
             is PostEvent.Nostr.Like -> {
-                if (event.reactionEventId != null) {
+                val reactionEventId = event.reactionEventId
+                if (reactionEventId != null) {
                     serviceManager.withService {
                         it.deleteStatus(
-                            statusKey = MicroBlogKey(event.reactionEventId, NostrService.NOSTR_HOST),
+                            statusKey = MicroBlogKey(reactionEventId, NostrService.NOSTR_HOST),
                         )
                     }
                 } else {
@@ -407,10 +408,11 @@ internal class NostrDataSource(
                 }
 
             is PostEvent.Nostr.Repost -> {
-                if (event.repostEventId != null) {
+                val repostEventId = event.repostEventId
+                if (repostEventId != null) {
                     serviceManager.withService {
                         it.deleteStatus(
-                            statusKey = MicroBlogKey(event.repostEventId, NostrService.NOSTR_HOST),
+                            statusKey = MicroBlogKey(repostEventId, NostrService.NOSTR_HOST),
                         )
                     }
                 } else {

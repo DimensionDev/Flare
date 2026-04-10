@@ -81,16 +81,17 @@ class PostEventHandlerTest : RobolectricTest() {
                 )
             }
 
-            val original = createPost(actions = persistentListOf(createMenuItem(updateKey = "like", count = 1)))
+            val updateKey = "xqt_like_$postKey"
+            val original = createPost(actions = persistentListOf(createMenuItem(updateKey = updateKey, count = 1)))
             insertPost(original)
 
             handler = PostEventHandler(accountType = AccountType.Specific(accountKey), handler = fakeRemoteHandler)
-            handler.handleEvent(TestUpdateMenuEvent(postKey = postKey, updateKey = "like", nextCount = 2))
+            handler.handleEvent(PostEvent.XQT.Like(postKey = postKey, liked = false, count = 1, accountKey = accountKey))
             advanceUntilIdle()
 
             val updated = readPost()
             assertNotNull(updated)
-            val updatedLike = updated.actions.filterIsInstance<ActionMenu.Item>().first { it.updateKey == "like" }
+            val updatedLike = updated.actions.filterIsInstance<ActionMenu.Item>().first { it.updateKey == updateKey }
             assertEquals(2, updatedLike.count?.value)
             assertEquals(1, fakeRemoteHandler.callCount)
         }
@@ -108,17 +109,18 @@ class PostEventHandlerTest : RobolectricTest() {
                 )
             }
 
-            val original = createPost(actions = persistentListOf(createMenuItem(updateKey = "like", count = 1)))
+            val updateKey = "xqt_like_$postKey"
+            val original = createPost(actions = persistentListOf(createMenuItem(updateKey = updateKey, count = 1)))
             insertPost(original)
 
             fakeRemoteHandler.shouldFail = true
             handler = PostEventHandler(accountType = AccountType.Specific(accountKey), handler = fakeRemoteHandler)
-            handler.handleEvent(TestUpdateMenuEvent(postKey = postKey, updateKey = "like", nextCount = 2))
+            handler.handleEvent(PostEvent.XQT.Like(postKey = postKey, liked = false, count = 1, accountKey = accountKey))
             advanceUntilIdle()
 
             val reverted = readPost()
             assertNotNull(reverted)
-            val like = reverted.actions.filterIsInstance<ActionMenu.Item>().first { it.updateKey == "like" }
+            val like = reverted.actions.filterIsInstance<ActionMenu.Item>().first { it.updateKey == updateKey }
             assertEquals(1, like.count?.value)
             assertEquals(1, fakeRemoteHandler.callCount)
         }
@@ -283,18 +285,5 @@ class PostEventHandlerTest : RobolectricTest() {
                 error("remote failed")
             }
         }
-    }
-
-    private data class TestUpdateMenuEvent(
-        override val postKey: MicroBlogKey,
-        val updateKey: String,
-        val nextCount: Long,
-    ) : UpdatePostActionMenuEvent {
-        override fun nextActionMenu(): ActionMenu.Item =
-            ActionMenu.Item(
-                updateKey = updateKey,
-                text = ActionMenu.Item.Text.Raw("updated"),
-                count = UiNumber(nextCount),
-            )
     }
 }

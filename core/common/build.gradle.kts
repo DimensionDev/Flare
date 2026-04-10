@@ -24,5 +24,10 @@ kotlin {
                 implementation(libs.kotlinx.serialization.protobuf)
             }
         }
+        val jvmMain by getting {
+            dependencies {
+                implementation(libs.commons.lang3)
+            }
+        }
     }
 }

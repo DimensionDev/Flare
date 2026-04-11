@@ -10,8 +10,7 @@ plugins {
 }
 
 flare {
-    namespace = "dev.dimension.flare.shared.api"
-    platforms(Android, Desktop, Ios, Macos, Linux, Windows)
+    platforms( "dev.dimension.flare.shared.api", Android, Desktop, Ios, Macos, Linux, Windows)
 }
 
 kotlin {

@@ -156,6 +156,7 @@ kotlinx-browser = { module = "org.jetbrains.kotlinx:kotlinx-browser", version = 
 
 koin-bom = { group = "io.insert-koin", name = "koin-bom", version.ref = "koin" }
 koin-core = { group = "io.insert-koin", name = "koin-core" }
+koin-annotations = { group = "io.insert-koin", name = "koin-annotations" }
 koin-android = { group = "io.insert-koin", name = "koin-android" }
 koin-compose = { group = "io.insert-koin", name = "koin-compose" }
 koin-androidx-compose = { group = "io.insert-koin", name = "koin-androidx-compose" }
@@ -292,3 +293,4 @@ compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "
 room = { id = "androidx.room3", version.ref = "room" }
 composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "compose-multiplatform" }
 nucleus = { id = "io.github.kdroidfilter.nucleus", version.ref = "nucleus" }
+koin = { id = "io.insert-koin.compiler.plugin", version = "1.0.0-RC1" }

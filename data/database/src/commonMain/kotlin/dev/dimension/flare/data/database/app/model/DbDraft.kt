@@ -27,14 +27,14 @@ public data class DraftContent(
     val reference: DraftReference? = null,
 ) {
     @Serializable
-    data class DraftPoll(
+    public data class DraftPoll(
         val options: List<String>,
         val expiredAfter: Long,
         val multiple: Boolean,
     )
 
     @Serializable
-    data class DraftReference(
+    public data class DraftReference(
         val type: DraftReferenceType,
         val statusKey: MicroBlogKey,
         val rootId: String? = null,
@@ -167,20 +167,20 @@ public data class DbDraftGroupWithRelations(
 
 public class DraftConverters {
     @TypeConverter
-    fun fromDraftContent(value: DraftContent): String = value.encodeJson()
+    public fun fromDraftContent(value: DraftContent): String = value.encodeJson()
 
     @TypeConverter
-    fun toDraftContent(value: String): DraftContent = value.decodeJson()
+    public fun toDraftContent(value: String): DraftContent = value.decodeJson()
 
     @TypeConverter
-    fun fromDraftTargetStatus(value: DraftTargetStatus): String = value.name
+    public fun fromDraftTargetStatus(value: DraftTargetStatus): String = value.name
 
     @TypeConverter
-    fun toDraftTargetStatus(value: String): DraftTargetStatus = DraftTargetStatus.valueOf(value)
+    public fun toDraftTargetStatus(value: String): DraftTargetStatus = DraftTargetStatus.valueOf(value)
 
     @TypeConverter
-    fun fromDraftMediaType(value: DraftMediaType): String = value.name
+    public fun fromDraftMediaType(value: DraftMediaType): String = value.name
 
     @TypeConverter
-    fun toDraftMediaType(value: String): DraftMediaType = DraftMediaType.valueOf(value)
+    public fun toDraftMediaType(value: String): DraftMediaType = DraftMediaType.valueOf(value)
 }

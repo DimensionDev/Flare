@@ -2101,18 +2101,18 @@ public class Readability(
                     }
                 }
 
-                val MINIMUM_TOPCANDIDATES = 3
-                if (alternativeCandidateAncestors.size >= MINIMUM_TOPCANDIDATES) {
+                val minimumTopcandidates = 3
+                if (alternativeCandidateAncestors.size >= minimumTopcandidates) {
                     parentOfTopCandidate = topCandidate.parent()
                     while (parentOfTopCandidate != null && parentOfTopCandidate.tagName().uppercase() != "BODY") {
                         var listsContainingThisAncestor = 0
                         for (ancestorIndex in alternativeCandidateAncestors.indices) {
-                            if (listsContainingThisAncestor >= MINIMUM_TOPCANDIDATES) break
+                            if (listsContainingThisAncestor >= minimumTopcandidates) break
                             if (alternativeCandidateAncestors[ancestorIndex].contains(parentOfTopCandidate)) {
                                 listsContainingThisAncestor++
                             }
                         }
-                        if (listsContainingThisAncestor >= MINIMUM_TOPCANDIDATES) {
+                        if (listsContainingThisAncestor >= minimumTopcandidates) {
                             topCandidate = parentOfTopCandidate
                             break
                         }

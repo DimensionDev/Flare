@@ -16,28 +16,28 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 public interface DraftDao {
     @Upsert
-    suspend fun upsertGroup(group: DbDraftGroup)
+    public suspend fun upsertGroup(group: DbDraftGroup)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertTargets(targets: List<DbDraftTarget>)
+    public suspend fun insertTargets(targets: List<DbDraftTarget>)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertMedias(medias: List<DbDraftMedia>)
+    public suspend fun insertMedias(medias: List<DbDraftMedia>)
 
     @Query("DELETE FROM DbDraftMedia WHERE group_id = :groupId")
-    suspend fun deleteMediasByGroup(groupId: String)
+    public suspend fun deleteMediasByGroup(groupId: String)
 
     @Query("DELETE FROM DbDraftTarget WHERE group_id = :groupId")
-    suspend fun deleteTargetsByGroup(groupId: String)
+    public suspend fun deleteTargetsByGroup(groupId: String)
 
     @Query("DELETE FROM DbDraftTarget WHERE target_id = :targetId")
-    suspend fun deleteTarget(targetId: String)
+    public suspend fun deleteTarget(targetId: String)
 
     @Query("DELETE FROM DbDraftGroup WHERE group_id = :groupId")
-    suspend fun deleteGroup(groupId: String)
+    public suspend fun deleteGroup(groupId: String)
 
     @Query("SELECT COUNT(*) FROM DbDraftTarget WHERE group_id = :groupId")
-    suspend fun countTargets(groupId: String): Int
+    public suspend fun countTargets(groupId: String): Int
 
     @Transaction
     @Query(
@@ -51,7 +51,7 @@ public interface DraftDao {
         ORDER BY updated_at DESC
         """,
     )
-    fun visibleDraftGroups(): Flow<List<DbDraftGroupWithRelations>>
+    public fun visibleDraftGroups(): Flow<List<DbDraftGroupWithRelations>>
 
     @Transaction
     @Query(
@@ -61,7 +61,7 @@ public interface DraftDao {
         LIMIT 1
         """,
     )
-    fun draftGroup(groupId: String): Flow<DbDraftGroupWithRelations?>
+    public fun draftGroup(groupId: String): Flow<DbDraftGroupWithRelations?>
 
     @Transaction
     @Query(
@@ -71,7 +71,7 @@ public interface DraftDao {
         LIMIT 1
         """,
     )
-    suspend fun getDraftGroup(groupId: String): DbDraftGroupWithRelations?
+    public suspend fun getDraftGroup(groupId: String): DbDraftGroupWithRelations?
 
     @Query(
         """
@@ -80,7 +80,7 @@ public interface DraftDao {
         LIMIT 1
         """,
     )
-    suspend fun getGroup(groupId: String): DbDraftGroup?
+    public suspend fun getGroup(groupId: String): DbDraftGroup?
 
     @Transaction
     @Query(
@@ -94,7 +94,7 @@ public interface DraftDao {
         ORDER BY updated_at DESC
         """,
     )
-    fun sendingDraftGroups(): Flow<List<DbDraftGroupWithRelations>>
+    public fun sendingDraftGroups(): Flow<List<DbDraftGroupWithRelations>>
 
     @Query(
         """
@@ -107,7 +107,7 @@ public interface DraftDao {
         WHERE target_id = :targetId
         """,
     )
-    suspend fun updateTargetStatus(
+    public suspend fun updateTargetStatus(
         targetId: String,
         status: DraftTargetStatus,
         errorMessage: String?,
@@ -123,7 +123,7 @@ public interface DraftDao {
         WHERE group_id = :groupId
         """,
     )
-    suspend fun touchGroup(
+    public suspend fun touchGroup(
         groupId: String,
         updatedAt: Long,
     )
@@ -135,7 +135,7 @@ public interface DraftDao {
           AND status = :status
         """,
     )
-    suspend fun countTargetsByStatus(
+    public suspend fun countTargetsByStatus(
         groupId: String,
         status: DraftTargetStatus,
     ): Int
@@ -150,7 +150,7 @@ public interface DraftDao {
           AND (last_attempt_at IS NULL OR last_attempt_at < :expiredBefore)
         """,
     )
-    suspend fun resetSendingTargets(
+    public suspend fun resetSendingTargets(
         fromStatus: DraftTargetStatus,
         toStatus: DraftTargetStatus,
         expiredBefore: Long,
@@ -169,7 +169,7 @@ public interface DraftDao {
         )
         """,
     )
-    suspend fun touchExpiredSendingGroups(
+    public suspend fun touchExpiredSendingGroups(
         fromStatus: DraftTargetStatus,
         expiredBefore: Long,
         updatedAt: Long,
@@ -184,7 +184,7 @@ public interface DraftDao {
         WHERE status = :fromStatus
         """,
     )
-    suspend fun updateTargetsByStatus(
+    public suspend fun updateTargetsByStatus(
         fromStatus: DraftTargetStatus,
         toStatus: DraftTargetStatus,
         errorMessage: String?,
@@ -201,7 +201,7 @@ public interface DraftDao {
         )
         """,
     )
-    suspend fun touchGroupsByTargetStatus(
+    public suspend fun touchGroupsByTargetStatus(
         status: DraftTargetStatus,
         updatedAt: Long,
     )

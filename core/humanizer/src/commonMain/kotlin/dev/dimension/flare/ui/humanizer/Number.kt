@@ -23,11 +23,11 @@ public object Formatter : KoinComponent {
 }
 
 public interface PlatformFormatter {
-    fun formatNumber(number: Long): String
+    public fun formatNumber(number: Long): String
 
-    fun formatRelativeInstant(instant: Instant): String
+    public fun formatRelativeInstant(instant: Instant): String
 
-    fun formatFullInstant(instant: Instant): String
+    public fun formatFullInstant(instant: Instant): String
 
-    fun formatAbsoluteInstant(instant: Instant): String
+    public fun formatAbsoluteInstant(instant: Instant): String
 }

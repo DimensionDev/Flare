@@ -2,11 +2,17 @@ import dev.dimension.flare.gradle.FlarePlatform
 
 plugins {
     id("flare.kmp")
+    id("flare.koin")
 }
 
 flare {
-    namespace = "dev.dimension.flare.data.datastore"
-    platforms(FlarePlatform.Android, FlarePlatform.Desktop, FlarePlatform.Ios, FlarePlatform.WasmJs)
+    platforms(
+        "dev.dimension.flare.data.datastore",
+        FlarePlatform.Android,
+        FlarePlatform.Desktop,
+        FlarePlatform.Ios,
+        FlarePlatform.WasmJs
+    )
 }
 
 kotlin {

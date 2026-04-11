@@ -9,8 +9,6 @@ import dev.dimension.flare.data.network.nostr.AmberSignerBridge
 import dev.dimension.flare.data.network.nostr.AndroidAmberSignerBridge
 import dev.dimension.flare.shared.image.AndroidImageCompressor
 import dev.dimension.flare.shared.image.ImageCompressor
-import dev.dimension.flare.ui.humanizer.AndroidFormatter
-import dev.dimension.flare.ui.humanizer.PlatformFormatter
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.singleOf
@@ -24,6 +22,5 @@ internal actual val platformModule: Module =
         singleOf(::AmberIntentLauncherRegistry)
         single<AmberSignerBridge> { AndroidAmberSignerBridge(androidContext(), get()) }
         singleOf(::AndroidPlatformPathProducer) bind PlatformPathProducer::class
-        singleOf(::AndroidFormatter) bind PlatformFormatter::class
         singleOf(::AndroidImageCompressor) bind ImageCompressor::class
     }

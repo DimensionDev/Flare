@@ -15,56 +15,56 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 public interface StatusDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(status: DbStatus)
+    public suspend fun insert(status: DbStatus)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAll(statuses: List<DbStatus>)
+    public suspend fun insertAll(statuses: List<DbStatus>)
 
     @Query("SELECT * FROM DbStatus WHERE statusKey = :statusKey AND accountType = :accountType")
-    fun get(
+    public fun get(
         statusKey: MicroBlogKey,
         accountType: DbAccountType,
     ): Flow<DbStatus?>
 
     @Transaction
     @Query("SELECT * FROM DbStatus WHERE statusKey = :statusKey AND accountType = :accountType")
-    fun getWithReferences(
+    public fun getWithReferences(
         statusKey: MicroBlogKey,
         accountType: DbAccountType,
     ): Flow<DbStatusWithReference?>
 
     @Transaction
     @Query("SELECT * FROM DbStatus WHERE statusKey = :statusKey AND accountType = :accountType")
-    suspend fun getWithReferencesSync(
+    public suspend fun getWithReferencesSync(
         statusKey: MicroBlogKey,
         accountType: DbAccountType,
     ): DbStatusWithReference?
 
     @Query("SELECT * FROM DbStatus WHERE accountType = :accountType AND statusKey IN (:statusKeys)")
-    suspend fun getByKeys(
+    public suspend fun getByKeys(
         statusKeys: List<MicroBlogKey>,
         accountType: DbAccountType,
     ): List<DbStatus>
 
     @Query("UPDATE DbStatus SET content = :content WHERE statusKey = :statusKey AND accountType = :accountType")
-    suspend fun update(
+    public suspend fun update(
         statusKey: MicroBlogKey,
         accountType: DbAccountType,
         content: UiTimelineV2,
     )
 
     @Query("DELETE FROM DbStatus WHERE statusKey = :statusKey AND accountType = :accountType")
-    suspend fun delete(
+    public suspend fun delete(
         statusKey: MicroBlogKey,
         accountType: DbAccountType,
     )
 
     @Query("DELETE FROM DbStatus WHERE accountType = :accountType")
-    suspend fun deleteByAccountType(accountType: DbAccountType)
+    public suspend fun deleteByAccountType(accountType: DbAccountType)
 
     @Query("SELECT COUNT(*) FROM DbStatus")
-    fun count(): Flow<Long>
+    public fun count(): Flow<Long>
 
     @Query("DELETE FROM DbStatus")
-    suspend fun clear()
+    public suspend fun clear()
 }

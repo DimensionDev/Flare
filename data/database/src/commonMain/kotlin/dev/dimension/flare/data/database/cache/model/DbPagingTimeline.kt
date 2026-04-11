@@ -84,14 +84,14 @@ public data class DbStatusWithReference(
 
 public class StatusConverter {
     @TypeConverter
-    fun fromReferenceType(value: ReferenceType): String = value.name
+    public fun fromReferenceType(value: ReferenceType): String = value.name
 
     @TypeConverter
-    fun toReferenceType(value: String): ReferenceType = ReferenceType.valueOf(value)
+    public fun toReferenceType(value: String): ReferenceType = ReferenceType.valueOf(value)
 
     @TypeConverter
-    fun fromTimestamp(value: Instant): Long = value.toEpochMilliseconds()
+    public fun fromTimestamp(value: Instant): Long = value.toEpochMilliseconds()
 
     @TypeConverter
-    fun toTimestamp(value: Long): Instant = Instant.fromEpochMilliseconds(value)
+    public fun toTimestamp(value: Long): Instant = Instant.fromEpochMilliseconds(value)
 }

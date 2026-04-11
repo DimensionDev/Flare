@@ -11,6 +11,7 @@ import dev.dimension.flare.data.datastore.model.ComposeConfigDataSerializer
 import dev.dimension.flare.data.datastore.model.FlareConfig
 import dev.dimension.flare.data.datastore.model.FlareConfigSerializer
 import dev.dimension.flare.data.io.PlatformPathProducer
+import org.koin.core.annotation.Singleton
 import kotlin.coroutines.CoroutineContext
 
 internal expect class PlatformStorage<T>(
@@ -20,8 +21,10 @@ internal expect class PlatformStorage<T>(
 ) : Storage<T> {
     override fun createConnection(): StorageConnection<T>
 }
+
 internal expect val storeContext: CoroutineContext
 
+@Singleton
 public class AppDataStore(
     private val platformPathProducer: PlatformPathProducer,
 ) {
@@ -34,8 +37,7 @@ public class AppDataStore(
                     platformPathProducer,
                 ),
                 storeContext,
-            )
-            .build()
+            ).build()
     }
 
     public val composeConfigData: DataStore<ComposeConfigData> by lazy {
@@ -47,8 +49,7 @@ public class AppDataStore(
                     platformPathProducer,
                 ),
                 storeContext,
-            )
-            .build()
+            ).build()
     }
 
     public val appSettingsStore: DataStore<AppSettings> by lazy {
@@ -60,7 +61,6 @@ public class AppDataStore(
                     platformPathProducer,
                 ),
                 storeContext,
-            )
-            .build()
+            ).build()
     }
 }

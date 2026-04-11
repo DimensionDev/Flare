@@ -6,12 +6,14 @@ import android.text.format.DateUtils
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.daysUntil
 import kotlinx.datetime.toLocalDateTime
+import org.koin.core.annotation.Singleton
 import java.math.RoundingMode
 import java.util.Locale
 import kotlin.time.Clock
 import kotlin.time.Instant
 
-internal class AndroidFormatter(
+@Singleton
+public class AndroidFormatter(
     private val context: Context,
 ) : PlatformFormatter {
     override fun formatNumber(number: Long): String {

@@ -69,28 +69,28 @@ public data class TranslationPayload(
 
 public class TranslationConverters {
     @TypeConverter
-    fun fromEntityType(value: TranslationEntityType): String = value.name
+    public fun fromEntityType(value: TranslationEntityType): String = value.name
 
     @TypeConverter
-    fun toEntityType(value: String): TranslationEntityType = TranslationEntityType.valueOf(value)
+    public fun toEntityType(value: String): TranslationEntityType = TranslationEntityType.valueOf(value)
 
     @TypeConverter
-    fun fromStatus(value: TranslationStatus): String = value.name
+    public fun fromStatus(value: TranslationStatus): String = value.name
 
     @TypeConverter
-    fun toStatus(value: String): TranslationStatus = TranslationStatus.valueOf(value)
+    public fun toStatus(value: String): TranslationStatus = TranslationStatus.valueOf(value)
 
     @TypeConverter
-    fun fromDisplayMode(value: TranslationDisplayMode): String = value.name
+    public fun fromDisplayMode(value: TranslationDisplayMode): String = value.name
 
     @TypeConverter
-    fun toDisplayMode(value: String): TranslationDisplayMode = TranslationDisplayMode.valueOf(value)
+    public fun toDisplayMode(value: String): TranslationDisplayMode = TranslationDisplayMode.valueOf(value)
 
     @TypeConverter
-    fun fromPayload(value: TranslationPayload?): String? = value?.encodeJson(TranslationPayload.serializer())
+    public fun fromPayload(value: TranslationPayload?): String? = value?.encodeJson(TranslationPayload.serializer())
 
     @TypeConverter
-    fun toPayload(value: String?): TranslationPayload? = value?.decodeJson(TranslationPayload.serializer())
+    public fun toPayload(value: String?): TranslationPayload? = value?.decodeJson(TranslationPayload.serializer())
 }
 
 public fun DbStatus.translationEntityKey(): String = id

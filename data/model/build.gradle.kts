@@ -1,15 +1,19 @@
-import dev.dimension.flare.gradle.FlarePlatform.Android
-import dev.dimension.flare.gradle.FlarePlatform.Desktop
-import dev.dimension.flare.gradle.FlarePlatform.Ios
-import dev.dimension.flare.gradle.FlarePlatform.WasmJs
+
+import dev.dimension.flare.gradle.FlarePlatform
 
 plugins {
     id("flare.kmp")
+    id("flare.koin")
 }
 
 flare {
-    namespace = "dev.dimension.flare.data.model"
-    platforms(Android, Desktop, Ios, WasmJs)
+    platforms(
+        "dev.dimension.flare.data.model",
+        FlarePlatform.Android,
+        FlarePlatform.Desktop,
+        FlarePlatform.Ios,
+        FlarePlatform.WasmJs
+    )
 }
 
 kotlin {
@@ -17,10 +21,9 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 implementation(projects.core.common)
+                implementation(projects.core.humanizer)
                 implementation(dependencies.platform(libs.compose.bom))
                 implementation(libs.compose.runtime)
-                implementation(dependencies.platform(libs.koin.bom))
-                implementation(libs.koin.core)
                 implementation(libs.kotlin.codepoints.deluxe)
                 implementation(libs.kotlinx.coroutines.core)
                 implementation(libs.kotlinx.datetime)

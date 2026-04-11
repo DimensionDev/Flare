@@ -28,7 +28,7 @@ public interface PagingTimelineDao {
             "WHERE DbPagingTimeline.pagingKey = :pagingKey AND DbStatus.accountType = :accountType " +
             "ORDER BY DbPagingTimeline.sortId",
     )
-    fun getPagingSource(
+    public fun getPagingSource(
         pagingKey: String,
         accountType: DbAccountType,
     ): PagingSource<Int, DbStatusWithReference>
@@ -40,7 +40,7 @@ public interface PagingTimelineDao {
             "WHERE DbPagingTimeline.pagingKey = :pagingKey " +
             "ORDER BY DbPagingTimeline.sortId",
     )
-    fun getPagingSource(pagingKey: String): PagingSource<Int, DbStatusWithReference>
+    public fun getPagingSource(pagingKey: String): PagingSource<Int, DbStatusWithReference>
 
     @Transaction
     @RewriteQueriesToDropUnusedColumns
@@ -48,7 +48,7 @@ public interface PagingTimelineDao {
         "SELECT * FROM DbStatus " +
             "WHERE DbStatus.text like :query",
     )
-    fun searchHistoryPagingSource(query: String): PagingSource<Int, DbStatusWithReference>
+    public fun searchHistoryPagingSource(query: String): PagingSource<Int, DbStatusWithReference>
 
     @Transaction
     @Query(
@@ -61,7 +61,7 @@ public interface PagingTimelineDao {
             ") " +
             "LIMIT 1",
     )
-    fun get(
+    public fun get(
         pagingKey: String,
         accountType: DbAccountType,
     ): Flow<DbStatusWithReference?>
@@ -73,16 +73,16 @@ public interface PagingTimelineDao {
             "WHERE DbPagingTimeline.pagingKey = :pagingKey " +
             "ORDER BY DbPagingTimeline.sortId DESC",
     )
-    fun getStatusHistoryPagingSource(pagingKey: String): PagingSource<Int, DbStatusWithReference>
+    public fun getStatusHistoryPagingSource(pagingKey: String): PagingSource<Int, DbStatusWithReference>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAll(timeline: List<DbPagingTimeline>)
+    public suspend fun insertAll(timeline: List<DbPagingTimeline>)
 
     @Query(
         "SELECT * FROM DbPagingTimeline " +
             "WHERE pagingKey = :pagingKey AND statusKey IN (:statusKeys)",
     )
-    suspend fun getByPagingKeyAndStatusKeys(
+    public suspend fun getByPagingKeyAndStatusKeys(
         pagingKey: String,
         statusKeys: List<MicroBlogKey>,
     ): List<DbPagingTimeline>
@@ -91,10 +91,10 @@ public interface PagingTimelineDao {
         "SELECT * FROM DbPagingTimeline " +
             "WHERE pagingKey = :pagingKey ORDER BY sortId",
     )
-    suspend fun getByPagingKey(pagingKey: String): List<DbPagingTimeline>
+    public suspend fun getByPagingKey(pagingKey: String): List<DbPagingTimeline>
 
     @Delete
-    suspend fun delete(timeline: List<DbPagingTimeline>)
+    public suspend fun delete(timeline: List<DbPagingTimeline>)
 
     @Query(
         "DELETE FROM DbPagingTimeline WHERE pagingKey = :pagingKey " +
@@ -104,12 +104,12 @@ public interface PagingTimelineDao {
             "AND DbStatus.accountType = :accountType" +
             ")",
     )
-    suspend fun delete(
+    public suspend fun delete(
         pagingKey: String,
         accountType: DbAccountType,
     )
 
-    suspend fun delete(
+    public suspend fun delete(
         pagingKey: String,
         accountKey: MicroBlogKey,
     ) {
@@ -120,7 +120,7 @@ public interface PagingTimelineDao {
      * Should be used to delete a specific paging timeline by its key.
      */
     @Query("DELETE FROM DbPagingTimeline WHERE pagingKey = :pagingKey")
-    suspend fun delete(pagingKey: String)
+    public suspend fun delete(pagingKey: String)
 
     @Query(
         "DELETE FROM DbPagingTimeline " +
@@ -130,7 +130,7 @@ public interface PagingTimelineDao {
             "AND DbStatus.accountType = :accountType" +
             ")",
     )
-    suspend fun deleteByAccountType(accountType: DbAccountType)
+    public suspend fun deleteByAccountType(accountType: DbAccountType)
 
     @Query(
         "DELETE FROM DbPagingTimeline " +
@@ -141,7 +141,7 @@ public interface PagingTimelineDao {
             "AND DbStatus.accountType = :accountType" +
             ")",
     )
-    suspend fun deleteStatus(
+    public suspend fun deleteStatus(
         accountType: DbAccountType,
         statusKey: MicroBlogKey,
     )
@@ -157,12 +157,12 @@ public interface PagingTimelineDao {
             ")" +
             ")",
     )
-    suspend fun existsPaging(
+    public suspend fun existsPaging(
         accountType: DbAccountType,
         paging_key: String,
     ): Boolean
 
-    suspend fun existsPaging(
+    public suspend fun existsPaging(
         account_key: MicroBlogKey,
         paging_key: String,
     ): Boolean =
@@ -172,28 +172,28 @@ public interface PagingTimelineDao {
         )
 
     @Query("DELETE FROM DbPagingTimeline")
-    suspend fun clear()
+    public suspend fun clear()
 
     @Query("SELECT EXISTS(SELECT 1 FROM DbPagingTimeline WHERE pagingKey = :pagingKey)")
-    suspend fun anyPaging(pagingKey: String): Boolean
+    public suspend fun anyPaging(pagingKey: String): Boolean
 
     @Query("SELECT * FROM DbPagingKey WHERE pagingKey = :pagingKey LIMIT 1")
-    suspend fun getPagingKey(pagingKey: String): DbPagingKey?
+    public suspend fun getPagingKey(pagingKey: String): DbPagingKey?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertPagingKey(pagingKey: DbPagingKey)
+    public suspend fun insertPagingKey(pagingKey: DbPagingKey)
 
     @Query("DELETE FROM DbPagingKey WHERE pagingKey = :pagingKey")
-    suspend fun deletePagingKey(pagingKey: String)
+    public suspend fun deletePagingKey(pagingKey: String)
 
     @Query("UPDATE DbPagingKey SET nextKey = :nextKey WHERE pagingKey = :pagingKey")
-    suspend fun updatePagingKeyNextKey(
+    public suspend fun updatePagingKeyNextKey(
         pagingKey: String,
         nextKey: String,
     )
 
     @Query("UPDATE DbPagingKey SET prevKey = :prevKey WHERE pagingKey = :pagingKey")
-    suspend fun updatePagingKeyPrevKey(
+    public suspend fun updatePagingKeyPrevKey(
         pagingKey: String,
         prevKey: String,
     )

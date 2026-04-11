@@ -5,8 +5,8 @@ plugins {
 }
 
 flare {
-    namespace = "dev.dimension.flare.readability"
     platforms(
+        "dev.dimension.flare.readability",
         FlarePlatform.Android,
         FlarePlatform.Desktop,
         FlarePlatform.Ios,

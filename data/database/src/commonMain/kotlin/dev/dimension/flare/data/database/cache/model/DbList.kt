@@ -28,17 +28,17 @@ public data class DbList(
     val id: String = "${accountType}_$listKey",
 ) {
     @Serializable
-    data class ListContent(
+    public data class ListContent(
         val data: UiList,
     )
 }
 
 public class ListContentConverters {
     @TypeConverter
-    fun fromMessageContent(content: ListContent): ByteArray = content.encodeProtobuf()
+    public fun fromMessageContent(content: ListContent): ByteArray = content.encodeProtobuf()
 
     @TypeConverter
-    fun toMessageContent(value: ByteArray): ListContent = value.decodeProtobuf()
+    public fun toMessageContent(value: ByteArray): ListContent = value.decodeProtobuf()
 }
 
 @Entity(

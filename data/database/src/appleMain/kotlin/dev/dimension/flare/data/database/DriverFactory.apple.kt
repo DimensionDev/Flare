@@ -2,15 +2,15 @@ package dev.dimension.flare.data.database
 
 import androidx.room3.Room
 import androidx.room3.RoomDatabase
-import kotlinx.cinterop.ExperimentalForeignApi
+import org.koin.core.annotation.Singleton
 import platform.Foundation.NSApplicationSupportDirectory
 import platform.Foundation.NSFileManager
 import platform.Foundation.NSSearchPathForDirectoriesInDomains
 import platform.Foundation.NSUserDomainMask
-import platform.Foundation.stringWithString
 
+@Singleton
 public actual class DriverFactory {
-    actual inline fun <reified T : RoomDatabase> createBuilder(
+    internal actual inline fun <reified T : RoomDatabase> createBuilder(
         name: String,
         isCache: Boolean,
     ): RoomDatabase.Builder<T> {

@@ -24,7 +24,7 @@ public class ApplePlatformTextRenderer(
 }
 
 public interface PlatformTextRendering {
-    fun render(renderRuns: ImmutableList<RenderContent>): PlatformText
+    public fun render(renderRuns: ImmutableList<RenderContent>): PlatformText
 }
 
 private object PlatformTextRendererHolder : KoinComponent {

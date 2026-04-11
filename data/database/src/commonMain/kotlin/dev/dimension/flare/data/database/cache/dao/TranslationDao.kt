@@ -14,17 +14,17 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 public interface TranslationDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(data: DbTranslation)
+    public suspend fun insert(data: DbTranslation)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAll(data: List<DbTranslation>)
+    public suspend fun insertAll(data: List<DbTranslation>)
 
     @Query(
         "SELECT * FROM DbTranslation " +
             "WHERE entityType = :entityType AND entityKey = :entityKey AND targetLanguage = :targetLanguage " +
             "LIMIT 1",
     )
-    fun find(
+    public fun find(
         entityType: TranslationEntityType,
         entityKey: String,
         targetLanguage: String,
@@ -35,7 +35,7 @@ public interface TranslationDao {
             "WHERE entityType = :entityType AND entityKey = :entityKey AND targetLanguage = :targetLanguage " +
             "LIMIT 1",
     )
-    suspend fun get(
+    public suspend fun get(
         entityType: TranslationEntityType,
         entityKey: String,
         targetLanguage: String,
@@ -45,7 +45,7 @@ public interface TranslationDao {
         "SELECT * FROM DbTranslation " +
             "WHERE entityType = :entityType AND entityKey IN (:entityKeys) AND targetLanguage = :targetLanguage",
     )
-    suspend fun getByEntityKeys(
+    public suspend fun getByEntityKeys(
         entityType: TranslationEntityType,
         entityKeys: List<String>,
         targetLanguage: String,
@@ -62,7 +62,7 @@ public interface TranslationDao {
             "updatedAt = :updatedAt " +
             "WHERE entityType = :entityType AND entityKey = :entityKey AND targetLanguage = :targetLanguage",
     )
-    suspend fun update(
+    public suspend fun update(
         entityType: TranslationEntityType,
         entityKey: String,
         targetLanguage: String,
@@ -81,7 +81,7 @@ public interface TranslationDao {
             "updatedAt = :updatedAt " +
             "WHERE entityType = :entityType AND entityKey = :entityKey AND targetLanguage = :targetLanguage",
     )
-    suspend fun updateDisplayMode(
+    public suspend fun updateDisplayMode(
         entityType: TranslationEntityType,
         entityKey: String,
         targetLanguage: String,
@@ -97,7 +97,7 @@ public interface TranslationDao {
             "updatedAt = :updatedAt " +
             "WHERE (status = :pendingStatus OR status = :translatingStatus) AND updatedAt < :staleBefore",
     )
-    suspend fun markStaleInFlightAsFailed(
+    public suspend fun markStaleInFlightAsFailed(
         staleBefore: Long,
         statusReason: String,
         updatedAt: Long,
@@ -110,7 +110,7 @@ public interface TranslationDao {
         "DELETE FROM DbTranslation " +
             "WHERE status = :pendingStatus OR status = :translatingStatus",
     )
-    suspend fun deleteInFlight(
+    public suspend fun deleteInFlight(
         pendingStatus: TranslationStatus = TranslationStatus.Pending,
         translatingStatus: TranslationStatus = TranslationStatus.Translating,
     )
@@ -119,15 +119,15 @@ public interface TranslationDao {
         "DELETE FROM DbTranslation " +
             "WHERE entityType = :entityType AND entityKey = :entityKey AND targetLanguage = :targetLanguage",
     )
-    suspend fun delete(
+    public suspend fun delete(
         entityType: TranslationEntityType,
         entityKey: String,
         targetLanguage: String,
     )
 
     @Query("DELETE FROM DbTranslation WHERE targetLanguage = :targetLanguage")
-    suspend fun deleteByLanguage(targetLanguage: String)
+    public suspend fun deleteByLanguage(targetLanguage: String)
 
     @Query("DELETE FROM DbTranslation")
-    suspend fun clear()
+    public suspend fun clear()
 }

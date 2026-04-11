@@ -11,9 +11,9 @@ internal actual class PlatformStorage<T> actual constructor(
     serializer: OkioSerializer<T>,
     platformPathProducer: PlatformPathProducer,
 ) : androidx.datastore.core.Storage<T> by androidx.datastore.core.okio.WebStorage(
-    serializer = serializer,
-    name = fileName,
-    storageType = androidx.datastore.core.okio.WebStorageType.LOCAL
-)
+        serializer = serializer,
+        name = fileName,
+        storageType = androidx.datastore.core.okio.WebStorageType.LOCAL,
+    )
 
 internal actual val storeContext: CoroutineContext = Dispatchers.Default + SupervisorJob()

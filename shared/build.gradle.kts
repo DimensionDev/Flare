@@ -107,6 +107,7 @@ kotlin {
                 implementation(libs.openai.client)
                 implementation(libs.nostr.sdk.kmp)
                 api(projects.core.common)
+                api(projects.core.humanizer)
                 api(projects.core.deeplink)
                 api(projects.data.model)
                 api(projects.data.datastore)
@@ -145,7 +146,6 @@ kotlin {
         val jvmMain by getting {
             dependencies {
                 implementation(libs.commons.lang3)
-                implementation(libs.prettytime)
                 implementation(libs.jna)
             }
         }

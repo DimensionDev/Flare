@@ -11,44 +11,44 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 public interface AccountDao {
     @Query("SELECT * FROM DbAccount ORDER BY last_active DESC LIMIT 1")
-    fun activeAccount(): Flow<DbAccount?>
+    public fun activeAccount(): Flow<DbAccount?>
 
     @Query("SELECT * FROM DbAccount ORDER BY sort_id")
-    fun sortedAccounts(): Flow<List<DbAccount>>
+    public fun sortedAccounts(): Flow<List<DbAccount>>
 
     @Query("SELECT * FROM DbAccount")
-    fun allAccounts(): Flow<List<DbAccount>>
+    public fun allAccounts(): Flow<List<DbAccount>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(account: DbAccount)
+    public suspend fun insert(account: DbAccount)
 
     @Query("UPDATE DbAccount SET last_active = :lastActive WHERE account_key = :accountKey")
-    suspend fun setLastActive(
+    public suspend fun setLastActive(
         accountKey: MicroBlogKey,
         lastActive: Long,
     )
 
     @Query("SELECT * FROM DbAccount WHERE account_key = :accountKey")
-    fun get(accountKey: MicroBlogKey): Flow<DbAccount?>
+    public fun get(accountKey: MicroBlogKey): Flow<DbAccount?>
 
     @Query("SELECT * FROM DbAccount WHERE account_key = :accountKey")
-    suspend fun getAccount(accountKey: MicroBlogKey): DbAccount?
+    public suspend fun getAccount(accountKey: MicroBlogKey): DbAccount?
 
     @Query("DELETE FROM DbAccount WHERE account_key = :accountKey")
-    suspend fun delete(accountKey: MicroBlogKey)
+    public suspend fun delete(accountKey: MicroBlogKey)
 
     @Query("UPDATE DbAccount SET credential_json = :credentialJson WHERE account_key = :accountKey")
-    suspend fun setCredential(
+    public suspend fun setCredential(
         accountKey: MicroBlogKey,
         credentialJson: String,
     )
 
     @Query("UPDATE DbAccount SET sort_id = :sortId WHERE account_key = :accountKey")
-    suspend fun setSortId(
+    public suspend fun setSortId(
         accountKey: MicroBlogKey,
         sortId: Long,
     )
 
     @Query("SELECT MAX(sort_id) FROM DbAccount")
-    suspend fun getMaxSortId(): Long?
+    public suspend fun getMaxSortId(): Long?
 }

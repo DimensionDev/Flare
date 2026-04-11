@@ -21,67 +21,67 @@ import kotlinx.coroutines.flow.Flow
 @DaoReturnTypeConverters(PagingSourceDaoReturnTypeConverter::class)
 public interface UserDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(user: DbUser)
+    public suspend fun insert(user: DbUser)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAll(users: List<DbUser>)
+    public suspend fun insertAll(users: List<DbUser>)
 
     @Query("UPDATE DbUser SET content = :content WHERE userKey = :userKey")
-    suspend fun update(
+    public suspend fun update(
         userKey: MicroBlogKey,
         content: UiProfile,
     )
 
     @Query("SELECT * FROM DbUser WHERE userKey IN (:userKeys)")
-    fun findByKeys(userKeys: List<MicroBlogKey>): Flow<List<DbUser>>
+    public fun findByKeys(userKeys: List<MicroBlogKey>): Flow<List<DbUser>>
 
     @Query("SELECT * FROM DbUser WHERE userKey = :userKey")
-    fun findByKey(userKey: MicroBlogKey): Flow<DbUser?>
+    public fun findByKey(userKey: MicroBlogKey): Flow<DbUser?>
 
     @Query("SELECT * FROM DbUser WHERE canonicalHandle = :canonicalHandle AND host = :host")
-    fun findByCanonicalHandleAndHost(
+    public fun findByCanonicalHandleAndHost(
         canonicalHandle: String,
         host: String,
     ): Flow<DbUser?>
 
     @Query("SELECT COUNT(*) FROM DbUser")
-    fun count(): Flow<Long>
+    public fun count(): Flow<Long>
 
     @Query("DELETE FROM DbUser")
-    suspend fun clear()
+    public suspend fun clear()
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertHistory(data: DbUserHistory)
+    public suspend fun insertHistory(data: DbUserHistory)
 
     @Transaction
     @Query("SELECT * FROM DbUserHistory ORDER BY lastVisit DESC")
-    fun getUserHistory(): PagingSource<Int, DbUserHistoryWithUser>
+    public fun getUserHistory(): PagingSource<Int, DbUserHistoryWithUser>
 
     @Transaction
     @Query(
         "SELECT * FROM DbUser " +
             "WHERE DbUser.name like :query OR DbUser.canonicalHandle like :query",
     )
-    fun searchUser(query: String): PagingSource<Int, DbUser>
+    public fun searchUser(query: String): PagingSource<Int, DbUser>
 
     @Query("DELETE FROM DbUserHistory WHERE accountType = :accountType")
-    suspend fun deleteHistoryByAccountType(accountType: DbAccountType)
+    public suspend fun deleteHistoryByAccountType(accountType: DbAccountType)
 
     @Query("SELECT * FROM DbUserRelation WHERE accountType = :accountType AND userKey = :userKey")
-    fun getUserRelation(
+    public fun getUserRelation(
         accountType: DbAccountType,
         userKey: MicroBlogKey,
     ): Flow<DbUserRelation?>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertUserRelation(relation: DbUserRelation)
+    public suspend fun insertUserRelation(relation: DbUserRelation)
 
     @Query("DELETE FROM DbUserRelation WHERE accountType = :accountType AND userKey = :userKey")
-    suspend fun deleteUserRelation(
+    public suspend fun deleteUserRelation(
         accountType: DbAccountType,
         userKey: MicroBlogKey,
     )
 
     @Query("DELETE FROM DbUserRelation")
-    suspend fun clearUserRelations()
+    public suspend fun clearUserRelations()
 }

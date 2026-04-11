@@ -12,26 +12,26 @@ import dev.dimension.flare.ui.model.UiTimelineV2
 
 public class AccountTypeConverter {
     @TypeConverter
-    fun fromString(value: String): DbAccountType = value.decodeJson()
+    public fun fromString(value: String): DbAccountType = value.decodeJson()
 
     @TypeConverter
-    fun fromEnum(value: DbAccountType): String = value.encodeJson()
+    public fun fromEnum(value: DbAccountType): String = value.encodeJson()
 
     @TypeConverter
-    fun fromUiProfile(value: UiProfile): ByteArray = value.encodeProtobuf()
+    public fun fromUiProfile(value: UiProfile): ByteArray = value.encodeProtobuf()
 
     @TypeConverter
-    fun toUiProfile(value: ByteArray): UiProfile = value.decodeProtobuf()
+    public fun toUiProfile(value: ByteArray): UiProfile = value.decodeProtobuf()
 
     @TypeConverter
-    fun fromUiTimelineV2(value: UiTimelineV2): ByteArray = value.encodeProtobuf()
+    public fun fromUiTimelineV2(value: UiTimelineV2): ByteArray = value.encodeProtobuf()
 
     @TypeConverter
-    fun toUiTimelineV2(value: ByteArray): UiTimelineV2 = value.decodeProtobuf()
+    public fun toUiTimelineV2(value: ByteArray): UiTimelineV2 = value.decodeProtobuf()
 
     @TypeConverter
-    fun fromUiRelation(value: UiRelation): ByteArray = value.encodeProtobuf()
+    public fun fromUiRelation(value: UiRelation): ByteArray = value.encodeProtobuf()
 
     @TypeConverter
-    fun toUiRelation(value: ByteArray): UiRelation = value.decodeProtobuf()
+    public fun toUiRelation(value: ByteArray): UiRelation = value.decodeProtobuf()
 }

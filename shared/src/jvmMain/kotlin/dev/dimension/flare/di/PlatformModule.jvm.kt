@@ -10,8 +10,6 @@ import dev.dimension.flare.data.network.nostr.AmberSignerBridge
 import dev.dimension.flare.data.network.nostr.JvmAmberSignerBridge
 import dev.dimension.flare.shared.image.ImageCompressor
 import dev.dimension.flare.shared.image.JvmImageCompressor
-import dev.dimension.flare.ui.humanizer.JVMFormatter
-import dev.dimension.flare.ui.humanizer.PlatformFormatter
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.bind
@@ -22,7 +20,6 @@ internal actual val platformModule: Module =
         singleOf(::AppDataStore)
         singleOf(::DriverFactory)
         singleOf(::JvmPlatformPathProducer) bind PlatformPathProducer::class
-        singleOf(::JVMFormatter) bind PlatformFormatter::class
         singleOf(::JvmImageCompressor) bind ImageCompressor::class
         singleOf(::JvmOnDeviceAI) bind OnDeviceAI::class
         singleOf(::JvmAmberSignerBridge) bind AmberSignerBridge::class

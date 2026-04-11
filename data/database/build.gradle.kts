@@ -1,27 +1,25 @@
 import dev.dimension.flare.gradle.FlarePlatform
-import java.util.Locale
+import dev.dimension.flare.gradle.addKspDependencyForTargets
 
 plugins {
     id("flare.kmp")
-    alias(libs.plugins.ksp)
+    id("flare.ksp")
     alias(libs.plugins.room)
+    id("flare.koin")
 }
 
 flare {
-    namespace = "dev.dimension.flare.data.database"
-    platforms(FlarePlatform.Android, FlarePlatform.Desktop, FlarePlatform.Ios, FlarePlatform.WasmJs)
+    platforms(
+        "dev.dimension.flare.data.database",
+        FlarePlatform.Android,
+        FlarePlatform.Desktop,
+        FlarePlatform.Ios,
+        FlarePlatform.WasmJs
+    )
 }
 
 kotlin {
-    targets.forEach { target ->
-        target.name.takeIf {
-            it != "metadata"
-        }?.let {
-            "ksp${it.replaceFirstChar { char -> if (char.isLowerCase()) char.titlecase(Locale.getDefault()) else char.toString() }}"
-        }?.let {
-            dependencies.add(it, libs.room.compiler)
-        }
-    }
+    addKspDependencyForTargets(project, libs.room.compiler)
 
     sourceSets {
         val commonMain by getting {

@@ -19,10 +19,10 @@ public data class DbEmoji(
 
 public class EmojiContentConverter {
     @TypeConverter
-    fun fromEmojiContent(emojiContent: EmojiContent): ByteArray = emojiContent.encodeProtobuf()
+    public fun fromEmojiContent(emojiContent: EmojiContent): ByteArray = emojiContent.encodeProtobuf()
 
     @TypeConverter
-    fun toEmojiContent(data: ByteArray): EmojiContent =
+    public fun toEmojiContent(data: ByteArray): EmojiContent =
         if (data.isEmpty()) {
             EmojiContent()
         } else {

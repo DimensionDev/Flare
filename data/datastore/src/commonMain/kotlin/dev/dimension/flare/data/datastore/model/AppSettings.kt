@@ -97,8 +97,7 @@ internal object AppSettingsSerializer : OkioSerializer<AppSettings> {
                 version = "",
             )
 
-    override suspend fun readFrom(source: BufferedSource): AppSettings =
-        ProtoBuf.decodeFromByteArray(source.readByteArray())
+    override suspend fun readFrom(source: BufferedSource): AppSettings = ProtoBuf.decodeFromByteArray(source.readByteArray())
 
     override suspend fun writeTo(
         t: AppSettings,

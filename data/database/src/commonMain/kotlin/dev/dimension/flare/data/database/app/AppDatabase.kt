@@ -57,21 +57,21 @@ import dev.dimension.flare.data.database.app.dao.SearchHistoryDao
 )
 @ConstructedBy(AppDatabaseConstructor::class)
 public abstract class AppDatabase : RoomDatabase() {
-    abstract fun accountDao(): AccountDao
+    public abstract fun accountDao(): AccountDao
 
-    abstract fun applicationDao(): ApplicationDao
+    public abstract fun applicationDao(): ApplicationDao
 
-    abstract fun draftDao(): DraftDao
+    public abstract fun draftDao(): DraftDao
 
-    abstract fun keywordFilterDao(): KeywordFilterDao
+    public abstract fun keywordFilterDao(): KeywordFilterDao
 
-    abstract fun searchHistoryDao(): SearchHistoryDao
+    public abstract fun searchHistoryDao(): SearchHistoryDao
 
-    abstract fun rssSourceDao(): RssSourceDao
+    public abstract fun rssSourceDao(): RssSourceDao
 }
 
 // The Room compiler generates the `actual` implementations.
 @Suppress("NO_ACTUAL_FOR_EXPECT")
 public expect object AppDatabaseConstructor : RoomDatabaseConstructor<AppDatabase> {
-    override fun initialize(): AppDatabase
+    public override fun initialize(): AppDatabase
 }

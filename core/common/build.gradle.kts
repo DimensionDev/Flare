@@ -1,15 +1,17 @@
-import dev.dimension.flare.gradle.FlarePlatform.Android
-import dev.dimension.flare.gradle.FlarePlatform.Desktop
-import dev.dimension.flare.gradle.FlarePlatform.Ios
-import dev.dimension.flare.gradle.FlarePlatform.WasmJs
+import dev.dimension.flare.gradle.FlarePlatform
 
 plugins {
     id("flare.kmp")
 }
 
 flare {
-    namespace = "dev.dimension.flare.core.common"
-    platforms(Android, Desktop, Ios, WasmJs)
+    platforms(
+        "dev.dimension.flare.core.common",
+        FlarePlatform.Android,
+        FlarePlatform.Desktop,
+        FlarePlatform.Ios,
+        FlarePlatform.WasmJs
+    )
 }
 
 kotlin {

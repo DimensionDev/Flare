@@ -4,14 +4,11 @@ import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryTarget
 import com.android.build.api.withAndroid
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.artifacts.VersionCatalog
-import org.gradle.api.artifacts.VersionCatalogsExtension
 import org.gradle.kotlin.dsl.configure
-import org.gradle.kotlin.dsl.getByType
-import org.jlleitschuh.gradle.ktlint.KtlintExtension
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
+import org.jlleitschuh.gradle.ktlint.KtlintExtension
 
 class FlareKmpPlugin : Plugin<Project> {
     override fun apply(project: Project) {
@@ -20,29 +17,22 @@ class FlareKmpPlugin : Plugin<Project> {
         project.pluginManager.apply("org.jlleitschuh.gradle.ktlint")
 
         val configuredPlatforms = linkedSetOf<FlarePlatform>()
-        val extension = FlareExtension(project) { requestedPlatforms ->
+        val extension = FlareExtension(project) { namespace, requestedPlatforms ->
             val effectivePlatforms = project.effectivePlatforms(requestedPlatforms)
             val newPlatforms = effectivePlatforms - configuredPlatforms
             if (newPlatforms.isNotEmpty()) {
                 configuredPlatforms += newPlatforms
-                project.configureKmpPlatforms(newPlatforms)
+                project.configureKmpPlatforms(namespace, newPlatforms)
             }
         }
         project.extensions.add("flare", extension)
 
         project.configureKotlinDefaults()
         project.configureKtlintDefaults()
-
-        project.afterEvaluate {
-            if (FlarePlatform.Android in configuredPlatforms) {
-                project.configureAndroidLibraryDefaults(extension.requireNamespace())
-            }
-        }
     }
 }
 
 private fun Project.configureKotlinDefaults() {
-    val versions = flareVersions
     val configuredFreeCompilerArgs = providers.gradleProperty("flare.kotlin.freeCompilerArgs")
         .map { it.toCsvList() }
         .orElse(emptyList())
@@ -57,14 +47,14 @@ private fun Project.configureKotlinDefaults() {
             freeCompilerArgs.addAll(configuredFreeCompilerArgs.get())
             optIn.addAll(configuredOptIns.get())
         }
-        jvmToolchain(versions.java)
+        jvmToolchain(flareVersionInt("java"))
     }
 }
 
 private fun Project.configureKtlintDefaults() {
     pluginManager.withPlugin("org.jlleitschuh.gradle.ktlint") {
         extensions.configure<KtlintExtension> {
-            version.set(flareVersions.ktlint)
+            version.set(flareVersion("ktlint"))
             filter {
                 exclude { element -> element.file.path.contains("build", ignoreCase = true) }
             }
@@ -73,7 +63,7 @@ private fun Project.configureKtlintDefaults() {
 }
 
 @OptIn(ExperimentalWasmDsl::class)
-private fun Project.configureKmpPlatforms(platforms: Set<FlarePlatform>) {
+private fun Project.configureKmpPlatforms(namespace: String, platforms: Set<FlarePlatform>) {
     extensions.configure<KotlinMultiplatformExtension> {
         applyDefaultHierarchyTemplate {
             withCompilations { true }
@@ -90,12 +80,23 @@ private fun Project.configureKmpPlatforms(platforms: Set<FlarePlatform>) {
 
         if (FlarePlatform.Android in platforms) {
             pluginManager.apply("com.android.kotlin.multiplatform.library")
+            extensions.configure<KotlinMultiplatformAndroidLibraryTarget> {
+                compileSdk {
+                    version = release(flareVersionInt("compileSdk")) {
+                        this.minorApiLevel = 0
+                    }
+                }
+                minSdk {
+                    version = release(flareVersionInt("minSdk"))
+                }
+                this.namespace = namespace
+            }
         }
 
         if (FlarePlatform.Desktop in platforms) {
             jvm {
                 compilerOptions {
-                    jvmTarget.set(JvmTarget.fromTarget(flareVersions.java.toString()))
+                    jvmTarget.set(JvmTarget.fromTarget(flareVersion("java")))
                 }
             }
         }
@@ -167,36 +168,17 @@ private fun currentHostSupportsKotlinNative(): Boolean {
 }
 
 private fun Project.configureAndroidLibraryDefaults(namespace: String) {
-    val versions = flareVersions
-
     extensions.configure<KotlinMultiplatformExtension> {
         targets.withType(KotlinMultiplatformAndroidLibraryTarget::class.java).configureEach {
             compileSdk {
-                version = release(versions.compileSdk)
+                version = release(flareVersionInt("compileSdk"))
             }
             minSdk {
-                version = release(versions.minSdk)
+                version = release(flareVersionInt("minSdk"))
             }
             this.namespace = namespace
         }
     }
-}
-
-private val Project.flareVersions: FlareVersions
-    get() = FlareVersions(extensions.getByType<VersionCatalogsExtension>().named("libs"))
-
-private class FlareVersions(
-    private val catalog: VersionCatalog,
-) {
-    val compileSdk: Int get() = version("compileSdk").toInt()
-    val minSdk: Int get() = version("minSdk").toInt()
-    val java: Int get() = version("java").toInt()
-    val ktlint: String get() = version("ktlint")
-
-    private fun version(name: String): String =
-        catalog.findVersion(name).orElseThrow {
-            IllegalArgumentException("Version '$name' is not defined in libs.versions.toml.")
-        }.requiredVersion
 }
 
 private fun String.toCsvList(): List<String> =

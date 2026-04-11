@@ -4,16 +4,9 @@ import org.gradle.api.Project
 
 open class FlareExtension internal constructor(
     private val project: Project,
-    private val configurePlatforms: (Set<FlarePlatform>) -> Unit,
+    private val configurePlatforms: (namespace: String, platforms:Set<FlarePlatform>) -> Unit,
 ) {
-    var namespace: String? = null
-
-    fun platforms(vararg platforms: FlarePlatform) {
-        configurePlatforms(platforms.toSet())
+    fun platforms(namespace: String, vararg platforms: FlarePlatform) {
+        configurePlatforms(namespace, platforms.toSet())
     }
-
-    internal fun requireNamespace(): String =
-        requireNotNull(namespace) {
-            "flare.namespace is required when ${project.path} enables ${FlarePlatform.Android}."
-        }
 }

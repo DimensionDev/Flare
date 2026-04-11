@@ -15,5 +15,13 @@ gradlePlugin {
             id = "flare.kmp"
             implementationClass = "dev.dimension.flare.gradle.FlareKmpPlugin"
         }
+        register("flareKoin") {
+            id = "flare.koin"
+            implementationClass = "dev.dimension.flare.gradle.FlareKoinPlugin"
+        }
+        register("flareKsp") {
+            id = "flare.ksp"
+            implementationClass = "dev.dimension.flare.gradle.FlareKspPlugin"
+        }
     }
 }

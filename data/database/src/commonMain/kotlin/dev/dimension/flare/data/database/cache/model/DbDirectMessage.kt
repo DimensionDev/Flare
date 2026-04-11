@@ -125,37 +125,37 @@ public data class DbMessageItemWithUser(
 @Serializable
 public sealed interface MessageContent {
     @Serializable
-    sealed interface Bluesky : MessageContent {
+    public sealed interface Bluesky : MessageContent {
         @Serializable
         @SerialName("bluesky-message")
-        data class Message(
+        public data class Message(
             val data: chat.bsky.convo.MessageView,
         ) : Bluesky
 
         @Serializable
         @SerialName("bluesky-deleted")
-        data class Deleted(
+        public data class Deleted(
             val data: chat.bsky.convo.DeletedMessageView,
         ) : Bluesky
     }
 
     @Serializable
-    sealed interface XQT : MessageContent {
+    public sealed interface XQT : MessageContent {
         @Serializable
         @SerialName("xqt-message")
-        data class Message(
+        public data class Message(
             val data: String,
         ) : XQT
     }
 
     @Serializable
     @SerialName("local")
-    data class Local(
+    public data class Local(
         val text: String,
         val state: State,
     ) : MessageContent {
         @Serializable
-        enum class State {
+        public enum class State {
             SENDING,
             FAILED,
         }
@@ -164,8 +164,8 @@ public sealed interface MessageContent {
 
 public class MessageContentConverters {
     @TypeConverter
-    fun fromMessageContent(content: MessageContent): String = content.encodeJson()
+    public fun fromMessageContent(content: MessageContent): String = content.encodeJson()
 
     @TypeConverter
-    fun toMessageContent(value: String): MessageContent = value.decodeJson()
+    public fun toMessageContent(value: String): MessageContent = value.decodeJson()
 }

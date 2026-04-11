@@ -8,7 +8,7 @@ import androidx.room3.TypeConverters
 import androidx.room3.immediateTransaction
 import androidx.room3.useWriterConnection
 
-public const val CACHE_DATABASE_VERSION = 37
+public const val CACHE_DATABASE_VERSION: Int = 37
 
 @Database(
     entities = [
@@ -45,27 +45,27 @@ public const val CACHE_DATABASE_VERSION = 37
 )
 @ConstructedBy(CacheDatabaseConstructor::class)
 public abstract class CacheDatabase : RoomDatabase() {
-    abstract fun emojiDao(): dev.dimension.flare.data.database.cache.dao.EmojiDao
+    public abstract fun emojiDao(): dev.dimension.flare.data.database.cache.dao.EmojiDao
 
-    abstract fun statusReferenceDao(): dev.dimension.flare.data.database.cache.dao.StatusReferenceDao
+    public abstract fun statusReferenceDao(): dev.dimension.flare.data.database.cache.dao.StatusReferenceDao
 
-    abstract fun statusDao(): dev.dimension.flare.data.database.cache.dao.StatusDao
+    public abstract fun statusDao(): dev.dimension.flare.data.database.cache.dao.StatusDao
 
-    abstract fun userDao(): dev.dimension.flare.data.database.cache.dao.UserDao
+    public abstract fun userDao(): dev.dimension.flare.data.database.cache.dao.UserDao
 
-    abstract fun pagingTimelineDao(): dev.dimension.flare.data.database.cache.dao.PagingTimelineDao
+    public abstract fun pagingTimelineDao(): dev.dimension.flare.data.database.cache.dao.PagingTimelineDao
 
-    abstract fun messageDao(): dev.dimension.flare.data.database.cache.dao.MessageDao
+    public abstract fun messageDao(): dev.dimension.flare.data.database.cache.dao.MessageDao
 
-    abstract fun listDao(): dev.dimension.flare.data.database.cache.dao.ListDao
+    public abstract fun listDao(): dev.dimension.flare.data.database.cache.dao.ListDao
 
-    abstract fun translationDao(): dev.dimension.flare.data.database.cache.dao.TranslationDao
+    public abstract fun translationDao(): dev.dimension.flare.data.database.cache.dao.TranslationDao
 }
 
 // The Room compiler generates the `actual` implementations.
 @Suppress("NO_ACTUAL_FOR_EXPECT")
 public expect object CacheDatabaseConstructor : RoomDatabaseConstructor<CacheDatabase> {
-    override fun initialize(): CacheDatabase
+    public override fun initialize(): CacheDatabase
 }
 
 public suspend fun <R> RoomDatabase.connect(block: suspend () -> R): R =

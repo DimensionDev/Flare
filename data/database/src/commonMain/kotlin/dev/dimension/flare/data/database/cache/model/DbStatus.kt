@@ -20,8 +20,8 @@ public data class DbStatus(
     @PrimaryKey
     val id: String = createId(accountType = accountType, statusKey = statusKey),
 ) {
-    companion object {
-        fun createId(
+    public companion object {
+        public fun createId(
             accountType: DbAccountType,
             statusKey: MicroBlogKey,
         ): String = "${accountType}_$statusKey"

@@ -11,33 +11,33 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 public interface ApplicationDao {
     @Query("SELECT * FROM DbApplication")
-    fun allApplication(): Flow<List<DbApplication>>
+    public fun allApplication(): Flow<List<DbApplication>>
 
     @Query("SELECT * FROM DbApplication WHERE host = :host")
-    fun get(host: String): Flow<DbApplication?>
+    public fun get(host: String): Flow<DbApplication?>
 
     @Query("SELECT * FROM DbApplication WHERE has_pending_oauth_request = 1")
-    fun getPending(): Flow<List<DbApplication>>
+    public fun getPending(): Flow<List<DbApplication>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(application: DbApplication)
+    public suspend fun insert(application: DbApplication)
 
     @Query("UPDATE DbApplication SET credential_json = :credentialJson, platform_type = :platformType WHERE host = :host")
-    suspend fun update(
+    public suspend fun update(
         host: String,
         credentialJson: String,
         platformType: PlatformType,
     )
 
     @Query("UPDATE DbApplication SET has_pending_oauth_request = :hasPendingOauthRequest WHERE host = :host")
-    suspend fun updatePending(
+    public suspend fun updatePending(
         host: String,
         hasPendingOauthRequest: Long,
     )
 
     @Query("DELETE FROM DbApplication WHERE host = :host")
-    suspend fun delete(host: String)
+    public suspend fun delete(host: String)
 
     @Query("UPDATE DbApplication SET has_pending_oauth_request = 0 WHERE has_pending_oauth_request = 1")
-    suspend fun clearPending()
+    public suspend fun clearPending()
 }

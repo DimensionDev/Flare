@@ -1,9 +1,3 @@
-import com.android.build.api.dsl.LibraryExtension
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension
-import org.jetbrains.kotlin.gradle.dsl.KotlinJvmExtension
-import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
-
 plugins {
     alias(libs.plugins.android.library) apply false
     alias(libs.plugins.kotlin.android) apply false
@@ -19,6 +13,7 @@ plugins {
     alias(libs.plugins.room) apply false
     alias(libs.plugins.composeMultiplatform) apply false
     alias(libs.plugins.nucleus) apply false
+    alias(libs.plugins.koin) apply false
 }
 
 //subprojects {

@@ -9,6 +9,7 @@ import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
 import dev.dimension.flare.data.datasource.nostr.NostrDataSource
 import dev.dimension.flare.data.datasource.pleroma.PleromaDataSource
+import dev.dimension.flare.data.datasource.tumblr.TumblrDataSource
 import dev.dimension.flare.data.datasource.vvo.VVODataSource
 import dev.dimension.flare.data.datasource.xqt.XQTDataSource
 import dev.dimension.flare.model.MicroBlogKey
@@ -192,6 +193,33 @@ public sealed class UiAccount {
     }
 
     @Immutable
+    internal data class Tumblr(
+        override val accountKey: MicroBlogKey,
+        val blogIdentifier: String,
+        val blogName: String,
+        val blogUrl: String,
+        val userName: String? = null,
+    ) : UiAccount() {
+        override val platformType: PlatformType
+            get() = PlatformType.Tumblr
+
+        @Immutable
+        @Serializable
+        @SerialName("TumblrCredential")
+        data class Credential(
+            val consumerKey: String,
+            val accessToken: String,
+            val refreshToken: String? = null,
+            val expiresIn: Long? = null,
+            val scope: String? = null,
+            val blogIdentifier: String,
+            val blogName: String,
+            val blogUrl: String,
+            val userName: String? = null,
+        ) : UiAccount.Credential
+    }
+
+    @Immutable
     internal data class XQT(
         override val accountKey: MicroBlogKey,
     ) : UiAccount() {
@@ -255,6 +283,11 @@ public sealed class UiAccount {
                         accountKey = accountKey,
                     )
 
+                is Tumblr ->
+                    TumblrDataSource(
+                        accountKey = accountKey,
+                    )
+
                 is XQT ->
                     XQTDataSource(
                         accountKey = accountKey,
@@ -296,6 +329,17 @@ public sealed class UiAccount {
                 PlatformType.Bluesky -> {
                     Bluesky(
                         accountKey = account_key,
+                    )
+                }
+
+                PlatformType.Tumblr -> {
+                    val credential = credential_json.decodeJson<Tumblr.Credential>()
+                    Tumblr(
+                        accountKey = account_key,
+                        blogIdentifier = credential.blogIdentifier,
+                        blogName = credential.blogName,
+                        blogUrl = credential.blogUrl,
+                        userName = credential.userName,
                     )
                 }
 

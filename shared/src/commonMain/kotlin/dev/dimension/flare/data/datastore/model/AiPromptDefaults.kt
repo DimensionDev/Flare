@@ -10,7 +10,8 @@ internal object AiPromptDefaults {
             "Inline markers like {{T0}} and {{L1}} are control markers.\n" +
             "Keep every control marker exactly unchanged and in the same order.\n" +
             "Translate every natural-language segment that appears after a {{Tn}} marker into natural {target_language}.\n" +
-            "Copying the original source text after a {{Tn}} marker is wrong unless that segment is already naturally written in {target_language}.\n" +
+            "Copying the original source text after a {{Tn}} marker is wrong unless that segment " +
+            "is already naturally written in {target_language}.\n" +
             "If you are unsure, still provide your best translation in {target_language} instead of leaving the source text unchanged.\n" +
             "Do not add any text after a {{Ln}} marker.\n" +
             "For item headers, use S only when the source text is already in {target_language}; otherwise keep C and translate.\n" +

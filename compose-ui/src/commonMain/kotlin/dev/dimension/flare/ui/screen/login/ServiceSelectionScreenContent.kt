@@ -449,6 +449,38 @@ public fun ServiceSelectionScreenContent(
                                     }
                                 }
 
+                                PlatformType.Tumblr -> {
+                                    registerDeeplinkCallback {
+                                        state.tumblrLoginState.resume(it)
+                                    }
+                                    state.tumblrLoginState.resumedState
+                                        ?.onLoading {
+                                            PlatformText(
+                                                text = stringResource(Res.string.mastodon_login_verify_message),
+                                            )
+                                            PlatformLinearProgressIndicator()
+                                        }?.onError {
+                                            PlatformText(text = it.message ?: "Unknown error")
+                                        } ?: run {
+                                        PlatformFilledTonalButton(
+                                            onClick = {
+                                                state.tumblrLoginState.login(
+                                                    launchUrl = openUri,
+                                                )
+                                            },
+                                            modifier = Modifier.width(300.dp),
+                                            enabled = !state.tumblrLoginState.loading,
+                                        ) {
+                                            PlatformText(
+                                                text = stringResource(Res.string.service_select_next_button),
+                                            )
+                                        }
+                                        state.tumblrLoginState.error?.let {
+                                            PlatformText(text = it)
+                                        }
+                                    }
+                                }
+
                                 PlatformType.Misskey -> {
                                     registerDeeplinkCallback {
                                         state.misskeyLoginState.resume(it)

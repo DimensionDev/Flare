@@ -20,6 +20,7 @@ public enum class UiIcon {
     Mastodon,
     Misskey,
     Bluesky,
+    Tumblr,
     List,
     Feeds,
     Messages,

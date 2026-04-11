@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.data.database.app.model.DbApplication
 import dev.dimension.flare.data.network.mastodon.api.model.CreateApplicationResponse
+import dev.dimension.flare.data.network.tumblr.model.TumblrApplicationCredential
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.vvoHost
 import dev.dimension.flare.model.xqtHost
@@ -32,6 +33,12 @@ public sealed interface UiApplication {
     @Immutable
     public data class Bluesky internal constructor(
         override val host: String,
+    ) : UiApplication
+
+    @Immutable
+    public data class Tumblr internal constructor(
+        override val host: String,
+        internal val credential: TumblrApplicationCredential,
     ) : UiApplication
 
     @Immutable
@@ -68,6 +75,12 @@ public sealed interface UiApplication {
                 PlatformType.Bluesky ->
                     Bluesky(
                         host = host,
+                    )
+
+                PlatformType.Tumblr ->
+                    Tumblr(
+                        host = host,
+                        credential = credential_json.decodeJson(),
                     )
 
                 PlatformType.xQt -> XQT

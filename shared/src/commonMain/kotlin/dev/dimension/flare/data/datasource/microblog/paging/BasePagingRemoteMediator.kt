@@ -63,26 +63,7 @@ internal abstract class BasePagingRemoteMediator<T : Any, R : Any>(
                 request = request,
             )
         database.connect {
-            if (loadType == LoadType.REFRESH) {
-                database.pagingTimelineDao().deletePagingKey(pagingKey)
-                database.pagingTimelineDao().insertPagingKey(
-                    DbPagingKey(
-                        pagingKey = pagingKey,
-                        nextKey = result.nextKey,
-                        prevKey = result.previousKey,
-                    ),
-                )
-            } else if (loadType == LoadType.PREPEND && result.previousKey != null) {
-                database.pagingTimelineDao().updatePagingKeyPrevKey(
-                    pagingKey = pagingKey,
-                    prevKey = result.previousKey,
-                )
-            } else if (loadType == LoadType.APPEND && result.nextKey != null) {
-                database.pagingTimelineDao().updatePagingKeyNextKey(
-                    pagingKey = pagingKey,
-                    nextKey = result.nextKey,
-                )
-            }
+            updatePagingKeys(loadType, request, result)
             onSaveCache(request, result.data)
         }
         return MediatorResult.Success(
@@ -99,6 +80,33 @@ internal abstract class BasePagingRemoteMediator<T : Any, R : Any>(
         pageSize: Int,
         request: PagingRequest,
     ): PagingResult<R>
+
+    protected open suspend fun updatePagingKeys(
+        loadType: LoadType,
+        request: PagingRequest,
+        result: PagingResult<R>,
+    ) {
+        if (loadType == LoadType.REFRESH) {
+            database.pagingTimelineDao().deletePagingKey(pagingKey)
+            database.pagingTimelineDao().insertPagingKey(
+                DbPagingKey(
+                    pagingKey = pagingKey,
+                    nextKey = result.nextKey,
+                    prevKey = result.previousKey,
+                ),
+            )
+        } else if (loadType == LoadType.PREPEND && result.previousKey != null) {
+            database.pagingTimelineDao().updatePagingKeyPrevKey(
+                pagingKey = pagingKey,
+                prevKey = result.previousKey,
+            )
+        } else if (loadType == LoadType.APPEND && result.nextKey != null) {
+            database.pagingTimelineDao().updatePagingKeyNextKey(
+                pagingKey = pagingKey,
+                nextKey = result.nextKey,
+            )
+        }
+    }
 
     protected abstract suspend fun onSaveCache(
         request: PagingRequest,

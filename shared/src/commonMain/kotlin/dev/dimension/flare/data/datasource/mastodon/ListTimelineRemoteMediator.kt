@@ -4,6 +4,7 @@ import androidx.paging.ExperimentalPagingApi
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
+import dev.dimension.flare.data.datasource.microblog.paging.RefreshBehavior
 import dev.dimension.flare.data.network.mastodon.MastodonService
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimelineV2
@@ -19,6 +20,9 @@ internal class ListTimelineRemoteMediator(
 
     override val supportPrepend: Boolean
         get() = true
+
+    override val refreshBehavior: RefreshBehavior
+        get() = RefreshBehavior.MergeTop
 
     override suspend fun load(
         pageSize: Int,

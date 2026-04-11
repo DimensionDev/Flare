@@ -6,6 +6,7 @@ import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
+import dev.dimension.flare.data.datasource.microblog.paging.RefreshBehavior
 import dev.dimension.flare.data.datasource.microblog.paging.ReportableRemoteLoader
 import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlinx.coroutines.async
@@ -52,7 +53,7 @@ internal class MixedRemoteMediator(
                                     reportError?.invoke(it)
                                     PagingResult(endOfPaginationReached = true)
                                 }.let {
-                                    SubResponse(subRequest.mediator, it)
+                                    SubResponse(subRequest.mediator, subRequest.request, it)
                                 }
                             }
                         }.awaitAll()
@@ -72,7 +73,7 @@ internal class MixedRemoteMediator(
 
                 database.connect {
                     response.forEach {
-                        saveSubResponse(request, it)
+                        saveSubResponse(it)
                     }
                 }
 
@@ -114,16 +115,23 @@ internal class MixedRemoteMediator(
                     ?.prevKey
                     ?.let(PagingRequest::Prepend)
 
-            is PagingRequest.Refresh -> PagingRequest.Refresh
+            is PagingRequest.Refresh ->
+                if (mediator.refreshBehavior == RefreshBehavior.MergeTop && mediator.supportPrepend) {
+                    database
+                        .pagingTimelineDao()
+                        .getPagingKey(subKey(mediator))
+                        ?.prevKey
+                        ?.let(PagingRequest::Prepend)
+                        ?: PagingRequest.Refresh
+                } else {
+                    PagingRequest.Refresh
+                }
         }?.let {
             SubRequest(mediator, it)
         }
 
-    private suspend fun saveSubResponse(
-        request: PagingRequest,
-        subResponse: SubResponse,
-    ) {
-        val (mediator, result) = subResponse
+    private suspend fun saveSubResponse(subResponse: SubResponse) {
+        val (mediator, request, result) = subResponse
         if (request is PagingRequest.Prepend && result.previousKey != null) {
             database.pagingTimelineDao().updatePagingKeyPrevKey(
                 pagingKey = subKey(mediator),
@@ -157,6 +165,7 @@ internal class MixedRemoteMediator(
 
     private data class SubResponse(
         val mediator: CacheableRemoteLoader<UiTimelineV2>,
+        val request: PagingRequest,
         val result: PagingResult<UiTimelineV2>,
     )
 }

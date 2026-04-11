@@ -5,7 +5,6 @@ import de.cketti.codepoints.deluxe.codePointSequence
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.database.cache.mapper.XQTTimeline
-import dev.dimension.flare.data.database.cache.model.MessageContent
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.userActionsMenu
 import dev.dimension.flare.data.network.xqt.model.Admin
@@ -41,7 +40,6 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.ClickEvent
-import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiCard
 import dev.dimension.flare.ui.model.UiDMItem
 import dev.dimension.flare.ui.model.UiHandle
@@ -1025,20 +1023,13 @@ internal fun TwitterList.render(accountKey: MicroBlogKey): UiList.List {
     )
 }
 
-internal fun MessageContent.XQT.render(
+internal fun renderXQTDirectMessage(
+    data: String,
     accountKey: MicroBlogKey,
-    credential: UiAccount.Credential,
-): UiDMItem.Message =
-    when (this) {
-        is MessageContent.XQT.Message -> render(accountKey, credential)
-    }
-
-private fun MessageContent.XQT.Message.render(
-    accountKey: MicroBlogKey,
-    credential: UiAccount.Credential,
+    chocolate: String?,
 ): UiDMItem.Message {
-    val data = data.decodeJson<InboxMessageData>()
-    val attachment = data.attachment
+    val messageData = data.decodeJson<InboxMessageData>()
+    val attachment = messageData.attachment
     val photo = attachment?.photo
     val animatedGif = attachment?.animatedGif
     val video = attachment?.video
@@ -1046,12 +1037,12 @@ private fun MessageContent.XQT.Message.render(
     if (!photo
             ?.url
             .isNullOrEmpty() &&
-        data.text
+        messageData.text
             .orEmpty()
             .endsWith(photo.url) &&
         !photo.mediaUrlHttps
             .isNullOrEmpty() &&
-        credential is UiAccount.XQT.Credential
+        chocolate != null
     ) {
         return UiDMItem.Message.Media(
             UiMedia.Image(
@@ -1069,7 +1060,7 @@ private fun MessageContent.XQT.Message.render(
                 description = photo.extAltText,
                 customHeaders =
                     persistentMapOf(
-                        "Cookie" to credential.chocolate,
+                        "Cookie" to chocolate,
                         "Referer" to "https://${accountKey.host}/",
                     ),
             ),
@@ -1077,12 +1068,12 @@ private fun MessageContent.XQT.Message.render(
     } else if (!animatedGif
             ?.url
             .isNullOrEmpty() &&
-        data.text
+        messageData.text
             .orEmpty()
             .endsWith(animatedGif.url) &&
         !animatedGif.mediaUrlHttps
             .isNullOrEmpty() &&
-        credential is UiAccount.XQT.Credential
+        chocolate != null
     ) {
         return UiDMItem.Message.Media(
             UiMedia.Gif(
@@ -1099,7 +1090,7 @@ private fun MessageContent.XQT.Message.render(
                 description = animatedGif.extAltText,
                 customHeaders =
                     persistentMapOf(
-                        "Cookie" to credential.chocolate,
+                        "Cookie" to chocolate,
                         "Referer" to "https://${accountKey.host}/",
                     ),
             ),
@@ -1107,12 +1098,12 @@ private fun MessageContent.XQT.Message.render(
     } else if (!video
             ?.url
             .isNullOrEmpty() &&
-        data.text
+        messageData.text
             .orEmpty()
             .endsWith(video.url) &&
         !video.mediaUrlHttps
             .isNullOrEmpty() &&
-        credential is UiAccount.XQT.Credential
+        chocolate != null
     ) {
         val url =
             video.videoInfo
@@ -1128,7 +1119,7 @@ private fun MessageContent.XQT.Message.render(
                         description = video.extAltText,
                         customHeaders =
                             persistentMapOf(
-                                "Cookie" to credential.chocolate,
+                                "Cookie" to chocolate,
                                 "Referer" to "https://${accountKey.host}/",
                             ),
                     ),
@@ -1149,7 +1140,7 @@ private fun MessageContent.XQT.Message.render(
                         description = video.extAltText,
                         customHeaders =
                             persistentMapOf(
-                                "Cookie" to credential.chocolate,
+                                "Cookie" to chocolate,
                                 "Referer" to "https://${accountKey.host}/",
                             ),
                     ),
@@ -1157,13 +1148,13 @@ private fun MessageContent.XQT.Message.render(
             }
         } else {
             return UiDMItem.Message.Text(
-                twitterParser.parse(data.text.orEmpty()).toUiRichText(accountKey),
+                twitterParser.parse(messageData.text.orEmpty()).toUiRichText(accountKey),
             )
         }
     } else if (!tweet
             ?.url
             .isNullOrEmpty() &&
-        data.text
+        messageData.text
             .orEmpty()
             .endsWith(tweet.url) &&
         tweet.status != null
@@ -1193,7 +1184,7 @@ private fun MessageContent.XQT.Message.render(
         )
     } else {
         return UiDMItem.Message.Text(
-            twitterParser.parse(data.text.orEmpty()).toUiRichText(accountKey),
+            twitterParser.parse(messageData.text.orEmpty()).toUiRichText(accountKey),
         )
     }
 }

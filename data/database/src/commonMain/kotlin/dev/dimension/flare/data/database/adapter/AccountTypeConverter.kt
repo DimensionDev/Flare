@@ -6,6 +6,8 @@ import dev.dimension.flare.common.decodeProtobuf
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.common.encodeProtobuf
 import dev.dimension.flare.model.DbAccountType
+import dev.dimension.flare.ui.model.UiDMItem
+import dev.dimension.flare.ui.model.UiDMRoom
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiTimelineV2
@@ -34,4 +36,16 @@ public class AccountTypeConverter {
 
     @TypeConverter
     public fun toUiRelation(value: ByteArray): UiRelation = value.decodeProtobuf()
+
+    @TypeConverter
+    public fun fromUiDMItem(value: UiDMItem): ByteArray = value.encodeProtobuf()
+
+    @TypeConverter
+    public fun toUiDMItem(value: ByteArray): UiDMItem = value.decodeProtobuf()
+
+    @TypeConverter
+    public fun fromUiDMRoom(value: UiDMRoom): ByteArray = value.encodeProtobuf()
+
+    @TypeConverter
+    public fun toUiDMRoom(value: ByteArray): UiDMRoom = value.decodeProtobuf()
 }

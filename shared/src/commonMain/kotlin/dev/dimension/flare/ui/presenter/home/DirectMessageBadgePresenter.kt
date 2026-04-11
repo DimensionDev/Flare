@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import dev.dimension.flare.common.collectAsState
-import dev.dimension.flare.data.datasource.microblog.DirectMessageDataSource
+import dev.dimension.flare.data.datasource.microblog.datasource.DirectMessageDataSource
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
@@ -33,7 +33,7 @@ public class DirectMessageBadgePresenter(
             serviceState.map { service ->
                 remember(service) {
                     require(service is DirectMessageDataSource)
-                    service.directMessageBadgeCount
+                    service.directMessageHandler.directMessageBadgeCount
                 }.collectAsState()
             }
         if (autoRefresh) {

@@ -29,7 +29,6 @@ kotlin {
                 api(libs.room.runtime)
                 api(libs.room.paging)
                 api(libs.paging.common)
-                implementation(libs.bluesky)
                 implementation(libs.kotlinx.coroutines.core)
                 implementation(libs.kotlinx.serialization.json)
                 implementation(libs.kotlinx.serialization.protobuf)

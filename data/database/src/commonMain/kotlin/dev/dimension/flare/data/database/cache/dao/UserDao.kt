@@ -38,6 +38,9 @@ public interface UserDao {
     @Query("SELECT * FROM DbUser WHERE userKey = :userKey")
     public fun findByKey(userKey: MicroBlogKey): Flow<DbUser?>
 
+    @Query("SELECT * FROM DbUser WHERE userKey = :userKey")
+    public suspend fun getUser(userKey: MicroBlogKey): DbUser?
+
     @Query("SELECT * FROM DbUser WHERE canonicalHandle = :canonicalHandle AND host = :host")
     public fun findByCanonicalHandleAndHost(
         canonicalHandle: String,

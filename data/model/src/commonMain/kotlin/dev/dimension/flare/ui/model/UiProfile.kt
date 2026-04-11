@@ -137,6 +137,23 @@ public data class UiProfile public constructor(
         Bot,
         Locked,
     }
+
+    public companion object {
+        public fun placeholder(key: MicroBlogKey): UiProfile =
+            UiProfile(
+                key = key,
+                handle = UiHandle(raw = key.id, host = key.host),
+                avatar = "",
+                nameInternal = key.id.toUiPlainText(),
+                platformType = PlatformType.Mastodon,
+                clickEvent = ClickEvent.Noop,
+                banner = null,
+                description = null,
+                matrices = Matrices(fansCount = 0, followsCount = 0, statusesCount = 0),
+                mark = persistentListOf(),
+                bottomContent = null,
+            )
+    }
 }
 
 public fun createSampleUser(): UiProfile =

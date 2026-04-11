@@ -8,7 +8,7 @@ import androidx.room3.TypeConverters
 import androidx.room3.immediateTransaction
 import androidx.room3.useWriterConnection
 
-public const val CACHE_DATABASE_VERSION: Int = 37
+public const val CACHE_DATABASE_VERSION: Int = 38
 
 @Database(
     entities = [
@@ -17,10 +17,8 @@ public const val CACHE_DATABASE_VERSION: Int = 37
         dev.dimension.flare.data.database.cache.model.DbStatus::class,
         dev.dimension.flare.data.database.cache.model.DbUser::class,
         dev.dimension.flare.data.database.cache.model.DbPagingTimeline::class,
-        dev.dimension.flare.data.database.cache.model.DbMessageRoom::class,
         dev.dimension.flare.data.database.cache.model.DbMessageItem::class,
         dev.dimension.flare.data.database.cache.model.DbDirectMessageTimeline::class,
-        dev.dimension.flare.data.database.cache.model.DbMessageRoomReference::class,
         dev.dimension.flare.data.database.cache.model.DbUserHistory::class,
         dev.dimension.flare.data.database.cache.model.DbEmojiHistory::class,
         dev.dimension.flare.data.database.cache.model.DbPagingKey::class,
@@ -39,7 +37,6 @@ public const val CACHE_DATABASE_VERSION: Int = 37
     dev.dimension.flare.data.database.adapter.AccountTypeConverter::class,
     dev.dimension.flare.data.database.cache.model.EmojiContentConverter::class,
     dev.dimension.flare.data.database.cache.model.StatusConverter::class,
-    dev.dimension.flare.data.database.cache.model.MessageContentConverters::class,
     dev.dimension.flare.data.database.cache.model.ListContentConverters::class,
     dev.dimension.flare.data.database.cache.model.TranslationConverters::class,
 )

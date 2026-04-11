@@ -29,7 +29,6 @@ import app.bsky.richtext.FacetMention
 import app.bsky.richtext.FacetTag
 import chat.bsky.convo.MessageView
 import dev.dimension.flare.common.SerializableImmutableList
-import dev.dimension.flare.data.database.cache.model.MessageContent
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.data.datasource.microblog.userActionsMenu
@@ -230,7 +229,7 @@ private fun parseBluesky(
         accountKey = accountKey,
     )
 
-private fun parseBluesky(
+internal fun parseBluesky(
     text: String,
     facets: List<Facet>,
     accountKey: MicroBlogKey,
@@ -1626,12 +1625,6 @@ internal fun ListView.render(accountKey: MicroBlogKey) =
         avatar = avatar?.uri,
         creator = creator.render(accountKey),
     )
-
-internal fun MessageContent.Bluesky.render(accountKey: MicroBlogKey) =
-    when (this) {
-        is MessageContent.Bluesky.Deleted -> UiDMItem.Message.Deleted
-        is MessageContent.Bluesky.Message -> data.render(accountKey)
-    }
 
 internal fun MessageView.render(accountKey: MicroBlogKey) =
     UiDMItem.Message.Text(

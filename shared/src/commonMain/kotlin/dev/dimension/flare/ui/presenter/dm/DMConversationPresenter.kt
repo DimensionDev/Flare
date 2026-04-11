@@ -9,7 +9,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.collectAsState
 import dev.dimension.flare.common.toPagingState
-import dev.dimension.flare.data.datasource.microblog.DirectMessageDataSource
+import dev.dimension.flare.data.datasource.microblog.datasource.DirectMessageDataSource
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
@@ -76,21 +76,21 @@ public class DMConversationPresenter(
             override fun send(message: String) {
                 serviceState.onSuccess {
                     require(it is DirectMessageDataSource)
-                    it.sendDirectMessage(roomKey, message)
+                    it.directMessageHandler.sendDirectMessage(roomKey, message)
                 }
             }
 
             override fun retry(key: MicroBlogKey) {
                 serviceState.onSuccess {
                     require(it is DirectMessageDataSource)
-                    it.retrySendDirectMessage(key)
+                    it.directMessageHandler.retrySendDirectMessage(key)
                 }
             }
 
             override fun leave() {
                 serviceState.onSuccess {
                     require(it is DirectMessageDataSource)
-                    it.leaveDirectMessage(roomKey)
+                    it.directMessageHandler.leaveDirectMessage(roomKey)
                 }
             }
         }

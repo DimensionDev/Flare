@@ -8,8 +8,8 @@ import androidx.compose.runtime.remember
 import dev.dimension.flare.common.collectAsState
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
-import dev.dimension.flare.data.datasource.microblog.DirectMessageDataSource
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
+import dev.dimension.flare.data.datasource.microblog.datasource.DirectMessageDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.ListDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.RelationDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
@@ -108,7 +108,7 @@ public class ProfilePresenter(
             if (service is DirectMessageDataSource && userKey != null) {
                 flow<Boolean> {
                     runCatching {
-                        service.canSendDirectMessage(userKey)
+                        service.directMessageHandler.canSendDirectMessage(userKey)
                     }.getOrElse {
                         false
                     }.let {

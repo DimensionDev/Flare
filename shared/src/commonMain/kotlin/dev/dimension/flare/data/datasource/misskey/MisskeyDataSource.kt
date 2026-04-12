@@ -12,9 +12,10 @@ import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeType
 import dev.dimension.flare.data.datasource.microblog.DatabaseUpdater
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
-import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
 import dev.dimension.flare.data.datasource.microblog.ReactionDataSource
+import dev.dimension.flare.data.datasource.microblog.StatusMutation
+import dev.dimension.flare.data.datasource.microblog.count
 import dev.dimension.flare.data.datasource.microblog.datasource.ListDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.RelationDataSource
@@ -34,6 +35,7 @@ import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.notSupported
 import dev.dimension.flare.data.datasource.microblog.paging.toPagingSource
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
+import dev.dimension.flare.data.datasource.microblog.toggled
 import dev.dimension.flare.data.network.misskey.api.model.AdminAccountsDeleteRequest
 import dev.dimension.flare.data.network.misskey.api.model.ChannelsFeaturedRequest
 import dev.dimension.flare.data.network.misskey.api.model.ChannelsFollowRequest
@@ -138,23 +140,22 @@ internal class MisskeyDataSource(
     }
 
     override suspend fun handle(
-        event: PostEvent,
+        mutation: StatusMutation,
         updater: DatabaseUpdater,
     ) {
-        require(event is PostEvent.Misskey)
-        when (event) {
-            is PostEvent.Misskey.React -> {
-                val reacted = !event.hasReacted
-                val nextActionCount = (event.count + if (reacted) 1 else -1).coerceAtLeast(0)
-                updater.updateCache(event.postKey) { current ->
-                    if (current !is UiTimelineV2.Post) {
-                        return@updateCache current
-                    }
+        val toggled = mutation.toggled
+        when (mutation.type) {
+            StatusMutation.TYPE_REACT -> {
+                val reaction = mutation.params["reaction"] ?: return
+                val reacted = !toggled
+                val nextActionCount = (mutation.count + if (reacted) 1 else -1).coerceAtLeast(0)
+                updater.updateCache(mutation.statusKey) { current ->
+                    if (current !is UiTimelineV2.Post) return@updateCache current
                     val updatedReactions =
                         current.emojiReactions
                             .toMutableList()
                             .let { reactions ->
-                                val index = reactions.indexOfFirst { it.name == event.reaction }
+                                val index = reactions.indexOfFirst { it.name == reaction }
                                 if (reacted) {
                                     if (index >= 0) {
                                         val original = reactions[index]
@@ -163,39 +164,37 @@ internal class MisskeyDataSource(
                                                 count = UiNumber(original.count.value + 1),
                                                 me = true,
                                                 clickEvent =
-                                                    ClickEvent.event(
-                                                        accountKey,
-                                                        PostEvent.Misskey.React(
-                                                            postKey = event.postKey,
-                                                            hasReacted = true,
-                                                            reaction = event.reaction,
-                                                            count = nextActionCount,
-                                                            accountKey = accountKey,
-                                                        ),
+                                                    ClickEvent.mutation(
+                                                        accountKey = accountKey,
+                                                        statusKey = mutation.statusKey,
+                                                        type = StatusMutation.TYPE_REACT,
+                                                        params =
+                                                            buildMap {
+                                                                put(StatusMutation.PARAM_TOGGLED, "true")
+                                                                put(StatusMutation.PARAM_COUNT, nextActionCount.toString())
+                                                                put("reaction", reaction)
+                                                            },
                                                     ),
                                             )
                                     } else {
                                         reactions.add(
                                             UiTimelineV2.Post.EmojiReaction(
-                                                name = event.reaction,
+                                                name = reaction,
                                                 url = "",
                                                 count = UiNumber(1),
                                                 clickEvent =
-                                                    ClickEvent.event(
-                                                        accountKey,
-                                                        PostEvent.Misskey.React(
-                                                            postKey = event.postKey,
-                                                            hasReacted = true,
-                                                            reaction = event.reaction,
-                                                            count = nextActionCount,
-                                                            accountKey = accountKey,
-                                                        ),
+                                                    ClickEvent.mutation(
+                                                        accountKey = accountKey,
+                                                        statusKey = mutation.statusKey,
+                                                        type = StatusMutation.TYPE_REACT,
+                                                        params =
+                                                            buildMap {
+                                                                put(StatusMutation.PARAM_TOGGLED, "true")
+                                                                put(StatusMutation.PARAM_COUNT, nextActionCount.toString())
+                                                                put("reaction", reaction)
+                                                            },
                                                     ),
-                                                isUnicode =
-                                                    !event.reaction.startsWith(':') &&
-                                                        !event.reaction.endsWith(
-                                                            ':',
-                                                        ),
+                                                isUnicode = !reaction.startsWith(':') && !reaction.endsWith(':'),
                                                 me = true,
                                             ),
                                         )
@@ -211,15 +210,16 @@ internal class MisskeyDataSource(
                                                 count = UiNumber(newCount),
                                                 me = false,
                                                 clickEvent =
-                                                    ClickEvent.event(
-                                                        accountKey,
-                                                        PostEvent.Misskey.React(
-                                                            postKey = event.postKey,
-                                                            hasReacted = false,
-                                                            reaction = event.reaction,
-                                                            count = nextActionCount,
-                                                            accountKey = accountKey,
-                                                        ),
+                                                    ClickEvent.mutation(
+                                                        accountKey = accountKey,
+                                                        statusKey = mutation.statusKey,
+                                                        type = StatusMutation.TYPE_REACT,
+                                                        params =
+                                                            buildMap {
+                                                                put(StatusMutation.PARAM_TOGGLED, "false")
+                                                                put(StatusMutation.PARAM_COUNT, nextActionCount.toString())
+                                                                put("reaction", reaction)
+                                                            },
                                                     ),
                                             )
                                     }
@@ -227,62 +227,72 @@ internal class MisskeyDataSource(
                                 reactions
                             }.sortedByDescending { it.count.value }
                             .toImmutableList()
-                    current.copy(
-                        emojiReactions = updatedReactions,
-                    )
+                    current.copy(emojiReactions = updatedReactions)
                 }
-                if (event.hasReacted) {
-                    service.notesReactionsDelete(IPinRequest(noteId = event.postKey.id))
+                if (toggled) {
+                    service.notesReactionsDelete(IPinRequest(noteId = mutation.statusKey.id))
                 } else {
                     service.notesReactionsCreate(
                         NotesReactionsCreateRequest(
-                            noteId = event.postKey.id,
-                            reaction = event.reaction,
+                            noteId = mutation.statusKey.id,
+                            reaction = reaction,
                         ),
                     )
                 }
             }
 
-            is PostEvent.Misskey.Renote ->
+            StatusMutation.TYPE_REPOST ->
                 service.notesCreate(
-                    NotesCreateRequest(
-                        renoteId = event.postKey.id,
-                    ),
+                    NotesCreateRequest(renoteId = mutation.statusKey.id),
                 )
 
-            is PostEvent.Misskey.Vote ->
-                event.options.forEach {
+            StatusMutation.TYPE_FAVOURITE -> {
+                if (toggled) {
+                    service.notesFavoritesDelete(IPinRequest(noteId = mutation.statusKey.id))
+                } else {
+                    service.notesFavoritesCreate(IPinRequest(noteId = mutation.statusKey.id))
+                }
+            }
+
+            StatusMutation.TYPE_VOTE -> {
+                val options =
+                    mutation.params[StatusMutation.PARAM_OPTIONS]
+                        ?.split(",")
+                        ?.mapNotNull { it.trim().toIntOrNull() }
+                        ?: return
+                options.forEach {
                     service.notesPollsVote(
                         notesPollsVoteRequest =
                             NotesPollsVoteRequest(
-                                noteId = event.postKey.id,
+                                noteId = mutation.statusKey.id,
                                 choice = it,
                             ),
                     )
                 }
-
-            is PostEvent.Misskey.Favourite -> {
-                if (event.favourited) {
-                    service.notesFavoritesDelete(IPinRequest(noteId = event.postKey.id))
-                } else {
-                    service.notesFavoritesCreate(IPinRequest(noteId = event.postKey.id))
-                }
             }
 
-            is PostEvent.Misskey.AcceptFollowRequest -> {
+            StatusMutation.TYPE_ACCEPT_FOLLOW_REQUEST -> {
+                val userKeyId = mutation.params[StatusMutation.PARAM_USER_KEY] ?: return
+                val notificationStatusKey = mutation.params[StatusMutation.PARAM_NOTIFICATION_STATUS_KEY]
                 service.followingRequestsAccept(
-                    adminAccountsDeleteRequest = AdminAccountsDeleteRequest(userId = event.userKey.id),
+                    adminAccountsDeleteRequest = AdminAccountsDeleteRequest(userId = userKeyId),
                 )
-                updater.deleteFromCache(event.notificationStatusKey)
-                relationHandler.approveFollowRequest(event.userKey)
+                if (notificationStatusKey != null) {
+                    updater.deleteFromCache(MicroBlogKey(notificationStatusKey, mutation.statusKey.host))
+                }
+                relationHandler.approveFollowRequest(MicroBlogKey(userKeyId, mutation.statusKey.host))
             }
 
-            is PostEvent.Misskey.RejectFollowRequest -> {
+            StatusMutation.TYPE_REJECT_FOLLOW_REQUEST -> {
+                val userKeyId = mutation.params[StatusMutation.PARAM_USER_KEY] ?: return
+                val notificationStatusKey = mutation.params[StatusMutation.PARAM_NOTIFICATION_STATUS_KEY]
                 service.followingRequestsReject(
-                    adminAccountsDeleteRequest = AdminAccountsDeleteRequest(userId = event.userKey.id),
+                    adminAccountsDeleteRequest = AdminAccountsDeleteRequest(userId = userKeyId),
                 )
-                updater.deleteFromCache(event.notificationStatusKey)
-                relationHandler.rejectFollowRequest(event.userKey)
+                if (notificationStatusKey != null) {
+                    updater.deleteFromCache(MicroBlogKey(notificationStatusKey, mutation.statusKey.host))
+                }
+                relationHandler.rejectFollowRequest(MicroBlogKey(userKeyId, mutation.statusKey.host))
             }
         }
     }

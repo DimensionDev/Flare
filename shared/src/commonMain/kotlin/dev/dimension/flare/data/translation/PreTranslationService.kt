@@ -38,46 +38,6 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.sync.withPermit
 import kotlin.time.Clock
 
-internal interface PreTranslationService {
-    fun enqueueStatuses(
-        statuses: List<DbStatus>,
-        allowLongText: Boolean = false,
-    )
-
-    fun enqueueProfile(user: DbUser)
-
-    fun retryStatus(
-        accountType: dev.dimension.flare.model.AccountType,
-        statusKey: dev.dimension.flare.model.MicroBlogKey,
-    )
-
-    fun setStatusDisplayMode(
-        accountType: dev.dimension.flare.model.AccountType,
-        statusKey: dev.dimension.flare.model.MicroBlogKey,
-        mode: TranslationDisplayMode,
-    )
-}
-
-internal data object NoopPreTranslationService : PreTranslationService {
-    override fun enqueueStatuses(
-        statuses: List<DbStatus>,
-        allowLongText: Boolean,
-    ) = Unit
-
-    override fun enqueueProfile(user: DbUser) = Unit
-
-    override fun retryStatus(
-        accountType: dev.dimension.flare.model.AccountType,
-        statusKey: dev.dimension.flare.model.MicroBlogKey,
-    ) = Unit
-
-    override fun setStatusDisplayMode(
-        accountType: dev.dimension.flare.model.AccountType,
-        statusKey: dev.dimension.flare.model.MicroBlogKey,
-        mode: TranslationDisplayMode,
-    ) = Unit
-}
-
 internal class OnlinePreTranslationService(
     private val database: CacheDatabase,
     private val appDataStore: AppDataStore,

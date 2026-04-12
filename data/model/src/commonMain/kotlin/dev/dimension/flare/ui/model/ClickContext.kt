@@ -1,6 +1,6 @@
 package dev.dimension.flare.ui.model
 
-import dev.dimension.flare.data.datasource.microblog.PostEvent
+import dev.dimension.flare.data.datasource.microblog.StatusMutation
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import dev.dimension.flare.ui.route.toUri
@@ -24,30 +24,29 @@ public sealed interface ClickEvent {
     }
 
     public companion object {
-        public fun event(
-            accountKey: MicroBlogKey?,
-            postEvent: PostEvent,
-        ): ClickEvent = if (accountKey == null) {
-            Noop
-        } else {
-            Deeplink(
-                DeeplinkEvent(
-                    accountKey = accountKey,
-                    postEvent = postEvent,
-                ),
-            )
-        }
+        public fun mutation(
+            statusMutation: StatusMutation,
+        ): ClickEvent = Deeplink(
+            DeeplinkEvent(
+                accountKey = statusMutation.accountKey,
+                statusMutation = statusMutation,
+            ),
+        )
 
-        public inline fun event(
+        public fun mutation(
             accountKey: MicroBlogKey?,
-            eventCreator: (accountKey: MicroBlogKey) -> PostEvent,
+            statusKey: MicroBlogKey,
+            type: String,
+            params: Map<String, String> = emptyMap(),
         ): ClickEvent = if (accountKey == null) {
             Noop
         } else {
-            Deeplink(
-                DeeplinkEvent(
+            mutation(
+                StatusMutation(
+                    statusKey = statusKey,
                     accountKey = accountKey,
-                    postEvent = eventCreator.invoke(accountKey),
+                    type = type,
+                    params = params,
                 ),
             )
         }

@@ -6,6 +6,9 @@ import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.database.cache.mapper.XQTTimeline
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
+import dev.dimension.flare.data.datasource.microblog.bookmark
+import dev.dimension.flare.data.datasource.microblog.like
+import dev.dimension.flare.data.datasource.microblog.repost
 import dev.dimension.flare.data.datasource.microblog.userActionsMenu
 import dev.dimension.flare.data.network.xqt.model.Admin
 import dev.dimension.flare.data.network.xqt.model.AudioSpace
@@ -542,7 +545,7 @@ internal fun Tweet.renderStatus(
                     options = options,
                     multiple = false,
                     ownVotes = ownVotes,
-                    voteEvent = null,
+                    voteMutation = null,
                     expiresAt =
                         cardLegacy.get("end_datetime_utc")?.stringValue?.let {
                             parseXQTCustomDateTime(
@@ -657,19 +660,19 @@ internal fun Tweet.renderStatus(
                 ),
                 ActionMenu.Group(
                     displayItem =
-                        ActionMenu.xqtRetweet(
+                        ActionMenu.repost(
                             statusKey = statusKey,
-                            retweeted = legacy?.retweeted == true,
-                            count = legacy?.retweetCount?.toLong() ?: 0,
                             accountKey = accountKey,
+                            toggled = legacy?.retweeted == true,
+                            count = legacy?.retweetCount?.toLong() ?: 0,
                         ),
                     actions =
                         listOfNotNull(
-                            ActionMenu.xqtRetweet(
+                            ActionMenu.repost(
                                 statusKey = statusKey,
-                                retweeted = legacy?.retweeted == true,
-                                count = legacy?.retweetCount?.toLong() ?: 0,
                                 accountKey = accountKey,
+                                toggled = legacy?.retweeted == true,
+                                count = legacy?.retweetCount?.toLong() ?: 0,
                             ),
                             ActionMenu.Item(
                                 icon = UiIcon.Quote,
@@ -686,11 +689,11 @@ internal fun Tweet.renderStatus(
                             ),
                         ).toImmutableList(),
                 ),
-                ActionMenu.xqtLike(
+                ActionMenu.like(
                     statusKey = statusKey,
-                    liked = legacy?.favorited == true,
-                    count = legacy?.favoriteCount?.toLong() ?: 0,
                     accountKey = accountKey,
+                    toggled = legacy?.favorited == true,
+                    count = legacy?.favoriteCount?.toLong() ?: 0,
                 ),
                 ActionMenu.Group(
                     displayItem =
@@ -701,11 +704,11 @@ internal fun Tweet.renderStatus(
                     actions =
                         buildList {
                             add(
-                                ActionMenu.xqtBookmark(
+                                ActionMenu.bookmark(
                                     statusKey = statusKey,
-                                    bookmarked = legacy?.bookmarked == true,
-                                    count = legacy?.bookmarkCount?.toLong() ?: 0,
                                     accountKey = accountKey,
+                                    toggled = legacy?.bookmarked == true,
+                                    count = legacy?.bookmarkCount?.toLong() ?: 0,
                                 ),
                             )
                             add(

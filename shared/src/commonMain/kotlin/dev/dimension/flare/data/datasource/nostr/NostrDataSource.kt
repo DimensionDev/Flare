@@ -9,8 +9,9 @@ import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeType
 import dev.dimension.flare.data.datasource.microblog.DatabaseUpdater
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
-import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
+import dev.dimension.flare.data.datasource.microblog.StatusMutation
+import dev.dimension.flare.data.datasource.microblog.count
 import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.RelationDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
@@ -18,12 +19,15 @@ import dev.dimension.flare.data.datasource.microblog.handler.PostEventHandler
 import dev.dimension.flare.data.datasource.microblog.handler.PostHandler
 import dev.dimension.flare.data.datasource.microblog.handler.RelationHandler
 import dev.dimension.flare.data.datasource.microblog.handler.UserHandler
+import dev.dimension.flare.data.datasource.microblog.like
 import dev.dimension.flare.data.datasource.microblog.loader.RelationActionType
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.notSupported
+import dev.dimension.flare.data.datasource.microblog.repost
+import dev.dimension.flare.data.datasource.microblog.toggled
 import dev.dimension.flare.data.network.nostr.AmberSignerBridge
 import dev.dimension.flare.data.network.nostr.NostrService
 import dev.dimension.flare.data.repository.AccountRepository
@@ -32,8 +36,6 @@ import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
-import dev.dimension.flare.ui.model.mapper.nostrLike
-import dev.dimension.flare.ui.model.mapper.nostrRepost
 import dev.dimension.flare.ui.model.normalized
 import dev.dimension.flare.ui.model.signerStableId
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
@@ -368,13 +370,19 @@ internal class NostrDataSource(
         }
 
     override suspend fun handle(
-        event: PostEvent,
+        mutation: StatusMutation,
         updater: DatabaseUpdater,
     ) {
-        require(event is PostEvent.Nostr)
-        when (event) {
-            is PostEvent.Nostr.Like -> {
-                val reactionEventId = event.reactionEventId
+        val toggled = mutation.toggled
+        when (mutation.type) {
+            StatusMutation.TYPE_REPORT -> {
+                serviceManager.withService {
+                    it.report(statusKey = mutation.statusKey)
+                }
+            }
+
+            StatusMutation.TYPE_LIKE -> {
+                val reactionEventId = mutation.params["reaction_event_id"]
                 if (reactionEventId != null) {
                     serviceManager.withService {
                         it.deleteStatus(
@@ -382,33 +390,28 @@ internal class NostrDataSource(
                         )
                     }
                 } else {
-                    val reactionEventId =
+                    val newReactionEventId =
                         serviceManager.withService {
-                            it.react(
-                                statusKey = event.postKey,
-                            )
+                            it.react(statusKey = mutation.statusKey)
                         }
                     updater.updateActionMenu(
-                        event.postKey,
-                        ActionMenu.nostrLike(
-                            statusKey = event.postKey,
-                            reactionEventId = reactionEventId,
-                            count = event.count + 1,
+                        mutation.statusKey,
+                        ActionMenu.like(
+                            statusKey = mutation.statusKey,
                             accountKey = accountKey,
+                            toggled = true,
+                            count = mutation.count + 1,
+                            extras =
+                                buildMap {
+                                    newReactionEventId?.let { put("reaction_event_id", it) }
+                                },
                         ),
                     )
                 }
             }
 
-            is PostEvent.Nostr.Report ->
-                serviceManager.withService {
-                    it.report(
-                        statusKey = event.postKey,
-                    )
-                }
-
-            is PostEvent.Nostr.Repost -> {
-                val repostEventId = event.repostEventId
+            StatusMutation.TYPE_REPOST -> {
+                val repostEventId = mutation.params["repost_event_id"]
                 if (repostEventId != null) {
                     serviceManager.withService {
                         it.deleteStatus(
@@ -416,19 +419,21 @@ internal class NostrDataSource(
                         )
                     }
                 } else {
-                    val repostEventId =
+                    val newRepostEventId =
                         serviceManager.withService {
-                            it.repost(
-                                statusKey = event.postKey,
-                            )
+                            it.repost(statusKey = mutation.statusKey)
                         }
                     updater.updateActionMenu(
-                        event.postKey,
-                        ActionMenu.nostrRepost(
-                            statusKey = event.postKey,
-                            repostEventId = repostEventId,
-                            count = event.count + 1,
+                        mutation.statusKey,
+                        ActionMenu.repost(
+                            statusKey = mutation.statusKey,
                             accountKey = accountKey,
+                            toggled = true,
+                            count = mutation.count + 1,
+                            extras =
+                                buildMap {
+                                    newRepostEventId?.let { put("repost_event_id", it) }
+                                },
                         ),
                     )
                 }

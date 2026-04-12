@@ -2,9 +2,6 @@ package dev.dimension.flare.data.datastore
 
 import androidx.datastore.core.okio.OkioSerializer
 import dev.dimension.flare.data.io.PlatformPathProducer
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlin.coroutines.CoroutineContext
 
 internal actual class PlatformStorage<T> actual constructor(
     fileName: String,
@@ -15,5 +12,3 @@ internal actual class PlatformStorage<T> actual constructor(
         name = fileName,
         storageType = androidx.datastore.core.okio.WebStorageType.LOCAL,
     )
-
-internal actual val storeContext: CoroutineContext = Dispatchers.Default + SupervisorJob()

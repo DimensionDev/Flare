@@ -6,7 +6,7 @@ import androidx.compose.runtime.remember
 import dev.dimension.flare.common.collectAsState
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeType
-import dev.dimension.flare.data.datasource.microblog.PostEvent
+import dev.dimension.flare.data.datasource.microblog.StatusMutation
 import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceProvider
@@ -74,13 +74,17 @@ public class AddReactionPresenter(
                                 val hasReacted = status.emojiReactions.any { it.me && it.name == emoji.shortcode }
                                 val count =
                                     status.emojiReactions.sumOf { it.count.value }
-                                postDataSource.postEventHandler.handleEvent(
-                                    PostEvent.Misskey.React(
-                                        postKey = statusKey,
-                                        hasReacted = hasReacted,
-                                        reaction = emoji.shortcode,
-                                        count = count,
+                                postDataSource.postEventHandler.handleMutation(
+                                    StatusMutation(
+                                        statusKey = statusKey,
                                         accountKey = dataSource.accountKey,
+                                        type = StatusMutation.TYPE_REACT,
+                                        params =
+                                            buildMap {
+                                                put(StatusMutation.PARAM_TOGGLED, hasReacted.toString())
+                                                put(StatusMutation.PARAM_COUNT, count.toString())
+                                                put("reaction", emoji.shortcode)
+                                            },
                                     ),
                                 )
                             }

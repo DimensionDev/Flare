@@ -2,10 +2,10 @@ package dev.dimension.flare.ui.model
 
 import androidx.compose.runtime.Immutable
 import dev.dimension.flare.common.SerializableImmutableList
-import dev.dimension.flare.data.datasource.microblog.PostEvent
+import dev.dimension.flare.data.datasource.microblog.StatusMutation
 import dev.dimension.flare.ui.humanizer.humanizePercentage
 import dev.dimension.flare.ui.render.UiDateTime
-import dev.dimension.flare.ui.render.toUi
+import dev.dimension.flare.ui.render.toUi as toUiDateTime
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.serialization.Serializable
 import kotlin.time.Clock
@@ -18,7 +18,7 @@ public data class UiPoll public constructor(
     val options: SerializableImmutableList<Option>,
     val multiple: Boolean,
     val ownVotes: SerializableImmutableList<Int>,
-    private val voteEvent: PostEvent.PollEvent?,
+    private val voteMutation: StatusMutation?,
     // null indicates no expiration
     private val expiresAt: Instant?,
     private val enabled: Boolean = true,
@@ -31,7 +31,7 @@ public data class UiPoll public constructor(
         }
     }
     val voted: Boolean by lazy { ownVotes.isNotEmpty() }
-    val expiredAt: UiDateTime? by lazy { expiresAt?.toUi() }
+    val expiredAt: UiDateTime? by lazy { expiresAt?.toUiDateTime() }
     val onVote: ClickContext.(
         selectedOptionIndexes: ImmutableList<Int>,
     ) -> Unit by lazy {
@@ -59,11 +59,14 @@ public data class UiPoll public constructor(
         clickContext: ClickContext,
         selectedOptionIndexes: ImmutableList<Int>,
     ) {
-        if (voteEvent != null) {
+        if (voteMutation != null) {
             ClickEvent
-                .event(
-                    accountKey = voteEvent.accountKey,
-                    postEvent = voteEvent.copyWithOptions(options = selectedOptionIndexes),
+                .mutation(
+                    voteMutation.copy(
+                        params = voteMutation.params + mapOf(
+                            StatusMutation.PARAM_OPTIONS to selectedOptionIndexes.joinToString(","),
+                        ),
+                    ),
                 ).onClicked
                 .invoke(clickContext)
         }

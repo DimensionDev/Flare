@@ -1,12 +1,13 @@
 package dev.dimension.flare.ui.model
 
-import dev.dimension.flare.data.datasource.microblog.PostEvent
+import dev.dimension.flare.data.datasource.microblog.StatusMutation
 import dev.dimension.flare.model.MicroBlogKey
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
 class UiPollTest {
     @Test
@@ -23,11 +24,11 @@ class UiPollTest {
                     ),
                 multiple = true,
                 ownVotes = persistentListOf(),
-                voteEvent =
-                    PostEvent.Misskey.Vote(
+                voteMutation =
+                    StatusMutation(
+                        statusKey = postKey,
                         accountKey = accountKey,
-                        postKey = postKey,
-                        options = persistentListOf(),
+                        type = StatusMutation.TYPE_VOTE,
                     ),
                 expiresAt = null,
             )
@@ -50,7 +51,8 @@ class UiPollTest {
 
         val deeplink = assertNotNull(launchedUrl)
         val event = assertNotNull(DeeplinkEvent.parse(deeplink))
-        val voteEvent = assertNotNull(event.postEvent as? PostEvent.Misskey.Vote)
-        assertEquals(listOf(1), voteEvent.options)
+        val mutation = assertNotNull(event.statusMutation)
+        assertEquals(StatusMutation.TYPE_VOTE, mutation.type)
+        assertEquals("1", mutation.params[StatusMutation.PARAM_OPTIONS])
     }
 }

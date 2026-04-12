@@ -19,6 +19,7 @@ import dev.dimension.flare.data.network.mastodon.api.createSearchResources
 import dev.dimension.flare.data.network.mastodon.api.createStatusResources
 import dev.dimension.flare.data.network.mastodon.api.createTimelineResources
 import dev.dimension.flare.data.network.mastodon.api.createTrendsResources
+import dev.dimension.flare.data.network.mastodon.api.model.MastodonPagingConverterFactory
 import dev.dimension.flare.data.network.mastodon.api.model.UploadResponse
 import io.ktor.client.plugins.HttpResponseValidator
 import io.ktor.client.plugins.ResponseException
@@ -54,7 +55,10 @@ private val MastodonHeaderPlugin =
 private fun config(
     baseUrl: String,
     accessTokenFlow: Flow<String>,
-) = ktorfit(baseUrl) {
+) = ktorfit(
+    baseUrl = baseUrl,
+    extraConverterFactories = listOf(MastodonPagingConverterFactory()),
+) {
     expectSuccess = true
     install(MastodonHeaderPlugin) {
         this.accessTokenFlow = accessTokenFlow

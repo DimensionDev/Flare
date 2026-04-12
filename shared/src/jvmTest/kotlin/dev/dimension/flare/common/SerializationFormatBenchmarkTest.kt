@@ -6,6 +6,7 @@ import dev.dimension.flare.data.datasource.microblog.paging.TimelinePagingMapper
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.ui.humanizer.PlatformFormatter
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiCard
 import dev.dimension.flare.ui.model.UiHandle
@@ -22,7 +23,6 @@ import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.protobuf.ProtoBuf
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
@@ -42,7 +42,7 @@ class SerializationFormatBenchmarkTest {
         startKoin {
             modules(
                 module {
-                    single<dev.dimension.flare.ui.humanizer.PlatformFormatter> { TestFormatter() }
+                    single<PlatformFormatter> { TestFormatter() }
                 },
             )
         }
@@ -423,12 +423,15 @@ class SerializationFormatBenchmarkTest {
             ).toPersistentList(),
         multiple = true,
         ownVotes = persistentListOf(1),
-        voteEvent =
-            dev.dimension.flare.data.datasource.microblog.PostEvent.Mastodon.Vote(
-                id = "vote-${statusKey.id}",
+        voteMutation =
+            dev.dimension.flare.data.datasource.microblog.StatusMutation(
+                statusKey = statusKey,
                 accountKey = accountKey,
-                postKey = statusKey,
-                options = persistentListOf(1),
+                type = dev.dimension.flare.data.datasource.microblog.StatusMutation.TYPE_VOTE,
+                params = mapOf(
+                    dev.dimension.flare.data.datasource.microblog.StatusMutation.PARAM_POLL_ID to "vote-${statusKey.id}",
+                    dev.dimension.flare.data.datasource.microblog.StatusMutation.PARAM_OPTIONS to "1",
+                ),
             ),
         expiresAt = Clock.System.now(),
     )

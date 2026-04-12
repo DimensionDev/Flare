@@ -8,8 +8,8 @@ import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeType
 import dev.dimension.flare.data.datasource.microblog.DatabaseUpdater
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
-import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
+import dev.dimension.flare.data.datasource.microblog.StatusMutation
 import dev.dimension.flare.data.datasource.microblog.datasource.ListDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.NotificationDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
@@ -27,6 +27,7 @@ import dev.dimension.flare.data.datasource.microblog.loader.ListLoader
 import dev.dimension.flare.data.datasource.microblog.loader.ListMemberLoader
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.notSupported
+import dev.dimension.flare.data.datasource.microblog.toggled
 import dev.dimension.flare.data.datasource.pleroma.PleromaDataSource
 import dev.dimension.flare.data.network.mastodon.MastodonService
 import dev.dimension.flare.data.network.mastodon.api.model.PostPoll
@@ -128,28 +129,58 @@ internal open class MastodonDataSource(
     }
 
     override suspend fun handle(
-        event: PostEvent,
+        mutation: StatusMutation,
         updater: DatabaseUpdater,
     ) {
-        require(event is PostEvent.Mastodon)
-        when (event) {
-            is PostEvent.Mastodon.AcceptFollowRequest ->
-                acceptFollowRequest(event, updater)
+        val toggled = mutation.toggled
+        when (mutation.type) {
+            StatusMutation.TYPE_LIKE -> {
+                if (toggled) {
+                    service.unfavourite(mutation.statusKey.id)
+                } else {
+                    service.favourite(mutation.statusKey.id)
+                }
+            }
 
-            is PostEvent.Mastodon.Bookmark ->
-                bookmark(event, updater)
+            StatusMutation.TYPE_REPOST -> {
+                if (toggled) {
+                    service.unreblog(mutation.statusKey.id)
+                } else {
+                    service.reblog(mutation.statusKey.id)
+                }
+            }
 
-            is PostEvent.Mastodon.Like ->
-                like(event, updater)
+            StatusMutation.TYPE_BOOKMARK -> {
+                if (toggled) {
+                    service.unbookmark(mutation.statusKey.id)
+                } else {
+                    service.bookmark(mutation.statusKey.id)
+                }
+            }
 
-            is PostEvent.Mastodon.Reblog ->
-                reblog(event, updater)
+            StatusMutation.TYPE_VOTE -> {
+                val pollId = mutation.params[StatusMutation.PARAM_POLL_ID] ?: return
+                val options =
+                    mutation.params[StatusMutation.PARAM_OPTIONS]
+                        ?.split(",")
+                        ?.mapNotNull { it.trim().toIntOrNull() }
+                        ?: return
+                service.vote(id = pollId, data = PostVote(choices = options.map { it.toString() }))
+            }
 
-            is PostEvent.Mastodon.RejectFollowRequest ->
-                rejectFollowRequest(event, updater)
+            StatusMutation.TYPE_ACCEPT_FOLLOW_REQUEST -> {
+                val userKeyId = mutation.params[StatusMutation.PARAM_USER_KEY] ?: return
+                service.authorizeFollowRequest(id = userKeyId)
+                updater.deleteFromCache(mutation.statusKey)
+                relationHandler.approveFollowRequest(MicroBlogKey(userKeyId, mutation.statusKey.host))
+            }
 
-            is PostEvent.Mastodon.Vote ->
-                vote(event, updater)
+            StatusMutation.TYPE_REJECT_FOLLOW_REQUEST -> {
+                val userKeyId = mutation.params[StatusMutation.PARAM_USER_KEY] ?: return
+                service.rejectFollowRequest(id = userKeyId)
+                updater.deleteFromCache(mutation.statusKey)
+                relationHandler.rejectFollowRequest(MicroBlogKey(userKeyId, mutation.statusKey.host))
+            }
         }
     }
 
@@ -317,45 +348,6 @@ internal open class MastodonDataSource(
 //        progress(ComposeProgress(maxProgress, maxProgress))
     }
 
-    suspend fun like(
-        event: PostEvent.Mastodon.Like,
-        updater: DatabaseUpdater,
-    ) {
-        val statusKey = event.postKey
-        val liked = event.liked
-        if (liked) {
-            service.unfavourite(statusKey.id)
-        } else {
-            service.favourite(statusKey.id)
-        }
-    }
-
-    suspend fun reblog(
-        event: PostEvent.Mastodon.Reblog,
-        updater: DatabaseUpdater,
-    ) {
-        val statusKey = event.postKey
-        val reblogged = event.reblogged
-        if (reblogged) {
-            service.unreblog(statusKey.id)
-        } else {
-            service.reblog(statusKey.id)
-        }
-    }
-
-    suspend fun bookmark(
-        event: PostEvent.Mastodon.Bookmark,
-        updater: DatabaseUpdater,
-    ) {
-        val statusKey = event.postKey
-        val bookmarked = event.bookmarked
-        if (bookmarked) {
-            service.unbookmark(statusKey.id)
-        } else {
-            service.bookmark(statusKey.id)
-        }
-    }
-
     suspend fun report(
         userKey: MicroBlogKey,
         statusKey: MicroBlogKey?,
@@ -464,14 +456,6 @@ internal open class MastodonDataSource(
         )
     }
 
-    suspend fun vote(
-        event: PostEvent.Mastodon.Vote,
-        updater: DatabaseUpdater,
-    ) {
-        val options = event.options
-        service.vote(id = event.id, data = PostVote(choices = options.map { it.toString() }))
-    }
-
     override fun fans(userKey: MicroBlogKey): RemoteLoader<UiProfile> =
         MastodonFansPagingSource(
             service = service,
@@ -512,26 +496,4 @@ internal open class MastodonDataSource(
             ),
             ProfileTab.Media,
         ).toPersistentList()
-
-    suspend fun acceptFollowRequest(
-        event: PostEvent.Mastodon.AcceptFollowRequest,
-        updater: DatabaseUpdater,
-    ) {
-        service.authorizeFollowRequest(
-            id = event.userKey.id,
-        )
-        updater.deleteFromCache(event.postKey)
-        relationHandler.approveFollowRequest(event.userKey)
-    }
-
-    suspend fun rejectFollowRequest(
-        event: PostEvent.Mastodon.RejectFollowRequest,
-        updater: DatabaseUpdater,
-    ) {
-        service.rejectFollowRequest(
-            id = event.userKey.id,
-        )
-        updater.deleteFromCache(event.postKey)
-        relationHandler.rejectFollowRequest(event.userKey)
-    }
 }

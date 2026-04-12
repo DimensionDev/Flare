@@ -1,7 +1,10 @@
 package dev.dimension.flare.ui.model.mapper
 
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
-import dev.dimension.flare.data.datasource.microblog.PostEvent
+import dev.dimension.flare.data.datasource.microblog.StatusMutation
+import dev.dimension.flare.data.datasource.microblog.favourite
+import dev.dimension.flare.data.datasource.microblog.react
+import dev.dimension.flare.data.datasource.microblog.repost
 import dev.dimension.flare.data.datasource.microblog.userActionsMenu
 import dev.dimension.flare.data.network.misskey.api.model.Antenna
 import dev.dimension.flare.data.network.misskey.api.model.Channel
@@ -189,26 +192,30 @@ internal fun Notification.render(accountKey: MicroBlogKey): UiTimelineV2 {
                         color = ActionMenu.Item.Color.PrimaryColor,
                         icon = UiIcon.Check,
                         clickEvent =
-                            ClickEvent.event(
-                                accountKey,
-                                PostEvent.Misskey.AcceptFollowRequest(
-                                    postKey = statusKey,
-                                    userKey = user.key,
-                                    notificationStatusKey = statusKey,
-                                ),
+                            ClickEvent.mutation(
+                                accountKey = accountKey,
+                                statusKey = statusKey,
+                                type = StatusMutation.TYPE_ACCEPT_FOLLOW_REQUEST,
+                                params =
+                                    buildMap {
+                                        put(StatusMutation.PARAM_USER_KEY, user.key.id)
+                                        put(StatusMutation.PARAM_NOTIFICATION_STATUS_KEY, statusKey.id)
+                                    },
                             ),
                     ),
                     ActionMenu.Item(
                         text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.RejectFollowRequest),
                         color = ActionMenu.Item.Color.Red,
                         clickEvent =
-                            ClickEvent.event(
-                                accountKey,
-                                PostEvent.Misskey.RejectFollowRequest(
-                                    postKey = statusKey,
-                                    userKey = user.key,
-                                    notificationStatusKey = statusKey,
-                                ),
+                            ClickEvent.mutation(
+                                accountKey = accountKey,
+                                statusKey = statusKey,
+                                type = StatusMutation.TYPE_REJECT_FOLLOW_REQUEST,
+                                params =
+                                    buildMap {
+                                        put(StatusMutation.PARAM_USER_KEY, user.key.id)
+                                        put(StatusMutation.PARAM_NOTIFICATION_STATUS_KEY, statusKey.id)
+                                    },
                             ),
                     ),
                 ),
@@ -409,13 +416,16 @@ private fun Note.renderStatus(accountKey: MicroBlogKey): UiTimelineV2.Post {
                     url = resolveMisskeyEmoji(emoji.key, accountKey.host, emojis),
                     isUnicode = !emoji.key.startsWith(':') && !emoji.key.endsWith(':'),
                     clickEvent =
-                        ClickEvent.event(
-                            accountKey,
-                            PostEvent.Misskey.React(
-                                postKey = statusKey,
-                                hasReacted = myReaction == emoji.key,
-                                reaction = emoji.key,
-                            ),
+                        ClickEvent.mutation(
+                            accountKey = accountKey,
+                            statusKey = statusKey,
+                            type = StatusMutation.TYPE_REACT,
+                            params =
+                                buildMap {
+                                    put(StatusMutation.PARAM_TOGGLED, (myReaction == emoji.key).toString())
+                                    put(StatusMutation.PARAM_COUNT, reactions.values.sum().toString())
+                                    put("reaction", emoji.key)
+                                },
                         ),
                     me = myReaction == emoji.key,
                 )
@@ -501,10 +511,11 @@ private fun Note.renderStatus(accountKey: MicroBlogKey): UiTimelineV2.Post {
                             ),
                         actions =
                             listOfNotNull(
-                                ActionMenu.misskeyRenote(
-                                    postKey = statusKey,
-                                    count = renoteCount.toLong(),
+                                ActionMenu.repost(
+                                    statusKey = statusKey,
                                     accountKey = accountKey,
+                                    toggled = false,
+                                    count = renoteCount.toLong(),
                                 ),
                                 ActionMenu.Item(
                                     icon = UiIcon.Quote,
@@ -524,12 +535,35 @@ private fun Note.renderStatus(accountKey: MicroBlogKey): UiTimelineV2.Post {
                 } else {
                     null
                 },
-                ActionMenu.misskeyReact(
-                    postKey = statusKey,
-                    hasReacted = myReaction != null,
-                    reaction = myReaction,
-                    count = reaction.sumOf { it.count.value },
+                ActionMenu.react(
+                    statusKey = statusKey,
                     accountKey = accountKey,
+                    toggled = myReaction != null,
+                    count = reaction.sumOf { it.count.value },
+                    clickEvent =
+                        if (myReaction == null || myReaction.isEmpty()) {
+                            ClickEvent.Deeplink(
+                                DeeplinkRoute.Status
+                                    .AddReaction(
+                                        statusKey = statusKey,
+                                        accountType =
+                                            accountKey?.let { AccountType.Specific(it) }
+                                                ?: AccountType.Guest,
+                                    ),
+                            )
+                        } else {
+                            ClickEvent.mutation(
+                                accountKey = accountKey,
+                                statusKey = statusKey,
+                                type = StatusMutation.TYPE_REACT,
+                                params =
+                                    buildMap {
+                                        put(StatusMutation.PARAM_TOGGLED, "true")
+                                        put(StatusMutation.PARAM_COUNT, reaction.sumOf { it.count.value }.toString())
+                                        put("reaction", myReaction)
+                                    },
+                            )
+                        },
                 ),
                 ActionMenu.Group(
                     displayItem =
@@ -540,10 +574,10 @@ private fun Note.renderStatus(accountKey: MicroBlogKey): UiTimelineV2.Post {
                     actions =
                         buildList {
                             add(
-                                ActionMenu.misskeyFavourite(
-                                    postKey = statusKey,
-                                    favourited = false,
+                                ActionMenu.favourite(
+                                    statusKey = statusKey,
                                     accountKey = accountKey,
+                                    toggled = false,
                                 ),
                             )
                             add(
@@ -639,11 +673,11 @@ private fun Note.renderStatus(accountKey: MicroBlogKey): UiTimelineV2.Post {
                             .mapIndexedNotNull { index, choice ->
                                 index.takeIf { choice.isVoted }
                             }.toPersistentList(),
-                    voteEvent =
-                        PostEvent.Misskey.Vote(
+                    voteMutation =
+                        StatusMutation(
+                            statusKey = statusKey,
                             accountKey = accountKey,
-                            postKey = statusKey,
-                            options = persistentListOf(),
+                            type = StatusMutation.TYPE_VOTE,
                         ),
                     enabled = !isFromMe,
                 )
@@ -672,104 +706,6 @@ private fun Note.renderStatus(accountKey: MicroBlogKey): UiTimelineV2.Post {
             },
     )
 }
-
-internal fun ActionMenu.Companion.misskeyRenote(
-    postKey: MicroBlogKey,
-    count: Long,
-    accountKey: MicroBlogKey?,
-): ActionMenu.Item =
-    ActionMenu.Item(
-        updateKey = "misskey_renote_$postKey",
-        icon = UiIcon.Retweet,
-        text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Retweet),
-        count = UiNumber(count),
-        clickEvent =
-            ClickEvent.event(
-                accountKey,
-            ) { accountKey ->
-                PostEvent.Misskey.Renote(
-                    postKey = postKey,
-                    count = count,
-                    accountKey = accountKey,
-                )
-            },
-    )
-
-internal fun ActionMenu.Companion.misskeyReact(
-    postKey: MicroBlogKey,
-    hasReacted: Boolean,
-    reaction: String?,
-    count: Long,
-    accountKey: MicroBlogKey?,
-): ActionMenu.Item =
-    ActionMenu.Item(
-        updateKey = "misskey_react_$postKey",
-        icon = if (hasReacted) UiIcon.UnReact else UiIcon.React,
-        text =
-            ActionMenu.Item.Text.Localized(
-                if (hasReacted) {
-                    ActionMenu.Item.Text.Localized.Type.UnReact
-                } else {
-                    ActionMenu.Item.Text.Localized.Type.React
-                },
-            ),
-        count = UiNumber(count),
-        color = if (hasReacted) ActionMenu.Item.Color.Red else null,
-        clickEvent =
-            if (!hasReacted || reaction.isNullOrEmpty()) {
-                ClickEvent.Deeplink(
-                    DeeplinkRoute.Status
-                        .AddReaction(
-                            statusKey = postKey,
-                            accountType =
-                                accountKey?.let { AccountType.Specific(it) }
-                                    ?: AccountType.Guest,
-                        ),
-                )
-            } else {
-                ClickEvent.event(
-                    accountKey,
-                ) { accountKey ->
-                    PostEvent.Misskey.React(
-                        postKey = postKey,
-                        hasReacted = true,
-                        reaction = reaction,
-                        count = count,
-                        accountKey = accountKey,
-                    )
-                }
-            },
-    )
-
-internal fun ActionMenu.Companion.misskeyFavourite(
-    postKey: MicroBlogKey,
-    favourited: Boolean,
-    accountKey: MicroBlogKey?,
-): ActionMenu.Item =
-    ActionMenu.Item(
-        updateKey = "misskey_favourite_$postKey",
-        icon = if (favourited) UiIcon.Unlike else UiIcon.Like,
-        text =
-            ActionMenu.Item.Text.Localized(
-                if (favourited) {
-                    ActionMenu.Item.Text.Localized.Type.Unlike
-                } else {
-                    ActionMenu.Item.Text.Localized.Type.Like
-                },
-            ),
-        count = UiNumber(0),
-        color = if (favourited) ActionMenu.Item.Color.Red else null,
-        clickEvent =
-            ClickEvent.event(
-                accountKey,
-            ) { accountKey ->
-                PostEvent.Misskey.Favourite(
-                    postKey = postKey,
-                    favourited = favourited,
-                    accountKey = accountKey,
-                )
-            },
-    )
 
 private fun DriveFile.toUi(): UiMedia? {
     if (type.startsWith("image/")) {

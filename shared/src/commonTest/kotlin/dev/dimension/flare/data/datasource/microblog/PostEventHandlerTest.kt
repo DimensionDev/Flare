@@ -81,19 +81,30 @@ class PostEventHandlerTest : RobolectricTest() {
                 )
             }
 
-            val updateKey = "xqt_like_$postKey"
+            val updateKey = "${StatusMutation.TYPE_LIKE}_$postKey"
             val original = createPost(actions = persistentListOf(createMenuItem(updateKey = updateKey, count = 1)))
             insertPost(original)
 
             handler = PostEventHandler(accountType = AccountType.Specific(accountKey), handler = fakeRemoteHandler)
-            handler.handleEvent(PostEvent.XQT.Like(postKey = postKey, liked = false, count = 1, accountKey = accountKey))
+            handler.handleMutation(
+                StatusMutation(
+                    statusKey = postKey,
+                    accountKey = accountKey,
+                    type = StatusMutation.TYPE_LIKE,
+                    params =
+                        mapOf(
+                            StatusMutation.PARAM_TOGGLED to "false",
+                            StatusMutation.PARAM_COUNT to "1",
+                        ),
+                ),
+            )
             advanceUntilIdle()
 
             val updated = readPost()
             assertNotNull(updated)
             val updatedLike = updated.actions.filterIsInstance<ActionMenu.Item>().first { it.updateKey == updateKey }
             assertEquals(2, updatedLike.count?.value)
-            assertEquals(1, fakeRemoteHandler.callCount)
+            assertEquals(1, fakeRemoteHandler.mutationCallCount)
         }
 
     @Test
@@ -109,20 +120,31 @@ class PostEventHandlerTest : RobolectricTest() {
                 )
             }
 
-            val updateKey = "xqt_like_$postKey"
+            val updateKey = "${StatusMutation.TYPE_LIKE}_$postKey"
             val original = createPost(actions = persistentListOf(createMenuItem(updateKey = updateKey, count = 1)))
             insertPost(original)
 
             fakeRemoteHandler.shouldFail = true
             handler = PostEventHandler(accountType = AccountType.Specific(accountKey), handler = fakeRemoteHandler)
-            handler.handleEvent(PostEvent.XQT.Like(postKey = postKey, liked = false, count = 1, accountKey = accountKey))
+            handler.handleMutation(
+                StatusMutation(
+                    statusKey = postKey,
+                    accountKey = accountKey,
+                    type = StatusMutation.TYPE_LIKE,
+                    params =
+                        mapOf(
+                            StatusMutation.PARAM_TOGGLED to "false",
+                            StatusMutation.PARAM_COUNT to "1",
+                        ),
+                ),
+            )
             advanceUntilIdle()
 
             val reverted = readPost()
             assertNotNull(reverted)
             val like = reverted.actions.filterIsInstance<ActionMenu.Item>().first { it.updateKey == updateKey }
             assertEquals(1, like.count?.value)
-            assertEquals(1, fakeRemoteHandler.callCount)
+            assertEquals(1, fakeRemoteHandler.mutationCallCount)
         }
 
     @Test
@@ -148,18 +170,22 @@ class PostEventHandlerTest : RobolectricTest() {
                         ),
                     multiple = false,
                     ownVotes = persistentListOf(),
-                    voteEvent = null,
+                    voteMutation = null,
                     expiresAt = null,
                 )
             insertPost(createPost(poll = poll))
 
             handler = PostEventHandler(accountType = AccountType.Specific(accountKey), handler = fakeRemoteHandler)
-            handler.handleEvent(
-                PostEvent.Mastodon.Vote(
-                    id = "poll-1",
+            handler.handleMutation(
+                StatusMutation(
+                    statusKey = postKey,
                     accountKey = accountKey,
-                    postKey = postKey,
-                    options = persistentListOf(1),
+                    type = StatusMutation.TYPE_VOTE,
+                    params =
+                        mapOf(
+                            StatusMutation.PARAM_POLL_ID to "poll-1",
+                            StatusMutation.PARAM_OPTIONS to "1",
+                        ),
                 ),
             )
             advanceUntilIdle()
@@ -274,13 +300,13 @@ class PostEventHandlerTest : RobolectricTest() {
 
     private class FakeRemoteHandler : PostEventHandler.Handler {
         var shouldFail: Boolean = false
-        var callCount: Int = 0
+        var mutationCallCount: Int = 0
 
         override suspend fun handle(
-            event: PostEvent,
+            mutation: StatusMutation,
             updater: DatabaseUpdater,
         ) {
-            callCount++
+            mutationCallCount++
             if (shouldFail) {
                 error("remote failed")
             }

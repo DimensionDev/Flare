@@ -4,6 +4,8 @@ import dev.dimension.flare.common.FileType
 import dev.dimension.flare.common.JSON
 import dev.dimension.flare.common.jsonObjectOrNull
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
+import dev.dimension.flare.data.datasource.microblog.like
+import dev.dimension.flare.data.datasource.microblog.repost
 import dev.dimension.flare.data.datasource.microblog.userActionsMenu
 import dev.dimension.flare.data.datasource.nostr.NostrCache
 import dev.dimension.flare.model.AccountType
@@ -21,8 +23,6 @@ import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.effectivePubkeyHex
 import dev.dimension.flare.ui.model.effectiveSigner
-import dev.dimension.flare.ui.model.mapper.nostrLike
-import dev.dimension.flare.ui.model.mapper.nostrRepost
 import dev.dimension.flare.ui.model.normalized
 import dev.dimension.flare.ui.render.RenderContent
 import dev.dimension.flare.ui.render.RenderRun
@@ -1757,19 +1757,27 @@ internal class NostrService(
                         add(
                             ActionMenu.Group(
                                 displayItem =
-                                    ActionMenu.nostrRepost(
+                                    ActionMenu.repost(
                                         statusKey = statusKey,
-                                        repostEventId = stats.myRepostEventId,
-                                        count = stats.repostCount,
                                         accountKey = accountKey,
+                                        toggled = stats.myRepostEventId != null,
+                                        count = stats.repostCount,
+                                        extras =
+                                            buildMap {
+                                                stats.myRepostEventId?.let { put("repost_event_id", it) }
+                                            },
                                     ),
                                 actions =
                                     listOf(
-                                        ActionMenu.nostrRepost(
+                                        ActionMenu.repost(
                                             statusKey = statusKey,
-                                            repostEventId = stats.myRepostEventId,
-                                            count = stats.repostCount,
                                             accountKey = accountKey,
+                                            toggled = stats.myRepostEventId != null,
+                                            count = stats.repostCount,
+                                            extras =
+                                                buildMap {
+                                                    stats.myRepostEventId?.let { put("repost_event_id", it) }
+                                                },
                                         ),
                                         ActionMenu.Item(
                                             icon = UiIcon.Quote,
@@ -1786,11 +1794,15 @@ internal class NostrService(
                             ),
                         )
                         add(
-                            ActionMenu.nostrLike(
+                            ActionMenu.like(
                                 statusKey = statusKey,
-                                reactionEventId = stats.myReactionEventId,
-                                count = stats.reactionCount,
                                 accountKey = accountKey,
+                                toggled = stats.myReactionEventId != null,
+                                count = stats.reactionCount,
+                                extras =
+                                    buildMap {
+                                        stats.myReactionEventId?.let { put("reaction_event_id", it) }
+                                    },
                             ),
                         )
                     }
@@ -1851,12 +1863,11 @@ internal class NostrService(
                                                 text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Report),
                                                 color = ActionMenu.Item.Color.Red,
                                                 clickEvent =
-                                                    ClickEvent.event(accountKey) {
-                                                        dev.dimension.flare.data.datasource.microblog.PostEvent.Nostr.Report(
-                                                            postKey = statusKey,
-                                                            accountKey = accountKey,
-                                                        )
-                                                    },
+                                                    dev.dimension.flare.ui.model.ClickEvent.mutation(
+                                                        accountKey = accountKey,
+                                                        statusKey = statusKey,
+                                                        type = dev.dimension.flare.data.datasource.microblog.StatusMutation.TYPE_REPORT,
+                                                    ),
                                             ),
                                         )
                                     }

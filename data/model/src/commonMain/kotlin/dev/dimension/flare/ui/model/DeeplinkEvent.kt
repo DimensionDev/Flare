@@ -1,6 +1,6 @@
 package dev.dimension.flare.ui.model
 
-import dev.dimension.flare.data.datasource.microblog.PostEvent
+import dev.dimension.flare.data.datasource.microblog.StatusMutation
 import dev.dimension.flare.model.MicroBlogKey
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
@@ -13,10 +13,11 @@ import kotlinx.serialization.protobuf.ProtoBuf
 public data class DeeplinkEvent(
     val accountKey: MicroBlogKey,
     val translationEvent: TranslationEvent? = null,
-    val postEvent: PostEvent? = null,
+    val statusMutation: StatusMutation? = null,
 ) {
     init {
-        require((translationEvent == null) xor (postEvent == null)) {
+        val payloadCount = listOf(translationEvent, statusMutation).count { it != null }
+        require(payloadCount == 1) {
             "Exactly one deeplink event payload must be provided"
         }
     }

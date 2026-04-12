@@ -12,8 +12,8 @@ import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeType
 import dev.dimension.flare.data.datasource.microblog.DatabaseUpdater
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
-import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
+import dev.dimension.flare.data.datasource.microblog.StatusMutation
 import dev.dimension.flare.data.datasource.microblog.datasource.NotificationDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.RelationDataSource
@@ -27,6 +27,7 @@ import dev.dimension.flare.data.datasource.microblog.handler.UserHandler
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
+import dev.dimension.flare.data.datasource.microblog.toggled
 import dev.dimension.flare.data.network.vvo.VVOService
 import dev.dimension.flare.data.network.vvo.model.StatusDetailItem
 import dev.dimension.flare.data.repository.AccountRepository
@@ -133,14 +134,35 @@ internal class VVODataSource(
     }
 
     override suspend fun handle(
-        event: PostEvent,
+        mutation: StatusMutation,
         updater: DatabaseUpdater,
     ) {
-        require(event is PostEvent.VVO)
-        when (event) {
-            is PostEvent.VVO.Favorite -> favorite(event)
-            is PostEvent.VVO.Like -> like(event)
-            is PostEvent.VVO.LikeComment -> likeComment(event)
+        val toggled = mutation.toggled
+        val st = ensureLogin()
+        when (mutation.type) {
+            StatusMutation.TYPE_LIKE -> {
+                if (toggled) {
+                    service.unlikeStatus(id = mutation.statusKey.id, st = st)
+                } else {
+                    service.likeStatus(id = mutation.statusKey.id, st = st)
+                }
+            }
+
+            StatusMutation.TYPE_LIKE_COMMENT -> {
+                if (toggled) {
+                    service.likesDestroy(id = mutation.statusKey.id, st = st)
+                } else {
+                    service.likesUpdate(id = mutation.statusKey.id, st = st)
+                }
+            }
+
+            StatusMutation.TYPE_BOOKMARK -> {
+                if (toggled) {
+                    service.unfavoriteStatus(id = mutation.statusKey.id, st = st)
+                } else {
+                    service.favoriteStatus(id = mutation.statusKey.id, st = st)
+                }
+            }
         }
     }
 
@@ -365,33 +387,6 @@ internal class VVODataSource(
                     accountKey = accountKey,
                 ),
         )
-
-    private suspend fun like(event: PostEvent.VVO.Like) {
-        val st = ensureLogin()
-        if (event.liked) {
-            service.unlikeStatus(id = event.postKey.id, st = st)
-        } else {
-            service.likeStatus(id = event.postKey.id, st = st)
-        }
-    }
-
-    private suspend fun likeComment(event: PostEvent.VVO.LikeComment) {
-        val st = ensureLogin()
-        if (event.liked) {
-            service.likesDestroy(id = event.postKey.id, st = st)
-        } else {
-            service.likesUpdate(id = event.postKey.id, st = st)
-        }
-    }
-
-    private suspend fun favorite(event: PostEvent.VVO.Favorite) {
-        val st = ensureLogin()
-        if (event.favorited) {
-            service.unfavoriteStatus(id = event.postKey.id, st = st)
-        } else {
-            service.favoriteStatus(id = event.postKey.id, st = st)
-        }
-    }
 
     fun favouriteTimeline() =
         FavouriteRemoteMediator(

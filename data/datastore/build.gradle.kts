@@ -19,6 +19,7 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
+                implementation(projects.core.common)
                 implementation(projects.data.model)
                 implementation(libs.datastore.core)
                 implementation(libs.okio)

@@ -30,6 +30,8 @@ kotlin {
                 implementation(libs.kotlinx.immutable)
                 implementation(libs.kotlinx.serialization.json)
                 implementation(libs.kotlinx.serialization.protobuf)
+                implementation(libs.paging.common)
+                implementation(libs.ksoup)
                 implementation(libs.okio)
             }
         }

@@ -52,8 +52,9 @@ import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeType
 import dev.dimension.flare.data.datasource.microblog.DatabaseUpdater
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
-import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
+import dev.dimension.flare.data.datasource.microblog.StatusMutation
+import dev.dimension.flare.data.datasource.microblog.count
 import dev.dimension.flare.data.datasource.microblog.datasource.DirectMessageDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.ListDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.NotificationDataSource
@@ -68,12 +69,15 @@ import dev.dimension.flare.data.datasource.microblog.handler.PostEventHandler
 import dev.dimension.flare.data.datasource.microblog.handler.PostHandler
 import dev.dimension.flare.data.datasource.microblog.handler.RelationHandler
 import dev.dimension.flare.data.datasource.microblog.handler.UserHandler
+import dev.dimension.flare.data.datasource.microblog.like
 import dev.dimension.flare.data.datasource.microblog.loader.DirectMessageLoader
 import dev.dimension.flare.data.datasource.microblog.loader.ListLoader
 import dev.dimension.flare.data.datasource.microblog.loader.ListMemberLoader
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.notSupported
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
+import dev.dimension.flare.data.datasource.microblog.repost
+import dev.dimension.flare.data.datasource.microblog.toggled
 import dev.dimension.flare.data.network.bluesky.BlueskyService
 import dev.dimension.flare.data.network.bluesky.model.DidDoc
 import dev.dimension.flare.data.repository.AccountRepository
@@ -88,8 +92,6 @@ import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
-import dev.dimension.flare.ui.model.mapper.blueskyLike
-import dev.dimension.flare.ui.model.mapper.blueskyReblog
 import dev.dimension.flare.ui.model.mapper.bskyJson
 import dev.dimension.flare.ui.model.mapper.parseBskyFacets
 import dev.dimension.flare.ui.model.mapper.render
@@ -225,19 +227,106 @@ internal class BlueskyDataSource(
     }
 
     override suspend fun handle(
-        event: PostEvent,
+        mutation: StatusMutation,
         updater: DatabaseUpdater,
     ) {
-        require(event is PostEvent.Bluesky)
-        when (event) {
-            is PostEvent.Bluesky.Bookmark ->
-                bookmark(event, updater)
+        val toggled = mutation.toggled
+        val cid = mutation.params["cid"] ?: return
+        val uri = mutation.params["uri"] ?: return
+        when (mutation.type) {
+            StatusMutation.TYPE_REPOST -> {
+                val repostUri = mutation.params["repost_uri"]
+                if (repostUri != null) {
+                    if (repostUri.isNotEmpty()) {
+                        pdsService().deleteRecord(
+                            DeleteRecordRequest(
+                                repo = Did(did = accountKey.id),
+                                collection = Nsid("app.bsky.feed.repost"),
+                                rkey = RKey(repostUri.substringAfterLast('/')),
+                            ),
+                        )
+                    }
+                } else {
+                    val response =
+                        pdsService()
+                            .createRecord(
+                                CreateRecordRequest(
+                                    repo = Did(did = accountKey.id),
+                                    collection = Nsid("app.bsky.feed.repost"),
+                                    record =
+                                        app.bsky.feed
+                                            .Repost(
+                                                subject =
+                                                    StrongRef(
+                                                        uri = AtUri(uri),
+                                                        cid = Cid(cid),
+                                                    ),
+                                                createdAt = Clock.System.now(),
+                                            ).bskyJson(),
+                                ),
+                            ).requireResponse()
+                    updater.updateActionMenu(
+                        postKey = mutation.statusKey,
+                        newActionMenu =
+                            ActionMenu.repost(
+                                statusKey = mutation.statusKey,
+                                accountKey = accountKey,
+                                toggled = true,
+                                count = mutation.count + 1,
+                                extras =
+                                    buildMap {
+                                        put("cid", cid)
+                                        put("uri", uri)
+                                        put("repost_uri", response.uri.atUri)
+                                    },
+                            ),
+                    )
+                }
+            }
 
-            is PostEvent.Bluesky.Like ->
-                like(event, updater)
+            StatusMutation.TYPE_LIKE -> {
+                val likedUri = mutation.params["liked_uri"]
+                if (likedUri != null) {
+                    if (likedUri.isNotEmpty()) {
+                        deleteLikeRecord(likedUri)
+                    }
+                } else {
+                    val response = createLikeRecord(cid, uri)
+                    updater.updateActionMenu(
+                        postKey = mutation.statusKey,
+                        newActionMenu =
+                            ActionMenu.like(
+                                statusKey = mutation.statusKey,
+                                accountKey = accountKey,
+                                toggled = true,
+                                count = mutation.count + 1,
+                                extras =
+                                    buildMap {
+                                        put("cid", cid)
+                                        put("uri", uri)
+                                        put("liked_uri", response.uri.atUri)
+                                    },
+                            ),
+                    )
+                }
+            }
 
-            is PostEvent.Bluesky.Reblog ->
-                reblog(event, updater)
+            StatusMutation.TYPE_BOOKMARK -> {
+                if (toggled) {
+                    pdsService()
+                        .deleteBookmark(
+                            app.bsky.bookmark.DeleteBookmarkRequest(uri = AtUri(uri)),
+                        ).requireResponse()
+                } else {
+                    pdsService()
+                        .createBookmark(
+                            app.bsky.bookmark.CreateBookmarkRequest(
+                                uri = AtUri(uri),
+                                cid = Cid(cid),
+                            ),
+                        ).requireResponse()
+                }
+            }
         }
     }
 
@@ -447,117 +536,6 @@ internal class BlueskyDataSource(
                     ),
                 )
             }
-        }
-    }
-
-    suspend fun reblog(
-        event: PostEvent.Bluesky.Reblog,
-        updater: DatabaseUpdater,
-    ) {
-        val service = pdsService()
-        val cid = event.cid
-        val uri = event.uri
-        val repostUri = event.repostUri
-        if (repostUri != null) {
-            if (repostUri.isEmpty()) {
-                // pending event, do nothing
-            } else {
-                service.deleteRecord(
-                    DeleteRecordRequest(
-                        repo = Did(did = accountKey.id),
-                        collection = Nsid("app.bsky.feed.repost"),
-                        rkey = RKey(repostUri.substringAfterLast('/')),
-                    ),
-                )
-            }
-        } else {
-            val response =
-                service
-                    .createRecord(
-                        CreateRecordRequest(
-                            repo = Did(did = accountKey.id),
-                            collection = Nsid("app.bsky.feed.repost"),
-                            record =
-                                app.bsky.feed
-                                    .Repost(
-                                        subject =
-                                            StrongRef(
-                                                uri = AtUri(uri),
-                                                cid = Cid(cid),
-                                            ),
-                                        createdAt =
-                                            Clock.System
-                                                .now(),
-                                    ).bskyJson(),
-                        ),
-                    ).requireResponse()
-            updater.updateActionMenu(
-                postKey = event.postKey,
-                newActionMenu =
-                    ActionMenu.blueskyReblog(
-                        accountKey = accountKey,
-                        postKey = event.postKey,
-                        cid = cid,
-                        uri = uri,
-                        count = event.count + 1,
-                        repostUri = response.uri.atUri,
-                    ),
-            )
-        }
-    }
-
-    suspend fun like(
-        event: PostEvent.Bluesky.Like,
-        updater: DatabaseUpdater,
-    ) {
-        val cid = event.cid
-        val uri = event.uri
-        val likedUri = event.likedUri
-        if (likedUri != null) {
-            if (likedUri.isEmpty()) {
-                // pending event, do nothing
-            } else {
-                deleteLikeRecord(likedUri)
-            }
-        } else {
-            val response = createLikeRecord(cid, uri)
-            updater.updateActionMenu(
-                postKey = event.postKey,
-                newActionMenu =
-                    ActionMenu.blueskyLike(
-                        accountKey = accountKey,
-                        postKey = event.postKey,
-                        cid = cid,
-                        uri = uri,
-                        count = event.count + 1,
-                        likedUri = response.uri.atUri,
-                    ),
-            )
-        }
-    }
-
-    suspend fun bookmark(
-        event: PostEvent.Bluesky.Bookmark,
-        updater: DatabaseUpdater,
-    ) {
-        val service = pdsService()
-        val cid = event.cid
-        val uri = event.uri
-        if (event.bookmarked) {
-            service
-                .deleteBookmark(
-                    DeleteBookmarkRequest(
-                        uri = AtUri(uri),
-                    ),
-                ).requireResponse()
-        } else {
-            service
-                .createBookmark(
-                    CreateBookmarkRequest(
-                        uri = AtUri(uri),
-                        cid = Cid(cid),
-                    ),
-                ).requireResponse()
         }
     }
 

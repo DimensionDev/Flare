@@ -109,6 +109,7 @@ kotlin {
                 api(projects.core.common)
                 api(projects.core.humanizer)
                 api(projects.core.deeplink)
+                api(projects.service.core)
                 api(projects.data.model)
                 api(projects.data.datastore)
                 api(projects.data.database)

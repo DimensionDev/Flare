@@ -58,16 +58,16 @@ public class DeepLinkPresenter(
                 if (DeeplinkEvent.isDeeplinkEvent(url)) {
                     val event = DeeplinkEvent.parse(url)
                     if (event != null) {
-                        val postEvent = event.postEvent
                         val translationEvent = event.translationEvent
+                        val statusMutation = event.statusMutation
                         when {
-                            postEvent != null ->
+                            statusMutation != null ->
                                 accountServiceFlow(
                                     accountType = AccountType.Specific(event.accountKey),
                                     repository = accountRepository,
                                 ).firstOrNull()?.let { service ->
                                     if (service is PostDataSource) {
-                                        service.postEventHandler.handleEvent(postEvent)
+                                        service.postEventHandler.handleMutation(statusMutation)
                                     }
                                 }
 

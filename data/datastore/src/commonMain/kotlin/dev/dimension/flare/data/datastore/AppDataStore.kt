@@ -4,6 +4,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.core.Storage
 import androidx.datastore.core.StorageConnection
 import androidx.datastore.core.okio.OkioSerializer
+import dev.dimension.flare.common.PlatformIO
 import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.datastore.model.AppSettingsSerializer
 import dev.dimension.flare.data.datastore.model.ComposeConfigData
@@ -11,8 +12,9 @@ import dev.dimension.flare.data.datastore.model.ComposeConfigDataSerializer
 import dev.dimension.flare.data.datastore.model.FlareConfig
 import dev.dimension.flare.data.datastore.model.FlareConfigSerializer
 import dev.dimension.flare.data.io.PlatformPathProducer
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import org.koin.core.annotation.Singleton
-import kotlin.coroutines.CoroutineContext
 
 internal expect class PlatformStorage<T>(
     fileName: String,
@@ -21,8 +23,6 @@ internal expect class PlatformStorage<T>(
 ) : Storage<T> {
     override fun createConnection(): StorageConnection<T>
 }
-
-internal expect val storeContext: CoroutineContext
 
 @Singleton
 public class AppDataStore(
@@ -36,7 +36,7 @@ public class AppDataStore(
                     FlareConfigSerializer,
                     platformPathProducer,
                 ),
-                storeContext,
+                Dispatchers.PlatformIO + SupervisorJob(),
             ).build()
     }
 
@@ -48,7 +48,7 @@ public class AppDataStore(
                     ComposeConfigDataSerializer,
                     platformPathProducer,
                 ),
-                storeContext,
+                Dispatchers.PlatformIO + SupervisorJob(),
             ).build()
     }
 
@@ -60,7 +60,7 @@ public class AppDataStore(
                     AppSettingsSerializer,
                     platformPathProducer,
                 ),
-                storeContext,
+                Dispatchers.PlatformIO + SupervisorJob(),
             ).build()
     }
 }

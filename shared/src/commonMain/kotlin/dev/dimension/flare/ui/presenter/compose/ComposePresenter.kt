@@ -589,24 +589,6 @@ public interface VisibilityState {
 }
 
 @Immutable
-public sealed class ComposeStatus {
-    public abstract val statusKey: MicroBlogKey
-
-    public data class Quote(
-        override val statusKey: MicroBlogKey,
-    ) : ComposeStatus()
-
-    public open class Reply(
-        override val statusKey: MicroBlogKey,
-    ) : ComposeStatus()
-
-    public data class VVOComment(
-        override val statusKey: MicroBlogKey,
-        val rootId: String,
-    ) : Reply(statusKey)
-}
-
-@Immutable
 public abstract class ComposeState(
     public val canSend: Boolean,
     public val visibilityState: UiState<VisibilityState>,

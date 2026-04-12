@@ -14,8 +14,8 @@ import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeType
 import dev.dimension.flare.data.datasource.microblog.DatabaseUpdater
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
-import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
+import dev.dimension.flare.data.datasource.microblog.StatusMutation
 import dev.dimension.flare.data.datasource.microblog.datasource.DirectMessageDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.ListDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.NotificationDataSource
@@ -33,6 +33,7 @@ import dev.dimension.flare.data.datasource.microblog.handler.UserHandler
 import dev.dimension.flare.data.datasource.microblog.loader.DirectMessageLoader
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.notSupported
+import dev.dimension.flare.data.datasource.microblog.toggled
 import dev.dimension.flare.data.network.xqt.XQTService
 import dev.dimension.flare.data.network.xqt.model.AddToConversationRequest
 import dev.dimension.flare.data.network.xqt.model.CreateBookmarkRequest
@@ -188,72 +189,60 @@ internal class XQTDataSource(
     }
 
     override suspend fun handle(
-        event: PostEvent,
+        mutation: StatusMutation,
         updater: DatabaseUpdater,
     ) {
-        require(event is PostEvent.XQT)
-        when (event) {
-            is PostEvent.XQT.Retweet -> {
-                if (event.retweeted) {
+        val toggled = mutation.toggled
+        when (mutation.type) {
+            StatusMutation.TYPE_REPOST -> {
+                if (toggled) {
                     service.postDeleteRetweet(
                         postDeleteRetweetRequest =
                             PostDeleteRetweetRequest(
-                                variables = PostDeleteRetweetRequestVariables(sourceTweetId = event.postKey.id),
+                                variables = PostDeleteRetweetRequestVariables(sourceTweetId = mutation.statusKey.id),
                             ),
                     )
                 } else {
                     service.postCreateRetweet(
                         postCreateRetweetRequest =
                             PostCreateRetweetRequest(
-                                variables =
-                                    PostCreateRetweetRequestVariables(
-                                        tweetId = event.postKey.id,
-                                    ),
+                                variables = PostCreateRetweetRequestVariables(tweetId = mutation.statusKey.id),
                             ),
                     )
                 }
             }
 
-            is PostEvent.XQT.Like -> {
-                if (event.liked) {
+            StatusMutation.TYPE_LIKE -> {
+                if (toggled) {
                     service.postUnfavoriteTweet(
                         postUnfavoriteTweetRequest =
                             PostUnfavoriteTweetRequest(
-                                variables = PostCreateRetweetRequestVariables(tweetId = event.postKey.id),
+                                variables = PostCreateRetweetRequestVariables(tweetId = mutation.statusKey.id),
                             ),
                     )
                 } else {
                     service.postFavoriteTweet(
                         postFavoriteTweetRequest =
                             PostFavoriteTweetRequest(
-                                variables =
-                                    PostCreateRetweetRequestVariables(
-                                        tweetId = event.postKey.id,
-                                    ),
+                                variables = PostCreateRetweetRequestVariables(tweetId = mutation.statusKey.id),
                             ),
                     )
                 }
             }
 
-            is PostEvent.XQT.Bookmark -> {
-                if (event.bookmarked) {
+            StatusMutation.TYPE_BOOKMARK -> {
+                if (toggled) {
                     service.postDeleteBookmark(
                         postDeleteBookmarkRequest =
                             DeleteBookmarkRequest(
-                                variables =
-                                    DeleteBookmarkRequestVariables(
-                                        tweetId = event.postKey.id,
-                                    ),
+                                variables = DeleteBookmarkRequestVariables(tweetId = mutation.statusKey.id),
                             ),
                     )
                 } else {
                     service.postCreateBookmark(
                         postCreateBookmarkRequest =
                             CreateBookmarkRequest(
-                                variables =
-                                    CreateBookmarkRequestVariables(
-                                        tweetId = event.postKey.id,
-                                    ),
+                                variables = CreateBookmarkRequestVariables(tweetId = mutation.statusKey.id),
                             ),
                     )
                 }

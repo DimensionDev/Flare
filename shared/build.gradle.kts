@@ -110,6 +110,7 @@ kotlin {
                 api(projects.core.humanizer)
                 api(projects.core.deeplink)
                 api(projects.service.core)
+                api(projects.service.mastodon)
                 api(projects.data.model)
                 api(projects.data.datastore)
                 api(projects.data.database)

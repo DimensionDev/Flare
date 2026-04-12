@@ -12,12 +12,12 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 
-internal class MixedRemoteMediator(
+public class MixedRemoteMediator(
     private val database: CacheDatabase,
     private val mediators: List<CacheableRemoteLoader<UiTimelineV2>>,
 ) : CacheableRemoteLoader<UiTimelineV2>,
     ReportableRemoteLoader {
-    override val pagingKey =
+    public override val pagingKey: String =
         buildString {
             append("mixed_timeline")
             mediators.forEach { mediator ->
@@ -26,7 +26,7 @@ internal class MixedRemoteMediator(
         }
     private var currentMediators = mediators
 
-    override var reportError: ((Throwable) -> Unit)? = null
+    public override var reportError: ((Throwable) -> Unit)? = null
 
     @OptIn(ExperimentalPagingApi::class)
     override suspend fun load(

@@ -15,6 +15,7 @@ class FlareKmpPlugin : Plugin<Project> {
         project.pluginManager.apply("org.jetbrains.kotlin.multiplatform")
         project.pluginManager.apply("org.jetbrains.kotlin.plugin.serialization")
         project.pluginManager.apply("org.jlleitschuh.gradle.ktlint")
+        project.pluginManager.apply("com.android.kotlin.multiplatform.library")
 
         val configuredPlatforms = linkedSetOf<FlarePlatform>()
         val extension = FlareExtension(project) { namespace, requestedPlatforms ->
@@ -79,7 +80,6 @@ private fun Project.configureKmpPlatforms(namespace: String, platforms: Set<Flar
         }
 
         if (FlarePlatform.Android in platforms) {
-            pluginManager.apply("com.android.kotlin.multiplatform.library")
             extensions.configure<KotlinMultiplatformAndroidLibraryTarget> {
                 compileSdk {
                     version = release(flareVersionInt("compileSdk")) {

@@ -23,9 +23,9 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-internal class PostHandler(
-    val accountType: AccountType,
-    val loader: PostLoader,
+public class PostHandler(
+    public val accountType: AccountType,
+    public val loader: PostLoader,
 ) : KoinComponent {
     private val database: CacheDatabase by inject()
     private val coroutineScope: CoroutineScope by inject()
@@ -36,7 +36,7 @@ internal class PostHandler(
         TranslationSettingsSupport.displayOptionsFlow(appDataStore)
     }
 
-    fun post(postKey: MicroBlogKey): Cacheable<UiTimelineV2> {
+    public fun post(postKey: MicroBlogKey): Cacheable<UiTimelineV2> {
         val pagingKey = "post_only_$postKey"
         return Cacheable(
             fetchSource = {
@@ -86,7 +86,7 @@ internal class PostHandler(
         )
     }
 
-    fun delete(postKey: MicroBlogKey) {
+    public fun delete(postKey: MicroBlogKey) {
         coroutineScope.launch {
             tryRun {
                 loader.deleteStatus(postKey)

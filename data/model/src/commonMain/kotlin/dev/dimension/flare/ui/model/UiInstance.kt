@@ -4,7 +4,7 @@ import androidx.compose.runtime.Immutable
 import dev.dimension.flare.model.PlatformType
 
 @Immutable
-public data class UiInstance internal constructor(
+public data class UiInstance(
     val name: String,
     val description: String?,
     val iconUrl: String?,

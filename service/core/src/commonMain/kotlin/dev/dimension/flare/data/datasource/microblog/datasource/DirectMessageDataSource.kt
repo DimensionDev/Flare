@@ -9,17 +9,17 @@ import dev.dimension.flare.ui.model.UiDMRoom
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 
-internal interface DirectMessageDataSource {
-    val directMessageHandler: DirectMessageHandler
+public interface DirectMessageDataSource {
+    public val directMessageHandler: DirectMessageHandler
 
-    fun directMessageList(scope: CoroutineScope): Flow<PagingData<UiDMRoom>>
+    public fun directMessageList(scope: CoroutineScope): Flow<PagingData<UiDMRoom>>
 
-    fun directMessageConversation(
+    public fun directMessageConversation(
         roomKey: MicroBlogKey,
         scope: CoroutineScope,
     ): Flow<PagingData<UiDMItem>>
 
-    fun getDirectMessageConversationInfo(roomKey: MicroBlogKey): CacheData<UiDMRoom>
+    public fun getDirectMessageConversationInfo(roomKey: MicroBlogKey): CacheData<UiDMRoom>
 
-    suspend fun fetchNewDirectMessageForConversation(roomKey: MicroBlogKey)
+    public suspend fun fetchNewDirectMessageForConversation(roomKey: MicroBlogKey)
 }

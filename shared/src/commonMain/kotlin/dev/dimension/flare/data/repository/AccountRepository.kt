@@ -13,6 +13,7 @@ import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.app.model.DbAccount
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.connect
+import dev.dimension.flare.data.datasource.microblog.CredentialRepository
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.model.AccountType
@@ -47,7 +48,7 @@ internal class AccountRepository internal constructor(
     private val coroutineScope: CoroutineScope,
     internal val appDataStore: AppDataStore,
     private val cacheDatabase: CacheDatabase,
-) {
+) : CredentialRepository {
     internal val activeAccount: Flow<UiState<UiAccount>> by lazy {
         appDatabase
             .accountDao()
@@ -189,7 +190,7 @@ internal class AccountRepository internal constructor(
             .firstOrNull()
             ?.toUi()
 
-    internal inline fun <reified T : UiAccount.Credential> credentialFlow(accountKey: MicroBlogKey): Flow<T> =
+    internal inline fun <reified T> credentialFlow(accountKey: MicroBlogKey): Flow<T> =
         appDatabase
             .accountDao()
             .get(accountKey)
@@ -197,6 +198,12 @@ internal class AccountRepository internal constructor(
             .map {
                 it.credential_json.decodeJson<T>()
             }
+
+    override fun credentialJsonFlow(accountKey: MicroBlogKey): Flow<String> =
+        appDatabase
+            .accountDao()
+            .get(accountKey)
+            .mapNotNull { it?.credential_json }
 
     internal suspend fun getOrCreateDataSource(account: UiAccount): MicroblogDataSource =
         dataSourceCacheMutex.withLock {

@@ -14,6 +14,7 @@ import dev.dimension.flare.data.platform.NostrPlatformSpec
 import dev.dimension.flare.data.platform.VvoPlatformSpec
 import dev.dimension.flare.data.platform.XqtPlatformSpec
 import dev.dimension.flare.ui.model.UiIcon
+import dev.dimension.flare.ui.model.UiInstance
 import dev.dimension.flare.ui.model.UiInstanceMetadata
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -35,6 +36,8 @@ internal interface PlatformSpec {
     fun secondary(accountKey: MicroBlogKey): ImmutableList<TabItem>
 
     suspend fun instanceMetadata(host: String): UiInstanceMetadata
+
+    suspend fun nodeList(): List<UiInstance> = emptyList()
 
     fun guestDataSource(
         host: String,

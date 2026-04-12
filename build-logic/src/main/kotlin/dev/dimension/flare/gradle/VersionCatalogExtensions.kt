@@ -1,6 +1,7 @@
 package dev.dimension.flare.gradle
 
 import org.gradle.api.Project
+import org.gradle.api.artifacts.ExternalModuleDependencyBundle
 import org.gradle.api.artifacts.MinimalExternalModuleDependency
 import org.gradle.api.artifacts.VersionCatalog
 import org.gradle.api.artifacts.VersionCatalogsExtension
@@ -15,10 +16,20 @@ internal fun Project.flareLibrary(alias: String): Provider<MinimalExternalModule
         IllegalArgumentException("Library alias '$alias' is not defined in libs.versions.toml.")
     }
 
+internal fun Project.flareBundle(alias: String): Provider<ExternalModuleDependencyBundle> =
+    flareCatalog.findBundle(alias).orElseThrow {
+        IllegalArgumentException("Bundle alias '$alias' is not defined in libs.versions.toml.")
+    }
+
 internal fun Project.flarePluginId(alias: String): String =
     flareCatalog.findPlugin(alias).orElseThrow {
         IllegalArgumentException("Plugin alias '$alias' is not defined in libs.versions.toml.")
     }.get().pluginId
+
+internal fun Project.flarePluginVersion(alias: String): String =
+    flareCatalog.findPlugin(alias).orElseThrow {
+        IllegalArgumentException("Plugin alias '$alias' is not defined in libs.versions.toml.")
+    }.get().version.requiredVersion
 
 internal fun Project.flareVersion(alias: String): String =
     flareCatalog.findVersion(alias).orElseThrow {

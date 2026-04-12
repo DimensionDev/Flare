@@ -151,24 +151,15 @@ public class CheckRssSourcePresenter(
 
             val trendsAvailable =
                 async {
-                    runCatching {
-                        service.trendsStatuses(limit = 1)
-                        true
-                    }.getOrDefault(false)
+                    service.isTrendsAvailable()
                 }
             val publicAvailable =
                 async {
-                    runCatching {
-                        service.publicTimeline(limit = 1)
-                        true
-                    }.getOrDefault(false)
+                    service.isPublicTimelineAvailable()
                 }
             val localAvailable =
                 async {
-                    runCatching {
-                        service.publicTimeline(limit = 1, local = true)
-                        true
-                    }.getOrDefault(false)
+                    service.isPublicTimelineAvailable(local = true)
                 }
 
             val instance = instanceInfo.await()

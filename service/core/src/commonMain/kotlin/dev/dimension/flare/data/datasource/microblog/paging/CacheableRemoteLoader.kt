@@ -1,11 +1,11 @@
 package dev.dimension.flare.data.datasource.microblog.paging
 
-internal interface CacheableRemoteLoader<T : Any> : RemoteLoader<T> {
-    val pagingKey: String
-    val supportPrepend: Boolean
+public interface CacheableRemoteLoader<T : Any> : RemoteLoader<T> {
+    public val pagingKey: String
+    public val supportPrepend: Boolean
         get() = false
 }
 
-internal interface ReportableRemoteLoader {
-    var reportError: ((Throwable) -> Unit)?
+public interface ReportableRemoteLoader {
+    public var reportError: ((Throwable) -> Unit)?
 }

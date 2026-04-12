@@ -14,7 +14,7 @@ import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlinx.collections.immutable.toImmutableList
 
 @OptIn(ExperimentalPagingApi::class)
-internal class TimelineRemoteMediator(
+public class TimelineRemoteMediator(
     private val loader: CacheableRemoteLoader<UiTimelineV2>,
     private val database: CacheDatabase,
     private val allowLongText: Boolean,
@@ -71,7 +71,7 @@ internal class TimelineRemoteMediator(
         )
     }
 
-    suspend fun timeline(
+    public suspend fun timeline(
         pageSize: Int,
         request: PagingRequest,
     ): PagingResult<UiTimelineV2> =

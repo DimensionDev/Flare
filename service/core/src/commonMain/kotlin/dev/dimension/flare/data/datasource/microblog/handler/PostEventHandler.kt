@@ -19,7 +19,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-internal class PostEventHandler(
+public class PostEventHandler(
     private val accountType: AccountType,
     private val handler: Handler,
 ) : KoinComponent,
@@ -28,14 +28,14 @@ internal class PostEventHandler(
     private val database: CacheDatabase by inject()
     private val dbAccountType = accountType as DbAccountType
 
-    interface Handler {
-        suspend fun handle(
+    public interface Handler {
+        public suspend fun handle(
             mutation: StatusMutation,
             updater: DatabaseUpdater,
         )
     }
 
-    fun handleMutation(mutation: StatusMutation) {
+    public fun handleMutation(mutation: StatusMutation) {
         coroutineScope.launch {
             val originalData =
                 database

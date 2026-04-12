@@ -8,7 +8,7 @@ import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.database.cache.model.DbPagingKey
 
-internal fun <T : Any, R : Any> createPagingRemoteMediator(
+public fun <T : Any, R : Any> createPagingRemoteMediator(
     database: CacheDatabase,
     pagingKey: String,
     onLoad: suspend (pageSize: Int, request: PagingRequest) -> PagingResult<R>,
@@ -30,10 +30,10 @@ internal fun <T : Any, R : Any> createPagingRemoteMediator(
         }
     }
 
-internal abstract class BasePagingRemoteMediator<T : Any, R : Any>(
+public abstract class BasePagingRemoteMediator<T : Any, R : Any>(
     private val database: CacheDatabase,
 ) : BaseRemoteMediator<Int, T>() {
-    abstract val pagingKey: String
+    public abstract val pagingKey: String
 
     @OptIn(ExperimentalPagingApi::class)
     override suspend fun doLoad(

@@ -1,6 +1,6 @@
 package dev.dimension.flare.data.datasource.microblog
 
-internal fun StatusMutation.nextActionMenu(): ActionMenu.Item? {
+public fun StatusMutation.nextActionMenu(): ActionMenu.Item? {
     val toggled = this.toggled
     val count = this.count
     val nextToggled = !toggled

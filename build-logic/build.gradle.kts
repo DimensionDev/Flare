@@ -7,6 +7,7 @@ dependencies {
     compileOnly("com.android.tools.build:gradle:${libs.versions.agp.get()}")
     compileOnly("org.jetbrains.kotlin:kotlin-gradle-plugin:${libs.versions.kotlin.get()}")
     implementation("org.jlleitschuh.gradle:ktlint-gradle:${libs.versions.ktlintPlugin.get()}")
+    compileOnly("de.jensklingenberg.ktorfit:ktorfit-gradle-plugin:${libs.plugins.ktorfit.get().version}")
 }
 
 gradlePlugin {
@@ -22,6 +23,10 @@ gradlePlugin {
         register("flareKsp") {
             id = "flare.ksp"
             implementationClass = "dev.dimension.flare.gradle.FlareKspPlugin"
+        }
+        register("flareKtorfit") {
+            id = "flare.ktorfit"
+            implementationClass = "dev.dimension.flare.gradle.FlareKtorfitPlugin"
         }
     }
 }

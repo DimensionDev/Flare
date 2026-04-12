@@ -8,7 +8,7 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
 
 @Immutable
-public data class ComposeConfig internal constructor(
+public data class ComposeConfig(
     val text: Text? = null,
     val media: Media? = null,
     val poll: Poll? = null,
@@ -18,7 +18,7 @@ public data class ComposeConfig internal constructor(
     val language: Language? = null,
 ) {
     @Immutable
-    public data class Text internal constructor(
+    public data class Text(
         val maxLength: Int,
     ) {
         internal fun merge(other: Text): Text =
@@ -29,7 +29,7 @@ public data class ComposeConfig internal constructor(
 
     @Immutable
     // in ISO 639-1 format
-    public data class Language internal constructor(
+    public data class Language(
         val maxCount: Int,
     ) {
         private val popularCodes =
@@ -246,7 +246,7 @@ public data class ComposeConfig internal constructor(
     }
 
     @Immutable
-    public data class Media internal constructor(
+    public data class Media(
         val maxCount: Int,
         val canSensitive: Boolean,
         val altTextMaxLength: Int,
@@ -262,7 +262,7 @@ public data class ComposeConfig internal constructor(
     }
 
     @Immutable
-    public data class Poll internal constructor(
+    public data class Poll(
         val maxOptions: Int,
     ) {
         internal fun merge(other: Poll): Poll =
@@ -272,8 +272,8 @@ public data class ComposeConfig internal constructor(
     }
 
     @Immutable
-    public data class Emoji internal constructor(
-        internal val emoji: CacheData<ImmutableMap<String, ImmutableList<UiEmoji>>>,
+    public data class Emoji(
+        val emoji: CacheData<ImmutableMap<String, ImmutableList<UiEmoji>>>,
         // Emojis picker can be merged only if their mergeTag is the same.
         val mergeTag: String,
         val accountKey: MicroBlogKey,

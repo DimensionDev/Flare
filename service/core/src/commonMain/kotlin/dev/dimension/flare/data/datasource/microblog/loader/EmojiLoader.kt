@@ -4,6 +4,6 @@ import dev.dimension.flare.ui.model.UiEmoji
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
 
-internal interface EmojiLoader {
-    suspend fun emojis(): ImmutableMap<String, ImmutableList<UiEmoji>>
+public interface EmojiLoader {
+    public suspend fun emojis(): ImmutableMap<String, ImmutableList<UiEmoji>>
 }

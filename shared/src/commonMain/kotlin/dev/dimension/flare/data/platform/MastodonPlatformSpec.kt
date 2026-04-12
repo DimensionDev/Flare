@@ -12,6 +12,7 @@ import dev.dimension.flare.data.model.TabItem
 import dev.dimension.flare.data.model.TabMetaData
 import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.data.model.TitleType
+import dev.dimension.flare.data.network.mastodon.JoinMastodonService
 import dev.dimension.flare.data.network.mastodon.MastodonInstanceService
 import dev.dimension.flare.data.network.mastodon.MastodonPlatformDetector
 import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
@@ -21,6 +22,7 @@ import dev.dimension.flare.model.PlatformSpec
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.PlatformTypeMetadata
 import dev.dimension.flare.ui.model.UiIcon
+import dev.dimension.flare.ui.model.UiInstance
 import dev.dimension.flare.ui.model.UiInstanceMetadata
 import dev.dimension.flare.ui.model.mapper.render
 import io.ktor.http.Url
@@ -93,6 +95,19 @@ internal data object MastodonPlatformSpec : PlatformSpec {
         )
 
     override suspend fun instanceMetadata(host: String): UiInstanceMetadata = MastodonInstanceService("https://$host/").instance().render()
+
+    override suspend fun nodeList(): List<UiInstance> =
+        JoinMastodonService.servers().map {
+            UiInstance(
+                name = it.domain,
+                description = it.description,
+                iconUrl = null,
+                domain = it.domain,
+                type = PlatformType.Mastodon,
+                bannerUrl = it.proxiedThumbnail,
+                usersCount = it.totalUsers,
+            )
+        }
 
     override fun guestDataSource(
         host: String,

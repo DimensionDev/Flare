@@ -2,6 +2,7 @@ package dev.dimension.flare.di
 
 import dev.dimension.flare.data.database.provideAppDatabase
 import dev.dimension.flare.data.database.provideCacheDatabase
+import dev.dimension.flare.data.datasource.microblog.CredentialRepository
 import dev.dimension.flare.data.datasource.nostr.DatabaseNostrCache
 import dev.dimension.flare.data.datasource.nostr.NostrCache
 import dev.dimension.flare.data.network.ai.AiCompletionService
@@ -31,6 +32,7 @@ import org.koin.dsl.module
 internal val commonModule =
     module {
         singleOf(::AccountRepository)
+        single<CredentialRepository> { get<AccountRepository>() }
         single(createdAtStart = true) { AccountTabSyncCoordinator(get(), get(), get()) }
         singleOf(::provideAppDatabase)
         singleOf(::provideCacheDatabase)

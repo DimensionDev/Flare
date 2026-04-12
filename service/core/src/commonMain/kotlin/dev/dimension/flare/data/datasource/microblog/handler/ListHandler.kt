@@ -27,7 +27,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 @OptIn(ExperimentalPagingApi::class)
-internal class ListHandler(
+public class ListHandler(
     private val pagingKey: String,
     private val accountKey: MicroBlogKey,
     private val loader: ListLoader,
@@ -35,10 +35,10 @@ internal class ListHandler(
     private val accountType: DbAccountType = AccountType.Specific(accountKey)
     private val database: CacheDatabase by inject()
 
-    val supportedMetaData: ImmutableList<ListMetaDataType> by lazy {
+    public val supportedMetaData: ImmutableList<ListMetaDataType> by lazy {
         loader.supportedMetaData
     }
-    val data by lazy {
+    public val data: kotlinx.coroutines.flow.Flow<androidx.paging.PagingData<UiList>> by lazy {
         Pager(
             config = pagingConfig,
             remoteMediator =
@@ -85,7 +85,7 @@ internal class ListHandler(
         }
     }
 
-    val cacheData by lazy {
+    public val cacheData: kotlinx.coroutines.flow.Flow<List<UiList>> by lazy {
         database.listDao().getListKeysFlow(pagingKey).map {
             it.map {
                 it.list.content.data
@@ -93,7 +93,7 @@ internal class ListHandler(
         }
     }
 
-    fun listInfo(listId: String): CacheData<UiList> {
+    public fun listInfo(listId: String): CacheData<UiList> {
         val listKey = MicroBlogKey(listId, accountKey.host)
         return Cacheable(
             fetchSource = {
@@ -123,7 +123,7 @@ internal class ListHandler(
         )
     }
 
-    suspend fun create(metaData: ListMetaData) {
+    public suspend fun create(metaData: ListMetaData) {
         tryRun {
             loader.create(metaData)
         }.onSuccess { result ->
@@ -150,7 +150,7 @@ internal class ListHandler(
         }
     }
 
-    suspend fun update(
+    public suspend fun update(
         listId: String,
         metaData: ListMetaData,
     ) {
@@ -168,7 +168,7 @@ internal class ListHandler(
         }
     }
 
-    suspend fun delete(listId: String) {
+    public suspend fun delete(listId: String) {
         val listKey = MicroBlogKey(listId, accountKey.host)
         tryRun {
             loader.delete(listId)
@@ -186,7 +186,7 @@ internal class ListHandler(
         }
     }
 
-    suspend fun insertToDatabase(data: UiList) {
+    public suspend fun insertToDatabase(data: UiList) {
         val listKey = MicroBlogKey(data.id, accountKey.host)
         database.connect {
             database.listDao().insertAllList(
@@ -211,7 +211,7 @@ internal class ListHandler(
         }
     }
 
-    suspend fun withDatabase(block: suspend (update: suspend (UiList) -> Unit) -> Unit) {
+    public suspend fun withDatabase(block: suspend (update: suspend (UiList) -> Unit) -> Unit) {
         block.invoke { data ->
             val listKey = MicroBlogKey(data.id, accountKey.host)
             database.connect {

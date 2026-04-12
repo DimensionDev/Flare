@@ -19,8 +19,8 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlin.uuid.Uuid
 
-internal object TimelinePagingMapper {
-    suspend fun toDb(
+public object TimelinePagingMapper {
+    public suspend fun toDb(
         data: UiTimelineV2,
         pagingKey: String,
     ): DbPagingTimelineWithStatus {
@@ -58,7 +58,7 @@ internal object TimelinePagingMapper {
         )
     }
 
-    fun toUi(
+    public fun toUi(
         item: DbPagingTimelineWithStatus,
         pagingKey: String,
         translationDisplayOptions: TranslationDisplayOptions,
@@ -69,7 +69,7 @@ internal object TimelinePagingMapper {
             translationDisplayOptions = translationDisplayOptions,
         )
 
-    fun toUi(
+    public fun toUi(
         item: DbStatusWithReference,
         pagingKey: String,
         translationDisplayOptions: TranslationDisplayOptions,

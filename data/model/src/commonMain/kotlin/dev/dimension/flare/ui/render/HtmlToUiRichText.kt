@@ -19,4 +19,4 @@ public fun Element.toUi(): UiRichText {
     )
 }
 
-internal fun parseHtml(html: String): Element = Ksoup.parse(html).body()
+public fun parseHtml(html: String): Element = Ksoup.parse(html).body()

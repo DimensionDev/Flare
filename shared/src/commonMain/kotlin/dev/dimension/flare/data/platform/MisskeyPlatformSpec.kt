@@ -11,6 +11,7 @@ import dev.dimension.flare.data.model.TabItem
 import dev.dimension.flare.data.model.TabMetaData
 import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.data.model.TitleType
+import dev.dimension.flare.data.network.misskey.JoinMisskeyService
 import dev.dimension.flare.data.network.misskey.MisskeyPlatformDetector
 import dev.dimension.flare.data.network.misskey.MisskeyService
 import dev.dimension.flare.data.network.misskey.api.model.MetaRequest
@@ -21,6 +22,7 @@ import dev.dimension.flare.model.PlatformSpec
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.PlatformTypeMetadata
 import dev.dimension.flare.ui.model.UiIcon
+import dev.dimension.flare.ui.model.UiInstance
 import dev.dimension.flare.ui.model.UiInstanceMetadata
 import dev.dimension.flare.ui.model.mapper.render
 import io.ktor.http.Url
@@ -108,6 +110,23 @@ internal data object MisskeyPlatformSpec : PlatformSpec {
 
     override suspend fun instanceMetadata(host: String): UiInstanceMetadata =
         MisskeyService("https://$host/api/").meta(MetaRequest()).render()
+
+    override suspend fun nodeList(): List<UiInstance> =
+        JoinMisskeyService.instances().instancesInfos.map {
+            UiInstance(
+                name = it.name,
+                description = it.description,
+                iconUrl = it.meta?.iconURL,
+                domain = it.url,
+                type = PlatformType.Misskey,
+                bannerUrl = it.meta?.bannerURL,
+                usersCount =
+                    it.stats?.usersCount ?: it.nodeinfo
+                        ?.usage
+                        ?.users
+                        ?.total ?: 0,
+            )
+        }
 
     override fun guestDataSource(
         host: String,

@@ -41,7 +41,7 @@ import kotlin.time.Clock
 import kotlin.uuid.Uuid
 
 @OptIn(ExperimentalPagingApi::class)
-internal class DirectMessageHandler(
+public class DirectMessageHandler(
     private val accountKey: MicroBlogKey,
     private val loader: DirectMessageLoader,
 ) : KoinComponent {
@@ -50,7 +50,7 @@ internal class DirectMessageHandler(
     private val accountType get() = AccountType.Specific(accountKey)
     private val roomPagingKey by lazy { "dm_rooms_$accountKey" }
 
-    fun directMessageList(scope: CoroutineScope): Flow<PagingData<UiDMRoom>> =
+    public fun directMessageList(scope: CoroutineScope): Flow<PagingData<UiDMRoom>> =
         Pager(
             config = pagingConfig,
             remoteMediator =
@@ -69,7 +69,7 @@ internal class DirectMessageHandler(
                 paging.map { it.content }
             }.cachedIn(scope)
 
-    fun directMessageConversation(
+    public fun directMessageConversation(
         roomKey: MicroBlogKey,
         scope: CoroutineScope,
     ): Flow<PagingData<UiDMItem>> =
@@ -93,7 +93,7 @@ internal class DirectMessageHandler(
                 paging.map { it.content }
             }.cachedIn(scope)
 
-    fun getDirectMessageConversationInfo(roomKey: MicroBlogKey): CacheData<UiDMRoom> =
+    public fun getDirectMessageConversationInfo(roomKey: MicroBlogKey): CacheData<UiDMRoom> =
         Cacheable(
             fetchSource = {
                 val info = loader.loadConversationInfo(roomKey)
@@ -108,7 +108,7 @@ internal class DirectMessageHandler(
             },
         )
 
-    suspend fun fetchNewDirectMessageForConversation(roomKey: MicroBlogKey) {
+    public suspend fun fetchNewDirectMessageForConversation(roomKey: MicroBlogKey) {
         val result = tryRun { loader.fetchNewMessages(roomKey) }
         result.onSuccess {
             saveMessages(
@@ -245,7 +245,7 @@ internal class DirectMessageHandler(
             content = this,
         )
 
-    fun sendDirectMessage(
+    public fun sendDirectMessage(
         roomKey: MicroBlogKey,
         message: String,
     ) {
@@ -271,7 +271,7 @@ internal class DirectMessageHandler(
         }
     }
 
-    fun retrySendDirectMessage(messageKey: MicroBlogKey) {
+    public fun retrySendDirectMessage(messageKey: MicroBlogKey) {
         coroutineScope.launch {
             val current = database.messageDao().getMessage(messageKey)
             if (current != null && current.isLocal) {
@@ -308,7 +308,7 @@ internal class DirectMessageHandler(
         }
     }
 
-    fun deleteDirectMessage(
+    public fun deleteDirectMessage(
         roomKey: MicroBlogKey,
         messageKey: MicroBlogKey,
     ) {
@@ -326,7 +326,7 @@ internal class DirectMessageHandler(
         }
     }
 
-    fun leaveDirectMessage(roomKey: MicroBlogKey) {
+    public fun leaveDirectMessage(roomKey: MicroBlogKey) {
         coroutineScope.launch {
             tryRun {
                 loader.leaveConversation(roomKey)
@@ -337,7 +337,7 @@ internal class DirectMessageHandler(
         }
     }
 
-    fun createDirectMessageRoom(userKey: MicroBlogKey): Flow<UiState<MicroBlogKey>> =
+    public fun createDirectMessageRoom(userKey: MicroBlogKey): Flow<UiState<MicroBlogKey>> =
         flow {
             tryRun {
                 loader.createRoom(userKey)
@@ -351,7 +351,7 @@ internal class DirectMessageHandler(
             )
         }
 
-    suspend fun canSendDirectMessage(userKey: MicroBlogKey): Boolean =
+    public suspend fun canSendDirectMessage(userKey: MicroBlogKey): Boolean =
         tryRun {
             loader.canSendMessage(userKey)
         }.getOrDefault(false)
@@ -360,7 +360,7 @@ internal class DirectMessageHandler(
         "dm_badgeCount_$accountKey"
     }
 
-    val directMessageBadgeCount: CacheData<Int> by lazy {
+    public val directMessageBadgeCount: CacheData<Int> by lazy {
         MemCacheable(
             key = badgeCountKey,
             fetchSource = {

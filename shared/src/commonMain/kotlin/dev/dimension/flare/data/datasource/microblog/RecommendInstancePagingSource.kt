@@ -2,11 +2,10 @@ package dev.dimension.flare.data.datasource.microblog
 
 import androidx.paging.PagingState
 import dev.dimension.flare.common.BasePagingSource
-import dev.dimension.flare.data.network.mastodon.JoinMastodonService
 import dev.dimension.flare.data.network.mastodon.MastodonInstanceService
-import dev.dimension.flare.data.network.misskey.JoinMisskeyService
 import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.model.spec
 import dev.dimension.flare.ui.model.UiInstance
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -21,36 +20,12 @@ internal class RecommendInstancePagingSource : BasePagingSource<Int, UiInstance>
                 listOf(
                     async {
                         tryRun {
-                            JoinMastodonService.servers().map {
-                                UiInstance(
-                                    name = it.domain,
-                                    description = it.description,
-                                    iconUrl = null,
-                                    domain = it.domain,
-                                    type = PlatformType.Mastodon,
-                                    bannerUrl = it.proxiedThumbnail,
-                                    usersCount = it.totalUsers,
-                                )
-                            }
+                            PlatformType.Mastodon.spec.nodeList()
                         }.getOrDefault(emptyList())
                     },
                     async {
                         tryRun {
-                            JoinMisskeyService.instances().instancesInfos.map {
-                                UiInstance(
-                                    name = it.name,
-                                    description = it.description,
-                                    iconUrl = it.meta?.iconURL,
-                                    domain = it.url,
-                                    type = PlatformType.Misskey,
-                                    bannerUrl = it.meta?.bannerURL,
-                                    usersCount =
-                                        it.stats?.usersCount ?: it.nodeinfo
-                                            ?.usage
-                                            ?.users
-                                            ?.total ?: 0,
-                                )
-                            }
+                            PlatformType.Misskey.spec.nodeList()
                         }.getOrDefault(emptyList())
                     },
                     async {

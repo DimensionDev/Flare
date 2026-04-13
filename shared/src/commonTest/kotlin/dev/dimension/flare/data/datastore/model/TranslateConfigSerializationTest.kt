@@ -124,7 +124,7 @@ class TranslateConfigSerializationTest {
                     aiConfig =
                         LegacyAiConfig(
                             type =
-                                LegacyOpenAIType(
+                                LegacyType.LegacyOpenAI(
                                     serverUrl = "https://api.openai.com/v1/",
                                     apiKey = "test-key",
                                     model = "gpt-5-mini",
@@ -163,18 +163,26 @@ private data class LegacyOpenAISettings(
 private data class LegacyAiConfig(
     val translation: Boolean = false,
     val tldr: Boolean = false,
-    val type: LegacyOpenAIType = LegacyOpenAIType(),
+    val type: LegacyType = LegacyType.LegacyOpenAI(),
     val translatePrompt: String = AiPromptDefaults.TRANSLATE_PROMPT,
     val tldrPrompt: String = AiPromptDefaults.TLDR_PROMPT,
     val preTranslation: Boolean = false,
 )
 
 @Serializable
-private data class LegacyOpenAIType(
-    val serverUrl: String = "",
-    val apiKey: String = "",
-    val model: String = "",
-)
+private sealed interface LegacyType {
+    @Serializable
+    @SerialName("dev.dimension.flare.data.datastore.model.AppSettings.AiConfig.Type.OnDevice")
+    data object OnDevice : LegacyType
+
+    @Serializable
+    @SerialName("dev.dimension.flare.data.datastore.model.AppSettings.AiConfig.Type.OpenAI")
+    data class LegacyOpenAI(
+        val serverUrl: String = "",
+        val apiKey: String = "",
+        val model: String = "",
+    ) : LegacyType
+}
 
 @Serializable
 private data class LegacyTranslateConfig(

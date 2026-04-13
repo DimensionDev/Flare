@@ -8,7 +8,6 @@ plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.compose.compiler)
-    alias(libs.plugins.ktlint)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.nucleus)
     id("com.github.gmazzo.buildconfig") version "6.0.9"
@@ -285,13 +284,5 @@ tasks.named<ProcessResources>("processResources") {
         from(foundationModelsBridgeLibrary) {
             into("natives/osx_arm64")
         }
-    }
-}
-
-
-ktlint {
-    version.set(libs.versions.ktlint)
-    filter {
-        exclude { element -> element.file.path.contains("build", ignoreCase = true) }
     }
 }

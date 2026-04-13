@@ -39,8 +39,14 @@ public class TwitterArticlePresenter(
         ) {
             value =
                 when (serviceState) {
-                    is UiState.Loading -> UiState.Loading()
-                    is UiState.Error -> UiState.Error(serviceState.throwable)
+                    is UiState.Loading -> {
+                        UiState.Loading()
+                    }
+
+                    is UiState.Error -> {
+                        UiState.Error(serviceState.throwable)
+                    }
+
                     is UiState.Success -> {
                         val service = serviceState.data as? XQTDataSource
                         if (service == null) {

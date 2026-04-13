@@ -31,13 +31,19 @@ internal class FavouriteRemoteMediator(
 
         val page =
             when (request) {
-                PagingRequest.Refresh -> null
+                PagingRequest.Refresh -> {
+                    null
+                }
+
                 is PagingRequest.Prepend -> {
                     return PagingResult(
                         endOfPaginationReached = true,
                     )
                 }
-                is PagingRequest.Append -> request.nextKey.toIntOrNull()
+
+                is PagingRequest.Append -> {
+                    request.nextKey.toIntOrNull()
+                }
             }
 
         val response =

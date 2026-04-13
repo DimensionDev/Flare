@@ -402,11 +402,18 @@ private class FakeListMemberLoader : ListMemberLoader {
         val allMembers = members[listId] ?: emptyList()
         val page =
             when (request) {
-                is PagingRequest.Refresh -> 1
-                is PagingRequest.Append ->
+                is PagingRequest.Refresh -> {
+                    1
+                }
+
+                is PagingRequest.Append -> {
                     request.nextKey.toIntOrNull()
                         ?: return PagingResult(data = emptyList(), endOfPaginationReached = true)
-                is PagingRequest.Prepend -> return PagingResult(data = emptyList(), endOfPaginationReached = true)
+                }
+
+                is PagingRequest.Prepend -> {
+                    return PagingResult(data = emptyList(), endOfPaginationReached = true)
+                }
             }
 
         val fromIndex = (page - 1) * pageSize

@@ -23,15 +23,37 @@ internal actual fun decodeBytes(
 ): String? {
     val nsEncoding =
         when (charset.lowercase()) {
-            "utf-8", "utf8" -> NSUTF8StringEncoding
-            "utf-16" -> NSUTF16StringEncoding
-            "utf-16le" -> NSUTF16LittleEndianStringEncoding
-            "utf-16be" -> NSUTF16BigEndianStringEncoding
-            "us-ascii", "ascii" -> NSASCIIStringEncoding
-            "iso-8859-1", "latin1", "latin-1" -> NSISOLatin1StringEncoding
-            "gbk", "gb2312", "gb18030", "x-gbk" ->
+            "utf-8", "utf8" -> {
+                NSUTF8StringEncoding
+            }
+
+            "utf-16" -> {
+                NSUTF16StringEncoding
+            }
+
+            "utf-16le" -> {
+                NSUTF16LittleEndianStringEncoding
+            }
+
+            "utf-16be" -> {
+                NSUTF16BigEndianStringEncoding
+            }
+
+            "us-ascii", "ascii" -> {
+                NSASCIIStringEncoding
+            }
+
+            "iso-8859-1", "latin1", "latin-1" -> {
+                NSISOLatin1StringEncoding
+            }
+
+            "gbk", "gb2312", "gb18030", "x-gbk" -> {
                 CFStringConvertEncodingToNSStringEncoding(kCFStringEncodingGB_18030_2000.toUInt())
-            else -> null
+            }
+
+            else -> {
+                null
+            }
         } ?: return null
     return bytes.usePinned {
         val data = NSData.create(bytes = it.addressOf(0), length = bytes.size.toULong())

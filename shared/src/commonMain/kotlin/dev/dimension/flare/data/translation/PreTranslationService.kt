@@ -436,23 +436,31 @@ internal class OnlinePreTranslationService(
         val sourceDocument = PreTranslationPayloadSupport.toBatchPayload(payload, targetLanguage)
         val skipReason =
             when {
-                PreTranslationContentRules.isNonTranslatableOnly(payload) ->
+                PreTranslationContentRules.isNonTranslatableOnly(payload) -> {
                     PreTranslationStoreSupport.SKIPPED_NON_TRANSLATABLE_ONLY_REASON
+                }
 
                 PreTranslationContentRules.shouldSkipForMatchingSourceLanguage(
                     sourceLanguages = sourceLanguages,
                     targetLanguage = targetLanguage,
-                ) -> PreTranslationStoreSupport.SKIPPED_SAME_LANGUAGE_REASON
+                ) -> {
+                    PreTranslationStoreSupport.SKIPPED_SAME_LANGUAGE_REASON
+                }
 
                 PreTranslationContentRules.shouldSkipForExcludedSourceLanguage(
                     sourceLanguages = sourceLanguages,
                     excludedLanguages = autoTranslateExcludedLanguages,
-                ) -> PreTranslationStoreSupport.SKIPPED_EXCLUDED_LANGUAGE_REASON
+                ) -> {
+                    PreTranslationStoreSupport.SKIPPED_EXCLUDED_LANGUAGE_REASON
+                }
 
-                PreTranslationPayloadSupport.isEmpty(sourceDocument) ->
+                PreTranslationPayloadSupport.isEmpty(sourceDocument) -> {
                     PreTranslationStoreSupport.SKIPPED_EMPTY_REASON
+                }
 
-                else -> null
+                else -> {
+                    null
+                }
             }
         if (skipReason != null) {
             PreTranslationStoreSupport.persistSkippedTranslationIfNeeded(
@@ -676,7 +684,7 @@ internal class OnlinePreTranslationService(
                 }
             }
 
-            PreTranslationBatchItemStatus.Skipped ->
+            PreTranslationBatchItemStatus.Skipped -> {
                 PreTranslationStoreSupport.toDbTranslation(
                     candidate = candidate,
                     status = TranslationStatus.Skipped,
@@ -684,6 +692,7 @@ internal class OnlinePreTranslationService(
                     statusReason =
                         translatedItem.reason ?: PreTranslationStoreSupport.SKIPPED_AI_SAME_LANGUAGE_REASON,
                 )
+            }
         }
 }
 

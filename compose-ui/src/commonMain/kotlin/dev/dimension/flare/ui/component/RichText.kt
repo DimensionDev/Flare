@@ -208,6 +208,7 @@ public fun RichText(
                                 textContent(textModifier)
                             }
                         }
+
                         is RichTextContent.BlockImage -> {
                             SubcomposeNetworkImage(
                                 modifier =

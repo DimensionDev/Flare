@@ -12,7 +12,7 @@ import dev.dimension.flare.model.MicroBlogKey
 
 public fun UiList.toTabItem(accountKey: MicroBlogKey): TabItem =
     when (this) {
-        is UiList.List ->
+        is UiList.List -> {
             ListTimelineTabItem(
                 account = AccountType.Specific(accountKey),
                 listId = id,
@@ -25,8 +25,9 @@ public fun UiList.toTabItem(accountKey: MicroBlogKey): TabItem =
                             } ?: IconType.Material(dev.dimension.flare.ui.model.UiIcon.List),
                     ),
             )
+        }
 
-        is UiList.Feed ->
+        is UiList.Feed -> {
             Bluesky.FeedTabItem(
                 account = AccountType.Specific(accountKey),
                 uri = id,
@@ -39,8 +40,9 @@ public fun UiList.toTabItem(accountKey: MicroBlogKey): TabItem =
                             } ?: IconType.Material(dev.dimension.flare.ui.model.UiIcon.Feeds),
                     ),
             )
+        }
 
-        is UiList.Antenna ->
+        is UiList.Antenna -> {
             Misskey.AntennasTimelineTabItem(
                 account = AccountType.Specific(accountKey),
                 antennasId = id,
@@ -50,8 +52,9 @@ public fun UiList.toTabItem(accountKey: MicroBlogKey): TabItem =
                         icon = IconType.Material(dev.dimension.flare.ui.model.UiIcon.List),
                     ),
             )
+        }
 
-        is UiList.Channel ->
+        is UiList.Channel -> {
             Misskey.ChannelTimelineTabItem(
                 account = AccountType.Specific(accountKey),
                 channelId = id,
@@ -61,4 +64,5 @@ public fun UiList.toTabItem(accountKey: MicroBlogKey): TabItem =
                         icon = IconType.Material(dev.dimension.flare.ui.model.UiIcon.List),
                     ),
             )
+        }
     }

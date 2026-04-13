@@ -20,13 +20,19 @@ internal class FollowingPagingSource(
     ): PagingResult<UiProfile> {
         val maxId =
             when (request) {
-                PagingRequest.Refresh -> null
+                PagingRequest.Refresh -> {
+                    null
+                }
+
                 is PagingRequest.Prepend -> {
                     return PagingResult(
                         endOfPaginationReached = true,
                     )
                 }
-                is PagingRequest.Append -> request.nextKey
+
+                is PagingRequest.Append -> {
+                    request.nextKey
+                }
             }
         val response =
             service

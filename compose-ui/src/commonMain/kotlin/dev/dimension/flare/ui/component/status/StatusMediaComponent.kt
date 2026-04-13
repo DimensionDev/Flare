@@ -457,7 +457,7 @@ public fun MediaItem(
             )
         }
 
-        is UiMedia.Gif ->
+        is UiMedia.Gif -> {
             NetworkImage(
                 model = media.url,
                 contentDescription = media.description,
@@ -477,5 +477,6 @@ public fun MediaItem(
                             }
                         },
             )
+        }
     }
 }

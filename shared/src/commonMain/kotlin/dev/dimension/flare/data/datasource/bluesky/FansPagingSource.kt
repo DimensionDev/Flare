@@ -28,7 +28,7 @@ internal class FansPagingSource(
                     )
                 }
 
-                PagingRequest.Refresh ->
+                PagingRequest.Refresh -> {
                     service
                         .getFollowers(
                             params =
@@ -37,8 +37,9 @@ internal class FansPagingSource(
                                     limit = pageSize.toLong(),
                                 ),
                         ).requireResponse()
+                }
 
-                is PagingRequest.Append ->
+                is PagingRequest.Append -> {
                     service
                         .getFollowers(
                             params =
@@ -48,6 +49,7 @@ internal class FansPagingSource(
                                     cursor = request.nextKey,
                                 ),
                         ).requireResponse()
+                }
             }
 
         return PagingResult(

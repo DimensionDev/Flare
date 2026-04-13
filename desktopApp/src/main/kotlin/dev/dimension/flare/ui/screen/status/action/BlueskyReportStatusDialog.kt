@@ -97,15 +97,22 @@ internal fun BlueskyReportStatusDialog(
         closeButtonText = stringResource(Res.string.cancel),
         onButtonClick = {
             when (it) {
-                ContentDialogButton.Primary ->
+                ContentDialogButton.Primary -> {
                     state.status.onSuccess { status ->
                         state.reason?.let {
                             state.report(it, status)
                             onBack.invoke()
                         }
                     }
-                ContentDialogButton.Secondary -> Unit
-                ContentDialogButton.Close -> onBack.invoke()
+                }
+
+                ContentDialogButton.Secondary -> {
+                    Unit
+                }
+
+                ContentDialogButton.Close -> {
+                    onBack.invoke()
+                }
             }
         },
     )

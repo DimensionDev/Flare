@@ -37,12 +37,23 @@ internal object TimelinePagingMapper {
                     status = rootStatus,
                     references =
                         when (data) {
-                            is UiTimelineV2.Feed -> emptyList()
-                            is UiTimelineV2.Message -> emptyList()
-                            is UiTimelineV2.Post -> collectPostReferences(data, rootStatus.data.id)
+                            is UiTimelineV2.Feed -> {
+                                emptyList()
+                            }
 
-                            is UiTimelineV2.User -> emptyList()
-                            is UiTimelineV2.UserList ->
+                            is UiTimelineV2.Message -> {
+                                emptyList()
+                            }
+
+                            is UiTimelineV2.Post -> {
+                                collectPostReferences(data, rootStatus.data.id)
+                            }
+
+                            is UiTimelineV2.User -> {
+                                emptyList()
+                            }
+
+                            is UiTimelineV2.UserList -> {
                                 data.post
                                     ?.let {
                                         listOf(
@@ -53,6 +64,7 @@ internal object TimelinePagingMapper {
                                             ),
                                         ) + collectPostReferences(it, rootStatus.data.id)
                                     }.orEmpty()
+                            }
                         },
                 ),
         )
@@ -92,8 +104,14 @@ internal object TimelinePagingMapper {
                 }
             }
         return when (root) {
-            is UiTimelineV2.Feed -> root
-            is UiTimelineV2.Message -> root
+            is UiTimelineV2.Feed -> {
+                root
+            }
+
+            is UiTimelineV2.Message -> {
+                root
+            }
+
             is UiTimelineV2.Post -> {
                 val resolvedRoot =
                     root.resolveReferences(
@@ -117,14 +135,19 @@ internal object TimelinePagingMapper {
                     resolvedRoot
                 }
             }
-            is UiTimelineV2.User -> root
-            is UiTimelineV2.UserList ->
+
+            is UiTimelineV2.User -> {
+                root
+            }
+
+            is UiTimelineV2.UserList -> {
                 root.copy(
                     post =
                         root.post?.let { post ->
                             references.map { it.second }.find { it.statusKey == post.statusKey } as? UiTimelineV2.Post ?: post
                         },
                 )
+            }
         }
     }
 
@@ -227,14 +250,18 @@ internal object TimelinePagingMapper {
 
     private fun UiTimelineV2.sanitizeForDatabase(): UiTimelineV2 =
         when (this) {
-            is UiTimelineV2.Post ->
+            is UiTimelineV2.Post -> {
                 copy(
                     references = directReferences(),
                     quote = persistentListOf(),
                     parents = persistentListOf(),
                     internalRepost = null,
                 )
-            else -> this
+            }
+
+            else -> {
+                this
+            }
         }
 
     private fun UiTimelineV2.Post.directReferences() =

@@ -27,13 +27,19 @@ internal class FollowingPagingSource(
     ): PagingResult<UiProfile> {
         val nextPage =
             when (request) {
-                PagingRequest.Refresh -> 1
+                PagingRequest.Refresh -> {
+                    1
+                }
+
                 is PagingRequest.Prepend -> {
                     return PagingResult(
                         endOfPaginationReached = true,
                     )
                 }
-                is PagingRequest.Append -> request.nextKey.toIntOrNull() ?: 1
+
+                is PagingRequest.Append -> {
+                    request.nextKey.toIntOrNull() ?: 1
+                }
             }
         val users =
             service

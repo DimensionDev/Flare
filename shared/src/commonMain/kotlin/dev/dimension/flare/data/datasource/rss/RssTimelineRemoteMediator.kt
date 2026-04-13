@@ -33,7 +33,7 @@ internal class RssTimelineRemoteMediator(
         val icon = rssSource?.icon ?: fetchIcon(url)
         val content =
             when (response) {
-                is Feed.Atom ->
+                is Feed.Atom -> {
                     response.entries.map {
                         it.render(
                             sourceName = title,
@@ -42,8 +42,9 @@ internal class RssTimelineRemoteMediator(
                             sourceLanguage = null,
                         )
                     }
+                }
 
-                is Feed.RDF ->
+                is Feed.RDF -> {
                     response.items.map {
                         it.render(
                             sourceName = title,
@@ -52,8 +53,9 @@ internal class RssTimelineRemoteMediator(
                             sourceLanguage = null,
                         )
                     }
+                }
 
-                is Feed.Rss20 ->
+                is Feed.Rss20 -> {
                     response.channel.items.map {
                         it.render(
                             sourceName = title,
@@ -62,6 +64,7 @@ internal class RssTimelineRemoteMediator(
                             sourceLanguage = response.channel.language,
                         )
                     }
+                }
             }
 
         return PagingResult(

@@ -44,6 +44,7 @@ public fun ErrorContent(
         is RequireReLoginException -> {
             RequireReLoginError(error, modifier)
         }
+
         else -> {
             CommonError(
                 error = error,

@@ -224,46 +224,54 @@ public sealed class UiAccount {
     internal companion object {
         fun UiAccount.createDataSource(): MicroblogDataSource =
             when (this) {
-                is Nostr ->
+                is Nostr -> {
                     NostrDataSource(
                         accountKey = accountKey,
                     )
+                }
 
-                is Mastodon ->
+                is Mastodon -> {
                     when (forkType) {
-                        Mastodon.Credential.ForkType.Mastodon ->
+                        Mastodon.Credential.ForkType.Mastodon -> {
                             MastodonDataSource(
                                 accountKey = accountKey,
                                 instance = instance,
                             )
+                        }
 
-                        Mastodon.Credential.ForkType.Pleroma ->
+                        Mastodon.Credential.ForkType.Pleroma -> {
                             PleromaDataSource(
                                 accountKey = accountKey,
                                 instance = instance,
                             )
+                        }
                     }
+                }
 
-                is Misskey ->
+                is Misskey -> {
                     MisskeyDataSource(
                         accountKey = accountKey,
                         host = host,
                     )
+                }
 
-                is Bluesky ->
+                is Bluesky -> {
                     BlueskyDataSource(
                         accountKey = accountKey,
                     )
+                }
 
-                is XQT ->
+                is XQT -> {
                     XQTDataSource(
                         accountKey = accountKey,
                     )
+                }
 
-                is VVo ->
+                is VVo -> {
                     VVODataSource(
                         accountKey = accountKey,
                     )
+                }
             }
 
         fun DbAccount.toUi(): UiAccount =

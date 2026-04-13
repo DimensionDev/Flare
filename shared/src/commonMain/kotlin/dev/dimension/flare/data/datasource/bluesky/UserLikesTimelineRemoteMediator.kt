@@ -25,7 +25,7 @@ internal class UserLikesTimelineRemoteMediator(
         val service = getService()
         val response =
             when (request) {
-                PagingRequest.Refresh ->
+                PagingRequest.Refresh -> {
                     service
                         .getActorLikes(
                             GetActorLikesQueryParams(
@@ -33,6 +33,7 @@ internal class UserLikesTimelineRemoteMediator(
                                 limit = pageSize.toLong(),
                             ),
                         ).maybeResponse()
+                }
 
                 is PagingRequest.Prepend -> {
                     return PagingResult(

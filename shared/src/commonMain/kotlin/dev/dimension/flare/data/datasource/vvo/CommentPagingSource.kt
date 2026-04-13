@@ -28,12 +28,19 @@ internal class CommentPagingSource(
         }
         val page =
             when (request) {
-                PagingRequest.Refresh -> 1
-                is PagingRequest.Prepend ->
+                PagingRequest.Refresh -> {
+                    1
+                }
+
+                is PagingRequest.Prepend -> {
                     return PagingResult(
                         endOfPaginationReached = true,
                     )
-                is PagingRequest.Append -> request.nextKey.toIntOrNull() ?: 1
+                }
+
+                is PagingRequest.Append -> {
+                    request.nextKey.toIntOrNull() ?: 1
+                }
             }
         if (request == PagingRequest.Refresh) {
             onClearMarker()

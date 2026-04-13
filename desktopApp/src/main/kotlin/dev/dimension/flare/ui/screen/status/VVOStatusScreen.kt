@@ -210,11 +210,13 @@ private fun LazyStaggeredGridScope.reactionContent(
         }
     }
     when (detailType) {
-        DetailType.Comment ->
+        DetailType.Comment -> {
             status(comment)
+        }
 
-        DetailType.Repost ->
+        DetailType.Repost -> {
             status(repost)
+        }
     }
 }
 

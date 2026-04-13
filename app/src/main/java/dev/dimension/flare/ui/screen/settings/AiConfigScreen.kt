@@ -734,7 +734,7 @@ internal fun TranslationConfigScreen(onBack: () -> Unit) {
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap)) {
                     when (state.translateProvider) {
-                        TranslateProviderOption.AI ->
+                        TranslateProviderOption.AI -> {
                             Column(verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap)) {
                                 SegmentedListItem(
                                     checked = state.textEditDialog?.field == TranslationEditField.TranslatePrompt,
@@ -812,6 +812,7 @@ internal fun TranslationConfigScreen(onBack: () -> Unit) {
                                     },
                                 )
                             }
+                        }
 
                         TranslateProviderOption.DeepL -> {
                             SegmentedListItem(
@@ -968,7 +969,9 @@ internal fun TranslationConfigScreen(onBack: () -> Unit) {
                             )
                         }
 
-                        TranslateProviderOption.GoogleWeb -> Unit
+                        TranslateProviderOption.GoogleWeb -> {
+                            Unit
+                        }
                     }
                 }
             }

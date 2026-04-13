@@ -216,17 +216,21 @@ internal fun TabAddBottomSheet(
                                         tab.extraTabs
                                             .map {
                                                 when (it) {
-                                                    is PinnableTimelineTabPresenter.State.Tab.Feed ->
+                                                    is PinnableTimelineTabPresenter.State.Tab.Feed -> {
                                                         R.string.tab_settings_feed
+                                                    }
 
-                                                    is PinnableTimelineTabPresenter.State.Tab.List ->
+                                                    is PinnableTimelineTabPresenter.State.Tab.List -> {
                                                         R.string.tab_settings_list
+                                                    }
 
-                                                    is PinnableTimelineTabPresenter.State.Tab.Antenna ->
+                                                    is PinnableTimelineTabPresenter.State.Tab.Antenna -> {
                                                         R.string.home_tab_antennas_title
+                                                    }
 
-                                                    is PinnableTimelineTabPresenter.State.Tab.Channel ->
+                                                    is PinnableTimelineTabPresenter.State.Tab.Channel -> {
                                                         R.string.channel_title
+                                                    }
                                                 }
                                             }.map { stringResource(id = it) }
                                 Row(

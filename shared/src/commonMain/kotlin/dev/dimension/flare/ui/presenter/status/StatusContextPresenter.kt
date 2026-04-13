@@ -113,8 +113,10 @@ public class StatusContextPresenter(
                 if (data !is UiTimelineV2.Post) {
                     return data
                 }
-                return if (currentCreatedAt != null &&
-                    data.createdAt <= currentCreatedAt ||
+                return if ((
+                        currentCreatedAt != null &&
+                            data.createdAt <= currentCreatedAt
+                    ) ||
                     data.parents.all { it.statusKey == statusKey }
                 ) {
                     data.copy(

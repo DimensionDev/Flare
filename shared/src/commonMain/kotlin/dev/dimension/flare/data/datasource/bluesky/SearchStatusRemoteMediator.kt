@@ -35,6 +35,7 @@ internal class SearchStatusRemoteMediator(
                         endOfPaginationReached = true,
                     )
                 }
+
                 PagingRequest.Refresh -> {
                     service.searchPosts(
                         SearchPostsQueryParams(

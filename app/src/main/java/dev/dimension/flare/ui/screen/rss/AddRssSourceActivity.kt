@@ -18,7 +18,9 @@ class AddRssSourceActivity : ComponentActivity() {
                     intent.getStringExtra(Intent.EXTRA_TEXT) ?: ""
                 }
 
-                else -> intent.dataString
+                else -> {
+                    intent.dataString
+                }
             }
 
         setContent {

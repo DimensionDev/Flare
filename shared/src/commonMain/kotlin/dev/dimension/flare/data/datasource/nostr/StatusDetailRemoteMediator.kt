@@ -26,7 +26,7 @@ internal class StatusDetailRemoteMediator(
         request: PagingRequest,
     ): PagingResult<UiTimelineV2> =
         when (request) {
-            PagingRequest.Refresh ->
+            PagingRequest.Refresh -> {
                 PagingResult(
                     endOfPaginationReached = false,
                     data =
@@ -39,8 +39,9 @@ internal class StatusDetailRemoteMediator(
                         ),
                     nextKey = pagingKey,
                 )
+            }
 
-            is PagingRequest.Append ->
+            is PagingRequest.Append -> {
                 PagingResult(
                     endOfPaginationReached = true,
                     data =
@@ -51,10 +52,12 @@ internal class StatusDetailRemoteMediator(
                             )
                         },
                 )
+            }
 
-            is PagingRequest.Prepend ->
+            is PagingRequest.Prepend -> {
                 PagingResult(
                     endOfPaginationReached = true,
                 )
+            }
         }
 }

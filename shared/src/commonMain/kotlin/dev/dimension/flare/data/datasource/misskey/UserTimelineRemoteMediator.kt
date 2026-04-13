@@ -45,9 +45,11 @@ internal class UserTimelineRemoteMediator(
     ): PagingResult<UiTimelineV2> {
         val response =
             when (request) {
-                is PagingRequest.Prepend -> return PagingResult(
-                    endOfPaginationReached = true,
-                )
+                is PagingRequest.Prepend -> {
+                    return PagingResult(
+                        endOfPaginationReached = true,
+                    )
+                }
 
                 PagingRequest.Refresh -> {
                     val pinned =

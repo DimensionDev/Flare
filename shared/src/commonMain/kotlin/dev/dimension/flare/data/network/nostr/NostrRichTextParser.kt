@@ -175,19 +175,23 @@ internal fun preprocessNostrText(
 private fun String.extractMentionedProfilePubkey(): String? {
     val value = removePrefix("nostr:").trim()
     return when {
-        value.startsWith("npub1", ignoreCase = true) ->
+        value.startsWith("npub1", ignoreCase = true) -> {
             withNip19(value) { nip19 ->
                 (nip19 as? RustNip19Enum.Pubkey)?.npub?.use { it.toHex() }
             }
+        }
 
-        value.startsWith("nprofile1", ignoreCase = true) ->
+        value.startsWith("nprofile1", ignoreCase = true) -> {
             withNip19(value) { nip19 ->
                 (nip19 as? RustNip19Enum.Profile)?.nprofile?.use { profile ->
                     profile.publicKey().use { it.toHex() }
                 }
             }
+        }
 
-        else -> null
+        else -> {
+            null
+        }
     }
 }
 
@@ -218,29 +222,36 @@ private fun String.removeQuoteReferences(quoteEventIds: Set<String>): String =
             }
             val normalized = trimmed.trimTrailingPunctuation()
             when {
-                normalized.startsWith("nostr:", ignoreCase = true) ->
+                normalized.startsWith("nostr:", ignoreCase = true) -> {
                     normalized.referencesQuotedEvent(quoteEventIds)
+                }
 
-                else -> false
+                else -> {
+                    false
+                }
             }
         }.joinToString(separator = " ")
 
 private fun String.referencesQuotedEvent(quoteEventIds: Set<String>): Boolean {
     val value = removePrefix("nostr:").trim()
     return when {
-        value.startsWith("note1", ignoreCase = true) ->
+        value.startsWith("note1", ignoreCase = true) -> {
             withNip19(value) { nip19 ->
                 (nip19 as? RustNip19Enum.Note)?.eventId?.use { it.toHex() in quoteEventIds }
             } == true
+        }
 
-        value.startsWith("nevent1", ignoreCase = true) ->
+        value.startsWith("nevent1", ignoreCase = true) -> {
             withNip19(value) { nip19 ->
                 (nip19 as? RustNip19Enum.Event)?.event?.use { event ->
                     event.eventId().use { it.toHex() in quoteEventIds }
                 }
             } == true
+        }
 
-        else -> false
+        else -> {
+            false
+        }
     }
 }
 
@@ -340,19 +351,25 @@ private fun String.resolveNostrReference(
 ): ResolvedNostrReference {
     val value = removePrefix("nostr:").trim()
     return when {
-        value.startsWith("npub1", ignoreCase = true) ->
+        value.startsWith("npub1", ignoreCase = true) -> {
             parseProfileReference(raw = this, value = value, accountKey = accountKey, profiles = profiles)
+        }
 
-        value.startsWith("nprofile1", ignoreCase = true) ->
+        value.startsWith("nprofile1", ignoreCase = true) -> {
             parseProfileReference(raw = this, value = value, accountKey = accountKey, profiles = profiles)
+        }
 
-        value.startsWith("note1", ignoreCase = true) ->
+        value.startsWith("note1", ignoreCase = true) -> {
             parseEventReference(raw = this, value = value, accountKey = accountKey)
+        }
 
-        value.startsWith("nevent1", ignoreCase = true) ->
+        value.startsWith("nevent1", ignoreCase = true) -> {
             parseEventReference(raw = this, value = value, accountKey = accountKey)
+        }
 
-        else -> ResolvedNostrReference(displayText = this, style = RenderTextStyle())
+        else -> {
+            ResolvedNostrReference(displayText = this, style = RenderTextStyle())
+        }
     }
 }
 
@@ -364,19 +381,23 @@ private fun parseProfileReference(
 ): ResolvedNostrReference {
     val pubKey =
         when {
-            value.startsWith("npub1", ignoreCase = true) ->
+            value.startsWith("npub1", ignoreCase = true) -> {
                 withNip19(value) { nip19 ->
                     (nip19 as? RustNip19Enum.Pubkey)?.npub?.use { it.toHex() }
                 }
+            }
 
-            value.startsWith("nprofile1", ignoreCase = true) ->
+            value.startsWith("nprofile1", ignoreCase = true) -> {
                 withNip19(value) { nip19 ->
                     (nip19 as? RustNip19Enum.Profile)?.nprofile?.use { profile ->
                         profile.publicKey().use { it.toHex() }
                     }
                 }
+            }
 
-            else -> null
+            else -> {
+                null
+            }
         }
     if (pubKey == null) {
         return ResolvedNostrReference(displayText = raw, style = RenderTextStyle())
@@ -410,19 +431,23 @@ private fun parseEventReference(
 ): ResolvedNostrReference {
     val eventId =
         when {
-            value.startsWith("note1", ignoreCase = true) ->
+            value.startsWith("note1", ignoreCase = true) -> {
                 withNip19(value) { nip19 ->
                     (nip19 as? RustNip19Enum.Note)?.eventId?.use { it.toHex() }
                 }
+            }
 
-            value.startsWith("nevent1", ignoreCase = true) ->
+            value.startsWith("nevent1", ignoreCase = true) -> {
                 withNip19(value) { nip19 ->
                     (nip19 as? RustNip19Enum.Event)?.event?.use { event ->
                         event.eventId().use { it.toHex() }
                     }
                 }
+            }
 
-            else -> null
+            else -> {
+                null
+            }
         }
     if (eventId == null) {
         return ResolvedNostrReference(displayText = raw, style = RenderTextStyle())

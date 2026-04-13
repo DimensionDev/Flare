@@ -48,31 +48,39 @@ public sealed interface UiApplication {
     public companion object {
         internal fun DbApplication.toUi(): UiApplication =
             when (platform_type) {
-                PlatformType.Nostr ->
+                PlatformType.Nostr -> {
                     Nostr(
                         host = host,
                     )
+                }
 
-                PlatformType.Mastodon ->
+                PlatformType.Mastodon -> {
                     Mastodon(
                         host = host,
                         application = credential_json.decodeJson(),
                     )
+                }
 
-                PlatformType.Misskey ->
+                PlatformType.Misskey -> {
                     Misskey(
                         host = host,
                         session = credential_json,
                     )
+                }
 
-                PlatformType.Bluesky ->
+                PlatformType.Bluesky -> {
                     Bluesky(
                         host = host,
                     )
+                }
 
-                PlatformType.xQt -> XQT
+                PlatformType.xQt -> {
+                    XQT
+                }
 
-                PlatformType.VVo -> VVo
+                PlatformType.VVo -> {
+                    VVo
+                }
             }
     }
 }

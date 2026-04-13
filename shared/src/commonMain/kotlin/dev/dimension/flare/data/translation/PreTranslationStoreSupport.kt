@@ -113,15 +113,23 @@ internal object PreTranslationStoreSupport {
         }
         return when (existing.status) {
             TranslationStatus.Completed,
-            -> false
+            -> {
+                false
+            }
 
-            TranslationStatus.Skipped ->
+            TranslationStatus.Skipped -> {
                 existing.statusReason == SKIPPED_EXCLUDED_LANGUAGE_REASON
+            }
 
-            TranslationStatus.Failed -> true
+            TranslationStatus.Failed -> {
+                true
+            }
+
             TranslationStatus.Pending,
             TranslationStatus.Translating,
-            -> false
+            -> {
+                false
+            }
         }
     }
 

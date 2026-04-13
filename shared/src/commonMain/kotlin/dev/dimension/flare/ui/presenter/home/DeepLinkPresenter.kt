@@ -59,7 +59,7 @@ public class DeepLinkPresenter(
                     val event = DeeplinkEvent.parse(url)
                     if (event != null) {
                         when {
-                            event.postEvent != null ->
+                            event.postEvent != null -> {
                                 accountServiceFlow(
                                     accountType = AccountType.Specific(event.accountKey),
                                     repository = accountRepository,
@@ -68,8 +68,9 @@ public class DeepLinkPresenter(
                                         service.postEventHandler.handleEvent(event.postEvent)
                                     }
                                 }
+                            }
 
-                            event.translationEvent is DeeplinkEvent.TranslationEvent.RetryTranslation ->
+                            event.translationEvent is DeeplinkEvent.TranslationEvent.RetryTranslation -> {
                                 with(event.translationEvent) {
                                     preTranslationService.setStatusDisplayMode(
                                         accountType = AccountType.Specific(event.accountKey),
@@ -81,8 +82,9 @@ public class DeepLinkPresenter(
                                         statusKey = statusKey,
                                     )
                                 }
+                            }
 
-                            event.translationEvent is DeeplinkEvent.TranslationEvent.Translate ->
+                            event.translationEvent is DeeplinkEvent.TranslationEvent.Translate -> {
                                 with(event.translationEvent) {
                                     preTranslationService.setStatusDisplayMode(
                                         accountType = AccountType.Specific(event.accountKey),
@@ -94,28 +96,32 @@ public class DeepLinkPresenter(
                                         statusKey = statusKey,
                                     )
                                 }
+                            }
 
-                            event.translationEvent is DeeplinkEvent.TranslationEvent.ShowOriginal ->
+                            event.translationEvent is DeeplinkEvent.TranslationEvent.ShowOriginal -> {
                                 preTranslationService.setStatusDisplayMode(
                                     accountType = AccountType.Specific(event.accountKey),
                                     statusKey = event.translationEvent.statusKey,
                                     mode = TranslationDisplayMode.Original,
                                 )
+                            }
                         }
                     }
                     pendingUrl = null
                 } else if (DeeplinkRoute.isDeeplink(url)) {
                     DeeplinkRoute.parse(url)?.let {
                         when (it) {
-                            is DeeplinkRoute.OpenLinkDirectly ->
+                            is DeeplinkRoute.OpenLinkDirectly -> {
                                 withContext(Dispatchers.Main) {
                                     onLink(it.url)
                                 }
+                            }
 
-                            else ->
+                            else -> {
                                 withContext(Dispatchers.Main) {
                                     onRoute(it)
                                 }
+                            }
                         }
                     }
                     pendingUrl = null

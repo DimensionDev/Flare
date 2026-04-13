@@ -15,10 +15,17 @@ internal object InitialTextResolver {
         selectedAccountKey: MicroBlogKey?,
     ): InitialText? =
         when (post.platformType) {
-            PlatformType.VVo -> resolveVVo(post, composeStatus)
-            PlatformType.Mastodon, PlatformType.Misskey ->
+            PlatformType.VVo -> {
+                resolveVVo(post, composeStatus)
+            }
+
+            PlatformType.Mastodon, PlatformType.Misskey -> {
                 resolveMastodonMisskey(post, composeStatus, currentUserHandle, selectedAccountKey)
-            else -> null
+            }
+
+            else -> {
+                null
+            }
         }
 
     private fun resolveVVo(
@@ -57,7 +64,10 @@ internal object InitialTextResolver {
                 }
             }.mapNotNull { run ->
                 when (run) {
-                    is RenderRun.Image -> null
+                    is RenderRun.Image -> {
+                        null
+                    }
+
                     is RenderRun.Text -> {
                         val href = run.style.link ?: return@mapNotNull null
                         if (!href.startsWith("flare://ProfileWithNameAndHost")) {

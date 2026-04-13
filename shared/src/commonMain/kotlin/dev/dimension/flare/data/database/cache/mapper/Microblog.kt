@@ -187,15 +187,24 @@ private suspend fun loadChangedTimeline(
 
 private fun UiTimelineV2.usersInContent(): List<UiProfile> =
     when (this) {
-        is UiTimelineV2.Post ->
+        is UiTimelineV2.Post -> {
             listOfNotNull(user, message?.user) +
                 quote.flatMap { it.usersInContent() } +
                 parents.flatMap { it.usersInContent() } +
                 listOfNotNull(internalRepost).flatMap { it.usersInContent() }
-        is UiTimelineV2.User -> listOfNotNull(value, message?.user)
-        is UiTimelineV2.UserList ->
+        }
+
+        is UiTimelineV2.User -> {
+            listOfNotNull(value, message?.user)
+        }
+
+        is UiTimelineV2.UserList -> {
             users +
                 listOfNotNull(message?.user) +
                 listOfNotNull(post).flatMap { it.usersInContent() }
-        else -> emptyList()
+        }
+
+        else -> {
+            emptyList()
+        }
     }

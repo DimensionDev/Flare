@@ -288,13 +288,17 @@ public class AiConfigPresenter :
                     copy(
                         type =
                             when (value) {
-                                AiTypeOption.OnDevice -> AppSettings.AiConfig.Type.OnDevice
-                                AiTypeOption.OpenAI ->
+                                AiTypeOption.OnDevice -> {
+                                    AppSettings.AiConfig.Type.OnDevice
+                                }
+
+                                AiTypeOption.OpenAI -> {
                                     AppSettings.AiConfig.Type.OpenAI(
                                         serverUrl = "",
                                         apiKey = "",
                                         model = "",
                                     )
+                                }
                             },
                     )
                 }
@@ -394,17 +398,28 @@ public class AiConfigPresenter :
                     copy(
                         provider =
                             when (value) {
-                                TranslateProviderOption.AI -> AppSettings.TranslateConfig.Provider.AI
-                                TranslateProviderOption.GoogleWeb -> AppSettings.TranslateConfig.Provider.GoogleWeb
-                                TranslateProviderOption.DeepL ->
+                                TranslateProviderOption.AI -> {
+                                    AppSettings.TranslateConfig.Provider.AI
+                                }
+
+                                TranslateProviderOption.GoogleWeb -> {
+                                    AppSettings.TranslateConfig.Provider.GoogleWeb
+                                }
+
+                                TranslateProviderOption.DeepL -> {
                                     (provider as? AppSettings.TranslateConfig.Provider.DeepL)
                                         ?: AppSettings.TranslateConfig.Provider.DeepL()
-                                TranslateProviderOption.GoogleCloud ->
+                                }
+
+                                TranslateProviderOption.GoogleCloud -> {
                                     (provider as? AppSettings.TranslateConfig.Provider.GoogleCloud)
                                         ?: AppSettings.TranslateConfig.Provider.GoogleCloud()
-                                TranslateProviderOption.LibreTranslate ->
+                                }
+
+                                TranslateProviderOption.LibreTranslate -> {
                                     (provider as? AppSettings.TranslateConfig.Provider.LibreTranslate)
                                         ?: AppSettings.TranslateConfig.Provider.LibreTranslate()
+                                }
                             },
                     )
                 }
@@ -413,7 +428,10 @@ public class AiConfigPresenter :
             override fun selectType(type: AiTypeOption) {
                 update {
                     when (type) {
-                        AiTypeOption.OnDevice -> copy(type = AppSettings.AiConfig.Type.OnDevice)
+                        AiTypeOption.OnDevice -> {
+                            copy(type = AppSettings.AiConfig.Type.OnDevice)
+                        }
+
                         AiTypeOption.OpenAI -> {
                             val currentType = this.type as? AppSettings.AiConfig.Type.OpenAI
                             copy(
@@ -435,17 +453,28 @@ public class AiConfigPresenter :
                     copy(
                         provider =
                             when (type) {
-                                TranslateProviderOption.AI -> AppSettings.TranslateConfig.Provider.AI
-                                TranslateProviderOption.GoogleWeb -> AppSettings.TranslateConfig.Provider.GoogleWeb
-                                TranslateProviderOption.DeepL ->
+                                TranslateProviderOption.AI -> {
+                                    AppSettings.TranslateConfig.Provider.AI
+                                }
+
+                                TranslateProviderOption.GoogleWeb -> {
+                                    AppSettings.TranslateConfig.Provider.GoogleWeb
+                                }
+
+                                TranslateProviderOption.DeepL -> {
                                     (provider as? AppSettings.TranslateConfig.Provider.DeepL)
                                         ?: AppSettings.TranslateConfig.Provider.DeepL()
-                                TranslateProviderOption.GoogleCloud ->
+                                }
+
+                                TranslateProviderOption.GoogleCloud -> {
                                     (provider as? AppSettings.TranslateConfig.Provider.GoogleCloud)
                                         ?: AppSettings.TranslateConfig.Provider.GoogleCloud()
-                                TranslateProviderOption.LibreTranslate ->
+                                }
+
+                                TranslateProviderOption.LibreTranslate -> {
                                     (provider as? AppSettings.TranslateConfig.Provider.LibreTranslate)
                                         ?: AppSettings.TranslateConfig.Provider.LibreTranslate()
+                                }
                             },
                     )
                 }
@@ -461,12 +490,15 @@ private fun AppSettings.TranslateConfig.normalized(): AppSettings.TranslateConfi
         autoTranslateExcludedLanguages = normalizeExcludedLanguages(autoTranslateExcludedLanguages),
         provider =
             when (val provider = provider) {
-                is AppSettings.TranslateConfig.Provider.LibreTranslate ->
+                is AppSettings.TranslateConfig.Provider.LibreTranslate -> {
                     provider.copy(
                         baseUrl = provider.baseUrl.trim(),
                     )
+                }
 
-                else -> provider
+                else -> {
+                    provider
+                }
             },
     )
 

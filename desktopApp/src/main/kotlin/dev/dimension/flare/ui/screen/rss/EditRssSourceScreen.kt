@@ -225,33 +225,37 @@ fun EditRssSourceScreen(
                         state.checkState
                             .onSuccess {
                                 when (it) {
-                                    is CheckRssSourcePresenter.State.RssState.RssFeed ->
+                                    is CheckRssSourcePresenter.State.RssState.RssFeed -> {
                                         FAIcon(
                                             FontAwesomeIcons.Solid.CircleCheck,
                                             contentDescription = null,
                                             modifier = Modifier.size(24.dp),
                                         )
+                                    }
 
-                                    CheckRssSourcePresenter.State.RssState.RssHub ->
+                                    CheckRssSourcePresenter.State.RssState.RssHub -> {
                                         FAIcon(
                                             FontAwesomeIcons.Solid.CircleChevronDown,
                                             contentDescription = null,
                                             modifier = Modifier.size(24.dp),
                                         )
+                                    }
 
-                                    is CheckRssSourcePresenter.State.RssState.RssSources ->
+                                    is CheckRssSourcePresenter.State.RssState.RssSources -> {
                                         FAIcon(
                                             FontAwesomeIcons.Solid.CircleChevronDown,
                                             contentDescription = null,
                                             modifier = Modifier.size(24.dp),
                                         )
+                                    }
 
-                                    is CheckRssSourcePresenter.State.RssState.MastodonInstance ->
+                                    is CheckRssSourcePresenter.State.RssState.MastodonInstance -> {
                                         FAIcon(
                                             FontAwesomeIcons.Solid.CircleCheck,
                                             contentDescription = null,
                                             modifier = Modifier.size(24.dp),
                                         )
+                                    }
                                 }
                             }.onError {
                                 FAIcon(
@@ -312,33 +316,37 @@ fun EditRssSourceScreen(
                                             it.checkState
                                                 .onSuccess {
                                                     when (it) {
-                                                        is CheckRssSourcePresenter.State.RssState.RssFeed ->
+                                                        is CheckRssSourcePresenter.State.RssState.RssFeed -> {
                                                             FAIcon(
                                                                 FontAwesomeIcons.Solid.CircleCheck,
                                                                 contentDescription = null,
                                                                 modifier = Modifier.size(24.dp),
                                                             )
+                                                        }
 
-                                                        CheckRssSourcePresenter.State.RssState.RssHub ->
+                                                        CheckRssSourcePresenter.State.RssState.RssHub -> {
                                                             FAIcon(
                                                                 FontAwesomeIcons.Solid.CircleChevronDown,
                                                                 contentDescription = null,
                                                                 modifier = Modifier.size(24.dp),
                                                             )
+                                                        }
 
-                                                        is CheckRssSourcePresenter.State.RssState.RssSources ->
+                                                        is CheckRssSourcePresenter.State.RssState.RssSources -> {
                                                             FAIcon(
                                                                 FontAwesomeIcons.Solid.CircleChevronDown,
                                                                 contentDescription = null,
                                                                 modifier = Modifier.size(24.dp),
                                                             )
+                                                        }
 
-                                                        is CheckRssSourcePresenter.State.RssState.MastodonInstance ->
+                                                        is CheckRssSourcePresenter.State.RssState.MastodonInstance -> {
                                                             FAIcon(
                                                                 FontAwesomeIcons.Solid.CircleCheck,
                                                                 contentDescription = null,
                                                                 modifier = Modifier.size(24.dp),
                                                             )
+                                                        }
                                                     }
                                                 }.onError {
                                                     FAIcon(

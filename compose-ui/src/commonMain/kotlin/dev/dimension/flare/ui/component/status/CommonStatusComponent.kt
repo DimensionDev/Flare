@@ -653,21 +653,29 @@ internal fun TranslationDisplayBadge(
         )
         AnimatedContent(state) { state ->
             when (state) {
-                TranslationDisplayState.Translating ->
+                TranslationDisplayState.Translating -> {
                     PlatformCircularProgressIndicator(
                         modifier = Modifier.size(12.dp),
                         color = PlatformTheme.colorScheme.caption,
                     )
+                }
 
-                TranslationDisplayState.Translated -> Unit
-                TranslationDisplayState.Failed ->
+                TranslationDisplayState.Translated -> {
+                    Unit
+                }
+
+                TranslationDisplayState.Failed -> {
                     FAIcon(
                         FontAwesomeIcons.Solid.TriangleExclamation,
                         contentDescription = null,
                         tint = PlatformTheme.colorScheme.caption,
                         modifier = Modifier.size(12.dp),
                     )
-                TranslationDisplayState.Hidden -> Unit
+                }
+
+                TranslationDisplayState.Hidden -> {
+                    Unit
+                }
             }
         }
     }
@@ -794,45 +802,50 @@ public fun StatusVisibilityComponent(
     modifier: Modifier = Modifier,
 ) {
     when (visibility) {
-        UiTimelineV2.Post.Visibility.Public ->
+        UiTimelineV2.Post.Visibility.Public -> {
             FAIcon(
                 imageVector = FontAwesomeIcons.Solid.Globe,
                 contentDescription = stringResource(resource = Res.string.mastodon_visibility_public),
                 modifier = modifier,
                 tint = tint,
             )
+        }
 
-        UiTimelineV2.Post.Visibility.Home ->
+        UiTimelineV2.Post.Visibility.Home -> {
             FAIcon(
                 imageVector = FontAwesomeIcons.Solid.LockOpen,
                 contentDescription = stringResource(resource = Res.string.mastodon_visibility_unlisted),
                 modifier = modifier,
                 tint = tint,
             )
+        }
 
-        UiTimelineV2.Post.Visibility.Followers ->
+        UiTimelineV2.Post.Visibility.Followers -> {
             FAIcon(
                 imageVector = FontAwesomeIcons.Solid.Lock,
                 contentDescription = stringResource(resource = Res.string.mastodon_visibility_private),
                 modifier = modifier,
                 tint = tint,
             )
+        }
 
-        UiTimelineV2.Post.Visibility.Specified ->
+        UiTimelineV2.Post.Visibility.Specified -> {
             FAIcon(
                 imageVector = FontAwesomeIcons.Solid.At,
                 contentDescription = stringResource(resource = Res.string.mastodon_visibility_direct),
                 modifier = modifier,
                 tint = tint,
             )
+        }
 
-        UiTimelineV2.Post.Visibility.Channel ->
+        UiTimelineV2.Post.Visibility.Channel -> {
             FAIcon(
                 imageVector = FontAwesomeIcons.Solid.Tv,
                 contentDescription = stringResource(resource = Res.string.channel_title),
                 modifier = modifier,
                 tint = tint,
             )
+        }
     }
 }
 
@@ -879,8 +892,13 @@ internal fun StatusActions(
                                 }
 
                                 // nested group is not supported
-                                is ActionMenu.Group -> Unit
-                                ActionMenu.Divider -> PlatformDropdownMenuDivider()
+                                is ActionMenu.Group -> {
+                                    Unit
+                                }
+
+                                ActionMenu.Divider -> {
+                                    PlatformDropdownMenuDivider()
+                                }
                             }
                         }
                     }
@@ -911,7 +929,9 @@ internal fun StatusActions(
                 }
 
                 // divider is only supported in group
-                ActionMenu.Divider -> Unit
+                ActionMenu.Divider -> {
+                    Unit
+                }
             }
         }
     }
@@ -958,7 +978,10 @@ private fun PlatformDropdownMenuScope.StatusActionItemMenu(
 @Composable
 private fun ActionMenu.Item.Text.asString(): String =
     when (this) {
-        is ActionMenu.Item.Text.Raw -> text
+        is ActionMenu.Item.Text.Raw -> {
+            text
+        }
+
         is ActionMenu.Item.Text.Localized -> {
             val resource =
                 when (type) {

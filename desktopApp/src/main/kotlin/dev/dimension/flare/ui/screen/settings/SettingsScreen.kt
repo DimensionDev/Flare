@@ -507,6 +507,7 @@ internal fun SettingsScreen(
                             pendingDeleteAccountKey = null
                             pendingDeleteAccountLabel = null
                         }
+
                         else -> {
                             pendingDeleteAccountKey = null
                             pendingDeleteAccountLabel = null
@@ -703,15 +704,17 @@ internal fun SettingsScreen(
                                     content = {
                                         Text(
                                             when (LocalAppearanceSettings.current.avatarShape) {
-                                                AvatarShape.CIRCLE ->
+                                                AvatarShape.CIRCLE -> {
                                                     stringResource(
                                                         Res.string.settings_appearance_avatar_shape_round,
                                                     )
+                                                }
 
-                                                AvatarShape.SQUARE ->
+                                                AvatarShape.SQUARE -> {
                                                     stringResource(
                                                         Res.string.settings_appearance_avatar_shape_square,
                                                     )
+                                                }
                                             },
                                         )
                                     },
@@ -1234,7 +1237,10 @@ internal fun SettingsScreen(
                                 dialog.onConfirm(textState.text.toString())
                                 state.aiConfigState.setTextEditDialog(null)
                             }
-                            else -> state.aiConfigState.setTextEditDialog(null)
+
+                            else -> {
+                                state.aiConfigState.setTextEditDialog(null)
+                            }
                         }
                     },
                 )
@@ -1269,6 +1275,7 @@ internal fun SettingsScreen(
                         ContentDialogButton.Primary -> {
                             state.storageState.confirmImport()
                         }
+
                         else -> {
                             state.storageState.cancelImport()
                         }
@@ -1845,7 +1852,9 @@ internal fun SettingsScreen(
                                 )
                             }
 
-                            TranslateProviderOption.GoogleWeb -> Unit
+                            TranslateProviderOption.GoogleWeb -> {
+                                Unit
+                            }
                         }
                     }
                 }
@@ -2394,10 +2403,13 @@ private fun ExcludedLanguagesDialog(
         closeButtonText = stringResource(Res.string.cancel),
         onButtonClick = {
             when (it) {
-                ContentDialogButton.Primary ->
+                ContentDialogButton.Primary -> {
                     onConfirm(options.map(LanguageOption::tag).filter { tag -> tag in selectedTags }.toImmutableList())
+                }
 
-                else -> onDismiss()
+                else -> {
+                    onDismiss()
+                }
             }
         },
     )

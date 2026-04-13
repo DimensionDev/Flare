@@ -73,16 +73,28 @@ internal object TranslationProvider {
         aiCompletionService: AiCompletionService,
     ): TranslationEngine =
         when (val provider = settings.translateConfig.provider) {
-            AppSettings.TranslateConfig.Provider.AI ->
+            AppSettings.TranslateConfig.Provider.AI -> {
                 AiTranslationEngine(
                     config = settings.aiConfig,
                     aiCompletionService = aiCompletionService,
                 )
+            }
 
-            AppSettings.TranslateConfig.Provider.GoogleWeb -> GoogleWebTranslationEngine
-            is AppSettings.TranslateConfig.Provider.DeepL -> DeepLTranslationEngine(provider)
-            is AppSettings.TranslateConfig.Provider.GoogleCloud -> GoogleCloudTranslationEngine(provider)
-            is AppSettings.TranslateConfig.Provider.LibreTranslate -> LibreTranslateEngine(provider)
+            AppSettings.TranslateConfig.Provider.GoogleWeb -> {
+                GoogleWebTranslationEngine
+            }
+
+            is AppSettings.TranslateConfig.Provider.DeepL -> {
+                DeepLTranslationEngine(provider)
+            }
+
+            is AppSettings.TranslateConfig.Provider.GoogleCloud -> {
+                GoogleCloudTranslationEngine(provider)
+            }
+
+            is AppSettings.TranslateConfig.Provider.LibreTranslate -> {
+                LibreTranslateEngine(provider)
+            }
         }
 }
 
@@ -567,28 +579,33 @@ internal fun String.toDeepLTargetLanguage(): String {
     val qualifiers = parts.drop(1).toSet()
 
     return when (language) {
-        "EN" ->
+        "EN" -> {
             if ("GB" in qualifiers) {
                 "EN-GB"
             } else {
                 "EN-US"
             }
+        }
 
-        "PT" ->
+        "PT" -> {
             if ("BR" in qualifiers) {
                 "PT-BR"
             } else {
                 "PT-PT"
             }
+        }
 
-        "ZH" ->
+        "ZH" -> {
             when {
                 qualifiers.any { it in setOf("HANT", "TW", "HK", "MO", "CHT") } -> "ZH-HANT"
                 qualifiers.any { it in setOf("HANS", "CN", "SG", "CHS", "CH") } -> "ZH-HANS"
                 else -> "ZH"
             }
+        }
 
-        else -> language
+        else -> {
+            language
+        }
     }
 }
 
@@ -676,13 +693,17 @@ internal object GoogleWebTranslationDocumentSupport {
                         tokens =
                             block.tokens.map { token ->
                                 when {
-                                    token.kind != TranslationTokenKind.Translatable || token.text.isBlank() -> token
-                                    else ->
+                                    token.kind != TranslationTokenKind.Translatable || token.text.isBlank() -> {
+                                        token
+                                    }
+
+                                    else -> {
                                         token.copy(
                                             text =
                                                 translatedTexts[token.text]
                                                     ?: error("Missing translated text for token '${token.text.take(50)}'"),
                                         )
+                                    }
                                 }
                             },
                     )

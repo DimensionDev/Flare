@@ -1,21 +1,26 @@
 // START Non-FOSS component
-import com.google.firebase.crashlytics.buildtools.gradle.CrashlyticsPlugin
 // END Non-FOSS component
+import com.google.firebase.crashlytics.buildtools.gradle.CrashlyticsPlugin
 import com.google.gms.googleservices.GoogleServicesPlugin
+import dev.dimension.flare.buildlogic.flare
 import java.util.Properties
 
 plugins {
-    id("com.android.application")
+    id("dev.dimension.flare.android-application")
     alias(libs.plugins.ksp)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ktorfit)
-    alias(libs.plugins.ktlint)
     alias(libs.plugins.google.services) apply false
     // START Non-FOSS component
     alias(libs.plugins.firebase.crashlytics) apply false
     // END Non-FOSS component
     alias(libs.plugins.compose.compiler)
     id("kotlin-parcelize")
+}
+
+flare {
+    namespace = "dev.dimension.flare"
+    applicationId = "dev.dimension.flare"
 }
 
 // START Non-FOSS component
@@ -26,22 +31,16 @@ if (project.file("google-services.json").exists()) {
 // END Non-FOSS component
 
 android {
-    namespace = "dev.dimension.flare"
-    compileSdk = libs.versions.compileSdk.get().toInt()
     val fdroid = rootProject.file("fdroid.properties")
     val fdroidProp = Properties()
     fdroidProp.load(fdroid.inputStream())
 
     defaultConfig {
-        applicationId = "dev.dimension.flare"
-        minSdk = libs.versions.minSdk.get().toInt()
-        targetSdk = libs.versions.compileSdk.get().toInt()
         versionCode =
             System.getenv("BUILD_NUMBER")?.toIntOrNull() ?: fdroidProp.getProperty("versionCode")
                 ?.toIntOrNull() ?: 1
         versionName =
-            System.getenv("BUILD_VERSION")?.toString() ?: fdroidProp.getProperty("versionName")
-                ?.toString() ?: "0.0.0"
+            System.getenv("BUILD_VERSION") ?: fdroidProp.getProperty("versionName") ?: "0.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -182,13 +181,6 @@ dependencies {
     androidTestImplementation(libs.ui.test.junit4)
     debugImplementation(libs.ui.tooling)
     debugImplementation(libs.ui.test.manifest)
-}
-
-ktlint {
-    version.set(libs.versions.ktlint)
-    filter {
-        exclude { element -> element.file.path.contains("build", ignoreCase = true) }
-    }
 }
 
 if (project.file("google-services.json").exists()) {

@@ -152,7 +152,7 @@ internal fun LocalCacheSearchScreen(onBack: () -> Unit) {
                 }
             }
             when (state.selectedSearchType) {
-                SearchType.Status ->
+                SearchType.Status -> {
                     status(
                         if (text.isEmpty()) {
                             state.history
@@ -160,7 +160,9 @@ internal fun LocalCacheSearchScreen(onBack: () -> Unit) {
                             state.data
                         },
                     )
-                SearchType.User ->
+                }
+
+                SearchType.User -> {
                     itemsIndexed(
                         if (text.isEmpty()) {
                             state.userHistory
@@ -180,6 +182,7 @@ internal fun LocalCacheSearchScreen(onBack: () -> Unit) {
                             },
                         )
                     }
+                }
             }
         }
     }

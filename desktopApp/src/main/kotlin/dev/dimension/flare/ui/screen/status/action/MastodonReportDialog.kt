@@ -46,8 +46,14 @@ internal fun MastodonReportDialog(
                     state.report()
                     onBack.invoke()
                 }
-                ContentDialogButton.Secondary -> Unit
-                ContentDialogButton.Close -> onBack.invoke()
+
+                ContentDialogButton.Secondary -> {
+                    Unit
+                }
+
+                ContentDialogButton.Close -> {
+                    onBack.invoke()
+                }
             }
         },
     )

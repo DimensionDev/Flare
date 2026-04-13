@@ -62,12 +62,16 @@ internal object FlareHardwareShortcutDetector : HardwareShortcutDetector {
                 else -> null
             }
         return when (panDirection) {
-            null -> null
-            else ->
+            null -> {
+                null
+            }
+
+            else -> {
                 ShortcutEvent.Pan(
                     direction = panDirection,
                     panOffset = ShortcutEvent.DefaultPanOffset * if (event.isAltPressed) 10f else 1f,
                 )
+            }
         }
     }
 
@@ -91,6 +95,7 @@ internal object FlareHardwareShortcutDetector : HardwareShortcutDetector {
                         event.keyboardModifiers.isShiftPressed && scroll.y != 0f -> {
                             if (scroll.y < 0f) PanDirection.Left else PanDirection.Right
                         }
+
                         else -> {
                             if (scroll.x == 0f) {
                                 if (scroll.y < 0f) PanDirection.Up else PanDirection.Down
@@ -103,8 +108,11 @@ internal object FlareHardwareShortcutDetector : HardwareShortcutDetector {
             )
         } else {
             return when (val scrollY = event.calculateScroll().y) {
-                0f -> null
-                else ->
+                0f -> {
+                    null
+                }
+
+                else -> {
                     ShortcutEvent.Zoom(
                         direction = if (scrollY < 0f) ZoomDirection.In else ZoomDirection.Out,
                         centroid = event.calculateScrollCentroid(),
@@ -116,6 +124,7 @@ internal object FlareHardwareShortcutDetector : HardwareShortcutDetector {
                         //   MacBook trackpad: -0.1 / 0.1
                         zoomFactor = (ShortcutEvent.DefaultZoomFactor / 2f) * scrollY.absoluteValue,
                     )
+                }
             }
         }
     }
@@ -233,6 +242,7 @@ internal class FlareHardwareShortcutsNode(
                     ShortcutEvent.ZoomDirection.Out -> onZoom(1f - shortcut.zoomFactor, shortcut.centroid)
                 }
             }
+
             is ShortcutEvent.Pan -> {
                 if (canPan()) {
                     val canContinuePan =

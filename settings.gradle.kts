@@ -1,4 +1,5 @@
 pluginManagement {
+    includeBuild("build-logic")
     repositories {
         google()
         mavenCentral()
@@ -25,7 +26,5 @@ include(":app")
 include(":shared")
 include(":compose-ui")
 include(":desktopApp")
-include(":server")
 include(":readability")
-include(":shared:api")
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")

@@ -1,32 +1,36 @@
+
 import co.touchlab.skie.configuration.DefaultArgumentInterop
+import dev.dimension.flare.buildlogic.FlarePlatform
+import dev.dimension.flare.buildlogic.flare
 import org.jetbrains.compose.compose
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 
 plugins {
+    id("dev.dimension.flare.multiplatform-library")
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.kotlin.serialization)
-    alias(libs.plugins.ktlint)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.skie)
 }
 
 kotlin {
-    jvmToolchain(libs.versions.java.get().toInt())
-    explicitApi()
-    applyDefaultHierarchyTemplate()
-    android {
-        compileSdk = libs.versions.compileSdk.get().toInt()
+    flare {
         namespace = "dev.dimension.flare.compose.ui"
-        minSdk = libs.versions.minSdk.get().toInt()
-        experimentalProperties["android.experimental.kmp.enableAndroidResources"] = true
-        enableCoreLibraryDesugaring = true
+        platforms(
+            FlarePlatform.ANDROID,
+            FlarePlatform.JVM,
+            FlarePlatform.IOS,
+        )
     }
-    jvm()
-    listOf(
-        iosArm64(),
-        iosSimulatorArm64(),
-    ).forEach { appleTarget ->
+//    android {
+//        experimentalProperties["android.experimental.kmp.enableAndroidResources"] = true
+//        enableCoreLibraryDesugaring = true
+//    }
+    listOf("iosArm64", "iosSimulatorArm64")
+        .map { targetName -> targets.getByName(targetName) as KotlinNativeTarget }
+        .forEach { appleTarget ->
         appleTarget.binaries.framework {
             baseName = "KotlinSharedUI"
             isStatic = true
@@ -117,14 +121,6 @@ skie {
 dependencies {
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 }
-
-ktlint {
-    version.set(libs.versions.ktlint)
-    filter {
-        exclude { element -> element.file.path.contains("build", ignoreCase = true) }
-    }
-}
-
 
 compose.resources {
     packageOfResClass = "dev.dimension.flare.compose.ui"

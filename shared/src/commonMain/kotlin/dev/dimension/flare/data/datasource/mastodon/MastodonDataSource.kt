@@ -133,23 +133,29 @@ internal open class MastodonDataSource(
     ) {
         require(event is PostEvent.Mastodon)
         when (event) {
-            is PostEvent.Mastodon.AcceptFollowRequest ->
+            is PostEvent.Mastodon.AcceptFollowRequest -> {
                 acceptFollowRequest(event, updater)
+            }
 
-            is PostEvent.Mastodon.Bookmark ->
+            is PostEvent.Mastodon.Bookmark -> {
                 bookmark(event, updater)
+            }
 
-            is PostEvent.Mastodon.Like ->
+            is PostEvent.Mastodon.Like -> {
                 like(event, updater)
+            }
 
-            is PostEvent.Mastodon.Reblog ->
+            is PostEvent.Mastodon.Reblog -> {
                 reblog(event, updater)
+            }
 
-            is PostEvent.Mastodon.RejectFollowRequest ->
+            is PostEvent.Mastodon.RejectFollowRequest -> {
                 rejectFollowRequest(event, updater)
+            }
 
-            is PostEvent.Mastodon.Vote ->
+            is PostEvent.Mastodon.Vote -> {
                 vote(event, updater)
+            }
         }
     }
 
@@ -187,7 +193,7 @@ internal open class MastodonDataSource(
 
     override fun notification(type: NotificationFilter): RemoteLoader<UiTimelineV2> =
         when (type) {
-            NotificationFilter.All ->
+            NotificationFilter.All -> {
                 NotificationRemoteMediator(
                     service,
                     accountKey,
@@ -195,14 +201,18 @@ internal open class MastodonDataSource(
                         notificationHandler.clear()
                     },
                 )
+            }
 
-            NotificationFilter.Mention ->
+            NotificationFilter.Mention -> {
                 MentionRemoteMediator(
                     service,
                     accountKey,
                 )
+            }
 
-            else -> notSupported()
+            else -> {
+                notSupported()
+            }
         }
 
     override val supportedNotificationFilter: List<NotificationFilter>

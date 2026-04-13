@@ -34,7 +34,10 @@ public class SplashPresenter(
                     toLogin()
                 }
 
-                is UiState.Loading -> Unit
+                is UiState.Loading -> {
+                    Unit
+                }
+
                 is UiState.Success -> {
                     delay(1000)
                     type = SplashType.Home

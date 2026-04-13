@@ -26,7 +26,7 @@ internal class FeedTimelineRemoteMediator(
         val service = getService()
         val response =
             when (request) {
-                PagingRequest.Refresh ->
+                PagingRequest.Refresh -> {
                     service
                         .getFeed(
                             GetFeedQueryParams(
@@ -34,6 +34,7 @@ internal class FeedTimelineRemoteMediator(
                                 limit = pageSize.toLong(),
                             ),
                         ).maybeResponse()
+                }
 
                 is PagingRequest.Prepend -> {
                     return PagingResult(

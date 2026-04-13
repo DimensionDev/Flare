@@ -498,7 +498,7 @@ internal sealed interface Route : NavKey {
 
         public fun from(deeplinkRoute: DeeplinkRoute): Route? {
             return when (deeplinkRoute) {
-                is DeeplinkRoute.Timeline.XQTDeviceFollow ->
+                is DeeplinkRoute.Timeline.XQTDeviceFollow -> {
                     Route.Timeline(
                         accountType = deeplinkRoute.accountType,
                         tabItem =
@@ -506,8 +506,13 @@ internal sealed interface Route : NavKey {
                                 account = deeplinkRoute.accountType,
                             ),
                     )
-                is DeeplinkRoute.OpenLinkDirectly -> null
-                is DeeplinkRoute.DeepLinkAccountPicker ->
+                }
+
+                is DeeplinkRoute.OpenLinkDirectly -> {
+                    null
+                }
+
+                is DeeplinkRoute.DeepLinkAccountPicker -> {
                     DeepLinkAccountPicker(
                         originalUrl = deeplinkRoute.originalUrl,
                         data =
@@ -518,125 +523,148 @@ internal sealed interface Route : NavKey {
                                 }.toMap()
                                 .toImmutableMap(),
                     )
+                }
 
-                is DeeplinkRoute.Login -> ServiceSelect.Selection
-                is DeeplinkRoute.Compose.New ->
+                is DeeplinkRoute.Login -> {
+                    ServiceSelect.Selection
+                }
+
+                is DeeplinkRoute.Compose.New -> {
                     Compose.New
+                }
 
-                is DeeplinkRoute.Compose.Quote ->
+                is DeeplinkRoute.Compose.Quote -> {
                     Compose.Quote(
                         accountKey = deeplinkRoute.accountKey,
                         statusKey = deeplinkRoute.statusKey,
                     )
+                }
 
-                is DeeplinkRoute.Compose.Reply ->
+                is DeeplinkRoute.Compose.Reply -> {
                     Compose.Reply(
                         accountKey = deeplinkRoute.accountKey,
                         statusKey = deeplinkRoute.statusKey,
                     )
+                }
 
-                is DeeplinkRoute.Compose.VVOReplyComment ->
+                is DeeplinkRoute.Compose.VVOReplyComment -> {
                     Compose.VVOReplyComment(
                         accountKey = deeplinkRoute.accountKey,
                         replyTo = deeplinkRoute.replyTo,
                         rootId = deeplinkRoute.rootId,
                     )
+                }
 
-                is DeeplinkRoute.Media.Image ->
+                is DeeplinkRoute.Media.Image -> {
                     Media.Image(
                         uri = deeplinkRoute.uri,
                         previewUrl = deeplinkRoute.previewUrl,
                     )
+                }
 
-                is DeeplinkRoute.Media.Podcast ->
+                is DeeplinkRoute.Media.Podcast -> {
                     Media.Podcast(
                         accountType = deeplinkRoute.accountType,
                         id = deeplinkRoute.id,
                     )
+                }
 
-                is DeeplinkRoute.Media.StatusMedia ->
+                is DeeplinkRoute.Media.StatusMedia -> {
                     Media.StatusMedia(
                         statusKey = deeplinkRoute.statusKey,
                         accountType = deeplinkRoute.accountType,
                         index = deeplinkRoute.index,
                         preview = deeplinkRoute.preview,
                     )
+                }
 
-                is DeeplinkRoute.Profile.User ->
+                is DeeplinkRoute.Profile.User -> {
                     Profile.User(
                         accountType = deeplinkRoute.accountType,
                         userKey = deeplinkRoute.userKey,
                     )
+                }
 
-                is DeeplinkRoute.Profile.UserNameWithHost ->
+                is DeeplinkRoute.Profile.UserNameWithHost -> {
                     Profile.UserNameWithHost(
                         accountType = deeplinkRoute.accountType,
                         name = deeplinkRoute.userName,
                         host = deeplinkRoute.host,
                     )
+                }
 
-                is DeeplinkRoute.Rss.Detail ->
+                is DeeplinkRoute.Rss.Detail -> {
                     Rss.Detail(
                         url = deeplinkRoute.url,
                     )
+                }
 
-                is DeeplinkRoute.TwitterArticle ->
+                is DeeplinkRoute.TwitterArticle -> {
                     TwitterArticle(
                         accountType = deeplinkRoute.accountType,
                         tweetId = deeplinkRoute.tweetId,
                         articleId = deeplinkRoute.articleId,
                     )
+                }
 
-                is DeeplinkRoute.Search ->
+                is DeeplinkRoute.Search -> {
                     Search(
                         accountType = deeplinkRoute.accountType,
                         query = deeplinkRoute.query,
                     )
+                }
 
-                is DeeplinkRoute.Status.AddReaction ->
+                is DeeplinkRoute.Status.AddReaction -> {
                     Status.AddReaction(
                         statusKey = deeplinkRoute.statusKey,
                         accountType = deeplinkRoute.accountType,
                     )
+                }
 
-                is DeeplinkRoute.Status.AltText ->
+                is DeeplinkRoute.Status.AltText -> {
                     Status.AltText(
                         text = deeplinkRoute.text,
                     )
+                }
 
-                is DeeplinkRoute.Status.BlueskyReport ->
+                is DeeplinkRoute.Status.BlueskyReport -> {
                     Status.BlueskyReport(
                         statusKey = deeplinkRoute.statusKey,
                         accountType = deeplinkRoute.accountType,
                     )
+                }
 
-                is DeeplinkRoute.Status.DeleteConfirm ->
+                is DeeplinkRoute.Status.DeleteConfirm -> {
                     Status.DeleteConfirm(
                         statusKey = deeplinkRoute.statusKey,
                         accountType = deeplinkRoute.accountType,
                     )
+                }
 
-                is DeeplinkRoute.Status.Detail ->
+                is DeeplinkRoute.Status.Detail -> {
                     Status.Detail(
                         statusKey = deeplinkRoute.statusKey,
                         accountType = deeplinkRoute.accountType,
                     )
+                }
 
-                is DeeplinkRoute.Status.MastodonReport ->
+                is DeeplinkRoute.Status.MastodonReport -> {
                     Status.MastodonReport(
                         userKey = deeplinkRoute.userKey,
                         statusKey = deeplinkRoute.statusKey,
                         accountType = deeplinkRoute.accountType,
                     )
+                }
 
-                is DeeplinkRoute.Status.MisskeyReport ->
+                is DeeplinkRoute.Status.MisskeyReport -> {
                     Status.MisskeyReport(
                         userKey = deeplinkRoute.userKey,
                         statusKey = deeplinkRoute.statusKey,
                         accountType = deeplinkRoute.accountType,
                     )
+                }
 
-                is DeeplinkRoute.Status.ShareSheet ->
+                is DeeplinkRoute.Status.ShareSheet -> {
                     Status.ShareSheet(
                         statusKey = deeplinkRoute.statusKey,
                         accountType = deeplinkRoute.accountType,
@@ -644,54 +672,70 @@ internal sealed interface Route : NavKey {
                         fxShareUrl = deeplinkRoute.fxShareUrl,
                         fixvxShareUrl = deeplinkRoute.fixvxShareUrl,
                     )
+                }
 
-                is DeeplinkRoute.Status.VVOComment ->
+                is DeeplinkRoute.Status.VVOComment -> {
                     Status.VVOComment(
                         commentKey = deeplinkRoute.commentKey,
                         accountType = deeplinkRoute.accountType,
                     )
+                }
 
-                is DeeplinkRoute.Status.VVOStatus ->
+                is DeeplinkRoute.Status.VVOStatus -> {
                     Status.VVOStatus(
                         statusKey = deeplinkRoute.statusKey,
                         accountType = deeplinkRoute.accountType,
                     )
+                }
 
-                is DeeplinkRoute.BlockUser ->
+                is DeeplinkRoute.BlockUser -> {
                     Route.BlockUser(
                         accountType = deeplinkRoute.accountKey?.let { AccountType.Specific(it) },
                         userKey = deeplinkRoute.userKey,
                     )
-                is DeeplinkRoute.UnblockUser ->
+                }
+
+                is DeeplinkRoute.UnblockUser -> {
                     Route.UnblockUser(
                         accountType = deeplinkRoute.accountKey?.let { AccountType.Specific(it) },
                         userKey = deeplinkRoute.userKey,
                     )
-                is DeeplinkRoute.DirectMessage ->
+                }
+
+                is DeeplinkRoute.DirectMessage -> {
                     DM.UserConversation(
                         accountType = AccountType.Specific(deeplinkRoute.accountKey),
                         userKey = deeplinkRoute.userKey,
                     )
-                is DeeplinkRoute.EditUserList ->
+                }
+
+                is DeeplinkRoute.EditUserList -> {
                     Lists.EditAccountList(
                         accountType = AccountType.Specific(deeplinkRoute.accountKey),
                         userKey = deeplinkRoute.userKey,
                     )
-                is DeeplinkRoute.MuteUser ->
+                }
+
+                is DeeplinkRoute.MuteUser -> {
                     Route.MuteUser(
                         accountType = deeplinkRoute.accountKey?.let { AccountType.Specific(it) },
                         userKey = deeplinkRoute.userKey,
                     )
-                is DeeplinkRoute.UnmuteUser ->
+                }
+
+                is DeeplinkRoute.UnmuteUser -> {
                     Route.UnmuteUser(
                         accountType = deeplinkRoute.accountKey?.let { AccountType.Specific(it) },
                         userKey = deeplinkRoute.userKey,
                     )
-                is DeeplinkRoute.ReportUser ->
+                }
+
+                is DeeplinkRoute.ReportUser -> {
                     Route.ReportUser(
                         accountType = deeplinkRoute.accountKey?.let { AccountType.Specific(it) },
                         userKey = deeplinkRoute.userKey,
                     )
+                }
             }
         }
     }

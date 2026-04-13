@@ -46,7 +46,7 @@ internal class UserTimelineRemoteMediator(
             }
         val response =
             when (request) {
-                PagingRequest.Refresh ->
+                PagingRequest.Refresh -> {
                     service
                         .getAuthorFeed(
                             GetAuthorFeedQueryParams(
@@ -56,6 +56,7 @@ internal class UserTimelineRemoteMediator(
                                 includePins = true,
                             ),
                         ).maybeResponse()
+                }
 
                 is PagingRequest.Prepend -> {
                     return PagingResult(

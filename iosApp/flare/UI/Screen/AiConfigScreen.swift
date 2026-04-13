@@ -70,7 +70,7 @@ struct AiConfigScreen: View {
                     .transition(.opacity.combined(with: .move(edge: .top)))
                 }
 
-                if presenter.state.aiType == .openAi {
+                if presenter.state.aiType == .openAi && !shouldShowManualModelInput {
                     let selectedModel = presenter.state.openAIModel
                     Picker(
                         selection: Binding(
@@ -89,24 +89,22 @@ struct AiConfigScreen: View {
                                 Text(selectedModel).tag(selectedModel)
                             }
                             Text("Loading models...").tag("__meta__loading")
-                        case .error:
-                            Text("Failed to load models").tag("__meta__error")
                         case .success(let data):
                             let models = (data.data as NSArray).cast(NSString.self).map(String.init)
-                            if models.isEmpty {
-                                Text("No models available").tag("__meta__empty")
-                            } else {
-                                ForEach(models, id: \.self) { model in
-                                    Text(model).tag(model)
-                                }
+                            ForEach(models, id: \.self) { model in
+                                Text(model).tag(model)
                             }
+                        case .error:
+                            EmptyView()
                         }
                     } label: {
                         Text("Model")
                         Text("OpenAI model used for translation and summary")
                     }
                     .transition(.opacity.combined(with: .move(edge: .top)))
+                }
 
+                if presenter.state.aiType == .openAi && shouldShowManualModelInput {
                     Button {
                         beginEditing(
                             field: .model,
@@ -231,6 +229,18 @@ struct AiConfigScreen: View {
 
     private func displayModelText(_ value: String) -> String {
         value.isEmpty ? String(localized: "Select model") : value
+    }
+
+    private var shouldShowManualModelInput: Bool {
+        switch onEnum(of: presenter.state.openAIModels) {
+        case .loading:
+            return false
+        case .error:
+            return true
+        case .success(let data):
+            let models = (data.data as NSArray).cast(NSString.self).map(String.init)
+            return models.isEmpty
+        }
     }
 
     private var serverUrlHint: LocalizedStringResource {

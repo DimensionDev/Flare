@@ -93,10 +93,8 @@ import dev.dimension.flare.settings_ai_config_enable_pre_translation
 import dev.dimension.flare.settings_ai_config_enable_tldr
 import dev.dimension.flare.settings_ai_config_model
 import dev.dimension.flare.settings_ai_config_model_description
-import dev.dimension.flare.settings_ai_config_model_error
 import dev.dimension.flare.settings_ai_config_model_loading
 import dev.dimension.flare.settings_ai_config_model_manual_input
-import dev.dimension.flare.settings_ai_config_model_no_models
 import dev.dimension.flare.settings_ai_config_model_select
 import dev.dimension.flare.settings_ai_config_pre_translation_description
 import dev.dimension.flare.settings_ai_config_server
@@ -203,6 +201,7 @@ import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScrollBar
 import dev.dimension.flare.ui.component.Header
 import dev.dimension.flare.ui.component.RichText
+import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.isSuccess
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
@@ -1407,45 +1406,69 @@ internal fun SettingsScreen(
                             },
                         )
                         ExpanderItemSeparator()
-                        ExpanderItem(
-                            heading = { Text(stringResource(Res.string.settings_ai_config_model)) },
-                            caption = { Text(stringResource(Res.string.settings_ai_config_model_description)) },
-                            trailing = {
-                                DropDownButton(
-                                    onClick = {
-                                        state.aiConfigState.setShowModelDropdown(!state.aiConfigState.showModelDropdown)
-                                    },
-                                ) {
+                        val shouldShowManualModelInput =
+                            when (val openAIModels = state.aiConfigState.openAIModels) {
+                                is UiState.Error -> true
+                                is UiState.Success -> openAIModels.data.isEmpty()
+                                is UiState.Loading -> false
+                            }
+                        if (shouldShowManualModelInput) {
+                            ExpanderItem(
+                                heading = { Text(stringResource(Res.string.settings_ai_config_model_manual_input)) },
+                                caption = {
                                     Text(
                                         state.aiConfigState.openAIModel.ifBlank {
-                                            stringResource(Res.string.settings_ai_config_model_select)
+                                            stringResource(Res.string.settings_ai_config_value_empty_placeholder)
                                         },
                                     )
-                                }
-                                MenuFlyout(
-                                    visible = state.aiConfigState.showModelDropdown,
-                                    onDismissRequest = { state.aiConfigState.setShowModelDropdown(false) },
-                                    placement = FlyoutPlacement.BottomAlignedEnd,
-                                    modifier = Modifier.heightIn(max = 200.dp),
-                                ) {
-                                    state.aiConfigState.openAIModels
-                                        .onLoading {
-                                            MenuFlyoutItem(
-                                                text = { Text(stringResource(Res.string.settings_ai_config_model_loading)) },
-                                                onClick = {},
+                                },
+                                trailing = {
+                                    Button(
+                                        onClick = {
+                                            state.aiConfigState.setTextEditDialog(
+                                                TextEditDialogState(
+                                                    title = modelTitle,
+                                                    placeholder = modelPlaceholder,
+                                                    value = state.aiConfigState.openAIModel,
+                                                    onConfirm = state.aiConfigState::setOpenAIModel,
+                                                ),
                                             )
-                                        }.onError {
-                                            MenuFlyoutItem(
-                                                text = { Text(stringResource(Res.string.settings_ai_config_model_error)) },
-                                                onClick = {},
-                                            )
-                                        }.onSuccess { models ->
-                                            if (models.isEmpty()) {
+                                        },
+                                    ) {
+                                        Text(stringResource(Res.string.edit))
+                                    }
+                                },
+                            )
+                            ExpanderItemSeparator()
+                        } else {
+                            ExpanderItem(
+                                heading = { Text(stringResource(Res.string.settings_ai_config_model)) },
+                                caption = { Text(stringResource(Res.string.settings_ai_config_model_description)) },
+                                trailing = {
+                                    DropDownButton(
+                                        onClick = {
+                                            state.aiConfigState.setShowModelDropdown(!state.aiConfigState.showModelDropdown)
+                                        },
+                                    ) {
+                                        Text(
+                                            state.aiConfigState.openAIModel.ifBlank {
+                                                stringResource(Res.string.settings_ai_config_model_select)
+                                            },
+                                        )
+                                    }
+                                    MenuFlyout(
+                                        visible = state.aiConfigState.showModelDropdown,
+                                        onDismissRequest = { state.aiConfigState.setShowModelDropdown(false) },
+                                        placement = FlyoutPlacement.BottomAlignedEnd,
+                                        modifier = Modifier.heightIn(max = 200.dp),
+                                    ) {
+                                        state.aiConfigState.openAIModels
+                                            .onLoading {
                                                 MenuFlyoutItem(
-                                                    text = { Text(stringResource(Res.string.settings_ai_config_model_no_models)) },
+                                                    text = { Text(stringResource(Res.string.settings_ai_config_model_loading)) },
                                                     onClick = {},
                                                 )
-                                            } else {
+                                            }.onSuccess { models ->
                                                 models.forEach { model ->
                                                     MenuFlyoutItem(
                                                         text = { Text(model) },
@@ -1456,38 +1479,11 @@ internal fun SettingsScreen(
                                                     )
                                                 }
                                             }
-                                        }
-                                }
-                            },
-                        )
-                        ExpanderItemSeparator()
-                        ExpanderItem(
-                            heading = { Text(stringResource(Res.string.settings_ai_config_model_manual_input)) },
-                            caption = {
-                                Text(
-                                    state.aiConfigState.openAIModel.ifBlank {
-                                        stringResource(Res.string.settings_ai_config_value_empty_placeholder)
-                                    },
-                                )
-                            },
-                            trailing = {
-                                Button(
-                                    onClick = {
-                                        state.aiConfigState.setTextEditDialog(
-                                            TextEditDialogState(
-                                                title = modelTitle,
-                                                placeholder = modelPlaceholder,
-                                                value = state.aiConfigState.openAIModel,
-                                                onConfirm = state.aiConfigState::setOpenAIModel,
-                                            ),
-                                        )
-                                    },
-                                ) {
-                                    Text(stringResource(Res.string.edit))
-                                }
-                            },
-                        )
-                        ExpanderItemSeparator()
+                                    }
+                                },
+                            )
+                            ExpanderItemSeparator()
+                        }
                     }
                 }
                 ExpanderItem(

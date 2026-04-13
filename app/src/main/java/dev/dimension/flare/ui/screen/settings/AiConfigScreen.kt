@@ -47,6 +47,7 @@ import dev.dimension.flare.ui.component.FlareDropdownMenu
 import dev.dimension.flare.ui.component.FlareLargeFlexibleTopAppBar
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.RichText
+import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
@@ -104,6 +105,12 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
             val modelTitle = stringResource(id = R.string.settings_ai_config_model)
             val modelPlaceholder = stringResource(id = R.string.settings_ai_config_model_select)
             val tldrPromptTitle = stringResource(id = R.string.settings_ai_config_tldr_prompt)
+            val shouldShowManualModelInput =
+                when (val openAIModels = state.openAIModels) {
+                    is UiState.Error -> true
+                    is UiState.Success -> openAIModels.data.isEmpty()
+                    is UiState.Loading -> false
+                }
             SegmentedListItem(
                 checked = state.showTypeDropdown,
                 onCheckedChange = {
@@ -247,7 +254,7 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
                     },
                 )
             }
-            AnimatedVisibility(visible = state.aiType == AiTypeOption.OpenAI) {
+            AnimatedVisibility(visible = state.aiType == AiTypeOption.OpenAI && !shouldShowManualModelInput) {
                 SegmentedListItem(
                     checked = state.showModelDropdown,
                     onCheckedChange = { checked ->
@@ -320,7 +327,7 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
                     },
                 )
             }
-            AnimatedVisibility(visible = state.aiType == AiTypeOption.OpenAI) {
+            AnimatedVisibility(visible = state.aiType == AiTypeOption.OpenAI && shouldShowManualModelInput) {
                 SegmentedListItem(
                     checked = state.textEditDialog?.field == AiConfigEditField.Model,
                     onCheckedChange = { checked ->

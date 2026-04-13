@@ -36,6 +36,15 @@ public enum class AiTypeOption {
     OpenAI,
 }
 
+public enum class AiReasoningEffortOption(
+    public val value: String,
+) {
+    Default(""),
+    Low("low"),
+    Medium("medium"),
+    High("high"),
+}
+
 public enum class TranslateProviderOption {
     AI,
     GoogleWeb,
@@ -57,6 +66,7 @@ public class AiConfigPresenter :
         public val openAIServerUrl: String
         public val openAIApiKey: String
         public val openAIModel: String
+        public val openAIReasoningEffort: AiReasoningEffortOption
         public val translateProvider: TranslateProviderOption
         public val deepLApiKey: String
         public val deepLUsePro: Boolean
@@ -65,6 +75,7 @@ public class AiConfigPresenter :
         public val libreTranslateApiKey: String
         public val openAIModels: UiState<ImmutableList<String>>
         public val supportedTypes: ImmutableList<AiTypeOption>
+        public val supportedOpenAIReasoningEfforts: ImmutableList<AiReasoningEffortOption>
         public val supportedTranslateProviders: ImmutableList<TranslateProviderOption>
         public val serverSuggestions: ImmutableList<String>
         public val aiTldr: Boolean
@@ -86,6 +97,8 @@ public class AiConfigPresenter :
         public fun setOpenAIApiKey(value: String)
 
         public fun setOpenAIModel(value: String)
+
+        public fun setOpenAIReasoningEffort(value: AiReasoningEffortOption)
 
         public fun setDeepLApiKey(value: String)
 
@@ -128,6 +141,15 @@ public class AiConfigPresenter :
                     TranslateProviderOption.DeepL,
                     TranslateProviderOption.GoogleCloud,
                     TranslateProviderOption.LibreTranslate,
+                )
+            }
+        val supportedOpenAIReasoningEfforts =
+            remember {
+                persistentListOf(
+                    AiReasoningEffortOption.Default,
+                    AiReasoningEffortOption.Low,
+                    AiReasoningEffortOption.Medium,
+                    AiReasoningEffortOption.High,
                 )
             }
 
@@ -200,6 +222,8 @@ public class AiConfigPresenter :
         return object : State {
             override val openAIModels: UiState<ImmutableList<String>> = openAIModels
             override val supportedTypes: ImmutableList<AiTypeOption> = supportedTypes
+            override val supportedOpenAIReasoningEfforts: ImmutableList<AiReasoningEffortOption> =
+                supportedOpenAIReasoningEfforts
             override val supportedTranslateProviders: ImmutableList<TranslateProviderOption> =
                 supportedTranslateProviders
             override val serverSuggestions: ImmutableList<String> = SERVER_SUGGESTIONS
@@ -235,6 +259,11 @@ public class AiConfigPresenter :
 
             override val openAIModel: String =
                 (appSettings.aiConfig.type as? AppSettings.AiConfig.Type.OpenAI)?.model ?: ""
+
+            override val openAIReasoningEffort: AiReasoningEffortOption =
+                AiReasoningEffortOption.entries.firstOrNull {
+                    it.value == (appSettings.aiConfig.type as? AppSettings.AiConfig.Type.OpenAI)?.reasoningEffort.orEmpty()
+                } ?: AiReasoningEffortOption.Default
 
             override val aiTldr: Boolean = appSettings.aiConfig.tldr
             override val translatePrompt: String = appSettings.aiConfig.translatePrompt
@@ -294,6 +323,7 @@ public class AiConfigPresenter :
                                         serverUrl = "",
                                         apiKey = "",
                                         model = "",
+                                        reasoningEffort = "",
                                     )
                             },
                     )
@@ -308,6 +338,7 @@ public class AiConfigPresenter :
                                 serverUrl = value,
                                 apiKey = openAIApiKey,
                                 model = openAIModel,
+                                reasoningEffort = openAIReasoningEffort.value,
                             ),
                     )
                 }
@@ -321,6 +352,7 @@ public class AiConfigPresenter :
                                 serverUrl = openAIServerUrl,
                                 apiKey = value,
                                 model = openAIModel,
+                                reasoningEffort = openAIReasoningEffort.value,
                             ),
                     )
                 }
@@ -334,6 +366,21 @@ public class AiConfigPresenter :
                                 serverUrl = openAIServerUrl,
                                 apiKey = openAIApiKey,
                                 model = value,
+                                reasoningEffort = openAIReasoningEffort.value,
+                            ),
+                    )
+                }
+            }
+
+            override fun setOpenAIReasoningEffort(value: AiReasoningEffortOption) {
+                update {
+                    copy(
+                        type =
+                            AppSettings.AiConfig.Type.OpenAI(
+                                serverUrl = openAIServerUrl,
+                                apiKey = openAIApiKey,
+                                model = openAIModel,
+                                reasoningEffort = value.value,
                             ),
                     )
                 }
@@ -423,6 +470,7 @@ public class AiConfigPresenter :
                                             serverUrl = "",
                                             apiKey = "",
                                             model = "",
+                                            reasoningEffort = "",
                                         ),
                             )
                         }

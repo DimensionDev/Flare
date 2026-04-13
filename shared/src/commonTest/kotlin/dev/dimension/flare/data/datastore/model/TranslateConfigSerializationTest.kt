@@ -113,6 +113,34 @@ class TranslateConfigSerializationTest {
             libreTranslateRoundTrip.translateConfig.provider,
         )
     }
+
+    @Test
+    fun decodesLegacyOpenAIConfigWithoutReasoningEffort() {
+        val bytes =
+            ProtoBuf.encodeToByteArray(
+                serializer = LegacyOpenAISettings.serializer(),
+                LegacyOpenAISettings(
+                    version = "legacy",
+                    aiConfig =
+                        AppSettings.AiConfig(
+                            type =
+                                LegacyOpenAIType(
+                                    serverUrl = "https://api.openai.com/v1/",
+                                    apiKey = "test-key",
+                                    model = "gpt-5-mini",
+                                ),
+                        ),
+                ),
+            )
+
+        val decoded = ProtoBuf.decodeFromByteArray(AppSettings.serializer(), bytes)
+        val openAI = decoded.aiConfig.type as? AppSettings.AiConfig.Type.OpenAI
+
+        assertEquals("https://api.openai.com/v1/", openAI?.serverUrl)
+        assertEquals("test-key", openAI?.apiKey)
+        assertEquals("gpt-5-mini", openAI?.model)
+        assertEquals("", openAI?.reasoningEffort)
+    }
 }
 
 @Serializable
@@ -121,6 +149,31 @@ private data class LegacyAppSettings(
     val aiConfig: AppSettings.AiConfig = AppSettings.AiConfig(),
     val language: String = "",
     val translateConfig: LegacyTranslateConfig = LegacyTranslateConfig(),
+)
+
+@Serializable
+private data class LegacyOpenAISettings(
+    val version: String = "",
+    val aiConfig: LegacyAiConfig = LegacyAiConfig(),
+    val language: String = "",
+    val translateConfig: AppSettings.TranslateConfig = AppSettings.TranslateConfig(),
+)
+
+@Serializable
+private data class LegacyAiConfig(
+    val translation: Boolean = false,
+    val tldr: Boolean = false,
+    val type: LegacyOpenAIType = LegacyOpenAIType(),
+    val translatePrompt: String = AiPromptDefaults.TRANSLATE_PROMPT,
+    val tldrPrompt: String = AiPromptDefaults.TLDR_PROMPT,
+    val preTranslation: Boolean = false,
+)
+
+@Serializable
+private data class LegacyOpenAIType(
+    val serverUrl: String = "",
+    val apiKey: String = "",
+    val model: String = "",
 )
 
 @Serializable

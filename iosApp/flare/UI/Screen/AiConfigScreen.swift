@@ -69,6 +69,25 @@ struct AiConfigScreen: View {
                     .buttonStyle(.plain)
                     .transition(.opacity.combined(with: .move(edge: .top)))
                 }
+                
+                if presenter.state.aiType == .openAi {
+                    Picker(
+                        selection: Binding(
+                            get: { presenter.state.openAIReasoningEffort },
+                            set: { effort in
+                                presenter.state.setOpenAIReasoningEffort(value: effort)
+                            }
+                        )
+                    ) {
+                        ForEach(presenter.state.supportedOpenAIReasoningEfforts, id: \.name) { effort in
+                            Text(reasoningEffortTitle(option: effort)).tag(effort)
+                        }
+                    } label: {
+                        Text("Reasoning Effort")
+                        Text("Choose how much effort the model spends on reasoning. Default uses the provider's default behavior.")
+                    }
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+                }
 
                 if presenter.state.aiType == .openAi && !shouldShowManualModelInput {
                     let selectedModel = presenter.state.openAIModel
@@ -220,6 +239,19 @@ struct AiConfigScreen: View {
             return "On Device"
         case .openAi:
             return "OpenAI Compatible"
+        }
+    }
+
+    private func reasoningEffortTitle(option: AiReasoningEffortOption) -> LocalizedStringResource {
+        switch option {
+        case .default:
+            return "Default"
+        case .low:
+            return "Low"
+        case .medium:
+            return "Medium"
+        case .high:
+            return "High"
         }
     }
 

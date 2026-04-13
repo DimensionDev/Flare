@@ -97,6 +97,12 @@ import dev.dimension.flare.settings_ai_config_model_loading
 import dev.dimension.flare.settings_ai_config_model_manual_input
 import dev.dimension.flare.settings_ai_config_model_select
 import dev.dimension.flare.settings_ai_config_pre_translation_description
+import dev.dimension.flare.settings_ai_config_reasoning_effort
+import dev.dimension.flare.settings_ai_config_reasoning_effort_default
+import dev.dimension.flare.settings_ai_config_reasoning_effort_description
+import dev.dimension.flare.settings_ai_config_reasoning_effort_high
+import dev.dimension.flare.settings_ai_config_reasoning_effort_low
+import dev.dimension.flare.settings_ai_config_reasoning_effort_medium
 import dev.dimension.flare.settings_ai_config_server
 import dev.dimension.flare.settings_ai_config_server_hint
 import dev.dimension.flare.settings_ai_config_server_url_requirement
@@ -212,6 +218,7 @@ import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
 import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.AiConfigPresenter
+import dev.dimension.flare.ui.presenter.settings.AiReasoningEffortOption
 import dev.dimension.flare.ui.presenter.settings.AiTranslationTestPresenter
 import dev.dimension.flare.ui.presenter.settings.AiTypeOption
 import dev.dimension.flare.ui.presenter.settings.StoragePresenter
@@ -1484,6 +1491,39 @@ internal fun SettingsScreen(
                             )
                             ExpanderItemSeparator()
                         }
+                        ExpanderItem(
+                            heading = { Text(stringResource(Res.string.settings_ai_config_reasoning_effort)) },
+                            caption = {
+                                Text(stringResource(Res.string.settings_ai_config_reasoning_effort_description))
+                            },
+                            trailing = {
+                                DropDownButton(
+                                    onClick = {
+                                        state.aiConfigState.setShowReasoningEffortDropdown(
+                                            !state.aiConfigState.showReasoningEffortDropdown,
+                                        )
+                                    },
+                                ) {
+                                    Text(openAIReasoningEffortLabel(state.aiConfigState.openAIReasoningEffort))
+                                }
+                                MenuFlyout(
+                                    visible = state.aiConfigState.showReasoningEffortDropdown,
+                                    onDismissRequest = { state.aiConfigState.setShowReasoningEffortDropdown(false) },
+                                    placement = FlyoutPlacement.BottomAlignedEnd,
+                                ) {
+                                    state.aiConfigState.supportedOpenAIReasoningEfforts.forEach { effort ->
+                                        MenuFlyoutItem(
+                                            text = { Text(openAIReasoningEffortLabel(effort)) },
+                                            onClick = {
+                                                state.aiConfigState.setOpenAIReasoningEffort(effort)
+                                                state.aiConfigState.setShowReasoningEffortDropdown(false)
+                                            },
+                                        )
+                                    }
+                                }
+                            },
+                        )
+                        ExpanderItemSeparator()
                     }
                 }
                 ExpanderItem(
@@ -2221,6 +2261,7 @@ private fun aiConfigPresenter() =
         val aiTranslationTestState = remember { AiTranslationTestPresenter() }.invoke()
         var showTypeDropdown by remember { mutableStateOf(false) }
         var showModelDropdown by remember { mutableStateOf(false) }
+        var showReasoningEffortDropdown by remember { mutableStateOf(false) }
         var showProviderDropdown by remember { mutableStateOf(false) }
         var showExcludedLanguagesDialog by remember { mutableStateOf(false) }
         var textEditDialog by remember { mutableStateOf<TextEditDialogState?>(null) }
@@ -2230,6 +2271,7 @@ private fun aiConfigPresenter() =
             val translationExpanded = translationExpanded
             val showTypeDropdown = showTypeDropdown
             val showModelDropdown = showModelDropdown
+            val showReasoningEffortDropdown = showReasoningEffortDropdown
             val showProviderDropdown = showProviderDropdown
             val showExcludedLanguagesDialog = showExcludedLanguagesDialog
             val textEditDialog = textEditDialog
@@ -2248,6 +2290,10 @@ private fun aiConfigPresenter() =
 
             fun setShowModelDropdown(value: Boolean) {
                 showModelDropdown = value
+            }
+
+            fun setShowReasoningEffortDropdown(value: Boolean) {
+                showReasoningEffortDropdown = value
             }
 
             fun setShowProviderDropdown(value: Boolean) {
@@ -2272,6 +2318,15 @@ private fun translateProviderOptionLabel(provider: TranslateProviderOption): Str
         TranslateProviderOption.DeepL -> stringResource(Res.string.settings_ai_config_translate_provider_deepl)
         TranslateProviderOption.GoogleCloud -> stringResource(Res.string.settings_ai_config_translate_provider_google_cloud)
         TranslateProviderOption.LibreTranslate -> stringResource(Res.string.settings_ai_config_translate_provider_libretranslate)
+    }
+
+@Composable
+private fun openAIReasoningEffortLabel(option: AiReasoningEffortOption): String =
+    when (option) {
+        AiReasoningEffortOption.Default -> stringResource(Res.string.settings_ai_config_reasoning_effort_default)
+        AiReasoningEffortOption.Low -> stringResource(Res.string.settings_ai_config_reasoning_effort_low)
+        AiReasoningEffortOption.Medium -> stringResource(Res.string.settings_ai_config_reasoning_effort_medium)
+        AiReasoningEffortOption.High -> stringResource(Res.string.settings_ai_config_reasoning_effort_high)
     }
 
 private data class TextEditDialogState(

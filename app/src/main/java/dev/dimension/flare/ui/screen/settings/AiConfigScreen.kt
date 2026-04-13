@@ -53,6 +53,7 @@ import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.AiConfigPresenter
+import dev.dimension.flare.ui.presenter.settings.AiReasoningEffortOption
 import dev.dimension.flare.ui.presenter.settings.AiTranslationTestPresenter
 import dev.dimension.flare.ui.presenter.settings.AiTypeOption
 import dev.dimension.flare.ui.presenter.settings.TranslateProviderOption
@@ -254,13 +255,60 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
                     },
                 )
             }
+            AnimatedVisibility(visible = state.aiType == AiTypeOption.OpenAI) {
+                SegmentedListItem(
+                    checked = state.showReasoningEffortDropdown,
+                    onCheckedChange = { checked ->
+                        state.setShowReasoningEffortDropdown(checked)
+                    },
+                    shapes = ListItemDefaults.item(),
+                    content = {
+                        Text(text = stringResource(id = R.string.settings_ai_config_reasoning_effort))
+                    },
+                    supportingContent = {
+                        Text(
+                            text = stringResource(id = R.string.settings_ai_config_reasoning_effort_description),
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                    },
+                    trailingContent = {
+                        Box {
+                            TextButton(
+                                onClick = {
+                                    state.setShowReasoningEffortDropdown(true)
+                                },
+                            ) {
+                                Text(
+                                    text = openAIReasoningEffortLabel(state.openAIReasoningEffort),
+                                )
+                            }
+                            FlareDropdownMenu(
+                                expanded = state.showReasoningEffortDropdown,
+                                onDismissRequest = {
+                                    state.setShowReasoningEffortDropdown(false)
+                                },
+                            ) {
+                                state.supportedOpenAIReasoningEfforts.forEach { effort ->
+                                    DropdownMenuItem(
+                                        text = { Text(openAIReasoningEffortLabel(effort)) },
+                                        onClick = {
+                                            state.setShowReasoningEffortDropdown(false)
+                                            state.setOpenAIReasoningEffort(value = effort)
+                                        },
+                                    )
+                                }
+                            }
+                        }
+                    },
+                )
+            }
             AnimatedVisibility(visible = state.aiType == AiTypeOption.OpenAI && !shouldShowManualModelInput) {
                 SegmentedListItem(
                     checked = state.showModelDropdown,
                     onCheckedChange = { checked ->
                         state.setShowModelDropdown(checked)
                     },
-                    shapes = ListItemDefaults.item(),
+                    shapes = ListItemDefaults.last(),
                     content = {
                         Text(text = stringResource(id = R.string.settings_ai_config_model))
                     },
@@ -453,11 +501,13 @@ private fun presenter() =
         val businessState = remember { AiConfigPresenter() }.invoke()
         var showTypeDropdown by remember { mutableStateOf(false) }
         var showModelDropdown by remember { mutableStateOf(false) }
+        var showReasoningEffortDropdown by remember { mutableStateOf(false) }
         var textEditDialog by remember { mutableStateOf<TextEditDialogState?>(null) }
 
         object : AiConfigPresenter.State by businessState {
             val showTypeDropdown = showTypeDropdown
             val showModelDropdown = showModelDropdown
+            val showReasoningEffortDropdown = showReasoningEffortDropdown
             val textEditDialog = textEditDialog
 
             fun setShowTypeDropdown(value: Boolean) {
@@ -468,10 +518,23 @@ private fun presenter() =
                 showModelDropdown = value
             }
 
+            fun setShowReasoningEffortDropdown(value: Boolean) {
+                showReasoningEffortDropdown = value
+            }
+
             fun setTextEditDialog(value: TextEditDialogState?) {
                 textEditDialog = value
             }
         }
+    }
+
+@Composable
+private fun openAIReasoningEffortLabel(option: AiReasoningEffortOption): String =
+    when (option) {
+        AiReasoningEffortOption.Default -> stringResource(id = R.string.settings_ai_config_reasoning_effort_default)
+        AiReasoningEffortOption.Low -> stringResource(id = R.string.settings_ai_config_reasoning_effort_low)
+        AiReasoningEffortOption.Medium -> stringResource(id = R.string.settings_ai_config_reasoning_effort_medium)
+        AiReasoningEffortOption.High -> stringResource(id = R.string.settings_ai_config_reasoning_effort_high)
     }
 
 private data class TextEditDialogState(

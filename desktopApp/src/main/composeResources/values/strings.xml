@@ -189,6 +189,12 @@
     <string name="settings_ai_config_model_error">Failed to load models</string>
     <string name="settings_ai_config_model_no_models">No models available</string>
     <string name="settings_ai_config_model_manual_input">Enter model manually</string>
+    <string name="settings_ai_config_reasoning_effort">Reasoning Effort</string>
+    <string name="settings_ai_config_reasoning_effort_description">Choose how much effort the model spends on reasoning. Default uses the provider\'s default behavior.</string>
+    <string name="settings_ai_config_reasoning_effort_default">Default</string>
+    <string name="settings_ai_config_reasoning_effort_low">Low</string>
+    <string name="settings_ai_config_reasoning_effort_medium">Medium</string>
+    <string name="settings_ai_config_reasoning_effort_high">High</string>
     <string name="settings_ai_config_translate_prompt">Translate Prompt</string>
     <string name="settings_ai_config_tldr_prompt">Summary Prompt</string>
     <string name="settings_ai_config_value_empty_placeholder">Tap to edit</string>

@@ -3,6 +3,7 @@ package dev.dimension.flare.data.network.ai
 import com.aallam.openai.api.chat.ChatCompletionRequest
 import com.aallam.openai.api.chat.ChatMessage
 import com.aallam.openai.api.chat.ChatRole
+import com.aallam.openai.api.chat.Effort
 import com.aallam.openai.api.http.Timeout
 import com.aallam.openai.api.model.ModelId
 import com.aallam.openai.client.OpenAI
@@ -46,6 +47,7 @@ internal class OpenAIService {
                                 content = prompt,
                             ),
                         ),
+                    reasoningEffort = config.reasoningEffort.takeIf { it.isNotBlank() }?.let(::Effort),
                 ),
         ).choices
             .firstOrNull()

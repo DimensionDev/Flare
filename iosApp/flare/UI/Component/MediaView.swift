@@ -74,34 +74,36 @@ struct MediaVideoView: View {
             }
             .clipped()
         .overlay {
-            VideoPlayer(url: .init(string: data.url)!, play: $play, time: $time)
-                .mute(true)
-                .autoReplay(true)
-                .onStateChanged { state in
-                    switch state {
-                    case .playing(let duration): videoState = .playing(duration)
-                    case .loading: videoState = .loading
-                    case .paused: videoState = .idle
-                    case .error(let error): videoState = .error(error)
+            if let videoURL = URL(string: data.url) {
+                VideoPlayer(url: videoURL, play: $play, time: $time)
+                    .mute(true)
+                    .autoReplay(true)
+                    .onStateChanged { state in
+                        switch state {
+                        case .playing(let duration): videoState = .playing(duration)
+                        case .loading: videoState = .loading
+                        case .paused: videoState = .idle
+                        case .error(let error): videoState = .error(error)
+                        }
                     }
-                }
-                .contentMode(.scaleAspectFill)
-                .onChange(of: effectiveIsScrolling, { oldValue, newValue in
-                    if !newValue, !play, isAppeared, canPlay() {
-                        play = true
+                    .contentMode(.scaleAspectFill)
+                    .onChange(of: effectiveIsScrolling, { oldValue, newValue in
+                        if !newValue, !play, isAppeared, canPlay() {
+                            play = true
+                        }
+                    })
+                    .onAppear {
+                        isAppeared = true
+                        if !effectiveIsScrolling, canPlay() {
+                            play = true
+                        }
                     }
-                })
-                .onAppear {
-                    isAppeared = true
-                    if !effectiveIsScrolling, canPlay() {
-                        play = true
+                    .onDisappear {
+                        isAppeared = false
+                        play = false
                     }
-                }
-                .onDisappear {
-                    isAppeared = false
-                    play = false
-                }
-                .allowsHitTesting(false)
+                    .allowsHitTesting(false)
+            }
         }
         .overlay(alignment: .bottomLeading) {
             switch videoState {

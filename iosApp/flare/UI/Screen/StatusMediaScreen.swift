@@ -299,26 +299,28 @@ struct StatusMediaVideoView: View {
             }
             .clipped()
         .overlay {
-            VideoPlayer(url: .init(string: data.url)!, play: $play, time: $time)
-                .mute(false)
-                .autoReplay(true)
-                .onStateChanged { state in
-                    switch state {
-                    case .playing(let duration): videoState = .playing(duration)
-                    case .loading: videoState = .loading
-                    case .paused:
-                        if case .playing(let duration) = videoState {
-                            videoState = .paused(duration)
-                        } else if case .paused(let duration) = videoState {
-                            videoState = .paused(duration)
-                        } else {
-                            videoState = .idle
+            if let videoURL = URL(string: data.url) {
+                VideoPlayer(url: videoURL, play: $play, time: $time)
+                    .mute(false)
+                    .autoReplay(true)
+                    .onStateChanged { state in
+                        switch state {
+                        case .playing(let duration): videoState = .playing(duration)
+                        case .loading: videoState = .loading
+                        case .paused:
+                            if case .playing(let duration) = videoState {
+                                videoState = .paused(duration)
+                            } else if case .paused(let duration) = videoState {
+                                videoState = .paused(duration)
+                            } else {
+                                videoState = .idle
+                            }
+                        case .error(let error): videoState = .error(error)
                         }
-                    case .error(let error): videoState = .error(error)
                     }
-                }
-                .contentMode(.scaleAspectFit)
-                .allowsHitTesting(false)
+                    .contentMode(.scaleAspectFit)
+                    .allowsHitTesting(false)
+            }
         }
     }
 }

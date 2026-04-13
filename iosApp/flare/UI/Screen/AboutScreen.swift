@@ -6,7 +6,11 @@ struct AboutScreen: View {
     var body: some View {
         let versionName = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? ""
         let versionCode = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? ""
-        AboutView(version: "\(versionName)(\(versionCode))", onOpenLink: { url in openURL.callAsFunction(.init(string: url)!) })
+        AboutView(version: "\(versionName)(\(versionCode))", onOpenLink: { url in
+            if let targetURL = URL(string: url) {
+                openURL.callAsFunction(targetURL)
+            }
+        })
             .background(Color(.systemGroupedBackground))
             .navigationTitle("about_title")
     }

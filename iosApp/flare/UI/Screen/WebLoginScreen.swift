@@ -17,7 +17,9 @@ struct WebLoginScreen: View {
             if viewModel.canShowWebView {
                 WebView(viewModel.page)
                     .onAppear {
-                        viewModel.page.load(.init(string: url)!)
+                        if let requestURL = URL(string: url) {
+                            viewModel.page.load(requestURL)
+                        }
                     }
                     .toolbar {
                         ToolbarItem(placement: .cancellationAction) {
@@ -41,7 +43,7 @@ struct WebLoginScreen: View {
 struct NavigationDecider: WebPage.NavigationDeciding {
     let onCookie: (String) -> Void
     let config: WebPage.Configuration
-    let url: URL
+    let url: URL?
     func decidePolicy(for response: WebPage.NavigationResponse) async -> WKNavigationResponsePolicy {
         getCookies()
         return .allow
@@ -78,7 +80,7 @@ class WebLoginViewModel: ObservableObject {
         var conf = WebPage.Configuration()
         conf.defaultNavigationPreferences.allowsContentJavaScript = true
         self.config = conf
-        self.decider = .init(onCookie: onCookie, config: conf, url: .init(string: url)!)
+        self.decider = .init(onCookie: onCookie, config: conf, url: .init(string: url))
         self.page = WebPage(configuration: conf, navigationDecider: decider)
         self.onCookie = onCookie
         self.page.customUserAgent = "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1"

@@ -23,7 +23,9 @@ struct DeepLinkAccountPicker: View {
                 }
             }
             Button {
-                openURL(URL(string: originalUrl)!)
+                if let url = URL(string: originalUrl) {
+                    openURL(url)
+                }
                 dismiss()
             } label: {
                 Label {

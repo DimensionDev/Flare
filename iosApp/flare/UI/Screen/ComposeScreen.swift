@@ -529,8 +529,14 @@ struct ComposeScreen: View {
     }
     
     private func getMedia() -> [ComposeData.Media] {
-        return viewModel.mediaViewModel.items.map { item in
-                .init(file: .init(name: item.fileName, data: KotlinByteArray.from(data: item.data!), type: item.type), altText: item.altText.isEmpty ? nil : item.altText)
+        return viewModel.mediaViewModel.items.compactMap { item in
+            guard let data = item.data else {
+                return nil
+            }
+            return .init(
+                file: .init(name: item.fileName, data: KotlinByteArray.from(data: data), type: item.type),
+                altText: item.altText.isEmpty ? nil : item.altText
+            )
         }
     }
     private func getReferenceStatus() -> ComposeData.ReferenceStatus? {

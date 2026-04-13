@@ -105,7 +105,11 @@ struct DMConversationScreen: View {
     @Environment(\.openURL) private var openURL
     @StateObject private var presenter: KotlinPresenter<DMConversationState>
     var body: some View {
-        ComposeDMConversationView(key: presenter.key, data: presenter.state, onOpenLink: { url in openURL(.init(string: url)!) })
+        ComposeDMConversationView(key: presenter.key, data: presenter.state, onOpenLink: { url in
+            if let targetURL = URL(string: url) {
+                openURL(targetURL)
+            }
+        })
 //            .ignoresSafeArea()
             .background(Color(.systemGroupedBackground))
             .safeAreaInset(edge: .bottom) {

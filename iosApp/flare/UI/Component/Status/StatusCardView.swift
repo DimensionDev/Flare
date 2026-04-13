@@ -53,7 +53,9 @@ struct StatusCardView: View {
                 .stroke(Color(.separator), lineWidth: 1)
         )
         .onTapGesture {
-            openURL.callAsFunction(.init(string: data.url)!)
+            if let url = URL(string: data.url) {
+                openURL.callAsFunction(url)
+            }
         }
     }
 }
@@ -109,7 +111,9 @@ struct StatusCompatCardView: View {
                 .stroke(Color(.separator), lineWidth: 1)
         )
         .onTapGesture {
-            openURL.callAsFunction(.init(string: data.url)!)
+            if let url = URL(string: data.url) {
+                openURL.callAsFunction(url)
+            }
         }
     }
 }

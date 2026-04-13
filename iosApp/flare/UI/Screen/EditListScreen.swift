@@ -154,7 +154,7 @@ struct EditListScreen: View {
                     Task {
                         isLoading = true
                         let imageData = try? await avatar?.loadTransferable(type: Data.self)
-                        let imageByteArray = imageData != nil ? KotlinByteArray.from(data: imageData!) : nil
+                        let imageByteArray = imageData.map { KotlinByteArray.from(data: $0) }
                         if let imageByteArray, let avatar {
                             try? await presenter.state.updateList(
                                 listMetaData: .init(
@@ -186,5 +186,4 @@ struct EditListScreen: View {
         .disabled(isLoading)
     }
 }
-
 

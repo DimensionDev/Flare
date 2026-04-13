@@ -28,13 +28,17 @@ struct ServiceSelectionScreen : View {
             toHome()
         }, openUri: { url, callback in
             Task {
-                let response = try? await webAuthenticationSession.authenticate(using: .init(string: url)!, callbackURLScheme: APPSCHEMA)
-                if let responseString = response?.absoluteString {
-                    _ = callback(responseString)
+                if let authURL = URL(string: url) {
+                    let response = try? await webAuthenticationSession.authenticate(using: authURL, callbackURLScheme: APPSCHEMA)
+                    if let responseString = response?.absoluteString {
+                        _ = callback(responseString)
+                    }
                 }
             }
         })) { url in
-            openURL.callAsFunction(.init(string: url)!)
+            if let targetURL = URL(string: url) {
+                openURL.callAsFunction(targetURL)
+            }
         }
         .ignoresSafeArea()
         .background(Color(.systemGroupedBackground))

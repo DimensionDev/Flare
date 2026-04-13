@@ -88,7 +88,11 @@ struct TimelinePagingContent: View {
                 data: data,
                 detailStatusKey: detailStatusKey,
                 topPadding: 0,
-                onOpenLink: { url in openURL.callAsFunction(.init(string: url)!) },
+                onOpenLink: { url in
+                    if let targetURL = URL(string: url) {
+                        openURL.callAsFunction(targetURL)
+                    }
+                },
                 onExpand: {},
                 onCollapse: {}
             )

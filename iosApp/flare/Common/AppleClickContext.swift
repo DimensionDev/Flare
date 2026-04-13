@@ -8,6 +8,8 @@ class AppleUriLauncher: UriLauncher {
     }
 
     func launch(uri: String) {
-        openUrl.callAsFunction(.init(string: uri)!)
+        if let url = URL(string: uri) {
+            openUrl.callAsFunction(url)
+        }
     }
 }

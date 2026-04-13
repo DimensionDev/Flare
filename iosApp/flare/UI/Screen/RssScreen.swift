@@ -388,7 +388,8 @@ extension EditRssSheet {
         self.id = id
         self.onImportOPML = onImportOPML
         self.url = initialUrl ?? ""
-        self._presenter = .init(wrappedValue: .init(presenter: EditRssSourcePresenter(id: id == nil ? nil : KotlinInt(value: Int32(id!)))))
+        let kotlinId = id.map { KotlinInt(value: Int32($0)) }
+        self._presenter = .init(wrappedValue: .init(presenter: EditRssSourcePresenter(id: kotlinId)))
     }
 }
 

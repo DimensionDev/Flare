@@ -46,8 +46,10 @@ struct StatusShareSheet: View {
                 .listRowBackground(Color.clear)
                 
                 Section {
-                    ShareLink(item: .init(string: shareUrl)!) {
-                        Label("share_link", systemImage: "link")
+                    if let url = URL(string: shareUrl) {
+                        ShareLink(item: url) {
+                            Label("share_link", systemImage: "link")
+                        }
                     }
                     
                     if let image {
@@ -64,14 +66,14 @@ struct StatusShareSheet: View {
                         Label("save_screenshot", systemImage: "arrow.down.circle")
                     }
                     
-                    if let fxShareUrl = fxShareUrl {
-                        ShareLink(item: .init(string: fxShareUrl)!) {
+                    if let fxShareUrl, let url = URL(string: fxShareUrl) {
+                        ShareLink(item: url) {
                             Label("share_via_fxembed", systemImage: "link")
                         }
                     }
                     
-                    if let fixvxShareUrl = fixvxShareUrl {
-                        ShareLink(item: .init(string: fixvxShareUrl)!) {
+                    if let fixvxShareUrl, let url = URL(string: fixvxShareUrl) {
+                        ShareLink(item: url) {
                             Label("share_via_fixvx", systemImage: "link")
                         }
                     }

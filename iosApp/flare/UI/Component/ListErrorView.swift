@@ -17,7 +17,9 @@ struct ListErrorView: View {
                     .multilineTextAlignment(.center)
                     .font(.headline)
                 Button {
-                    openURL(URL(string: DeeplinkRoute.Login.shared.toUri())!)
+                    if let url = URL(string: DeeplinkRoute.Login.shared.toUri()) {
+                        openURL(url)
+                    }
                 } label: {
                     Text("error_login_expired_action")
                 }
@@ -33,7 +35,9 @@ struct ListErrorView: View {
                     .font(.headline)
                 Text("permission_denied_message")
                 Button {
-                    openURL(URL(string: DeeplinkRoute.Login.shared.toUri())!)
+                    if let url = URL(string: DeeplinkRoute.Login.shared.toUri()) {
+                        openURL(url)
+                    }
                 } label: {
                     Text("error_login_expired_action")
                 }

@@ -56,7 +56,9 @@ struct CommonProfileHeader: View {
                     NetworkImage(data: banner)
                         .frame(height: CommonProfileHeaderConstants.headerHeight)
                         .onTapGesture {
-                            openURL.callAsFunction(.init(string: DeeplinkRoute.Media.MediaImage(uri: banner, previewUrl: nil).toUri())!)
+                            if let url = URL(string: DeeplinkRoute.Media.MediaImage(uri: banner, previewUrl: nil).toUri()) {
+                                openURL.callAsFunction(url)
+                            }
                         }
                 }
                 .frame(height: CommonProfileHeaderConstants.headerHeight)
@@ -78,7 +80,9 @@ struct CommonProfileHeader: View {
                         AvatarView(data: user.avatar)
                             .frame(width: CommonProfileHeaderConstants.avatarSize, height: CommonProfileHeaderConstants.avatarSize)
                             .onTapGesture {
-                                openURL.callAsFunction(.init(string: DeeplinkRoute.Media.MediaImage(uri: user.avatar, previewUrl: nil).toUri())!)
+                                if let url = URL(string: DeeplinkRoute.Media.MediaImage(uri: user.avatar, previewUrl: nil).toUri()) {
+                                    openURL.callAsFunction(url)
+                                }
                             }
                     }
                     Spacer()

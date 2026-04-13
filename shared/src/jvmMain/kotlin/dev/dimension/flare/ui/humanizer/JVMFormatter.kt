@@ -43,6 +43,7 @@ internal class JVMFormatter : PlatformFormatter {
             diff.inWholeDays < 7 -> {
                 prettyTime.format(Date(-diff.inWholeMilliseconds))
             }
+
             else -> {
                 DateTimeFormatter.ISO_DATE
                     .format(
@@ -92,6 +93,7 @@ internal class JVMFormatter : PlatformFormatter {
                     .withLocale(locale)
                     .format(zonedDateTime)
             }
+
             daysDiff < 7 -> {
                 val pattern =
                     DateTimeFormatterBuilder.getLocalizedDateTimePattern(
@@ -104,6 +106,7 @@ internal class JVMFormatter : PlatformFormatter {
                     .ofPattern(pattern)
                     .format(zonedDateTime)
             }
+
             else -> {
                 DateTimeFormatter
                     .ofLocalizedDateTime(FormatStyle.SHORT)

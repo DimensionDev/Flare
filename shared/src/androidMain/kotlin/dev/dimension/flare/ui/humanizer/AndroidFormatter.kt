@@ -40,6 +40,7 @@ internal class AndroidFormatter(
                     DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_ABBREV_MONTH,
                 )
             }
+
             diff.inWholeDays >= 1 -> {
                 DateUtils
                     .getRelativeTimeSpanString(
@@ -49,6 +50,7 @@ internal class AndroidFormatter(
                         DateUtils.FORMAT_ABBREV_RELATIVE,
                     ).toString()
             }
+
             diff.inWholeHours >= 1 -> {
                 DateUtils
                     .getRelativeTimeSpanString(
@@ -58,6 +60,7 @@ internal class AndroidFormatter(
                         DateUtils.FORMAT_ABBREV_RELATIVE,
                     ).toString()
             }
+
             diff.inWholeMinutes < 1 -> {
                 DateUtils
                     .getRelativeTimeSpanString(
@@ -67,6 +70,7 @@ internal class AndroidFormatter(
                         DateUtils.FORMAT_ABBREV_RELATIVE,
                     ).toString()
             }
+
             compareTo.toLocalDateTime(timeZone).year != time.year -> {
                 DateUtils.formatDateTime(
                     context,
@@ -74,6 +78,7 @@ internal class AndroidFormatter(
                     DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_ABBREV_MONTH or DateUtils.FORMAT_NUMERIC_DATE,
                 )
             }
+
             else -> {
                 DateUtils
                     .getRelativeTimeSpanString(
@@ -112,6 +117,7 @@ internal class AndroidFormatter(
                     DateUtils.FORMAT_SHOW_TIME,
                 )
             }
+
             daysDiff < 7 -> {
                 DateUtils.formatDateTime(
                     context,
@@ -119,6 +125,7 @@ internal class AndroidFormatter(
                     DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_ABBREV_WEEKDAY or DateUtils.FORMAT_SHOW_TIME,
                 )
             }
+
             else -> {
                 DateUtils.formatDateTime(
                     context,

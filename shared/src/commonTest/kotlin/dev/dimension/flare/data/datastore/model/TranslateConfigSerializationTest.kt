@@ -122,7 +122,7 @@ class TranslateConfigSerializationTest {
                 LegacyOpenAISettings(
                     version = "legacy",
                     aiConfig =
-                        AppSettings.AiConfig(
+                        LegacyAiConfig(
                             type =
                                 LegacyOpenAIType(
                                     serverUrl = "https://api.openai.com/v1/",

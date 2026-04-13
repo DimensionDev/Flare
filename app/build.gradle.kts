@@ -1,6 +1,6 @@
 // START Non-FOSS component
-// END Non-FOSS component
 import com.google.firebase.crashlytics.buildtools.gradle.CrashlyticsPlugin
+// END Non-FOSS component
 import com.google.gms.googleservices.GoogleServicesPlugin
 import dev.dimension.flare.buildlogic.flare
 import java.util.Properties
@@ -183,6 +183,7 @@ dependencies {
     debugImplementation(libs.ui.test.manifest)
 }
 
+// START Non-FOSS component
 if (project.file("google-services.json").exists()) {
     afterEvaluate {
         val uploadCrashlyticsMappingFileRelease by tasks
@@ -190,7 +191,7 @@ if (project.file("google-services.json").exists()) {
         uploadCrashlyticsMappingFileRelease.dependsOn(processDebugGoogleServices)
     }
 }
-
+// END Non-FOSS component
 
 abstract class GenerateDeepLinkManifestTask : DefaultTask() {
     @get:InputFile

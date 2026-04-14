@@ -45,11 +45,11 @@ internal object RssService {
             .filter { it.isNotBlank() }
             .distinct()
             .map {
-                if (it.startsWith("/")) {
+                if (it.startsWith("//")) {
+                    "https:$it"
+                } else if (it.startsWith("/")) {
                     val baseUrl = Url(url)
                     "${baseUrl.protocol.name}://${baseUrl.host}$it"
-                } else if (it.startsWith("//")) {
-                    "https:$it"
                 } else if (!it.startsWith("http")) {
                     val baseUrl = Url(url)
                     "${baseUrl.protocol.name}://${baseUrl.host}/$it"

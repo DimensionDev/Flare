@@ -29,7 +29,7 @@ internal object TimelinePagingMapper {
             timeline =
                 DbPagingTimeline(
                     pagingKey = pagingKey,
-                    statusKey = data.statusKey,
+                    statusId = rootStatus.data.id,
                     sortId = SnowflakeIdGenerator.nextId(),
                 ),
             status =

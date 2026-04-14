@@ -170,18 +170,18 @@ private suspend fun loadChangedTimeline(
             .groupBy { it.pagingKey }
             .flatMap { (pagingKey, rows) ->
                 rows
-                    .map { it.statusKey }
+                    .map { it.statusId }
                     .distinct()
                     .chunked(SQL_IN_BATCH_SIZE)
                     .flatMap { chunk ->
-                        database.pagingTimelineDao().getByPagingKeyAndStatusKeys(
+                        database.pagingTimelineDao().getByPagingKeyAndStatusIds(
                             pagingKey = pagingKey,
-                            statusKeys = chunk,
+                            statusIds = chunk,
                         )
                     }
-            }.associateBy { it.pagingKey to it.statusKey }
+            }.associateBy { it.pagingKey to it.statusId }
     return incoming.filter { timeline ->
-        existingByPair[timeline.pagingKey to timeline.statusKey] != timeline
+        existingByPair[timeline.pagingKey to timeline.statusId] != timeline
     }
 }
 

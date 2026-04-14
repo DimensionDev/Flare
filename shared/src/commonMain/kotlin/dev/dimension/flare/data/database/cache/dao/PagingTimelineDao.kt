@@ -24,7 +24,7 @@ internal interface PagingTimelineDao {
     @Transaction
     @Query(
         "SELECT DbStatus.* FROM DbStatus " +
-            "INNER JOIN DbPagingTimeline ON DbStatus.statusKey = DbPagingTimeline.statusKey " +
+            "INNER JOIN DbPagingTimeline ON DbStatus.id = DbPagingTimeline.statusId " +
             "WHERE DbPagingTimeline.pagingKey = :pagingKey AND DbStatus.accountType = :accountType " +
             "ORDER BY DbPagingTimeline.sortId",
     )
@@ -36,7 +36,7 @@ internal interface PagingTimelineDao {
     @Transaction
     @Query(
         "SELECT DbStatus.* FROM DbStatus " +
-            "INNER JOIN DbPagingTimeline ON DbStatus.statusKey = DbPagingTimeline.statusKey " +
+            "INNER JOIN DbPagingTimeline ON DbStatus.id = DbPagingTimeline.statusId " +
             "WHERE DbPagingTimeline.pagingKey = :pagingKey " +
             "ORDER BY DbPagingTimeline.sortId",
     )
@@ -57,7 +57,7 @@ internal interface PagingTimelineDao {
             "AND EXISTS(" +
             "SELECT 1 FROM DbPagingTimeline " +
             "WHERE DbPagingTimeline.pagingKey = :pagingKey " +
-            "AND DbPagingTimeline.statusKey = DbStatus.statusKey" +
+            "AND DbPagingTimeline.statusId = DbStatus.id" +
             ") " +
             "LIMIT 1",
     )
@@ -69,7 +69,7 @@ internal interface PagingTimelineDao {
     @Transaction
     @Query(
         "SELECT DbStatus.* FROM DbStatus " +
-            "INNER JOIN DbPagingTimeline ON DbStatus.statusKey = DbPagingTimeline.statusKey " +
+            "INNER JOIN DbPagingTimeline ON DbStatus.id = DbPagingTimeline.statusId " +
             "WHERE DbPagingTimeline.pagingKey = :pagingKey " +
             "ORDER BY DbPagingTimeline.sortId DESC",
     )
@@ -80,11 +80,11 @@ internal interface PagingTimelineDao {
 
     @Query(
         "SELECT * FROM DbPagingTimeline " +
-            "WHERE pagingKey = :pagingKey AND statusKey IN (:statusKeys)",
+            "WHERE pagingKey = :pagingKey AND statusId IN (:statusIds)",
     )
-    suspend fun getByPagingKeyAndStatusKeys(
+    suspend fun getByPagingKeyAndStatusIds(
         pagingKey: String,
-        statusKeys: List<MicroBlogKey>,
+        statusIds: List<String>,
     ): List<DbPagingTimeline>
 
     @Query(
@@ -100,7 +100,7 @@ internal interface PagingTimelineDao {
         "DELETE FROM DbPagingTimeline WHERE pagingKey = :pagingKey " +
             "AND EXISTS(" +
             "SELECT 1 FROM DbStatus " +
-            "WHERE DbStatus.statusKey = DbPagingTimeline.statusKey " +
+            "WHERE DbStatus.id = DbPagingTimeline.statusId " +
             "AND DbStatus.accountType = :accountType" +
             ")",
     )
@@ -126,7 +126,7 @@ internal interface PagingTimelineDao {
         "DELETE FROM DbPagingTimeline " +
             "WHERE EXISTS(" +
             "SELECT 1 FROM DbStatus " +
-            "WHERE DbStatus.statusKey = DbPagingTimeline.statusKey " +
+            "WHERE DbStatus.id = DbPagingTimeline.statusId " +
             "AND DbStatus.accountType = :accountType" +
             ")",
     )
@@ -134,16 +134,16 @@ internal interface PagingTimelineDao {
 
     @Query(
         "DELETE FROM DbPagingTimeline " +
-            "WHERE statusKey = :statusKey " +
+            "WHERE statusId = :statusId " +
             "AND EXISTS(" +
             "SELECT 1 FROM DbStatus " +
-            "WHERE DbStatus.statusKey = DbPagingTimeline.statusKey " +
+            "WHERE DbStatus.id = DbPagingTimeline.statusId " +
             "AND DbStatus.accountType = :accountType" +
             ")",
     )
     suspend fun deleteStatus(
         accountType: DbAccountType,
-        statusKey: MicroBlogKey,
+        statusId: String,
     )
 
     @Query(
@@ -152,7 +152,7 @@ internal interface PagingTimelineDao {
             "WHERE pagingKey = :paging_key " +
             "AND EXISTS(" +
             "SELECT 1 FROM DbStatus " +
-            "WHERE DbStatus.statusKey = DbPagingTimeline.statusKey " +
+            "WHERE DbStatus.id = DbPagingTimeline.statusId " +
             "AND DbStatus.accountType = :accountType" +
             ")" +
             ")",

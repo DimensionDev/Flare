@@ -6,7 +6,6 @@ import androidx.room3.Index
 import androidx.room3.PrimaryKey
 import androidx.room3.Relation
 import androidx.room3.TypeConverter
-import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.ReferenceType
 import kotlin.time.Instant
 import kotlin.uuid.Uuid
@@ -14,7 +13,7 @@ import kotlin.uuid.Uuid
 @Entity(
     indices = [
         Index(
-            value = ["statusKey", "pagingKey"],
+            value = ["statusId", "pagingKey"],
             unique = true,
         ),
         Index(
@@ -24,7 +23,7 @@ import kotlin.uuid.Uuid
 )
 internal data class DbPagingTimeline(
     val pagingKey: String,
-    val statusKey: MicroBlogKey,
+    val statusId: String,
     val sortId: Long,
     @PrimaryKey
     val _id: String = Uuid.random().toString(),
@@ -42,8 +41,8 @@ internal data class DbPagingTimelineWithStatus(
     @Embedded
     val timeline: DbPagingTimeline,
     @Relation(
-        parentColumn = "statusKey",
-        entityColumn = "statusKey",
+        parentColumn = "statusId",
+        entityColumn = "id",
         entity = DbStatus::class,
     )
     val status: DbStatusWithReference,

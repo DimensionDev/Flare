@@ -7,6 +7,7 @@ import androidx.compose.runtime.remember
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
+import dev.dimension.flare.data.database.cache.model.DbStatus
 import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
@@ -93,7 +94,7 @@ public class StatusContextPresenter(
                                                 .insertAll(
                                                     listOf(
                                                         DbPagingTimeline(
-                                                            statusKey = statusKey,
+                                                            statusId = DbStatus.createId(accountType as DbAccountType, statusKey),
                                                             pagingKey = pagingKey,
                                                             sortId = 0,
                                                         ),

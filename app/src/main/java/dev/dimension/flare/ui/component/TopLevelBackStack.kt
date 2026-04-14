@@ -62,11 +62,6 @@ internal class TopLevelBackStack<T : NavKey>(
             // If the key is already the last one, do nothing
             return
         }
-        if (isInBackStack(key)) {
-            // If the key already exists in any stack, do nothing to avoid
-            // duplicate key crash in SaveableStateProvider
-            return
-        }
         topLevelStacks[topLevelKey]?.add(key)
         updateBackStack()
     }

@@ -33,12 +33,17 @@ internal class ComposeUseCase(
             }
             withContext(Dispatchers.Main) {
                 when (it) {
-                    is ComposeProgressState.Error ->
+                    is ComposeProgressState.Error -> {
                         inAppNotification.onError(Message.Compose, it.throwable)
-                    is ComposeProgressState.Progress ->
+                    }
+
+                    is ComposeProgressState.Progress -> {
                         inAppNotification.onProgress(Message.Compose, it.current, it.max)
-                    ComposeProgressState.Success ->
+                    }
+
+                    ComposeProgressState.Success -> {
                         inAppNotification.onSuccess(Message.Compose)
+                    }
                 }
             }
         }

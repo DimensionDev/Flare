@@ -234,6 +234,7 @@ internal data class Status(
                         JSON.decodeFromJsonElement(it)
                     }
                 }
+
                 else -> {
                     null
                 }
@@ -380,6 +381,7 @@ internal data class StatusPic(
                 is JsonObject -> {
                     JSON.decodeFromJsonElement(geo)
                 }
+
                 else -> {
                     null
                 }
@@ -399,6 +401,7 @@ internal data class Large(
                 is JsonObject -> {
                     JSON.decodeFromJsonElement(geo)
                 }
+
                 else -> {
                     null
                 }

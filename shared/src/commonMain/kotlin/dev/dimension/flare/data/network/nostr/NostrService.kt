@@ -222,12 +222,17 @@ internal class NostrService(
         private fun parseSecret(raw: String): RustSecretKey? {
             val value = raw.removePrefix("nostr:").trim()
             return when {
-                value.startsWith("nsec1", ignoreCase = true) ->
+                value.startsWith("nsec1", ignoreCase = true) -> {
                     RustKeys.parse(value).use { it.secretKey() }
+                }
 
-                HEX_KEY_REGEX.matches(value) -> RustSecretKey.Companion.parse(value.lowercase())
+                HEX_KEY_REGEX.matches(value) -> {
+                    RustSecretKey.Companion.parse(value.lowercase())
+                }
 
-                else -> null
+                else -> {
+                    null
+                }
             }
         }
 
@@ -1299,42 +1304,54 @@ internal class NostrService(
     private fun parseSearchProfilePubkey(raw: String): String? {
         val value = raw.removePrefix("nostr:").trim()
         return when {
-            value.startsWith("npub1", ignoreCase = true) ->
+            value.startsWith("npub1", ignoreCase = true) -> {
                 withNip19(value) { nip19 ->
                     (nip19 as? RustNip19Enum.Pubkey)?.npub?.use { it.toHex() }
                 }
+            }
 
-            value.startsWith("nprofile1", ignoreCase = true) ->
+            value.startsWith("nprofile1", ignoreCase = true) -> {
                 withNip19(value) { nip19 ->
                     (nip19 as? RustNip19Enum.Profile)?.nprofile?.use { profile ->
                         profile.publicKey().use { it.toHex() }
                     }
                 }
+            }
 
-            HEX_KEY_REGEX.matches(value) -> value.lowercase()
+            HEX_KEY_REGEX.matches(value) -> {
+                value.lowercase()
+            }
 
-            else -> null
+            else -> {
+                null
+            }
         }
     }
 
     private fun parseSearchStatusEventId(raw: String): String? {
         val value = raw.removePrefix("nostr:").trim()
         return when {
-            value.startsWith("note1", ignoreCase = true) ->
+            value.startsWith("note1", ignoreCase = true) -> {
                 withNip19(value) { nip19 ->
                     (nip19 as? RustNip19Enum.Note)?.eventId?.use { it.toHex() }
                 }
+            }
 
-            value.startsWith("nevent1", ignoreCase = true) ->
+            value.startsWith("nevent1", ignoreCase = true) -> {
                 withNip19(value) { nip19 ->
                     (nip19 as? RustNip19Enum.Event)?.event?.use { event ->
                         event.eventId().use { it.toHex() }
                     }
                 }
+            }
 
-            HEX_KEY_REGEX.matches(value) -> value.lowercase()
+            HEX_KEY_REGEX.matches(value) -> {
+                value.lowercase()
+            }
 
-            else -> null
+            else -> {
+                null
+            }
         }
     }
 
@@ -1424,11 +1441,12 @@ internal class NostrService(
                 }.distinctBy { it.joinToString(separator = "\u0000") }
             }
 
-            else ->
+            else -> {
                 listOf(
                     arrayOf("e", target.id),
                     pTag(target.pubKey),
                 )
+            }
         }
 
     private suspend fun loadEvent(statusKey: MicroBlogKey): Event? =
@@ -1479,15 +1497,21 @@ internal class NostrService(
         cachedAuthorPubKey: String?,
     ): Array<String>? =
         when {
-            target != null -> arrayOf("q", target.id, "", target.pubKey)
-            cachedAuthorPubKey != null && statusKey.id.length == 64 ->
+            target != null -> {
+                arrayOf("q", target.id, "", target.pubKey)
+            }
+
+            cachedAuthorPubKey != null && statusKey.id.length == 64 -> {
                 buildList {
                     add("q")
                     add(statusKey.id)
                     add(cachedAuthorPubKey)
                 }.toTypedArray()
+            }
 
-            else -> null
+            else -> {
+                null
+            }
         }
 
     private suspend fun loadInteractionStats(
@@ -1540,7 +1564,7 @@ internal class NostrService(
             val current = acc[targetId] ?: InteractionStats()
             acc[targetId] =
                 when (event) {
-                    is ReactionEvent ->
+                    is ReactionEvent -> {
                         if (event.content == ReactionEvent.LIKE || event.content.isBlank()) {
                             current.copy(
                                 reactionCount = current.reactionCount + 1,
@@ -1554,8 +1578,9 @@ internal class NostrService(
                         } else {
                             current
                         }
+                    }
 
-                    is RepostEvent ->
+                    is RepostEvent -> {
                         current.copy(
                             repostCount = current.repostCount + 1,
                             myRepostEventId =
@@ -1565,8 +1590,9 @@ internal class NostrService(
                                     current.myRepostEventId
                                 },
                         )
+                    }
 
-                    is GenericRepostEvent ->
+                    is GenericRepostEvent -> {
                         current.copy(
                             repostCount = current.repostCount + 1,
                             myRepostEventId =
@@ -1576,8 +1602,11 @@ internal class NostrService(
                                     current.myRepostEventId
                                 },
                         )
+                    }
 
-                    else -> current
+                    else -> {
+                        current
+                    }
                 }
             acc
         }
@@ -1602,7 +1631,7 @@ internal class NostrService(
             val nextVisited = visited + event.id
             val resolved =
                 when (event) {
-                    is TextNoteEvent ->
+                    is TextNoteEvent -> {
                         event.toUi(
                             profile =
                                 profiles[event.pubKey] ?: profileOf(
@@ -1616,24 +1645,29 @@ internal class NostrService(
                             visited = nextVisited,
                             resolveEvent = ::resolve,
                         )
+                    }
 
-                    is RepostEvent ->
+                    is RepostEvent -> {
                         event.toUiRepost(
                             profiles = profiles,
                             eventsById = eventsById,
                             visited = nextVisited,
                             resolveEvent = ::resolve,
                         )
+                    }
 
-                    is GenericRepostEvent ->
+                    is GenericRepostEvent -> {
                         event.toUiGenericRepost(
                             profiles = profiles,
                             eventsById = eventsById,
                             visited = nextVisited,
                             resolveEvent = ::resolve,
                         )
+                    }
 
-                    else -> null
+                    else -> {
+                        null
+                    }
                 }
             if (resolved != null) {
                 cache[event.id] = resolved
@@ -1666,7 +1700,7 @@ internal class NostrService(
             val nextVisited = visited + event.id
             val resolved =
                 when (event) {
-                    is TextNoteEvent ->
+                    is TextNoteEvent -> {
                         event.toUi(
                             profile =
                                 profiles[event.pubKey] ?: profileOf(
@@ -1680,24 +1714,29 @@ internal class NostrService(
                             visited = nextVisited,
                             resolveEvent = ::resolve,
                         )
+                    }
 
-                    is RepostEvent ->
+                    is RepostEvent -> {
                         event.toUiRepost(
                             profiles = profiles,
                             eventsById = eventsById,
                             visited = nextVisited,
                             resolveEvent = ::resolve,
                         )
+                    }
 
-                    is GenericRepostEvent ->
+                    is GenericRepostEvent -> {
                         event.toUiGenericRepost(
                             profiles = profiles,
                             eventsById = eventsById,
                             visited = nextVisited,
                             resolveEvent = ::resolve,
                         )
+                    }
 
-                    else -> null
+                    else -> {
+                        null
+                    }
                 }
             if (resolved != null) {
                 cache[event.id] = resolved
@@ -2021,7 +2060,7 @@ internal class NostrService(
         val width = dimensions?.width?.toFloat() ?: 0f
         val height = dimensions?.height?.toFloat() ?: 0f
         return when {
-            isVideoUrl(url) ->
+            isVideoUrl(url) -> {
                 UiMedia.Video(
                     url = url,
                     thumbnailUrl = url,
@@ -2029,8 +2068,9 @@ internal class NostrService(
                     height = height,
                     width = width,
                 )
+            }
 
-            isGifUrl(url) ->
+            isGifUrl(url) -> {
                 UiMedia.Gif(
                     url = url,
                     previewUrl = url,
@@ -2038,15 +2078,17 @@ internal class NostrService(
                     height = height,
                     width = width,
                 )
+            }
 
-            isAudioUrl(url) ->
+            isAudioUrl(url) -> {
                 UiMedia.Audio(
                     url = url,
                     description = description,
                     previewUrl = null,
                 )
+            }
 
-            isImageUrl(url) ->
+            isImageUrl(url) -> {
                 UiMedia.Image(
                     url = url,
                     previewUrl = url,
@@ -2055,8 +2097,9 @@ internal class NostrService(
                     width = width,
                     sensitive = false,
                 )
+            }
 
-            else ->
+            else -> {
                 UiMedia.Image(
                     url = url,
                     previewUrl = url,
@@ -2065,6 +2108,7 @@ internal class NostrService(
                     width = width,
                     sensitive = false,
                 )
+            }
         }
     }
 
@@ -2306,7 +2350,9 @@ internal class NostrService(
                 )
             }
 
-            else -> null
+            else -> {
+                null
+            }
         }
 
     private suspend fun loadEventGraph(roots: List<Event>): Map<String, Event> {
@@ -2588,7 +2634,7 @@ internal class NostrService(
         type: dev.dimension.flare.data.datasource.microblog.NotificationFilter,
     ): List<Filter> =
         when (type) {
-            dev.dimension.flare.data.datasource.microblog.NotificationFilter.All ->
+            dev.dimension.flare.data.datasource.microblog.NotificationFilter.All -> {
                 listOf(
                     Filter(
                         kinds = listOf(TextNoteEvent.KIND),
@@ -2603,8 +2649,9 @@ internal class NostrService(
                         limit = pageSize,
                     ),
                 )
+            }
 
-            dev.dimension.flare.data.datasource.microblog.NotificationFilter.Mention ->
+            dev.dimension.flare.data.datasource.microblog.NotificationFilter.Mention -> {
                 listOf(
                     Filter(
                         kinds = listOf(TextNoteEvent.KIND),
@@ -2613,8 +2660,11 @@ internal class NostrService(
                         limit = pageSize,
                     ),
                 )
+            }
 
-            else -> emptyList()
+            else -> {
+                emptyList()
+            }
         }
 
     private fun notificationMessage(

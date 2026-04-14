@@ -122,20 +122,24 @@ internal class BlueskyAuthPlugin(
                         val newTokens =
                             runCatching {
                                 when (error) {
-                                    "invalid_token", "ExpiredToken" ->
+                                    "invalid_token", "ExpiredToken" -> {
                                         plugin.refreshExpiredTokenLocked(
                                             currentCredential,
                                             oAuthApi,
                                             scope,
                                         )
+                                    }
 
-                                    "use_dpop_nonce" ->
+                                    "use_dpop_nonce" -> {
                                         refreshDpopNonce(
                                             currentCredential,
                                             result.response,
                                         )?.also { plugin.cacheCredential(it) }
+                                    }
 
-                                    else -> null
+                                    else -> {
+                                        null
+                                    }
                                 }
                             }.getOrElse {
                                 if (it is AtpException && it.error?.error == "invalid_grant") {
@@ -188,17 +192,19 @@ internal class BlueskyAuthPlugin(
             oAuthApi: OAuthApi,
         ) {
             when (val tokens = credential) {
-                is UiAccount.Bluesky.Credential.BlueskyCredential ->
+                is UiAccount.Bluesky.Credential.BlueskyCredential -> {
                     header(
                         HttpHeaders.Authorization,
                         "Bearer ${tokens.accessToken}",
                     )
+                }
 
-                is UiAccount.Bluesky.Credential.OAuthCredential ->
+                is UiAccount.Bluesky.Credential.OAuthCredential -> {
                     applyDpop(
                         credential,
                         oAuthApi,
                     )
+                }
             }
         }
 
@@ -207,17 +213,19 @@ internal class BlueskyAuthPlugin(
             oAuthApi: OAuthApi,
         ) {
             when (val tokens = credential) {
-                is UiAccount.Bluesky.Credential.BlueskyCredential ->
+                is UiAccount.Bluesky.Credential.BlueskyCredential -> {
                     header(
                         HttpHeaders.Authorization,
                         "Bearer ${tokens.refreshToken}",
                     )
+                }
 
-                is UiAccount.Bluesky.Credential.OAuthCredential ->
+                is UiAccount.Bluesky.Credential.OAuthCredential -> {
                     applyDpop(
                         tokens,
                         oAuthApi,
                     )
+                }
             }
         }
 
@@ -275,7 +283,9 @@ internal class BlueskyAuthPlugin(
             callResponse: HttpResponse,
         ): UiAccount.Bluesky.Credential? =
             when (val tokens = credential) {
-                is UiAccount.Bluesky.Credential.BlueskyCredential -> null
+                is UiAccount.Bluesky.Credential.BlueskyCredential -> {
+                    null
+                }
 
                 is UiAccount.Bluesky.Credential.OAuthCredential -> {
                     callResponse.headers["DPoP-Nonce"]?.let {
@@ -367,5 +377,7 @@ private suspend inline fun HttpResponse.errorDescriptionOrNull(): AtpErrorDescri
             runCatching { body<AtpErrorDescription>() }.getOrNull()
         }
 
-        else -> null
+        else -> {
+            null
+        }
     }

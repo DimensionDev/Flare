@@ -127,41 +127,53 @@ fun NavigationSuiteScaffold2(
             bottomBarAutoHideEnabled,
         ) {
             when (bottomBarStyle) {
-                BottomBarStyle.Floating ->
+                BottomBarStyle.Floating -> {
                     when (bottomBarBehavior) {
-                        BottomBarBehavior.AlwaysShow -> BottomBarState.FloatingNormal
-                        BottomBarBehavior.HideOnScroll ->
+                        BottomBarBehavior.AlwaysShow -> {
+                            BottomBarState.FloatingNormal
+                        }
+
+                        BottomBarBehavior.HideOnScroll -> {
                             if (!isBottomBarExpanded && bottomBarAutoHideEnabled) {
                                 BottomBarState.FloatingHidden
                             } else {
                                 BottomBarState.FloatingNormal
                             }
+                        }
 
-                        BottomBarBehavior.MinimizeOnScroll ->
+                        BottomBarBehavior.MinimizeOnScroll -> {
                             if (!isBottomBarExpanded && bottomBarAutoHideEnabled) {
                                 BottomBarState.FloatingMinimized
                             } else {
                                 BottomBarState.FloatingNormal
                             }
+                        }
                     }
+                }
 
-                BottomBarStyle.Classic ->
+                BottomBarStyle.Classic -> {
                     when (bottomBarBehavior) {
-                        BottomBarBehavior.AlwaysShow -> BottomBarState.ClassicNormal
-                        BottomBarBehavior.HideOnScroll ->
-                            if (!isBottomBarExpanded && bottomBarAutoHideEnabled) {
-                                BottomBarState.ClassicHidden
-                            } else {
-                                BottomBarState.ClassicNormal
-                            }
+                        BottomBarBehavior.AlwaysShow -> {
+                            BottomBarState.ClassicNormal
+                        }
 
-                        BottomBarBehavior.MinimizeOnScroll ->
+                        BottomBarBehavior.HideOnScroll -> {
                             if (!isBottomBarExpanded && bottomBarAutoHideEnabled) {
                                 BottomBarState.ClassicHidden
                             } else {
                                 BottomBarState.ClassicNormal
                             }
+                        }
+
+                        BottomBarBehavior.MinimizeOnScroll -> {
+                            if (!isBottomBarExpanded && bottomBarAutoHideEnabled) {
+                                BottomBarState.ClassicHidden
+                            } else {
+                                BottomBarState.ClassicNormal
+                            }
+                        }
                     }
+                }
             }
         }
     Surface(

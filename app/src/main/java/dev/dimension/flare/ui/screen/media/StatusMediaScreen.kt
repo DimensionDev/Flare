@@ -215,8 +215,14 @@ internal fun StatusMediaScreen(
                                 userScrollEnabled = !state.lockPager,
                                 key = {
                                     when (val medias = state.medias) {
-                                        is UiState.Error -> preview
-                                        is UiState.Loading -> preview
+                                        is UiState.Error -> {
+                                            preview
+                                        }
+
+                                        is UiState.Loading -> {
+                                            preview
+                                        }
+
                                         is UiState.Success -> {
                                             when (val item = medias.data[it]) {
                                                 is UiMedia.Audio -> item.previewUrl
@@ -921,8 +927,14 @@ private fun statusMediaPresenter(
 
         fun shareMedia(data: UiMedia) {
             when (data) {
-                is UiMedia.Audio -> Unit
-                is UiMedia.Gif -> Unit
+                is UiMedia.Audio -> {
+                    Unit
+                }
+
+                is UiMedia.Gif -> {
+                    Unit
+                }
+
                 is UiMedia.Image -> {
                     scope.launch {
                         context.imageLoader.diskCache?.openSnapshot(data.url)?.use {
@@ -971,7 +983,9 @@ private fun statusMediaPresenter(
                     }
                 }
 
-                is UiMedia.Video -> Unit
+                is UiMedia.Video -> {
+                    Unit
+                }
             }
         }
 

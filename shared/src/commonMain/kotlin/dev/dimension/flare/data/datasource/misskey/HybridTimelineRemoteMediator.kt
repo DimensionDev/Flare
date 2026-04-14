@@ -32,6 +32,7 @@ internal class HybridTimelineRemoteMediator(
                         ),
                     )
                 }
+
                 PagingRequest.Refresh -> {
                     service.notesHybridTimeline(
                         NotesHybridTimelineRequest(

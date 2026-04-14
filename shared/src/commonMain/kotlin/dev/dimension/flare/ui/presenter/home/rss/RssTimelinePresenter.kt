@@ -41,8 +41,11 @@ public class SubscriptionTimelinePresenter(
 
     override val loader: Flow<RemoteLoader<UiTimelineV2>> by lazy {
         when (type) {
-            SubscriptionType.RSS -> flowOf(RssDataSource.fetchLoader(url))
-            else ->
+            SubscriptionType.RSS -> {
+                flowOf(RssDataSource.fetchLoader(url))
+            }
+
+            else -> {
                 flowOf(
                     RssDataSource.fetchLoader(
                         dev.dimension.flare.data.database.app.model.DbRssSources(
@@ -54,6 +57,7 @@ public class SubscriptionTimelinePresenter(
                         ),
                     ),
                 )
+            }
         }
     }
 }

@@ -138,11 +138,12 @@ class MixedRemoteMediatorTest : RobolectricTest() {
             val first =
                 FakeLoader("a") { request ->
                     when (request) {
-                        PagingRequest.Refresh ->
+                        PagingRequest.Refresh -> {
                             PagingResult(
                                 data = listOf(feed("https://example.com/a_refresh", 1000L)),
                                 nextKey = "a_next",
                             )
+                        }
 
                         is PagingRequest.Append -> {
                             assertEquals("a_next", request.nextKey)
@@ -152,21 +153,29 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                             )
                         }
 
-                        is PagingRequest.Prepend -> error("Prepend should not be requested here")
+                        is PagingRequest.Prepend -> {
+                            error("Prepend should not be requested here")
+                        }
                     }
                 }
 
             val second =
                 FakeLoader("b") { request ->
                     when (request) {
-                        PagingRequest.Refresh ->
+                        PagingRequest.Refresh -> {
                             PagingResult(
                                 data = listOf(feed("https://example.com/b_refresh", 2000L)),
                                 nextKey = null,
                             )
+                        }
 
-                        is PagingRequest.Append -> error("Second mediator should be filtered out before append")
-                        is PagingRequest.Prepend -> error("Prepend should not be requested here")
+                        is PagingRequest.Append -> {
+                            error("Second mediator should be filtered out before append")
+                        }
+
+                        is PagingRequest.Prepend -> {
+                            error("Prepend should not be requested here")
+                        }
                     }
                 }
 
@@ -197,14 +206,20 @@ class MixedRemoteMediatorTest : RobolectricTest() {
             val healthy =
                 FakeLoader("healthy") { request ->
                     when (request) {
-                        PagingRequest.Refresh ->
+                        PagingRequest.Refresh -> {
                             PagingResult(
                                 data = listOf(feed("https://example.com/healthy", 3000L)),
                                 nextKey = null,
                             )
+                        }
 
-                        is PagingRequest.Append -> error("No append expected")
-                        is PagingRequest.Prepend -> error("No prepend expected")
+                        is PagingRequest.Append -> {
+                            error("No append expected")
+                        }
+
+                        is PagingRequest.Prepend -> {
+                            error("No prepend expected")
+                        }
                     }
                 }
 
@@ -227,7 +242,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
             val first =
                 FakeLoader("a") { request ->
                     when (request) {
-                        PagingRequest.Refresh ->
+                        PagingRequest.Refresh -> {
                             PagingResult(
                                 data =
                                     listOf(
@@ -236,15 +251,21 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                                     ),
                                 nextKey = null,
                             )
+                        }
 
-                        is PagingRequest.Append -> error("No append expected")
-                        is PagingRequest.Prepend -> error("No prepend expected")
+                        is PagingRequest.Append -> {
+                            error("No append expected")
+                        }
+
+                        is PagingRequest.Prepend -> {
+                            error("No prepend expected")
+                        }
                     }
                 }
             val second =
                 FakeLoader("b") { request ->
                     when (request) {
-                        PagingRequest.Refresh ->
+                        PagingRequest.Refresh -> {
                             PagingResult(
                                 data =
                                     listOf(
@@ -253,9 +274,15 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                                     ),
                                 nextKey = null,
                             )
+                        }
 
-                        is PagingRequest.Append -> error("No append expected")
-                        is PagingRequest.Prepend -> error("No prepend expected")
+                        is PagingRequest.Append -> {
+                            error("No append expected")
+                        }
+
+                        is PagingRequest.Prepend -> {
+                            error("No prepend expected")
+                        }
                     }
                 }
 
@@ -333,14 +360,20 @@ class MixedRemoteMediatorTest : RobolectricTest() {
             val loader =
                 FakeLoader("reply_chain") { request ->
                     when (request) {
-                        PagingRequest.Refresh ->
+                        PagingRequest.Refresh -> {
                             PagingResult(
                                 data = listOf(postC, postB, postA),
                                 nextKey = null,
                             )
+                        }
 
-                        is PagingRequest.Append -> error("No append expected")
-                        is PagingRequest.Prepend -> error("No prepend expected")
+                        is PagingRequest.Append -> {
+                            error("No append expected")
+                        }
+
+                        is PagingRequest.Prepend -> {
+                            error("No prepend expected")
+                        }
                     }
                 }
 
@@ -432,14 +465,20 @@ class MixedRemoteMediatorTest : RobolectricTest() {
             val loader =
                 FakeLoader("pretranslation") { request ->
                     when (request) {
-                        PagingRequest.Refresh ->
+                        PagingRequest.Refresh -> {
                             PagingResult(
                                 data = listOf(rootPost),
                                 nextKey = null,
                             )
+                        }
 
-                        is PagingRequest.Append -> error("No append expected")
-                        is PagingRequest.Prepend -> error("No prepend expected")
+                        is PagingRequest.Append -> {
+                            error("No append expected")
+                        }
+
+                        is PagingRequest.Prepend -> {
+                            error("No prepend expected")
+                        }
                     }
                 }
             val mediator =
@@ -524,14 +563,20 @@ class MixedRemoteMediatorTest : RobolectricTest() {
             val loader =
                 FakeLoader("home") { request ->
                     when (request) {
-                        PagingRequest.Refresh ->
+                        PagingRequest.Refresh -> {
                             PagingResult(
                                 data = listOf(post),
                                 nextKey = null,
                             )
+                        }
 
-                        is PagingRequest.Append -> error("No append expected")
-                        is PagingRequest.Prepend -> error("No prepend expected")
+                        is PagingRequest.Append -> {
+                            error("No append expected")
+                        }
+
+                        is PagingRequest.Prepend -> {
+                            error("No prepend expected")
+                        }
                     }
                 }
             val mediator =
@@ -601,14 +646,20 @@ class MixedRemoteMediatorTest : RobolectricTest() {
             val loader =
                 FakeLoader("home") { request ->
                     when (request) {
-                        PagingRequest.Refresh ->
+                        PagingRequest.Refresh -> {
                             PagingResult(
                                 data = listOf(post),
                                 nextKey = null,
                             )
+                        }
 
-                        is PagingRequest.Append -> error("No append expected")
-                        is PagingRequest.Prepend -> error("No prepend expected")
+                        is PagingRequest.Append -> {
+                            error("No append expected")
+                        }
+
+                        is PagingRequest.Prepend -> {
+                            error("No prepend expected")
+                        }
                     }
                 }
             val mediator =
@@ -767,14 +818,20 @@ class MixedRemoteMediatorTest : RobolectricTest() {
             val loader =
                 FakeLoader("home") { request ->
                     when (request) {
-                        PagingRequest.Refresh ->
+                        PagingRequest.Refresh -> {
                             PagingResult(
                                 data = listOf(post),
                                 nextKey = null,
                             )
+                        }
 
-                        is PagingRequest.Append -> error("No append expected")
-                        is PagingRequest.Prepend -> error("No prepend expected")
+                        is PagingRequest.Append -> {
+                            error("No append expected")
+                        }
+
+                        is PagingRequest.Prepend -> {
+                            error("No prepend expected")
+                        }
                     }
                 }
             val mediator =
@@ -846,14 +903,20 @@ class MixedRemoteMediatorTest : RobolectricTest() {
             val loader =
                 FakeLoader("home") { request ->
                     when (request) {
-                        PagingRequest.Refresh ->
+                        PagingRequest.Refresh -> {
                             PagingResult(
                                 data = listOf(post),
                                 nextKey = null,
                             )
+                        }
 
-                        is PagingRequest.Append -> error("No append expected")
-                        is PagingRequest.Prepend -> error("No prepend expected")
+                        is PagingRequest.Append -> {
+                            error("No append expected")
+                        }
+
+                        is PagingRequest.Prepend -> {
+                            error("No prepend expected")
+                        }
                     }
                 }
             val mediator =
@@ -1068,13 +1131,16 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                                 )
                             }
 
-                            AppSettings.TranslateConfig.Provider.GoogleWeb ->
+                            AppSettings.TranslateConfig.Provider.GoogleWeb -> {
                                 completedTranslationJson(
                                     document = sourceDocument,
                                     targetLanguage = targetLanguage,
                                 )
+                            }
 
-                            else -> error("Unexpected provider in provider switch test")
+                            else -> {
+                                error("Unexpected provider in provider switch test")
+                            }
                         }
                     },
                 )
@@ -1179,27 +1245,39 @@ class MixedRemoteMediatorTest : RobolectricTest() {
             val first =
                 FakeLoader("home") { request ->
                     when (request) {
-                        PagingRequest.Refresh ->
+                        PagingRequest.Refresh -> {
                             PagingResult(
                                 data = listOf(duplicatedPost),
                                 nextKey = null,
                             )
+                        }
 
-                        is PagingRequest.Append -> error("No append expected")
-                        is PagingRequest.Prepend -> error("No prepend expected")
+                        is PagingRequest.Append -> {
+                            error("No append expected")
+                        }
+
+                        is PagingRequest.Prepend -> {
+                            error("No prepend expected")
+                        }
                     }
                 }
             val second =
                 FakeLoader("list") { request ->
                     when (request) {
-                        PagingRequest.Refresh ->
+                        PagingRequest.Refresh -> {
                             PagingResult(
                                 data = listOf(duplicatedPost),
                                 nextKey = null,
                             )
+                        }
 
-                        is PagingRequest.Append -> error("No append expected")
-                        is PagingRequest.Prepend -> error("No prepend expected")
+                        is PagingRequest.Append -> {
+                            error("No append expected")
+                        }
+
+                        is PagingRequest.Prepend -> {
+                            error("No prepend expected")
+                        }
                     }
                 }
 
@@ -1235,27 +1313,39 @@ class MixedRemoteMediatorTest : RobolectricTest() {
             val first =
                 FakeLoader("home_a") { request ->
                     when (request) {
-                        PagingRequest.Refresh ->
+                        PagingRequest.Refresh -> {
                             PagingResult(
                                 data = listOf(firstPost),
                                 nextKey = null,
                             )
+                        }
 
-                        is PagingRequest.Append -> error("No append expected")
-                        is PagingRequest.Prepend -> error("No prepend expected")
+                        is PagingRequest.Append -> {
+                            error("No append expected")
+                        }
+
+                        is PagingRequest.Prepend -> {
+                            error("No prepend expected")
+                        }
                     }
                 }
             val second =
                 FakeLoader("home_b") { request ->
                     when (request) {
-                        PagingRequest.Refresh ->
+                        PagingRequest.Refresh -> {
                             PagingResult(
                                 data = listOf(secondPost),
                                 nextKey = null,
                             )
+                        }
 
-                        is PagingRequest.Append -> error("No append expected")
-                        is PagingRequest.Prepend -> error("No prepend expected")
+                        is PagingRequest.Append -> {
+                            error("No append expected")
+                        }
+
+                        is PagingRequest.Prepend -> {
+                            error("No prepend expected")
+                        }
                     }
                 }
 

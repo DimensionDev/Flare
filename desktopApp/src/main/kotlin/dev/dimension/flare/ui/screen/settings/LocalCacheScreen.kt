@@ -98,7 +98,7 @@ internal fun LocalCacheScreen() {
                 }
             }
             when (state.selectedSearchType) {
-                SearchType.Status ->
+                SearchType.Status -> {
                     status(
                         if (state.data.isEmpty || !state.data.isSuccess()) {
                             state.history
@@ -106,7 +106,9 @@ internal fun LocalCacheScreen() {
                             state.data
                         },
                     )
-                SearchType.User ->
+                }
+
+                SearchType.User -> {
                     itemsIndexed(
                         if (state.searchUser.isEmpty || !state.searchUser.isSuccess()) {
                             state.userHistory
@@ -120,6 +122,7 @@ internal fun LocalCacheScreen() {
                             toLogin = {},
                         )
                     }
+                }
             }
         }
     }

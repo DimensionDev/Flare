@@ -62,8 +62,14 @@ public class VVOStatusDetailPresenter(
                 service.map { service ->
                     require(service is VVODataSource)
                     when (extendedText) {
-                        is UiState.Error -> item
-                        is UiState.Loading -> item
+                        is UiState.Error -> {
+                            item
+                        }
+
+                        is UiState.Loading -> {
+                            item
+                        }
+
                         is UiState.Success -> {
                             if (item is UiTimelineV2.Post) {
                                 item.copy(

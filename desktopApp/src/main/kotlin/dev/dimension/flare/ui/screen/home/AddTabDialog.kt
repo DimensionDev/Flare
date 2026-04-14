@@ -248,17 +248,21 @@ internal fun AddTabDialog(
                                                 tab.extraTabs
                                                     .map {
                                                         when (it) {
-                                                            is PinnableTimelineTabPresenter.State.Tab.Feed ->
+                                                            is PinnableTimelineTabPresenter.State.Tab.Feed -> {
                                                                 Res.string.tab_settings_feed
+                                                            }
 
-                                                            is PinnableTimelineTabPresenter.State.Tab.List ->
+                                                            is PinnableTimelineTabPresenter.State.Tab.List -> {
                                                                 Res.string.tab_settings_list
+                                                            }
 
-                                                            is PinnableTimelineTabPresenter.State.Tab.Antenna ->
+                                                            is PinnableTimelineTabPresenter.State.Tab.Antenna -> {
                                                                 Res.string.antenna_title
+                                                            }
 
-                                                            is PinnableTimelineTabPresenter.State.Tab.Channel ->
+                                                            is PinnableTimelineTabPresenter.State.Tab.Channel -> {
                                                                 Res.string.channel_title
+                                                            }
                                                         }
                                                     }.map { stringResource(it) }
                                         LiteFilter(

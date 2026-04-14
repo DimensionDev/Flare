@@ -107,14 +107,17 @@ internal class MixedRemoteMediator(
                     ?.let(PagingRequest::Append)
             }
 
-            is PagingRequest.Prepend ->
+            is PagingRequest.Prepend -> {
                 database
                     .pagingTimelineDao()
                     .getPagingKey(subKey(mediator))
                     ?.prevKey
                     ?.let(PagingRequest::Prepend)
+            }
 
-            is PagingRequest.Refresh -> PagingRequest.Refresh
+            is PagingRequest.Refresh -> {
+                PagingRequest.Refresh
+            }
         }?.let {
             SubRequest(mediator, it)
         }

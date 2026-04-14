@@ -57,8 +57,14 @@ public actual class FileItem {
         ): FileType {
             val mimeType = context.contentResolver.getType(uri)
             return when {
-                mimeType?.startsWith("image/") == true -> FileType.Image
-                mimeType?.startsWith("video/") == true -> FileType.Video
+                mimeType?.startsWith("image/") == true -> {
+                    FileType.Image
+                }
+
+                mimeType?.startsWith("video/") == true -> {
+                    FileType.Video
+                }
+
                 else -> {
                     val extension = android.webkit.MimeTypeMap.getFileExtensionFromUrl(uri.toString())
                     val type =

@@ -232,14 +232,17 @@ internal fun accountProvider(
         when (accountType) {
             AccountType.Guest,
             is AccountType.GuestHost,
-            ->
+            -> {
                 flowOf(
                     UiState.Error(
                         NoActiveAccountException,
                     ),
                 )
+            }
 
-            is AccountType.Specific -> repository.getFlow(accountType.accountKey)
+            is AccountType.Specific -> {
+                repository.getFlow(accountType.accountKey)
+            }
         }.collect {
             value = it
         }

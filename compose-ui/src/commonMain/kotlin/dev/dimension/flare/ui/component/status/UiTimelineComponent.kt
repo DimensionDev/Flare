@@ -228,12 +228,13 @@ internal fun UiTimelineComponent(
     detailStatusKey: MicroBlogKey? = null,
 ) {
     when (item) {
-        is UiTimelineV2.Post ->
+        is UiTimelineV2.Post -> {
             StatusContent(
                 data = item,
                 detailStatusKey = detailStatusKey,
                 modifier = modifier,
             )
+        }
 
         is UiTimelineV2.User -> {
             UserContent(
@@ -245,7 +246,7 @@ internal fun UiTimelineComponent(
             )
         }
 
-        is UiTimelineV2.UserList ->
+        is UiTimelineV2.UserList -> {
             UserListContent(
                 data = item,
                 modifier =
@@ -253,6 +254,7 @@ internal fun UiTimelineComponent(
                         .padding(horizontal = screenHorizontalPadding)
                         .padding(vertical = 8.dp),
             )
+        }
 
         is UiTimelineV2.Feed -> {
             FeedComponent(
@@ -261,7 +263,7 @@ internal fun UiTimelineComponent(
             )
         }
 
-        is UiTimelineV2.Message ->
+        is UiTimelineV2.Message -> {
             TopMessageComponent(
                 data = item,
                 topMessageOnly = true,
@@ -271,6 +273,7 @@ internal fun UiTimelineComponent(
                         .padding(vertical = 8.dp)
                         .fillMaxWidth(),
             )
+        }
     }
 }
 
@@ -311,7 +314,7 @@ private fun UserContent(
             ) {
                 item.button.fastForEach { button ->
                     when ((button.text as? ActionMenu.Item.Text.Localized)?.type) {
-                        ActionMenu.Item.Text.Localized.Type.AcceptFollowRequest ->
+                        ActionMenu.Item.Text.Localized.Type.AcceptFollowRequest -> {
                             PlatformFilledTonalButton(
                                 onClick = {
                                     button.onClicked.invoke(
@@ -338,6 +341,7 @@ private fun UserContent(
                                         ),
                                 )
                             }
+                        }
 
                         ActionMenu.Item.Text.Localized.Type.RejectFollowRequest -> {
                             PlatformButton(
@@ -371,7 +375,9 @@ private fun UserContent(
                             )
                         }
 
-                        else -> Unit
+                        else -> {
+                            Unit
+                        }
                     }
                 }
             }
@@ -559,45 +565,63 @@ private fun TopMessageComponent(
     val icon = data.icon.toImageVector()
     val text: String? =
         when (val type = data.type) {
-            is UiTimelineV2.Message.Type.Raw -> type.content
-            is UiTimelineV2.Message.Type.Unknown -> type.rawType.ifBlank { null }
-            is UiTimelineV2.Message.Type.Localized ->
+            is UiTimelineV2.Message.Type.Raw -> {
+                type.content
+            }
+
+            is UiTimelineV2.Message.Type.Unknown -> {
+                type.rawType.ifBlank { null }
+            }
+
+            is UiTimelineV2.Message.Type.Localized -> {
                 when (type.data) {
-                    UiTimelineV2.Message.Type.Localized.MessageId.Mention ->
+                    UiTimelineV2.Message.Type.Localized.MessageId.Mention -> {
                         stringResource(resource = Res.string.mastodon_notification_item_mentioned_you)
+                    }
 
-                    UiTimelineV2.Message.Type.Localized.MessageId.NewPost ->
+                    UiTimelineV2.Message.Type.Localized.MessageId.NewPost -> {
                         stringResource(resource = Res.string.mastodon_notification_item_posted_status)
+                    }
 
-                    UiTimelineV2.Message.Type.Localized.MessageId.Repost ->
+                    UiTimelineV2.Message.Type.Localized.MessageId.Repost -> {
                         stringResource(resource = Res.string.mastodon_notification_item_reblogged_your_status)
+                    }
 
-                    UiTimelineV2.Message.Type.Localized.MessageId.Follow ->
+                    UiTimelineV2.Message.Type.Localized.MessageId.Follow -> {
                         stringResource(resource = Res.string.mastodon_notification_item_followed_you)
+                    }
 
-                    UiTimelineV2.Message.Type.Localized.MessageId.FollowRequest ->
+                    UiTimelineV2.Message.Type.Localized.MessageId.FollowRequest -> {
                         stringResource(resource = Res.string.mastodon_notification_item_requested_follow)
+                    }
 
-                    UiTimelineV2.Message.Type.Localized.MessageId.Favourite ->
+                    UiTimelineV2.Message.Type.Localized.MessageId.Favourite -> {
                         stringResource(resource = Res.string.mastodon_notification_item_favourited_your_status)
+                    }
 
-                    UiTimelineV2.Message.Type.Localized.MessageId.PollEnded ->
+                    UiTimelineV2.Message.Type.Localized.MessageId.PollEnded -> {
                         stringResource(resource = Res.string.mastodon_notification_item_poll_ended)
+                    }
 
-                    UiTimelineV2.Message.Type.Localized.MessageId.PostUpdated ->
+                    UiTimelineV2.Message.Type.Localized.MessageId.PostUpdated -> {
                         stringResource(resource = Res.string.mastodon_notification_item_updated_status)
+                    }
 
-                    UiTimelineV2.Message.Type.Localized.MessageId.Reply ->
+                    UiTimelineV2.Message.Type.Localized.MessageId.Reply -> {
                         stringResource(resource = Res.string.mastodon_notification_item_mentioned_you)
+                    }
 
-                    UiTimelineV2.Message.Type.Localized.MessageId.Quote ->
+                    UiTimelineV2.Message.Type.Localized.MessageId.Quote -> {
                         stringResource(resource = Res.string.mastodon_notification_item_reblogged_your_status)
+                    }
 
-                    UiTimelineV2.Message.Type.Localized.MessageId.Reaction ->
+                    UiTimelineV2.Message.Type.Localized.MessageId.Reaction -> {
                         stringResource(resource = Res.string.misskey_notification_item_reacted_to_your_status)
+                    }
 
-                    UiTimelineV2.Message.Type.Localized.MessageId.FollowRequestAccepted ->
+                    UiTimelineV2.Message.Type.Localized.MessageId.FollowRequestAccepted -> {
                         stringResource(resource = Res.string.misskey_notification_item_follow_request_accepted)
+                    }
 
                     UiTimelineV2.Message.Type.Localized.MessageId.AchievementEarned -> {
                         runCatching {
@@ -616,15 +640,19 @@ private fun TopMessageComponent(
                             )
                     }
 
-                    UiTimelineV2.Message.Type.Localized.MessageId.App ->
+                    UiTimelineV2.Message.Type.Localized.MessageId.App -> {
                         stringResource(resource = Res.string.misskey_notification_item_app)
+                    }
 
-                    UiTimelineV2.Message.Type.Localized.MessageId.StarterpackJoined ->
+                    UiTimelineV2.Message.Type.Localized.MessageId.StarterpackJoined -> {
                         stringResource(resource = Res.string.bluesky_notification_item_starterpack_joined)
+                    }
 
-                    UiTimelineV2.Message.Type.Localized.MessageId.Pinned ->
+                    UiTimelineV2.Message.Type.Localized.MessageId.Pinned -> {
                         stringResource(resource = Res.string.mastodon_item_pinned)
+                    }
                 }
+            }
         }
 
     if (text != null) {
@@ -754,85 +782,315 @@ private val MisskeyAchievement.titleResId: StringResource
 private val MisskeyAchievement.descriptionResId: StringResource
     get() =
         when (this) {
-            MisskeyAchievement.NOTES1 -> Res.string.misskey_achievement_notes1_description
-            MisskeyAchievement.NOTES10 -> Res.string.misskey_achievement_notes10_description
-            MisskeyAchievement.NOTES100 -> Res.string.misskey_achievement_notes100_description
-            MisskeyAchievement.NOTES500 -> Res.string.misskey_achievement_notes500_description
-            MisskeyAchievement.NOTES1000 -> Res.string.misskey_achievement_notes1000_description
-            MisskeyAchievement.NOTES5000 -> Res.string.misskey_achievement_notes5000_description
-            MisskeyAchievement.NOTES10000 -> Res.string.misskey_achievement_notes10000_description
-            MisskeyAchievement.NOTES20000 -> Res.string.misskey_achievement_notes20000_description
-            MisskeyAchievement.NOTES30000 -> Res.string.misskey_achievement_notes30000_description
-            MisskeyAchievement.NOTES40000 -> Res.string.misskey_achievement_notes40000_description
-            MisskeyAchievement.NOTES50000 -> Res.string.misskey_achievement_notes50000_description
-            MisskeyAchievement.NOTES60000 -> Res.string.misskey_achievement_notes60000_description
-            MisskeyAchievement.NOTES70000 -> Res.string.misskey_achievement_notes70000_description
-            MisskeyAchievement.NOTES80000 -> Res.string.misskey_achievement_notes80000_description
-            MisskeyAchievement.NOTES90000 -> Res.string.misskey_achievement_notes90000_description
-            MisskeyAchievement.NOTES100000 -> Res.string.misskey_achievement_notes100000_description
-            MisskeyAchievement.LOGIN3 -> Res.string.misskey_achievement_login3_description
-            MisskeyAchievement.LOGIN7 -> Res.string.misskey_achievement_login7_description
-            MisskeyAchievement.LOGIN15 -> Res.string.misskey_achievement_login15_description
-            MisskeyAchievement.LOGIN30 -> Res.string.misskey_achievement_login30_description
-            MisskeyAchievement.LOGIN60 -> Res.string.misskey_achievement_login60_description
-            MisskeyAchievement.LOGIN100 -> Res.string.misskey_achievement_login100_description
-            MisskeyAchievement.LOGIN200 -> Res.string.misskey_achievement_login200_description
-            MisskeyAchievement.LOGIN300 -> Res.string.misskey_achievement_login300_description
-            MisskeyAchievement.LOGIN400 -> Res.string.misskey_achievement_login400_description
-            MisskeyAchievement.LOGIN500 -> Res.string.misskey_achievement_login500_description
-            MisskeyAchievement.LOGIN600 -> Res.string.misskey_achievement_login600_description
-            MisskeyAchievement.LOGIN700 -> Res.string.misskey_achievement_login700_description
-            MisskeyAchievement.LOGIN800 -> Res.string.misskey_achievement_login800_description
-            MisskeyAchievement.LOGIN900 -> Res.string.misskey_achievement_login900_description
-            MisskeyAchievement.LOGIN1000 -> Res.string.misskey_achievement_login1000_description
-            MisskeyAchievement.NOTE_CLIPPED1 -> Res.string.misskey_achievement_note_clipped1_description
-            MisskeyAchievement.NOTE_FAVORITED1 -> Res.string.misskey_achievement_note_favorited1_description
-            MisskeyAchievement.MY_NOTE_FAVORITED1 -> Res.string.misskey_achievement_my_note_favorited1_description
-            MisskeyAchievement.PROFILE_FILLED -> Res.string.misskey_achievement_profile_filled_description
-            MisskeyAchievement.MARKED_AS_CAT -> Res.string.misskey_achievement_marked_as_cat_description
-            MisskeyAchievement.FOLLOWING1 -> Res.string.misskey_achievement_following1_description
-            MisskeyAchievement.FOLLOWING10 -> Res.string.misskey_achievement_following10_description
-            MisskeyAchievement.FOLLOWING50 -> Res.string.misskey_achievement_following50_description
-            MisskeyAchievement.FOLLOWING100 -> Res.string.misskey_achievement_following100_description
-            MisskeyAchievement.FOLLOWING300 -> Res.string.misskey_achievement_following300_description
-            MisskeyAchievement.FOLLOWERS1 -> Res.string.misskey_achievement_followers1_description
-            MisskeyAchievement.FOLLOWERS10 -> Res.string.misskey_achievement_followers10_description
-            MisskeyAchievement.FOLLOWERS50 -> Res.string.misskey_achievement_followers50_description
-            MisskeyAchievement.FOLLOWERS100 -> Res.string.misskey_achievement_followers100_description
-            MisskeyAchievement.FOLLOWERS300 -> Res.string.misskey_achievement_followers300_description
-            MisskeyAchievement.FOLLOWERS500 -> Res.string.misskey_achievement_followers500_description
-            MisskeyAchievement.FOLLOWERS1000 -> Res.string.misskey_achievement_followers1000_description
-            MisskeyAchievement.COLLECT_ACHIEVEMENTS30 -> Res.string.misskey_achievement_collect_achievements30_description
-            MisskeyAchievement.VIEW_ACHIEVEMENTS3MIN -> Res.string.misskey_achievement_view_achievements3min_description
-            MisskeyAchievement.I_LOVE_MISSKEY -> Res.string.misskey_achievement_i_love_misskey_description
-            MisskeyAchievement.FOUND_TREASURE -> Res.string.misskey_achievement_found_treasure_description
-            MisskeyAchievement.CLIENT30MIN -> Res.string.misskey_achievement_client30min_description
-            MisskeyAchievement.CLIENT60MIN -> Res.string.misskey_achievement_client60min_description
-            MisskeyAchievement.NOTE_DELETED_WITHIN1MIN -> Res.string.misskey_achievement_note_deleted_within1min_description
-            MisskeyAchievement.POSTED_AT_LATE_NIGHT -> Res.string.misskey_achievement_posted_at_late_night_description
-            MisskeyAchievement.POSTED_AT_0MIN0SEC -> Res.string.misskey_achievement_posted_at_0min0sec_description
-            MisskeyAchievement.SELF_QUOTE -> Res.string.misskey_achievement_self_quote_description
-            MisskeyAchievement.HTL20NPM -> Res.string.misskey_achievement_htl20npm_description
-            MisskeyAchievement.VIEW_INSTANCE_CHART -> Res.string.misskey_achievement_view_instance_chart_description
-            MisskeyAchievement.OUTPUT_HELLO_WORLD_ON_SCRATCHPAD ->
-                Res.string.misskey_achievement_output_hello_world_on_scratchpad_description
+            MisskeyAchievement.NOTES1 -> {
+                Res.string.misskey_achievement_notes1_description
+            }
 
-            MisskeyAchievement.OPEN3WINDOWS -> Res.string.misskey_achievement_open3windows_description
-            MisskeyAchievement.DRIVE_FOLDER_CIRCULAR_REFERENCE -> Res.string.misskey_achievement_drive_folder_circular_reference_description
-            MisskeyAchievement.REACT_WITHOUT_READ -> Res.string.misskey_achievement_react_without_read_description
-            MisskeyAchievement.CLICKED_CLICK_HERE -> Res.string.misskey_achievement_clicked_click_here_description
-            MisskeyAchievement.JUST_PLAIN_LUCKY -> Res.string.misskey_achievement_just_plain_lucky_description
-            MisskeyAchievement.SET_NAME_TO_SYUILO -> Res.string.misskey_achievement_set_name_to_syuilo_description
-            MisskeyAchievement.PASSED_SINCE_ACCOUNT_CREATED1 -> Res.string.misskey_achievement_passed_since_account_created1_description
-            MisskeyAchievement.PASSED_SINCE_ACCOUNT_CREATED2 -> Res.string.misskey_achievement_passed_since_account_created2_description
-            MisskeyAchievement.PASSED_SINCE_ACCOUNT_CREATED3 -> Res.string.misskey_achievement_passed_since_account_created3_description
-            MisskeyAchievement.LOGGED_IN_ON_BIRTHDAY -> Res.string.misskey_achievement_logged_in_on_birthday_description
-            MisskeyAchievement.LOGGED_IN_ON_NEW_YEARS_DAY -> Res.string.misskey_achievement_logged_in_on_new_years_day_description
-            MisskeyAchievement.COOKIE_CLICKED -> Res.string.misskey_achievement_cookie_clicked_description
-            MisskeyAchievement.BRAIN_DIVER -> Res.string.misskey_achievement_brain_diver_description
-            MisskeyAchievement.SMASH_TEST_NOTIFICATION_BUTTON -> Res.string.misskey_achievement_smash_test_notification_button_description
-            MisskeyAchievement.TUTORIAL_COMPLETED -> Res.string.misskey_achievement_tutorial_completed_description
-            MisskeyAchievement.BUBBLE_GAME_EXPLODING_HEAD -> Res.string.misskey_achievement_bubble_game_exploding_head_description
-            MisskeyAchievement.BUBBLE_GAME_DOUBLE_EXPLODING_HEAD ->
+            MisskeyAchievement.NOTES10 -> {
+                Res.string.misskey_achievement_notes10_description
+            }
+
+            MisskeyAchievement.NOTES100 -> {
+                Res.string.misskey_achievement_notes100_description
+            }
+
+            MisskeyAchievement.NOTES500 -> {
+                Res.string.misskey_achievement_notes500_description
+            }
+
+            MisskeyAchievement.NOTES1000 -> {
+                Res.string.misskey_achievement_notes1000_description
+            }
+
+            MisskeyAchievement.NOTES5000 -> {
+                Res.string.misskey_achievement_notes5000_description
+            }
+
+            MisskeyAchievement.NOTES10000 -> {
+                Res.string.misskey_achievement_notes10000_description
+            }
+
+            MisskeyAchievement.NOTES20000 -> {
+                Res.string.misskey_achievement_notes20000_description
+            }
+
+            MisskeyAchievement.NOTES30000 -> {
+                Res.string.misskey_achievement_notes30000_description
+            }
+
+            MisskeyAchievement.NOTES40000 -> {
+                Res.string.misskey_achievement_notes40000_description
+            }
+
+            MisskeyAchievement.NOTES50000 -> {
+                Res.string.misskey_achievement_notes50000_description
+            }
+
+            MisskeyAchievement.NOTES60000 -> {
+                Res.string.misskey_achievement_notes60000_description
+            }
+
+            MisskeyAchievement.NOTES70000 -> {
+                Res.string.misskey_achievement_notes70000_description
+            }
+
+            MisskeyAchievement.NOTES80000 -> {
+                Res.string.misskey_achievement_notes80000_description
+            }
+
+            MisskeyAchievement.NOTES90000 -> {
+                Res.string.misskey_achievement_notes90000_description
+            }
+
+            MisskeyAchievement.NOTES100000 -> {
+                Res.string.misskey_achievement_notes100000_description
+            }
+
+            MisskeyAchievement.LOGIN3 -> {
+                Res.string.misskey_achievement_login3_description
+            }
+
+            MisskeyAchievement.LOGIN7 -> {
+                Res.string.misskey_achievement_login7_description
+            }
+
+            MisskeyAchievement.LOGIN15 -> {
+                Res.string.misskey_achievement_login15_description
+            }
+
+            MisskeyAchievement.LOGIN30 -> {
+                Res.string.misskey_achievement_login30_description
+            }
+
+            MisskeyAchievement.LOGIN60 -> {
+                Res.string.misskey_achievement_login60_description
+            }
+
+            MisskeyAchievement.LOGIN100 -> {
+                Res.string.misskey_achievement_login100_description
+            }
+
+            MisskeyAchievement.LOGIN200 -> {
+                Res.string.misskey_achievement_login200_description
+            }
+
+            MisskeyAchievement.LOGIN300 -> {
+                Res.string.misskey_achievement_login300_description
+            }
+
+            MisskeyAchievement.LOGIN400 -> {
+                Res.string.misskey_achievement_login400_description
+            }
+
+            MisskeyAchievement.LOGIN500 -> {
+                Res.string.misskey_achievement_login500_description
+            }
+
+            MisskeyAchievement.LOGIN600 -> {
+                Res.string.misskey_achievement_login600_description
+            }
+
+            MisskeyAchievement.LOGIN700 -> {
+                Res.string.misskey_achievement_login700_description
+            }
+
+            MisskeyAchievement.LOGIN800 -> {
+                Res.string.misskey_achievement_login800_description
+            }
+
+            MisskeyAchievement.LOGIN900 -> {
+                Res.string.misskey_achievement_login900_description
+            }
+
+            MisskeyAchievement.LOGIN1000 -> {
+                Res.string.misskey_achievement_login1000_description
+            }
+
+            MisskeyAchievement.NOTE_CLIPPED1 -> {
+                Res.string.misskey_achievement_note_clipped1_description
+            }
+
+            MisskeyAchievement.NOTE_FAVORITED1 -> {
+                Res.string.misskey_achievement_note_favorited1_description
+            }
+
+            MisskeyAchievement.MY_NOTE_FAVORITED1 -> {
+                Res.string.misskey_achievement_my_note_favorited1_description
+            }
+
+            MisskeyAchievement.PROFILE_FILLED -> {
+                Res.string.misskey_achievement_profile_filled_description
+            }
+
+            MisskeyAchievement.MARKED_AS_CAT -> {
+                Res.string.misskey_achievement_marked_as_cat_description
+            }
+
+            MisskeyAchievement.FOLLOWING1 -> {
+                Res.string.misskey_achievement_following1_description
+            }
+
+            MisskeyAchievement.FOLLOWING10 -> {
+                Res.string.misskey_achievement_following10_description
+            }
+
+            MisskeyAchievement.FOLLOWING50 -> {
+                Res.string.misskey_achievement_following50_description
+            }
+
+            MisskeyAchievement.FOLLOWING100 -> {
+                Res.string.misskey_achievement_following100_description
+            }
+
+            MisskeyAchievement.FOLLOWING300 -> {
+                Res.string.misskey_achievement_following300_description
+            }
+
+            MisskeyAchievement.FOLLOWERS1 -> {
+                Res.string.misskey_achievement_followers1_description
+            }
+
+            MisskeyAchievement.FOLLOWERS10 -> {
+                Res.string.misskey_achievement_followers10_description
+            }
+
+            MisskeyAchievement.FOLLOWERS50 -> {
+                Res.string.misskey_achievement_followers50_description
+            }
+
+            MisskeyAchievement.FOLLOWERS100 -> {
+                Res.string.misskey_achievement_followers100_description
+            }
+
+            MisskeyAchievement.FOLLOWERS300 -> {
+                Res.string.misskey_achievement_followers300_description
+            }
+
+            MisskeyAchievement.FOLLOWERS500 -> {
+                Res.string.misskey_achievement_followers500_description
+            }
+
+            MisskeyAchievement.FOLLOWERS1000 -> {
+                Res.string.misskey_achievement_followers1000_description
+            }
+
+            MisskeyAchievement.COLLECT_ACHIEVEMENTS30 -> {
+                Res.string.misskey_achievement_collect_achievements30_description
+            }
+
+            MisskeyAchievement.VIEW_ACHIEVEMENTS3MIN -> {
+                Res.string.misskey_achievement_view_achievements3min_description
+            }
+
+            MisskeyAchievement.I_LOVE_MISSKEY -> {
+                Res.string.misskey_achievement_i_love_misskey_description
+            }
+
+            MisskeyAchievement.FOUND_TREASURE -> {
+                Res.string.misskey_achievement_found_treasure_description
+            }
+
+            MisskeyAchievement.CLIENT30MIN -> {
+                Res.string.misskey_achievement_client30min_description
+            }
+
+            MisskeyAchievement.CLIENT60MIN -> {
+                Res.string.misskey_achievement_client60min_description
+            }
+
+            MisskeyAchievement.NOTE_DELETED_WITHIN1MIN -> {
+                Res.string.misskey_achievement_note_deleted_within1min_description
+            }
+
+            MisskeyAchievement.POSTED_AT_LATE_NIGHT -> {
+                Res.string.misskey_achievement_posted_at_late_night_description
+            }
+
+            MisskeyAchievement.POSTED_AT_0MIN0SEC -> {
+                Res.string.misskey_achievement_posted_at_0min0sec_description
+            }
+
+            MisskeyAchievement.SELF_QUOTE -> {
+                Res.string.misskey_achievement_self_quote_description
+            }
+
+            MisskeyAchievement.HTL20NPM -> {
+                Res.string.misskey_achievement_htl20npm_description
+            }
+
+            MisskeyAchievement.VIEW_INSTANCE_CHART -> {
+                Res.string.misskey_achievement_view_instance_chart_description
+            }
+
+            MisskeyAchievement.OUTPUT_HELLO_WORLD_ON_SCRATCHPAD -> {
+                Res.string.misskey_achievement_output_hello_world_on_scratchpad_description
+            }
+
+            MisskeyAchievement.OPEN3WINDOWS -> {
+                Res.string.misskey_achievement_open3windows_description
+            }
+
+            MisskeyAchievement.DRIVE_FOLDER_CIRCULAR_REFERENCE -> {
+                Res.string.misskey_achievement_drive_folder_circular_reference_description
+            }
+
+            MisskeyAchievement.REACT_WITHOUT_READ -> {
+                Res.string.misskey_achievement_react_without_read_description
+            }
+
+            MisskeyAchievement.CLICKED_CLICK_HERE -> {
+                Res.string.misskey_achievement_clicked_click_here_description
+            }
+
+            MisskeyAchievement.JUST_PLAIN_LUCKY -> {
+                Res.string.misskey_achievement_just_plain_lucky_description
+            }
+
+            MisskeyAchievement.SET_NAME_TO_SYUILO -> {
+                Res.string.misskey_achievement_set_name_to_syuilo_description
+            }
+
+            MisskeyAchievement.PASSED_SINCE_ACCOUNT_CREATED1 -> {
+                Res.string.misskey_achievement_passed_since_account_created1_description
+            }
+
+            MisskeyAchievement.PASSED_SINCE_ACCOUNT_CREATED2 -> {
+                Res.string.misskey_achievement_passed_since_account_created2_description
+            }
+
+            MisskeyAchievement.PASSED_SINCE_ACCOUNT_CREATED3 -> {
+                Res.string.misskey_achievement_passed_since_account_created3_description
+            }
+
+            MisskeyAchievement.LOGGED_IN_ON_BIRTHDAY -> {
+                Res.string.misskey_achievement_logged_in_on_birthday_description
+            }
+
+            MisskeyAchievement.LOGGED_IN_ON_NEW_YEARS_DAY -> {
+                Res.string.misskey_achievement_logged_in_on_new_years_day_description
+            }
+
+            MisskeyAchievement.COOKIE_CLICKED -> {
+                Res.string.misskey_achievement_cookie_clicked_description
+            }
+
+            MisskeyAchievement.BRAIN_DIVER -> {
+                Res.string.misskey_achievement_brain_diver_description
+            }
+
+            MisskeyAchievement.SMASH_TEST_NOTIFICATION_BUTTON -> {
+                Res.string.misskey_achievement_smash_test_notification_button_description
+            }
+
+            MisskeyAchievement.TUTORIAL_COMPLETED -> {
+                Res.string.misskey_achievement_tutorial_completed_description
+            }
+
+            MisskeyAchievement.BUBBLE_GAME_EXPLODING_HEAD -> {
+                Res.string.misskey_achievement_bubble_game_exploding_head_description
+            }
+
+            MisskeyAchievement.BUBBLE_GAME_DOUBLE_EXPLODING_HEAD -> {
                 Res.string.misskey_achievement_bubble_game_double_exploding_head_description
+            }
         }

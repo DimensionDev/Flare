@@ -31,6 +31,7 @@ internal class AppleFormatter(
             diff.inWholeDays < 7 -> {
                 PlatformDateFormatter.getRelativeTimeSpanString(instant.toEpochMilliseconds())
             }
+
             else -> {
                 PlatformDateFormatter.formatAsFullDate(instant.toEpochMilliseconds())
             }
@@ -53,10 +54,12 @@ internal class AppleFormatter(
                 formatter.dateStyle = NSDateFormatterNoStyle
                 formatter.timeStyle = NSDateFormatterShortStyle
             }
+
             daysDiff < 7 -> {
                 formatter.dateStyle = NSDateFormatterShortStyle
                 formatter.timeStyle = NSDateFormatterShortStyle
             }
+
             else -> {
                 formatter.dateStyle = NSDateFormatterShortStyle
                 formatter.timeStyle = NSDateFormatterShortStyle

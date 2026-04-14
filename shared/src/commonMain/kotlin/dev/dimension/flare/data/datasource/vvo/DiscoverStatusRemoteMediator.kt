@@ -33,13 +33,19 @@ internal class DiscoverStatusRemoteMediator(
 
         val page =
             when (request) {
-                is PagingRequest.Append -> request.nextKey.toIntOrNull() ?: 0
+                is PagingRequest.Append -> {
+                    request.nextKey.toIntOrNull() ?: 0
+                }
+
                 is PagingRequest.Prepend -> {
                     return PagingResult(
                         endOfPaginationReached = true,
                     )
                 }
-                PagingRequest.Refresh -> 0
+
+                PagingRequest.Refresh -> {
+                    0
+                }
             }
 
         val response =

@@ -2,20 +2,25 @@
 import com.google.firebase.crashlytics.buildtools.gradle.CrashlyticsPlugin
 // END Non-FOSS component
 import com.google.gms.googleservices.GoogleServicesPlugin
+import dev.dimension.flare.buildlogic.flare
 import java.util.Properties
 
 plugins {
-    id("com.android.application")
+    id("dev.dimension.flare.android-application")
     alias(libs.plugins.ksp)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ktorfit)
-    alias(libs.plugins.ktlint)
     alias(libs.plugins.google.services) apply false
     // START Non-FOSS component
     alias(libs.plugins.firebase.crashlytics) apply false
     // END Non-FOSS component
     alias(libs.plugins.compose.compiler)
     id("kotlin-parcelize")
+}
+
+flare {
+    namespace = "dev.dimension.flare"
+    applicationId = "dev.dimension.flare"
 }
 
 // START Non-FOSS component
@@ -25,35 +30,23 @@ if (project.file("google-services.json").exists()) {
 }
 // END Non-FOSS component
 
+kotlin {
+    compilerOptions {
+        optIn.add("androidx.compose.material3.ExperimentalMaterial3ExpressiveApi")
+    }
+}
+
 android {
-    namespace = "dev.dimension.flare"
-    compileSdk = libs.versions.compileSdk.get().toInt()
     val fdroid = rootProject.file("fdroid.properties")
     val fdroidProp = Properties()
     fdroidProp.load(fdroid.inputStream())
 
     defaultConfig {
-        applicationId = "dev.dimension.flare"
-        minSdk = libs.versions.minSdk.get().toInt()
-        targetSdk = libs.versions.compileSdk.get().toInt()
         versionCode =
             System.getenv("BUILD_NUMBER")?.toIntOrNull() ?: fdroidProp.getProperty("versionCode")
                 ?.toIntOrNull() ?: 1
         versionName =
-            System.getenv("BUILD_VERSION")?.toString() ?: fdroidProp.getProperty("versionName")
-                ?.toString() ?: "0.0.0"
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        vectorDrawables {
-            useSupportLibrary = true
-        }
-
-        packaging {
-            resources {
-                excludes.add("/META-INF/{AL2.0,LGPL2.1}")
-                excludes.add("DebugProbesKt.bin")
-            }
-        }
+            System.getenv("BUILD_VERSION") ?: fdroidProp.getProperty("versionName") ?: "0.0.0"
     }
 
     val file = rootProject.file("signing.properties")
@@ -90,26 +83,6 @@ android {
                 signingConfig = signingConfigs.getByName("debug")
             }
         }
-    }
-    compileOptions {
-        isCoreLibraryDesugaringEnabled = true
-        sourceCompatibility = JavaVersion.toVersion(libs.versions.java.get())
-        targetCompatibility = JavaVersion.toVersion(libs.versions.java.get())
-    }
-    buildFeatures {
-        compose = true
-        buildConfig = true
-    }
-    packaging {
-        resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
-        }
-    }
-    lint {
-        disable.add("MissingTranslation")
-    }
-    androidResources {
-        generateLocaleConfig = true
     }
 
     // START Non-FOSS component
@@ -184,13 +157,7 @@ dependencies {
     debugImplementation(libs.ui.test.manifest)
 }
 
-ktlint {
-    version.set(libs.versions.ktlint)
-    filter {
-        exclude { element -> element.file.path.contains("build", ignoreCase = true) }
-    }
-}
-
+// START Non-FOSS component
 if (project.file("google-services.json").exists()) {
     afterEvaluate {
         val uploadCrashlyticsMappingFileRelease by tasks
@@ -198,7 +165,7 @@ if (project.file("google-services.json").exists()) {
         uploadCrashlyticsMappingFileRelease.dependsOn(processDebugGoogleServices)
     }
 }
-
+// END Non-FOSS component
 
 abstract class GenerateDeepLinkManifestTask : DefaultTask() {
     @get:InputFile

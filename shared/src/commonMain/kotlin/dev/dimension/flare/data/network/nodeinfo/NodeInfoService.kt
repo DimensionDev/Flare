@@ -50,7 +50,7 @@ internal data object NodeInfoService {
             .filter { it.rel in supportedSchemas }
             .map {
                 when (it.rel) {
-                    "http://nodeinfo.diaspora.software/ns/schema/1.0" ->
+                    "http://nodeinfo.diaspora.software/ns/schema/1.0" -> {
                         ktorClient()
                             .get(
                                 it.href,
@@ -58,8 +58,9 @@ internal data object NodeInfoService {
                             .software
                             ?.name
                             ?.value
+                    }
 
-                    "http://nodeinfo.diaspora.software/ns/schema/1.1" ->
+                    "http://nodeinfo.diaspora.software/ns/schema/1.1" -> {
                         ktorClient()
                             .get(
                                 it.href,
@@ -67,22 +68,27 @@ internal data object NodeInfoService {
                             .software
                             ?.name
                             ?.value
+                    }
 
-                    "http://nodeinfo.diaspora.software/ns/schema/2.0" ->
+                    "http://nodeinfo.diaspora.software/ns/schema/2.0" -> {
                         ktorClient()
                             .get(it.href)
                             .body<Schema20>()
                             .software
                             ?.name
+                    }
 
-                    "http://nodeinfo.diaspora.software/ns/schema/2.1" ->
+                    "http://nodeinfo.diaspora.software/ns/schema/2.1" -> {
                         ktorClient()
                             .get(it.href)
                             .body<Schema21>()
                             .software
                             ?.name
+                    }
 
-                    else -> throw IllegalArgumentException("Unsupported schema: ${it.rel}")
+                    else -> {
+                        throw IllegalArgumentException("Unsupported schema: ${it.rel}")
+                    }
                 }
             }.first()
     }

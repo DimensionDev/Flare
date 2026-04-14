@@ -236,14 +236,17 @@ internal class BlueskyDataSource(
     ) {
         require(event is PostEvent.Bluesky)
         when (event) {
-            is PostEvent.Bluesky.Bookmark ->
+            is PostEvent.Bluesky.Bookmark -> {
                 bookmark(event, updater)
+            }
 
-            is PostEvent.Bluesky.Like ->
+            is PostEvent.Bluesky.Like -> {
                 like(event, updater)
+            }
 
-            is PostEvent.Bluesky.Reblog ->
+            is PostEvent.Bluesky.Reblog -> {
                 reblog(event, updater)
+            }
         }
     }
 
@@ -255,7 +258,7 @@ internal class BlueskyDataSource(
 
     override fun notification(type: NotificationFilter): RemoteLoader<UiTimelineV2> =
         when (type) {
-            NotificationFilter.All ->
+            NotificationFilter.All -> {
                 NotificationRemoteMediator(
                     getService = this::pdsService,
                     accountKey,
@@ -263,8 +266,11 @@ internal class BlueskyDataSource(
                         notificationHandler.clear()
                     },
                 )
+            }
 
-            else -> notSupported()
+            else -> {
+                notSupported()
+            }
         }
 
     override val supportedNotificationFilter: List<NotificationFilter>
@@ -991,29 +997,39 @@ internal class BlueskyDataSource(
             when (it) {
                 is GetLogResponseLogUnion.CreateMessage -> {
                     when (val message = it.value.message) {
-                        is LogCreateMessageMessageUnion.MessageView ->
+                        is LogCreateMessageMessageUnion.MessageView -> {
                             handleMessage(roomKey = roomKey, message = message.value)
+                        }
 
-                        is LogCreateMessageMessageUnion.DeletedMessageView ->
+                        is LogCreateMessageMessageUnion.DeletedMessageView -> {
                             handleMessage(roomKey = roomKey, message = message.value)
+                        }
 
-                        is LogCreateMessageMessageUnion.Unknown -> Unit
+                        is LogCreateMessageMessageUnion.Unknown -> {
+                            Unit
+                        }
                     }
                 }
 
                 is GetLogResponseLogUnion.DeleteMessage -> {
                     when (val message = it.value.message) {
-                        is LogDeleteMessageMessageUnion.MessageView ->
+                        is LogDeleteMessageMessageUnion.MessageView -> {
                             handleMessage(roomKey = roomKey, message = message.value)
+                        }
 
-                        is LogDeleteMessageMessageUnion.DeletedMessageView ->
+                        is LogDeleteMessageMessageUnion.DeletedMessageView -> {
                             handleMessage(roomKey = roomKey, message = message.value)
+                        }
 
-                        is LogDeleteMessageMessageUnion.Unknown -> Unit
+                        is LogDeleteMessageMessageUnion.Unknown -> {
+                            Unit
+                        }
                     }
                 }
 
-                else -> Unit
+                else -> {
+                    Unit
+                }
             }
         }
     }

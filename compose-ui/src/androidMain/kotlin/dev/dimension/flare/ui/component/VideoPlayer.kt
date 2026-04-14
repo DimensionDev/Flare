@@ -185,7 +185,7 @@ public fun VideoPlayer(
                     visible = it
                 },
     ) {
-        if (!isLoaded && LocalIsScrollingInProgress.current || !visible || player == null) {
+        if ((!isLoaded && LocalIsScrollingInProgress.current) || !visible || player == null) {
             idlePlaceholder()
         } else {
             var remainingTime by remember { mutableLongStateOf(0L) }

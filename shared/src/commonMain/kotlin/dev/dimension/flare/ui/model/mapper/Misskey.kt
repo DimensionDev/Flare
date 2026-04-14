@@ -91,43 +91,56 @@ internal fun Notification.render(accountKey: MicroBlogKey): UiTimelineV2 {
     val statusKey = MicroBlogKey(id, accountKey.host)
     val messageType =
         when (notificationType) {
-            NotificationType.Follow ->
+            NotificationType.Follow -> {
                 UiTimelineV2.Message.Type.Localized(UiTimelineV2.Message.Type.Localized.MessageId.Follow)
+            }
 
-            NotificationType.Mention ->
+            NotificationType.Mention -> {
                 UiTimelineV2.Message.Type.Localized(UiTimelineV2.Message.Type.Localized.MessageId.Mention)
+            }
 
-            NotificationType.Reply ->
+            NotificationType.Reply -> {
                 UiTimelineV2.Message.Type.Localized(UiTimelineV2.Message.Type.Localized.MessageId.Reply)
+            }
 
-            NotificationType.Renote ->
+            NotificationType.Renote -> {
                 UiTimelineV2.Message.Type.Localized(UiTimelineV2.Message.Type.Localized.MessageId.Repost)
+            }
 
-            NotificationType.Quote ->
+            NotificationType.Quote -> {
                 UiTimelineV2.Message.Type.Localized(UiTimelineV2.Message.Type.Localized.MessageId.Quote)
+            }
 
-            NotificationType.Reaction ->
+            NotificationType.Reaction -> {
                 UiTimelineV2.Message.Type.Localized(UiTimelineV2.Message.Type.Localized.MessageId.Reaction)
+            }
 
-            NotificationType.PollEnded ->
+            NotificationType.PollEnded -> {
                 UiTimelineV2.Message.Type.Localized(UiTimelineV2.Message.Type.Localized.MessageId.PollEnded)
+            }
 
-            NotificationType.ReceiveFollowRequest ->
+            NotificationType.ReceiveFollowRequest -> {
                 UiTimelineV2.Message.Type.Localized(UiTimelineV2.Message.Type.Localized.MessageId.FollowRequest)
+            }
 
-            NotificationType.FollowRequestAccepted ->
+            NotificationType.FollowRequestAccepted -> {
                 UiTimelineV2.Message.Type.Localized(UiTimelineV2.Message.Type.Localized.MessageId.FollowRequestAccepted)
+            }
 
-            NotificationType.AchievementEarned ->
+            NotificationType.AchievementEarned -> {
                 UiTimelineV2.Message.Type.Localized(
                     UiTimelineV2.Message.Type.Localized.MessageId.AchievementEarned,
                     listOfNotNull(achievement?.let { MisskeyAchievement.fromString(it) }?.name).toPersistentList(),
                 )
+            }
 
-            NotificationType.App ->
+            NotificationType.App -> {
                 UiTimelineV2.Message.Type.Localized(UiTimelineV2.Message.Type.Localized.MessageId.App)
+            }
 
-            else -> UiTimelineV2.Message.Type.Unknown(rawType = type)
+            else -> {
+                UiTimelineV2.Message.Type.Unknown(rawType = type)
+            }
         }
     val message =
         UiTimelineV2.Message(
@@ -992,22 +1005,53 @@ private class MisskeyRichTextBuilder(
         block: RenderBlockStyle,
     ) {
         when (node) {
-            is CenterNode -> renderChildren(node.content, style, block.copy(textAlignment = RenderTextAlignment.Center), asBlock = true)
-            is CodeBlockNode -> appendText(node.code, style.copy(monospace = true, code = true), block)
-            is MathBlockNode -> appendText(node.formula, style.copy(monospace = true, code = true), block)
+            is CenterNode -> {
+                renderChildren(node.content, style, block.copy(textAlignment = RenderTextAlignment.Center), asBlock = true)
+            }
+
+            is CodeBlockNode -> {
+                appendText(node.code, style.copy(monospace = true, code = true), block)
+            }
+
+            is MathBlockNode -> {
+                appendText(node.formula, style.copy(monospace = true, code = true), block)
+            }
+
             is QuoteNode -> {
                 trimTrailingQuoteSpacing()
                 renderChildren(node.content, style, block.copy(isBlockQuote = true), asBlock = true)
                 shouldTrimLeadingQuoteSpacing = true
             }
-            is SearchNode -> appendText(node.query, style, block)
-            is BoldNode -> renderChildren(node.content, style.copy(bold = true), block)
-            is FnNode -> renderFnNode(node, style, block)
-            is ItalicNode -> renderChildren(node.content, style.copy(italic = true), block)
-            is RootNode -> renderChildren(node.content, style, block)
-            is SmallNode -> renderChildren(node.content, style.copy(small = true), block)
-            is StrikeNode -> renderChildren(node.content, style.copy(strikethrough = true), block)
-            is CashNode ->
+
+            is SearchNode -> {
+                appendText(node.query, style, block)
+            }
+
+            is BoldNode -> {
+                renderChildren(node.content, style.copy(bold = true), block)
+            }
+
+            is FnNode -> {
+                renderFnNode(node, style, block)
+            }
+
+            is ItalicNode -> {
+                renderChildren(node.content, style.copy(italic = true), block)
+            }
+
+            is RootNode -> {
+                renderChildren(node.content, style, block)
+            }
+
+            is SmallNode -> {
+                renderChildren(node.content, style.copy(small = true), block)
+            }
+
+            is StrikeNode -> {
+                renderChildren(node.content, style.copy(strikethrough = true), block)
+            }
+
+            is CashNode -> {
                 appendText(
                     "$${node.content}",
                     style.copy(
@@ -1015,15 +1059,17 @@ private class MisskeyRichTextBuilder(
                     ),
                     block,
                 )
+            }
 
-            is EmojiCodeNode ->
+            is EmojiCodeNode -> {
                 appendImage(
                     url = resolveMisskeyEmoji(node.emoji, accountKey.host, emojis),
                     alt = node.emoji,
                     block = block,
                 )
+            }
 
-            is HashtagNode ->
+            is HashtagNode -> {
                 appendText(
                     "#${node.tag}",
                     style.copy(
@@ -1031,11 +1077,21 @@ private class MisskeyRichTextBuilder(
                     ),
                     block,
                 )
+            }
 
-            is InlineCodeNode -> appendText(node.code, style.copy(monospace = true, code = true), block)
-            is LinkNode -> renderChildren(node.content, style.copy(link = node.url), block)
-            is MathInlineNode -> appendText(node.formula, style.copy(monospace = true, code = true), block)
-            is MentionNode ->
+            is InlineCodeNode -> {
+                appendText(node.code, style.copy(monospace = true, code = true), block)
+            }
+
+            is LinkNode -> {
+                renderChildren(node.content, style.copy(link = node.url), block)
+            }
+
+            is MathInlineNode -> {
+                appendText(node.formula, style.copy(monospace = true, code = true), block)
+            }
+
+            is MentionNode -> {
                 appendText(
                     buildString {
                         append("@")
@@ -1055,10 +1111,19 @@ private class MisskeyRichTextBuilder(
                     ),
                     block,
                 )
+            }
 
-            is TextNode -> appendText(node.content, style, block)
-            is UrlNode -> appendText(node.url, style.copy(link = node.url), block)
-            is UnicodeEmojiNode -> appendText(node.emoji, style, block)
+            is TextNode -> {
+                appendText(node.content, style, block)
+            }
+
+            is UrlNode -> {
+                appendText(node.url, style.copy(link = node.url), block)
+            }
+
+            is UnicodeEmojiNode -> {
+                appendText(node.emoji, style, block)
+            }
         }
     }
 

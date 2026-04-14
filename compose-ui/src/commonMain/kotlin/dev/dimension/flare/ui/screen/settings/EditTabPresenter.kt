@@ -57,13 +57,16 @@ public class EditTabPresenter(
             override val availableIcons: ImmutableList<IconType> =
                 run {
                     when (val account = tabItem.account) {
-                        is AccountType.Specific ->
+                        is AccountType.Specific -> {
                             listOf(
                                 IconType.Avatar(account.accountKey),
                                 IconType.FavIcon(account.accountKey.host),
                             )
+                        }
 
-                        else -> emptyList()
+                        else -> {
+                            emptyList()
+                        }
                     } +
                         dev.dimension.flare.ui.model.UiIcon.entries.map {
                             IconType.Material(it)
@@ -88,15 +91,25 @@ public class EditTabPresenter(
                 icon =
                     if (withAvatar && account is AccountType.Specific) {
                         when (value) {
-                            is IconType.Avatar -> value
-                            is IconType.Material ->
-                                IconType.Mixed(value.icon, account.accountKey)
+                            is IconType.Avatar -> {
+                                value
+                            }
 
-                            is IconType.Mixed ->
+                            is IconType.Material -> {
                                 IconType.Mixed(value.icon, account.accountKey)
+                            }
 
-                            is IconType.Url -> value
-                            is IconType.FavIcon -> value
+                            is IconType.Mixed -> {
+                                IconType.Mixed(value.icon, account.accountKey)
+                            }
+
+                            is IconType.Url -> {
+                                value
+                            }
+
+                            is IconType.FavIcon -> {
+                                value
+                            }
                         }
                     } else {
                         when (value) {

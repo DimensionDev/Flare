@@ -80,13 +80,20 @@ internal fun DraftContent.toComposeData(
 
 internal fun DraftContent.DraftReference.toComposeStatus(): ComposeStatus =
     when (type) {
-        dev.dimension.flare.data.database.app.model.DraftReferenceType.QUOTE -> ComposeStatus.Quote(statusKey)
-        dev.dimension.flare.data.database.app.model.DraftReferenceType.REPLY -> ComposeStatus.Reply(statusKey)
-        dev.dimension.flare.data.database.app.model.DraftReferenceType.VVO_COMMENT ->
+        dev.dimension.flare.data.database.app.model.DraftReferenceType.QUOTE -> {
+            ComposeStatus.Quote(statusKey)
+        }
+
+        dev.dimension.flare.data.database.app.model.DraftReferenceType.REPLY -> {
+            ComposeStatus.Reply(statusKey)
+        }
+
+        dev.dimension.flare.data.database.app.model.DraftReferenceType.VVO_COMMENT -> {
             ComposeStatus.VVOComment(
                 statusKey = statusKey,
                 rootId = requireNotNull(rootId),
             )
+        }
     }
 
 private fun dev.dimension.flare.data.repository.DraftGroup.toUiDraftStatus(): UiDraftStatus =

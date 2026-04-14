@@ -35,7 +35,7 @@ internal fun UiTimelineV2.applyTranslation(
         }
 
     return when (this) {
-        is UiTimelineV2.Feed ->
+        is UiTimelineV2.Feed -> {
             copy(
                 title =
                     translation
@@ -51,8 +51,9 @@ internal fun UiTimelineV2.applyTranslation(
                         ?.raw ?: description,
                 translationDisplayState = translation.toDisplayState(),
             )
+        }
 
-        is UiTimelineV2.Post ->
+        is UiTimelineV2.Post -> {
             run {
                 val displayMode = translation?.displayMode ?: TranslationDisplayMode.Auto
                 val translatedPayload = translation?.takeIf { it.status == TranslationStatus.Completed }?.payload
@@ -85,10 +86,19 @@ internal fun UiTimelineV2.applyTranslation(
                     actions = actions.withTranslationMenuAction(menuAction, accountType, statusKey),
                 )
             }
+        }
 
-        is UiTimelineV2.Message -> this
-        is UiTimelineV2.User -> this
-        is UiTimelineV2.UserList -> this
+        is UiTimelineV2.Message -> {
+            this
+        }
+
+        is UiTimelineV2.User -> {
+            this
+        }
+
+        is UiTimelineV2.UserList -> {
+            this
+        }
     }
 }
 
@@ -114,21 +124,31 @@ internal fun UiProfile.applyTranslation(
 
 internal fun UiTimelineV2.translationPayload(): TranslationPayload? =
     when (this) {
-        is UiTimelineV2.Feed ->
+        is UiTimelineV2.Feed -> {
             TranslationPayload(
                 title = title?.toUiPlainText(),
                 description = description?.toUiPlainText(),
             )
+        }
 
-        is UiTimelineV2.Post ->
+        is UiTimelineV2.Post -> {
             TranslationPayload(
                 content = content,
                 contentWarning = contentWarning,
             )
+        }
 
-        is UiTimelineV2.Message -> null
-        is UiTimelineV2.User -> null
-        is UiTimelineV2.UserList -> null
+        is UiTimelineV2.Message -> {
+            null
+        }
+
+        is UiTimelineV2.User -> {
+            null
+        }
+
+        is UiTimelineV2.UserList -> {
+            null
+        }
     }
 
 internal fun UiProfile.translationPayload(): TranslationPayload =
@@ -150,7 +170,9 @@ private fun DbTranslation?.toDisplayState(): TranslationDisplayState =
         -> TranslationDisplayState.Translating
 
         TranslationStatus.Completed -> TranslationDisplayState.Translated
+
         TranslationStatus.Failed -> TranslationDisplayState.Failed
+
         TranslationStatus.Skipped,
         null,
         -> TranslationDisplayState.Hidden
@@ -180,7 +202,7 @@ private fun ActionMenu.prependTranslationAction(
     translationAction: TranslationMenuAction,
 ): ActionMenu =
     when (this) {
-        is ActionMenu.Group ->
+        is ActionMenu.Group -> {
             if (displayItem.text.isMoreMenuText()) {
                 val localAction =
                     ActionMenu.Item(
@@ -223,10 +245,13 @@ private fun ActionMenu.prependTranslationAction(
             } else {
                 this
             }
+        }
 
         is ActionMenu.Item,
         ActionMenu.Divider,
-        -> this
+        -> {
+            this
+        }
     }
 
 private fun ActionMenu.Item.Text?.isMoreMenuText(): Boolean =

@@ -127,7 +127,7 @@ public fun StatusActionButton(
                 tint = color,
             )
         }
-        if (withTextMinWidth || number != null && appearanceSettings.showNumbers) {
+        if (withTextMinWidth || (number != null && appearanceSettings.showNumbers)) {
             Box(
                 modifier = Modifier.align(Alignment.CenterVertically),
             ) {

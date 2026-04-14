@@ -42,13 +42,19 @@ internal class SearchStatusRemoteMediator(
 
         val page =
             when (request) {
-                is PagingRequest.Append -> request.nextKey.toIntOrNull() ?: 1
+                is PagingRequest.Append -> {
+                    request.nextKey.toIntOrNull() ?: 1
+                }
+
                 is PagingRequest.Prepend -> {
                     return PagingResult(
                         endOfPaginationReached = true,
                     )
                 }
-                PagingRequest.Refresh -> 1
+
+                PagingRequest.Refresh -> {
+                    1
+                }
             }
 
         val response =

@@ -164,31 +164,39 @@ internal fun DbMessageItemWithUser.render(
     timestamp = Instant.fromEpochMilliseconds(message.timestamp).toUi(),
     content =
         when (val content = message.content) {
-            is MessageContent.Bluesky -> content.render(accountKey = accountKey)
-            is MessageContent.XQT ->
+            is MessageContent.Bluesky -> {
+                content.render(accountKey = accountKey)
+            }
+
+            is MessageContent.XQT -> {
                 content.render(
                     accountKey = accountKey,
                     credential = credential,
                 )
+            }
 
-            is MessageContent.Local ->
+            is MessageContent.Local -> {
                 UiDMItem.Message.Text(
                     Element("span")
                         .apply {
                             appendText(content.text)
                         }.toUi(),
                 )
+            }
         },
     isFromMe = accountKey == message.userKey,
     sendState =
         when (val content = message.content) {
-            is MessageContent.Local ->
+            is MessageContent.Local -> {
                 when (content.state) {
                     MessageContent.Local.State.SENDING -> UiDMItem.SendState.Sending
                     MessageContent.Local.State.FAILED -> UiDMItem.SendState.Failed
                 }
+            }
 
-            else -> null
+            else -> {
+                null
+            }
         },
     showSender = message.showSender && message.userKey != accountKey,
 )

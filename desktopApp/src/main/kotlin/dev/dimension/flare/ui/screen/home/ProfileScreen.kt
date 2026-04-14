@@ -407,13 +407,17 @@ internal fun ProfileScreen(
 private val ProfileState.Tab.title: StringResource
     get() =
         when (this) {
-            is ProfileState.Tab.Media -> Res.string.profile_tab_media
-            is ProfileState.Tab.Timeline ->
+            is ProfileState.Tab.Media -> {
+                Res.string.profile_tab_media
+            }
+
+            is ProfileState.Tab.Timeline -> {
                 when (type) {
                     ProfileTab.Timeline.Type.Status -> Res.string.profile_tab_timeline
                     ProfileTab.Timeline.Type.StatusWithReplies -> Res.string.profile_tab_timeline_with_reply
                     ProfileTab.Timeline.Type.Likes -> Res.string.profile_tab_likes
                 }
+            }
         }
 
 @Composable
@@ -434,11 +438,13 @@ private fun presenter(
         state.tabs.map {
             it.map {
                 when (val tab = it) {
-                    is ProfileState.Tab.Media ->
+                    is ProfileState.Tab.Media -> {
                         ProfileTabItem.Media(tab.presenter.body().mediaState)
+                    }
 
-                    is ProfileState.Tab.Timeline ->
+                    is ProfileState.Tab.Timeline -> {
                         ProfileTabItem.Timeline(tab.type, tab.presenter.body().listState)
+                    }
                 }
             }
         }

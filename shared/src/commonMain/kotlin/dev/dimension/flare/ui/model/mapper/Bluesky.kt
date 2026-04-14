@@ -174,19 +174,21 @@ internal suspend fun parseBskyFacets(
 
         val feature =
             when (token) {
-                is UrlToken ->
+                is UrlToken -> {
                     FacetFeatureUnion.Link(
                         FacetLink(
                             uri = Uri(token.value),
                         ),
                     )
+                }
 
-                is HashTagToken ->
+                is HashTagToken -> {
                     FacetFeatureUnion.Tag(
                         FacetTag(
                             tag = token.value.trimStart('#'),
                         ),
                     )
+                }
 
                 is UserNameToken -> {
                     val handle = token.value.removePrefix("@")
@@ -198,7 +200,9 @@ internal suspend fun parseBskyFacets(
                     )
                 }
 
-                else -> null
+                else -> {
+                    null
+                }
             }
 
         if (feature != null) {
@@ -271,15 +275,16 @@ private fun parseBluesky(
         val feature = facet.features.firstOrNull()
         if (feature != null) {
             when (feature) {
-                is FacetFeatureUnion.Link ->
+                is FacetFeatureUnion.Link -> {
                     appendText(
                         facetText,
                         RenderTextStyle(
                             link = feature.value.uri.uri,
                         ),
                     )
+                }
 
-                is FacetFeatureUnion.Mention ->
+                is FacetFeatureUnion.Mention -> {
                     appendText(
                         facetText,
                         RenderTextStyle(
@@ -295,8 +300,9 @@ private fun parseBluesky(
                                     ).toUri(),
                         ),
                     )
+                }
 
-                is FacetFeatureUnion.Tag ->
+                is FacetFeatureUnion.Tag -> {
                     appendText(
                         facetText,
                         RenderTextStyle(
@@ -308,8 +314,11 @@ private fun parseBluesky(
                                     ).toUri(),
                         ),
                     )
+                }
 
-                is FacetFeatureUnion.Unknown -> appendText(facetText)
+                is FacetFeatureUnion.Unknown -> {
+                    appendText(facetText)
+                }
             }
         } else {
             appendText(facetText)
@@ -333,38 +342,42 @@ private fun List<Token>.toUiRichText(accountKey: MicroBlogKey): UiRichText {
         buildList<RenderRun> {
             this@toUiRichText.forEach { token ->
                 when (token) {
-                    is CashTagToken ->
+                    is CashTagToken -> {
                         add(
                             RenderRun.Text(
                                 text = token.value,
                                 style = RenderTextStyle(link = DeeplinkRoute.Search(AccountType.Specific(accountKey), token.value).toUri()),
                             ),
                         )
+                    }
 
-                    is EmojiToken, is StringToken ->
+                    is EmojiToken, is StringToken -> {
                         add(
                             RenderRun.Text(
                                 text = token.value,
                             ),
                         )
+                    }
 
-                    is HashTagToken ->
+                    is HashTagToken -> {
                         add(
                             RenderRun.Text(
                                 text = token.value,
                                 style = RenderTextStyle(link = DeeplinkRoute.Search(AccountType.Specific(accountKey), token.value).toUri()),
                             ),
                         )
+                    }
 
-                    is UrlToken ->
+                    is UrlToken -> {
                         add(
                             RenderRun.Text(
                                 text = token.value,
                                 style = RenderTextStyle(link = token.value),
                             ),
                         )
+                    }
 
-                    is UserNameToken ->
+                    is UserNameToken -> {
                         add(
                             RenderRun.Text(
                                 text = token.value,
@@ -380,6 +393,7 @@ private fun List<Token>.toUiRichText(accountKey: MicroBlogKey): UiRichText {
                                     ),
                             ),
                         )
+                    }
                 }
             }
         }
@@ -415,75 +429,89 @@ private val ListNotificationsNotificationReason.icon: UiIcon
 private val ListNotificationsNotificationReason.type: UiTimelineV2.Message.Type
     get() =
         when (this) {
-            ListNotificationsNotificationReason.Like ->
+            ListNotificationsNotificationReason.Like -> {
                 UiTimelineV2.Message.Type.Localized(
                     UiTimelineV2.Message.Type.Localized.MessageId.Favourite,
                 )
+            }
 
-            ListNotificationsNotificationReason.Repost ->
+            ListNotificationsNotificationReason.Repost -> {
                 UiTimelineV2.Message.Type.Localized(
                     UiTimelineV2.Message.Type.Localized.MessageId.Repost,
                 )
+            }
 
-            ListNotificationsNotificationReason.Follow ->
+            ListNotificationsNotificationReason.Follow -> {
                 UiTimelineV2.Message.Type.Localized(
                     UiTimelineV2.Message.Type.Localized.MessageId.Follow,
                 )
+            }
 
-            ListNotificationsNotificationReason.Mention ->
+            ListNotificationsNotificationReason.Mention -> {
                 UiTimelineV2.Message.Type.Localized(
                     UiTimelineV2.Message.Type.Localized.MessageId.Mention,
                 )
+            }
 
-            ListNotificationsNotificationReason.Reply ->
+            ListNotificationsNotificationReason.Reply -> {
                 UiTimelineV2.Message.Type.Localized(
                     UiTimelineV2.Message.Type.Localized.MessageId.Reply,
                 )
+            }
 
-            ListNotificationsNotificationReason.Quote ->
+            ListNotificationsNotificationReason.Quote -> {
                 UiTimelineV2.Message.Type.Localized(
                     UiTimelineV2.Message.Type.Localized.MessageId.Quote,
                 )
+            }
 
-            is ListNotificationsNotificationReason.Unknown ->
+            is ListNotificationsNotificationReason.Unknown -> {
                 UiTimelineV2.Message.Type.Unknown(
                     rawType = rawValue,
                 )
+            }
 
-            ListNotificationsNotificationReason.StarterpackJoined ->
+            ListNotificationsNotificationReason.StarterpackJoined -> {
                 UiTimelineV2.Message.Type.Localized(
                     UiTimelineV2.Message.Type.Localized.MessageId.StarterpackJoined,
                 )
+            }
 
-            ListNotificationsNotificationReason.Unverified ->
+            ListNotificationsNotificationReason.Unverified -> {
                 UiTimelineV2.Message.Type.Unknown(
                     rawType = "Unverified",
                 )
+            }
 
-            ListNotificationsNotificationReason.Verified ->
+            ListNotificationsNotificationReason.Verified -> {
                 UiTimelineV2.Message.Type.Unknown(
                     rawType = "Verified",
                 )
+            }
 
-            ListNotificationsNotificationReason.LikeViaRepost ->
+            ListNotificationsNotificationReason.LikeViaRepost -> {
                 UiTimelineV2.Message.Type.Localized(
                     UiTimelineV2.Message.Type.Localized.MessageId.Favourite,
                 )
+            }
 
-            ListNotificationsNotificationReason.RepostViaRepost ->
+            ListNotificationsNotificationReason.RepostViaRepost -> {
                 UiTimelineV2.Message.Type.Localized(
                     UiTimelineV2.Message.Type.Localized.MessageId.Repost,
                 )
+            }
 
-            ListNotificationsNotificationReason.SubscribedPost ->
+            ListNotificationsNotificationReason.SubscribedPost -> {
                 UiTimelineV2.Message.Type.Unknown(
                     rawType = "SubscribedPost",
                 )
+            }
 
-            ListNotificationsNotificationReason.ContactMatch ->
+            ListNotificationsNotificationReason.ContactMatch -> {
                 UiTimelineV2.Message.Type.Unknown(
                     rawType = "ContactMatch",
                 )
+            }
         }
 
 internal fun List<FeedViewPost>.render(accountKey: MicroBlogKey): List<UiTimelineV2> = this.map { it.render(accountKey) }
@@ -648,7 +676,7 @@ private fun FeedViewPost.render(accountKey: MicroBlogKey): UiTimelineV2 {
     val renderedPost = post.render(accountKey)
     val message =
         when (val reason = reason) {
-            is FeedViewPostReasonUnion.ReasonPin ->
+            is FeedViewPostReasonUnion.ReasonPin -> {
                 UiTimelineV2.Message(
                     user = renderedPost.user,
                     icon = UiIcon.Pin,
@@ -668,6 +696,7 @@ private fun FeedViewPost.render(accountKey: MicroBlogKey): UiTimelineV2 {
                             ),
                         ),
                 )
+            }
 
             is FeedViewPostReasonUnion.ReasonRepost -> {
                 val user = reason.value.by.render(accountKey)
@@ -692,28 +721,37 @@ private fun FeedViewPost.render(accountKey: MicroBlogKey): UiTimelineV2 {
                 )
             }
 
-            else -> null
+            else -> {
+                null
+            }
         }
     val postForTimeline =
         when (reason) {
-            is FeedViewPostReasonUnion.ReasonRepost ->
+            is FeedViewPostReasonUnion.ReasonRepost -> {
                 renderedPost.copy(
                     statusKey = message?.statusKey ?: renderedPost.statusKey,
                     internalRepost = renderedPost,
                 )
-            else -> renderedPost
+            }
+
+            else -> {
+                renderedPost
+            }
         }
 
     val reply =
         when (val reply = reply?.parent) {
-            is ReplyRefParentUnion.PostView ->
+            is ReplyRefParentUnion.PostView -> {
                 if (reply.value.uri != post.uri) {
                     reply.value
                 } else {
                     null
                 }
+            }
 
-            else -> null
+            else -> {
+                null
+            }
         }?.render(accountKey)
     return postForTimeline.copy(
         message = message,
@@ -1256,7 +1294,7 @@ private fun findMedias(postView: PostView): SerializableImmutableList<UiMedia> =
                     findMediaFromExternal(media.value)
                 }
 
-                is RecordWithMediaViewMediaUnion.ImagesView ->
+                is RecordWithMediaViewMediaUnion.ImagesView -> {
                     media.value.images
                         .map {
                             UiMedia.Image(
@@ -1268,8 +1306,9 @@ private fun findMedias(postView: PostView): SerializableImmutableList<UiMedia> =
                                 sensitive = false,
                             )
                         }.toPersistentList()
+                }
 
-                is RecordWithMediaViewMediaUnion.VideoView ->
+                is RecordWithMediaViewMediaUnion.VideoView -> {
                     persistentListOf(
                         UiMedia.Video(
                             url = media.value.playlist.uri,
@@ -1285,8 +1324,11 @@ private fun findMedias(postView: PostView): SerializableImmutableList<UiMedia> =
                                     ?.toFloat() ?: 0f,
                         ),
                     )
+                }
 
-                is RecordWithMediaViewMediaUnion.Unknown -> persistentListOf()
+                is RecordWithMediaViewMediaUnion.Unknown -> {
+                    persistentListOf()
+                }
             }
         }
 
@@ -1294,7 +1336,9 @@ private fun findMedias(postView: PostView): SerializableImmutableList<UiMedia> =
             findMediaFromExternal(embed.value)
         }
 
-        else -> persistentListOf()
+        else -> {
+            persistentListOf()
+        }
     }
 
 private fun findMediaFromExternal(value: ExternalView): PersistentList<UiMedia> {
@@ -1339,14 +1383,20 @@ private fun findQuote(
     postView: PostView,
 ): UiTimelineV2.Post? =
     when (val embed = postView.embed) {
-        is PostViewEmbedUnion.RecordView -> render(accountKey, embed.value.record)
-        is PostViewEmbedUnion.RecordWithMediaView ->
+        is PostViewEmbedUnion.RecordView -> {
+            render(accountKey, embed.value.record)
+        }
+
+        is PostViewEmbedUnion.RecordWithMediaView -> {
             render(
                 accountKey,
                 embed.value.record.record,
             )
+        }
 
-        else -> null
+        else -> {
+            null
+        }
     }
 
 private fun render(
@@ -1389,7 +1439,7 @@ private fun render(
                         .orEmpty()
                         .mapNotNull {
                             when (it) {
-                                is RecordViewRecordEmbedUnion.ImagesView ->
+                                is RecordViewRecordEmbedUnion.ImagesView -> {
                                     it.value.images.map {
                                         UiMedia.Image(
                                             url = it.fullsize.uri,
@@ -1400,10 +1450,11 @@ private fun render(
                                             sensitive = false,
                                         )
                                     }
+                                }
 
-                                is RecordViewRecordEmbedUnion.RecordWithMediaView ->
+                                is RecordViewRecordEmbedUnion.RecordWithMediaView -> {
                                     when (val media = it.value.media) {
-                                        is RecordWithMediaViewMediaUnion.ImagesView ->
+                                        is RecordWithMediaViewMediaUnion.ImagesView -> {
                                             media.value.images.map {
                                                 UiMedia.Image(
                                                     url = it.fullsize.uri,
@@ -1416,8 +1467,9 @@ private fun render(
                                                     sensitive = false,
                                                 )
                                             }
+                                        }
 
-                                        is RecordWithMediaViewMediaUnion.VideoView ->
+                                        is RecordWithMediaViewMediaUnion.VideoView -> {
                                             persistentListOf(
                                                 UiMedia.Video(
                                                     url = media.value.playlist.uri,
@@ -1433,18 +1485,24 @@ private fun render(
                                                             ?.toFloat() ?: 0f,
                                                 ),
                                             )
+                                        }
 
-                                        else -> null
+                                        else -> {
+                                            null
+                                        }
                                     }
+                                }
 
-                                else -> null
+                                else -> {
+                                    null
+                                }
                             }
                         }.flatten()
                         .toImmutableList(),
                 card =
                     record.value.embeds?.firstNotNullOfOrNull {
                         when (it) {
-                            is RecordViewRecordEmbedUnion.ExternalView ->
+                            is RecordViewRecordEmbedUnion.ExternalView -> {
                                 UiCard(
                                     url = it.value.external.uri.uri,
                                     title = it.value.external.title,
@@ -1461,8 +1519,11 @@ private fun render(
                                             )
                                         },
                                 )
+                            }
 
-                            else -> null
+                            else -> {
+                                null
+                            }
                         }
                     },
                 statusKey = statusKey,
@@ -1604,7 +1665,9 @@ private fun render(
             )
         }
 
-        else -> null
+        else -> {
+            null
+        }
     }
 
 internal fun GeneratorView.render(accountKey: MicroBlogKey) =

@@ -53,8 +53,14 @@ internal fun BlockUserDialog(
                     state.confirm()
                     onBack.invoke()
                 }
-                ContentDialogButton.Secondary -> onBack.invoke()
-                ContentDialogButton.Close -> onBack.invoke()
+
+                ContentDialogButton.Secondary -> {
+                    onBack.invoke()
+                }
+
+                ContentDialogButton.Close -> {
+                    onBack.invoke()
+                }
             }
         },
     )
@@ -86,8 +92,14 @@ internal fun MuteUserDialog(
                     state.confirm()
                     onBack.invoke()
                 }
-                ContentDialogButton.Secondary -> onBack.invoke()
-                ContentDialogButton.Close -> onBack.invoke()
+
+                ContentDialogButton.Secondary -> {
+                    onBack.invoke()
+                }
+
+                ContentDialogButton.Close -> {
+                    onBack.invoke()
+                }
             }
         },
     )
@@ -118,8 +130,14 @@ internal fun UnblockUserDialog(
                     state.confirm()
                     onBack.invoke()
                 }
-                ContentDialogButton.Secondary -> onBack.invoke()
-                ContentDialogButton.Close -> onBack.invoke()
+
+                ContentDialogButton.Secondary -> {
+                    onBack.invoke()
+                }
+
+                ContentDialogButton.Close -> {
+                    onBack.invoke()
+                }
             }
         },
     )
@@ -151,8 +169,14 @@ internal fun UnmuteUserDialog(
                     state.confirm()
                     onBack.invoke()
                 }
-                ContentDialogButton.Secondary -> onBack.invoke()
-                ContentDialogButton.Close -> onBack.invoke()
+
+                ContentDialogButton.Secondary -> {
+                    onBack.invoke()
+                }
+
+                ContentDialogButton.Close -> {
+                    onBack.invoke()
+                }
             }
         },
     )
@@ -177,8 +201,14 @@ internal fun ReportUserDialog(
                 ContentDialogButton.Primary -> {
                     onBack.invoke()
                 }
-                ContentDialogButton.Secondary -> onBack.invoke()
-                ContentDialogButton.Close -> onBack.invoke()
+
+                ContentDialogButton.Secondary -> {
+                    onBack.invoke()
+                }
+
+                ContentDialogButton.Close -> {
+                    onBack.invoke()
+                }
             }
         },
     )

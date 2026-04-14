@@ -109,12 +109,16 @@ public class BlueskyLoginPresenter(
                 )
             }.let {
                 when (it) {
-                    is AtpResponse.Failure<CreateSessionResponse> ->
+                    is AtpResponse.Failure<CreateSessionResponse> -> {
                         throw AtpException(
                             statusCode = it.statusCode,
                             error = it.error,
                         )
-                    is AtpResponse.Success<CreateSessionResponse> -> it.response
+                    }
+
+                    is AtpResponse.Success<CreateSessionResponse> -> {
+                        it.response
+                    }
                 }
             }
 

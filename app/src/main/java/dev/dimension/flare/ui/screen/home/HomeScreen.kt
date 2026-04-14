@@ -314,7 +314,7 @@ private fun HomeRailHeader(
                 wideNavigationRailState.currentValue,
             ) { railState ->
                 when (railState) {
-                    WideNavigationRailValue.Collapsed ->
+                    WideNavigationRailValue.Collapsed -> {
                         Box(
                             modifier =
                                 Modifier
@@ -342,8 +342,9 @@ private fun HomeRailHeader(
                                     Box(modifier = Modifier.size(56.dp))
                                 }
                         }
+                    }
 
-                    WideNavigationRailValue.Expanded ->
+                    WideNavigationRailValue.Expanded -> {
                         Row(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically,
@@ -429,6 +430,7 @@ private fun HomeRailHeader(
                                 )
                             }
                         }
+                    }
                 }
             }
             if (layoutType == NavigationSuiteType.NavigationRail &&
@@ -439,7 +441,7 @@ private fun HomeRailHeader(
                     modifier = Modifier.padding(horizontal = 20.dp),
                 ) { railState ->
                     when (railState) {
-                        WideNavigationRailValue.Collapsed ->
+                        WideNavigationRailValue.Collapsed -> {
                             FloatingActionButton(
                                 onClick = {
                                     navigate(Route.Compose.New)
@@ -460,8 +462,9 @@ private fun HomeRailHeader(
                                     contentDescription = stringResource(id = R.string.compose_title),
                                 )
                             }
+                        }
 
-                        WideNavigationRailValue.Expanded ->
+                        WideNavigationRailValue.Expanded -> {
                             ExtendedFloatingActionButton(
                                 onClick = {
                                     navigate(Route.Compose.New)
@@ -490,6 +493,7 @@ private fun HomeRailHeader(
                                             animatedVisibilityScope = this@AnimatedContent,
                                         ),
                             )
+                        }
                     }
                 }
             }

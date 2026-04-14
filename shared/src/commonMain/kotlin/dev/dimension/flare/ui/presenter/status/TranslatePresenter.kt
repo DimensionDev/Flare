@@ -115,7 +115,9 @@ public class TranslatePresenter(
         }
         return when (translation.status) {
             TranslationStatus.Completed -> target.readField(translation.payload)
+
             TranslationStatus.Skipped -> source
+
             TranslationStatus.Pending,
             TranslationStatus.Translating,
             TranslationStatus.Failed,
@@ -195,15 +197,17 @@ private fun TranslateCacheTarget.mergePayload(
     translated: UiRichText,
 ): TranslationPayload =
     when (field) {
-        TranslateCacheTarget.Field.Content ->
+        TranslateCacheTarget.Field.Content -> {
             TranslationPayload(
                 content = translated,
                 contentWarning = existing?.contentWarning,
             )
+        }
 
-        TranslateCacheTarget.Field.ContentWarning ->
+        TranslateCacheTarget.Field.ContentWarning -> {
             TranslationPayload(
                 content = existing?.content,
                 contentWarning = translated,
             )
+        }
     }

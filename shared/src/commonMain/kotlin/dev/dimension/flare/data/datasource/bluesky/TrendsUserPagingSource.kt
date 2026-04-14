@@ -26,15 +26,16 @@ internal class TrendsUserPagingSource(
                     )
                 }
 
-                PagingRequest.Refresh ->
+                PagingRequest.Refresh -> {
                     service
                         .getSuggestions(
                             GetSuggestionsQueryParams(
                                 limit = pageSize.toLong(),
                             ),
                         ).requireResponse()
+                }
 
-                is PagingRequest.Append ->
+                is PagingRequest.Append -> {
                     service
                         .getSuggestions(
                             GetSuggestionsQueryParams(
@@ -42,6 +43,7 @@ internal class TrendsUserPagingSource(
                                 cursor = request.nextKey,
                             ),
                         ).requireResponse()
+                }
             }
 
         return PagingResult(

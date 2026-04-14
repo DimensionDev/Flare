@@ -180,20 +180,24 @@ internal fun TopLevel.renderNotifications(accountKey: MicroBlogKey): List<UiTime
                     )
                 val clickEvent =
                     when {
-                        url == "/2/notifications/device_follow.json" ->
+                        url == "/2/notifications/device_follow.json" -> {
                             ClickEvent.Deeplink(
                                 DeeplinkRoute.Timeline
                                     .XQTDeviceFollow(
                                         accountType = AccountType.Specific(accountKey),
                                     ),
                             )
+                        }
 
-                        post == null && !url.isNullOrEmpty() && !url.startsWith("/") ->
+                        post == null && !url.isNullOrEmpty() && !url.startsWith("/") -> {
                             ClickEvent.Deeplink(
                                 DeeplinkRoute.OpenLinkDirectly(url),
                             )
+                        }
 
-                        else -> ClickEvent.Noop
+                        else -> {
+                            ClickEvent.Noop
+                        }
                     }
                 val messageItem =
                     UiTimelineV2.Message(
@@ -206,7 +210,7 @@ internal fun TopLevel.renderNotifications(accountKey: MicroBlogKey): List<UiTime
                         accountType = AccountType.Specific(accountKey),
                     )
                 when {
-                    data?.icon?.id == "person_icon" && users?.size == 1 ->
+                    data?.icon?.id == "person_icon" && users?.size == 1 -> {
                         UiTimelineV2.User(
                             message = messageItem,
                             value = users.first(),
@@ -214,8 +218,9 @@ internal fun TopLevel.renderNotifications(accountKey: MicroBlogKey): List<UiTime
                             statusKey = users.first().key,
                             accountType = AccountType.Specific(accountKey),
                         )
+                    }
 
-                    data?.icon?.id == "person_icon" && !users.isNullOrEmpty() ->
+                    data?.icon?.id == "person_icon" && !users.isNullOrEmpty() -> {
                         UiTimelineV2.UserList(
                             message = messageItem,
                             users = users.toImmutableList(),
@@ -224,9 +229,15 @@ internal fun TopLevel.renderNotifications(accountKey: MicroBlogKey): List<UiTime
                             post = null,
                             accountType = AccountType.Specific(accountKey),
                         )
+                    }
 
-                    post != null -> post.copy(message = messageItem)
-                    else -> messageItem
+                    post != null -> {
+                        post.copy(message = messageItem)
+                    }
+
+                    else -> {
+                        messageItem
+                    }
                 }
             } else if (mentionTweet != null) {
                 val tweet = globalObjects?.tweets?.get(mentionTweet.id) ?: return@mapNotNull null
@@ -569,7 +580,7 @@ internal fun Tweet.renderStatus(
                 ?.media
                 ?.map { media ->
                     when (media.type) {
-                        Media.Type.photo ->
+                        Media.Type.photo -> {
                             UiMedia.Image(
                                 url = media.mediaUrlHttps + "?name=orig",
                                 previewUrl = media.mediaUrlHttps,
@@ -578,8 +589,9 @@ internal fun Tweet.renderStatus(
                                 sensitive = legacy.possiblySensitive == true,
                                 description = media.ext_alt_text,
                             )
+                        }
 
-                        Media.Type.video, Media.Type.animatedGif ->
+                        Media.Type.video, Media.Type.animatedGif -> {
                             UiMedia.Video(
                                 url =
                                     media.videoInfo
@@ -591,6 +603,7 @@ internal fun Tweet.renderStatus(
                                 width = media.originalInfo.width.toFloat(),
                                 description = media.ext_alt_text,
                             )
+                        }
                     }
                 }.orEmpty()
                 .toImmutableList()
@@ -970,30 +983,37 @@ internal fun parseXQTCustomDateTime(dateTimeStr: String): Instant? {
 internal fun List<InstructionUnion>.list(accountKey: MicroBlogKey): List<UiList.List> =
     flatMap {
         when (it) {
-            is TimelineAddEntries ->
+            is TimelineAddEntries -> {
                 it.propertyEntries.flatMap {
                     when (it.content) {
-                        is TimelineTimelineModule ->
+                        is TimelineTimelineModule -> {
                             it.content.items.orEmpty().mapNotNull {
                                 when (it.item.itemContent) {
                                     is TimelineTwitterList -> it.item.itemContent.list
                                     else -> null
                                 }
                             }
+                        }
 
-                        else -> emptyList()
+                        else -> {
+                            emptyList()
+                        }
                     }
                 }
+            }
 
-            is TimelineAddToModule ->
+            is TimelineAddToModule -> {
                 it.moduleItems.flatMap {
                     when (it.item.itemContent) {
                         is TimelineTwitterList -> listOfNotNull(it.item.itemContent.list)
                         else -> emptyList()
                     }
                 }
+            }
 
-            else -> emptyList()
+            else -> {
+                emptyList()
+            }
         }
     }.filter {
         it.following == true
@@ -1579,7 +1599,9 @@ internal fun Tweet.renderContent(accountKey: MicroBlogKey): UiRichText {
                     )
                 }
 
-                is RichEntityContent.Text -> appendText(content.run.text, content.run.style)
+                is RichEntityContent.Text -> {
+                    appendText(content.run.text, content.run.style)
+                }
             }
             current = entity.end
         }
@@ -1614,7 +1636,7 @@ private fun List<Token>.toUiRichText(accountKey: MicroBlogKey): UiRichText {
         buildList<RenderRun> {
             this@toUiRichText.forEach { token ->
                 when (token) {
-                    is CashTagToken ->
+                    is CashTagToken -> {
                         add(
                             RenderRun.Text(
                                 text = token.value,
@@ -1624,15 +1646,17 @@ private fun List<Token>.toUiRichText(accountKey: MicroBlogKey): UiRichText {
                                     ),
                             ),
                         )
+                    }
 
-                    is EmojiToken, is StringToken ->
+                    is EmojiToken, is StringToken -> {
                         add(
                             RenderRun.Text(
                                 text = token.value,
                             ),
                         )
+                    }
 
-                    is HashTagToken ->
+                    is HashTagToken -> {
                         add(
                             RenderRun.Text(
                                 text = token.value,
@@ -1642,8 +1666,9 @@ private fun List<Token>.toUiRichText(accountKey: MicroBlogKey): UiRichText {
                                     ),
                             ),
                         )
+                    }
 
-                    is UrlToken ->
+                    is UrlToken -> {
                         add(
                             RenderRun.Text(
                                 text = token.value.trimUrl(),
@@ -1653,8 +1678,9 @@ private fun List<Token>.toUiRichText(accountKey: MicroBlogKey): UiRichText {
                                     ),
                             ),
                         )
+                    }
 
-                    is UserNameToken ->
+                    is UserNameToken -> {
                         add(
                             RenderRun.Text(
                                 text = token.value,
@@ -1670,6 +1696,7 @@ private fun List<Token>.toUiRichText(accountKey: MicroBlogKey): UiRichText {
                                     ),
                             ),
                         )
+                    }
                 }
             }
         }
@@ -1836,14 +1863,18 @@ private fun TwitterArticleBlock.toRenderContents(
                 }
             val link =
                 when {
-                    entity?.type.equals("LINK", ignoreCase = true) -> entity?.data?.url
-                    else ->
+                    entity?.type.equals("LINK", ignoreCase = true) -> {
+                        entity?.data?.url
+                    }
+
+                    else -> {
                         data.urls
                             .firstOrNull { url ->
                                 val from = url.fromIndex ?: return@firstOrNull false
                                 val to = url.toIndex ?: return@firstOrNull false
                                 start >= from && start < to
                             }?.text
+                    }
                 }
             runs +=
                 RenderRun.Text(

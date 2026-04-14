@@ -149,21 +149,25 @@ private fun DraftBoxItem(
         enabled = item.status != UiDraftStatus.SENDING,
         leadingContent = {
             when (item.status) {
-                UiDraftStatus.DRAFT -> Unit
+                UiDraftStatus.DRAFT -> {
+                    Unit
+                }
 
-                UiDraftStatus.FAILED ->
+                UiDraftStatus.FAILED -> {
                     FAIcon(
                         imageVector = FontAwesomeIcons.Solid.TriangleExclamation,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.error,
                     )
+                }
 
-                UiDraftStatus.SENDING ->
+                UiDraftStatus.SENDING -> {
                     FAIcon(
                         imageVector = FontAwesomeIcons.Solid.Upload,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.primary,
                     )
+                }
             }
         },
         overlineContent = {
@@ -216,17 +220,18 @@ private fun DraftBoxItem(
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         item.medias.take(4).forEach { media ->
                             when (media.type) {
-                                UiDraftMediaType.IMAGE ->
+                                UiDraftMediaType.IMAGE -> {
                                     NetworkImage(
                                         model = media.cachePath,
                                         contentDescription = null,
                                         modifier = Modifier.size(60.dp),
                                         contentScale = ContentScale.Crop,
                                     )
+                                }
 
                                 UiDraftMediaType.VIDEO,
                                 UiDraftMediaType.OTHER,
-                                ->
+                                -> {
                                     Box(
                                         modifier = Modifier.size(60.dp),
                                         contentAlignment = Alignment.Center,
@@ -241,6 +246,7 @@ private fun DraftBoxItem(
                                             contentDescription = null,
                                         )
                                     }
+                                }
                             }
                         }
                     }

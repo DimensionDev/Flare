@@ -186,13 +186,15 @@ internal fun StatusMediaScreen(
                                     }
                                 }
 
-                                else -> false
+                                else -> {
+                                    false
+                                }
                             }
                         },
             ) {
                 val media = medias[it]
                 when (media) {
-                    is UiMedia.Image ->
+                    is UiMedia.Image -> {
                         ImageItem(
                             modifier = Modifier.fillMaxSize(),
                             url = media.url,
@@ -201,6 +203,7 @@ internal fun StatusMediaScreen(
                             isFocused = pagerState.currentPage == it,
                             setLockPager = state::setLockPager,
                         )
+                    }
 
                     is UiMedia.Video -> {
                         if (pagerState.currentPage == it) {
@@ -224,7 +227,7 @@ internal fun StatusMediaScreen(
                         }
                     }
 
-                    else ->
+                    else -> {
                         CompositionLocalProvider(
                             LocalComponentAppearance provides
                                 LocalComponentAppearance
@@ -239,6 +242,7 @@ internal fun StatusMediaScreen(
                                 contentScale = ContentScale.Fit,
                             )
                         }
+                    }
                 }
             }
             LazyRow(
@@ -625,8 +629,14 @@ private fun presenter(
 @Stable
 private fun scaledInsideAndCenterAligned(size: androidx.compose.ui.geometry.Size?): ZoomableContentLocation =
     when {
-        size == null -> Unspecified
-        size.isUnspecified -> SameAsLayoutBounds
+        size == null -> {
+            Unspecified
+        }
+
+        size.isUnspecified -> {
+            SameAsLayoutBounds
+        }
+
         else -> {
             RelativeContentLocation(
                 size = size,

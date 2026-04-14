@@ -28,7 +28,7 @@ internal object RssDataSource :
 
     fun fetchLoader(subscription: DbRssSources): CacheableRemoteLoader<UiTimelineV2> =
         when (subscription.type) {
-            SubscriptionType.RSS ->
+            SubscriptionType.RSS -> {
                 RssTimelineRemoteMediator(
                     url = subscription.url,
                     fetchSource = {
@@ -38,25 +38,29 @@ internal object RssDataSource :
                             .firstOrNull()
                     },
                 )
+            }
 
-            SubscriptionType.MASTODON_TRENDS ->
+            SubscriptionType.MASTODON_TRENDS -> {
                 GuestTrendsRemoteMediator(
                     host = subscription.url,
                     locale = Locale.language,
                 )
+            }
 
-            SubscriptionType.MASTODON_PUBLIC ->
+            SubscriptionType.MASTODON_PUBLIC -> {
                 GuestPublicTimelineRemoteMediator(
                     host = subscription.url,
                     locale = Locale.language,
                     local = false,
                 )
+            }
 
-            SubscriptionType.MASTODON_LOCAL ->
+            SubscriptionType.MASTODON_LOCAL -> {
                 GuestPublicTimelineRemoteMediator(
                     host = subscription.url,
                     locale = Locale.language,
                     local = true,
                 )
+            }
         }
 }

@@ -58,18 +58,54 @@ private class RenderRunBuilder {
         block: RenderBlockStyle,
     ) {
         when (element.tagName().lowercase()) {
-            "a" -> renderChildren(element, style.copy(link = element.attr("href").ifEmpty { null }), block)
-            "strong", "b" -> renderChildren(element, style.copy(bold = true), block)
-            "em", "i" -> renderChildren(element, style.copy(italic = true), block)
-            "br" -> appendText("\n", style, block)
-            "p", "div" -> renderBlock(element, style, block)
-            "span" -> renderChildren(element, style, block)
-            "del", "s" -> renderChildren(element, style.copy(strikethrough = true), block)
-            "code" -> renderChildren(element, style.copy(monospace = true, code = true), block)
-            "blockquote" -> renderBlock(element, style, block.copy(isBlockQuote = true))
-            "u" -> renderChildren(element, style.copy(underline = true), block)
-            "small" -> renderChildren(element, style.copy(small = true), block)
-            "center" -> renderBlock(element, style, block.copy(textAlignment = RenderTextAlignment.Center))
+            "a" -> {
+                renderChildren(element, style.copy(link = element.attr("href").ifEmpty { null }), block)
+            }
+
+            "strong", "b" -> {
+                renderChildren(element, style.copy(bold = true), block)
+            }
+
+            "em", "i" -> {
+                renderChildren(element, style.copy(italic = true), block)
+            }
+
+            "br" -> {
+                appendText("\n", style, block)
+            }
+
+            "p", "div" -> {
+                renderBlock(element, style, block)
+            }
+
+            "span" -> {
+                renderChildren(element, style, block)
+            }
+
+            "del", "s" -> {
+                renderChildren(element, style.copy(strikethrough = true), block)
+            }
+
+            "code" -> {
+                renderChildren(element, style.copy(monospace = true, code = true), block)
+            }
+
+            "blockquote" -> {
+                renderBlock(element, style, block.copy(isBlockQuote = true))
+            }
+
+            "u" -> {
+                renderChildren(element, style.copy(underline = true), block)
+            }
+
+            "small" -> {
+                renderChildren(element, style.copy(small = true), block)
+            }
+
+            "center" -> {
+                renderBlock(element, style, block.copy(textAlignment = RenderTextAlignment.Center))
+            }
+
             "li" -> {
                 val listBlock = block.copy(isListItem = true)
                 runInBlock(listBlock) {
@@ -77,13 +113,35 @@ private class RenderRunBuilder {
                     renderChildren(element, style, listBlock)
                 }
             }
-            "ul" -> renderChildren(element, style, block)
-            "h1" -> renderBlock(element, style, block.copy(headingLevel = 1))
-            "h2" -> renderBlock(element, style, block.copy(headingLevel = 2))
-            "h3" -> renderBlock(element, style, block.copy(headingLevel = 3))
-            "h4" -> renderBlock(element, style, block.copy(headingLevel = 4))
-            "h5" -> renderBlock(element, style, block.copy(headingLevel = 5))
-            "h6" -> renderBlock(element, style, block.copy(headingLevel = 6))
+
+            "ul" -> {
+                renderChildren(element, style, block)
+            }
+
+            "h1" -> {
+                renderBlock(element, style, block.copy(headingLevel = 1))
+            }
+
+            "h2" -> {
+                renderBlock(element, style, block.copy(headingLevel = 2))
+            }
+
+            "h3" -> {
+                renderBlock(element, style, block.copy(headingLevel = 3))
+            }
+
+            "h4" -> {
+                renderBlock(element, style, block.copy(headingLevel = 4))
+            }
+
+            "h5" -> {
+                renderBlock(element, style, block.copy(headingLevel = 5))
+            }
+
+            "h6" -> {
+                renderBlock(element, style, block.copy(headingLevel = 6))
+            }
+
             "emoji" -> {
                 appendImage(
                     url = element.attr("target"),
@@ -92,12 +150,14 @@ private class RenderRunBuilder {
                 )
                 renderChildren(element, style, block)
             }
+
             "figure" -> {
                 val previousBlockState = isInBlockImageState
                 isInBlockImageState = true
                 renderChildren(element, style, block)
                 isInBlockImageState = previousBlockState
             }
+
             "img" -> {
                 val src = element.attr("src")
                 if (isInBlockImageState) {
@@ -114,6 +174,7 @@ private class RenderRunBuilder {
                     )
                 }
             }
+
             "figcaption" -> {
                 renderBlock(
                     element = element,
@@ -125,8 +186,14 @@ private class RenderRunBuilder {
                         ),
                 )
             }
-            "time" -> renderChildren(element, style.copy(time = true), block)
-            else -> renderChildren(element, style, block)
+
+            "time" -> {
+                renderChildren(element, style.copy(time = true), block)
+            }
+
+            else -> {
+                renderChildren(element, style, block)
+            }
         }
     }
 

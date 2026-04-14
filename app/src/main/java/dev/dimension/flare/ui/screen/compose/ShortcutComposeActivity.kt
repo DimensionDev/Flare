@@ -18,7 +18,10 @@ class ShortcutComposeActivity : ComponentActivity() {
                 intent?.action == Intent.ACTION_SEND -> {
                     intent.getStringExtra(Intent.EXTRA_TEXT) ?: ""
                 }
-                else -> ""
+
+                else -> {
+                    ""
+                }
             }
 
         val initialMedias =
@@ -33,6 +36,7 @@ class ShortcutComposeActivity : ComponentActivity() {
                         ),
                     ).toPersistentList()
                 }
+
                 intent?.action == Intent.ACTION_SEND_MULTIPLE &&
                     intent.type?.startsWith("image/") == true -> {
                     IntentCompat
@@ -43,7 +47,10 @@ class ShortcutComposeActivity : ComponentActivity() {
                         ).orEmpty()
                         .toPersistentList()
                 }
-                else -> persistentListOf()
+
+                else -> {
+                    persistentListOf()
+                }
             }
 
         setContent {

@@ -53,10 +53,11 @@ internal class StatusDetailRemoteMediator(
                         )
                 }
 
-                is PagingRequest.Prepend ->
+                is PagingRequest.Prepend -> {
                     return PagingResult(
                         endOfPaginationReached = true,
                     )
+                }
 
                 PagingRequest.Refresh -> {
                     val current =

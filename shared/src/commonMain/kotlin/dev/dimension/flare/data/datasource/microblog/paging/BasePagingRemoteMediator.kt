@@ -42,13 +42,17 @@ internal abstract class BasePagingRemoteMediator<T : Any, R : Any>(
     ): MediatorResult {
         val request: PagingRequest =
             when (loadType) {
-                LoadType.REFRESH -> PagingRequest.Refresh
+                LoadType.REFRESH -> {
+                    PagingRequest.Refresh
+                }
+
                 LoadType.PREPEND -> {
                     val previousKey =
                         database.pagingTimelineDao().getPagingKey(pagingKey)?.prevKey
                             ?: return MediatorResult.Success(endOfPaginationReached = true)
                     PagingRequest.Prepend(previousKey)
                 }
+
                 LoadType.APPEND -> {
                     val nextKey =
                         database.pagingTimelineDao().getPagingKey(pagingKey)?.nextKey

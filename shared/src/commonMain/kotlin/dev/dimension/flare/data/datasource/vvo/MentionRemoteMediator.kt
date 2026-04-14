@@ -33,13 +33,19 @@ internal class MentionRemoteMediator(
 
         val page =
             when (request) {
-                PagingRequest.Refresh -> 0
+                PagingRequest.Refresh -> {
+                    0
+                }
+
                 is PagingRequest.Prepend -> {
                     return PagingResult(
                         endOfPaginationReached = true,
                     )
                 }
-                is PagingRequest.Append -> request.nextKey.toIntOrNull() ?: 0
+
+                is PagingRequest.Append -> {
+                    request.nextKey.toIntOrNull() ?: 0
+                }
             }
 
         val response =

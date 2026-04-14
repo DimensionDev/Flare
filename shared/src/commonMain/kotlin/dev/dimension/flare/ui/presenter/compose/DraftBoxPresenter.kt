@@ -123,10 +123,11 @@ public class DraftBoxPresenter :
                 coroutineScope.launch {
                     sendDraftUseCase(groupId) {
                         when (it) {
-                            is ComposeProgressState.Error ->
+                            is ComposeProgressState.Error -> {
                                 inAppNotification.onError(Message.Compose, it.throwable)
+                            }
 
-                            is ComposeProgressState.Progress ->
+                            is ComposeProgressState.Progress -> {
                                 if (it.max > 0) {
                                     inAppNotification.onProgress(
                                         Message.Compose,
@@ -134,9 +135,11 @@ public class DraftBoxPresenter :
                                         it.max,
                                     )
                                 }
+                            }
 
-                            ComposeProgressState.Success ->
+                            ComposeProgressState.Success -> {
                                 inAppNotification.onSuccess(Message.Compose)
+                            }
                         }
                     }
                 }

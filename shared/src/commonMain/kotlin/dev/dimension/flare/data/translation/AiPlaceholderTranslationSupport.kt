@@ -166,13 +166,17 @@ internal object AiPlaceholderTranslationSupport {
             tokens =
                 sourceBlock.tokens.map { token ->
                     when (token.kind) {
-                        TranslationTokenKind.Locked -> token
-                        TranslationTokenKind.Translatable ->
+                        TranslationTokenKind.Locked -> {
+                            token
+                        }
+
+                        TranslationTokenKind.Translatable -> {
                             token.copy(
                                 text =
                                     translatedTextById[token.id]
                                         ?: error("Missing token ${token.id} in block ${sourceBlock.id}"),
                             )
+                        }
                     }
                 },
         )
@@ -209,7 +213,7 @@ internal object AiPlaceholderTranslationSupport {
                         translatedItems[sourceItem.entityKey]
                             ?: error("Missing translated item ${sourceItem.entityKey}")
                     when (translatedItem.status) {
-                        PreTranslationBatchItemStatus.Completed ->
+                        PreTranslationBatchItemStatus.Completed -> {
                             sourceItem.copy(
                                 status = PreTranslationBatchItemStatus.Completed,
                                 payload =
@@ -221,13 +225,15 @@ internal object AiPlaceholderTranslationSupport {
                                     ),
                                 reason = translatedItem.reason,
                             )
+                        }
 
-                        PreTranslationBatchItemStatus.Skipped ->
+                        PreTranslationBatchItemStatus.Skipped -> {
                             sourceItem.copy(
                                 status = PreTranslationBatchItemStatus.Skipped,
                                 payload = null,
                                 reason = translatedItem.reason,
                             )
+                        }
                     }
                 },
         )
@@ -285,7 +291,7 @@ internal object AiPlaceholderTranslationSupport {
                 null
             }
 
-            else ->
+            else -> {
                 PreTranslationBatchPayload(
                     content =
                         applyTemplateBatchField(
@@ -320,6 +326,7 @@ internal object AiPlaceholderTranslationSupport {
                             field = "description",
                         ),
                 )
+            }
         }
 
     private fun applyTemplateBatchField(
@@ -337,13 +344,17 @@ internal object AiPlaceholderTranslationSupport {
                 null
             }
 
-            translatedTemplate == null -> error("Missing translated field $field for $entityKey")
-            else ->
+            translatedTemplate == null -> {
+                error("Missing translated field $field for $entityKey")
+            }
+
+            else -> {
                 applyTemplateDocument(
                     sourceDocument = sourceDocument,
                     translatedTemplate = translatedTemplate,
                     targetLanguage = targetLanguage,
                 )
+            }
         }
 
     private fun TranslationToken.marker(): String =

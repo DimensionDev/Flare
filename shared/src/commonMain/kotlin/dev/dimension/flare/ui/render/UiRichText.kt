@@ -82,14 +82,18 @@ public data class UiRichText(
     public val isEmpty: Boolean =
         renderRuns.all { content ->
             when (content) {
-                is RenderContent.BlockImage -> false
-                is RenderContent.Text ->
+                is RenderContent.BlockImage -> {
+                    false
+                }
+
+                is RenderContent.Text -> {
                     content.runs.all { run ->
                         when (run) {
                             is RenderRun.Image -> false
                             is RenderRun.Text -> run.text.isEmpty()
                         }
                     }
+                }
             }
         }
     public val isLongText: Boolean = innerText.codePointCount() > 480
@@ -137,7 +141,10 @@ public fun UiRichText.toTranslatableText(): String {
     var appendedTextBlock = false
     renderRuns.forEach { content ->
         when (content) {
-            is RenderContent.BlockImage -> Unit
+            is RenderContent.BlockImage -> {
+                Unit
+            }
+
             is RenderContent.Text -> {
                 val blockText = content.plainText().trim()
                 if (blockText.isNotEmpty()) {
@@ -162,7 +169,10 @@ public fun RenderContent.Text.plainText(): String =
                         append(run.alt)
                     }
                 }
-                is RenderRun.Text -> append(run.text)
+
+                is RenderRun.Text -> {
+                    append(run.text)
+                }
             }
         }
     }
@@ -176,14 +186,18 @@ private fun RenderContent.plainText(): String =
 private fun List<RenderContent>.imageUrls(): List<String> =
     flatMap { content ->
         when (content) {
-            is RenderContent.BlockImage -> listOf(content.url)
-            is RenderContent.Text ->
+            is RenderContent.BlockImage -> {
+                listOf(content.url)
+            }
+
+            is RenderContent.Text -> {
                 content.runs.mapNotNull { run ->
                     when (run) {
                         is RenderRun.Image -> run.url
                         is RenderRun.Text -> null
                     }
                 }
+            }
         }
     }
 

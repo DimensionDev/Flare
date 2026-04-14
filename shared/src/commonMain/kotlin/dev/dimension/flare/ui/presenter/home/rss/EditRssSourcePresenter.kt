@@ -112,7 +112,7 @@ public class EditRssSourcePresenter(
         val inputState =
             checkRssSourcePresenterState.state.map {
                 when (it) {
-                    is RssState.RssFeed ->
+                    is RssState.RssFeed -> {
                         object : State.RssInputState.RssFeed {
                             override fun save(
                                 title: String,
@@ -135,6 +135,7 @@ public class EditRssSourcePresenter(
                                 return data.render()
                             }
                         }
+                    }
 
                     RssState.RssHub -> {
                         var serverStr by remember { mutableStateOf("") }
@@ -203,7 +204,7 @@ public class EditRssSourcePresenter(
                         }
                     }
 
-                    is RssState.RssSources ->
+                    is RssState.RssSources -> {
                         object : State.RssInputState.RssSources {
                             override fun save(
                                 sources: List<UiRssSource>,
@@ -227,8 +228,9 @@ public class EditRssSourcePresenter(
                                 }
                             }
                         }
+                    }
 
-                    is RssState.MastodonInstance ->
+                    is RssState.MastodonInstance -> {
                         object : State.RssInputState.MastodonInstance {
                             override val host = it.host
                             override val instanceName = it.instanceName
@@ -260,26 +262,42 @@ public class EditRssSourcePresenter(
                                 return subscriptions.map { it.render() }
                             }
                         }
+                    }
                 }
             }
         val canSave =
             when (val state = checkRssSourcePresenterState.state) {
-                is UiState.Success ->
+                is UiState.Success -> {
                     when (state.data) {
-                        is RssState.RssFeed -> true
-                        RssState.RssHub ->
+                        is RssState.RssFeed -> {
+                            true
+                        }
+
+                        RssState.RssHub -> {
                             when (val inputState = inputState) {
-                                is State.RssInputState.RssHub ->
+                                is State.RssInputState.RssHub -> {
                                     inputState.checkState is UiState.Success
+                                }
 
-                                else -> false
+                                else -> {
+                                    false
+                                }
                             }
+                        }
 
-                        is RssState.RssSources -> state.data.sources.isNotEmpty()
-                        is RssState.MastodonInstance -> state.data.availableTimelines.isNotEmpty()
+                        is RssState.RssSources -> {
+                            state.data.sources.isNotEmpty()
+                        }
+
+                        is RssState.MastodonInstance -> {
+                            state.data.availableTimelines.isNotEmpty()
+                        }
                     }
+                }
 
-                else -> false
+                else -> {
+                    false
+                }
             }
         return object : State {
             override val checkState = checkRssSourcePresenterState.state

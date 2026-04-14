@@ -64,21 +64,25 @@ internal class PostHandler(
                     translationDisplayFlow,
                 ) { status, paging, translationDisplayOptions ->
                     when {
-                        paging != null ->
+                        paging != null -> {
                             TimelinePagingMapper.toUi(
                                 item = paging,
                                 pagingKey = pagingKey,
                                 translationDisplayOptions = translationDisplayOptions,
                             )
+                        }
 
-                        status != null ->
+                        status != null -> {
                             TimelinePagingMapper.toUi(
                                 item = status,
                                 pagingKey = pagingKey,
                                 translationDisplayOptions = translationDisplayOptions,
                             )
+                        }
 
-                        else -> null
+                        else -> {
+                            null
+                        }
                     }
                 }.distinctUntilChanged()
                     .mapNotNull { it }

@@ -30,6 +30,12 @@ if (project.file("google-services.json").exists()) {
 }
 // END Non-FOSS component
 
+kotlin {
+    compilerOptions {
+        optIn.add("androidx.compose.material3.ExperimentalMaterial3ExpressiveApi")
+    }
+}
+
 android {
     val fdroid = rootProject.file("fdroid.properties")
     val fdroidProp = Properties()
@@ -41,18 +47,6 @@ android {
                 ?.toIntOrNull() ?: 1
         versionName =
             System.getenv("BUILD_VERSION") ?: fdroidProp.getProperty("versionName") ?: "0.0.0"
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        vectorDrawables {
-            useSupportLibrary = true
-        }
-
-        packaging {
-            resources {
-                excludes.add("/META-INF/{AL2.0,LGPL2.1}")
-                excludes.add("DebugProbesKt.bin")
-            }
-        }
     }
 
     val file = rootProject.file("signing.properties")
@@ -89,26 +83,6 @@ android {
                 signingConfig = signingConfigs.getByName("debug")
             }
         }
-    }
-    compileOptions {
-        isCoreLibraryDesugaringEnabled = true
-        sourceCompatibility = JavaVersion.toVersion(libs.versions.java.get())
-        targetCompatibility = JavaVersion.toVersion(libs.versions.java.get())
-    }
-    buildFeatures {
-        compose = true
-        buildConfig = true
-    }
-    packaging {
-        resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
-        }
-    }
-    lint {
-        disable.add("MissingTranslation")
-    }
-    androidResources {
-        generateLocaleConfig = true
     }
 
     // START Non-FOSS component

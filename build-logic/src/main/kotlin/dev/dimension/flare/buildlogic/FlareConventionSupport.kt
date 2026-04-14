@@ -3,6 +3,7 @@ package dev.dimension.flare.buildlogic
 import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryTarget
 import com.android.build.api.withAndroid
+import org.gradle.api.JavaVersion
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.VersionCatalogsExtension
@@ -85,6 +86,38 @@ class FlareAndroidApplicationSpec internal constructor(
                 targetSdk {
                     version = release(project.intVersion("compileSdk"))
                 }
+                vectorDrawables {
+                    useSupportLibrary = true
+                }
+                testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+                packaging {
+                    resources {
+                        excludes.add("/META-INF/{AL2.0,LGPL2.1}")
+                        excludes.add("DebugProbesKt.bin")
+                    }
+                }
+            }
+
+            compileOptions {
+                isCoreLibraryDesugaringEnabled = true
+                sourceCompatibility = JavaVersion.toVersion(project.intVersion("java"))
+                targetCompatibility = JavaVersion.toVersion(project.intVersion("java"))
+            }
+            buildFeatures {
+                compose = true
+                buildConfig = true
+            }
+            packaging {
+                resources {
+                    excludes += "/META-INF/{AL2.0,LGPL2.1}"
+                }
+            }
+            lint {
+                disable.add("MissingTranslation")
+            }
+            androidResources {
+                generateLocaleConfig = true
             }
             configure()
         }

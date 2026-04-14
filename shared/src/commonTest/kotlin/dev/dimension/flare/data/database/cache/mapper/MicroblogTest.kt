@@ -494,7 +494,7 @@ class MicroblogTest : RobolectricTest() {
                 )
 
             val mapped = TimelinePagingMapper.toDb(rootPost, pagingKey = "home")
-            assertEquals(rootPost.statusKey, mapped.timeline.statusKey)
+            assertEquals(mapped.status.status.data.id, mapped.timeline.statusId)
             assertEquals(1, mapped.status.references.size)
             val reference =
                 mapped.status.references

@@ -59,7 +59,7 @@ internal fun EditTabDialog(
         closeButtonText = stringResource(Res.string.cancel),
         onButtonClick = {
             when (it) {
-                ContentDialogButton.Primary ->
+                ContentDialogButton.Primary -> {
                     tabItem.metaData
                         .copy(
                             title = TitleType.Text(state.text.text.toString()),
@@ -69,9 +69,15 @@ internal fun EditTabDialog(
                                 onConfirm(tabItem.update(metaData = it))
                             }
                         }
+                }
 
-                ContentDialogButton.Secondary -> Unit
-                ContentDialogButton.Close -> onDismissRequest()
+                ContentDialogButton.Secondary -> {
+                    Unit
+                }
+
+                ContentDialogButton.Close -> {
+                    onDismissRequest()
+                }
             }
         },
         content = {

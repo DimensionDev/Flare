@@ -1,53 +1,34 @@
-
-import com.android.build.api.withAndroid
-import java.util.Locale
+import dev.dimension.flare.buildlogic.FlarePlatform
+import dev.dimension.flare.buildlogic.flare
 
 plugins {
+    id("dev.dimension.flare.multiplatform-library")
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.ktorfit)
-    alias(libs.plugins.ktlint)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.room)
 }
 
 kotlin {
-    applyDefaultHierarchyTemplate {
-        common {
-            group("apple") {
-                withIos()
-            }
-            group("androidJvm") {
-                withAndroid()
-                withJvm()
-            }
-        }
-    }
-    jvmToolchain(libs.versions.java.get().toInt())
-    explicitApi()
-    android {
-        compileSdk = libs.versions.compileSdk.get().toInt()
+    flare {
         namespace = "dev.dimension.flare.shared"
-        minSdk = libs.versions.minSdk.get().toInt()
+        platforms(
+            FlarePlatform.ANDROID,
+            FlarePlatform.JVM,
+            FlarePlatform.IOS,
+        )
+        ksp(
+            libs.ktorfit.ksp,
+            libs.room.compiler,
+        )
+    }
+    android {
         withDeviceTest {
             instrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
             execution = "HOST"
-        }
-    }
-    jvm()
-    iosArm64()
-    iosSimulatorArm64()
-
-    targets.forEach { target ->
-        target.name.takeIf {
-            it != "metadata"
-        }?.let {
-            "ksp${it.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }}"
-        }?.let {
-            dependencies.add(it, libs.ktorfit.ksp)
-            dependencies.add(it, libs.room.compiler)
         }
     }
 
@@ -82,7 +63,6 @@ kotlin {
                 implementation(libs.datastore)
                 implementation(libs.kotlinx.serialization.protobuf)
                 implementation(libs.xmlUtil)
-                implementation(projects.shared.api)
                 implementation(libs.ktor.client.resources)
                 implementation(libs.cryptography.provider.optimal)
                 implementation(libs.openai.client)
@@ -139,15 +119,6 @@ room3 {
 
 ktorfit {
     compilerPluginVersion.set("2.3.3")
-}
-
-ktlint {
-    version.set(libs.versions.ktlint)
-    filter {
-        exclude { element -> element.file.path.contains("build", ignoreCase = true) }
-        exclude { element -> element.file.absolutePath.contains("data/network/misskey/api/", ignoreCase = true) }
-        exclude { element -> element.file.absolutePath.contains("data/network/xqt/", ignoreCase = true) }
-    }
 }
 
 afterEvaluate {

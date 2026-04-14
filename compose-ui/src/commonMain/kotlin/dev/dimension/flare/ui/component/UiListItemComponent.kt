@@ -109,7 +109,7 @@ public fun <T : UiList> UiListItem(
     modifier: Modifier = Modifier,
 ) {
     when (item) {
-        is UiList.List ->
+        is UiList.List -> {
             UiListCard(
                 item = item,
                 onClicked = onClicked,
@@ -120,7 +120,9 @@ public fun <T : UiList> UiListItem(
                 totalCount = totalCount,
                 modifier = modifier,
             )
-        is UiList.Feed ->
+        }
+
+        is UiList.Feed -> {
             UiFeedCard(
                 item = item,
                 onClicked = onClicked,
@@ -131,7 +133,9 @@ public fun <T : UiList> UiListItem(
                 totalCount = totalCount,
                 modifier = modifier,
             )
-        is UiList.Antenna ->
+        }
+
+        is UiList.Antenna -> {
             UiAntennaCard(
                 item = item,
                 onClicked = onClicked,
@@ -142,7 +146,9 @@ public fun <T : UiList> UiListItem(
                 totalCount = totalCount,
                 modifier = modifier,
             )
-        is UiList.Channel ->
+        }
+
+        is UiList.Channel -> {
             UiChannelCard(
                 item = item,
                 onClicked = onClicked,
@@ -153,6 +159,7 @@ public fun <T : UiList> UiListItem(
                 totalCount = totalCount,
                 modifier = modifier,
             )
+        }
     }
 }
 

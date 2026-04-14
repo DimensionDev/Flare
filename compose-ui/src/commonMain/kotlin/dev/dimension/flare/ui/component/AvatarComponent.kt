@@ -26,10 +26,13 @@ public fun AvatarComponent(
                 .size(size)
                 .clip(
                     when (appearanceSettings.avatarShape) {
-                        ComponentAppearance.AvatarShape.CIRCLE ->
+                        ComponentAppearance.AvatarShape.CIRCLE -> {
                             CircleShape
-                        ComponentAppearance.AvatarShape.SQUARE ->
+                        }
+
+                        ComponentAppearance.AvatarShape.SQUARE -> {
                             RoundedCornerShape(4.dp)
+                        }
                     },
                 ).then(modifier),
     )

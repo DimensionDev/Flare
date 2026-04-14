@@ -123,6 +123,7 @@ private fun RichTextScope.RenderElement(
         "header" -> {
             // ignore
         }
+
         "code" -> {
             with(context.builder) {
                 withFormat(RichTextString.Format.Code) {
@@ -473,11 +474,17 @@ private fun RichTextScope.RenderNode(
     node: Node,
 ) {
     when (node) {
-        is Element -> RenderElement(context, node)
+        is Element -> {
+            RenderElement(context, node)
+        }
+
         is TextNode -> {
             context.builder.append(node.text())
         }
-        else -> Unit
+
+        else -> {
+            Unit
+        }
     }
 }
 

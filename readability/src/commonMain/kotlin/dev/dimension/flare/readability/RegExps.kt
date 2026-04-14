@@ -6,7 +6,10 @@ package dev.dimension.flare.readability
  */
 internal object RegExps {
     val unlikelyCandidates =
-        Regex("""-ad-|ai2html|banner|breadcrumbs|combx|comment|community|cover-wrap|disqus|extra|footer|gdpr|header|legends|menu|related|remark|replies|rss|shoutbox|sidebar|skyscraper|social|sponsor|supplemental|ad-break|agegate|pagination|pager|popup|yom-remote""", RegexOption.IGNORE_CASE)
+        Regex(
+            """-ad-|ai2html|banner|breadcrumbs|combx|comment|community|cover-wrap|disqus|extra|footer|gdpr|header|legends|menu|related|remark|replies|rss|shoutbox|sidebar|skyscraper|social|sponsor|supplemental|ad-break|agegate|pagination|pager|popup|yom-remote""",
+            RegexOption.IGNORE_CASE,
+        )
 
     val okMaybeItsACandidate =
         Regex("""and|article|body|column|content|main|mathjax|shadow""", RegexOption.IGNORE_CASE)
@@ -15,7 +18,10 @@ internal object RegExps {
         Regex("""article|body|content|entry|hentry|h-entry|main|page|pagination|post|text|blog|story""", RegexOption.IGNORE_CASE)
 
     val negative =
-        Regex("""-ad-|hidden|^hid$| hid$| hid |^hid |banner|combx|comment|com-|contact|footer|gdpr|masthead|media|meta|outbrain|promo|related|scroll|share|shoutbox|sidebar|skyscraper|sponsor|shopping|tags|widget""", RegexOption.IGNORE_CASE)
+        Regex(
+            """-ad-|hidden|^hid$| hid$| hid |^hid |banner|combx|comment|com-|contact|footer|gdpr|masthead|media|meta|outbrain|promo|related|scroll|share|shoutbox|sidebar|skyscraper|sponsor|shopping|tags|widget""",
+            RegexOption.IGNORE_CASE,
+        )
 
     val extraneous =
         Regex("""print|archive|comment|discuss|e[-]?mail|share|reply|all|login|sign|single|utility""", RegexOption.IGNORE_CASE)
@@ -26,7 +32,10 @@ internal object RegExps {
     val normalize = Regex("""\s{2,}""")
 
     val videos =
-        Regex("""//(www\.)?((dailymotion|youtube|youtube-nocookie|player\.vimeo|v\.qq|bilibili|live\.bilibili)\.com|(archive|upload\.wikimedia)\.org|player\.twitch\.tv)""", RegexOption.IGNORE_CASE)
+        Regex(
+            """//(www\.)?((dailymotion|youtube|youtube-nocookie|player\.vimeo|v\.qq|bilibili|live\.bilibili)\.com|(archive|upload\.wikimedia)\.org|player\.twitch\.tv)""",
+            RegexOption.IGNORE_CASE,
+        )
 
     val shareElements =
         Regex("""(\b|_)(share|sharedaddy)(\b|_)""", RegexOption.IGNORE_CASE)
@@ -54,7 +63,9 @@ internal object RegExps {
 
     // See: https://schema.org/Article
     val jsonLdArticleTypes =
-        Regex("""^Article|AdvertiserContentArticle|NewsArticle|AnalysisNewsArticle|AskPublicNewsArticle|BackgroundNewsArticle|OpinionNewsArticle|ReportageNewsArticle|ReviewNewsArticle|Report|SatiricalArticle|ScholarlyArticle|MedicalScholarlyArticle|SocialMediaPosting|BlogPosting|LiveBlogPosting|DiscussionForumPosting|TechArticle|APIReference$""")
+        Regex(
+            """^Article|AdvertiserContentArticle|NewsArticle|AnalysisNewsArticle|AskPublicNewsArticle|BackgroundNewsArticle|OpinionNewsArticle|ReportageNewsArticle|ReviewNewsArticle|Report|SatiricalArticle|ScholarlyArticle|MedicalScholarlyArticle|SocialMediaPosting|BlogPosting|LiveBlogPosting|DiscussionForumPosting|TechArticle|APIReference$""",
+        )
 
     // used to see if a node's content matches words commonly used for ad blocks or loading indicators
     val adWords =

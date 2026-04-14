@@ -46,8 +46,14 @@ internal fun DeleteStatusConfirmDialog(
                     state.delete()
                     onBack.invoke()
                 }
-                ContentDialogButton.Secondary -> Unit
-                ContentDialogButton.Close -> onBack.invoke()
+
+                ContentDialogButton.Secondary -> {
+                    Unit
+                }
+
+                ContentDialogButton.Close -> {
+                    onBack.invoke()
+                }
             }
         },
     )

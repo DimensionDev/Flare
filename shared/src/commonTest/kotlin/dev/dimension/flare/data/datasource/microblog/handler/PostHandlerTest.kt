@@ -327,7 +327,7 @@ class PostHandlerTest : RobolectricTest() {
                 listOf(
                     DbPagingTimeline(
                         pagingKey = "post_only_$postKey",
-                        statusKey = postKey,
+                        statusId = DbStatus.createId(accountType, postKey),
                         sortId = 1L,
                     ),
                 ),
@@ -352,7 +352,7 @@ class PostHandlerTest : RobolectricTest() {
             assertNull(savedStatus)
             val refs = db.statusReferenceDao().getByStatusId(DbStatus.createId(accountType, postKey))
             assertTrue(refs.isEmpty())
-            val pagingRows = db.pagingTimelineDao().getByPagingKeyAndStatusKeys("post_only_$postKey", listOf(postKey))
+            val pagingRows = db.pagingTimelineDao().getByPagingKeyAndStatusIds("post_only_$postKey", listOf(DbStatus.createId(accountType, postKey)))
             assertTrue(pagingRows.isEmpty())
         }
 
@@ -373,7 +373,7 @@ class PostHandlerTest : RobolectricTest() {
                 listOf(
                     DbPagingTimeline(
                         pagingKey = "post_only_$postKey",
-                        statusKey = postKey,
+                        statusId = DbStatus.createId(accountType, postKey),
                         sortId = 1L,
                     ),
                 ),

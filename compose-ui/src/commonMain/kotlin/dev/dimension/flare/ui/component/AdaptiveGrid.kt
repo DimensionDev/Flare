@@ -67,21 +67,23 @@ internal fun AdaptiveGrid(
 
                             measurables.mapIndexed { index, measurable ->
                                 when (index) {
-                                    0 ->
+                                    0 -> {
                                         measurable.measure(
                                             constraints.copy(
                                                 maxWidth = leftWidth,
                                                 maxHeight = containerHeight,
                                             ),
                                         )
+                                    }
 
-                                    else ->
+                                    else -> {
                                         measurable.measure(
                                             constraints.copy(
                                                 maxWidth = rightWidth,
                                                 maxHeight = rightHeight,
                                             ),
                                         )
+                                    }
                                 }
                             }
                         }

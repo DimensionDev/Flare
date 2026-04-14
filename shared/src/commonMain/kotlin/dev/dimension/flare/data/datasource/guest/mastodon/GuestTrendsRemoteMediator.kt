@@ -23,8 +23,14 @@ internal class GuestTrendsRemoteMediator(
     ): PagingResult<UiTimelineV2> {
         val offset =
             when (request) {
-                PagingRequest.Refresh -> 0
-                is PagingRequest.Append -> request.nextKey.toIntOrNull() ?: 0
+                PagingRequest.Refresh -> {
+                    0
+                }
+
+                is PagingRequest.Append -> {
+                    request.nextKey.toIntOrNull() ?: 0
+                }
+
                 is PagingRequest.Prepend -> {
                     return PagingResult(endOfPaginationReached = true)
                 }

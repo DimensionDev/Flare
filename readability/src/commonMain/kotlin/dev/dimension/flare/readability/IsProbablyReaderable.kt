@@ -42,6 +42,7 @@ public fun isNodeVisible(node: Element): Boolean {
  */
 private fun textContent(node: Node): String {
     val sb = StringBuilder()
+
     fun collect(n: Node) {
         if (n is TextNode) {
             sb.append(n.getWholeText())
@@ -64,7 +65,10 @@ private fun textContent(node: Node): String {
  * @param options configuration for the check
  * @return whether Readability.parse() will likely succeed at returning an article
  */
-public fun isProbablyReaderable(doc: Document, options: ReaderableOptions = ReaderableOptions()): Boolean {
+public fun isProbablyReaderable(
+    doc: Document,
+    options: ReaderableOptions = ReaderableOptions(),
+): Boolean {
     val nodes = mutableSetOf<Element>()
 
     // Get <p>, <pre>, <article> nodes
@@ -112,7 +116,10 @@ public fun isProbablyReaderable(doc: Document, options: ReaderableOptions = Read
  * @param options configuration for the check
  * @return whether Readability.parse() will likely succeed
  */
-public fun isProbablyReaderable(html: String, options: ReaderableOptions = ReaderableOptions()): Boolean {
+public fun isProbablyReaderable(
+    html: String,
+    options: ReaderableOptions = ReaderableOptions(),
+): Boolean {
     val doc = Ksoup.parse(html)
     return isProbablyReaderable(doc, options)
 }

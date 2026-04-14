@@ -78,28 +78,65 @@ internal class NotificationRemoteMediator(
             response.notifications
                 .mapNotNull {
                     when (it.reason) {
-                        is ListNotificationsNotificationReason.Unknown -> null
-                        ListNotificationsNotificationReason.Like ->
+                        is ListNotificationsNotificationReason.Unknown -> {
+                            null
+                        }
+
+                        ListNotificationsNotificationReason.Like -> {
                             it.record
                                 .decodeAs<Like>()
                                 .subject.uri
+                        }
 
-                        ListNotificationsNotificationReason.Repost ->
+                        ListNotificationsNotificationReason.Repost -> {
                             it.record
                                 .decodeAs<Repost>()
                                 .subject.uri
+                        }
 
-                        ListNotificationsNotificationReason.Follow -> null
-                        ListNotificationsNotificationReason.Mention -> it.uri
-                        ListNotificationsNotificationReason.Reply -> it.uri
-                        ListNotificationsNotificationReason.Quote -> it.uri
-                        ListNotificationsNotificationReason.StarterpackJoined -> null
-                        ListNotificationsNotificationReason.Unverified -> null
-                        ListNotificationsNotificationReason.Verified -> null
-                        ListNotificationsNotificationReason.LikeViaRepost -> it.uri
-                        ListNotificationsNotificationReason.RepostViaRepost -> it.uri
-                        ListNotificationsNotificationReason.SubscribedPost -> it.uri
-                        ListNotificationsNotificationReason.ContactMatch -> it.uri
+                        ListNotificationsNotificationReason.Follow -> {
+                            null
+                        }
+
+                        ListNotificationsNotificationReason.Mention -> {
+                            it.uri
+                        }
+
+                        ListNotificationsNotificationReason.Reply -> {
+                            it.uri
+                        }
+
+                        ListNotificationsNotificationReason.Quote -> {
+                            it.uri
+                        }
+
+                        ListNotificationsNotificationReason.StarterpackJoined -> {
+                            null
+                        }
+
+                        ListNotificationsNotificationReason.Unverified -> {
+                            null
+                        }
+
+                        ListNotificationsNotificationReason.Verified -> {
+                            null
+                        }
+
+                        ListNotificationsNotificationReason.LikeViaRepost -> {
+                            it.uri
+                        }
+
+                        ListNotificationsNotificationReason.RepostViaRepost -> {
+                            it.uri
+                        }
+
+                        ListNotificationsNotificationReason.SubscribedPost -> {
+                            it.uri
+                        }
+
+                        ListNotificationsNotificationReason.ContactMatch -> {
+                            it.uri
+                        }
                     }
                 }.distinct()
                 .toImmutableList()

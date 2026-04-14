@@ -136,7 +136,10 @@ private fun ProfileHeaderSuccess(
             isMe.onSuccess {
                 if (!it) {
                     when (relationState) {
-                        is UiState.Error -> Unit
+                        is UiState.Error -> {
+                            Unit
+                        }
+
                         is UiState.Loading -> {
                             PlatformFilledTonalButton(
                                 onClick = {
@@ -166,7 +169,7 @@ private fun ProfileHeaderSuccess(
                                     label = "profile_follow_button",
                                 ) { buttonState ->
                                     when (buttonState) {
-                                        FollowButtonState.Blocked ->
+                                        FollowButtonState.Blocked -> {
                                             PlatformErrorButton(
                                                 onClick = {
                                                     uriLauncher.openUri(
@@ -180,8 +183,9 @@ private fun ProfileHeaderSuccess(
                                             ) {
                                                 PlatformText(text = stringResource(Res.string.profile_header_button_blocked))
                                             }
+                                        }
 
-                                        FollowButtonState.Following ->
+                                        FollowButtonState.Following -> {
                                             PlatformOutlinedButton(
                                                 onClick = {
                                                     onUnfollowClick.invoke(user.key)
@@ -189,8 +193,9 @@ private fun ProfileHeaderSuccess(
                                             ) {
                                                 PlatformText(text = stringResource(Res.string.profile_header_button_following))
                                             }
+                                        }
 
-                                        FollowButtonState.Requested ->
+                                        FollowButtonState.Requested -> {
                                             PlatformOutlinedButton(
                                                 onClick = {
                                                     onUnfollowClick.invoke(user.key)
@@ -198,8 +203,9 @@ private fun ProfileHeaderSuccess(
                                             ) {
                                                 PlatformText(text = stringResource(Res.string.profile_header_button_requested))
                                             }
+                                        }
 
-                                        FollowButtonState.Follow ->
+                                        FollowButtonState.Follow -> {
                                             PlatformFilledTonalButton(
                                                 onClick = {
                                                     onFollowClick.invoke(user.key)
@@ -207,6 +213,7 @@ private fun ProfileHeaderSuccess(
                                             ) {
                                                 PlatformText(text = stringResource(Res.string.profile_header_button_follow))
                                             }
+                                        }
                                     }
                                 }
                                 if (relation.isFans) {
@@ -232,7 +239,7 @@ private fun ProfileHeaderSuccess(
         handleTrailing = {
             user.mark.fastForEach {
                 when (it) {
-                    UiProfile.Mark.Verified ->
+                    UiProfile.Mark.Verified -> {
                         FAIcon(
                             imageVector = FontAwesomeIcons.Solid.CircleCheck,
                             contentDescription = null,
@@ -241,8 +248,9 @@ private fun ProfileHeaderSuccess(
                                     .size(12.dp),
                             tint = Color.Blue,
                         )
+                    }
 
-                    UiProfile.Mark.Cat ->
+                    UiProfile.Mark.Cat -> {
                         FAIcon(
                             imageVector = FontAwesomeIcons.Solid.Cat,
                             contentDescription = null,
@@ -251,8 +259,9 @@ private fun ProfileHeaderSuccess(
                                 Modifier
                                     .size(12.dp),
                         )
+                    }
 
-                    UiProfile.Mark.Bot ->
+                    UiProfile.Mark.Bot -> {
                         FAIcon(
                             imageVector = FontAwesomeIcons.Solid.Robot,
                             contentDescription = null,
@@ -261,8 +270,9 @@ private fun ProfileHeaderSuccess(
                                 Modifier
                                     .size(12.dp),
                         )
+                    }
 
-                    UiProfile.Mark.Locked ->
+                    UiProfile.Mark.Locked -> {
                         FAIcon(
                             imageVector = FontAwesomeIcons.Solid.Lock,
                             contentDescription = null,
@@ -271,6 +281,7 @@ private fun ProfileHeaderSuccess(
                                 Modifier
                                     .size(12.dp),
                         )
+                    }
                 }
             }
             AnimatedVisibility(user.translationDisplayState != TranslationDisplayState.Hidden) {
@@ -288,7 +299,7 @@ private fun ProfileHeaderSuccess(
                 }
             }
             when (val content = user.bottomContent) {
-                is UiProfile.BottomContent.Fields ->
+                is UiProfile.BottomContent.Fields -> {
                     UserFields(
                         fields = content.fields,
                         modifier =
@@ -298,6 +309,7 @@ private fun ProfileHeaderSuccess(
                                 .padding(vertical = 8.dp)
                                 .fillMaxWidth(),
                     )
+                }
 
                 is UiProfile.BottomContent.Iconify -> {
                     content.items.forEach { (key, value) ->
@@ -317,7 +329,9 @@ private fun ProfileHeaderSuccess(
                     }
                 }
 
-                null -> Unit
+                null -> {
+                    Unit
+                }
             }
             MatricesDisplay(
                 data = user.matrices,

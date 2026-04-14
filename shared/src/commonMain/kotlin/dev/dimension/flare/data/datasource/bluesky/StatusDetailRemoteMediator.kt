@@ -2,11 +2,15 @@ package dev.dimension.flare.data.datasource.bluesky
 
 import androidx.paging.ExperimentalPagingApi
 import app.bsky.feed.FeedViewPost
+import app.bsky.feed.GetPostThreadQueryParams
+import app.bsky.feed.GetPostThreadResponseThreadUnion
 import app.bsky.feed.GetPostsQueryParams
-import app.bsky.unspecced.GetPostThreadV2QueryParams
-import app.bsky.unspecced.GetPostThreadV2Sort
-import app.bsky.unspecced.GetPostThreadV2ThreadItem
-import app.bsky.unspecced.GetPostThreadV2ThreadItemValueUnion
+import app.bsky.feed.ReplyRef
+import app.bsky.feed.ReplyRefParentUnion
+import app.bsky.feed.ReplyRefRootUnion
+import app.bsky.feed.ThreadViewPost
+import app.bsky.feed.ThreadViewPostParentUnion
+import app.bsky.feed.ThreadViewPostReplieUnion
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
@@ -15,7 +19,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.toPersistentList
+import kotlinx.coroutines.flow.firstOrNull
 import sh.christian.ozone.api.AtUri
 
 @OptIn(ExperimentalPagingApi::class)
@@ -41,7 +45,7 @@ internal class StatusDetailRemoteMediator(
         request: PagingRequest,
     ): PagingResult<UiTimelineV2> {
         val service = getService()
-        val result: List<UiTimelineV2> =
+        val result =
             when (request) {
                 is PagingRequest.Append -> {
                     if (statusOnly) {
@@ -51,22 +55,90 @@ internal class StatusDetailRemoteMediator(
                     } else {
                         val context =
                             service
-                                .getPostThreadV2Unspecced(
-                                    GetPostThreadV2QueryParams(
+                                .getPostThread(
+                                    GetPostThreadQueryParams(
                                         AtUri(statusKey.id),
-                                        branchingFactor = 1,
-                                        below = 10,
-                                        sort = GetPostThreadV2Sort.Top,
                                     ),
                                 ).requireResponse()
-                        context.thread.renderThread(accountKey)
+                        when (val thread = context.thread) {
+                            is GetPostThreadResponseThreadUnion.ThreadViewPost -> {
+                                val parents = mutableListOf<ThreadViewPost>()
+                                var current: ThreadViewPost? = thread.value
+                                while (current != null) {
+                                    parents.add(current)
+                                    current =
+                                        when (val parent = current.parent) {
+                                            is ThreadViewPostParentUnion.ThreadViewPost -> parent.value
+                                            else -> null
+                                        }
+                                }
+                                val replies =
+                                    thread.value.replies.orEmpty().mapNotNull {
+                                        when (it) {
+                                            is ThreadViewPostReplieUnion.ThreadViewPost -> {
+                                                if (it.value.replies
+                                                        .orEmpty()
+                                                        .any()
+                                                ) {
+                                                    val last =
+                                                        it.value.replies.orEmpty().last().let {
+                                                            when (it) {
+                                                                is ThreadViewPostReplieUnion.ThreadViewPost -> it.value.post
+                                                                else -> null
+                                                            }
+                                                        }
+                                                    if (last != null) {
+                                                        val parents =
+                                                            listOfNotNull(it.value.post) +
+                                                                it.value.replies.orEmpty().toList().dropLast(1).mapNotNull {
+                                                                    when (it) {
+                                                                        is ThreadViewPostReplieUnion.ThreadViewPost -> it.value.post
+                                                                        else -> null
+                                                                    }
+                                                                }
+                                                        val currentRef =
+                                                            ReplyRef(
+                                                                root = ReplyRefRootUnion.PostView(parents.last()),
+                                                                parent = ReplyRefParentUnion.PostView(parents.last()),
+                                                            )
+
+                                                        FeedViewPost(
+                                                            post = last,
+                                                            reply = currentRef,
+                                                        )
+                                                    } else {
+                                                        FeedViewPost(
+                                                            it.value.post,
+                                                        )
+                                                    }
+                                                } else {
+                                                    FeedViewPost(
+                                                        it.value.post,
+                                                    )
+                                                }
+                                            }
+
+                                            else -> {
+                                                null
+                                            }
+                                        }
+                                    }
+                                parents.map { FeedViewPost(it.post) }.reversed() + FeedViewPost(thread.value.post) + replies
+                            }
+
+                            else -> {
+                                emptyList()
+                            }
+                        }
                     }
                 }
+
                 is PagingRequest.Prepend -> {
                     return PagingResult(
                         endOfPaginationReached = true,
                     )
                 }
+
                 PagingRequest.Refresh -> {
                     val current =
                         service
@@ -77,62 +149,15 @@ internal class StatusDetailRemoteMediator(
                             ).requireResponse()
                             .posts
                             .firstOrNull()
-                    listOfNotNull(current).map(::FeedViewPost).render(accountKey)
+                    listOfNotNull(current).map(::FeedViewPost)
                 }
             }
 
         val shouldLoadMore = !(request is PagingRequest.Append || statusOnly)
         return PagingResult(
             endOfPaginationReached = !shouldLoadMore,
-            data = result,
+            data = result.render(accountKey),
             nextKey = if (shouldLoadMore) pagingKey else null,
         )
     }
 }
-
-private fun List<GetPostThreadV2ThreadItem>.renderThread(accountKey: MicroBlogKey): List<UiTimelineV2> {
-    val renderedPosts = mutableListOf<Pair<Long, UiTimelineV2.Post>>()
-    val stack = mutableListOf<Pair<Long, UiTimelineV2.Post>>()
-
-    mapNotNull { item ->
-        when (val value = item.value) {
-            is GetPostThreadV2ThreadItemValueUnion.Post -> item.depth to value.value.post
-            else -> null
-        }
-    }.forEach { (depth, post) ->
-        while (stack.lastOrNull()?.first?.let { it >= depth } == true) {
-            stack.removeLast()
-        }
-        val parents =
-            when {
-                depth <= 0L -> stack.map { it.second }
-                else -> stack.filter { it.first >= 0L }.map { it.second }
-            }
-        val current =
-            post
-                .render(accountKey)
-                .copy(
-                    parents = parents.toPersistentList(),
-                )
-        renderedPosts += depth to current
-        stack += depth to current
-    }
-
-    val visiblePosts = renderedPosts.filter { it.first >= 0L }
-    val descendantParentKeys =
-        visiblePosts
-            .filter { it.first > 0L }
-            .map { it.second }
-            .flatMap { it.collectParentKeys() }
-            .toSet()
-
-    return visiblePosts
-        .filterNot { (depth, post) ->
-            depth > 0L && post.statusKey in descendantParentKeys
-        }.map { it.second }
-}
-
-private fun UiTimelineV2.Post.collectParentKeys(): Set<MicroBlogKey> =
-    parents
-        .map { it.statusKey }
-        .toSet()

@@ -33,14 +33,21 @@ public sealed class UiState<T : Any> {
 
 public inline fun <T : Any, R : Any> UiState<T>.map(transform: (T) -> R): UiState<R> =
     when (this) {
-        is UiState.Success ->
+        is UiState.Success -> {
             try {
                 UiState.Success(transform(data))
             } catch (e: Exception) {
                 UiState.Error(e)
             }
-        is UiState.Error -> UiState.Error(throwable)
-        is UiState.Loading -> UiState.Loading()
+        }
+
+        is UiState.Error -> {
+            UiState.Error(throwable)
+        }
+
+        is UiState.Loading -> {
+            UiState.Loading()
+        }
     }
 
 public inline fun <T : Any, R : Any> UiState<T>.mapNotNull(transform: (T) -> R?): UiState<R> =
@@ -55,14 +62,21 @@ public inline fun <T : Any, R : Any> UiState<T>.flatMap(
     transform: (T) -> UiState<R>,
 ): UiState<R> =
     when (this) {
-        is UiState.Success ->
+        is UiState.Success -> {
             try {
                 transform(data)
             } catch (e: Exception) {
                 onError(e)
             }
-        is UiState.Error -> onError(throwable)
-        is UiState.Loading -> UiState.Loading()
+        }
+
+        is UiState.Error -> {
+            onError(throwable)
+        }
+
+        is UiState.Loading -> {
+            UiState.Loading()
+        }
     }
 
 public inline fun <T1 : Any, T2 : Any, R : Any> zipState(
@@ -72,16 +86,29 @@ public inline fun <T1 : Any, T2 : Any, R : Any> zipState(
     transform: (T1, T2) -> R,
 ): UiState<R> =
     when {
-        a is UiState.Loading || b is UiState.Loading -> UiState.Loading()
-        a is UiState.Error -> onError(a.throwable)
-        b is UiState.Error -> onError(b.throwable)
-        a is UiState.Success && b is UiState.Success ->
+        a is UiState.Loading || b is UiState.Loading -> {
+            UiState.Loading()
+        }
+
+        a is UiState.Error -> {
+            onError(a.throwable)
+        }
+
+        b is UiState.Error -> {
+            onError(b.throwable)
+        }
+
+        a is UiState.Success && b is UiState.Success -> {
             try {
                 UiState.Success(transform(a.data, b.data))
             } catch (e: Exception) {
                 UiState.Error(e)
             }
-        else -> UiState.Error(IllegalStateException("Unreachable"))
+        }
+
+        else -> {
+            UiState.Error(IllegalStateException("Unreachable"))
+        }
     }
 
 public fun <T : Any> List<UiState<T>>.merge(requireAllSuccess: Boolean = true): UiState<List<T>> {
@@ -90,11 +117,21 @@ public fun <T : Any> List<UiState<T>>.merge(requireAllSuccess: Boolean = true): 
     val loading = filterIsInstance<UiState.Loading<T>>()
 
     return when {
-        requireAllSuccess && success.size != size && loading.isEmpty() ->
+        requireAllSuccess && success.size != size && loading.isEmpty() -> {
             UiState.Error(IllegalStateException("Not all success"))
-        error.isNotEmpty() -> UiState.Error(error.first())
-        loading.isNotEmpty() -> UiState.Loading()
-        else -> UiState.Success(success)
+        }
+
+        error.isNotEmpty() -> {
+            UiState.Error(error.first())
+        }
+
+        loading.isNotEmpty() -> {
+            UiState.Loading()
+        }
+
+        else -> {
+            UiState.Success(success)
+        }
     }
 }
 

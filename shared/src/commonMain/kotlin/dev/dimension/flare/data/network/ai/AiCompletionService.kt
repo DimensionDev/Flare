@@ -33,17 +33,19 @@ internal class AiCompletionService(
         onDeviceCall: suspend () -> String?,
     ): String? =
         when (type) {
-            AppSettings.AiConfig.Type.OnDevice ->
+            AppSettings.AiConfig.Type.OnDevice -> {
                 if (onDeviceAI.isAvailable()) {
                     onDeviceCall()
                 } else {
                     null
                 }
+            }
 
-            is AppSettings.AiConfig.Type.OpenAI ->
+            is AppSettings.AiConfig.Type.OpenAI -> {
                 openAIService.chatCompletionOrNull(
                     config = type,
                     prompt = prompt,
                 )
+            }
         }
 }

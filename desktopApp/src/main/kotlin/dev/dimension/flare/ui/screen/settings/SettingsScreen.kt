@@ -93,12 +93,16 @@ import dev.dimension.flare.settings_ai_config_enable_pre_translation
 import dev.dimension.flare.settings_ai_config_enable_tldr
 import dev.dimension.flare.settings_ai_config_model
 import dev.dimension.flare.settings_ai_config_model_description
-import dev.dimension.flare.settings_ai_config_model_error
 import dev.dimension.flare.settings_ai_config_model_loading
 import dev.dimension.flare.settings_ai_config_model_manual_input
-import dev.dimension.flare.settings_ai_config_model_no_models
 import dev.dimension.flare.settings_ai_config_model_select
 import dev.dimension.flare.settings_ai_config_pre_translation_description
+import dev.dimension.flare.settings_ai_config_reasoning_effort
+import dev.dimension.flare.settings_ai_config_reasoning_effort_default
+import dev.dimension.flare.settings_ai_config_reasoning_effort_description
+import dev.dimension.flare.settings_ai_config_reasoning_effort_high
+import dev.dimension.flare.settings_ai_config_reasoning_effort_low
+import dev.dimension.flare.settings_ai_config_reasoning_effort_medium
 import dev.dimension.flare.settings_ai_config_server
 import dev.dimension.flare.settings_ai_config_server_hint
 import dev.dimension.flare.settings_ai_config_server_url_requirement
@@ -203,6 +207,7 @@ import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScrollBar
 import dev.dimension.flare.ui.component.Header
 import dev.dimension.flare.ui.component.RichText
+import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.isSuccess
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
@@ -213,6 +218,7 @@ import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
 import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.AiConfigPresenter
+import dev.dimension.flare.ui.presenter.settings.AiReasoningEffortOption
 import dev.dimension.flare.ui.presenter.settings.AiTranslationTestPresenter
 import dev.dimension.flare.ui.presenter.settings.AiTypeOption
 import dev.dimension.flare.ui.presenter.settings.StoragePresenter
@@ -507,6 +513,7 @@ internal fun SettingsScreen(
                             pendingDeleteAccountKey = null
                             pendingDeleteAccountLabel = null
                         }
+
                         else -> {
                             pendingDeleteAccountKey = null
                             pendingDeleteAccountLabel = null
@@ -703,15 +710,17 @@ internal fun SettingsScreen(
                                     content = {
                                         Text(
                                             when (LocalAppearanceSettings.current.avatarShape) {
-                                                AvatarShape.CIRCLE ->
+                                                AvatarShape.CIRCLE -> {
                                                     stringResource(
                                                         Res.string.settings_appearance_avatar_shape_round,
                                                     )
+                                                }
 
-                                                AvatarShape.SQUARE ->
+                                                AvatarShape.SQUARE -> {
                                                     stringResource(
                                                         Res.string.settings_appearance_avatar_shape_square,
                                                     )
+                                                }
                                             },
                                         )
                                     },
@@ -1234,7 +1243,10 @@ internal fun SettingsScreen(
                                 dialog.onConfirm(textState.text.toString())
                                 state.aiConfigState.setTextEditDialog(null)
                             }
-                            else -> state.aiConfigState.setTextEditDialog(null)
+
+                            else -> {
+                                state.aiConfigState.setTextEditDialog(null)
+                            }
                         }
                     },
                 )
@@ -1269,6 +1281,7 @@ internal fun SettingsScreen(
                         ContentDialogButton.Primary -> {
                             state.storageState.confirmImport()
                         }
+
                         else -> {
                             state.storageState.cancelImport()
                         }
@@ -1407,45 +1420,69 @@ internal fun SettingsScreen(
                             },
                         )
                         ExpanderItemSeparator()
-                        ExpanderItem(
-                            heading = { Text(stringResource(Res.string.settings_ai_config_model)) },
-                            caption = { Text(stringResource(Res.string.settings_ai_config_model_description)) },
-                            trailing = {
-                                DropDownButton(
-                                    onClick = {
-                                        state.aiConfigState.setShowModelDropdown(!state.aiConfigState.showModelDropdown)
-                                    },
-                                ) {
+                        val shouldShowManualModelInput =
+                            when (val openAIModels = state.aiConfigState.openAIModels) {
+                                is UiState.Error -> true
+                                is UiState.Success -> openAIModels.data.isEmpty()
+                                is UiState.Loading -> false
+                            }
+                        if (shouldShowManualModelInput) {
+                            ExpanderItem(
+                                heading = { Text(stringResource(Res.string.settings_ai_config_model_manual_input)) },
+                                caption = {
                                     Text(
                                         state.aiConfigState.openAIModel.ifBlank {
-                                            stringResource(Res.string.settings_ai_config_model_select)
+                                            stringResource(Res.string.settings_ai_config_value_empty_placeholder)
                                         },
                                     )
-                                }
-                                MenuFlyout(
-                                    visible = state.aiConfigState.showModelDropdown,
-                                    onDismissRequest = { state.aiConfigState.setShowModelDropdown(false) },
-                                    placement = FlyoutPlacement.BottomAlignedEnd,
-                                    modifier = Modifier.heightIn(max = 200.dp),
-                                ) {
-                                    state.aiConfigState.openAIModels
-                                        .onLoading {
-                                            MenuFlyoutItem(
-                                                text = { Text(stringResource(Res.string.settings_ai_config_model_loading)) },
-                                                onClick = {},
+                                },
+                                trailing = {
+                                    Button(
+                                        onClick = {
+                                            state.aiConfigState.setTextEditDialog(
+                                                TextEditDialogState(
+                                                    title = modelTitle,
+                                                    placeholder = modelPlaceholder,
+                                                    value = state.aiConfigState.openAIModel,
+                                                    onConfirm = state.aiConfigState::setOpenAIModel,
+                                                ),
                                             )
-                                        }.onError {
-                                            MenuFlyoutItem(
-                                                text = { Text(stringResource(Res.string.settings_ai_config_model_error)) },
-                                                onClick = {},
-                                            )
-                                        }.onSuccess { models ->
-                                            if (models.isEmpty()) {
+                                        },
+                                    ) {
+                                        Text(stringResource(Res.string.edit))
+                                    }
+                                },
+                            )
+                            ExpanderItemSeparator()
+                        } else {
+                            ExpanderItem(
+                                heading = { Text(stringResource(Res.string.settings_ai_config_model)) },
+                                caption = { Text(stringResource(Res.string.settings_ai_config_model_description)) },
+                                trailing = {
+                                    DropDownButton(
+                                        onClick = {
+                                            state.aiConfigState.setShowModelDropdown(!state.aiConfigState.showModelDropdown)
+                                        },
+                                    ) {
+                                        Text(
+                                            state.aiConfigState.openAIModel.ifBlank {
+                                                stringResource(Res.string.settings_ai_config_model_select)
+                                            },
+                                        )
+                                    }
+                                    MenuFlyout(
+                                        visible = state.aiConfigState.showModelDropdown,
+                                        onDismissRequest = { state.aiConfigState.setShowModelDropdown(false) },
+                                        placement = FlyoutPlacement.BottomAlignedEnd,
+                                        modifier = Modifier.heightIn(max = 200.dp),
+                                    ) {
+                                        state.aiConfigState.openAIModels
+                                            .onLoading {
                                                 MenuFlyoutItem(
-                                                    text = { Text(stringResource(Res.string.settings_ai_config_model_no_models)) },
+                                                    text = { Text(stringResource(Res.string.settings_ai_config_model_loading)) },
                                                     onClick = {},
                                                 )
-                                            } else {
+                                            }.onSuccess { models ->
                                                 models.forEach { model ->
                                                     MenuFlyoutItem(
                                                         text = { Text(model) },
@@ -1456,34 +1493,40 @@ internal fun SettingsScreen(
                                                     )
                                                 }
                                             }
-                                        }
-                                }
-                            },
-                        )
-                        ExpanderItemSeparator()
+                                    }
+                                },
+                            )
+                            ExpanderItemSeparator()
+                        }
                         ExpanderItem(
-                            heading = { Text(stringResource(Res.string.settings_ai_config_model_manual_input)) },
+                            heading = { Text(stringResource(Res.string.settings_ai_config_reasoning_effort)) },
                             caption = {
-                                Text(
-                                    state.aiConfigState.openAIModel.ifBlank {
-                                        stringResource(Res.string.settings_ai_config_value_empty_placeholder)
-                                    },
-                                )
+                                Text(stringResource(Res.string.settings_ai_config_reasoning_effort_description))
                             },
                             trailing = {
-                                Button(
+                                DropDownButton(
                                     onClick = {
-                                        state.aiConfigState.setTextEditDialog(
-                                            TextEditDialogState(
-                                                title = modelTitle,
-                                                placeholder = modelPlaceholder,
-                                                value = state.aiConfigState.openAIModel,
-                                                onConfirm = state.aiConfigState::setOpenAIModel,
-                                            ),
+                                        state.aiConfigState.setShowReasoningEffortDropdown(
+                                            !state.aiConfigState.showReasoningEffortDropdown,
                                         )
                                     },
                                 ) {
-                                    Text(stringResource(Res.string.edit))
+                                    Text(openAIReasoningEffortLabel(state.aiConfigState.openAIReasoningEffort))
+                                }
+                                MenuFlyout(
+                                    visible = state.aiConfigState.showReasoningEffortDropdown,
+                                    onDismissRequest = { state.aiConfigState.setShowReasoningEffortDropdown(false) },
+                                    placement = FlyoutPlacement.BottomAlignedEnd,
+                                ) {
+                                    state.aiConfigState.supportedOpenAIReasoningEfforts.forEach { effort ->
+                                        MenuFlyoutItem(
+                                            text = { Text(openAIReasoningEffortLabel(effort)) },
+                                            onClick = {
+                                                state.aiConfigState.setOpenAIReasoningEffort(effort)
+                                                state.aiConfigState.setShowReasoningEffortDropdown(false)
+                                            },
+                                        )
+                                    }
                                 }
                             },
                         )
@@ -1845,7 +1888,9 @@ internal fun SettingsScreen(
                                 )
                             }
 
-                            TranslateProviderOption.GoogleWeb -> Unit
+                            TranslateProviderOption.GoogleWeb -> {
+                                Unit
+                            }
                         }
                     }
                 }
@@ -2225,6 +2270,7 @@ private fun aiConfigPresenter() =
         val aiTranslationTestState = remember { AiTranslationTestPresenter() }.invoke()
         var showTypeDropdown by remember { mutableStateOf(false) }
         var showModelDropdown by remember { mutableStateOf(false) }
+        var showReasoningEffortDropdown by remember { mutableStateOf(false) }
         var showProviderDropdown by remember { mutableStateOf(false) }
         var showExcludedLanguagesDialog by remember { mutableStateOf(false) }
         var textEditDialog by remember { mutableStateOf<TextEditDialogState?>(null) }
@@ -2234,6 +2280,7 @@ private fun aiConfigPresenter() =
             val translationExpanded = translationExpanded
             val showTypeDropdown = showTypeDropdown
             val showModelDropdown = showModelDropdown
+            val showReasoningEffortDropdown = showReasoningEffortDropdown
             val showProviderDropdown = showProviderDropdown
             val showExcludedLanguagesDialog = showExcludedLanguagesDialog
             val textEditDialog = textEditDialog
@@ -2252,6 +2299,10 @@ private fun aiConfigPresenter() =
 
             fun setShowModelDropdown(value: Boolean) {
                 showModelDropdown = value
+            }
+
+            fun setShowReasoningEffortDropdown(value: Boolean) {
+                showReasoningEffortDropdown = value
             }
 
             fun setShowProviderDropdown(value: Boolean) {
@@ -2276,6 +2327,15 @@ private fun translateProviderOptionLabel(provider: TranslateProviderOption): Str
         TranslateProviderOption.DeepL -> stringResource(Res.string.settings_ai_config_translate_provider_deepl)
         TranslateProviderOption.GoogleCloud -> stringResource(Res.string.settings_ai_config_translate_provider_google_cloud)
         TranslateProviderOption.LibreTranslate -> stringResource(Res.string.settings_ai_config_translate_provider_libretranslate)
+    }
+
+@Composable
+private fun openAIReasoningEffortLabel(option: AiReasoningEffortOption): String =
+    when (option) {
+        AiReasoningEffortOption.Default -> stringResource(Res.string.settings_ai_config_reasoning_effort_default)
+        AiReasoningEffortOption.Low -> stringResource(Res.string.settings_ai_config_reasoning_effort_low)
+        AiReasoningEffortOption.Medium -> stringResource(Res.string.settings_ai_config_reasoning_effort_medium)
+        AiReasoningEffortOption.High -> stringResource(Res.string.settings_ai_config_reasoning_effort_high)
     }
 
 private data class TextEditDialogState(
@@ -2394,10 +2454,13 @@ private fun ExcludedLanguagesDialog(
         closeButtonText = stringResource(Res.string.cancel),
         onButtonClick = {
             when (it) {
-                ContentDialogButton.Primary ->
+                ContentDialogButton.Primary -> {
                     onConfirm(options.map(LanguageOption::tag).filter { tag -> tag in selectedTags }.toImmutableList())
+                }
 
-                else -> onDismiss()
+                else -> {
+                    onDismiss()
+                }
             }
         },
     )

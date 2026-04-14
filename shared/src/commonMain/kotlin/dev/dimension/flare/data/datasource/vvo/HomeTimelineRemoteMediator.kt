@@ -32,7 +32,9 @@ internal class HomeTimelineRemoteMediator(
 
         val response =
             when (request) {
-                PagingRequest.Refresh -> service.getFriendsTimeline()
+                PagingRequest.Refresh -> {
+                    service.getFriendsTimeline()
+                }
 
                 is PagingRequest.Prepend -> {
                     return PagingResult(

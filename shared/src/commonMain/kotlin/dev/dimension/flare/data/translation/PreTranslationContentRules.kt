@@ -81,11 +81,17 @@ internal object PreTranslationContentRules {
         var hasVisibleContent = false
         richText.renderRuns.forEach { content ->
             when (content) {
-                is RenderContent.BlockImage -> hasVisibleContent = true
-                is RenderContent.Text ->
+                is RenderContent.BlockImage -> {
+                    hasVisibleContent = true
+                }
+
+                is RenderContent.Text -> {
                     content.runs.forEach { run ->
                         when (run) {
-                            is RenderRun.Image -> hasVisibleContent = true
+                            is RenderRun.Image -> {
+                                hasVisibleContent = true
+                            }
+
                             is RenderRun.Text -> {
                                 if (run.text.isBlank()) {
                                     return@forEach
@@ -97,6 +103,7 @@ internal object PreTranslationContentRules {
                             }
                         }
                     }
+                }
             }
         }
         return hasVisibleContent
@@ -150,7 +157,10 @@ internal object PreTranslationContentRules {
         while (index < text.length) {
             val current = text[index]
             when {
-                current.isWhitespace() -> index += 1
+                current.isWhitespace() -> {
+                    index += 1
+                }
+
                 current in '\uD83C'..'\uD83E' && index + 1 < text.length && text[index + 1].isLowSurrogate() -> {
                     hasEmoji = true
                     index += 2
@@ -164,7 +174,9 @@ internal object PreTranslationContentRules {
                     index += 1
                 }
 
-                else -> return false
+                else -> {
+                    return false
+                }
             }
         }
         return hasEmoji

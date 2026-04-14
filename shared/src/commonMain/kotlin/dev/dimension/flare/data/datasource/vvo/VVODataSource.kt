@@ -152,7 +152,7 @@ internal class VVODataSource(
 
     override fun notification(type: NotificationFilter): RemoteLoader<UiTimelineV2> =
         when (type) {
-            NotificationFilter.All ->
+            NotificationFilter.All -> {
                 MentionRemoteMediator(
                     service = service,
                     accountKey = accountKey,
@@ -160,8 +160,9 @@ internal class VVODataSource(
                         notificationBadgeStore.clearAll()
                     },
                 )
+            }
 
-            NotificationFilter.Mention ->
+            NotificationFilter.Mention -> {
                 MentionRemoteMediator(
                     service = service,
                     accountKey = accountKey,
@@ -169,8 +170,9 @@ internal class VVODataSource(
                         notificationBadgeStore.clear(NotificationFilter.Mention)
                     },
                 )
+            }
 
-            NotificationFilter.Comment ->
+            NotificationFilter.Comment -> {
                 CommentPagingSource(
                     service = service,
                     accountKey = accountKey,
@@ -178,8 +180,9 @@ internal class VVODataSource(
                         notificationBadgeStore.clear(NotificationFilter.Comment)
                     },
                 )
+            }
 
-            NotificationFilter.Like ->
+            NotificationFilter.Like -> {
                 LikePagingSource(
                     service = service,
                     accountKey = accountKey,
@@ -187,6 +190,7 @@ internal class VVODataSource(
                         notificationBadgeStore.clear(NotificationFilter.Like)
                     },
                 )
+            }
         }
 
     override val supportedNotificationFilter: List<NotificationFilter>
@@ -216,12 +220,15 @@ internal class VVODataSource(
                 when (request) {
                     is PagingRequest.Prepend,
                     is PagingRequest.Append,
-                    ->
+                    -> {
                         return PagingResult(
                             endOfPaginationReached = true,
                         )
+                    }
 
-                    PagingRequest.Refresh -> Unit
+                    PagingRequest.Refresh -> {
+                        Unit
+                    }
                 }
 
                 val status = loadStatusDetail(statusKey)

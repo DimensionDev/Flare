@@ -189,17 +189,19 @@ internal data class XQTTimeline(
 internal fun List<InstructionUnion>.tweets(includePin: Boolean = true): List<XQTTimeline> =
     flatMap { union ->
         when (union) {
-            is TimelineAddEntries ->
+            is TimelineAddEntries -> {
                 union.propertyEntries
+            }
 
-            is TimelinePinEntry ->
+            is TimelinePinEntry -> {
                 if (!includePin) {
                     emptyList()
                 } else {
                     listOf(union.entry)
                 }
+            }
 
-            is TimelineAddToModule ->
+            is TimelineAddToModule -> {
                 union.moduleItems.mapNotNull {
                     if (it.item.itemContent is TimelineTweet &&
                         it.item.itemContent.tweetResults.result is Tweet
@@ -219,12 +221,18 @@ internal fun List<InstructionUnion>.tweets(includePin: Boolean = true): List<XQT
                         null
                     }
                 }
+            }
 
-            else -> emptyList()
+            else -> {
+                emptyList()
+            }
         }
     }.flatMap { entry ->
         when (entry.content) {
-            is TimelineTimelineCursor -> listOf()
+            is TimelineTimelineCursor -> {
+                listOf()
+            }
+
             is TimelineTimelineItem -> {
                 listOfNotNull(
                     if (entry.content.itemContent is TimelineTweet) {
@@ -294,16 +302,23 @@ internal fun List<InstructionUnion>.tweets(includePin: Boolean = true): List<XQT
                                 }
                             }.groupBy {
                                 when (it.tweets.tweetResults.result) {
-                                    is Tweet ->
+                                    is Tweet -> {
                                         it.tweets.tweetResults.result.legacy
                                             ?.conversationIdStr
+                                    }
 
-                                    is TweetTombstone -> null
-                                    is TweetWithVisibilityResults ->
+                                    is TweetTombstone -> {
+                                        null
+                                    }
+
+                                    is TweetWithVisibilityResults -> {
                                         it.tweets.tweetResults.result.tweet.legacy
                                             ?.conversationIdStr
+                                    }
 
-                                    null -> null
+                                    null -> {
+                                        null
+                                    }
                                 }
                             }.map { (_, items) ->
                                 val parents = items.take(items.size - 1)
@@ -325,7 +340,9 @@ internal fun List<InstructionUnion>.tweets(includePin: Boolean = true): List<XQT
                 }
             }
 
-            null -> listOf()
+            null -> {
+                listOf()
+            }
         }
     }.filter {
         it.tweets.promotedMetadata == null
@@ -334,21 +351,27 @@ internal fun List<InstructionUnion>.tweets(includePin: Boolean = true): List<XQT
 internal fun List<InstructionUnion>.cursor() =
     flatMap {
         when (it) {
-            is TimelineAddEntries ->
+            is TimelineAddEntries -> {
                 it.propertyEntries.mapNotNull {
                     when (it.content) {
-                        is TimelineTimelineCursor ->
+                        is TimelineTimelineCursor -> {
                             if (it.content.cursorType == CursorType.bottom) {
                                 it.content.value
                             } else {
                                 null
                             }
+                        }
 
-                        else -> null
+                        else -> {
+                            null
+                        }
                     }
                 }
+            }
 
-            else -> emptyList()
+            else -> {
+                emptyList()
+            }
         }
     }.firstOrNull()
 
@@ -422,22 +445,35 @@ internal fun TopLevel.tweets(): List<XQTTimeline> =
 internal fun List<InstructionUnion>.users(): List<User> =
     flatMap { union ->
         when (union) {
-            is TimelineAddEntries ->
+            is TimelineAddEntries -> {
                 union.propertyEntries
                     .flatMap { entry ->
                         when (entry.content) {
-                            null -> emptyList()
-                            is TimelineTimelineCursor -> emptyList()
-                            is TimelineTimelineItem -> listOf(entry.content.itemContent)
-                            is TimelineTimelineModule ->
+                            null -> {
+                                emptyList()
+                            }
+
+                            is TimelineTimelineCursor -> {
+                                emptyList()
+                            }
+
+                            is TimelineTimelineItem -> {
+                                listOf(entry.content.itemContent)
+                            }
+
+                            is TimelineTimelineModule -> {
                                 entry.content.items
                                     ?.map {
                                         it.item.itemContent
                                     }.orEmpty()
+                            }
                         }
                     }
+            }
 
-            else -> emptyList()
+            else -> {
+                emptyList()
+            }
         }
     }.mapNotNull { content ->
         when (content) {

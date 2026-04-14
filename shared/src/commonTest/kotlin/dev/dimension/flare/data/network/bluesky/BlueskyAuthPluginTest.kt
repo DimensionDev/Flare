@@ -60,22 +60,27 @@ class BlueskyAuthPluginTest {
                             )
                         }
 
-                        else ->
+                        else -> {
                             when (authorization) {
-                                "Bearer access-old" ->
+                                "Bearer access-old" -> {
                                     jsonResponse(
                                         HttpStatusCode.Unauthorized,
                                         """{"error":"ExpiredToken","message":"token expired"}""",
                                     )
+                                }
 
-                                "Bearer access-new" ->
+                                "Bearer access-new" -> {
                                     jsonResponse(
                                         HttpStatusCode.OK,
                                         """{"ok":true}""",
                                     )
+                                }
 
-                                else -> error("Unexpected authorization header: $authorization")
+                                else -> {
+                                    error("Unexpected authorization header: $authorization")
+                                }
                             }
+                        }
                     }
                 }
 
@@ -125,11 +130,13 @@ class BlueskyAuthPluginTest {
                                     )
                                 }
 
-                                else -> error("Unexpected refresh call count: $refreshCalls")
+                                else -> {
+                                    error("Unexpected refresh call count: $refreshCalls")
+                                }
                             }
                         }
 
-                        else ->
+                        else -> {
                             when (authorization) {
                                 "Bearer access-old" -> {
                                     expiredCalls += 1
@@ -144,14 +151,18 @@ class BlueskyAuthPluginTest {
                                     )
                                 }
 
-                                "Bearer access-new" ->
+                                "Bearer access-new" -> {
                                     jsonResponse(
                                         HttpStatusCode.OK,
                                         """{"ok":true}""",
                                     )
+                                }
 
-                                else -> error("Unexpected authorization header: $authorization")
+                                else -> {
+                                    error("Unexpected authorization header: $authorization")
+                                }
                             }
+                        }
                     }
                 }
 
@@ -195,19 +206,23 @@ class BlueskyAuthPluginTest {
                     onTokensChanged = { credentialFlow.value = it },
                 ) { path, authorization ->
                     when (authorization) {
-                        "Bearer access-old" ->
+                        "Bearer access-old" -> {
                             jsonResponse(
                                 HttpStatusCode.OK,
                                 """{"ok":"old"}""",
                             )
+                        }
 
-                        "Bearer access-new" ->
+                        "Bearer access-new" -> {
                             jsonResponse(
                                 HttpStatusCode.OK,
                                 """{"ok":"new"}""",
                             )
+                        }
 
-                        else -> error("Unexpected authorization header: $authorization")
+                        else -> {
+                            error("Unexpected authorization header: $authorization")
+                        }
                     }
                 }
 

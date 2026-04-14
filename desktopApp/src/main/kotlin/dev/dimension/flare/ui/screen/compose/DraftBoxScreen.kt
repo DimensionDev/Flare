@@ -188,17 +188,18 @@ private fun DraftBoxCard(
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     item.medias.take(4).forEach { media ->
                         when (media.type) {
-                            UiDraftMediaType.IMAGE ->
+                            UiDraftMediaType.IMAGE -> {
                                 NetworkImage(
                                     model = media.cachePath,
                                     contentDescription = null,
                                     modifier = Modifier.size(60.dp),
                                     contentScale = ContentScale.Crop,
                                 )
+                            }
 
                             UiDraftMediaType.VIDEO,
                             UiDraftMediaType.OTHER,
-                            ->
+                            -> {
                                 Box(
                                     modifier =
                                         Modifier
@@ -216,6 +217,7 @@ private fun DraftBoxCard(
                                         modifier = Modifier.align(Alignment.Center),
                                     )
                                 }
+                            }
                         }
                     }
                 }

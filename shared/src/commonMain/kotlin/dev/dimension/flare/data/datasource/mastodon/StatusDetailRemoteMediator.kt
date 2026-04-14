@@ -52,10 +52,13 @@ internal class StatusDetailRemoteMediator(
                         context.ancestors.orEmpty() + listOf(current) + context.descendants.orEmpty()
                     }
                 }
-                is PagingRequest.Prepend ->
+
+                is PagingRequest.Prepend -> {
                     return PagingResult(
                         endOfPaginationReached = true,
                     )
+                }
+
                 PagingRequest.Refresh -> {
                     val current =
                         service.lookupStatus(

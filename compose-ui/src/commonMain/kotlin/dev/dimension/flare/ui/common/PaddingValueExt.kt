@@ -33,9 +33,11 @@ private class AdditionalPaddingValues(
 
     override fun equals(other: Any?): Boolean =
         this === other ||
-            other is AdditionalPaddingValues &&
-            base == other.base &&
-            additional == other.additional
+            (
+                other is AdditionalPaddingValues &&
+                    base == other.base &&
+                    additional == other.additional
+            )
 
     override fun hashCode(): Int {
         var result = base.hashCode()

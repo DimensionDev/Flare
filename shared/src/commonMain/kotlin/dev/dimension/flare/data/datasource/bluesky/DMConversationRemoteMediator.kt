@@ -49,11 +49,13 @@ internal class DMConversationRemoteMediator(
                             ),
                     )
                 }
+
                 LoadType.PREPEND -> {
                     return MediatorResult.Success(
                         endOfPaginationReached = true,
                     )
                 }
+
                 LoadType.APPEND -> {
                     service.getMessages(
                         params =

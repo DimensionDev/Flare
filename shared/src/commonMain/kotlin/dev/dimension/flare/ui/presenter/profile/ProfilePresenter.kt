@@ -147,7 +147,7 @@ public class ProfilePresenter(
                 .profileTabs(actualUserKey)
                 .map {
                     when (it) {
-                        ProfileTab.Media ->
+                        ProfileTab.Media -> {
                             ProfileState.Tab.Media(
                                 presenter =
                                     ProfileMediaPresenter(
@@ -155,6 +155,7 @@ public class ProfilePresenter(
                                         userKey = actualUserKey,
                                     ),
                             )
+                        }
 
                         is ProfileTab.Timeline -> {
                             ProfileState.Tab.Timeline(

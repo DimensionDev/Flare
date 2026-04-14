@@ -38,10 +38,13 @@ internal class DMListRemoteMediator(
                                 ),
                         ).requireResponse()
                 }
-                LoadType.PREPEND ->
+
+                LoadType.PREPEND -> {
                     return MediatorResult.Success(
                         endOfPaginationReached = true,
                     )
+                }
+
                 LoadType.APPEND -> {
                     service
                         .listConvos(

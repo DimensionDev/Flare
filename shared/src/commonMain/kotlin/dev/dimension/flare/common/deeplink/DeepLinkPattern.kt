@@ -108,14 +108,23 @@ private typealias TypeParser = (String) -> Any
 private fun getTypeParser(kind: SerialKind): TypeParser =
     when (kind) {
         PrimitiveKind.STRING -> Any::toString
+
         PrimitiveKind.INT -> String::toInt
+
         PrimitiveKind.BOOLEAN -> String::toBoolean
+
         PrimitiveKind.BYTE -> String::toByte
+
         PrimitiveKind.CHAR -> String::toCharArray
+
         PrimitiveKind.DOUBLE -> String::toDouble
+
         PrimitiveKind.FLOAT -> String::toFloat
+
         PrimitiveKind.LONG -> String::toLong
+
         PrimitiveKind.SHORT -> String::toShort
+
         else -> throw IllegalArgumentException(
             "Unsupported argument type of SerialKind:$kind. The argument type must be a Primitive.",
         )

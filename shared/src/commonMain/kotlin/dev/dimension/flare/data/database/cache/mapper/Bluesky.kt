@@ -76,20 +76,27 @@ private fun ConvoView.toDbMessageRoom(host: String) =
         platformType = PlatformType.Bluesky,
         messageKey =
             when (val message = lastMessage) {
-                is ConvoViewLastMessageUnion.MessageView ->
+                is ConvoViewLastMessageUnion.MessageView -> {
                     MicroBlogKey(
                         id = message.value.id,
                         host = host,
                     )
+                }
 
-                is ConvoViewLastMessageUnion.DeletedMessageView ->
+                is ConvoViewLastMessageUnion.DeletedMessageView -> {
                     MicroBlogKey(
                         id = message.value.id,
                         host = host,
                     )
+                }
 
-                null -> null
-                is ConvoViewLastMessageUnion.Unknown -> null
+                null -> {
+                    null
+                }
+
+                is ConvoViewLastMessageUnion.Unknown -> {
+                    null
+                }
             },
     )
 

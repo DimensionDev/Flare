@@ -115,10 +115,13 @@ private class PullToRefreshNestedScrollConnection(
         when {
             // If pulling isn't enabled, return zero
             !enabled -> Offset.Zero
+
             // If we're refreshing, consume y
             state.isRefreshing -> Offset(0f, available.y)
+
             // If the user is pulling up, handle it
             source == NestedScrollSource.UserInput && available.y < 0 -> dragUp(available)
+
             else -> Offset.Zero
         }
 
@@ -146,10 +149,13 @@ private class PullToRefreshNestedScrollConnection(
         when {
             // If pulling isn't enabled, return zero
             !enabled -> Offset.Zero
+
             // If we're refreshing, return zero
             state.isRefreshing -> Offset.Zero
+
             // If the user is pulling down and there's y remaining, handle it
             source == NestedScrollSource.UserInput && available.y > 0 -> dragDown(available)
+
             else -> Offset.Zero
         }
 
@@ -174,6 +180,7 @@ private class PullToRefreshNestedScrollConnection(
         return when {
             // If we're pulling/refreshing/resting, consume velocity
             state.contentOffset != 0f -> available
+
             // Allow the scrolling layout to fling
             else -> Velocity.Zero
         }

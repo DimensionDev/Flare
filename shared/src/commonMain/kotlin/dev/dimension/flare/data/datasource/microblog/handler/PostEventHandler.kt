@@ -2,6 +2,7 @@ package dev.dimension.flare.data.datasource.microblog.handler
 
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.connect
+import dev.dimension.flare.data.database.cache.model.DbStatus
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.DatabaseUpdater
 import dev.dimension.flare.data.datasource.microblog.PostEvent
@@ -114,7 +115,7 @@ internal class PostEventHandler(
             )
             database.pagingTimelineDao().deleteStatus(
                 accountType = dbAccountType,
-                statusKey = postKey,
+                statusId = DbStatus.createId(dbAccountType, postKey),
             )
         }
     }

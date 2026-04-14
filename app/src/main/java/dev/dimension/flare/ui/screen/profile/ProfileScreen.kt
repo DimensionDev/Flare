@@ -691,12 +691,15 @@ private val ProfileTabItem.title: String
     @Composable
     get() =
         when (this) {
-            is ProfileTabItem.Timeline ->
+            is ProfileTabItem.Timeline -> {
                 when (type) {
                     ProfileTab.Timeline.Type.Status -> stringResource(R.string.profile_tab_timeline)
                     ProfileTab.Timeline.Type.StatusWithReplies -> stringResource(R.string.profile_tab_timeline_with_reply)
                     ProfileTab.Timeline.Type.Likes -> stringResource(R.string.profile_tab_likes)
                 }
+            }
 
-            is ProfileTabItem.Media -> stringResource(R.string.profile_tab_media)
+            is ProfileTabItem.Media -> {
+                stringResource(R.string.profile_tab_media)
+            }
         }

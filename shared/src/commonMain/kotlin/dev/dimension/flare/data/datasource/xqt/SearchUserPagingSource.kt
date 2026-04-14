@@ -24,13 +24,19 @@ internal class SearchUserPagingSource(
     ): PagingResult<UiProfile> {
         val cursor =
             when (request) {
-                PagingRequest.Refresh -> null
+                PagingRequest.Refresh -> {
+                    null
+                }
+
                 is PagingRequest.Prepend -> {
                     return PagingResult(
                         endOfPaginationReached = true,
                     )
                 }
-                is PagingRequest.Append -> request.nextKey
+
+                is PagingRequest.Append -> {
+                    request.nextKey
+                }
             }
         val response =
             service

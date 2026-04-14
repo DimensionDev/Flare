@@ -98,7 +98,7 @@ public fun DMItem(
                     }
                 }
                 when (val message = item.content) {
-                    is UiDMItem.Message.Text ->
+                    is UiDMItem.Message.Text -> {
                         RichText(
                             text = message.text,
                             modifier =
@@ -117,15 +117,17 @@ public fun DMItem(
                                     ),
                             color = PlatformTheme.colorScheme.onCard,
                         )
+                    }
 
-                    UiDMItem.Message.Deleted ->
+                    UiDMItem.Message.Deleted -> {
                         PlatformText(
                             text = stringResource(Res.string.dm_deleted),
                             style = PlatformTheme.typography.caption,
                             color = PlatformTheme.colorScheme.onCard,
                         )
+                    }
 
-                    is UiDMItem.Message.Media ->
+                    is UiDMItem.Message.Media -> {
                         MediaItem(
                             media = message.media,
                             modifier =
@@ -143,8 +145,9 @@ public fun DMItem(
                                         }
                                     },
                         )
+                    }
 
-                    is UiDMItem.Message.Status ->
+                    is UiDMItem.Message.Status -> {
                         CommonStatusComponent(
                             message.status,
                             modifier =
@@ -160,6 +163,7 @@ public fun DMItem(
                                         shape = PlatformTheme.shapes.large,
                                     ).padding(8.dp),
                         )
+                    }
                 }
             }
         }

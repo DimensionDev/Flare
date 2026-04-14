@@ -64,21 +64,25 @@ internal class PostHandler(
                     translationDisplayFlow,
                 ) { status, paging, translationDisplayOptions ->
                     when {
-                        paging != null ->
+                        paging != null -> {
                             TimelinePagingMapper.toUi(
                                 item = paging,
                                 pagingKey = pagingKey,
                                 translationDisplayOptions = translationDisplayOptions,
                             )
+                        }
 
-                        status != null ->
+                        status != null -> {
                             TimelinePagingMapper.toUi(
                                 item = status,
                                 pagingKey = pagingKey,
                                 translationDisplayOptions = translationDisplayOptions,
                             )
+                        }
 
-                        else -> null
+                        else -> {
+                            null
+                        }
                     }
                 }.distinctUntilChanged()
                     .mapNotNull { it }
@@ -95,7 +99,7 @@ internal class PostHandler(
                     val dbAccountType = accountType as DbAccountType
                     database.pagingTimelineDao().deleteStatus(
                         accountType = dbAccountType,
-                        statusKey = postKey,
+                        statusId = DbStatus.createId(dbAccountType, postKey),
                     )
                     database.statusDao().delete(
                         statusKey = postKey,

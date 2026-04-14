@@ -368,7 +368,10 @@ private fun presenter(
                         }.invoke()
                     }
                 }
-                else -> null
+
+                else -> {
+                    null
+                }
             }
         } else {
             null

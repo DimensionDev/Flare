@@ -219,11 +219,15 @@ fun ComposeDialog(
                             }
                         }
                     }
+
                     ContentDialogButton.Secondary -> {
                         showCloseConfirmDialog = false
                         onBack?.invoke()
                     }
-                    ContentDialogButton.Close -> Unit
+
+                    ContentDialogButton.Close -> {
+                        Unit
+                    }
                 }
             },
         )
@@ -1405,37 +1409,47 @@ internal enum class PollExpiration(
 internal val UiTimelineV2.Post.Visibility.localName: StringResource
     get() =
         when (this) {
-            UiTimelineV2.Post.Visibility.Public ->
+            UiTimelineV2.Post.Visibility.Public -> {
                 Res.string.misskey_visibility_public
+            }
 
-            UiTimelineV2.Post.Visibility.Home ->
+            UiTimelineV2.Post.Visibility.Home -> {
                 Res.string.misskey_visibility_home
+            }
 
-            UiTimelineV2.Post.Visibility.Followers ->
+            UiTimelineV2.Post.Visibility.Followers -> {
                 Res.string.misskey_visibility_followers
+            }
 
-            UiTimelineV2.Post.Visibility.Specified ->
+            UiTimelineV2.Post.Visibility.Specified -> {
                 Res.string.misskey_visibility_specified
+            }
 
-            UiTimelineV2.Post.Visibility.Channel ->
+            UiTimelineV2.Post.Visibility.Channel -> {
                 Res.string.misskey_visibility_public
+            }
         }
 
 internal val UiTimelineV2.Post.Visibility.localDescription: StringResource
     get() =
         when (this) {
-            UiTimelineV2.Post.Visibility.Public ->
+            UiTimelineV2.Post.Visibility.Public -> {
                 Res.string.misskey_visibility_public_description
+            }
 
-            UiTimelineV2.Post.Visibility.Home ->
+            UiTimelineV2.Post.Visibility.Home -> {
                 Res.string.misskey_visibility_home_description
+            }
 
-            UiTimelineV2.Post.Visibility.Followers ->
+            UiTimelineV2.Post.Visibility.Followers -> {
                 Res.string.misskey_visibility_followers_description
+            }
 
-            UiTimelineV2.Post.Visibility.Specified ->
+            UiTimelineV2.Post.Visibility.Specified -> {
                 Res.string.misskey_visibility_specified_description
+            }
 
-            UiTimelineV2.Post.Visibility.Channel ->
+            UiTimelineV2.Post.Visibility.Channel -> {
                 Res.string.misskey_visibility_public_description
+            }
         }

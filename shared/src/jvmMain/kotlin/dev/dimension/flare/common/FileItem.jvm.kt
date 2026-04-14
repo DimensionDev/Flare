@@ -18,12 +18,14 @@ public actual class FileItem(
                     lowerName.endsWith(".png") ||
                     lowerName.endsWith(".webp") ||
                     lowerName.endsWith(".gif") -> FileType.Image
+
                 lowerName.endsWith(
                     ".mp4",
                 ) ||
                     lowerName.endsWith(".mov") ||
                     lowerName.endsWith(".avi") ||
                     lowerName.endsWith(".mkv") -> FileType.Video
+
                 else -> FileType.Other
             }
         }

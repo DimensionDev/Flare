@@ -54,13 +54,17 @@ internal fun UiRichText.toTranslationDocument(targetLanguage: String? = null): T
                     tokens =
                         block.pieces.mapNotNull { piece ->
                             when (piece) {
-                                is TranslationProjectionPiece.StaticImage -> null
-                                is TranslationProjectionPiece.Token ->
+                                is TranslationProjectionPiece.StaticImage -> {
+                                    null
+                                }
+
+                                is TranslationProjectionPiece.Token -> {
                                     TranslationToken(
                                         id = piece.id,
                                         kind = piece.kind,
                                         text = piece.text,
                                     )
+                                }
                             }
                         },
                 )
@@ -93,7 +97,10 @@ internal fun UiRichText.applyTranslationDocument(document: TranslationDocument):
     val translatedContents =
         renderRuns.map { content ->
             when (content) {
-                is RenderContent.BlockImage -> content
+                is RenderContent.BlockImage -> {
+                    content
+                }
+
                 is RenderContent.Text -> {
                     val projectedBlock =
                         projectedBlocksByContent[content]
@@ -127,7 +134,10 @@ private fun applyTranslatedBlock(
         buildList {
             projectedBlock.pieces.forEach { piece ->
                 when (piece) {
-                    is TranslationProjectionPiece.StaticImage -> add(piece.run)
+                    is TranslationProjectionPiece.StaticImage -> {
+                        add(piece.run)
+                    }
+
                     is TranslationProjectionPiece.Token -> {
                         val translatedToken =
                             translatedTokens[piece.id]
@@ -188,7 +198,10 @@ private fun UiRichText.toProjectionBlocks(): List<TranslationProjectionBlock> =
         var nextBlockId = 0
         renderRuns.forEach { content ->
             when (content) {
-                is RenderContent.BlockImage -> Unit
+                is RenderContent.BlockImage -> {
+                    Unit
+                }
+
                 is RenderContent.Text -> {
                     val pieces = content.toProjectionPieces()
                     if (pieces.any { it is TranslationProjectionPiece.Token && it.kind == TranslationTokenKind.Translatable }) {
@@ -211,7 +224,10 @@ private fun RenderContent.Text.toProjectionPieces(): List<TranslationProjectionP
     var nextTokenId = 0
     runs.forEach { run ->
         when (run) {
-            is RenderRun.Image -> pieces.add(TranslationProjectionPiece.StaticImage(run))
+            is RenderRun.Image -> {
+                pieces.add(TranslationProjectionPiece.StaticImage(run))
+            }
+
             is RenderRun.Text -> {
                 tokenizeTranslationText(run.text, run.style).forEach { (kind, text) ->
                     if (text.isEmpty()) {

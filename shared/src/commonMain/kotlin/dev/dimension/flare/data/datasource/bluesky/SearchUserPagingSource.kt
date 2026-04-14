@@ -27,7 +27,7 @@ internal class SearchUserPagingSource(
                     )
                 }
 
-                PagingRequest.Refresh ->
+                PagingRequest.Refresh -> {
                     service
                         .searchActors(
                             SearchActorsQueryParams(
@@ -35,8 +35,9 @@ internal class SearchUserPagingSource(
                                 limit = pageSize.toLong(),
                             ),
                         ).requireResponse()
+                }
 
-                is PagingRequest.Append ->
+                is PagingRequest.Append -> {
                     service
                         .searchActors(
                             SearchActorsQueryParams(
@@ -45,6 +46,7 @@ internal class SearchUserPagingSource(
                                 cursor = request.nextKey,
                             ),
                         ).requireResponse()
+                }
             }
 
         return PagingResult(

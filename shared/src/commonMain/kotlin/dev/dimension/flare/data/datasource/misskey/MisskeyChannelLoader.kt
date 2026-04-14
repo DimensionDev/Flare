@@ -43,29 +43,32 @@ internal class MisskeyChannelLoader(
 
         val result =
             when (source) {
-                Source.Followed ->
+                Source.Followed -> {
                     service.channelsFollowed(
                         ChannelsFollowedRequest(
                             untilId = untilId,
                             limit = pageSize,
                         ),
                     )
+                }
 
-                Source.MyFavorites ->
+                Source.MyFavorites -> {
                     service.channelsMyFavorites(
                         ChannelsFollowedRequest(
                             untilId = untilId,
                             limit = pageSize,
                         ),
                     )
+                }
 
-                Source.Owned ->
+                Source.Owned -> {
                     service.channelsOwned(
                         ChannelsFollowedRequest(
                             untilId = untilId,
                             limit = pageSize,
                         ),
                     )
+                }
             }.map {
                 it.render(accountKey)
             }.toImmutableList()

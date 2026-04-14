@@ -28,7 +28,7 @@ internal class FollowingPagingSource(
                     )
                 }
 
-                PagingRequest.Refresh ->
+                PagingRequest.Refresh -> {
                     service
                         .getFollows(
                             params =
@@ -37,8 +37,9 @@ internal class FollowingPagingSource(
                                     limit = pageSize.toLong(),
                                 ),
                         ).requireResponse()
+                }
 
-                is PagingRequest.Append ->
+                is PagingRequest.Append -> {
                     service
                         .getFollows(
                             params =
@@ -48,6 +49,7 @@ internal class FollowingPagingSource(
                                     cursor = request.nextKey,
                                 ),
                         ).requireResponse()
+                }
             }
 
         return PagingResult(

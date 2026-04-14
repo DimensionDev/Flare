@@ -66,36 +66,44 @@ internal fun Notification.render(accountKey: MicroBlogKey): UiTimelineV2 {
             UiTimelineV2.Message.Type.Unknown(rawType = "")
         } else {
             when (type) {
-                NotificationTypes.Follow ->
+                NotificationTypes.Follow -> {
                     UiTimelineV2.Message.Type.Localized.MessageId.Follow
+                }
 
-                NotificationTypes.Favourite ->
+                NotificationTypes.Favourite -> {
                     UiTimelineV2.Message.Type.Localized.MessageId
                         .Favourite
+                }
 
-                NotificationTypes.Reblog ->
+                NotificationTypes.Reblog -> {
                     UiTimelineV2.Message.Type.Localized.MessageId
                         .Repost
+                }
 
-                NotificationTypes.Mention ->
+                NotificationTypes.Mention -> {
                     UiTimelineV2.Message.Type.Localized.MessageId
                         .Mention
+                }
 
-                NotificationTypes.Poll ->
+                NotificationTypes.Poll -> {
                     UiTimelineV2.Message.Type.Localized.MessageId
                         .PollEnded
+                }
 
-                NotificationTypes.FollowRequest ->
+                NotificationTypes.FollowRequest -> {
                     UiTimelineV2.Message.Type.Localized.MessageId
                         .FollowRequest
+                }
 
-                NotificationTypes.Status ->
+                NotificationTypes.Status -> {
                     UiTimelineV2.Message.Type.Localized.MessageId
                         .NewPost
+                }
 
-                NotificationTypes.Update ->
+                NotificationTypes.Update -> {
                     UiTimelineV2.Message.Type.Localized.MessageId
                         .PostUpdated
+                }
             }.let {
                 UiTimelineV2.Message.Type.Localized(it)
             }
@@ -294,8 +302,13 @@ private fun Status.renderStatus(
                     }
                 }
 
-                QuoteApproval.CurrentUser.Denied -> false
-                QuoteApproval.CurrentUser.Unknown -> false
+                QuoteApproval.CurrentUser.Denied -> {
+                    false
+                }
+
+                QuoteApproval.CurrentUser.Unknown -> {
+                    false
+                }
             }
         } else {
             false
@@ -845,7 +858,7 @@ internal fun ActionMenu.Companion.mastodonBookmark(
 
 private fun Attachment.toUi(sensitive: Boolean): UiMedia? =
     when (type) {
-        MediaType.Image ->
+        MediaType.Image -> {
             UiMedia.Image(
                 url = url.orEmpty(),
                 previewUrl = previewURL.orEmpty(),
@@ -854,8 +867,9 @@ private fun Attachment.toUi(sensitive: Boolean): UiMedia? =
                 height = meta?.height?.toFloat() ?: meta?.original?.height?.toFloat() ?: 0f,
                 sensitive = sensitive,
             )
+        }
 
-        MediaType.GifV ->
+        MediaType.GifV -> {
             UiMedia.Video(
                 url = url.orEmpty(),
                 thumbnailUrl = previewURL.orEmpty(),
@@ -863,8 +877,9 @@ private fun Attachment.toUi(sensitive: Boolean): UiMedia? =
                 width = meta?.width?.toFloat() ?: meta?.original?.width?.toFloat() ?: 0f,
                 height = meta?.height?.toFloat() ?: meta?.original?.height?.toFloat() ?: 0f,
             )
+        }
 
-        MediaType.Video ->
+        MediaType.Video -> {
             UiMedia.Video(
                 url = url.orEmpty(),
                 thumbnailUrl = previewURL.orEmpty(),
@@ -872,15 +887,17 @@ private fun Attachment.toUi(sensitive: Boolean): UiMedia? =
                 width = meta?.width?.toFloat() ?: meta?.original?.width?.toFloat() ?: 0f,
                 height = meta?.height?.toFloat() ?: meta?.original?.height?.toFloat() ?: 0f,
             )
+        }
 
-        MediaType.Audio ->
+        MediaType.Audio -> {
             UiMedia.Audio(
                 url = url.orEmpty(),
                 description = description,
                 previewUrl = previewURL,
             )
+        }
 
-        else ->
+        else -> {
             UiMedia.Image(
                 url = url.orEmpty(),
                 previewUrl = previewURL.orEmpty(),
@@ -889,6 +906,7 @@ private fun Attachment.toUi(sensitive: Boolean): UiMedia? =
                 height = meta?.height?.toFloat() ?: meta?.original?.height?.toFloat() ?: 0f,
                 sensitive = sensitive,
             )
+        }
     }
 
 internal fun Account.render(
@@ -1039,7 +1057,9 @@ private fun updateHtmlTagToken(
                 )
             }
 
-            else -> Unit
+            else -> {
+                Unit
+            }
         }
     }
     node.childNodes().forEach {

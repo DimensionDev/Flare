@@ -175,7 +175,7 @@ public fun VideoPlayer(
                     visible = it
                 },
     ) {
-        if (!isLoaded && LocalIsScrollingInProgress.current || !visible || playerState == null) {
+        if ((!isLoaded && LocalIsScrollingInProgress.current) || !visible || playerState == null) {
             idlePlaceholder()
         } else {
             AnimatedContent(

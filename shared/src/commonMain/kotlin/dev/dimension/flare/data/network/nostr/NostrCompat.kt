@@ -269,7 +269,7 @@ internal class PeopleListEvent(
 internal fun RustEvent.toCompatEvent(): Event {
     val snapshot = snapshot()
     return when (snapshot.kind) {
-        MetadataEvent.KIND ->
+        MetadataEvent.KIND -> {
             MetadataEvent(
                 snapshot.id,
                 snapshot.pubKey,
@@ -278,7 +278,9 @@ internal fun RustEvent.toCompatEvent(): Event {
                 snapshot.tags,
                 snapshot.rawJson,
             )
-        TextNoteEvent.KIND ->
+        }
+
+        TextNoteEvent.KIND -> {
             TextNoteEvent(
                 snapshot.id,
                 snapshot.pubKey,
@@ -287,7 +289,9 @@ internal fun RustEvent.toCompatEvent(): Event {
                 snapshot.tags,
                 snapshot.rawJson,
             )
-        ContactListEvent.KIND ->
+        }
+
+        ContactListEvent.KIND -> {
             ContactListEvent(
                 snapshot.id,
                 snapshot.pubKey,
@@ -296,7 +300,9 @@ internal fun RustEvent.toCompatEvent(): Event {
                 snapshot.tags,
                 snapshot.rawJson,
             )
-        DeletionEvent.KIND ->
+        }
+
+        DeletionEvent.KIND -> {
             DeletionEvent(
                 snapshot.id,
                 snapshot.pubKey,
@@ -305,8 +311,13 @@ internal fun RustEvent.toCompatEvent(): Event {
                 snapshot.tags,
                 snapshot.rawJson,
             )
-        RepostEvent.KIND -> RepostEvent(snapshot.id, snapshot.pubKey, snapshot.createdAt, snapshot.content, snapshot.tags, snapshot.rawJson)
-        ReactionEvent.KIND ->
+        }
+
+        RepostEvent.KIND -> {
+            RepostEvent(snapshot.id, snapshot.pubKey, snapshot.createdAt, snapshot.content, snapshot.tags, snapshot.rawJson)
+        }
+
+        ReactionEvent.KIND -> {
             ReactionEvent(
                 snapshot.id,
                 snapshot.pubKey,
@@ -315,7 +326,9 @@ internal fun RustEvent.toCompatEvent(): Event {
                 snapshot.tags,
                 snapshot.rawJson,
             )
-        GenericRepostEvent.KIND ->
+        }
+
+        GenericRepostEvent.KIND -> {
             GenericRepostEvent(
                 snapshot.id,
                 snapshot.pubKey,
@@ -324,7 +337,9 @@ internal fun RustEvent.toCompatEvent(): Event {
                 snapshot.tags,
                 snapshot.rawJson,
             )
-        MuteListEvent.KIND ->
+        }
+
+        MuteListEvent.KIND -> {
             MuteListEvent(
                 snapshot.id,
                 snapshot.pubKey,
@@ -333,7 +348,9 @@ internal fun RustEvent.toCompatEvent(): Event {
                 snapshot.tags,
                 snapshot.rawJson,
             )
-        PeopleListEvent.KIND ->
+        }
+
+        PeopleListEvent.KIND -> {
             PeopleListEvent(
                 snapshot.id,
                 snapshot.pubKey,
@@ -342,7 +359,9 @@ internal fun RustEvent.toCompatEvent(): Event {
                 snapshot.tags,
                 snapshot.rawJson,
             )
-        else ->
+        }
+
+        else -> {
             GenericEvent(
                 snapshot.id,
                 snapshot.pubKey,
@@ -352,6 +371,7 @@ internal fun RustEvent.toCompatEvent(): Event {
                 snapshot.tags,
                 snapshot.rawJson,
             )
+        }
     }
 }
 
@@ -530,7 +550,10 @@ internal data class MarkedETag(
             }
             val eventId = tag.getOrNull(1)?.takeIf(::isHexKey) ?: return null
             return when (tag.size) {
-                2, 3 -> eventId
+                2, 3 -> {
+                    eventId
+                }
+
                 4 -> {
                     val fourth = tag[3]
                     if (fourth.isEmpty() || isHexKey(fourth)) {
@@ -695,21 +718,27 @@ internal fun bech32PublicKey(hex: String): String = RustPublicKey.Companion.pars
 internal fun parsePublicKeyHex(raw: String): String? {
     val value = raw.removePrefix("nostr:").trim()
     return when {
-        value.startsWith("npub1", ignoreCase = true) ->
+        value.startsWith("npub1", ignoreCase = true) -> {
             withNip19(value) { nip19 ->
                 (nip19 as? RustNip19Enum.Pubkey)?.npub?.use { it.toHex() }
             }
+        }
 
-        value.startsWith("nprofile1", ignoreCase = true) ->
+        value.startsWith("nprofile1", ignoreCase = true) -> {
             withNip19(value) { nip19 ->
                 (nip19 as? RustNip19Enum.Profile)?.nprofile?.use { profile ->
                     profile.publicKey().use { it.toHex() }
                 }
             }
+        }
 
-        isHexKey(value) -> value.lowercase()
+        isHexKey(value) -> {
+            value.lowercase()
+        }
 
-        else -> null
+        else -> {
+            null
+        }
     }
 }
 

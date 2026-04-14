@@ -29,13 +29,19 @@ internal class LikePagingSource(
 
         val page =
             when (request) {
-                PagingRequest.Refresh -> 1
+                PagingRequest.Refresh -> {
+                    1
+                }
+
                 is PagingRequest.Prepend -> {
                     return PagingResult(
                         endOfPaginationReached = true,
                     )
                 }
-                is PagingRequest.Append -> request.nextKey.toIntOrNull() ?: 1
+
+                is PagingRequest.Append -> {
+                    request.nextKey.toIntOrNull() ?: 1
+                }
             }
         if (request == PagingRequest.Refresh) {
             onClearMarker()

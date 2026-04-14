@@ -243,14 +243,15 @@ internal class MisskeyDataSource(
                 }
             }
 
-            is PostEvent.Misskey.Renote ->
+            is PostEvent.Misskey.Renote -> {
                 service.notesCreate(
                     NotesCreateRequest(
                         renoteId = event.postKey.id,
                     ),
                 )
+            }
 
-            is PostEvent.Misskey.Vote ->
+            is PostEvent.Misskey.Vote -> {
                 event.options.forEach {
                     service.notesPollsVote(
                         notesPollsVoteRequest =
@@ -260,6 +261,7 @@ internal class MisskeyDataSource(
                             ),
                     )
                 }
+            }
 
             is PostEvent.Misskey.Favourite -> {
                 if (event.favourited) {
@@ -323,12 +325,13 @@ internal class MisskeyDataSource(
                     when (request) {
                         is PagingRequest.Prepend,
                         is PagingRequest.Append,
-                        ->
+                        -> {
                             PagingResult<UiList>(
                                 endOfPaginationReached = true,
                             )
+                        }
 
-                        PagingRequest.Refresh ->
+                        PagingRequest.Refresh -> {
                             PagingResult(
                                 endOfPaginationReached = true,
                                 data =
@@ -342,6 +345,7 @@ internal class MisskeyDataSource(
                                             it.render(accountKey)
                                         },
                             )
+                        }
                     }
             }.toPagingSource()
         }.flow
@@ -365,19 +369,23 @@ internal class MisskeyDataSource(
 
     override fun notification(type: NotificationFilter): RemoteLoader<UiTimelineV2> =
         when (type) {
-            NotificationFilter.All ->
+            NotificationFilter.All -> {
                 NotificationRemoteMediator(
                     accountKey,
                     service,
                 )
+            }
 
-            NotificationFilter.Mention ->
+            NotificationFilter.Mention -> {
                 MentionTimelineRemoteMediator(
                     accountKey,
                     service,
                 )
+            }
 
-            else -> notSupported()
+            else -> {
+                notSupported()
+            }
         }
 
     override val supportedNotificationFilter: List<NotificationFilter>

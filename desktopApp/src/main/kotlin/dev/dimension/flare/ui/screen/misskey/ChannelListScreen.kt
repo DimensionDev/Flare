@@ -73,14 +73,21 @@ internal fun ChannelListScreen(
                             text =
                                 stringResource(
                                     when (type) {
-                                        MisskeyChannelListPresenter.State.Type.Following ->
+                                        MisskeyChannelListPresenter.State.Type.Following -> {
                                             Res.string.misskey_channel_tab_following
-                                        MisskeyChannelListPresenter.State.Type.Favorites ->
+                                        }
+
+                                        MisskeyChannelListPresenter.State.Type.Favorites -> {
                                             Res.string.misskey_channel_tab_favorites
-                                        MisskeyChannelListPresenter.State.Type.Owned ->
+                                        }
+
+                                        MisskeyChannelListPresenter.State.Type.Owned -> {
                                             Res.string.misskey_channel_tab_owned
-                                        MisskeyChannelListPresenter.State.Type.Featured ->
+                                        }
+
+                                        MisskeyChannelListPresenter.State.Type.Featured -> {
                                             Res.string.misskey_channel_tab_featured
+                                        }
                                     },
                                 ),
                         )

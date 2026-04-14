@@ -27,8 +27,14 @@ public class ActiveAccountPresenter :
     private val userFlow by lazy {
         accountRepository.activeAccount.flatMapLatest { accountState ->
             when (accountState) {
-                is UiState.Loading -> flowOf(UiState.Loading())
-                is UiState.Error -> flowOf(UiState.Error(accountState.throwable))
+                is UiState.Loading -> {
+                    flowOf(UiState.Loading())
+                }
+
+                is UiState.Error -> {
+                    flowOf(UiState.Error(accountState.throwable))
+                }
+
                 is UiState.Success -> {
                     val accountKey = accountState.data.accountKey
                     accountServiceFlow(

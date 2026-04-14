@@ -399,12 +399,13 @@ internal class NostrDataSource(
                 }
             }
 
-            is PostEvent.Nostr.Report ->
+            is PostEvent.Nostr.Report -> {
                 serviceManager.withService {
                     it.report(
                         statusKey = event.postKey,
                     )
                 }
+            }
 
             is PostEvent.Nostr.Repost -> {
                 if (event.repostEventId != null) {
@@ -459,7 +460,7 @@ internal class NostrDataSource(
                     }
             }
         when (val composeStatus = data.referenceStatus?.composeStatus) {
-            is ComposeStatus.Quote ->
+            is ComposeStatus.Quote -> {
                 serviceManager.withService {
                     it.composeQuote(
                         statusKey = composeStatus.statusKey,
@@ -468,8 +469,9 @@ internal class NostrDataSource(
                         contentWarning = data.spoilerText,
                     )
                 }
+            }
 
-            is ComposeStatus.Reply ->
+            is ComposeStatus.Reply -> {
                 serviceManager.withService {
                     it.composeReply(
                         statusKey = composeStatus.statusKey,
@@ -478,8 +480,9 @@ internal class NostrDataSource(
                         contentWarning = data.spoilerText,
                     )
                 }
+            }
 
-            null ->
+            null -> {
                 serviceManager.withService {
                     it.composeNote(
                         content = data.content,
@@ -487,6 +490,7 @@ internal class NostrDataSource(
                         contentWarning = data.spoilerText,
                     )
                 }
+            }
         }
     }
 

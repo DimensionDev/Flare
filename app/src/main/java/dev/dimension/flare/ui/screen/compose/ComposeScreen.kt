@@ -223,14 +223,21 @@ internal fun ComposeScreen(
             colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
             title = {
                 when (state.state.composeStatus) {
-                    is ComposeStatus.VVOComment ->
+                    is ComposeStatus.VVOComment -> {
                         Text(text = stringResource(id = R.string.compose_vvo_comment_title))
-                    is ComposeStatus.Quote ->
+                    }
+
+                    is ComposeStatus.Quote -> {
                         Text(text = stringResource(id = R.string.compose_quote_title))
-                    is ComposeStatus.Reply ->
+                    }
+
+                    is ComposeStatus.Reply -> {
                         Text(text = stringResource(id = R.string.compose_reply_title))
-                    null ->
+                    }
+
+                    null -> {
                         Text(text = stringResource(id = R.string.compose_title))
+                    }
                 }
             },
             navigationIcon = {
@@ -1468,37 +1475,47 @@ internal enum class PollExpiration(
 internal val UiTimelineV2.Post.Visibility.localName: Int
     get() =
         when (this) {
-            UiTimelineV2.Post.Visibility.Public ->
+            UiTimelineV2.Post.Visibility.Public -> {
                 R.string.misskey_visibility_public
+            }
 
-            UiTimelineV2.Post.Visibility.Home ->
+            UiTimelineV2.Post.Visibility.Home -> {
                 R.string.misskey_visibility_home
+            }
 
-            UiTimelineV2.Post.Visibility.Followers ->
+            UiTimelineV2.Post.Visibility.Followers -> {
                 R.string.misskey_visibility_followers
+            }
 
-            UiTimelineV2.Post.Visibility.Specified ->
+            UiTimelineV2.Post.Visibility.Specified -> {
                 R.string.misskey_visibility_specified
+            }
 
-            UiTimelineV2.Post.Visibility.Channel ->
+            UiTimelineV2.Post.Visibility.Channel -> {
                 R.string.misskey_visibility_public
+            }
         }
 
 internal val UiTimelineV2.Post.Visibility.localDescription: Int
     get() =
         when (this) {
-            UiTimelineV2.Post.Visibility.Public ->
+            UiTimelineV2.Post.Visibility.Public -> {
                 R.string.misskey_visibility_public_description
+            }
 
-            UiTimelineV2.Post.Visibility.Home ->
+            UiTimelineV2.Post.Visibility.Home -> {
                 R.string.misskey_visibility_home_description
+            }
 
-            UiTimelineV2.Post.Visibility.Followers ->
+            UiTimelineV2.Post.Visibility.Followers -> {
                 R.string.misskey_visibility_followers_description
+            }
 
-            UiTimelineV2.Post.Visibility.Specified ->
+            UiTimelineV2.Post.Visibility.Specified -> {
                 R.string.misskey_visibility_specified_description
+            }
 
-            UiTimelineV2.Post.Visibility.Channel ->
+            UiTimelineV2.Post.Visibility.Channel -> {
                 R.string.misskey_visibility_public_description
+            }
         }

@@ -396,19 +396,24 @@ private class RenderHashBuilder {
 
 private fun UiTimelineV2.Message.Type.renderSummaryHash(): Int =
     when (this) {
-        is UiTimelineV2.Message.Type.Localized ->
+        is UiTimelineV2.Message.Type.Localized -> {
             renderHashBuilder()
                 .add(data)
                 .add(args)
                 .build()
-        is UiTimelineV2.Message.Type.Raw ->
+        }
+
+        is UiTimelineV2.Message.Type.Raw -> {
             renderHashBuilder()
                 .add(content)
                 .build()
-        is UiTimelineV2.Message.Type.Unknown ->
+        }
+
+        is UiTimelineV2.Message.Type.Unknown -> {
             renderHashBuilder()
                 .add(rawType)
                 .build()
+        }
     }
 
 private fun UiTimelineV2.Post.renderSummaryHash(): Int =
@@ -454,7 +459,7 @@ private fun UiProfile.renderSummaryHash(): Int =
 
 private fun UiProfile.BottomContent.renderSummaryHash(): Int =
     when (this) {
-        is UiProfile.BottomContent.Fields ->
+        is UiProfile.BottomContent.Fields -> {
             fields.entries
                 .sortedBy { it.key }
                 .fold(renderHashBuilder()) { builder, entry ->
@@ -462,7 +467,9 @@ private fun UiProfile.BottomContent.renderSummaryHash(): Int =
                         .add(entry.key)
                         .add(entry.value.renderSummaryHash())
                 }.build()
-        is UiProfile.BottomContent.Iconify ->
+        }
+
+        is UiProfile.BottomContent.Iconify -> {
             items.entries
                 .sortedBy { it.key.name }
                 .fold(renderHashBuilder()) { builder, entry ->
@@ -470,6 +477,7 @@ private fun UiProfile.BottomContent.renderSummaryHash(): Int =
                         .add(entry.key)
                         .add(entry.value.renderSummaryHash())
                 }.build()
+        }
     }
 
 private fun UiPoll.renderSummaryHash(): Int =
@@ -500,13 +508,15 @@ private fun UiCard.renderSummaryHash(): Int =
 
 private fun UiMedia.renderSummaryHash(): Int =
     when (this) {
-        is UiMedia.Audio ->
+        is UiMedia.Audio -> {
             renderHashBuilder()
                 .add(url)
                 .add(description)
                 .add(previewUrl)
                 .build()
-        is UiMedia.Gif ->
+        }
+
+        is UiMedia.Gif -> {
             renderHashBuilder()
                 .add(url)
                 .add(previewUrl)
@@ -514,7 +524,9 @@ private fun UiMedia.renderSummaryHash(): Int =
                 .add(height.toBits())
                 .add(width.toBits())
                 .build()
-        is UiMedia.Image ->
+        }
+
+        is UiMedia.Image -> {
             renderHashBuilder()
                 .add(url)
                 .add(previewUrl)
@@ -523,7 +535,9 @@ private fun UiMedia.renderSummaryHash(): Int =
                 .add(width.toBits())
                 .add(sensitive)
                 .build()
-        is UiMedia.Video ->
+        }
+
+        is UiMedia.Video -> {
             renderHashBuilder()
                 .add(url)
                 .add(thumbnailUrl)
@@ -531,6 +545,7 @@ private fun UiMedia.renderSummaryHash(): Int =
                 .add(height.toBits())
                 .add(width.toBits())
                 .build()
+        }
     }
 
 private fun UiRichText.renderSummaryHash(): Int =
@@ -557,17 +572,22 @@ private fun UiTimelineV2.Post.Reference.renderSummaryHash(): Int =
 
 private fun ActionMenu.renderSummaryHash(): Int =
     when (this) {
-        ActionMenu.Divider ->
+        ActionMenu.Divider -> {
             renderHashBuilder()
                 .add("divider")
                 .build()
-        is ActionMenu.Group ->
+        }
+
+        is ActionMenu.Group -> {
             renderHashBuilder()
                 .add(displayItem.renderSummaryHash())
                 .add(actions.renderSummaryHash { it.renderSummaryHash() })
                 .build()
-        is ActionMenu.Item ->
+        }
+
+        is ActionMenu.Item -> {
             renderSummaryHash()
+        }
     }
 
 private fun ActionMenu.Item.renderSummaryHash(): Int =
@@ -581,16 +601,22 @@ private fun ActionMenu.Item.renderSummaryHash(): Int =
 
 private fun ActionMenu.Item.Text?.renderSummaryHash(): Int =
     when (this) {
-        null -> 0
-        is ActionMenu.Item.Text.Localized ->
+        null -> {
+            0
+        }
+
+        is ActionMenu.Item.Text.Localized -> {
             renderHashBuilder()
                 .add(type)
                 .add(parameters)
                 .build()
-        is ActionMenu.Item.Text.Raw ->
+        }
+
+        is ActionMenu.Item.Text.Raw -> {
             renderHashBuilder()
                 .add(text)
                 .build()
+        }
     }
 
 private inline fun <T> Iterable<T>.renderSummaryHash(hash: (T) -> Int): Int =

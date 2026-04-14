@@ -4,7 +4,6 @@ import androidx.compose.runtime.Immutable
 import com.fleeksoft.ksoup.nodes.Element
 import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.data.repository.tryRun
-import dev.dimension.flare.readability.Readability
 import dev.dimension.flare.ui.render.UiDateTime
 import dev.dimension.flare.ui.render.parseHtml
 import dev.dimension.flare.ui.render.toUi
@@ -13,6 +12,7 @@ import io.ktor.client.statement.bodyAsText
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.serialization.Serializable
+import moe.tlaster.readability.Readability
 import kotlin.experimental.ExperimentalObjCRefinement
 import kotlin.native.HiddenFromObjC
 import kotlin.time.Instant

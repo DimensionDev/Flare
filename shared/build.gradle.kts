@@ -67,7 +67,7 @@ kotlin {
                 implementation(libs.cryptography.provider.optimal)
                 implementation(libs.openai.client)
                 implementation(libs.nostr.sdk.kmp)
-                implementation(projects.readability)
+                implementation(libs.readability)
             }
         }
         val commonTest by getting {

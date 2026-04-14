@@ -114,7 +114,7 @@ struct EditRssSheet: View {
     @State private var url: String = ""
     @State private var title: String = ""
     @State private var rssHubHost: String = ""
-    @State private var openInApp: Bool = true
+    @State private var displayMode: RssDisplayMode = .fullContent
     @State private var selectedRssSources: [UiRssSource] = []
     @State private var selectedMastodonTypes: [SubscriptionType] = []
     @State private var showFileImporter = false
@@ -306,9 +306,10 @@ struct EditRssSheet: View {
                     // No open-in picker for Mastodon instance subscriptions
                 } else {
                     Section {
-                        Picker("rss_open_in", selection: $openInApp) {
-                            Text("rss_open_in_app").tag(true)
-                            Text("rss_open_in_browser").tag(false)
+                        Picker("rss_open_in", selection: $displayMode) {
+                            Text("rss_sources_full_content").tag(RssDisplayMode.fullContent)
+                            Text("rss_sources_open_in_browser").tag(RssDisplayMode.openInBrowser)
+                            Text("rss_sources_description_only").tag(RssDisplayMode.descriptionOnly)
                         }
                     }
                 }
@@ -351,11 +352,11 @@ struct EditRssSheet: View {
                     if case .success(let success) = onEnum(of: presenter.state.inputState) {
                         switch onEnum(of: success.data) {
                         case .rssFeed(let feed):
-                            feed.save(title: title, openInBrowser: !openInApp)
+                            feed.save(title: title, displayMode: displayMode)
                         case .rssHub(let rssHub):
-                            rssHub.save(title: title, openInBrowser: !openInApp)
+                            rssHub.save(title: title, displayMode: displayMode)
                         case .rssSources(let rssSources):
-                            rssSources.save(sources: selectedRssSources, openInBrowser: !openInApp)
+                            rssSources.save(sources: selectedRssSources, displayMode: displayMode)
                         case .mastodonInstance(let mastodonInstance):
                             let typeNames: [SubscriptionType: String] = [
                                 SubscriptionType.mastodonTrends: String(localized: "mastodon_trending_statuses"),

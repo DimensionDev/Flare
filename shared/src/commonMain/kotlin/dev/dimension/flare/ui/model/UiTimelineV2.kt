@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.model
 
 import androidx.compose.runtime.Immutable
 import dev.dimension.flare.common.SerializableImmutableList
+import dev.dimension.flare.data.database.app.model.RssDisplayMode
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -122,19 +123,28 @@ public sealed class UiTimelineV2 {
     public data class Feed internal constructor(
         val title: String?,
         val description: String?,
+        val descriptionHtml: String? = null,
         val url: String,
         internal val sourceLanguages: SerializableImmutableList<String> = persistentListOf(),
         @Transient
         public val translationDisplayState: TranslationDisplayState = TranslationDisplayState.Hidden,
         override val createdAt: UiDateTime,
         val source: Source,
-        val openInBrowser: Boolean,
+        val displayMode: RssDisplayMode = RssDisplayMode.FULL_CONTENT,
         val media: UiMedia.Image? = null,
         private val clickEvent: ClickEvent =
-            if (openInBrowser) {
-                ClickEvent.Deeplink(DeeplinkRoute.OpenLinkDirectly(url))
-            } else {
-                ClickEvent.Deeplink(DeeplinkRoute.Rss.Detail(url))
+            when (displayMode) {
+                RssDisplayMode.OPEN_IN_BROWSER -> {
+                    ClickEvent.Deeplink(DeeplinkRoute.OpenLinkDirectly(url))
+                }
+
+                RssDisplayMode.FULL_CONTENT -> {
+                    ClickEvent.Deeplink(DeeplinkRoute.Rss.Detail(url))
+                }
+
+                RssDisplayMode.DESCRIPTION_ONLY -> {
+                    ClickEvent.Deeplink(DeeplinkRoute.Rss.Detail(url, descriptionHtml, title))
+                }
             },
         override val accountType: AccountType,
         @Transient
@@ -172,7 +182,7 @@ public sealed class UiTimelineV2 {
                 .add(createdAt.value)
                 .add(source.name)
                 .add(source.icon)
-                .add(openInBrowser)
+                .add(displayMode)
                 .add(media?.renderSummaryHash())
                 .add(accountType)
                 .build()

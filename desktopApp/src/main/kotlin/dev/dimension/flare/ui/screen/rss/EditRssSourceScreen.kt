@@ -126,7 +126,7 @@ fun EditRssSourceScreen(
                                 val data =
                                     inputState.save(
                                         title = state.title.text.toString(),
-                                        openInBrowser = false,
+                                        displayMode = dev.dimension.flare.data.database.app.model.RssDisplayMode.FULL_CONTENT,
                                     )
                                 state.save(
                                     sources = listOf(data),
@@ -141,7 +141,7 @@ fun EditRssSourceScreen(
                                     val data =
                                         inputState.save(
                                             title = state.title.text.toString(),
-                                            openInBrowser = false,
+                                            displayMode = dev.dimension.flare.data.database.app.model.RssDisplayMode.FULL_CONTENT,
                                         )
                                     state.save(
                                         sources = listOf(data),
@@ -154,7 +154,7 @@ fun EditRssSourceScreen(
                                 if (state.selectedSource.isNotEmpty()) {
                                     inputState.save(
                                         sources = state.selectedSource,
-                                        openInBrowser = false,
+                                        displayMode = dev.dimension.flare.data.database.app.model.RssDisplayMode.FULL_CONTENT,
                                     )
                                     state.save(
                                         sources = state.selectedSource,

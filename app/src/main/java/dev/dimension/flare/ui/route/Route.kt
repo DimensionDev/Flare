@@ -163,6 +163,8 @@ internal sealed interface Route : NavKey {
         @Serializable
         data class Detail(
             val url: String,
+            val descriptionHtml: String? = null,
+            val title: String? = null,
         ) : Rss
 
         @Serializable
@@ -596,6 +598,8 @@ internal sealed interface Route : NavKey {
                 is DeeplinkRoute.Rss.Detail -> {
                     Rss.Detail(
                         url = deeplinkRoute.url,
+                        descriptionHtml = deeplinkRoute.descriptionHtml,
+                        title = deeplinkRoute.title,
                     )
                 }
 

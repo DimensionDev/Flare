@@ -214,9 +214,9 @@ private struct RssArticleContentView: View {
 }
 
 extension RssDetailScreen {
-    init(url: String) {
+    init(url: String, descriptionHtml: String? = nil, descriptionTitle: String? = nil) {
         self.url = url
-        self._presenter = .init(wrappedValue: .init(presenter: RssDetailPresenter(url: url)))
+        self._presenter = .init(wrappedValue: .init(presenter: RssDetailPresenter(url: url, descriptionHtml: descriptionHtml, descriptionTitle: descriptionTitle)))
     }
 }
 

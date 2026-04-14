@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.model.mapper
 
 import com.fleeksoft.ksoup.Ksoup
+import dev.dimension.flare.data.database.app.model.RssDisplayMode
 import dev.dimension.flare.data.network.rss.model.Feed
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -43,19 +44,19 @@ internal val Feed.link: String?
 internal fun Feed.Atom.Entry.render(
     sourceName: String,
     sourceIcon: String?,
-    openInBrowser: Boolean,
+    displayMode: RssDisplayMode,
     sourceLanguage: String? = null,
 ): UiTimelineV2 {
+    val rawHtml = content?.value ?: summary?.value
     val descHtml =
-        content?.value?.let {
-            Ksoup.parse(it)
-        } ?: summary?.value?.let {
+        rawHtml?.let {
             Ksoup.parse(it)
         }
     val img = descHtml?.select("img")?.firstOrNull()?.attr("src") ?: media?.thumbnail?.url
     return UiTimelineV2.Feed(
         title = title?.value?.takeIf { it.isNotEmpty() && it.isNotBlank() },
         description = descHtml?.text(),
+        descriptionHtml = rawHtml,
         url = links.first().href.replace("http://", "https://"),
         sourceLanguages = listOfNotNull(sourceLanguage).toPersistentList(),
         source =
@@ -73,7 +74,7 @@ internal fun Feed.Atom.Entry.render(
                         ),
                 )
             },
-        openInBrowser = openInBrowser,
+        displayMode = displayMode,
         createdAt =
             (published ?: updated)
                 ?.let { input -> parseRssDateToInstant(input) }
@@ -85,7 +86,7 @@ internal fun Feed.Atom.Entry.render(
 internal fun Feed.Rss20.Item.render(
     sourceName: String,
     sourceIcon: String?,
-    openInBrowser: Boolean,
+    displayMode: RssDisplayMode,
     sourceLanguage: String? = null,
 ): UiTimelineV2 {
     val descHtml =
@@ -96,6 +97,7 @@ internal fun Feed.Rss20.Item.render(
     return UiTimelineV2.Feed(
         title = title,
         description = descHtml?.text(),
+        descriptionHtml = description,
         url = link.replace("http://", "https://"),
         sourceLanguages = listOfNotNull(sourceLanguage).toPersistentList(),
         source =
@@ -113,7 +115,7 @@ internal fun Feed.Rss20.Item.render(
                         ),
                 )
             },
-        openInBrowser = openInBrowser,
+        displayMode = displayMode,
         createdAt =
             pubDate
                 ?.let { input -> parseRssDateToInstant(input) }
@@ -125,7 +127,7 @@ internal fun Feed.Rss20.Item.render(
 internal fun Feed.RDF.Item.render(
     sourceName: String,
     sourceIcon: String?,
-    openInBrowser: Boolean,
+    displayMode: RssDisplayMode,
     sourceLanguage: String? = null,
 ): UiTimelineV2 {
     val descHtml =
@@ -136,6 +138,7 @@ internal fun Feed.RDF.Item.render(
     return UiTimelineV2.Feed(
         title = title,
         description = descHtml?.text(),
+        descriptionHtml = description,
         url = link.replace("http://", "https://"),
         sourceLanguages = listOfNotNull(sourceLanguage).toPersistentList(),
         source =
@@ -153,7 +156,7 @@ internal fun Feed.RDF.Item.render(
                         ),
                 )
             },
-        openInBrowser = openInBrowser,
+        displayMode = displayMode,
         createdAt =
             date
                 ?.let { input -> parseRssDateToInstant(input) }

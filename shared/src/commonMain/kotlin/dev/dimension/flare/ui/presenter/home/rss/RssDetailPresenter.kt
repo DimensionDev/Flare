@@ -20,6 +20,8 @@ import org.koin.core.component.inject
 
 public class RssDetailPresenter(
     private val url: String,
+    private val descriptionHtml: String? = null,
+    private val descriptionTitle: String? = null,
 ) : PresenterBase<RssDetailPresenter.State>(),
     KoinComponent {
     private val readability: Readability by inject()
@@ -37,17 +39,36 @@ public class RssDetailPresenter(
                 statusKey = MicroBlogKey.fromRss(url),
             )
         }.body()
-        val data by remember(url) {
-            readability
-                .parse(url)
-                .map {
-                    it.fold(
-                        onSuccess = { UiState.Success(it) },
-                        onFailure = { UiState.Error(it) },
-                    )
-                }.onStart {
-                    emit(UiState.Loading())
-                }
+        val data by remember(url, descriptionHtml) {
+            if (descriptionHtml != null) {
+                kotlinx.coroutines.flow.flowOf(
+                    UiState.Success(
+                        DocumentData(
+                            title = descriptionTitle ?: "",
+                            content = descriptionHtml,
+                            textContent = descriptionHtml,
+                            length = null,
+                            excerpt = null,
+                            byline = null,
+                            dir = null,
+                            siteName = null,
+                            lang = null,
+                            publishedTime = null,
+                        ),
+                    ),
+                )
+            } else {
+                readability
+                    .parse(url)
+                    .map {
+                        it.fold(
+                            onSuccess = { UiState.Success(it) },
+                            onFailure = { UiState.Error(it) },
+                        )
+                    }.onStart {
+                        emit(UiState.Loading())
+                    }
+            }
         }.collectAsState(UiState.Loading())
         return object : State {
             override val data = data

@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.model
 
 import androidx.compose.runtime.Immutable
+import dev.dimension.flare.data.database.app.model.RssDisplayMode
 import dev.dimension.flare.data.database.app.model.SubscriptionType
 import dev.dimension.flare.model.vvo
 import dev.dimension.flare.model.vvoHost
@@ -17,7 +18,7 @@ public data class UiRssSource internal constructor(
     val title: String?,
     val lastUpdate: UiDateTime,
     val favIcon: String?,
-    val openInBrowser: Boolean,
+    val displayMode: RssDisplayMode = RssDisplayMode.FULL_CONTENT,
     val type: SubscriptionType = SubscriptionType.RSS,
 ) {
     val host: String by lazy {

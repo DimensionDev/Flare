@@ -183,6 +183,8 @@ internal sealed interface Route : NavKey {
 
     data class RssDetail(
         override val url: String,
+        val descriptionHtml: String? = null,
+        val title: String? = null,
     ) : UrlRoute
 
     data class TwitterArticle(
@@ -378,7 +380,7 @@ internal sealed interface Route : NavKey {
                 }
 
                 is DeeplinkRoute.Rss.Detail -> {
-                    RssDetail(url = deeplinkRoute.url)
+                    RssDetail(url = deeplinkRoute.url, descriptionHtml = deeplinkRoute.descriptionHtml, title = deeplinkRoute.title)
                 }
 
                 is DeeplinkRoute.TwitterArticle -> {

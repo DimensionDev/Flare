@@ -87,6 +87,7 @@ public data class AppSettings(
                 val serverUrl: String,
                 val apiKey: String,
                 val model: String = "",
+                val reasoningEffort: String = "",
             ) : Type
         }
     }

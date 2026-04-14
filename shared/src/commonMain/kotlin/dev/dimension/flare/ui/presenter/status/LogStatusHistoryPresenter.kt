@@ -5,7 +5,9 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
+import dev.dimension.flare.data.database.cache.model.DbStatus
 import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.presenter.PresenterBase
 import org.koin.core.component.KoinComponent
@@ -32,7 +34,7 @@ public class LogStatusHistoryPresenter(
             cacheDatabase.pagingTimelineDao().insertAll(
                 listOf(
                     DbPagingTimeline(
-                        statusKey = statusKey,
+                        statusId = DbStatus.createId(accountType as DbAccountType, statusKey),
                         pagingKey = PAGING_KEY,
                         sortId = Clock.System.now().toEpochMilliseconds(),
                     ),

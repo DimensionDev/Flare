@@ -95,7 +95,7 @@ internal class PostHandler(
                     val dbAccountType = accountType as DbAccountType
                     database.pagingTimelineDao().deleteStatus(
                         accountType = dbAccountType,
-                        statusKey = postKey,
+                        statusId = DbStatus.createId(dbAccountType, postKey),
                     )
                     database.statusDao().delete(
                         statusKey = postKey,

@@ -182,10 +182,10 @@ internal sealed interface Route : NavKey {
     ) : FloatingRoute
 
     data class RssDetail(
-        override val url: String,
+        val url: String,
         val descriptionHtml: String? = null,
         val title: String? = null,
-    ) : UrlRoute
+    ) : ScreenRoute
 
     data class TwitterArticle(
         val accountType: AccountType,

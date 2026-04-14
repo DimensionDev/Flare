@@ -33,6 +33,7 @@ import compose.icons.fontawesomeicons.solid.CircleXmark
 import dev.dimension.flare.Res
 import dev.dimension.flare.add_rss_source
 import dev.dimension.flare.cancel
+import dev.dimension.flare.data.database.app.model.RssDisplayMode
 import dev.dimension.flare.data.database.app.model.SubscriptionType
 import dev.dimension.flare.data.model.RssTimelineTabItem
 import dev.dimension.flare.data.model.SubscriptionTimelineTabItem
@@ -44,7 +45,11 @@ import dev.dimension.flare.mastodon_local_timeline
 import dev.dimension.flare.mastodon_trending_statuses
 import dev.dimension.flare.ok
 import dev.dimension.flare.opml_import
+import dev.dimension.flare.rss_sources_description_only
 import dev.dimension.flare.rss_sources_discovered_rss_sources
+import dev.dimension.flare.rss_sources_display_mode
+import dev.dimension.flare.rss_sources_full_content
+import dev.dimension.flare.rss_sources_open_in_browser
 import dev.dimension.flare.rss_sources_pinned_in_tabs
 import dev.dimension.flare.rss_sources_rss_hub_host_hint
 import dev.dimension.flare.rss_sources_rss_hub_host_label
@@ -68,10 +73,13 @@ import dev.dimension.flare.ui.presenter.home.rss.EditRssSourcePresenter
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.theme.LocalComposeWindow
 import io.github.composefluent.FluentTheme
+import io.github.composefluent.component.Button
 import io.github.composefluent.component.CardExpanderItem
 import io.github.composefluent.component.CheckBox
 import io.github.composefluent.component.ContentDialog
 import io.github.composefluent.component.ContentDialogButton
+import io.github.composefluent.component.MenuFlyoutContainer
+import io.github.composefluent.component.MenuFlyoutItem
 import io.github.composefluent.component.ProgressRing
 import io.github.composefluent.component.Text
 import io.github.composefluent.component.TextField
@@ -126,7 +134,7 @@ fun EditRssSourceScreen(
                                 val data =
                                     inputState.save(
                                         title = state.title.text.toString(),
-                                        displayMode = dev.dimension.flare.data.database.app.model.RssDisplayMode.FULL_CONTENT,
+                                        displayMode = state.displayMode,
                                     )
                                 state.save(
                                     sources = listOf(data),
@@ -141,7 +149,7 @@ fun EditRssSourceScreen(
                                     val data =
                                         inputState.save(
                                             title = state.title.text.toString(),
-                                            displayMode = dev.dimension.flare.data.database.app.model.RssDisplayMode.FULL_CONTENT,
+                                            displayMode = state.displayMode,
                                         )
                                     state.save(
                                         sources = listOf(data),
@@ -154,7 +162,7 @@ fun EditRssSourceScreen(
                                 if (state.selectedSource.isNotEmpty()) {
                                     inputState.save(
                                         sources = state.selectedSource,
-                                        displayMode = dev.dimension.flare.data.database.app.model.RssDisplayMode.FULL_CONTENT,
+                                        displayMode = state.displayMode,
                                     )
                                     state.save(
                                         sources = state.selectedSource,
@@ -472,6 +480,53 @@ fun EditRssSourceScreen(
                     }
                 }
                 state.inputState.onSuccess { inputState ->
+                    if (inputState !is EditRssSourcePresenter.State.RssInputState.MastodonInstance) {
+                        CardExpanderItem(
+                            heading = {
+                                Text(text = stringResource(Res.string.rss_sources_display_mode))
+                            },
+                            trailing = {
+                                MenuFlyoutContainer(
+                                    flyout = {
+                                        MenuFlyoutItem(
+                                            text = { Text(stringResource(Res.string.rss_sources_full_content)) },
+                                            onClick = {
+                                                state.setDisplayMode(RssDisplayMode.FULL_CONTENT)
+                                                isFlyoutVisible = false
+                                            },
+                                        )
+                                        MenuFlyoutItem(
+                                            text = { Text(stringResource(Res.string.rss_sources_open_in_browser)) },
+                                            onClick = {
+                                                state.setDisplayMode(RssDisplayMode.OPEN_IN_BROWSER)
+                                                isFlyoutVisible = false
+                                            },
+                                        )
+                                        MenuFlyoutItem(
+                                            text = { Text(stringResource(Res.string.rss_sources_description_only)) },
+                                            onClick = {
+                                                state.setDisplayMode(RssDisplayMode.DESCRIPTION_ONLY)
+                                                isFlyoutVisible = false
+                                            },
+                                        )
+                                    },
+                                    adaptivePlacement = true,
+                                ) {
+                                    Button(
+                                        onClick = { isFlyoutVisible = !isFlyoutVisible },
+                                    ) {
+                                        Text(
+                                            when (state.displayMode) {
+                                                RssDisplayMode.FULL_CONTENT -> stringResource(Res.string.rss_sources_full_content)
+                                                RssDisplayMode.OPEN_IN_BROWSER -> stringResource(Res.string.rss_sources_open_in_browser)
+                                                RssDisplayMode.DESCRIPTION_ONLY -> stringResource(Res.string.rss_sources_description_only)
+                                            },
+                                        )
+                                    }
+                                }
+                            },
+                        )
+                    }
                     Row(
                         horizontalArrangement =
                             androidx.compose.foundation.layout.Arrangement
@@ -538,6 +593,7 @@ private fun presenter(
     val selectedSource = remember { mutableStateListOf<UiRssSource>() }
     val selectedMastodonTypes = remember { mutableStateListOf<SubscriptionType>() }
     var pinnedInTabs by remember { mutableStateOf(false) }
+    var displayMode by remember { mutableStateOf(RssDisplayMode.FULL_CONTENT) }
     state.data.onSuccess {
         LaunchedEffect(Unit) {
             titleText.edit {
@@ -546,6 +602,7 @@ private fun presenter(
             urlText.edit {
                 append(it.url)
             }
+            displayMode = it.displayMode
         }
     }
 
@@ -600,12 +657,17 @@ private fun presenter(
     }
     object : EditRssSourcePresenter.State by state {
         val pinnedInTabs = pinnedInTabs
+        val displayMode = displayMode
         val selectedSource = selectedSource
         val selectedMastodonTypes: List<SubscriptionType> = selectedMastodonTypes
         val rssHubHostText = rssHubHostText
 
         fun setPinnedInTabs(value: Boolean) {
             pinnedInTabs = value
+        }
+
+        fun setDisplayMode(value: RssDisplayMode) {
+            displayMode = value
         }
 
         fun selectSource(source: UiRssSource) {

@@ -228,7 +228,14 @@ internal fun WindowScope.Router(
                         onBack = onBack,
                     )
                 }
-                entry<Route.RssDetail> { }
+                entry<Route.RssDetail> { args ->
+                    dev.dimension.flare.ui.screen.rss.RssDetailScreen(
+                        url = args.url,
+                        descriptionHtml = args.descriptionHtml,
+                        descriptionTitle = args.title,
+                        onBack = onBack,
+                    )
+                }
                 entry<Route.AddReaction>(
                     metadata = dialog(),
                 ) { args ->

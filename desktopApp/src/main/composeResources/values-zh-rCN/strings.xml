@@ -297,6 +297,14 @@
     <string name="rss_sources_rss_hub_host_hint">如果你想要使用 RSSHub ，你需要设置RSSHub 主机或选择公共 RSSHub 服务器</string>
     <string name="rss_sources_discovered_rss_sources">发现的 RSS 源</string>
     <string name="rss_sources_pinned_in_tabs">固定到主标签页</string>
+    <string name="rss_sources_display_mode">显示模式</string>
+    <string name="rss_sources_open_in_browser">在浏览器中打开</string>
+    <string name="rss_sources_full_content">全文解析</string>
+    <string name="rss_sources_description_only">仅展示</string>
+    <string name="rss_detail_open_in_browser">在浏览器中打开</string>
+    <string name="rss_detail_translate">翻译</string>
+    <string name="rss_detail_tldr">总结</string>
+    <string name="rss_detail_tldr_error">总结失败</string>
     <string name="mastodon_available_timelines">可用的时间表</string>
     <string name="mastodon_trending_statuses">Trending statuses</string>
     <string name="mastodon_federated_timeline">联邦时间线</string>

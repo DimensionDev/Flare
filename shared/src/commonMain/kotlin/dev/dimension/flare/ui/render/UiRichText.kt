@@ -96,7 +96,7 @@ public data class UiRichText(
                 }
             }
         }
-    public val isLongText: Boolean = innerText.codePointCount() > 480
+    public val isLongText: Boolean = innerText.codePointCount() > 500
     public val platformText: PlatformText by lazy {
         renderPlatformText(renderRuns)
     }

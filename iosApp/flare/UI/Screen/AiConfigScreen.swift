@@ -575,33 +575,22 @@ struct TranslationConfigScreen: View {
         }
         .sheet(isPresented: $showExcludedLanguagesPicker) {
             NavigationStack {
-                List {
+                List(selection: $pendingExcludedLanguages) {
                     ForEach(filteredLanguageOptions) { option in
-                        Button {
-                            if pendingExcludedLanguages.contains(option.tag) {
-                                pendingExcludedLanguages.remove(option.tag)
-                            } else {
-                                pendingExcludedLanguages.insert(option.tag)
+                        Label {
+                            Text(option.title)
+                            if option.title != option.tag {
+                                Text(option.tag)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
                             }
-                        } label: {
-                            HStack {
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text(option.title)
-                                    if option.title != option.tag {
-                                        Text(option.tag)
-                                            .font(.caption)
-                                            .foregroundStyle(.secondary)
-                                    }
-                                }
-                                Spacer()
-                                if pendingExcludedLanguages.contains(option.tag) {
-                                    Image(systemName: "checkmark")
-                                }
-                            }
+                        } icon: {
+                            
                         }
-                        .buttonStyle(.plain)
+                        .tag(option.tag)
                     }
                 }
+                .environment(\.editMode, .constant(.active))
                 .searchable(text: $excludedLanguagesQuery, prompt: "Search language")
                 .navigationTitle("Auto-translate excluded languages")
                 .toolbar {

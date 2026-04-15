@@ -46,6 +46,16 @@ struct AppearanceScreen: View {
                         Text("appearance_use_compose_view")
                         Text("appearance_use_compose_view_description")
                     }
+                    Toggle(isOn: Binding(get: {
+                        appearance.inAppBrowser
+                    }, set: { newValue in
+                        presenter.state.updateAppearanceSettings { settings in
+                            settings.copy(inAppBrowser: newValue)
+                        }
+                    })) {
+                        Text("appearance_in_app_browser")
+                        Text("appearance_in_app_browser_description")
+                    }
                 }
             }
             Section {

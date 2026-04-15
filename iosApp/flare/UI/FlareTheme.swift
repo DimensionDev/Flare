@@ -6,22 +6,43 @@ import Combine
 struct FlareTheme<Content: View>: View {
     @ViewBuilder let content: () -> Content
     @StateObject private var presenter = KotlinPresenter(presenter: SettingsPresenter())
+    @State private var openedURL: URL? = nil
+    @State private var appSettings: AppSettings = AppSettings(version: "0")
+    @State private var appearance: AppearanceSettings = AppearanceSettings.companion.Default
     private let sizes: [DynamicTypeSize] =
       [.xSmall, .small, .medium, .large, .xLarge, .xxLarge, .xxxLarge]
     var body: some View {
-        StateView(state: presenter.state.appSettings) { appSettings in
-            StateView(state: presenter.state.appearance) { appearance in
-                content()
-                    .networkStatus()
-                    .environment(\.aiConfig, appSettings.aiConfig)
-                    .environment(\.translateConfig, appSettings.translateConfig)
-                    .environment(\.appearanceSettings, appearance)
-                    .preferredColorScheme(
-                        appearance.theme == .system ? nil : (appearance.theme == .dark ? .dark : .light)
-                    )
-                    .dynamicTypeSize(sizes[min(max(Int(appearance.fontSizeDiff) + 2, 0), sizes.count - 1)])
+        content()
+            .networkStatus()
+            .environment(\.aiConfig, appSettings.aiConfig)
+            .environment(\.translateConfig, appSettings.translateConfig)
+            .environment(\.appearanceSettings, appearance)
+            .preferredColorScheme(
+                appearance.theme == .system ? nil : (appearance.theme == .dark ? .dark : .light)
+            )
+            .dynamicTypeSize(sizes[min(max(Int(appearance.fontSizeDiff) + 2, 0), sizes.count - 1)])
+            .environment(\.openURL, OpenURLAction { url in
+                if #available(iOS 26.0, *) {
+                    return .systemAction(url, prefersInApp: appearance.inAppBrowser)
+                } else if appearance.inAppBrowser {
+                    openedURL = url
+                    return .handled
+                } else {
+                    return .systemAction(url)
+                }
+            })
+            .fullScreenCover(item: $openedURL) { url in
+                SafariView(url: url, onClose: {
+                    openedURL = nil
+                })
+                .ignoresSafeArea()
             }
-        }
+            .onSuccessOf(of: presenter.state.appSettings) { newValue in
+                appSettings = newValue
+            }
+            .onSuccessOf(of: presenter.state.appearance) { newValue in
+                appearance = newValue
+            }
     }
 }
 

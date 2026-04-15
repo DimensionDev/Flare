@@ -6,32 +6,62 @@ struct NetworkImage: View {
     let placeholder: URL?
     let customHeader: [String: String]?
     var body: some View {
-        KFImage(data)
-            .resizable()
-            .requestModifier({ request in
-                if let customHeader {
-                    for (key, value) in customHeader {
-                        request.setValue(value, forHTTPHeaderField: key)
+        if data?.absoluteString.hasSuffix(".gif") == true {
+            KFAnimatedImage(data)
+                .fade(duration: 0.25)
+                .requestModifier({ request in
+                    if let customHeader {
+                        for (key, value) in customHeader {
+                            request.setValue(value, forHTTPHeaderField: key)
+                        }
+                    }
+                })
+                .placeholder {
+                    if let placeholder {
+                        NetworkImage(data: placeholder)
+                    } else {
+                        Rectangle()
+                            .fill(.placeholder)
+                            .redacted(reason: .placeholder)
                     }
                 }
-            })
-            .placeholder {
-                if let placeholder {
-                    NetworkImage(data: placeholder)
-                } else {
-                    Rectangle()
-                        .fill(.placeholder)
-                        .redacted(reason: .placeholder)
+                .cancelOnDisappear(true)
+    //            .if(placeholder == nil, if: { image in
+    //                image.loadTransition(.opacity)
+    //            }, else: { image in
+    //                image
+    //            })
+    //            .resizable()
+                .scaledToFill()
+        } else {
+            KFImage(data)
+                .resizable()
+                .fade(duration: 0.25)
+                .requestModifier({ request in
+                    if let customHeader {
+                        for (key, value) in customHeader {
+                            request.setValue(value, forHTTPHeaderField: key)
+                        }
+                    }
+                })
+                .placeholder {
+                    if let placeholder {
+                        NetworkImage(data: placeholder)
+                    } else {
+                        Rectangle()
+                            .fill(.placeholder)
+                            .redacted(reason: .placeholder)
+                    }
                 }
-            }
-            .cancelOnDisappear(true)
-//            .if(placeholder == nil, if: { image in
-//                image.loadTransition(.opacity)
-//            }, else: { image in
-//                image
-//            })
-//            .resizable()
-            .scaledToFill()
+                .cancelOnDisappear(true)
+    //            .if(placeholder == nil, if: { image in
+    //                image.loadTransition(.opacity)
+    //            }, else: { image in
+    //                image
+    //            })
+    //            .resizable()
+                .scaledToFill()
+        }
     }
 }
 

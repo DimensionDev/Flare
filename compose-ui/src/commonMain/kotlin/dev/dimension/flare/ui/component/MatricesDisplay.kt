@@ -78,9 +78,11 @@ internal fun MatricesDisplay(
                     text = stringResource(resId, text),
                     style = PlatformTheme.typography.caption,
                     modifier =
-                        Modifier.clickable {
-                            onClicked.invoke(index)
-                        },
+                        Modifier
+                            .alignByBaseline()
+                            .clickable {
+                                onClicked.invoke(index)
+                            },
                 )
             }
         }

@@ -25,6 +25,7 @@ struct UiRssView: View {
             Text(data.url)
                 .font(.caption)
                 .foregroundStyle(.secondary)
+                .lineLimit(1)
         }
     }
 }

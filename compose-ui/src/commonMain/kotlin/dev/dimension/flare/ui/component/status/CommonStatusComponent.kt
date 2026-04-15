@@ -139,11 +139,11 @@ import dev.dimension.flare.ui.route.DeeplinkRoute
 import dev.dimension.flare.ui.route.toUri
 import dev.dimension.flare.ui.theme.PlatformContentColor
 import dev.dimension.flare.ui.theme.PlatformTheme
+import kotlin.native.HiddenFromObjC
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.stringResource
-import kotlin.native.HiddenFromObjC
 
 @HiddenFromObjC
 @Composable
@@ -284,6 +284,7 @@ public fun CommonStatusComponent(
                     ) {
                         dateContent.invoke()
                     }
+                    Spacer(modifier = Modifier.height(4.dp))
                 }
             }
             item.replyToHandle?.let { replyHandle ->

@@ -496,8 +496,17 @@ private fun StatusContent(
                                 .zIndex(-1f)
                                 .padding(
                                     start = screenHorizontalPadding,
-                                ).padding(start = AvatarComponentDefaults.size / 2)
-                                .offset(y = AvatarComponentDefaults.size / 2),
+                                ).padding(
+                                    start = AvatarComponentDefaults.size / 2,
+                                ).padding(
+                                    top = AvatarComponentDefaults.size / 2,
+                                ).let {
+                                    if (data.message == null) {
+                                        it.offset(y = AvatarComponentDefaults.size / 2)
+                                    } else {
+                                        it
+                                    }
+                                },
                     )
                 },
                 measurePolicy = { measurables, constraints ->

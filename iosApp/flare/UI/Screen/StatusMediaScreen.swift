@@ -343,24 +343,47 @@ struct AdaptiveKFImage: View {
     }
     
     var kfImageView: some View {
-        KFImage(.init(string: data))
-            .onSuccess { result in
-                let size = result.image.size
-                let ratio = size.height / size.width
-                if ratio > wideThreshold {
-                    shouldFill = true
-                } else {
-                    shouldFill = false
-                }
+        ZStack {
+            if data.hasSuffix(".gif") {
+                KFAnimatedImage(.init(string: data))
+                    .onSuccess { result in
+                        let size = result.image.size
+                        let ratio = size.height / size.width
+                        if ratio > wideThreshold {
+                            shouldFill = true
+                        } else {
+                            shouldFill = false
+                        }
+                    }
+                    .placeholder {
+                        if let placeholder {
+                            AdaptiveKFImage(data: placeholder, placeholder: nil)
+                        } else {
+                            ProgressView()
+                        }
+                    }
+                    .aspectRatio(contentMode: shouldFill ? .fill : .fit)
+            } else {
+                KFImage(.init(string: data))
+                    .onSuccess { result in
+                        let size = result.image.size
+                        let ratio = size.height / size.width
+                        if ratio > wideThreshold {
+                            shouldFill = true
+                        } else {
+                            shouldFill = false
+                        }
+                    }
+                    .placeholder {
+                        if let placeholder {
+                            AdaptiveKFImage(data: placeholder, placeholder: nil)
+                        } else {
+                            ProgressView()
+                        }
+                    }
+                    .resizable()
+                    .aspectRatio(contentMode: shouldFill ? .fill : .fit)
             }
-            .placeholder {
-                if let placeholder {
-                    AdaptiveKFImage(data: placeholder, placeholder: nil)
-                } else {
-                    ProgressView()
-                }
-            }
-            .resizable()
-            .aspectRatio(contentMode: shouldFill ? .fill : .fit)
+        }
     }
 }

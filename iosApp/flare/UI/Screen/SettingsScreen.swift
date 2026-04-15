@@ -4,24 +4,12 @@ import KotlinSharedUI
 struct SettingsScreen: View {
     var body: some View {
         List {
-            if #available(iOS 26.0, *) {
-                NavigationLink(value: Route.accountManagement) {
-                    Label {
-                        Text("account_management_title")
-                        Text("account_management_description")
-                    } icon: {
-                        Image(.faCircleUser)
-                    }
-                    .labelReservedIconWidth(44)
-                }
-            } else {
-                NavigationLink(value: Route.accountManagement) {
-                    Label {
-                        Text("account_management_title")
-                        Text("account_management_description")
-                    } icon: {
-                        Image(.faCircleUser)
-                    }
+            NavigationLink(value: Route.accountManagement) {
+                Label {
+                    Text("account_management_title")
+                    Text("account_management_description")
+                } icon: {
+                    Image(.faCircleUser)
                 }
             }
 

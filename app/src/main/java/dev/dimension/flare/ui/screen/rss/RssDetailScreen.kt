@@ -78,10 +78,12 @@ import org.koin.compose.koinInject
 @Composable
 internal fun RssDetailScreen(
     url: String,
+    descriptionHtml: String? = null,
+    descriptionTitle: String? = null,
     onBack: () -> Unit,
 ) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
-    val state by producePresenter(url) { presenter(url) }
+    val state by producePresenter(url) { presenter(url, descriptionHtml, descriptionTitle) }
     val uriHandler = LocalUriHandler.current
     val context = LocalContext.current
     FlareScaffold(
@@ -313,11 +315,13 @@ internal fun RssDetailScreen(
 @Composable
 private fun presenter(
     url: String,
+    descriptionHtml: String? = null,
+    descriptionTitle: String? = null,
     settingsRepository: SettingsRepository = koinInject(),
 ) = run {
     val state =
-        remember(url) {
-            RssDetailPresenter(url)
+        remember(url, descriptionHtml) {
+            RssDetailPresenter(url, descriptionHtml, descriptionTitle)
         }.invoke()
     val headers =
         remember(url) {

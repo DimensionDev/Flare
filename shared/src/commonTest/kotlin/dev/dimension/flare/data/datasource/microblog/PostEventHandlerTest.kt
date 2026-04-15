@@ -185,7 +185,15 @@ class PostEventHandlerTest : RobolectricTest() {
             }
 
             insertPost(createPost())
-            db.pagingTimelineDao().insertAll(listOf(DbPagingTimeline(pagingKey = "home", statusId = DbStatus.createId(AccountType.Specific(accountKey), postKey), sortId = 1L)))
+            db.pagingTimelineDao().insertAll(
+                listOf(
+                    DbPagingTimeline(
+                        pagingKey = "home",
+                        statusId = DbStatus.createId(AccountType.Specific(accountKey), postKey),
+                        sortId = 1L,
+                    ),
+                ),
+            )
 
             handler = PostEventHandler(accountType = AccountType.Specific(accountKey), handler = fakeRemoteHandler)
             handler.deleteFromCache(postKey)

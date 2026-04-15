@@ -355,6 +355,8 @@
     <string name="rss_sources_pinned_in_tabs">固定到主标签页</string>
     <string name="rss_sources_open_in_browser">在浏览器中打开</string>
     <string name="rss_sources_open_in_app">在应用程序中打开</string>
+    <string name="rss_sources_full_content">全文解析</string>
+    <string name="rss_sources_description_only">仅展示</string>
     <string name="mastodon_available_timelines">可用的时间表</string>
     <string name="mastodon_trending_statuses">Trending statuses</string>
     <string name="mastodon_federated_timeline">联邦时间线</string>

@@ -32,6 +32,7 @@ ktorfit = "2.7.3-SNAPSHOT"
 ktor = "3.4.2"
 platformtoolsDarkmodedetector = "0.7.5"
 prettytime = "5.0.9.Final"
+readability = "1.0.0"
 reorderable = "3.0.0"
 richtextUiMaterial3 = "1.0.0-alpha04"
 sentry = "8.38.0"
@@ -95,12 +96,14 @@ lifecycle-viewmodel-navigation3 = { module = "org.jetbrains.androidx.lifecycle:l
 nucleus-aot-runtime = { module = "io.github.kdroidfilter:nucleus.aot-runtime", version.ref = "nucleus" }
 nucleus-darkmode-detector = { module = "io.github.kdroidfilter:nucleus.darkmode-detector", version.ref = "nucleus" }
 nucleus-decorated-window = { module = "io.github.kdroidfilter:nucleus.decorated-window-jni", version.ref = "nucleus" }
+readability = { module = "moe.tlaster:readability", version.ref = "readability" }
 sentry = { module = "io.sentry:sentry", version.ref = "sentry" }
 systemColor = { module = "io.github.kdroidfilter:nucleus.system-color", version.ref = "nucleus" }
 openai-client = { module = "com.aallam.openai:openai-client", version.ref = "openaiClient" }
 platformtools-darkmodedetector = { module = "io.github.kdroidfilter:platformtools.darkmodedetector", version.ref = "platformtoolsDarkmodedetector" }
 prettytime = { module = "org.ocpsoft.prettytime:prettytime", version.ref = "prettytime" }
 reorderable = { module = "sh.calvin.reorderable:reorderable", version.ref = "reorderable" }
+richtext-ui = { module = "com.halilibo.compose-richtext:richtext-ui", version.ref = "richtextUiMaterial3" }
 richtext-ui-material3 = { module = "com.halilibo.compose-richtext:richtext-ui-material3", version.ref = "richtextUiMaterial3" }
 stately-iso-collections = { module = "co.touchlab:stately-iso-collections", version.ref = "stately" }
 stately-isolate = { module = "co.touchlab:stately-isolate", version.ref = "stately" }

@@ -182,8 +182,10 @@ internal sealed interface Route : NavKey {
     ) : FloatingRoute
 
     data class RssDetail(
-        override val url: String,
-    ) : UrlRoute
+        val url: String,
+        val descriptionHtml: String? = null,
+        val title: String? = null,
+    ) : ScreenRoute
 
     data class TwitterArticle(
         val accountType: AccountType,
@@ -378,7 +380,7 @@ internal sealed interface Route : NavKey {
                 }
 
                 is DeeplinkRoute.Rss.Detail -> {
-                    RssDetail(url = deeplinkRoute.url)
+                    RssDetail(url = deeplinkRoute.url, descriptionHtml = deeplinkRoute.descriptionHtml, title = deeplinkRoute.title)
                 }
 
                 is DeeplinkRoute.TwitterArticle -> {

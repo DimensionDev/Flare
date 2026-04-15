@@ -38,7 +38,7 @@ internal class RssTimelineRemoteMediator(
                         it.render(
                             sourceName = title,
                             sourceIcon = icon,
-                            openInBrowser = rssSource?.openInBrowser ?: false,
+                            displayMode = rssSource?.displayMode ?: dev.dimension.flare.data.database.app.model.RssDisplayMode.FULL_CONTENT,
                             sourceLanguage = null,
                         )
                     }
@@ -49,7 +49,7 @@ internal class RssTimelineRemoteMediator(
                         it.render(
                             sourceName = title,
                             sourceIcon = icon,
-                            openInBrowser = rssSource?.openInBrowser ?: false,
+                            displayMode = rssSource?.displayMode ?: dev.dimension.flare.data.database.app.model.RssDisplayMode.FULL_CONTENT,
                             sourceLanguage = null,
                         )
                     }
@@ -60,7 +60,7 @@ internal class RssTimelineRemoteMediator(
                         it.render(
                             sourceName = title,
                             sourceIcon = icon,
-                            openInBrowser = rssSource?.openInBrowser ?: false,
+                            displayMode = rssSource?.displayMode ?: dev.dimension.flare.data.database.app.model.RssDisplayMode.FULL_CONTENT,
                             sourceLanguage = response.channel.language,
                         )
                     }

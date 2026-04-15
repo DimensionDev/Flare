@@ -335,6 +335,14 @@
     <string name="rss_sources_rss_hub_host_hint">You need to set the RssHub host if you want to use RssHub, or select the public RssHub server</string>
     <string name="rss_sources_discovered_rss_sources">Discovered Rss Sources</string>
     <string name="rss_sources_pinned_in_tabs">Pin to home tabs</string>
+    <string name="rss_sources_display_mode">Display mode</string>
+    <string name="rss_sources_open_in_browser">Open in browser</string>
+    <string name="rss_sources_full_content">Full content</string>
+    <string name="rss_sources_description_only">Description only</string>
+    <string name="rss_detail_open_in_browser">Open in browser</string>
+    <string name="rss_detail_translate">Translate</string>
+    <string name="rss_detail_tldr">Summarize</string>
+    <string name="rss_detail_tldr_error">Failed to summarize</string>
     <string name="mastodon_available_timelines">Available timelines</string>
     <string name="mastodon_trending_statuses">Trending statuses</string>
     <string name="mastodon_federated_timeline">Federated timeline</string>

@@ -6,6 +6,9 @@ import androidx.room3.Database
 import androidx.room3.RoomDatabase
 import androidx.room3.RoomDatabaseConstructor
 import androidx.room3.TypeConverters
+import androidx.room3.migration.Migration
+import androidx.sqlite.SQLiteConnection
+import androidx.sqlite.execSQL
 import dev.dimension.flare.data.database.app.dao.AccountDao
 import dev.dimension.flare.data.database.app.dao.ApplicationDao
 import dev.dimension.flare.data.database.app.dao.DraftDao
@@ -24,7 +27,7 @@ import dev.dimension.flare.data.database.app.dao.SearchHistoryDao
         dev.dimension.flare.data.database.app.model.DbSearchHistory::class,
         dev.dimension.flare.data.database.app.model.DbRssSources::class,
     ],
-    version = 8,
+    version = 9,
     autoMigrations = [
         AutoMigration(
             from = 3,
@@ -54,6 +57,7 @@ import dev.dimension.flare.data.database.app.dao.SearchHistoryDao
     dev.dimension.flare.data.database.adapter.PlatformTypeConverter::class,
     dev.dimension.flare.data.database.app.model.DraftConverters::class,
     dev.dimension.flare.data.database.adapter.SubscriptionTypeConverter::class,
+    dev.dimension.flare.data.database.adapter.RssDisplayModeConverter::class,
 )
 @ConstructedBy(AppDatabaseConstructor::class)
 internal abstract class AppDatabase : RoomDatabase() {
@@ -68,6 +72,23 @@ internal abstract class AppDatabase : RoomDatabase() {
     abstract fun searchHistoryDao(): SearchHistoryDao
 
     abstract fun rssSourceDao(): RssSourceDao
+
+    companion object {
+        val MIGRATION_8_9 =
+            object : Migration(8, 9) {
+                override suspend fun migrate(connection: SQLiteConnection) {
+                    connection.execSQL(
+                        "ALTER TABLE DbRssSources ADD COLUMN displayMode TEXT NOT NULL DEFAULT 'FULL_CONTENT'",
+                    )
+                    connection.execSQL(
+                        "UPDATE DbRssSources SET displayMode = 'OPEN_IN_BROWSER' WHERE openInBrowser = 1",
+                    )
+                    connection.execSQL(
+                        "ALTER TABLE DbRssSources DROP COLUMN openInBrowser",
+                    )
+                }
+            }
+    }
 }
 
 // The Room compiler generates the `actual` implementations.

@@ -95,6 +95,8 @@ public sealed class DeeplinkRoute {
         @Serializable
         public data class Detail(
             val url: String,
+            val descriptionHtml: String? = null,
+            val title: String? = null,
         ) : Rss()
     }
 

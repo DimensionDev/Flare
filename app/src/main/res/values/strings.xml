@@ -417,11 +417,14 @@
     <string name="rss_sources_pinned_in_tabs">Pin to home tabs</string>
     <string name="rss_sources_open_in_browser">Open in browser</string>
     <string name="rss_sources_open_in_app">Open in app</string>
+    <string name="rss_sources_full_content">Full content</string>
+    <string name="rss_sources_description_only">Description only</string>
     <string name="mastodon_available_timelines">Available timelines</string>
     <string name="mastodon_trending_statuses">Trending statuses</string>
     <string name="mastodon_federated_timeline">Federated timeline</string>
     <string name="mastodon_local_timeline">Local timeline</string>
     <string name="subscription_url_hint">Supports RSS feeds and Mastodon instances</string>
+    <string name="rss_sources_display_mode">Display mode</string>
 
     <string name="rss_detail_open_in_browser">Open in browser</string>
     <string name="rss_detail_share">Share link</string>

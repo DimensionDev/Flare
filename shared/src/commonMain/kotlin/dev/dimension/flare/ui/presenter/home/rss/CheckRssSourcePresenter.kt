@@ -104,7 +104,7 @@ public class CheckRssSourcePresenter(
                                                     title = RssService.fetch(it).title.trim(),
                                                     lastUpdate = Instant.DISTANT_PAST.toUi(),
                                                     favIcon = icon,
-                                                    openInBrowser = false,
+                                                    displayMode = dev.dimension.flare.data.database.app.model.RssDisplayMode.FULL_CONTENT,
                                                 )
                                             }
                                         }.awaitAll()

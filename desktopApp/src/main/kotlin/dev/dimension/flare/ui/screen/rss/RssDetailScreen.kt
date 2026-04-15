@@ -1,0 +1,319 @@
+package dev.dimension.flare.ui.screen.rss
+
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.text.intl.Locale
+import androidx.compose.ui.unit.dp
+import dev.dimension.flare.LocalWindowPadding
+import dev.dimension.flare.Res
+import dev.dimension.flare.common.encodeJson
+import dev.dimension.flare.data.network.rss.DocumentData
+import dev.dimension.flare.data.repository.SettingsRepository
+import dev.dimension.flare.rss_detail_open_in_browser
+import dev.dimension.flare.rss_detail_tldr
+import dev.dimension.flare.rss_detail_tldr_error
+import dev.dimension.flare.rss_detail_translate
+import dev.dimension.flare.ui.component.FlareScrollBar
+import dev.dimension.flare.ui.component.RssRichText
+import dev.dimension.flare.ui.component.listCard
+import dev.dimension.flare.ui.model.UiState
+import dev.dimension.flare.ui.model.collectAsUiState
+import dev.dimension.flare.ui.model.flatMap
+import dev.dimension.flare.ui.model.onError
+import dev.dimension.flare.ui.model.onLoading
+import dev.dimension.flare.ui.model.onSuccess
+import dev.dimension.flare.ui.presenter.home.rss.RssDetailPresenter
+import dev.dimension.flare.ui.presenter.home.rss.RssDetailTranslatePresenter
+import dev.dimension.flare.ui.presenter.invoke
+import dev.dimension.flare.ui.presenter.server.AiTLDRPresenter
+import dev.dimension.flare.ui.theme.screenHorizontalPadding
+import io.github.composefluent.FluentTheme
+import io.github.composefluent.component.Button
+import io.github.composefluent.component.ProgressBar
+import io.github.composefluent.component.ProgressRing
+import io.github.composefluent.component.Text
+import kotlinx.coroutines.flow.map
+import moe.tlaster.precompose.molecule.producePresenter
+import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.koinInject
+
+@Composable
+internal fun RssDetailScreen(
+    url: String,
+    descriptionHtml: String? = null,
+    descriptionTitle: String? = null,
+    onBack: () -> Unit,
+) {
+    val uriHandler = LocalUriHandler.current
+    val state by producePresenter(url) { presenter(url, descriptionHtml, descriptionTitle) }
+    val scrollState = rememberScrollState()
+    androidx.compose.foundation.layout.Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.TopCenter,
+    ) {
+        FlareScrollBar(state = scrollState) {
+            Column(
+                modifier =
+                    Modifier
+                        .verticalScroll(scrollState)
+                        .padding(horizontal = screenHorizontalPadding, vertical = 16.dp)
+                        .padding(LocalWindowPadding.current),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                state.data
+                    .onSuccess { data ->
+                        val displayTitle =
+                            state.translateState?.translatedTitle?.let { titleState ->
+                                when (titleState) {
+                                    is UiState.Success -> titleState.data
+                                    else -> data.title
+                                }
+                            } ?: data.title
+                        if (displayTitle.isNotEmpty()) {
+                            Text(
+                                text = displayTitle,
+                                style = FluentTheme.typography.title,
+                                modifier =
+                                    Modifier
+                                        .listCard(0, 2)
+                                        .background(FluentTheme.colors.background.card.default)
+                                        .padding(horizontal = screenHorizontalPadding, vertical = 8.dp),
+                            )
+                        }
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            Button(
+                                onClick = { uriHandler.openUri(url) },
+                            ) {
+                                Text(stringResource(Res.string.rss_detail_open_in_browser))
+                            }
+                            if (!state.isAutoTranslate && !state.enableTranslate) {
+                                Button(
+                                    onClick = { state.setEnableTranslate(true) },
+                                ) {
+                                    Text(stringResource(Res.string.rss_detail_translate))
+                                }
+                            }
+                            state.enableTldr.onSuccess {
+                                if (it) {
+                                    Button(
+                                        onClick = { state.setShowTldr(true) },
+                                    ) {
+                                        Text(stringResource(Res.string.rss_detail_tldr))
+                                    }
+                                }
+                            }
+                        }
+                    }.onLoading {
+                        ProgressRing(modifier = Modifier.align(Alignment.CenterHorizontally))
+                    }.onError {
+                        Text(
+                            text = it.message ?: "Failed to load article",
+                        )
+                    }
+                state.data
+                    .onSuccess { data ->
+                        AnimatedVisibility(state.showTldr) {
+                            state.tldrState?.let { tldrState ->
+                                Column(
+                                    modifier =
+                                        Modifier
+                                            .animateContentSize()
+                                            .fillMaxWidth()
+                                            .listCard()
+                                            .background(FluentTheme.colors.background.card.default)
+                                            .padding(8.dp)
+                                            .clickable {
+                                                tldrState.onError {
+                                                    state.refreshTldr()
+                                                }
+                                            },
+                                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                ) {
+                                    AnimatedContent(tldrState) {
+                                        it
+                                            .onSuccess {
+                                                Text(
+                                                    text = it,
+                                                    modifier =
+                                                        Modifier
+                                                            .padding(
+                                                                horizontal = screenHorizontalPadding,
+                                                                vertical = 8.dp,
+                                                            ),
+                                                )
+                                            }.onLoading {
+                                                ProgressRing(
+                                                    modifier =
+                                                        Modifier
+                                                            .padding(
+                                                                horizontal = screenHorizontalPadding,
+                                                                vertical = 8.dp,
+                                                            ),
+                                                )
+                                            }.onError {
+                                                Text(
+                                                    text = stringResource(Res.string.rss_detail_tldr_error),
+                                                    modifier =
+                                                        Modifier
+                                                            .padding(
+                                                                horizontal = screenHorizontalPadding,
+                                                                vertical = 8.dp,
+                                                            ),
+                                                )
+                                            }
+                                    }
+                                }
+                            }
+                        }
+                        state.translateState?.translatedHtml?.onLoading {
+                            ProgressBar(
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = screenHorizontalPadding),
+                            )
+                        }
+                        SelectionContainer(
+                            modifier =
+                                Modifier
+                                    .listCard()
+                                    .background(FluentTheme.colors.background.card.default)
+                                    .padding(horizontal = screenHorizontalPadding, vertical = 8.dp),
+                        ) {
+                            val displayData =
+                                state.translateState?.translatedHtml?.let { htmlState ->
+                                    when (htmlState) {
+                                        is UiState.Success -> data.copy(content = htmlState.data)
+                                        else -> data
+                                    }
+                                } ?: data
+                            RssRichText(
+                                element = displayData.element,
+                                modifier = Modifier.fillMaxWidth(),
+                            )
+                        }
+                        state.translateState?.translatedHtml?.onError {
+                            Text(
+                                text = it.message ?: "Translation failed",
+                                modifier =
+                                    Modifier
+                                        .padding(horizontal = screenHorizontalPadding)
+                                        .clickable { state.refreshTranslate() },
+                            )
+                        }
+                    }
+            }
+        }
+    }
+}
+
+@Composable
+private fun presenter(
+    url: String,
+    descriptionHtml: String? = null,
+    descriptionTitle: String? = null,
+    settingsRepository: SettingsRepository = koinInject(),
+) = run {
+    val state =
+        remember(url, descriptionHtml) {
+            RssDetailPresenter(url, descriptionHtml, descriptionTitle)
+        }.invoke()
+    val enableTldr by remember {
+        settingsRepository.appSettings.map { it.aiConfig.tldr }
+    }.collectAsUiState()
+    val preTranslate by remember {
+        settingsRepository.appSettings.map { it.translateConfig.preTranslate }
+    }.collectAsUiState()
+    var showTldr by remember { mutableStateOf(false) }
+    var tldrRefreshKey by remember { mutableIntStateOf(0) }
+    var enableTranslate by remember { mutableStateOf(false) }
+    var translateRefreshKey by remember { mutableIntStateOf(0) }
+    val tldrState =
+        if (showTldr) {
+            key(tldrRefreshKey, state.data) {
+                state.data.flatMap {
+                    AiTLDRPresenter(
+                        it.encodeJson(DocumentData.serializer()),
+                        Locale.current.toLanguageTag(),
+                    ).invoke()
+                }
+            }
+        } else {
+            null
+        }
+    val isAutoTranslate = preTranslate is UiState.Success && (preTranslate as UiState.Success<Boolean>).data
+    val shouldTranslate = isAutoTranslate || enableTranslate
+    val translateState: RssDetailTranslatePresenter.State? =
+        if (shouldTranslate) {
+            when (val dataState = state.data) {
+                is UiState.Success -> {
+                    key(translateRefreshKey) {
+                        remember(dataState.data.content, dataState.data.title) {
+                            RssDetailTranslatePresenter(
+                                htmlContent = dataState.data.content,
+                                title = dataState.data.title,
+                                targetLanguage = Locale.current.toLanguageTag(),
+                            )
+                        }.invoke()
+                    }
+                }
+
+                else -> {
+                    null
+                }
+            }
+        } else {
+            null
+        }
+    object : RssDetailPresenter.State by state {
+        val enableTldr = enableTldr
+        val isAutoTranslate = isAutoTranslate
+        val tldrState = tldrState
+        val showTldr = showTldr
+        val translateState = translateState
+        val enableTranslate = enableTranslate
+
+        fun setShowTldr(value: Boolean) {
+            showTldr = value
+        }
+
+        fun refreshTldr() {
+            tldrRefreshKey++
+        }
+
+        fun setEnableTranslate(value: Boolean) {
+            enableTranslate = value
+        }
+
+        fun refreshTranslate() {
+            translateRefreshKey++
+        }
+    }
+}

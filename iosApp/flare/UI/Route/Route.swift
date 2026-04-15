@@ -73,8 +73,8 @@ enum Route: Hashable, Identifiable {
             TabSettingsScreen()
         case .tabGroupConfig(let item):
             GroupConfigScreen(item: item)
-        case .rssDetail(let url):
-            RssDetailScreen(url: url)
+        case .rssDetail(let url, let descriptionHtml, let title):
+            RssDetailScreen(url: url, descriptionHtml: descriptionHtml, descriptionTitle: title)
         case .twitterArticle(let accountType, let tweetId, let articleId):
             TwitterArticleScreen(accountType: accountType, tweetId: tweetId, articleId: articleId)
         case .statusVVOStatus(let accountType, let statusKey):
@@ -133,7 +133,7 @@ enum Route: Hashable, Identifiable {
     case mediaStatusMedia(AccountType, MicroBlogKey, Int32, String?)
     case profileUser(AccountType, MicroBlogKey)
     case profileUserNameWithHost(AccountType, String, String)
-    case rssDetail(String)
+    case rssDetail(String, String?, String?)
     case twitterArticle(AccountType, String, String?)
     case search(AccountType, String)
     case statusAddReaction(AccountType, MicroBlogKey)
@@ -254,7 +254,7 @@ enum Route: Hashable, Identifiable {
         case .rss(let rss):
             switch onEnum(of: rss) {
             case .detail(let data):
-                return Route.rssDetail(data.url)
+                return Route.rssDetail(data.url, data.descriptionHtml, data.title)
             }
         case .twitterArticle(let data):
             return Route.twitterArticle(data.accountType, data.tweetId, data.articleId)

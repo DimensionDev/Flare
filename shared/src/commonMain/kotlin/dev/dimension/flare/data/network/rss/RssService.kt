@@ -44,7 +44,19 @@ internal object RssService {
             }.map { it.attr("href") }
             .filter { it.isNotBlank() }
             .distinct()
-            .takeIf { it.isNotEmpty() }
+            .map {
+                if (it.startsWith("//")) {
+                    "https:$it"
+                } else if (it.startsWith("/")) {
+                    val baseUrl = Url(url)
+                    "${baseUrl.protocol.name}://${baseUrl.host}$it"
+                } else if (!it.startsWith("http")) {
+                    val baseUrl = Url(url)
+                    "${baseUrl.protocol.name}://${baseUrl.host}/$it"
+                } else {
+                    it
+                }
+            }.takeIf { it.isNotEmpty() }
             ?: throw IllegalArgumentException("No RSS or Atom feeds found at the provided URL: $url")
 
     suspend fun fetchIcon(url: String): String? {

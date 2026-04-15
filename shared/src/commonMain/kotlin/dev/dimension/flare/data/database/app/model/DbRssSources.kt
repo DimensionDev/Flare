@@ -14,6 +14,13 @@ public enum class SubscriptionType {
 }
 
 @Serializable
+public enum class RssDisplayMode {
+    FULL_CONTENT,
+    OPEN_IN_BROWSER,
+    DESCRIPTION_ONLY,
+}
+
+@Serializable
 @Entity
 internal data class DbRssSources(
     @PrimaryKey(autoGenerate = true)
@@ -21,8 +28,8 @@ internal data class DbRssSources(
     val url: String,
     val title: String?,
     val icon: String?,
-    @ColumnInfo(defaultValue = "0")
-    val openInBrowser: Boolean = false,
+    @ColumnInfo(defaultValue = "FULL_CONTENT")
+    val displayMode: RssDisplayMode = RssDisplayMode.FULL_CONTENT,
     val lastUpdate: Long,
     @ColumnInfo(defaultValue = "RSS")
     val type: SubscriptionType = SubscriptionType.RSS,

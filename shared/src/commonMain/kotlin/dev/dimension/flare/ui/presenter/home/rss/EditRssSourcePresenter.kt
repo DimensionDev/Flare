@@ -8,6 +8,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.app.model.DbRssSources
+import dev.dimension.flare.data.database.app.model.RssDisplayMode
 import dev.dimension.flare.data.database.app.model.SubscriptionType
 import dev.dimension.flare.ui.model.UiRssSource
 import dev.dimension.flare.ui.model.UiState
@@ -40,7 +41,7 @@ public class EditRssSourcePresenter(
             public interface RssFeed : RssInputState {
                 public fun save(
                     title: String,
-                    openInBrowser: Boolean,
+                    displayMode: RssDisplayMode,
                 ): UiRssSource
             }
 
@@ -48,7 +49,7 @@ public class EditRssSourcePresenter(
             public interface RssSources : RssInputState {
                 public fun save(
                     sources: List<UiRssSource>,
-                    openInBrowser: Boolean,
+                    displayMode: RssDisplayMode,
                 )
             }
 
@@ -60,7 +61,7 @@ public class EditRssSourcePresenter(
 
                 public fun save(
                     title: String,
-                    openInBrowser: Boolean,
+                    displayMode: RssDisplayMode,
                 ): UiRssSource
 
                 public val actualUrl: String
@@ -116,7 +117,7 @@ public class EditRssSourcePresenter(
                         object : State.RssInputState.RssFeed {
                             override fun save(
                                 title: String,
-                                openInBrowser: Boolean,
+                                displayMode: RssDisplayMode,
                             ): UiRssSource {
                                 val data =
                                     DbRssSources(
@@ -124,7 +125,7 @@ public class EditRssSourcePresenter(
                                         url = it.url,
                                         title = title,
                                         lastUpdate = 0,
-                                        openInBrowser = openInBrowser,
+                                        displayMode = displayMode,
                                         icon = it.icon,
                                     )
                                 scope.launch {
@@ -183,7 +184,7 @@ public class EditRssSourcePresenter(
 
                             override fun save(
                                 title: String,
-                                openInBrowser: Boolean,
+                                displayMode: RssDisplayMode,
                             ): UiRssSource {
                                 val data =
                                     DbRssSources(
@@ -191,7 +192,7 @@ public class EditRssSourcePresenter(
                                         url = actualUrl,
                                         title = title,
                                         lastUpdate = 0,
-                                        openInBrowser = openInBrowser,
+                                        displayMode = displayMode,
                                         icon = UiRssSource.favIconUrl(actualUrl),
                                     )
                                 scope.launch {
@@ -208,7 +209,7 @@ public class EditRssSourcePresenter(
                         object : State.RssInputState.RssSources {
                             override fun save(
                                 sources: List<UiRssSource>,
-                                openInBrowser: Boolean,
+                                displayMode: RssDisplayMode,
                             ) {
                                 scope.launch {
                                     appDatabase
@@ -220,7 +221,7 @@ public class EditRssSourcePresenter(
                                                     url = it.url,
                                                     title = it.title ?: "",
                                                     lastUpdate = 0,
-                                                    openInBrowser = openInBrowser,
+                                                    displayMode = displayMode,
                                                     icon = it.favIcon,
                                                 )
                                             },
@@ -249,7 +250,7 @@ public class EditRssSourcePresenter(
                                             url = it.host,
                                             title = "${it.instanceName ?: it.host} - $typeName",
                                             lastUpdate = 0,
-                                            openInBrowser = false,
+                                            displayMode = RssDisplayMode.FULL_CONTENT,
                                             icon = it.icon,
                                             type = type,
                                         )

@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.controllers
 import coil3.ImageLoader
 import coil3.SingletonImageLoader
 import coil3.annotation.ExperimentalCoilApi
+import coil3.gif.GifDecoder
 import coil3.network.ktor3.KtorNetworkFetcherFactory
 import coil3.request.crossfade
 import dev.dimension.flare.common.InAppNotification
@@ -51,6 +52,7 @@ public object ComposeUIHelper {
             ImageLoader
                 .Builder(context)
                 .components {
+                    add(GifDecoder.Factory())
                     add(
                         KtorNetworkFetcherFactory(
                             httpClient =

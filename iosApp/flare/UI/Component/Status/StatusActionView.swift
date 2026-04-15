@@ -317,7 +317,7 @@ extension UiIcon {
         case .misskey: return "fa-misskey"
         case .bluesky: return "fa-bluesky"
         case .nostr: return "fa-nostr"
-        case .twitter: return "fa-x-twitter"
+        case .twitter: return "fa-twitter"
         case .x: return "fa-x-twitter"
         case .weibo: return "fa-weibo"
         case .translate: return "fa-language"

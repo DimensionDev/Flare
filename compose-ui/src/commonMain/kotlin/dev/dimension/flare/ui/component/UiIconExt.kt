@@ -7,6 +7,7 @@ import compose.icons.fontawesomeicons.Regular
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.brands.Bluesky
 import compose.icons.fontawesomeicons.brands.Mastodon
+import compose.icons.fontawesomeicons.brands.Twitter
 import compose.icons.fontawesomeicons.brands.Weibo
 import compose.icons.fontawesomeicons.brands.XTwitter
 import compose.icons.fontawesomeicons.regular.Bookmark
@@ -97,7 +98,7 @@ public fun UiIcon.toImageVector(): ImageVector =
         UiIcon.Misskey -> FontAwesomeIcons.Brands.Misskey
         UiIcon.Bluesky -> FontAwesomeIcons.Brands.Bluesky
         UiIcon.Nostr -> FontAwesomeIcons.Brands.Nostr
-        UiIcon.Twitter -> FontAwesomeIcons.Brands.XTwitter
+        UiIcon.Twitter -> FontAwesomeIcons.Brands.Twitter
         UiIcon.X -> FontAwesomeIcons.Brands.XTwitter
         UiIcon.Weibo -> FontAwesomeIcons.Brands.Weibo
         UiIcon.Translate -> FontAwesomeIcons.Solid.Language

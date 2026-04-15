@@ -49,6 +49,7 @@ kotlin {
                 implementation(compose("org.jetbrains.compose.components:components-resources"))
                 implementation(libs.composeIcons.fontAwesome)
                 implementation(libs.coil3.compose)
+                implementation(libs.coil3.gif)
                 implementation(libs.coil3.ktor3)
                 implementation(libs.coil3.network)
                 implementation(libs.compose.placeholder)

@@ -16,6 +16,7 @@ import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import coil3.ImageLoader
 import coil3.annotation.ExperimentalCoilApi
+import coil3.gif.GifDecoder
 import coil3.compose.setSingletonImageLoaderFactory
 import coil3.network.ktor3.KtorNetworkFetcherFactory
 import coil3.request.crossfade
@@ -85,6 +86,7 @@ fun main(args: Array<String>) {
             ImageLoader
                 .Builder(context)
                 .components {
+                    add(GifDecoder.Factory())
                     add(
                         KtorNetworkFetcherFactory(
                             httpClient =

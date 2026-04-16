@@ -6,6 +6,7 @@ import Photos
 import Kingfisher
 import SwiftUIBackports
 import VideoPlayer
+import FlareUI
 
 struct StatusMediaScreen: View {
     @Environment(\.appearanceSettings) private var appearanceSettings

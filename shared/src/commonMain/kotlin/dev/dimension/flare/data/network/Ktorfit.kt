@@ -4,6 +4,7 @@ import de.jensklingenberg.ktorfit.converter.CallConverterFactory
 import de.jensklingenberg.ktorfit.converter.FlowConverterFactory
 import de.jensklingenberg.ktorfit.converter.ResponseConverterFactory
 import dev.dimension.flare.common.BuildConfig
+import dev.dimension.flare.common.GlobalConfig
 import dev.dimension.flare.common.JSON
 import dev.dimension.flare.data.network.mastodon.api.model.MastodonPagingConverterFactory
 import dev.dimension.flare.data.repository.DebugRepository
@@ -51,14 +52,16 @@ public fun ktorClient(
 ): HttpClient =
     HttpClient(httpClientEngine) {
         config.invoke(this)
-        install(Logging) {
-            logger = FlareLogger
-            level =
-                if (BuildConfig.debug) {
-                    LogLevel.ALL
-                } else {
-                    LogLevel.BODY
-                }
+        if (!GlobalConfig.disableLogging) {
+            install(Logging) {
+                logger = FlareLogger
+                level =
+                    if (BuildConfig.debug) {
+                        LogLevel.ALL
+                    } else {
+                        LogLevel.BODY
+                    }
+            }
         }
     }
 

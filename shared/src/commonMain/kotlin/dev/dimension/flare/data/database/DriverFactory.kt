@@ -7,9 +7,4 @@ internal expect class DriverFactory {
         name: String,
         isCache: Boolean = false,
     ): RoomDatabase.Builder<T>
-
-    fun deleteDatabase(
-        name: String,
-        isCache: Boolean,
-    )
 }

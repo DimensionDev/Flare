@@ -1,5 +1,6 @@
 import SwiftUI
 import KotlinSharedUI
+import FlareUI
 
 struct VVOStatusScreen: View {
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass

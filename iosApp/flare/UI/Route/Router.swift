@@ -2,6 +2,7 @@ import SwiftUI
 import KotlinSharedUI
 import LazyPager
 import Combine
+import FlareUI
 
 struct Router<Root: View>: View {
     @Environment(\.openURL) private var openURL

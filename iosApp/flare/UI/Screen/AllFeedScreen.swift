@@ -1,5 +1,6 @@
 import SwiftUI
 @preconcurrency import KotlinSharedUI
+import FlareUI
 
 struct AllFeedScreen: View {
     @StateObject private var presenter: KotlinPresenter<BlueskyFeedsWithTabsPresenterState>

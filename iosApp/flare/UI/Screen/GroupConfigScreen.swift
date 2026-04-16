@@ -1,6 +1,7 @@
 import SwiftUI
 import KotlinSharedUI
 import SwiftUIBackports
+import FlareUI
 
 struct GroupConfigScreen: View {
     @Environment(\.dismiss) private var dismiss

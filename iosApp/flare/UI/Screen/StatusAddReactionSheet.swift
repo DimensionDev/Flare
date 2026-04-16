@@ -1,5 +1,6 @@
 import SwiftUI
 import KotlinSharedUI
+import FlareUI
 
 struct StatusAddReactionSheet: View {
     let accountType: AccountType

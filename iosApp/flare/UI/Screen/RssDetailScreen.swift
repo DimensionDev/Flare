@@ -3,6 +3,7 @@ import KotlinSharedUI
 import SafariServices
 import SwiftUIBackports
 import WebKit
+import FlareUI
 
 struct RssDetailScreen: View {
     @State private var webViewHeight: CGFloat = .zero

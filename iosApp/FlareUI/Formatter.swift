@@ -1,11 +1,11 @@
 import Foundation
 import KotlinSharedUI
 
-class Formatter: SwiftFormatter {
+public class PlatformFormatter: SwiftFormatter {
     private init() {}
     
-    static let shared = Formatter()
-    nonisolated func formatNumber(number: Int64) -> String {
+    public static let shared = PlatformFormatter()
+    nonisolated public func formatNumber(number: Int64) -> String {
         return Int(number)
             .formatted(
                 .number

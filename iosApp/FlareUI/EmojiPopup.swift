@@ -1,22 +1,25 @@
 import SwiftUI
 import KotlinSharedUI
-import SwiftUIBackports
+internal import SwiftUIBackports
+internal import Kingfisher
 
-struct EmojiPopup: View {
+public struct EmojiPopup: View {
     @StateObject private var presenter: KotlinPresenter<EmojiHistoryPresenterState>
     @State private var filterText: String = ""
-    let data: EmojiData
-    let onItemClicked: (UiEmoji) -> Void
+    public let data: EmojiData
+    public let onItemClicked: (UiEmoji) -> Void
     
-    var body: some View {
+    public var body: some View {
         List {
-            StateView(state: presenter.state.history) { history in
-                let items = history.cast(UiEmoji.self)
-                if !items.isEmpty {
+            if case .success(let historyData) = onEnum(of: presenter.state.history) {
+                let history = historyData.data
+                if history.count > 0 {
                     Section {
                         LazyVGrid(columns: [GridItem(.adaptive(minimum: 48))], spacing: 8) {
-                            ForEach(items, id: \.shortcode) { item in
-                                NetworkImage(data: item.url)
+                            ForEach(Array(history.enumerated()), id: \.offset) { element in
+                                let item = element.element as! UiEmoji
+                                KFImage(URL(string: item.url))
+                                    .resizable()
                                     .scaledToFit()
                                     .frame(width: 32, height: 32)
                                     .onTapGesture {
@@ -46,7 +49,8 @@ struct EmojiPopup: View {
                     Section {
                         LazyVGrid(columns: [GridItem(.adaptive(minimum: 48))], spacing: 8) {
                             ForEach(value, id: \.shortcode) { item in
-                                NetworkImage(data: item.url)
+                                KFImage(URL(string: item.url))
+                                    .resizable()
                                     .scaledToFit()
                                     .frame(width: 32, height: 32)
                                     .onTapGesture {
@@ -86,7 +90,8 @@ struct EmojiSection: View {
         Section(isExpanded: $isExpanded) {
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 48))], spacing: 8) {
                 ForEach(value, id: \.shortcode) { item in
-                    NetworkImage(data: item.url)
+                    KFImage(URL(string: item.url))
+                        .resizable()
                         .scaledToFit()
                         .frame(width: 32, height: 32)
                         .onTapGesture {
@@ -100,7 +105,8 @@ struct EmojiSection: View {
         }
     }
 }
-extension EmojiPopup {
+
+public extension EmojiPopup {
     init(
         data: EmojiData,
         onItemClicked: @escaping (UiEmoji) -> Void

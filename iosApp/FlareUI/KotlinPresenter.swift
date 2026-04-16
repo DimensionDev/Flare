@@ -6,12 +6,12 @@ import Foundation
 // which is a heavy work since Kotlin Presenter is not designed to do so
 // so we keep using the old ObservableObject and @StateObject
 // see: https://github.com/Dimillian/IceCubesApp/issues/2033
-final class KotlinPresenter<T: AnyObject>: ObservableObject {
+public final class KotlinPresenter<T: AnyObject>: ObservableObject {
     private var subscribers = Set<AnyCancellable>()
     var presenter: PresenterBase<T>
-    let key = UUID().uuidString
+    public let key = UUID().uuidString
 
-    init(presenter: PresenterBase<T>) {
+    public init(presenter: PresenterBase<T>) {
         self.presenter = presenter
         self.state = presenter.models.value
         self.presenter.models.toPublisher().receive(on: DispatchQueue.main).sink { [weak self] newState in
@@ -21,7 +21,7 @@ final class KotlinPresenter<T: AnyObject>: ObservableObject {
     }
 
     @Published
-    var state: T
+    public var state: T
 
 //    @MainActor
     deinit {

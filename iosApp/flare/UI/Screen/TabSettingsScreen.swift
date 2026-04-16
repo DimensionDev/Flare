@@ -1,5 +1,6 @@
 import SwiftUI
 import KotlinSharedUI
+import FlareUI
 struct TabSettingsScreen: View {
     @StateObject private var presenter = KotlinPresenter(presenter: SettingsPresenter())
     @Environment(\.dismiss) private var dismiss

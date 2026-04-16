@@ -132,21 +132,13 @@ fun ShortcutComposeRoute(
     initialText: String = "",
     initialMedias: ImmutableList<Uri> = persistentListOf(),
 ) {
-    val activeAccountState by producePresenter(key = "shortcut_compose_active_account") {
-        activeAccountPresenter()
-    }
-    val accountType =
-        activeAccountState.user
-            .takeSuccess()
-            ?.let { AccountType.Specific(it.key) }
-            ?: AccountType.Guest
     FlareTheme {
         CompositionLocalProvider(
             LocalContentColor provides MaterialTheme.colorScheme.onBackground,
         ) {
             ComposeScreen(
                 onBack = onBack,
-                accountType = accountType,
+                accountType = null,
                 initialText = initialText,
                 initialMedias = initialMedias,
             )

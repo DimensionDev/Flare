@@ -1,5 +1,6 @@
 import SwiftUI
 import KotlinSharedUI
+import FlareUI
 
 struct AppearanceScreen: View {
     @AppStorage("pref_timeline_use_compose_view") private var useComposeView: Bool = false

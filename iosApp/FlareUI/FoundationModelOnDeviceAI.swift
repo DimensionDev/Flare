@@ -2,23 +2,23 @@ import Foundation
 import KotlinSharedUI
 import FoundationModels
 
-final class FoundationModelOnDeviceAI: SwiftOnDeviceAI {
+public final class FoundationModelOnDeviceAI: SwiftOnDeviceAI {
     private init() {}
 
-    static let shared = FoundationModelOnDeviceAI()
+    public static let shared = FoundationModelOnDeviceAI()
 
-    func __isAvailable() async throws -> KotlinBoolean {
+    public func __isAvailable() async throws -> KotlinBoolean {
         if #available(iOS 26.0, *) {
             return KotlinBoolean(bool: SystemLanguageModel.default.isAvailable)
         }
         return KotlinBoolean(bool: false)
     }
 
-    func __translate(source: String, targetLanguage: String, prompt: String) async throws -> String? {
+    public func __translate(source: String, targetLanguage: String, prompt: String) async throws -> String? {
         return await generateText(prompt: prompt)
     }
 
-    func __tldr(source: String, targetLanguage: String, prompt: String) async throws -> String? {
+    public func __tldr(source: String, targetLanguage: String, prompt: String) async throws -> String? {
         return await generateText(prompt: prompt)
     }
 

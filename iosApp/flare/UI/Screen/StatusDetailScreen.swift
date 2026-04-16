@@ -1,5 +1,6 @@
 import SwiftUI
 @preconcurrency import KotlinSharedUI
+import FlareUI
 
 struct StatusDetailScreen: View {
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass

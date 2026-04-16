@@ -1,6 +1,7 @@
 import SwiftUI
 import KotlinSharedUI
 import AVFAudio
+import FlareUI
 
 @main
 struct FlareApp: App {
@@ -8,9 +9,10 @@ struct FlareApp: App {
         configureAudioSessionForMixing()
         ComposeUIHelper.shared.initialize(
             inAppNotification: SwiftInAppNotification.shared,
-            swiftFormatter: Formatter.shared,
+            swiftFormatter: PlatformFormatter.shared,
             swiftPlatformTextRenderer: PlatformTextRenderer.shared,
-            swiftOnDeviceAI: FoundationModelOnDeviceAI.shared
+            swiftOnDeviceAI: FoundationModelOnDeviceAI.shared,
+            isMainApp: true,
         )
     }
     var body: some Scene {

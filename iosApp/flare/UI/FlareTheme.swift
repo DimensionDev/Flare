@@ -2,6 +2,7 @@ import SwiftUI
 import KotlinSharedUI
 import Foundation
 import Combine
+import FlareUI
 
 struct FlareTheme<Content: View>: View {
     @ViewBuilder let content: () -> Content

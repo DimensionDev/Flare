@@ -1,6 +1,7 @@
 import SwiftUI
 import KotlinSharedUI
 import Kingfisher
+import FlareUI
 
 struct RichText: View {
     let text: UiRichText

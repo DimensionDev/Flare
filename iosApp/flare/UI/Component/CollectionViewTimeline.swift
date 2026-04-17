@@ -7,6 +7,7 @@ struct CollectionViewTimelineView: UIViewControllerRepresentable {
     let data: PagingState<UiTimelineV2>
     let detailStatusKey: MicroBlogKey?
     let topContentInset: CGFloat
+    @Environment(\.appearanceSettings.timelineDisplayMode) private var timelineDisplayMode
     @Environment(\.refresh) private var refreshAction: RefreshAction?
 
     init(
@@ -25,6 +26,7 @@ struct CollectionViewTimelineView: UIViewControllerRepresentable {
             { await action() }
         }
         controller.topContentInset = topContentInset
+        controller.usesCardBackground = timelineDisplayMode == .card
         controller.update(data: data)
         return controller
     }
@@ -34,6 +36,7 @@ struct CollectionViewTimelineView: UIViewControllerRepresentable {
             { await action() }
         }
         controller.topContentInset = topContentInset
+        controller.usesCardBackground = timelineDisplayMode == .card
         controller.update(data: data)
     }
 }
@@ -55,6 +58,12 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
         didSet {
             guard isViewLoaded else { return }
             updateContentInsets()
+        }
+    }
+    var usesCardBackground: Bool = true {
+        didSet {
+            guard isViewLoaded else { return }
+            updateBackgroundColors()
         }
     }
 
@@ -100,6 +109,7 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
         setupDataSource()
         setupRefreshControl()
         updateContentInsets()
+        updateBackgroundColors()
         if let data = currentData {
             syncRefreshControl(data: data)
             applySnapshot(data: data)
@@ -127,7 +137,6 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
             return section
         }
         collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
-        collectionView.backgroundColor = .systemGroupedBackground
         collectionView.delegate = self
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(collectionView)
@@ -162,6 +171,12 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
         guard collectionView != nil else { return }
         collectionView.contentInset.top = topContentInset
         collectionView.verticalScrollIndicatorInsets.top = topContentInset
+    }
+
+    private func updateBackgroundColors() {
+        let backgroundColor: UIColor = usesCardBackground ? .systemGroupedBackground : .clear
+        view.backgroundColor = backgroundColor
+        collectionView.backgroundColor = backgroundColor
     }
 
     // MARK: - Cell Configuration
@@ -206,17 +221,15 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
         let scrollState = scrollingState
         if let item {
             cell.contentConfiguration = UIHostingConfiguration {
-                ListCardView(index: index, totalCount: totalCount) {
+                AdaptiveTimelineCard(index: index, totalCount: totalCount) {
                     TimelineView(data: item, detailStatusKey: detailKey)
                         .padding(.vertical, 12)
                         .padding(.horizontal)
                 }
-                .padding(.horizontal)
                 .environment(\.isScrollingState, scrollState)
             }
             .margins(.all, 0)
             .minSize(width: 0, height: 0)
-            .background { Color(.systemGroupedBackground) }
         } else {
             configurePlaceholderCell(cell, index: index)
         }
@@ -230,16 +243,14 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
             totalCount = 5
         }
         cell.contentConfiguration = UIHostingConfiguration {
-            ListCardView(index: index, totalCount: totalCount) {
+            AdaptiveTimelineCard(index: index, totalCount: totalCount) {
                 TimelinePlaceholderView()
                     .padding(.vertical, 12)
                     .padding(.horizontal)
             }
-            .padding(.horizontal)
         }
         .margins(.all, 0)
         .minSize(width: 0, height: 0)
-        .background { Color(.systemGroupedBackground) }
     }
 
     private func configureHostingCell<V: View>(_ cell: UICollectionViewCell, @ViewBuilder content: () -> V) {
@@ -250,7 +261,6 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
         }
         .margins(.all, 0)
         .minSize(width: 0, height: 0)
-        .background { Color(.systemGroupedBackground) }
     }
 
     private func configureErrorCell(_ cell: UICollectionViewCell) {
@@ -263,7 +273,6 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
         }
         .margins(.all, 0)
         .minSize(width: 0, height: 0)
-        .background { Color(.systemGroupedBackground) }
     }
 
     private func configureFooterErrorCell(_ cell: UICollectionViewCell) {
@@ -277,7 +286,6 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
             }
             .margins(.all, 0)
             .minSize(width: 0, height: 0)
-            .background { Color(.systemGroupedBackground) }
         }
     }
 

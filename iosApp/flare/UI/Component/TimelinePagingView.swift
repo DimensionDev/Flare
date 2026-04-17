@@ -14,13 +14,13 @@ struct TimelinePagingView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
         } loadingContent: { index, totalCount in
-            ListCardView(index: index, totalCount: totalCount) {
+            AdaptiveTimelineCard(index: index, totalCount: totalCount) {
                 TimelinePlaceholderView()
                     .padding(.horizontal)
                     .padding(.vertical, 12)
             }
         } successContent: { item, index, totalCount in
-            ListCardView(index: index, totalCount: totalCount) {
+            AdaptiveTimelineCard(index: index, totalCount: totalCount) {
                 TimelineView(data: item, detailStatusKey: detailStatusKey)
                     .padding(.horizontal)
                     .padding(.vertical, 12)

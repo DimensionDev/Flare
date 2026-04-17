@@ -12,12 +12,12 @@ import androidx.compose.material3.Typography
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.sp
@@ -161,7 +161,11 @@ fun FlareTheme(
                 typography(fontSizeDiff, lineHeightDiff)
             },
         content = {
-            content.invoke()
+            CompositionLocalProvider(
+                LocalIsLightTheme provides !darkTheme,
+            ) {
+                content.invoke()
+            }
         },
     )
 }
@@ -196,7 +200,7 @@ private fun ApplyCaptionBarAppearance(
 }
 
 @Composable
-fun ColorScheme.isLight() = this.background.luminance() > 0.5
+fun ColorScheme.isLight() = LocalIsLightTheme.current
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun typography(

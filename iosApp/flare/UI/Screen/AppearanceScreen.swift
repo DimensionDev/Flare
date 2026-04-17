@@ -76,6 +76,19 @@ struct AppearanceScreen: View {
                         Text("appearance_avatar_shape")
                         Text("appearance_avatar_shape_description")
                     }
+                    Picker(selection: Binding(get: {
+                        appearance.timelineDisplayMode
+                    }, set: { newValue in
+                        presenter.state.updateAppearanceSettings { settings in
+                            settings.copy(timelineDisplayMode: newValue)
+                        }
+                    })) {
+                        Text("appearance_timeline_display_mode_card").tag(TimelineDisplayMode.card)
+                        Text("appearance_timeline_display_mode_plain").tag(TimelineDisplayMode.plain)
+                    } label: {
+                        Text("appearance_timeline_display_mode")
+                        Text("appearance_timeline_display_mode_description")
+                    }
                     Toggle(isOn: Binding(get: {
                         appearance.fullWidthPost
                     }, set: { newValue in
@@ -241,6 +254,7 @@ extension AppearanceSettings {
         postActionStyle: PostActionStyle? = nil,
         absoluteTimestamp: Bool? = nil,
         showPlatformLogo: Bool? = nil,
+        timelineDisplayMode: TimelineDisplayMode? = nil,
     ) -> AppearanceSettings {
         AppearanceSettings(
             theme: theme ?? self.theme,
@@ -265,7 +279,8 @@ extension AppearanceSettings {
             fullWidthPost: fullWidthPost ?? self.fullWidthPost,
             postActionStyle: postActionStyle ?? self.postActionStyle,
             absoluteTimestamp: absoluteTimestamp ?? self.absoluteTimestamp,
-            showPlatformLogo: showPlatformLogo ?? self.showPlatformLogo
+            showPlatformLogo: showPlatformLogo ?? self.showPlatformLogo,
+            timelineDisplayMode: timelineDisplayMode ?? self.timelineDisplayMode
         )
     }
 }

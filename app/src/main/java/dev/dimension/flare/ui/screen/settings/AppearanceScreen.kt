@@ -53,6 +53,7 @@ import dev.dimension.flare.data.model.BottomBarStyle
 import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.data.model.PostActionStyle
 import dev.dimension.flare.data.model.Theme
+import dev.dimension.flare.data.model.TimelineDisplayMode
 import dev.dimension.flare.data.model.VideoAutoplay
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.ui.component.BackButton
@@ -392,6 +393,22 @@ internal fun AppearanceScreen(
                         } else {
                             ListItemDefaults.first()
                         },
+                )
+                SingleChoiceSettingsItem(
+                    headline = { Text(text = stringResource(id = R.string.settings_appearance_timeline_display_mode)) },
+                    supporting = { Text(text = stringResource(id = R.string.settings_appearance_timeline_display_mode_description)) },
+                    items =
+                        persistentMapOf(
+                            TimelineDisplayMode.Card to stringResource(id = R.string.settings_appearance_timeline_display_mode_card),
+                            TimelineDisplayMode.Plain to stringResource(id = R.string.settings_appearance_timeline_display_mode_plain),
+                        ),
+                    selected = appearanceSettings.timelineDisplayMode,
+                    onSelected = {
+                        state.updateSettings {
+                            copy(timelineDisplayMode = it)
+                        }
+                    },
+                    shapes = ListItemDefaults.item(),
                 )
                 SegmentedListItem(
                     onClick = {

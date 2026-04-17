@@ -249,6 +249,10 @@
     <string name="settings_appearance_avatar_shape_description">Change the shape of the avatar</string>
     <string name="settings_appearance_avatar_shape_round">Round</string>
     <string name="settings_appearance_avatar_shape_square">Square</string>
+    <string name="settings_appearance_timeline_display_mode">Timeline display mode</string>
+    <string name="settings_appearance_timeline_display_mode_description">Choose how items are displayed in timelines</string>
+    <string name="settings_appearance_timeline_display_mode_card">Card</string>
+    <string name="settings_appearance_timeline_display_mode_plain">Plain (single column only)</string>
     <string name="settings_appearance_theme">Theme</string>
     <string name="settings_appearance_theme_description">Change the theme of the app</string>
     <string name="settings_appearance_theme_light">Light</string>

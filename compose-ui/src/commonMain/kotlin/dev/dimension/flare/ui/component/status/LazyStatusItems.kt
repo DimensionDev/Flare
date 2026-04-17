@@ -67,6 +67,7 @@ public fun LazyStaggeredGridScope.status(
 //                            .animateItem(),
                     index = index,
                     totalCount = itemCount,
+                    respectTimelineMode = true,
                     content = {
                         StatusItem(
                             item,
@@ -116,6 +117,7 @@ public fun LazyStaggeredGridScope.status(
                             },
                             index = it,
                             totalCount = 10,
+                            respectTimelineMode = true,
 //                            modifier = Modifier.animateItem(),
                         )
                     }
@@ -158,6 +160,7 @@ public fun LazyStaggeredGridScope.status(
 //                    modifier = Modifier.animateItem(),
                     index = it,
                     totalCount = 10,
+                    respectTimelineMode = true,
                     content = {
                         OnLoading()
                     },

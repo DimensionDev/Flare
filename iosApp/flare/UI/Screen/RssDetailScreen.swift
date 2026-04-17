@@ -349,15 +349,13 @@ struct HtmlWebView: UIViewRepresentable {
           <style>
             .markdown-body img {
               display: block;
-              max-width: 100%;
+              width: 100%;
               height: auto;
-              margin: 1rem auto;
             }
             .markdown-body video {
               display: block;
-              max-width: 100%;
+              width: 100%;
               height: auto;
-              margin: 1rem auto;
             }
             .markdown-body img[data-flare-clickable="true"] {
               cursor: pointer;

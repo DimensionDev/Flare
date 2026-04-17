@@ -1,5 +1,6 @@
 package dev.dimension.flare.ui.component.status
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.FlingBehavior
 import androidx.compose.foundation.gestures.ScrollableDefaults
 import androidx.compose.foundation.layout.Arrangement
@@ -23,7 +24,11 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import dev.dimension.flare.data.model.LocalAppearanceSettings
+import dev.dimension.flare.data.model.TimelineDisplayMode
 import dev.dimension.flare.ui.common.plus
+import dev.dimension.flare.ui.theme.PlatformTheme
+import dev.dimension.flare.ui.theme.isLightTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.debounce
@@ -48,9 +53,11 @@ public fun LazyStatusVerticalStaggeredGrid(
         ),
     flingBehavior: FlingBehavior = ScrollableDefaults.flingBehavior(),
     userScrollEnabled: Boolean = true,
+    forceCardMode: Boolean = false,
     content: LazyStaggeredGridScope.() -> Unit,
 ) {
-    val padding = contentPadding + PaddingValues(horizontal = screenHorizontalPadding)
+    val displayMode = LocalAppearanceSettings.current.timelineDisplayMode
+    val paddingForColumnCalc = contentPadding + PaddingValues(horizontal = screenHorizontalPadding)
     val layoutDirection = LocalLayoutDirection.current
     val density = LocalDensity.current
     val columnCount by remember(state) {
@@ -60,8 +67,8 @@ public fun LazyStatusVerticalStaggeredGrid(
                 with(density) {
                     with(columns) {
                         calculateCrossAxisCellSizes(
-                            it - padding.calculateStartPadding(layoutDirection).roundToPx() -
-                                padding.calculateEndPadding(layoutDirection).roundToPx(),
+                            it - paddingForColumnCalc.calculateStartPadding(layoutDirection).roundToPx() -
+                                paddingForColumnCalc.calculateEndPadding(layoutDirection).roundToPx(),
                             8.dp.roundToPx(),
                         )
                     }
@@ -69,6 +76,13 @@ public fun LazyStatusVerticalStaggeredGrid(
             }.distinctUntilChanged()
     }.collectAsState(1)
     val bigScreen = columnCount > 1
+    val plainTimeline = !bigScreen && displayMode == TimelineDisplayMode.Plain && !forceCardMode
+    val padding =
+        if (plainTimeline) {
+            contentPadding
+        } else {
+            paddingForColumnCalc
+        }
     val actualVerticalSpacing =
         if (bigScreen) {
             verticalItemSpacing
@@ -80,12 +94,18 @@ public fun LazyStatusVerticalStaggeredGrid(
             .distinctUntilChanged()
             .debounce(500)
     }.collectAsState(false)
+    val gridModifier =
+        if (plainTimeline && isLightTheme()) {
+            modifier.background(PlatformTheme.colorScheme.card)
+        } else {
+            modifier
+        }
     CompositionLocalProvider(
         LocalIsScrollingInProgress provides isScrollInProgressDebounced,
         LocalMultipleColumns provides bigScreen,
     ) {
         LazyVerticalStaggeredGrid(
-            modifier = modifier,
+            modifier = gridModifier,
             columns = columns,
             state = state,
             contentPadding = padding,

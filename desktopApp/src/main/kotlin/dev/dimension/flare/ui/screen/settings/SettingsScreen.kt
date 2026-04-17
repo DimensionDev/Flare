@@ -61,6 +61,7 @@ import dev.dimension.flare.data.model.AvatarShape
 import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.data.model.PostActionStyle
 import dev.dimension.flare.data.model.Theme
+import dev.dimension.flare.data.model.TimelineDisplayMode
 import dev.dimension.flare.data.model.VideoAutoplay
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.delete
@@ -163,6 +164,10 @@ import dev.dimension.flare.settings_appearance_theme_auto
 import dev.dimension.flare.settings_appearance_theme_dark
 import dev.dimension.flare.settings_appearance_theme_description
 import dev.dimension.flare.settings_appearance_theme_light
+import dev.dimension.flare.settings_appearance_timeline_display_mode
+import dev.dimension.flare.settings_appearance_timeline_display_mode_card
+import dev.dimension.flare.settings_appearance_timeline_display_mode_description
+import dev.dimension.flare.settings_appearance_timeline_display_mode_plain
 import dev.dimension.flare.settings_appearance_title
 import dev.dimension.flare.settings_appearance_video_autoplay
 import dev.dimension.flare.settings_appearance_video_autoplay_description
@@ -723,6 +728,51 @@ internal fun SettingsScreen(
                                                 }
                                             },
                                         )
+                                    },
+                                )
+                            },
+                            adaptivePlacement = true,
+                            placement = FlyoutPlacement.BottomAlignedEnd,
+                        )
+                    },
+                )
+                ExpanderItemSeparator()
+                ExpanderItem(
+                    heading = {
+                        Text(stringResource(Res.string.settings_appearance_timeline_display_mode))
+                    },
+                    caption = {
+                        Text(stringResource(Res.string.settings_appearance_timeline_display_mode_description))
+                    },
+                    trailing = {
+                        val items =
+                            remember {
+                                persistentMapOf(
+                                    TimelineDisplayMode.Card to Res.string.settings_appearance_timeline_display_mode_card,
+                                    TimelineDisplayMode.Plain to Res.string.settings_appearance_timeline_display_mode_plain,
+                                )
+                            }
+                        MenuFlyoutContainer(
+                            flyout = {
+                                items.forEach { (key, value) ->
+                                    MenuFlyoutItem(
+                                        onClick = {
+                                            state.appearanceState.updateSettings {
+                                                copy(timelineDisplayMode = key)
+                                            }
+                                            isFlyoutVisible = false
+                                        },
+                                        text = { Text(stringResource(value)) },
+                                    )
+                                }
+                            },
+                            content = {
+                                DropDownButton(
+                                    onClick = { isFlyoutVisible = !isFlyoutVisible },
+                                    content = {
+                                        items[LocalAppearanceSettings.current.timelineDisplayMode]?.let {
+                                            Text(stringResource(it))
+                                        }
                                     },
                                 )
                             },

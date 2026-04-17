@@ -40,6 +40,7 @@ private enum FollowButtonState: Equatable {
 }
 
 struct CommonProfileHeader: View {
+    @Environment(\.appearanceSettings.timelineDisplayMode) private var timelineDisplayMode
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @Environment(\.openURL) private var openURL
     let user: UiProfile
@@ -120,7 +121,7 @@ struct CommonProfileHeader: View {
                     }
                 }
 
-                if horizontalSizeClass == .compact {
+                if horizontalSizeClass == .compact, timelineDisplayMode != .plain {
                     ListCardView {
                         content
                             .padding()
@@ -129,7 +130,7 @@ struct CommonProfileHeader: View {
                     content
                 }
             }
-            .padding([.horizontal])
+            .padding(.horizontal)
         }
     }
 

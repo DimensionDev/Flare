@@ -42,6 +42,7 @@ public data class AppearanceSettings(
     val postActionStyle: PostActionStyle = PostActionStyle.LeftAligned,
     val absoluteTimestamp: Boolean = false,
     val showPlatformLogo: Boolean = true,
+    val timelineDisplayMode: TimelineDisplayMode = TimelineDisplayMode.Card,
 ) {
     public companion object {
         // for iOS
@@ -85,6 +86,12 @@ public enum class VideoAutoplay {
     ALWAYS,
     WIFI,
     NEVER,
+}
+
+@Serializable
+public enum class TimelineDisplayMode {
+    Card,
+    Plain,
 }
 
 @OptIn(ExperimentalSerializationApi::class)

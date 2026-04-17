@@ -13,6 +13,7 @@ struct HomeTimelineScreen: View {
     @State private var selectedTabIndex = 0
     @StateObject private var presenter: KotlinPresenter<HomeTimelineWithTabsPresenterState>
     @StateObject private var activeAccountPresenter = KotlinPresenter(presenter: ActiveAccountPresenter())
+    @StateObject private var loggedInPresenter = KotlinPresenter(presenter: LoggedInPresenter())
 
     init(accountType: AccountType, toServiceSelect: @escaping () -> Void, toCompose: @escaping () -> Void, toTabSetting: @escaping () -> Void, toSecondaryMenu: @escaping () -> Void) {
         self.accountType = accountType
@@ -106,7 +107,7 @@ struct HomeTimelineScreen: View {
                         }
                     }
                     ToolbarItem(placement: .primaryAction) {
-                        if case .error = onEnum(of: presenter.state.user) {
+                        if case .success(let isLoggedIn) = onEnum(of: loggedInPresenter.state.isLoggedIn), !isLoggedIn.data.boolValue {
                             Button {
                                 toServiceSelect()
                             } label: {

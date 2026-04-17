@@ -78,8 +78,10 @@ import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
+import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.presenter.HomeTimelineWithTabsPresenter
 import dev.dimension.flare.ui.presenter.TimelineItemPresenterWithLazyListState
+import dev.dimension.flare.ui.presenter.home.LoggedInPresenter
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.coroutines.launch
@@ -97,6 +99,7 @@ internal fun HomeTimelineScreen(
     val state by producePresenter(key = "home_timeline_$accountType") {
         timelinePresenter(accountType)
     }
+    val loggedInState = remember { LoggedInPresenter() }.invoke()
     val scope = rememberCoroutineScope()
 
     val topAppBarScrollBehavior =
@@ -226,12 +229,11 @@ internal fun HomeTimelineScreen(
                             contentDescription = stringResource(R.string.edit_tab_title),
                         )
                     }
-                    state.user
-                        .onError {
-                            TextButton(onClick = toLogin) {
-                                Text(text = stringResource(id = R.string.login_button))
-                            }
+                    if (loggedInState.isLoggedIn.takeSuccess() == false) {
+                        TextButton(onClick = toLogin) {
+                            Text(text = stringResource(id = R.string.login_button))
                         }
+                    }
                 },
             )
         },

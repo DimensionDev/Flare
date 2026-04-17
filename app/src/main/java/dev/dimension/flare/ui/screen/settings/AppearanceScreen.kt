@@ -64,8 +64,6 @@ import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.component.status.StatusItem
 import dev.dimension.flare.ui.model.isSuccess
 import dev.dimension.flare.ui.model.onSuccess
-import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
-import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.AppearancePresenter
 import dev.dimension.flare.ui.presenter.settings.AppearanceState
@@ -735,10 +733,9 @@ private fun appearancePresenter() =
     run {
         val scope = rememberCoroutineScope()
         val settingsRepository = koinInject<SettingsRepository>()
-        val activeAccountState = remember { ActiveAccountPresenter() }.invoke()
         val appearanceState = remember { AppearancePresenter() }.invoke()
 
-        object : UserState by activeAccountState, AppearanceState by appearanceState {
+        object : AppearanceState by appearanceState {
             fun updateSettings(block: AppearanceSettings.() -> AppearanceSettings) {
                 scope.launch {
                     settingsRepository.updateAppearanceSettings(block)

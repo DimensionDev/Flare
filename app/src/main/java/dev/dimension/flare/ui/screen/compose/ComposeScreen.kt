@@ -112,7 +112,6 @@ import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.presenter.compose.ComposePresenter
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
-import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
@@ -132,33 +131,19 @@ fun ShortcutComposeRoute(
     initialText: String = "",
     initialMedias: ImmutableList<Uri> = persistentListOf(),
 ) {
-    val activeAccountState by producePresenter(key = "shortcut_compose_active_account") {
-        activeAccountPresenter()
-    }
-    val accountType =
-        activeAccountState.user
-            .takeSuccess()
-            ?.let { AccountType.Specific(it.key) }
-            ?: AccountType.Guest
     FlareTheme {
         CompositionLocalProvider(
             LocalContentColor provides MaterialTheme.colorScheme.onBackground,
         ) {
             ComposeScreen(
                 onBack = onBack,
-                accountType = accountType,
+                accountType = null,
                 initialText = initialText,
                 initialMedias = initialMedias,
             )
         }
     }
 }
-
-@Composable
-private fun activeAccountPresenter() =
-    run {
-        remember { ActiveAccountPresenter() }.invoke()
-    }
 
 @OptIn(
     ExperimentalMaterial3Api::class,

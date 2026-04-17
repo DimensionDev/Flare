@@ -3,20 +3,12 @@ package dev.dimension.flare.ui.screen.home
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Badge
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -45,7 +37,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalUriHandler
@@ -56,7 +47,6 @@ import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Bars
 import compose.icons.fontawesomeicons.solid.ClockRotateLeft
-import compose.icons.fontawesomeicons.solid.EllipsisVertical
 import compose.icons.fontawesomeicons.solid.Gear
 import compose.icons.fontawesomeicons.solid.Pen
 import compose.icons.fontawesomeicons.solid.PenToSquare
@@ -85,19 +75,14 @@ import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.component.TabIcon
 import dev.dimension.flare.ui.component.TabTitle
 import dev.dimension.flare.ui.component.TopLevelBackStack
-import dev.dimension.flare.ui.component.listCard
-import dev.dimension.flare.ui.component.platform.isBigScreen
-import dev.dimension.flare.ui.model.UiProfile
-import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.isError
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.presenter.HomeTabsPresenter
-import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
 import dev.dimension.flare.ui.presenter.home.AllNotificationBadgePresenter
 import dev.dimension.flare.ui.presenter.home.DeepLinkPresenter
+import dev.dimension.flare.ui.presenter.home.LoggedInPresenter
 import dev.dimension.flare.ui.presenter.home.SecondaryTabsPresenter
 import dev.dimension.flare.ui.presenter.home.UserPresenter
 import dev.dimension.flare.ui.presenter.invoke
@@ -146,7 +131,7 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                     bottomBarAutoHideEnabled = state.navigationState.bottomBarAutoHideEnabled,
                     layoutType = layoutType,
                     showFab =
-                        state.defaultAccountType !is AccountType.Guest &&
+                        state.loggedInState.takeSuccess() == true &&
                             state.topLevelBackStack.takeSuccess()?.currentKey is Route.Home,
                     onFabClicked = {
                         state.navigate(Route.Compose.New)
@@ -171,6 +156,73 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                                     imageVector = FontAwesomeIcons.Solid.Bars,
                                     contentDescription = null,
                                 )
+                            }
+
+                            if (layoutType == NavigationSuiteType.NavigationRail &&
+                                state.loggedInState.takeSuccess() == true
+                            ) {
+                                SharedTransitionLayout {
+                                    AnimatedContent(
+                                        state.wideNavigationRailState.currentValue,
+                                        modifier = Modifier.padding(horizontal = 20.dp),
+                                    ) { railState ->
+                                        when (railState) {
+                                            WideNavigationRailValue.Collapsed -> {
+                                                FloatingActionButton(
+                                                    onClick = {
+                                                        state.navigate(Route.Compose.New)
+                                                    },
+                                                    elevation =
+                                                        FloatingActionButtonDefaults.elevation(
+                                                            defaultElevation = 0.dp,
+                                                        ),
+                                                    modifier =
+                                                        Modifier
+                                                            .sharedElement(
+                                                                rememberSharedContentState(key = "compose"),
+                                                                animatedVisibilityScope = this@AnimatedContent,
+                                                            ),
+                                                ) {
+                                                    FAIcon(
+                                                        imageVector = FontAwesomeIcons.Solid.Pen,
+                                                        contentDescription = stringResource(id = R.string.compose_title),
+                                                    )
+                                                }
+                                            }
+
+                                            WideNavigationRailValue.Expanded -> {
+                                                ExtendedFloatingActionButton(
+                                                    onClick = {
+                                                        state.navigate(Route.Compose.New)
+                                                    },
+                                                    icon = {
+                                                        FAIcon(
+                                                            imageVector = FontAwesomeIcons.Solid.Pen,
+                                                            contentDescription =
+                                                                stringResource(
+                                                                    id = R.string.compose_title,
+                                                                ),
+                                                        )
+                                                    },
+                                                    text = {
+                                                        Text(text = stringResource(id = R.string.compose_title))
+                                                    },
+                                                    elevation =
+                                                        FloatingActionButtonDefaults.elevation(
+                                                            defaultElevation = 0.dp,
+                                                        ),
+                                                    modifier =
+                                                        Modifier
+                                                            .fillMaxWidth()
+                                                            .sharedElement(
+                                                                rememberSharedContentState(key = "compose"),
+                                                                animatedVisibilityScope = this@AnimatedContent,
+                                                            ),
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     },
@@ -431,210 +483,6 @@ internal fun HomeScreen(afterInit: () -> Unit) {
         }
 }
 
-@Composable
-@OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalSharedTransitionApi::class)
-private fun HomeRailHeader(
-    wideNavigationRailState: WideNavigationRailState,
-    userState: UiState<UiProfile>,
-    layoutType: NavigationSuiteType,
-    navigate: (Route) -> Unit,
-) {
-    val scope = rememberCoroutineScope()
-    SharedTransitionLayout {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            AnimatedContent(
-                wideNavigationRailState.currentValue,
-            ) { railState ->
-                when (railState) {
-                    WideNavigationRailValue.Collapsed -> {
-                        Box(
-                            modifier =
-                                Modifier
-                                    .padding(horizontal = 20.dp),
-                        ) {
-                            userState
-                                .onSuccess { user ->
-                                    AvatarComponent(
-                                        user.avatar,
-                                        size = 56.dp,
-                                        modifier =
-                                            Modifier
-                                                .sharedElement(
-                                                    rememberSharedContentState(
-                                                        key = "avatar",
-                                                    ),
-                                                    animatedVisibilityScope = this@AnimatedContent,
-                                                ).clickable {
-                                                    scope.launch {
-                                                        wideNavigationRailState.toggle()
-                                                    }
-                                                }.clip(CircleShape),
-                                    )
-                                }.onLoading {
-                                    Box(modifier = Modifier.size(56.dp))
-                                }
-                        }
-                    }
-
-                    WideNavigationRailValue.Expanded -> {
-                        Row(
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier =
-                                Modifier
-                                    .let {
-                                        if (isBigScreen() || layoutType != NavigationSuiteType.NavigationBar) {
-                                            it
-                                        } else {
-                                            it
-                                                .padding(horizontal = 16.dp)
-                                                .listCard()
-                                                .background(MaterialTheme.colorScheme.surface)
-                                        }
-                                    }.fillMaxWidth()
-                                    .clickable {
-                                        userState.onSuccess { user ->
-                                            navigate(
-                                                Route.Profile.Me(
-                                                    accountType =
-                                                        AccountType.Specific(
-                                                            user.key,
-                                                        ),
-                                                ),
-                                            )
-                                        }
-                                    },
-                        ) {
-                            Column(
-                                modifier =
-                                    Modifier
-                                        .weight(1f)
-                                        .padding(
-                                            horizontal =
-                                                if (layoutType ==
-                                                    NavigationSuiteType.NavigationBar
-                                                ) {
-                                                    16.dp
-                                                } else {
-                                                    24.dp
-                                                },
-                                            vertical = 16.dp,
-                                        ),
-                            ) {
-                                AvatarComponent(
-                                    data = userState.takeSuccess()?.avatar,
-                                    size = 64.dp,
-                                    modifier =
-                                        Modifier
-                                            .sharedElement(
-                                                rememberSharedContentState(
-                                                    key = "avatar",
-                                                ),
-                                                animatedVisibilityScope = this@AnimatedContent,
-                                            ).clip(CircleShape),
-                                )
-                                Spacer(modifier = Modifier.height(4.dp))
-                                userState.onSuccess { user ->
-                                    RichText(
-                                        text = user.name,
-                                        textStyle = MaterialTheme.typography.titleMedium,
-                                    )
-                                    Text(
-                                        user.handle.canonical,
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.outline,
-                                    )
-                                }
-                            }
-                            IconButton(
-                                onClick = {
-                                    navigate(Route.AccountSelection)
-                                },
-                                modifier =
-                                    Modifier
-                                        .padding(
-                                            horizontal = 8.dp,
-                                        ),
-                            ) {
-                                FAIcon(
-                                    FontAwesomeIcons.Solid.EllipsisVertical,
-                                    contentDescription = null,
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-            if (layoutType == NavigationSuiteType.NavigationRail &&
-                !userState.isError
-            ) {
-                AnimatedContent(
-                    wideNavigationRailState.currentValue,
-                    modifier = Modifier.padding(horizontal = 20.dp),
-                ) { railState ->
-                    when (railState) {
-                        WideNavigationRailValue.Collapsed -> {
-                            FloatingActionButton(
-                                onClick = {
-                                    navigate(Route.Compose.New)
-                                },
-                                elevation =
-                                    FloatingActionButtonDefaults.elevation(
-                                        defaultElevation = 0.dp,
-                                    ),
-                                modifier =
-                                    Modifier
-                                        .sharedElement(
-                                            rememberSharedContentState(key = "compose"),
-                                            animatedVisibilityScope = this@AnimatedContent,
-                                        ),
-                            ) {
-                                FAIcon(
-                                    imageVector = FontAwesomeIcons.Solid.Pen,
-                                    contentDescription = stringResource(id = R.string.compose_title),
-                                )
-                            }
-                        }
-
-                        WideNavigationRailValue.Expanded -> {
-                            ExtendedFloatingActionButton(
-                                onClick = {
-                                    navigate(Route.Compose.New)
-                                },
-                                icon = {
-                                    FAIcon(
-                                        imageVector = FontAwesomeIcons.Solid.Pen,
-                                        contentDescription =
-                                            stringResource(
-                                                id = R.string.compose_title,
-                                            ),
-                                    )
-                                },
-                                text = {
-                                    Text(text = stringResource(id = R.string.compose_title))
-                                },
-                                elevation =
-                                    FloatingActionButtonDefaults.elevation(
-                                        defaultElevation = 0.dp,
-                                    ),
-                                modifier =
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .sharedElement(
-                                            rememberSharedContentState(key = "compose"),
-                                            animatedVisibilityScope = this@AnimatedContent,
-                                        ),
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
 private fun getDirection(
     tab: TabItem,
     accountType: AccountType = tab.account,
@@ -658,7 +506,7 @@ private fun getDirection(
 private fun presenter(uriHandler: UriHandler) =
     run {
         val secondaryTabsPresenter = remember { SecondaryTabsPresenter() }.invoke()
-        val activeAccountState = remember { ActiveAccountPresenter() }.invoke()
+        val loggedInState = remember { LoggedInPresenter() }.invoke()
         val navigationState =
             remember {
                 NavigationState()
@@ -730,12 +578,7 @@ private fun presenter(uriHandler: UriHandler) =
             val deeplinkPresenter = deeplinkPresenter
             val topLevelBackStack = topLevelBackStack
             val wideNavigationRailState = wideNavigationRailState
-            val userState = activeAccountState.user
-            val defaultAccountType: AccountType =
-                activeAccountState.user
-                    .takeSuccess()
-                    ?.let { AccountType.Specific(it.key) }
-                    ?: AccountType.Guest
+            val loggedInState = loggedInState.isLoggedIn
 
             fun navigate(route: Route) {
                 navigate(

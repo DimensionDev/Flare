@@ -67,16 +67,14 @@ Maecenas fringilla vitae leo sit amet lacinia. Donec in dui a ex hendrerit volut
                         .font(.title)
                         .bold()
                         .redacted(reason: .placeholder)
-                    ListCardView {
-                        Text(placeholderText)
-                            .redacted(reason: .placeholder)
-                            .padding()
-                    }
+                    Divider()
+                    Text(placeholderText)
+                        .redacted(reason: .placeholder)
+                        .padding()
                 }
                 .padding()
             }
         }
-        .background(Color(.systemGroupedBackground))
         .toolbar {
             ToolbarItem {
                 if let url = URL(string: url) {
@@ -157,58 +155,52 @@ private struct RssArticleContentView: View {
     var body: some View {
         ScrollView {
             VStack(
-                alignment: .trailing,
                 spacing: 16
             ) {
                 Text(translatedTitle ?? document.title)
-                    .font(.title)
+                    .font(.title2)
                     .bold()
-                    .frame(maxWidth: .infinity, alignment: .center)
-                
-                HStack {
-                    if showTranslateButton {
-                        Button {
-                            showTranslate = true
-                        } label: {
-                            Text("Translate")
-                        }
-                        .backport
-                        .glassProminentButtonStyle()
-                    }
-                    
-                    Button {
-                        showTLDR = true
-                    } label: {
-                        Text("Summarize this article")
-                    }
-                    .backport
-                    .glassProminentButtonStyle()
-                }
+                Divider()
                 
                 if showTLDR {
-                    ListCardView {
-                        TLDRTextView(text: document.textContent)
-                            .padding()
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                    }
+                    TLDRTextView(text: document.textContent)
+                        .padding()
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    Divider()
                 }
                 
                 if isTranslating {
                     ProgressView()
                         .padding(.vertical, 4)
+                        .frame(maxWidth: .infinity, alignment: .center)
                 }
                 
-                ListCardView {
-                    HtmlWebView(
-                        dynamicHeight: $webViewHeight,
-                        htmlString: translatedHtml ?? document.content,
-                        baseURL: .init(string: url)
-                    )
-                    .frame(height: webViewHeight)
-                    .padding()
-                }
+                HtmlWebView(
+                    dynamicHeight: $webViewHeight,
+                    htmlString: translatedHtml ?? document.content,
+                    baseURL: .init(string: url)
+                )
+                .frame(height: webViewHeight)
             }
             .padding()
+        }
+        .toolbar {
+            ToolbarItem {
+                if showTranslateButton {
+                    Button {
+                        showTranslate = true
+                    } label: {
+                        Image(.faLanguage)
+                    }
+                }
+            }
+            ToolbarItem {
+                Button {
+                    showTLDR = true
+                } label: {
+                    Text("Summarize")
+                }
+            }
         }
     }
 }
@@ -291,39 +283,21 @@ struct HtmlWebView: UIViewRepresentable {
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <meta name="color-scheme" content="light dark">
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.8.1/github-markdown.min.css">
           <style>
-            :root {
-              color-scheme: light dark;
-              --bg: #ffffff;
-              --fg: #111111;
-              --muted: #666666;
-              --link: #0a84ff;
-              --code-bg: #f5f5f7;
+            .markdown-body img {
+              display: block;
+              max-width: 100%;
+              height: auto;
+              margin: 1rem auto;
             }
-            @media (prefers-color-scheme: dark) {
-              :root {
-                --bg: #000000;
-                --fg: #eeeeee;
-                --muted: #aaaaaa;
-                --link: #7ab8ff;
-                --code-bg: #141416;
-              }
-            }
-            html, body {
-              margin: 0; padding: 0;
-              color: var(--fg);
-              font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", Arial, sans-serif;
-              -webkit-font-smoothing: antialiased;
-            }
-            a {
-              color: var(--link); 
-              text-decoration: none;
-            }
-            img, video { max-width: 100%; height: auto; }
+        
           </style>
         </head>
         <body>
+        <article class="markdown-body">
           \(html)
+        </article>
         </body>
         </html>
         """

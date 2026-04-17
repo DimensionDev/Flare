@@ -101291,6 +101291,9 @@
         }
       }
     },
+    "Summarize" : {
+
+    },
     "Summarize long text with AI" : {
       "localizations" : {
         "ar" : {
@@ -101428,6 +101431,7 @@
       }
     },
     "Summarize this article" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {

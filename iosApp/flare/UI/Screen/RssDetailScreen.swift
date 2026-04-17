@@ -151,6 +151,8 @@ private struct RssArticleContentView: View {
     let translatedHtml: String?
     let isTranslating: Bool
     let showTranslateButton: Bool
+
+    @Environment(\.openURL) private var openURL
     
     var body: some View {
         ScrollView {
@@ -206,7 +208,8 @@ private struct RssArticleContentView: View {
                 HtmlWebView(
                     dynamicHeight: $webViewHeight,
                     htmlString: translatedHtml ?? document.content,
-                    baseURL: .init(string: url)
+                    baseURL: .init(string: url),
+                    onOpenURL: { url in self.openURL(url) }
                 )
                 .frame(height: webViewHeight)
             }
@@ -245,12 +248,43 @@ struct HtmlWebView: UIViewRepresentable {
     @Binding var dynamicHeight: CGFloat
     let htmlString: String?
     let baseURL: URL?
+    let onOpenURL: ((URL) -> Void)?
     
     var forceColorScheme: ColorScheme? = nil
     
     class Coordinator: NSObject, WKNavigationDelegate {
         var parent: HtmlWebView
         init(_ parent: HtmlWebView) { self.parent = parent }
+
+        @MainActor
+        func webView(_ webView: WKWebView,
+                     decidePolicyFor navigationAction: WKNavigationAction,
+                     decisionHandler: @escaping @MainActor (WKNavigationActionPolicy) -> Void) {
+            guard let targetURL = navigationAction.request.url else {
+                decisionHandler(.allow)
+                return
+            }
+
+            if targetURL.scheme == "flare-media-image",
+               let components = URLComponents(url: targetURL, resolvingAgainstBaseURL: false),
+               let imageUrl =
+                components.queryItems?.first(where: { $0.name == "url" })?.value,
+               let deeplink = URL(string: DeeplinkRoute.Media.MediaImage(uri: imageUrl, previewUrl: nil).toUri()) {
+                parent.onOpenURL?(deeplink)
+                decisionHandler(.cancel)
+                return
+            }
+            
+            if let baseURL = parent.baseURL,
+               targetURL.host() == baseURL.host(),
+               targetURL.scheme == baseURL.scheme {
+                decisionHandler(.allow)
+                return
+            }
+            
+            parent.onOpenURL?(targetURL)
+            decisionHandler(.cancel)
+        }
         
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
             webView.evaluateJavaScript("document.documentElement.scrollHeight") { height, _ in
@@ -319,13 +353,47 @@ struct HtmlWebView: UIViewRepresentable {
               height: auto;
               margin: 1rem auto;
             }
+            .markdown-body video {
+              display: block;
+              max-width: 100%;
+              height: auto;
+              margin: 1rem auto;
+            }
+            .markdown-body img[data-flare-clickable="true"] {
+              cursor: pointer;
+            }
         
           </style>
+          <script>
+            function bindFlareImageClicks() {
+              const images = document.querySelectorAll('.markdown-body img');
+              images.forEach((img) => {
+                if (img.dataset.flareClickable === 'true') {
+                  return;
+                }
+                img.dataset.flareClickable = 'true';
+                img.addEventListener('click', function(event) {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  const src = img.currentSrc || img.src;
+                  if (!src) {
+                    return;
+                  }
+                  window.location.href = 'flare-media-image://open?url=' + encodeURIComponent(src);
+                });
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', bindFlareImageClicks);
+          </script>
         </head>
         <body>
         <article class="markdown-body">
           \(html)
         </article>
+        <script>
+          bindFlareImageClicks();
+        </script>
         </body>
         </html>
         """

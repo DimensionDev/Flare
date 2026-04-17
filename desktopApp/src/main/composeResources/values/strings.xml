@@ -343,6 +343,7 @@
     <string name="rss_detail_translate">Translate</string>
     <string name="rss_detail_tldr">Summarize</string>
     <string name="rss_detail_tldr_error">Failed to summarize</string>
+    <string name="rss_detail_copy_link">Copy link</string>
     <string name="mastodon_available_timelines">Available timelines</string>
     <string name="mastodon_trending_statuses">Trending statuses</string>
     <string name="mastodon_federated_timeline">Federated timeline</string>

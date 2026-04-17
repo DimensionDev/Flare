@@ -160,6 +160,34 @@ private struct RssArticleContentView: View {
                 Text(translatedTitle ?? document.title)
                     .font(.title2)
                     .bold()
+                
+                if document.siteName != nil || document.byline != nil || document.publishDateTime != nil {
+                    VStack(alignment: .leading, spacing: 4) {
+                        if let siteName = document.siteName, let host = URL(string: url)?.host() {
+                            HStack(spacing: 4) {
+                                FavTabIcon(host: host)
+                                    .frame(width: 16, height: 16)
+                                Text(siteName)
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                        HStack {
+                            if let byline = document.byline {
+                                Text(byline)
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                            if let publishDateTime = document.publishDateTime {
+                                Spacer()
+                                DateTimeText(data: publishDateTime, fullTime: true)
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                    }
+                }
+                
                 Divider()
                 
                 if showTLDR {

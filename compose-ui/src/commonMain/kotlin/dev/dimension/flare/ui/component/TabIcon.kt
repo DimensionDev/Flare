@@ -211,36 +211,47 @@ public fun TabIcon(
         }
 
         is IconType.FavIcon -> {
-            val iconState by producePresenter(key = "fav-$accountType:${icon.host}") {
-                remember(accountType, icon) {
-                    FavIconPresenter(
-                        icon.host,
-                    )
-                }.invoke()
-            }
-            iconState
-                .onSuccess {
-                    NetworkImage(
-                        it,
-                        contentDescription =
-                            when (title) {
-                                is TitleType.Localized -> stringResource(title.res)
-                                is TitleType.Text -> title.content
-                            },
-                        modifier =
-                            modifier
-                                .size(size),
-                        contentScale = ContentScale.Fit,
-                    )
-                }.onLoading {
-                    AvatarComponent(
-                        null,
-                        size = size,
-                        modifier = Modifier.placeholder(true),
-                    )
-                }
+            FavIcon(icon.host, modifier, title, size)
         }
     }
+}
+
+@Composable
+public fun FavIcon(
+    host: String,
+    modifier: Modifier = Modifier,
+    title: TitleType? = null,
+    size: Dp = 24.dp,
+) {
+    val iconState by producePresenter(key = "fav:$host") {
+        remember(host) {
+            FavIconPresenter(
+                host,
+            )
+        }.invoke()
+    }
+    iconState
+        .onSuccess {
+            NetworkImage(
+                it,
+                contentDescription =
+                    when (title) {
+                        is TitleType.Localized -> stringResource(title.res)
+                        is TitleType.Text -> title.content
+                        null -> null
+                    },
+                modifier =
+                    modifier
+                        .size(size),
+                contentScale = ContentScale.Fit,
+            )
+        }.onLoading {
+            AvatarComponent(
+                null,
+                size = size,
+                modifier = Modifier.placeholder(true),
+            )
+        }
 }
 
 internal val TitleType.Localized.res: StringResource

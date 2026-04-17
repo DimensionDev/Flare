@@ -53,7 +53,7 @@ import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.AnglesUp
 import compose.icons.fontawesomeicons.solid.Bars
-import compose.icons.fontawesomeicons.solid.Plus
+import compose.icons.fontawesomeicons.solid.Sliders
 import dev.dimension.flare.R
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.data.model.BottomBarBehavior
@@ -168,16 +168,6 @@ internal fun HomeTimelineScreen(
                                             )
                                         }
                                     }
-                                    IconButton(
-                                        onClick = {
-                                            toTabSettings.invoke()
-                                        },
-                                    ) {
-                                        FAIcon(
-                                            imageVector = FontAwesomeIcons.Solid.Plus,
-                                            contentDescription = null,
-                                        )
-                                    }
                                 }
                             }
                         }
@@ -226,12 +216,21 @@ internal fun HomeTimelineScreen(
                     }
                 },
                 actions = {
+                    IconButton(
+                        onClick = {
+                            toTabSettings.invoke()
+                        },
+                    ) {
+                        FAIcon(
+                            imageVector = FontAwesomeIcons.Solid.Sliders,
+                            contentDescription = stringResource(R.string.edit_tab_title),
+                        )
+                    }
                     state.user
                         .onError {
                             TextButton(onClick = toLogin) {
                                 Text(text = stringResource(id = R.string.login_button))
                             }
-                        }.onSuccess {
                         }
                 },
             )
@@ -240,7 +239,6 @@ internal fun HomeTimelineScreen(
     ) { contentPadding ->
         state.pagerState.onSuccess { pagerState ->
             state.tabState.onSuccess { tabState ->
-
                 LaunchedEffect(pagerState.currentPage >= tabState.size) {
                     if (pagerState.currentPage >= tabState.size) {
                         scope.launch {

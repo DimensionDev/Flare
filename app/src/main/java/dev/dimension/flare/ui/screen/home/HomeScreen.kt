@@ -54,9 +54,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.Bars
+import compose.icons.fontawesomeicons.solid.ClockRotateLeft
 import compose.icons.fontawesomeicons.solid.EllipsisVertical
 import compose.icons.fontawesomeicons.solid.Gear
 import compose.icons.fontawesomeicons.solid.Pen
+import compose.icons.fontawesomeicons.solid.PenToSquare
+import compose.icons.fontawesomeicons.solid.SquareRss
 import dev.dimension.flare.R
 import dev.dimension.flare.data.model.AllListTabItem
 import dev.dimension.flare.data.model.AllNotificationTabItem
@@ -94,6 +98,7 @@ import dev.dimension.flare.ui.presenter.HomeTabsPresenter
 import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
 import dev.dimension.flare.ui.presenter.home.AllNotificationBadgePresenter
 import dev.dimension.flare.ui.presenter.home.DeepLinkPresenter
+import dev.dimension.flare.ui.presenter.home.SecondaryTabsPresenter
 import dev.dimension.flare.ui.presenter.home.UserPresenter
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.route.Route
@@ -151,12 +156,23 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                             navigationBarContainerColor = MaterialTheme.colorScheme.surface,
                         ),
                     railHeader = {
-                        HomeRailHeader(
-                            state.wideNavigationRailState,
-                            state.userState,
-                            layoutType,
-                            state::navigate,
-                        )
+                        if (layoutType == NavigationSuiteType.NavigationRail) {
+                            IconButton(
+                                onClick = {
+                                    state.openDrawer()
+                                },
+                                modifier =
+                                    Modifier
+                                        .padding(
+                                            horizontal = 24.dp,
+                                        ).padding(top = 12.dp, bottom = 4.dp),
+                            ) {
+                                FAIcon(
+                                    imageVector = FontAwesomeIcons.Solid.Bars,
+                                    contentDescription = null,
+                                )
+                            }
+                        }
                     },
                     navigationSuiteItems = {
                         tabs.primary.forEach { tab ->
@@ -208,45 +224,163 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                         }
                     },
                     secondaryItems = {
-                        tabs.secondary.forEach { tab ->
+                        if (layoutType != NavigationSuiteType.NavigationBar) {
                             item(
-                                selected = currentRoute == getDirection(tab),
+                                selected = currentRoute is Route.DraftBox,
                                 onClick = {
-                                    if (currentRoute == getDirection(tab)) {
-                                        state.scrollToTopRegistry.scrollToTop()
-                                    } else {
-                                        state.navigate(getDirection(tab))
-                                    }
+                                    state.navigate(Route.DraftBox)
                                 },
                                 icon = {
-                                    TabIcon(
-                                        accountType = tab.account,
-                                        icon = tab.metaData.icon,
-                                        title = tab.metaData.title,
-                                        iconOnly = tabs.secondaryIconOnly,
+                                    FAIcon(
+                                        imageVector = FontAwesomeIcons.Solid.PenToSquare,
+                                        contentDescription = stringResource(id = R.string.draft_box_title),
                                     )
                                 },
                                 label = {
-                                    TabTitle(
-                                        title = tab.metaData.title,
+                                    Text(text = stringResource(id = R.string.draft_box_title))
+                                },
+                            )
+                            item(
+                                selected = currentRoute is Route.Rss.Sources,
+                                onClick = {
+                                    state.navigate(Route.Rss.Sources)
+                                },
+                                icon = {
+                                    FAIcon(
+                                        imageVector = FontAwesomeIcons.Solid.SquareRss,
+                                        contentDescription = stringResource(id = R.string.settings_rss_management_title),
                                     )
                                 },
-                                badge =
-                                    if (tab is AllNotificationTabItem || tab is NotificationTabItem) {
-                                        {
-                                            if (state.notificationState.count > 0) {
-                                                Badge {
-                                                    Text(text = state.notificationState.count.toString())
-                                                }
+                                label = {
+                                    Text(text = stringResource(id = R.string.settings_rss_management_title))
+                                },
+                            )
+                            item(
+                                selected = currentRoute is Route.Settings.LocalHistory,
+                                onClick = {
+                                    state.navigate(Route.Settings.LocalHistory)
+                                },
+                                icon = {
+                                    FAIcon(
+                                        imageVector = FontAwesomeIcons.Solid.ClockRotateLeft,
+                                        contentDescription = stringResource(id = R.string.settings_local_history_title),
+                                    )
+                                },
+                                label = {
+                                    Text(text = stringResource(id = R.string.settings_local_history_title))
+                                },
+                            )
+                        }
+                        state.secondaryTabsState.onSuccess { secondaryTabs ->
+                            secondaryTabs.forEach { item ->
+                                expandableItem(
+                                    icon = {
+                                        item.user.onSuccess {
+                                            AvatarComponent(it.avatar)
+                                        }
+                                    },
+                                    label = {
+                                        Column {
+                                            item.user.onSuccess {
+                                                RichText(it.name)
+                                                Text(
+                                                    it.handle.canonical,
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                )
                                             }
                                         }
-                                    } else {
-                                        null
                                     },
-                            )
+                                    children = {
+                                        item.tabs.forEach {
+                                            item(
+                                                selected = currentRoute == getDirection(it, it.account),
+                                                onClick = {
+                                                    if (currentRoute == getDirection(it, it.account)) {
+                                                        state.scrollToTopRegistry.scrollToTop()
+                                                    } else {
+                                                        state.navigate(getDirection(it, it.account))
+                                                    }
+                                                },
+                                                icon = {
+                                                    TabIcon(
+                                                        accountType = it.account,
+                                                        icon = it.metaData.icon,
+                                                        title = it.metaData.title,
+                                                        iconOnly = true,
+                                                    )
+                                                },
+                                                label = {
+                                                    TabTitle(
+                                                        title = it.metaData.title,
+                                                    )
+                                                },
+                                                badge =
+                                                    if (it is AllNotificationTabItem || it is NotificationTabItem) {
+                                                        {
+                                                            if (state.notificationState.count > 0) {
+                                                                Badge {
+                                                                    Text(text = state.notificationState.count.toString())
+                                                                }
+                                                            }
+                                                        }
+                                                    } else {
+                                                        null
+                                                    },
+                                            )
+                                        }
+                                    },
+                                )
+                            }
                         }
                     },
                     footerItems = {
+                        if (layoutType == NavigationSuiteType.NavigationBar) {
+                            item(
+                                selected = currentRoute is Route.DraftBox,
+                                onClick = {
+                                    state.navigate(Route.DraftBox)
+                                },
+                                icon = {
+                                    FAIcon(
+                                        imageVector = FontAwesomeIcons.Solid.PenToSquare,
+                                        contentDescription = stringResource(id = R.string.draft_box_title),
+                                    )
+                                },
+                                label = {
+                                    Text(text = stringResource(id = R.string.draft_box_title))
+                                },
+                            )
+                            item(
+                                selected = currentRoute is Route.Rss.Sources,
+                                onClick = {
+                                    state.navigate(Route.Rss.Sources)
+                                },
+                                icon = {
+                                    FAIcon(
+                                        imageVector = FontAwesomeIcons.Solid.SquareRss,
+                                        contentDescription = stringResource(id = R.string.settings_rss_management_title),
+                                    )
+                                },
+                                label = {
+                                    Text(text = stringResource(id = R.string.settings_rss_management_title))
+                                },
+                            )
+                            item(
+                                selected = currentRoute is Route.Settings.LocalHistory,
+                                onClick = {
+                                    state.navigate(Route.Settings.LocalHistory)
+                                },
+                                icon = {
+                                    FAIcon(
+                                        imageVector = FontAwesomeIcons.Solid.ClockRotateLeft,
+                                        contentDescription = stringResource(id = R.string.settings_local_history_title),
+                                    )
+                                },
+                                label = {
+                                    Text(text = stringResource(id = R.string.settings_local_history_title))
+                                },
+                            )
+                        }
                         item(
                             selected = currentRoute is Route.Settings.Main,
                             onClick = {
@@ -523,6 +657,7 @@ private fun getDirection(
 @Composable
 private fun presenter(uriHandler: UriHandler) =
     run {
+        val secondaryTabsPresenter = remember { SecondaryTabsPresenter() }.invoke()
         val activeAccountState = remember { ActiveAccountPresenter() }.invoke()
         val navigationState =
             remember {
@@ -556,7 +691,13 @@ private fun presenter(uriHandler: UriHandler) =
         val topLevelRoutes =
             remember(tabs.tabs) {
                 tabs.tabs.map { state ->
-                    state.all.map { getDirection(it) }.toSet() + setOf(Route.Settings.Main)
+                    state.all.map { getDirection(it) }.toSet() +
+                        setOf(
+                            Route.Settings.Main,
+                            Route.DraftBox,
+                            Route.Rss.Sources,
+                            Route.Settings.LocalHistory,
+                        )
                 }
             }
         val scope = rememberCoroutineScope()
@@ -581,6 +722,7 @@ private fun presenter(uriHandler: UriHandler) =
                 )
             }.invoke()
         object {
+            val secondaryTabsState = secondaryTabsPresenter.items
             val notificationState = notificationState
             val tabs = tabs.tabs
             val navigationState = navigationState

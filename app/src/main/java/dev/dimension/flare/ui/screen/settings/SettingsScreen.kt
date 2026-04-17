@@ -27,16 +27,12 @@ import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.CircleInfo
 import compose.icons.fontawesomeicons.solid.CircleUser
-import compose.icons.fontawesomeicons.solid.ClockRotateLeft
 import compose.icons.fontawesomeicons.solid.Database
 import compose.icons.fontawesomeicons.solid.Filter
 import compose.icons.fontawesomeicons.solid.Gear
 import compose.icons.fontawesomeicons.solid.Language
 import compose.icons.fontawesomeicons.solid.Palette
-import compose.icons.fontawesomeicons.solid.PenToSquare
 import compose.icons.fontawesomeicons.solid.Robot
-import compose.icons.fontawesomeicons.solid.SquareRss
-import compose.icons.fontawesomeicons.solid.TableList
 import dev.dimension.flare.BuildConfig
 import dev.dimension.flare.R
 import dev.dimension.flare.ui.component.BackButton
@@ -46,7 +42,6 @@ import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.ThemeIconData
 import dev.dimension.flare.ui.component.ThemedIcon
 import dev.dimension.flare.ui.theme.first
-import dev.dimension.flare.ui.theme.item
 import dev.dimension.flare.ui.theme.last
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import dev.dimension.flare.ui.theme.single
@@ -179,7 +174,7 @@ internal fun SettingsScreen(
                                 e.printStackTrace()
                             }
                         },
-                        shapes = ListItemDefaults.item(),
+                        shapes = ListItemDefaults.last(),
                         content = {
                             Text(text = stringResource(id = R.string.settings_language_title))
                         },
@@ -195,25 +190,6 @@ internal fun SettingsScreen(
                         },
                     )
                 }
-                SegmentedListItem(
-                    onClick = {
-                        toTabCustomization.invoke()
-                    },
-                    shapes = ListItemDefaults.last(),
-                    content = {
-                        Text(text = stringResource(id = R.string.settings_side_panel))
-                    },
-                    leadingContent = {
-                        ThemedIcon(
-                            imageVector = FontAwesomeIcons.Solid.TableList,
-                            contentDescription = stringResource(id = R.string.settings_side_panel),
-                            color = ThemeIconData.Color.DeepTeal,
-                        )
-                    },
-                    supportingContent = {
-                        Text(text = stringResource(id = R.string.settings_side_panel_description))
-                    },
-                )
             }
 
             Column(
@@ -221,28 +197,9 @@ internal fun SettingsScreen(
             ) {
                 SegmentedListItem(
                     onClick = {
-                        toRSSManagement.invoke()
-                    },
-                    shapes = ListItemDefaults.first(),
-                    content = {
-                        Text(text = stringResource(id = R.string.settings_rss_management_title))
-                    },
-                    leadingContent = {
-                        ThemedIcon(
-                            imageVector = FontAwesomeIcons.Solid.SquareRss,
-                            contentDescription = stringResource(id = R.string.settings_rss_management_title),
-                            color = ThemeIconData.Color.ImperialMagenta,
-                        )
-                    },
-                    supportingContent = {
-                        Text(text = stringResource(id = R.string.settings_rss_management_description))
-                    },
-                )
-                SegmentedListItem(
-                    onClick = {
                         toLocalFilter.invoke()
                     },
-                    shapes = ListItemDefaults.item(),
+                    shapes = ListItemDefaults.first(),
                     content = {
                         Text(text = stringResource(id = R.string.settings_local_filter_title))
                     },
@@ -255,44 +212,6 @@ internal fun SettingsScreen(
                     },
                     supportingContent = {
                         Text(text = stringResource(id = R.string.settings_local_filter_description))
-                    },
-                )
-                SegmentedListItem(
-                    onClick = {
-                        toLocalHistory.invoke()
-                    },
-                    shapes = ListItemDefaults.item(),
-                    content = {
-                        Text(text = stringResource(id = R.string.settings_local_history_title))
-                    },
-                    leadingContent = {
-                        ThemedIcon(
-                            imageVector = FontAwesomeIcons.Solid.ClockRotateLeft,
-                            contentDescription = stringResource(id = R.string.settings_local_history_title),
-                            color = ThemeIconData.Color.BurntUmber,
-                        )
-                    },
-                    supportingContent = {
-                        Text(text = stringResource(id = R.string.settings_local_history_description))
-                    },
-                )
-                SegmentedListItem(
-                    onClick = {
-                        toDraftBox.invoke()
-                    },
-                    shapes = ListItemDefaults.item(),
-                    content = {
-                        Text(text = stringResource(id = R.string.draft_box_title))
-                    },
-                    leadingContent = {
-                        ThemedIcon(
-                            imageVector = FontAwesomeIcons.Solid.PenToSquare,
-                            contentDescription = stringResource(id = R.string.draft_box_title),
-                            color = ThemeIconData.Color.ForestGreen,
-                        )
-                    },
-                    supportingContent = {
-                        Text(text = stringResource(id = R.string.settings_draft_box_description))
                     },
                 )
                 SegmentedListItem(

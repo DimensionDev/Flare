@@ -8,6 +8,7 @@ struct StatusMediaView: View {
     let data: [any UiMedia]
     let sensitive: Bool
     let onMediaClicked: (any UiMedia, Int) -> Void
+    let cornerRadius: CGFloat
     @Environment(\.appearanceSettings.expandMediaSize) private var expandMediaSize
     @State private var isBlur: Bool
 //    @State private var selectedIndex: Int? = nil
@@ -79,15 +80,16 @@ struct StatusMediaView: View {
                 EmptyView()
             }
         }
-        .clipShape(.rect(cornerRadius: 16))
+        .clipShape(.rect(cornerRadius: cornerRadius))
     }
 }
 
 extension StatusMediaView {
-    init(data: [any UiMedia], sensitive: Bool, onMediaClicked: @escaping (any UiMedia, Int) -> Void) {
+    init(data: [any UiMedia], sensitive: Bool, cornerRadius: CGFloat, onMediaClicked: @escaping (any UiMedia, Int) -> Void) {
         self.data = data
         self.sensitive = sensitive
         self.onMediaClicked = onMediaClicked
+        self.cornerRadius = cornerRadius
         self._isBlur = State(initialValue: sensitive)
     }
 }

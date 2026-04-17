@@ -71,9 +71,7 @@ internal fun StatusMediaComponent(
     }
     val showSensitiveButton = sensitive && !appearanceSettings.showSensitiveContent
     Box(
-        modifier =
-            modifier
-                .clip(PlatformTheme.shapes.medium),
+        modifier = modifier,
     ) {
         AdaptiveGrid(
             content = {
@@ -158,7 +156,6 @@ internal fun StatusMediaComponent(
             },
             modifier =
                 Modifier
-                    .clip(PlatformTheme.shapes.medium)
                     .let {
 //                        if (hideSensitive) {
 //                            it.blur(32.dp)

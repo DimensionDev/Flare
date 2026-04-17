@@ -23,7 +23,9 @@ struct SettingsScreen: View {
                     }
                 }
                 if let url = URL(string: UIApplication.openSettingsURLString) {
-                    Link(destination: url) {
+                    Button {
+                        UIApplication.shared.open(url)
+                    } label: {
                         Label {
                             Text("system_settings_title")
                             Text("system_settings_description")

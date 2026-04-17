@@ -4,6 +4,7 @@ import KotlinSharedUI
 struct StatusCardView: View {
     @Environment(\.openURL) private var openURL
     let data: UiCard
+    let cornerRadius: CGFloat
 
     var body: some View {
         VStack(
@@ -47,9 +48,9 @@ struct StatusCardView: View {
                     .padding(.bottom, 8)
             })
         }
-        .clipShape(.rect(cornerRadius: 16))
+        .clipShape(.rect(cornerRadius: cornerRadius))
         .overlay(
-            RoundedRectangle(cornerRadius: 16)
+            RoundedRectangle(cornerRadius: cornerRadius)
                 .stroke(Color(.separator), lineWidth: 1)
         )
         .onTapGesture {
@@ -64,6 +65,7 @@ struct StatusCardView: View {
 struct StatusCompatCardView: View {
     @Environment(\.openURL) private var openURL
     let data: UiCard
+    let cornerRadius: CGFloat
     var body: some View {
         HStack(
             spacing: 8
@@ -105,9 +107,9 @@ struct StatusCompatCardView: View {
                     .padding(.trailing)
             })
         }
-        .clipShape(.rect(cornerRadius: 16))
+        .clipShape(.rect(cornerRadius: cornerRadius))
         .overlay(
-            RoundedRectangle(cornerRadius: 16)
+            RoundedRectangle(cornerRadius: cornerRadius)
                 .stroke(Color(.separator), lineWidth: 1)
         )
         .onTapGesture {

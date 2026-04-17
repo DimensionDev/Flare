@@ -285,8 +285,10 @@
     <string name="settings_accounts_remove">Remove</string>
     <string name="settings_accounts_remove_confirm">Are you sure you want to remove account %1$s from this device?</string>
 
-    <string name="media_menu_save">Save screenshot</string>
-    <string name="media_menu_share_image">Share screenshot</string>
+    <string name="media_menu_save">Save image</string>
+    <string name="media_menu_share_image">Share image</string>
+    <string name="media_menu_copy_link">Copy link</string>
+    <string name="media_menu_media_link">Media link</string>
     <string name="status_menu_share_via_fxembed">Share via FxEmbed</string>
     <string name="status_menu_share_via_fixvx">Share via Fixvx</string>
     <string name="media_save_success">Saved to Downloads</string>

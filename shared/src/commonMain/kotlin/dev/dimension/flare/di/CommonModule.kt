@@ -65,3 +65,29 @@ internal val commonModule =
         singleOf(::AiCompletionService)
         single<PreTranslationService> { OnlinePreTranslationService(get(), get(), get(), get()) }
     }
+
+internal val liteModule =
+    module {
+        singleOf(::AccountRepository)
+        singleOf(::provideAppDatabase)
+        single {
+            DraftMediaStore(get())
+        }
+        single {
+            DraftRepository(
+                database = get(),
+                draftMediaStore = get(),
+            )
+        }
+        single { CoroutineScope(Dispatchers.IO) }
+        singleOf(::SaveDraftUseCase)
+        singleOf(::RestoreDraftUseCase)
+        single {
+            SendDraftUseCase(
+                draftRepository = get(),
+                accountRepository = get(),
+                draftMediaStore = get(),
+            )
+        }
+        singleOf(::ComposeUseCase)
+    }

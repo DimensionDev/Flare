@@ -1,6 +1,7 @@
 import SwiftUI
 @preconcurrency import KotlinSharedUI
 import PhotosUI
+import FlareUI
 
 struct EditListScreen: View {
     @Environment(\.dismiss) var dismiss

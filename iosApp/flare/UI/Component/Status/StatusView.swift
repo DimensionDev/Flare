@@ -1,6 +1,7 @@
 import SwiftUI
 import KotlinSharedUI
 import SwiftUIBackports
+import FlareUI
 
 struct StatusView: View {
     @Environment(\.appearanceSettings.fullWidthPost) private var fullWidthPost

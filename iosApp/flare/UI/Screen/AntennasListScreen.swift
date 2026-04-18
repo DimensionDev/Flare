@@ -1,5 +1,6 @@
 import SwiftUI
 @preconcurrency import KotlinSharedUI
+import FlareUI
 
 struct AntennasListScreen: View {
     let accountType: AccountType

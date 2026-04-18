@@ -1,5 +1,6 @@
 import SwiftUI
 import KotlinSharedUI
+import FlareUI
 
 struct AppLogScreen: View {
     @StateObject private var presenter = KotlinPresenter(presenter: DevModePresenter())

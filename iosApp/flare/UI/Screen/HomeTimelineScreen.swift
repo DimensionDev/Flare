@@ -1,6 +1,7 @@
 import SwiftUI
 @preconcurrency import KotlinSharedUI
 import SwiftUIBackports
+import FlareUI
 
 struct HomeTimelineScreen: View {
     let toServiceSelect: () -> Void

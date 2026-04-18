@@ -2,6 +2,7 @@ import SwiftUI
 import KotlinSharedUI
 import SwiftUIBackports
 import UniformTypeIdentifiers
+import FlareUI
 
 struct StatusShareSheet: View {
     let statusKey: MicroBlogKey

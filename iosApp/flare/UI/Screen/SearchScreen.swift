@@ -1,5 +1,6 @@
 import SwiftUI
 @preconcurrency import KotlinSharedUI
+import FlareUI
 
 struct SearchScreen: View {
     @Environment(\.openURL) private var openURL

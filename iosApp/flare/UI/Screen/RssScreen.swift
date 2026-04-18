@@ -1,6 +1,7 @@
 import SwiftUI
 import KotlinSharedUI
 import UniformTypeIdentifiers
+import FlareUI
 
 struct RssScreen: View {
     @StateObject private var presenter = KotlinPresenter(presenter: RssListWithTabsPresenter())

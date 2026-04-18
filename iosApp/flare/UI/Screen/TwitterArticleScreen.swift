@@ -1,5 +1,6 @@
 import SwiftUI
 import KotlinSharedUI
+import FlareUI
 
 struct TwitterArticleScreen: View {
     @StateObject private var presenter: KotlinPresenter<TwitterArticlePresenterState>

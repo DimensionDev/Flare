@@ -1,12 +1,12 @@
 import SwiftUI
 @preconcurrency import KotlinSharedUI
 
-class PlatformTextContent: NSObject {}
+public class PlatformTextContent: NSObject {}
 
-final class PlatformTextTextContent: PlatformTextContent {
-    let runs: [PlatformTextRun]
-    let alignment: TextAlignment?
-    let isBlockQuote: Bool
+public final class PlatformTextTextContent: PlatformTextContent {
+    public let runs: [PlatformTextRun]
+    public let alignment: TextAlignment?
+    public let isBlockQuote: Bool
 
     init(runs: [PlatformTextRun], alignment: TextAlignment?, isBlockQuote: Bool) {
         self.runs = runs
@@ -16,9 +16,9 @@ final class PlatformTextTextContent: PlatformTextContent {
     }
 }
 
-final class PlatformTextBlockImageContent: PlatformTextContent {
-    let url: String
-    let href: String?
+public final class PlatformTextBlockImageContent: PlatformTextContent {
+    public let url: String
+    public let href: String?
 
     init(url: String, href: String?) {
         self.url = url
@@ -27,10 +27,10 @@ final class PlatformTextBlockImageContent: PlatformTextContent {
     }
 }
 
-class PlatformTextRun: NSObject {}
+public class PlatformTextRun: NSObject {}
 
-final class PlatformTextAttributedRun: PlatformTextRun {
-    let text: AttributedString
+public final class PlatformTextAttributedRun: PlatformTextRun {
+    public let text: AttributedString
 
     init(text: AttributedString) {
         self.text = text
@@ -38,9 +38,9 @@ final class PlatformTextAttributedRun: PlatformTextRun {
     }
 }
 
-final class PlatformTextImageRun: PlatformTextRun {
-    let url: String
-    let alt: String
+public final class PlatformTextImageRun: PlatformTextRun {
+    public let url: String
+    public let alt: String
 
     init(url: String, alt: String) {
         self.url = url
@@ -49,12 +49,12 @@ final class PlatformTextImageRun: PlatformTextRun {
     }
 }
 
-final class PlatformTextRenderer: SwiftPlatformTextRenderer {
-    static let shared = PlatformTextRenderer()
+public final class PlatformTextRenderer: SwiftPlatformTextRenderer {
+    public static let shared = PlatformTextRenderer()
 
     private init() {}
 
-    func render(renderRuns: [RenderContent]) -> [Any] {
+    public func render(renderRuns: [RenderContent]) -> [Any] {
         dispatchPrecondition(condition: .onQueue(.main))
 
         let context = RenderContext()

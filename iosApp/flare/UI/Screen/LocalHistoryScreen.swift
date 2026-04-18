@@ -1,5 +1,6 @@
 import SwiftUI
 import KotlinSharedUI
+import FlareUI
 
 struct LocalHistoryScreen: View {
     @StateObject private var presenter = KotlinPresenter(presenter: LocalCacheSearchPresenter())

@@ -1,5 +1,6 @@
 import SwiftUI
 @preconcurrency import KotlinSharedUI
+import FlareUI
 
 struct NostrRelaysScreen: View {
     let accountKey: MicroBlogKey

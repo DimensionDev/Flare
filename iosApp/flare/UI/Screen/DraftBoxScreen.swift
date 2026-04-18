@@ -1,5 +1,6 @@
 import SwiftUI
 import KotlinSharedUI
+import FlareUI
 
 struct DraftBoxScreen: View {
     let onEditDraft: (String) -> Void

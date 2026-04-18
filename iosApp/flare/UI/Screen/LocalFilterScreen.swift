@@ -1,5 +1,6 @@
 import SwiftUI
 import KotlinSharedUI
+import FlareUI
 
 struct LocalFilterScreen: View {
     @StateObject private var presenter = KotlinPresenter(presenter: LocalFilterPresenter())

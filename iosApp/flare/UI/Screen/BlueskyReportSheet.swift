@@ -1,5 +1,6 @@
 import SwiftUI
 import KotlinSharedUI
+import FlareUI
 
 struct BlueskyReportSheet: View {
     @Environment(\.dismiss) private var dismiss

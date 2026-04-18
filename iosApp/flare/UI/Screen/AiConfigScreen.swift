@@ -1,5 +1,6 @@
 import SwiftUI
 import KotlinSharedUI
+import FlareUI
 
 struct AiConfigScreen: View {
     @StateObject private var presenter = KotlinPresenter(presenter: AiConfigPresenter())

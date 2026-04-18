@@ -1,6 +1,7 @@
 import SwiftUI
 import SwiftUIBackports
 @preconcurrency import KotlinSharedUI
+import FlareUI
 
 struct ProfileScreen: View {
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass

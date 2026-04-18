@@ -2,6 +2,7 @@ import SwiftUI
 import KotlinSharedUI
 import AuthenticationServices
 import WebKit
+import FlareUI
 
 struct ServiceSelectionScreen : View {
     @Environment(\.webAuthenticationSession) private var webAuthenticationSession

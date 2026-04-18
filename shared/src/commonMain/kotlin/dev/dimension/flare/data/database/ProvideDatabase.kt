@@ -6,9 +6,11 @@ import dev.dimension.flare.data.database.cache.CacheDatabase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 
+internal const val APP_DATABASE_NAME = "app.db"
+
 internal fun provideAppDatabase(driverFactory: DriverFactory): AppDatabase =
     driverFactory
-        .createBuilder<AppDatabase>("app.db")
+        .createBuilder<AppDatabase>(APP_DATABASE_NAME)
         .addMigrations(AppDatabase.MIGRATION_8_9)
         .setDriver(BundledSQLiteDriver())
         .setQueryCoroutineContext(Dispatchers.IO)

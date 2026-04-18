@@ -1,6 +1,7 @@
 import SwiftUI
 import KotlinSharedUI
 import SwiftUIBackports
+import FlareUI
 
 @available(iOS 18.0, *)
 struct FlareRoot: View {

@@ -15,10 +15,80 @@
 		06C6B5482E853AAF00CCD388 /* SwiftUIIntrospect in Frameworks */ = {isa = PBXBuildFile; productRef = 06C6B5472E853AAF00CCD388 /* SwiftUIIntrospect */; };
 		06C7FC172E7D474900A0D01A /* LazyPager in Frameworks */ = {isa = PBXBuildFile; productRef = 06C7FC162E7D474900A0D01A /* LazyPager */; };
 		06F36AAD2E8F7BEC00F5905F /* SwiftUIBackports in Frameworks */ = {isa = PBXBuildFile; productRef = 06F36AAC2E8F7BEC00F5905F /* SwiftUIBackports */; };
+		06FD30712F8F9D3C00275D3D /* FlareShareExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 06FD30672F8F9D3C00275D3D /* FlareShareExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		06FD30822F8F9D9B00275D3D /* FlareUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 06FD307C2F8F9D9B00275D3D /* FlareUI.framework */; };
+		06FD30832F8F9D9B00275D3D /* FlareUI.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 06FD307C2F8F9D9B00275D3D /* FlareUI.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		06FD30912F8F9DD700275D3D /* FlareUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 06FD307C2F8F9D9B00275D3D /* FlareUI.framework */; };
+		06FD30922F8F9DD700275D3D /* FlareUI.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 06FD307C2F8F9D9B00275D3D /* FlareUI.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		06FD30A02F8FA48800275D3D /* SwiftUIIntrospect in Frameworks */ = {isa = PBXBuildFile; productRef = 06FD309F2F8FA48800275D3D /* SwiftUIIntrospect */; };
+		06FD30A22F8FA49300275D3D /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 06FD30A12F8FA49300275D3D /* Kingfisher */; };
+		06FD30A42F8FA49800275D3D /* SwiftUIBackports in Frameworks */ = {isa = PBXBuildFile; productRef = 06FD30A32F8FA49800275D3D /* SwiftUIBackports */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		06FD306F2F8F9D3C00275D3D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 06E433F62E6A9A2600CD0826 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 06FD30662F8F9D3C00275D3D;
+			remoteInfo = FlareShareExtension;
+		};
+		06FD30802F8F9D9B00275D3D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 06E433F62E6A9A2600CD0826 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 06FD307B2F8F9D9B00275D3D;
+			remoteInfo = FlareUI;
+		};
+		06FD30932F8F9DD700275D3D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 06E433F62E6A9A2600CD0826 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 06FD307B2F8F9D9B00275D3D;
+			remoteInfo = FlareUI;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		06FD30722F8F9D3C00275D3D /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				06FD30712F8F9D3C00275D3D /* FlareShareExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		06FD30872F8F9D9B00275D3D /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				06FD30832F8F9D9B00275D3D /* FlareUI.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		06FD30952F8F9DD700275D3D /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				06FD30922F8F9DD700275D3D /* FlareUI.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		06E433FE2E6A9A2600CD0826 /* Flare.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Flare.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		06FD30672F8F9D3C00275D3D /* FlareShareExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = FlareShareExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		06FD307C2F8F9D9B00275D3D /* FlareUI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = FlareUI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -29,6 +99,29 @@
 			);
 			target = 06E433FD2E6A9A2600CD0826 /* Flare */;
 		};
+		06E7D3A62F90BA5E006E5834 /* Exceptions for "Flare" folder in "FlareShareExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Assets.xcassets,
+				Localizable.xcstrings,
+			);
+			target = 06FD30662F8F9D3C00275D3D /* FlareShareExtension */;
+		};
+		06E7D3A72F90BA5E006E5834 /* Exceptions for "Flare" folder in "FlareUI" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Assets.xcassets,
+				Localizable.xcstrings,
+			);
+			target = 06FD307B2F8F9D9B00275D3D /* FlareUI */;
+		};
+		06FD30762F8F9D3C00275D3D /* Exceptions for "FlareShareExtension" folder in "FlareShareExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 06FD30662F8F9D3C00275D3D /* FlareShareExtension */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -36,8 +129,23 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				06E434172E6A9DE000CD0826 /* Exceptions for "Flare" folder in "Flare" target */,
+				06E7D3A62F90BA5E006E5834 /* Exceptions for "Flare" folder in "FlareShareExtension" target */,
+				06E7D3A72F90BA5E006E5834 /* Exceptions for "Flare" folder in "FlareUI" target */,
 			);
 			path = Flare;
+			sourceTree = "<group>";
+		};
+		06FD30682F8F9D3C00275D3D /* FlareShareExtension */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				06FD30762F8F9D3C00275D3D /* Exceptions for "FlareShareExtension" folder in "FlareShareExtension" target */,
+			);
+			path = FlareShareExtension;
+			sourceTree = "<group>";
+		};
+		06FD307D2F8F9D9B00275D3D /* FlareUI */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = FlareUI;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -50,11 +158,30 @@
 				068923482E82A80700981D8E /* Flow in Frameworks */,
 				06C7FC172E7D474900A0D01A /* LazyPager in Frameworks */,
 				0672EE122E8689C70092AD1F /* Drops in Frameworks */,
+				06FD30822F8F9D9B00275D3D /* FlareUI.framework in Frameworks */,
 				06C6B5482E853AAF00CCD388 /* SwiftUIIntrospect in Frameworks */,
 				0646B2622E7151A700535A3E /* Kingfisher in Frameworks */,
 				068B19382EB7490E0093DFC5 /* WaterfallGrids in Frameworks */,
 				06F36AAD2E8F7BEC00F5905F /* SwiftUIBackports in Frameworks */,
 				06310D712E96120700B6E081 /* VideoPlayer in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		06FD30642F8F9D3C00275D3D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				06FD30912F8F9DD700275D3D /* FlareUI.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		06FD30792F8F9D9B00275D3D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				06FD30A22F8FA49300275D3D /* Kingfisher in Frameworks */,
+				06FD30A42F8FA49800275D3D /* SwiftUIBackports in Frameworks */,
+				06FD30A02F8FA48800275D3D /* SwiftUIIntrospect in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -65,6 +192,9 @@
 			isa = PBXGroup;
 			children = (
 				06E434002E6A9A2600CD0826 /* Flare */,
+				06FD30682F8F9D3C00275D3D /* FlareShareExtension */,
+				06FD307D2F8F9D9B00275D3D /* FlareUI */,
+				06FD30902F8F9DD700275D3D /* Frameworks */,
 				06E433FF2E6A9A2600CD0826 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -73,11 +203,30 @@
 			isa = PBXGroup;
 			children = (
 				06E433FE2E6A9A2600CD0826 /* Flare.app */,
+				06FD30672F8F9D3C00275D3D /* FlareShareExtension.appex */,
+				06FD307C2F8F9D9B00275D3D /* FlareUI.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
+		06FD30902F8F9DD700275D3D /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		06FD30772F8F9D9B00275D3D /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
 		06E433FD2E6A9A2600CD0826 /* Flare */ = {
@@ -88,10 +237,14 @@
 				06E433FA2E6A9A2600CD0826 /* Sources */,
 				06E433FB2E6A9A2600CD0826 /* Frameworks */,
 				06E433FC2E6A9A2600CD0826 /* Resources */,
+				06FD30722F8F9D3C00275D3D /* Embed Foundation Extensions */,
+				06FD30872F8F9D9B00275D3D /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				06FD30702F8F9D3C00275D3D /* PBXTargetDependency */,
+				06FD30812F8F9D9B00275D3D /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				06E434002E6A9A2600CD0826 /* Flare */,
@@ -111,6 +264,57 @@
 			productReference = 06E433FE2E6A9A2600CD0826 /* Flare.app */;
 			productType = "com.apple.product-type.application";
 		};
+		06FD30662F8F9D3C00275D3D /* FlareShareExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 06FD30752F8F9D3C00275D3D /* Build configuration list for PBXNativeTarget "FlareShareExtension" */;
+			buildPhases = (
+				06FD30632F8F9D3C00275D3D /* Sources */,
+				06FD30642F8F9D3C00275D3D /* Frameworks */,
+				06FD30652F8F9D3C00275D3D /* Resources */,
+				06FD30952F8F9DD700275D3D /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				06FD30942F8F9DD700275D3D /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				06FD30682F8F9D3C00275D3D /* FlareShareExtension */,
+			);
+			name = FlareShareExtension;
+			packageProductDependencies = (
+			);
+			productName = FlareShareExtension;
+			productReference = 06FD30672F8F9D3C00275D3D /* FlareShareExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		06FD307B2F8F9D9B00275D3D /* FlareUI */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 06FD30842F8F9D9B00275D3D /* Build configuration list for PBXNativeTarget "FlareUI" */;
+			buildPhases = (
+				06FD30A52F8FA4C400275D3D /* Build Kotlin */,
+				06FD30772F8F9D9B00275D3D /* Headers */,
+				06FD30782F8F9D9B00275D3D /* Sources */,
+				06FD30792F8F9D9B00275D3D /* Frameworks */,
+				06FD307A2F8F9D9B00275D3D /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				06FD307D2F8F9D9B00275D3D /* FlareUI */,
+			);
+			name = FlareUI;
+			packageProductDependencies = (
+				06FD309F2F8FA48800275D3D /* SwiftUIIntrospect */,
+				06FD30A12F8FA49300275D3D /* Kingfisher */,
+				06FD30A32F8FA49800275D3D /* SwiftUIBackports */,
+			);
+			productName = FlareUI;
+			productReference = 06FD307C2F8F9D9B00275D3D /* FlareUI.framework */;
+			productType = "com.apple.product-type.framework";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -118,11 +322,17 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 2600;
+				LastSwiftUpdateCheck = 2640;
 				LastUpgradeCheck = 2600;
 				TargetAttributes = {
 					06E433FD2E6A9A2600CD0826 = {
 						CreatedOnToolsVersion = 26.0;
+					};
+					06FD30662F8F9D3C00275D3D = {
+						CreatedOnToolsVersion = 26.4;
+					};
+					06FD307B2F8F9D9B00275D3D = {
+						CreatedOnToolsVersion = 26.4;
 					};
 				};
 			};
@@ -152,12 +362,28 @@
 			projectRoot = "";
 			targets = (
 				06E433FD2E6A9A2600CD0826 /* Flare */,
+				06FD30662F8F9D3C00275D3D /* FlareShareExtension */,
+				06FD307B2F8F9D9B00275D3D /* FlareUI */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		06E433FC2E6A9A2600CD0826 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		06FD30652F8F9D3C00275D3D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		06FD307A2F8F9D9B00275D3D /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -185,6 +411,24 @@
 			shellPath = /bin/sh;
 			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\ncd \"$SRCROOT/..\"\n./gradlew :compose-ui:embedAndSignAppleFrameworkForXcode\n";
 		};
+		06FD30A52F8FA4C400275D3D /* Build Kotlin */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Build Kotlin";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\ncd \"$SRCROOT/..\"\n./gradlew :compose-ui:embedAndSignAppleFrameworkForXcode\n";
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -195,7 +439,39 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		06FD30632F8F9D3C00275D3D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		06FD30782F8F9D9B00275D3D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		06FD30702F8F9D3C00275D3D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 06FD30662F8F9D3C00275D3D /* FlareShareExtension */;
+			targetProxy = 06FD306F2F8F9D3C00275D3D /* PBXContainerItemProxy */;
+		};
+		06FD30812F8F9D9B00275D3D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 06FD307B2F8F9D9B00275D3D /* FlareUI */;
+			targetProxy = 06FD30802F8F9D9B00275D3D /* PBXContainerItemProxy */;
+		};
+		06FD30942F8F9DD700275D3D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 06FD307B2F8F9D9B00275D3D /* FlareUI */;
+			targetProxy = 06FD30932F8F9DD700275D3D /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		06E434072E6A9A2700CD0826 /* Debug */ = {
@@ -329,6 +605,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
+				CODE_SIGN_ENTITLEMENTS = Flare/Flare.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 38;
 				DEVELOPMENT_TEAM = 7LFDZ96332;
@@ -369,6 +646,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
+				CODE_SIGN_ENTITLEMENTS = Flare/Flare.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 38;
 				DEVELOPMENT_TEAM = 7LFDZ96332;
@@ -403,6 +681,150 @@
 			};
 			name = Release;
 		};
+		06FD30732F8F9D3C00275D3D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = FlareShareExtension/FlareShareExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 7LFDZ96332;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = FlareShareExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = FlareShareExtension;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.dimension.flare.FlareShareExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		06FD30742F8F9D3C00275D3D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = FlareShareExtension/FlareShareExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 7LFDZ96332;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = FlareShareExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = FlareShareExtension;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.dimension.flare.FlareShareExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		06FD30852F8F9D9B00275D3D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 7LFDZ96332;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_MODULE_VERIFIER = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
+				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
+				PRODUCT_BUNDLE_IDENTIFIER = dev.dimension.flare.FlareUI;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_INSTALL_MODULE = YES;
+				SWIFT_INSTALL_OBJC_HEADER = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		06FD30862F8F9D9B00275D3D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 7LFDZ96332;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_MODULE_VERIFIER = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
+				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
+				PRODUCT_BUNDLE_IDENTIFIER = dev.dimension.flare.FlareUI;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_INSTALL_MODULE = YES;
+				SWIFT_INSTALL_OBJC_HEADER = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -420,6 +842,24 @@
 			buildConfigurations = (
 				06E4340A2E6A9A2700CD0826 /* Debug */,
 				06E4340B2E6A9A2700CD0826 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		06FD30752F8F9D3C00275D3D /* Build configuration list for PBXNativeTarget "FlareShareExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				06FD30732F8F9D3C00275D3D /* Debug */,
+				06FD30742F8F9D3C00275D3D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		06FD30842F8F9D9B00275D3D /* Build configuration list for PBXNativeTarget "FlareUI" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				06FD30852F8F9D9B00275D3D /* Debug */,
+				06FD30862F8F9D9B00275D3D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -538,6 +978,21 @@
 			productName = LazyPager;
 		};
 		06F36AAC2E8F7BEC00F5905F /* SwiftUIBackports */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 06F36AAB2E8F7BEC00F5905F /* XCRemoteSwiftPackageReference "iOS-Backports" */;
+			productName = SwiftUIBackports;
+		};
+		06FD309F2F8FA48800275D3D /* SwiftUIIntrospect */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 06C6B5462E853AAF00CCD388 /* XCRemoteSwiftPackageReference "swiftui-introspect" */;
+			productName = SwiftUIIntrospect;
+		};
+		06FD30A12F8FA49300275D3D /* Kingfisher */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0646B2602E7151A700535A3E /* XCRemoteSwiftPackageReference "Kingfisher" */;
+			productName = Kingfisher;
+		};
+		06FD30A32F8FA49800275D3D /* SwiftUIBackports */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 06F36AAB2E8F7BEC00F5905F /* XCRemoteSwiftPackageReference "iOS-Backports" */;
 			productName = SwiftUIBackports;

@@ -80,6 +80,7 @@ internal fun HomeTimelineScreen(
                                     },
                                 ),
                         contentPadding = PaddingValues(top = 48.dp),
+                        allowGalleryMode = true,
                         onScrollToTop = {
                             state.setTopBarExpanded(true)
                         },

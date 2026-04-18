@@ -30,7 +30,7 @@ struct HomeTimelineScreen: View {
                 let tabs: [TimelineTabItem] = state.cast(TimelineTabItem.self)
                 let tab = tabs[min(max(selectedTabIndex, 0), tabs.count - 1)]
                 ZStack {
-                    TimelineScreen(tabItem: tab)
+                    TimelineScreen(tabItem: tab, allowGalleryMode: true)
                         .id(tab.key)
                 }
                 .onChange(of: state.count, { oldValue, newValue in

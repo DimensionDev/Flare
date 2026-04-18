@@ -54,18 +54,36 @@ public fun LazyStatusVerticalStaggeredGrid(
     flingBehavior: FlingBehavior = ScrollableDefaults.flingBehavior(),
     userScrollEnabled: Boolean = true,
     forceCardMode: Boolean = false,
+    allowGalleryMode: Boolean = false,
     content: LazyStaggeredGridScope.() -> Unit,
 ) {
     val displayMode = LocalAppearanceSettings.current.timelineDisplayMode
+    val effectiveMode =
+        when {
+            allowGalleryMode -> displayMode
+            displayMode == TimelineDisplayMode.Gallery -> TimelineDisplayMode.Card
+            else -> displayMode
+        }
     val paddingForColumnCalc = contentPadding + PaddingValues(horizontal = screenHorizontalPadding)
     val layoutDirection = LocalLayoutDirection.current
     val density = LocalDensity.current
-    val columnCount by remember(state) {
+    val viewportWidthPx by remember(state) {
+        snapshotFlow { state.layoutInfo.viewportSize.width }
+            .distinctUntilChanged()
+    }.collectAsState(0)
+    val isWideViewport = with(density) { viewportWidthPx.toDp() } >= 600.dp
+    val effectiveColumns =
+        if (effectiveMode == TimelineDisplayMode.Gallery) {
+            StaggeredGridCells.Adaptive(if (isWideViewport) 240.dp else 160.dp)
+        } else {
+            columns
+        }
+    val columnCount by remember(state, effectiveColumns) {
         snapshotFlow { state.layoutInfo.viewportSize.width }
             .distinctUntilChanged()
             .map {
                 with(density) {
-                    with(columns) {
+                    with(effectiveColumns) {
                         calculateCrossAxisCellSizes(
                             it - paddingForColumnCalc.calculateStartPadding(layoutDirection).roundToPx() -
                                 paddingForColumnCalc.calculateEndPadding(layoutDirection).roundToPx(),
@@ -75,8 +93,8 @@ public fun LazyStatusVerticalStaggeredGrid(
                 }.size
             }.distinctUntilChanged()
     }.collectAsState(1)
-    val bigScreen = columnCount > 1
-    val plainTimeline = !bigScreen && displayMode == TimelineDisplayMode.Plain && !forceCardMode
+    val bigScreen = effectiveMode != TimelineDisplayMode.Gallery && columnCount > 1
+    val plainTimeline = !bigScreen && effectiveMode == TimelineDisplayMode.Plain && !forceCardMode
     val padding =
         if (plainTimeline) {
             contentPadding
@@ -84,10 +102,10 @@ public fun LazyStatusVerticalStaggeredGrid(
             paddingForColumnCalc
         }
     val actualVerticalSpacing =
-        if (bigScreen) {
-            verticalItemSpacing
-        } else {
-            2.dp
+        when {
+            effectiveMode == TimelineDisplayMode.Gallery -> 8.dp
+            bigScreen -> verticalItemSpacing
+            else -> 2.dp
         }
     val isScrollInProgressDebounced by remember(state) {
         snapshotFlow { state.isScrollInProgress }
@@ -103,10 +121,11 @@ public fun LazyStatusVerticalStaggeredGrid(
     CompositionLocalProvider(
         LocalIsScrollingInProgress provides isScrollInProgressDebounced,
         LocalMultipleColumns provides bigScreen,
+        LocalEffectiveTimelineDisplayMode provides effectiveMode,
     ) {
         LazyVerticalStaggeredGrid(
             modifier = gridModifier,
-            columns = columns,
+            columns = effectiveColumns,
             state = state,
             contentPadding = padding,
             reverseLayout = reverseLayout,
@@ -124,3 +143,6 @@ internal val LocalIsScrollingInProgress =
 
 internal val LocalMultipleColumns =
     androidx.compose.runtime.compositionLocalOf { false }
+
+internal val LocalEffectiveTimelineDisplayMode =
+    androidx.compose.runtime.compositionLocalOf { TimelineDisplayMode.Card }

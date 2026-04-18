@@ -85,6 +85,7 @@ struct AppearanceScreen: View {
                     })) {
                         Text("appearance_timeline_display_mode_card").tag(TimelineDisplayMode.card)
                         Text("appearance_timeline_display_mode_plain").tag(TimelineDisplayMode.plain)
+                        Text("appearance_timeline_display_mode_gallery").tag(TimelineDisplayMode.gallery)
                     } label: {
                         Text("appearance_timeline_display_mode")
                         Text("appearance_timeline_display_mode_description")

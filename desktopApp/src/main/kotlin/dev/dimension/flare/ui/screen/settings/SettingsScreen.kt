@@ -167,6 +167,7 @@ import dev.dimension.flare.settings_appearance_theme_light
 import dev.dimension.flare.settings_appearance_timeline_display_mode
 import dev.dimension.flare.settings_appearance_timeline_display_mode_card
 import dev.dimension.flare.settings_appearance_timeline_display_mode_description
+import dev.dimension.flare.settings_appearance_timeline_display_mode_gallery
 import dev.dimension.flare.settings_appearance_timeline_display_mode_plain
 import dev.dimension.flare.settings_appearance_title
 import dev.dimension.flare.settings_appearance_video_autoplay
@@ -750,6 +751,7 @@ internal fun SettingsScreen(
                                 persistentMapOf(
                                     TimelineDisplayMode.Card to Res.string.settings_appearance_timeline_display_mode_card,
                                     TimelineDisplayMode.Plain to Res.string.settings_appearance_timeline_display_mode_plain,
+                                    TimelineDisplayMode.Gallery to Res.string.settings_appearance_timeline_display_mode_gallery,
                                 )
                             }
                         MenuFlyoutContainer(

@@ -92,6 +92,7 @@ public enum class VideoAutoplay {
 public enum class TimelineDisplayMode {
     Card,
     Plain,
+    Gallery,
 }
 
 @OptIn(ExperimentalSerializationApi::class)

@@ -26,7 +26,7 @@ struct CollectionViewTimelineView: UIViewControllerRepresentable {
             { await action() }
         }
         controller.topContentInset = topContentInset
-        controller.usesCardBackground = timelineDisplayMode == .card
+        controller.usesCardBackground = timelineDisplayMode != .plain
         controller.update(data: data)
         return controller
     }
@@ -36,7 +36,7 @@ struct CollectionViewTimelineView: UIViewControllerRepresentable {
             { await action() }
         }
         controller.topContentInset = topContentInset
-        controller.usesCardBackground = timelineDisplayMode == .card
+        controller.usesCardBackground = timelineDisplayMode != .plain
         controller.update(data: data)
     }
 }

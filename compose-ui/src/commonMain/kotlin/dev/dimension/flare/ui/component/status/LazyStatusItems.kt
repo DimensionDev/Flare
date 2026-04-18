@@ -31,6 +31,7 @@ import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.compose.ui.Res
 import dev.dimension.flare.compose.ui.status_empty
 import dev.dimension.flare.compose.ui.status_loadmore_end
+import dev.dimension.flare.data.model.TimelineDisplayMode
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.ErrorContent
 import dev.dimension.flare.ui.component.FAIcon
@@ -61,6 +62,11 @@ public fun LazyStaggeredGridScope.status(
                     },
             ) { index ->
                 val item = get(index)
+                val mode = LocalEffectiveTimelineDisplayMode.current
+                if (mode == TimelineDisplayMode.Gallery) {
+                    GalleryTimelineItem(item = item)
+                    return@items
+                }
                 AdaptiveCard(
 //                    modifier =
 //                        Modifier

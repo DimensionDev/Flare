@@ -316,6 +316,7 @@ internal fun TimelineItemContent(
             LazyStatusVerticalStaggeredGrid(
                 state = state.lazyListState,
                 contentPadding = contentPadding,
+                allowGalleryMode = true,
                 modifier =
                     Modifier
                         .fillMaxSize(),

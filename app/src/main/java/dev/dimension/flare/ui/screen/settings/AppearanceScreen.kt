@@ -401,6 +401,7 @@ internal fun AppearanceScreen(
                         persistentMapOf(
                             TimelineDisplayMode.Card to stringResource(id = R.string.settings_appearance_timeline_display_mode_card),
                             TimelineDisplayMode.Plain to stringResource(id = R.string.settings_appearance_timeline_display_mode_plain),
+                            TimelineDisplayMode.Gallery to stringResource(id = R.string.settings_appearance_timeline_display_mode_gallery),
                         ),
                     selected = appearanceSettings.timelineDisplayMode,
                     onSelected = {

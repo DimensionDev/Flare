@@ -1,6 +1,5 @@
 package dev.dimension.flare.ui.screen.xqt
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -74,44 +73,26 @@ internal fun TwitterArticleScreen(
                                         .listCard(),
                             )
                         }
-                        Column(
-                            verticalArrangement = Arrangement.spacedBy(2.dp),
-                        ) {
-                            Text(
-                                text = article.title,
-                                style = FluentTheme.typography.title,
-                                modifier =
-                                    Modifier
-                                        .listCard(0, 3)
-                                        .background(
-                                            FluentTheme.colors.background.card.default,
-                                        ).padding(horizontal = screenHorizontalPadding, vertical = 8.dp),
-                            )
-                            AccountItem(
-                                userState = UiState.Success(article.profile),
-                                onClick = {
-                                    article.profile.onClicked(
-                                        ClickContext(
-                                            launcher = { uri -> uriHandler.openUri(uri) },
-                                        ),
-                                    )
-                                },
-                                toLogin = {},
-                                modifier = Modifier.listCard(1, 3),
-                            )
-                            SelectionContainer(
-                                modifier =
-                                    Modifier
-                                        .listCard(2, 3)
-                                        .background(
-                                            FluentTheme.colors.background.card.default,
-                                        ).padding(horizontal = screenHorizontalPadding, vertical = 8.dp),
-                            ) {
-                                RichText(
-                                    text = article.content,
-                                    modifier = Modifier.fillMaxWidth(),
+                        Text(
+                            text = article.title,
+                            style = FluentTheme.typography.title,
+                        )
+                        AccountItem(
+                            userState = UiState.Success(article.profile),
+                            onClick = {
+                                article.profile.onClicked(
+                                    ClickContext(
+                                        launcher = { uri -> uriHandler.openUri(uri) },
+                                    ),
                                 )
-                            }
+                            },
+                            toLogin = {},
+                        )
+                        SelectionContainer {
+                            RichText(
+                                text = article.content,
+                                modifier = Modifier.fillMaxWidth(),
+                            )
                         }
                     }.onLoading {
                     }.onError {

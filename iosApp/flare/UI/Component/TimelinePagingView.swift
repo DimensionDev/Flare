@@ -14,13 +14,13 @@ struct TimelinePagingView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
         } loadingContent: { index, totalCount in
-            ListCardView(index: index, totalCount: totalCount) {
+            AdaptiveTimelineCard(index: index, totalCount: totalCount) {
                 TimelinePlaceholderView()
                     .padding(.horizontal)
                     .padding(.vertical, 12)
             }
         } successContent: { item, index, totalCount in
-            ListCardView(index: index, totalCount: totalCount) {
+            AdaptiveTimelineCard(index: index, totalCount: totalCount) {
                 TimelineView(data: item, detailStatusKey: detailStatusKey)
                     .padding(.horizontal)
                     .padding(.vertical, 12)
@@ -64,25 +64,32 @@ struct TimelinePagingContent: View {
     @AppStorage("pref_timeline_use_compose_view") private var useComposeView: Bool = false
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @Environment(\.openURL) private var openURL
+    @Environment(\.appearanceSettings.timelineDisplayMode) private var timelineDisplayMode
+    @Environment(\.refresh) private var refreshAction: RefreshAction?
     let data: PagingState<UiTimelineV2>
     let detailStatusKey: MicroBlogKey?
     let key: String
     let topContentInset: CGFloat
+    let allowGalleryMode: Bool
 
     init(
         data: PagingState<UiTimelineV2>,
         detailStatusKey: MicroBlogKey?,
         key: String,
-        topContentInset: CGFloat = 0
+        topContentInset: CGFloat = 0,
+        allowGalleryMode: Bool = false
     ) {
         self.data = data
         self.detailStatusKey = detailStatusKey
         self.key = key
         self.topContentInset = topContentInset
+        self.allowGalleryMode = allowGalleryMode
     }
 
     var body: some View {
-        if useComposeView {
+        if allowGalleryMode && timelineDisplayMode == .gallery {
+            GalleryTimelinePagingView(data: data)
+        } else if useComposeView {
             ComposeTimelineView(
                 key: key,
                 data: data,
@@ -111,11 +118,11 @@ struct TimelinePagingContent: View {
                         TimelineWaterFallPagingView(data: data, detailStatusKey: detailStatusKey, columns: columns)
                             .padding()
                     }
+                    .refreshable {
+                        await refreshAction?()
+                    }
                     .environment(\.isMultipleColumn, true)
                     .detectScrolling()
-//                    .refreshable {
-//                        try? await presenter.state.refreshSuspend()
-//                    }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .background(Color(.systemGroupedBackground))
                 }

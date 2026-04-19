@@ -8,6 +8,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -26,6 +27,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.unit.dp
+import compose.icons.FontAwesomeIcons
+import compose.icons.fontawesomeicons.Brands
+import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.brands.Chrome
+import compose.icons.fontawesomeicons.solid.Language
 import dev.dimension.flare.LocalWindowPadding
 import dev.dimension.flare.Res
 import dev.dimension.flare.common.encodeJson
@@ -35,25 +41,32 @@ import dev.dimension.flare.rss_detail_open_in_browser
 import dev.dimension.flare.rss_detail_tldr
 import dev.dimension.flare.rss_detail_tldr_error
 import dev.dimension.flare.rss_detail_translate
+import dev.dimension.flare.ui.component.DateTimeText
+import dev.dimension.flare.ui.component.FAIcon
+import dev.dimension.flare.ui.component.FavIcon
 import dev.dimension.flare.ui.component.FlareScrollBar
 import dev.dimension.flare.ui.component.RssRichText
 import dev.dimension.flare.ui.component.listCard
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.flatMap
+import dev.dimension.flare.ui.model.isSuccess
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
+import dev.dimension.flare.ui.model.takeSuccessOr
 import dev.dimension.flare.ui.presenter.home.rss.RssDetailPresenter
 import dev.dimension.flare.ui.presenter.home.rss.RssDetailTranslatePresenter
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.server.AiTLDRPresenter
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.composefluent.FluentTheme
-import io.github.composefluent.component.Button
+import io.github.composefluent.component.ListItemSeparator
 import io.github.composefluent.component.ProgressBar
 import io.github.composefluent.component.ProgressRing
+import io.github.composefluent.component.SubtleButton
 import io.github.composefluent.component.Text
+import io.ktor.http.Url
 import kotlinx.coroutines.flow.map
 import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.stringResource
@@ -84,6 +97,43 @@ internal fun RssDetailScreen(
             ) {
                 state.data
                     .onSuccess { data ->
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            SubtleButton(
+                                onClick = {
+                                    uriHandler.openUri(url)
+                                },
+                            ) {
+                                FAIcon(
+                                    FontAwesomeIcons.Brands.Chrome,
+                                    contentDescription = stringResource(Res.string.rss_detail_open_in_browser),
+                                )
+                            }
+                            AnimatedVisibility(state.data.isSuccess && !state.isAutoTranslate && !state.enableTranslate) {
+                                SubtleButton(
+                                    onClick = {
+                                        state.setEnableTranslate(true)
+                                    },
+                                ) {
+                                    FAIcon(
+                                        FontAwesomeIcons.Solid.Language,
+                                        contentDescription = stringResource(Res.string.rss_detail_translate),
+                                    )
+                                }
+                            }
+                            AnimatedVisibility(state.data.isSuccess && state.enableTldr.takeSuccessOr(false)) {
+                                SubtleButton(
+                                    onClick = {
+                                        state.setShowTldr(true)
+                                    },
+                                ) {
+                                    Text(stringResource(Res.string.rss_detail_tldr))
+                                }
+                            }
+                        }
                         val displayTitle =
                             state.translateState?.translatedTitle?.let { titleState ->
                                 when (titleState) {
@@ -92,43 +142,60 @@ internal fun RssDetailScreen(
                                 }
                             } ?: data.title
                         if (displayTitle.isNotEmpty()) {
-                            Text(
-                                text = displayTitle,
-                                style = FluentTheme.typography.title,
-                                modifier =
-                                    Modifier
-                                        .listCard(0, 2)
-                                        .background(FluentTheme.colors.background.card.default)
-                                        .padding(horizontal = screenHorizontalPadding, vertical = 8.dp),
-                            )
+                            SelectionContainer {
+                                Text(
+                                    text = displayTitle,
+                                    style = FluentTheme.typography.subtitle,
+                                )
+                            }
                         }
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.fillMaxWidth(),
-                        ) {
-                            Button(
-                                onClick = { uriHandler.openUri(url) },
+                        if (data.siteName != null || data.byline != null || data.publishDateTime != null) {
+                            Column(
+                                verticalArrangement = Arrangement.spacedBy(4.dp),
                             ) {
-                                Text(stringResource(Res.string.rss_detail_open_in_browser))
-                            }
-                            if (!state.isAutoTranslate && !state.enableTranslate) {
-                                Button(
-                                    onClick = { state.setEnableTranslate(true) },
-                                ) {
-                                    Text(stringResource(Res.string.rss_detail_translate))
-                                }
-                            }
-                            state.enableTldr.onSuccess {
-                                if (it) {
-                                    Button(
-                                        onClick = { state.setShowTldr(true) },
+                                data.siteName?.let {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(4.dp),
                                     ) {
-                                        Text(stringResource(Res.string.rss_detail_tldr))
+                                        FavIcon(
+                                            host =
+                                                remember {
+                                                    Url(url).host
+                                                },
+                                            size = 16.dp,
+                                        )
+                                        Text(
+                                            text = it,
+                                            style = FluentTheme.typography.caption,
+                                        )
+                                    }
+                                }
+
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                ) {
+                                    data.byline?.let {
+                                        Text(
+                                            text = it,
+                                            style = FluentTheme.typography.caption,
+                                        )
+                                    }
+
+                                    Spacer(modifier = Modifier.weight(1f))
+
+                                    data.publishDateTime?.let {
+                                        DateTimeText(
+                                            data = it,
+                                            style = FluentTheme.typography.caption,
+                                            fullTime = true,
+                                        )
                                     }
                                 }
                             }
                         }
+                        ListItemSeparator(Modifier.fillMaxWidth())
                     }.onLoading {
                         ProgressRing(modifier = Modifier.align(Alignment.CenterHorizontally))
                     }.onError {
@@ -200,13 +267,7 @@ internal fun RssDetailScreen(
                                         .padding(horizontal = screenHorizontalPadding),
                             )
                         }
-                        SelectionContainer(
-                            modifier =
-                                Modifier
-                                    .listCard()
-                                    .background(FluentTheme.colors.background.card.default)
-                                    .padding(horizontal = screenHorizontalPadding, vertical = 8.dp),
-                        ) {
+                        SelectionContainer {
                             val displayData =
                                 state.translateState?.translatedHtml?.let { htmlState ->
                                     when (htmlState) {

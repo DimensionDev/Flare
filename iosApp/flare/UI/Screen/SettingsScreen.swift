@@ -4,38 +4,52 @@ import KotlinSharedUI
 struct SettingsScreen: View {
     var body: some View {
         List {
-            if #available(iOS 26.0, *) {
-                NavigationLink(value: Route.accountManagement) {
-                    Label {
-                        Text("account_management_title")
-                        Text("account_management_description")
-                    } icon: {
-                        Image(.faCircleUser)
-                    }
-                    .labelReservedIconWidth(44)
-                }
-            } else {
-                NavigationLink(value: Route.accountManagement) {
-                    Label {
-                        Text("account_management_title")
-                        Text("account_management_description")
-                    } icon: {
-                        Image(.faCircleUser)
-                    }
+            NavigationLink(value: Route.accountManagement) {
+                Label {
+                    Text("account_management_title")
+                    Text("account_management_description")
+                } icon: {
+                    Image(.faCircleUser)
                 }
             }
 
             Section {
-                NavigationLink(value: Route.appearance) {
+                NavigationLink(value: Route.appearanceTheme) {
                     Label {
-                        Text("appearance_title")
-                        Text("appearance_description")
+                        Text("appearance_theme_group_title")
+                        Text("appearance_theme_group_subtitle")
                     } icon: {
                         Image("fa-palette")
                     }
                 }
+                NavigationLink(value: Route.appearanceLayout) {
+                    Label {
+                        Text("appearance_layout_group_title")
+                        Text("appearance_layout_group_subtitle")
+                    } icon: {
+                        Image("fa-table-list")
+                    }
+                }
+                NavigationLink(value: Route.appearanceDisplay) {
+                    Label {
+                        Text("appearance_display_group_title")
+                        Text("appearance_display_group_subtitle")
+                    } icon: {
+                        Image(.faNewspaper)
+                    }
+                }
+                NavigationLink(value: Route.appearanceMedia) {
+                    Label {
+                        Text("appearance_media_group_title")
+                        Text("appearance_media_group_subtitle")
+                    } icon: {
+                        Image(.faPhotoFilm)
+                    }
+                }
                 if let url = URL(string: UIApplication.openSettingsURLString) {
-                    Link(destination: url) {
+                    Button {
+                        UIApplication.shared.open(url)
+                    } label: {
                         Label {
                             Text("system_settings_title")
                             Text("system_settings_description")

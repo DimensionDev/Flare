@@ -55,6 +55,14 @@
     <string name="settings_accounts_title">Account Management</string>
     <string name="settings_appearance_title">Appearance</string>
     <string name="settings_appearance_subtitle">Customize the look and feel of Flare</string>
+    <string name="settings_appearance_theme_group_title">Theme</string>
+    <string name="settings_appearance_theme_group_subtitle">Colors, font size and avatar shape</string>
+    <string name="settings_appearance_layout_group_title">Layout</string>
+    <string name="settings_appearance_layout_group_subtitle">Timeline, navigation bar and post layout</string>
+    <string name="settings_appearance_display_group_title">Display</string>
+    <string name="settings_appearance_display_group_subtitle">Timestamps, platform logos and link previews</string>
+    <string name="settings_appearance_media_group_title">Media</string>
+    <string name="settings_appearance_media_group_subtitle">Images, videos and sensitive content</string>
     <string name="settings_storage_title">Storage</string>
     <string name="settings_storage_subtitle">Manage Flare\'s storage</string>
     <string name="settings_about_title">About</string>
@@ -230,6 +238,11 @@
     <string name="settings_appearance_avatar_shape_description">Change the shape of the avatar</string>
     <string name="settings_appearance_avatar_shape_round">Round</string>
     <string name="settings_appearance_avatar_shape_square">Square</string>
+    <string name="settings_appearance_timeline_display_mode">Timeline display mode</string>
+    <string name="settings_appearance_timeline_display_mode_description">Choose how items are displayed in timelines</string>
+    <string name="settings_appearance_timeline_display_mode_card">Card</string>
+    <string name="settings_appearance_timeline_display_mode_plain">Plain (single column only)</string>
+    <string name="settings_appearance_timeline_display_mode_gallery">Gallery (home timeline only)</string>
     <string name="settings_appearance_theme">Theme</string>
     <string name="settings_appearance_theme_description">Change the theme of the app</string>
     <string name="settings_appearance_theme_light">Light</string>
@@ -285,8 +298,10 @@
     <string name="settings_accounts_remove">Remove</string>
     <string name="settings_accounts_remove_confirm">Are you sure you want to remove account %1$s from this device?</string>
 
-    <string name="media_menu_save">Save screenshot</string>
-    <string name="media_menu_share_image">Share screenshot</string>
+    <string name="media_menu_save">Save image</string>
+    <string name="media_menu_share_image">Share image</string>
+    <string name="media_menu_copy_link">Copy link</string>
+    <string name="media_menu_media_link">Media link</string>
     <string name="status_menu_share_via_fxembed">Share via FxEmbed</string>
     <string name="status_menu_share_via_fixvx">Share via Fixvx</string>
     <string name="media_save_success">Saved to Downloads</string>

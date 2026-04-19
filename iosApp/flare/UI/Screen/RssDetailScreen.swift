@@ -67,16 +67,14 @@ Maecenas fringilla vitae leo sit amet lacinia. Donec in dui a ex hendrerit volut
                         .font(.title)
                         .bold()
                         .redacted(reason: .placeholder)
-                    ListCardView {
-                        Text(placeholderText)
-                            .redacted(reason: .placeholder)
-                            .padding()
-                    }
+                    Divider()
+                    Text(placeholderText)
+                        .redacted(reason: .placeholder)
+                        .padding()
                 }
                 .padding()
             }
         }
-        .background(Color(.systemGroupedBackground))
         .toolbar {
             ToolbarItem {
                 if let url = URL(string: url) {
@@ -153,62 +151,87 @@ private struct RssArticleContentView: View {
     let translatedHtml: String?
     let isTranslating: Bool
     let showTranslateButton: Bool
+
+    @Environment(\.openURL) private var openURL
     
     var body: some View {
         ScrollView {
             VStack(
-                alignment: .trailing,
                 spacing: 16
             ) {
                 Text(translatedTitle ?? document.title)
-                    .font(.title)
+                    .font(.title2)
                     .bold()
-                    .frame(maxWidth: .infinity, alignment: .center)
                 
-                HStack {
-                    if showTranslateButton {
-                        Button {
-                            showTranslate = true
-                        } label: {
-                            Text("Translate")
+                if document.siteName != nil || document.byline != nil || document.publishDateTime != nil {
+                    VStack(alignment: .leading, spacing: 4) {
+                        if let siteName = document.siteName, let host = URL(string: url)?.host() {
+                            HStack(spacing: 4) {
+                                FavTabIcon(host: host)
+                                    .frame(width: 16, height: 16)
+                                Text(siteName)
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
                         }
-                        .backport
-                        .glassProminentButtonStyle()
+                        HStack {
+                            if let byline = document.byline {
+                                Text(byline)
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                            if let publishDateTime = document.publishDateTime {
+                                Spacer()
+                                DateTimeText(data: publishDateTime, fullTime: true)
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
                     }
-                    
-                    Button {
-                        showTLDR = true
-                    } label: {
-                        Text("Summarize this article")
-                    }
-                    .backport
-                    .glassProminentButtonStyle()
                 }
                 
+                Divider()
+                
                 if showTLDR {
-                    ListCardView {
-                        TLDRTextView(text: document.textContent)
-                            .padding()
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                    }
+                    TLDRTextView(text: document.textContent)
+                        .padding()
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    Divider()
                 }
                 
                 if isTranslating {
                     ProgressView()
                         .padding(.vertical, 4)
+                        .frame(maxWidth: .infinity, alignment: .center)
                 }
                 
-                ListCardView {
-                    HtmlWebView(
-                        dynamicHeight: $webViewHeight,
-                        htmlString: translatedHtml ?? document.content,
-                        baseURL: .init(string: url)
-                    )
-                    .frame(height: webViewHeight)
-                    .padding()
-                }
+                HtmlWebView(
+                    dynamicHeight: $webViewHeight,
+                    htmlString: translatedHtml ?? document.content,
+                    baseURL: .init(string: url),
+                    onOpenURL: { url in self.openURL(url) }
+                )
+                .frame(height: webViewHeight)
             }
             .padding()
+        }
+        .toolbar {
+            ToolbarItem {
+                if showTranslateButton {
+                    Button {
+                        showTranslate = true
+                    } label: {
+                        Image(.faLanguage)
+                    }
+                }
+            }
+            ToolbarItem {
+                Button {
+                    showTLDR = true
+                } label: {
+                    Text("Summarize")
+                }
+            }
         }
     }
 }
@@ -225,12 +248,43 @@ struct HtmlWebView: UIViewRepresentable {
     @Binding var dynamicHeight: CGFloat
     let htmlString: String?
     let baseURL: URL?
+    let onOpenURL: ((URL) -> Void)?
     
     var forceColorScheme: ColorScheme? = nil
     
     class Coordinator: NSObject, WKNavigationDelegate {
         var parent: HtmlWebView
         init(_ parent: HtmlWebView) { self.parent = parent }
+
+        @MainActor
+        func webView(_ webView: WKWebView,
+                     decidePolicyFor navigationAction: WKNavigationAction,
+                     decisionHandler: @escaping @MainActor (WKNavigationActionPolicy) -> Void) {
+            guard let targetURL = navigationAction.request.url else {
+                decisionHandler(.allow)
+                return
+            }
+
+            if targetURL.scheme == "flare-media-image",
+               let components = URLComponents(url: targetURL, resolvingAgainstBaseURL: false),
+               let imageUrl =
+                components.queryItems?.first(where: { $0.name == "url" })?.value,
+               let deeplink = URL(string: DeeplinkRoute.Media.MediaImage(uri: imageUrl, previewUrl: nil).toUri()) {
+                parent.onOpenURL?(deeplink)
+                decisionHandler(.cancel)
+                return
+            }
+            
+            if let baseURL = parent.baseURL,
+               targetURL.host() == baseURL.host(),
+               targetURL.scheme == baseURL.scheme {
+                decisionHandler(.allow)
+                return
+            }
+            
+            parent.onOpenURL?(targetURL)
+            decisionHandler(.cancel)
+        }
         
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
             webView.evaluateJavaScript("document.documentElement.scrollHeight") { height, _ in
@@ -291,59 +345,55 @@ struct HtmlWebView: UIViewRepresentable {
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <meta name="color-scheme" content="light dark">
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.8.1/github-markdown.min.css">
           <style>
-            :root {
-              color-scheme: light dark;
-              --bg: #ffffff;
-              --fg: #111111;
-              --muted: #666666;
-              --link: #0a84ff;
-              --code-bg: #f5f5f7;
+            .markdown-body img {
+              display: block;
+              width: 100%;
+              height: auto;
             }
-            @media (prefers-color-scheme: dark) {
-              :root {
-                --bg: #000000;
-                --fg: #eeeeee;
-                --muted: #aaaaaa;
-                --link: #7ab8ff;
-                --code-bg: #141416;
-              }
+            .markdown-body video {
+              display: block;
+              width: 100%;
+              height: auto;
             }
-            html, body {
-              margin: 0; padding: 0;
-              color: var(--fg);
-              font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", Arial, sans-serif;
-              -webkit-font-smoothing: antialiased;
+            .markdown-body img[data-flare-clickable="true"] {
+              cursor: pointer;
             }
-            a {
-              color: var(--link); 
-              text-decoration: none;
-            }
-            img, video { max-width: 100%; height: auto; }
+        
           </style>
+          <script>
+            function bindFlareImageClicks() {
+              const images = document.querySelectorAll('.markdown-body img');
+              images.forEach((img) => {
+                if (img.dataset.flareClickable === 'true') {
+                  return;
+                }
+                img.dataset.flareClickable = 'true';
+                img.addEventListener('click', function(event) {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  const src = img.currentSrc || img.src;
+                  if (!src) {
+                    return;
+                  }
+                  window.location.href = 'flare-media-image://open?url=' + encodeURIComponent(src);
+                });
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', bindFlareImageClicks);
+          </script>
         </head>
         <body>
+        <article class="markdown-body">
           \(html)
+        </article>
+        <script>
+          bindFlareImageClicks();
+        </script>
         </body>
         </html>
         """
     }
-}
-
-
-
-struct SafariView: UIViewControllerRepresentable {
-
-    let url: URL
-
-    func makeUIViewController(context: UIViewControllerRepresentableContext<SafariView>) -> SFSafariViewController {
-        let config = SFSafariViewController.Configuration()
-        config.entersReaderIfAvailable = true
-        return SFSafariViewController(url: url, configuration: config)
-    }
-
-    func updateUIViewController(_ uiViewController: SFSafariViewController, context: UIViewControllerRepresentableContext<SafariView>) {
-
-    }
-
 }

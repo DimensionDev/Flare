@@ -1,5 +1,6 @@
 package dev.dimension.flare.ui.component.status
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.FlingBehavior
 import androidx.compose.foundation.gestures.ScrollableDefaults
 import androidx.compose.foundation.layout.Arrangement
@@ -23,7 +24,11 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import dev.dimension.flare.data.model.LocalAppearanceSettings
+import dev.dimension.flare.data.model.TimelineDisplayMode
 import dev.dimension.flare.ui.common.plus
+import dev.dimension.flare.ui.theme.PlatformTheme
+import dev.dimension.flare.ui.theme.isLightTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.debounce
@@ -48,45 +53,79 @@ public fun LazyStatusVerticalStaggeredGrid(
         ),
     flingBehavior: FlingBehavior = ScrollableDefaults.flingBehavior(),
     userScrollEnabled: Boolean = true,
+    forceCardMode: Boolean = false,
+    allowGalleryMode: Boolean = false,
     content: LazyStaggeredGridScope.() -> Unit,
 ) {
-    val padding = contentPadding + PaddingValues(horizontal = screenHorizontalPadding)
+    val displayMode = LocalAppearanceSettings.current.timelineDisplayMode
+    val effectiveMode =
+        when {
+            allowGalleryMode -> displayMode
+            displayMode == TimelineDisplayMode.Gallery -> TimelineDisplayMode.Card
+            else -> displayMode
+        }
+    val paddingForColumnCalc = contentPadding + PaddingValues(horizontal = screenHorizontalPadding)
     val layoutDirection = LocalLayoutDirection.current
     val density = LocalDensity.current
-    val columnCount by remember(state) {
+    val viewportWidthPx by remember(state) {
+        snapshotFlow { state.layoutInfo.viewportSize.width }
+            .distinctUntilChanged()
+    }.collectAsState(0)
+    val isWideViewport = with(density) { viewportWidthPx.toDp() } >= 600.dp
+    val effectiveColumns =
+        if (effectiveMode == TimelineDisplayMode.Gallery) {
+            StaggeredGridCells.Adaptive(if (isWideViewport) 240.dp else 160.dp)
+        } else {
+            columns
+        }
+    val columnCount by remember(state, effectiveColumns) {
         snapshotFlow { state.layoutInfo.viewportSize.width }
             .distinctUntilChanged()
             .map {
                 with(density) {
-                    with(columns) {
+                    with(effectiveColumns) {
                         calculateCrossAxisCellSizes(
-                            it - padding.calculateStartPadding(layoutDirection).roundToPx() -
-                                padding.calculateEndPadding(layoutDirection).roundToPx(),
+                            it - paddingForColumnCalc.calculateStartPadding(layoutDirection).roundToPx() -
+                                paddingForColumnCalc.calculateEndPadding(layoutDirection).roundToPx(),
                             8.dp.roundToPx(),
                         )
                     }
                 }.size
             }.distinctUntilChanged()
     }.collectAsState(1)
-    val bigScreen = columnCount > 1
-    val actualVerticalSpacing =
-        if (bigScreen) {
-            verticalItemSpacing
+    val bigScreen = effectiveMode != TimelineDisplayMode.Gallery && columnCount > 1
+    val plainTimeline = !bigScreen && effectiveMode == TimelineDisplayMode.Plain && !forceCardMode
+    val padding =
+        if (plainTimeline) {
+            contentPadding
         } else {
-            2.dp
+            paddingForColumnCalc
+        }
+    val actualVerticalSpacing =
+        when {
+            effectiveMode == TimelineDisplayMode.Gallery -> 8.dp
+            bigScreen -> verticalItemSpacing
+            else -> 2.dp
         }
     val isScrollInProgressDebounced by remember(state) {
         snapshotFlow { state.isScrollInProgress }
             .distinctUntilChanged()
             .debounce(500)
     }.collectAsState(false)
+    val gridModifier =
+        if (plainTimeline && isLightTheme()) {
+            modifier.background(PlatformTheme.colorScheme.card)
+        } else {
+            modifier
+        }
     CompositionLocalProvider(
         LocalIsScrollingInProgress provides isScrollInProgressDebounced,
         LocalMultipleColumns provides bigScreen,
+        LocalEffectiveTimelineDisplayMode provides effectiveMode,
     ) {
         LazyVerticalStaggeredGrid(
-            modifier = modifier,
-            columns = columns,
+            modifier = gridModifier,
+            columns = effectiveColumns,
             state = state,
             contentPadding = padding,
             reverseLayout = reverseLayout,
@@ -104,3 +143,6 @@ internal val LocalIsScrollingInProgress =
 
 internal val LocalMultipleColumns =
     androidx.compose.runtime.compositionLocalOf { false }
+
+internal val LocalEffectiveTimelineDisplayMode =
+    androidx.compose.runtime.compositionLocalOf { TimelineDisplayMode.Card }

@@ -38,27 +38,14 @@ Maecenas fringilla vitae leo sit amet lacinia. Donec in dui a ex hendrerit volut
                                 .clipShape(.rect(cornerRadius: 12))
                         }
                     }
-                    VStack(spacing: 2) {
-                        ListCardView(index: 0, totalCount: 3) {
-                            Text(article.title)
-                                .font(.title)
-                                .bold()
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .padding()
-                        }
-                        
-                        ListCardView(index: 1, totalCount: 3) {
-                            UserCompatView(data: article.profile)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .padding()
-                        }
-                        
-                        ListCardView(index: 2, totalCount: 3) {
-                            RichText(text: article.content)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .padding()
-                        }
-                    }
+                    Text(article.title)
+                        .font(.title)
+                        .bold()
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    UserCompatView(data: article.profile)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    RichText(text: article.content)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 .padding()
             }

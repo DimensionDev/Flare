@@ -75,6 +75,7 @@ internal fun TimelineContent(
     contentPadding: PaddingValues = PaddingValues(0.dp),
     header: @Composable (() -> Unit)? = null,
     onScrollToTop: (() -> Unit)? = null,
+    allowGalleryMode: Boolean = false,
 ) {
     val scope = rememberCoroutineScope()
     RegisterTabCallback(
@@ -106,6 +107,7 @@ internal fun TimelineContent(
             LazyStatusVerticalStaggeredGrid(
                 contentPadding = LocalWindowPadding.current + contentPadding,
                 state = state.lazyListState,
+                allowGalleryMode = allowGalleryMode,
             ) {
                 if (header != null) {
                     item(

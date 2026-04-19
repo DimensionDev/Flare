@@ -26,6 +26,7 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.EmojiData
+import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiDraft
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiState
@@ -43,9 +44,11 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
@@ -82,6 +85,41 @@ public class ComposePresenter(
         MutableStateFlow<ImmutableList<MicroBlogKey>>(persistentListOf())
     }
 
+    private val allAccountsFlow by lazy {
+        accountRepository.allAccounts
+            .distinctUntilChangedBy {
+                it.map { account -> account.accountKey }.toSet()
+            }.map {
+                it.map { account ->
+                    accountRepository.getFlow(account.accountKey).map {
+                        account.accountKey to it
+                    }
+                }
+            }.combineLatestFlowLists()
+            .map { it.toMap() }
+    }
+
+    private val allUsersFlow by lazy {
+        accountRepository.allAccounts
+            .map { accounts ->
+                accounts.map { account ->
+                    accountServiceFlow(
+                        accountType = AccountType.Specific(account.accountKey),
+                        repository = accountRepository,
+                    ).mapNotNull { service ->
+                        if (service is UserDataSource && service is AuthenticatedMicroblogDataSource) {
+                            service.userHandler.userById(service.accountKey.id).toUi().map {
+                                service.accountKey to it
+                            }
+                        } else {
+                            null
+                        }
+                    }.flatMapLatest { it }
+                }
+            }.combineLatestFlowLists()
+            .map { it.toMap() }
+    }
+
     private val activeStatusFlow by lazy {
         MutableStateFlow(status)
     }
@@ -100,19 +138,16 @@ public class ComposePresenter(
         }
     }
 
-    private val selectedAccountsFlow by lazy {
-        selectedAccountsKeyFlow
-            .map { accountKeys ->
-                accountKeys.map { key ->
-                    accountRepository.getFlow(key)
-                }
-            }.combineLatestFlowLists()
-            .map {
-                it
-                    .mapNotNull {
-                        it.takeSuccess()
-                    }.toImmutableList()
-            }
+    private val selectedAccountsFlow: Flow<ImmutableList<UiAccount>> by lazy {
+        combine(
+            allAccountsFlow,
+            selectedAccountsKeyFlow,
+        ) { allAccounts, selectedKeys ->
+            selectedKeys
+                .mapNotNull { key ->
+                    allAccounts[key]?.takeSuccess()
+                }.toImmutableList()
+        }
     }
 
     private val selectedAccountServicesFlow by lazy {
@@ -154,19 +189,16 @@ public class ComposePresenter(
         }
     }
 
-    private val selectedUsersFlow by lazy {
-        selectedAccountServicesFlow
-            .map { services ->
-                services
-                    .mapNotNull { service ->
-                        if (service is UserDataSource && service is AuthenticatedMicroblogDataSource) {
-                            service.userHandler.userById(service.accountKey.id).toUi()
-                        } else {
-                            null
-                        }
-                    }
-            }.combineLatestFlowLists()
-            .map { it.toImmutableList() }
+    private val selectedUsersFlow: Flow<ImmutableList<UiState<UiProfile>>> by lazy {
+        combine(
+            selectedAccountsKeyFlow,
+            allUsersFlow,
+        ) { selectedKeys, allUsers ->
+            selectedKeys
+                .mapNotNull { key ->
+                    allUsers[key]
+                }.toImmutableList()
+        }
     }
 
     private val otherAccountsFlow by lazy {
@@ -192,22 +224,15 @@ public class ComposePresenter(
     }
 
     private val otherUsersFlow by lazy {
-        otherAccountsFlow
-            .map { keys ->
-                keys.map { key ->
-                    accountServiceFlow(
-                        accountType = AccountType.Specific(accountKey = key),
-                        repository = accountRepository,
-                    ).mapNotNull {
-                        if (it is UserDataSource && it is AuthenticatedMicroblogDataSource) {
-                            it.userHandler.userById(it.accountKey.id).toUi()
-                        } else {
-                            null
-                        }
-                    }.flatMapLatest { it }
-                }
-            }.combineLatestFlowLists()
-            .map { it.toImmutableList() }
+        combine(
+            otherAccountsFlow,
+            allUsersFlow,
+        ) { otherAccountKeys, allUsers ->
+            otherAccountKeys
+                .mapNotNull { key ->
+                    allUsers[key]
+                }.toImmutableList()
+        }
     }
 
     private val emojiFlow by lazy {

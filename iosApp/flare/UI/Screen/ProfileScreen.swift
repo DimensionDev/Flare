@@ -14,6 +14,7 @@ struct ProfileScreen: View {
     @State private var showToolbarTabPicker = false
     @State private var isProfileHeaderVisible = true
     @State private var isInlineTabPickerVisible = true
+    @Environment(\.appearanceSettings.timelineDisplayMode) private var timelineDisplayMode
     
     var body: some View {
         ZStack {
@@ -24,7 +25,7 @@ struct ProfileScreen: View {
                 compatBody
             }
         }
-        .background(Color(.systemGroupedBackground))
+        .background(Color(timelineDisplayMode == .plain && horizontalSizeClass == .compact ? .clear : .systemGroupedBackground))
         .toolbar {
             if horizontalSizeClass == .compact && showToolbarTabPicker, case .success(let userState) = onEnum(of: presenter.state.userState) {
                 ToolbarItem(placement: .principal) {
@@ -71,7 +72,6 @@ struct ProfileScreen: View {
                 }
             }
         }
-        .background(Color(.systemGroupedBackground))
     }
     
     var regularBody: some View {
@@ -338,7 +338,6 @@ struct ProfileTimelineView: View {
         TimelinePagingView(data: presenter.state.listState)
             .listRowSeparator(.hidden)
             .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
-            .padding(.horizontal)
             .listRowBackground(Color.clear)
 //            .refreshable {
 //                try? await presenter.state.refresh()

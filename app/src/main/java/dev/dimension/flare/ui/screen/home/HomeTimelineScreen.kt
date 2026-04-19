@@ -53,7 +53,7 @@ import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.AnglesUp
 import compose.icons.fontawesomeicons.solid.Bars
-import compose.icons.fontawesomeicons.solid.Plus
+import compose.icons.fontawesomeicons.solid.Sliders
 import dev.dimension.flare.R
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.data.model.BottomBarBehavior
@@ -78,8 +78,10 @@ import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
+import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.presenter.HomeTimelineWithTabsPresenter
 import dev.dimension.flare.ui.presenter.TimelineItemPresenterWithLazyListState
+import dev.dimension.flare.ui.presenter.home.LoggedInPresenter
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.coroutines.launch
@@ -97,6 +99,7 @@ internal fun HomeTimelineScreen(
     val state by producePresenter(key = "home_timeline_$accountType") {
         timelinePresenter(accountType)
     }
+    val loggedInState = remember { LoggedInPresenter() }.invoke()
     val scope = rememberCoroutineScope()
 
     val topAppBarScrollBehavior =
@@ -168,16 +171,6 @@ internal fun HomeTimelineScreen(
                                             )
                                         }
                                     }
-                                    IconButton(
-                                        onClick = {
-                                            toTabSettings.invoke()
-                                        },
-                                    ) {
-                                        FAIcon(
-                                            imageVector = FontAwesomeIcons.Solid.Plus,
-                                            contentDescription = null,
-                                        )
-                                    }
                                 }
                             }
                         }
@@ -226,13 +219,21 @@ internal fun HomeTimelineScreen(
                     }
                 },
                 actions = {
-                    state.user
-                        .onError {
-                            TextButton(onClick = toLogin) {
-                                Text(text = stringResource(id = R.string.login_button))
-                            }
-                        }.onSuccess {
+                    IconButton(
+                        onClick = {
+                            toTabSettings.invoke()
+                        },
+                    ) {
+                        FAIcon(
+                            imageVector = FontAwesomeIcons.Solid.Sliders,
+                            contentDescription = stringResource(R.string.edit_tab_title),
+                        )
+                    }
+                    if (loggedInState.isLoggedIn.takeSuccess() == false) {
+                        TextButton(onClick = toLogin) {
+                            Text(text = stringResource(id = R.string.login_button))
                         }
+                    }
                 },
             )
         },
@@ -240,7 +241,6 @@ internal fun HomeTimelineScreen(
     ) { contentPadding ->
         state.pagerState.onSuccess { pagerState ->
             state.tabState.onSuccess { tabState ->
-
                 LaunchedEffect(pagerState.currentPage >= tabState.size) {
                     if (pagerState.currentPage >= tabState.size) {
                         scope.launch {
@@ -316,6 +316,7 @@ internal fun TimelineItemContent(
             LazyStatusVerticalStaggeredGrid(
                 state = state.lazyListState,
                 contentPadding = contentPadding,
+                allowGalleryMode = true,
                 modifier =
                     Modifier
                         .fillMaxSize(),

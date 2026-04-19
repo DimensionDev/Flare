@@ -284,6 +284,7 @@ public fun CommonStatusComponent(
                     ) {
                         dateContent.invoke()
                     }
+                    Spacer(modifier = Modifier.height(4.dp))
                 }
             }
             item.replyToHandle?.let { replyHandle ->
@@ -332,6 +333,7 @@ public fun CommonStatusComponent(
                 Spacer(modifier = Modifier.height(8.dp))
                 StatusMediasComponent(
                     item,
+                    isQuote = isQuote,
                     onMediaClick = { media ->
                         val index = item.images.indexOf(media)
                         val link =
@@ -358,7 +360,23 @@ public fun CommonStatusComponent(
                         card = card,
                         modifier =
                             Modifier
-                                .pointerHoverIcon(PointerIcon.Hand)
+                                .border(
+                                    FlareDividerDefaults.thickness,
+                                    color = FlareDividerDefaults.color,
+                                    shape =
+                                        if (isQuote) {
+                                            PlatformTheme.shapes.small
+                                        } else {
+                                            PlatformTheme.shapes.medium
+                                        },
+                                ).clip(
+                                    shape =
+                                        if (isQuote) {
+                                            PlatformTheme.shapes.small
+                                        } else {
+                                            PlatformTheme.shapes.medium
+                                        },
+                                ).pointerHoverIcon(PointerIcon.Hand)
                                 .clickable {
                                     uriHandler.openUri(card.url)
                                 }.fillMaxWidth(),
@@ -424,6 +442,7 @@ public fun CommonStatusComponent(
 @Composable
 internal fun StatusMediasComponent(
     item: UiTimelineV2.Post,
+    isQuote: Boolean,
     onMediaClick: (UiMedia) -> Unit,
 ) {
     val appearanceSettings = LocalComponentAppearance.current
@@ -459,6 +478,14 @@ internal fun StatusMediasComponent(
             data = item.images,
             onMediaClick = onMediaClick,
             sensitive = item.sensitive,
+            modifier =
+                Modifier.clip(
+                    if (isQuote) {
+                        PlatformTheme.shapes.small
+                    } else {
+                        PlatformTheme.shapes.medium
+                    },
+                ),
         )
     } else {
         Row(
@@ -1338,15 +1365,7 @@ private fun ExpandedCard(
 ) {
     val appearanceSettings = LocalComponentAppearance.current
     Column(
-        modifier =
-            Modifier
-                .border(
-                    FlareDividerDefaults.thickness,
-                    color = FlareDividerDefaults.color,
-                    shape = PlatformTheme.shapes.medium,
-                ).clip(
-                    shape = PlatformTheme.shapes.medium,
-                ).then(modifier),
+        modifier = modifier,
     ) {
         card.media?.let {
             AdaptiveGrid(
@@ -1392,15 +1411,7 @@ private fun CompatCard(
     modifier: Modifier = Modifier,
 ) {
     Row(
-        modifier =
-            Modifier
-                .border(
-                    FlareDividerDefaults.thickness,
-                    color = FlareDividerDefaults.color,
-                    shape = PlatformTheme.shapes.medium,
-                ).clip(
-                    shape = PlatformTheme.shapes.medium,
-                ).then(modifier),
+        modifier = modifier,
     ) {
         card.media?.let {
             MediaItem(

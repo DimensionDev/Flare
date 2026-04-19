@@ -36,11 +36,12 @@ import dev.dimension.flare.ui.component.TabIcon
 import dev.dimension.flare.ui.component.TabTitle
 import dev.dimension.flare.ui.component.floatingToolbarVerticalNestedScroll
 import dev.dimension.flare.ui.component.status.AdaptiveCard
-import dev.dimension.flare.ui.model.isSuccess
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
+import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.presenter.HomeTimelineWithTabsPresenter
 import dev.dimension.flare.ui.presenter.TimelineItemPresenterWithLazyListState
+import dev.dimension.flare.ui.presenter.home.LoggedInPresenter
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.screen.compose.ComposeDialog
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
@@ -60,6 +61,7 @@ internal fun HomeTimelineScreen(
     val state by producePresenter(key = "home_timeline_$accountType") {
         presenter(accountType)
     }
+    val loggedInState = remember { LoggedInPresenter() }.invoke()
     state.tabState.onSuccess { tabState ->
         state.selectedTabTimelineState.onSuccess { currentTabTimelineState ->
             state.selectedTab.onSuccess { currentTab ->
@@ -78,11 +80,14 @@ internal fun HomeTimelineScreen(
                                     },
                                 ),
                         contentPadding = PaddingValues(top = 48.dp),
+                        allowGalleryMode = true,
                         onScrollToTop = {
                             state.setTopBarExpanded(true)
                         },
                         header =
-                            if (LocalAppearanceSettings.current.showComposeInHomeTimeline && state.user.isSuccess) {
+                            if (LocalAppearanceSettings.current.showComposeInHomeTimeline &&
+                                loggedInState.isLoggedIn.takeSuccess() == true
+                            ) {
                                 {
                                     Box(
                                         contentAlignment = Alignment.Center,

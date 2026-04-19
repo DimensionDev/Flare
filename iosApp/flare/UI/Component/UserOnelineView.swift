@@ -12,11 +12,8 @@ struct UserOnelineView<TrailingContent: View>: View {
             if showAvatar {
                 AvatarView(data: data.avatar)
                     .frame(width: 20, height: 20)
-                    .if(onClicked != nil) { view in
-                        view
-                            .onTapGesture {
-                                onClicked?()
-                            }
+                    .onTapGesture {
+                        onClicked?()
                     }
             }
             HStack {
@@ -24,12 +21,6 @@ struct UserOnelineView<TrailingContent: View>: View {
                 Text(data.handle.canonical)
                     .font(.caption)
                     .foregroundStyle(.secondary)
-            }
-            .if(onClicked != nil) { view in
-                view
-                    .onTapGesture {
-                        onClicked?()
-                    }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             trailing()

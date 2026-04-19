@@ -101,6 +101,7 @@ internal fun DiscoverScreen(onUserClick: (AccountType, MicroBlogKey) -> Unit) {
                 LazyStatusVerticalStaggeredGrid(
                     state = lazyListState,
                     contentPadding = contentPadding,
+                    forceCardMode = true,
                 ) {
                     state.accounts.onSuccess { accounts ->
                         if (accounts.size > 1) {

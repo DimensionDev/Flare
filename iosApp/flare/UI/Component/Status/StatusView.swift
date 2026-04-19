@@ -154,7 +154,7 @@ struct StatusView: View {
                         }
                         
                         if !data.images.isEmpty, showMedia {
-                            StatusMediaContent(data: data.images, sensitive: data.sensitive) { media, index in
+                            StatusMediaContent(data: data.images, sensitive: data.sensitive, cornerRadius: isQuote ? 12 : 16) { media, index in
                                 let preview: String? = switch onEnum(of: media) {
                                 case .image(let image):
                                     image.previewUrl
@@ -179,9 +179,9 @@ struct StatusView: View {
 
                         if let card = data.card, showMedia, data.images.isEmpty, data.quote.isEmpty, showLinkPreview {
                             if compatLinkPreview {
-                                StatusCompatCardView(data: card)
+                                StatusCompatCardView(data: card, cornerRadius: isQuote ? 12 : 16)
                             } else {
-                                StatusCardView(data: card)
+                                StatusCardView(data: card, cornerRadius: isQuote ? 12 : 16)
                             }
                         }
 
@@ -300,10 +300,11 @@ struct StatusMediaContent: View {
     @State private var expandMedia = false
     let data: [any UiMedia]
     let sensitive: Bool
+    let cornerRadius: CGFloat
     let onMediaClicked: (any UiMedia, Int) -> Void
     var body: some View {
         if showMedia || expandMedia {
-            StatusMediaView(data: data, sensitive: !(showSensitiveContent) && sensitive, onMediaClicked: onMediaClicked)
+            StatusMediaView(data: data, sensitive: !(showSensitiveContent) && sensitive, cornerRadius: cornerRadius, onMediaClicked: onMediaClicked)
         } else {
             Button {
                 withAnimation {

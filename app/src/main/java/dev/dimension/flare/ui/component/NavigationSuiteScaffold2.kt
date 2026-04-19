@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.component
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -24,6 +26,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.plus
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -59,12 +62,14 @@ import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collection.MutableVector
 import androidx.compose.runtime.collection.mutableVectorOf
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.movableContentOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -78,6 +83,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.CaretDown
+import compose.icons.fontawesomeicons.solid.CaretUp
 import compose.icons.fontawesomeicons.solid.Pen
 import dev.dimension.flare.R
 import dev.dimension.flare.data.model.BottomBarBehavior
@@ -208,6 +215,7 @@ fun NavigationSuiteScaffold2(
                             modalContainerColor = MaterialTheme.colorScheme.background,
                             modalContentColor = contentColorFor(MaterialTheme.colorScheme.background),
                         ),
+                contentPadding = PaddingValues(vertical = 16.dp),
             ) {
                 val actualLayoutType =
                     if (layoutType == NavigationSuiteType.NavigationBar) {
@@ -237,106 +245,28 @@ fun NavigationSuiteScaffold2(
                 ) {
                     railHeader?.invoke(this)
                     if (layoutType != NavigationSuiteType.NavigationBar) {
-                        scope.itemList.forEach {
-                            androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteItem(
-                                modifier = it.modifier,
-                                selected = it.selected,
-                                onClick = it.onClick,
-                                icon = it.icon,
-                                enabled = it.enabled,
-                                label = it.label,
-                                interactionSource = it.interactionSource,
-                                navigationSuiteType = actualLayoutType,
-                                badge = it.badge,
-                            )
-                        }
+                        NavigationSuiteItemGroup(
+                            provider = scope,
+                            layoutType = layoutType,
+                            actualLayoutType = actualLayoutType,
+                        )
                     }
                     if (wideNavigationRailState.currentValue == WideNavigationRailValue.Expanded) {
-                        if (secondaryScope.itemList.isNotEmpty()) {
-                            Spacer(modifier = Modifier.height(16.dp))
-                        }
+                        NavigationSuiteItemGroup(
+                            provider = secondaryScope,
+                            layoutType = layoutType,
+                            actualLayoutType = actualLayoutType,
+                        )
                         if (layoutType == NavigationSuiteType.NavigationBar) {
-                            Column(
-                                verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
-                            ) {
-                                secondaryScope.itemList.forEachIndexed { index, it ->
-                                    SegmentedListItem(
-                                        onClick = {
-                                            it.onClick()
-                                        },
-                                        shapes =
-                                            ListItemDefaults.segmentedShapes2(
-                                                index,
-                                                secondaryScope.itemsCount,
-                                            ),
-                                        content = {
-                                            it.label?.invoke()
-                                        },
-                                        leadingContent = it.icon,
-                                        trailingContent = it.badge,
-                                        modifier =
-                                            it.modifier
-                                                .padding(horizontal = 16.dp),
-                                    )
-                                }
-                            }
-                        } else {
-                            secondaryScope.itemList.forEach {
-                                androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteItem(
-                                    modifier = it.modifier,
-                                    selected = it.selected,
-                                    onClick = it.onClick,
-                                    icon = it.icon,
-                                    enabled = it.enabled,
-                                    label = it.label,
-                                    interactionSource = it.interactionSource,
-                                    navigationSuiteType = actualLayoutType,
-                                    badge = it.badge,
-                                )
-                            }
+                            Spacer(modifier = Modifier.height(16.dp))
                         }
                     }
                     Spacer(modifier = Modifier.weight(1f))
-                    if (layoutType == NavigationSuiteType.NavigationBar) {
-                        Column(
-                            verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
-                        ) {
-                            footerScope.itemList.forEachIndexed { index, it ->
-                                SegmentedListItem(
-                                    content = {
-                                        it.label?.invoke()
-                                    },
-                                    onClick = {
-                                        it.onClick()
-                                    },
-                                    shapes =
-                                        ListItemDefaults.segmentedShapes2(
-                                            index,
-                                            footerScope.itemsCount,
-                                        ),
-                                    leadingContent = it.icon,
-                                    trailingContent = it.badge,
-                                    modifier =
-                                        it.modifier
-                                            .padding(horizontal = 16.dp),
-                                )
-                            }
-                        }
-                    } else {
-                        footerScope.itemList.forEach {
-                            androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteItem(
-                                modifier = it.modifier,
-                                selected = it.selected,
-                                onClick = it.onClick,
-                                icon = it.icon,
-                                enabled = it.enabled,
-                                label = it.label,
-                                interactionSource = it.interactionSource,
-                                navigationSuiteType = actualLayoutType,
-                                badge = it.badge,
-                            )
-                        }
-                    }
+                    NavigationSuiteItemGroup(
+                        provider = footerScope,
+                        layoutType = layoutType,
+                        actualLayoutType = actualLayoutType,
+                    )
                 }
             }
             Box {
@@ -347,7 +277,11 @@ fun NavigationSuiteScaffold2(
                         } else {
                             0.dp
                         } +
-                        if (scope.itemList.any { item -> item.selected } && layoutType == NavigationSuiteType.NavigationBar) {
+                        if (
+                            scope.itemList.any { item ->
+                                item is NavigationSuiteItem.DefaultItem && item.selected
+                            } && layoutType == NavigationSuiteType.NavigationBar
+                        ) {
                             when (bottomBarStyle) {
                                 BottomBarStyle.Floating -> 72.dp
                                 BottomBarStyle.Classic -> 64.dp
@@ -432,7 +366,7 @@ fun NavigationSuiteScaffold2(
 
                 androidx.compose.animation.AnimatedVisibility(
                     layoutType == NavigationSuiteType.NavigationBar &&
-                        scope.itemList.any { item -> item.selected } &&
+                        scope.itemList.any { item -> item is NavigationSuiteItem.DefaultItem && item.selected } &&
                         (
                             bottomBarState != BottomBarState.FloatingHidden &&
                                 bottomBarState != BottomBarState.ClassicHidden
@@ -445,21 +379,9 @@ fun NavigationSuiteScaffold2(
                             .align(Alignment.BottomCenter),
                 ) {
                     Box(
-//                            horizontalArrangement = Arrangement.SpaceBetween,
-//                            verticalAlignment = Alignment.Bottom,
-//                            contentAlignment = Alignment.BottomCenter,
                         modifier =
                             Modifier
                                 .fillMaxWidth(),
-//                                    .windowInsetsPadding(
-//                                        WindowInsets.systemBars.only(
-//                                            WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom,
-//                                        ),
-//                                    )
-//                                    .padding(
-//                                        horizontal = 16.dp,
-//                                        vertical = 8.dp,
-//                                    ),
                     ) {
                         SharedTransitionLayout(
                             modifier = Modifier.align(Alignment.BottomStart),
@@ -676,6 +598,9 @@ private fun SharedTransitionScope.BottomBar(
             horizontalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             provider.itemList.forEachIndexed { index, it ->
+                require(it is NavigationSuiteItem.DefaultItem) {
+                    "Only default items are supported in the bottom bar. Found: ${it::class.simpleName}"
+                }
                 if (isExpanded || it.selected) {
                     ShortNavigationBarItem(
                         modifier =
@@ -724,20 +649,276 @@ private interface NavigationSuiteItemProvider {
     val itemList: MutableVector<NavigationSuiteItem>
 }
 
-@OptIn(ExperimentalMaterial3AdaptiveNavigationSuiteApi::class)
-private class NavigationSuiteItem(
-    val selected: Boolean,
-    val onClick: () -> Unit,
-    val icon: @Composable () -> Unit,
-    val modifier: Modifier,
-    val enabled: Boolean,
-    val label: @Composable (() -> Unit)?,
-    val alwaysShowLabel: Boolean,
-    val badge: (@Composable () -> Unit)?,
-    val colors: NavigationSuiteItemColors?,
-    val interactionSource: MutableInteractionSource?,
-    val onLongClick: (() -> Unit)? = null,
+private data class SegmentedGroupPosition(
+    val index: Int,
+    val size: Int,
 )
+
+private fun NavigationSuiteItemProvider.segmentedGroupPosition(
+    itemIndex: Int,
+    isExpanded: (Int) -> Boolean,
+): SegmentedGroupPosition {
+    val item = itemList[itemIndex]
+    val isExpandable = item is NavigationSuiteItem.ExpandableItem
+
+    var groupStart = itemIndex
+    while (groupStart > 0) {
+        if (isExpandable && isExpanded(groupStart)) {
+            break
+        }
+        val previousIsExpandable = itemList[groupStart - 1] is NavigationSuiteItem.ExpandableItem
+        if (previousIsExpandable != isExpandable) {
+            break
+        }
+        if (isExpandable && isExpanded(groupStart - 1)) {
+            break
+        }
+        groupStart--
+    }
+
+    var groupEnd = itemIndex
+    while (groupEnd < itemList.size - 1) {
+        val nextIsExpandable = itemList[groupEnd + 1] is NavigationSuiteItem.ExpandableItem
+        if (nextIsExpandable != isExpandable) {
+            break
+        }
+        if (isExpandable && isExpanded(groupEnd + 1)) {
+            break
+        }
+        if (isExpandable && isExpanded(groupEnd)) {
+            break
+        }
+        groupEnd++
+    }
+
+    return SegmentedGroupPosition(
+        index = itemIndex - groupStart,
+        size = groupEnd - groupStart + 1,
+    )
+}
+
+@Composable
+private fun NavigationSuiteItemGroup(
+    provider: NavigationSuiteItemProvider,
+    layoutType: NavigationSuiteType,
+    actualLayoutType: NavigationSuiteType,
+) {
+    val expandedStates = remember { mutableStateMapOf<Int, Boolean>() }
+    DisposableEffect(provider.itemsCount) {
+        expandedStates.keys.removeAll { it >= provider.itemsCount }
+        onDispose {}
+    }
+    if (layoutType == NavigationSuiteType.NavigationBar) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
+        ) {
+            provider.itemList.forEachIndexed { index, item ->
+                val groupPosition =
+                    provider.segmentedGroupPosition(index) { expandedIndex ->
+                        expandedStates[expandedIndex] == true
+                    }
+                NavigationSuiteSegmentedItem(
+                    item = item,
+                    index = groupPosition.index,
+                    itemsCount = groupPosition.size,
+                    expanded = expandedStates[index] == true,
+                    onExpandedChange = { expandedStates[index] = it },
+                )
+            }
+        }
+    } else {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
+        ) {
+            provider.itemList.forEachIndexed { index, item ->
+                when (item) {
+                    is NavigationSuiteItem.DefaultItem -> {
+                        NavigationSuiteAdaptiveDefaultItem(
+                            item = item,
+                            actualLayoutType = actualLayoutType,
+                            modifier =
+                                Modifier.padding(
+                                    vertical = 4.dp,
+                                ),
+                        )
+                    }
+
+                    is NavigationSuiteItem.ExpandableItem -> {
+                        val groupPosition =
+                            provider.segmentedGroupPosition(index) { expandedIndex ->
+                                expandedStates[expandedIndex] == true
+                            }
+                        NavigationSuiteSegmentedItem(
+                            item = item,
+                            index = groupPosition.index,
+                            itemsCount = groupPosition.size,
+                            expanded = expandedStates[index] == true,
+                            onExpandedChange = { expandedStates[index] = it },
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ColumnScope.NavigationSuiteSegmentedItem(
+    item: NavigationSuiteItem,
+    index: Int,
+    itemsCount: Int,
+    expanded: Boolean = false,
+    onExpandedChange: (Boolean) -> Unit = {},
+) {
+    when (item) {
+        is NavigationSuiteItem.DefaultItem -> {
+            NavigationSuiteSegmentedDefaultItem(
+                item = item,
+                index = index,
+                itemsCount = itemsCount,
+            )
+        }
+
+        is NavigationSuiteItem.ExpandableItem -> {
+            NavigationSuiteSegmentedExpandableItem(
+                item = item,
+                index = index,
+                itemsCount = itemsCount,
+                expanded = expanded,
+                onExpandedChange = onExpandedChange,
+            )
+        }
+    }
+}
+
+@Composable
+private fun NavigationSuiteSegmentedDefaultItem(
+    item: NavigationSuiteItem.DefaultItem,
+    index: Int,
+    itemsCount: Int,
+    contentPadding: PaddingValues = ListItemDefaults.ContentPadding,
+) {
+    SegmentedListItem(
+        content = {
+            item.label?.invoke()
+        },
+        onClick = item.onClick,
+        shapes =
+            ListItemDefaults.segmentedShapes2(
+                index,
+                itemsCount,
+            ),
+        leadingContent = item.icon,
+        trailingContent = item.badge,
+        modifier =
+            item.modifier
+                .padding(horizontal = 16.dp),
+        contentPadding = contentPadding,
+    )
+}
+
+@Composable
+private fun ColumnScope.NavigationSuiteSegmentedExpandableItem(
+    item: NavigationSuiteItem.ExpandableItem,
+    index: Int,
+    itemsCount: Int,
+    expanded: Boolean,
+    onExpandedChange: (Boolean) -> Unit,
+) {
+    SegmentedListItem(
+        checked = expanded,
+        onCheckedChange = onExpandedChange,
+        shapes =
+            ListItemDefaults.segmentedShapes2(
+                index,
+                itemsCount,
+            ),
+        content = {
+            item.label?.invoke()
+        },
+        leadingContent = item.icon,
+        trailingContent = {
+            if (item.children.isNotEmpty()) {
+                FAIcon(
+                    imageVector =
+                        if (expanded) {
+                            FontAwesomeIcons.Solid.CaretUp
+                        } else {
+                            FontAwesomeIcons.Solid.CaretDown
+                        },
+                    contentDescription = null,
+                )
+            }
+        },
+        modifier =
+            item.modifier
+                .padding(horizontal = 16.dp),
+    )
+    AnimatedVisibility(expanded) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
+        ) {
+            item.children.forEachIndexed { subIndex, subItem ->
+                require(subItem is NavigationSuiteItem.DefaultItem) {
+                    "Only default items are supported as expandable children. Found: ${subItem::class.simpleName}"
+                }
+                NavigationSuiteSegmentedDefaultItem(
+                    item = subItem,
+                    index = subIndex,
+                    itemsCount = item.children.size,
+                    contentPadding =
+                        ListItemDefaults.ContentPadding
+                            .plus(PaddingValues(start = 16.dp)),
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun NavigationSuiteAdaptiveDefaultItem(
+    item: NavigationSuiteItem.DefaultItem,
+    actualLayoutType: NavigationSuiteType,
+    modifier: Modifier = Modifier,
+) {
+    androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteItem(
+        modifier = item.modifier.then(modifier),
+        selected = item.selected,
+        onClick = item.onClick,
+        icon = item.icon,
+        enabled = item.enabled,
+        label = item.label,
+        interactionSource = item.interactionSource,
+        navigationSuiteType = actualLayoutType,
+        badge = item.badge,
+    )
+}
+
+private sealed interface NavigationSuiteItem {
+    data class DefaultItem(
+        val selected: Boolean,
+        val onClick: () -> Unit,
+        val icon: @Composable () -> Unit,
+        val modifier: Modifier,
+        val enabled: Boolean,
+        val label: @Composable (() -> Unit)?,
+        val alwaysShowLabel: Boolean,
+        val badge: (@Composable () -> Unit)?,
+        val colors: NavigationSuiteItemColors?,
+        val interactionSource: MutableInteractionSource?,
+        val onLongClick: (() -> Unit)? = null,
+    ) : NavigationSuiteItem
+
+    data class ExpandableItem(
+        val icon: @Composable () -> Unit,
+        val modifier: Modifier,
+        val enabled: Boolean,
+        val label: @Composable (() -> Unit)?,
+        val alwaysShowLabel: Boolean,
+        val colors: NavigationSuiteItemColors?,
+        val children: MutableVector<NavigationSuiteItem>,
+    ) : NavigationSuiteItem
+}
 
 /** The scope associated with the [NavigationSuiteScope]. */
 @ExperimentalMaterial3AdaptiveNavigationSuiteApi
@@ -781,6 +962,16 @@ interface NavigationSuiteScope2 {
         interactionSource: MutableInteractionSource? = null,
         onLongClick: (() -> Unit)? = null,
     )
+
+    fun expandableItem(
+        icon: @Composable () -> Unit,
+        modifier: Modifier = Modifier,
+        enabled: Boolean = true,
+        label: @Composable (() -> Unit)? = null,
+        alwaysShowLabel: Boolean = true,
+        colors: NavigationSuiteItemColors? = null,
+        children: NavigationSuiteScope2.() -> Unit,
+    )
 }
 
 @OptIn(ExperimentalMaterial3AdaptiveNavigationSuiteApi::class)
@@ -801,7 +992,7 @@ private class NavigationSuiteScopeImpl :
         onLongClick: (() -> Unit)?,
     ) {
         itemList.add(
-            NavigationSuiteItem(
+            NavigationSuiteItem.DefaultItem(
                 selected = selected,
                 onClick = onClick,
                 icon = icon,
@@ -813,6 +1004,32 @@ private class NavigationSuiteScopeImpl :
                 colors = colors,
                 interactionSource = interactionSource,
                 onLongClick = onLongClick,
+            ),
+        )
+    }
+
+    override fun expandableItem(
+        icon: @Composable (() -> Unit),
+        modifier: Modifier,
+        enabled: Boolean,
+        label: @Composable (() -> Unit)?,
+        alwaysShowLabel: Boolean,
+        colors: NavigationSuiteItemColors?,
+        children: NavigationSuiteScope2.() -> Unit,
+    ) {
+        itemList.add(
+            NavigationSuiteItem.ExpandableItem(
+                icon = icon,
+                modifier = modifier,
+                enabled = enabled,
+                label = label,
+                alwaysShowLabel = alwaysShowLabel,
+                colors = colors,
+                children =
+                    NavigationSuiteScopeImpl()
+                        .apply {
+                            children.invoke(this)
+                        }.itemList,
             ),
         )
     }

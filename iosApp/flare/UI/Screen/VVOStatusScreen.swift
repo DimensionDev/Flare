@@ -2,6 +2,7 @@ import SwiftUI
 import KotlinSharedUI
 
 struct VVOStatusScreen: View {
+    @Environment(\.appearanceSettings.timelineDisplayMode) private var timelineDisplayMode
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     let statusKey: MicroBlogKey
     let accountType: AccountType
@@ -30,7 +31,7 @@ struct VVOStatusScreen: View {
             }
             List {
                 if horizontalSizeClass == .compact {
-                    ListCardView {
+                    AdaptiveTimelineCard(index: 0, totalCount: 1) {
                         StateView(state: presenter.state.status) { item in
                             TimelineView(data: item, detailStatusKey: statusKey)
                         } errorContent: { error in
@@ -38,11 +39,11 @@ struct VVOStatusScreen: View {
                         } loadingContent: {
                             TimelinePlaceholderView()
                         }
-                        .padding()
+                        .padding(.horizontal)
+                        .padding(.vertical, 12)
                     }
                     .listRowSeparator(.hidden)
                     .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
-                    .padding(.horizontal)
                     .listRowBackground(Color.clear)
                 }
                 
@@ -62,12 +63,10 @@ struct VVOStatusScreen: View {
                 case .comment: TimelinePagingView(data: presenter.state.comment)
                         .listRowSeparator(.hidden)
                         .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
-                        .padding(.horizontal)
                         .listRowBackground(Color.clear)
                 case .repost: TimelinePagingView(data: presenter.state.repost)
                         .listRowSeparator(.hidden)
                         .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
-                        .padding(.horizontal)
                         .listRowBackground(Color.clear)
                 }
             }
@@ -76,7 +75,7 @@ struct VVOStatusScreen: View {
             .listRowSpacing(2)
             .listStyle(.plain)
         }
-        .background(Color(.systemGroupedBackground))
+        .background(Color(timelineDisplayMode == .plain && horizontalSizeClass == .compact ? .clear : .systemGroupedBackground))
         .navigationTitle("vvo_status_title")
     }
 }

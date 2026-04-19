@@ -37,8 +37,6 @@ import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.xqt.TwitterArticlePresenter
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.screen.settings.AccountItem
-import dev.dimension.flare.ui.theme.first
-import dev.dimension.flare.ui.theme.last
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import dev.dimension.flare.ui.theme.single
 import moe.tlaster.precompose.molecule.producePresenter
@@ -103,43 +101,26 @@ internal fun TwitterArticleScreen(
                                     ),
                         )
                     }
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
-                    ) {
-                        AccountItem(
-                            userState = UiState.Success(data.profile),
-                            onClick = {
-                                data.profile.onClicked(
-                                    ClickContext(
-                                        launcher = { uri -> uriHandler.openUri(uri) },
-                                    ),
-                                )
-                            },
-                            toLogin = {},
-                            shapes = ListItemDefaults.first(),
-                        )
-                        SelectionContainer(
-                            modifier =
-                                Modifier
-                                    .clip(
-                                        ListItemDefaults.last().shape,
-                                    ).background(MaterialTheme.colorScheme.surface)
-                                    .padding(horizontal = screenHorizontalPadding, vertical = 8.dp),
-                        ) {
-                            RichText(
-                                text = data.content,
+                    AccountItem(
+                        userState = UiState.Success(data.profile),
+                        onClick = {
+                            data.profile.onClicked(
+                                ClickContext(
+                                    launcher = { uri -> uriHandler.openUri(uri) },
+                                ),
                             )
-                        }
+                        },
+                        toLogin = {},
+                        shapes = ListItemDefaults.single(),
+                    )
+                    SelectionContainer {
+                        RichText(
+                            text = data.content,
+                        )
                     }
                 }.onLoading {
                     Text(
                         "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam elementum eget dui a bibendum. Fusce eget porttitor est, et rhoncus massa. Etiam cursus urna at odio vulputate semper. Interdum et malesuada fames ac ante ipsum primis in faucibus. Quisque tincidunt rhoncus massa sed volutpat. Nulla porta orci et finibus accumsan. Duis maximus diam quis congue suscipit. Suspendisse velit enim, mollis non tellus eu, auctor vulputate diam. Sed ut purus eleifend, tempor lectus ac, imperdiet tellus. Proin eleifend lorem ut risus gravida, id bibendum metus posuere. Cras pretium tortor mi. Quisque ac congue urna. Morbi posuere ac orci vestibulum euismod. Maecenas venenatis, justo at aliquet venenatis, arcu mauris sodales ligula, a iaculis nulla eros at turpis. Quisque varius lobortis porttitor.",
-                        modifier =
-                            Modifier
-                                .listCard()
-                                .background(MaterialTheme.colorScheme.surface)
-                                .padding(horizontal = screenHorizontalPadding, vertical = 8.dp)
-                                .placeholder(true),
                     )
                 }.onError {
                     Text(

@@ -44,7 +44,6 @@ import dev.dimension.flare.ui.route.Route.Profile
 import dev.dimension.flare.ui.route.Route.RssTimeline
 import dev.dimension.flare.ui.route.Route.Search
 import dev.dimension.flare.ui.route.Route.Timeline
-import dev.dimension.flare.ui.route.Route.TwitterArticle
 import dev.dimension.flare.ui.route.WindowSceneStrategy.Companion.window
 import dev.dimension.flare.ui.screen.compose.ComposeDialog
 import dev.dimension.flare.ui.screen.compose.DraftBoxScreen
@@ -119,11 +118,13 @@ internal fun WindowScope.Router(
     }
     NavDisplay(
         modifier = modifier,
-        sceneStrategy =
+        sceneStrategies =
             remember(listDetailStrategy) {
-                FluentDialogSceneStrategy<Route>()
-                    .then(WindowSceneStrategy())
-                    .then(listDetailStrategy)
+                listOf(
+                    FluentDialogSceneStrategy(),
+                    WindowSceneStrategy(),
+                    listDetailStrategy,
+                )
             },
         entryDecorators =
             listOf(
@@ -997,7 +998,13 @@ internal fun WindowScope.Router(
                     ChannelListScreen(
                         accountType = args.accountType,
                         toTimeline = {
-                            navigate(Route.MisskeyChannelTimeline(args.accountType, it.id, it.title))
+                            navigate(
+                                Route.MisskeyChannelTimeline(
+                                    args.accountType,
+                                    it.id,
+                                    it.title,
+                                ),
+                            )
                         },
                     )
                 }

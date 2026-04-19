@@ -151,6 +151,14 @@
     <string name="settings_status_appearance_title">Post Appearance</string>
     <string name="settings_status_appearance_subtitle">Customize the appearance of post</string>
     <string name="settings_appearance_subtitle">Customize the look and feel of Flare</string>
+    <string name="settings_appearance_theme_group_title">Theme</string>
+    <string name="settings_appearance_theme_group_subtitle">Colors, avatar shape, and theme mode</string>
+    <string name="settings_appearance_layout_group_title">Layout</string>
+    <string name="settings_appearance_layout_group_subtitle">Timeline and post layout</string>
+    <string name="settings_appearance_display_group_title">Display</string>
+    <string name="settings_appearance_display_group_subtitle">Timestamps, previews, and platform logos</string>
+    <string name="settings_appearance_media_group_title">Media</string>
+    <string name="settings_appearance_media_group_subtitle">Images, sensitive content, and videos</string>
     <string name="settings_storage_title">Storage</string>
     <string name="settings_draft_box_title">Draft Box</string>
     <string name="settings_draft_box_description">View sending, failed, and unsent drafts</string>
@@ -249,6 +257,11 @@
     <string name="settings_appearance_avatar_shape_description">Change the shape of the avatar</string>
     <string name="settings_appearance_avatar_shape_round">Round</string>
     <string name="settings_appearance_avatar_shape_square">Square</string>
+    <string name="settings_appearance_timeline_display_mode">Timeline display mode</string>
+    <string name="settings_appearance_timeline_display_mode_description">Choose how items are displayed in timelines</string>
+    <string name="settings_appearance_timeline_display_mode_card">Card</string>
+    <string name="settings_appearance_timeline_display_mode_plain">Plain (single column only)</string>
+    <string name="settings_appearance_timeline_display_mode_gallery">Gallery (home timeline only)</string>
     <string name="settings_appearance_theme">Theme</string>
     <string name="settings_appearance_theme_description">Change the theme of the app</string>
     <string name="settings_appearance_theme_light">Light</string>
@@ -343,6 +356,7 @@
     <string name="rss_detail_translate">Translate</string>
     <string name="rss_detail_tldr">Summarize</string>
     <string name="rss_detail_tldr_error">Failed to summarize</string>
+    <string name="rss_detail_copy_link">Copy link</string>
     <string name="mastodon_available_timelines">Available timelines</string>
     <string name="mastodon_trending_statuses">Trending statuses</string>
     <string name="mastodon_federated_timeline">Federated timeline</string>

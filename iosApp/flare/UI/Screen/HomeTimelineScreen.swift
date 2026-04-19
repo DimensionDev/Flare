@@ -13,6 +13,7 @@ struct HomeTimelineScreen: View {
     @State private var selectedTabIndex = 0
     @StateObject private var presenter: KotlinPresenter<HomeTimelineWithTabsPresenterState>
     @StateObject private var activeAccountPresenter = KotlinPresenter(presenter: ActiveAccountPresenter())
+    @StateObject private var loggedInPresenter = KotlinPresenter(presenter: LoggedInPresenter())
 
     init(accountType: AccountType, toServiceSelect: @escaping () -> Void, toCompose: @escaping () -> Void, toTabSetting: @escaping () -> Void, toSecondaryMenu: @escaping () -> Void) {
         self.accountType = accountType
@@ -29,7 +30,7 @@ struct HomeTimelineScreen: View {
                 let tabs: [TimelineTabItem] = state.cast(TimelineTabItem.self)
                 let tab = tabs[min(max(selectedTabIndex, 0), tabs.count - 1)]
                 ZStack {
-                    TimelineScreen(tabItem: tab)
+                    TimelineScreen(tabItem: tab, allowGalleryMode: true)
                         .id(tab.key)
                 }
                 .onChange(of: state.count, { oldValue, newValue in
@@ -106,7 +107,7 @@ struct HomeTimelineScreen: View {
                         }
                     }
                     ToolbarItem(placement: .primaryAction) {
-                        if case .error = onEnum(of: presenter.state.user) {
+                        if case .success(let isLoggedIn) = onEnum(of: loggedInPresenter.state.isLoggedIn), !isLoggedIn.data.boolValue {
                             Button {
                                 toServiceSelect()
                             } label: {

@@ -127,6 +127,7 @@ public fun ServiceSelectionScreenContent(
             Modifier.fillMaxSize(),
         columns = StaggeredGridCells.Adaptive(300.dp),
         contentPadding = contentPadding,
+        forceCardMode = true,
     ) {
         item(
             span = StaggeredGridItemSpan.FullLine,

@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.runtime.Composable
@@ -67,6 +68,25 @@ internal fun FlareScrollBar(
 @Composable
 internal fun FlareScrollBar(
     state: ScrollState,
+    modifier: Modifier = Modifier,
+    isVertical: Boolean = true,
+    reverseLayout: Boolean = false,
+    scrollbarPadding: PaddingValues = PaddingValues(),
+    content: @Composable () -> Unit,
+) {
+    FlareScrollBar(
+        adapter = rememberScrollbarAdapter(state),
+        modifier = modifier,
+        isVertical = isVertical,
+        reverseLayout = reverseLayout,
+        scrollbarPadding = scrollbarPadding,
+        content = content,
+    )
+}
+
+@Composable
+internal fun FlareScrollBar(
+    state: LazyGridState,
     modifier: Modifier = Modifier,
     isVertical: Boolean = true,
     reverseLayout: Boolean = false,

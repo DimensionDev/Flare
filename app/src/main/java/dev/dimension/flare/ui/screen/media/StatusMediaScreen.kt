@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.screen.media
 
 import android.Manifest
+import android.content.ClipData
 import android.content.Context
 import android.content.Intent
 import android.os.Build
@@ -52,6 +53,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -69,6 +71,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.ClipEntry
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalUriHandler
@@ -76,9 +80,11 @@ import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
+import androidx.core.net.toUri
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.compose.state.rememberPlayPauseButtonState
+import androidx.window.core.layout.WindowSizeClass
 import coil3.annotation.ExperimentalCoilApi
 import coil3.imageLoader
 import coil3.request.ImageRequest
@@ -90,6 +96,7 @@ import com.google.accompanist.permissions.rememberPermissionState
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.CircleInfo
+import compose.icons.fontawesomeicons.solid.Copy
 import compose.icons.fontawesomeicons.solid.Download
 import compose.icons.fontawesomeicons.solid.Pause
 import compose.icons.fontawesomeicons.solid.Play
@@ -105,7 +112,6 @@ import dev.dimension.flare.ui.component.LocalComponentAppearance
 import dev.dimension.flare.ui.component.SurfaceBindingManager
 import dev.dimension.flare.ui.component.VideoPlayer
 import dev.dimension.flare.ui.component.placeholder
-import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.component.status.CommonStatusComponent
 import dev.dimension.flare.ui.humanizer.humanize
 import dev.dimension.flare.ui.model.UiMedia
@@ -157,7 +163,9 @@ internal fun StatusMediaScreen(
     uriHandler: UriHandler,
     surfaceBindingManager: SurfaceBindingManager = koinInject(),
 ) {
-    val isBigScreen = isBigScreen()
+    val scope = rememberCoroutineScope()
+    val clipboard = LocalClipboard.current
+    val isBigScreen = currentWindowAdaptiveInfoV2().windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_LARGE_LOWER_BOUND)
     val hapticFeedback = LocalHapticFeedback.current
     val context = LocalContext.current
     val permissionState =
@@ -671,6 +679,42 @@ internal fun StatusMediaScreen(
                                 ),
                         )
                     }
+                }
+
+                state.medias.onSuccess { medias ->
+                    val label = stringResource(R.string.media_menu_media_link)
+                    ListItem(
+                        headlineContent = {
+                            Text(stringResource(id = R.string.media_menu_copy_link))
+                        },
+                        leadingContent = {
+                            FAIcon(
+                                FontAwesomeIcons.Solid.Copy,
+                                contentDescription = null,
+                                modifier = Modifier.size(24.dp),
+                            )
+                        },
+                        modifier =
+                            Modifier
+                                .clickable {
+                                    scope.launch {
+                                        val url = medias[state.currentPage].url
+                                        clipboard.setClipEntry(
+                                            ClipEntry(
+                                                ClipData.newRawUri(
+                                                    label,
+                                                    url.toUri(),
+                                                ),
+                                            ),
+                                        )
+                                        state.setShowSheet(false)
+                                    }
+                                },
+                        colors =
+                            ListItemDefaults.colors(
+                                containerColor = Color.Transparent,
+                            ),
+                    )
                 }
             }
         }

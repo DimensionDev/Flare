@@ -12,17 +12,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearWavyProgressIndicator
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -43,15 +40,19 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
+import compose.icons.fontawesomeicons.Brands
 import compose.icons.fontawesomeicons.Solid
-import compose.icons.fontawesomeicons.solid.Globe
+import compose.icons.fontawesomeicons.brands.Chrome
+import compose.icons.fontawesomeicons.solid.Language
 import compose.icons.fontawesomeicons.solid.ShareNodes
 import dev.dimension.flare.R
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.network.rss.DocumentData
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.ui.component.BackButton
+import dev.dimension.flare.ui.component.DateTimeText
 import dev.dimension.flare.ui.component.FAIcon
+import dev.dimension.flare.ui.component.FavIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.component.RssRichText
@@ -60,9 +61,11 @@ import dev.dimension.flare.ui.component.placeholder
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.flatMap
+import dev.dimension.flare.ui.model.isSuccess
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
+import dev.dimension.flare.ui.model.takeSuccessOr
 import dev.dimension.flare.ui.presenter.home.rss.RssDetailPresenter
 import dev.dimension.flare.ui.presenter.home.rss.RssDetailTranslatePresenter
 import dev.dimension.flare.ui.presenter.invoke
@@ -96,21 +99,15 @@ internal fun RssDetailScreen(
                 },
                 scrollBehavior = scrollBehavior,
                 actions = {
-                    TextButton(
-                        colors =
-                            ButtonDefaults.textButtonColors(
-                                contentColor = LocalContentColor.current,
-                            ),
+                    IconButton(
                         onClick = {
                             uriHandler.openUri(url)
                         },
                     ) {
                         FAIcon(
-                            FontAwesomeIcons.Solid.Globe,
+                            FontAwesomeIcons.Brands.Chrome,
                             contentDescription = stringResource(R.string.rss_detail_open_in_browser),
                         )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(stringResource(R.string.rss_detail_open_in_browser))
                     }
                     IconButton(
                         onClick = {
@@ -129,6 +126,27 @@ internal fun RssDetailScreen(
                             contentDescription = stringResource(R.string.rss_detail_share),
                         )
                     }
+                    AnimatedVisibility(state.data.isSuccess && !state.isAutoTranslate && !state.enableTranslate) {
+                        IconButton(
+                            onClick = {
+                                state.setEnableTranslate(true)
+                            },
+                        ) {
+                            FAIcon(
+                                FontAwesomeIcons.Solid.Language,
+                                contentDescription = stringResource(R.string.rss_detail_translate),
+                            )
+                        }
+                    }
+                    AnimatedVisibility(state.data.isSuccess && state.enableTldr.takeSuccessOr(false)) {
+                        TextButton(
+                            onClick = {
+                                state.setShowTldr(true)
+                            },
+                        ) {
+                            Text(stringResource(R.string.rss_detail_tldr))
+                        }
+                    }
                 },
             )
         },
@@ -142,48 +160,63 @@ internal fun RssDetailScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             state.data
-                .onSuccess {
+                .onSuccess { documentData ->
                     // Show translated title if available, otherwise original
                     val displayTitle =
                         state.translateState?.translatedTitle?.let { titleState ->
                             when (titleState) {
                                 is UiState.Success -> titleState.data
-                                else -> it.title
+                                else -> documentData.title
                             }
-                        } ?: it.title
+                        } ?: documentData.title
                     Text(
                         text = displayTitle,
                         style = MaterialTheme.typography.titleLarge,
                         modifier =
-                            Modifier
-                                .padding(horizontal = screenHorizontalPadding),
+                        Modifier,
                     )
-                    Row(
-                        verticalAlignment = Alignment.Bottom,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
-                        modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = screenHorizontalPadding),
-                    ) {
-                        // Show translate button only when auto-translate is off
-                        if (!state.isAutoTranslate && !state.enableTranslate) {
-                            FilledTonalButton(
-                                onClick = {
-                                    state.setEnableTranslate(true)
-                                },
-                            ) {
-                                Text(stringResource(R.string.rss_detail_translate))
-                            }
-                        }
-                        state.enableTldr.onSuccess {
-                            if (it) {
-                                FilledTonalButton(
-                                    onClick = {
-                                        state.setShowTldr(true)
-                                    },
+                    if (documentData.siteName != null || documentData.byline != null || documentData.publishDateTime != null) {
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(4.dp),
+                        ) {
+                            documentData.siteName?.let {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp),
                                 ) {
-                                    Text(stringResource(R.string.rss_detail_tldr))
+                                    FavIcon(
+                                        host =
+                                            remember {
+                                                Url(url).host
+                                            },
+                                        size = 16.dp,
+                                    )
+                                    Text(
+                                        text = it,
+                                        style = MaterialTheme.typography.bodySmall,
+                                    )
+                                }
+                            }
+
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            ) {
+                                documentData.byline?.let {
+                                    Text(
+                                        text = it,
+                                        style = MaterialTheme.typography.bodySmall,
+                                    )
+                                }
+
+                                Spacer(modifier = Modifier.weight(1f))
+
+                                documentData.publishDateTime?.let {
+                                    DateTimeText(
+                                        data = it,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        fullTime = true,
+                                    )
                                 }
                             }
                         }
@@ -193,10 +226,10 @@ internal fun RssDetailScreen(
                         "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
                         modifier =
                             Modifier
-                                .padding(horizontal = screenHorizontalPadding)
                                 .placeholder(true),
                     )
                 }
+            HorizontalDivider()
             state.data
                 .onSuccess { data ->
                     AnimatedVisibility(state.showTldr) {
@@ -260,16 +293,12 @@ internal fun RssDetailScreen(
                         LinearWavyProgressIndicator(
                             modifier =
                                 Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = screenHorizontalPadding),
+                                    .fillMaxWidth(),
                         )
                     }
                     SelectionContainer(
                         modifier =
-                            Modifier
-                                .listCard()
-                                .background(MaterialTheme.colorScheme.surface)
-                                .padding(horizontal = screenHorizontalPadding, vertical = 8.dp),
+                        Modifier,
                     ) {
                         // Use translated content if available by creating a new DocumentData
                         // whose lazy .element will re-parse the translated HTML
@@ -293,7 +322,6 @@ internal fun RssDetailScreen(
                             style = MaterialTheme.typography.bodySmall,
                             modifier =
                                 Modifier
-                                    .padding(horizontal = screenHorizontalPadding)
                                     .clickable { state.refreshTranslate() },
                         )
                     }
@@ -302,9 +330,6 @@ internal fun RssDetailScreen(
                         "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam elementum eget dui a bibendum. Fusce eget porttitor est, et rhoncus massa. Etiam cursus urna at odio vulputate semper. Interdum et malesuada fames ac ante ipsum primis in faucibus. Quisque tincidunt rhoncus massa sed volutpat. Nulla porta orci et finibus accumsan. Duis maximus diam quis congue suscipit. Suspendisse velit enim, mollis non tellus eu, auctor vulputate diam. Sed ut purus eleifend, tempor lectus ac, imperdiet tellus. Proin eleifend lorem ut risus gravida, id bibendum metus posuere. Cras pretium tortor mi. Quisque ac congue urna. Morbi posuere ac orci vestibulum euismod. Maecenas venenatis, justo at aliquet venenatis, arcu mauris sodales ligula, a iaculis nulla eros at turpis. Quisque varius lobortis porttitor.",
                         modifier =
                             Modifier
-                                .listCard()
-                                .background(MaterialTheme.colorScheme.surface)
-                                .padding(horizontal = screenHorizontalPadding, vertical = 8.dp)
                                 .placeholder(true),
                     )
                 }

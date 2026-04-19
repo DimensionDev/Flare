@@ -137,10 +137,16 @@ import dev.dimension.flare.settings_appearance_avatar_shape_round
 import dev.dimension.flare.settings_appearance_avatar_shape_square
 import dev.dimension.flare.settings_appearance_compat_link_previews
 import dev.dimension.flare.settings_appearance_compat_link_previews_description
+import dev.dimension.flare.settings_appearance_display_group_subtitle
+import dev.dimension.flare.settings_appearance_display_group_title
 import dev.dimension.flare.settings_appearance_expand_media
 import dev.dimension.flare.settings_appearance_expand_media_description
 import dev.dimension.flare.settings_appearance_full_width_post
 import dev.dimension.flare.settings_appearance_full_width_post_description
+import dev.dimension.flare.settings_appearance_layout_group_subtitle
+import dev.dimension.flare.settings_appearance_layout_group_title
+import dev.dimension.flare.settings_appearance_media_group_subtitle
+import dev.dimension.flare.settings_appearance_media_group_title
 import dev.dimension.flare.settings_appearance_post_action_style
 import dev.dimension.flare.settings_appearance_post_action_style_description
 import dev.dimension.flare.settings_appearance_post_action_style_hidden
@@ -163,6 +169,8 @@ import dev.dimension.flare.settings_appearance_theme
 import dev.dimension.flare.settings_appearance_theme_auto
 import dev.dimension.flare.settings_appearance_theme_dark
 import dev.dimension.flare.settings_appearance_theme_description
+import dev.dimension.flare.settings_appearance_theme_group_subtitle
+import dev.dimension.flare.settings_appearance_theme_group_title
 import dev.dimension.flare.settings_appearance_theme_light
 import dev.dimension.flare.settings_appearance_timeline_display_mode
 import dev.dimension.flare.settings_appearance_timeline_display_mode_card
@@ -183,8 +191,6 @@ import dev.dimension.flare.settings_privacy_policy
 import dev.dimension.flare.settings_rss_management_description
 import dev.dimension.flare.settings_rss_management_title
 import dev.dimension.flare.settings_services_title
-import dev.dimension.flare.settings_status_appearance_subtitle
-import dev.dimension.flare.settings_status_appearance_title
 import dev.dimension.flare.settings_storage_app_log
 import dev.dimension.flare.settings_storage_app_log_description
 import dev.dimension.flare.settings_storage_clear_database
@@ -533,65 +539,6 @@ internal fun SettingsScreen(
             CardExpanderItem(
                 icon = null,
                 heading = {
-                    Text(stringResource(Res.string.settings_appearance_theme))
-                },
-                caption = {
-                    Text(stringResource(Res.string.settings_appearance_theme_description))
-                },
-                trailing = {
-                    MenuFlyoutContainer(
-                        flyout = {
-                            MenuFlyoutItem(
-                                text = { Text(stringResource(Res.string.settings_appearance_theme_auto)) },
-                                onClick = {
-                                    state.appearanceState.updateSettings {
-                                        copy(theme = Theme.SYSTEM)
-                                    }
-                                    isFlyoutVisible = false
-                                },
-                            )
-                            MenuFlyoutItem(
-                                text = { Text(stringResource(Res.string.settings_appearance_theme_dark)) },
-                                onClick = {
-                                    isFlyoutVisible = false
-                                    state.appearanceState.updateSettings {
-                                        copy(theme = Theme.DARK)
-                                    }
-                                },
-                            )
-                            MenuFlyoutItem(
-                                text = { Text(stringResource(Res.string.settings_appearance_theme_light)) },
-                                onClick = {
-                                    isFlyoutVisible = false
-                                    state.appearanceState.updateSettings {
-                                        copy(theme = Theme.LIGHT)
-                                    }
-                                },
-                            )
-                        },
-                        content = {
-                            DropDownButton(
-                                onClick = { isFlyoutVisible = !isFlyoutVisible },
-                                content = {
-                                    Text(
-                                        when (LocalAppearanceSettings.current.theme) {
-                                            Theme.SYSTEM -> stringResource(Res.string.settings_appearance_theme_auto)
-                                            Theme.DARK -> stringResource(Res.string.settings_appearance_theme_dark)
-                                            Theme.LIGHT -> stringResource(Res.string.settings_appearance_theme_light)
-                                        },
-                                    )
-                                },
-                            )
-                        },
-                        adaptivePlacement = true,
-                        placement = FlyoutPlacement.BottomAlignedEnd,
-                    )
-                },
-            )
-
-            CardExpanderItem(
-                icon = null,
-                heading = {
                     Text(stringResource(Res.string.settings_language_title))
                 },
                 caption = {
@@ -630,53 +577,72 @@ internal fun SettingsScreen(
                 },
             )
 
+            var themeExpanded by remember { mutableStateOf(false) }
             Expander(
                 icon = null,
-                expanded = state.appearanceState.expanded,
-                onExpandedChanged = state.appearanceState::setExpanded,
+                expanded = themeExpanded,
+                onExpandedChanged = { themeExpanded = it },
                 heading = {
-                    Text(stringResource(Res.string.settings_status_appearance_title))
+                    Text(stringResource(Res.string.settings_appearance_theme_group_title))
                 },
                 caption = {
-                    Text(stringResource(Res.string.settings_status_appearance_subtitle))
+                    Text(stringResource(Res.string.settings_appearance_theme_group_subtitle))
                 },
             ) {
                 ExpanderItem(
                     heading = {
-                        Text(stringResource(Res.string.settings_appearance_show_compose_in_home_timeline))
+                        Text(stringResource(Res.string.settings_appearance_theme))
                     },
                     caption = {
-                        Text(stringResource(Res.string.settings_appearance_show_compose_in_home_timeline_description))
+                        Text(stringResource(Res.string.settings_appearance_theme_description))
                     },
                     trailing = {
-                        Switcher(
-                            checked = LocalAppearanceSettings.current.showComposeInHomeTimeline,
-                            {
-                                state.appearanceState.updateSettings {
-                                    copy(showComposeInHomeTimeline = it)
-                                }
+                        MenuFlyoutContainer(
+                            flyout = {
+                                MenuFlyoutItem(
+                                    text = { Text(stringResource(Res.string.settings_appearance_theme_auto)) },
+                                    onClick = {
+                                        state.appearanceState.updateSettings {
+                                            copy(theme = Theme.SYSTEM)
+                                        }
+                                        isFlyoutVisible = false
+                                    },
+                                )
+                                MenuFlyoutItem(
+                                    text = { Text(stringResource(Res.string.settings_appearance_theme_dark)) },
+                                    onClick = {
+                                        isFlyoutVisible = false
+                                        state.appearanceState.updateSettings {
+                                            copy(theme = Theme.DARK)
+                                        }
+                                    },
+                                )
+                                MenuFlyoutItem(
+                                    text = { Text(stringResource(Res.string.settings_appearance_theme_light)) },
+                                    onClick = {
+                                        isFlyoutVisible = false
+                                        state.appearanceState.updateSettings {
+                                            copy(theme = Theme.LIGHT)
+                                        }
+                                    },
+                                )
                             },
-                            textBefore = true,
-                        )
-                    },
-                )
-                ExpanderItemSeparator()
-                ExpanderItem(
-                    heading = {
-                        Text(stringResource(Res.string.settings_appearance_full_width_post))
-                    },
-                    caption = {
-                        Text(stringResource(Res.string.settings_appearance_full_width_post_description))
-                    },
-                    trailing = {
-                        Switcher(
-                            checked = LocalAppearanceSettings.current.fullWidthPost,
-                            {
-                                state.appearanceState.updateSettings {
-                                    copy(fullWidthPost = it)
-                                }
+                            content = {
+                                DropDownButton(
+                                    onClick = { isFlyoutVisible = !isFlyoutVisible },
+                                    content = {
+                                        Text(
+                                            when (LocalAppearanceSettings.current.theme) {
+                                                Theme.SYSTEM -> stringResource(Res.string.settings_appearance_theme_auto)
+                                                Theme.DARK -> stringResource(Res.string.settings_appearance_theme_dark)
+                                                Theme.LIGHT -> stringResource(Res.string.settings_appearance_theme_light)
+                                            },
+                                        )
+                                    },
+                                )
                             },
-                            textBefore = true,
+                            adaptivePlacement = true,
+                            placement = FlyoutPlacement.BottomAlignedEnd,
                         )
                     },
                 )
@@ -737,6 +703,39 @@ internal fun SettingsScreen(
                         )
                     },
                 )
+            }
+
+            var layoutExpanded by remember { mutableStateOf(false) }
+            Expander(
+                icon = null,
+                expanded = layoutExpanded,
+                onExpandedChanged = { layoutExpanded = it },
+                heading = {
+                    Text(stringResource(Res.string.settings_appearance_layout_group_title))
+                },
+                caption = {
+                    Text(stringResource(Res.string.settings_appearance_layout_group_subtitle))
+                },
+            ) {
+                ExpanderItem(
+                    heading = {
+                        Text(stringResource(Res.string.settings_appearance_show_compose_in_home_timeline))
+                    },
+                    caption = {
+                        Text(stringResource(Res.string.settings_appearance_show_compose_in_home_timeline_description))
+                    },
+                    trailing = {
+                        Switcher(
+                            checked = LocalAppearanceSettings.current.showComposeInHomeTimeline,
+                            {
+                                state.appearanceState.updateSettings {
+                                    copy(showComposeInHomeTimeline = it)
+                                }
+                            },
+                            textBefore = true,
+                        )
+                    },
+                )
                 ExpanderItemSeparator()
                 ExpanderItem(
                     heading = {
@@ -780,6 +779,26 @@ internal fun SettingsScreen(
                             },
                             adaptivePlacement = true,
                             placement = FlyoutPlacement.BottomAlignedEnd,
+                        )
+                    },
+                )
+                ExpanderItemSeparator()
+                ExpanderItem(
+                    heading = {
+                        Text(stringResource(Res.string.settings_appearance_full_width_post))
+                    },
+                    caption = {
+                        Text(stringResource(Res.string.settings_appearance_full_width_post_description))
+                    },
+                    trailing = {
+                        Switcher(
+                            checked = LocalAppearanceSettings.current.fullWidthPost,
+                            {
+                                state.appearanceState.updateSettings {
+                                    copy(fullWidthPost = it)
+                                }
+                            },
+                            textBefore = true,
                         )
                     },
                 )
@@ -830,9 +849,9 @@ internal fun SettingsScreen(
                         )
                     },
                 )
-                ExpanderItemSeparator()
                 AnimatedVisibility(LocalAppearanceSettings.current.postActionStyle != PostActionStyle.Hidden) {
                     Column {
+                        ExpanderItemSeparator()
                         ExpanderItem(
                             heading = {
                                 Text(stringResource(Res.string.settings_appearance_show_numbers))
@@ -852,9 +871,22 @@ internal fun SettingsScreen(
                                 )
                             },
                         )
-                        ExpanderItemSeparator()
                     }
                 }
+            }
+
+            var displayExpanded by remember { mutableStateOf(false) }
+            Expander(
+                icon = null,
+                expanded = displayExpanded,
+                onExpandedChanged = { displayExpanded = it },
+                heading = {
+                    Text(stringResource(Res.string.settings_appearance_display_group_title))
+                },
+                caption = {
+                    Text(stringResource(Res.string.settings_appearance_display_group_subtitle))
+                },
+            ) {
                 ExpanderItem(
                     heading = {
                         Text(stringResource(Res.string.settings_appearance_absolute_timestamp))
@@ -914,9 +946,9 @@ internal fun SettingsScreen(
                         )
                     },
                 )
-                ExpanderItemSeparator()
                 AnimatedVisibility(LocalAppearanceSettings.current.showLinkPreview) {
                     Column {
+                        ExpanderItemSeparator()
                         ExpanderItem(
                             heading = {
                                 Text(stringResource(Res.string.settings_appearance_compat_link_previews))
@@ -936,9 +968,22 @@ internal fun SettingsScreen(
                                 )
                             },
                         )
-                        ExpanderItemSeparator()
                     }
                 }
+            }
+
+            var mediaExpanded by remember { mutableStateOf(false) }
+            Expander(
+                icon = null,
+                expanded = mediaExpanded,
+                onExpandedChanged = { mediaExpanded = it },
+                heading = {
+                    Text(stringResource(Res.string.settings_appearance_media_group_title))
+                },
+                caption = {
+                    Text(stringResource(Res.string.settings_appearance_media_group_subtitle))
+                },
+            ) {
                 ExpanderItem(
                     heading = {
                         Text(stringResource(Res.string.settings_appearance_show_media))
@@ -958,9 +1003,9 @@ internal fun SettingsScreen(
                         )
                     },
                 )
-                ExpanderItemSeparator()
                 AnimatedVisibility(LocalAppearanceSettings.current.showMedia) {
                     Column {
+                        ExpanderItemSeparator()
                         ExpanderItem(
                             heading = {
                                 Text(stringResource(Res.string.settings_appearance_show_cw_img))
@@ -980,11 +1025,11 @@ internal fun SettingsScreen(
                                 )
                             },
                         )
-                        ExpanderItemSeparator()
                     }
                 }
                 AnimatedVisibility(LocalAppearanceSettings.current.showMedia) {
                     Column {
+                        ExpanderItemSeparator()
                         ExpanderItem(
                             heading = {
                                 Text(stringResource(Res.string.settings_appearance_expand_media))
@@ -1004,9 +1049,9 @@ internal fun SettingsScreen(
                                 )
                             },
                         )
-                        ExpanderItemSeparator()
                     }
                 }
+                ExpanderItemSeparator()
                 ExpanderItem(
                     heading = {
                         Text(stringResource(Res.string.settings_appearance_video_autoplay))

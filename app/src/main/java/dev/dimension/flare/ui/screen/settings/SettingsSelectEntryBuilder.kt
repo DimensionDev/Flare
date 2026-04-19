@@ -24,8 +24,17 @@ internal fun EntryProviderScope<NavKey>.settingsSelectEntryBuilder(
             toAccounts = {
                 navigate(Route.Settings.Accounts)
             },
-            toAppearance = {
-                navigate(Route.Settings.Appearance)
+            toAppearanceTheme = {
+                navigate(Route.Settings.AppearanceTheme)
+            },
+            toAppearanceLayout = {
+                navigate(Route.Settings.AppearanceLayout)
+            },
+            toAppearanceDisplay = {
+                navigate(Route.Settings.AppearanceDisplay)
+            },
+            toAppearanceMedia = {
+                navigate(Route.Settings.AppearanceMedia)
             },
             toStorage = {
                 navigate(Route.Settings.Storage)
@@ -77,16 +86,46 @@ internal fun EntryProviderScope<NavKey>.settingsSelectEntryBuilder(
         )
     }
 
-    entry<Route.Settings.Appearance>(
+    entry<Route.Settings.AppearanceTheme>(
         metadata = ListDetailSceneStrategy.detailPane(
             sceneKey = "Settings"
         )
     ) {
-        AppearanceScreen(
+        AppearanceThemeScreen(
             onBack = onBack,
             toColorPicker = {
                 navigate(Route.Settings.ColorPicker)
             }
+        )
+    }
+
+    entry<Route.Settings.AppearanceLayout>(
+        metadata = ListDetailSceneStrategy.detailPane(
+            sceneKey = "Settings"
+        )
+    ) {
+        AppearanceLayoutScreen(
+            onBack = onBack
+        )
+    }
+
+    entry<Route.Settings.AppearanceDisplay>(
+        metadata = ListDetailSceneStrategy.detailPane(
+            sceneKey = "Settings"
+        )
+    ) {
+        AppearanceDisplayScreen(
+            onBack = onBack
+        )
+    }
+
+    entry<Route.Settings.AppearanceMedia>(
+        metadata = ListDetailSceneStrategy.detailPane(
+            sceneKey = "Settings"
+        )
+    ) {
+        AppearanceMediaScreen(
+            onBack = onBack
         )
     }
 

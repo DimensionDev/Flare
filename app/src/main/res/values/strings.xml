@@ -55,6 +55,14 @@
     <string name="settings_accounts_title">Account Management</string>
     <string name="settings_appearance_title">Appearance</string>
     <string name="settings_appearance_subtitle">Customize the look and feel of Flare</string>
+    <string name="settings_appearance_theme_group_title">Theme</string>
+    <string name="settings_appearance_theme_group_subtitle">Colors, font size and avatar shape</string>
+    <string name="settings_appearance_layout_group_title">Layout</string>
+    <string name="settings_appearance_layout_group_subtitle">Timeline, navigation bar and post layout</string>
+    <string name="settings_appearance_display_group_title">Display</string>
+    <string name="settings_appearance_display_group_subtitle">Timestamps, platform logos and link previews</string>
+    <string name="settings_appearance_media_group_title">Media</string>
+    <string name="settings_appearance_media_group_subtitle">Images, videos and sensitive content</string>
     <string name="settings_storage_title">Storage</string>
     <string name="settings_storage_subtitle">Manage Flare\'s storage</string>
     <string name="settings_about_title">About</string>

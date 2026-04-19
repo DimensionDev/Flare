@@ -7642,6 +7642,7 @@
       }
     },
     "appearance_description" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -7833,6 +7834,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "自訂Flare的外觀和感受"
+          }
+        }
+      }
+    },
+    "appearance_display_group_subtitle" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Timestamps, platform logos and link previews"
+          }
+        }
+      }
+    },
+    "appearance_display_group_title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Display"
           }
         }
       }
@@ -8665,6 +8686,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Open links in the in-app browser"
+          }
+        }
+      }
+    },
+    "appearance_layout_group_subtitle" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Timeline and post layout"
+          }
+        }
+      }
+    },
+    "appearance_layout_group_title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Layout"
+          }
+        }
+      }
+    },
+    "appearance_media_group_subtitle" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Images, videos and sensitive content"
+          }
+        }
+      }
+    },
+    "appearance_media_group_title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Media"
           }
         }
       }
@@ -11751,6 +11812,26 @@
         }
       }
     },
+    "appearance_theme_group_subtitle" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Colors, font size and avatar shape"
+          }
+        }
+      }
+    },
+    "appearance_theme_group_title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Theme"
+          }
+        }
+      }
+    },
     "appearance_theme_light" : {
       "localizations" : {
         "af" : {
@@ -12248,6 +12329,7 @@
       }
     },
     "appearance_title" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {

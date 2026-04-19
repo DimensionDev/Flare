@@ -55,8 +55,14 @@ enum Route: Hashable, Identifiable {
             ComposeScreen(accountType: accountType, composeStatus: ComposeStatus.VVOComment(statusKey: statueKey, rootId: rootId))
         case .profileUserNameWithHost(let accountType, let userName, let host):
             ProfileWithUserNameAndHostScreen(userName: userName, host: host, accountType: accountType, onFollowingClick: { key in onNavigate(.userFollowing(accountType, key)) }, onFansClick: { key in onNavigate(.userFans(accountType, key)) })
-        case .appearance:
-            AppearanceScreen()
+        case .appearanceTheme:
+            AppearanceThemeScreen()
+        case .appearanceLayout:
+            AppearanceLayoutScreen()
+        case .appearanceDisplay:
+            AppearanceDisplayScreen()
+        case .appearanceMedia:
+            AppearanceMediaScreen()
         case .about:
             AboutScreen()
         case .localHostory:
@@ -155,7 +161,10 @@ enum Route: Hashable, Identifiable {
     case aiConfig
     case translationConfig
     case storage
-    case appearance
+    case appearanceTheme
+    case appearanceLayout
+    case appearanceDisplay
+    case appearanceMedia
     case settings
     case about
     case tabItem(TabItem)

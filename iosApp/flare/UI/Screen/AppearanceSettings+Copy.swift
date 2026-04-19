@@ -1,0 +1,56 @@
+import KotlinSharedUI
+
+extension AppearanceSettings {
+    func copy(
+        theme: Theme? = nil,
+        dynamicTheme: Bool? = nil,
+        colorSeed: UInt64? = nil,
+        avatarShape: AvatarShape? = nil,
+        pureColorMode: Bool? = nil,
+        showNumbers: Bool? = nil,
+        showLinkPreview: Bool? = nil,
+        showMedia: Bool? = nil,
+        showSensitiveContent: Bool? = nil,
+        videoAutoplay: VideoAutoplay? = nil,
+        expandMediaSize: Bool? = nil,
+        compatLinkPreview: Bool? = nil,
+        fontSizeDiff: Float? = nil,
+        lineHeightDiff: Float? = nil,
+        showComposeInHomeTimeline: Bool? = nil,
+        bottomBarStyle: BottomBarStyle? = nil,
+        bottomBarBehavior: BottomBarBehavior? = nil,
+        inAppBrowser: Bool? = nil,
+        fullWidthPost: Bool? = nil,
+        postActionStyle: PostActionStyle? = nil,
+        absoluteTimestamp: Bool? = nil,
+        showPlatformLogo: Bool? = nil,
+        timelineDisplayMode: TimelineDisplayMode? = nil,
+    ) -> AppearanceSettings {
+        AppearanceSettings(
+            theme: theme ?? self.theme,
+            dynamicTheme: dynamicTheme ?? self.dynamicTheme,
+            colorSeed: colorSeed ?? self.colorSeed,
+            avatarShape: avatarShape ?? self.avatarShape,
+            showActions: false,
+            pureColorMode: pureColorMode ?? self.pureColorMode,
+            showNumbers: showNumbers ?? self.showNumbers,
+            showLinkPreview: showLinkPreview ?? self.showLinkPreview,
+            showMedia: showMedia ?? self.showMedia,
+            showSensitiveContent: showSensitiveContent ?? self.showSensitiveContent,
+            videoAutoplay: videoAutoplay ?? self.videoAutoplay,
+            expandMediaSize: expandMediaSize ?? self.expandMediaSize,
+            compatLinkPreview: compatLinkPreview ?? self.compatLinkPreview,
+            fontSizeDiff: fontSizeDiff ?? self.fontSizeDiff,
+            lineHeightDiff: lineHeightDiff ?? self.lineHeightDiff,
+            showComposeInHomeTimeline: showComposeInHomeTimeline ?? self.showComposeInHomeTimeline,
+            bottomBarStyle: bottomBarStyle ?? self.bottomBarStyle,
+            bottomBarBehavior: bottomBarBehavior ?? self.bottomBarBehavior,
+            inAppBrowser: inAppBrowser ?? self.inAppBrowser,
+            fullWidthPost: fullWidthPost ?? self.fullWidthPost,
+            postActionStyle: postActionStyle ?? self.postActionStyle,
+            absoluteTimestamp: absoluteTimestamp ?? self.absoluteTimestamp,
+            showPlatformLogo: showPlatformLogo ?? self.showPlatformLogo,
+            timelineDisplayMode: timelineDisplayMode ?? self.timelineDisplayMode
+        )
+    }
+}

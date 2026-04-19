@@ -31,8 +31,11 @@ import compose.icons.fontawesomeicons.solid.Database
 import compose.icons.fontawesomeicons.solid.Filter
 import compose.icons.fontawesomeicons.solid.Gear
 import compose.icons.fontawesomeicons.solid.Language
+import compose.icons.fontawesomeicons.solid.Newspaper
 import compose.icons.fontawesomeicons.solid.Palette
+import compose.icons.fontawesomeicons.solid.PhotoFilm
 import compose.icons.fontawesomeicons.solid.Robot
+import compose.icons.fontawesomeicons.solid.TableList
 import dev.dimension.flare.BuildConfig
 import dev.dimension.flare.R
 import dev.dimension.flare.ui.component.BackButton
@@ -42,6 +45,7 @@ import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.ThemeIconData
 import dev.dimension.flare.ui.component.ThemedIcon
 import dev.dimension.flare.ui.theme.first
+import dev.dimension.flare.ui.theme.item
 import dev.dimension.flare.ui.theme.last
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import dev.dimension.flare.ui.theme.single
@@ -76,7 +80,10 @@ internal fun SettingsDetailPlaceholder(modifier: Modifier = Modifier) {
 @Composable
 internal fun SettingsScreen(
     toAccounts: () -> Unit,
-    toAppearance: () -> Unit,
+    toAppearanceTheme: () -> Unit,
+    toAppearanceLayout: () -> Unit,
+    toAppearanceDisplay: () -> Unit,
+    toAppearanceMedia: () -> Unit,
     toStorage: () -> Unit,
     toAbout: () -> Unit,
     toColorSpace: () -> Unit,
@@ -138,27 +145,76 @@ internal fun SettingsScreen(
                 verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
             ) {
                 SegmentedListItem(
-                    onClick = {
-                        toAppearance.invoke()
-                    },
-                    shapes =
-                        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.TIRAMISU) {
-                            ListItemDefaults.single()
-                        } else {
-                            ListItemDefaults.first()
-                        },
+                    onClick = { toAppearanceTheme.invoke() },
+                    shapes = ListItemDefaults.first(),
                     content = {
-                        Text(text = stringResource(id = R.string.settings_appearance_title))
+                        Text(text = stringResource(id = R.string.settings_appearance_theme_group_title))
                     },
                     leadingContent = {
                         ThemedIcon(
                             imageVector = FontAwesomeIcons.Solid.Palette,
-                            contentDescription = stringResource(id = R.string.settings_appearance_title),
+                            contentDescription = stringResource(id = R.string.settings_appearance_theme_group_title),
                             color = ThemeIconData.Color.RoyalPurple,
                         )
                     },
                     supportingContent = {
-                        Text(text = stringResource(id = R.string.settings_appearance_subtitle))
+                        Text(text = stringResource(id = R.string.settings_appearance_theme_group_subtitle))
+                    },
+                )
+                SegmentedListItem(
+                    onClick = { toAppearanceLayout.invoke() },
+                    shapes = ListItemDefaults.item(),
+                    content = {
+                        Text(text = stringResource(id = R.string.settings_appearance_layout_group_title))
+                    },
+                    leadingContent = {
+                        ThemedIcon(
+                            imageVector = FontAwesomeIcons.Solid.TableList,
+                            contentDescription = stringResource(id = R.string.settings_appearance_layout_group_title),
+                            color = ThemeIconData.Color.SapphireBlue,
+                        )
+                    },
+                    supportingContent = {
+                        Text(text = stringResource(id = R.string.settings_appearance_layout_group_subtitle))
+                    },
+                )
+                SegmentedListItem(
+                    onClick = { toAppearanceDisplay.invoke() },
+                    shapes = ListItemDefaults.item(),
+                    content = {
+                        Text(text = stringResource(id = R.string.settings_appearance_display_group_title))
+                    },
+                    leadingContent = {
+                        ThemedIcon(
+                            imageVector = FontAwesomeIcons.Solid.Newspaper,
+                            contentDescription = stringResource(id = R.string.settings_appearance_display_group_title),
+                            color = ThemeIconData.Color.ForestGreen,
+                        )
+                    },
+                    supportingContent = {
+                        Text(text = stringResource(id = R.string.settings_appearance_display_group_subtitle))
+                    },
+                )
+                SegmentedListItem(
+                    onClick = { toAppearanceMedia.invoke() },
+                    shapes =
+                        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.TIRAMISU) {
+                            ListItemDefaults.last()
+                        } else {
+                            ListItemDefaults.item()
+                        },
+                    content = {
+                        Text(text = stringResource(id = R.string.settings_appearance_media_group_title))
+                    },
+                    leadingContent = {
+                        ThemedIcon(
+                            imageVector = FontAwesomeIcons.Solid.PhotoFilm,
+                            contentDescription = stringResource(id = R.string.settings_appearance_media_group_title),
+                            color = ThemeIconData.Color.BurntUmber,
+                        )
+                    },
+                    supportingContent = {
+                        Text(text = stringResource(id = R.string.settings_appearance_media_group_subtitle))
                     },
                 )
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {

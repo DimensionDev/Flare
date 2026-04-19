@@ -104,7 +104,16 @@ internal sealed interface Route : NavKey {
         data object Accounts : Settings
 
         @Serializable
-        data object Appearance : Settings
+        data object AppearanceTheme : Settings
+
+        @Serializable
+        data object AppearanceLayout : Settings
+
+        @Serializable
+        data object AppearanceDisplay : Settings
+
+        @Serializable
+        data object AppearanceMedia : Settings
 
         @Serializable
         data object Storage : Settings

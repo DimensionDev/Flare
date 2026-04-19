@@ -14,12 +14,36 @@ struct SettingsScreen: View {
             }
 
             Section {
-                NavigationLink(value: Route.appearance) {
+                NavigationLink(value: Route.appearanceTheme) {
                     Label {
-                        Text("appearance_title")
-                        Text("appearance_description")
+                        Text("appearance_theme_group_title")
+                        Text("appearance_theme_group_subtitle")
                     } icon: {
                         Image("fa-palette")
+                    }
+                }
+                NavigationLink(value: Route.appearanceLayout) {
+                    Label {
+                        Text("appearance_layout_group_title")
+                        Text("appearance_layout_group_subtitle")
+                    } icon: {
+                        Image("fa-table-list")
+                    }
+                }
+                NavigationLink(value: Route.appearanceDisplay) {
+                    Label {
+                        Text("appearance_display_group_title")
+                        Text("appearance_display_group_subtitle")
+                    } icon: {
+                        Image(.faNewspaper)
+                    }
+                }
+                NavigationLink(value: Route.appearanceMedia) {
+                    Label {
+                        Text("appearance_media_group_title")
+                        Text("appearance_media_group_subtitle")
+                    } icon: {
+                        Image(.faPhotoFilm)
                     }
                 }
                 if let url = URL(string: UIApplication.openSettingsURLString) {

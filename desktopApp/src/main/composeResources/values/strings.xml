@@ -151,6 +151,14 @@
     <string name="settings_status_appearance_title">Post Appearance</string>
     <string name="settings_status_appearance_subtitle">Customize the appearance of post</string>
     <string name="settings_appearance_subtitle">Customize the look and feel of Flare</string>
+    <string name="settings_appearance_theme_group_title">Theme</string>
+    <string name="settings_appearance_theme_group_subtitle">Colors, avatar shape, and theme mode</string>
+    <string name="settings_appearance_layout_group_title">Layout</string>
+    <string name="settings_appearance_layout_group_subtitle">Timeline and post layout</string>
+    <string name="settings_appearance_display_group_title">Display</string>
+    <string name="settings_appearance_display_group_subtitle">Timestamps, previews, and platform logos</string>
+    <string name="settings_appearance_media_group_title">Media</string>
+    <string name="settings_appearance_media_group_subtitle">Images, sensitive content, and videos</string>
     <string name="settings_storage_title">Storage</string>
     <string name="settings_draft_box_title">Draft Box</string>
     <string name="settings_draft_box_description">View sending, failed, and unsent drafts</string>

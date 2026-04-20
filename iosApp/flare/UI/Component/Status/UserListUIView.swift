@@ -103,8 +103,8 @@ final class UserListUIView: UIView {
 
         var desired: [UIView] = [scroll]
         if let post = data.post {
-            quoteView.appearance = appearance
-            quoteView.configure(data: post, isQuote: true, forceHideActions: true)
+//            quoteView.appearance = appearance
+            quoteView.configure(data: post, appearance: appearance, isQuote: true, forceHideActions: true)
             desired.append(quoteContainer)
         }
         column.flareSyncArrangedSubviews(desired)

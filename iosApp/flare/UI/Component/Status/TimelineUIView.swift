@@ -87,12 +87,12 @@ final class TimelineUIView: UIView {
                 configureMessage(message, topMessageOnly: false)
                 desired.append(messageContainer)
             }
-            statusView.appearance = appearance
             statusView.openURL = onOpenURL
             statusView.configure(
                 data: post,
+                appearance: appearance,
                 isDetail: detailStatusKey == post.statusKey,
-                showTranslate: showTranslate
+                showTranslate: showTranslate,
             )
             desired.append(statusView)
 

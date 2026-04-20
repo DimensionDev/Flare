@@ -217,7 +217,11 @@ final class StatusActionsUIView: UIView {
             minimumIconOnlySize: title == nil ? actionIconSize : nil
         )
         control.showsMenuAsPrimaryAction = true
-        control.menu = buildMenu(from: group.actions)
+        control.menu = UIMenu(children: [
+            UIDeferredMenuElement.uncached { completion in
+                completion(self.buildMenu(from: group.actions))
+            }
+        ])
         return control
     }
 
@@ -236,7 +240,8 @@ final class StatusActionsUIView: UIView {
         return view
     }
 
-    private func buildMenu(from actions: [ActionMenu]) -> UIMenu {
+    private func buildMenu(from actions: [ActionMenu]) -> [UIMenuElement] {
+        
         var children: [UIMenuElement] = []
         var section: [UIMenuElement] = []
         var hasDivider = false
@@ -275,7 +280,7 @@ final class StatusActionsUIView: UIView {
                 } else {
                     subtitle = ""
                 }
-                section.append(UIMenu(title: subtitle, children: buildMenu(from: g.actions).children))
+                section.append(UIMenu(title: subtitle, children: buildMenu(from: g.actions)))
             case .divider:
                 hasDivider = true
                 flushSection()
@@ -283,9 +288,9 @@ final class StatusActionsUIView: UIView {
         }
         if hasDivider {
             flushSection()
-            return UIMenu(title: "", children: children)
+            return children
         }
-        return UIMenu(title: "", children: section)
+        return section
     }
 
     private func makeLauncher() -> AppleUriLauncher {
@@ -445,8 +450,8 @@ private final class ActionItemControl: UIButton {
         let symbolConfiguration = UIImage.SymbolConfiguration(pointSize: iconSize)
         iconView.preferredSymbolConfiguration = symbolConfiguration
         iconView.tintColor = tintColor
-        let templateImage = image?.withRenderingMode(.alwaysTemplate)
-        iconView.image = templateImage?.applyingSymbolConfiguration(symbolConfiguration) ?? templateImage
+//        let templateImage = image?.withRenderingMode(.alwaysTemplate)
+        iconView.image = image //templateImage?.applyingSymbolConfiguration(symbolConfiguration) ?? templateImage
         iconView.isHidden = image == nil
         iconWidthConstraint.constant = iconSize
         iconHeightConstraint.constant = iconSize

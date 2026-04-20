@@ -17,14 +17,14 @@ import KotlinSharedUI
 final class StatusUIKitView: UIView, UIGestureRecognizerDelegate {
     // MARK: - Environment mirrors (inputs that were `@Environment` in SwiftUI)
 
-    var appearance: AppearanceSettings = AppearanceSettings.companion.Default {
-        didSet {
-            if data != nil {
-                rebuild()
-//                invalidateContainingCollectionLayout()
-            }
-        }
-    }
+//    var appearance: AppearanceSettings = AppearanceSettings.companion.Default {
+//        didSet {
+//            if data != nil {
+//                rebuild()
+////                invalidateContainingCollectionLayout()
+//            }
+//        }
+//    }
     /// Forwarded to all URL-clicking machinery.
     var openURL: ((URL) -> Void)?
 
@@ -41,6 +41,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate {
     private var forceHideActions: Bool = false
     private var showTranslate: Bool = true
     private var showParents: Bool = true
+    private var appearance: AppearanceSettings = AppearanceSettings.companion.Default
 
     // MARK: - @State
 
@@ -243,6 +244,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate {
 
     func configure(
         data: UiTimelineV2.Post,
+        appearance: AppearanceSettings,
         isDetail: Bool = false,
         isQuote: Bool = false,
         withLeadingPadding: Bool = false,
@@ -268,6 +270,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate {
         self.forceHideActions = forceHideActions
         self.showTranslate = showTranslate
         self.showParents = showParents
+        self.appearance = appearance
         rebuild()
     }
 
@@ -523,9 +526,9 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate {
         }
         for (i, parent) in parentData.enumerated() {
             let container = parentContainers[i]
-            container.child.appearance = appearance
+//            container.child.appearance = appearance
             container.child.openURL = openURL
-            container.child.configure(data: parent, withLeadingPadding: true)
+            container.child.configure(data: parent, appearance: appearance, withLeadingPadding: true)
         }
         return Array(parentContainers.prefix(parentData.count))
     }
@@ -543,9 +546,9 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate {
         var desired: [UIView] = []
         for (i, quote) in quotes.enumerated() {
             let child = quoteChildren[i]
-            child.appearance = appearance
+//            child.appearance = appearance
             child.openURL = openURL
-            child.configure(data: quote, isQuote: true, forceHideActions: true)
+            child.configure(data: quote, appearance: appearance, isQuote: true, forceHideActions: true)
             desired.append(child)
             if i != quotes.count - 1 {
                 desired.append(quoteDividers[i])

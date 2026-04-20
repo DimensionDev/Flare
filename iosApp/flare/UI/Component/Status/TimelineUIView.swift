@@ -221,6 +221,12 @@ final class TimelineUIView: UIView {
         userListView.onOpenURL = onOpenURL
     }
 
+    func autoplayCandidates(prefix: String) -> [TimelineVideoAutoplayCandidate] {
+        guard let data, !isHidden, window != nil else { return [] }
+        guard case .post = onEnum(of: data) else { return [] }
+        return statusView.autoplayCandidates(prefix: prefix)
+    }
+
 }
 
 extension UIView {

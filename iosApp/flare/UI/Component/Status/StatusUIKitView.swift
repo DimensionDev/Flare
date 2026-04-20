@@ -671,6 +671,31 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate {
         }
     }
 
+    func autoplayCandidates(prefix: String = "status") -> [TimelineVideoAutoplayCandidate] {
+        guard let data, !isHidden, window != nil else { return [] }
+
+        let statusPrefix = "\(prefix):\(String(describing: data.statusKey))"
+        var candidates: [TimelineVideoAutoplayCandidate] = []
+
+        if showMediaInput {
+            candidates.append(contentsOf: mediaView.autoplayCandidates(prefix: statusPrefix))
+        }
+
+        if showParents {
+            for container in parentContainers where container.superview != nil {
+                candidates.append(contentsOf: container.child.autoplayCandidates(prefix: "\(statusPrefix):parent"))
+            }
+        }
+
+        if !isQuote {
+            for child in quoteChildren where child.superview != nil {
+                candidates.append(contentsOf: child.autoplayCandidates(prefix: "\(statusPrefix):quote"))
+            }
+        }
+
+        return candidates
+    }
+
     // MARK: - Arranged-subview diff
 
     /// Reorders `stack.arrangedSubviews` to match `desired`, reusing the same

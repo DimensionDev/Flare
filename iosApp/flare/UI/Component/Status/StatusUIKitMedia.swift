@@ -3,6 +3,23 @@ import Kingfisher
 import KotlinSharedUI
 import SwiftUI
 
+struct TimelineVideoAutoplayCandidate {
+    let id: String
+    let url: URL
+    let hostView: UIView
+}
+
+extension Notification.Name {
+    static let timelineVideoAutoplayNeedsUpdate = Notification.Name("timelineVideoAutoplayNeedsUpdate")
+}
+
+enum VideoAutoplayOverlayState {
+    case idle
+    case loading
+    case playing(remaining: TimeInterval)
+    case error
+}
+
 private struct MediaItemSignature: Equatable {
     let kind: String
     let primaryURL: String
@@ -68,8 +85,27 @@ final class MediaUIView: UIView {
         v.isHidden = true
         return v
     }()
+    private let loadingIndicator: UIActivityIndicatorView = {
+        let indicator = UIActivityIndicatorView(style: .medium)
+        indicator.color = .white
+        indicator.translatesAutoresizingMaskIntoConstraints = false
+        indicator.isHidden = true
+        return indicator
+    }()
+    private let countdownLabel: UILabel = {
+        let label = UILabel()
+        label.font = .preferredFont(forTextStyle: .caption1)
+        label.textColor = .white
+        label.adjustsFontForContentSizeCategory = true
+        label.textAlignment = .center
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.isHidden = true
+        return label
+    }()
     private var lastMediaSignature: MediaItemSignature?
     private var lastCornerRadius: CGFloat?
+    private weak var autoplayPlayerView: UIView?
+    private var autoplayPlayerConstraints: [NSLayoutConstraint] = []
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -78,6 +114,8 @@ final class MediaUIView: UIView {
         addSubview(imageView)
         addSubview(playBadgeBg)
         playBadgeBg.addSubview(playBadge)
+        playBadgeBg.addSubview(loadingIndicator)
+        playBadgeBg.addSubview(countdownLabel)
         NSLayoutConstraint.activate([
             background.topAnchor.constraint(equalTo: topAnchor),
             background.leadingAnchor.constraint(equalTo: leadingAnchor),
@@ -89,12 +127,18 @@ final class MediaUIView: UIView {
             imageView.bottomAnchor.constraint(equalTo: bottomAnchor),
             playBadgeBg.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
             playBadgeBg.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -16),
-            playBadgeBg.widthAnchor.constraint(equalToConstant: 32),
+            playBadgeBg.widthAnchor.constraint(greaterThanOrEqualToConstant: 32),
             playBadgeBg.heightAnchor.constraint(equalToConstant: 32),
             playBadge.centerXAnchor.constraint(equalTo: playBadgeBg.centerXAnchor),
             playBadge.centerYAnchor.constraint(equalTo: playBadgeBg.centerYAnchor),
             playBadge.widthAnchor.constraint(equalToConstant: 16),
             playBadge.heightAnchor.constraint(equalToConstant: 16),
+            loadingIndicator.centerXAnchor.constraint(equalTo: playBadgeBg.centerXAnchor),
+            loadingIndicator.centerYAnchor.constraint(equalTo: playBadgeBg.centerYAnchor),
+            countdownLabel.topAnchor.constraint(equalTo: playBadgeBg.topAnchor),
+            countdownLabel.leadingAnchor.constraint(equalTo: playBadgeBg.leadingAnchor, constant: 8),
+            countdownLabel.trailingAnchor.constraint(equalTo: playBadgeBg.trailingAnchor, constant: -8),
+            countdownLabel.bottomAnchor.constraint(equalTo: playBadgeBg.bottomAnchor),
         ])
     }
     required init?(coder: NSCoder) { fatalError("init(coder:) not supported") }
@@ -113,21 +157,81 @@ final class MediaUIView: UIView {
         layer.cornerRadius = cornerRadius
         imageView.kf.cancelDownloadTask()
         imageView.image = nil
-        playBadge.isHidden = true
-        playBadgeBg.isHidden = true
+        setAutoplayOverlay(.idle, showsBadge: false)
 
         switch onEnum(of: media) {
         case .image(let image):
             loadImage(url: image.previewUrl)
         case .video(let video):
             loadImage(url: video.thumbnailUrl)
-            playBadge.isHidden = false
-            playBadgeBg.isHidden = false
+            setAutoplayOverlay(.idle)
         case .gif(let gif):
             loadGif(url: gif.url)
         case .audio:
             imageView.image = nil
         }
+    }
+
+    func attachAutoplayPlayer(_ playerView: UIView) {
+        guard autoplayPlayerView !== playerView || playerView.superview !== self else { return }
+        detachAutoplayPlayer()
+        playerView.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(playerView)
+        bringSubviewToFront(playBadgeBg)
+        autoplayPlayerView = playerView
+        autoplayPlayerConstraints = [
+            playerView.topAnchor.constraint(equalTo: topAnchor),
+            playerView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            playerView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            playerView.bottomAnchor.constraint(equalTo: bottomAnchor),
+        ]
+        NSLayoutConstraint.activate(autoplayPlayerConstraints)
+    }
+
+    func detachAutoplayPlayer() {
+        guard let autoplayPlayerView else { return }
+        NSLayoutConstraint.deactivate(autoplayPlayerConstraints)
+        autoplayPlayerConstraints = []
+        if autoplayPlayerView.superview === self {
+            autoplayPlayerView.removeFromSuperview()
+        }
+        self.autoplayPlayerView = nil
+        setAutoplayOverlay(.idle)
+    }
+
+    func setAutoplayOverlay(_ state: VideoAutoplayOverlayState, showsBadge: Bool = true) {
+        playBadgeBg.isHidden = !showsBadge
+        playBadge.isHidden = true
+        countdownLabel.isHidden = true
+        loadingIndicator.isHidden = true
+        loadingIndicator.stopAnimating()
+
+        switch state {
+        case .idle:
+            playBadge.image = UIImage(named: "fa-circle-play")
+            playBadge.isHidden = false
+        case .loading:
+            loadingIndicator.isHidden = false
+            loadingIndicator.startAnimating()
+        case .playing(let remaining):
+            countdownLabel.text = Self.formatRemainingTime(remaining)
+            countdownLabel.isHidden = false
+        case .error:
+            playBadge.image = UIImage(systemName: "exclamationmark.triangle.fill")
+            playBadge.isHidden = false
+        }
+    }
+
+    private static func formatRemainingTime(_ remaining: TimeInterval) -> String {
+        let seconds = max(Int(ceil(remaining)), 0)
+        let minutes = seconds / 60
+        let remainder = seconds % 60
+        if minutes >= 60 {
+            let hours = minutes / 60
+            let minuteRemainder = minutes % 60
+            return String(format: "%d:%02d:%02d", hours, minuteRemainder, remainder)
+        }
+        return String(format: "%d:%02d", minutes, remainder)
     }
 
     private func loadImage(url: String?) {
@@ -272,6 +376,16 @@ final class StatusMediaUIView: UIView {
         updateAspectConstraint()
         rebuildGrid()
         updateBlurUI()
+    }
+
+    func autoplayCandidates(prefix: String) -> [TimelineVideoAutoplayCandidate] {
+        guard !isHidden, window != nil, !items.isEmpty, !(sensitive && isBlurred) else { return [] }
+        return cellPool
+            .prefix(items.count)
+            .compactMap { cell in
+                guard !cell.isHidden else { return nil }
+                return cell.autoplayCandidate(prefix: prefix)
+            }
     }
 
     private func rebuildGrid() {
@@ -483,6 +597,7 @@ final class StatusMediaUIView: UIView {
             self.isBlurred.toggle()
             self.updateBlurUI()
             self.layoutIfNeeded()
+            NotificationCenter.default.post(name: .timelineVideoAutoplayNeedsUpdate, object: self)
         }
     }
 }
@@ -492,6 +607,8 @@ private final class MediaGridCellView: UIView {
 
     private let mediaView = MediaUIView()
     private var altButton: AltTextButton?
+    private var media: UiMedia?
+    private var index: Int = 0
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -514,6 +631,8 @@ private final class MediaGridCellView: UIView {
 
     func configure(media: UiMedia, index: Int) {
         tag = index
+        self.index = index
+        self.media = media
         mediaView.set(media: media, cornerRadius: 0)
         if let altText = media.description_, !altText.isEmpty {
             let button: AltTextButton
@@ -534,6 +653,24 @@ private final class MediaGridCellView: UIView {
         } else {
             altButton?.isHidden = true
         }
+    }
+
+    func autoplayCandidate(prefix: String) -> TimelineVideoAutoplayCandidate? {
+        guard !isHidden,
+              !mediaView.isHidden,
+              window != nil,
+              bounds.width > 0,
+              bounds.height > 0,
+              let media,
+              case .video(let video) = onEnum(of: media),
+              let url = URL(string: video.url) else {
+            return nil
+        }
+        return TimelineVideoAutoplayCandidate(
+            id: "\(prefix):video:\(index):\(video.url)",
+            url: url,
+            hostView: mediaView
+        )
     }
 
     @objc private func onCellTapped() {
@@ -718,6 +855,11 @@ final class StatusMediaContentUIView: UIView {
         invalidateIntrinsicContentSize()
     }
 
+    func autoplayCandidates(prefix: String) -> [TimelineVideoAutoplayCandidate] {
+        guard !isHidden, !grid.isHidden, window != nil else { return [] }
+        return grid.autoplayCandidates(prefix: prefix)
+    }
+
     private func applyVisibility() {
         if appearanceShowMedia || expanded {
             grid.isHidden = false
@@ -754,6 +896,7 @@ final class StatusMediaContentUIView: UIView {
             self.superview?.layoutIfNeeded()
         } completion: { _ in
             self.invalidateContainingCollectionLayout()
+            NotificationCenter.default.post(name: .timelineVideoAutoplayNeedsUpdate, object: self)
         }
     }
 

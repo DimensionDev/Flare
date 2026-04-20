@@ -7,7 +7,9 @@ struct CollectionViewTimelineView: UIViewControllerRepresentable {
     let data: PagingState<UiTimelineV2>
     let detailStatusKey: MicroBlogKey?
     let topContentInset: CGFloat
+    @Environment(\.appearanceSettings) private var appearanceSettings
     @Environment(\.appearanceSettings.timelineDisplayMode) private var timelineDisplayMode
+    @Environment(\.openURL) private var openURL
     @Environment(\.refresh) private var refreshAction: RefreshAction?
 
     init(
@@ -26,6 +28,10 @@ struct CollectionViewTimelineView: UIViewControllerRepresentable {
             { await action() }
         }
         controller.topContentInset = topContentInset
+        controller.appearanceSettings = appearanceSettings
+        controller.openURL = { url in
+            openURL.callAsFunction(url)
+        }
         controller.usesCardBackground = timelineDisplayMode != .plain
         controller.update(data: data)
         return controller
@@ -36,6 +42,10 @@ struct CollectionViewTimelineView: UIViewControllerRepresentable {
             { await action() }
         }
         controller.topContentInset = topContentInset
+        controller.appearanceSettings = appearanceSettings
+        controller.openURL = { url in
+            openURL.callAsFunction(url)
+        }
         controller.usesCardBackground = timelineDisplayMode != .plain
         controller.update(data: data)
     }
@@ -54,6 +64,17 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
     private var currentSuccess: PagingStateSuccess<UiTimelineV2>?
 
     var refreshCallback: (() async -> Void)?
+    var openURL: ((URL) -> Void)?
+    var appearanceSettings: AppearanceSettings = AppearanceSettings.companion.Default {
+        didSet {
+            guard isViewLoaded else { return }
+            guard AppearanceSignature(settings: oldValue) != AppearanceSignature(settings: appearanceSettings) else {
+                return
+            }
+            usesCardBackground = appearanceSettings.timelineDisplayMode != .plain
+            reconfigureVisibleCells()
+        }
+    }
     var topContentInset: CGFloat = 0 {
         didSet {
             guard isViewLoaded else { return }
@@ -63,6 +84,7 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
     var usesCardBackground: Bool = true {
         didSet {
             guard isViewLoaded else { return }
+            guard oldValue != usesCardBackground else { return }
             updateBackgroundColors()
         }
     }
@@ -82,6 +104,36 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
     private struct SnapshotSignature: Equatable {
         let itemIDs: [String]
         let footerIDs: [String]
+    }
+
+    private struct AppearanceSignature: Equatable {
+        let timelineDisplayMode: String
+        let fullWidthPost: Bool
+        let avatarShape: String
+        let showPlatformLogo: Bool
+        let absoluteTimestamp: Bool
+        let postActionStyle: String
+        let showNumbers: Bool
+        let showMedia: Bool
+        let showSensitiveContent: Bool
+        let showLinkPreview: Bool
+        let compatLinkPreview: Bool
+        let expandMediaSize: Bool
+
+        init(settings: AppearanceSettings) {
+            timelineDisplayMode = String(describing: settings.timelineDisplayMode)
+            fullWidthPost = settings.fullWidthPost
+            avatarShape = String(describing: settings.avatarShape)
+            showPlatformLogo = settings.showPlatformLogo
+            absoluteTimestamp = settings.absoluteTimestamp
+            postActionStyle = String(describing: settings.postActionStyle)
+            showNumbers = settings.showNumbers
+            showMedia = settings.showMedia
+            showSensitiveContent = settings.showSensitiveContent
+            showLinkPreview = settings.showLinkPreview
+            compatLinkPreview = settings.compatLinkPreview
+            expandMediaSize = settings.expandMediaSize
+        }
     }
 
     // Item ID prefixes / constants
@@ -127,13 +179,15 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
     // MARK: - Setup
 
     private func setupCollectionView() {
-        let layout = UICollectionViewCompositionalLayout { _, layoutEnvironment in
-            var listConfig = UICollectionLayoutListConfiguration(appearance: .plain)
-            listConfig.showsSeparators = false
-            listConfig.backgroundColor = .clear
-            let section = NSCollectionLayoutSection.list(using: listConfig, layoutEnvironment: layoutEnvironment)
+        let layout = UICollectionViewCompositionalLayout { _, _ in
+            let itemSize = NSCollectionLayoutSize(
+                widthDimension: .fractionalWidth(1),
+                heightDimension: .estimated(180)
+            )
+            let item = NSCollectionLayoutItem(layoutSize: itemSize)
+            let group = NSCollectionLayoutGroup.vertical(layoutSize: itemSize, subitems: [item])
+            let section = NSCollectionLayoutSection(group: group)
             section.interGroupSpacing = 2
-//            section.contentInsets = .init(top: 0, leading: 16, bottom: 0, trailing: 16)
             return section
         }
         collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
@@ -149,7 +203,7 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
     }
 
     private func setupDataSource() {
-        let cellReg = UICollectionView.CellRegistration<UICollectionViewCell, String> {
+        let cellReg = UICollectionView.CellRegistration<TimelineUIKitCollectionViewCell, String> {
             [weak self] cell, _, itemID in
             guard let self else { return }
             self.configureCell(cell, itemID: itemID)
@@ -181,7 +235,7 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
 
     // MARK: - Cell Configuration
 
-    private func configureCell(_ cell: UICollectionViewCell, itemID: String) {
+    private func configureCell(_ cell: TimelineUIKitCollectionViewCell, itemID: String) {
         if itemID.hasPrefix(Self.timelinePrefix) {
             if let index = itemIndexMap[itemID] {
                 configureTimelineCell(cell, index: index)
@@ -191,102 +245,86 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
             let index = Int(indexStr) ?? 0
             configurePlaceholderCell(cell, index: index)
         } else if itemID == Self.emptyID {
-            configureHostingCell(cell) { ListEmptyView() }
+            cell.setHostedView(CenteredCellContentView(content: ListEmptyUIView()))
         } else if itemID == Self.errorID {
             configureErrorCell(cell)
         } else if itemID == Self.footerLoadingID {
-            configureHostingCell(cell) {
-                ProgressView()
-                    .padding()
-                    .frame(maxWidth: .infinity, alignment: .center)
-            }
+            cell.setHostedView(makeLoadingFooterView())
         } else if itemID == Self.footerErrorID {
             configureFooterErrorCell(cell)
         } else if itemID == Self.footerEndID {
-            configureHostingCell(cell) {
-                Text("end_of_list")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-                    .padding()
-                    .frame(maxWidth: .infinity, alignment: .center)
-            }
+            cell.setHostedView(makeTextFooterView(text: String(localized: "end_of_list")))
         }
     }
 
-    private func configureTimelineCell(_ cell: UICollectionViewCell, index: Int) {
+    private func configureTimelineCell(_ cell: TimelineUIKitCollectionViewCell, index: Int) {
         guard let success = currentSuccess else { return }
         let item = success.peek(index: Int32(index))
         let totalCount = Int(success.itemCount)
-        let detailKey = detailStatusKey
-        let scrollState = scrollingState
         if let item {
-            cell.contentConfiguration = UIHostingConfiguration {
-                AdaptiveTimelineCard(index: index, totalCount: totalCount) {
-                    TimelineView(data: item, detailStatusKey: detailKey)
-                        .padding(.vertical, 12)
-                        .padding(.horizontal)
-                }
-                .environment(\.isScrollingState, scrollState)
-            }
-            .margins(.all, 0)
-            .minSize(width: 0, height: 0)
+            cell.configureTimeline(
+                data: item,
+                index: index,
+                totalCount: totalCount,
+                appearance: appearanceSettings,
+                detailStatusKey: detailStatusKey,
+                openURL: openURL
+            )
         } else {
             configurePlaceholderCell(cell, index: index)
         }
     }
 
-    private func configurePlaceholderCell(_ cell: UICollectionViewCell, index: Int) {
+    private func configurePlaceholderCell(_ cell: TimelineUIKitCollectionViewCell, index: Int) {
         let totalCount: Int
         if let success = currentSuccess {
             totalCount = Int(success.itemCount)
         } else {
             totalCount = 5
         }
-        cell.contentConfiguration = UIHostingConfiguration {
-            AdaptiveTimelineCard(index: index, totalCount: totalCount) {
-                TimelinePlaceholderView()
-                    .padding(.vertical, 12)
-                    .padding(.horizontal)
-            }
-        }
-        .margins(.all, 0)
-        .minSize(width: 0, height: 0)
+        cell.configurePlaceholder(
+            index: index,
+            totalCount: totalCount,
+            appearance: appearanceSettings
+        )
     }
 
-    private func configureHostingCell<V: View>(_ cell: UICollectionViewCell, @ViewBuilder content: () -> V) {
-        let contentView = content()
-        cell.contentConfiguration = UIHostingConfiguration {
-            contentView
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-        }
-        .margins(.all, 0)
-        .minSize(width: 0, height: 0)
-    }
-
-    private func configureErrorCell(_ cell: UICollectionViewCell) {
+    private func configureErrorCell(_ cell: TimelineUIKitCollectionViewCell) {
         guard let data = currentData, case .error(let errorState) = onEnum(of: data) else { return }
-        cell.contentConfiguration = UIHostingConfiguration {
-            ListErrorView(error: errorState.error) {
-                errorState.onRetry()
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+        let errorView = ListErrorUIView()
+        errorView.onOpenURL = openURL
+        errorView.configure(error: errorState.error) {
+            errorState.onRetry()
         }
-        .margins(.all, 0)
-        .minSize(width: 0, height: 0)
+        cell.setHostedView(CenteredCellContentView(content: errorView))
     }
 
-    private func configureFooterErrorCell(_ cell: UICollectionViewCell) {
+    private func configureFooterErrorCell(_ cell: TimelineUIKitCollectionViewCell) {
         guard let success = currentSuccess else { return }
         if case .error(let error) = onEnum(of: success.appendState) {
-            cell.contentConfiguration = UIHostingConfiguration {
-                ListErrorView(error: error.error) {
-                    success.retry()
-                }
-                .frame(maxWidth: .infinity, alignment: .center)
+            let errorView = ListErrorUIView()
+            errorView.onOpenURL = openURL
+            errorView.configure(error: error.error) {
+                success.retry()
             }
-            .margins(.all, 0)
-            .minSize(width: 0, height: 0)
+            cell.setHostedView(UIView.padding(errorView, insets: UIEdgeInsets(top: 16, left: 16, bottom: 16, right: 16)))
         }
+    }
+
+    private func makeLoadingFooterView() -> UIView {
+        let progress = UIActivityIndicatorView(style: .medium)
+        progress.startAnimating()
+        return UIView.padding(progress, insets: UIEdgeInsets(top: 16, left: 16, bottom: 16, right: 16))
+    }
+
+    private func makeTextFooterView(text: String) -> UIView {
+        let label = UILabel()
+        label.text = text
+        label.font = .preferredFont(forTextStyle: .footnote)
+        label.textColor = .secondaryLabel
+        label.textAlignment = .center
+        label.adjustsFontForContentSizeCategory = true
+        return UIView.padding(label, insets: UIEdgeInsets(top: 16, left: 16, bottom: 16, right: 16))
     }
 
     // MARK: - Refresh
@@ -465,6 +503,13 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
         dataSource.apply(snapshot, animatingDifferences: false)
     }
 
+    private func reconfigureVisibleCells() {
+        let visibleIDs = collectionView.indexPathsForVisibleItems.compactMap {
+            dataSource.itemIdentifier(for: $0)
+        }
+        reconfigureItems(visibleIDs)
+    }
+
     private func applyFooterSnapshot(footerIDs: [String], reconfigureIDs: [String], data: PagingState<UiTimelineV2>) {
         var snapshot = dataSource.snapshot()
         let hasFooterSection = snapshot.sectionIdentifiers.contains(Self.sectionFooter)
@@ -530,5 +575,147 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
 
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
         scrollingState.isScrolling = false
+    }
+}
+
+private final class TimelineUIKitCollectionViewCell: UICollectionViewCell {
+    private var hostedView: UIView?
+    private var hostedConstraints: [NSLayoutConstraint] = []
+    private var hostedBottomConstraint: NSLayoutConstraint?
+    private let timelineView = TimelineUIView()
+    private let timelineCard = AdaptiveTimelineCardUIView()
+    private let placeholderView = TimelinePlaceholderUIView()
+    private let placeholderCard = AdaptiveTimelineCardUIView()
+
+    // Rebuild-skip signature. When the incoming data + appearance + detail-key are
+    // identical to the previous configure we short-circuit the expensive
+    // `TimelineUIView.configure` → `StatusUIKitView.rebuild()` path.
+    private var lastRenderHash: Int32?
+    private var lastItemKey: String?
+    private var lastAppearanceIdentity: ObjectIdentifier?
+    private var lastDetailStatusKey: String?
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        backgroundColor = .clear
+        contentView.backgroundColor = .clear
+        timelineCard.isMultipleColumn = false
+        timelineCard.setContent(UIView.padding(timelineView, insets: UIEdgeInsets(top: 12, left: 16, bottom: 12, right: 16)))
+        placeholderCard.isMultipleColumn = false
+        placeholderCard.setContent(UIView.padding(placeholderView, insets: UIEdgeInsets(top: 12, left: 16, bottom: 12, right: 16)))
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) not supported")
+    }
+
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        // Reset signature so a recycled cell always rebuilds for its new tenant,
+        // even in the (unlikely) event that renderHash/itemKey collide.
+        lastRenderHash = nil
+        lastItemKey = nil
+        lastAppearanceIdentity = nil
+        lastDetailStatusKey = nil
+    }
+
+    func configureTimeline(
+        data: UiTimelineV2,
+        index: Int,
+        totalCount: Int,
+        appearance: AppearanceSettings,
+        detailStatusKey: MicroBlogKey?,
+        openURL: ((URL) -> Void)?
+    ) {
+        // Card styling is cheap; always reapply so index/totalCount changes
+        // (affecting the card's outer rounded corners) are picked up.
+        timelineCard.timelineDisplayMode = appearance.timelineDisplayMode
+        timelineCard.configure(index: index, totalCount: totalCount)
+
+        let itemKey = data.itemKey ?? ""
+        let detailKeyStr = detailStatusKey.map { String(describing: $0) } ?? ""
+        let appearanceId = ObjectIdentifier(appearance)
+
+        let dataUnchanged =
+            lastRenderHash == data.renderHash &&
+            lastItemKey == itemKey &&
+            lastAppearanceIdentity == appearanceId &&
+            lastDetailStatusKey == detailKeyStr
+
+        if !dataUnchanged {
+            lastRenderHash = data.renderHash
+            lastItemKey = itemKey
+            lastAppearanceIdentity = appearanceId
+            lastDetailStatusKey = detailKeyStr
+            timelineView.configure(
+                data: data,
+                appearance: appearance,
+                detailStatusKey: detailStatusKey,
+                onOpenURL: openURL
+            )
+        } else {
+            // Same render state — just refresh the click callback in case the
+            // parent routed a new openURL handler through.
+            timelineView.onOpenURL = openURL
+        }
+        setHostedView(timelineCard)
+    }
+
+    func configurePlaceholder(index: Int, totalCount: Int, appearance: AppearanceSettings) {
+        placeholderCard.timelineDisplayMode = appearance.timelineDisplayMode
+        placeholderCard.configure(index: index, totalCount: totalCount)
+        setHostedView(placeholderCard)
+    }
+
+    func setHostedView(_ view: UIView?) {
+        contentConfiguration = nil
+        backgroundConfiguration = .clear()
+        if hostedView === view {
+            view?.invalidateIntrinsicContentSize()
+            view?.setNeedsLayout()
+            contentView.setNeedsLayout()
+            setNeedsLayout()
+            return
+        }
+        NSLayoutConstraint.deactivate(hostedConstraints)
+        hostedConstraints = []
+        hostedBottomConstraint = nil
+        hostedView?.removeFromSuperview()
+        hostedView = view
+
+        guard let view else { return }
+        view.translatesAutoresizingMaskIntoConstraints = false
+        contentView.addSubview(view)
+        let bottomConstraint = view.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
+        bottomConstraint.priority = .init(999)
+        hostedConstraints = [
+            view.topAnchor.constraint(equalTo: contentView.topAnchor),
+            view.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            view.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            bottomConstraint,
+        ]
+        hostedBottomConstraint = bottomConstraint
+        NSLayoutConstraint.activate(hostedConstraints)
+    }
+}
+
+private final class CenteredCellContentView: UIView {
+    init(content: UIView) {
+        super.init(frame: .zero)
+        content.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(content)
+        NSLayoutConstraint.activate([
+            content.centerXAnchor.constraint(equalTo: centerXAnchor),
+            content.centerYAnchor.constraint(equalTo: centerYAnchor),
+            content.leadingAnchor.constraint(greaterThanOrEqualTo: leadingAnchor, constant: 16),
+            content.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -16),
+            content.topAnchor.constraint(greaterThanOrEqualTo: topAnchor, constant: 16),
+            content.bottomAnchor.constraint(lessThanOrEqualTo: bottomAnchor, constant: -16),
+            heightAnchor.constraint(greaterThanOrEqualToConstant: 160),
+        ])
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) not supported")
     }
 }

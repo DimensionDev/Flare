@@ -108,25 +108,26 @@ struct TimelinePagingContent: View {
         } else if horizontalSizeClass == .compact {
             singleListView
         } else {
-            GeometryReader { proxy in
-                let columnCount = max((proxy.size.width / 320).rounded(.down), 1)
-                if columnCount == 1 {
-                    singleListView
-                } else {
-                    let columns: [WaterfallItems.Column] = Array(repeating: .init(spacing: 12), count: Int(columnCount))
-                    ScrollView {
-                        TimelineWaterFallPagingView(data: data, detailStatusKey: detailStatusKey, columns: columns)
-                            .padding()
-                    }
-                    .refreshable {
-                        await refreshAction?()
-                    }
-                    .environment(\.isMultipleColumn, true)
-                    .detectScrolling()
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background(Color(.systemGroupedBackground))
-                }
-            }
+            singleListView
+//            GeometryReader { proxy in
+//                let columnCount = max((proxy.size.width / 320).rounded(.down), 1)
+//                if columnCount == 1 {
+//                    singleListView
+//                } else {
+//                    let columns: [WaterfallItems.Column] = Array(repeating: .init(spacing: 12), count: Int(columnCount))
+//                    ScrollView {
+//                        TimelineWaterFallPagingView(data: data, detailStatusKey: detailStatusKey, columns: columns)
+//                            .padding()
+//                    }
+//                    .refreshable {
+//                        await refreshAction?()
+//                    }
+//                    .environment(\.isMultipleColumn, true)
+//                    .detectScrolling()
+//                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+//                    .background(Color(.systemGroupedBackground))
+//                }
+//            }
         }
     }
     

@@ -1,5 +1,4 @@
 import SwiftUI
-import WaterfallGrids
 import KotlinSharedUI
 
 struct TimelinePagingView: View {
@@ -89,6 +88,7 @@ struct TimelinePagingContent: View {
     var body: some View {
         if allowGalleryMode && timelineDisplayMode == .gallery {
             GalleryTimelinePagingView(data: data)
+                .ignoresSafeArea(edges: .vertical)
         } else if useComposeView {
             ComposeTimelineView(
                 key: key,
@@ -103,103 +103,31 @@ struct TimelinePagingContent: View {
                 onExpand: {},
                 onCollapse: {}
             )
-            .ignoresSafeArea()
+            .ignoresSafeArea(edges: .vertical)
             .background(Color(.systemGroupedBackground))
         } else if horizontalSizeClass == .compact {
             singleListView
         } else {
-            singleListView
-//            GeometryReader { proxy in
-//                let columnCount = max((proxy.size.width / 320).rounded(.down), 1)
-//                if columnCount == 1 {
-//                    singleListView
-//                } else {
-//                    let columns: [WaterfallItems.Column] = Array(repeating: .init(spacing: 12), count: Int(columnCount))
-//                    ScrollView {
-//                        TimelineWaterFallPagingView(data: data, detailStatusKey: detailStatusKey, columns: columns)
-//                            .padding()
-//                    }
-//                    .refreshable {
-//                        await refreshAction?()
-//                    }
-//                    .environment(\.isMultipleColumn, true)
-//                    .detectScrolling()
-//                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-//                    .background(Color(.systemGroupedBackground))
-//                }
-//            }
+            GeometryReader { proxy in
+                let columnCount = max(Int((proxy.size.width / 320).rounded(.down)), 1)
+                CollectionViewTimelineView(
+                    data: data,
+                    detailStatusKey: detailStatusKey,
+                    topContentInset: topContentInset,
+                    columnCount: columnCount
+                )
+                .ignoresSafeArea(edges: .vertical)
+            }
         }
     }
-    
+
     var singleListView: some View {
         CollectionViewTimelineView(
             data: data,
             detailStatusKey: detailStatusKey,
             topContentInset: topContentInset
         )
-        .ignoresSafeArea()
+        .ignoresSafeArea(edges: .vertical)
     }
 }
 
-struct TimelineWaterFallPagingView: View {
-    let data: PagingState<UiTimelineV2>
-    let detailStatusKey: MicroBlogKey?
-    let columns: [WaterfallItems.Column]
-    var body: some View {
-        
-        switch onEnum(of: data) {
-        case .empty: ListEmptyView()
-        case .error(let error): ListErrorView(error: error.error) {
-            error.onRetry()
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-        case .loading: LazyWaterfallGrid(items: .columns(columns), spacing: 12, data: [0, 1, 2, 3, 4]) { index in
-            ListCardView(index: index, totalCount: 5) {
-                TimelinePlaceholderView()
-                    .padding()
-            }
-        }
-        case .success(let success):
-            LazyWaterfallGrid(items: .columns(columns), spacing: 12, data: TimelineCollection(data: success)) { data in
-                if let item = data.data {
-                    ListCardView(index: data.index, totalCount: Int(success.itemCount)) {
-                        TimelineView(data: item, detailStatusKey: detailStatusKey)
-                            .padding()
-                            .onAppear {
-                                _ = success.get(index: Int32(data.index))
-                            }
-                    }
-                } else {
-                    ListCardView(index: data.index, totalCount: Int(success.itemCount)) {
-                        TimelinePlaceholderView()
-                            .padding()
-                            .onAppear {
-                                _ = success.get(index: Int32(data.index))
-                            }
-                    }
-                }
-            }
-            switch onEnum(of: success.appendState) {
-            case .error(let error):
-                ListErrorView(error: error.error) {
-                    success.retry()
-                }
-                .frame(maxWidth: .infinity, alignment: .center)
-            case .loading:
-                ProgressView()
-                    .padding()
-                    .frame(maxWidth: .infinity, alignment: .center)
-            case .notLoading(let notLoading):
-                if notLoading.endOfPaginationReached {
-                    Text("end_of_list")
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
-                        .padding()
-                        .frame(maxWidth: .infinity, alignment: .center)
-                } else {
-                    EmptyView()
-                }
-            }
-        }
-    }
-}

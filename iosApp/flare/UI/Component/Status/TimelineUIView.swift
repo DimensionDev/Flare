@@ -16,6 +16,58 @@ final class TimelineUIView: UIView {
 
     private var data: UiTimelineV2?
     private var isBatchConfiguring = false
+    private var lastRenderSignature: RenderSignature?
+
+    private struct RenderSignature: Equatable {
+        let itemKey: String
+        let itemType: String
+        let renderHash: Int32
+        let detailStatusKey: String
+        let showTranslate: Bool
+        let appearance: AppearanceSignature
+
+        init(
+            data: UiTimelineV2,
+            appearance: AppearanceSettings,
+            detailStatusKey: MicroBlogKey?,
+            showTranslate: Bool
+        ) {
+            itemKey = data.itemKey ?? ""
+            itemType = data.itemType
+            renderHash = data.renderHash
+            self.detailStatusKey = detailStatusKey.map { String(describing: $0) } ?? ""
+            self.showTranslate = showTranslate
+            self.appearance = AppearanceSignature(settings: appearance)
+        }
+    }
+
+    private struct AppearanceSignature: Equatable {
+        let fullWidthPost: Bool
+        let avatarShape: String
+        let showPlatformLogo: Bool
+        let absoluteTimestamp: Bool
+        let postActionStyle: String
+        let showNumbers: Bool
+        let showMedia: Bool
+        let showSensitiveContent: Bool
+        let showLinkPreview: Bool
+        let compatLinkPreview: Bool
+        let expandMediaSize: Bool
+
+        init(settings: AppearanceSettings) {
+            fullWidthPost = settings.fullWidthPost
+            avatarShape = String(describing: settings.avatarShape)
+            showPlatformLogo = settings.showPlatformLogo
+            absoluteTimestamp = settings.absoluteTimestamp
+            postActionStyle = String(describing: settings.postActionStyle)
+            showNumbers = settings.showNumbers
+            showMedia = settings.showMedia
+            showSensitiveContent = settings.showSensitiveContent
+            showLinkPreview = settings.showLinkPreview
+            compatLinkPreview = settings.compatLinkPreview
+            expandMediaSize = settings.expandMediaSize
+        }
+    }
 
     private let stack: UIStackView = {
         let stack = UIStackView()
@@ -48,7 +100,18 @@ final class TimelineUIView: UIView {
     }
 
     func configure(data: UiTimelineV2) {
+        let signature = RenderSignature(
+            data: data,
+            appearance: appearance,
+            detailStatusKey: detailStatusKey,
+            showTranslate: showTranslate
+        )
         self.data = data
+        guard lastRenderSignature != signature else {
+            forwardOpenURL()
+            return
+        }
+        lastRenderSignature = signature
         rebuild()
     }
 
@@ -66,6 +129,17 @@ final class TimelineUIView: UIView {
         self.onOpenURL = onOpenURL
         self.data = data
         isBatchConfiguring = false
+        let signature = RenderSignature(
+            data: data,
+            appearance: appearance,
+            detailStatusKey: detailStatusKey,
+            showTranslate: showTranslate
+        )
+        guard lastRenderSignature != signature else {
+            forwardOpenURL()
+            return
+        }
+        lastRenderSignature = signature
         rebuild()
     }
 

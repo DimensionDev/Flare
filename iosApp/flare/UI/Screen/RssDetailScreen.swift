@@ -360,6 +360,9 @@ struct HtmlWebView: UIViewRepresentable {
             .markdown-body img[data-flare-clickable="true"] {
               cursor: pointer;
             }
+            .markdown-body {
+              background-color: transparent;
+            }
         
           </style>
           <script>

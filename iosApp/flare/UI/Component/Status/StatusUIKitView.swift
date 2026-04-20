@@ -42,6 +42,77 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate {
     private var showTranslate: Bool = true
     private var showParents: Bool = true
     private var appearance: AppearanceSettings = AppearanceSettings.companion.Default
+    private var lastConfigureSignature: ConfigureSignature?
+
+    private struct ConfigureSignature: Equatable {
+        let statusKey: String
+        let renderHash: Int32
+        let isDetail: Bool
+        let isQuote: Bool
+        let withLeadingPadding: Bool
+        let showMedia: Bool
+        let maxLine: Int
+        let showExpandTextButton: Bool
+        let forceHideActions: Bool
+        let showTranslate: Bool
+        let showParents: Bool
+        let appearance: AppearanceSignature
+
+        init(
+            data: UiTimelineV2.Post,
+            appearance: AppearanceSettings,
+            isDetail: Bool,
+            isQuote: Bool,
+            withLeadingPadding: Bool,
+            showMedia: Bool,
+            maxLine: Int,
+            showExpandTextButton: Bool,
+            forceHideActions: Bool,
+            showTranslate: Bool,
+            showParents: Bool
+        ) {
+            statusKey = String(describing: data.statusKey)
+            renderHash = data.renderHash
+            self.isDetail = isDetail
+            self.isQuote = isQuote
+            self.withLeadingPadding = withLeadingPadding
+            self.showMedia = showMedia
+            self.maxLine = maxLine
+            self.showExpandTextButton = showExpandTextButton
+            self.forceHideActions = forceHideActions
+            self.showTranslate = showTranslate
+            self.showParents = showParents
+            self.appearance = AppearanceSignature(settings: appearance)
+        }
+    }
+
+    private struct AppearanceSignature: Equatable {
+        let fullWidthPost: Bool
+        let avatarShape: String
+        let showPlatformLogo: Bool
+        let absoluteTimestamp: Bool
+        let postActionStyle: String
+        let showNumbers: Bool
+        let showMedia: Bool
+        let showSensitiveContent: Bool
+        let showLinkPreview: Bool
+        let compatLinkPreview: Bool
+        let expandMediaSize: Bool
+
+        init(settings: AppearanceSettings) {
+            fullWidthPost = settings.fullWidthPost
+            avatarShape = String(describing: settings.avatarShape)
+            showPlatformLogo = settings.showPlatformLogo
+            absoluteTimestamp = settings.absoluteTimestamp
+            postActionStyle = String(describing: settings.postActionStyle)
+            showNumbers = settings.showNumbers
+            showMedia = settings.showMedia
+            showSensitiveContent = settings.showSensitiveContent
+            showLinkPreview = settings.showLinkPreview
+            compatLinkPreview = settings.compatLinkPreview
+            expandMediaSize = settings.expandMediaSize
+        }
+    }
 
     // MARK: - @State
 
@@ -260,6 +331,19 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate {
             expand = false
             boundStatusKey = newStatusKey
         }
+        let signature = ConfigureSignature(
+            data: data,
+            appearance: appearance,
+            isDetail: isDetail,
+            isQuote: isQuote,
+            withLeadingPadding: withLeadingPadding,
+            showMedia: showMedia,
+            maxLine: maxLine,
+            showExpandTextButton: showExpandTextButton,
+            forceHideActions: forceHideActions,
+            showTranslate: showTranslate,
+            showParents: showParents
+        )
         self.data = data
         self.isDetail = isDetail
         self.isQuote = isQuote
@@ -271,6 +355,11 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate {
         self.showTranslate = showTranslate
         self.showParents = showParents
         self.appearance = appearance
+        guard lastConfigureSignature != signature else {
+            forwardOpenURL()
+            return
+        }
+        lastConfigureSignature = signature
         rebuild()
     }
 
@@ -362,9 +451,12 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate {
         // content warning
         let hasCW = (data.contentWarning != nil) && (data.contentWarning?.isEmpty == false)
         if hasCW, let cw = data.contentWarning {
-            contentWarningText.text = cw
-            contentWarningText.onOpenURL = openURL
-            contentWarningText.isTextSelectionEnabled = isDetail
+            contentWarningText.configure(
+                text: cw,
+                lineLimit: nil,
+                isTextSelectionEnabled: isDetail,
+                onOpenURL: openURL
+            )
             items.append(contentWarningText)
             contentWarningToggle.setTitle(
                 expand
@@ -378,18 +470,24 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate {
         // main body
         if expand || !hasCW {
             if !data.content.isEmpty {
-                bodyText.text = data.content
-                bodyText.onOpenURL = openURL
+                let bodyLineLimit: Int?
+                let bodySelectionEnabled: Bool
                 if isDetail {
-                    bodyText.isTextSelectionEnabled = true
-                    bodyText.lineLimit = nil
+                    bodySelectionEnabled = true
+                    bodyLineLimit = nil
                 } else if (data.shouldExpandTextByDefault || expand) && maxLine >= 5 {
-                    bodyText.isTextSelectionEnabled = false
-                    bodyText.lineLimit = nil
+                    bodySelectionEnabled = false
+                    bodyLineLimit = nil
                 } else {
-                    bodyText.isTextSelectionEnabled = false
-                    bodyText.lineLimit = Int(maxLine)
+                    bodySelectionEnabled = false
+                    bodyLineLimit = Int(maxLine)
                 }
+                bodyText.configure(
+                    text: data.content,
+                    lineLimit: bodyLineLimit,
+                    isTextSelectionEnabled: bodySelectionEnabled,
+                    onOpenURL: openURL
+                )
                 items.append(bodyText)
                 if !data.shouldExpandTextByDefault, !isDetail, !expand, showExpandTextButton {
                     items.append(expandMoreButton)
@@ -555,6 +653,22 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate {
             }
         }
         syncArrangedSubviews(quotesStack, desired)
+    }
+
+    private func forwardOpenURL() {
+        contentWarningText.onOpenURL = openURL
+        bodyText.onOpenURL = openURL
+        normalCardView.onOpenURL = { [weak self] in self?.openURL?($0) }
+        compatCardView.onOpenURL = { [weak self] in self?.openURL?($0) }
+        actionsView.onOpenURL = { [weak self] in self?.openURL?($0) }
+        for container in parentContainers {
+            container.child.openURL = openURL
+            container.child.forwardOpenURL()
+        }
+        for child in quoteChildren {
+            child.openURL = openURL
+            child.forwardOpenURL()
+        }
     }
 
     // MARK: - Arranged-subview diff

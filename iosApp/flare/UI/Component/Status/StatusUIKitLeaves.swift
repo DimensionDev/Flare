@@ -201,9 +201,9 @@ final class UserOnelineUIView: UIStackView {
         alignment = .center
         name.lineLimit = 1
         name.setContentHuggingPriority(.required, for: .horizontal)
-        name.setContentCompressionResistancePriority(.defaultHigh, for: .horizontal)
-        handleLabel.setContentHuggingPriority(.required, for: .horizontal)
-        handleLabel.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        name.setContentCompressionResistancePriority(UILayoutPriority(900), for: .horizontal)
+        handleLabel.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        handleLabel.setContentCompressionResistancePriority(UILayoutPriority(100), for: .horizontal)
 
         if showAvatar {
             addArrangedSubview(avatar)
@@ -287,9 +287,9 @@ final class UserCompatUIView: UIStackView {
 
         name.lineLimit = 1
         name.setContentHuggingPriority(.required, for: .horizontal)
-        name.setContentCompressionResistancePriority(.defaultHigh, for: .horizontal)
-        handleLabel.setContentHuggingPriority(.required, for: .horizontal)
-        handleLabel.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        name.setContentCompressionResistancePriority(UILayoutPriority(900), for: .horizontal)
+        handleLabel.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        handleLabel.setContentCompressionResistancePriority(UILayoutPriority(100), for: .horizontal)
 
         NSLayoutConstraint.activate([
             avatar.widthAnchor.constraint(equalToConstant: 44),

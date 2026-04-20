@@ -1,5 +1,6 @@
 import SwiftUI
 import KotlinSharedUI
+import CHTCollectionViewWaterfallLayout
 
 // MARK: - SwiftUI Wrapper
 
@@ -7,6 +8,7 @@ struct CollectionViewTimelineView: UIViewControllerRepresentable {
     let data: PagingState<UiTimelineV2>
     let detailStatusKey: MicroBlogKey?
     let topContentInset: CGFloat
+    let columnCount: Int
     @Environment(\.appearanceSettings) private var appearanceSettings
     @Environment(\.appearanceSettings.timelineDisplayMode) private var timelineDisplayMode
     @Environment(\.openURL) private var openURL
@@ -15,11 +17,13 @@ struct CollectionViewTimelineView: UIViewControllerRepresentable {
     init(
         data: PagingState<UiTimelineV2>,
         detailStatusKey: MicroBlogKey?,
-        topContentInset: CGFloat = 0
+        topContentInset: CGFloat = 0,
+        columnCount: Int = 1
     ) {
         self.data = data
         self.detailStatusKey = detailStatusKey
         self.topContentInset = topContentInset
+        self.columnCount = max(columnCount, 1)
     }
 
     func makeUIViewController(context: Context) -> CollectionViewTimelineController {
@@ -33,6 +37,7 @@ struct CollectionViewTimelineView: UIViewControllerRepresentable {
             openURL.callAsFunction(url)
         }
         controller.usesCardBackground = timelineDisplayMode != .plain
+        controller.columnCount = columnCount
         controller.update(data: data)
         return controller
     }
@@ -47,13 +52,14 @@ struct CollectionViewTimelineView: UIViewControllerRepresentable {
             openURL.callAsFunction(url)
         }
         controller.usesCardBackground = timelineDisplayMode != .plain
+        controller.columnCount = columnCount
         controller.update(data: data)
     }
 }
 
 // MARK: - Controller
 
-final class CollectionViewTimelineController: UIViewController, UICollectionViewDelegate, UIScrollViewDelegate {
+final class CollectionViewTimelineController: UIViewController, UICollectionViewDelegate, UIScrollViewDelegate, CHTCollectionViewDelegateWaterfallLayout {
 
     // Use Int for section and String for item to avoid Sendable issues
     private static let sectionMain = 0
@@ -72,6 +78,8 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
                 return
             }
             usesCardBackground = appearanceSettings.timelineDisplayMode != .plain
+            heightCache.removeAll()
+            applyLayoutForColumnCount()
             reconfigureVisibleCells()
         }
     }
@@ -86,6 +94,19 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
             guard isViewLoaded else { return }
             guard oldValue != usesCardBackground else { return }
             updateBackgroundColors()
+        }
+    }
+    var columnCount: Int = 1 {
+        didSet {
+            let clamped = max(columnCount, 1)
+            if clamped != columnCount {
+                columnCount = clamped
+                return
+            }
+            guard oldValue != columnCount, isViewLoaded else { return }
+            heightCache.removeAll()
+            applyLayoutForColumnCount()
+            reconfigureVisibleCells()
         }
     }
 
@@ -179,18 +200,7 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
     // MARK: - Setup
 
     private func setupCollectionView() {
-        let layout = UICollectionViewCompositionalLayout { _, _ in
-            let itemSize = NSCollectionLayoutSize(
-                widthDimension: .fractionalWidth(1),
-                heightDimension: .estimated(180)
-            )
-            let item = NSCollectionLayoutItem(layoutSize: itemSize)
-            let group = NSCollectionLayoutGroup.vertical(layoutSize: itemSize, subitems: [item])
-            let section = NSCollectionLayoutSection(group: group)
-            section.interGroupSpacing = 2
-            return section
-        }
-        collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView = UICollectionView(frame: .zero, collectionViewLayout: makeSingleColumnLayout())
         collectionView.delegate = self
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(collectionView)
@@ -200,6 +210,70 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
             collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
         ])
+        applyLayoutForColumnCount()
+    }
+
+    private func makeSingleColumnLayout() -> UICollectionViewLayout {
+        let horizontalInset = appearanceSettings.timelineDisplayMode == .plain ? 0 : 16
+        return UICollectionViewCompositionalLayout { _, _ in
+            let itemSize = NSCollectionLayoutSize(
+                widthDimension: .fractionalWidth(1),
+                heightDimension: .estimated(180)
+            )
+            let item = NSCollectionLayoutItem(layoutSize: itemSize)
+            let group = NSCollectionLayoutGroup.vertical(layoutSize: itemSize, subitems: [item])
+            let section = NSCollectionLayoutSection(group: group)
+            section.interGroupSpacing = 2
+            section.contentInsets = NSDirectionalEdgeInsets(
+                top: 0,
+                leading: CGFloat(horizontalInset),
+                bottom: 0,
+                trailing: CGFloat(horizontalInset)
+            )
+            return section
+        }
+    }
+
+    private func makeWaterfallLayout(columns: Int) -> UICollectionViewLayout {
+        let layout = CHTCollectionViewWaterfallLayout()
+        layout.columnCount = columns
+        layout.minimumColumnSpacing = 12
+        layout.minimumInteritemSpacing = 12
+        layout.sectionInset = UIEdgeInsets(
+            top: 12,
+            left: layout.minimumColumnSpacing,
+            bottom: 12,
+            right: layout.minimumColumnSpacing
+        )
+        layout.itemRenderDirection = .shortestFirst
+        return layout
+    }
+
+    // MARK: - Sizing (for waterfall)
+
+    private lazy var sizingTimelineView = TimelineUIView()
+    private lazy var sizingTimelineCard: AdaptiveTimelineCardUIView = {
+        let card = AdaptiveTimelineCardUIView()
+        card.isMultipleColumn = true
+        card.setContent(UIView.padding(sizingTimelineView, insets: UIEdgeInsets(top: 12, left: 16, bottom: 12, right: 16)))
+        return card
+    }()
+    private lazy var sizingPlaceholderView = TimelinePlaceholderUIView()
+    private lazy var sizingPlaceholderCard: AdaptiveTimelineCardUIView = {
+        let card = AdaptiveTimelineCardUIView()
+        card.isMultipleColumn = true
+        card.setContent(UIView.padding(sizingPlaceholderView, insets: UIEdgeInsets(top: 12, left: 16, bottom: 12, right: 16)))
+        return card
+    }()
+    private var heightCache: [String: CGFloat] = [:]
+
+    private func applyLayoutForColumnCount() {
+        guard collectionView != nil else { return }
+        let newLayout: UICollectionViewLayout = columnCount > 1
+            ? makeWaterfallLayout(columns: columnCount)
+            : makeSingleColumnLayout()
+        collectionView.setCollectionViewLayout(newLayout, animated: false)
+        collectionView.collectionViewLayout.invalidateLayout()
     }
 
     private func setupDataSource() {
@@ -259,8 +333,8 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
 
     private func configureTimelineCell(_ cell: TimelineUIKitCollectionViewCell, index: Int) {
         guard let success = currentSuccess else { return }
-        let item = success.peek(index: Int32(index))
         let totalCount = Int(success.itemCount)
+        let item = (index >= 0 && index < totalCount) ? success.peek(index: Int32(index)) : nil
         if let item {
             cell.configureTimeline(
                 data: item,
@@ -268,6 +342,7 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
                 totalCount: totalCount,
                 appearance: appearanceSettings,
                 detailStatusKey: detailStatusKey,
+                isMultipleColumn: columnCount > 1,
                 openURL: openURL
             )
         } else {
@@ -285,7 +360,8 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
         cell.configurePlaceholder(
             index: index,
             totalCount: totalCount,
-            appearance: appearanceSettings
+            appearance: appearanceSettings,
+            isMultipleColumn: columnCount > 1
         )
     }
 
@@ -551,12 +627,101 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
         }
     }
 
+    // MARK: - CHTCollectionViewDelegateWaterfallLayout
+
+    func collectionView(
+        _ collectionView: UICollectionView,
+        layout collectionViewLayout: UICollectionViewLayout,
+        sizeForItemAt indexPath: IndexPath
+    ) -> CGSize {
+        guard let layout = collectionViewLayout as? CHTCollectionViewWaterfallLayout else {
+            return CGSize(width: collectionView.bounds.width, height: 200)
+        }
+        let section = indexPath.section
+        let columns = section == Self.sectionFooter ? 1 : max(columnCount, 1)
+        let insets = layout.sectionInset
+        let available = collectionView.bounds.width - insets.left - insets.right
+        let totalSpacing = CGFloat(columns - 1) * layout.minimumColumnSpacing
+        let width = max((available - totalSpacing) / CGFloat(columns), 1)
+
+        guard let itemID = dataSource.itemIdentifier(for: indexPath) else {
+            return CGSize(width: width, height: 200)
+        }
+
+        switch itemID {
+        case Self.emptyID, Self.errorID:
+            return CGSize(width: width, height: 240)
+        case Self.footerLoadingID, Self.footerErrorID, Self.footerEndID:
+            return CGSize(width: width, height: 60)
+        default:
+            break
+        }
+
+        if itemID.hasPrefix(Self.placeholderPrefix) {
+            let key = "__placeholder__:\(Int(width))"
+            if let cached = heightCache[key] { return CGSize(width: width, height: cached) }
+            let totalCount = currentSuccess.map { Int($0.itemCount) } ?? 5
+            sizingPlaceholderCard.timelineDisplayMode = appearanceSettings.timelineDisplayMode
+            sizingPlaceholderCard.isMultipleColumn = true
+            sizingPlaceholderCard.configure(index: 0, totalCount: totalCount)
+            let target = CGSize(width: width, height: UIView.layoutFittingCompressedSize.height)
+            let size = sizingPlaceholderCard.systemLayoutSizeFitting(
+                target,
+                withHorizontalFittingPriority: .required,
+                verticalFittingPriority: .fittingSizeLevel
+            )
+            let height = max(size.height, 120)
+            heightCache[key] = height
+            return CGSize(width: width, height: height)
+        }
+
+        if itemID.hasPrefix(Self.timelinePrefix),
+           let index = itemIndexMap[itemID],
+           let success = currentSuccess,
+           index >= 0,
+           index < Int(success.itemCount),
+           let item = success.peek(index: Int32(index)) {
+            let key = "\(itemID):\(item.renderHash):\(Int(width))"
+            if let cached = heightCache[key] { return CGSize(width: width, height: cached) }
+            sizingTimelineCard.timelineDisplayMode = appearanceSettings.timelineDisplayMode
+            sizingTimelineCard.isMultipleColumn = true
+            sizingTimelineCard.configure(index: index, totalCount: Int(success.itemCount))
+            sizingTimelineView.configure(
+                data: item,
+                appearance: appearanceSettings,
+                detailStatusKey: detailStatusKey,
+                onOpenURL: nil
+            )
+            let target = CGSize(width: width, height: UIView.layoutFittingCompressedSize.height)
+            let size = sizingTimelineCard.systemLayoutSizeFitting(
+                target,
+                withHorizontalFittingPriority: .required,
+                verticalFittingPriority: .fittingSizeLevel
+            )
+            let height = max(size.height, 120)
+            heightCache[key] = height
+            return CGSize(width: width, height: height)
+        }
+
+        return CGSize(width: width, height: 200)
+    }
+
+    func collectionView(
+        _ collectionView: UICollectionView,
+        layout collectionViewLayout: UICollectionViewLayout,
+        columnCountFor section: Int
+    ) -> Int {
+        section == Self.sectionFooter ? 1 : max(columnCount, 1)
+    }
+
     // MARK: - UICollectionViewDelegate
 
     func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         guard let success = currentSuccess else { return }
         if let itemID = dataSource.itemIdentifier(for: indexPath),
-           let index = itemIndexMap[itemID] {
+           let index = itemIndexMap[itemID],
+           index >= 0,
+           index < Int(success.itemCount) {
             _ = success.get(index: Int32(index))
         }
     }
@@ -599,9 +764,7 @@ private final class TimelineUIKitCollectionViewCell: UICollectionViewCell {
         super.init(frame: frame)
         backgroundColor = .clear
         contentView.backgroundColor = .clear
-        timelineCard.isMultipleColumn = false
         timelineCard.setContent(UIView.padding(timelineView, insets: UIEdgeInsets(top: 12, left: 16, bottom: 12, right: 16)))
-        placeholderCard.isMultipleColumn = false
         placeholderCard.setContent(UIView.padding(placeholderView, insets: UIEdgeInsets(top: 12, left: 16, bottom: 12, right: 16)))
     }
 
@@ -625,11 +788,13 @@ private final class TimelineUIKitCollectionViewCell: UICollectionViewCell {
         totalCount: Int,
         appearance: AppearanceSettings,
         detailStatusKey: MicroBlogKey?,
+        isMultipleColumn: Bool,
         openURL: ((URL) -> Void)?
     ) {
         // Card styling is cheap; always reapply so index/totalCount changes
         // (affecting the card's outer rounded corners) are picked up.
         timelineCard.timelineDisplayMode = appearance.timelineDisplayMode
+        timelineCard.isMultipleColumn = isMultipleColumn
         timelineCard.configure(index: index, totalCount: totalCount)
 
         let itemKey = data.itemKey ?? ""
@@ -661,8 +826,9 @@ private final class TimelineUIKitCollectionViewCell: UICollectionViewCell {
         setHostedView(timelineCard)
     }
 
-    func configurePlaceholder(index: Int, totalCount: Int, appearance: AppearanceSettings) {
+    func configurePlaceholder(index: Int, totalCount: Int, appearance: AppearanceSettings, isMultipleColumn: Bool) {
         placeholderCard.timelineDisplayMode = appearance.timelineDisplayMode
+        placeholderCard.isMultipleColumn = isMultipleColumn
         placeholderCard.configure(index: index, totalCount: totalCount)
         setHostedView(placeholderCard)
     }

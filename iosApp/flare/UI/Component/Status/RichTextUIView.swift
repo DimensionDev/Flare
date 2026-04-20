@@ -6,24 +6,30 @@ import KotlinSharedUI
 final class RichTextUIView: UIView {
     // MARK: - Public inputs
 
-    var text: UiRichText? { didSet { update() } }
+    var text: UiRichText? { didSet { if !isBatchUpdating { update() } } }
     var lineLimit: Int? = nil {
         didSet {
+            guard !isBatchUpdating, oldValue != lineLimit else { return }
             updateHorizontalLayoutPolicy()
             updateTextViews()
         }
     }
     var isTextSelectionEnabled: Bool = false {
         didSet {
-            if oldValue != isTextSelectionEnabled {
+            if !isBatchUpdating, oldValue != isTextSelectionEnabled {
                 update()
             }
         }
     }
-    var fixedVertical: Bool = true { didSet { invalidateIntrinsicContentSize() } }
-    var onOpenURL: ((URL) -> Void)? { didSet { updateTextViews() } }
-    var baseTextStyle: UIFont.TextStyle = .body { didSet { update() } }
-    var baseTextColor: UIColor = .label { didSet { update() } }
+    var fixedVertical: Bool = true {
+        didSet {
+            guard !isBatchUpdating, oldValue != fixedVertical else { return }
+            invalidateIntrinsicContentSize()
+        }
+    }
+    var onOpenURL: ((URL) -> Void)? { didSet { if !isBatchUpdating { updateTextViews() } } }
+    var baseTextStyle: UIFont.TextStyle = .body { didSet { if !isBatchUpdating { update() } } }
+    var baseTextColor: UIColor = .label { didSet { if !isBatchUpdating { update() } } }
 
     // MARK: - Private state
 
@@ -40,7 +46,28 @@ final class RichTextUIView: UIView {
     private var textBlocks: [RenderedTextBlock] = []
     private var renderGeneration = 0
     private var lastLayoutWidth: CGFloat = 0
+    private var isBatchUpdating = false
+    private var lastStructuralSignature: StructuralSignature?
     private var traitRegistration: UITraitChangeRegistration?
+
+    private struct StructuralSignature: Equatable {
+        let textID: ObjectIdentifier?
+        let isTextSelectionEnabled: Bool
+        let baseTextStyle: String
+        let baseTextColor: String
+
+        init(
+            text: UiRichText?,
+            isTextSelectionEnabled: Bool,
+            baseTextStyle: UIFont.TextStyle,
+            baseTextColor: UIColor
+        ) {
+            textID = text.map { ObjectIdentifier($0) }
+            self.isTextSelectionEnabled = isTextSelectionEnabled
+            self.baseTextStyle = String(describing: baseTextStyle)
+            self.baseTextColor = String(describing: baseTextColor)
+        }
+    }
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -70,7 +97,42 @@ final class RichTextUIView: UIView {
 
     // MARK: - Rendering
 
-    private func update() {
+    func configure(
+        text: UiRichText?,
+        lineLimit: Int?,
+        isTextSelectionEnabled: Bool,
+        onOpenURL: ((URL) -> Void)?,
+        baseTextStyle: UIFont.TextStyle = .body,
+        baseTextColor: UIColor = .label
+    ) {
+        let oldLineLimit = self.lineLimit
+        isBatchUpdating = true
+        self.text = text
+        self.lineLimit = lineLimit
+        self.isTextSelectionEnabled = isTextSelectionEnabled
+        self.onOpenURL = onOpenURL
+        self.baseTextStyle = baseTextStyle
+        self.baseTextColor = baseTextColor
+        isBatchUpdating = false
+
+        if oldLineLimit != lineLimit {
+            updateHorizontalLayoutPolicy()
+        }
+        update()
+    }
+
+    private func update(force: Bool = false) {
+        let structuralSignature = StructuralSignature(
+            text: text,
+            isTextSelectionEnabled: isTextSelectionEnabled,
+            baseTextStyle: baseTextStyle,
+            baseTextColor: baseTextColor
+        )
+        guard force || lastStructuralSignature != structuralSignature else {
+            updateTextViews()
+            return
+        }
+        lastStructuralSignature = structuralSignature
         renderGeneration += 1
         clearStack()
 

@@ -3,9 +3,10 @@ import KotlinSharedUI
 
 /// UIKit port of `AdaptiveTimelineCard` + `ListCardView`.
 ///
-/// Exactly replicates the SwiftUI branching:
+/// Mirrors the SwiftUI branching, with UIKit collection layouts owning
+/// outer screen spacing:
 ///   if isMultipleColumn || !(timelineDisplayMode == .plain) {
-///       ListCardView(...) { content }.padding(.horizontal)
+///       ListCardView(...) { content }
 ///   } else {
 ///       VStack(spacing: 0) { content; if !last { Divider() } }
 ///   }
@@ -21,8 +22,6 @@ final class AdaptiveTimelineCardUIView: UIView {
 
     private static let cornerRadius: CGFloat = 32
     private static let plainEdgeRadius: CGFloat = 4
-    /// SwiftUI's `.padding(.horizontal)` default.
-    private static let horizontalPadding: CGFloat = 16
 
     private let contentContainer = UIView()
     private let cardBackground = CAShapeLayer()
@@ -101,9 +100,10 @@ final class AdaptiveTimelineCardUIView: UIView {
 
     private func applyMode() {
         if useCardStyle {
-            // Card mode: horizontal padding outside card, card background, no divider.
-            leadingConstraint.constant = Self.horizontalPadding
-            trailingConstraint.constant = -Self.horizontalPadding
+            // Screen spacing is owned by the collection layout so cell widths
+            // and inter-column spacing stay consistent.
+            leadingConstraint.constant = 0
+            trailingConstraint.constant = 0
             cardBackground.isHidden = false
             divider.isHidden = true
             dividerHeightConstraint.isActive = false

@@ -3,6 +3,32 @@ import Kingfisher
 import KotlinSharedUI
 import SwiftUI
 
+private struct MediaItemSignature: Equatable {
+    let kind: String
+    let primaryURL: String
+    let altText: String
+    let aspectRatio: CGFloat?
+
+    init(media: UiMedia) {
+        altText = media.description_ ?? ""
+        aspectRatio = media.aspectRatio
+        switch onEnum(of: media) {
+        case .image(let image):
+            kind = "image"
+            primaryURL = image.previewUrl
+        case .video(let video):
+            kind = "video"
+            primaryURL = video.thumbnailUrl
+        case .gif(let gif):
+            kind = "gif"
+            primaryURL = gif.url
+        case .audio:
+            kind = "audio"
+            primaryURL = ""
+        }
+    }
+}
+
 // MARK: - MediaUIView
 // UIKit port of MediaView.swift for a single UiMedia item.
 //
@@ -42,6 +68,8 @@ final class MediaUIView: UIView {
         v.isHidden = true
         return v
     }()
+    private var lastMediaSignature: MediaItemSignature?
+    private var lastCornerRadius: CGFloat?
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -72,6 +100,16 @@ final class MediaUIView: UIView {
     required init?(coder: NSCoder) { fatalError("init(coder:) not supported") }
 
     func set(media: UiMedia, cornerRadius: CGFloat) {
+        let signature = MediaItemSignature(media: media)
+        if lastMediaSignature == signature {
+            if lastCornerRadius != cornerRadius {
+                layer.cornerRadius = cornerRadius
+                lastCornerRadius = cornerRadius
+            }
+            return
+        }
+        lastMediaSignature = signature
+        lastCornerRadius = cornerRadius
         layer.cornerRadius = cornerRadius
         imageView.kf.cancelDownloadTask()
         imageView.image = nil
@@ -122,6 +160,27 @@ final class StatusMediaUIView: UIView {
     private var aspectConstraint: NSLayoutConstraint?
     private var lastLayoutWidth: CGFloat = 0
     private let spacing: CGFloat = 4
+    private var cellPool: [MediaGridCellView] = []
+    private var lastConfigureSignature: ConfigureSignature?
+
+    private struct ConfigureSignature: Equatable {
+        let items: [MediaItemSignature]
+        let sensitive: Bool
+        let cornerRadius: CGFloat
+        let singleFollowsImageAspect: Bool
+
+        init(
+            data: [UiMedia],
+            sensitive: Bool,
+            cornerRadius: CGFloat,
+            singleFollowsImageAspect: Bool
+        ) {
+            items = data.map(MediaItemSignature.init)
+            self.sensitive = sensitive
+            self.cornerRadius = cornerRadius
+            self.singleFollowsImageAspect = singleFollowsImageAspect
+        }
+    }
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -191,11 +250,24 @@ final class StatusMediaUIView: UIView {
     }
 
     func configure(data: [UiMedia], sensitive: Bool, cornerRadius: CGFloat, singleFollowsImageAspect: Bool) {
+        let signature = ConfigureSignature(
+            data: data,
+            sensitive: sensitive,
+            cornerRadius: cornerRadius,
+            singleFollowsImageAspect: singleFollowsImageAspect
+        )
+        guard lastConfigureSignature != signature else { return }
+        let shouldResetBlur =
+            lastConfigureSignature?.items != signature.items ||
+            lastConfigureSignature?.sensitive != signature.sensitive
+        lastConfigureSignature = signature
         self.items = data
         self.sensitive = sensitive
         self.cornerRadius = cornerRadius
         self.singleFollowsImageAspect = singleFollowsImageAspect
-        self.isBlurred = sensitive
+        if shouldResetBlur {
+            self.isBlurred = sensitive
+        }
         layer.cornerRadius = cornerRadius
         updateAspectConstraint()
         rebuildGrid()
@@ -203,13 +275,26 @@ final class StatusMediaUIView: UIView {
     }
 
     private func rebuildGrid() {
-        grid.subviews.forEach {
-            $0.removeFromSuperview()
+        while cellPool.count < items.count {
+            let cell = MediaGridCellView()
+            cell.onTap = { [weak self] index in
+                self?.handleCellTap(index: index)
+            }
+            cellPool.append(cell)
+            grid.addSubview(cell)
         }
-        guard !items.isEmpty else { return }
-
         for (index, item) in items.enumerated() {
-            grid.addSubview(makeCell(media: item, index: index))
+            let cell = cellPool[index]
+            if cell.superview == nil {
+                grid.addSubview(cell)
+            }
+            cell.isHidden = false
+            cell.configure(media: item, index: index)
+        }
+        if items.count < cellPool.count {
+            for cell in cellPool[items.count..<cellPool.count] {
+                cell.isHidden = true
+            }
         }
         setNeedsLayout()
         invalidateIntrinsicContentSize()
@@ -245,7 +330,7 @@ final class StatusMediaUIView: UIView {
 
     private func layoutGrid() {
         let frames = gridFrames(for: grid.bounds.width)
-        for (view, frame) in zip(grid.subviews, frames) {
+        for (view, frame) in zip(cellPool.prefix(items.count), frames) {
             view.frame = frame
         }
     }
@@ -353,41 +438,7 @@ final class StatusMediaUIView: UIView {
         return 1
     }
 
-    private func makeCell(media: UiMedia, index: Int) -> UIView {
-        let container = UIView()
-        let mv = MediaUIView()
-        mv.set(media: media, cornerRadius: 0)
-        mv.translatesAutoresizingMaskIntoConstraints = false
-        container.addSubview(mv)
-
-        NSLayoutConstraint.activate([
-            mv.topAnchor.constraint(equalTo: container.topAnchor),
-            mv.leadingAnchor.constraint(equalTo: container.leadingAnchor),
-            mv.trailingAnchor.constraint(equalTo: container.trailingAnchor),
-            mv.bottomAnchor.constraint(equalTo: container.bottomAnchor),
-        ])
-
-        let tap = UITapGestureRecognizer(target: self, action: #selector(onCellTapped(_:)))
-        container.tag = index
-        container.isUserInteractionEnabled = true
-        container.addGestureRecognizer(tap)
-
-        // ALT overlay
-        if let alt = media.description_, !alt.isEmpty {
-            let alt = AltTextButton(text: alt)
-            alt.translatesAutoresizingMaskIntoConstraints = false
-            container.addSubview(alt)
-            NSLayoutConstraint.activate([
-                alt.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -8),
-                alt.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -8),
-            ])
-        }
-        return container
-    }
-
-    @objc private func onCellTapped(_ gesture: UITapGestureRecognizer) {
-        guard let view = gesture.view else { return }
-        let index = view.tag
+    private func handleCellTap(index: Int) {
         if sensitive, isBlurred { return }
         guard items.indices.contains(index) else { return }
         onMediaClicked?(items[index], index)
@@ -436,9 +487,63 @@ final class StatusMediaUIView: UIView {
     }
 }
 
+private final class MediaGridCellView: UIView {
+    var onTap: ((Int) -> Void)?
+
+    private let mediaView = MediaUIView()
+    private var altButton: AltTextButton?
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        clipsToBounds = true
+        mediaView.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(mediaView)
+        NSLayoutConstraint.activate([
+            mediaView.topAnchor.constraint(equalTo: topAnchor),
+            mediaView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            mediaView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            mediaView.bottomAnchor.constraint(equalTo: bottomAnchor),
+        ])
+
+        let tap = UITapGestureRecognizer(target: self, action: #selector(onCellTapped))
+        isUserInteractionEnabled = true
+        addGestureRecognizer(tap)
+    }
+
+    required init?(coder: NSCoder) { fatalError("init(coder:) not supported") }
+
+    func configure(media: UiMedia, index: Int) {
+        tag = index
+        mediaView.set(media: media, cornerRadius: 0)
+        if let altText = media.description_, !altText.isEmpty {
+            let button: AltTextButton
+            if let altButton {
+                button = altButton
+            } else {
+                button = AltTextButton(text: altText)
+                button.translatesAutoresizingMaskIntoConstraints = false
+                addSubview(button)
+                NSLayoutConstraint.activate([
+                    button.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -8),
+                    button.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -8),
+                ])
+                altButton = button
+            }
+            button.configure(text: altText)
+            button.isHidden = false
+        } else {
+            altButton?.isHidden = true
+        }
+    }
+
+    @objc private func onCellTapped() {
+        onTap?(tag)
+    }
+}
+
 // Tiny popover-on-tap button for the `description_` / alt text.
 private final class AltTextButton: UIButton {
-    private let altText: String
+    private var altText: String
     init(text: String) {
         self.altText = text
         super.init(frame: .zero)
@@ -449,6 +554,10 @@ private final class AltTextButton: UIButton {
         addTarget(self, action: #selector(showAlt), for: .touchUpInside)
     }
     required init?(coder: NSCoder) { fatalError("init(coder:) not supported") }
+
+    func configure(text: String) {
+        altText = text
+    }
 
     @objc private func showAlt() {
         guard let parent = findParentViewController() else { return }
@@ -479,6 +588,32 @@ final class StatusMediaContentUIView: UIView {
     private var appearanceShowSensitive: Bool = false
     private var appearanceExpandMediaSize: Bool = true
     private var showButtonConstraints: [NSLayoutConstraint] = []
+    private var lastConfigureSignature: ConfigureSignature?
+
+    private struct ConfigureSignature: Equatable {
+        let items: [MediaItemSignature]
+        let sensitive: Bool
+        let cornerRadius: CGFloat
+        let appearanceShowMedia: Bool
+        let appearanceShowSensitive: Bool
+        let appearanceExpandMediaSize: Bool
+
+        init(
+            data: [UiMedia],
+            sensitive: Bool,
+            cornerRadius: CGFloat,
+            appearanceShowMedia: Bool,
+            appearanceShowSensitive: Bool,
+            appearanceExpandMediaSize: Bool
+        ) {
+            items = data.map(MediaItemSignature.init)
+            self.sensitive = sensitive
+            self.cornerRadius = cornerRadius
+            self.appearanceShowMedia = appearanceShowMedia
+            self.appearanceShowSensitive = appearanceShowSensitive
+            self.appearanceExpandMediaSize = appearanceExpandMediaSize
+        }
+    }
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -557,13 +692,28 @@ final class StatusMediaContentUIView: UIView {
         appearanceShowSensitive: Bool,
         appearanceExpandMediaSize: Bool
     ) {
+        let signature = ConfigureSignature(
+            data: data,
+            sensitive: sensitive,
+            cornerRadius: cornerRadius,
+            appearanceShowMedia: appearanceShowMedia,
+            appearanceShowSensitive: appearanceShowSensitive,
+            appearanceExpandMediaSize: appearanceExpandMediaSize
+        )
+        guard lastConfigureSignature != signature else { return }
+        let shouldResetExpanded =
+            lastConfigureSignature?.items != signature.items ||
+            lastConfigureSignature?.sensitive != signature.sensitive
+        lastConfigureSignature = signature
         self.items = data
         self.sensitive = sensitive
         self.cornerRadius = cornerRadius
         self.appearanceShowMedia = appearanceShowMedia
         self.appearanceShowSensitive = appearanceShowSensitive
         self.appearanceExpandMediaSize = appearanceExpandMediaSize
-        self.expanded = false
+        if shouldResetExpanded {
+            self.expanded = false
+        }
         applyVisibility()
         invalidateIntrinsicContentSize()
     }

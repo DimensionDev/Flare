@@ -694,6 +694,21 @@ private final class GalleryPostTileUIView: UIView, UIGestureRecognizerDelegate {
 
     private let stack = UIStackView()
     private let imageView = GalleryNetworkImageView(frame: .zero)
+    private let playBadge: UIImageView = {
+        let imageView = UIImageView(image: UIImage(named: "fa-circle-play"))
+        imageView.contentMode = .scaleAspectFit
+        imageView.tintColor = .white
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        return imageView
+    }()
+    private let playBadgeBackground: UIView = {
+        let view = UIView()
+        view.backgroundColor = .black
+        view.layer.cornerRadius = 16
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.isHidden = true
+        return view
+    }()
     private let textContainer = UIView()
     private let bodyText = RichTextUIView()
     private let userRow = UIStackView()
@@ -722,8 +737,20 @@ private final class GalleryPostTileUIView: UIView, UIGestureRecognizerDelegate {
 
         imageView.isUserInteractionEnabled = true
         stack.addArrangedSubview(imageView)
+        imageView.addSubview(playBadgeBackground)
+        playBadgeBackground.addSubview(playBadge)
+        NSLayoutConstraint.activate([
+            playBadgeBackground.leadingAnchor.constraint(equalTo: imageView.leadingAnchor, constant: 12),
+            playBadgeBackground.bottomAnchor.constraint(equalTo: imageView.bottomAnchor, constant: -12),
+            playBadgeBackground.widthAnchor.constraint(equalToConstant: 32),
+            playBadgeBackground.heightAnchor.constraint(equalToConstant: 32),
+            playBadge.centerXAnchor.constraint(equalTo: playBadgeBackground.centerXAnchor),
+            playBadge.centerYAnchor.constraint(equalTo: playBadgeBackground.centerYAnchor),
+            playBadge.widthAnchor.constraint(equalToConstant: 16),
+            playBadge.heightAnchor.constraint(equalToConstant: 16),
+        ])
 
-        bodyText.baseTextStyle = .caption1
+        bodyText.baseTextStyle = .subheadline
         bodyText.lineLimit = 5
         bodyText.fixedVertical = true
         bodyText.setContentHuggingPriority(.required, for: .vertical)
@@ -775,6 +802,7 @@ private final class GalleryPostTileUIView: UIView, UIGestureRecognizerDelegate {
         imageAspectConstraint?.isActive = false
         imageAspectConstraint = nil
         imageView.cancel()
+        playBadgeBackground.isHidden = true
         avatar.set(url: nil)
         bodyText.text = nil
         userName.text = nil
@@ -786,6 +814,7 @@ private final class GalleryPostTileUIView: UIView, UIGestureRecognizerDelegate {
         avatar.avatarShape = appearance.avatarShape
 
         imageView.isHidden = true
+        playBadgeBackground.isHidden = true
         imageView.cancel()
         textContainer.isHidden = true
         bodyText.text = nil
@@ -798,6 +827,7 @@ private final class GalleryPostTileUIView: UIView, UIGestureRecognizerDelegate {
             mediaPreviewURL = preview
             if let preview {
                 imageView.isHidden = false
+                playBadgeBackground.isHidden = !isVideo(media)
                 if loadsRemoteImages {
                     imageView.set(url: preview, customHeaders: nil)
                 }
@@ -819,6 +849,13 @@ private final class GalleryPostTileUIView: UIView, UIGestureRecognizerDelegate {
             avatar.set(url: nil)
             userName.text = nil
         }
+    }
+
+    private func isVideo(_ media: any UiMedia) -> Bool {
+        if case .video = onEnum(of: media) {
+            return true
+        }
+        return false
     }
 
     private func previewURL(for media: any UiMedia) -> String? {

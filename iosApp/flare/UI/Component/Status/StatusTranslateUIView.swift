@@ -15,6 +15,8 @@ final class StatusTranslateUIView: UIView {
     var contentWarning: UiRichText? { didSet { update() } }
 
     private let host: UIHostingController<AnyView>
+    private var lastReportedSize: CGSize = .zero
+    private var isLayoutInvalidationScheduled = false
 
     override init(frame: CGRect) {
         self.host = UIHostingController(rootView: AnyView(EmptyView()))
@@ -28,8 +30,10 @@ final class StatusTranslateUIView: UIView {
     }
 
     private func commonInit() {
+        clipsToBounds = true
         host.view.backgroundColor = .clear
         host.view.translatesAutoresizingMaskIntoConstraints = false
+        host.sizingOptions = [.intrinsicContentSize]
         addSubview(host.view)
         NSLayoutConstraint.activate([
             host.view.topAnchor.constraint(equalTo: topAnchor),
@@ -48,13 +52,73 @@ final class StatusTranslateUIView: UIView {
 
     private func update() {
         guard let content = content else {
+            lastReportedSize = .zero
             host.rootView = AnyView(EmptyView())
             return
         }
         host.rootView = AnyView(
-            StatusTranslateView(content: content, contentWarning: contentWarning)
+            StatusTranslateView(
+                content: content,
+                contentWarning: contentWarning,
+                onSizeChange: { [weak self] size in
+                    self?.handleSizeChange(size)
+                },
+                onLayoutChange: { [weak self] in
+                    self?.scheduleContainingLayoutInvalidation()
+                }
+            )
         )
+        host.view.invalidateIntrinsicContentSize()
         invalidateIntrinsicContentSize()
+    }
+
+    private func handleSizeChange(_ size: CGSize) {
+        guard size.width.isFinite, size.height.isFinite else { return }
+        let didChange =
+            abs(size.width - lastReportedSize.width) > 0.5 ||
+            abs(size.height - lastReportedSize.height) > 0.5
+        guard didChange else { return }
+        lastReportedSize = size
+        scheduleContainingLayoutInvalidation()
+    }
+
+    private func scheduleContainingLayoutInvalidation() {
+        guard !isLayoutInvalidationScheduled else { return }
+        isLayoutInvalidationScheduled = true
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            self.isLayoutInvalidationScheduled = false
+            self.host.view.invalidateIntrinsicContentSize()
+            self.invalidateIntrinsicContentSize()
+            self.setNeedsLayout()
+            self.superview?.setNeedsLayout()
+            self.invalidateContainingCollectionLayout()
+        }
+    }
+
+    private func invalidateContainingCollectionLayout() {
+        var responder: UIResponder? = self
+        var cellRef: UICollectionViewCell?
+        while let current = responder {
+            if cellRef == nil, let cell = current as? UICollectionViewCell {
+                cellRef = cell
+            }
+            if let collectionView = current as? UICollectionView {
+                if let cell = cellRef, let indexPath = collectionView.indexPath(for: cell) {
+                    cell.setNeedsLayout()
+                    cell.contentView.setNeedsLayout()
+                    cell.layoutIfNeeded()
+                    let context = UICollectionViewLayoutInvalidationContext()
+                    context.invalidateItems(at: [indexPath])
+                    collectionView.collectionViewLayout.invalidateLayout(with: context)
+                } else {
+                    collectionView.collectionViewLayout.invalidateLayout()
+                }
+                collectionView.performBatchUpdates(nil)
+                return
+            }
+            responder = current.next
+        }
     }
 
     private func findParentViewController() -> UIViewController? {

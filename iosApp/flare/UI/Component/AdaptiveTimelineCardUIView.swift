@@ -12,8 +12,8 @@ import KotlinSharedUI
 ///   }
 final class AdaptiveTimelineCardUIView: UIView {
 
-    // Mirrors `@Environment(\.appearanceSettings.timelineDisplayMode)`.
-    var timelineDisplayMode: TimelineDisplayMode = .plain
+    // Mirrors `@Environment(\.appearanceSettings.timelineDisplayMode == .plain)`.
+    var isPlainTimelineDisplayMode = true
     // Mirrors `@Environment(\.isMultipleColumn)`.
     var isMultipleColumn: Bool = false
 
@@ -95,7 +95,7 @@ final class AdaptiveTimelineCardUIView: UIView {
     }
 
     private var useCardStyle: Bool {
-        isMultipleColumn || timelineDisplayMode != .plain
+        isMultipleColumn || !isPlainTimelineDisplayMode
     }
 
     private func applyMode() {

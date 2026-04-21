@@ -10,8 +10,8 @@ struct CollectionViewTimelineView: UIViewControllerRepresentable {
     let detailStatusKey: MicroBlogKey?
     let topContentInset: CGFloat
     let columnCount: Int
+    let accessoryItems: [CollectionViewTimelineAccessoryItem]
     @Environment(\.appearanceSettings) private var appearanceSettings
-    @Environment(\.appearanceSettings.timelineDisplayMode) private var timelineDisplayMode
     @Environment(\.networkKind) private var networkKind
     @Environment(\.openURL) private var openURL
     @Environment(\.refresh) private var refreshAction: RefreshAction?
@@ -20,12 +20,14 @@ struct CollectionViewTimelineView: UIViewControllerRepresentable {
         data: PagingState<UiTimelineV2>,
         detailStatusKey: MicroBlogKey?,
         topContentInset: CGFloat = 0,
-        columnCount: Int = 1
+        columnCount: Int = 1,
+        accessoryItems: [CollectionViewTimelineAccessoryItem] = []
     ) {
         self.data = data
         self.detailStatusKey = detailStatusKey
         self.topContentInset = topContentInset
         self.columnCount = max(columnCount, 1)
+        self.accessoryItems = accessoryItems
     }
 
     func makeUIViewController(context: Context) -> CollectionViewTimelineController {
@@ -34,13 +36,13 @@ struct CollectionViewTimelineView: UIViewControllerRepresentable {
             { await action() }
         }
         controller.topContentInset = topContentInset
-        controller.appearanceSettings = appearanceSettings
+        controller.appearance = TimelineUIKitAppearance(settings: appearanceSettings)
         controller.openURL = { url in
             openURL.callAsFunction(url)
         }
         controller.networkKind = networkKind
-        controller.usesCardBackground = timelineDisplayMode != .plain
         controller.columnCount = columnCount
+        controller.accessoryItems = accessoryItems
         controller.update(data: data)
         return controller
     }
@@ -50,14 +52,26 @@ struct CollectionViewTimelineView: UIViewControllerRepresentable {
             { await action() }
         }
         controller.topContentInset = topContentInset
-        controller.appearanceSettings = appearanceSettings
+        controller.appearance = TimelineUIKitAppearance(settings: appearanceSettings)
         controller.openURL = { url in
             openURL.callAsFunction(url)
         }
         controller.networkKind = networkKind
-        controller.usesCardBackground = timelineDisplayMode != .plain
         controller.columnCount = columnCount
+        controller.accessoryItems = accessoryItems
         controller.update(data: data)
+    }
+}
+
+struct CollectionViewTimelineAccessoryItem {
+    let id: String
+    let view: UIView
+    let onVisibilityChanged: ((Bool) -> Void)?
+
+    init(id: String, view: UIView, onVisibilityChanged: ((Bool) -> Void)? = nil) {
+        self.id = id
+        self.view = view
+        self.onVisibilityChanged = onVisibilityChanged
     }
 }
 
@@ -66,8 +80,9 @@ struct CollectionViewTimelineView: UIViewControllerRepresentable {
 final class CollectionViewTimelineController: UIViewController, UICollectionViewDelegate, UIScrollViewDelegate, CHTCollectionViewDelegateWaterfallLayout {
 
     // Use Int for section and String for item to avoid Sendable issues
-    private static let sectionMain = 0
-    private static let sectionFooter = 1
+    private static let sectionAccessories = 0
+    private static let sectionMain = 1
+    private static let sectionFooter = 2
 
     private let detailStatusKey: MicroBlogKey?
     private var currentData: PagingState<UiTimelineV2>?
@@ -75,13 +90,13 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
 
     var refreshCallback: (() async -> Void)?
     var openURL: ((URL) -> Void)?
-    var appearanceSettings: AppearanceSettings = AppearanceSettings.companion.Default {
+    var appearance = TimelineUIKitAppearance(settings: AppearanceSettings.companion.Default) {
         didSet {
             guard isViewLoaded else { return }
-            guard AppearanceSignature(settings: oldValue) != AppearanceSignature(settings: appearanceSettings) else {
+            guard oldValue != appearance else {
                 return
             }
-            usesCardBackground = appearanceSettings.timelineDisplayMode != .plain
+            usesCardBackground = appearance.usesCardBackground
             heightCache.removeAll()
             applyLayoutForColumnCount()
             reconfigureVisibleCells()
@@ -97,6 +112,12 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
     var topContentInset: CGFloat = 0 {
         didSet {
             guard isViewLoaded else { return }
+            updateContentInsets()
+        }
+    }
+    var extendsContentUnderTopBars: Bool = false {
+        didSet {
+            guard oldValue != extendsContentUnderTopBars, isViewLoaded else { return }
             updateContentInsets()
         }
     }
@@ -120,6 +141,50 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
             reconfigureVisibleCells()
         }
     }
+    var accessoryItems: [CollectionViewTimelineAccessoryItem] = [] {
+        didSet {
+            let oldIDs = oldValue.map { "\(Self.accessoryPrefix)\($0.id)" }
+            let newIDs = accessoryItems.map { "\(Self.accessoryPrefix)\($0.id)" }
+            accessoryItemMap = Dictionary(
+                uniqueKeysWithValues: zip(newIDs, accessoryItems)
+            )
+            guard isViewLoaded else { return }
+            if oldIDs.isEmpty != newIDs.isEmpty {
+                collectionView.collectionViewLayout.invalidateLayout()
+            }
+            if oldIDs == newIDs {
+                reconfigureItems(newIDs)
+                return
+            }
+            guard let currentData else { return }
+            lastAppliedSignature = nil
+            applySnapshot(data: currentData)
+        }
+    }
+
+    var currentContentOffset: CGPoint {
+        collectionView?.contentOffset ?? .zero
+    }
+
+    func setContentOffset(_ offset: CGPoint, animated: Bool) {
+        guard isViewLoaded else { return }
+        collectionView.setContentOffset(offset, animated: animated)
+    }
+
+    func restoreContentOffset(_ offset: CGPoint, animated: Bool) {
+        guard isViewLoaded else { return }
+        view.layoutIfNeeded()
+        collectionView.layoutIfNeeded()
+        let minY = -collectionView.adjustedContentInset.top
+        let maxY = max(
+            minY,
+            collectionView.contentSize.height - collectionView.bounds.height + collectionView.adjustedContentInset.bottom
+        )
+        collectionView.setContentOffset(
+            CGPoint(x: offset.x, y: min(max(offset.y, minY), maxY)),
+            animated: animated
+        )
+    }
 
     private var collectionView: UICollectionView!
     private var dataSource: UICollectionViewDiffableDataSource<Int, String>!
@@ -134,50 +199,21 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
     private var autoplayCountdownTask: Task<Void, Never>?
     private weak var currentAutoplayHostView: UIView?
     private var currentAutoplayID: String?
+    private var accessoryItemMap: [String: CollectionViewTimelineAccessoryItem] = [:]
 
     // Maps item identifier → index for timeline cells
     private var itemIndexMap: [String: Int] = [:]
 
     private struct SnapshotSignature: Equatable {
+        let accessoryIDs: [String]
         let itemIDs: [String]
         let footerIDs: [String]
-    }
-
-    private struct AppearanceSignature: Equatable {
-        let timelineDisplayMode: String
-        let fullWidthPost: Bool
-        let avatarShape: String
-        let showPlatformLogo: Bool
-        let absoluteTimestamp: Bool
-        let postActionStyle: String
-        let showNumbers: Bool
-        let showMedia: Bool
-        let showSensitiveContent: Bool
-        let showLinkPreview: Bool
-        let compatLinkPreview: Bool
-        let expandMediaSize: Bool
-        let videoAutoplay: String
-
-        init(settings: AppearanceSettings) {
-            timelineDisplayMode = String(describing: settings.timelineDisplayMode)
-            fullWidthPost = settings.fullWidthPost
-            avatarShape = String(describing: settings.avatarShape)
-            showPlatformLogo = settings.showPlatformLogo
-            absoluteTimestamp = settings.absoluteTimestamp
-            postActionStyle = String(describing: settings.postActionStyle)
-            showNumbers = settings.showNumbers
-            showMedia = settings.showMedia
-            showSensitiveContent = settings.showSensitiveContent
-            showLinkPreview = settings.showLinkPreview
-            compatLinkPreview = settings.compatLinkPreview
-            expandMediaSize = settings.expandMediaSize
-            videoAutoplay = String(describing: settings.videoAutoplay)
-        }
     }
 
     // Item ID prefixes / constants
     private static let timelinePrefix = "t:"
     private static let placeholderPrefix = "p:"
+    private static let accessoryPrefix = "a:"
     private static let emptyID = "__empty__"
     private static let errorID = "__error__"
     private static let footerLoadingID = "__fl__"
@@ -211,15 +247,22 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
 
+        updateContentInsets()
         if shouldRevealRefreshControl {
             revealRefreshControlIfNeeded()
         }
         scheduleAutoplaySelection()
     }
 
+    override func viewSafeAreaInsetsDidChange() {
+        super.viewSafeAreaInsetsDidChange()
+        updateContentInsets()
+    }
+
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         detachAutoplayPlayer(pause: true)
+        accessoryItems.forEach { $0.onVisibilityChanged?(false) }
     }
 
     deinit {
@@ -245,8 +288,9 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
     }
 
     private func makeSingleColumnLayout() -> UICollectionViewLayout {
-        let horizontalInset = appearanceSettings.timelineDisplayMode == .plain ? 0 : 16
-        return UICollectionViewCompositionalLayout { _, _ in
+        return UICollectionViewCompositionalLayout { sectionIndex, _ in
+            let isAccessorySection = !self.accessoryItems.isEmpty && sectionIndex == 0
+            let horizontalInset = isAccessorySection || self.appearance.isPlainTimelineDisplayMode ? 0 : 16
             let itemSize = NSCollectionLayoutSize(
                 widthDimension: .fractionalWidth(1),
                 heightDimension: .estimated(180)
@@ -346,8 +390,23 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
 
     private func updateContentInsets() {
         guard collectionView != nil else { return }
-        collectionView.contentInset.top = topContentInset
+        let oldAdjustedTopInset = collectionView.adjustedContentInset.top
+        let wasPinnedToTop = abs(collectionView.contentOffset.y + oldAdjustedTopInset) < 1
+        let automaticTopInset = max(0, oldAdjustedTopInset - collectionView.contentInset.top)
+        let desiredTopInset = topContentInset - (extendsContentUnderTopBars ? automaticTopInset : 0)
+        if abs(collectionView.contentInset.top - desiredTopInset) > 0.5 {
+            collectionView.contentInset.top = desiredTopInset
+        }
         collectionView.verticalScrollIndicatorInsets.top = topContentInset
+        if wasPinnedToTop {
+            let topOffset = -collectionView.adjustedContentInset.top
+            if abs(collectionView.contentOffset.y - topOffset) > 0.5 {
+                collectionView.setContentOffset(
+                    CGPoint(x: collectionView.contentOffset.x, y: topOffset),
+                    animated: false
+                )
+            }
+        }
     }
 
     private func updateBackgroundColors() {
@@ -364,7 +423,9 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
     // MARK: - Cell Configuration
 
     private func configureCell(_ cell: TimelineUIKitCollectionViewCell, itemID: String) {
-        if itemID.hasPrefix(Self.timelinePrefix) {
+        if itemID.hasPrefix(Self.accessoryPrefix) {
+            cell.setHostedView(accessoryItemMap[itemID]?.view)
+        } else if itemID.hasPrefix(Self.timelinePrefix) {
             if let index = itemIndexMap[itemID] {
                 configureTimelineCell(cell, index: index)
             }
@@ -394,7 +455,7 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
                 data: item,
                 index: index,
                 totalCount: totalCount,
-                appearance: appearanceSettings,
+                appearance: appearance,
                 detailStatusKey: detailStatusKey,
                 isMultipleColumn: columnCount > 1,
                 openURL: openURL
@@ -414,7 +475,7 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
         cell.configurePlaceholder(
             index: index,
             totalCount: totalCount,
-            appearance: appearanceSettings,
+            appearance: appearance,
             isMultipleColumn: columnCount > 1
         )
     }
@@ -545,8 +606,14 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
         var snapshot = NSDiffableDataSourceSnapshot<Int, String>()
         var newIndexMap: [String: Int] = [:]
         var newRenderHashMap: [String: Int32] = [:]
+        let accessoryIDs = accessoryItems.map { "\(Self.accessoryPrefix)\($0.id)" }
         var itemIDs: [String] = []
         var footerIDs: [String] = []
+
+        if !accessoryIDs.isEmpty {
+            snapshot.appendSections([Self.sectionAccessories])
+            snapshot.appendItems(accessoryIDs, toSection: Self.sectionAccessories)
+        }
 
         switch onEnum(of: data) {
         case .loading:
@@ -592,10 +659,11 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
         }
 
         itemIndexMap = newIndexMap
-        let newSignature = SnapshotSignature(itemIDs: itemIDs, footerIDs: footerIDs)
+        let newSignature = SnapshotSignature(accessoryIDs: accessoryIDs, itemIDs: itemIDs, footerIDs: footerIDs)
         let previousSignature = lastAppliedSignature
 
-        if previousSignature?.itemIDs == newSignature.itemIDs,
+        if previousSignature?.accessoryIDs == newSignature.accessoryIDs,
+           previousSignature?.itemIDs == newSignature.itemIDs,
            previousSignature?.footerIDs == newSignature.footerIDs {
             let changedIDs = itemIDs.filter { lastRenderHashMap[$0] != newRenderHashMap[$0] }
             lastRenderHashMap = newRenderHashMap
@@ -605,7 +673,8 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
             return
         }
 
-        if previousSignature?.itemIDs == newSignature.itemIDs {
+        if previousSignature?.accessoryIDs == newSignature.accessoryIDs,
+           previousSignature?.itemIDs == newSignature.itemIDs {
             let changedIDs = itemIDs.filter { lastRenderHashMap[$0] != newRenderHashMap[$0] }
             applyFooterSnapshot(footerIDs: footerIDs, reconfigureIDs: changedIDs, data: data)
             lastAppliedSignature = newSignature
@@ -696,7 +765,7 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
     // MARK: - Video Autoplay
 
     private var isVideoAutoplayAllowed: Bool {
-        switch appearanceSettings.videoAutoplay {
+        switch appearance.videoAutoplay {
         case .never:
             return false
         case .wifi:
@@ -922,7 +991,7 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
             let key = "__placeholder__:\(Int(width))"
             if let cached = heightCache[key] { return CGSize(width: width, height: cached) }
             let totalCount = currentSuccess.map { Int($0.itemCount) } ?? 5
-            sizingPlaceholderCard.timelineDisplayMode = appearanceSettings.timelineDisplayMode
+            sizingPlaceholderCard.isPlainTimelineDisplayMode = appearance.isPlainTimelineDisplayMode
             sizingPlaceholderCard.isMultipleColumn = true
             sizingPlaceholderCard.configure(index: 0, totalCount: totalCount)
             let target = CGSize(width: width, height: UIView.layoutFittingCompressedSize.height)
@@ -944,12 +1013,12 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
            let item = success.peek(index: Int32(index)) {
             let key = "\(itemID):\(item.renderHash):\(Int(width))"
             if let cached = heightCache[key] { return CGSize(width: width, height: cached) }
-            sizingTimelineCard.timelineDisplayMode = appearanceSettings.timelineDisplayMode
+            sizingTimelineCard.isPlainTimelineDisplayMode = appearance.isPlainTimelineDisplayMode
             sizingTimelineCard.isMultipleColumn = true
             sizingTimelineCard.configure(index: index, totalCount: Int(success.itemCount))
             sizingTimelineView.configure(
                 data: item,
-                appearance: appearanceSettings,
+                appearance: appearance.status,
                 detailStatusKey: detailStatusKey,
                 onOpenURL: nil
             )
@@ -978,6 +1047,11 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
     // MARK: - UICollectionViewDelegate
 
     func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        if let itemID = dataSource.itemIdentifier(for: indexPath),
+           let accessory = accessoryItemMap[itemID] {
+            accessory.onVisibilityChanged?(true)
+            return
+        }
         guard let success = currentSuccess else { return }
         if let itemID = dataSource.itemIdentifier(for: indexPath),
            let index = itemIndexMap[itemID],
@@ -989,6 +1063,11 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
     }
 
     func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        if let itemID = dataSource.itemIdentifier(for: indexPath),
+           let accessory = accessoryItemMap[itemID] {
+            accessory.onVisibilityChanged?(false)
+            return
+        }
         guard let host = currentAutoplayHostView,
               host.isDescendant(of: cell) else {
             return
@@ -1034,7 +1113,7 @@ private final class TimelineUIKitCollectionViewCell: UICollectionViewCell {
     // `TimelineUIView.configure` → `StatusUIKitView.rebuild()` path.
     private var lastRenderHash: Int32?
     private var lastItemKey: String?
-    private var lastAppearanceIdentity: ObjectIdentifier?
+    private var lastAppearance: TimelineUIKitAppearance?
     private var lastDetailStatusKey: String?
 
     override init(frame: CGRect) {
@@ -1055,7 +1134,7 @@ private final class TimelineUIKitCollectionViewCell: UICollectionViewCell {
         // even in the (unlikely) event that renderHash/itemKey collide.
         lastRenderHash = nil
         lastItemKey = nil
-        lastAppearanceIdentity = nil
+        lastAppearance = nil
         lastDetailStatusKey = nil
     }
 
@@ -1067,35 +1146,33 @@ private final class TimelineUIKitCollectionViewCell: UICollectionViewCell {
         data: UiTimelineV2,
         index: Int,
         totalCount: Int,
-        appearance: AppearanceSettings,
+        appearance: TimelineUIKitAppearance,
         detailStatusKey: MicroBlogKey?,
         isMultipleColumn: Bool,
         openURL: ((URL) -> Void)?
     ) {
         // Card styling is cheap; always reapply so index/totalCount changes
         // (affecting the card's outer rounded corners) are picked up.
-        timelineCard.timelineDisplayMode = appearance.timelineDisplayMode
+        timelineCard.isPlainTimelineDisplayMode = appearance.isPlainTimelineDisplayMode
         timelineCard.isMultipleColumn = isMultipleColumn
         timelineCard.configure(index: index, totalCount: totalCount)
 
         let itemKey = data.itemKey ?? ""
         let detailKeyStr = detailStatusKey.map { String(describing: $0) } ?? ""
-        let appearanceId = ObjectIdentifier(appearance)
-
         let dataUnchanged =
             lastRenderHash == data.renderHash &&
             lastItemKey == itemKey &&
-            lastAppearanceIdentity == appearanceId &&
+            lastAppearance == appearance &&
             lastDetailStatusKey == detailKeyStr
 
         if !dataUnchanged {
             lastRenderHash = data.renderHash
             lastItemKey = itemKey
-            lastAppearanceIdentity = appearanceId
+            lastAppearance = appearance
             lastDetailStatusKey = detailKeyStr
             timelineView.configure(
                 data: data,
-                appearance: appearance,
+                appearance: appearance.status,
                 detailStatusKey: detailStatusKey,
                 onOpenURL: openURL
             )
@@ -1107,8 +1184,8 @@ private final class TimelineUIKitCollectionViewCell: UICollectionViewCell {
         setHostedView(timelineCard)
     }
 
-    func configurePlaceholder(index: Int, totalCount: Int, appearance: AppearanceSettings, isMultipleColumn: Bool) {
-        placeholderCard.timelineDisplayMode = appearance.timelineDisplayMode
+    func configurePlaceholder(index: Int, totalCount: Int, appearance: TimelineUIKitAppearance, isMultipleColumn: Bool) {
+        placeholderCard.isPlainTimelineDisplayMode = appearance.isPlainTimelineDisplayMode
         placeholderCard.isMultipleColumn = isMultipleColumn
         placeholderCard.configure(index: index, totalCount: totalCount)
         setHostedView(placeholderCard)

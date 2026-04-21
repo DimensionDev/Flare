@@ -27,14 +27,14 @@ struct GalleryTimelinePagingView: UIViewControllerRepresentable {
         // Apply data before appearance so the appearance setter's reconfigure
         // sees a coherent itemIndexMap / currentSuccess pair.
         controller.update(data: data)
-        controller.appearanceSettings = appearanceSettings
+        controller.appearance = GalleryUIKitAppearance(settings: appearanceSettings)
     }
 
     private func apply(to controller: GalleryTimelineController) {
         controller.refreshCallback = refreshAction.map { action in
             { await action() }
         }
-        controller.appearanceSettings = appearanceSettings
+        controller.appearance = GalleryUIKitAppearance(settings: appearanceSettings)
         controller.openURL = { url in openURL.callAsFunction(url) }
     }
 }
@@ -64,10 +64,10 @@ final class GalleryTimelineController: UIViewController, UICollectionViewDelegat
 
     var refreshCallback: (() async -> Void)?
     var openURL: ((URL) -> Void)?
-    var appearanceSettings: AppearanceSettings = AppearanceSettings.companion.Default {
+    var appearance = GalleryUIKitAppearance(settings: AppearanceSettings.companion.Default) {
         didSet {
             guard isViewLoaded else { return }
-            guard AppearanceSignature(settings: oldValue) != AppearanceSignature(settings: appearanceSettings) else {
+            guard oldValue != appearance else {
                 return
             }
             removeAllHeightCache()
@@ -97,16 +97,6 @@ final class GalleryTimelineController: UIViewController, UICollectionViewDelegat
         case error
         case empty
         case success(itemCount: Int, isRefreshing: Bool, footerIDs: [String])
-    }
-
-    private struct AppearanceSignature: Equatable {
-        let showMedia: Bool
-        let avatarShape: String
-
-        init(settings: AppearanceSettings) {
-            showMedia = settings.showMedia
-            avatarShape = String(describing: settings.avatarShape)
-        }
     }
 
     override func viewDidLoad() {
@@ -191,7 +181,7 @@ final class GalleryTimelineController: UIViewController, UICollectionViewDelegat
            index >= 0,
            index < Int(success.itemCount),
            let item = success.peek(index: Int32(index)) {
-            cell.configureTile(item: item, appearance: appearanceSettings, openURL: openURL)
+            cell.configureTile(item: item, appearance: appearance, openURL: openURL)
         } else if itemID.hasPrefix(Self.placeholderPrefix) {
             cell.configurePlaceholder()
         } else if itemID == Self.emptyID {
@@ -491,10 +481,10 @@ final class GalleryTimelineController: UIViewController, UICollectionViewDelegat
         let measuredHeight: CGFloat
         switch onEnum(of: item) {
         case .post(let post):
-            sizingPostTile.configure(post: post, appearance: appearanceSettings, loadsRemoteImages: false)
+            sizingPostTile.configure(post: post, appearance: appearance, loadsRemoteImages: false)
             measuredHeight = measuredTileHeight(sizingPostTile, width: width)
         case .feed(let feed):
-            sizingFeedTile.configure(feed: feed, appearance: appearanceSettings, loadsRemoteImages: false)
+            sizingFeedTile.configure(feed: feed, appearance: appearance, loadsRemoteImages: false)
             measuredHeight = measuredTileHeight(sizingFeedTile, width: width)
         default:
             measuredHeight = 180
@@ -506,13 +496,12 @@ final class GalleryTimelineController: UIViewController, UICollectionViewDelegat
 
     private func heightCacheKey(for item: UiTimelineV2, itemID: String, width: CGFloat) -> String {
         let scaledWidth = Int((width * UIScreen.main.scale).rounded(.toNearestOrAwayFromZero))
-        let appearance = AppearanceSignature(settings: appearanceSettings)
         return [
             itemID,
             String(item.renderHash),
             String(scaledWidth),
             appearance.showMedia ? "media" : "text",
-            appearance.avatarShape,
+            appearance.avatarShapeID,
             traitCollection.preferredContentSizeCategory.rawValue,
         ].joined(separator: "|")
     }
@@ -581,7 +570,7 @@ private final class GalleryTimelineCollectionViewCell: UICollectionViewCell {
         tileView.prepareForReuse()
     }
 
-    func configureTile(item: UiTimelineV2, appearance: AppearanceSettings, openURL: ((URL) -> Void)?) {
+    func configureTile(item: UiTimelineV2, appearance: GalleryUIKitAppearance, openURL: ((URL) -> Void)?) {
         tileView.onOpenURL = openURL
         tileView.configure(item: item, appearance: appearance)
         setHostedView(tileView)
@@ -643,7 +632,7 @@ private final class GalleryTimelineTileUIView: UIView {
         feedTile.prepareForReuse()
     }
 
-    func configure(item: UiTimelineV2, appearance: AppearanceSettings) {
+    func configure(item: UiTimelineV2, appearance: GalleryUIKitAppearance) {
         switch onEnum(of: item) {
         case .post(let post):
             postTile.configure(post: post, appearance: appearance)
@@ -809,7 +798,7 @@ private final class GalleryPostTileUIView: UIView, UIGestureRecognizerDelegate {
         onOpenURL = nil
     }
 
-    func configure(post: UiTimelineV2.Post, appearance: AppearanceSettings, loadsRemoteImages: Bool = true) {
+    func configure(post: UiTimelineV2.Post, appearance: GalleryUIKitAppearance, loadsRemoteImages: Bool = true) {
         self.post = post
         avatar.avatarShape = appearance.avatarShape
 
@@ -982,7 +971,7 @@ private final class GalleryFeedTileUIView: UIView {
         onOpenURL = nil
     }
 
-    func configure(feed: UiTimelineV2.Feed, appearance: AppearanceSettings, loadsRemoteImages: Bool = true) {
+    func configure(feed: UiTimelineV2.Feed, appearance: GalleryUIKitAppearance, loadsRemoteImages: Bool = true) {
         self.feed = feed
         imageView.isHidden = true
         imageView.cancel()

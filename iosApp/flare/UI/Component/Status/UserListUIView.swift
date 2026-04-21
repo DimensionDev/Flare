@@ -10,7 +10,7 @@ import KotlinSharedUI
 ///   }
 final class UserListUIView: UIView {
     var onOpenURL: ((URL) -> Void)?
-    var appearance: AppearanceSettings = AppearanceSettings.companion.Default {
+    var appearance = StatusUIKitAppearance(settings: AppearanceSettings.companion.Default) {
         didSet { if data != nil { rebuild() } }
     }
 

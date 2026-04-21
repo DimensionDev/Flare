@@ -17,14 +17,6 @@ import KotlinSharedUI
 final class StatusUIKitView: UIView, UIGestureRecognizerDelegate {
     // MARK: - Environment mirrors (inputs that were `@Environment` in SwiftUI)
 
-//    var appearance: AppearanceSettings = AppearanceSettings.companion.Default {
-//        didSet {
-//            if data != nil {
-//                rebuild()
-////                invalidateContainingCollectionLayout()
-//            }
-//        }
-//    }
     /// Forwarded to all URL-clicking machinery.
     var openURL: ((URL) -> Void)?
 
@@ -41,7 +33,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate {
     private var forceHideActions: Bool = false
     private var showTranslate: Bool = true
     private var showParents: Bool = true
-    private var appearance: AppearanceSettings = AppearanceSettings.companion.Default
+    private var appearance = StatusUIKitAppearance(settings: AppearanceSettings.companion.Default)
     private var lastConfigureSignature: ConfigureSignature?
 
     private struct ConfigureSignature: Equatable {
@@ -56,11 +48,11 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate {
         let forceHideActions: Bool
         let showTranslate: Bool
         let showParents: Bool
-        let appearance: AppearanceSignature
+        let appearance: StatusUIKitAppearance
 
         init(
             data: UiTimelineV2.Post,
-            appearance: AppearanceSettings,
+            appearance: StatusUIKitAppearance,
             isDetail: Bool,
             isQuote: Bool,
             withLeadingPadding: Bool,
@@ -82,35 +74,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate {
             self.forceHideActions = forceHideActions
             self.showTranslate = showTranslate
             self.showParents = showParents
-            self.appearance = AppearanceSignature(settings: appearance)
-        }
-    }
-
-    private struct AppearanceSignature: Equatable {
-        let fullWidthPost: Bool
-        let avatarShape: String
-        let showPlatformLogo: Bool
-        let absoluteTimestamp: Bool
-        let postActionStyle: String
-        let showNumbers: Bool
-        let showMedia: Bool
-        let showSensitiveContent: Bool
-        let showLinkPreview: Bool
-        let compatLinkPreview: Bool
-        let expandMediaSize: Bool
-
-        init(settings: AppearanceSettings) {
-            fullWidthPost = settings.fullWidthPost
-            avatarShape = String(describing: settings.avatarShape)
-            showPlatformLogo = settings.showPlatformLogo
-            absoluteTimestamp = settings.absoluteTimestamp
-            postActionStyle = String(describing: settings.postActionStyle)
-            showNumbers = settings.showNumbers
-            showMedia = settings.showMedia
-            showSensitiveContent = settings.showSensitiveContent
-            showLinkPreview = settings.showLinkPreview
-            compatLinkPreview = settings.compatLinkPreview
-            expandMediaSize = settings.expandMediaSize
+            self.appearance = appearance
         }
     }
 
@@ -315,7 +279,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate {
 
     func configure(
         data: UiTimelineV2.Post,
-        appearance: AppearanceSettings,
+        appearance: StatusUIKitAppearance,
         isDetail: Bool = false,
         isQuote: Bool = false,
         withLeadingPadding: Bool = false,

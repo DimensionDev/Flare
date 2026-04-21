@@ -4,10 +4,14 @@ import SwiftUI
 struct SearchScreen: View {
     @Environment(\.openURL) private var openURL
     @StateObject private var searchPresenter: KotlinPresenter<SearchState>
+    @StateObject private var searchHistoryPresenter: KotlinPresenter<SearchHistoryState>
     @State var searchText = ""
+    @State private var isSearchPresented = false
+    @State private var didRecordInitialQuery = false
     
     init(accountType: AccountType, initialQuery: String) {
         self._searchPresenter = .init(wrappedValue: .init(presenter: SearchPresenter(accountType: accountType, initialQuery: initialQuery)))
+        self._searchHistoryPresenter = .init(wrappedValue: .init(presenter: SearchHistoryPresenter()))
         self._searchText = .init(initialValue: initialQuery)
     }
     
@@ -52,7 +56,6 @@ struct SearchScreen: View {
                 Text("search_status")
             }
             .listRowSeparator(.hidden)
-            .padding(.horizontal)
             .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
             .listRowBackground(Color.clear)
         }
@@ -110,9 +113,17 @@ struct SearchScreen: View {
                 }
             }
         }
-        .searchable(text: $searchText)
+        .searchable(text: $searchText, isPresented: $isSearchPresented)
+        .searchSuggestions {
+            SearchHistorySuggestions(
+                state: searchHistoryPresenter.state,
+                searchText: searchText,
+                onSelect: commitSearch,
+                onDelete: searchHistoryPresenter.state.deleteSearchHistory
+            )
+        }
         .onSubmit(of: .search) {
-            searchPresenter.state.search(new: searchText)
+            commitSearch(searchText)
         }
         .detectScrolling()
         .onChange(of: searchText) {
@@ -120,5 +131,23 @@ struct SearchScreen: View {
                 searchPresenter.state.search(new: "")
             }
         }
+        .onAppear {
+            guard !didRecordInitialQuery else { return }
+            didRecordInitialQuery = true
+            let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !query.isEmpty {
+                searchHistoryPresenter.state.addSearchHistory(keyword: query)
+            }
+        }
+    }
+
+    private func commitSearch(_ rawQuery: String) {
+        let query = rawQuery.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !query.isEmpty else { return }
+
+        searchText = query
+        searchHistoryPresenter.state.addSearchHistory(keyword: query)
+        searchPresenter.state.search(new: query)
+        isSearchPresented = false
     }
 }

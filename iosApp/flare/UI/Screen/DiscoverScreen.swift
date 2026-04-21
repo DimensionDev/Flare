@@ -6,11 +6,14 @@ struct DiscoverScreen: View {
     @Environment(\.openURL) private var openURL
     @StateObject private var presenter: KotlinPresenter<DiscoverState>
     @StateObject private var searchPresenter: KotlinPresenter<SearchState>
+    @StateObject private var searchHistoryPresenter: KotlinPresenter<SearchHistoryState>
     @State var searchText = ""
+    @State private var isSearchPresented = false
     
     init() {
         self._presenter = .init(wrappedValue: .init(presenter: DiscoverPresenter()))
         self._searchPresenter = .init(wrappedValue: .init(presenter: SearchPresenter(accountType: AccountType.Guest.shared, initialQuery: "")))
+        self._searchHistoryPresenter = .init(wrappedValue: .init(presenter: SearchHistoryPresenter()))
     }
     
     var body: some View {
@@ -76,9 +79,17 @@ struct DiscoverScreen: View {
                 }
             }
         }
-        .searchable(text: $searchText)
+        .searchable(text: $searchText, isPresented: $isSearchPresented)
+        .searchSuggestions {
+            SearchHistorySuggestions(
+                state: searchHistoryPresenter.state,
+                searchText: searchText,
+                onSelect: commitSearch,
+                onDelete: searchHistoryPresenter.state.deleteSearchHistory
+            )
+        }
         .onSubmit(of: .search) {
-            searchPresenter.state.search(new: searchText)
+            commitSearch(searchText)
         }
         .onChange(of: searchText) {
             if searchText.isEmpty {
@@ -189,8 +200,7 @@ struct DiscoverScreen: View {
                                         _ = tagState.get(index: index)
                                     }
                                     .onTapGesture {
-                                        searchText = item.hashtag
-                                        searchPresenter.state.search(new: item.hashtag)
+                                        commitSearch(item.hashtag)
                                     }
                             }
                         } else {
@@ -222,5 +232,15 @@ struct DiscoverScreen: View {
             .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
             .listRowBackground(Color.clear)
         }
+    }
+
+    private func commitSearch(_ rawQuery: String) {
+        let query = rawQuery.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !query.isEmpty else { return }
+
+        searchText = query
+        searchHistoryPresenter.state.addSearchHistory(keyword: query)
+        searchPresenter.state.search(new: query)
+        isSearchPresented = false
     }
 }

@@ -1,6 +1,7 @@
 import UIKit
 import Kingfisher
 import KotlinSharedUI
+import SwiftUI
 
 /// Pure-UIKit renderer for the iOS `RichText` SwiftUI view.
 final class RichTextUIView: UIView {
@@ -51,21 +52,27 @@ final class RichTextUIView: UIView {
     private var traitRegistration: UITraitChangeRegistration?
 
     private struct StructuralSignature: Equatable {
-        let textID: ObjectIdentifier?
+        let text: UiRichText?
         let isTextSelectionEnabled: Bool
-        let baseTextStyle: String
-        let baseTextColor: String
+        let baseTextStyle: UIFont.TextStyle
+        let baseTextColor: UIColor
 
-        init(
-            text: UiRichText?,
-            isTextSelectionEnabled: Bool,
-            baseTextStyle: UIFont.TextStyle,
-            baseTextColor: UIColor
-        ) {
-            textID = text.map { ObjectIdentifier($0) }
-            self.isTextSelectionEnabled = isTextSelectionEnabled
-            self.baseTextStyle = String(describing: baseTextStyle)
-            self.baseTextColor = String(describing: baseTextColor)
+        static func == (lhs: StructuralSignature, rhs: StructuralSignature) -> Bool {
+            lhs.isTextSelectionEnabled == rhs.isTextSelectionEnabled &&
+            lhs.baseTextStyle == rhs.baseTextStyle &&
+            lhs.baseTextColor.isEqual(rhs.baseTextColor) &&
+            Self.textsAreEqual(lhs.text, rhs.text)
+        }
+
+        private static func textsAreEqual(_ lhs: UiRichText?, _ rhs: UiRichText?) -> Bool {
+            switch (lhs, rhs) {
+            case (nil, nil):
+                return true
+            case let (l?, r?):
+                return (l as AnyObject).isEqual(r)
+            default:
+                return false
+            }
         }
     }
 
@@ -166,6 +173,30 @@ final class RichTextUIView: UIView {
         }
     }
 
+    func prepareForFitting(width: CGFloat) {
+        guard width.isFinite, width > 0 else { return }
+        bounds = CGRect(x: bounds.minX, y: bounds.minY, width: width, height: bounds.height)
+        stack.bounds = CGRect(x: 0, y: 0, width: width, height: stack.bounds.height)
+        for subview in stack.arrangedSubviews {
+            prepareSubview(subview, forFittingWidth: width)
+        }
+        invalidateIntrinsicContentSize()
+        setNeedsLayout()
+    }
+
+    private func prepareSubview(_ view: UIView, forFittingWidth width: CGFloat) {
+        if let fittingView = view as? RichTextFittingPreparing {
+            fittingView.prepareForFitting(width: width)
+            return
+        }
+        view.bounds = CGRect(x: view.bounds.minX, y: view.bounds.minY, width: width, height: view.bounds.height)
+        for subview in view.subviews {
+            prepareSubview(subview, forFittingWidth: width)
+        }
+        view.invalidateIntrinsicContentSize()
+        view.setNeedsLayout()
+    }
+
 //    override var intrinsicContentSize: CGSize {
 //        let exposesWidth = exposesHorizontalIntrinsicSize
 //        let size = measuredStackSize(for: bounds.width, exposesWidth: exposesWidth)
@@ -175,18 +206,23 @@ final class RichTextUIView: UIView {
 //        )
 //    }
 
-//    override func systemLayoutSizeFitting(
-//        _ targetSize: CGSize,
-//        withHorizontalFittingPriority horizontalFittingPriority: UILayoutPriority,
-//        verticalFittingPriority: UILayoutPriority
-//    ) -> CGSize {
-//        let exposesWidth = exposesHorizontalIntrinsicSize && horizontalFittingPriority != .required
-//        let size = measuredStackSize(for: targetSize.width, exposesWidth: exposesWidth)
-//        return CGSize(
-//            width: horizontalFittingPriority == .required ? targetSize.width : (exposesWidth ? ceil(size.width) : UIView.noIntrinsicMetric),
-//            height: fixedVertical ? ceil(size.height) : UIView.noIntrinsicMetric
-//        )
-//    }
+    override func systemLayoutSizeFitting(
+        _ targetSize: CGSize,
+        withHorizontalFittingPriority horizontalFittingPriority: UILayoutPriority,
+        verticalFittingPriority: UILayoutPriority
+    ) -> CGSize {
+        let exposesWidth = exposesHorizontalIntrinsicSize && horizontalFittingPriority != .required
+        if horizontalFittingPriority == .required,
+           targetSize.width.isFinite,
+           targetSize.width > 0 {
+            prepareForFitting(width: targetSize.width)
+        }
+        let size = measuredStackSize(for: targetSize.width, exposesWidth: exposesWidth)
+        return CGSize(
+            width: horizontalFittingPriority == .required ? targetSize.width : (exposesWidth ? ceil(size.width) : UIView.noIntrinsicMetric),
+            height: fixedVertical ? ceil(size.height) : UIView.noIntrinsicMetric
+        )
+    }
 
     private func measuredStackSize(for proposedWidth: CGFloat, exposesWidth: Bool) -> CGSize {
         if exposesWidth {
@@ -530,7 +566,11 @@ private protocol RichTextTextRendering: AnyObject {
     func update(lineLimit: Int?, selectionEnabled: Bool, linkColor: UIColor, onOpenURL: ((URL) -> Void)?)
 }
 
-private final class RichTextLabel: UILabel, RichTextTextRendering {
+private protocol RichTextFittingPreparing: AnyObject {
+    func prepareForFitting(width: CGFloat)
+}
+
+private final class RichTextLabel: UILabel, RichTextTextRendering, RichTextFittingPreparing {
     private var lastLayoutWidth: CGFloat = 0
     var renderedView: UIView { self }
 
@@ -568,15 +608,14 @@ private final class RichTextLabel: UILabel, RichTextTextRendering {
         invalidateIntrinsicContentSize()
     }
 
-//    override func layoutSubviews() {
-//        super.layoutSubviews()
-//        guard numberOfLines != 1 else { return }
-//        if abs(bounds.width - lastLayoutWidth) > 0.5 {
-//            lastLayoutWidth = bounds.width
-//            preferredMaxLayoutWidth = bounds.width
-//            invalidateIntrinsicContentSize()
-//        }
-//    }
+    func prepareForFitting(width: CGFloat) {
+        guard width.isFinite, width > 0 else { return }
+        bounds = CGRect(x: bounds.minX, y: bounds.minY, width: width, height: bounds.height)
+        guard numberOfLines != 1 else { return }
+        preferredMaxLayoutWidth = width
+        invalidateIntrinsicContentSize()
+        setNeedsLayout()
+    }
 
 //    override var intrinsicContentSize: CGSize {
 //        guard numberOfLines != 1, bounds.width > 0 else {
@@ -585,26 +624,26 @@ private final class RichTextLabel: UILabel, RichTextTextRendering {
 //        return measuredSize(for: bounds.width)
 //    }
 
-//    override func systemLayoutSizeFitting(
-//        _ targetSize: CGSize,
-//        withHorizontalFittingPriority horizontalFittingPriority: UILayoutPriority,
-//        verticalFittingPriority: UILayoutPriority
-//    ) -> CGSize {
-//        guard numberOfLines != 1,
-//              targetSize.width.isFinite,
-//              targetSize.width > 0 else {
-//            return super.systemLayoutSizeFitting(
-//                targetSize,
-//                withHorizontalFittingPriority: horizontalFittingPriority,
-//                verticalFittingPriority: verticalFittingPriority
-//            )
-//        }
-//        let size = measuredSize(for: targetSize.width)
-//        return CGSize(
-//            width: horizontalFittingPriority == .required ? targetSize.width : size.width,
-//            height: size.height
-//        )
-//    }
+    override func systemLayoutSizeFitting(
+        _ targetSize: CGSize,
+        withHorizontalFittingPriority horizontalFittingPriority: UILayoutPriority,
+        verticalFittingPriority: UILayoutPriority
+    ) -> CGSize {
+        guard numberOfLines != 1,
+              targetSize.width.isFinite,
+              targetSize.width > 0 else {
+            return super.systemLayoutSizeFitting(
+                targetSize,
+                withHorizontalFittingPriority: horizontalFittingPriority,
+                verticalFittingPriority: verticalFittingPriority
+            )
+        }
+        let size = measuredSize(for: targetSize.width)
+        return CGSize(
+            width: horizontalFittingPriority == .required ? targetSize.width : size.width,
+            height: size.height
+        )
+    }
 
     private func measuredSize(for width: CGFloat) -> CGSize {
         preferredMaxLayoutWidth = width
@@ -613,7 +652,7 @@ private final class RichTextLabel: UILabel, RichTextTextRendering {
     }
 }
 
-private final class RichTextTextView: UITextView, UITextViewDelegate, RichTextTextRendering {
+private final class RichTextTextView: UITextView, UITextViewDelegate, RichTextTextRendering, RichTextFittingPreparing {
     private var linkHandler: ((URL) -> Void)?
     private var selectionEnabled = false
     private var lastLayoutWidth: CGFloat = 0
@@ -699,33 +738,32 @@ private final class RichTextTextView: UITextView, UITextViewDelegate, RichTextTe
         return url(at: point) != nil
     }
 
-//    override func layoutSubviews() {
-//        super.layoutSubviews()
-//        if abs(bounds.width - lastLayoutWidth) > 0.5 {
-//            lastLayoutWidth = bounds.width
-//            invalidateIntrinsicContentSize()
-//        }
-//    }
+    func prepareForFitting(width: CGFloat) {
+        guard width.isFinite, width > 0 else { return }
+        bounds = CGRect(x: bounds.minX, y: bounds.minY, width: width, height: bounds.height)
+        invalidateIntrinsicContentSize()
+        setNeedsLayout()
+    }
 //
 //    override var intrinsicContentSize: CGSize {
 //        let width = bounds.width > 0 ? bounds.width : UIScreen.main.bounds.width
 //        return measuredSize(for: width)
 //    }
 
-//    override func systemLayoutSizeFitting(
-//        _ targetSize: CGSize,
-//        withHorizontalFittingPriority horizontalFittingPriority: UILayoutPriority,
-//        verticalFittingPriority: UILayoutPriority
-//    ) -> CGSize {
-//        let width = targetSize.width.isFinite && targetSize.width > 0
-//            ? targetSize.width
-//            : (bounds.width > 0 ? bounds.width : UIScreen.main.bounds.width)
-//        let size = measuredSize(for: width)
-//        return CGSize(
-//            width: horizontalFittingPriority == .required ? width : size.width,
-//            height: size.height
-//        )
-//    }
+    override func systemLayoutSizeFitting(
+        _ targetSize: CGSize,
+        withHorizontalFittingPriority horizontalFittingPriority: UILayoutPriority,
+        verticalFittingPriority: UILayoutPriority
+    ) -> CGSize {
+        let width = targetSize.width.isFinite && targetSize.width > 0
+            ? targetSize.width
+            : (bounds.width > 0 ? bounds.width : UIScreen.main.bounds.width)
+        let size = measuredSize(for: width)
+        return CGSize(
+            width: horizontalFittingPriority == .required ? width : size.width,
+            height: size.height
+        )
+    }
 
     private func measuredSize(for width: CGFloat) -> CGSize {
         let size = sizeThatFits(CGSize(width: width, height: .greatestFiniteMagnitude))
@@ -734,8 +772,38 @@ private final class RichTextTextView: UITextView, UITextViewDelegate, RichTextTe
 
     func textView(_ textView: UITextView, primaryActionFor textItem: UITextItem, defaultAction: UIAction) -> UIAction? {
         guard case .link(let url) = textItem.content else { return defaultAction }
+        
         return UIAction { [weak self] _ in
             self?.linkHandler?(url)
+        }
+    }
+    
+    func textView(_ textView: UITextView, menuConfigurationFor textItem: UITextItem, defaultMenu: UIMenu) -> UITextItem.MenuConfiguration? {
+        guard case .link(let url) = textItem.content else {
+            return UITextItem.MenuConfiguration(
+                preview: .none,
+                menu: defaultMenu
+            )
+        }
+        if url.absoluteString.hasPrefix("flare://"), let route = Route.fromDeepLink(url: url.absoluteString) {
+            let host = UIHostingController(rootView: route.view(onNavigate: { _ in
+                
+            }, clearToHome: {
+                
+            }))
+            host.view.backgroundColor = .clear
+            host.sizingOptions = [.intrinsicContentSize]
+
+
+            return UITextItem.MenuConfiguration(
+                preview: .view(host.view),
+                menu: UIMenu(title: "", children: [])
+            )
+        } else {
+            return UITextItem.MenuConfiguration(
+                preview: .default,
+                menu: defaultMenu
+            )
         }
     }
 
@@ -757,7 +825,7 @@ private final class RichTextTextView: UITextView, UITextViewDelegate, RichTextTe
     }
 }
 
-private final class RichTextQuoteBlockView: UIView {
+private final class RichTextQuoteBlockView: UIView, RichTextFittingPreparing {
     private let contentView: UIView
     private let horizontalInset: CGFloat
     private let verticalInset: CGFloat = 8
@@ -796,35 +864,56 @@ private final class RichTextQuoteBlockView: UIView {
         fatalError("init(coder:) not supported")
     }
 
-//    override func systemLayoutSizeFitting(
-//        _ targetSize: CGSize,
-//        withHorizontalFittingPriority horizontalFittingPriority: UILayoutPriority,
-//        verticalFittingPriority: UILayoutPriority
-//    ) -> CGSize {
-//        let width = targetSize.width.isFinite && targetSize.width > 0
-//            ? targetSize.width
-//            : bounds.width
-//        guard width > horizontalInset else {
-//            return super.systemLayoutSizeFitting(
-//                targetSize,
-//                withHorizontalFittingPriority: horizontalFittingPriority,
-//                verticalFittingPriority: verticalFittingPriority
-//            )
-//        }
-//        let contentWidth = width - horizontalInset
-//        let contentSize = contentView.systemLayoutSizeFitting(
-//            CGSize(width: contentWidth, height: UIView.layoutFittingCompressedSize.height),
-//            withHorizontalFittingPriority: .required,
-//            verticalFittingPriority: .fittingSizeLevel
-//        )
-//        return CGSize(
-//            width: horizontalFittingPriority == .required ? targetSize.width : contentSize.width + horizontalInset,
-//            height: ceil(contentSize.height + verticalInset * 2)
-//        )
-//    }
+    func prepareForFitting(width: CGFloat) {
+        guard width.isFinite, width > horizontalInset else { return }
+        bounds = CGRect(x: bounds.minX, y: bounds.minY, width: width, height: bounds.height)
+        let contentWidth = width - horizontalInset
+        if let fittingView = contentView as? RichTextFittingPreparing {
+            fittingView.prepareForFitting(width: contentWidth)
+        } else {
+            contentView.bounds = CGRect(
+                x: contentView.bounds.minX,
+                y: contentView.bounds.minY,
+                width: contentWidth,
+                height: contentView.bounds.height
+            )
+            contentView.invalidateIntrinsicContentSize()
+            contentView.setNeedsLayout()
+        }
+        invalidateIntrinsicContentSize()
+        setNeedsLayout()
+    }
+
+    override func systemLayoutSizeFitting(
+        _ targetSize: CGSize,
+        withHorizontalFittingPriority horizontalFittingPriority: UILayoutPriority,
+        verticalFittingPriority: UILayoutPriority
+    ) -> CGSize {
+        let width = targetSize.width.isFinite && targetSize.width > 0
+            ? targetSize.width
+            : bounds.width
+        guard width > horizontalInset else {
+            return super.systemLayoutSizeFitting(
+                targetSize,
+                withHorizontalFittingPriority: horizontalFittingPriority,
+                verticalFittingPriority: verticalFittingPriority
+            )
+        }
+        prepareForFitting(width: width)
+        let contentWidth = width - horizontalInset
+        let contentSize = contentView.systemLayoutSizeFitting(
+            CGSize(width: contentWidth, height: UIView.layoutFittingCompressedSize.height),
+            withHorizontalFittingPriority: .required,
+            verticalFittingPriority: .fittingSizeLevel
+        )
+        return CGSize(
+            width: horizontalFittingPriority == .required ? targetSize.width : contentSize.width + horizontalInset,
+            height: ceil(contentSize.height + verticalInset * 2)
+        )
+    }
 }
 
-private final class RichTextBlockImageView: UIView {
+private final class RichTextBlockImageView: UIView, RichTextFittingPreparing {
     var onOpenURL: ((URL) -> Void)?
 
     private let url: String
@@ -883,27 +972,34 @@ private final class RichTextBlockImageView: UIView {
         invalidateIntrinsicContentSize()
     }
 
-//    override func systemLayoutSizeFitting(
-//        _ targetSize: CGSize,
-//        withHorizontalFittingPriority horizontalFittingPriority: UILayoutPriority,
-//        verticalFittingPriority: UILayoutPriority
-//    ) -> CGSize {
-//        let width = targetSize.width.isFinite && targetSize.width > 0
-//            ? targetSize.width
-//            : bounds.width
-//        guard width > 0 else {
-//            return super.systemLayoutSizeFitting(
-//                targetSize,
-//                withHorizontalFittingPriority: horizontalFittingPriority,
-//                verticalFittingPriority: verticalFittingPriority
-//            )
-//        }
-//        let ratio = aspectRatio ?? 9.0 / 16.0
-//        return CGSize(
-//            width: horizontalFittingPriority == .required ? targetSize.width : width,
-//            height: ceil(width * ratio)
-//        )
-//    }
+    func prepareForFitting(width: CGFloat) {
+        guard width.isFinite, width > 0 else { return }
+        bounds = CGRect(x: bounds.minX, y: bounds.minY, width: width, height: bounds.height)
+        invalidateIntrinsicContentSize()
+        setNeedsLayout()
+    }
+
+    override func systemLayoutSizeFitting(
+        _ targetSize: CGSize,
+        withHorizontalFittingPriority horizontalFittingPriority: UILayoutPriority,
+        verticalFittingPriority: UILayoutPriority
+    ) -> CGSize {
+        let width = targetSize.width.isFinite && targetSize.width > 0
+            ? targetSize.width
+            : bounds.width
+        guard width > 0 else {
+            return super.systemLayoutSizeFitting(
+                targetSize,
+                withHorizontalFittingPriority: horizontalFittingPriority,
+                verticalFittingPriority: verticalFittingPriority
+            )
+        }
+        let ratio = aspectRatio ?? 9.0 / 16.0
+        return CGSize(
+            width: horizontalFittingPriority == .required ? targetSize.width : width,
+            height: ceil(width * ratio)
+        )
+    }
 
     @objc private func onTapped() {
         guard let href, let url = URL(string: href) else { return }

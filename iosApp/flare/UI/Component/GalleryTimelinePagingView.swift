@@ -59,7 +59,7 @@ final class GalleryTimelineController: UIViewController, UICollectionViewDelegat
     private var itemIndexMap: [String: Int] = [:]
     private var lastAppliedSignature: SnapshotSignature?
     private var lastRenderHashMap: [String: Int32] = [:]
-    private var lastProcessedDataID: ObjectIdentifier?
+    private var lastProcessedDataRef: AnyObject?
     private var lastProcessedUpdateSignature: UpdateSignature?
 
     var refreshCallback: (() async -> Void)?
@@ -82,10 +82,8 @@ final class GalleryTimelineController: UIViewController, UICollectionViewDelegat
     private let sizingPostTile = GalleryPostTileUIView()
     private let sizingFeedTile = GalleryFeedTileUIView()
     private var heightCache: [String: CGFloat] = [:]
-    private var heightCacheInsertionOrder: [String] = []
+    private var heightCacheKeysByItemID: [String: Set<String>] = [:]
     private var isUserRefreshing = false
-
-    private static let maxHeightCacheEntries = 800
 
     private struct SnapshotSignature: Equatable {
         let itemIDs: [String]
@@ -107,7 +105,7 @@ final class GalleryTimelineController: UIViewController, UICollectionViewDelegat
         setupRefreshControl()
         if let data = currentData {
             applySnapshot(data: data)
-            lastProcessedDataID = ObjectIdentifier(data as AnyObject)
+            lastProcessedDataRef = data as AnyObject
             lastProcessedUpdateSignature = updateSignature(for: data)
         }
     }
@@ -241,7 +239,7 @@ final class GalleryTimelineController: UIViewController, UICollectionViewDelegat
     // MARK: - State
 
     func update(data: PagingState<UiTimelineV2>) {
-        let dataID = ObjectIdentifier(data as AnyObject)
+        let dataRef = data as AnyObject
         let newUpdateSignature = updateSignature(for: data)
 
         currentData = data
@@ -260,14 +258,15 @@ final class GalleryTimelineController: UIViewController, UICollectionViewDelegat
             refreshControl.endRefreshing()
         }
 
-        if lastProcessedDataID == dataID,
+        if let lastRef = lastProcessedDataRef,
+           lastRef === dataRef,
            lastProcessedUpdateSignature == newUpdateSignature,
            lastAppliedSignature != nil {
             return
         }
 
         applySnapshot(data: data)
-        lastProcessedDataID = dataID
+        lastProcessedDataRef = dataRef
         lastProcessedUpdateSignature = newUpdateSignature
     }
 
@@ -335,6 +334,7 @@ final class GalleryTimelineController: UIViewController, UICollectionViewDelegat
         }
 
         itemIndexMap = newIndexMap
+        pruneHeightCache(keepingItemIDs: Set(newIndexMap.keys))
         let newSignature = SnapshotSignature(itemIDs: itemIDs, footerIDs: footerIDs)
         let previousSignature = lastAppliedSignature
 
@@ -490,7 +490,7 @@ final class GalleryTimelineController: UIViewController, UICollectionViewDelegat
             measuredHeight = 180
         }
 
-        setCachedHeight(measuredHeight, for: cacheKey)
+        setCachedHeight(measuredHeight, for: cacheKey, itemID: itemID)
         return measuredHeight
     }
 
@@ -506,22 +506,26 @@ final class GalleryTimelineController: UIViewController, UICollectionViewDelegat
         ].joined(separator: "|")
     }
 
-    private func setCachedHeight(_ height: CGFloat, for key: String) {
-        if heightCache[key] == nil {
-            heightCacheInsertionOrder.append(key)
-        }
+    private func setCachedHeight(_ height: CGFloat, for key: String, itemID: String) {
         heightCache[key] = height
+        heightCacheKeysByItemID[itemID, default: []].insert(key)
+    }
 
-        let overflow = heightCacheInsertionOrder.count - Self.maxHeightCacheEntries
-        guard overflow > 0 else { return }
-        let keysToRemove = heightCacheInsertionOrder.prefix(overflow)
-        keysToRemove.forEach { heightCache.removeValue(forKey: $0) }
-        heightCacheInsertionOrder.removeFirst(overflow)
+    private func pruneHeightCache(keepingItemIDs: Set<String>) {
+        let existing = Set(heightCacheKeysByItemID.keys)
+        let removed = existing.subtracting(keepingItemIDs)
+        guard !removed.isEmpty else { return }
+        for itemID in removed {
+            guard let keys = heightCacheKeysByItemID.removeValue(forKey: itemID) else { continue }
+            for key in keys {
+                heightCache.removeValue(forKey: key)
+            }
+        }
     }
 
     private func removeAllHeightCache() {
         heightCache.removeAll(keepingCapacity: true)
-        heightCacheInsertionOrder.removeAll(keepingCapacity: true)
+        heightCacheKeysByItemID.removeAll(keepingCapacity: true)
     }
 
     private func measuredTileHeight(_ tile: UIView, width: CGFloat) -> CGFloat {

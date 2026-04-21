@@ -96,11 +96,11 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
             guard oldValue != appearance else {
                 return
             }
-            usesCardBackground = appearance.usesCardBackground
-            heightCache.removeAll()
+            clearAllHeightCache()
             applyLayoutForColumnCount()
             reconfigureVisibleCells()
             handleAutoplayAvailabilityChanged()
+            updateBackgroundColors()
         }
     }
     var networkKind: NetworkKind = .cellular {
@@ -121,13 +121,6 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
             updateContentInsets()
         }
     }
-    var usesCardBackground: Bool = true {
-        didSet {
-            guard isViewLoaded else { return }
-            guard oldValue != usesCardBackground else { return }
-            updateBackgroundColors()
-        }
-    }
     var columnCount: Int = 1 {
         didSet {
             let clamped = max(columnCount, 1)
@@ -136,9 +129,10 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
                 return
             }
             guard oldValue != columnCount, isViewLoaded else { return }
-            heightCache.removeAll()
+            clearAllHeightCache()
             applyLayoutForColumnCount()
             reconfigureVisibleCells()
+            updateBackgroundColors()
         }
     }
     var accessoryItems: [CollectionViewTimelineAccessoryItem] = [] {
@@ -197,6 +191,9 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
     private let autoplayPlayerView = VideoPlayerView()
     private var autoplaySelectionTask: Task<Void, Never>?
     private var autoplayCountdownTask: Task<Void, Never>?
+    private var postRefreshPoolCleanupTask: Task<Void, Never>?
+    private var deferredPoolCleanupTask: Task<Void, Never>?
+    private let deferredPoolCleanupCells = NSHashTable<TimelineUIKitCollectionViewCell>.weakObjects()
     private weak var currentAutoplayHostView: UIView?
     private var currentAutoplayID: String?
     private var accessoryItemMap: [String: CollectionViewTimelineAccessoryItem] = [:]
@@ -261,6 +258,8 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
 
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
+        postRefreshPoolCleanupTask?.cancel()
+        deferredPoolCleanupTask?.cancel()
         detachAutoplayPlayer(pause: true)
         accessoryItems.forEach { $0.onVisibilityChanged?(false) }
     }
@@ -268,6 +267,8 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
     deinit {
         autoplaySelectionTask?.cancel()
         autoplayCountdownTask?.cancel()
+        postRefreshPoolCleanupTask?.cancel()
+        deferredPoolCleanupTask?.cancel()
         NotificationCenter.default.removeObserver(self)
     }
 
@@ -341,6 +342,64 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
         return card
     }()
     private var heightCache: [String: CGFloat] = [:]
+    private var heightCacheKeysByItemID: [String: Set<String>] = [:]
+
+    private func clearAllHeightCache() {
+        heightCache.removeAll(keepingCapacity: true)
+        heightCacheKeysByItemID.removeAll(keepingCapacity: true)
+    }
+
+    private func heightCacheWidthKey(for width: CGFloat) -> Int {
+        Int((width * UIScreen.main.scale).rounded(.toNearestOrAwayFromZero))
+    }
+
+    private func timelineHeightCacheKey(itemID: String, renderHash: Int32, width: CGFloat) -> String {
+        "\(itemID):\(renderHash):\(heightCacheWidthKey(for: width))"
+    }
+
+    private func measuredCompressedCardHeight(_ card: UIView, width: CGFloat) -> CGFloat {
+        card.bounds = CGRect(x: 0, y: 0, width: width, height: UIView.layoutFittingCompressedSize.height)
+        card.setNeedsLayout()
+        let size = card.systemLayoutSizeFitting(
+            CGSize(width: width, height: UIView.layoutFittingCompressedSize.height),
+            withHorizontalFittingPriority: .required,
+            verticalFittingPriority: .fittingSizeLevel
+        )
+        return ceil(size.height) + 1
+    }
+
+    private func pruneHeightCache(keepingItemIDs: Set<String>) {
+        let existing = Set(heightCacheKeysByItemID.keys)
+        let removed = existing.subtracting(keepingItemIDs)
+        guard !removed.isEmpty else { return }
+        for itemID in removed {
+            guard let keys = heightCacheKeysByItemID.removeValue(forKey: itemID) else { continue }
+            for key in keys {
+                heightCache.removeValue(forKey: key)
+            }
+        }
+    }
+
+    private func applyMeasuredHeightCorrection(
+        itemID: String,
+        renderHash: Int32,
+        width: CGFloat,
+        height: CGFloat
+    ) {
+        guard columnCount > 1, width > 1, height.isFinite else { return }
+        let key = timelineHeightCacheKey(itemID: itemID, renderHash: renderHash, width: width)
+        let correctedHeight = max(ceil(height), 120)
+        guard correctedHeight > (heightCache[key] ?? 0) + 1 else { return }
+
+        heightCache[key] = correctedHeight
+        heightCacheKeysByItemID[itemID, default: []].insert(key)
+
+        Task { @MainActor [weak self] in
+            guard let self, self.isViewLoaded else { return }
+            self.collectionView.collectionViewLayout.invalidateLayout()
+            self.collectionView.performBatchUpdates(nil)
+        }
+    }
 
     private func applyLayoutForColumnCount() {
         guard collectionView != nil else { return }
@@ -410,7 +469,7 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
     }
 
     private func updateBackgroundColors() {
-        let backgroundColor: UIColor = usesCardBackground ? .systemGroupedBackground : .clear
+        let backgroundColor: UIColor = appearance.usesCardBackground || columnCount > 1 ? .systemGroupedBackground : .systemBackground
         view.backgroundColor = backgroundColor
         collectionView.backgroundColor = backgroundColor
     }
@@ -427,30 +486,48 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
             cell.setHostedView(accessoryItemMap[itemID]?.view)
         } else if itemID.hasPrefix(Self.timelinePrefix) {
             if let index = itemIndexMap[itemID] {
-                configureTimelineCell(cell, index: index)
+                configureTimelineCell(cell, itemID: itemID, index: index)
             }
         } else if itemID.hasPrefix(Self.placeholderPrefix) {
             let indexStr = itemID.dropFirst(Self.placeholderPrefix.count)
             let index = Int(indexStr) ?? 0
+            cell.onPreferredHeightChanged = nil
             configurePlaceholderCell(cell, index: index)
         } else if itemID == Self.emptyID {
+            cell.onPreferredHeightChanged = nil
             cell.setHostedView(CenteredCellContentView(content: ListEmptyUIView()))
         } else if itemID == Self.errorID {
+            cell.onPreferredHeightChanged = nil
             configureErrorCell(cell)
         } else if itemID == Self.footerLoadingID {
+            cell.onPreferredHeightChanged = nil
             cell.setHostedView(makeLoadingFooterView())
         } else if itemID == Self.footerErrorID {
+            cell.onPreferredHeightChanged = nil
             configureFooterErrorCell(cell)
         } else if itemID == Self.footerEndID {
+            cell.onPreferredHeightChanged = nil
             cell.setHostedView(makeTextFooterView(text: String(localized: "end_of_list")))
         }
     }
 
-    private func configureTimelineCell(_ cell: TimelineUIKitCollectionViewCell, index: Int) {
+    private func configureTimelineCell(_ cell: TimelineUIKitCollectionViewCell, itemID: String, index: Int) {
         guard let success = currentSuccess else { return }
         let totalCount = Int(success.itemCount)
         let item = (index >= 0 && index < totalCount) ? success.peek(index: Int32(index)) : nil
         if let item {
+            if columnCount > 1 {
+                cell.onPreferredHeightChanged = { [weak self] width, height in
+                    self?.applyMeasuredHeightCorrection(
+                        itemID: itemID,
+                        renderHash: item.renderHash,
+                        width: width,
+                        height: height
+                    )
+                }
+            } else {
+                cell.onPreferredHeightChanged = nil
+            }
             cell.configureTimeline(
                 data: item,
                 index: index,
@@ -461,6 +538,7 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
                 openURL: openURL
             )
         } else {
+            cell.onPreferredHeightChanged = nil
             configurePlaceholderCell(cell, index: index)
         }
     }
@@ -547,6 +625,8 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
     // MARK: - State Update
 
     func update(data: PagingState<UiTimelineV2>) {
+        let wasRefreshing = currentData.map(pagingIsRefreshing) ?? false
+        let isRefreshing = pagingIsRefreshing(data)
         currentData = data
         if case .success(let success) = onEnum(of: data) {
             currentSuccess = success
@@ -563,6 +643,9 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
         } else {
             validateCurrentAutoplayVisibility()
             scheduleAutoplaySelection()
+        }
+        if wasRefreshing && !isRefreshing {
+            schedulePostRefreshPoolCleanup()
         }
     }
 
@@ -659,6 +742,7 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
         }
 
         itemIndexMap = newIndexMap
+        pruneHeightCache(keepingItemIDs: Set(newIndexMap.keys))
         let newSignature = SnapshotSignature(accessoryIDs: accessoryIDs, itemIDs: itemIDs, footerIDs: footerIDs)
         let previousSignature = lastAppliedSignature
 
@@ -798,6 +882,78 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
             guard let self, !Task.isCancelled else { return }
             self.selectAutoplayCandidateIfStable()
         }
+    }
+
+    private func schedulePostRefreshPoolCleanup() {
+        postRefreshPoolCleanupTask?.cancel()
+        guard isViewLoaded else { return }
+        postRefreshPoolCleanupTask = Task { @MainActor [weak self] in
+            do {
+                try await Task.sleep(nanoseconds: 300_000_000)
+            } catch {
+                return
+            }
+            guard let self, !Task.isCancelled else { return }
+            self.performLightweightPoolCleanupIfStable()
+        }
+    }
+
+    private func performLightweightPoolCleanupIfStable() {
+        guard !collectionView.isDragging,
+              !collectionView.isDecelerating,
+              !scrollingState.isScrolling else {
+            return
+        }
+
+        for cell in collectionView.visibleCells {
+            (cell as? TimelineUIKitCollectionViewCell)?.performLightweightPoolCleanup()
+        }
+    }
+
+    private func scheduleDeferredPoolCleanup() {
+        deferredPoolCleanupTask?.cancel()
+        guard isViewLoaded else { return }
+        deferredPoolCleanupTask = Task { @MainActor [weak self] in
+            do {
+                try await Task.sleep(nanoseconds: 10_000_000_000)
+            } catch {
+                return
+            }
+            guard let self, !Task.isCancelled else { return }
+            self.performDeferredPoolCleanupIfStable()
+        }
+    }
+
+    private func performDeferredPoolCleanupIfStable() {
+        guard !collectionView.isDragging,
+              !collectionView.isDecelerating,
+              !scrollingState.isScrolling else {
+            return
+        }
+
+        var seen = Set<ObjectIdentifier>()
+        var cells: [TimelineUIKitCollectionViewCell] = []
+
+        func append(_ cell: TimelineUIKitCollectionViewCell) {
+            let id = ObjectIdentifier(cell)
+            guard !seen.contains(id) else { return }
+            seen.insert(id)
+            cells.append(cell)
+        }
+
+        for cell in collectionView.visibleCells {
+            if let timelineCell = cell as? TimelineUIKitCollectionViewCell {
+                append(timelineCell)
+            }
+        }
+        for cell in deferredPoolCleanupCells.allObjects {
+            append(cell)
+        }
+
+        for cell in cells {
+            cell.performDeferredPoolCleanup()
+        }
+        deferredPoolCleanupCells.removeAllObjects()
     }
 
     private func selectAutoplayCandidateIfStable() {
@@ -988,19 +1144,13 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
         }
 
         if itemID.hasPrefix(Self.placeholderPrefix) {
-            let key = "__placeholder__:\(Int(width))"
+            let key = "__placeholder__:\(heightCacheWidthKey(for: width))"
             if let cached = heightCache[key] { return CGSize(width: width, height: cached) }
             let totalCount = currentSuccess.map { Int($0.itemCount) } ?? 5
             sizingPlaceholderCard.isPlainTimelineDisplayMode = appearance.isPlainTimelineDisplayMode
             sizingPlaceholderCard.isMultipleColumn = true
             sizingPlaceholderCard.configure(index: 0, totalCount: totalCount)
-            let target = CGSize(width: width, height: UIView.layoutFittingCompressedSize.height)
-            let size = sizingPlaceholderCard.systemLayoutSizeFitting(
-                target,
-                withHorizontalFittingPriority: .required,
-                verticalFittingPriority: .fittingSizeLevel
-            )
-            let height = max(size.height, 120)
+            let height = max(measuredCompressedCardHeight(sizingPlaceholderCard, width: width), 120)
             heightCache[key] = height
             return CGSize(width: width, height: height)
         }
@@ -1011,7 +1161,7 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
            index >= 0,
            index < Int(success.itemCount),
            let item = success.peek(index: Int32(index)) {
-            let key = "\(itemID):\(item.renderHash):\(Int(width))"
+            let key = timelineHeightCacheKey(itemID: itemID, renderHash: item.renderHash, width: width)
             if let cached = heightCache[key] { return CGSize(width: width, height: cached) }
             sizingTimelineCard.isPlainTimelineDisplayMode = appearance.isPlainTimelineDisplayMode
             sizingTimelineCard.isMultipleColumn = true
@@ -1022,14 +1172,17 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
                 detailStatusKey: detailStatusKey,
                 onOpenURL: nil
             )
-            let target = CGSize(width: width, height: UIView.layoutFittingCompressedSize.height)
-            let size = sizingTimelineCard.systemLayoutSizeFitting(
-                target,
-                withHorizontalFittingPriority: .required,
-                verticalFittingPriority: .fittingSizeLevel
-            )
-            let height = max(size.height, 120)
+            let contentWidth = max(width - 32, 1)
+            sizingTimelineView.prepareForFitting(width: contentWidth)
+            let measuredHeight: CGFloat
+            if let contentHeight = sizingTimelineView.estimatedHeightForFitting(width: contentWidth) {
+                measuredHeight = ceil(contentHeight + 24) + 1
+            } else {
+                measuredHeight = measuredCompressedCardHeight(sizingTimelineCard, width: width)
+            }
+            let height = max(measuredHeight, 120)
             heightCache[key] = height
+            heightCacheKeysByItemID[itemID, default: []].insert(key)
             return CGSize(width: width, height: height)
         }
 
@@ -1068,6 +1221,9 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
             accessory.onVisibilityChanged?(false)
             return
         }
+        if let timelineCell = cell as? TimelineUIKitCollectionViewCell {
+            deferredPoolCleanupCells.add(timelineCell)
+        }
         guard let host = currentAutoplayHostView,
               host.isDescendant(of: cell) else {
             return
@@ -1080,6 +1236,8 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
     func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
         scrollingState.isScrolling = true
         autoplaySelectionTask?.cancel()
+        postRefreshPoolCleanupTask?.cancel()
+        deferredPoolCleanupTask?.cancel()
     }
 
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
@@ -1090,16 +1248,26 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
         if !decelerate {
             scrollingState.isScrolling = false
             scheduleAutoplaySelection()
+            scheduleDeferredPoolCleanup()
         }
     }
 
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
         scrollingState.isScrolling = false
         scheduleAutoplaySelection()
+        scheduleDeferredPoolCleanup()
+    }
+
+    func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
+        scrollingState.isScrolling = false
+        scheduleAutoplaySelection()
+        scheduleDeferredPoolCleanup()
     }
 }
 
 private final class TimelineUIKitCollectionViewCell: UICollectionViewCell {
+    var onPreferredHeightChanged: ((CGFloat, CGFloat) -> Void)?
+
     private var hostedView: UIView?
     private var hostedConstraints: [NSLayoutConstraint] = []
     private var hostedBottomConstraint: NSLayoutConstraint?
@@ -1115,6 +1283,7 @@ private final class TimelineUIKitCollectionViewCell: UICollectionViewCell {
     private var lastItemKey: String?
     private var lastAppearance: TimelineUIKitAppearance?
     private var lastDetailStatusKey: String?
+    private var lastPreferredHeightReport: (widthKey: Int, height: CGFloat)?
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -1132,14 +1301,34 @@ private final class TimelineUIKitCollectionViewCell: UICollectionViewCell {
         super.prepareForReuse()
         // Reset signature so a recycled cell always rebuilds for its new tenant,
         // even in the (unlikely) event that renderHash/itemKey collide.
-        lastRenderHash = nil
-        lastItemKey = nil
-        lastAppearance = nil
-        lastDetailStatusKey = nil
+        resetRenderSignature()
+        onPreferredHeightChanged = nil
+        lastPreferredHeightReport = nil
     }
 
     func autoplayCandidates(prefix: String) -> [TimelineVideoAutoplayCandidate] {
         timelineView.autoplayCandidates(prefix: prefix)
+    }
+
+    func performDeferredPoolCleanup() {
+        if window == nil || hostedView !== timelineCard {
+            resetRenderSignature()
+            timelineView.prepareForDeferredReuseCleanup()
+        } else {
+            timelineView.performDeferredPoolCleanup()
+        }
+    }
+
+    func performLightweightPoolCleanup() {
+        guard window != nil, hostedView === timelineCard else { return }
+        timelineView.performLightweightPoolCleanup()
+    }
+
+    private func resetRenderSignature() {
+        lastRenderHash = nil
+        lastItemKey = nil
+        lastAppearance = nil
+        lastDetailStatusKey = nil
     }
 
     func configureTimeline(
@@ -1184,6 +1373,11 @@ private final class TimelineUIKitCollectionViewCell: UICollectionViewCell {
         setHostedView(timelineCard)
     }
 
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        reportPreferredHeightIfNeeded()
+    }
+
     func configurePlaceholder(index: Int, totalCount: Int, appearance: TimelineUIKitAppearance, isMultipleColumn: Bool) {
         placeholderCard.isPlainTimelineDisplayMode = appearance.isPlainTimelineDisplayMode
         placeholderCard.isMultipleColumn = isMultipleColumn
@@ -1220,6 +1414,41 @@ private final class TimelineUIKitCollectionViewCell: UICollectionViewCell {
         ]
         hostedBottomConstraint = bottomConstraint
         NSLayoutConstraint.activate(hostedConstraints)
+        lastPreferredHeightReport = nil
+    }
+
+    private func reportPreferredHeightIfNeeded() {
+        guard hostedView === timelineCard,
+              let onPreferredHeightChanged,
+              contentView.bounds.width > 1 else {
+            return
+        }
+
+        let width = contentView.bounds.width
+        timelineView.prepareForFitting(width: max(width - 32, 1))
+        timelineCard.bounds = CGRect(
+            x: 0,
+            y: 0,
+            width: width,
+            height: UIView.layoutFittingCompressedSize.height
+        )
+        timelineCard.setNeedsLayout()
+        let size = timelineCard.systemLayoutSizeFitting(
+            CGSize(width: width, height: UIView.layoutFittingCompressedSize.height),
+            withHorizontalFittingPriority: .required,
+            verticalFittingPriority: .fittingSizeLevel
+        )
+        let preferredHeight = ceil(size.height) + 1
+        guard preferredHeight > contentView.bounds.height + 1 else { return }
+
+        let widthKey = Int((width * UIScreen.main.scale).rounded(.toNearestOrAwayFromZero))
+        if let lastPreferredHeightReport,
+           lastPreferredHeightReport.widthKey == widthKey,
+           abs(lastPreferredHeightReport.height - preferredHeight) < 0.5 {
+            return
+        }
+        lastPreferredHeightReport = (widthKey, preferredHeight)
+        onPreferredHeightChanged(width, preferredHeight)
     }
 }
 

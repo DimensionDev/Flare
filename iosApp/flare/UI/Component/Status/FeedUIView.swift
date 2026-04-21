@@ -26,6 +26,7 @@ final class FeedUIView: UIView {
         let l = UILabel()
         l.font = .preferredFont(forTextStyle: .footnote)
         l.numberOfLines = 0
+        l.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         return l
     }()
     private let translation = TranslateStatusStateView()
@@ -114,6 +115,108 @@ final class FeedUIView: UIView {
     }
     required init?(coder: NSCoder) { fatalError("init(coder:) not supported") }
 
+    override func layoutSubviews() {
+        updatePreferredMaxLayoutWidths(for: bounds.width)
+        super.layoutSubviews()
+    }
+
+    override func systemLayoutSizeFitting(
+        _ targetSize: CGSize,
+        withHorizontalFittingPriority horizontalFittingPriority: UILayoutPriority,
+        verticalFittingPriority: UILayoutPriority
+    ) -> CGSize {
+        let fittingWidth = targetSize.width > 0 ? targetSize.width : bounds.width
+        updatePreferredMaxLayoutWidths(for: fittingWidth)
+        return super.systemLayoutSizeFitting(
+            targetSize,
+            withHorizontalFittingPriority: horizontalFittingPriority,
+            verticalFittingPriority: verticalFittingPriority
+        )
+    }
+
+    func prepareForFitting(width: CGFloat) {
+        updatePreferredMaxLayoutWidths(for: width)
+    }
+
+    func estimatedHeight(for width: CGFloat) -> CGFloat {
+        guard width > 0 else { return 0 }
+        updatePreferredMaxLayoutWidths(for: width)
+
+        var rowHeights: [CGFloat] = [estimatedHeaderHeight(for: width)]
+
+        if !titleLabel.isHidden {
+            rowHeights.append(estimatedLabelHeight(titleLabel, width: width))
+        }
+
+        if !bodyRow.isHidden {
+            let descriptionHeight = descriptionLabel.isHidden
+                ? 0
+                : estimatedLabelHeight(descriptionLabel, width: descriptionLabel.preferredMaxLayoutWidth)
+            let mediaHeight: CGFloat = mediaView.isHidden ? 0 : 72
+            rowHeights.append(max(descriptionHeight, mediaHeight))
+        }
+
+        let contentHeight = rowHeights.reduce(0, +)
+        let spacing = CGFloat(max(rowHeights.count - 1, 0)) * stack.spacing
+        return ceil(contentHeight + spacing)
+    }
+
+    private func estimatedHeaderHeight(for width: CGFloat) -> CGFloat {
+        var heights: [CGFloat] = [
+            estimatedLabelHeight(sourceName, width: sourceName.preferredMaxLayoutWidth)
+        ]
+        if !sourceIcon.isHidden {
+            heights.append(20)
+        }
+        if !translation.isHidden {
+            heights.append(translation.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).height)
+        }
+        if !dateLabel.isHidden {
+            heights.append(dateLabel.intrinsicContentSize.height)
+        }
+        return ceil(heights.max() ?? 0)
+    }
+
+    private func estimatedLabelHeight(_ label: UILabel, width: CGFloat) -> CGFloat {
+        guard !label.isHidden, width > 0, label.text?.isEmpty == false else { return 0 }
+        let size = label.sizeThatFits(
+            CGSize(width: width, height: CGFloat.greatestFiniteMagnitude)
+        )
+        if label.numberOfLines > 0 {
+            let lineHeight = label.font.lineHeight
+            return ceil(min(size.height, lineHeight * CGFloat(label.numberOfLines)))
+        }
+        return ceil(size.height)
+    }
+
+    private func updatePreferredMaxLayoutWidths(for width: CGFloat) {
+        guard width > 0 else { return }
+
+        titleLabel.preferredMaxLayoutWidth = width
+
+        let bodyTextWidth = mediaView.isHidden
+            ? width
+            : max(width - 72 - bodyRow.spacing, 0)
+        descriptionLabel.preferredMaxLayoutWidth = bodyTextWidth
+
+        var fixedHeaderWidth: CGFloat = 0
+        var headerItemCount = 2 // source name + flexible spacer
+        if !sourceIcon.isHidden {
+            fixedHeaderWidth += 20
+            headerItemCount += 1
+        }
+        if !translation.isHidden {
+            fixedHeaderWidth += translation.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).width
+            headerItemCount += 1
+        }
+        if !dateLabel.isHidden {
+            fixedHeaderWidth += dateLabel.intrinsicContentSize.width
+            headerItemCount += 1
+        }
+        let headerSpacing = CGFloat(max(headerItemCount - 1, 0)) * headerRow.spacing
+        sourceName.preferredMaxLayoutWidth = max(width - fixedHeaderWidth - headerSpacing, 1)
+    }
+
     func configure(data: UiTimelineV2.Feed) {
         self.data = data
 
@@ -166,6 +269,9 @@ final class FeedUIView: UIView {
         }
 
         bodyRow.isHidden = descriptionLabel.isHidden && mediaView.isHidden
+        updatePreferredMaxLayoutWidths(for: bounds.width)
+        invalidateIntrinsicContentSize()
+        setNeedsLayout()
     }
 
     @objc private func onTap() {

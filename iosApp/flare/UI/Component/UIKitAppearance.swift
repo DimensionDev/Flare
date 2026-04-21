@@ -58,7 +58,7 @@ struct TimelineUIKitAppearance: Equatable {
     }
 
     var usesCardBackground: Bool {
-        !isPlainTimelineDisplayMode
+        timelineDisplayMode == .card
     }
 
     init(settings: AppearanceSettings) {

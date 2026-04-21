@@ -293,9 +293,13 @@ struct StatusMediaVideoView: View {
         Color.clear
 //            .opacity(0.2)
             .overlay {
-                NetworkImage(data: data.thumbnailUrl)
-                    .scaledToFit()
-                    .allowsHitTesting(false)
+                if case .idle = videoState {
+                    NetworkImage(data: data.thumbnailUrl)
+                        .scaledToFit()
+                        .allowsHitTesting(false)
+                } else {
+                    EmptyView()
+                }
             }
             .clipped()
         .overlay {

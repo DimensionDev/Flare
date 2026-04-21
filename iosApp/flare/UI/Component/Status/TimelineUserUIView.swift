@@ -44,6 +44,14 @@ final class TimelineUserUIView: UIView {
         rebuild()
     }
 
+    func prepareForPoolRemoval() {
+        data = nil
+        buttonRow.prepareForPoolRemoval()
+        column.flareSyncArrangedSubviews([])
+        invalidateIntrinsicContentSize()
+        setNeedsLayout()
+    }
+
     private func rebuild() {
         guard let data = data else {
             column.flareSyncArrangedSubviews([])
@@ -76,6 +84,22 @@ final class TimelineUserUIView: UIView {
             )
             desired.append(buttonRow)
             column.flareSyncArrangedSubviews(desired)
+        }
+    }
+
+    func performDeferredPoolCleanup() {
+        if data?.button.isEmpty == false {
+            buttonRow.performDeferredPoolCleanup()
+        } else {
+            buttonRow.prepareForPoolRemoval()
+        }
+    }
+
+    func performLightweightPoolCleanup() {
+        if data?.button.isEmpty == false {
+            buttonRow.performLightweightPoolCleanup()
+        } else {
+            buttonRow.prepareForPoolRemoval()
         }
     }
 }

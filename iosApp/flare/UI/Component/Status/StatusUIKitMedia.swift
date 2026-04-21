@@ -172,6 +172,15 @@ final class MediaUIView: UIView {
         }
     }
 
+    func prepareForPoolRemoval() {
+        imageView.kf.cancelDownloadTask()
+        imageView.image = nil
+        lastMediaSignature = nil
+        lastCornerRadius = nil
+        detachAutoplayPlayer()
+        setAutoplayOverlay(.idle, showsBadge: false)
+    }
+
     func attachAutoplayPlayer(_ playerView: UIView) {
         guard autoplayPlayerView !== playerView || playerView.superview !== self else { return }
         detachAutoplayPlayer()
@@ -412,6 +421,23 @@ final class StatusMediaUIView: UIView {
         }
         setNeedsLayout()
         invalidateIntrinsicContentSize()
+    }
+
+    func performDeferredPoolCleanup() {
+        trimCellPool(activeCount: items.count)
+    }
+
+    func performLightweightPoolCleanup() {
+        trimCellPool(activeCount: items.count)
+    }
+
+    private func trimCellPool(activeCount: Int) {
+        guard cellPool.count > activeCount else { return }
+        for cell in cellPool[activeCount...] {
+            cell.prepareForPoolRemoval()
+            cell.removeFromSuperview()
+        }
+        cellPool.removeLast(cellPool.count - activeCount)
     }
 
     private func updateAspectConstraint() {
@@ -655,6 +681,13 @@ private final class MediaGridCellView: UIView {
         }
     }
 
+    func prepareForPoolRemoval() {
+        media = nil
+        altButton?.isHidden = true
+        mediaView.prepareForPoolRemoval()
+        isHidden = true
+    }
+
     func autoplayCandidate(prefix: String) -> TimelineVideoAutoplayCandidate? {
         guard !isHidden,
               !mediaView.isHidden,
@@ -853,6 +886,32 @@ final class StatusMediaContentUIView: UIView {
         }
         applyVisibility()
         invalidateIntrinsicContentSize()
+    }
+
+    func prepareForPoolRemoval() {
+        lastConfigureSignature = nil
+        items = []
+        sensitive = false
+        expanded = false
+        grid.configure(
+            data: [],
+            sensitive: false,
+            cornerRadius: cornerRadius,
+            singleFollowsImageAspect: appearanceExpandMediaSize
+        )
+        grid.performDeferredPoolCleanup()
+        grid.isHidden = true
+        showButton.isHidden = true
+        NSLayoutConstraint.deactivate(showButtonConstraints)
+        invalidateIntrinsicContentSize()
+    }
+
+    func performDeferredPoolCleanup() {
+        grid.performDeferredPoolCleanup()
+    }
+
+    func performLightweightPoolCleanup() {
+        grid.performLightweightPoolCleanup()
     }
 
     func autoplayCandidates(prefix: String) -> [TimelineVideoAutoplayCandidate] {

@@ -121,6 +121,46 @@ final class StatusActionsUIView: UIView {
         row.flareSyncArrangedSubviews(desired)
     }
 
+    func performDeferredPoolCleanup() {
+        trimPoolsToActiveCursors()
+    }
+
+    func performLightweightPoolCleanup() {
+        trimPoolsToActiveCursors()
+    }
+
+    func prepareForPoolRemoval() {
+        row.flareSyncArrangedSubviews([])
+        data = []
+        itemButtonCursor = 0
+        groupButtonCursor = 0
+        textGroupCursor = 0
+        dividerCursor = 0
+        spacerCursor = 0
+        trimPoolsToActiveCursors()
+    }
+
+    private func trimPoolsToActiveCursors() {
+        Self.trimPool(&itemButtonPool, activeCount: itemButtonCursor) { $0.prepareForPoolRemoval() }
+        Self.trimPool(&groupButtonPool, activeCount: groupButtonCursor) { $0.prepareForPoolRemoval() }
+        Self.trimPool(&textGroupPool, activeCount: textGroupCursor) { $0.prepareForPoolRemoval() }
+        Self.trimPool(&dividerPool, activeCount: dividerCursor)
+        Self.trimPool(&spacerPool, activeCount: spacerCursor)
+    }
+
+    private static func trimPool<View: UIView>(
+        _ pool: inout [View],
+        activeCount: Int,
+        prepare: (View) -> Void = { _ in }
+    ) {
+        guard pool.count > activeCount else { return }
+        for view in pool[activeCount...] {
+            prepare(view)
+            view.removeFromSuperview()
+        }
+        pool.removeLast(pool.count - activeCount)
+    }
+
     private func flexSpacer() -> UIView {
         while spacerPool.count <= spacerCursor {
             let v = UIView()
@@ -218,7 +258,11 @@ final class StatusActionsUIView: UIView {
         )
         control.showsMenuAsPrimaryAction = true
         control.menu = UIMenu(children: [
-            UIDeferredMenuElement.uncached { completion in
+            UIDeferredMenuElement.uncached { [weak self] completion in
+                guard let self else {
+                    completion([])
+                    return
+                }
                 completion(self.buildMenu(from: group.actions))
             }
         ])
@@ -328,6 +372,10 @@ private final class ActionGroupColumnView: UIView {
     }
 
     required init?(coder: NSCoder) { fatalError("init(coder:) not supported") }
+
+    func prepareForPoolRemoval() {
+        nestedActions.prepareForPoolRemoval()
+    }
 
     func configure(
         actions: [ActionMenu],
@@ -483,6 +531,20 @@ private final class ActionItemControl: UIButton {
 
         invalidateIntrinsicContentSize()
         setNeedsLayout()
+    }
+
+    func prepareForPoolRemoval() {
+        onTap = nil
+        menu = nil
+        showsMenuAsPrimaryAction = false
+        iconView.image = nil
+        label.text = nil
+        minimumTextWidthConstraint?.isActive = false
+        minimumWidthConstraint?.isActive = false
+        minimumHeightConstraint?.isActive = false
+        minimumTextWidthConstraint = nil
+        minimumWidthConstraint = nil
+        minimumHeightConstraint = nil
     }
 
     @objc private func onTapped() {

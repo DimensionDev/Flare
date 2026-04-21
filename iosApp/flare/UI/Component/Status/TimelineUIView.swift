@@ -17,6 +17,9 @@ final class TimelineUIView: UIView {
     private var data: UiTimelineV2?
     private var isBatchConfiguring = false
     private var lastRenderSignature: RenderSignature?
+    private var statusViewPreparedForReuse = true
+    private var userViewPreparedForReuse = true
+    private var userListViewPreparedForReuse = true
 
     private struct RenderSignature: Equatable {
         let itemKey: String
@@ -129,6 +132,7 @@ final class TimelineUIView: UIView {
             desired.append(feedView)
 
         case .post(let post):
+            statusViewPreparedForReuse = false
             if let message = post.message {
                 configureMessage(message, topMessageOnly: false)
                 desired.append(messageContainer)
@@ -143,6 +147,7 @@ final class TimelineUIView: UIView {
             desired.append(statusView)
 
         case .user(let user):
+            userViewPreparedForReuse = false
             if let message = user.message {
                 configureMessage(message, topMessageOnly: false)
                 desired.append(messageContainer)
@@ -153,6 +158,7 @@ final class TimelineUIView: UIView {
             desired.append(userView)
 
         case .userList(let userList):
+            userListViewPreparedForReuse = false
             if let message = userList.message {
                 configureMessage(message, topMessageOnly: false)
                 desired.append(messageContainer)
@@ -169,6 +175,126 @@ final class TimelineUIView: UIView {
         stack.flareSyncArrangedSubviews(desired)
         invalidateIntrinsicContentSize()
         setNeedsLayout()
+    }
+
+    func prepareForReuse() {
+        data = nil
+        lastRenderSignature = nil
+        invalidateIntrinsicContentSize()
+        setNeedsLayout()
+    }
+
+    func prepareForDeferredReuseCleanup() {
+        data = nil
+        lastRenderSignature = nil
+        stack.flareSyncArrangedSubviews([])
+        performDeferredPoolCleanup()
+        invalidateIntrinsicContentSize()
+        setNeedsLayout()
+    }
+
+    func performLightweightPoolCleanup() {
+        let activeStatus: Bool
+        let activeUser: Bool
+        let activeUserList: Bool
+        if let data {
+            switch onEnum(of: data) {
+            case .post:
+                activeStatus = true
+                activeUser = false
+                activeUserList = false
+            case .user:
+                activeStatus = false
+                activeUser = true
+                activeUserList = false
+            case .userList:
+                activeStatus = false
+                activeUser = false
+                activeUserList = true
+            default:
+                activeStatus = false
+                activeUser = false
+                activeUserList = false
+            }
+        } else {
+            activeStatus = false
+            activeUser = false
+            activeUserList = false
+        }
+
+        if activeStatus {
+            statusView.performLightweightPoolCleanup()
+            statusViewPreparedForReuse = false
+        } else if !statusViewPreparedForReuse {
+            statusView.prepareForPoolRemoval()
+            statusViewPreparedForReuse = true
+        }
+        if activeUser {
+            userView.performLightweightPoolCleanup()
+            userViewPreparedForReuse = false
+        } else if !userViewPreparedForReuse {
+            userView.prepareForPoolRemoval()
+            userViewPreparedForReuse = true
+        }
+        if activeUserList {
+            userListView.performLightweightPoolCleanup()
+            userListViewPreparedForReuse = false
+        } else if !userListViewPreparedForReuse {
+            userListView.prepareForPoolRemoval()
+            userListViewPreparedForReuse = true
+        }
+    }
+
+    func performDeferredPoolCleanup() {
+        let activeStatus: Bool
+        let activeUser: Bool
+        let activeUserList: Bool
+        if let data {
+            switch onEnum(of: data) {
+            case .post:
+                activeStatus = true
+                activeUser = false
+                activeUserList = false
+            case .user:
+                activeStatus = false
+                activeUser = true
+                activeUserList = false
+            case .userList:
+                activeStatus = false
+                activeUser = false
+                activeUserList = true
+            default:
+                activeStatus = false
+                activeUser = false
+                activeUserList = false
+            }
+        } else {
+            activeStatus = false
+            activeUser = false
+            activeUserList = false
+        }
+
+        if activeStatus {
+            statusView.performDeferredPoolCleanup()
+            statusViewPreparedForReuse = false
+        } else if !statusViewPreparedForReuse {
+            statusView.prepareForPoolRemoval()
+            statusViewPreparedForReuse = true
+        }
+        if activeUser {
+            userView.performDeferredPoolCleanup()
+            userViewPreparedForReuse = false
+        } else if !userViewPreparedForReuse {
+            userView.prepareForPoolRemoval()
+            userViewPreparedForReuse = true
+        }
+        if activeUserList {
+            userListView.performDeferredPoolCleanup()
+            userListViewPreparedForReuse = false
+        } else if !userListViewPreparedForReuse {
+            userListView.prepareForPoolRemoval()
+            userListViewPreparedForReuse = true
+        }
     }
 
     private func configureMessage(_ message: UiTimelineV2.Message, topMessageOnly: Bool) {
@@ -191,6 +317,60 @@ final class TimelineUIView: UIView {
         statusView.openURL = onOpenURL
         userView.onOpenURL = onOpenURL
         userListView.onOpenURL = onOpenURL
+    }
+
+    func prepareForFitting(width: CGFloat) {
+        guard let data else { return }
+        bounds = CGRect(x: bounds.minX, y: bounds.minY, width: width, height: bounds.height)
+        switch onEnum(of: data) {
+        case .feed:
+            feedView.prepareForFitting(width: width)
+        case .post:
+            statusView.prepareForFitting(width: width)
+        default:
+            break
+        }
+    }
+
+    func estimatedHeightForFitting(width: CGFloat) -> CGFloat? {
+        guard let data else { return nil }
+        switch onEnum(of: data) {
+        case .feed:
+            return feedView.estimatedHeight(for: width)
+        case .post(let post) where !post.quote.isEmpty:
+            prepareForFitting(width: width)
+            let size = stack.systemLayoutSizeFitting(
+                CGSize(width: width, height: UIView.layoutFittingCompressedSize.height),
+                withHorizontalFittingPriority: .required,
+                verticalFittingPriority: .fittingSizeLevel
+            )
+            return ceil(size.height) + 1
+        default:
+            return nil
+        }
+    }
+
+    override func systemLayoutSizeFitting(
+        _ targetSize: CGSize,
+        withHorizontalFittingPriority horizontalFittingPriority: UILayoutPriority,
+        verticalFittingPriority: UILayoutPriority
+    ) -> CGSize {
+        guard horizontalFittingPriority == .required,
+              targetSize.width.isFinite,
+              targetSize.width > 0 else {
+            return super.systemLayoutSizeFitting(
+                targetSize,
+                withHorizontalFittingPriority: horizontalFittingPriority,
+                verticalFittingPriority: verticalFittingPriority
+            )
+        }
+        prepareForFitting(width: targetSize.width)
+        let size = stack.systemLayoutSizeFitting(
+            CGSize(width: targetSize.width, height: UIView.layoutFittingCompressedSize.height),
+            withHorizontalFittingPriority: .required,
+            verticalFittingPriority: verticalFittingPriority
+        )
+        return CGSize(width: targetSize.width, height: ceil(size.height))
     }
 
     func autoplayCandidates(prefix: String) -> [TimelineVideoAutoplayCandidate] {

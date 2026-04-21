@@ -327,11 +327,101 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate {
         rebuild()
     }
 
+    func prepareForPoolRemoval() {
+        data = nil
+        lastConfigureSignature = nil
+        boundStatusKey = nil
+        expand = false
+
+        mediaView.prepareForPoolRemoval()
+        actionsView.prepareForPoolRemoval()
+        syncArrangedSubviews(quotesStack, [])
+        syncArrangedSubviews(contentColumn, [])
+        syncArrangedSubviews(innerColumn, [])
+        syncArrangedSubviews(mainRow, [])
+        syncArrangedSubviews(outerStack, [])
+
+        for container in parentContainers {
+            container.child.prepareForPoolRemoval()
+            container.removeFromSuperview()
+        }
+        parentContainers.removeAll()
+
+        for child in quoteChildren {
+            child.prepareForPoolRemoval()
+            child.removeFromSuperview()
+        }
+        quoteChildren.removeAll()
+
+        for divider in quoteDividers {
+            divider.removeFromSuperview()
+        }
+        quoteDividers.removeAll()
+
+        invalidateIntrinsicContentSize()
+        setNeedsLayout()
+    }
+
+    func prepareForFitting(width: CGFloat) {
+        guard width.isFinite, width > 0 else { return }
+        bounds = CGRect(x: bounds.minX, y: bounds.minY, width: width, height: bounds.height)
+
+        let contentWidth = fittingContentColumnWidth(for: width)
+        contentWarningText.prepareForFitting(width: contentWidth)
+        bodyText.prepareForFitting(width: contentWidth)
+        mediaView.bounds = CGRect(x: 0, y: 0, width: contentWidth, height: mediaView.bounds.height)
+        normalCardView.bounds = CGRect(x: 0, y: 0, width: contentWidth, height: normalCardView.bounds.height)
+        compatCardView.bounds = CGRect(x: 0, y: 0, width: contentWidth, height: compatCardView.bounds.height)
+
+        for container in parentContainers where container.superview != nil {
+            container.prepareForFitting(width: width)
+        }
+
+        let quoteWidth = max(contentWidth - 16, 1)
+        quotesContainer.bounds = CGRect(x: 0, y: 0, width: contentWidth, height: quotesContainer.bounds.height)
+        for child in quoteChildren where child.superview != nil {
+            child.prepareForFitting(width: quoteWidth)
+        }
+
+        invalidateIntrinsicContentSize()
+        setNeedsLayout()
+    }
+
+    override func systemLayoutSizeFitting(
+        _ targetSize: CGSize,
+        withHorizontalFittingPriority horizontalFittingPriority: UILayoutPriority,
+        verticalFittingPriority: UILayoutPriority
+    ) -> CGSize {
+        guard horizontalFittingPriority == .required,
+              targetSize.width.isFinite,
+              targetSize.width > 0 else {
+            return super.systemLayoutSizeFitting(
+                targetSize,
+                withHorizontalFittingPriority: horizontalFittingPriority,
+                verticalFittingPriority: verticalFittingPriority
+            )
+        }
+
+        prepareForFitting(width: targetSize.width)
+        let size = outerStack.systemLayoutSizeFitting(
+            CGSize(width: targetSize.width, height: UIView.layoutFittingCompressedSize.height),
+            withHorizontalFittingPriority: .required,
+            verticalFittingPriority: verticalFittingPriority
+        )
+        return CGSize(width: targetSize.width, height: ceil(size.height))
+    }
+
     // MARK: - SwiftUI-equivalent computed
 
     /// `(!fullWidthPost || withLeadingPadding) && !isQuote && !isDetail`
     private var showAsFullWidth: Bool {
         (!appearance.fullWidthPost || withLeadingPadding) && !isQuote && !isDetail
+    }
+
+    private func fittingContentColumnWidth(for width: CGFloat) -> CGFloat {
+        let wantsAvatar = showAsFullWidth && data?.user != nil
+        let avatarWidth = wantsAvatar ? 44 + mainRow.spacing : 0
+        return max(width - avatarWidth, 1)
     }
 
     // MARK: - Rebuild (incremental diff)
@@ -536,6 +626,8 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate {
         if !data.quote.isEmpty, !isQuote {
             updateQuotes(quotes: data.quote)
             items.append(quotesContainer)
+        } else {
+            updateQuotes(quotes: [])
         }
 
         // source channel + reactions
@@ -617,6 +709,94 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate {
             }
         }
         syncArrangedSubviews(quotesStack, desired)
+    }
+
+    func performLightweightPoolCleanup() {
+        let activeParentCount: Int
+        let activeQuoteCount: Int
+        if let data {
+            activeParentCount = showParents ? data.parents.count : 0
+            activeQuoteCount = !isQuote ? data.quote.count : 0
+        } else {
+            activeParentCount = 0
+            activeQuoteCount = 0
+        }
+
+        if let data, !data.images.isEmpty, showMediaInput {
+            mediaView.performLightweightPoolCleanup()
+        } else {
+            mediaView.prepareForPoolRemoval()
+        }
+
+        let hideActions = (appearance.postActionStyle == .hidden && !isDetail) || forceHideActions
+        if data != nil, !hideActions {
+            actionsView.performLightweightPoolCleanup()
+        } else {
+            actionsView.prepareForPoolRemoval()
+        }
+        trimParentContainers(activeCount: activeParentCount)
+        trimQuoteChildren(activeCount: activeQuoteCount)
+        trimQuoteDividers(activeCount: max(0, activeQuoteCount - 1))
+    }
+
+    func performDeferredPoolCleanup() {
+        let activeParentCount: Int
+        let activeQuoteCount: Int
+        if let data {
+            activeParentCount = showParents ? data.parents.count : 0
+            activeQuoteCount = !isQuote ? data.quote.count : 0
+        } else {
+            activeParentCount = 0
+            activeQuoteCount = 0
+        }
+
+        for container in parentContainers.prefix(activeParentCount) {
+            container.child.performDeferredPoolCleanup()
+        }
+        for child in quoteChildren.prefix(activeQuoteCount) {
+            child.performDeferredPoolCleanup()
+        }
+        if let data, !data.images.isEmpty, showMediaInput {
+            mediaView.performDeferredPoolCleanup()
+        } else {
+            mediaView.prepareForPoolRemoval()
+        }
+
+        let hideActions = (appearance.postActionStyle == .hidden && !isDetail) || forceHideActions
+        if data != nil, !hideActions {
+            actionsView.performDeferredPoolCleanup()
+        } else {
+            actionsView.prepareForPoolRemoval()
+        }
+        trimParentContainers(activeCount: activeParentCount)
+        trimQuoteChildren(activeCount: activeQuoteCount)
+        trimQuoteDividers(activeCount: max(0, activeQuoteCount - 1))
+    }
+
+    private func trimParentContainers(activeCount: Int) {
+        guard parentContainers.count > activeCount else { return }
+        for container in parentContainers[activeCount...] {
+            container.child.prepareForPoolRemoval()
+            container.removeFromSuperview()
+        }
+        parentContainers.removeLast(parentContainers.count - activeCount)
+    }
+
+    private func trimQuoteChildren(activeCount: Int) {
+        guard quoteChildren.count > activeCount else { return }
+        for child in quoteChildren[activeCount...] {
+            child.prepareForPoolRemoval()
+            child.removeFromSuperview()
+        }
+        quoteChildren.removeLast(quoteChildren.count - activeCount)
+    }
+
+    private func trimQuoteDividers(activeCount: Int) {
+        guard quoteDividers.count > activeCount else { return }
+        for divider in quoteDividers[activeCount...] {
+            divider.removeFromSuperview()
+        }
+        quoteDividers.removeLast(quoteDividers.count - activeCount)
     }
 
     private func forwardOpenURL() {
@@ -804,6 +984,13 @@ private final class ParentContainerView: UIView {
         ])
     }
     required init?(coder: NSCoder) { fatalError("init(coder:) not supported") }
+
+    func prepareForFitting(width: CGFloat) {
+        bounds = CGRect(x: bounds.minX, y: bounds.minY, width: width, height: bounds.height)
+        child.prepareForFitting(width: width)
+        invalidateIntrinsicContentSize()
+        setNeedsLayout()
+    }
 }
 
 // MARK: - Helpers

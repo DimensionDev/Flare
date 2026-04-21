@@ -81,6 +81,16 @@ final class UserListUIView: UIView {
         rebuild()
     }
 
+    func prepareForPoolRemoval() {
+        data = nil
+        row.flareSyncArrangedSubviews([])
+        column.flareSyncArrangedSubviews([])
+        quoteView.prepareForPoolRemoval()
+        trimUserChips(activeCount: 0)
+        invalidateIntrinsicContentSize()
+        setNeedsLayout()
+    }
+
     private func rebuild() {
         guard let data = data else {
             row.flareSyncArrangedSubviews([])
@@ -108,6 +118,35 @@ final class UserListUIView: UIView {
             desired.append(quoteContainer)
         }
         column.flareSyncArrangedSubviews(desired)
+    }
+
+    func performDeferredPoolCleanup() {
+        let activeChipCount = data?.users.count ?? 0
+        if data?.post != nil {
+            quoteView.performDeferredPoolCleanup()
+        } else {
+            quoteView.prepareForPoolRemoval()
+        }
+        trimUserChips(activeCount: activeChipCount)
+    }
+
+    func performLightweightPoolCleanup() {
+        let activeChipCount = data?.users.count ?? 0
+        if data?.post != nil {
+            quoteView.performLightweightPoolCleanup()
+        } else {
+            quoteView.prepareForPoolRemoval()
+        }
+        trimUserChips(activeCount: activeChipCount)
+    }
+
+    private func trimUserChips(activeCount: Int) {
+        guard userChips.count > activeCount else { return }
+        for chip in userChips[activeCount...] {
+            chip.prepareForPoolRemoval()
+            chip.removeFromSuperview()
+        }
+        userChips.removeLast(userChips.count - activeCount)
     }
 }
 
@@ -143,6 +182,11 @@ private final class UserChipView: UIView {
         compat.configure(data: user, trailing: nil, onClicked: { [weak self] in
             self?.openUser()
         })
+    }
+
+    func prepareForPoolRemoval() {
+        user = nil
+        onOpenURL = nil
     }
 
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {

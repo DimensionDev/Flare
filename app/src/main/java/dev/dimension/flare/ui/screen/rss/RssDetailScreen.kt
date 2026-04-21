@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
@@ -154,185 +155,194 @@ internal fun RssDetailScreen(
         Column(
             modifier =
                 Modifier
-                    .verticalScroll(rememberScrollState())
-                    .padding(contentPadding)
-                    .padding(horizontal = screenHorizontalPadding),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState()),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            state.data
-                .onSuccess { documentData ->
-                    // Show translated title if available, otherwise original
-                    val displayTitle =
-                        state.translateState?.translatedTitle?.let { titleState ->
-                            when (titleState) {
-                                is UiState.Success -> titleState.data
-                                else -> documentData.title
-                            }
-                        } ?: documentData.title
-                    Text(
-                        text = displayTitle,
-                        style = MaterialTheme.typography.titleLarge,
-                        modifier =
-                        Modifier,
-                    )
-                    if (documentData.siteName != null || documentData.byline != null || documentData.publishDateTime != null) {
-                        Column(
-                            verticalArrangement = Arrangement.spacedBy(4.dp),
-                        ) {
-                            documentData.siteName?.let {
+            Column(
+                modifier =
+                    Modifier
+                        .widthIn(max = 600.dp)
+                        .padding(contentPadding)
+                        .padding(horizontal = screenHorizontalPadding),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                state.data
+                    .onSuccess { documentData ->
+                        // Show translated title if available, otherwise original
+                        val displayTitle =
+                            state.translateState?.translatedTitle?.let { titleState ->
+                                when (titleState) {
+                                    is UiState.Success -> titleState.data
+                                    else -> documentData.title
+                                }
+                            } ?: documentData.title
+                        Text(
+                            text = displayTitle,
+                            style = MaterialTheme.typography.titleLarge,
+                            modifier =
+                            Modifier,
+                        )
+                        if (documentData.siteName != null || documentData.byline != null || documentData.publishDateTime != null) {
+                            Column(
+                                verticalArrangement = Arrangement.spacedBy(4.dp),
+                            ) {
+                                documentData.siteName?.let {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                    ) {
+                                        FavIcon(
+                                            host =
+                                                remember {
+                                                    Url(url).host
+                                                },
+                                            size = 16.dp,
+                                        )
+                                        Text(
+                                            text = it,
+                                            style = MaterialTheme.typography.bodySmall,
+                                        )
+                                    }
+                                }
+
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                                 ) {
-                                    FavIcon(
-                                        host =
-                                            remember {
-                                                Url(url).host
-                                            },
-                                        size = 16.dp,
-                                    )
-                                    Text(
-                                        text = it,
-                                        style = MaterialTheme.typography.bodySmall,
-                                    )
-                                }
-                            }
+                                    documentData.byline?.let {
+                                        Text(
+                                            text = it,
+                                            style = MaterialTheme.typography.bodySmall,
+                                        )
+                                    }
 
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            ) {
-                                documentData.byline?.let {
-                                    Text(
-                                        text = it,
-                                        style = MaterialTheme.typography.bodySmall,
-                                    )
-                                }
+                                    Spacer(modifier = Modifier.weight(1f))
 
-                                Spacer(modifier = Modifier.weight(1f))
-
-                                documentData.publishDateTime?.let {
-                                    DateTimeText(
-                                        data = it,
-                                        style = MaterialTheme.typography.bodySmall,
-                                        fullTime = true,
-                                    )
+                                    documentData.publishDateTime?.let {
+                                        DateTimeText(
+                                            data = it,
+                                            style = MaterialTheme.typography.bodySmall,
+                                            fullTime = true,
+                                        )
+                                    }
                                 }
                             }
                         }
+                    }.onLoading {
+                        Text(
+                            "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                            modifier =
+                                Modifier
+                                    .placeholder(true),
+                        )
                     }
-                }.onLoading {
-                    Text(
-                        "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-                        modifier =
-                            Modifier
-                                .placeholder(true),
-                    )
-                }
-            HorizontalDivider()
-            state.data
-                .onSuccess { data ->
-                    AnimatedVisibility(state.showTldr) {
-                        state.tldrState?.let { tldrState ->
-                            Column(
+                HorizontalDivider()
+                state.data
+                    .onSuccess { data ->
+                        AnimatedVisibility(state.showTldr) {
+                            state.tldrState?.let { tldrState ->
+                                Column(
+                                    modifier =
+                                        Modifier
+                                            .animateContentSize()
+                                            .fillMaxWidth()
+                                            .listCard()
+                                            .background(MaterialTheme.colorScheme.surface)
+                                            .padding(8.dp)
+                                            .clickable {
+                                                tldrState.onError {
+                                                    state.refreshTldr()
+                                                }
+                                            },
+                                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                ) {
+                                    AnimatedContent(tldrState) {
+                                        it
+                                            .onSuccess {
+                                                Text(
+                                                    text = it,
+                                                    modifier =
+                                                        Modifier
+                                                            .padding(
+                                                                horizontal = screenHorizontalPadding,
+                                                                vertical = 8.dp,
+                                                            ),
+                                                )
+                                            }.onLoading {
+                                                LinearWavyProgressIndicator(
+                                                    modifier =
+                                                        Modifier
+                                                            .padding(
+                                                                horizontal = screenHorizontalPadding,
+                                                                vertical = 8.dp,
+                                                            ),
+                                                )
+                                            }.onError {
+                                                Text(
+                                                    text = stringResource(R.string.rss_detail_tldr_error),
+                                                    color = MaterialTheme.colorScheme.error,
+                                                    style = MaterialTheme.typography.titleMedium,
+                                                    modifier =
+                                                        Modifier
+                                                            .padding(
+                                                                horizontal = screenHorizontalPadding,
+                                                                vertical = 8.dp,
+                                                            ),
+                                                )
+                                            }
+                                    }
+                                }
+                            }
+                        }
+                        // Show translation loading indicator
+                        state.translateState?.translatedHtml?.onLoading {
+                            LinearWavyProgressIndicator(
                                 modifier =
                                     Modifier
-                                        .animateContentSize()
-                                        .fillMaxWidth()
-                                        .listCard()
-                                        .background(MaterialTheme.colorScheme.surface)
-                                        .padding(8.dp)
-                                        .clickable {
-                                            tldrState.onError {
-                                                state.refreshTldr()
-                                            }
-                                        },
-                                verticalArrangement = Arrangement.spacedBy(4.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                            ) {
-                                AnimatedContent(tldrState) {
-                                    it
-                                        .onSuccess {
-                                            Text(
-                                                text = it,
-                                                modifier =
-                                                    Modifier
-                                                        .padding(
-                                                            horizontal = screenHorizontalPadding,
-                                                            vertical = 8.dp,
-                                                        ),
-                                            )
-                                        }.onLoading {
-                                            LinearWavyProgressIndicator(
-                                                modifier =
-                                                    Modifier
-                                                        .padding(
-                                                            horizontal = screenHorizontalPadding,
-                                                            vertical = 8.dp,
-                                                        ),
-                                            )
-                                        }.onError {
-                                            Text(
-                                                text = stringResource(R.string.rss_detail_tldr_error),
-                                                color = MaterialTheme.colorScheme.error,
-                                                style = MaterialTheme.typography.titleMedium,
-                                                modifier =
-                                                    Modifier
-                                                        .padding(
-                                                            horizontal = screenHorizontalPadding,
-                                                            vertical = 8.dp,
-                                                        ),
-                                            )
-                                        }
-                                }
-                            }
+                                        .fillMaxWidth(),
+                            )
                         }
-                    }
-                    // Show translation loading indicator
-                    state.translateState?.translatedHtml?.onLoading {
-                        LinearWavyProgressIndicator(
+                        SelectionContainer(
                             modifier =
-                                Modifier
-                                    .fillMaxWidth(),
-                        )
-                    }
-                    SelectionContainer(
-                        modifier =
-                        Modifier,
-                    ) {
-                        // Use translated content if available by creating a new DocumentData
-                        // whose lazy .element will re-parse the translated HTML
-                        val displayData =
-                            state.translateState?.translatedHtml?.let { htmlState ->
-                                when (htmlState) {
-                                    is UiState.Success -> data.copy(content = htmlState.data)
-                                    else -> data
-                                }
-                            } ?: data
-                        RssRichText(
-                            element = displayData.element,
-                            imageHeader = state.headers,
-                        )
-                    }
-                    // Show translation error if any
-                    state.translateState?.translatedHtml?.onError {
+                            Modifier,
+                        ) {
+                            // Use translated content if available by creating a new DocumentData
+                            // whose lazy .element will re-parse the translated HTML
+                            val displayData =
+                                state.translateState?.translatedHtml?.let { htmlState ->
+                                    when (htmlState) {
+                                        is UiState.Success -> data.copy(content = htmlState.data)
+                                        else -> data
+                                    }
+                                } ?: data
+                            RssRichText(
+                                element = displayData.element,
+                                imageHeader = state.headers,
+                            )
+                        }
+                        // Show translation error if any
+                        state.translateState?.translatedHtml?.onError {
+                            Text(
+                                text = stringResource(R.string.rss_detail_translate_error),
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodySmall,
+                                modifier =
+                                    Modifier
+                                        .clickable { state.refreshTranslate() },
+                            )
+                        }
+                    }.onLoading {
                         Text(
-                            text = stringResource(R.string.rss_detail_translate_error),
-                            color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.bodySmall,
+                            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam elementum eget dui a bibendum. Fusce eget porttitor est, et rhoncus massa. Etiam cursus urna at odio vulputate semper. Interdum et malesuada fames ac ante ipsum primis in faucibus. Quisque tincidunt rhoncus massa sed volutpat. Nulla porta orci et finibus accumsan. Duis maximus diam quis congue suscipit. Suspendisse velit enim, mollis non tellus eu, auctor vulputate diam. Sed ut purus eleifend, tempor lectus ac, imperdiet tellus. Proin eleifend lorem ut risus gravida, id bibendum metus posuere. Cras pretium tortor mi. Quisque ac congue urna. Morbi posuere ac orci vestibulum euismod. Maecenas venenatis, justo at aliquet venenatis, arcu mauris sodales ligula, a iaculis nulla eros at turpis. Quisque varius lobortis porttitor.",
                             modifier =
                                 Modifier
-                                    .clickable { state.refreshTranslate() },
+                                    .placeholder(true),
                         )
                     }
-                }.onLoading {
-                    Text(
-                        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam elementum eget dui a bibendum. Fusce eget porttitor est, et rhoncus massa. Etiam cursus urna at odio vulputate semper. Interdum et malesuada fames ac ante ipsum primis in faucibus. Quisque tincidunt rhoncus massa sed volutpat. Nulla porta orci et finibus accumsan. Duis maximus diam quis congue suscipit. Suspendisse velit enim, mollis non tellus eu, auctor vulputate diam. Sed ut purus eleifend, tempor lectus ac, imperdiet tellus. Proin eleifend lorem ut risus gravida, id bibendum metus posuere. Cras pretium tortor mi. Quisque ac congue urna. Morbi posuere ac orci vestibulum euismod. Maecenas venenatis, justo at aliquet venenatis, arcu mauris sodales ligula, a iaculis nulla eros at turpis. Quisque varius lobortis porttitor.",
-                        modifier =
-                            Modifier
-                                .placeholder(true),
-                    )
-                }
+            }
         }
     }
 }

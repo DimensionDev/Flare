@@ -63,16 +63,20 @@ Maecenas fringilla vitae leo sit amet lacinia. Donec in dui a ex hendrerit volut
         } loadingContent: {
             ScrollView {
                 VStack {
-                    Text("Loading...")
-                        .font(.title)
-                        .bold()
-                        .redacted(reason: .placeholder)
-                    Divider()
-                    Text(placeholderText)
-                        .redacted(reason: .placeholder)
-                        .padding()
+                    VStack {
+                        Text("Loading...")
+                            .font(.title)
+                            .bold()
+                            .redacted(reason: .placeholder)
+                        Divider()
+                        Text(placeholderText)
+                            .redacted(reason: .placeholder)
+                            .padding()
+                    }
+                    .frame(maxWidth: 600)
+                    .padding()
                 }
-                .padding()
+                .frame(maxWidth: .infinity)
             }
         }
         .toolbar {
@@ -156,64 +160,68 @@ private struct RssArticleContentView: View {
     
     var body: some View {
         ScrollView {
-            VStack(
-                spacing: 16
-            ) {
-                Text(translatedTitle ?? document.title)
-                    .font(.title2)
-                    .bold()
-                
-                if document.siteName != nil || document.byline != nil || document.publishDateTime != nil {
-                    VStack(alignment: .leading, spacing: 4) {
-                        if let siteName = document.siteName, let host = URL(string: url)?.host() {
-                            HStack(spacing: 4) {
-                                FavTabIcon(host: host)
-                                    .frame(width: 16, height: 16)
-                                Text(siteName)
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
+            VStack {
+                VStack(
+                    spacing: 16
+                ) {
+                    Text(translatedTitle ?? document.title)
+                        .font(.title2)
+                        .bold()
+                    
+                    if document.siteName != nil || document.byline != nil || document.publishDateTime != nil {
+                        VStack(alignment: .leading, spacing: 4) {
+                            if let siteName = document.siteName, let host = URL(string: url)?.host() {
+                                HStack(spacing: 4) {
+                                    FavTabIcon(host: host)
+                                        .frame(width: 16, height: 16)
+                                    Text(siteName)
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
                             }
-                        }
-                        HStack {
-                            if let byline = document.byline {
-                                Text(byline)
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                            }
-                            if let publishDateTime = document.publishDateTime {
-                                Spacer()
-                                DateTimeText(data: publishDateTime, fullTime: true)
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
+                            HStack {
+                                if let byline = document.byline {
+                                    Text(byline)
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
+                                if let publishDateTime = document.publishDateTime {
+                                    Spacer()
+                                    DateTimeText(data: publishDateTime, fullTime: true)
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
                             }
                         }
                     }
-                }
-                
-                Divider()
-                
-                if showTLDR {
-                    TLDRTextView(text: document.textContent)
-                        .padding()
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                    
                     Divider()
+                    
+                    if showTLDR {
+                        TLDRTextView(text: document.textContent)
+                            .padding()
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        Divider()
+                    }
+                    
+                    if isTranslating {
+                        ProgressView()
+                            .padding(.vertical, 4)
+                            .frame(maxWidth: .infinity, alignment: .center)
+                    }
+                    
+                    HtmlWebView(
+                        dynamicHeight: $webViewHeight,
+                        htmlString: translatedHtml ?? document.content,
+                        baseURL: .init(string: url),
+                        onOpenURL: { url in self.openURL(url) }
+                    )
+                    .frame(height: webViewHeight)
                 }
-                
-                if isTranslating {
-                    ProgressView()
-                        .padding(.vertical, 4)
-                        .frame(maxWidth: .infinity, alignment: .center)
-                }
-                
-                HtmlWebView(
-                    dynamicHeight: $webViewHeight,
-                    htmlString: translatedHtml ?? document.content,
-                    baseURL: .init(string: url),
-                    onOpenURL: { url in self.openURL(url) }
-                )
-                .frame(height: webViewHeight)
+                .frame(maxWidth: 600)
+                .padding()
             }
-            .padding()
+            .frame(maxWidth: .infinity)
         }
         .toolbar {
             ToolbarItem {

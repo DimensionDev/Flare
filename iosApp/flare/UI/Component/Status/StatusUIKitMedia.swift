@@ -953,7 +953,8 @@ final class StatusMediaContentUIView: UIView {
         UIView.animate(withDuration: 0.2) { [weak self] in
             guard let self = self else { return }
             self.superview?.layoutIfNeeded()
-        } completion: { _ in
+        } completion: { [weak self] _ in
+            guard let self = self else { return }
             self.invalidateContainingCollectionLayout()
             NotificationCenter.default.post(name: .timelineVideoAutoplayNeedsUpdate, object: self)
         }

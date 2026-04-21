@@ -8,6 +8,10 @@ final class RichTextUIView: UIView {
     // MARK: - Public inputs
 
     var text: UiRichText? { didSet { if !isBatchUpdating { update() } } }
+    /// Optional caller-provided stable key for `text`. When set, the structural
+    /// signature compares by key instead of deep-walking Kotlin bridged values.
+    /// Callers must guarantee: same key ⇒ same text.
+    var contentKey: Int? { didSet { if !isBatchUpdating { update() } } }
     var lineLimit: Int? = nil {
         didSet {
             guard !isBatchUpdating, oldValue != lineLimit else { return }
@@ -52,16 +56,22 @@ final class RichTextUIView: UIView {
     private var traitRegistration: UITraitChangeRegistration?
 
     private struct StructuralSignature: Equatable {
+        let contentKey: Int?
         let text: UiRichText?
         let isTextSelectionEnabled: Bool
         let baseTextStyle: UIFont.TextStyle
         let baseTextColor: UIColor
 
         static func == (lhs: StructuralSignature, rhs: StructuralSignature) -> Bool {
-            lhs.isTextSelectionEnabled == rhs.isTextSelectionEnabled &&
-            lhs.baseTextStyle == rhs.baseTextStyle &&
-            lhs.baseTextColor.isEqual(rhs.baseTextColor) &&
-            Self.textsAreEqual(lhs.text, rhs.text)
+            guard lhs.isTextSelectionEnabled == rhs.isTextSelectionEnabled,
+                  lhs.baseTextStyle == rhs.baseTextStyle,
+                  lhs.baseTextColor.isEqual(rhs.baseTextColor) else {
+                return false
+            }
+            if let l = lhs.contentKey, let r = rhs.contentKey {
+                return l == r
+            }
+            return Self.textsAreEqual(lhs.text, rhs.text)
         }
 
         private static func textsAreEqual(_ lhs: UiRichText?, _ rhs: UiRichText?) -> Bool {
@@ -69,6 +79,7 @@ final class RichTextUIView: UIView {
             case (nil, nil):
                 return true
             case let (l?, r?):
+                if (l as AnyObject) === (r as AnyObject) { return true }
                 return (l as AnyObject).isEqual(r)
             default:
                 return false
@@ -110,11 +121,13 @@ final class RichTextUIView: UIView {
         isTextSelectionEnabled: Bool,
         onOpenURL: ((URL) -> Void)?,
         baseTextStyle: UIFont.TextStyle = .body,
-        baseTextColor: UIColor = .label
+        baseTextColor: UIColor = .label,
+        contentKey: Int? = nil
     ) {
         let oldLineLimit = self.lineLimit
         isBatchUpdating = true
         self.text = text
+        self.contentKey = contentKey
         self.lineLimit = lineLimit
         self.isTextSelectionEnabled = isTextSelectionEnabled
         self.onOpenURL = onOpenURL
@@ -130,6 +143,7 @@ final class RichTextUIView: UIView {
 
     private func update(force: Bool = false) {
         let structuralSignature = StructuralSignature(
+            contentKey: contentKey,
             text: text,
             isTextSelectionEnabled: isTextSelectionEnabled,
             baseTextStyle: baseTextStyle,

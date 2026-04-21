@@ -509,7 +509,8 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate {
                 text: cw,
                 lineLimit: nil,
                 isTextSelectionEnabled: isDetail,
-                onOpenURL: openURL
+                onOpenURL: openURL,
+                contentKey: Int(data.renderHash)
             )
             items.append(contentWarningText)
             contentWarningToggle.setTitle(
@@ -540,7 +541,8 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate {
                     text: data.content,
                     lineLimit: bodyLineLimit,
                     isTextSelectionEnabled: bodySelectionEnabled,
-                    onOpenURL: openURL
+                    onOpenURL: openURL,
+                    contentKey: Int(data.renderHash)
                 )
                 items.append(bodyText)
                 if !data.shouldExpandTextByDefault, !isDetail, !expand, showExpandTextButton {

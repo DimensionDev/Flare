@@ -118,7 +118,7 @@ struct AiConfigScreen: View {
                         }
                     } label: {
                         Text("Model")
-                        Text("OpenAI model used for translation and summary")
+                        Text("AI model used for translation and summary")
                     }
                     .transition(.opacity.combined(with: .move(edge: .top)))
                 }
@@ -238,7 +238,7 @@ struct AiConfigScreen: View {
         case .onDevice:
             return "On Device"
         case .openAi:
-            return "OpenAI Compatible"
+            return "AI Compatible"
         }
     }
 
@@ -276,7 +276,7 @@ struct AiConfigScreen: View {
     }
 
     private var serverUrlHint: LocalizedStringResource {
-        "Server URL must end with '/' and support the OpenAI-compatible v1/chat/completions API."
+        "Server URL must end with '/' and support the AI-compatible v1/chat/completions API."
     }
 
     private var serverSuggestions: [String] {
@@ -313,11 +313,11 @@ struct AiConfigScreen: View {
     private func fieldPlaceholder(field: EditableField) -> String {
         switch field {
         case .serverUrl:
-            return "https://api.openai.com/v1/"
+            return "https://api.example.com/v1/"
         case .apiKey:
             return "sk-..."
         case .model:
-            return "gpt-4.1-mini"
+            return "model-name"
         case .tldrPrompt:
             return ""
         }

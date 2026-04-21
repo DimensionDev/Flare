@@ -85061,268 +85061,268 @@
         }
       }
     },
-    "OpenAI Compatible" : {
+    "AI Compatible" : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "تطابق OpenAI"
+            "value" : "تطابق AI"
           }
         },
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "OpenAI kompatibilní"
+            "value" : "AI kompatibilní"
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "OpenAI Kompatibel"
+            "value" : "AI Kompatibel"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "OpenAI kompatibel"
+            "value" : "AI kompatibel"
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Συμβατό Σύστημα OpenAI"
+            "value" : "Συμβατό Σύστημα AI"
           }
         },
         "en-JP" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "オペナイ コンパチブル"
+            "value" : "AI コンパチブル"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "OpenAI compatible"
+            "value" : "AI compatible"
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "OpenAi Yhteensopiva"
+            "value" : "AI Yhteensopiva"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Compatible avec OpenAI"
+            "value" : "Compatible avec AI"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Compatibile OpenAI"
+            "value" : "Compatibile AI"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "OpenAI 対応"
+            "value" : "AI 対応"
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "OpenAI kompatibelt"
+            "value" : "AI kompatibelt"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "OpenAI Compatibel"
+            "value" : "AI Compatibel"
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kompatybilne OpenAI"
+            "value" : "Kompatybilne AI"
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Compatível com OpenAI"
+            "value" : "Compatível com AI"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Compatível com OpenAI"
+            "value" : "Compatível com AI"
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Compatibil OpenAI"
+            "value" : "Compatibil AI"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "OpenAI совместим"
+            "value" : "AI совместим"
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "OpenAI kompatibel"
+            "value" : "AI kompatibel"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Сумісний з OpenAI"
+            "value" : "Сумісний з AI"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "OpenAI 兼容"
+            "value" : "AI 兼容"
           }
         }
       }
     },
-    "OpenAI model used for translation and summary" : {
+    "AI model used for translation and summary" : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "نموذج OpenAI المستخدم للترجمة والموجز"
+            "value" : "نموذج AI المستخدم للترجمة والموجز"
           }
         },
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "OpenAI model použitý pro překlad a shrnutí"
+            "value" : "AI model použitý pro překlad a shrnutí"
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "OpenAI model brugt til oversættelse og resumé"
+            "value" : "AI model brugt til oversættelse og resumé"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "OpenAI-Modell für Übersetzung und Zusammenfassung"
+            "value" : "AI-Modell für Übersetzung und Zusammenfassung"
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Μοντέλο OpenAI που χρησιμοποιείται για μετάφραση και περίληψη"
+            "value" : "Μοντέλο AI που χρησιμοποιείται για μετάφραση και περίληψη"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "OpenAI model used for translation and summary"
+            "value" : "AI model used for translation and summary"
           }
         },
         "en-JP" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "オペナイ モデル ユーズド フォー トランスレーション アンド サマリー"
+            "value" : "AI モデル ユーズド フォー トランスレーション アンド サマリー"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Modelo OpenAI utilizado para la traducción y resumen"
+            "value" : "Modelo AI utilizado para la traducción y resumen"
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "OpenAI malli käytetään kääntämiseen ja tiivistelmään"
+            "value" : "AI malli käytetään kääntämiseen ja tiivistelmään"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Modèle OpenAI utilisé pour la traduction et le résumé"
+            "value" : "Modèle AI utilisé pour la traduction et le résumé"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Modello OpenAI utilizzato per traduzione e riepilogo"
+            "value" : "Modello AI utilizzato per traduzione e riepilogo"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "翻訳と概要に使用されるOpenAIモデル"
+            "value" : "翻訳と概要に使用されるAIモデル"
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "OpenAI-modell brukt for oversettelse og sammendrag"
+            "value" : "AI-modell brukt for oversettelse og sammendrag"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "OpenAI-model gebruikt voor vertaling en samenvatting"
+            "value" : "AI-model gebruikt voor vertaling en samenvatting"
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Model OpenAI używany do tłumaczenia i podsumowania"
+            "value" : "Model AI używany do tłumaczenia i podsumowania"
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Modelo OpenAI usado para tradução e resumo"
+            "value" : "Modelo AI usado para tradução e resumo"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Modelo OpenAI usado para tradução e resumo"
+            "value" : "Modelo AI usado para tradução e resumo"
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Modelul OpenAI folosit pentru traducere și rezumat"
+            "value" : "Modelul AI folosit pentru traducere și rezumat"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Модель OpenAI, используемая для перевода и сводки"
+            "value" : "Модель AI, используемая для перевода и сводки"
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "OpenAI-modell som används för översättning och sammanfattning"
+            "value" : "AI-modell som används för översättning och sammanfattning"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Модель OpenAI, яка використовується для перекладу та резюме"
+            "value" : "Модель AI, яка використовується для перекладу та резюме"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "用于翻译和摘要的 OpenAI 模型"
+            "value" : "用于翻译和摘要的 AI 模型"
           }
         }
       }
@@ -95419,7 +95419,7 @@
         }
       }
     },
-    "Server URL must end with '/' and support the OpenAI-compatible v1/chat/completions API." : {
+    "Server URL must end with '/' and support the AI-compatible v1/chat/completions API." : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -95430,91 +95430,91 @@
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Adresa URL serveru musí skončit '/' a podpořit API kompatibilní s OpenAI v1/chat/completions API."
+            "value" : "Adresa URL serveru musí skončit '/' a podpořit API kompatibilní s AI v1/chat/completions API."
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Server URL skal slutte med '/' og støtte OpenAI-kompatibel v1/chat/fuldførelse API."
+            "value" : "Server URL skal slutte med '/' og støtte AI-kompatibel v1/chat/fuldførelse API."
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Server-URL muss mit '/' enden und die OpenAI-kompatible v1/chat/completions API unterstützen."
+            "value" : "Server-URL muss mit '/' enden und die AI-kompatible v1/chat/completions API unterstützen."
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Το URL διακομιστή πρέπει να τελειώνει με '/' και να υποστηρίζει το API συμβατό με OpenAI v1/chat/completions API."
+            "value" : "Το URL διακομιστή πρέπει να τελειώνει με '/' και να υποστηρίζει το API συμβατό με AI v1/chat/completions API."
           }
         },
         "en-JP" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "サーバー ユーアールエル マスト エンド ウィズ '/' アンド サポート ザ オペナイ-コンパチブル ブイワン/チャット/コンプリーションズ エーピーアイ."
+            "value" : "サーバー ユーアールエル マスト エンド ウィズ '/' アンド サポート ザ AI-コンパチブル ブイワン/チャット/コンプリーションズ エーピーアイ."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "La URL del servidor debe terminar con '/' y soportar la API v1/chat/completions compatible con OpenAI."
+            "value" : "La URL del servidor debe terminar con '/' y soportar la API v1/chat/completions compatible con AI."
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Palvelimen URL-osoitteen tulee päättyä '/' ja tukea OpenAI-yhteensopivaa v1/chat/completions APIa."
+            "value" : "Palvelimen URL-osoitteen tulee päättyä '/' ja tukea AI-yhteensopivaa v1/chat/completions APIa."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "L'URL du serveur doit se terminer par '/' et supporter l'API compatible OpenAI v1/chat/completions."
+            "value" : "L'URL du serveur doit se terminer par '/' et supporter l'API compatible AI v1/chat/completions."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "L'URL del server deve terminare con '/' e supportare l'API v1/chat/completamenti compatibile con OpenAI."
+            "value" : "L'URL del server deve terminare con '/' e supportare l'API v1/chat/completamenti compatibile con AI."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "サーバー URL は '/' で終わり、OpenAI 互換の v1/chat/completions API をサポートする必要があります。"
+            "value" : "サーバー URL は '/' で終わり、AI 互換の v1/chat/completions API をサポートする必要があります。"
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Server-URL må avsluttes med '/' og støtte OpenAI-kompatibelt v1/chat/completions API."
+            "value" : "Server-URL må avsluttes med '/' og støtte AI-kompatibelt v1/chat/completions API."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Server-URL moet eindigen met '/' en de OpenAI-compatibele v1/chat/aanvullingen API ondersteunen."
+            "value" : "Server-URL moet eindigen met '/' en de AI-compatibele v1/chat/aanvullingen API ondersteunen."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Adres URL serwera musi kończyć się '/' i obsługiwać API kompatybilne z OpenAI v1/chat/completions API."
+            "value" : "Adres URL serwera musi kończyć się '/' i obsługiwać API kompatybilne z AI v1/chat/completions API."
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "A URL do servidor deve terminar com '/' e apoiar a API OpenAI-compatível v1/chat/completions."
+            "value" : "A URL do servidor deve terminar com '/' e apoiar a API AI-compatível v1/chat/completions."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "A URL do servidor deve terminar com '/' e apoiar a API OpenAI-compatível v1/chat/completions."
+            "value" : "A URL do servidor deve terminar com '/' e apoiar a API AI-compatível v1/chat/completions."
           }
         },
         "ro" : {
@@ -95526,25 +95526,25 @@
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "URL сервера должен заканчиваться '/' и поддерживать OpenAI-совместимый v1/chat/completions API."
+            "value" : "URL сервера должен заканчиваться '/' и поддерживать AI-совместимый v1/chat/completions API."
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Server-URL måste sluta med '/' och stödja OpenAI-kompatibla v1/chat/complettions API."
+            "value" : "Server-URL måste sluta med '/' och stödja AI-kompatibla v1/chat/complettions API."
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "URL-адреса сервера повинна закінчуватися '/' і підтримувати API сумісних з OpenAI-chat/completions."
+            "value" : "URL-адреса сервера повинна закінчуватися '/' і підтримувати API сумісних з AI-chat/completions."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "服务器 URL 必须以 '/' 结尾，并支持OpenAI兼容的 v1/chat/complitions API。"
+            "value" : "服务器 URL 必须以 '/' 结尾，并支持AI兼容的 v1/chat/complitions API。"
           }
         }
       }

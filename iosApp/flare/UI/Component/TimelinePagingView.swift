@@ -70,19 +70,22 @@ struct TimelinePagingContent: View {
     let key: String
     let topContentInset: CGFloat
     let allowGalleryMode: Bool
+    let suppressInitialRefreshIndicator: Bool
 
     init(
         data: PagingState<UiTimelineV2>,
         detailStatusKey: MicroBlogKey?,
         key: String,
         topContentInset: CGFloat = 0,
-        allowGalleryMode: Bool = false
+        allowGalleryMode: Bool = false,
+        suppressInitialRefreshIndicator: Bool = false
     ) {
         self.data = data
         self.detailStatusKey = detailStatusKey
         self.key = key
         self.topContentInset = topContentInset
         self.allowGalleryMode = allowGalleryMode
+        self.suppressInitialRefreshIndicator = suppressInitialRefreshIndicator
     }
 
     var body: some View {
@@ -114,7 +117,8 @@ struct TimelinePagingContent: View {
                     data: data,
                     detailStatusKey: detailStatusKey,
                     topContentInset: topContentInset,
-                    columnCount: columnCount
+                    columnCount: columnCount,
+                    suppressInitialRefreshIndicator: suppressInitialRefreshIndicator
                 )
                 .ignoresSafeArea(edges: .vertical)
             }
@@ -125,9 +129,9 @@ struct TimelinePagingContent: View {
         CollectionViewTimelineView(
             data: data,
             detailStatusKey: detailStatusKey,
-            topContentInset: topContentInset
+            topContentInset: topContentInset,
+            suppressInitialRefreshIndicator: suppressInitialRefreshIndicator
         )
         .ignoresSafeArea(edges: .vertical)
     }
 }
-

@@ -267,6 +267,7 @@ private struct ProfileCompatTimelineView: UIViewControllerRepresentable {
         controller.networkKind = networkKind
         controller.columnCount = 1
         controller.extendsContentUnderTopBars = true
+        controller.suppressInitialRefreshIndicator = true
         let accessoriesChanged = context.coordinator.updateAccessories(
             profileState: profileState,
             tabs: tabs,
@@ -428,6 +429,7 @@ private struct ProfileCompatTimelineView: UIViewControllerRepresentable {
             if needsBinding {
                 currentTabID = tabID
                 boundController = controller
+                controller.resetInitialRefreshIndicatorSuppression()
                 cancellable = presenter.$state
                     .receive(on: DispatchQueue.main)
                     .sink { [weak controller] state in
@@ -745,7 +747,12 @@ struct ProfileTimelineWaterFallView: View {
     }
     
     var body: some View {
-        TimelinePagingContent(data: presenter.state.listState, detailStatusKey: nil, key: presenter.key)
+        TimelinePagingContent(
+            data: presenter.state.listState,
+            detailStatusKey: nil,
+            key: presenter.key,
+            suppressInitialRefreshIndicator: true
+        )
             .refreshable {
                 try? await presenter.state.refresh()
             }

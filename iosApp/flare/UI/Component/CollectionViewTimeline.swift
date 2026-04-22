@@ -11,6 +11,7 @@ struct CollectionViewTimelineView: UIViewControllerRepresentable {
     let topContentInset: CGFloat
     let columnCount: Int
     let accessoryItems: [CollectionViewTimelineAccessoryItem]
+    let suppressInitialRefreshIndicator: Bool
     @Environment(\.appearanceSettings) private var appearanceSettings
     @Environment(\.networkKind) private var networkKind
     @Environment(\.openURL) private var openURL
@@ -21,13 +22,15 @@ struct CollectionViewTimelineView: UIViewControllerRepresentable {
         detailStatusKey: MicroBlogKey?,
         topContentInset: CGFloat = 0,
         columnCount: Int = 1,
-        accessoryItems: [CollectionViewTimelineAccessoryItem] = []
+        accessoryItems: [CollectionViewTimelineAccessoryItem] = [],
+        suppressInitialRefreshIndicator: Bool = false
     ) {
         self.data = data
         self.detailStatusKey = detailStatusKey
         self.topContentInset = topContentInset
         self.columnCount = max(columnCount, 1)
         self.accessoryItems = accessoryItems
+        self.suppressInitialRefreshIndicator = suppressInitialRefreshIndicator
     }
 
     func makeUIViewController(context: Context) -> CollectionViewTimelineController {
@@ -43,6 +46,7 @@ struct CollectionViewTimelineView: UIViewControllerRepresentable {
         controller.networkKind = networkKind
         controller.columnCount = columnCount
         controller.accessoryItems = accessoryItems
+        controller.suppressInitialRefreshIndicator = suppressInitialRefreshIndicator
         controller.update(data: data)
         return controller
     }
@@ -59,6 +63,7 @@ struct CollectionViewTimelineView: UIViewControllerRepresentable {
         controller.networkKind = networkKind
         controller.columnCount = columnCount
         controller.accessoryItems = accessoryItems
+        controller.suppressInitialRefreshIndicator = suppressInitialRefreshIndicator
         controller.update(data: data)
     }
 }
@@ -90,6 +95,7 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
 
     var refreshCallback: (() async -> Void)?
     var openURL: ((URL) -> Void)?
+    var suppressInitialRefreshIndicator = false
     var appearance = TimelineUIKitAppearance(settings: AppearanceSettings.companion.Default) {
         didSet {
             guard isViewLoaded else { return }
@@ -169,13 +175,8 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
         guard isViewLoaded else { return }
         view.layoutIfNeeded()
         collectionView.layoutIfNeeded()
-        let minY = -collectionView.adjustedContentInset.top
-        let maxY = max(
-            minY,
-            collectionView.contentSize.height - collectionView.bounds.height + collectionView.adjustedContentInset.bottom
-        )
         collectionView.setContentOffset(
-            CGPoint(x: offset.x, y: min(max(offset.y, minY), maxY)),
+            CGPoint(x: offset.x, y: clampedContentOffsetY(offset.y)),
             animated: animated
         )
     }
@@ -185,6 +186,7 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
     private var refreshControl = UIRefreshControl()
     private var isUserRefreshing = false
     private var shouldRevealRefreshControl = false
+    private var hasCompletedInitialRefreshCycle = false
     private var scrollingState = IsScrollingState()
     private var lastAppliedSignature: SnapshotSignature?
     private var lastRenderHashMap: [String: Int32] = [:]
@@ -197,14 +199,22 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
     private weak var currentAutoplayHostView: UIView?
     private var currentAutoplayID: String?
     private var accessoryItemMap: [String: CollectionViewTimelineAccessoryItem] = [:]
+    private var pendingScrollAnchor: ScrollAnchor?
+    private var isRestoringScrollAnchor = false
 
     // Maps item identifier → index for timeline cells
     private var itemIndexMap: [String: Int] = [:]
+    private var stableTimelineItemIDs: Set<String> = []
 
     private struct SnapshotSignature: Equatable {
         let accessoryIDs: [String]
         let itemIDs: [String]
         let footerIDs: [String]
+    }
+
+    private struct ScrollAnchor {
+        let itemID: String
+        let distanceFromViewportTop: CGFloat
     }
 
     // Item ID prefixes / constants
@@ -622,6 +632,18 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
         }
     }
 
+    func resetInitialRefreshIndicatorSuppression() {
+        hasCompletedInitialRefreshCycle = false
+        shouldRevealRefreshControl = false
+        guard isViewLoaded,
+              suppressInitialRefreshIndicator,
+              refreshControl.isRefreshing,
+              !isUserRefreshing else {
+            return
+        }
+        refreshControl.endRefreshing()
+    }
+
     // MARK: - State Update
 
     func update(data: PagingState<UiTimelineV2>) {
@@ -651,7 +673,23 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
 
     private func syncRefreshControl(data: PagingState<UiTimelineV2>) {
         let isRefreshing = pagingIsRefreshing(data)
+        if !isRefreshing {
+            hasCompletedInitialRefreshCycle = true
+        }
+
+        let shouldSuppressInitialRefreshIndicator =
+            suppressInitialRefreshIndicator &&
+            !hasCompletedInitialRefreshCycle &&
+            !isUserRefreshing
+
         if isRefreshing {
+            guard !shouldSuppressInitialRefreshIndicator else {
+                shouldRevealRefreshControl = false
+                if refreshControl.isRefreshing {
+                    refreshControl.endRefreshing()
+                }
+                return
+            }
             if !refreshControl.isRefreshing {
                 refreshControl.beginRefreshing()
                 shouldRevealRefreshControl = !isUserRefreshing
@@ -685,10 +723,92 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
         shouldRevealRefreshControl = false
     }
 
+    private var effectiveViewportTop: CGFloat {
+        collectionView.contentOffset.y + collectionView.adjustedContentInset.top
+    }
+
+    private func clampedContentOffsetY(_ offsetY: CGFloat) -> CGFloat {
+        let minY = -collectionView.adjustedContentInset.top
+        let maxY = max(
+            minY,
+            collectionView.contentSize.height - collectionView.bounds.height + collectionView.adjustedContentInset.bottom
+        )
+        return min(max(offsetY, minY), maxY)
+    }
+
+    private func isStableTimelineItemID(_ itemID: String) -> Bool {
+        itemID.hasPrefix(Self.timelinePrefix) && stableTimelineItemIDs.contains(itemID)
+    }
+
+    private func captureScrollAnchor() -> ScrollAnchor? {
+        guard isViewLoaded,
+              currentSuccess != nil,
+              collectionView.bounds.height > 1 else {
+            return nil
+        }
+
+        let viewportTop = effectiveViewportTop
+        let viewportBottom = collectionView.contentOffset.y + collectionView.bounds.height - collectionView.adjustedContentInset.bottom
+        return collectionView.indexPathsForVisibleItems
+            .compactMap { indexPath -> (itemID: String, frame: CGRect)? in
+                guard let itemID = dataSource.itemIdentifier(for: indexPath),
+                      isStableTimelineItemID(itemID) else {
+                    return nil
+                }
+                let frame = collectionView.layoutAttributesForItem(at: indexPath)?.frame
+                    ?? collectionView.cellForItem(at: indexPath)?.frame
+                    ?? .null
+                guard !frame.isNull,
+                      frame.maxY > viewportTop,
+                      frame.minY < viewportBottom else {
+                    return nil
+                }
+                return (itemID, frame)
+            }
+            .min { lhs, rhs in
+                if abs(lhs.frame.minY - rhs.frame.minY) > 0.5 {
+                    return lhs.frame.minY < rhs.frame.minY
+                }
+                return lhs.frame.minX < rhs.frame.minX
+            }
+            .map {
+                ScrollAnchor(
+                    itemID: $0.itemID,
+                    distanceFromViewportTop: $0.frame.minY - viewportTop
+                )
+            }
+    }
+
+    @discardableResult
+    private func restoreScrollAnchorIfNeeded(_ anchor: ScrollAnchor?) -> Bool {
+        guard let anchor,
+              isViewLoaded,
+              let indexPath = dataSource.indexPath(for: anchor.itemID) else {
+            return false
+        }
+
+        view.layoutIfNeeded()
+        collectionView.layoutIfNeeded()
+
+        guard let attributes = collectionView.layoutAttributesForItem(at: indexPath) else {
+            return false
+        }
+
+        let targetOffsetY = attributes.frame.minY - anchor.distanceFromViewportTop - collectionView.adjustedContentInset.top
+        let targetOffset = CGPoint(x: collectionView.contentOffset.x, y: clampedContentOffsetY(targetOffsetY))
+        if abs(collectionView.contentOffset.y - targetOffset.y) > 0.5 {
+            isRestoringScrollAnchor = true
+            collectionView.setContentOffset(targetOffset, animated: false)
+            isRestoringScrollAnchor = false
+        }
+        return true
+    }
+
     private func applySnapshot(data: PagingState<UiTimelineV2>) {
         var snapshot = NSDiffableDataSourceSnapshot<Int, String>()
         var newIndexMap: [String: Int] = [:]
         var newRenderHashMap: [String: Int32] = [:]
+        var newStableTimelineItemIDs = Set<String>()
         let accessoryIDs = accessoryItems.map { "\(Self.accessoryPrefix)\($0.id)" }
         var itemIDs: [String] = []
         var footerIDs: [String] = []
@@ -722,7 +842,14 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
             items.reserveCapacity(itemCount)
             for i in 0..<itemCount {
                 let peeked = success.peek(index: Int32(i))
-                let id = "\(Self.timelinePrefix)\(peeked?.itemKey ?? "idx_\(i)")"
+                let itemKey = peeked?.itemKey
+                let id: String
+                if let itemKey, !itemKey.isEmpty {
+                    id = "\(Self.timelinePrefix)\(itemKey)"
+                    newStableTimelineItemIDs.insert(id)
+                } else {
+                    id = "\(Self.timelinePrefix)idx_\(i)"
+                }
                 items.append(id)
                 newIndexMap[id] = i
                 if let peeked {
@@ -741,10 +868,15 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
             }
         }
 
-        itemIndexMap = newIndexMap
-        pruneHeightCache(keepingItemIDs: Set(newIndexMap.keys))
         let newSignature = SnapshotSignature(accessoryIDs: accessoryIDs, itemIDs: itemIDs, footerIDs: footerIDs)
         let previousSignature = lastAppliedSignature
+        let scrollAnchor = previousSignature != nil && previousSignature?.itemIDs != newSignature.itemIDs
+            ? captureScrollAnchor()
+            : nil
+
+        itemIndexMap = newIndexMap
+        stableTimelineItemIDs = newStableTimelineItemIDs
+        pruneHeightCache(keepingItemIDs: Set(newIndexMap.keys))
 
         if previousSignature?.accessoryIDs == newSignature.accessoryIDs,
            previousSignature?.itemIDs == newSignature.itemIDs,
@@ -779,13 +911,45 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
         let shouldAnimateDifferences =
                     !pagingIsRefreshing(data) &&
                     !refreshControl.isRefreshing &&
+                    scrollAnchor == nil &&
                     !collectionView.isDragging &&
                     !collectionView.isDecelerating
-        dataSource.apply(snapshot, animatingDifferences: shouldAnimateDifferences)
+
+        if let scrollAnchor {
+            pendingScrollAnchor = scrollAnchor
+            UIView.performWithoutAnimation {
+                CATransaction.begin()
+                CATransaction.setDisableActions(true)
+                dataSource.apply(snapshot, animatingDifferences: false) { [weak self] in
+                    guard let self else { return }
+                    self.restoreScrollAnchorIfNeeded(scrollAnchor)
+                    self.pendingScrollAnchor = nil
+                    self.validateCurrentAutoplayVisibility()
+                    self.scheduleAutoplaySelection()
+                }
+                restoreScrollAnchorIfNeeded(scrollAnchor)
+                collectionView.layer.removeAllAnimations()
+                CATransaction.commit()
+            }
+        } else {
+            dataSource.apply(snapshot, animatingDifferences: shouldAnimateDifferences) { [weak self] in
+                guard let self else { return }
+                self.validateCurrentAutoplayVisibility()
+                self.scheduleAutoplaySelection()
+            }
+        }
         lastAppliedSignature = newSignature
         lastRenderHashMap = newRenderHashMap
-        validateCurrentAutoplayVisibility()
-        scheduleAutoplaySelection()
+    }
+
+    private func restorePendingScrollAnchorIfNeeded() {
+        guard !isRestoringScrollAnchor,
+              let pendingScrollAnchor else {
+            return
+        }
+        if restoreScrollAnchorIfNeeded(pendingScrollAnchor) {
+            collectionView.layer.removeAllAnimations()
+        }
     }
 
     private func reconfigureItems(_ itemIDs: [String]) {
@@ -1241,6 +1405,7 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
     }
 
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        restorePendingScrollAnchorIfNeeded()
         validateCurrentAutoplayVisibility()
     }
 

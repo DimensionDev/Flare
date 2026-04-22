@@ -191,7 +191,7 @@ private fun Status.renderStatusV2(accountKey: MicroBlogKey): UiTimelineV2.Post {
         contentWarning = null,
         user = displayUser,
         quote = listOfNotNull(retweetedStatus?.renderStatusV2(accountKey)).toImmutableList(),
-        content = renderVVOText(text.orEmpty(), accountKey),
+        content = renderVVOText(text.orEmpty(), accountKey, sourceLanguages = persistentListOf("zh-CN")),
         sourceLanguages = persistentListOf("zh-CN"),
         actions =
             listOfNotNull(
@@ -355,7 +355,7 @@ private fun Comment.renderStatusV2(accountKey: MicroBlogKey): UiTimelineV2.Post 
         contentWarning = null,
         user = user,
         quote = quote,
-        content = renderVVOText(text.orEmpty(), accountKey),
+        content = renderVVOText(text.orEmpty(), accountKey, sourceLanguages = persistentListOf("zh-CN")),
         sourceLanguages = persistentListOf("zh-CN"),
         actions =
             listOfNotNull(
@@ -455,8 +455,8 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
                 raw = screenName.orEmpty(),
                 host = accountKey.host,
             ),
-        nameInternal = screenName.toString().toUiPlainText(),
-        description = description?.toUiPlainText(),
+        nameInternal = screenName.toString().toUiPlainText(persistentListOf("zh-CN")),
+        description = description?.toUiPlainText(persistentListOf("zh-CN")),
         banner = coverImagePhone,
         sourceLanguages = persistentListOf("zh-CN"),
         matrices =
@@ -483,7 +483,7 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
                         items =
                             mapOf(
                                 UiProfile.BottomContent.Iconify.Icon.Verify to
-                                    it.toUiPlainText(),
+                                    it.toUiPlainText(persistentListOf("zh-CN")),
                             ).toImmutableMap(),
                     )
                 },
@@ -579,13 +579,14 @@ internal fun ActionMenu.Companion.vvoFavorite(
 internal fun renderVVOText(
     text: String,
     accountKey: MicroBlogKey,
+    sourceLanguages: List<String> = emptyList(),
 ): UiRichText {
     val element = parseHtml(text)
     extractImagesFromLinks(element)
     element.childNodes().forEach {
         replaceMentionAndHashtag(element, it, accountKey)
     }
-    return element.toUi()
+    return element.toUi(sourceLanguages)
 }
 
 private fun extractImagesFromLinks(element: Element) {

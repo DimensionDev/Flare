@@ -363,6 +363,7 @@ private fun Status.renderStatus(
             }
         }
     val quoteStatus = quote?.renderStatus(host, accountKey)
+    val sourceLanguages = listOfNotNull(language).toPersistentList()
     return UiTimelineV2.Post(
         images =
             mediaAttachments
@@ -370,11 +371,13 @@ private fun Status.renderStatus(
                     attachment.toUi(sensitive = sensitive ?: false)
                 }?.toPersistentList() ?: persistentListOf(),
         contentWarning =
-            spoilerText?.takeIf { it.isNotEmpty() && it.isNotBlank() }?.toUiPlainText(),
+            spoilerText
+                ?.takeIf { it.isNotEmpty() && it.isNotBlank() }
+                ?.toUiPlainText(sourceLanguages),
         user = actualUser,
-        sourceLanguages = listOfNotNull(language).toPersistentList(),
+        sourceLanguages = sourceLanguages,
         quote = listOfNotNull(quoteStatus).toImmutableList(),
-        content = parseMastodonContent(this, accountKey, host),
+        content = parseMastodonContent(this, accountKey, host, sourceLanguages),
         card =
             card?.url?.let { url ->
                 UiCard(
@@ -1098,6 +1101,7 @@ internal fun parseMastodonContent(
 //    text: String,
     accountKey: MicroBlogKey?,
     host: String,
+    sourceLanguages: List<String> = emptyList(),
 ): UiRichText {
     val emoji = status.emojis.orEmpty()
     val mentions = status.mentions.orEmpty()
@@ -1113,7 +1117,7 @@ internal fun parseMastodonContent(
     body.childNodes().forEach {
         replaceMentionAndHashtag(mentions, it, accountKey, host)
     }
-    return body.toUi()
+    return body.toUi(sourceLanguages)
 }
 
 private fun replaceMentionAndHashtag(

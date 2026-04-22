@@ -610,7 +610,8 @@ internal fun Tweet.renderStatus(
         } else {
             persistentListOf()
         }
-    val content = renderContent(accountKey)
+    val sourceLanguages = listOfNotNull(legacy?.lang).toPersistentList()
+    val content = renderContent(accountKey, sourceLanguages)
 
     val replyToHandle = legacy?.in_reply_to_screen_name?.let { "@$it" }
 
@@ -651,7 +652,7 @@ internal fun Tweet.renderStatus(
         sensitive = legacy?.possiblySensitive == true,
         contentWarning = null,
         user = user,
-        sourceLanguages = listOfNotNull(legacy?.lang).toPersistentList(),
+        sourceLanguages = sourceLanguages,
         quote = listOfNotNull(actualQuote).toImmutableList(),
         content = content,
         actions =
@@ -1380,7 +1381,10 @@ internal fun Tweet.renderArticle(
     )
 }
 
-internal fun Tweet.renderContent(accountKey: MicroBlogKey): UiRichText {
+internal fun Tweet.renderContent(
+    accountKey: MicroBlogKey,
+    sourceLanguages: List<String> = emptyList(),
+): UiRichText {
     if (noteTweet == null) {
         val text =
             legacy
@@ -1403,7 +1407,7 @@ internal fun Tweet.renderContent(accountKey: MicroBlogKey): UiRichText {
                         it
                     }
                 }.orEmpty()
-        return renderRichText(text, legacy?.entities, accountKey)
+        return renderRichText(text, legacy?.entities, accountKey, sourceLanguages)
     } else {
         val result = noteTweet.noteTweetResults.result
         val text = result.text
@@ -1610,7 +1614,7 @@ internal fun Tweet.renderContent(accountKey: MicroBlogKey): UiRichText {
             appendText(codePointText(current, codePoints.size))
         }
         flushTextContent()
-        return uiRichTextOf(contents)
+        return uiRichTextOf(contents, sourceLanguages = sourceLanguages)
     }
 }
 
@@ -1631,7 +1635,10 @@ private data class RichEntity(
     val content: RichEntityContent,
 )
 
-private fun List<Token>.toUiRichText(accountKey: MicroBlogKey): UiRichText {
+private fun List<Token>.toUiRichText(
+    accountKey: MicroBlogKey,
+    sourceLanguages: List<String> = emptyList(),
+): UiRichText {
     val runs =
         buildList<RenderRun> {
             this@toUiRichText.forEach { token ->
@@ -1707,6 +1714,7 @@ private fun List<Token>.toUiRichText(accountKey: MicroBlogKey): UiRichText {
             } else {
                 listOf(RenderContent.Text(runs = runs.toImmutableList()))
             },
+        sourceLanguages = sourceLanguages,
     )
 }
 
@@ -1728,6 +1736,7 @@ private fun renderRichText(
     text: String,
     entities: Entities?,
     accountKey: MicroBlogKey,
+    sourceLanguages: List<String> = emptyList(),
 ): UiRichText =
     twitterParser
         .parse(text)
@@ -1746,7 +1755,7 @@ private fun renderRichText(
             } else {
                 token
             }
-        }.toUiRichText(accountKey)
+        }.toUiRichText(accountKey, sourceLanguages)
 
 private fun TwitterArticleResult.renderContent(accountKey: MicroBlogKey): UiRichText {
     val blocks = contentState?.blocks.orEmpty()

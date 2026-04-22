@@ -126,8 +126,8 @@ internal fun UiTimelineV2.translationPayload(): TranslationPayload? =
     when (this) {
         is UiTimelineV2.Feed -> {
             TranslationPayload(
-                title = title?.toUiPlainText(),
-                description = description?.toUiPlainText(),
+                title = title?.toUiPlainText(sourceLanguages),
+                description = description?.toUiPlainText(sourceLanguages),
             )
         }
 

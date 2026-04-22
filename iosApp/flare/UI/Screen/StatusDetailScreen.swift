@@ -15,7 +15,12 @@ struct StatusDetailScreen: View {
 
     var body: some View {
         ZStack {
-            TimelinePagingContent(data: presenter.state.listState, detailStatusKey: statusKey, key: presenter.key)
+            TimelinePagingContent(
+                data: presenter.state.listState,
+                detailStatusKey: statusKey,
+                key: presenter.key,
+                suppressInitialRefreshIndicator: true
+            )
                 .frame(maxWidth: horizontalSizeClass == .compact ? .infinity : 600, alignment: .center)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)

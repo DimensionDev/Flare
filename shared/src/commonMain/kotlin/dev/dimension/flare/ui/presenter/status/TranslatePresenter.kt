@@ -96,7 +96,7 @@ public class TranslatePresenter(
                 tryRun {
                     source.applyTranslationJson(cleaned)
                 }.getOrElse {
-                    cleaned.toUiPlainText()
+                    cleaned.toUiPlainText(listOf(Locale.language))
                 }
             }
 

@@ -35,7 +35,7 @@ public data class UiProfile internal constructor(
     // If name is blank, use handle without @ as display name
     val name: UiRichText by lazy {
         if (nameInternal.raw.isEmpty() || nameInternal.raw.isBlank()) {
-            handleWithoutAtAndHost.toUiPlainText()
+            handleWithoutAtAndHost.toUiPlainText(sourceLanguages)
         } else {
             nameInternal
         }

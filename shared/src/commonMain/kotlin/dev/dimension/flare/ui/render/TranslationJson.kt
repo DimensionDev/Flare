@@ -115,6 +115,7 @@ internal fun UiRichText.applyTranslationDocument(document: TranslationDocument):
 
     return uiRichTextOf(
         renderRuns = translatedContents,
+        sourceLanguages = listOfNotNull(document.targetLanguage),
     )
 }
 

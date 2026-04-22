@@ -6,51 +6,25 @@ import KotlinSharedUI
 // Mirrors StatusReactionView.swift:
 // - isDetail: wrapping layout (multiple lines)
 // - otherwise: horizontal scroll view.
-final class StatusReactionUIView: UIView {
+final class StatusReactionUIView: UIView, ManualLayoutMeasurable, TimelineHeightProviding {
     var onReactionTapped: ((UiTimelineV2.PostEmojiReaction) -> Void)?
 
     private let scroll = UIScrollView()
-    private let scrollStack = UIStackView()
     private let wrap = WrappingStackView()
 
     private var isDetail: Bool = false
     private var chipPool: [ReactionChipView] = []
+    private var scrollChips: [UIView] = []
+    private static let chipHeight: CGFloat = 36
+    private static let chipSpacing: CGFloat = 8
 
     override init(frame: CGRect) {
         super.init(frame: frame)
 
         scroll.showsHorizontalScrollIndicator = false
         scroll.showsVerticalScrollIndicator = false
-        scroll.translatesAutoresizingMaskIntoConstraints = false
-        scroll.addSubview(scrollStack)
-
-        scrollStack.axis = .horizontal
-        scrollStack.alignment = .center
-        scrollStack.spacing = 8
-        scrollStack.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            scrollStack.topAnchor.constraint(equalTo: scroll.topAnchor),
-            scrollStack.bottomAnchor.constraint(equalTo: scroll.bottomAnchor),
-            scrollStack.leadingAnchor.constraint(equalTo: scroll.leadingAnchor),
-            scrollStack.trailingAnchor.constraint(equalTo: scroll.trailingAnchor),
-            scrollStack.heightAnchor.constraint(equalTo: scroll.heightAnchor),
-        ])
-
-        wrap.translatesAutoresizingMaskIntoConstraints = false
-
         addSubview(scroll)
         addSubview(wrap)
-        NSLayoutConstraint.activate([
-            scroll.topAnchor.constraint(equalTo: topAnchor),
-            scroll.leadingAnchor.constraint(equalTo: leadingAnchor),
-            scroll.trailingAnchor.constraint(equalTo: trailingAnchor),
-            scroll.bottomAnchor.constraint(equalTo: bottomAnchor),
-            scroll.heightAnchor.constraint(equalToConstant: 36),
-            wrap.topAnchor.constraint(equalTo: topAnchor),
-            wrap.leadingAnchor.constraint(equalTo: leadingAnchor),
-            wrap.trailingAnchor.constraint(equalTo: trailingAnchor),
-            wrap.bottomAnchor.constraint(equalTo: bottomAnchor),
-        ])
     }
     required init?(coder: NSCoder) { fatalError("init(coder:) not supported") }
 
@@ -71,54 +45,92 @@ final class StatusReactionUIView: UIView {
 
         if isDetail {
             wrap.setViews(chips)
-            scrollStack.flareSyncArrangedSubviews([])
+            // Remove scroll chips
+            for chip in scrollChips { chip.removeFromSuperview() }
+            scrollChips = []
         } else {
-            scrollStack.flareSyncArrangedSubviews(chips)
+            syncManagedSubviews(parent: scroll, current: &scrollChips, desired: chips)
             wrap.setViews([])
         }
+        invalidateIntrinsicContentSize()
+        setNeedsLayout()
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        let w = bounds.width
+        if isDetail {
+            wrap.frame = bounds
+        } else {
+            scroll.frame = CGRect(x: 0, y: 0, width: w, height: Self.chipHeight)
+            // Layout chips horizontally inside scroll
+            var x: CGFloat = 0
+            for chip in scrollChips {
+                let chipSize = chip.sizeThatFits(CGSize(width: .greatestFiniteMagnitude, height: Self.chipHeight))
+                chip.frame = CGRect(x: x, y: 0, width: ceil(chipSize.width), height: Self.chipHeight)
+                x += ceil(chipSize.width) + Self.chipSpacing
+            }
+            scroll.contentSize = CGSize(width: max(x - Self.chipSpacing, 0), height: Self.chipHeight)
+        }
+    }
+
+    override func sizeThatFits(_ size: CGSize) -> CGSize {
+        CGSize(width: size.width, height: timelineHeight(for: size.width) ?? 0)
+    }
+
+    func timelineHeight(for width: CGFloat) -> CGFloat? {
+        guard width > 0, width.isFinite else { return nil }
+        if isDetail {
+            return wrap.timelineHeight(for: width)
+        } else {
+            return Self.chipHeight
+        }
+    }
+
+    override func systemLayoutSizeFitting(
+        _ targetSize: CGSize,
+        withHorizontalFittingPriority horizontalFittingPriority: UILayoutPriority,
+        verticalFittingPriority: UILayoutPriority
+    ) -> CGSize {
+        sizeThatFits(CGSize(width: targetSize.width, height: .greatestFiniteMagnitude))
+    }
+
+    override var intrinsicContentSize: CGSize {
+        let w = bounds.width > 0 ? bounds.width : UIView.noIntrinsicMetric
+        guard w != UIView.noIntrinsicMetric else { return CGSize(width: w, height: Self.chipHeight) }
+        return sizeThatFits(CGSize(width: w, height: .greatestFiniteMagnitude))
     }
 }
 
-private final class ReactionChipView: UIControl {
+private final class ReactionChipView: UIControl, ManualLayoutMeasurable, TimelineHeightProviding {
     var onTap: (() -> Void)?
     private let nameLabel = UILabel()
     private let countLabel = UILabel()
     private let imageView = UIImageView()
-    private let stack = UIStackView()
-    private var imageWidthConstraint: NSLayoutConstraint!
-    private var imageHeightConstraint: NSLayoutConstraint!
+    private var showsImage: Bool = false
+    private static let hPadding: CGFloat = 8
+    private static let vPadding: CGFloat = 4
+    private static let spacing: CGFloat = 4
+    private static let imageSize: CGFloat = 20
+    private static let totalHeight: CGFloat = 36
 
     override init(frame: CGRect) {
         super.init(frame: frame)
-        translatesAutoresizingMaskIntoConstraints = false
         layer.cornerRadius = 8
         layer.cornerCurve = .continuous
         clipsToBounds = true
 
-        stack.axis = .horizontal
-        stack.alignment = .center
-        stack.spacing = 4
-        stack.isUserInteractionEnabled = false
-        stack.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(stack)
-
         imageView.contentMode = .scaleAspectFit
-        imageWidthConstraint = imageView.widthAnchor.constraint(equalToConstant: 20)
-        imageHeightConstraint = imageView.heightAnchor.constraint(equalToConstant: 20)
-        NSLayoutConstraint.activate([
-            imageWidthConstraint,
-            imageHeightConstraint,
-        ])
+        imageView.isUserInteractionEnabled = false
+        addSubview(imageView)
+
+        nameLabel.isUserInteractionEnabled = false
+        addSubview(nameLabel)
 
         countLabel.font = .preferredFont(forTextStyle: .footnote)
+        countLabel.isUserInteractionEnabled = false
+        addSubview(countLabel)
 
-        NSLayoutConstraint.activate([
-            stack.topAnchor.constraint(equalTo: topAnchor, constant: 4),
-            stack.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -4),
-            stack.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 8),
-            stack.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -8),
-            heightAnchor.constraint(equalToConstant: 36),
-        ])
         addTarget(self, action: #selector(handleTap), for: .touchUpInside)
     }
     required init?(coder: NSCoder) { fatalError("init(coder:) not supported") }
@@ -135,23 +147,82 @@ private final class ReactionChipView: UIControl {
         }
 
         if item.isUnicode {
+            showsImage = false
             nameLabel.text = item.name
+            nameLabel.isHidden = false
             imageView.kf.cancelDownloadTask()
             imageView.image = nil
-            stack.flareSyncArrangedSubviews([nameLabel, countLabel])
+            imageView.isHidden = true
         } else {
+            showsImage = true
             nameLabel.text = nil
+            nameLabel.isHidden = true
+            imageView.isHidden = false
             imageView.kf.cancelDownloadTask()
             imageView.image = nil
             if let url = URL(string: item.url) {
                 imageView.kf.setImage(with: url)
             }
-            stack.flareSyncArrangedSubviews([imageView, countLabel])
         }
 
         countLabel.text = item.count.humanized
         invalidateIntrinsicContentSize()
         setNeedsLayout()
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        let h = Self.totalHeight
+        var x = Self.hPadding
+
+        if showsImage {
+            let imgY = (h - Self.imageSize) / 2
+            imageView.frame = CGRect(x: x, y: imgY, width: Self.imageSize, height: Self.imageSize)
+            x += Self.imageSize + Self.spacing
+        } else if !nameLabel.isHidden {
+            let labelSize = nameLabel.sizeThatFits(CGSize(width: .greatestFiniteMagnitude, height: h))
+            let labelY = (h - labelSize.height) / 2
+            nameLabel.frame = CGRect(x: x, y: labelY, width: ceil(labelSize.width), height: ceil(labelSize.height))
+            x += ceil(labelSize.width) + Self.spacing
+        }
+
+        let countSize = countLabel.sizeThatFits(CGSize(width: .greatestFiniteMagnitude, height: h))
+        let countY = (h - countSize.height) / 2
+        countLabel.frame = CGRect(x: x, y: countY, width: ceil(countSize.width), height: ceil(countSize.height))
+    }
+
+    override func sizeThatFits(_ size: CGSize) -> CGSize {
+        let width = timelineWidth()
+        return CGSize(width: width, height: Self.totalHeight)
+    }
+
+    func timelineHeight(for width: CGFloat) -> CGFloat? {
+        Self.totalHeight
+    }
+
+    private func timelineWidth() -> CGFloat {
+        var w = Self.hPadding
+        if showsImage {
+            w += Self.imageSize + Self.spacing
+        } else if nameLabel.text != nil {
+            let labelSize = nameLabel.sizeThatFits(CGSize(width: .greatestFiniteMagnitude, height: Self.totalHeight))
+            w += ceil(labelSize.width) + Self.spacing
+        }
+        let countSize = countLabel.sizeThatFits(CGSize(width: .greatestFiniteMagnitude, height: Self.totalHeight))
+        w += ceil(countSize.width) + Self.hPadding
+        return ceil(w)
+    }
+
+    override func systemLayoutSizeFitting(
+        _ targetSize: CGSize,
+        withHorizontalFittingPriority horizontalFittingPriority: UILayoutPriority,
+        verticalFittingPriority: UILayoutPriority
+    ) -> CGSize {
+        sizeThatFits(targetSize)
+    }
+
+    override var intrinsicContentSize: CGSize {
+        sizeThatFits(CGSize(width: .greatestFiniteMagnitude, height: Self.totalHeight))
     }
 
     @objc private func handleTap() { onTap?() }
@@ -160,7 +231,7 @@ private final class ReactionChipView: UIControl {
 // MARK: - WrappingStackView
 // UIKit analogue of SwiftUI's WrappedHStack layout: lays out subviews left to
 // right, wrapping to the next row when space runs out. Used in isDetail mode.
-final class WrappingStackView: UIView {
+final class WrappingStackView: UIView, ManualLayoutMeasurable, TimelineHeightProviding {
     var horizontalSpacing: CGFloat = 8
     var verticalSpacing: CGFloat = 8
 
@@ -175,13 +246,22 @@ final class WrappingStackView: UIView {
         }
         managed = views
         managed.forEach {
-            $0.translatesAutoresizingMaskIntoConstraints = true
             if $0.superview !== self {
                 addSubview($0)
             }
         }
         invalidateIntrinsicContentSize()
         setNeedsLayout()
+    }
+
+    override func sizeThatFits(_ size: CGSize) -> CGSize {
+        let w = size.width > 0 ? size.width : bounds.width
+        return CGSize(width: w, height: timelineHeight(for: w) ?? 0)
+    }
+
+    func timelineHeight(for width: CGFloat) -> CGFloat? {
+        guard width > 0, width.isFinite else { return nil }
+        return computeHeight(for: width)
     }
 
     override var intrinsicContentSize: CGSize {
@@ -195,18 +275,16 @@ final class WrappingStackView: UIView {
         var y: CGFloat = 0
         var rowH: CGFloat = 0
         for v in managed {
-            let s = v.systemLayoutSizeFitting(
-                CGSize(width: width, height: UIView.layoutFittingCompressedSize.height),
-                withHorizontalFittingPriority: .defaultLow,
-                verticalFittingPriority: .fittingSizeLevel
-            )
-            if x > 0, x + s.width > width {
+            let s = v.sizeThatFits(CGSize(width: width, height: .greatestFiniteMagnitude))
+            let sw = s.width > 0 ? s.width : childWidth(of: v, for: s.height)
+            let sh = s.height > 0 ? s.height : childHeight(of: v, for: width)
+            if x > 0, x + sw > width {
                 y += rowH + verticalSpacing
                 x = 0
                 rowH = 0
             }
-            x += s.width + horizontalSpacing
-            rowH = max(rowH, s.height)
+            x += sw + horizontalSpacing
+            rowH = max(rowH, sh)
         }
         y += rowH
         return y
@@ -219,19 +297,17 @@ final class WrappingStackView: UIView {
         var y: CGFloat = 0
         var rowH: CGFloat = 0
         for v in managed {
-            let s = v.systemLayoutSizeFitting(
-                CGSize(width: bounds.width, height: UIView.layoutFittingCompressedSize.height),
-                withHorizontalFittingPriority: .defaultLow,
-                verticalFittingPriority: .fittingSizeLevel
-            )
-            if x > 0, x + s.width > bounds.width {
+            let s = v.sizeThatFits(CGSize(width: bounds.width, height: .greatestFiniteMagnitude))
+            let sw = s.width > 0 ? s.width : childWidth(of: v, for: s.height)
+            let sh = s.height > 0 ? s.height : childHeight(of: v, for: bounds.width)
+            if x > 0, x + sw > bounds.width {
                 y += rowH + verticalSpacing
                 x = 0
                 rowH = 0
             }
-            v.frame = CGRect(x: x, y: y, width: s.width, height: s.height)
-            x += s.width + horizontalSpacing
-            rowH = max(rowH, s.height)
+            v.frame = CGRect(x: x, y: y, width: sw, height: sh)
+            x += sw + horizontalSpacing
+            rowH = max(rowH, sh)
         }
         invalidateIntrinsicContentSize()
     }

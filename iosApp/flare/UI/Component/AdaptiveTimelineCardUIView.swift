@@ -2,19 +2,10 @@ import UIKit
 import KotlinSharedUI
 
 /// UIKit port of `AdaptiveTimelineCard` + `ListCardView`.
-///
-/// Mirrors the SwiftUI branching, with UIKit collection layouts owning
-/// outer screen spacing:
-///   if isMultipleColumn || !(timelineDisplayMode == .plain) {
-///       ListCardView(...) { content }
-///   } else {
-///       VStack(spacing: 0) { content; if !last { Divider() } }
-///   }
-final class AdaptiveTimelineCardUIView: UIView {
+/// Manual frame-based layout — no Auto Layout constraints.
+final class AdaptiveTimelineCardUIView: UIView, ManualLayoutMeasurable, TimelineHeightProviding {
 
-    // Mirrors `@Environment(\.appearanceSettings.timelineDisplayMode == .plain)`.
     var isPlainTimelineDisplayMode = true
-    // Mirrors `@Environment(\.isMultipleColumn)`.
     var isMultipleColumn: Bool = false
 
     var index: Int = 0
@@ -22,63 +13,33 @@ final class AdaptiveTimelineCardUIView: UIView {
 
     private static let cornerRadius: CGFloat = 32
     private static let plainEdgeRadius: CGFloat = 4
+    private static let dividerHeight: CGFloat = 1.0 / UIScreen.main.scale
 
     private let contentContainer = UIView()
     private let cardBackground = CAShapeLayer()
     private let divider: UIView = {
         let v = UIView()
         v.backgroundColor = .separator
-        v.translatesAutoresizingMaskIntoConstraints = false
         return v
     }()
 
-    private var leadingConstraint: NSLayoutConstraint!
-    private var trailingConstraint: NSLayoutConstraint!
-    private var dividerHeightConstraint: NSLayoutConstraint!
-    private var contentBottomToDividerConstraint: NSLayoutConstraint!
-    private var contentBottomToBottomConstraint: NSLayoutConstraint!
     private weak var contentView: UIView?
+    private var showsDivider: Bool = false
 
     override init(frame: CGRect) {
         super.init(frame: frame)
-        contentContainer.translatesAutoresizingMaskIntoConstraints = false
         addSubview(contentContainer)
-
-        leadingConstraint = contentContainer.leadingAnchor.constraint(equalTo: leadingAnchor)
-        trailingConstraint = contentContainer.trailingAnchor.constraint(equalTo: trailingAnchor)
-        NSLayoutConstraint.activate([
-            contentContainer.topAnchor.constraint(equalTo: topAnchor),
-            leadingConstraint,
-            trailingConstraint,
-        ])
-
         addSubview(divider)
-        dividerHeightConstraint = divider.heightAnchor.constraint(equalToConstant: 1.0 / UIScreen.main.scale)
-        contentBottomToDividerConstraint = contentContainer.bottomAnchor.constraint(equalTo: divider.topAnchor)
-        contentBottomToBottomConstraint = contentContainer.bottomAnchor.constraint(equalTo: bottomAnchor)
-        NSLayoutConstraint.activate([
-            divider.leadingAnchor.constraint(equalTo: leadingAnchor),
-            divider.trailingAnchor.constraint(equalTo: trailingAnchor),
-            divider.bottomAnchor.constraint(equalTo: bottomAnchor),
-        ])
-
         layer.insertSublayer(cardBackground, at: 0)
         cardBackground.fillColor = UIColor.secondarySystemGroupedBackground.cgColor
     }
     required init?(coder: NSCoder) { fatalError("init(coder:) not supported") }
 
-    /// Swaps in a fresh content subview (replacing any prior one).
     func setContent(_ view: UIView) {
         contentContainer.subviews.forEach { $0.removeFromSuperview() }
         contentView = view
-        view.translatesAutoresizingMaskIntoConstraints = false
         contentContainer.addSubview(view)
-        NSLayoutConstraint.activate([
-            view.topAnchor.constraint(equalTo: contentContainer.topAnchor),
-            view.leadingAnchor.constraint(equalTo: contentContainer.leadingAnchor),
-            view.trailingAnchor.constraint(equalTo: contentContainer.trailingAnchor),
-            view.bottomAnchor.constraint(equalTo: contentContainer.bottomAnchor),
-        ])
+        setNeedsLayout()
     }
 
     func configure(index: Int, totalCount: Int) {
@@ -100,39 +61,63 @@ final class AdaptiveTimelineCardUIView: UIView {
 
     private func applyMode() {
         if useCardStyle {
-            // Screen spacing is owned by the collection layout so cell widths
-            // and inter-column spacing stay consistent.
-            leadingConstraint.constant = 0
-            trailingConstraint.constant = 0
             cardBackground.isHidden = false
             divider.isHidden = true
-            dividerHeightConstraint.isActive = false
-            contentBottomToDividerConstraint.isActive = false
-            contentBottomToBottomConstraint.isActive = true
+            showsDivider = false
         } else {
-            // Plain mode: no horizontal padding, divider after non-last items.
-            leadingConstraint.constant = 0
-            trailingConstraint.constant = 0
             cardBackground.isHidden = true
             let isLast = !(totalCount <= 0 || index < totalCount - 1)
             divider.isHidden = isLast
-            dividerHeightConstraint.isActive = !isLast
-            contentBottomToBottomConstraint.isActive = isLast
-            contentBottomToDividerConstraint.isActive = !isLast
+            showsDivider = !isLast
         }
     }
 
     override func layoutSubviews() {
         super.layoutSubviews()
+        let w = bounds.width
+        let h = bounds.height
+
+        if showsDivider {
+            let dh = Self.dividerHeight
+            let containerH = max(h - dh, 0)
+            contentContainer.frame = CGRect(x: 0, y: 0, width: w, height: containerH)
+            divider.frame = CGRect(x: 0, y: containerH, width: w, height: dh)
+        } else {
+            contentContainer.frame = CGRect(x: 0, y: 0, width: w, height: h)
+        }
+
+        // Layout content view to fill contentContainer
+        contentView?.frame = contentContainer.bounds
+
         if useCardStyle {
             cardBackground.path = makeCardPath().cgPath
             cardBackground.frame = bounds
         }
     }
 
-    /// Uneven rounded rectangle matching SwiftUI's `UnevenRoundedRectangle`:
-    /// first/last items keep big corners on their outer edges, interior edges
-    /// shrink to a 4pt radius for the tight-stacked look.
+    override func sizeThatFits(_ size: CGSize) -> CGSize {
+        CGSize(width: size.width, height: timelineHeight(for: size.width) ?? 0)
+    }
+
+    func timelineHeight(for width: CGFloat) -> CGFloat? {
+        let contentH: CGFloat
+        if let cv = contentView {
+            contentH = childHeight(of: cv, for: width)
+        } else {
+            contentH = 0
+        }
+        let dividerH = showsDivider ? Self.dividerHeight : 0
+        return ceil(contentH + dividerH)
+    }
+
+    override func systemLayoutSizeFitting(
+        _ targetSize: CGSize,
+        withHorizontalFittingPriority horizontalFittingPriority: UILayoutPriority,
+        verticalFittingPriority: UILayoutPriority
+    ) -> CGSize {
+        sizeThatFits(CGSize(width: targetSize.width, height: .greatestFiniteMagnitude))
+    }
+
     private func makeCardPath() -> UIBezierPath {
         let rect = contentContainer.frame
         let (tl, tr, br, bl): (CGFloat, CGFloat, CGFloat, CGFloat)

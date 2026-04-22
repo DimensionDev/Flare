@@ -6,10 +6,10 @@ import KotlinSharedUI
 // StatusActionView.swift — horizontal bar of action buttons with optional
 // group (menu) children, optional text labels, Spacer insertion per
 // postActionStyle, haptic feedback on tap.
-final class StatusActionsUIView: UIView {
+final class StatusActionsUIView: UIView, ManualLayoutMeasurable, TimelineHeightProviding {
     var onOpenURL: ((URL) -> Void)?
 
-    private let row = UIStackView()
+    private var managedChildren: [UIView] = []
 
     // Inputs
     private var data: [ActionMenu] = []
@@ -19,30 +19,19 @@ final class StatusActionsUIView: UIView {
     private var showNumbers: Bool = true
     private var fontSize: CGFloat = 13
     private var textStyle: UIFont.TextStyle = .footnote
+    private var isStretch: Bool = false
+    private var spacerIndex: Int? = nil
     private var itemButtonPool: [ActionItemControl] = []
     private var groupButtonPool: [ActionItemControl] = []
     private var textGroupPool: [ActionGroupColumnView] = []
     private var dividerPool: [UIView] = []
-    private var spacerPool: [UIView] = []
     private var itemButtonCursor = 0
     private var groupButtonCursor = 0
     private var textGroupCursor = 0
     private var dividerCursor = 0
-    private var spacerCursor = 0
 
     override init(frame: CGRect) {
         super.init(frame: frame)
-        row.axis = .horizontal
-        row.alignment = .center
-        row.spacing = 8
-        row.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(row)
-        NSLayoutConstraint.activate([
-            row.topAnchor.constraint(equalTo: topAnchor),
-            row.leadingAnchor.constraint(equalTo: leadingAnchor),
-            row.trailingAnchor.constraint(equalTo: trailingAnchor),
-            row.bottomAnchor.constraint(equalTo: bottomAnchor),
-        ])
     }
     required init?(coder: NSCoder) { fatalError("init(coder:) not supported") }
 
@@ -73,13 +62,12 @@ final class StatusActionsUIView: UIView {
     }
 
     private func rebuild() {
-        row.distribution = .fill
-        row.spacing = 8
         itemButtonCursor = 0
         groupButtonCursor = 0
         textGroupCursor = 0
         dividerCursor = 0
-        spacerCursor = 0
+        isStretch = false
+        spacerIndex = nil
         var desired: [UIView] = []
 
         if useText {
@@ -88,37 +76,137 @@ final class StatusActionsUIView: UIView {
                     desired.append(v)
                 }
             }
-            row.flareSyncArrangedSubviews(desired)
+            syncManagedSubviews(parent: self, current: &managedChildren, desired: desired)
+            invalidateIntrinsicContentSize()
+            setNeedsLayout()
             return
         }
 
         if postActionStyle == .stretch, allowSpacer {
-            row.distribution = .equalSpacing
-            row.spacing = 0
+            isStretch = true
             for (index, item) in data.enumerated() {
                 if let v = makeActionView(for: item, isFixedWidth: index != data.count - 1) {
                     desired.append(v)
                 }
             }
-            row.flareSyncArrangedSubviews(desired)
+            syncManagedSubviews(parent: self, current: &managedChildren, desired: desired)
+            invalidateIntrinsicContentSize()
+            setNeedsLayout()
             return
         }
 
-        // Non-stretch modes mirror the SwiftUI Spacer-insertion rule.
         for (index, item) in data.enumerated() {
             let needsSpacerBefore =
                 (index == data.count - 1 && postActionStyle == .leftAligned) ||
                 (postActionStyle == .rightAligned && index == 0)
 
             if needsSpacerBefore, allowSpacer {
-                desired.append(flexSpacer())
+                spacerIndex = desired.count
             }
 
             if let v = makeActionView(for: item, isFixedWidth: index != data.count - 1) {
                 desired.append(v)
             }
         }
-        row.flareSyncArrangedSubviews(desired)
+        syncManagedSubviews(parent: self, current: &managedChildren, desired: desired)
+        invalidateIntrinsicContentSize()
+        setNeedsLayout()
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        let w = bounds.width
+        let h = bounds.height
+        guard !managedChildren.isEmpty else { return }
+
+        if isStretch {
+            // Equal spacing distribution
+            let totalChildWidth = managedChildren.reduce(CGFloat(0)) { sum, child in
+                sum + child.sizeThatFits(CGSize(width: .greatestFiniteMagnitude, height: h)).width
+            }
+            let totalSpacing = max(w - totalChildWidth, 0)
+            let gapCount = max(managedChildren.count - 1, 1)
+            let gap = totalSpacing / CGFloat(gapCount)
+            var x: CGFloat = 0
+            for (i, child) in managedChildren.enumerated() {
+                let childSize = child.sizeThatFits(CGSize(width: .greatestFiniteMagnitude, height: h))
+                child.frame = CGRect(
+                    x: x,
+                    y: (h - childSize.height) / 2,
+                    width: ceil(childSize.width),
+                    height: childSize.height
+                )
+                x += ceil(childSize.width)
+                if i < managedChildren.count - 1 { x += gap }
+            }
+            return
+        }
+
+        // Compute total content width
+        let spacing: CGFloat = 8
+        var totalContentWidth: CGFloat = 0
+        var childSizes: [CGSize] = []
+        for child in managedChildren {
+            let s = child.sizeThatFits(CGSize(width: .greatestFiniteMagnitude, height: h))
+            childSizes.append(s)
+            totalContentWidth += ceil(s.width)
+        }
+        totalContentWidth += spacing * CGFloat(max(managedChildren.count - 1, 0))
+
+        // Compute spacer width if needed
+        let spacerWidth: CGFloat
+        if let _ = spacerIndex, allowSpacer {
+            spacerWidth = max(w - totalContentWidth, 0)
+        } else {
+            spacerWidth = 0
+        }
+
+        var x: CGFloat = 0
+        for (i, child) in managedChildren.enumerated() {
+            if i == spacerIndex {
+                x += spacerWidth
+            }
+            let s = childSizes[i]
+            child.frame = CGRect(
+                x: x,
+                y: (h - s.height) / 2,
+                width: ceil(s.width),
+                height: s.height
+            )
+            x += ceil(s.width)
+            if i < managedChildren.count - 1 { x += spacing }
+        }
+    }
+
+    override func sizeThatFits(_ size: CGSize) -> CGSize {
+        CGSize(width: size.width, height: timelineHeight(for: size.width) ?? 0)
+    }
+
+    func timelineHeight(for width: CGFloat) -> CGFloat? {
+        guard !managedChildren.isEmpty else { return .zero }
+        var maxH: CGFloat = 0
+        for child in managedChildren {
+            if let provider = child as? TimelineHeightProviding,
+               let h = provider.timelineHeight(for: .greatestFiniteMagnitude) {
+                maxH = max(maxH, h)
+            } else {
+                let s = child.sizeThatFits(CGSize(width: CGFloat.greatestFiniteMagnitude, height: CGFloat.greatestFiniteMagnitude))
+                maxH = max(maxH, s.height)
+            }
+        }
+        return ceil(maxH)
+    }
+
+    override func systemLayoutSizeFitting(
+        _ targetSize: CGSize,
+        withHorizontalFittingPriority horizontalFittingPriority: UILayoutPriority,
+        verticalFittingPriority: UILayoutPriority
+    ) -> CGSize {
+        sizeThatFits(CGSize(width: targetSize.width, height: .greatestFiniteMagnitude))
+    }
+
+    override var intrinsicContentSize: CGSize {
+        sizeThatFits(CGSize(width: bounds.width > 0 ? bounds.width : 320, height: .greatestFiniteMagnitude))
     }
 
     func performDeferredPoolCleanup() {
@@ -130,13 +218,12 @@ final class StatusActionsUIView: UIView {
     }
 
     func prepareForPoolRemoval() {
-        row.flareSyncArrangedSubviews([])
+        syncManagedSubviews(parent: self, current: &managedChildren, desired: [])
         data = []
         itemButtonCursor = 0
         groupButtonCursor = 0
         textGroupCursor = 0
         dividerCursor = 0
-        spacerCursor = 0
         trimPoolsToActiveCursors()
     }
 
@@ -145,7 +232,6 @@ final class StatusActionsUIView: UIView {
         Self.trimPool(&groupButtonPool, activeCount: groupButtonCursor) { $0.prepareForPoolRemoval() }
         Self.trimPool(&textGroupPool, activeCount: textGroupCursor) { $0.prepareForPoolRemoval() }
         Self.trimPool(&dividerPool, activeCount: dividerCursor)
-        Self.trimPool(&spacerPool, activeCount: spacerCursor)
     }
 
     private static func trimPool<View: UIView>(
@@ -159,20 +245,6 @@ final class StatusActionsUIView: UIView {
             view.removeFromSuperview()
         }
         pool.removeLast(pool.count - activeCount)
-    }
-
-    private func flexSpacer() -> UIView {
-        while spacerPool.count <= spacerCursor {
-            let v = UIView()
-            v.setContentHuggingPriority(.defaultLow, for: .horizontal)
-            v.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
-            spacerPool.append(v)
-        }
-        let v = spacerPool[spacerCursor]
-        spacerCursor += 1
-        v.setContentHuggingPriority(.defaultLow, for: .horizontal)
-        v.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
-        return v
     }
 
     // MARK: - Action view factory (matches the switch in StatusActionView)
@@ -196,7 +268,6 @@ final class StatusActionsUIView: UIView {
         while dividerPool.count <= dividerCursor {
             let view = UIView()
             view.backgroundColor = .separator
-            view.heightAnchor.constraint(equalToConstant: 1.0 / UIScreen.main.scale).isActive = true
             dividerPool.append(view)
         }
         let view = dividerPool[dividerCursor]
@@ -285,7 +356,7 @@ final class StatusActionsUIView: UIView {
     }
 
     private func buildMenu(from actions: [ActionMenu]) -> [UIMenuElement] {
-        
+
         var children: [UIMenuElement] = []
         var section: [UIMenuElement] = []
         var hasDivider = false
@@ -345,30 +416,20 @@ final class StatusActionsUIView: UIView {
     }
 }
 
-private final class ActionGroupColumnView: UIView {
-    private let column = UIStackView()
+private final class ActionGroupColumnView: UIView, ManualLayoutMeasurable, TimelineHeightProviding {
     private let topDivider = UIView()
     private let nestedActions = StatusActionsUIView()
     private let bottomDivider = UIView()
+    private static let dividerHeight: CGFloat = 1.0 / UIScreen.main.scale
+    private static let spacing: CGFloat = 4
 
     override init(frame: CGRect) {
         super.init(frame: frame)
-        column.axis = .vertical
-        column.spacing = 4
-        column.alignment = .fill
-        column.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(column)
-        NSLayoutConstraint.activate([
-            column.topAnchor.constraint(equalTo: topAnchor),
-            column.leadingAnchor.constraint(equalTo: leadingAnchor),
-            column.trailingAnchor.constraint(equalTo: trailingAnchor),
-            column.bottomAnchor.constraint(equalTo: bottomAnchor),
-            topDivider.heightAnchor.constraint(equalToConstant: 1.0 / UIScreen.main.scale),
-            bottomDivider.heightAnchor.constraint(equalToConstant: 1.0 / UIScreen.main.scale),
-        ])
         topDivider.backgroundColor = .separator
         bottomDivider.backgroundColor = .separator
-        column.flareSyncArrangedSubviews([topDivider, nestedActions, bottomDivider])
+        addSubview(topDivider)
+        addSubview(nestedActions)
+        addSubview(bottomDivider)
     }
 
     required init?(coder: NSCoder) { fatalError("init(coder:) not supported") }
@@ -392,19 +453,51 @@ private final class ActionGroupColumnView: UIView {
             showNumbers: showNumbers,
             isDetail: false
         )
+        invalidateIntrinsicContentSize()
+        setNeedsLayout()
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        let w = bounds.width
+        let dh = Self.dividerHeight
+        var y: CGFloat = 0
+        topDivider.frame = CGRect(x: 0, y: y, width: w, height: dh)
+        y += dh + Self.spacing
+        let actionsH = childHeight(of: nestedActions, for: w)
+        nestedActions.frame = CGRect(x: 0, y: y, width: w, height: actionsH)
+        y += actionsH + Self.spacing
+        bottomDivider.frame = CGRect(x: 0, y: y, width: w, height: dh)
+    }
+
+    override func sizeThatFits(_ size: CGSize) -> CGSize {
+        CGSize(width: size.width, height: timelineHeight(for: size.width) ?? 0)
+    }
+
+    func timelineHeight(for width: CGFloat) -> CGFloat? {
+        guard width > 0, width.isFinite else { return nil }
+        let dh = Self.dividerHeight
+        let actionsH = childHeight(of: nestedActions, for: width)
+        let total = dh + Self.spacing + actionsH + Self.spacing + dh
+        return ceil(total)
+    }
+
+    override func systemLayoutSizeFitting(
+        _ targetSize: CGSize,
+        withHorizontalFittingPriority horizontalFittingPriority: UILayoutPriority,
+        verticalFittingPriority: UILayoutPriority
+    ) -> CGSize {
+        sizeThatFits(CGSize(width: targetSize.width, height: .greatestFiniteMagnitude))
     }
 }
 
-private final class ActionItemControl: UIButton {
-    private let stack = UIStackView()
+private final class ActionItemControl: UIButton, ManualLayoutMeasurable, TimelineHeightProviding {
     private let iconView = UIImageView()
     private let label = UILabel()
     private var minimumIconOnlySize: CGFloat?
-    private var iconWidthConstraint: NSLayoutConstraint!
-    private var iconHeightConstraint: NSLayoutConstraint!
-    private var minimumTextWidthConstraint: NSLayoutConstraint?
-    private var minimumWidthConstraint: NSLayoutConstraint?
-    private var minimumHeightConstraint: NSLayoutConstraint?
+    private var minimumTextWidth: CGFloat?
+    private var iconSize: CGFloat = 0
+    private var currentSpacing: CGFloat = 0
     private var onTap: (() -> Void)?
 
     override init(frame: CGRect) {
@@ -437,45 +530,22 @@ private final class ActionItemControl: UIButton {
     required init?(coder: NSCoder) { fatalError("init(coder:) not supported") }
 
     private func commonInit() {
-        translatesAutoresizingMaskIntoConstraints = false
         configuration = nil
         contentHorizontalAlignment = .leading
         contentVerticalAlignment = .center
         directionalLayoutMargins = .zero
         layoutMargins = .zero
 
-        stack.axis = .horizontal
-        stack.alignment = .center
-        stack.spacing = 0
-        stack.isUserInteractionEnabled = false
-        stack.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(stack)
-        NSLayoutConstraint.activate([
-            stack.topAnchor.constraint(equalTo: topAnchor),
-            stack.leadingAnchor.constraint(equalTo: leadingAnchor),
-            stack.trailingAnchor.constraint(equalTo: trailingAnchor),
-            stack.bottomAnchor.constraint(equalTo: bottomAnchor),
-        ])
-
         iconView.contentMode = .center
-        iconView.setContentHuggingPriority(.required, for: .horizontal)
-        iconView.setContentCompressionResistancePriority(.required, for: .horizontal)
-        iconWidthConstraint = iconView.widthAnchor.constraint(equalToConstant: 0)
-        iconHeightConstraint = iconView.heightAnchor.constraint(equalToConstant: 0)
-        NSLayoutConstraint.activate([
-            iconWidthConstraint,
-            iconHeightConstraint,
-        ])
+        iconView.isUserInteractionEnabled = false
+        addSubview(iconView)
 
         label.adjustsFontForContentSizeCategory = true
         label.numberOfLines = 1
         label.lineBreakMode = .byTruncatingTail
-        label.setContentHuggingPriority(.required, for: .horizontal)
-        label.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
-        stack.addArrangedSubview(iconView)
-        stack.addArrangedSubview(label)
-        setContentHuggingPriority(.required, for: .horizontal)
-        setContentCompressionResistancePriority(.required, for: .horizontal)
+        label.isUserInteractionEnabled = false
+        addSubview(label)
+
         addTarget(self, action: #selector(onTapped), for: .touchUpInside)
     }
 
@@ -490,44 +560,24 @@ private final class ActionItemControl: UIButton {
         onTap: (() -> Void)? = nil
     ) {
         self.minimumIconOnlySize = minimumIconOnlySize
+        self.minimumTextWidth = minimumTextWidth
+        self.iconSize = iconSize
         self.onTap = onTap
         self.tintColor = tintColor
+        self.currentSpacing = title == nil ? 0 : 4
         menu = nil
         showsMenuAsPrimaryAction = false
 
         let symbolConfiguration = UIImage.SymbolConfiguration(pointSize: iconSize)
         iconView.preferredSymbolConfiguration = symbolConfiguration
         iconView.tintColor = tintColor
-//        let templateImage = image?.withRenderingMode(.alwaysTemplate)
-        iconView.image = image //templateImage?.applyingSymbolConfiguration(symbolConfiguration) ?? templateImage
+        iconView.image = image
         iconView.isHidden = image == nil
-        iconWidthConstraint.constant = iconSize
-        iconHeightConstraint.constant = iconSize
 
         label.text = title
         label.font = font
         label.textColor = tintColor
         label.isHidden = title == nil
-        stack.spacing = title == nil ? 0 : 4
-        minimumTextWidthConstraint?.isActive = false
-        minimumTextWidthConstraint = nil
-        if let minimumTextWidth {
-            let constraint = label.widthAnchor.constraint(greaterThanOrEqualToConstant: minimumTextWidth)
-            constraint.isActive = true
-            minimumTextWidthConstraint = constraint
-        }
-
-        minimumWidthConstraint?.isActive = false
-        minimumHeightConstraint?.isActive = false
-        minimumWidthConstraint = nil
-        minimumHeightConstraint = nil
-        if let minimumIconOnlySize {
-            let width = widthAnchor.constraint(greaterThanOrEqualToConstant: minimumIconOnlySize)
-            let height = heightAnchor.constraint(greaterThanOrEqualToConstant: minimumIconOnlySize)
-            NSLayoutConstraint.activate([width, height])
-            minimumWidthConstraint = width
-            minimumHeightConstraint = height
-        }
 
         invalidateIntrinsicContentSize()
         setNeedsLayout()
@@ -539,20 +589,49 @@ private final class ActionItemControl: UIButton {
         showsMenuAsPrimaryAction = false
         iconView.image = nil
         label.text = nil
-        minimumTextWidthConstraint?.isActive = false
-        minimumWidthConstraint?.isActive = false
-        minimumHeightConstraint?.isActive = false
-        minimumTextWidthConstraint = nil
-        minimumWidthConstraint = nil
-        minimumHeightConstraint = nil
+        minimumTextWidth = nil
+        minimumIconOnlySize = nil
     }
 
     @objc private func onTapped() {
         onTap?()
     }
 
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        let size = actionContentSize()
+        var x: CGFloat = 0
+        if !iconView.isHidden {
+            iconView.frame = CGRect(
+                x: x,
+                y: (size.height - iconSize) / 2,
+                width: iconSize,
+                height: iconSize
+            )
+            x += iconSize + currentSpacing
+        }
+        if !label.isHidden {
+            let labelSize = label.sizeThatFits(CGSize(width: .greatestFiniteMagnitude, height: size.height))
+            let labelW = max(labelSize.width, minimumTextWidth ?? 0)
+            label.frame = CGRect(
+                x: x,
+                y: (size.height - labelSize.height) / 2,
+                width: labelW,
+                height: labelSize.height
+            )
+        }
+    }
+
     override var intrinsicContentSize: CGSize {
         actionContentSize()
+    }
+
+    override func sizeThatFits(_ size: CGSize) -> CGSize {
+        actionContentSize()
+    }
+
+    func timelineHeight(for width: CGFloat) -> CGFloat? {
+        actionContentSize().height
     }
 
     override func systemLayoutSizeFitting(_ targetSize: CGSize) -> CGSize {
@@ -568,11 +647,22 @@ private final class ActionItemControl: UIButton {
     }
 
     private func actionContentSize() -> CGSize {
-        let size = stack.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize)
         let minimum = minimumIconOnlySize ?? 0
+        var w: CGFloat = 0
+        var h: CGFloat = 0
+        if !iconView.isHidden {
+            w += iconSize
+            h = max(h, iconSize)
+        }
+        if !label.isHidden {
+            let labelSize = label.sizeThatFits(CGSize(width: CGFloat.greatestFiniteMagnitude, height: CGFloat.greatestFiniteMagnitude))
+            let labelW = max(labelSize.width, minimumTextWidth ?? 0)
+            w += currentSpacing + labelW
+            h = max(h, labelSize.height)
+        }
         return CGSize(
-            width: ceil(max(size.width, minimum)),
-            height: ceil(max(size.height, minimum))
+            width: ceil(max(w, minimum)),
+            height: ceil(max(h, minimum))
         )
     }
 

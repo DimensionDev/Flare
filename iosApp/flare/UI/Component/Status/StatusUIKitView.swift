@@ -4,17 +4,14 @@ import KotlinSharedUI
 
 /// UIKit port of the SwiftUI `StatusView`.
 ///
-/// The layout skeleton (outer / main / inner / content stacks) and every leaf
-/// view are built once and cached on this instance. `rebuild()` computes the
-/// desired arranged-subview list for each stack and runs a structural diff
-/// (`syncArrangedSubviews`) so that cell reuse doesn't tear down and rebuild
-/// RichText / Media / Poll / Action subtrees every configure — it just
-/// reconfigures the existing instances in place.
+/// Layout is fully manual (frame-based) for performance — no UIStackView or
+/// Auto Layout constraints. The view hierarchy is flat: all visible children
+/// are direct subviews of this view, positioned in `layoutSubviews()`.
 ///
-/// `parents` and `quotes` are backed by simple object pools
-/// (`parentContainers` / `quoteChildren`). `@State expand` maps to a stored
-/// property with explicit `rebuild()` calls.
-final class StatusUIKitView: UIView, UIGestureRecognizerDelegate {
+/// `rebuild()` determines which children should be visible and updates the
+/// managed arrays via `syncManagedSubviews`. `layoutSubviews()` then assigns
+/// frames based on the current `bounds.width`.
+final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMeasurable, TimelineHeightProviding {
     // MARK: - Environment mirrors (inputs that were `@Environment` in SwiftUI)
 
     /// Forwarded to all URL-clicking machinery.
@@ -82,37 +79,25 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate {
 
     private var expand: Bool = false
 
-    // MARK: - Skeleton stacks
+    // MARK: - Managed child arrays (replaces UIStackViews)
 
-    private let outerStack: UIStackView = {
-        let s = UIStackView()
-        s.axis = .vertical
-        s.alignment = .fill
-        s.spacing = 0
-        s.translatesAutoresizingMaskIntoConstraints = false
-        return s
-    }()
-    private let mainRow: UIStackView = {
-        let s = UIStackView()
-        s.axis = .horizontal
-        s.alignment = .top
-        s.spacing = 8
-        return s
-    }()
-    private let innerColumn: UIStackView = {
-        let s = UIStackView()
-        s.axis = .vertical
-        s.alignment = .fill
-        s.spacing = 8
-        return s
-    }()
-    private let contentColumn: UIStackView = {
-        let s = UIStackView()
-        s.axis = .vertical
-        s.alignment = .fill
-        s.spacing = 8
-        return s
-    }()
+    /// Parents displayed before the main row (vertical, spacing 0)
+    private var activeParents: [UIView] = []
+    /// The current header view (one of userHeaderFull/userHeaderQuote/userHeaderCompat), or nil
+    private var currentHeaderView: UIView?
+    /// Content column children (vertical, spacing 8)
+    private var contentColumnChildren: [UIView] = []
+    /// Whether avatar is currently displayed
+    private var wantsAvatar: Bool = false
+
+    // MARK: - Layout constants
+
+    private static let mainRowSpacing: CGFloat = 8
+    private static let innerColumnSpacing: CGFloat = 8
+    private static let contentColumnSpacing: CGFloat = 8
+    private static let avatarSize: CGFloat = 44
+    private static let replyIconSize: CGFloat = 12
+    private static let sourceIconSize: CGFloat = 12
 
     // MARK: - Cached leaves (built once, reconfigured per `rebuild`)
 
@@ -122,9 +107,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate {
     private let userHeaderCompat = UserCompatUIView()
     private let topEndView = StatusTopEndView()
 
-    private let replyToRow = UIStackView()
-    private let replyToIcon = UIImageView(image: UIImage(named: "fa-reply"))
-    private let replyToLabel = UILabel()
+    private let replyToContainer = ReplyToRowView()
 
     private let contentWarningText = RichTextUIView()
     private let contentWarningToggle = UIButton(type: .system)
@@ -138,14 +121,11 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate {
     private let normalCardView = StatusCardUIView(cornerRadius: 16)
     private let compatCardView = StatusCompatCardUIView(cornerRadius: 16)
 
-    private let quotesContainer = UIView()
-    private let quotesStack = UIStackView()
+    private let quotesContainer = QuotesContainerView()
     private var quoteChildren: [StatusUIKitView] = []
     private var quoteDividers: [UIView] = []
 
-    private let sourceChannelRow = UIStackView()
-    private let sourceChannelIcon = UIImageView(image: UIImage(named: "fa-tv"))
-    private let sourceChannelLabel = UILabel()
+    private let sourceChannelContainer = SourceChannelRowView()
 
     private let reactionView = StatusReactionUIView()
     private let detailTimestampView: DateTimeUILabel = {
@@ -155,10 +135,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate {
     }()
 
     private let actionsView = StatusActionsUIView()
-    private lazy var actionsContainer: UIView = UIView.padding(
-        actionsView,
-        insets: UIEdgeInsets(top: 4, left: 0, bottom: 0, right: 0)
-    )
+    private let actionsContainer = ActionsContainerView()
 
     private var parentContainers: [ParentContainerView] = []
 
@@ -174,25 +151,11 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate {
     }
 
     private func commonInit() {
-        addSubview(outerStack)
-        NSLayoutConstraint.activate([
-            outerStack.topAnchor.constraint(equalTo: topAnchor),
-            outerStack.leadingAnchor.constraint(equalTo: leadingAnchor),
-            outerStack.trailingAnchor.constraint(equalTo: trailingAnchor),
-            outerStack.bottomAnchor.constraint(equalTo: bottomAnchor),
-        ])
+        actionsContainer.content = actionsView
 
         setupAvatar()
-        setupReplyToRow()
         setupContentWarningToggle()
         setupExpandMoreButton()
-        setupSourceChannelRow()
-        setupQuotesContainer()
-
-        // Assemble empty skeleton — `rebuild()` syncs actual arranged children.
-        mainRow.addArrangedSubview(innerColumn)
-        innerColumn.addArrangedSubview(contentColumn)
-        outerStack.addArrangedSubview(mainRow)
 
         let tap = UITapGestureRecognizer(target: self, action: #selector(onRootTapped))
         tap.cancelsTouchesInView = false
@@ -201,27 +164,9 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate {
     }
 
     private func setupAvatar() {
-        avatarView.widthAnchor.constraint(equalToConstant: 44).isActive = true
-        avatarView.heightAnchor.constraint(equalToConstant: 44).isActive = true
         avatarView.isUserInteractionEnabled = true
         let tap = UITapGestureRecognizer(target: self, action: #selector(onAvatarTapped))
         avatarView.addGestureRecognizer(tap)
-    }
-
-    private func setupReplyToRow() {
-        replyToRow.axis = .horizontal
-        replyToRow.alignment = .center
-        replyToRow.spacing = 4
-        replyToIcon.tintColor = .secondaryLabel
-        replyToIcon.contentMode = .scaleAspectFit
-        replyToIcon.widthAnchor.constraint(equalToConstant: 12).isActive = true
-        replyToIcon.heightAnchor.constraint(equalToConstant: 12).isActive = true
-        replyToLabel.font = .preferredFont(forTextStyle: .caption1)
-        replyToLabel.textColor = .secondaryLabel
-        replyToLabel.adjustsFontForContentSizeCategory = true
-        replyToLabel.numberOfLines = 0
-        replyToRow.addArrangedSubview(replyToIcon)
-        replyToRow.addArrangedSubview(replyToLabel)
     }
 
     private func setupContentWarningToggle() {
@@ -239,40 +184,6 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate {
             UIAction { [weak self] _ in self?.expandOnly() },
             for: .touchUpInside
         )
-    }
-
-    private func setupSourceChannelRow() {
-        sourceChannelRow.axis = .horizontal
-        sourceChannelRow.alignment = .center
-        sourceChannelRow.spacing = 4
-        sourceChannelIcon.tintColor = .secondaryLabel
-        sourceChannelIcon.contentMode = .scaleAspectFit
-        sourceChannelIcon.widthAnchor.constraint(equalToConstant: 12).isActive = true
-        sourceChannelIcon.heightAnchor.constraint(equalToConstant: 12).isActive = true
-        sourceChannelLabel.font = .preferredFont(forTextStyle: .footnote)
-        sourceChannelLabel.textColor = .secondaryLabel
-        sourceChannelLabel.adjustsFontForContentSizeCategory = true
-        sourceChannelLabel.numberOfLines = 0
-        sourceChannelRow.addArrangedSubview(sourceChannelIcon)
-        sourceChannelRow.addArrangedSubview(sourceChannelLabel)
-    }
-
-    private func setupQuotesContainer() {
-        quotesContainer.layer.cornerRadius = 16
-        quotesContainer.layer.borderWidth = 1
-        quotesContainer.layer.borderColor = UIColor.separator.cgColor
-
-        quotesStack.axis = .vertical
-        quotesStack.alignment = .fill
-        quotesStack.spacing = 8
-        quotesStack.translatesAutoresizingMaskIntoConstraints = false
-        quotesContainer.addSubview(quotesStack)
-        NSLayoutConstraint.activate([
-            quotesStack.topAnchor.constraint(equalTo: quotesContainer.topAnchor, constant: 8),
-            quotesStack.leadingAnchor.constraint(equalTo: quotesContainer.leadingAnchor, constant: 8),
-            quotesStack.trailingAnchor.constraint(equalTo: quotesContainer.trailingAnchor, constant: -8),
-            quotesStack.bottomAnchor.constraint(equalTo: quotesContainer.bottomAnchor, constant: -8),
-        ])
     }
 
     // MARK: - Public API
@@ -335,11 +246,17 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate {
 
         mediaView.prepareForPoolRemoval()
         actionsView.prepareForPoolRemoval()
-        syncArrangedSubviews(quotesStack, [])
-        syncArrangedSubviews(contentColumn, [])
-        syncArrangedSubviews(innerColumn, [])
-        syncArrangedSubviews(mainRow, [])
-        syncArrangedSubviews(outerStack, [])
+
+        // Remove all managed children
+        for view in contentColumnChildren { view.removeFromSuperview() }
+        contentColumnChildren = []
+        currentHeaderView?.removeFromSuperview()
+        currentHeaderView = nil
+        avatarView.removeFromSuperview()
+        wantsAvatar = false
+
+        for parent in activeParents { parent.removeFromSuperview() }
+        activeParents = []
 
         for container in parentContainers {
             container.child.prepareForPoolRemoval()
@@ -387,40 +304,102 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate {
         setNeedsLayout()
     }
 
+    // MARK: - Layout
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        performLayout(width: bounds.width, assignFrames: true)
+    }
+
+    override func sizeThatFits(_ size: CGSize) -> CGSize {
+        CGSize(width: size.width, height: timelineHeight(for: size.width) ?? 0)
+    }
+
+    func timelineHeight(for width: CGFloat) -> CGFloat? {
+        guard width > 0, width.isFinite else { return nil }
+        return ceil(performLayout(width: width, assignFrames: false))
+    }
+
     override func systemLayoutSizeFitting(
         _ targetSize: CGSize,
         withHorizontalFittingPriority horizontalFittingPriority: UILayoutPriority,
         verticalFittingPriority: UILayoutPriority
     ) -> CGSize {
-        guard horizontalFittingPriority == .required,
-              targetSize.width.isFinite,
-              targetSize.width > 0 else {
+        let w: CGFloat
+        if horizontalFittingPriority == .required, targetSize.width.isFinite, targetSize.width > 0 {
+            w = targetSize.width
+        } else if bounds.width > 0 {
+            w = bounds.width
+        } else {
             return super.systemLayoutSizeFitting(
                 targetSize,
                 withHorizontalFittingPriority: horizontalFittingPriority,
                 verticalFittingPriority: verticalFittingPriority
             )
         }
+        prepareForFitting(width: w)
+        let h = performLayout(width: w, assignFrames: false)
+        return CGSize(width: w, height: ceil(h))
+    }
 
-        prepareForFitting(width: targetSize.width)
-        let size = outerStack.systemLayoutSizeFitting(
-            CGSize(width: targetSize.width, height: UIView.layoutFittingCompressedSize.height),
-            withHorizontalFittingPriority: .required,
-            verticalFittingPriority: verticalFittingPriority
-        )
-        return CGSize(width: targetSize.width, height: ceil(size.height))
+    override var intrinsicContentSize: CGSize {
+        guard bounds.width > 0 else { return CGSize(width: UIView.noIntrinsicMetric, height: UIView.noIntrinsicMetric) }
+        return sizeThatFits(CGSize(width: bounds.width, height: .greatestFiniteMagnitude))
+    }
+
+    /// Core layout routine. When `assignFrames` is true, sets child frames.
+    /// Always returns the total height.
+    @discardableResult
+    private func performLayout(width: CGFloat, assignFrames: Bool) -> CGFloat {
+        guard width > 0 else { return 0 }
+        var y: CGFloat = 0
+
+        // Parents (vertical, spacing 0)
+        for parent in activeParents {
+            let h = childHeight(of: parent, for: width)
+            if assignFrames { parent.frame = CGRect(x: 0, y: y, width: width, height: h) }
+            y += h // spacing 0
+        }
+
+        // Main row
+        let contentX: CGFloat = wantsAvatar ? Self.avatarSize + Self.mainRowSpacing : 0
+        let contentWidth = max(width - contentX, 1)
+
+        if wantsAvatar && assignFrames {
+            avatarView.frame = CGRect(x: 0, y: y, width: Self.avatarSize, height: Self.avatarSize)
+        }
+
+        var innerY = y
+
+        // Header
+        if let header = currentHeaderView {
+            let h = childHeight(of: header, for: contentWidth)
+            if assignFrames { header.frame = CGRect(x: contentX, y: innerY, width: contentWidth, height: h) }
+            innerY += h + Self.innerColumnSpacing
+        }
+
+        // Content column (vertical, spacing 8)
+        for (i, child) in contentColumnChildren.enumerated() {
+            let h = childHeight(of: child, for: contentWidth)
+            if assignFrames { child.frame = CGRect(x: contentX, y: innerY, width: contentWidth, height: h) }
+            innerY += h
+            if i < contentColumnChildren.count - 1 {
+                innerY += Self.contentColumnSpacing
+            }
+        }
+
+        return max(innerY, y)
     }
 
     // MARK: - SwiftUI-equivalent computed
 
-    /// `(!fullWidthPost || withLeadingPadding) && !isQuote && !isDetail`
     private var showAsFullWidth: Bool {
         (!appearance.fullWidthPost || withLeadingPadding) && !isQuote && !isDetail
     }
 
     private func fittingContentColumnWidth(for width: CGFloat) -> CGFloat {
         let wantsAvatar = showAsFullWidth && data?.user != nil
-        let avatarWidth = wantsAvatar ? 44 + mainRow.spacing : 0
+        let avatarWidth = wantsAvatar ? Self.avatarSize + Self.mainRowSpacing : 0
         return max(width - avatarWidth, 1)
     }
 
@@ -428,42 +407,50 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate {
 
     private func rebuild() {
         guard let data = data else {
-            syncArrangedSubviews(outerStack, [])
+            removeAllManaged()
             return
         }
 
         // Avatar
-        let wantsAvatar = showAsFullWidth && data.user != nil
-        if wantsAvatar, let user = data.user {
+        let newWantsAvatar = showAsFullWidth && data.user != nil
+        if newWantsAvatar, let user = data.user {
             avatarView.avatarShape = appearance.avatarShape
             avatarView.set(url: user.avatar)
+            if avatarView.superview !== self { addSubview(avatarView) }
+        } else if avatarView.superview === self {
+            avatarView.removeFromSuperview()
         }
+        wantsAvatar = newWantsAvatar
 
         // Header
-        let headerView = selectAndConfigureHeader(data: data)
+        let newHeader = selectAndConfigureHeader(data: data)
+        if currentHeaderView !== newHeader {
+            currentHeaderView?.removeFromSuperview()
+            currentHeaderView = newHeader
+            if let h = newHeader, h.superview !== self { addSubview(h) }
+        }
 
         // Content column children
         let contentItems = buildContentColumnList(data: data)
-        syncArrangedSubviews(contentColumn, contentItems)
+        syncManagedSubviews(parent: self, current: &contentColumnChildren, desired: contentItems)
 
-        // innerColumn: [header?, contentColumn]
-        var innerDesired: [UIView] = []
-        if let headerView { innerDesired.append(headerView) }
-        innerDesired.append(contentColumn)
-        syncArrangedSubviews(innerColumn, innerDesired)
+        // Parents
+        let parents = resolveActiveParentContainers(data: data)
+        syncManagedSubviews(parent: self, current: &activeParents, desired: parents)
 
-        // mainRow: [avatar?, innerColumn]
-        var mainRowDesired: [UIView] = []
-        if wantsAvatar { mainRowDesired.append(avatarView) }
-        mainRowDesired.append(innerColumn)
-        syncArrangedSubviews(mainRow, mainRowDesired)
+        invalidateIntrinsicContentSize()
+        setNeedsLayout()
+    }
 
-        // outerStack: [parents..., mainRow]
-        let parents = activeParentContainers(data: data)
-        var outerDesired: [UIView] = parents
-        outerDesired.append(mainRow)
-        syncArrangedSubviews(outerStack, outerDesired)
-
+    private func removeAllManaged() {
+        for view in contentColumnChildren { view.removeFromSuperview() }
+        contentColumnChildren = []
+        currentHeaderView?.removeFromSuperview()
+        currentHeaderView = nil
+        avatarView.removeFromSuperview()
+        wantsAvatar = false
+        for parent in activeParents { parent.removeFromSuperview() }
+        activeParents = []
         invalidateIntrinsicContentSize()
         setNeedsLayout()
     }
@@ -498,8 +485,8 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate {
 
         // reply-to
         if let replyToHandle = data.replyToHandle {
-            replyToLabel.text = String(localized: "Reply to \(replyToHandle)")
-            items.append(replyToRow)
+            replyToContainer.configure(text: String(localized: "Reply to \(replyToHandle)"))
+            items.append(replyToContainer)
         }
 
         // content warning
@@ -635,8 +622,8 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate {
         // source channel + reactions
         if showMediaInput, !isQuote {
             if let channel = data.sourceChannel {
-                sourceChannelLabel.text = channel.name
-                items.append(sourceChannelRow)
+                sourceChannelContainer.configure(text: channel.name)
+                items.append(sourceChannelContainer)
             }
             if !data.emojiReactions.isEmpty {
                 reactionView.configure(data: Array(data.emojiReactions), isDetail: isDetail)
@@ -675,14 +662,13 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate {
 
     // MARK: - Pools
 
-    private func activeParentContainers(data: UiTimelineV2.Post) -> [ParentContainerView] {
+    private func resolveActiveParentContainers(data: UiTimelineV2.Post) -> [ParentContainerView] {
         let parentData = showParents ? Array(data.parents) : []
         while parentContainers.count < parentData.count {
             parentContainers.append(ParentContainerView())
         }
         for (i, parent) in parentData.enumerated() {
             let container = parentContainers[i]
-//            container.child.appearance = appearance
             container.child.openURL = openURL
             container.child.configure(data: parent, appearance: appearance, withLeadingPadding: true)
         }
@@ -696,13 +682,11 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate {
         while quoteDividers.count < max(0, quotes.count - 1) {
             let d = UIView()
             d.backgroundColor = .separator
-            d.heightAnchor.constraint(equalToConstant: 1.0 / UIScreen.main.scale).isActive = true
             quoteDividers.append(d)
         }
         var desired: [UIView] = []
         for (i, quote) in quotes.enumerated() {
             let child = quoteChildren[i]
-//            child.appearance = appearance
             child.openURL = openURL
             child.configure(data: quote, appearance: appearance, isQuote: true, forceHideActions: true)
             desired.append(child)
@@ -710,7 +694,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate {
                 desired.append(quoteDividers[i])
             }
         }
-        syncArrangedSubviews(quotesStack, desired)
+        quotesContainer.setChildren(desired)
     }
 
     func performLightweightPoolCleanup() {
@@ -842,32 +826,6 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate {
         return candidates
     }
 
-    // MARK: - Arranged-subview diff
-
-    /// Reorders `stack.arrangedSubviews` to match `desired`, reusing the same
-    /// `UIView` instances rather than recreating them. Views in the current
-    /// stack that don't appear in `desired` are removed (both from the
-    /// arranged list and from the view hierarchy).
-    private func syncArrangedSubviews(_ stack: UIStackView, _ desired: [UIView]) {
-        let desiredIDs = Set(desired.map { ObjectIdentifier($0) })
-        // 1. Remove arranged subviews no longer wanted.
-        for view in stack.arrangedSubviews where !desiredIDs.contains(ObjectIdentifier(view)) {
-            stack.removeArrangedSubview(view)
-            view.removeFromSuperview()
-        }
-        // 2. Reorder / insert so the arranged list matches `desired` element-wise.
-        for (i, target) in desired.enumerated() {
-            let arranged = stack.arrangedSubviews
-            if arranged.indices.contains(i), arranged[i] === target {
-                continue
-            }
-            if arranged.contains(where: { $0 === target }) {
-                stack.removeArrangedSubview(target)
-            }
-            stack.insertArrangedSubview(target, at: min(i, stack.arrangedSubviews.count))
-        }
-    }
-
     // MARK: - Actions & state transitions
 
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
@@ -936,7 +894,6 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate {
             }
             if let collectionView = current as? UICollectionView {
                 if let cell = cellRef, let indexPath = collectionView.indexPath(for: cell) {
-                    // Scoped invalidation: only this cell re-measures.
                     let context = UICollectionViewLayoutInvalidationContext()
                     context.invalidateItems(at: [indexPath])
                     collectionView.collectionViewLayout.invalidateLayout(with: context)
@@ -956,36 +913,299 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate {
     }
 }
 
+// MARK: - ReplyToRowView (replaces replyToRow UIStackView)
+
+private final class ReplyToRowView: UIView, ManualLayoutMeasurable, TimelineHeightProviding {
+    private let icon = UIImageView(image: UIImage(named: "fa-reply"))
+    private let label = UILabel()
+    private static let iconSize: CGFloat = 12
+    private static let spacing: CGFloat = 4
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        icon.tintColor = .secondaryLabel
+        icon.contentMode = .scaleAspectFit
+        addSubview(icon)
+
+        label.font = .preferredFont(forTextStyle: .caption1)
+        label.textColor = .secondaryLabel
+        label.adjustsFontForContentSizeCategory = true
+        label.numberOfLines = 0
+        addSubview(label)
+    }
+    required init?(coder: NSCoder) { fatalError("init(coder:) not supported") }
+
+    func configure(text: String) {
+        label.text = text
+        invalidateIntrinsicContentSize()
+        setNeedsLayout()
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        let s = Self.iconSize
+        let labelX = s + Self.spacing
+        let labelW = max(bounds.width - labelX, 0)
+        let labelH = label.textRect(
+            forBounds: CGRect(x: 0, y: 0, width: labelW, height: .greatestFiniteMagnitude),
+            limitedToNumberOfLines: 0
+        ).height
+        icon.frame = CGRect(x: 0, y: (ceil(labelH) - s) / 2, width: s, height: s)
+        label.frame = CGRect(x: labelX, y: 0, width: labelW, height: ceil(labelH))
+    }
+
+    override func sizeThatFits(_ size: CGSize) -> CGSize {
+        CGSize(width: size.width, height: timelineHeight(for: size.width) ?? 0)
+    }
+
+    func timelineHeight(for width: CGFloat) -> CGFloat? {
+        guard width > 0, width.isFinite else { return nil }
+        let labelW = max(width - Self.iconSize - Self.spacing, 0)
+        let labelH = label.textRect(
+            forBounds: CGRect(x: 0, y: 0, width: labelW, height: .greatestFiniteMagnitude),
+            limitedToNumberOfLines: 0
+        ).height
+        return ceil(max(labelH, Self.iconSize))
+    }
+
+    override func systemLayoutSizeFitting(
+        _ targetSize: CGSize,
+        withHorizontalFittingPriority horizontalFittingPriority: UILayoutPriority,
+        verticalFittingPriority: UILayoutPriority
+    ) -> CGSize {
+        sizeThatFits(CGSize(width: targetSize.width, height: .greatestFiniteMagnitude))
+    }
+}
+
+// MARK: - SourceChannelRowView (replaces sourceChannelRow UIStackView)
+
+private final class SourceChannelRowView: UIView, ManualLayoutMeasurable, TimelineHeightProviding {
+    private let icon = UIImageView(image: UIImage(named: "fa-tv"))
+    private let label = UILabel()
+    private static let iconSize: CGFloat = 12
+    private static let spacing: CGFloat = 4
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        icon.tintColor = .secondaryLabel
+        icon.contentMode = .scaleAspectFit
+        addSubview(icon)
+
+        label.font = .preferredFont(forTextStyle: .footnote)
+        label.textColor = .secondaryLabel
+        label.adjustsFontForContentSizeCategory = true
+        label.numberOfLines = 0
+        addSubview(label)
+    }
+    required init?(coder: NSCoder) { fatalError("init(coder:) not supported") }
+
+    func configure(text: String) {
+        label.text = text
+        invalidateIntrinsicContentSize()
+        setNeedsLayout()
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        let s = Self.iconSize
+        let labelX = s + Self.spacing
+        let labelW = max(bounds.width - labelX, 0)
+        let labelH = label.textRect(
+            forBounds: CGRect(x: 0, y: 0, width: labelW, height: .greatestFiniteMagnitude),
+            limitedToNumberOfLines: 0
+        ).height
+        icon.frame = CGRect(x: 0, y: (ceil(labelH) - s) / 2, width: s, height: s)
+        label.frame = CGRect(x: labelX, y: 0, width: labelW, height: ceil(labelH))
+    }
+
+    override func sizeThatFits(_ size: CGSize) -> CGSize {
+        CGSize(width: size.width, height: timelineHeight(for: size.width) ?? 0)
+    }
+
+    func timelineHeight(for width: CGFloat) -> CGFloat? {
+        guard width > 0, width.isFinite else { return nil }
+        let labelW = max(width - Self.iconSize - Self.spacing, 0)
+        let labelH = label.textRect(
+            forBounds: CGRect(x: 0, y: 0, width: labelW, height: .greatestFiniteMagnitude),
+            limitedToNumberOfLines: 0
+        ).height
+        return ceil(max(labelH, Self.iconSize))
+    }
+
+    override func systemLayoutSizeFitting(
+        _ targetSize: CGSize,
+        withHorizontalFittingPriority horizontalFittingPriority: UILayoutPriority,
+        verticalFittingPriority: UILayoutPriority
+    ) -> CGSize {
+        sizeThatFits(CGSize(width: targetSize.width, height: .greatestFiniteMagnitude))
+    }
+}
+
+// MARK: - ActionsContainerView (replaces PaddingContainerView for actions with 4pt top padding)
+
+private final class ActionsContainerView: UIView, ManualLayoutMeasurable, TimelineHeightProviding {
+    var content: UIView? {
+        didSet {
+            oldValue?.removeFromSuperview()
+            if let c = content { addSubview(c) }
+            setNeedsLayout()
+        }
+    }
+    private static let topPadding: CGFloat = 4
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        guard let content else { return }
+        content.frame = CGRect(
+            x: 0,
+            y: Self.topPadding,
+            width: bounds.width,
+            height: max(bounds.height - Self.topPadding, 0)
+        )
+    }
+
+    override func sizeThatFits(_ size: CGSize) -> CGSize {
+        CGSize(width: size.width, height: timelineHeight(for: size.width) ?? 0)
+    }
+
+    func timelineHeight(for width: CGFloat) -> CGFloat? {
+        guard width > 0, width.isFinite else { return nil }
+        guard let content else { return .zero }
+        let h = childHeight(of: content, for: width)
+        return ceil(h + Self.topPadding)
+    }
+
+    override func systemLayoutSizeFitting(
+        _ targetSize: CGSize,
+        withHorizontalFittingPriority horizontalFittingPriority: UILayoutPriority,
+        verticalFittingPriority: UILayoutPriority
+    ) -> CGSize {
+        sizeThatFits(CGSize(width: targetSize.width, height: .greatestFiniteMagnitude))
+    }
+}
+
+// MARK: - QuotesContainerView (replaces quotesContainer + quotesStack)
+
+private final class QuotesContainerView: UIView, ManualLayoutMeasurable, TimelineHeightProviding {
+    private var managedChildren: [UIView] = []
+    private static let padding: CGFloat = 8
+    private static let spacing: CGFloat = 8
+    private static let dividerHeight: CGFloat = 1.0 / UIScreen.main.scale
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        layer.cornerRadius = 16
+        layer.borderWidth = 1
+        layer.borderColor = UIColor.separator.cgColor
+    }
+    required init?(coder: NSCoder) { fatalError("init(coder:) not supported") }
+
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        layer.borderColor = UIColor.separator.cgColor
+    }
+
+    func setChildren(_ desired: [UIView]) {
+        syncManagedSubviews(parent: self, current: &managedChildren, desired: desired)
+        invalidateIntrinsicContentSize()
+        setNeedsLayout()
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        let p = Self.padding
+        let contentWidth = max(bounds.width - p * 2, 0)
+        var y = p
+        for (i, child) in managedChildren.enumerated() {
+            // Dividers get fixed height
+            if child.backgroundColor == .separator && !(child is StatusUIKitView) {
+                child.frame = CGRect(x: p, y: y, width: contentWidth, height: Self.dividerHeight)
+                y += Self.dividerHeight
+            } else {
+                let h = childHeight(of: child, for: contentWidth)
+                child.frame = CGRect(x: p, y: y, width: contentWidth, height: h)
+                y += h
+            }
+            if i < managedChildren.count - 1 {
+                y += Self.spacing
+            }
+        }
+    }
+
+    override func sizeThatFits(_ size: CGSize) -> CGSize {
+        CGSize(width: size.width, height: timelineHeight(for: size.width) ?? 0)
+    }
+
+    func timelineHeight(for width: CGFloat) -> CGFloat? {
+        guard width > 0, width.isFinite else { return nil }
+        let p = Self.padding
+        let contentWidth = max(width - p * 2, 0)
+        var h = p
+        for (i, child) in managedChildren.enumerated() {
+            if child.backgroundColor == .separator && !(child is StatusUIKitView) {
+                h += Self.dividerHeight
+            } else {
+                h += childHeight(of: child, for: contentWidth)
+            }
+            if i < managedChildren.count - 1 {
+                h += Self.spacing
+            }
+        }
+        h += p
+        return ceil(h)
+    }
+
+    override func systemLayoutSizeFitting(
+        _ targetSize: CGSize,
+        withHorizontalFittingPriority horizontalFittingPriority: UILayoutPriority,
+        verticalFittingPriority: UILayoutPriority
+    ) -> CGSize {
+        sizeThatFits(CGSize(width: targetSize.width, height: .greatestFiniteMagnitude))
+    }
+}
+
 // MARK: - Parent container
 
 /// Wraps a `StatusUIKitView` with SwiftUI-equivalent leading line overlay and
-/// an 8pt trailing spacer. Pooled per `StatusUIKitView` instance so parent
-/// chains reuse these wrappers across configures.
-private final class ParentContainerView: UIView {
+/// an 8pt trailing spacer.
+private final class ParentContainerView: UIView, ManualLayoutMeasurable, TimelineHeightProviding {
     let child = StatusUIKitView()
     private let line = UIView()
+    private static let bottomSpacing: CGFloat = 8
 
     override init(frame: CGRect) {
         super.init(frame: frame)
         line.backgroundColor = .separator
-        line.translatesAutoresizingMaskIntoConstraints = false
-        child.translatesAutoresizingMaskIntoConstraints = false
         addSubview(line)
         addSubview(child)
-        NSLayoutConstraint.activate([
-            child.topAnchor.constraint(equalTo: topAnchor),
-            child.leadingAnchor.constraint(equalTo: leadingAnchor),
-            child.trailingAnchor.constraint(equalTo: trailingAnchor),
-            // 8pt spacer after child
-            child.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -8),
-
-            line.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 22),
-            line.widthAnchor.constraint(equalToConstant: 1),
-            line.topAnchor.constraint(equalTo: topAnchor, constant: 44),
-            line.bottomAnchor.constraint(equalTo: bottomAnchor),
-        ])
     }
     required init?(coder: NSCoder) { fatalError("init(coder:) not supported") }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        let w = bounds.width
+        let childH = max(bounds.height - Self.bottomSpacing, 0)
+        child.frame = CGRect(x: 0, y: 0, width: w, height: childH)
+        line.frame = CGRect(x: 22, y: 44, width: 1, height: max(bounds.height - 44, 0))
+    }
+
+    override func sizeThatFits(_ size: CGSize) -> CGSize {
+        CGSize(width: size.width, height: timelineHeight(for: size.width) ?? 0)
+    }
+
+    func timelineHeight(for width: CGFloat) -> CGFloat? {
+        guard width > 0, width.isFinite else { return nil }
+        let childH = childHeight(of: child, for: width)
+        return ceil(childH + Self.bottomSpacing)
+    }
+
+    override func systemLayoutSizeFitting(
+        _ targetSize: CGSize,
+        withHorizontalFittingPriority horizontalFittingPriority: UILayoutPriority,
+        verticalFittingPriority: UILayoutPriority
+    ) -> CGSize {
+        sizeThatFits(CGSize(width: targetSize.width, height: .greatestFiniteMagnitude))
+    }
 
     func prepareForFitting(width: CGFloat) {
         bounds = CGRect(x: bounds.minX, y: bounds.minY, width: width, height: bounds.height)

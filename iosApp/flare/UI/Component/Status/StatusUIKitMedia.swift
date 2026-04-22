@@ -257,7 +257,7 @@ final class MediaUIView: UIView {
 // MARK: - StatusMediaUIView
 // Mirrors StatusMediaView.swift: grid + sensitive blur overlay + alt-text
 // buttons. Up to 3 columns; rows arranged so items fill available width.
-final class StatusMediaUIView: UIView {
+final class StatusMediaUIView: UIView, TimelineHeightProviding {
     var onMediaClicked: ((UiMedia, Int) -> Void)?
 
     private let grid = UIView()
@@ -360,6 +360,11 @@ final class StatusMediaUIView: UIView {
             width: horizontalFittingPriority == .required ? targetSize.width : UIView.noIntrinsicMetric,
             height: ceil(gridHeight(for: width))
         )
+    }
+
+    func timelineHeight(for width: CGFloat) -> CGFloat? {
+        guard width > 0, width.isFinite else { return nil }
+        return ceil(gridHeight(for: width))
     }
 
     func configure(data: [UiMedia], sensitive: Bool, cornerRadius: CGFloat, singleFollowsImageAspect: Bool) {
@@ -745,7 +750,7 @@ private final class AltTextButton: UIButton {
 // MARK: - StatusMediaContentUIView
 // Mirrors StatusMediaContent in StatusView.swift. When `showMedia` (appearance)
 // is off, renders a show-media button; after tapping, shows the grid.
-final class StatusMediaContentUIView: UIView {
+final class StatusMediaContentUIView: UIView, TimelineHeightProviding {
     var onMediaClicked: ((UiMedia, Int) -> Void)?
 
     private let grid = StatusMediaUIView()
@@ -823,15 +828,9 @@ final class StatusMediaContentUIView: UIView {
             guard bounds.width > 0 else {
                 return CGSize(width: UIView.noIntrinsicMetric, height: UIView.noIntrinsicMetric)
             }
-            let size = grid.systemLayoutSizeFitting(
-                CGSize(width: bounds.width, height: UIView.layoutFittingCompressedSize.height),
-                withHorizontalFittingPriority: .required,
-                verticalFittingPriority: .fittingSizeLevel
-            )
-            return CGSize(width: UIView.noIntrinsicMetric, height: ceil(size.height))
+            return CGSize(width: UIView.noIntrinsicMetric, height: timelineHeight(for: bounds.width) ?? UIView.noIntrinsicMetric)
         }
-        let size = showButton.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize)
-        return CGSize(width: UIView.noIntrinsicMetric, height: ceil(size.height))
+        return CGSize(width: UIView.noIntrinsicMetric, height: timelineHeight(for: bounds.width) ?? UIView.noIntrinsicMetric)
     }
 
     override func systemLayoutSizeFitting(
@@ -843,15 +842,19 @@ final class StatusMediaContentUIView: UIView {
             let width = targetSize.width.isFinite && targetSize.width > 0
                 ? targetSize.width
                 : (bounds.width > 0 ? bounds.width : 0)
-            let size = grid.systemLayoutSizeFitting(
-                CGSize(width: width, height: UIView.layoutFittingCompressedSize.height),
-                withHorizontalFittingPriority: width > 0 ? .required : .fittingSizeLevel,
-                verticalFittingPriority: verticalFittingPriority
-            )
-            return CGSize(width: targetSize.width, height: ceil(size.height))
+            return CGSize(width: targetSize.width, height: timelineHeight(for: width) ?? 0)
+        }
+        return CGSize(width: targetSize.width, height: timelineHeight(for: targetSize.width) ?? 0)
+    }
+
+    func timelineHeight(for width: CGFloat) -> CGFloat? {
+        if !grid.isHidden {
+            guard width > 0, width.isFinite else { return nil }
+            return grid.timelineHeight(for: width)
         }
         let size = showButton.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize)
-        return CGSize(width: targetSize.width, height: ceil(size.height))
+        guard size.height > 0, size.height.isFinite else { return nil }
+        return ceil(size.height)
     }
 
     func configure(

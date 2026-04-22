@@ -10,7 +10,6 @@ final class AvatarUIView: UIView {
         v.contentMode = .scaleAspectFill
         v.clipsToBounds = true
         v.backgroundColor = .secondarySystemBackground
-        v.translatesAutoresizingMaskIntoConstraints = false
         return v
     }()
 
@@ -21,12 +20,6 @@ final class AvatarUIView: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         addSubview(imageView)
-        NSLayoutConstraint.activate([
-            imageView.topAnchor.constraint(equalTo: topAnchor),
-            imageView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            imageView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            imageView.bottomAnchor.constraint(equalTo: bottomAnchor),
-        ])
     }
     required init(coder: NSCoder) { fatalError("init(coder:) not supported") }
 
@@ -40,12 +33,17 @@ final class AvatarUIView: UIView {
 
     override func layoutSubviews() {
         super.layoutSubviews()
+        imageView.frame = bounds
         switch avatarShape {
         case .circle:
             imageView.layer.cornerRadius = min(bounds.width, bounds.height) / 2
         default:
             imageView.layer.cornerRadius = 8
         }
+    }
+
+    override func sizeThatFits(_ size: CGSize) -> CGSize {
+        size
     }
 }
 

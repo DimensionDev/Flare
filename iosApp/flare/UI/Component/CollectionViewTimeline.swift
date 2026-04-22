@@ -353,10 +353,13 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
     }()
     private var heightCache: [String: CGFloat] = [:]
     private var heightCacheKeysByItemID: [String: Set<String>] = [:]
+    private var pendingHeightCorrections: [String: CGFloat] = [:]
+    private var isHeightCorrectionFlushScheduled = false
 
     private func clearAllHeightCache() {
         heightCache.removeAll(keepingCapacity: true)
         heightCacheKeysByItemID.removeAll(keepingCapacity: true)
+        pendingHeightCorrections.removeAll(keepingCapacity: true)
     }
 
     private func heightCacheWidthKey(for width: CGFloat) -> Int {
@@ -398,17 +401,36 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
     ) {
         guard columnCount > 1, width > 1, height.isFinite else { return }
         let key = timelineHeightCacheKey(itemID: itemID, renderHash: renderHash, width: width)
-        let correctedHeight = max(ceil(height), 120)
-        guard correctedHeight > (heightCache[key] ?? 0) + 1 else { return }
+        let correctedHeight = max(ceil(height), 1)
+        if let cachedHeight = heightCache[key],
+           abs(cachedHeight - correctedHeight) <= 1 {
+            return
+        }
 
         heightCache[key] = correctedHeight
         heightCacheKeysByItemID[itemID, default: []].insert(key)
+        pendingHeightCorrections[key] = correctedHeight
+        scheduleHeightCorrectionFlush()
+    }
 
-        Task { @MainActor [weak self] in
-            guard let self, self.isViewLoaded else { return }
-            self.collectionView.collectionViewLayout.invalidateLayout()
-            self.collectionView.performBatchUpdates(nil)
+    private func scheduleHeightCorrectionFlush() {
+        guard !isHeightCorrectionFlushScheduled else { return }
+        isHeightCorrectionFlushScheduled = true
+        DispatchQueue.main.async { [weak self] in
+            self?.flushPendingHeightCorrections()
         }
+    }
+
+    private func flushPendingHeightCorrections() {
+        isHeightCorrectionFlushScheduled = false
+        guard isViewLoaded, !pendingHeightCorrections.isEmpty else {
+            pendingHeightCorrections.removeAll(keepingCapacity: true)
+            return
+        }
+
+        pendingHeightCorrections.removeAll(keepingCapacity: true)
+        collectionView.collectionViewLayout.invalidateLayout()
+        collectionView.performBatchUpdates(nil)
     }
 
     private func applyLayoutForColumnCount() {
@@ -493,7 +515,7 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
 
     private func configureCell(_ cell: TimelineUIKitCollectionViewCell, itemID: String) {
         if itemID.hasPrefix(Self.accessoryPrefix) {
-            cell.setHostedView(accessoryItemMap[itemID]?.view)
+            cell.setHostedView(accessoryItemMap[itemID]?.view, usesWaterfallLayout: columnCount > 1)
         } else if itemID.hasPrefix(Self.timelinePrefix) {
             if let index = itemIndexMap[itemID] {
                 configureTimelineCell(cell, itemID: itemID, index: index)
@@ -505,19 +527,19 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
             configurePlaceholderCell(cell, index: index)
         } else if itemID == Self.emptyID {
             cell.onPreferredHeightChanged = nil
-            cell.setHostedView(CenteredCellContentView(content: ListEmptyUIView()))
+            cell.setHostedView(CenteredCellContentView(content: ListEmptyUIView()), usesWaterfallLayout: columnCount > 1)
         } else if itemID == Self.errorID {
             cell.onPreferredHeightChanged = nil
             configureErrorCell(cell)
         } else if itemID == Self.footerLoadingID {
             cell.onPreferredHeightChanged = nil
-            cell.setHostedView(makeLoadingFooterView())
+            cell.setHostedView(makeLoadingFooterView(), usesWaterfallLayout: columnCount > 1)
         } else if itemID == Self.footerErrorID {
             cell.onPreferredHeightChanged = nil
             configureFooterErrorCell(cell)
         } else if itemID == Self.footerEndID {
             cell.onPreferredHeightChanged = nil
-            cell.setHostedView(makeTextFooterView(text: String(localized: "end_of_list")))
+            cell.setHostedView(makeTextFooterView(text: String(localized: "end_of_list")), usesWaterfallLayout: columnCount > 1)
         }
     }
 
@@ -575,7 +597,7 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
         errorView.configure(error: errorState.error) {
             errorState.onRetry()
         }
-        cell.setHostedView(CenteredCellContentView(content: errorView))
+        cell.setHostedView(CenteredCellContentView(content: errorView), usesWaterfallLayout: columnCount > 1)
     }
 
     private func configureFooterErrorCell(_ cell: TimelineUIKitCollectionViewCell) {
@@ -586,7 +608,10 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
             errorView.configure(error: error.error) {
                 success.retry()
             }
-            cell.setHostedView(UIView.padding(errorView, insets: UIEdgeInsets(top: 16, left: 16, bottom: 16, right: 16)))
+            cell.setHostedView(
+                UIView.padding(errorView, insets: UIEdgeInsets(top: 16, left: 16, bottom: 16, right: 16)),
+                usesWaterfallLayout: columnCount > 1
+            )
         }
     }
 
@@ -911,10 +936,11 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
             return
         }
 
-        // Reconfigure existing items so cells pick up data changes (e.g. like count)
-        let existing = dataSource.snapshot().itemIdentifiers
-        let newSet = Set(snapshot.itemIdentifiers)
-        let toReconfigure = existing.filter { newSet.contains($0) }
+        // Reconfigure only existing timeline items whose render payload changed.
+        let existing = Set(dataSource.snapshot().itemIdentifiers)
+        let toReconfigure = itemIDs.filter {
+            existing.contains($0) && lastRenderHashMap[$0] != newRenderHashMap[$0]
+        }
         if !toReconfigure.isEmpty {
             snapshot.reconfigureItems(toReconfigure)
         }
@@ -1462,6 +1488,7 @@ private final class TimelineUIKitCollectionViewCell: UICollectionViewCell {
     private var lastAppearance: TimelineUIKitAppearance?
     private var lastDetailStatusKey: String?
     private var lastPreferredHeightReport: (widthKey: Int, height: CGFloat)?
+    private var usesWaterfallLayout = false
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -1482,6 +1509,7 @@ private final class TimelineUIKitCollectionViewCell: UICollectionViewCell {
         resetRenderSignature()
         onPreferredHeightChanged = nil
         lastPreferredHeightReport = nil
+        usesWaterfallLayout = false
     }
 
     func autoplayCandidates(prefix: String) -> [TimelineVideoAutoplayCandidate] {
@@ -1548,22 +1576,42 @@ private final class TimelineUIKitCollectionViewCell: UICollectionViewCell {
             // parent routed a new openURL handler through.
             timelineView.onOpenURL = openURL
         }
-        setHostedView(timelineCard)
+        setHostedView(timelineCard, usesWaterfallLayout: isMultipleColumn)
     }
 
     override func layoutSubviews() {
         super.layoutSubviews()
+        hostedView?.frame = contentView.bounds
         reportPreferredHeightIfNeeded()
+    }
+
+    override func preferredLayoutAttributesFitting(_ layoutAttributes: UICollectionViewLayoutAttributes) -> UICollectionViewLayoutAttributes {
+        guard !usesWaterfallLayout else {
+            return layoutAttributes
+        }
+        guard hostedView != nil else {
+            return super.preferredLayoutAttributesFitting(layoutAttributes)
+        }
+
+        let fitted = layoutAttributes.copy() as! UICollectionViewLayoutAttributes
+        let width = fitted.size.width > 1 ? fitted.size.width : contentView.bounds.width
+        guard width > 1, width.isFinite else {
+            return super.preferredLayoutAttributesFitting(layoutAttributes)
+        }
+
+        fitted.size = CGSize(width: width, height: measuredHostedHeight(width: width))
+        return fitted
     }
 
     func configurePlaceholder(index: Int, totalCount: Int, appearance: TimelineUIKitAppearance, isMultipleColumn: Bool) {
         placeholderCard.isPlainTimelineDisplayMode = appearance.isPlainTimelineDisplayMode
         placeholderCard.isMultipleColumn = isMultipleColumn
         placeholderCard.configure(index: index, totalCount: totalCount)
-        setHostedView(placeholderCard)
+        setHostedView(placeholderCard, usesWaterfallLayout: isMultipleColumn)
     }
 
-    func setHostedView(_ view: UIView?) {
+    func setHostedView(_ view: UIView?, usesWaterfallLayout: Bool = false) {
+        self.usesWaterfallLayout = usesWaterfallLayout
         contentConfiguration = nil
         backgroundConfiguration = .clear()
         if hostedView === view {
@@ -1595,6 +1643,21 @@ private final class TimelineUIKitCollectionViewCell: UICollectionViewCell {
         lastPreferredHeightReport = nil
     }
 
+    private func measuredHostedHeight(width: CGFloat) -> CGFloat {
+        guard let hostedView else { return 0 }
+
+        if hostedView === timelineCard {
+            timelineView.prepareForFitting(width: max(width - 32, 1))
+        }
+
+        contentView.bounds = CGRect(x: 0, y: 0, width: width, height: contentView.bounds.height)
+        hostedView.bounds = CGRect(x: 0, y: 0, width: width, height: hostedView.bounds.height)
+        hostedView.setNeedsLayout()
+
+        let height = childHeight(of: hostedView, for: width)
+        return max(ceil(height) + 1, 1)
+    }
+
     private func reportPreferredHeightIfNeeded() {
         guard hostedView === timelineCard,
               let onPreferredHeightChanged,
@@ -1603,21 +1666,8 @@ private final class TimelineUIKitCollectionViewCell: UICollectionViewCell {
         }
 
         let width = contentView.bounds.width
-        timelineView.prepareForFitting(width: max(width - 32, 1))
-        timelineCard.bounds = CGRect(
-            x: 0,
-            y: 0,
-            width: width,
-            height: UIView.layoutFittingCompressedSize.height
-        )
-        timelineCard.setNeedsLayout()
-        let size = timelineCard.systemLayoutSizeFitting(
-            CGSize(width: width, height: UIView.layoutFittingCompressedSize.height),
-            withHorizontalFittingPriority: .required,
-            verticalFittingPriority: .fittingSizeLevel
-        )
-        let preferredHeight = ceil(size.height) + 1
-        guard preferredHeight > contentView.bounds.height + 1 else { return }
+        let preferredHeight = measuredHostedHeight(width: width)
+        guard abs(preferredHeight - contentView.bounds.height) > 1 else { return }
 
         let widthKey = Int((width * UIScreen.main.scale).rounded(.toNearestOrAwayFromZero))
         if let lastPreferredHeightReport,

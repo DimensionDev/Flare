@@ -1,8 +1,8 @@
 import UIKit
 import KotlinSharedUI
 
-/// UIKit port of `TimelineView`.
-final class TimelineUIView: UIView {
+/// UIKit port of `TimelineView`. Manual frame-based layout.
+final class TimelineUIView: UIView, ManualLayoutMeasurable, TimelineHeightProviding {
     var appearance = StatusUIKitAppearance(settings: AppearanceSettings.companion.Default) {
         didSet { if !isBatchConfiguring, data != nil { rebuild() } }
     }
@@ -44,14 +44,9 @@ final class TimelineUIView: UIView {
         }
     }
 
-    private let stack: UIStackView = {
-        let stack = UIStackView()
-        stack.axis = .vertical
-        stack.alignment = .fill
-        stack.spacing = 8
-        stack.translatesAutoresizingMaskIntoConstraints = false
-        return stack
-    }()
+    private var managedChildren: [UIView] = []
+    private static let spacing: CGFloat = 8
+
     private let messageView = StatusTopMessageUIView()
     private lazy var messageContainer = MutablePaddingContainerView(content: messageView)
     private let feedView = FeedUIView()
@@ -61,18 +56,58 @@ final class TimelineUIView: UIView {
 
     override init(frame: CGRect) {
         super.init(frame: frame)
-        addSubview(stack)
-        NSLayoutConstraint.activate([
-            stack.topAnchor.constraint(equalTo: topAnchor),
-            stack.leadingAnchor.constraint(equalTo: leadingAnchor),
-            stack.trailingAnchor.constraint(equalTo: trailingAnchor),
-            stack.bottomAnchor.constraint(equalTo: bottomAnchor),
-        ])
     }
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) not supported")
     }
+
+    // MARK: - Layout
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        let w = bounds.width
+        manualLayoutVertical(views: managedChildren, x: 0, y: 0, width: w, spacing: Self.spacing)
+    }
+
+    override func sizeThatFits(_ size: CGSize) -> CGSize {
+        CGSize(width: size.width, height: timelineHeight(for: size.width) ?? 0)
+    }
+
+    func timelineHeight(for width: CGFloat) -> CGFloat? {
+        guard width > 0, width.isFinite else { return nil }
+        return ceil(manualHeightForVertical(views: managedChildren, width: width, spacing: Self.spacing))
+    }
+
+    override func systemLayoutSizeFitting(
+        _ targetSize: CGSize,
+        withHorizontalFittingPriority horizontalFittingPriority: UILayoutPriority,
+        verticalFittingPriority: UILayoutPriority
+    ) -> CGSize {
+        guard horizontalFittingPriority == .required,
+              targetSize.width.isFinite,
+              targetSize.width > 0 else {
+            let w = bounds.width > 0 ? bounds.width : targetSize.width
+            if w > 0, w.isFinite {
+                prepareForFitting(width: w)
+                return sizeThatFits(CGSize(width: w, height: .greatestFiniteMagnitude))
+            }
+            return super.systemLayoutSizeFitting(
+                targetSize,
+                withHorizontalFittingPriority: horizontalFittingPriority,
+                verticalFittingPriority: verticalFittingPriority
+            )
+        }
+        prepareForFitting(width: targetSize.width)
+        return sizeThatFits(CGSize(width: targetSize.width, height: .greatestFiniteMagnitude))
+    }
+
+    override var intrinsicContentSize: CGSize {
+        guard bounds.width > 0 else { return CGSize(width: UIView.noIntrinsicMetric, height: UIView.noIntrinsicMetric) }
+        return sizeThatFits(CGSize(width: bounds.width, height: .greatestFiniteMagnitude))
+    }
+
+    // MARK: - Configure
 
     func configure(data: UiTimelineV2) {
         let signature = RenderSignature(
@@ -120,7 +155,7 @@ final class TimelineUIView: UIView {
 
     private func rebuild() {
         guard let data else {
-            stack.flareSyncArrangedSubviews([])
+            syncManagedSubviews(parent: self, current: &managedChildren, desired: [])
             return
         }
 
@@ -172,7 +207,7 @@ final class TimelineUIView: UIView {
             configureMessage(message, topMessageOnly: true)
             desired.append(messageContainer)
         }
-        stack.flareSyncArrangedSubviews(desired)
+        syncManagedSubviews(parent: self, current: &managedChildren, desired: desired)
         invalidateIntrinsicContentSize()
         setNeedsLayout()
     }
@@ -187,7 +222,7 @@ final class TimelineUIView: UIView {
     func prepareForDeferredReuseCleanup() {
         data = nil
         lastRenderSignature = nil
-        stack.flareSyncArrangedSubviews([])
+        syncManagedSubviews(parent: self, current: &managedChildren, desired: [])
         performDeferredPoolCleanup()
         invalidateIntrinsicContentSize()
         setNeedsLayout()
@@ -339,38 +374,10 @@ final class TimelineUIView: UIView {
             return feedView.estimatedHeight(for: width)
         case .post(let post) where !post.quote.isEmpty:
             prepareForFitting(width: width)
-            let size = stack.systemLayoutSizeFitting(
-                CGSize(width: width, height: UIView.layoutFittingCompressedSize.height),
-                withHorizontalFittingPriority: .required,
-                verticalFittingPriority: .fittingSizeLevel
-            )
-            return ceil(size.height) + 1
+            return sizeThatFits(CGSize(width: width, height: .greatestFiniteMagnitude)).height + 1
         default:
             return nil
         }
-    }
-
-    override func systemLayoutSizeFitting(
-        _ targetSize: CGSize,
-        withHorizontalFittingPriority horizontalFittingPriority: UILayoutPriority,
-        verticalFittingPriority: UILayoutPriority
-    ) -> CGSize {
-        guard horizontalFittingPriority == .required,
-              targetSize.width.isFinite,
-              targetSize.width > 0 else {
-            return super.systemLayoutSizeFitting(
-                targetSize,
-                withHorizontalFittingPriority: horizontalFittingPriority,
-                verticalFittingPriority: verticalFittingPriority
-            )
-        }
-        prepareForFitting(width: targetSize.width)
-        let size = stack.systemLayoutSizeFitting(
-            CGSize(width: targetSize.width, height: UIView.layoutFittingCompressedSize.height),
-            withHorizontalFittingPriority: .required,
-            verticalFittingPriority: verticalFittingPriority
-        )
-        return CGSize(width: targetSize.width, height: ceil(size.height))
     }
 
     func autoplayCandidates(prefix: String) -> [TimelineVideoAutoplayCandidate] {
@@ -381,68 +388,95 @@ final class TimelineUIView: UIView {
 
 }
 
+// MARK: - Padding containers (manual layout)
+
 extension UIView {
     static func padding(_ content: UIView, insets: UIEdgeInsets) -> UIView {
         PaddingContainerView(content: content, insets: insets)
     }
 }
 
-private final class PaddingContainerView: UIView {
+private final class PaddingContainerView: UIView, ManualLayoutMeasurable, TimelineHeightProviding {
+    private let content: UIView
+    private let insets: UIEdgeInsets
+
     init(content: UIView, insets: UIEdgeInsets) {
+        self.content = content
+        self.insets = insets
         super.init(frame: .zero)
-        content.translatesAutoresizingMaskIntoConstraints = false
         addSubview(content)
-        NSLayoutConstraint.activate([
-            content.topAnchor.constraint(equalTo: topAnchor, constant: insets.top),
-            content.leadingAnchor.constraint(equalTo: leadingAnchor, constant: insets.left),
-            content.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -insets.right),
-            content.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -insets.bottom),
-        ])
     }
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) not supported")
     }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        content.frame = bounds.inset(by: insets)
+    }
+
+    override func sizeThatFits(_ size: CGSize) -> CGSize {
+        CGSize(width: size.width, height: timelineHeight(for: size.width) ?? 0)
+    }
+
+    func timelineHeight(for width: CGFloat) -> CGFloat? {
+        guard width > 0, width.isFinite else { return nil }
+        let innerWidth = max(width - insets.left - insets.right, 0)
+        let innerH = childHeight(of: content, for: innerWidth)
+        return ceil(innerH + insets.top + insets.bottom)
+    }
+
+    override func systemLayoutSizeFitting(
+        _ targetSize: CGSize,
+        withHorizontalFittingPriority horizontalFittingPriority: UILayoutPriority,
+        verticalFittingPriority: UILayoutPriority
+    ) -> CGSize {
+        sizeThatFits(CGSize(width: targetSize.width, height: .greatestFiniteMagnitude))
+    }
 }
 
-private final class MutablePaddingContainerView: UIView {
+private final class MutablePaddingContainerView: UIView, ManualLayoutMeasurable, TimelineHeightProviding {
     var insets: UIEdgeInsets = .zero {
-        didSet { applyInsets() }
+        didSet {
+            invalidateIntrinsicContentSize()
+            setNeedsLayout()
+        }
     }
 
     private let content: UIView
-    private var topConstraint: NSLayoutConstraint!
-    private var leadingConstraint: NSLayoutConstraint!
-    private var trailingConstraint: NSLayoutConstraint!
-    private var bottomConstraint: NSLayoutConstraint!
 
     init(content: UIView) {
         self.content = content
         super.init(frame: .zero)
-        content.translatesAutoresizingMaskIntoConstraints = false
         addSubview(content)
-        topConstraint = content.topAnchor.constraint(equalTo: topAnchor)
-        leadingConstraint = content.leadingAnchor.constraint(equalTo: leadingAnchor)
-        trailingConstraint = content.trailingAnchor.constraint(equalTo: trailingAnchor)
-        bottomConstraint = content.bottomAnchor.constraint(equalTo: bottomAnchor)
-        NSLayoutConstraint.activate([
-            topConstraint,
-            leadingConstraint,
-            trailingConstraint,
-            bottomConstraint,
-        ])
     }
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) not supported")
     }
 
-    private func applyInsets() {
-        topConstraint.constant = insets.top
-        leadingConstraint.constant = insets.left
-        trailingConstraint.constant = -insets.right
-        bottomConstraint.constant = -insets.bottom
-        invalidateIntrinsicContentSize()
-        setNeedsLayout()
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        content.frame = bounds.inset(by: insets)
+    }
+
+    override func sizeThatFits(_ size: CGSize) -> CGSize {
+        CGSize(width: size.width, height: timelineHeight(for: size.width) ?? 0)
+    }
+
+    func timelineHeight(for width: CGFloat) -> CGFloat? {
+        guard width > 0, width.isFinite else { return nil }
+        let innerWidth = max(width - insets.left - insets.right, 0)
+        let innerH = childHeight(of: content, for: innerWidth)
+        return ceil(innerH + insets.top + insets.bottom)
+    }
+
+    override func systemLayoutSizeFitting(
+        _ targetSize: CGSize,
+        withHorizontalFittingPriority horizontalFittingPriority: UILayoutPriority,
+        verticalFittingPriority: UILayoutPriority
+    ) -> CGSize {
+        sizeThatFits(CGSize(width: targetSize.width, height: .greatestFiniteMagnitude))
     }
 }

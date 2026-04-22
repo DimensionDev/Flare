@@ -3,7 +3,9 @@ import UIKit
 /// UIKit port of `TimelinePlaceholderView` + the `UserLoadingView` row inside
 /// it. SwiftUI uses `.redacted(reason: .placeholder)`; we approximate the
 /// effect with flat grey bars so the cell size matches a real row.
-final class TimelinePlaceholderUIView: UIView {
+final class TimelinePlaceholderUIView: UIView, TimelineHeightProviding {
+    private static let measuredHeight: CGFloat = 44 + 12 + 96
+
     private let avatar: UIView = {
         let v = UIView()
         v.backgroundColor = .tertiarySystemFill
@@ -60,4 +62,8 @@ final class TimelinePlaceholderUIView: UIView {
         ])
     }
     required init?(coder: NSCoder) { fatalError("init(coder:) not supported") }
+
+    func timelineHeight(for width: CGFloat) -> CGFloat? {
+        Self.measuredHeight
+    }
 }

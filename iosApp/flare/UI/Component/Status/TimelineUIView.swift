@@ -362,6 +362,8 @@ final class TimelineUIView: UIView, ManualLayoutMeasurable, TimelineHeightProvid
             feedView.prepareForFitting(width: width)
         case .post:
             statusView.prepareForFitting(width: width)
+        case .userList:
+            userListView.prepareForFitting(width: width)
         default:
             break
         }
@@ -373,6 +375,9 @@ final class TimelineUIView: UIView, ManualLayoutMeasurable, TimelineHeightProvid
         case .feed:
             return feedView.estimatedHeight(for: width)
         case .post(let post) where !post.quote.isEmpty:
+            prepareForFitting(width: width)
+            return sizeThatFits(CGSize(width: width, height: .greatestFiniteMagnitude)).height + 1
+        case .userList:
             prepareForFitting(width: width)
             return sizeThatFits(CGSize(width: width, height: .greatestFiniteMagnitude)).height + 1
         default:

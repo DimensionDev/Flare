@@ -727,6 +727,13 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
         collectionView.contentOffset.y + collectionView.adjustedContentInset.top
     }
 
+    private var allowsScrollAnchorRestoration: Bool {
+        !collectionView.isTracking &&
+            !collectionView.isDragging &&
+            !collectionView.isDecelerating &&
+            !scrollingState.isScrolling
+    }
+
     private func clampedContentOffsetY(_ offsetY: CGFloat) -> CGFloat {
         let minY = -collectionView.adjustedContentInset.top
         let maxY = max(
@@ -743,6 +750,7 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
     private func captureScrollAnchor() -> ScrollAnchor? {
         guard isViewLoaded,
               currentSuccess != nil,
+              allowsScrollAnchorRestoration,
               collectionView.bounds.height > 1 else {
             return nil
         }
@@ -783,6 +791,7 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
     private func restoreScrollAnchorIfNeeded(_ anchor: ScrollAnchor?) -> Bool {
         guard let anchor,
               isViewLoaded,
+              allowsScrollAnchorRestoration,
               let indexPath = dataSource.indexPath(for: anchor.itemID) else {
             return false
         }
@@ -870,7 +879,9 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
 
         let newSignature = SnapshotSignature(accessoryIDs: accessoryIDs, itemIDs: itemIDs, footerIDs: footerIDs)
         let previousSignature = lastAppliedSignature
-        let scrollAnchor = previousSignature != nil && previousSignature?.itemIDs != newSignature.itemIDs
+        let scrollAnchor = previousSignature != nil &&
+            previousSignature?.itemIDs != newSignature.itemIDs &&
+            allowsScrollAnchorRestoration
             ? captureScrollAnchor()
             : nil
 
@@ -944,6 +955,7 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
 
     private func restorePendingScrollAnchorIfNeeded() {
         guard !isRestoringScrollAnchor,
+              allowsScrollAnchorRestoration,
               let pendingScrollAnchor else {
             return
         }
@@ -1399,6 +1411,7 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
 
     func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
         scrollingState.isScrolling = true
+        pendingScrollAnchor = nil
         autoplaySelectionTask?.cancel()
         postRefreshPoolCleanupTask?.cancel()
         deferredPoolCleanupTask?.cancel()

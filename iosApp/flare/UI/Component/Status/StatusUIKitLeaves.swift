@@ -125,30 +125,19 @@ final class StatusVisibilityImageView: UIImageView {
 
 // MARK: - TranslateStatusStateView
 // Mirrors TranslateStatusComponent.swift — language icon + state icon/spinner.
-final class TranslateStatusStateView: UIStackView {
+final class TranslateStatusStateView: UIView, ManualLayoutMeasurable, TimelineHeightProviding {
     private let langIcon = UIImageView(image: UIImage(named: "fa-language"))
     private let stateIcon = UIImageView()
     private let spinner = UIActivityIndicatorView(style: .medium)
 
     override init(frame: CGRect) {
         super.init(frame: frame)
-        axis = .horizontal
-        spacing = 4
-        alignment = .center
         tintColor = .secondaryLabel
         langIcon.contentMode = .scaleAspectFit
         stateIcon.contentMode = .scaleAspectFit
-        addArrangedSubview(langIcon)
-        addArrangedSubview(stateIcon)
-        addArrangedSubview(spinner)
-        NSLayoutConstraint.activate([
-            langIcon.widthAnchor.constraint(equalToConstant: 16),
-            langIcon.heightAnchor.constraint(equalToConstant: 16),
-            stateIcon.widthAnchor.constraint(equalToConstant: 12),
-            stateIcon.heightAnchor.constraint(equalToConstant: 12),
-            spinner.widthAnchor.constraint(equalToConstant: 12),
-            spinner.heightAnchor.constraint(equalToConstant: 12),
-        ])
+        addSubview(langIcon)
+        addSubview(stateIcon)
+        addSubview(spinner)
     }
     required init(coder: NSCoder) { fatalError("init(coder:) not supported") }
 
@@ -169,12 +158,48 @@ final class TranslateStatusStateView: UIStackView {
             spinner.isHidden = true
         }
     }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        let size = preferredSize()
+        let y = max((bounds.height - size.height) / 2, 0)
+        langIcon.frame = CGRect(x: 0, y: y, width: 16, height: 16)
+        let stateFrame = CGRect(x: 20, y: y + 2, width: 12, height: 12)
+        stateIcon.frame = stateIcon.isHidden ? .zero : stateFrame
+        spinner.frame = spinner.isHidden ? .zero : stateFrame
+    }
+
+    override func sizeThatFits(_ size: CGSize) -> CGSize {
+        preferredSize()
+    }
+
+    override var intrinsicContentSize: CGSize {
+        preferredSize()
+    }
+
+    override func systemLayoutSizeFitting(
+        _ targetSize: CGSize,
+        withHorizontalFittingPriority horizontalFittingPriority: UILayoutPriority,
+        verticalFittingPriority: UILayoutPriority
+    ) -> CGSize {
+        preferredSize()
+    }
+
+    func timelineHeight(for width: CGFloat) -> CGFloat? {
+        16
+    }
+
+    private func preferredSize() -> CGSize {
+        let hasState = !stateIcon.isHidden || !spinner.isHidden
+        return CGSize(width: hasState ? 32 : 16, height: 16)
+    }
 }
 
 // MARK: - UserOnelineUIView / UserCompatUIView
 // Mirror UserOnelineView.swift / UserCompatView.swift.
 
-final class UserOnelineUIView: UIStackView {
+final class UserOnelineUIView: UIView, ManualLayoutMeasurable, TimelineHeightProviding {
+    private let showsAvatar: Bool
     let avatar = AvatarUIView()
     let name = RichTextUIView()
     let handleLabel: UILabel = {
@@ -186,17 +211,13 @@ final class UserOnelineUIView: UIStackView {
         l.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         return l
     }()
-    private let nameHandleRow = UIStackView()
-    private let flexibleSpace = UIView()
-    private let trailingContainer = UIStackView()
+    private var trailingView: UIView?
 
     var onTapped: (() -> Void)?
 
     init(showAvatar: Bool) {
+        self.showsAvatar = showAvatar
         super.init(frame: .zero)
-        axis = .horizontal
-        spacing = 8
-        alignment = .center
         name.lineLimit = 1
         name.setContentHuggingPriority(.required, for: .horizontal)
         name.setContentCompressionResistancePriority(UILayoutPriority(900), for: .horizontal)
@@ -204,59 +225,143 @@ final class UserOnelineUIView: UIStackView {
         handleLabel.setContentCompressionResistancePriority(UILayoutPriority(100), for: .horizontal)
 
         if showAvatar {
-            addArrangedSubview(avatar)
-            NSLayoutConstraint.activate([
-                avatar.widthAnchor.constraint(equalToConstant: 20),
-                avatar.heightAnchor.constraint(equalToConstant: 20),
-            ])
+            addSubview(avatar)
             let tap = UITapGestureRecognizer(target: self, action: #selector(onTapFired))
             avatar.isUserInteractionEnabled = true
             avatar.addGestureRecognizer(tap)
         }
+        addSubview(name)
+        addSubview(handleLabel)
 
-        nameHandleRow.axis = .horizontal
-        nameHandleRow.alignment = .firstBaseline
-        nameHandleRow.spacing = 4
-        nameHandleRow.setContentHuggingPriority(.required, for: .horizontal)
-        nameHandleRow.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
-        nameHandleRow.addArrangedSubview(name)
-        nameHandleRow.addArrangedSubview(handleLabel)
-        addArrangedSubview(nameHandleRow)
-
-        flexibleSpace.setContentHuggingPriority(.defaultLow, for: .horizontal)
-        flexibleSpace.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
-        addArrangedSubview(flexibleSpace)
-
-        trailingContainer.axis = .horizontal
-        trailingContainer.spacing = 8
-        trailingContainer.alignment = .center
-        trailingContainer.setContentHuggingPriority(.required, for: .horizontal)
-        trailingContainer.setContentCompressionResistancePriority(.required, for: .horizontal)
-        addArrangedSubview(trailingContainer)
+        let nameTap = UITapGestureRecognizer(target: self, action: #selector(onTapFired))
+        name.isUserInteractionEnabled = true
+        name.addGestureRecognizer(nameTap)
+        let handleTap = UITapGestureRecognizer(target: self, action: #selector(onTapFired))
+        handleLabel.isUserInteractionEnabled = true
+        handleLabel.addGestureRecognizer(handleTap)
     }
     required init(coder: NSCoder) { fatalError("init(coder:) not supported") }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        layout(width: bounds.width, assignFrames: true)
+    }
+
+    override func sizeThatFits(_ size: CGSize) -> CGSize {
+        CGSize(width: size.width, height: timelineHeight(for: size.width) ?? 0)
+    }
+
+    override var intrinsicContentSize: CGSize {
+        CGSize(width: UIView.noIntrinsicMetric, height: preferredSingleLineHeight(width: bounds.width))
+    }
+
+    func timelineHeight(for width: CGFloat) -> CGFloat? {
+        guard width.isFinite else { return nil }
+        return preferredSingleLineHeight(width: width)
+    }
+
+    private func preferredSingleLineHeight(width: CGFloat) -> CGFloat {
+        let nameHeight = UIFont.preferredFont(forTextStyle: .body).lineHeight
+        let handleHeight = handleLabel.font?.lineHeight ?? 0
+        let fittingWidth = width > 0 ? width : 1
+        let trailingHeight = trailingView.map { $0.isHidden ? 0 : childHeight(of: $0, for: fittingWidth) } ?? 0
+        let avatarHeight: CGFloat = showsAvatar ? 20 : 0
+        return ceil(max(avatarHeight, nameHeight, handleHeight, trailingHeight))
+    }
+
+    override func systemLayoutSizeFitting(
+        _ targetSize: CGSize,
+        withHorizontalFittingPriority horizontalFittingPriority: UILayoutPriority,
+        verticalFittingPriority: UILayoutPriority
+    ) -> CGSize {
+        let width = targetSize.width > 0 && targetSize.width.isFinite
+            ? targetSize.width
+            : (bounds.width > 0 ? bounds.width : 1)
+        return CGSize(width: horizontalFittingPriority == .required ? width : UIView.noIntrinsicMetric,
+                      height: preferredSingleLineHeight(width: width))
+    }
 
     func configure(data: UiProfile, trailing: UIView?, onClicked: (() -> Void)?) {
         avatar.set(url: data.avatar)
         name.text = data.name
         handleLabel.text = data.handle.canonical
-        if let trailing = trailing {
+        if trailingView !== trailing {
+            trailingView?.removeFromSuperview()
+            trailingView = trailing
+            if let trailing {
+                addSubview(trailing)
+            }
+        }
+        if let trailing {
             trailing.setContentHuggingPriority(.required, for: .horizontal)
             trailing.setContentCompressionResistancePriority(.required, for: .horizontal)
-            trailingContainer.flareSyncArrangedSubviews([trailing])
-        } else {
-            trailingContainer.flareSyncArrangedSubviews([])
         }
         onTapped = onClicked
-        if onClicked != nil {
-            let tap = UITapGestureRecognizer(target: self, action: #selector(onTapFired))
-            nameHandleRow.isUserInteractionEnabled = true
-            nameHandleRow.gestureRecognizers?.forEach { nameHandleRow.removeGestureRecognizer($0) }
-            nameHandleRow.addGestureRecognizer(tap)
-        }
+        invalidateIntrinsicContentSize()
+        setNeedsLayout()
     }
 
     @objc private func onTapFired() { onTapped?() }
+
+    @discardableResult
+    private func layout(width: CGFloat, assignFrames: Bool) -> CGFloat {
+        let rowHeight = preferredSingleLineHeight(width: width)
+        let rowWidth = max(width, 1)
+        let edgeSpacing: CGFloat = 8
+        let nameSpacing: CGFloat = 4
+
+        var leadingX: CGFloat = 0
+        if showsAvatar {
+            if assignFrames {
+                avatar.frame = CGRect(x: 0, y: (rowHeight - 20) / 2, width: 20, height: 20).integral
+            }
+            leadingX = 20 + edgeSpacing
+        }
+
+        let trailingSize = preferredTrailingSize(height: rowHeight)
+        if let trailing = trailingView, !trailing.isHidden, assignFrames {
+            trailing.frame = CGRect(
+                x: max(rowWidth - trailingSize.width, leadingX),
+                y: (rowHeight - trailingSize.height) / 2,
+                width: trailingSize.width,
+                height: trailingSize.height
+            ).integral
+        }
+
+        let trailingReserved = trailingSize.width > 0 ? trailingSize.width + edgeSpacing : 0
+        let available = max(rowWidth - leadingX - trailingReserved, 1)
+        let handleIntrinsic = handleLabel.sizeThatFits(CGSize(width: CGFloat.greatestFiniteMagnitude, height: rowHeight)).width
+        let nameIntrinsic = childWidth(of: name, for: rowHeight)
+        let handleWidth: CGFloat
+        let nameWidth: CGFloat
+        if nameIntrinsic + nameSpacing + handleIntrinsic <= available {
+            nameWidth = nameIntrinsic
+            handleWidth = handleIntrinsic
+        } else {
+            handleWidth = min(handleIntrinsic, max(available * 0.45, 0))
+            nameWidth = max(available - handleWidth - (handleWidth > 0 ? nameSpacing : 0), 1)
+        }
+
+        if assignFrames {
+            let nameHeight = childHeight(of: name, for: max(nameWidth, 1))
+            name.frame = CGRect(x: leadingX, y: (rowHeight - nameHeight) / 2, width: max(nameWidth, 1), height: nameHeight).integral
+            handleLabel.frame = CGRect(
+                x: name.frame.maxX + (handleWidth > 0 ? nameSpacing : 0),
+                y: (rowHeight - (handleLabel.font?.lineHeight ?? rowHeight)) / 2,
+                width: handleWidth,
+                height: handleLabel.font?.lineHeight ?? rowHeight
+            ).integral
+        }
+
+        return rowHeight
+    }
+
+    private func preferredTrailingSize(height: CGFloat) -> CGSize {
+        guard let trailing = trailingView, !trailing.isHidden else { return .zero }
+        let trailingHeight = max(childHeight(of: trailing, for: CGFloat.greatestFiniteMagnitude), 1)
+        let trailingWidth = childWidth(of: trailing, for: max(height, trailingHeight))
+        return CGSize(width: trailingWidth, height: trailingHeight)
+    }
 }
 
 final class UserCompatUIView: UIStackView {
@@ -345,7 +450,7 @@ final class UserCompatUIView: UIStackView {
 // MARK: - StatusTopEndView
 // Mirrors `topEndContent` in StatusView.swift — visibility + translation state
 // + optional platform logo + timestamp in an HStack.
-final class StatusTopEndView: UIStackView {
+final class StatusTopEndView: UIView, ManualLayoutMeasurable, TimelineHeightProviding {
     private let visibility = StatusVisibilityImageView()
     private let translation = TranslateStatusStateView()
     private let platformLogo = UIImageView()
@@ -353,9 +458,6 @@ final class StatusTopEndView: UIStackView {
 
     override init(frame: CGRect) {
         super.init(frame: frame)
-        axis = .horizontal
-        spacing = 8
-        alignment = .center
         setContentHuggingPriority(.required, for: .horizontal)
         setContentCompressionResistancePriority(.required, for: .horizontal)
         platformLogo.contentMode = .scaleAspectFit
@@ -364,18 +466,61 @@ final class StatusTopEndView: UIStackView {
         platformLogo.setContentCompressionResistancePriority(.required, for: .horizontal)
         translation.setContentHuggingPriority(.required, for: .horizontal)
         translation.setContentCompressionResistancePriority(.required, for: .horizontal)
-        NSLayoutConstraint.activate([
-            platformLogo.widthAnchor.constraint(equalToConstant: 14),
-            platformLogo.heightAnchor.constraint(equalToConstant: 14),
-            visibility.widthAnchor.constraint(equalToConstant: 14),
-            visibility.heightAnchor.constraint(equalToConstant: 14),
-        ])
-        addArrangedSubview(visibility)
-        addArrangedSubview(translation)
-        addArrangedSubview(platformLogo)
-        addArrangedSubview(time)
+        addSubview(visibility)
+        addSubview(translation)
+        addSubview(platformLogo)
+        addSubview(time)
     }
     required init(coder: NSCoder) { fatalError("init(coder:) not supported") }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        layout(width: bounds.width, assignFrames: true)
+    }
+
+    override func sizeThatFits(_ size: CGSize) -> CGSize {
+        let preferred = preferredSize()
+        let width = size.width.isFinite && size.width < CGFloat.greatestFiniteMagnitude / 2 ? size.width : preferred.width
+        return CGSize(width: width, height: preferred.height)
+    }
+
+    override var intrinsicContentSize: CGSize {
+        preferredSize()
+    }
+
+    func timelineHeight(for width: CGFloat) -> CGFloat? {
+        guard width.isFinite else { return nil }
+        return preferredSingleLineHeight()
+    }
+
+    private func preferredSingleLineHeight() -> CGFloat {
+        var height: CGFloat = 0
+        if !visibility.isHidden {
+            height = max(height, 14)
+        }
+        if !translation.isHidden {
+            height = max(height, 16)
+        }
+        if !platformLogo.isHidden {
+            height = max(height, 14)
+        }
+        if !time.isHidden {
+            height = max(height, time.font?.lineHeight ?? 0)
+        }
+        return ceil(height)
+    }
+
+    override func systemLayoutSizeFitting(
+        _ targetSize: CGSize,
+        withHorizontalFittingPriority horizontalFittingPriority: UILayoutPriority,
+        verticalFittingPriority: UILayoutPriority
+    ) -> CGSize {
+        let width = targetSize.width > 0 && targetSize.width.isFinite
+            ? targetSize.width
+            : preferredSize().width
+        return CGSize(width: horizontalFittingPriority == .required ? width : UIView.noIntrinsicMetric,
+                      height: preferredSingleLineHeight())
+    }
 
     func configure(
         post: UiTimelineV2.Post,
@@ -422,5 +567,51 @@ final class StatusTopEndView: UIStackView {
             time.fullTime = false
             time.set(data: post.createdAt)
         }
+        invalidateIntrinsicContentSize()
+        setNeedsLayout()
+    }
+
+    @discardableResult
+    private func layout(width: CGFloat, assignFrames: Bool) -> CGFloat {
+        let height = preferredSingleLineHeight()
+        let items = visibleItems()
+        var x: CGFloat = 0
+        for (index, item) in items.enumerated() {
+            let size = item.size
+            if assignFrames {
+                item.view.frame = CGRect(x: x, y: (height - size.height) / 2, width: size.width, height: size.height).integral
+            }
+            x += size.width
+            if index < items.count - 1 {
+                x += 8
+            }
+        }
+        return height
+    }
+
+    private func preferredSize() -> CGSize {
+        let items = visibleItems()
+        let width = items.reduce(CGFloat(0)) { partial, item in
+            partial + item.size.width
+        } + CGFloat(max(items.count - 1, 0)) * 8
+        return CGSize(width: ceil(width), height: preferredSingleLineHeight())
+    }
+
+    private func visibleItems() -> [(view: UIView, size: CGSize)] {
+        var items: [(UIView, CGSize)] = []
+        if !visibility.isHidden {
+            items.append((visibility, CGSize(width: 14, height: 14)))
+        }
+        if !translation.isHidden {
+            items.append((translation, translation.sizeThatFits(.zero)))
+        }
+        if !platformLogo.isHidden {
+            items.append((platformLogo, CGSize(width: 14, height: 14)))
+        }
+        if !time.isHidden {
+            let size = time.sizeThatFits(CGSize(width: CGFloat.greatestFiniteMagnitude, height: CGFloat.greatestFiniteMagnitude))
+            items.append((time, CGSize(width: ceil(size.width), height: ceil(size.height))))
+        }
+        return items
     }
 }

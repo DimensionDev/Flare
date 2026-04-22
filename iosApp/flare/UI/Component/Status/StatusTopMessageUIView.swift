@@ -1,9 +1,8 @@
 import UIKit
 import KotlinSharedUI
 
-/// UIKit port of StatusTopMessageView — HStack of icon + user name (rich text)
-/// + localized message text, with a tap gesture.
-final class StatusTopMessageUIView: UIStackView {
+/// UIKit port of StatusTopMessageView: icon + user name + localized text.
+final class StatusTopMessageUIView: UIView, ManualLayoutMeasurable, TimelineHeightProviding {
     var onOpenURL: ((URL) -> Void)? {
         didSet {
             nameView.onOpenURL = onOpenURL
@@ -29,23 +28,16 @@ final class StatusTopMessageUIView: UIStackView {
     }()
 
     private var topMessage: UiTimelineV2.Message?
+    private var topMessageOnly = false
 
     override init(frame: CGRect) {
         super.init(frame: frame)
-        axis = .horizontal
-        alignment = .center
-        spacing = 8
         nameView.setContentHuggingPriority(.required, for: .horizontal)
         nameView.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
 
-        addArrangedSubview(iconView)
-        addArrangedSubview(nameView)
-        addArrangedSubview(textLabel)
-
-        NSLayoutConstraint.activate([
-            iconView.widthAnchor.constraint(equalToConstant: 15),
-            iconView.heightAnchor.constraint(equalToConstant: 15),
-        ])
+        addSubview(iconView)
+        addSubview(nameView)
+        addSubview(textLabel)
 
         isUserInteractionEnabled = true
         let tap = UITapGestureRecognizer(target: self, action: #selector(onTapped))
@@ -57,6 +49,7 @@ final class StatusTopMessageUIView: UIStackView {
     /// the secondary color — the SwiftUI modifiers applied for inline headers.
     func configure(message: UiTimelineV2.Message, topMessageOnly: Bool) {
         self.topMessage = message
+        self.topMessageOnly = topMessageOnly
 
         iconView.image = UIImage(named: message.icon.imageName)
 
@@ -89,6 +82,118 @@ final class StatusTopMessageUIView: UIStackView {
         }
 
         iconView.tintColor = topMessageOnly ? .label : .secondaryLabel
+        invalidateIntrinsicContentSize()
+        setNeedsLayout()
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        layout(width: bounds.width, assignFrames: true)
+    }
+
+    override func sizeThatFits(_ size: CGSize) -> CGSize {
+        let fittingWidth = size.width.isFinite && size.width > 0 ? size.width : preferredWidth()
+        return CGSize(width: fittingWidth, height: timelineHeight(for: fittingWidth) ?? 0)
+    }
+
+    override var intrinsicContentSize: CGSize {
+        CGSize(width: UIView.noIntrinsicMetric, height: timelineHeight(for: bounds.width > 0 ? bounds.width : preferredWidth()) ?? UIView.noIntrinsicMetric)
+    }
+
+    override func systemLayoutSizeFitting(
+        _ targetSize: CGSize,
+        withHorizontalFittingPriority horizontalFittingPriority: UILayoutPriority,
+        verticalFittingPriority: UILayoutPriority
+    ) -> CGSize {
+        let width = targetSize.width > 0 && targetSize.width.isFinite
+            ? targetSize.width
+            : (bounds.width > 0 ? bounds.width : preferredWidth())
+        return CGSize(width: horizontalFittingPriority == .required ? width : preferredWidth(),
+                      height: timelineHeight(for: width) ?? 0)
+    }
+
+    func timelineHeight(for width: CGFloat) -> CGFloat? {
+        guard width.isFinite else { return nil }
+        return ceil(layout(width: max(width, 1), assignFrames: false))
+    }
+
+    @discardableResult
+    private func layout(width: CGFloat, assignFrames: Bool) -> CGFloat {
+        let iconSize = preferredIconSize()
+        let spacing: CGFloat = 8
+        var x: CGFloat = 0
+        let visibleName = !nameView.isHidden
+        let visibleText = !textLabel.isHidden
+        let contentHeight = preferredContentHeight(width: max(width, 1))
+
+        let iconFrame = CGRect(x: x, y: (contentHeight - iconSize) / 2, width: iconSize, height: iconSize)
+        if assignFrames { iconView.frame = iconFrame.integral }
+        x += iconSize
+
+        let remainingAfterIcon = max(width - x, 0)
+        let nameWidth: CGFloat
+        if visibleName {
+            x += spacing
+            nameWidth = preferredNameWidth(maxWidth: max(remainingAfterIcon - spacing, 1))
+            let nameHeight = childHeight(of: nameView, for: max(nameWidth, 1))
+            if assignFrames {
+                nameView.frame = CGRect(x: x, y: (contentHeight - nameHeight) / 2, width: nameWidth, height: nameHeight).integral
+            }
+            x += nameWidth
+        } else {
+            nameWidth = 0
+            if assignFrames { nameView.frame = .zero }
+        }
+
+        if visibleText {
+            if x > 0 { x += spacing }
+            let textWidth = max(width - x, 1)
+            let textHeight = textLabel.sizeThatFits(CGSize(width: textWidth, height: CGFloat.greatestFiniteMagnitude)).height
+            if assignFrames {
+                textLabel.frame = CGRect(x: x, y: (contentHeight - textHeight) / 2, width: textWidth, height: ceil(textHeight)).integral
+            }
+        } else if assignFrames {
+            textLabel.frame = .zero
+        }
+
+        return contentHeight
+    }
+
+    private func preferredContentHeight(width: CGFloat) -> CGFloat {
+        var height = preferredIconSize()
+        if !nameView.isHidden {
+            let nameWidth = preferredNameWidth(maxWidth: width)
+            height = max(height, childHeight(of: nameView, for: max(nameWidth, 1)))
+        }
+        if !textLabel.isHidden {
+            let textWidth = max(width - preferredIconSize() - 8 - (!nameView.isHidden ? preferredNameWidth(maxWidth: width) + 8 : 0), 1)
+            height = max(height, textLabel.sizeThatFits(CGSize(width: textWidth, height: CGFloat.greatestFiniteMagnitude)).height)
+        }
+        return ceil(height)
+    }
+
+    private func preferredWidth() -> CGFloat {
+        let iconSize = preferredIconSize()
+        var width = iconSize
+        if !nameView.isHidden {
+            width += 8 + preferredNameWidth(maxWidth: CGFloat.greatestFiniteMagnitude)
+        }
+        if !textLabel.isHidden {
+            width += 8 + textLabel.sizeThatFits(CGSize(width: CGFloat.greatestFiniteMagnitude, height: CGFloat.greatestFiniteMagnitude)).width
+        }
+        return ceil(width)
+    }
+
+    private func preferredNameWidth(maxWidth: CGFloat) -> CGFloat {
+        guard !nameView.isHidden else { return 0 }
+        let height = UIFont.preferredFont(forTextStyle: topMessageOnly ? .body : .caption1).lineHeight
+        let width = childWidth(of: nameView, for: height)
+        guard width > 0 else { return min(maxWidth, 1) }
+        return min(width, max(maxWidth, 1))
+    }
+
+    private func preferredIconSize() -> CGFloat {
+        UIFontMetrics(forTextStyle: topMessageOnly ? .body : .caption1).scaledValue(for: 15)
     }
 
     @objc private func onTapped() {

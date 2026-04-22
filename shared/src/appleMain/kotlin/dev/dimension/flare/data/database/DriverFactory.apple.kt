@@ -2,6 +2,8 @@ package dev.dimension.flare.data.database
 
 import androidx.room3.Room
 import androidx.room3.RoomDatabase
+import androidx.sqlite.SQLiteConnection
+import androidx.sqlite.execSQL
 import kotlinx.cinterop.ExperimentalForeignApi
 import platform.Foundation.NSApplicationSupportDirectory
 import platform.Foundation.NSFileManager
@@ -17,7 +19,11 @@ internal actual class DriverFactory {
         val dbFilePath = databaseDirPath() + "/$name"
         return Room.databaseBuilder<T>(
             name = dbFilePath,
-        )
+        ).addCallback(object : RoomDatabase.Callback() {
+            override suspend fun onOpen(connection: SQLiteConnection) {
+                connection.execSQL("PRAGMA journal_size_limit = 0")
+            }
+        })
     }
 
     @OptIn(ExperimentalForeignApi::class)
@@ -37,7 +43,11 @@ internal actual class DriverFactory {
 
     @OptIn(kotlinx.cinterop.ExperimentalForeignApi::class, kotlinx.cinterop.UnsafeNumber::class)
     internal fun iosDirPath(folder: String): String {
-        val paths = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, true)
+        val paths = NSSearchPathForDirectoriesInDomains(
+            NSApplicationSupportDirectory,
+            NSUserDomainMask,
+            true
+        )
         val documentsDirectory = paths[0] as String
 
         val databaseDirectory = "$documentsDirectory/$folder"

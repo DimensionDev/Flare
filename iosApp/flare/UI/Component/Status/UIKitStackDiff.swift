@@ -80,6 +80,15 @@ private func isValidFittingLength(_ value: CGFloat) -> Bool {
 
 /// Query a child view's preferred width for a given height.
 func childWidth(of view: UIView, for height: CGFloat) -> CGFloat {
+    if view is ManualLayoutMeasurable {
+        let size = view.sizeThatFits(CGSize(width: .greatestFiniteMagnitude, height: height))
+        if size.width > 0,
+           size.width.isFinite,
+           size.width != UIView.noIntrinsicMetric {
+            return ceil(size.width)
+        }
+    }
+
     let systemSize = view.systemLayoutSizeFitting(
         CGSize(width: UIView.layoutFittingCompressedSize.width, height: height),
         withHorizontalFittingPriority: .fittingSizeLevel,

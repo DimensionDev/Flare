@@ -112,13 +112,23 @@ internal fun RssDetailScreen(
                     }
                     IconButton(
                         onClick = {
+                            val title =
+                                when (val data = state.data) {
+                                    is UiState.Success -> data.data.title.takeIf { it.isNotBlank() }
+                                    else -> null
+                                }
+                                    ?: descriptionTitle?.takeIf { it.isNotBlank() }
                             val sendIntent =
                                 Intent().apply {
                                     action = Intent.ACTION_SEND
+                                    title?.let {
+                                        putExtra(Intent.EXTRA_TITLE, it)
+                                        putExtra(Intent.EXTRA_SUBJECT, it)
+                                    }
                                     putExtra(Intent.EXTRA_TEXT, url)
                                     type = "text/plain"
                                 }
-                            val shareIntent = Intent.createChooser(sendIntent, null)
+                            val shareIntent = Intent.createChooser(sendIntent, title)
                             context.startActivity(shareIntent)
                         },
                     ) {

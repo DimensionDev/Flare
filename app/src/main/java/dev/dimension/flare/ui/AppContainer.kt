@@ -1,8 +1,6 @@
 package dev.dimension.flare.ui
 
 import android.content.Context
-import android.content.Intent
-import android.content.pm.PackageManager
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -101,51 +99,16 @@ fun FlareApp(content: @Composable () -> Unit) {
     )
 }
 
-private fun getNonSelfBrowserPackageName(
-    context: Context,
-    url: String,
-): String? {
-    val packageName = context.packageName
-    val browserIntent = Intent(Intent.ACTION_VIEW, url.toUri())
-    val packageManager = context.packageManager
-    val list = packageManager.queryIntentActivities(browserIntent, PackageManager.MATCH_ALL)
-    val defaultResolveInfo = packageManager.resolveActivity(browserIntent, PackageManager.MATCH_DEFAULT_ONLY)
-    if (defaultResolveInfo != null && defaultResolveInfo.activityInfo.packageName != packageName) {
-        return defaultResolveInfo.activityInfo.packageName
-    }
-    for (info in list) {
-        if (info.activityInfo.packageName != packageName) {
-            return info.activityInfo.packageName
-        }
-    }
-
-    return null
-}
-
 private fun openInBrowser(
     context: Context,
     url: String,
     inAppBrowser: Boolean,
     fallbackOpenUrl: (String) -> Unit,
 ) {
-    val targetPackage = getNonSelfBrowserPackageName(context, url)
-    if (targetPackage != null) {
-        runCatching {
-            if (inAppBrowser) {
-                val builder = CustomTabsIntent.Builder()
-                val customTabsIntent = builder.build()
-                customTabsIntent.intent.setPackage(targetPackage)
-                customTabsIntent.launchUrl(context, url.toUri())
-            } else {
-                val intent = Intent(Intent.ACTION_VIEW, url.toUri())
-                intent.addCategory(Intent.CATEGORY_BROWSABLE)
-                intent.setPackage(targetPackage)
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                context.startActivity(intent)
-            }
-        }.onFailure {
-            fallbackOpenUrl.invoke(url)
-        }
+    if (inAppBrowser) {
+        val builder = CustomTabsIntent.Builder()
+        val customTabsIntent = builder.build()
+        customTabsIntent.launchUrl(context, url.toUri())
     } else {
         fallbackOpenUrl.invoke(url)
     }

@@ -1,5 +1,6 @@
 package dev.dimension.flare.ui.screen.home
 
+import android.content.ClipData
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
@@ -12,8 +13,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.ClipEntry
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
@@ -31,6 +34,7 @@ import dev.dimension.flare.ui.screen.settings.AccountItem
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 
 @Composable
@@ -40,7 +44,8 @@ internal fun DeepLinkAccountPickerModal(
     onNavigate: (Route) -> Unit,
     onDismissRequest: () -> Unit,
 ) {
-    val uriHandler = LocalUriHandler.current
+    val scope = rememberCoroutineScope()
+    val clipboard = LocalClipboard.current
     val accounts by producePresenter { presenter(data) }
     LazyColumn(
         contentPadding =
@@ -72,14 +77,15 @@ internal fun DeepLinkAccountPickerModal(
             )
         }
         item {
+            val text = stringResource(R.string.media_menu_copy_link)
             ListItem(
                 headlineContent = {
-                    Text(stringResource(R.string.deeplink_account_selection_browser))
+                    Text(stringResource(R.string.media_menu_copy_link))
                 },
                 leadingContent = {
                     FAIcon(
                         FontAwesomeIcons.Solid.Globe,
-                        contentDescription = stringResource(R.string.deeplink_account_selection_browser),
+                        contentDescription = stringResource(R.string.media_menu_copy_link),
                     )
                 },
                 modifier =
@@ -88,8 +94,18 @@ internal fun DeepLinkAccountPickerModal(
                             index = accounts.size,
                             totalCount = accounts.size + 1,
                         ).clickable {
-                            uriHandler.openUri(originalUrl)
-                            onDismissRequest.invoke()
+                            scope.launch {
+                                clipboard.setClipEntry(
+                                    ClipEntry(
+                                        clipData =
+                                            ClipData.newPlainText(
+                                                text,
+                                                originalUrl,
+                                            ),
+                                    ),
+                                )
+                                onDismissRequest.invoke()
+                            }
                         },
             )
         }

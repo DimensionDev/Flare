@@ -23,7 +23,8 @@ struct DeepLinkAccountPicker: View {
                 }
             }
             Button {
-                if let url = URL(string: originalUrl) {
+                let routeLink = DeeplinkRoute.OpenLinkDirectly(url: originalUrl).toUri()
+                if let url = URL(string: routeLink) {
                     openURL(url)
                 }
                 dismiss()

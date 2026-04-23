@@ -63,7 +63,9 @@ internal class PostHandler(
                             .statusDao()
                             .getWithReferences(postKey, dbAccountType)
                             .filterNotNull(),
-                        database.pagingTimelineDao().get(pagingKey, accountType = dbAccountType)
+                        database
+                            .pagingTimelineDao()
+                            .get(pagingKey, accountType = dbAccountType)
                             .filterNotNull(),
                     ),
                     translationDisplayFlow,

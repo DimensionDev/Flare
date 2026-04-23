@@ -16,10 +16,7 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.spec
 import dev.dimension.flare.ui.model.DeeplinkEvent
 import dev.dimension.flare.ui.presenter.PresenterBase
-import dev.dimension.flare.ui.route.APPSCHEMA
 import dev.dimension.flare.ui.route.DeeplinkRoute
-import io.ktor.http.URLProtocol
-import io.ktor.http.buildUrl
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.firstOrNull
@@ -135,12 +132,7 @@ public class DeepLinkPresenter(
                         } else {
                             val route =
                                 DeeplinkRoute.DeepLinkAccountPicker(
-                                    originalUrl =
-                                        buildUrl {
-                                            protocol = URLProtocol(APPSCHEMA, 0)
-                                            host = "OpenLinkDirectly"
-                                            parameters.append("url", url)
-                                        }.toString(),
+                                    originalUrl = url,
                                     data =
                                         matches
                                             .map {

@@ -1,27 +1,28 @@
 import UIKit
 import Kingfisher
 import KotlinSharedUI
+import SwiftUI
 
 /// UIKit port of `FeedView`.
 ///
-/// Layout mirrors the SwiftUI body exactly:
-///   VStack {
-///     HStack { icon · name · Spacer · translation · date }
-///     Text(title)?
-///     HStack { description (maxLines 5) · 72×72 media? }
-///   }
-final class FeedUIView: UIView {
+/// The rest of the UIKit timeline uses manual frame layout, so this view does
+/// the same to keep the date and thumbnail anchored to the full timeline width.
+final class FeedUIView: UIView, ManualLayoutMeasurable, TimelineHeightProviding {
     var onOpenURL: ((URL) -> Void)?
 
     private var data: UiTimelineV2.Feed?
+
+    private static let spacing: CGFloat = 8
+    private static let sourceIconSize: CGFloat = 20
+    private static let mediaSize: CGFloat = 72
 
     private let sourceIcon: UIImageView = {
         let v = UIImageView()
         v.contentMode = .scaleAspectFit
         v.clipsToBounds = true
-        v.translatesAutoresizingMaskIntoConstraints = false
         return v
     }()
+
     private let sourceName: UILabel = {
         let l = UILabel()
         l.font = .preferredFont(forTextStyle: .footnote)
@@ -29,7 +30,9 @@ final class FeedUIView: UIView {
         l.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         return l
     }()
+
     private let translation = TranslateStatusStateView()
+
     private let dateLabel: DateTimeUILabel = {
         let l = DateTimeUILabel()
         l.font = .preferredFont(forTextStyle: .footnote)
@@ -58,66 +61,35 @@ final class FeedUIView: UIView {
         v.contentMode = .scaleAspectFill
         v.clipsToBounds = true
         v.layer.cornerRadius = 8
-        v.translatesAutoresizingMaskIntoConstraints = false
         return v
     }()
 
-    private let headerRow = UIStackView()
-    private let bodyRow = UIStackView()
-    private let stack = UIStackView()
-
     override init(frame: CGRect) {
         super.init(frame: frame)
-        translatesAutoresizingMaskIntoConstraints = false
-
-        headerRow.axis = .horizontal
-        headerRow.alignment = .center
-        headerRow.spacing = 8
-        headerRow.addArrangedSubview(sourceIcon)
-        headerRow.addArrangedSubview(sourceName)
-        let spacer = UIView()
-        spacer.setContentHuggingPriority(.defaultLow, for: .horizontal)
-        headerRow.addArrangedSubview(spacer)
-        headerRow.addArrangedSubview(translation)
-        headerRow.addArrangedSubview(dateLabel)
-        NSLayoutConstraint.activate([
-            sourceIcon.widthAnchor.constraint(equalToConstant: 20),
-            sourceIcon.heightAnchor.constraint(equalToConstant: 20),
-        ])
-
-        bodyRow.axis = .horizontal
-        bodyRow.alignment = .top
-        bodyRow.spacing = 8
-        bodyRow.addArrangedSubview(descriptionLabel)
-        bodyRow.addArrangedSubview(mediaView)
-        NSLayoutConstraint.activate([
-            mediaView.widthAnchor.constraint(equalToConstant: 72),
-            mediaView.heightAnchor.constraint(equalToConstant: 72),
-        ])
-
-        stack.axis = .vertical
-        stack.spacing = 8
-        stack.alignment = .fill
-        stack.translatesAutoresizingMaskIntoConstraints = false
-        stack.addArrangedSubview(headerRow)
-        stack.addArrangedSubview(titleLabel)
-        stack.addArrangedSubview(bodyRow)
-        addSubview(stack)
-        NSLayoutConstraint.activate([
-            stack.topAnchor.constraint(equalTo: topAnchor),
-            stack.leadingAnchor.constraint(equalTo: leadingAnchor),
-            stack.trailingAnchor.constraint(equalTo: trailingAnchor),
-            stack.bottomAnchor.constraint(equalTo: bottomAnchor),
-        ])
+        addSubview(sourceIcon)
+        addSubview(sourceName)
+        addSubview(translation)
+        addSubview(dateLabel)
+        addSubview(titleLabel)
+        addSubview(descriptionLabel)
+        addSubview(mediaView)
 
         let tap = UITapGestureRecognizer(target: self, action: #selector(onTap))
         addGestureRecognizer(tap)
     }
+
     required init?(coder: NSCoder) { fatalError("init(coder:) not supported") }
 
     override func layoutSubviews() {
-        updatePreferredMaxLayoutWidths(for: bounds.width)
         super.layoutSubviews()
+        performLayout(width: bounds.width, assignFrames: true)
+    }
+
+    override var intrinsicContentSize: CGSize {
+        guard bounds.width > 0 else {
+            return CGSize(width: UIView.noIntrinsicMetric, height: UIView.noIntrinsicMetric)
+        }
+        return CGSize(width: UIView.noIntrinsicMetric, height: estimatedHeight(for: bounds.width))
     }
 
     override func systemLayoutSizeFitting(
@@ -126,59 +98,197 @@ final class FeedUIView: UIView {
         verticalFittingPriority: UILayoutPriority
     ) -> CGSize {
         let fittingWidth = targetSize.width > 0 ? targetSize.width : bounds.width
-        updatePreferredMaxLayoutWidths(for: fittingWidth)
-        return super.systemLayoutSizeFitting(
-            targetSize,
-            withHorizontalFittingPriority: horizontalFittingPriority,
-            verticalFittingPriority: verticalFittingPriority
-        )
+        guard fittingWidth > 0, fittingWidth.isFinite else {
+            return super.systemLayoutSizeFitting(
+                targetSize,
+                withHorizontalFittingPriority: horizontalFittingPriority,
+                verticalFittingPriority: verticalFittingPriority
+            )
+        }
+        return CGSize(width: fittingWidth, height: estimatedHeight(for: fittingWidth))
+    }
+
+    override func sizeThatFits(_ size: CGSize) -> CGSize {
+        CGSize(width: size.width, height: timelineHeight(for: size.width) ?? 0)
+    }
+
+    func timelineHeight(for width: CGFloat) -> CGFloat? {
+        guard width > 0, width.isFinite else { return nil }
+        return estimatedHeight(for: width)
     }
 
     func prepareForFitting(width: CGFloat) {
-        updatePreferredMaxLayoutWidths(for: width)
+        guard width > 0, width.isFinite else { return }
+        bounds = CGRect(x: bounds.minX, y: bounds.minY, width: width, height: bounds.height)
+        setNeedsLayout()
     }
 
     func estimatedHeight(for width: CGFloat) -> CGFloat {
-        guard width > 0 else { return 0 }
-        updatePreferredMaxLayoutWidths(for: width)
-
-        var rowHeights: [CGFloat] = [estimatedHeaderHeight(for: width)]
-
-        if !titleLabel.isHidden {
-            rowHeights.append(estimatedLabelHeight(titleLabel, width: width))
-        }
-
-        if !bodyRow.isHidden {
-            let descriptionHeight = descriptionLabel.isHidden
-                ? 0
-                : estimatedLabelHeight(descriptionLabel, width: descriptionLabel.preferredMaxLayoutWidth)
-            let mediaHeight: CGFloat = mediaView.isHidden ? 0 : 72
-            rowHeights.append(max(descriptionHeight, mediaHeight))
-        }
-
-        let contentHeight = rowHeights.reduce(0, +)
-        let spacing = CGFloat(max(rowHeights.count - 1, 0)) * stack.spacing
-        return ceil(contentHeight + spacing)
+        guard width > 0, width.isFinite else { return 0 }
+        return ceil(performLayout(width: width, assignFrames: false))
     }
 
-    private func estimatedHeaderHeight(for width: CGFloat) -> CGFloat {
-        var heights: [CGFloat] = [
-            estimatedLabelHeight(sourceName, width: sourceName.preferredMaxLayoutWidth)
-        ]
+    @discardableResult
+    private func performLayout(width: CGFloat, assignFrames: Bool) -> CGFloat {
+        guard width > 0, width.isFinite else { return 0 }
+
+        let header = headerMetrics(width: width)
+        var y: CGFloat = 0
+
+        if assignFrames {
+            if !sourceIcon.isHidden {
+                sourceIcon.frame = CGRect(
+                    x: 0,
+                    y: y + (header.height - Self.sourceIconSize) / 2,
+                    width: Self.sourceIconSize,
+                    height: Self.sourceIconSize
+                )
+            }
+            sourceName.frame = CGRect(
+                x: header.sourceNameX,
+                y: y + (header.height - header.sourceNameHeight) / 2,
+                width: header.sourceNameWidth,
+                height: header.sourceNameHeight
+            )
+            if !translation.isHidden {
+                translation.frame = CGRect(
+                    x: header.translationX,
+                    y: y + (header.height - header.translationSize.height) / 2,
+                    width: header.translationSize.width,
+                    height: header.translationSize.height
+                )
+            }
+            if !dateLabel.isHidden {
+                dateLabel.frame = CGRect(
+                    x: header.dateX,
+                    y: y + (header.height - header.dateSize.height) / 2,
+                    width: header.dateSize.width,
+                    height: header.dateSize.height
+                )
+            }
+        }
+        y += header.height
+
+        if !titleLabel.isHidden {
+            y += Self.spacing
+            let titleHeight = estimatedLabelHeight(titleLabel, width: width)
+            if assignFrames {
+                titleLabel.frame = CGRect(x: 0, y: y, width: width, height: titleHeight)
+            }
+            y += titleHeight
+        }
+
+        if hasVisibleBody {
+            y += Self.spacing
+            let descriptionWidth = bodyDescriptionWidth(for: width)
+            let descriptionHeight = descriptionLabel.isHidden
+                ? 0
+                : estimatedLabelHeight(descriptionLabel, width: descriptionWidth)
+            let bodyHeight = max(descriptionHeight, mediaView.isHidden ? 0 : Self.mediaSize)
+
+            if assignFrames {
+                if !descriptionLabel.isHidden {
+                    descriptionLabel.frame = CGRect(
+                        x: 0,
+                        y: y,
+                        width: descriptionWidth,
+                        height: descriptionHeight
+                    )
+                }
+                if !mediaView.isHidden {
+                    mediaView.frame = CGRect(
+                        x: max(width - Self.mediaSize, 0),
+                        y: y,
+                        width: Self.mediaSize,
+                        height: Self.mediaSize
+                    )
+                }
+            }
+            y += bodyHeight
+        }
+
+        return ceil(y)
+    }
+
+    private var hasVisibleBody: Bool {
+        !descriptionLabel.isHidden || !mediaView.isHidden
+    }
+
+    private struct HeaderMetrics {
+        let height: CGFloat
+        let sourceNameX: CGFloat
+        let sourceNameWidth: CGFloat
+        let sourceNameHeight: CGFloat
+        let translationX: CGFloat
+        let translationSize: CGSize
+        let dateX: CGFloat
+        let dateSize: CGSize
+    }
+
+    private func headerMetrics(width: CGFloat) -> HeaderMetrics {
+        var leadingX: CGFloat = 0
         if !sourceIcon.isHidden {
-            heights.append(20)
+            leadingX += Self.sourceIconSize + Self.spacing
         }
-        if !translation.isHidden {
-            heights.append(translation.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).height)
+
+        let dateSize = dateLabel.isHidden ? .zero : dateLabel.intrinsicContentSize.ceilPositive()
+        let translationSize = translation.isHidden
+            ? .zero
+            : translation.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).ceilPositive()
+
+        var trailingX = width
+        let dateX: CGFloat
+        if dateSize.width > 0 {
+            trailingX -= dateSize.width
+            dateX = trailingX
+        } else {
+            dateX = width
         }
-        if !dateLabel.isHidden {
-            heights.append(dateLabel.intrinsicContentSize.height)
+
+        let translationX: CGFloat
+        if translationSize.width > 0 {
+            if dateSize.width > 0 {
+                trailingX -= Self.spacing
+            }
+            trailingX -= translationSize.width
+            translationX = trailingX
+        } else {
+            translationX = trailingX
         }
-        return ceil(heights.max() ?? 0)
+
+        let hasTrailingContent = dateSize.width > 0 || translationSize.width > 0
+        let trailingSpacing = hasTrailingContent ? Self.spacing : 0
+        let sourceNameWidth = max(trailingX - leadingX - trailingSpacing, 1)
+        let sourceNameHeight = estimatedLabelHeight(sourceName, width: sourceNameWidth)
+        let height = max(
+            sourceIcon.isHidden ? 0 : Self.sourceIconSize,
+            sourceNameHeight,
+            translationSize.height,
+            dateSize.height
+        )
+
+        return HeaderMetrics(
+            height: ceil(height),
+            sourceNameX: leadingX,
+            sourceNameWidth: sourceNameWidth,
+            sourceNameHeight: sourceNameHeight,
+            translationX: translationX,
+            translationSize: translationSize,
+            dateX: dateX,
+            dateSize: dateSize
+        )
+    }
+
+    private func bodyDescriptionWidth(for width: CGFloat) -> CGFloat {
+        if mediaView.isHidden {
+            return width
+        }
+        return max(width - Self.mediaSize - Self.spacing, 1)
     }
 
     private func estimatedLabelHeight(_ label: UILabel, width: CGFloat) -> CGFloat {
-        guard !label.isHidden, width > 0, label.text?.isEmpty == false else { return 0 }
+        guard !label.isHidden, width > 0, width.isFinite, label.text?.isEmpty == false else { return 0 }
+        label.preferredMaxLayoutWidth = width
         let size = label.sizeThatFits(
             CGSize(width: width, height: CGFloat.greatestFiniteMagnitude)
         )
@@ -187,34 +297,6 @@ final class FeedUIView: UIView {
             return ceil(min(size.height, lineHeight * CGFloat(label.numberOfLines)))
         }
         return ceil(size.height)
-    }
-
-    private func updatePreferredMaxLayoutWidths(for width: CGFloat) {
-        guard width > 0 else { return }
-
-        titleLabel.preferredMaxLayoutWidth = width
-
-        let bodyTextWidth = mediaView.isHidden
-            ? width
-            : max(width - 72 - bodyRow.spacing, 0)
-        descriptionLabel.preferredMaxLayoutWidth = bodyTextWidth
-
-        var fixedHeaderWidth: CGFloat = 0
-        var headerItemCount = 2 // source name + flexible spacer
-        if !sourceIcon.isHidden {
-            fixedHeaderWidth += 20
-            headerItemCount += 1
-        }
-        if !translation.isHidden {
-            fixedHeaderWidth += translation.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).width
-            headerItemCount += 1
-        }
-        if !dateLabel.isHidden {
-            fixedHeaderWidth += dateLabel.intrinsicContentSize.width
-            headerItemCount += 1
-        }
-        let headerSpacing = CGFloat(max(headerItemCount - 1, 0)) * headerRow.spacing
-        sourceName.preferredMaxLayoutWidth = max(width - fixedHeaderWidth - headerSpacing, 1)
     }
 
     func configure(data: UiTimelineV2.Feed) {
@@ -268,19 +350,21 @@ final class FeedUIView: UIView {
             mediaView.image = nil
         }
 
-        bodyRow.isHidden = descriptionLabel.isHidden && mediaView.isHidden
-        updatePreferredMaxLayoutWidths(for: bounds.width)
         invalidateIntrinsicContentSize()
         setNeedsLayout()
     }
 
     @objc private func onTap() {
         guard let data = data else { return }
-        data.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: SwiftUI.OpenURLAction { [weak self] url in
+        data.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: OpenURLAction { [weak self] url in
             self?.onOpenURL?(url)
             return .handled
         })))
     }
 }
 
-import SwiftUI // OpenURLAction
+private extension CGSize {
+    func ceilPositive() -> CGSize {
+        CGSize(width: ceil(max(width, 0)), height: ceil(max(height, 0)))
+    }
+}

@@ -233,12 +233,6 @@ final class UserOnelineUIView: UIView, ManualLayoutMeasurable, TimelineHeightPro
         addSubview(name)
         addSubview(handleLabel)
 
-        let nameTap = UITapGestureRecognizer(target: self, action: #selector(onTapFired))
-        name.isUserInteractionEnabled = true
-        name.addGestureRecognizer(nameTap)
-        let handleTap = UITapGestureRecognizer(target: self, action: #selector(onTapFired))
-        handleLabel.isUserInteractionEnabled = true
-        handleLabel.addGestureRecognizer(handleTap)
     }
     required init(coder: NSCoder) { fatalError("init(coder:) not supported") }
 
@@ -331,15 +325,18 @@ final class UserOnelineUIView: UIView, ManualLayoutMeasurable, TimelineHeightPro
         let trailingReserved = trailingSize.width > 0 ? trailingSize.width + edgeSpacing : 0
         let available = max(rowWidth - leadingX - trailingReserved, 1)
         let handleIntrinsic = handleLabel.sizeThatFits(CGSize(width: CGFloat.greatestFiniteMagnitude, height: rowHeight)).width
-        let nameIntrinsic = childWidth(of: name, for: rowHeight)
+        let nameIntrinsic = name.singleLineContentSize().width
         let handleWidth: CGFloat
         let nameWidth: CGFloat
         if nameIntrinsic + nameSpacing + handleIntrinsic <= available {
             nameWidth = nameIntrinsic
             handleWidth = handleIntrinsic
+        } else if nameIntrinsic < available {
+            nameWidth = nameIntrinsic
+            handleWidth = max(available - nameWidth - nameSpacing, 0)
         } else {
-            handleWidth = min(handleIntrinsic, max(available * 0.45, 0))
-            nameWidth = max(available - handleWidth - (handleWidth > 0 ? nameSpacing : 0), 1)
+            nameWidth = available
+            handleWidth = 0
         }
 
         if assignFrames {

@@ -271,6 +271,43 @@ final class RichTextUIView: UIView {
         return CGSize(width: measuredWidth, height: height)
     }
 
+    func singleLineContentSize() -> CGSize {
+        measuredSingleLineStackSize()
+    }
+
+    private func measuredSingleLineStackSize() -> CGSize {
+        var height: CGFloat = 0
+        var measuredWidth: CGFloat = 0
+        let visibleSubviews = stack.arrangedSubviews.filter { !$0.isHidden }
+        for (index, subview) in visibleSubviews.enumerated() {
+            let size = singleLineSize(of: subview)
+            if index > 0 {
+                height += stack.spacing
+            }
+            height += ceil(size.height)
+            measuredWidth = max(measuredWidth, size.width)
+        }
+        return CGSize(width: measuredWidth, height: height)
+    }
+
+    private func singleLineSize(of view: UIView) -> CGSize {
+        if let provider = view as? RichTextSingleLineSizeProviding {
+            return provider.singleLineSize()
+        }
+        let size = view.sizeThatFits(
+            CGSize(width: Self.singleLineMeasurementWidth, height: CGFloat.greatestFiniteMagnitude)
+        )
+        if size.width > 0, size.width.isFinite, size.height > 0, size.height.isFinite {
+            return CGSize(width: ceil(size.width), height: ceil(size.height))
+        }
+        let fittingSize = view.systemLayoutSizeFitting(
+            UIView.layoutFittingCompressedSize,
+            withHorizontalFittingPriority: .fittingSizeLevel,
+            verticalFittingPriority: .fittingSizeLevel
+        )
+        return CGSize(width: ceil(max(fittingSize.width, 0)), height: ceil(max(fittingSize.height, 0)))
+    }
+
 //    override func layoutSubviews() {
 //        super.layoutSubviews()
 //        if abs(bounds.width - lastLayoutWidth) > 0.5 {
@@ -290,6 +327,8 @@ final class RichTextUIView: UIView {
     private var exposesHorizontalIntrinsicSize: Bool {
         lineLimit == 1
     }
+
+    fileprivate static let singleLineMeasurementWidth: CGFloat = 10_000
 
     private func updateHorizontalLayoutPolicy() {
         setContentHuggingPriority(exposesHorizontalIntrinsicSize ? .required : .defaultLow, for: .horizontal)
@@ -584,7 +623,11 @@ private protocol RichTextFittingPreparing: AnyObject {
     func prepareForFitting(width: CGFloat)
 }
 
-private final class RichTextLabel: UILabel, RichTextTextRendering, RichTextFittingPreparing {
+private protocol RichTextSingleLineSizeProviding: AnyObject {
+    func singleLineSize() -> CGSize
+}
+
+private final class RichTextLabel: UILabel, RichTextTextRendering, RichTextFittingPreparing, RichTextSingleLineSizeProviding {
     private var lastLayoutWidth: CGFloat = 0
     var renderedView: UIView { self }
 
@@ -631,6 +674,13 @@ private final class RichTextLabel: UILabel, RichTextTextRendering, RichTextFitti
         setNeedsLayout()
     }
 
+    func singleLineSize() -> CGSize {
+        let size = sizeThatFits(
+            CGSize(width: RichTextUIView.singleLineMeasurementWidth, height: CGFloat.greatestFiniteMagnitude)
+        )
+        return CGSize(width: ceil(max(size.width, 0)), height: ceil(max(size.height, 0)))
+    }
+
 //    override var intrinsicContentSize: CGSize {
 //        guard numberOfLines != 1, bounds.width > 0 else {
 //            return super.intrinsicContentSize
@@ -666,7 +716,7 @@ private final class RichTextLabel: UILabel, RichTextTextRendering, RichTextFitti
     }
 }
 
-private final class RichTextTextView: UITextView, UITextViewDelegate, RichTextTextRendering, RichTextFittingPreparing {
+private final class RichTextTextView: UITextView, UITextViewDelegate, RichTextTextRendering, RichTextFittingPreparing, RichTextSingleLineSizeProviding {
     private var linkHandler: ((URL) -> Void)?
     private var selectionEnabled = false
     private var lastLayoutWidth: CGFloat = 0
@@ -757,6 +807,20 @@ private final class RichTextTextView: UITextView, UITextViewDelegate, RichTextTe
         bounds = CGRect(x: bounds.minX, y: bounds.minY, width: width, height: bounds.height)
         invalidateIntrinsicContentSize()
         setNeedsLayout()
+    }
+
+    func singleLineSize() -> CGSize {
+        let boundingSize = CGSize(
+            width: RichTextUIView.singleLineMeasurementWidth,
+            height: CGFloat.greatestFiniteMagnitude
+        )
+        let rect = attributedText.boundingRect(
+            with: boundingSize,
+            options: [.usesLineFragmentOrigin, .usesFontLeading],
+            context: nil
+        )
+        let height = max(rect.height, font?.lineHeight ?? 0)
+        return CGSize(width: ceil(max(rect.width, 0)), height: ceil(max(height, 0)))
     }
 //
 //    override var intrinsicContentSize: CGSize {

@@ -33,15 +33,19 @@ import compose.icons.fontawesomeicons.Brands
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.brands.Chrome
 import compose.icons.fontawesomeicons.solid.Language
+import compose.icons.fontawesomeicons.solid.ShareNodes
 import dev.dimension.flare.LocalWindowPadding
 import dev.dimension.flare.Res
 import dev.dimension.flare.common.encodeJson
+import dev.dimension.flare.copied_to_clipboard
 import dev.dimension.flare.data.network.rss.DocumentData
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.rss_detail_open_in_browser
 import dev.dimension.flare.rss_detail_tldr
 import dev.dimension.flare.rss_detail_tldr_error
 import dev.dimension.flare.rss_detail_translate
+import dev.dimension.flare.status_share
+import dev.dimension.flare.ui.component.ComposeInAppNotification
 import dev.dimension.flare.ui.component.DateTimeText
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FavIcon
@@ -72,6 +76,8 @@ import kotlinx.coroutines.flow.map
 import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
+import java.awt.Toolkit
+import java.awt.datatransfer.StringSelection
 
 @Composable
 internal fun RssDetailScreen(
@@ -82,6 +88,7 @@ internal fun RssDetailScreen(
 ) {
     val uriHandler = LocalUriHandler.current
     val state by producePresenter(url) { presenter(url, descriptionHtml, descriptionTitle) }
+    val inAppNotification: ComposeInAppNotification = koinInject()
     val scrollState = rememberScrollState()
     androidx.compose.foundation.layout.Box(
         modifier = Modifier.fillMaxSize(),
@@ -120,6 +127,17 @@ internal fun RssDetailScreen(
                                     FAIcon(
                                         FontAwesomeIcons.Brands.Chrome,
                                         contentDescription = stringResource(Res.string.rss_detail_open_in_browser),
+                                    )
+                                }
+                                SubtleButton(
+                                    onClick = {
+                                        shareRssText(title = data.title, url = url)
+                                        inAppNotification.message(Res.string.copied_to_clipboard)
+                                    },
+                                ) {
+                                    FAIcon(
+                                        FontAwesomeIcons.Solid.ShareNodes,
+                                        contentDescription = stringResource(Res.string.status_share),
                                     )
                                 }
                                 AnimatedVisibility(state.data.isSuccess && !state.isAutoTranslate && !state.enableTranslate) {
@@ -309,6 +327,19 @@ internal fun RssDetailScreen(
             }
         }
     }
+}
+
+private fun shareRssText(
+    title: String,
+    url: String,
+) {
+    val text =
+        if (title.isBlank()) {
+            url
+        } else {
+            "$title\n$url"
+        }
+    Toolkit.getDefaultToolkit().systemClipboard.setContents(StringSelection(text), null)
 }
 
 @Composable

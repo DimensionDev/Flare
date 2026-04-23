@@ -225,6 +225,18 @@ private struct RssArticleContentView: View {
         }
         .toolbar {
             ToolbarItem {
+                if let url = URL(string: url) {
+                    ShareLink(
+                        item: url,
+                        subject: Text(document.title),
+                        message: Text(document.title),
+                        preview: SharePreview(document.title)
+                    ) {
+                        Image(.faShareNodes)
+                    }
+                }
+            }
+            ToolbarItem {
                 if showTranslateButton {
                     Button {
                         showTranslate = true

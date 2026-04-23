@@ -16,7 +16,7 @@ class ShortcutComposeActivity : ComponentActivity() {
         val initialText =
             when {
                 intent?.action == Intent.ACTION_SEND -> {
-                    intent.getStringExtra(Intent.EXTRA_TEXT) ?: ""
+                    intent.sharedTextWithTitle()
                 }
 
                 else -> {
@@ -62,5 +62,22 @@ class ShortcutComposeActivity : ComponentActivity() {
                 )
             }
         }
+    }
+}
+
+private fun Intent.sharedTextWithTitle(): String {
+    val text = getCharSequenceExtra(Intent.EXTRA_TEXT)?.toString().orEmpty().trim()
+    val title =
+        (
+            getCharSequenceExtra(Intent.EXTRA_SUBJECT)?.toString()
+                ?: getCharSequenceExtra(Intent.EXTRA_TITLE)?.toString()
+        ).orEmpty().trim()
+
+    return when {
+        title.isBlank() -> text
+        text.isBlank() -> title
+        text == title -> text
+        text.startsWith("$title\n") -> text
+        else -> "$title\n$text"
     }
 }

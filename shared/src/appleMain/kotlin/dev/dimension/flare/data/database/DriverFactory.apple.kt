@@ -17,13 +17,16 @@ internal actual class DriverFactory {
         isCache: Boolean,
     ): RoomDatabase.Builder<T> {
         val dbFilePath = databaseDirPath() + "/$name"
-        return Room.databaseBuilder<T>(
-            name = dbFilePath,
-        ).addCallback(object : RoomDatabase.Callback() {
-            override suspend fun onOpen(connection: SQLiteConnection) {
-                connection.execSQL("PRAGMA journal_size_limit = 0")
-            }
-        })
+        return Room
+            .databaseBuilder<T>(
+                name = dbFilePath,
+            ).addCallback(
+                object : RoomDatabase.Callback() {
+                    override suspend fun onOpen(connection: SQLiteConnection) {
+                        connection.execSQL("PRAGMA journal_size_limit = 0")
+                    }
+                },
+            )
     }
 
     @OptIn(ExperimentalForeignApi::class)
@@ -43,11 +46,12 @@ internal actual class DriverFactory {
 
     @OptIn(kotlinx.cinterop.ExperimentalForeignApi::class, kotlinx.cinterop.UnsafeNumber::class)
     internal fun iosDirPath(folder: String): String {
-        val paths = NSSearchPathForDirectoriesInDomains(
-            NSApplicationSupportDirectory,
-            NSUserDomainMask,
-            true
-        )
+        val paths =
+            NSSearchPathForDirectoriesInDomains(
+                NSApplicationSupportDirectory,
+                NSUserDomainMask,
+                true,
+            )
         val documentsDirectory = paths[0] as String
 
         val databaseDirectory = "$documentsDirectory/$folder"

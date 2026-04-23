@@ -37,6 +37,8 @@
     <string name="settings_accounts_title">Gestió del compte</string>
     <string name="settings_appearance_title">Aparença</string>
     <string name="settings_appearance_subtitle">Personalitzeu l\'aparença de Flare</string>
+    <string name="settings_appearance_theme_group_title">Tema</string>
+    <string name="settings_appearance_media_group_title">Mitjans</string>
     <string name="settings_storage_title">Emmagatzematge</string>
     <string name="settings_storage_subtitle">Gestionar l\'emmagatzematge de Flare</string>
     <string name="settings_about_title">Quant a</string>
@@ -57,6 +59,7 @@
     <string name="settings_ai_config_server">URL del servidor</string>
     <string name="settings_ai_config_server_hint">Introdueix la URL del servidor</string>
     <string name="settings_ai_config_server_self_host_description">Podeu utilitzar el servidor oficial o allotjar el vostre propi servidor</string>
+    <string name="settings_ai_config_reasoning_effort_default">Per defecte</string>
     <string name="settings_ai_config_entable_translation">Activa la traducció d\'IA</string>
     <string name="settings_ai_config_translation_description">Substituir Google Translate per la traducció d\'IA, pot trigar més temps</string>
     <string name="settings_ai_config_enable_tldr">Activa el resum d\'IA</string>
@@ -98,12 +101,14 @@
     <string name="discover_users">Recomanar usuaris</string>
     <string name="discover_hashtags">Etiquetes tendents</string>
     <string name="search_users">Usuaris</string>
+    <string name="search_status">Estat</string>
     <string name="quick_menu_add_account">Afegir compte</string>
     <string name="settings_appearance_generic">Genèric</string>
     <string name="settings_appearance_show_actions">Mostrar accions</string>
     <string name="settings_appearance_show_media">Mostrar mitjans</string>
     <string name="settings_appearance_show_numbers">Mostrar números</string>
     <string name="settings_appearance_show_cw_img">Mostrar contingut sensible</string>
+    <string name="settings_appearance_show_cw_img_description">Mostrar sempre contingut sensible a l\'estat</string>
     <string name="settings_appearance_expand_media">Ampliar mitjans a mida completa</string>
     <string name="settings_appearance_expand_media_description">Mantenir el ràdio aspecte dels mitjans a la línia de temps</string>
     <string name="settings_appearance_video_autoplay">Reproducció automàtica de vídeo</string>
@@ -219,7 +224,10 @@
     <string name="following_title">Seguint</string>
     <string name="fans_title">Seguidor</string>
     <string name="local_history_search_placeholder">Cerca a la memòria cau local</string>
+    <string name="local_history_search_status_title">Estat</string>
     <string name="local_history_search_user_title">Usuari</string>
+    <string name="add_rss_source">Afegir</string>
+    <string name="edit_rss_source">Editar font Rss</string>
     <string name="rss_sources_title_label">Títol</string>
     <string name="rss_sources_url_label">Url</string>
     <string name="rss_sources_open_in_browser">Obre al navegador</string>
@@ -230,8 +238,6 @@
     <string name="rss_detail_tldr_loading">Resumint…</string>
     <string name="emoji_picker_recent">Recent</string>
     <string name="emoji_picker_search">Cerca</string>
-    <string name="changelog_title">Ben tornats!</string>
-    <string name="changelog_message">Hem fet alguns canvis des de la darrera sessió d\'inici. Aquí teniu els detalls:</string>
     <string name="podcast_host">Hoste</string>
     <string name="podcast_title">Podcast</string>
     <string name="podcast_speaker">Locutor</string>

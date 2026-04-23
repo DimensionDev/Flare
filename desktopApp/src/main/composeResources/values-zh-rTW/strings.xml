@@ -60,6 +60,7 @@
     <string name="reply">回覆</string>
     <string name="report">報告</string>
     <string name="retweet">轉發</string>
+    <string name="retweet_remove">刪除轉發</string>
     <string name="status_loadmore_error_retry">重試</string>
     <string name="status_detail_comment">評論</string>
     <string name="status_detail_repost">轉發</string>
@@ -115,6 +116,8 @@
     <string name="settings_accounts_title">帳號管理</string>
     <string name="settings_appearance_title">外觀</string>
     <string name="settings_appearance_subtitle">自訂Flare的外觀和感受</string>
+    <string name="settings_appearance_theme_group_title">主題</string>
+    <string name="settings_appearance_media_group_title">媒體</string>
     <string name="settings_storage_title">儲存</string>
     <string name="settings_storage_subtitle">管理Flare的儲存空間</string>
     <string name="settings_about_title">關於</string>
@@ -132,11 +135,15 @@
     <string name="settings_app_logging_clear">清除日誌</string>
     <string name="settings_app_logging_enable_network_logging">啟用網路日誌</string>
     <string name="settings_ai_config_title">AI配置</string>
+    <string name="settings_ai_config_description">配置AI設置</string>
     <string name="settings_ai_config_server">伺服器網址</string>
     <string name="settings_ai_config_server_hint">輸入伺服器網址</string>
     <string name="settings_ai_config_server_self_host_description">您可以使用官方伺服器或自行架設伺服器</string>
+    <string name="settings_ai_config_reasoning_effort_default">預設</string>
     <string name="settings_ai_config_entable_translation">啟用AI翻譯</string>
     <string name="settings_ai_config_translation_description">將Google翻譯替換為AI翻譯，可能需要更長時間</string>
+    <string name="settings_ai_config_enable_pre_translation">啟用預翻譯</string>
+    <string name="settings_ai_config_pre_translation_description">在背景翻譯並快取新載入的時間線和個人資料內容。這會消耗大量 token。</string>
     <string name="settings_ai_config_enable_tldr">啟用AI總結</string>
     <string name="settings_ai_config_tldr_description">啟用長帖子總結，只適用於長度超過500個字符的帖子</string>
     <string name="settings_appearance_generic">通用</string>
@@ -144,6 +151,7 @@
     <string name="settings_appearance_show_media">顯示媒體</string>
     <string name="settings_appearance_show_numbers">顯示數字</string>
     <string name="settings_appearance_show_cw_img">顯示敏感內容</string>
+    <string name="settings_appearance_show_cw_img_description">總是顯示狀態中的敏感內容</string>
     <string name="settings_appearance_expand_media">擴展媒體至全尺寸</string>
     <string name="settings_appearance_expand_media_description">在時間線中保持媒體的長寬比例</string>
     <string name="settings_appearance_video_autoplay">視頻自動播放</string>
@@ -198,12 +206,18 @@
     <string name="misskey_visibility_home">首頁</string>
     <string name="misskey_visibility_followers">追隨者</string>
     <string name="misskey_visibility_specified">指定</string>
+    <string name="add_rss_source">添加</string>
+    <string name="edit_rss_source">編輯Rss來源</string>
     <string name="rss_sources_title_label">標題</string>
     <string name="rss_sources_url_label">網址</string>
     <string name="rss_sources_rss_hub_host_label">RssHub 主機</string>
     <string name="rss_sources_rss_hub_host_hint">如果要使用 RssHub，您需要設定 RssHub 主機，或選擇公共 RssHub 伺服器</string>
     <string name="rss_sources_discovered_rss_sources">發現的 Rss 來源</string>
     <string name="rss_sources_pinned_in_tabs">釘選到首頁標籤</string>
+    <string name="rss_sources_open_in_browser">在瀏覽器中打開</string>
+    <string name="rss_detail_open_in_browser">在瀏覽器中打開</string>
+    <string name="rss_detail_tldr">總結</string>
+    <string name="rss_detail_tldr_error">總結失敗</string>
     <string name="tab_settings_add">添加</string>
     <string name="tab_settings_drag">拖曳</string>
     <string name="tab_settings_edit">編輯</string>
@@ -229,6 +243,7 @@
     <string name="edit_tab_with_avatar">帶頭像</string>
     <string name="edit">編輯</string>
     <string name="local_history_search_placeholder">搜尋本地快取</string>
+    <string name="local_history_search_status_title">狀態</string>
     <string name="local_history_search_user_title">用戶</string>
     <string name="settings_storage_clear_image_cache">清除圖片快取</string>
     <string name="settings_storage_clear_image_cache_description">將移除%1$s MB的圖片</string>

@@ -52,6 +52,14 @@
     <string name="settings_accounts_title">إدارة الحساب</string>
     <string name="settings_appearance_title">المظهر</string>
     <string name="settings_appearance_subtitle">تخصيص مظهر و إحساس Felle</string>
+    <string name="settings_appearance_theme_group_title">السمة</string>
+    <string name="settings_appearance_theme_group_subtitle">الألوان، حجم الخط وشكل الصورة الرمزية</string>
+    <string name="settings_appearance_layout_group_title">تخطيط</string>
+    <string name="settings_appearance_layout_group_subtitle">الجدول الزمني، شريط التنقل، تخطيط البريد</string>
+    <string name="settings_appearance_display_group_title">عرض</string>
+    <string name="settings_appearance_display_group_subtitle">العلامات الزمنية، شعارات المنصة ومعاينات الرابط</string>
+    <string name="settings_appearance_media_group_title">الوسائط</string>
+    <string name="settings_appearance_media_group_subtitle">الصور ومقاطع الفيديو والمحتوى الحساس</string>
     <string name="settings_storage_title">التخزين</string>
     <string name="settings_storage_subtitle">إدارة تخزين اللعب</string>
     <string name="settings_about_title">حول</string>
@@ -71,15 +79,15 @@
     <string name="settings_ai_config_title">إعدادات الذكاء الاصطناعي</string>
     <string name="settings_ai_config_server">رابط الخادم</string>
     <string name="settings_ai_config_server_hint">أدخل رابط الخادم</string>
-    <string name="settings_ai_config_server_url_requirement">يجب أن ينتهي عنوان URL للخادم بقطع متتالي ودعم واجهة OpenAI-متوافقة مع v1/Chat/completions API.</string>
+    <string name="settings_ai_config_server_url_requirement">يجب أن ينتهي عنوان URL للخادم بقطع متتالي ودعم API المتوافقة مع v1/دردشة/إكمال API.</string>
     <string name="settings_ai_config_server_self_host_description">يمكنك استخدام الخادم الرسمي أو استضافة الخادم الخاص بك</string>
     <string name="settings_ai_config_type">AI Type</string>
     <string name="settings_ai_config_type_description">انقر لاختيار نوع خلفية الذكاء الاصطناعي</string>
     <string name="settings_ai_config_type_select">حدد</string>
     <string name="settings_ai_config_type_on_device">AI قيد الجهاز</string>
     <string name="settings_ai_config_type_on_device_description">استخدام تنفيذ الذكاء الاصطناعي المحلي على الجهاز الحالي</string>
-    <string name="settings_ai_config_type_openai">واجهة برمجة التطبيقات المتوافقة مع OpenAI</string>
-    <string name="settings_ai_config_type_openai_description">استخدام نقطة نهاية متوافقة مع OpenAI-لميزات الذكاء الاصطناعي</string>
+    <string name="settings_ai_config_type_openai">AI Compatible API</string>
+    <string name="settings_ai_config_type_openai_description">استخدام نقطة نهاية متوافقة مع AI-لميزات الذكاء الاصطناعي</string>
     <string name="settings_ai_config_value_empty_placeholder">لم يتم تعيينه</string>
     <string name="settings_ai_config_api_key">مفتاح API</string>
     <string name="settings_ai_config_api_key_hint">أدخل مفتاح API</string>
@@ -90,6 +98,12 @@
     <string name="settings_ai_config_model_error">فشل في تحميل النماذج</string>
     <string name="settings_ai_config_model_no_models">لا توجد نماذج</string>
     <string name="settings_ai_config_model_manual_input">أدخل النموذج يدوياً</string>
+    <string name="settings_ai_config_reasoning_effort">تعليل الجهود</string>
+    <string name="settings_ai_config_reasoning_effort_description">اختر مقدار الجهد الذي تنفقه الوحدة على التعليل. يستخدم الافتراضي السلوك الافتراضي لمقدم الخدمة.</string>
+    <string name="settings_ai_config_reasoning_effort_default">الافتراضي</string>
+    <string name="settings_ai_config_reasoning_effort_low">منخفض</string>
+    <string name="settings_ai_config_reasoning_effort_medium">متوسط</string>
+    <string name="settings_ai_config_reasoning_effort_high">مرتفع</string>
     <string name="settings_ai_config_tap_to_edit">انقر للتحرير</string>
     <string name="settings_ai_config_entable_translation">تمكين ترجمة الذاكرة</string>
     <string name="settings_ai_config_translation_description">استبدال ترجمة جوجل بترجمة الذكاء الاصطناعي، قد يستغرق وقتاً أطول</string>
@@ -203,6 +217,11 @@
     <string name="settings_appearance_avatar_shape_description">تغيير شكل الصورة الرمزية</string>
     <string name="settings_appearance_avatar_shape_round">تقريب</string>
     <string name="settings_appearance_avatar_shape_square">مربع</string>
+    <string name="settings_appearance_timeline_display_mode">وضع عرض الخط الزمني</string>
+    <string name="settings_appearance_timeline_display_mode_description">اختر كيفية عرض العناصر في الجداول الزمنية</string>
+    <string name="settings_appearance_timeline_display_mode_card">بطاقة</string>
+    <string name="settings_appearance_timeline_display_mode_plain">عادي (عمود واحد فقط)</string>
+    <string name="settings_appearance_timeline_display_mode_gallery">المعرض (الخط الزمني الرئيسي فقط)</string>
     <string name="settings_appearance_theme">السمة</string>
     <string name="settings_appearance_theme_description">تغيير موضوع التطبيق</string>
     <string name="settings_appearance_theme_light">فاتح</string>
@@ -251,8 +270,10 @@
     <string name="media_viewer_title">مشاهدة الوسائط</string>
     <string name="settings_accounts_remove">إزالة</string>
     <string name="settings_accounts_remove_confirm">هل أنت متأكد من أنك تريد إزالة الحساب %1$s من هذا الجهاز؟</string>
-    <string name="media_menu_save">حفظ لقطة الشاشة</string>
-    <string name="media_menu_share_image">مشاركة لقطة الشاشة</string>
+    <string name="media_menu_save">حفظ الصورة</string>
+    <string name="media_menu_share_image">مشاركة الصورة</string>
+    <string name="media_menu_copy_link">نسخ الرابط</string>
+    <string name="media_menu_media_link">رابط الوسائط</string>
     <string name="status_menu_share_via_fxembed">مشاركة عبر FxEmbed</string>
     <string name="status_menu_share_via_fixvx">شارك عبر Fixvx</string>
     <string name="media_save_success">حفظ في التنزيلات</string>
@@ -360,11 +381,14 @@
     <string name="rss_sources_pinned_in_tabs">تثبيت إلى علامات التبويب الرئيسية</string>
     <string name="rss_sources_open_in_browser">فتح في المتصفح</string>
     <string name="rss_sources_open_in_app">فتح في التطبيق</string>
+    <string name="rss_sources_full_content">المحتوى الكامل</string>
+    <string name="rss_sources_description_only">الوصف فقط</string>
     <string name="mastodon_available_timelines">الجداول الزمنية المتاحة</string>
     <string name="mastodon_trending_statuses">Trending statuses</string>
     <string name="mastodon_federated_timeline">الخط الزمني الموحد</string>
     <string name="mastodon_local_timeline">الخيط المحلي</string>
     <string name="subscription_url_hint">يدعم تغذية RSS ومثيلات ماستدون</string>
+    <string name="rss_sources_display_mode">وضع العرض</string>
     <string name="rss_detail_open_in_browser">فتح في المتصفح</string>
     <string name="rss_detail_share">مشاركة الرابط</string>
     <string name="rss_detail_tldr">Summarize</string>
@@ -375,8 +399,6 @@
     <string name="rss_detail_translate_error">فشل في الترجمة</string>
     <string name="emoji_picker_recent">حديثاً</string>
     <string name="emoji_picker_search">البحث</string>
-    <string name="changelog_title">مرحبا بعودتك!</string>
-    <string name="changelog_message">لقد قمنا ببعض التغييرات منذ آخر تسجيل دخولك. وفيما يلي التفاصيل:</string>
     <string name="podcast_host">المضيف</string>
     <string name="podcast_title">Podcast</string>
     <string name="podcast_speaker">مكبر</string>
@@ -418,14 +440,6 @@
     <string name="import_error">فشل استيراد البيانات</string>
     <string name="import_confirmation_title">تأكيد الاستيراد</string>
     <string name="import_confirmation_message">سيتم استيراد البيانات من الملف. سيتم استبدال السجلات الموجودة مع مطابقة المعرفات. هل تريد المتابعة؟</string>
-    <string name="changelog_current"><![CDATA[            <span>الإصدار %1$s:</span>
-            <ul>
-                <li>إضافة دعم للمقالات X مع تكريس تجربة للقراءة.</li>
-                <li>جودة الترجمة التلقائية مع اللغات المستبعدة واختبار الترجمة السريعة.</li>
-                <li>تحليل RSS أسرع بكثير، مع تحميل أسرع للمقالة وتوافق أفضل للتغذية.</li>
-                <li>إصلاحات الشوائب وتحسينات الأداء.</li>
-            </ul>
-        ]]></string>
     <string name="tab_settings_add_group">إضافة مجموعة</string>
     <string name="tab_settings_add_tab">إضافة علامة تبويب</string>
     <string name="tab_settings_edit_group">تحرير المجموعة</string>

@@ -48,6 +48,14 @@
     <string name="settings_accounts_title">Tilin Hallinta</string>
     <string name="settings_appearance_title">Ulkoasu</string>
     <string name="settings_appearance_subtitle">Mukauta Floren ulkoasua ja tunnelmaa</string>
+    <string name="settings_appearance_theme_group_title">Teema</string>
+    <string name="settings_appearance_theme_group_subtitle">Värit, fontin koko ja profiilikuva</string>
+    <string name="settings_appearance_layout_group_title">Asettelu</string>
+    <string name="settings_appearance_layout_group_subtitle">Aikataulu, navigointipalkki ja post layout</string>
+    <string name="settings_appearance_display_group_title">Näyttö</string>
+    <string name="settings_appearance_display_group_subtitle">Aikaleimat, alustan logot ja linkitä esikatselut</string>
+    <string name="settings_appearance_media_group_title">Media</string>
+    <string name="settings_appearance_media_group_subtitle">Kuvat, videot ja herkkä sisältö</string>
     <string name="settings_storage_title">Tallennustila</string>
     <string name="settings_storage_subtitle">Hallitse Flare-tallennustilaa</string>
     <string name="settings_about_title">Tietoja</string>
@@ -67,15 +75,15 @@
     <string name="settings_ai_config_title">AI Asetukset</string>
     <string name="settings_ai_config_server">Palvelimen URL</string>
     <string name="settings_ai_config_server_hint">Syötä palvelimen URL</string>
-    <string name="settings_ai_config_server_url_requirement">Palvelimen URL-osoitteen tulee päättyä perään slash ja tukea OpenAI-yhteensopivaa v1/chat/completions APIa.</string>
+    <string name="settings_ai_config_server_url_requirement">Palvelimen URL-osoitteen tulee päättyä peräaukkoon ja tukea AI-yhteensopivaa v1/chat/completions APIa.</string>
     <string name="settings_ai_config_server_self_host_description">Voit käyttää virallista palvelinta tai itse isäntä oma palvelin</string>
     <string name="settings_ai_config_type">AI Type</string>
     <string name="settings_ai_config_type_description">Napauta valitaksesi AI taustaosan tyyppi</string>
     <string name="settings_ai_config_type_select">Valitse</string>
     <string name="settings_ai_config_type_on_device">Laitteen AI</string>
     <string name="settings_ai_config_type_on_device_description">Käytä paikallista tekoälyn suoritusta nykyisellä laitteella</string>
-    <string name="settings_ai_config_type_openai">OpenAI- Yhteensopiva API</string>
-    <string name="settings_ai_config_type_openai_description">Käytä OpenAI:n yhteensopivaa päätepistettä tekoälyn ominaisuuksiin</string>
+    <string name="settings_ai_config_type_openai">AI Compatible API</string>
+    <string name="settings_ai_config_type_openai_description">Käytä tekoälyn yhteensopivaa päätepistettä tekoälyn ominaisuuksiin</string>
     <string name="settings_ai_config_value_empty_placeholder">Ei asetettu</string>
     <string name="settings_ai_config_api_key">Api Avain</string>
     <string name="settings_ai_config_api_key_hint">Syötä API-avain</string>
@@ -86,6 +94,12 @@
     <string name="settings_ai_config_model_error">Mallien lataaminen epäonnistui</string>
     <string name="settings_ai_config_model_no_models">Ei malleja</string>
     <string name="settings_ai_config_model_manual_input">Syötä malli käsin</string>
+    <string name="settings_ai_config_reasoning_effort">Perustelu Ponnistelut</string>
+    <string name="settings_ai_config_reasoning_effort_description">Valitse, kuinka paljon vaivaa malli kuluttaa päättelyyn. Oletus käyttää tarjoajan oletuskäyttäytymistä.</string>
+    <string name="settings_ai_config_reasoning_effort_default">Oletus</string>
+    <string name="settings_ai_config_reasoning_effort_low">Matala</string>
+    <string name="settings_ai_config_reasoning_effort_medium">Keskitaso</string>
+    <string name="settings_ai_config_reasoning_effort_high">Korkea</string>
     <string name="settings_ai_config_tap_to_edit">Napauta muokataksesi</string>
     <string name="settings_ai_config_entable_translation">Ota käyttöön tekoälyn käännös</string>
     <string name="settings_ai_config_translation_description">Korvaa Google Translate kanssa AI käännös, saattaa kestää pidempään aikaa</string>
@@ -199,6 +213,11 @@
     <string name="settings_appearance_avatar_shape_description">Muuta hahmon muotoa</string>
     <string name="settings_appearance_avatar_shape_round">Pyöreä</string>
     <string name="settings_appearance_avatar_shape_square">Neliö</string>
+    <string name="settings_appearance_timeline_display_mode">Aikajanan näyttötila</string>
+    <string name="settings_appearance_timeline_display_mode_description">Valitse, miten kohteet näytetään aikajanoissa</string>
+    <string name="settings_appearance_timeline_display_mode_card">Kortti</string>
+    <string name="settings_appearance_timeline_display_mode_plain">Pelkkä (vain yksi sarake)</string>
+    <string name="settings_appearance_timeline_display_mode_gallery">Galleria (vain kotiaikajana )</string>
     <string name="settings_appearance_theme">Teema</string>
     <string name="settings_appearance_theme_description">Muuta sovelluksen teemaa</string>
     <string name="settings_appearance_theme_light">Vaalea</string>
@@ -247,8 +266,10 @@
     <string name="media_viewer_title">Median katselin</string>
     <string name="settings_accounts_remove">Poista</string>
     <string name="settings_accounts_remove_confirm">Oletko varma, että haluat poistaa tilin %1$s tästä laitteesta?</string>
-    <string name="media_menu_save">Tallenna kuvakaappaus</string>
-    <string name="media_menu_share_image">Jaa kuvakaappaus</string>
+    <string name="media_menu_save">Tallenna kuva</string>
+    <string name="media_menu_share_image">Jaa kuva</string>
+    <string name="media_menu_copy_link">Kopioi linkki</string>
+    <string name="media_menu_media_link">Median linkki</string>
     <string name="status_menu_share_via_fxembed">Jaa FxEmbedin kautta</string>
     <string name="status_menu_share_via_fixvx">Jaa Fixvx:n kautta</string>
     <string name="media_save_success">Tallennettu latauksiin</string>
@@ -356,11 +377,14 @@
     <string name="rss_sources_pinned_in_tabs">Kiinnitä kotiin välilehdet</string>
     <string name="rss_sources_open_in_browser">Avaa selaimessa</string>
     <string name="rss_sources_open_in_app">Avaa sovelluksessa</string>
+    <string name="rss_sources_full_content">Täysi sisältö</string>
+    <string name="rss_sources_description_only">Vain kuvaus</string>
     <string name="mastodon_available_timelines">Saatavilla olevat aikajanat</string>
     <string name="mastodon_trending_statuses">Trending statuses</string>
     <string name="mastodon_federated_timeline">Ulkopuolinen aikajana</string>
     <string name="mastodon_local_timeline">Paikallinen aikajana</string>
     <string name="subscription_url_hint">Tukee RSS-syötteitä ja Mastodonin esiintymiä</string>
+    <string name="rss_sources_display_mode">Näytä tila</string>
     <string name="rss_detail_open_in_browser">Avaa selaimessa</string>
     <string name="rss_detail_share">Jaa linkki</string>
     <string name="rss_detail_tldr">Summarize</string>
@@ -371,8 +395,6 @@
     <string name="rss_detail_translate_error">Kääntäminen epäonnistui</string>
     <string name="emoji_picker_recent">Viimeisimmät</string>
     <string name="emoji_picker_search">Etsi</string>
-    <string name="changelog_title">Tervetuloa takaisin!</string>
-    <string name="changelog_message">Olemme tehneet joitakin muutoksia, koska olet viimeksi kirjautunut sisään. Tässä on yksityiskohdat:</string>
     <string name="podcast_host">Isäntä</string>
     <string name="podcast_title">Podcast</string>
     <string name="podcast_speaker">Kaiutin</string>
@@ -414,14 +436,6 @@
     <string name="import_error">Tietojen tuonti epäonnistui</string>
     <string name="import_confirmation_title">Vahvista Tuonti</string>
     <string name="import_confirmation_message">Tämä tuo tiedostosta tietoja. Olemassa olevat tietueet ja vastaavat ID:t korvataan. Haluatko jatkaa?</string>
-    <string name="changelog_current"><![CDATA[            <span>Versio %1$s:</span>
-            <ul>
-                <li>Lisätty tuki X artikkeleille, joilla on oma lukukokemus.</li>
-                <li>Hienosäädä automaattikäännös, jossa on poistetut kielet ja nopea käännöstestaus.</li>
-                <li>RSS-jäsennys on nyt paljon nopeampi, nopeampi artikkelien lastaus ja parempi rehun yhteensopivuus.</li>
-                <li>Virheenkorjauksia ja suorituskyvyn parannuksia.</li>
-            </ul>
-        ]]></string>
     <string name="tab_settings_add_group">Lisää Ryhmä</string>
     <string name="tab_settings_add_tab">Lisää Välilehti</string>
     <string name="tab_settings_edit_group">Muokkaa Ryhmää</string>

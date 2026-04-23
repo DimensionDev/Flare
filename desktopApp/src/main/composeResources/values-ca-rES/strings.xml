@@ -60,6 +60,7 @@
     <string name="reply">Respondre</string>
     <string name="report">Informar</string>
     <string name="retweet">Republiqui</string>
+    <string name="retweet_remove">Eliminar retweet</string>
     <string name="status_loadmore_error_retry">Reintenteu</string>
     <string name="status_detail_comment">Comenta</string>
     <string name="status_detail_repost">Republiqui</string>
@@ -110,6 +111,8 @@
     <string name="settings_accounts_title">Gestió del compte</string>
     <string name="settings_appearance_title">Aparença</string>
     <string name="settings_appearance_subtitle">Personalitzeu l\'aparença de Flare</string>
+    <string name="settings_appearance_theme_group_title">Tema</string>
+    <string name="settings_appearance_media_group_title">Mitjans</string>
     <string name="settings_storage_title">Emmagatzematge</string>
     <string name="settings_storage_subtitle">Gestionar l\'emmagatzematge de Flare</string>
     <string name="settings_about_title">Quant a</string>
@@ -127,9 +130,11 @@
     <string name="settings_app_logging_clear">Esborrar registre</string>
     <string name="settings_app_logging_enable_network_logging">Activar registre de xarxa</string>
     <string name="settings_ai_config_title">Configuració d\'IA</string>
+    <string name="settings_ai_config_description">Configureu la configuració d\'IA</string>
     <string name="settings_ai_config_server">URL del servidor</string>
     <string name="settings_ai_config_server_hint">Introdueix la URL del servidor</string>
     <string name="settings_ai_config_server_self_host_description">Podeu utilitzar el servidor oficial o allotjar el vostre propi servidor</string>
+    <string name="settings_ai_config_reasoning_effort_default">Per defecte</string>
     <string name="settings_ai_config_entable_translation">Activa la traducció d\'IA</string>
     <string name="settings_ai_config_translation_description">Substituir Google Translate per la traducció d\'IA, pot trigar més temps</string>
     <string name="settings_ai_config_enable_tldr">Activa el resum d\'IA</string>
@@ -139,6 +144,7 @@
     <string name="settings_appearance_show_media">Mostrar mitjans</string>
     <string name="settings_appearance_show_numbers">Mostrar números</string>
     <string name="settings_appearance_show_cw_img">Mostrar contingut sensible</string>
+    <string name="settings_appearance_show_cw_img_description">Mostrar sempre contingut sensible a l\'estat</string>
     <string name="settings_appearance_expand_media">Ampliar mitjans a mida completa</string>
     <string name="settings_appearance_expand_media_description">Mantenir el ràdio aspecte dels mitjans a la línia de temps</string>
     <string name="settings_appearance_video_autoplay">Reproducció automàtica de vídeo</string>
@@ -188,8 +194,14 @@
     <string name="misskey_visibility_home">Inici</string>
     <string name="misskey_visibility_followers">Seguidors</string>
     <string name="misskey_visibility_specified">Especificat</string>
+    <string name="add_rss_source">Afegir</string>
+    <string name="edit_rss_source">Editar font Rss</string>
     <string name="rss_sources_title_label">Títol</string>
     <string name="rss_sources_url_label">Url</string>
+    <string name="rss_sources_open_in_browser">Obre al navegador</string>
+    <string name="rss_detail_open_in_browser">Obre al navegador</string>
+    <string name="rss_detail_tldr">Resumir</string>
+    <string name="rss_detail_tldr_error">No s\'ha pogut resumir</string>
     <string name="tab_settings_add">Afegir</string>
     <string name="tab_settings_drag">Arrossegueu</string>
     <string name="tab_settings_edit">Editar</string>
@@ -215,6 +227,7 @@
     <string name="edit_tab_with_avatar">Amb avatar</string>
     <string name="edit">Editar</string>
     <string name="local_history_search_placeholder">Cerca a la memòria cau local</string>
+    <string name="local_history_search_status_title">Estat</string>
     <string name="local_history_search_user_title">Usuari</string>
     <string name="settings_storage_clear_image_cache">Esborrar la memòria cau d\'imatges</string>
     <string name="settings_storage_clear_image_cache_description">S\'eliminaran %1$s MB d\'imatges</string>

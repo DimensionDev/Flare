@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="changelog_title">おかえりなさい！</string>
+    <string name="changelog_message">最後にログインしてからいくつかの変更がありました。詳細は次のとおりです:</string>
+</resources>

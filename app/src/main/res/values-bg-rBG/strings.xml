@@ -38,6 +38,8 @@
     <string name="settings_accounts_title">Управление на акаунти</string>
     <string name="settings_appearance_title">Облик</string>
     <string name="settings_appearance_subtitle">Персонализиране на външния вид и усещането на Flare</string>
+    <string name="settings_appearance_theme_group_title">Тема</string>
+    <string name="settings_appearance_media_group_title">Медия</string>
     <string name="settings_storage_title">Съхранение</string>
     <string name="settings_storage_subtitle">Управление на съхранението на Flare</string>
     <string name="settings_about_title">Относно</string>
@@ -51,6 +53,7 @@
     <string name="settings_ai_config_title">Конфигурация на ИИ</string>
     <string name="settings_ai_config_server">Адрес на сървъра</string>
     <string name="settings_ai_config_server_hint">Въведете URL адреса на сървъра</string>
+    <string name="settings_ai_config_reasoning_effort_default">По подразбиране</string>
     <string name="settings_ai_config_entable_translation">Включване на превеждането с ИИ</string>
     <string name="settings_ai_config_enable_tldr">Включване на обобщаването с ИИ</string>
     <string name="status_loadmore_error_retry">Повторен опит</string>
@@ -76,6 +79,7 @@
     <string name="discover_status">Изгряващи публикации</string>
     <string name="discover_hashtags">Изгряващи хаштагове</string>
     <string name="search_users">Потребители</string>
+    <string name="search_status">Състояние</string>
     <string name="quick_menu_add_account">Добавяне на профил</string>
     <string name="settings_appearance_show_actions">Показване на действия</string>
     <string name="settings_appearance_show_media">Показване на медия</string>
@@ -121,6 +125,7 @@
     <string name="service_select_next_button">Напред</string>
     <string name="service_select_empty_message">Не са намерени инстанции</string>
     <string name="settings_accounts_remove">Премахване</string>
+    <string name="media_menu_share_image">Споделяне на изображение</string>
     <string name="status_menu_share_via_fxembed">Споделяне чрез FxEmbed</string>
     <string name="media_save_fail">Неуспешно запазване</string>
     <string name="media_alt_text">Алтернативен текст</string>
@@ -200,7 +205,9 @@
     <string name="following_title">Следван</string>
     <string name="fans_title">Последовател</string>
     <string name="local_history_search_placeholder">Търсене в локалния кеш</string>
+    <string name="local_history_search_status_title">Състояние</string>
     <string name="local_history_search_user_title">Потребител</string>
+    <string name="add_rss_source">Добавяне</string>
     <string name="rss_sources_title_label">Заглавие</string>
     <string name="rss_sources_url_label">Url</string>
     <string name="rss_sources_rss_hub_host_label">Хост на RSSHub</string>
@@ -214,7 +221,6 @@
     <string name="rss_detail_tldr_error">Неуспешно обобщаване</string>
     <string name="rss_detail_tldr_loading">Обобщава се…</string>
     <string name="emoji_picker_search">Търсене</string>
-    <string name="changelog_title">Добре дошли отново!</string>
     <string name="podcast_host">Хост</string>
     <string name="podcast_title">Подкаст</string>
     <string name="podcast_speaker">Говорител</string>

@@ -37,6 +37,8 @@
     <string name="settings_accounts_title">Управљање рачунима</string>
     <string name="settings_appearance_title">Изглед</string>
     <string name="settings_appearance_subtitle">Прилагодите изглед и осећај Flare-а</string>
+    <string name="settings_appearance_theme_group_title">Тема</string>
+    <string name="settings_appearance_media_group_title">Медији</string>
     <string name="settings_storage_title">Складиште</string>
     <string name="settings_storage_subtitle">Управљајте складишtem Flare-а</string>
     <string name="settings_about_title">О апликацији</string>
@@ -57,6 +59,7 @@
     <string name="settings_ai_config_server">URL сервера</string>
     <string name="settings_ai_config_server_hint">Унесите URL сервера</string>
     <string name="settings_ai_config_server_self_host_description">Можете користити службени сервер или угостити свој сервер</string>
+    <string name="settings_ai_config_reasoning_effort_default">Дефолт</string>
     <string name="settings_ai_config_entable_translation">Омогући AI превод</string>
     <string name="settings_ai_config_translation_description">Замените Google Translate AI превођем, може потрајати дуже</string>
     <string name="settings_ai_config_enable_tldr">Омогући AI сажимање</string>
@@ -98,12 +101,14 @@
     <string name="discover_users">Препоручите кориснике</string>
     <string name="discover_hashtags">Популарни хаштагови</string>
     <string name="search_users">Корисници</string>
+    <string name="search_status">Статус</string>
     <string name="quick_menu_add_account">Додај рачун</string>
     <string name="settings_appearance_generic">Опште</string>
     <string name="settings_appearance_show_actions">Прикажи акције</string>
     <string name="settings_appearance_show_media">Прикажи медије</string>
     <string name="settings_appearance_show_numbers">Прикажи бројеве</string>
     <string name="settings_appearance_show_cw_img">Прикажи осетљив садржај</string>
+    <string name="settings_appearance_show_cw_img_description">Увек прикажите осетљив садржај у статусу</string>
     <string name="settings_appearance_expand_media">Проширите медије на целу величину</string>
     <string name="settings_appearance_expand_media_description">Задржите однос екрана медија у временској линији</string>
     <string name="settings_appearance_video_autoplay">Аутоматско репродуковање видеа</string>
@@ -219,7 +224,10 @@
     <string name="following_title">Пратим</string>
     <string name="fans_title">Пратилац</string>
     <string name="local_history_search_placeholder">Претражите локални кеш</string>
+    <string name="local_history_search_status_title">Статус</string>
     <string name="local_history_search_user_title">Корисник</string>
+    <string name="add_rss_source">Додај</string>
+    <string name="edit_rss_source">Уреди Rss Извор</string>
     <string name="rss_sources_title_label">Наслов</string>
     <string name="rss_sources_url_label">Урл</string>
     <string name="rss_sources_open_in_browser">Отворите у прегледаћу</string>
@@ -230,8 +238,6 @@
     <string name="rss_detail_tldr_loading">Сажимање…</string>
     <string name="emoji_picker_recent">Недавни</string>
     <string name="emoji_picker_search">Претрага</string>
-    <string name="changelog_title">Добродошли назад!</string>
-    <string name="changelog_message">Постигли смо неке промене од последњег пријављивања. Ево детаља:</string>
     <string name="podcast_host">Домаћин</string>
     <string name="podcast_title">Подкаст</string>
     <string name="podcast_speaker">Говорник</string>

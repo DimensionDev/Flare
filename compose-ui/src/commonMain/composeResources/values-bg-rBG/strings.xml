@@ -20,6 +20,7 @@
     <string name="mastodon_notification_item_requested_follow">поиска да ви следва</string>
     <string name="mastodon_item_show_more">Показване на още</string>
     <string name="mastodon_item_show_less">Показване на по-малко</string>
+    <string name="mastodon_item_pinned">Закачена публикация</string>
     <string name="post_show_full_text">Показване на целия текст</string>
     <string name="bluesky_notification_item_followed_you">ви последва</string>
     <string name="bluesky_notification_item_favourited_your_status">хареса</string>
@@ -84,6 +85,7 @@
     <string name="reply_to">Отговор към %1$s</string>
     <string name="status_detail_translate">Превеждане на публикацията</string>
     <string name="status_detail_tldr">Обобщаване на публикацията</string>
+    <string name="vvo_notification_like">Хареса статуса ви</string>
     <string name="user_follow_edit_list">Добавяне или премахване от списък</string>
     <string name="list_empty">Няма списъци</string>
     <string name="list_error">Неуспешно зареждане на списъци</string>
@@ -174,6 +176,7 @@
     <string name="list_add">Добавяне на списък</string>
     <string name="list_edit">Редактиране на списъка</string>
     <string name="list_delete">Изтриване на списъка</string>
+    <string name="add_rss_source">Добавяне</string>
     <string name="rss_sources_title_label">Заглавие</string>
     <string name="rss_sources_url_label">Url</string>
     <string name="service_select_welcome_title">Добре дошли във Flare</string>

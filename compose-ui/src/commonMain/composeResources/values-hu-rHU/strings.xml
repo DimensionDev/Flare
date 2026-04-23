@@ -17,13 +17,16 @@
     <string name="mastodon_notification_item_poll_ended">Egy közvélemény-kutatás, amelyben részt vettél, véget ért</string>
     <string name="mastodon_notification_item_mentioned_you">említett téged</string>
     <string name="mastodon_notification_item_requested_follow">kérés, hogy kövessétek egymást</string>
+    <string name="mastodon_notification_item_updated_status">frissített egy toot-ot</string>
     <string name="mastodon_item_show_more">Több mutatása</string>
     <string name="mastodon_item_show_less">Kevesebbet mutatni</string>
+    <string name="mastodon_item_pinned">Rögzített toot</string>
     <string name="bluesky_notification_item_followed_you">követett téged</string>
     <string name="bluesky_notification_item_favourited_your_status">kedvelte</string>
     <string name="bluesky_notification_item_reblogged_your_status">újra megosztotta</string>
     <string name="bluesky_notification_item_poll_ended">Egy közvélemény-kutatás, amelyben részt vettél, véget ért</string>
     <string name="bluesky_notification_item_mentioned_you">említett téged</string>
+    <string name="bluesky_item_reblogged_status">újra megosztott egy állapotot</string>
     <string name="bluesky_notification_item_replied_to_you">válaszolt neked</string>
     <string name="bluesky_notification_item_quoted_your_status">idézett</string>
     <string name="bluesky_notification_item_starterpack_joined">Starterpack csatlakozott</string>
@@ -40,6 +43,7 @@
     <string name="misskey_notification_item_followed_you">követett téged</string>
     <string name="misskey_notification_item_requested_follow">kérted, hogy kövessétek egymást</string>
     <string name="misskey_notification_unknwon">Ismeretlen értesítés %1$s</string>
+    <string name="misskey_item_reblogged_status">újra megosztott egy állapotot</string>
     <string name="xqt_item_reblogged_status">retweetelt</string>
     <string name="xqt_item_mention_status">említ téged</string>
     <string name="mastodon_visibility_public">Nyilvános</string>
@@ -81,6 +85,7 @@
     <string name="reply">Válasz</string>
     <string name="report">Jelentés</string>
     <string name="retweet">Újraposztolás</string>
+    <string name="retweet_remove">Retweet eltávolítása</string>
     <string name="share">Megosztás</string>
     <string name="comment">Hozzászólás</string>
     <string name="user_report">Jelentés</string>
@@ -95,6 +100,7 @@
     <string name="date_format_year_month_day">dd MMM yy</string>
     <string name="date_format_month_day">dd MMM</string>
     <string name="date_format_full">dd MMM yy HH:mm</string>
+    <string name="vvo_notification_like">Tetszett az állapotod</string>
     <string name="user_follow_edit_list">Hozzáadás/eltávolítás a listából</string>
     <string name="list_empty">Nincsenek listák</string>
     <string name="list_error">Lista betöltési hiba</string>
@@ -299,6 +305,8 @@
     <string name="list_add">Lista hozzáadása</string>
     <string name="list_edit">Lista szerkesztése</string>
     <string name="list_delete">Lista törlése</string>
+    <string name="add_rss_source">Hozzáadás</string>
+    <string name="edit_rss_source">Rss forrás szerkesztése</string>
     <string name="rss_sources_title_label">Cím</string>
     <string name="rss_sources_url_label">URL</string>
     <string name="service_select_welcome_title">Üdvözöljük a Flairól</string>

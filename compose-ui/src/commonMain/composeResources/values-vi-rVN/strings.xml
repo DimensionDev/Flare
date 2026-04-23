@@ -17,13 +17,16 @@
     <string name="mastodon_notification_item_poll_ended">Một cuộc thăm dò mà bạn tham gia đã kết thúc</string>
     <string name="mastodon_notification_item_mentioned_you">đã đề cập đến bạn</string>
     <string name="mastodon_notification_item_requested_follow">yêu cầu theo dõi bạn</string>
+    <string name="mastodon_notification_item_updated_status">đã cập nhật một toot</string>
     <string name="mastodon_item_show_more">Hiển thị thêm</string>
     <string name="mastodon_item_show_less">Hiển thị ít hơn</string>
+    <string name="mastodon_item_pinned">Ghim toot</string>
     <string name="bluesky_notification_item_followed_you">đã theo dõi bạn</string>
     <string name="bluesky_notification_item_favourited_your_status">đã yêu thích</string>
     <string name="bluesky_notification_item_reblogged_your_status">đã đăng lại</string>
     <string name="bluesky_notification_item_poll_ended">Một cuộc thăm dò mà bạn tham gia đã kết thúc</string>
     <string name="bluesky_notification_item_mentioned_you">đã đề cập đến bạn</string>
+    <string name="bluesky_item_reblogged_status">đã tăng cường một toot</string>
     <string name="bluesky_notification_item_replied_to_you">đã trả lời bạn</string>
     <string name="bluesky_notification_item_quoted_your_status">trích dẫn</string>
     <string name="bluesky_notification_item_starterpack_joined">Starterpack Đã tham gia</string>
@@ -40,6 +43,7 @@
     <string name="misskey_notification_item_followed_you">đã theo dõi bạn</string>
     <string name="misskey_notification_item_requested_follow">đã yêu cầu theo dõi bạn</string>
     <string name="misskey_notification_unknwon">Thông báo không xác định %1$s</string>
+    <string name="misskey_item_reblogged_status">đã tăng cường một toot</string>
     <string name="xqt_item_reblogged_status">đã retweet</string>
     <string name="xqt_item_mention_status">đề cập đến bạn</string>
     <string name="mastodon_visibility_public">Công khai</string>
@@ -81,6 +85,7 @@
     <string name="reply">Trả lời</string>
     <string name="report">Báo cáo</string>
     <string name="retweet">Chia sẻ lại</string>
+    <string name="retweet_remove">Bỏ retweet</string>
     <string name="share">Chia sẻ</string>
     <string name="comment">Bình luận</string>
     <string name="user_report">Báo cáo</string>
@@ -95,6 +100,7 @@
     <string name="date_format_year_month_day">dd MMM yy</string>
     <string name="date_format_month_day">dd MMM</string>
     <string name="date_format_full">dd MMM yy HH:mm</string>
+    <string name="vvo_notification_like">Đã thích trạng thái của bạn</string>
     <string name="user_follow_edit_list">Thêm/Xóa khỏi danh sách</string>
     <string name="list_empty">Không có danh sách</string>
     <string name="list_error">Không thể tải danh sách</string>
@@ -299,6 +305,8 @@
     <string name="list_add">Thêm danh sách</string>
     <string name="list_edit">Chỉnh sửa danh sách</string>
     <string name="list_delete">Xóa danh sách</string>
+    <string name="add_rss_source">Thêm</string>
+    <string name="edit_rss_source">Chỉnh sửa Nguồn Rss</string>
     <string name="rss_sources_title_label">Tiêu đề</string>
     <string name="rss_sources_url_label">Url</string>
     <string name="service_select_welcome_title">Chào mừng bạn đến với Flare</string>

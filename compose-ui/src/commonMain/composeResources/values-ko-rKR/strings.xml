@@ -17,13 +17,16 @@
     <string name="mastodon_notification_item_poll_ended">참여했던 설문조사가 종료되었습니다</string>
     <string name="mastodon_notification_item_mentioned_you">당신을 언급했습니다</string>
     <string name="mastodon_notification_item_requested_follow">당신을 팔로우 요청했습니다</string>
+    <string name="mastodon_notification_item_updated_status">투트를 업데이트했습니다</string>
     <string name="mastodon_item_show_more">더 보기</string>
     <string name="mastodon_item_show_less">덜 보기</string>
+    <string name="mastodon_item_pinned">고정된 투트</string>
     <string name="bluesky_notification_item_followed_you">당신을 팔로우했습니다</string>
     <string name="bluesky_notification_item_favourited_your_status">좋아요를 눌렀습니다</string>
     <string name="bluesky_notification_item_reblogged_your_status">리블로그했습니다</string>
     <string name="bluesky_notification_item_poll_ended">참여했던 설문조사가 종료되었습니다</string>
     <string name="bluesky_notification_item_mentioned_you">당신을 언급했습니다</string>
+    <string name="bluesky_item_reblogged_status">투트를 부스트했습니다</string>
     <string name="bluesky_notification_item_replied_to_you">당신에게 답글을 달았습니다</string>
     <string name="bluesky_notification_item_quoted_your_status">인용했습니다</string>
     <string name="bluesky_notification_item_starterpack_joined">스타터팩에 가입했습니다</string>
@@ -40,6 +43,7 @@
     <string name="misskey_notification_item_followed_you">당신을 팔로우했습니다</string>
     <string name="misskey_notification_item_requested_follow">당신을 팔로우 요청했습니다</string>
     <string name="misskey_notification_unknwon">알 수 없는 알림 %1$s</string>
+    <string name="misskey_item_reblogged_status">투트를 부스트했습니다</string>
     <string name="xqt_item_reblogged_status">리트윗했습니다</string>
     <string name="xqt_item_mention_status">당신을 언급했습니다</string>
     <string name="mastodon_visibility_public">공개</string>
@@ -81,6 +85,7 @@
     <string name="reply">답글</string>
     <string name="report">신고하기</string>
     <string name="retweet">다시 게시</string>
+    <string name="retweet_remove">리트윗 제거</string>
     <string name="share">공유</string>
     <string name="comment">댓글</string>
     <string name="user_report">신고하기</string>
@@ -95,6 +100,7 @@
     <string name="date_format_year_month_day">dd MMM yy</string>
     <string name="date_format_month_day">dd MMM</string>
     <string name="date_format_full">dd MMM yy HH:mm</string>
+    <string name="vvo_notification_like">당신의 상태에 좋아요를 눌렀습니다</string>
     <string name="user_follow_edit_list">목록에 추가/제거</string>
     <string name="list_empty">목록 없음</string>
     <string name="list_error">목록 로드 실패</string>
@@ -299,6 +305,8 @@
     <string name="list_add">목록 추가</string>
     <string name="list_edit">목록 편집</string>
     <string name="list_delete">목록 삭제</string>
+    <string name="add_rss_source">추가</string>
+    <string name="edit_rss_source">RSS 소스 편집</string>
     <string name="rss_sources_title_label">제목</string>
     <string name="rss_sources_url_label">URL</string>
     <string name="service_select_welcome_title">Flare에 오신 것을 환영합니다</string>

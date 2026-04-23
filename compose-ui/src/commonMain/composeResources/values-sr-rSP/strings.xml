@@ -17,13 +17,16 @@
     <string name="mastodon_notification_item_poll_ended">Анкета у којој сте учествовали је завршена</string>
     <string name="mastodon_notification_item_mentioned_you">поменули вас</string>
     <string name="mastodon_notification_item_requested_follow">захтев за праћење вас</string>
+    <string name="mastodon_notification_item_updated_status">ажурирао је тут</string>
     <string name="mastodon_item_show_more">Прикажи више</string>
     <string name="mastodon_item_show_less">Прикажи мање</string>
+    <string name="mastodon_item_pinned">Прикачени туд</string>
     <string name="bluesky_notification_item_followed_you">пратио вас је</string>
     <string name="bluesky_notification_item_favourited_your_status">додали у омиљене</string>
     <string name="bluesky_notification_item_reblogged_your_status">делили</string>
     <string name="bluesky_notification_item_poll_ended">Анкета у којој сте учествовали је завршена</string>
     <string name="bluesky_notification_item_mentioned_you">поменули вас</string>
+    <string name="bluesky_item_reblogged_status">попустио тут</string>
     <string name="bluesky_notification_item_replied_to_you">одговорио вам</string>
     <string name="bluesky_notification_item_quoted_your_status">цитирао</string>
     <string name="bluesky_notification_item_starterpack_joined">Starterpack се придружио</string>
@@ -40,6 +43,7 @@
     <string name="misskey_notification_item_followed_you">пратио вас је</string>
     <string name="misskey_notification_item_requested_follow">захтевао праћење вас</string>
     <string name="misskey_notification_unknwon">непозната обавештење %1$s</string>
+    <string name="misskey_item_reblogged_status">попустио тут</string>
     <string name="xqt_item_reblogged_status">ретвитовао</string>
     <string name="xqt_item_mention_status">помена вас</string>
     <string name="mastodon_visibility_public">Јавни</string>
@@ -81,6 +85,7 @@
     <string name="reply">Одговори</string>
     <string name="report">Пријави</string>
     <string name="retweet">Поново</string>
+    <string name="retweet_remove">Уклоните ретвит</string>
     <string name="share">Делите</string>
     <string name="comment">Коментар</string>
     <string name="user_report">Пријави</string>
@@ -95,6 +100,7 @@
     <string name="date_format_year_month_day">dd MMM yy</string>
     <string name="date_format_month_day">dd MMM</string>
     <string name="date_format_full">dd MMM yy HH:mm</string>
+    <string name="vvo_notification_like">Свиђао се ваш статус</string>
     <string name="user_follow_edit_list">Додај/Уклони из списка</string>
     <string name="list_empty">Нема спискова</string>
     <string name="list_error">Непосредан учитани спискова</string>
@@ -299,6 +305,8 @@
     <string name="list_add">Додај листу</string>
     <string name="list_edit">Уреди листу</string>
     <string name="list_delete">Обриши листу</string>
+    <string name="add_rss_source">Додај</string>
+    <string name="edit_rss_source">Уреди Rss Извор</string>
     <string name="rss_sources_title_label">Наслов</string>
     <string name="rss_sources_url_label">Урл</string>
     <string name="service_select_welcome_title">Добродошли у Flare</string>

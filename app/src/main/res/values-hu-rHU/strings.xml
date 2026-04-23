@@ -37,6 +37,8 @@
     <string name="settings_accounts_title">Fiók kezelés</string>
     <string name="settings_appearance_title">Megjelenés</string>
     <string name="settings_appearance_subtitle">Személyre szabja a Flare megjelenését</string>
+    <string name="settings_appearance_theme_group_title">Téma</string>
+    <string name="settings_appearance_media_group_title">Média</string>
     <string name="settings_storage_title">Tárhely</string>
     <string name="settings_storage_subtitle">Kezelje a Flare tárhelyét</string>
     <string name="settings_about_title">Rólunk</string>
@@ -57,6 +59,7 @@
     <string name="settings_ai_config_server">Szerver URL</string>
     <string name="settings_ai_config_server_hint">Adja meg a szerver URL-jét</string>
     <string name="settings_ai_config_server_self_host_description">Használhatja a hivatalos szervert vagy saját szerverét is üzemeltetheti</string>
+    <string name="settings_ai_config_reasoning_effort_default">Alapértelmezett</string>
     <string name="settings_ai_config_entable_translation">AI fordítás engedélyezése</string>
     <string name="settings_ai_config_translation_description">A Google Fordítót AI fordításra cserélje, hosszabb időt vehet igénybe</string>
     <string name="settings_ai_config_enable_tldr">AI összefoglalás engedélyezése</string>
@@ -98,12 +101,14 @@
     <string name="discover_users">Felhasználók ajánlása</string>
     <string name="discover_hashtags">Trendi hashtagok</string>
     <string name="search_users">Felhasználók</string>
+    <string name="search_status">Állapot</string>
     <string name="quick_menu_add_account">Fiók hozzáadása</string>
     <string name="settings_appearance_generic">Általános</string>
     <string name="settings_appearance_show_actions">Műveletek megjelenítése</string>
     <string name="settings_appearance_show_media">Média megjelenítése</string>
     <string name="settings_appearance_show_numbers">Számok megjelenítése</string>
     <string name="settings_appearance_show_cw_img">Érzékeny tartalom megjelenítése</string>
+    <string name="settings_appearance_show_cw_img_description">Mindig mutassák az érzékeny tartalmat az állapotban</string>
     <string name="settings_appearance_expand_media">Média teljes méretre bővítése</string>
     <string name="settings_appearance_expand_media_description">Tartja a média arányait az idővonalon</string>
     <string name="settings_appearance_video_autoplay">Videók automatikus lejátszása</string>
@@ -219,7 +224,10 @@
     <string name="following_title">Követés</string>
     <string name="fans_title">Követő</string>
     <string name="local_history_search_placeholder">Helyi gyorsítótár keresése</string>
+    <string name="local_history_search_status_title">Állapot</string>
     <string name="local_history_search_user_title">Felhasználó</string>
+    <string name="add_rss_source">Hozzáadás</string>
+    <string name="edit_rss_source">Rss forrás szerkesztése</string>
     <string name="rss_sources_title_label">Cím</string>
     <string name="rss_sources_url_label">URL</string>
     <string name="rss_sources_pinned_in_tabs">Pin to home tabs</string>
@@ -231,8 +239,6 @@
     <string name="rss_detail_tldr_loading">Összefoglalás...</string>
     <string name="emoji_picker_recent">Legutóbbi</string>
     <string name="emoji_picker_search">Keresés</string>
-    <string name="changelog_title">Üdvözöljük vissza!</string>
-    <string name="changelog_message">Tettünk néhány változtatást, mióta utoljára bejelentkezett. Íme a részletek:</string>
     <string name="podcast_host">Gazda</string>
     <string name="podcast_title">Podcast</string>
     <string name="podcast_speaker">Beszélő</string>

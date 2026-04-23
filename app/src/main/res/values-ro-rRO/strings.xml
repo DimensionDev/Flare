@@ -49,6 +49,14 @@
     <string name="settings_accounts_title">Administrare cont</string>
     <string name="settings_appearance_title">Aspectul</string>
     <string name="settings_appearance_subtitle">Personalizați aspectul și simțul Flare</string>
+    <string name="settings_appearance_theme_group_title">Tema</string>
+    <string name="settings_appearance_theme_group_subtitle">Culori, dimensiunea fontului și forma avatarului</string>
+    <string name="settings_appearance_layout_group_title">Aspect</string>
+    <string name="settings_appearance_layout_group_subtitle">Momentan, bară de navigare și prezentare postare</string>
+    <string name="settings_appearance_display_group_title">Afişare</string>
+    <string name="settings_appearance_display_group_subtitle">Marcaje de timp, platforme logo-uri și previzualizări link-uri</string>
+    <string name="settings_appearance_media_group_title">Media</string>
+    <string name="settings_appearance_media_group_subtitle">Imagini, videoclipuri și conținut sensibil</string>
     <string name="settings_storage_title">Depozitare</string>
     <string name="settings_storage_subtitle">Gestionează spațiul de stocare al Flare</string>
     <string name="settings_about_title">Despre</string>
@@ -68,15 +76,15 @@
     <string name="settings_ai_config_title">Configurare AI</string>
     <string name="settings_ai_config_server">URL Server</string>
     <string name="settings_ai_config_server_hint">Introduceți URL-ul serverului</string>
-    <string name="settings_ai_config_server_url_requirement">URL-ul serverului trebuie să se termine cu un trailing slash şi acceptă API-ul v1/chat/completare compatibil OpenAI.</string>
+    <string name="settings_ai_config_server_url_requirement">URL-ul serverului trebuie să se termine cu un trailing slash şi acceptă API-ul v1/chat/completions compatibil cu AI.</string>
     <string name="settings_ai_config_server_self_host_description">Puteţi utiliza serverul oficial sau vă puteţi gazdui propriul server</string>
     <string name="settings_ai_config_type">AI Type</string>
     <string name="settings_ai_config_type_description">Atingeți pentru a alege tipul backend AI</string>
     <string name="settings_ai_config_type_select">Selectare</string>
     <string name="settings_ai_config_type_on_device">AI dispozitiv pornit</string>
     <string name="settings_ai_config_type_on_device_description">Folosește execuția AI locală pe dispozitivul curent</string>
-    <string name="settings_ai_config_type_openai">API compatibil OpenAI</string>
-    <string name="settings_ai_config_type_openai_description">Utilizaţi un criteriu compatibil OpenAI-pentru caracteristicile AI</string>
+    <string name="settings_ai_config_type_openai">AI Compatible API</string>
+    <string name="settings_ai_config_type_openai_description">Utilizaţi un criteriu de evaluare compatibil cu AI-pentru caracteristicile AI</string>
     <string name="settings_ai_config_value_empty_placeholder">Nu este setat</string>
     <string name="settings_ai_config_api_key">Cheie API</string>
     <string name="settings_ai_config_api_key_hint">Introduceți cheia API</string>
@@ -87,6 +95,12 @@
     <string name="settings_ai_config_model_error">Încărcarea modelelor a eșuat</string>
     <string name="settings_ai_config_model_no_models">Nu există modele</string>
     <string name="settings_ai_config_model_manual_input">Introduceți modelul manual</string>
+    <string name="settings_ai_config_reasoning_effort">Efort de motivare</string>
+    <string name="settings_ai_config_reasoning_effort_description">Alegeți cât de mult efort cheltuie modelul pe raționament. Implicit folosește comportamentul implicit al furnizorului.</string>
+    <string name="settings_ai_config_reasoning_effort_default">Implicit</string>
+    <string name="settings_ai_config_reasoning_effort_low">scazut</string>
+    <string name="settings_ai_config_reasoning_effort_medium">Medie</string>
+    <string name="settings_ai_config_reasoning_effort_high">Ridicat</string>
     <string name="settings_ai_config_tap_to_edit">Atingeți pentru a edita</string>
     <string name="settings_ai_config_entable_translation">Activează traducerea AI</string>
     <string name="settings_ai_config_translation_description">Înlocuiți traducerea Google cu AI traducere, ar putea dura mai mult timp</string>
@@ -200,6 +214,11 @@
     <string name="settings_appearance_avatar_shape_description">Schimbă forma avatarului</string>
     <string name="settings_appearance_avatar_shape_round">Rotunjire</string>
     <string name="settings_appearance_avatar_shape_square">Patrat</string>
+    <string name="settings_appearance_timeline_display_mode">Mod afișare cronologie</string>
+    <string name="settings_appearance_timeline_display_mode_description">Alegeți cum sunt afișate articolele în cronologii</string>
+    <string name="settings_appearance_timeline_display_mode_card">Card</string>
+    <string name="settings_appearance_timeline_display_mode_plain">Simplu (doar o singură coloană)</string>
+    <string name="settings_appearance_timeline_display_mode_gallery">Galerie (numai acasă)</string>
     <string name="settings_appearance_theme">Tema</string>
     <string name="settings_appearance_theme_description">Schimbă tema aplicației</string>
     <string name="settings_appearance_theme_light">Lumină</string>
@@ -248,8 +267,10 @@
     <string name="media_viewer_title">Vizualizare media</string>
     <string name="settings_accounts_remove">Elimină</string>
     <string name="settings_accounts_remove_confirm">Ești sigur că vrei să ștergi contul %1$s de pe acest dispozitiv?</string>
-    <string name="media_menu_save">Salvare captură ecran</string>
-    <string name="media_menu_share_image">Distribuie captură ecran</string>
+    <string name="media_menu_save">Salvează imaginea</string>
+    <string name="media_menu_share_image">Distribuie imaginea</string>
+    <string name="media_menu_copy_link">Copiază link-ul</string>
+    <string name="media_menu_media_link">Link media</string>
     <string name="status_menu_share_via_fxembed">Distribuie prin FxEmbed</string>
     <string name="status_menu_share_via_fixvx">Distribuie prin Fixvx</string>
     <string name="media_save_success">Salvat în Descărcări</string>
@@ -357,11 +378,14 @@
     <string name="rss_sources_pinned_in_tabs">Fixează în filele principale</string>
     <string name="rss_sources_open_in_browser">Deschide în browser</string>
     <string name="rss_sources_open_in_app">Deschide în aplicație</string>
+    <string name="rss_sources_full_content">Conținut complet</string>
+    <string name="rss_sources_description_only">Doar descriere</string>
     <string name="mastodon_available_timelines">Termene disponibile</string>
     <string name="mastodon_trending_statuses">Trending statuses</string>
     <string name="mastodon_federated_timeline">Cronologie federată</string>
     <string name="mastodon_local_timeline">Cronologie locală</string>
     <string name="subscription_url_hint">Suportă fluxuri RSS și instanțe Mastodon</string>
+    <string name="rss_sources_display_mode">Mod de afişare</string>
     <string name="rss_detail_open_in_browser">Deschide în browser</string>
     <string name="rss_detail_share">Distribuie link-ul</string>
     <string name="rss_detail_tldr">Summarize</string>
@@ -372,8 +396,6 @@
     <string name="rss_detail_translate_error">Traducerea a eșuat</string>
     <string name="emoji_picker_recent">Recente</string>
     <string name="emoji_picker_search">Caută</string>
-    <string name="changelog_title">Bine ai revenit!</string>
-    <string name="changelog_message">Am făcut unele modificări de când v-ați autentificat ultima dată. Iată detaliile:</string>
     <string name="podcast_host">Gazdă</string>
     <string name="podcast_title">Podcast</string>
     <string name="podcast_speaker">Difuzor</string>
@@ -415,14 +437,6 @@
     <string name="import_error">Importarea datelor a eșuat</string>
     <string name="import_confirmation_title">Confirmare import</string>
     <string name="import_confirmation_message">Acest lucru va importa date din fișier. Înregistrările existente cu ID-uri de potrivire vor fi înlocuite. Doriți să continuați?</string>
-    <string name="changelog_current"><![CDATA[            <span>Versiunea %1$s:</span>
-            <ul>
-                <li>a adăugat suport pentru X articole cu experiență de lectură dedicată.</li>
-                <li>Auto Traducere Fin-Tune cu limbi excluse și teste de traducere rapidă.</li>
-                <li>Parsarea RSS este acum mult mai rapidă, cu încărcarea mai rapidă a articolului și o mai bună compatibilitate a hranei pentru animale.</li>
-                <li>Remedierea erorilor şi îmbunătăţirea performanţei.</li>
-            </ul>
-        ]]></string>
     <string name="tab_settings_add_group">Adaugă grup</string>
     <string name="tab_settings_add_tab">Adaugă filă</string>
     <string name="tab_settings_edit_group">Editează grup</string>

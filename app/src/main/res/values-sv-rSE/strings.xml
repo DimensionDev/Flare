@@ -48,6 +48,14 @@
     <string name="settings_accounts_title">Hantering av konto</string>
     <string name="settings_appearance_title">Utseende</string>
     <string name="settings_appearance_subtitle">Anpassa utseendet och känslan av Flare</string>
+    <string name="settings_appearance_theme_group_title">Tema</string>
+    <string name="settings_appearance_theme_group_subtitle">Färger, teckenstorlek och avatar form</string>
+    <string name="settings_appearance_layout_group_title">Layout</string>
+    <string name="settings_appearance_layout_group_subtitle">Tidslinje, navigeringsfält och postlayout</string>
+    <string name="settings_appearance_display_group_title">Visa</string>
+    <string name="settings_appearance_display_group_subtitle">Tidsstämplar, plattformslogotyper och länkförhandsvisningar</string>
+    <string name="settings_appearance_media_group_title">Media</string>
+    <string name="settings_appearance_media_group_subtitle">Bilder, videor och känsligt innehåll</string>
     <string name="settings_storage_title">Lagring</string>
     <string name="settings_storage_subtitle">Hantera flare\'s lagring</string>
     <string name="settings_about_title">Om</string>
@@ -67,15 +75,15 @@
     <string name="settings_ai_config_title">AI konfiguration</string>
     <string name="settings_ai_config_server">Server URL</string>
     <string name="settings_ai_config_server_hint">Ange serverns URL</string>
-    <string name="settings_ai_config_server_url_requirement">Server-URL måste sluta med ett avslutande snedstreck och stödja OpenAI-kompatibla v1/chat/complettions API.</string>
+    <string name="settings_ai_config_server_url_requirement">Server-URL måste sluta med ett avslutande snedstreck och stödja AI-kompatibla v1/chat/complettions API.</string>
     <string name="settings_ai_config_server_self_host_description">Du kan använda den officiella servern eller själv värd din egen server</string>
     <string name="settings_ai_config_type">AI Type</string>
     <string name="settings_ai_config_type_description">Tryck för att välja typ av AI backend</string>
     <string name="settings_ai_config_type_select">Välj</string>
     <string name="settings_ai_config_type_on_device">AI:n på enheten</string>
     <string name="settings_ai_config_type_on_device_description">Använd lokal AI-körning på den aktuella enheten</string>
-    <string name="settings_ai_config_type_openai">OpenAI kompatibelt API</string>
-    <string name="settings_ai_config_type_openai_description">Använd en OpenAI-kompatibel slutpunkt för AI-funktioner</string>
+    <string name="settings_ai_config_type_openai">AI Compatible API</string>
+    <string name="settings_ai_config_type_openai_description">Använd en AI-kompatibel slutpunkt för AI-funktioner</string>
     <string name="settings_ai_config_value_empty_placeholder">Ej inställd</string>
     <string name="settings_ai_config_api_key">API nyckel</string>
     <string name="settings_ai_config_api_key_hint">Ange API-nyckel</string>
@@ -86,6 +94,12 @@
     <string name="settings_ai_config_model_error">Det gick inte att ladda modeller</string>
     <string name="settings_ai_config_model_no_models">Inga modeller</string>
     <string name="settings_ai_config_model_manual_input">Ange modell manuellt</string>
+    <string name="settings_ai_config_reasoning_effort">Resonerar ansträngning</string>
+    <string name="settings_ai_config_reasoning_effort_description">Välj hur mycket ansträngning modellen spenderar på resonemang. Standard använder leverantörens standardbeteende.</string>
+    <string name="settings_ai_config_reasoning_effort_default">Standard</string>
+    <string name="settings_ai_config_reasoning_effort_low">Låg</string>
+    <string name="settings_ai_config_reasoning_effort_medium">Medel</string>
+    <string name="settings_ai_config_reasoning_effort_high">Hög</string>
     <string name="settings_ai_config_tap_to_edit">Tryck för att redigera</string>
     <string name="settings_ai_config_entable_translation">Aktivera AI-översättning</string>
     <string name="settings_ai_config_translation_description">Ersätt Google Translate med AI-översättning, kan ta längre tid</string>
@@ -199,6 +213,11 @@
     <string name="settings_appearance_avatar_shape_description">Ändra formen på avatar</string>
     <string name="settings_appearance_avatar_shape_round">Rund</string>
     <string name="settings_appearance_avatar_shape_square">Kvadrat</string>
+    <string name="settings_appearance_timeline_display_mode">Tidslinje visningsläge</string>
+    <string name="settings_appearance_timeline_display_mode_description">Välj hur objekt visas i tidslinjer</string>
+    <string name="settings_appearance_timeline_display_mode_card">Kort</string>
+    <string name="settings_appearance_timeline_display_mode_plain">Oformaterad (endast en kolumn)</string>
+    <string name="settings_appearance_timeline_display_mode_gallery">Galleri (endast hemtid)</string>
     <string name="settings_appearance_theme">Tema</string>
     <string name="settings_appearance_theme_description">Ändra temat för appen</string>
     <string name="settings_appearance_theme_light">Ljus</string>
@@ -247,8 +266,10 @@
     <string name="media_viewer_title">Media visare</string>
     <string name="settings_accounts_remove">Radera</string>
     <string name="settings_accounts_remove_confirm">Är du säker på att du vill ta bort kontot %1$s från denna enhet?</string>
-    <string name="media_menu_save">Spara skärmdump</string>
-    <string name="media_menu_share_image">Dela skärmdump</string>
+    <string name="media_menu_save">Spara bild</string>
+    <string name="media_menu_share_image">Dela bild</string>
+    <string name="media_menu_copy_link">Kopiera länk</string>
+    <string name="media_menu_media_link">Medialänk</string>
     <string name="status_menu_share_via_fxembed">Dela via FxEmbed</string>
     <string name="status_menu_share_via_fixvx">Dela via Fixvx</string>
     <string name="media_save_success">Sparad i hämtningar</string>
@@ -356,11 +377,14 @@
     <string name="rss_sources_pinned_in_tabs">Fäst på fliken hem</string>
     <string name="rss_sources_open_in_browser">Öppna i webbläsare</string>
     <string name="rss_sources_open_in_app">Öppna i app</string>
+    <string name="rss_sources_full_content">Fullständigt innehåll</string>
+    <string name="rss_sources_description_only">Endast beskrivning</string>
     <string name="mastodon_available_timelines">Tillgängliga tidslinjer</string>
     <string name="mastodon_trending_statuses">Trending statuses</string>
     <string name="mastodon_federated_timeline">Förenad tidslinje</string>
     <string name="mastodon_local_timeline">Lokal tidslinje</string>
     <string name="subscription_url_hint">Stöder RSS-flöden och Mastodon instanser</string>
+    <string name="rss_sources_display_mode">Visningsläge</string>
     <string name="rss_detail_open_in_browser">Öppna i webbläsare</string>
     <string name="rss_detail_share">Dela länk</string>
     <string name="rss_detail_tldr">Summarize</string>
@@ -371,8 +395,6 @@
     <string name="rss_detail_translate_error">Misslyckades att översätta</string>
     <string name="emoji_picker_recent">Senaste</string>
     <string name="emoji_picker_search">Sök</string>
-    <string name="changelog_title">Välkommen tillbaka!</string>
-    <string name="changelog_message">Vi har gjort några ändringar sedan du senast loggade in. Här är detaljerna:</string>
     <string name="podcast_host">Värd</string>
     <string name="podcast_title">Podcast</string>
     <string name="podcast_speaker">Högtalare</string>
@@ -414,14 +436,6 @@
     <string name="import_error">Det gick inte att importera data</string>
     <string name="import_confirmation_title">Bekräfta import</string>
     <string name="import_confirmation_message">Detta kommer att importera data från filen. Befintliga poster med matchande ID kommer att ersättas. Vill du fortsätta?</string>
-    <string name="changelog_current"><![CDATA[            <span>Version %1$s:</span>
-            <ul>
-                <li>Lagt till stöd för X-artiklar med en dedikerad läsupplevelse.</li>
-                <li>Finjustera automatisk översättning med exkluderade språk och snabb översättningstestning.</li>
-                <li>RSS-tolkning är nu mycket snabbare, med snabbare artikelladdning och bättre foderkompatibilitet.</li>
-                <li>Felrättelser och prestandaförbättringar.</li>
-            </ul>
-        ]]></string>
     <string name="tab_settings_add_group">Lägg till grupp</string>
     <string name="tab_settings_add_tab">Lägg till flik</string>
     <string name="tab_settings_edit_group">Redigera grupp</string>

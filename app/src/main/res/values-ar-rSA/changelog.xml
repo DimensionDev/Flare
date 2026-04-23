@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="changelog_title">مرحبا بعودتك!</string>
+    <string name="changelog_message">لقد قمنا ببعض التغييرات منذ آخر تسجيل دخولك. وفيما يلي التفاصيل:</string>
+    <string name="changelog_current"><![CDATA[            <span>الإصدار %1$s:</span>
+            <ul>
+                <li>إضافة أوضاع جديدة لعرض الخط الزمني، بما في ذلك تصميم المعرض.</li>
+                <li>تحسين قراءة RSS ، المشاركة والترجمة والموجزات.</li>
+                <li>إعادة تنظيم إعدادات الظهور لتخصيص أسهل.</li>
+                <li>إصلاحات الشوائب وتحسينات الأداء.</li>
+            </ul>
+        ]]></string>
+</resources>

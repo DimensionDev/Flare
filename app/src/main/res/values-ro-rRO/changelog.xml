@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="changelog_title">Bine ai revenit!</string>
+    <string name="changelog_message">Am făcut unele modificări de când v-ați autentificat ultima dată. Iată detaliile:</string>
+    <string name="changelog_current"><![CDATA[            <span>Versiunea %1$s:</span>
+            <ul>
+                <li>a adăugat noi moduri de afişare a cronologiei, incluzând un aspect de galerie.</li>
+                <li>S-a îmbunătățit citirea RSS, partajarea, traducerea și rezumatele.</li>
+                <li>Setări reorganizate de Appearance pentru o personalizare mai ușoară.</li>
+                <li>Remedierea erorilor şi îmbunătăţirea performanţei.</li>
+            </ul>
+        ]]></string>
+</resources>

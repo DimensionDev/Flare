@@ -60,6 +60,7 @@
     <string name="reply">Antwoord</string>
     <string name="report">Verslag</string>
     <string name="retweet">Herpost</string>
+    <string name="retweet_remove">Verwyder retweet</string>
     <string name="status_loadmore_error_retry">Probeer weer</string>
     <string name="status_detail_comment">Kommentaar</string>
     <string name="status_detail_repost">Herpost</string>
@@ -110,6 +111,8 @@
     <string name="settings_accounts_title">Rekeningbestuur</string>
     <string name="settings_appearance_title">Uiterlik</string>
     <string name="settings_appearance_subtitle">Pas die voorkoms van Flare aan</string>
+    <string name="settings_appearance_theme_group_title">Tema</string>
+    <string name="settings_appearance_media_group_title">Media</string>
     <string name="settings_storage_title">Berging</string>
     <string name="settings_storage_subtitle">Bestuur Flare se berging</string>
     <string name="settings_about_title">Oor</string>
@@ -127,9 +130,11 @@
     <string name="settings_app_logging_clear">Maak log skoon</string>
     <string name="settings_app_logging_enable_network_logging">Aktiveer netwerk logging</string>
     <string name="settings_ai_config_title">AI Konfigurasie</string>
+    <string name="settings_ai_config_description">Konfigureer AI instellings</string>
     <string name="settings_ai_config_server">Bediener URL</string>
     <string name="settings_ai_config_server_hint">Voer die bediener URL in</string>
     <string name="settings_ai_config_server_self_host_description">Jy kan die amptelike bediener gebruik of jou eie bediener self aanloop</string>
+    <string name="settings_ai_config_reasoning_effort_default">Standaard</string>
     <string name="settings_ai_config_entable_translation">Aktiveer AI vertaling</string>
     <string name="settings_ai_config_translation_description">Vervang Google Translate met AI vertaling, mag langer neem</string>
     <string name="settings_ai_config_enable_tldr">Aktiveer AI Samevatting</string>
@@ -139,6 +144,7 @@
     <string name="settings_appearance_show_media">Wys media</string>
     <string name="settings_appearance_show_numbers">Wys nommers</string>
     <string name="settings_appearance_show_cw_img">Wys sensitiewe inhoud</string>
+    <string name="settings_appearance_show_cw_img_description">Wys altyd sensitiewe inhoud in die status</string>
     <string name="settings_appearance_expand_media">Strek media na volle grootte</string>
     <string name="settings_appearance_expand_media_description">Hou die verhouding van die media in tydlyn</string>
     <string name="settings_appearance_video_autoplay">Video outomaties speel</string>
@@ -188,8 +194,14 @@
     <string name="misskey_visibility_home">Tuis</string>
     <string name="misskey_visibility_followers">Volgers</string>
     <string name="misskey_visibility_specified">Geselekteerde</string>
+    <string name="add_rss_source">Voeg by</string>
+    <string name="edit_rss_source">Bewerk Rss Bron</string>
     <string name="rss_sources_title_label">Titel</string>
     <string name="rss_sources_url_label">Url</string>
+    <string name="rss_sources_open_in_browser">Open in blaai</string>
+    <string name="rss_detail_open_in_browser">Open in blaai</string>
+    <string name="rss_detail_tldr">Som op</string>
+    <string name="rss_detail_tldr_error">Kon nie opsom nie</string>
     <string name="tab_settings_add">Voeg by</string>
     <string name="tab_settings_drag">Sleep</string>
     <string name="tab_settings_edit">Bewerk</string>
@@ -215,6 +227,7 @@
     <string name="edit_tab_with_avatar">Met avatar</string>
     <string name="edit">Bewerk</string>
     <string name="local_history_search_placeholder">Soek plaaslike kas</string>
+    <string name="local_history_search_status_title">Status</string>
     <string name="local_history_search_user_title">Gebruiker</string>
     <string name="settings_storage_clear_image_cache">Maak beeldkas skoon</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB van beelde sal verwyder word</string>

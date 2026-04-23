@@ -60,6 +60,7 @@
     <string name="reply">Одговори</string>
     <string name="report">Пријави</string>
     <string name="retweet">Поново</string>
+    <string name="retweet_remove">Уклоните ретвит</string>
     <string name="status_loadmore_error_retry">Поновите</string>
     <string name="status_detail_comment">Коментар</string>
     <string name="status_detail_repost">Поново</string>
@@ -110,6 +111,8 @@
     <string name="settings_accounts_title">Управљање рачунима</string>
     <string name="settings_appearance_title">Изглед</string>
     <string name="settings_appearance_subtitle">Прилагодите изглед и осећај Flare-а</string>
+    <string name="settings_appearance_theme_group_title">Тема</string>
+    <string name="settings_appearance_media_group_title">Медији</string>
     <string name="settings_storage_title">Складиште</string>
     <string name="settings_storage_subtitle">Управљајте складишtem Flare-а</string>
     <string name="settings_about_title">О апликацији</string>
@@ -127,9 +130,11 @@
     <string name="settings_app_logging_clear">Очистите лог</string>
     <string name="settings_app_logging_enable_network_logging">Омогућите логовање мреже</string>
     <string name="settings_ai_config_title">AI Конфигурација</string>
+    <string name="settings_ai_config_description">Поставите AI подешавања</string>
     <string name="settings_ai_config_server">URL сервера</string>
     <string name="settings_ai_config_server_hint">Унесите URL сервера</string>
     <string name="settings_ai_config_server_self_host_description">Можете користити службени сервер или угостити свој сервер</string>
+    <string name="settings_ai_config_reasoning_effort_default">Дефолт</string>
     <string name="settings_ai_config_entable_translation">Омогући AI превод</string>
     <string name="settings_ai_config_translation_description">Замените Google Translate AI превођем, може потрајати дуже</string>
     <string name="settings_ai_config_enable_tldr">Омогући AI сажимање</string>
@@ -139,6 +144,7 @@
     <string name="settings_appearance_show_media">Прикажи медије</string>
     <string name="settings_appearance_show_numbers">Прикажи бројеве</string>
     <string name="settings_appearance_show_cw_img">Прикажи осетљив садржај</string>
+    <string name="settings_appearance_show_cw_img_description">Увек прикажите осетљив садржај у статусу</string>
     <string name="settings_appearance_expand_media">Проширите медије на целу величину</string>
     <string name="settings_appearance_expand_media_description">Задржите однос екрана медија у временској линији</string>
     <string name="settings_appearance_video_autoplay">Аутоматско репродуковање видеа</string>
@@ -188,8 +194,14 @@
     <string name="misskey_visibility_home">Почетна</string>
     <string name="misskey_visibility_followers">Пратиоци</string>
     <string name="misskey_visibility_specified">Одређени</string>
+    <string name="add_rss_source">Додај</string>
+    <string name="edit_rss_source">Уреди Rss Извор</string>
     <string name="rss_sources_title_label">Наслов</string>
     <string name="rss_sources_url_label">Урл</string>
+    <string name="rss_sources_open_in_browser">Отворите у прегледаћу</string>
+    <string name="rss_detail_open_in_browser">Отворите у прегледаћу</string>
+    <string name="rss_detail_tldr">Сажмите</string>
+    <string name="rss_detail_tldr_error">Неуспех сажимања</string>
     <string name="tab_settings_add">Додај</string>
     <string name="tab_settings_drag">Повучите</string>
     <string name="tab_settings_edit">Уреди</string>
@@ -215,6 +227,7 @@
     <string name="edit_tab_with_avatar">С аватаром</string>
     <string name="edit">Уреди</string>
     <string name="local_history_search_placeholder">Претражите локални кеш</string>
+    <string name="local_history_search_status_title">Статус</string>
     <string name="local_history_search_user_title">Корисник</string>
     <string name="settings_storage_clear_image_cache">Очистите кеш слике</string>
     <string name="settings_storage_clear_image_cache_description">%1$s МБ слика биће уклоњено</string>

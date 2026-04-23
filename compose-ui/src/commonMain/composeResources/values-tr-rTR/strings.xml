@@ -17,13 +17,16 @@
     <string name="mastodon_notification_item_poll_ended">Katıldığın bir anket sona erdi</string>
     <string name="mastodon_notification_item_mentioned_you">seni bahsetti</string>
     <string name="mastodon_notification_item_requested_follow">seni takip etme isteği</string>
+    <string name="mastodon_notification_item_updated_status">bir toot güncelledin</string>
     <string name="mastodon_item_show_more">Daha fazlasını göster</string>
     <string name="mastodon_item_show_less">Daha az göster</string>
+    <string name="mastodon_item_pinned">Sabitlenmiş toot</string>
     <string name="bluesky_notification_item_followed_you">seni takip etti</string>
     <string name="bluesky_notification_item_favourited_your_status">favori olarak ekledi</string>
     <string name="bluesky_notification_item_reblogged_your_status">yeniden paylaştı</string>
     <string name="bluesky_notification_item_poll_ended">Katıldığın bir anket sona erdi</string>
     <string name="bluesky_notification_item_mentioned_you">seni bahsetti</string>
+    <string name="bluesky_item_reblogged_status">bir durumu boostladı</string>
     <string name="bluesky_notification_item_replied_to_you">sana yanıt verdi</string>
     <string name="bluesky_notification_item_quoted_your_status">alıntı yaptı</string>
     <string name="bluesky_notification_item_starterpack_joined">Başlangıç paketi Katıldı</string>
@@ -40,12 +43,16 @@
     <string name="misskey_notification_item_followed_you">seni takip etti</string>
     <string name="misskey_notification_item_requested_follow">seni takip etme isteği gönderdi</string>
     <string name="misskey_notification_unknwon">Bilinmeyen bildirim %1$s</string>
+    <string name="misskey_item_reblogged_status">bir durumu boostladı</string>
     <string name="xqt_item_reblogged_status">yeniden paylaştı</string>
     <string name="xqt_item_mention_status">seni bahsetti</string>
     <string name="mastodon_visibility_public">Herkese açık</string>
     <string name="mastodon_visibility_unlisted">Listeye alınmamış</string>
     <string name="mastodon_visibility_private">Özel</string>
     <string name="mastodon_visibility_direct">Doğrudan</string>
+    <string name="mastodon_visibility_public_description">Bu gönderiyi herkes görebilir ve beğenebilir</string>
+    <string name="mastodon_visibility_private_description">Sadece takipçiler bu gönderiyi görebilir</string>
+    <string name="mastodon_visibility_direct_description">Yalnızca belirtilen kullanıcılar bu gönderiyi görebilir</string>
     <string name="settings_notifications_title">Bildirimler</string>
     <string name="settings_notifications_subtitle">Flare\'ın size nasıl bildirim göndereceğini özelleştirin</string>
     <string name="status_loadmore_error_retry">Yeniden dene</string>
@@ -56,6 +63,7 @@
     <string name="login_expired_message">Yeniden giriş yapmak için tıklayın</string>
     <string name="login_expired_relogin">Yeniden giriş yap</string>
     <string name="misskey_compose_local_only">Yerel yalnızca</string>
+    <string name="misskey_compose_local_only_description">Yalnızca bu örnekteki kullanıcılar bu gönderiyi görebilir</string>
     <string name="misskey_item_action_renote">Yeniden paylaşıyorum</string>
     <string name="misskey_item_action_quote">Alıntı</string>
     <string name="bluesky_notification_unknown_message">Bilinmeyen bildirim türü %1$s</string>
@@ -83,6 +91,7 @@
     <string name="retweet">Yeniden paylaş</string>
     <string name="retweet_remove">Yeniden gönderimi kaldır</string>
     <string name="share">Paylaş</string>
+    <string name="fx_share">FxEmbed aracılığıyla paylaş</string>
     <string name="comment">Yorum</string>
     <string name="user_report">Şikayet et</string>
     <string name="user_block">engelle</string>
@@ -96,6 +105,7 @@
     <string name="date_format_year_month_day">dd MMM yy</string>
     <string name="date_format_month_day">dd MMM</string>
     <string name="date_format_full">dd MMM yy HH:mm</string>
+    <string name="vvo_notification_like">durumunu beğendin</string>
     <string name="user_follow_edit_list">Listeye Ekle/Kaldır</string>
     <string name="list_empty">Liste yok</string>
     <string name="list_error">Listeleri yüklemede hata oluştu</string>
@@ -300,6 +310,8 @@
     <string name="list_add">Liste ekle</string>
     <string name="list_edit">Listeyi düzenle</string>
     <string name="list_delete">Listeyi sil</string>
+    <string name="add_rss_source">Ekle</string>
+    <string name="edit_rss_source">Rss Kaynağını Düzenle</string>
     <string name="rss_sources_title_label">Başlık</string>
     <string name="rss_sources_url_label">Url</string>
     <string name="service_select_welcome_title">Flare\'a hoş geldiniz</string>
@@ -343,4 +355,5 @@
     <string name="settings_about_localization">Crowdin</string>
     <string name="settings_about_localization_description">Flare\'ı çevirmemize yardım edin</string>
     <string name="settings_privacy_policy">Gizlilik Politikası</string>
+    <string name="channel_title">Kanal</string>
 </resources>

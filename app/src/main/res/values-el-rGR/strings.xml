@@ -48,6 +48,14 @@
     <string name="settings_accounts_title">Διαχείριση Λογαριασμού</string>
     <string name="settings_appearance_title">Εμφάνιση</string>
     <string name="settings_appearance_subtitle">Προσαρμόστε την εμφάνιση και την αίσθηση του Flare</string>
+    <string name="settings_appearance_theme_group_title">Θέμα</string>
+    <string name="settings_appearance_theme_group_subtitle">Χρώματα, μέγεθος γραμματοσειράς και σχήμα avatar</string>
+    <string name="settings_appearance_layout_group_title">Διάταξη</string>
+    <string name="settings_appearance_layout_group_subtitle">Χρονοδιάγραμμα, γραμμή πλοήγησης και διάταξη δημοσίευσης</string>
+    <string name="settings_appearance_display_group_title">Εμφάνιση</string>
+    <string name="settings_appearance_display_group_subtitle">Χρονοσφραγίδες, λογότυπα πλατφόρμας και προεπισκοπήσεις συνδέσμων</string>
+    <string name="settings_appearance_media_group_title">Πολυμέσα</string>
+    <string name="settings_appearance_media_group_subtitle">Εικόνες, βίντεο και ευαίσθητο περιεχόμενο</string>
     <string name="settings_storage_title">Αποθήκευση</string>
     <string name="settings_storage_subtitle">Διαχείριση χώρου αποθήκευσης Flare</string>
     <string name="settings_about_title">Σχετικά</string>
@@ -67,15 +75,15 @@
     <string name="settings_ai_config_title">Ρύθμιση Τεχνητής Νοημοσύνης</string>
     <string name="settings_ai_config_server">Url Διακομιστή</string>
     <string name="settings_ai_config_server_hint">Εισάγετε το URL του διακομιστή</string>
-    <string name="settings_ai_config_server_url_requirement">Το URL διακομιστή πρέπει να τελειώσει με μια τελική κάθετο και να υποστηρίξει το API συμβατό με OpenAI v1/chat/completions API.</string>
+    <string name="settings_ai_config_server_url_requirement">Το URL διακομιστή πρέπει να τελειώσει με μια τελική κάθετο και να υποστηρίξει το API συμβατό με AI v1/chat/completions API.</string>
     <string name="settings_ai_config_server_self_host_description">Μπορείτε να χρησιμοποιήσετε τον επίσημο διακομιστή ή αυτο-φιλοξενία του δικού σας διακομιστή</string>
     <string name="settings_ai_config_type">AI Type</string>
     <string name="settings_ai_config_type_description">Πατήστε για να επιλέξετε τον τύπο συστήματος υποστήριξης τεχνητής νοημοσύνης</string>
     <string name="settings_ai_config_type_select">Επιλογή</string>
     <string name="settings_ai_config_type_on_device">Συσκευή τεχνητής νοημοσύνης</string>
     <string name="settings_ai_config_type_on_device_description">Χρήση τοπικής εκτέλεσης τεχνητής νοημοσύνης στην τρέχουσα συσκευή</string>
-    <string name="settings_ai_config_type_openai">OpenAI Συμβατό API</string>
-    <string name="settings_ai_config_type_openai_description">Χρήση τελικού σημείου συμβατού με το OpenAI για χαρακτηριστικά τεχνητής νοημοσύνης</string>
+    <string name="settings_ai_config_type_openai">AI Compatible API</string>
+    <string name="settings_ai_config_type_openai_description">Χρησιμοποιήστε ένα τελικό σημείο συμβατό με AI για χαρακτηριστικά AI</string>
     <string name="settings_ai_config_value_empty_placeholder">Δεν έχει οριστεί</string>
     <string name="settings_ai_config_api_key">Κλειδί API</string>
     <string name="settings_ai_config_api_key_hint">Εισαγωγή κλειδιού API</string>
@@ -86,6 +94,12 @@
     <string name="settings_ai_config_model_error">Αποτυχία φόρτωσης μοντέλων</string>
     <string name="settings_ai_config_model_no_models">Κανένα μοντέλο</string>
     <string name="settings_ai_config_model_manual_input">Χειροκίνητη εισαγωγή μοντέλου</string>
+    <string name="settings_ai_config_reasoning_effort">Προσπάθεια Αξιολόγησης</string>
+    <string name="settings_ai_config_reasoning_effort_description">Επιλέξτε πόση προσπάθεια ξοδεύει το μοντέλο για συλλογισμό. Η προεπιλογή χρησιμοποιεί την προεπιλεγμένη συμπεριφορά του παρόχου.</string>
+    <string name="settings_ai_config_reasoning_effort_default">Προεπιλογή</string>
+    <string name="settings_ai_config_reasoning_effort_low">Χαμηλή</string>
+    <string name="settings_ai_config_reasoning_effort_medium">Μεσαίο</string>
+    <string name="settings_ai_config_reasoning_effort_high">Υψηλή</string>
     <string name="settings_ai_config_tap_to_edit">Πατήστε για επεξεργασία</string>
     <string name="settings_ai_config_entable_translation">Ενεργοποίηση μετάφρασης τεχνητής νοημοσύνης</string>
     <string name="settings_ai_config_translation_description">Αντικαταστήστε το Google Translate με τη μετάφραση τεχνητής νοημοσύνης, μπορεί να πάρει περισσότερο χρόνο</string>
@@ -199,6 +213,11 @@
     <string name="settings_appearance_avatar_shape_description">Αλλαγή του σχήματος του avatar</string>
     <string name="settings_appearance_avatar_shape_round">Στρογγυλό</string>
     <string name="settings_appearance_avatar_shape_square">Τετράγωνο</string>
+    <string name="settings_appearance_timeline_display_mode">Λειτουργία οθόνης χρονολογίου</string>
+    <string name="settings_appearance_timeline_display_mode_description">Επιλέξτε τον τρόπο εμφάνισης των αντικειμένων στις χρονοδιαγράμματα</string>
+    <string name="settings_appearance_timeline_display_mode_card">Κάρτα</string>
+    <string name="settings_appearance_timeline_display_mode_plain">Απλό (μόνο μία στήλη)</string>
+    <string name="settings_appearance_timeline_display_mode_gallery">Γκαλερί (αρχικό χρονοδιάγραμμα μόνο)</string>
     <string name="settings_appearance_theme">Θέμα</string>
     <string name="settings_appearance_theme_description">Αλλαγή θέματος της εφαρμογής</string>
     <string name="settings_appearance_theme_light">Φωτεινό</string>
@@ -247,8 +266,10 @@
     <string name="media_viewer_title">Προβολέας μέσων</string>
     <string name="settings_accounts_remove">Αφαίρεση</string>
     <string name="settings_accounts_remove_confirm">Είστε βέβαιοι ότι θέλετε να καταργήσετε τον λογαριασμό %1$s από αυτήν τη συσκευή?</string>
-    <string name="media_menu_save">Αποθήκευση στιγμιότυπου</string>
-    <string name="media_menu_share_image">Κοινοποίηση στιγμιότυπου οθόνης</string>
+    <string name="media_menu_save">Αποθήκευση εικόνας</string>
+    <string name="media_menu_share_image">Κοινή χρήση εικόνας</string>
+    <string name="media_menu_copy_link">Αντιγραφή συνδέσμου</string>
+    <string name="media_menu_media_link">Σύνδεσμος πολυμέσων</string>
     <string name="status_menu_share_via_fxembed">Κοινοποίηση μέσω FxEmbed</string>
     <string name="status_menu_share_via_fixvx">Κοινή χρήση μέσω Fixvx</string>
     <string name="media_save_success">Αποθηκεύτηκε στις Λήψεις</string>
@@ -356,11 +377,14 @@
     <string name="rss_sources_pinned_in_tabs">Καρφίτσωμα στις καρτέλες του σπιτιού</string>
     <string name="rss_sources_open_in_browser">Άνοιγμα σε πρόγραμμα περιήγησης</string>
     <string name="rss_sources_open_in_app">Άνοιγμα σε εφαρμογή</string>
+    <string name="rss_sources_full_content">Πλήρες περιεχόμενο</string>
+    <string name="rss_sources_description_only">Περιγραφή μόνο</string>
     <string name="mastodon_available_timelines">Διαθέσιμα χρονοδιαγράμματα</string>
     <string name="mastodon_trending_statuses">Trending statuses</string>
     <string name="mastodon_federated_timeline">Ομόσπονδο χρονοδιάγραμμα</string>
     <string name="mastodon_local_timeline">Τοπικό χρονοδιάγραμμα</string>
     <string name="subscription_url_hint">Υποστηρίζει τροφοδοσίες RSS και παρουσίες Mastodon</string>
+    <string name="rss_sources_display_mode">Λειτουργία προβολής</string>
     <string name="rss_detail_open_in_browser">Άνοιγμα σε πρόγραμμα περιήγησης</string>
     <string name="rss_detail_share">Κοινοποίηση συνδέσμου</string>
     <string name="rss_detail_tldr">Summarize</string>
@@ -371,8 +395,6 @@
     <string name="rss_detail_translate_error">Αποτυχία μετάφρασης</string>
     <string name="emoji_picker_recent">Πρόσφατα</string>
     <string name="emoji_picker_search">Αναζήτηση</string>
-    <string name="changelog_title">Καλώς ήρθατε!</string>
-    <string name="changelog_message">Έχουμε κάνει κάποιες αλλαγές από τότε που συνδεθήκατε την τελευταία φορά. Εδώ είναι οι λεπτομέρειες:</string>
     <string name="podcast_host">Διακομιστής</string>
     <string name="podcast_title">Podcast</string>
     <string name="podcast_speaker">Ηχείο</string>
@@ -414,14 +436,6 @@
     <string name="import_error">Αποτυχία εισαγωγής δεδομένων</string>
     <string name="import_confirmation_title">Επιβεβαίωση Εισαγωγής</string>
     <string name="import_confirmation_message">Αυτό θα εισάγει δεδομένα από το αρχείο. Οι υπάρχουσες εγγραφές με ταυτότητες που ταιριάζουν θα αντικατασταθούν. Θέλετε να συνεχίσετε?</string>
-    <string name="changelog_current"><![CDATA[            <span>Έκδοση %1$s:</span>
-            <ul>
-                <li>Προστέθηκε υποστήριξη για Χ άρθρα με ειδική εμπειρία ανάγνωσης.</li>
-                <li>Αυτόματη μετάφραση Fine-tune με αποκλεισμένες γλώσσες και γρήγορη δοκιμή μετάφρασης.</li>
-                <li>Η ανάλυση RSS είναι τώρα πολύ ταχύτερη, με γρηγορότερη φόρτωση άρθρου και καλύτερη συμβατότητα ζωοτροφών.</li>
-                <li>Διορθώσεις σφαλμάτων και βελτιώσεις απόδοσης.</li>
-            </ul>
-        ]]></string>
     <string name="tab_settings_add_group">Προσθήκη Ομάδας</string>
     <string name="tab_settings_add_tab">Προσθήκη Καρτέλας</string>
     <string name="tab_settings_edit_group">Επεξεργασία Ομάδας</string>

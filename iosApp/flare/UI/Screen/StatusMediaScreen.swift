@@ -200,9 +200,12 @@ struct VideoControlView: View {
                 } label: {
                     Image(isPlaying ? "fa-pause" : "fa-play")
                         .font(.title2)
+                        .frame(height: 24)
                         .contentTransition(.symbolEffect(.replace))
                 }
-                .buttonStyle(.plain)
+                .contentShape(Rectangle())
+                .backport
+                .glassButtonStyle(fallbackStyle: .plain)
                 
                 Text(formatTime(isSeeking ? sliderValue : currentTime.seconds))
                     .font(.caption)

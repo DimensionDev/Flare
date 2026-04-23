@@ -23,6 +23,9 @@ struct StatusMediaScreen: View {
     @State var opacity: CGFloat = 1 // Dismiss gesture background opacity
     @State var showData = true
     @State private var protectInitialPagerSelection: Bool = false
+    @State private var shareImage: UIImage?
+    @State private var shareImageURL: String?
+
     var body: some View {
         ZStack {
             if medias.isEmpty {
@@ -93,6 +96,9 @@ struct StatusMediaScreen: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .task(id: selectedImageURL) {
+            await loadShareImage(url: selectedImageURL)
+        }
         .onChange(of: selectedIndex) { oldValue, newValue in
             isPlaying = true
             videoState = .idle
@@ -131,6 +137,24 @@ struct StatusMediaScreen: View {
                             Image("fa-download")
                         }
                     }
+                    ToolbarItem(placement: .primaryAction) {
+                        if let shareImage, shareImageURL == selectedMedia.url {
+                            ShareLink(
+                                item: Image(uiImage: shareImage),
+                                preview: SharePreview("Share image", image: Image(uiImage: shareImage))
+                            ) {
+                                Image("fa-share-nodes")
+                            }
+                            .accessibilityLabel("Share image")
+                        } else {
+                            Button {
+                            } label: {
+                                Image("fa-share-nodes")
+                            }
+                            .disabled(true)
+                            .accessibilityLabel("Share image")
+                        }
+                    }
                 }
             }
         }
@@ -161,11 +185,46 @@ struct StatusMediaScreen: View {
         return medias[selectedIndex]
     }
 
+    private var selectedImageURL: String? {
+        guard let selectedMedia else {
+            return nil
+        }
+
+        switch onEnum(of: selectedMedia) {
+        case .image(let image):
+            return image.url
+        case .video, .gif, .audio:
+            return nil
+        }
+    }
+
     private func clampedIndex(_ index: Int, count: Int) -> Int {
         guard count > 0 else {
             return 0
         }
         return min(max(index, 0), count - 1)
+    }
+
+    private func loadShareImage(url: String?) async {
+        shareImage = nil
+        shareImageURL = url
+
+        guard let url, let imageURL = URL(string: url) else {
+            return
+        }
+
+        do {
+            let result = try await KingfisherManager.shared.retrieveImage(with: imageURL)
+            guard !Task.isCancelled, shareImageURL == url else {
+                return
+            }
+            shareImage = result.image
+        } catch {
+            guard !Task.isCancelled, shareImageURL == url else {
+                return
+            }
+            shareImage = nil
+        }
     }
     
     var statusView: some View {

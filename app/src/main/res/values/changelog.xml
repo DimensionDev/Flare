@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="changelog_title">Welcome back!</string>
+    <string name="changelog_message">We have made some changes since you last logged in. Here are the details:</string>
+    <string name="changelog_current">
+        <![CDATA[
+            <span>Version %1$s:</span>
+            <ul>
+                <li>Added new timeline display modes, including a Gallery layout.</li>
+                <li>Improved RSS reading, sharing, translation, and summaries.</li>
+                <li>Reorganized Appearance settings for easier customization.</li>
+                <li>Bug fixes and performance improvements.</li>
+            </ul>
+        ]]>
+    </string>
+</resources>

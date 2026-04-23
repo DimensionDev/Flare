@@ -12,6 +12,11 @@ files:
       "translation": "%original_path%-%android_code%/strings.xml",
     },
     {
+      "source": "**/values/changelog.xml",
+      "translation": "%original_path%-%android_code%/changelog.xml",
+      "excluded_target_languages": ["fr", "it"],
+    },
+    {
       "source": "iosApp/flare/Localizable.xcstrings",
       "translation": "iosApp/flare/Localizable.xcstrings",
       "multilingual": true,

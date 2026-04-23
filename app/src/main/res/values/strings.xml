@@ -453,9 +453,6 @@
     <string name="emoji_picker_recent">Recent</string>
     <string name="emoji_picker_search">Search</string>
 
-    <string name="changelog_title">Welcome back!</string>
-    <string name="changelog_message">We have made some changes since you last logged in. Here are the details:</string>
-
     <string name="podcast_host">Host</string>
     <string name="podcast_title">Podcast</string>
     <string name="podcast_speaker">Speaker</string>
@@ -504,17 +501,6 @@
     <string name="import_confirmation_title">Confirm Import</string>
     <string name="import_confirmation_message">This will import data from the file. Existing records with matching IDs will be replaced. Do you want to continue?</string>
 
-    <string name="changelog_current">
-        <![CDATA[
-            <span>Version %1$s:</span>
-            <ul>
-                <li>Added new timeline display modes, including a Gallery layout.</li>
-                <li>Improved RSS reading, sharing, translation, and summaries.</li>
-                <li>Reorganized Appearance settings for easier customization.</li>
-                <li>Bug fixes and performance improvements.</li>
-            </ul>
-        ]]>
-    </string>
     <string name="tab_settings_add_group">Add Group</string>
     <string name="tab_settings_add_tab">Add Tab</string>
     <string name="tab_settings_edit_group">Edit Group</string>

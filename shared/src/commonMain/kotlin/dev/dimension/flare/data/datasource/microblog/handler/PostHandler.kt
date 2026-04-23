@@ -18,7 +18,8 @@ import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -57,35 +58,22 @@ internal class PostHandler(
             cacheSource = {
                 val dbAccountType = accountType as DbAccountType
                 combine(
-                    database
-                        .statusDao()
-                        .getWithReferences(postKey, dbAccountType),
-                    database.pagingTimelineDao().get(pagingKey, accountType = dbAccountType),
+                    merge(
+                        database
+                            .statusDao()
+                            .getWithReferences(postKey, dbAccountType)
+                            .filterNotNull(),
+                        database.pagingTimelineDao().get(pagingKey, accountType = dbAccountType)
+                            .filterNotNull(),
+                    ),
                     translationDisplayFlow,
-                ) { status, paging, translationDisplayOptions ->
-                    when {
-                        paging != null -> {
-                            TimelinePagingMapper.toUi(
-                                item = paging,
-                                pagingKey = pagingKey,
-                                translationDisplayOptions = translationDisplayOptions,
-                            )
-                        }
-
-                        status != null -> {
-                            TimelinePagingMapper.toUi(
-                                item = status,
-                                pagingKey = pagingKey,
-                                translationDisplayOptions = translationDisplayOptions,
-                            )
-                        }
-
-                        else -> {
-                            null
-                        }
-                    }
+                ) { status, translationDisplayOptions ->
+                    TimelinePagingMapper.toUi(
+                        item = status,
+                        pagingKey = pagingKey,
+                        translationDisplayOptions = translationDisplayOptions,
+                    )
                 }.distinctUntilChanged()
-                    .mapNotNull { it }
             },
         )
     }

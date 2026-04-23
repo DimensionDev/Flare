@@ -2,7 +2,10 @@ import SwiftUI
 @preconcurrency import KotlinSharedUI
 import Kingfisher
 import UniformTypeIdentifiers
+import GSPlayer
+import VideoPlayer
 import Drops
+import WebKit
 
 struct StorageScreen: View {
     private let storagePresenter: StoragePresenter
@@ -50,6 +53,18 @@ struct StorageScreen: View {
                         showImageClearAlert = false
                         isClearingImageCache = true
                         KingfisherManager.shared.cache.clearMemoryCache()
+                        try? VideoCacheManager.cleanAllCache()
+                        VideoPlayer.cleanAllCache()
+                        let types: Set<String> = [
+                            WKWebsiteDataTypeMemoryCache,
+                            WKWebsiteDataTypeDiskCache
+                        ]
+
+                        WKWebsiteDataStore.default().removeData(
+                            ofTypes: types,
+                            modifiedSince: .distantPast
+                        ) {
+                        }
                         KingfisherManager.shared.cache.clearDiskCache {
                             Task { @MainActor in
                                 isClearingImageCache = false

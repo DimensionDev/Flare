@@ -107,19 +107,20 @@ internal fun uiRichTextOf(
     raw: String? = null,
     innerText: String? = null,
     imageUrls: List<String>? = null,
+    sourceLanguages: List<String> = emptyList(),
 ): UiRichText {
     val contents = renderRuns.toImmutableList()
     val resolvedInnerText = innerText ?: contents.joinToString(separator = "") { it.plainText() }
     return UiRichText(
         renderRuns = contents,
-        isRtl = resolvedInnerText.isRtl(),
+        isRtl = resolvedInnerText.resolveRtl(sourceLanguages),
         raw = raw ?: resolvedInnerText,
         innerText = resolvedInnerText,
         imageUrls = (imageUrls ?: contents.imageUrls()).toImmutableList(),
     )
 }
 
-public fun String.toUiPlainText(): UiRichText =
+public fun String.toUiPlainText(sourceLanguages: List<String> = emptyList()): UiRichText =
     UiRichText(
         renderRuns =
             persistentListOf(
@@ -130,7 +131,7 @@ public fun String.toUiPlainText(): UiRichText =
                         ),
                 ),
             ),
-        isRtl = isRtl(),
+        isRtl = resolveRtl(sourceLanguages),
         raw = this,
         innerText = this,
         imageUrls = persistentListOf<String>(),
@@ -200,5 +201,133 @@ private fun List<RenderContent>.imageUrls(): List<String> =
             }
         }
     }
+
+internal fun String.resolveRtl(sourceLanguages: List<String> = emptyList()): Boolean {
+    sourceLanguages.firstNotNullOfOrNull { it.languageIsRtl() }?.let {
+        return it
+    }
+    if (isBlank() || isLatinText()) {
+        return false
+    }
+    if (!hasStrongRtlCodePoint()) {
+        return false
+    }
+    return isRtl()
+}
+
+private fun String.languageIsRtl(): Boolean? {
+    val language =
+        substringBefore('-')
+            .substringBefore('_')
+            .lowercase()
+            .takeIf { it.isNotBlank() }
+            ?: return null
+    if (language in unknownLanguageCodes) {
+        return null
+    }
+    return language in rtlLanguageCodes
+}
+
+private fun String.isLatinText(): Boolean =
+    all { char ->
+        !char.isLetter() || char.isLatinLetter()
+    }
+
+private fun Char.isLatinLetter(): Boolean =
+    this in '\u0041'..'\u005A' ||
+        this in '\u0061'..'\u007A' ||
+        this in '\u00C0'..'\u024F' ||
+        this in '\u1E00'..'\u1EFF'
+
+private fun String.hasStrongRtlCodePoint(): Boolean {
+    var index = 0
+    while (index < length) {
+        val codePoint = codePointAt(index)
+        if (codePoint.isStrongRtlCodePoint()) {
+            return true
+        }
+        index += codePoint.charCount()
+    }
+    return false
+}
+
+private fun String.codePointAt(index: Int): Int {
+    val high = this[index]
+    if (high.isHighSurrogate() && index + 1 < length) {
+        val low = this[index + 1]
+        if (low.isLowSurrogate()) {
+            return ((high.code - HIGH_SURROGATE_START) shl 10) +
+                (low.code - LOW_SURROGATE_START) +
+                SUPPLEMENTARY_CODE_POINT_START
+        }
+    }
+    return high.code
+}
+
+private fun Int.charCount(): Int =
+    if (this >= SUPPLEMENTARY_CODE_POINT_START) {
+        2
+    } else {
+        1
+    }
+
+private fun Int.isStrongRtlCodePoint(): Boolean =
+    rtlCodePointRanges.any { range ->
+        this in range
+    }
+
+private val rtlCodePointRanges =
+    listOf(
+        0x0590..0x05FF, // Hebrew
+        0x0600..0x06FF, // Arabic
+        0x0700..0x074F, // Syriac
+        0x0750..0x077F, // Arabic Supplement
+        0x0780..0x07BF, // Thaana
+        0x07C0..0x07FF, // NKo
+        0x0800..0x083F, // Samaritan
+        0x0840..0x085F, // Mandaic
+        0x0860..0x086F, // Syriac Supplement
+        0x0870..0x089F, // Arabic Extended-B
+        0x08A0..0x08FF, // Arabic Extended-A
+        0xFB1D..0xFB4F, // Hebrew Presentation Forms
+        0xFB50..0xFDFF, // Arabic Presentation Forms-A
+        0xFE70..0xFEFF, // Arabic Presentation Forms-B
+        0x10800..0x10FFF, // Historical RTL scripts
+        0x1E800..0x1E95F, // Mende Kikakui, Adlam
+    )
+
+private const val HIGH_SURROGATE_START = 0xD800
+private const val LOW_SURROGATE_START = 0xDC00
+private const val SUPPLEMENTARY_CODE_POINT_START = 0x10000
+
+private val rtlLanguageCodes =
+    setOf(
+        "ar",
+        "arc",
+        "dv",
+        "fa",
+        "ha",
+        "he",
+        "iw",
+        "ks",
+        "ku",
+        "nqo",
+        "pa",
+        "ps",
+        "sd",
+        "syr",
+        "ug",
+        "ur",
+        "yi",
+    )
+
+private val unknownLanguageCodes =
+    setOf(
+        "mis",
+        "mul",
+        "qaa",
+        "und",
+        "zxx",
+    )
 
 internal expect fun String.isRtl(): Boolean

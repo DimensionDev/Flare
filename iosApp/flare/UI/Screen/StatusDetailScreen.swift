@@ -2,6 +2,7 @@ import SwiftUI
 @preconcurrency import KotlinSharedUI
 
 struct StatusDetailScreen: View {
+    @Environment(\.appearanceSettings.timelineDisplayMode) private var timelineDisplayMode
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @Environment(\.openURL) private var openURL
     @StateObject private var presenter: KotlinPresenter<StatusContextPresenterState>
@@ -14,11 +15,16 @@ struct StatusDetailScreen: View {
 
     var body: some View {
         ZStack {
-            TimelinePagingContent(data: presenter.state.listState, detailStatusKey: statusKey, key: presenter.key)
+            TimelinePagingContent(
+                data: presenter.state.listState,
+                detailStatusKey: statusKey,
+                key: presenter.key,
+                suppressInitialRefreshIndicator: true
+            )
                 .frame(maxWidth: horizontalSizeClass == .compact ? .infinity : 600, alignment: .center)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color(.systemGroupedBackground))
+        .background(Color(timelineDisplayMode == .plain ? .clear : .systemGroupedBackground))
         .navigationTitle("status_detail_title")
     }
 }

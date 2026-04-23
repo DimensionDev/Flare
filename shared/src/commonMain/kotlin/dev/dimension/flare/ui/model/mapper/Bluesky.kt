@@ -120,9 +120,10 @@ internal fun BookmarkView.render(accountKey: MicroBlogKey): UiTimelineV2? =
 internal fun parseBlueskyJson(
     json: JsonContent,
     accountKey: MicroBlogKey,
+    sourceLanguages: List<String> = emptyList(),
 ): UiRichText {
     try {
-        return parseBluesky(post = json.decodeAs(), accountKey = accountKey)
+        return parseBluesky(post = json.decodeAs(), accountKey = accountKey, sourceLanguages = sourceLanguages)
     } catch (e: Exception) {
         val jobj = json.decodeAs<JsonObject>()
         val text = jobj["text"]?.jsonPrimitive?.contentOrNull
@@ -137,9 +138,10 @@ internal fun parseBlueskyJson(
                 text = text ?: "",
                 facets = facets,
                 accountKey = accountKey,
+                sourceLanguages = sourceLanguages,
             )
         } else {
-            return text.orEmpty().toUiPlainText()
+            return text.orEmpty().toUiPlainText(sourceLanguages)
         }
     }
 }
@@ -227,17 +229,20 @@ internal suspend fun parseBskyFacets(
 private fun parseBluesky(
     post: Post,
     accountKey: MicroBlogKey,
+    sourceLanguages: List<String> = emptyList(),
 ): UiRichText =
     parseBluesky(
         text = post.text,
         facets = post.facets.orEmpty(),
         accountKey = accountKey,
+        sourceLanguages = sourceLanguages,
     )
 
 private fun parseBluesky(
     text: String,
     facets: List<Facet>,
     accountKey: MicroBlogKey,
+    sourceLanguages: List<String> = emptyList(),
 ): UiRichText {
     val codePoints = text.toByteArray(charset = Charsets.UTF_8)
     val runs = mutableListOf<RenderRun>()
@@ -334,6 +339,7 @@ private fun parseBluesky(
             } else {
                 listOf(RenderContent.Text(runs = runs.toImmutableList()))
             },
+        sourceLanguages = sourceLanguages,
     )
 }
 
@@ -787,14 +793,15 @@ internal fun PostView.render(accountKey: MicroBlogKey): UiTimelineV2.Post {
             append(uri.atUri.substringAfterLast("/"))
         }
 
+    val sourceLanguages = record.sourceLanguages()
     return UiTimelineV2.Post(
         platformType = PlatformType.Bluesky,
         user = user,
         images = findMedias(this),
         card = findCard(this),
         statusKey = statusKey,
-        sourceLanguages = record.sourceLanguages(),
-        content = parseBlueskyJson(record, accountKey),
+        sourceLanguages = sourceLanguages,
+        content = parseBlueskyJson(record, accountKey, sourceLanguages),
         poll = null,
         quote = listOfNotNull(findQuote(accountKey, this)).toImmutableList(),
         contentWarning = null,
@@ -1412,6 +1419,7 @@ private fun render(
                     id = record.value.uri.atUri,
                     host = accountKey.host,
                 )
+            val sourceLanguages = record.value.value.sourceLanguages()
             val url =
                 buildString {
                     append("https://bsky.app/profile/")
@@ -1527,8 +1535,13 @@ private fun render(
                         }
                     },
                 statusKey = statusKey,
-                sourceLanguages = record.value.value.sourceLanguages(),
-                content = parseBlueskyJson(record.value.value, accountKey),
+                sourceLanguages = sourceLanguages,
+                content =
+                    parseBlueskyJson(
+                        record.value.value,
+                        accountKey,
+                        sourceLanguages,
+                    ),
                 actions =
                     listOfNotNull(
                         ActionMenu.Item(

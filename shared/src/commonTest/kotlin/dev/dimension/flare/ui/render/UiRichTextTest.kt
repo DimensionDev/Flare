@@ -138,4 +138,26 @@ class UiRichTextTest {
         val content = assertIs<RenderContent.Text>(decoded.renderRuns.single())
         assertEquals("1 < 2 && @friend", assertIs<RenderRun.Text>(content.runs.single()).text)
     }
+
+    @Test
+    fun rtlDetection_fastPaths_blank_and_latin_text_as_ltr() {
+        assertFalse("".toUiPlainText().isRtl)
+        assertFalse("Hello cafe 123!".toUiPlainText().isRtl)
+        assertFalse("Café déjà vu".toUiPlainText().isRtl)
+        assertFalse("こんにちは世界".toUiPlainText().isRtl)
+        assertFalse("中文测试 😀".toUiPlainText().isRtl)
+    }
+
+    @Test
+    fun rtlDetection_onlyFallsBackForStrongRtlCodePoints() {
+        assertTrue("مرحبا".toUiPlainText().isRtl)
+        assertTrue("שלום".toUiPlainText().isRtl)
+    }
+
+    @Test
+    fun rtlDetection_prefers_source_languages() {
+        assertTrue("Hello".toUiPlainText(listOf("ar")).isRtl)
+        assertFalse("مرحبا".toUiPlainText(listOf("en-US")).isRtl)
+        assertTrue(parseHtml("<p>Hello</p>").toUi(listOf("he")).isRtl)
+    }
 }

@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
@@ -86,210 +87,225 @@ internal fun RssDetailScreen(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.TopCenter,
     ) {
-        FlareScrollBar(state = scrollState) {
+        FlareScrollBar(
+            state = scrollState,
+        ) {
             Column(
                 modifier =
                     Modifier
-                        .verticalScroll(scrollState)
-                        .padding(horizontal = screenHorizontalPadding, vertical = 16.dp)
-                        .padding(LocalWindowPadding.current),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
+                        .fillMaxWidth()
+                        .verticalScroll(scrollState),
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                state.data
-                    .onSuccess { data ->
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.fillMaxWidth(),
-                        ) {
-                            SubtleButton(
-                                onClick = {
-                                    uriHandler.openUri(url)
-                                },
+                Column(
+                    modifier =
+                        Modifier
+                            .widthIn(max = 600.dp)
+                            .padding(horizontal = screenHorizontalPadding, vertical = 16.dp)
+                            .padding(LocalWindowPadding.current),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                ) {
+                    state.data
+                        .onSuccess { data ->
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.fillMaxWidth(),
                             ) {
-                                FAIcon(
-                                    FontAwesomeIcons.Brands.Chrome,
-                                    contentDescription = stringResource(Res.string.rss_detail_open_in_browser),
-                                )
-                            }
-                            AnimatedVisibility(state.data.isSuccess && !state.isAutoTranslate && !state.enableTranslate) {
                                 SubtleButton(
                                     onClick = {
-                                        state.setEnableTranslate(true)
+                                        uriHandler.openUri(url)
                                     },
                                 ) {
                                     FAIcon(
-                                        FontAwesomeIcons.Solid.Language,
-                                        contentDescription = stringResource(Res.string.rss_detail_translate),
+                                        FontAwesomeIcons.Brands.Chrome,
+                                        contentDescription = stringResource(Res.string.rss_detail_open_in_browser),
+                                    )
+                                }
+                                AnimatedVisibility(state.data.isSuccess && !state.isAutoTranslate && !state.enableTranslate) {
+                                    SubtleButton(
+                                        onClick = {
+                                            state.setEnableTranslate(true)
+                                        },
+                                    ) {
+                                        FAIcon(
+                                            FontAwesomeIcons.Solid.Language,
+                                            contentDescription = stringResource(Res.string.rss_detail_translate),
+                                        )
+                                    }
+                                }
+                                AnimatedVisibility(
+                                    state.data.isSuccess &&
+                                        state.enableTldr.takeSuccessOr(
+                                            false,
+                                        ),
+                                ) {
+                                    SubtleButton(
+                                        onClick = {
+                                            state.setShowTldr(true)
+                                        },
+                                    ) {
+                                        Text(stringResource(Res.string.rss_detail_tldr))
+                                    }
+                                }
+                            }
+                            val displayTitle =
+                                state.translateState?.translatedTitle?.let { titleState ->
+                                    when (titleState) {
+                                        is UiState.Success -> titleState.data
+                                        else -> data.title
+                                    }
+                                } ?: data.title
+                            if (displayTitle.isNotEmpty()) {
+                                SelectionContainer {
+                                    Text(
+                                        text = displayTitle,
+                                        style = FluentTheme.typography.subtitle,
                                     )
                                 }
                             }
-                            AnimatedVisibility(state.data.isSuccess && state.enableTldr.takeSuccessOr(false)) {
-                                SubtleButton(
-                                    onClick = {
-                                        state.setShowTldr(true)
-                                    },
+                            if (data.siteName != null || data.byline != null || data.publishDateTime != null) {
+                                Column(
+                                    verticalArrangement = Arrangement.spacedBy(4.dp),
                                 ) {
-                                    Text(stringResource(Res.string.rss_detail_tldr))
+                                    data.siteName?.let {
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                        ) {
+                                            FavIcon(
+                                                host =
+                                                    remember {
+                                                        Url(url).host
+                                                    },
+                                                size = 16.dp,
+                                            )
+                                            Text(
+                                                text = it,
+                                                style = FluentTheme.typography.caption,
+                                            )
+                                        }
+                                    }
+
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    ) {
+                                        data.byline?.let {
+                                            Text(
+                                                text = it,
+                                                style = FluentTheme.typography.caption,
+                                            )
+                                        }
+
+                                        Spacer(modifier = Modifier.weight(1f))
+
+                                        data.publishDateTime?.let {
+                                            DateTimeText(
+                                                data = it,
+                                                style = FluentTheme.typography.caption,
+                                                fullTime = true,
+                                            )
+                                        }
+                                    }
                                 }
                             }
+                            ListItemSeparator(Modifier.fillMaxWidth())
+                        }.onLoading {
+                            ProgressRing(modifier = Modifier.align(Alignment.CenterHorizontally))
+                        }.onError {
+                            Text(
+                                text = it.message ?: "Failed to load article",
+                            )
                         }
-                        val displayTitle =
-                            state.translateState?.translatedTitle?.let { titleState ->
-                                when (titleState) {
-                                    is UiState.Success -> titleState.data
-                                    else -> data.title
+                    state.data
+                        .onSuccess { data ->
+                            AnimatedVisibility(state.showTldr) {
+                                state.tldrState?.let { tldrState ->
+                                    Column(
+                                        modifier =
+                                            Modifier
+                                                .animateContentSize()
+                                                .fillMaxWidth()
+                                                .listCard()
+                                                .background(FluentTheme.colors.background.card.default)
+                                                .padding(8.dp)
+                                                .clickable {
+                                                    tldrState.onError {
+                                                        state.refreshTldr()
+                                                    }
+                                                },
+                                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                    ) {
+                                        AnimatedContent(tldrState) {
+                                            it
+                                                .onSuccess {
+                                                    Text(
+                                                        text = it,
+                                                        modifier =
+                                                            Modifier
+                                                                .padding(
+                                                                    horizontal = screenHorizontalPadding,
+                                                                    vertical = 8.dp,
+                                                                ),
+                                                    )
+                                                }.onLoading {
+                                                    ProgressRing(
+                                                        modifier =
+                                                            Modifier
+                                                                .padding(
+                                                                    horizontal = screenHorizontalPadding,
+                                                                    vertical = 8.dp,
+                                                                ),
+                                                    )
+                                                }.onError {
+                                                    Text(
+                                                        text = stringResource(Res.string.rss_detail_tldr_error),
+                                                        modifier =
+                                                            Modifier
+                                                                .padding(
+                                                                    horizontal = screenHorizontalPadding,
+                                                                    vertical = 8.dp,
+                                                                ),
+                                                    )
+                                                }
+                                        }
+                                    }
                                 }
-                            } ?: data.title
-                        if (displayTitle.isNotEmpty()) {
+                            }
+                            state.translateState?.translatedHtml?.onLoading {
+                                ProgressBar(
+                                    modifier =
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = screenHorizontalPadding),
+                                )
+                            }
                             SelectionContainer {
+                                val displayData =
+                                    state.translateState?.translatedHtml?.let { htmlState ->
+                                        when (htmlState) {
+                                            is UiState.Success -> data.copy(content = htmlState.data)
+                                            else -> data
+                                        }
+                                    } ?: data
+                                RssRichText(
+                                    element = displayData.element,
+                                    modifier = Modifier.fillMaxWidth(),
+                                )
+                            }
+                            state.translateState?.translatedHtml?.onError {
                                 Text(
-                                    text = displayTitle,
-                                    style = FluentTheme.typography.subtitle,
+                                    text = it.message ?: "Translation failed",
+                                    modifier =
+                                        Modifier
+                                            .padding(horizontal = screenHorizontalPadding)
+                                            .clickable { state.refreshTranslate() },
                                 )
                             }
                         }
-                        if (data.siteName != null || data.byline != null || data.publishDateTime != null) {
-                            Column(
-                                verticalArrangement = Arrangement.spacedBy(4.dp),
-                            ) {
-                                data.siteName?.let {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                                    ) {
-                                        FavIcon(
-                                            host =
-                                                remember {
-                                                    Url(url).host
-                                                },
-                                            size = 16.dp,
-                                        )
-                                        Text(
-                                            text = it,
-                                            style = FluentTheme.typography.caption,
-                                        )
-                                    }
-                                }
-
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                ) {
-                                    data.byline?.let {
-                                        Text(
-                                            text = it,
-                                            style = FluentTheme.typography.caption,
-                                        )
-                                    }
-
-                                    Spacer(modifier = Modifier.weight(1f))
-
-                                    data.publishDateTime?.let {
-                                        DateTimeText(
-                                            data = it,
-                                            style = FluentTheme.typography.caption,
-                                            fullTime = true,
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                        ListItemSeparator(Modifier.fillMaxWidth())
-                    }.onLoading {
-                        ProgressRing(modifier = Modifier.align(Alignment.CenterHorizontally))
-                    }.onError {
-                        Text(
-                            text = it.message ?: "Failed to load article",
-                        )
-                    }
-                state.data
-                    .onSuccess { data ->
-                        AnimatedVisibility(state.showTldr) {
-                            state.tldrState?.let { tldrState ->
-                                Column(
-                                    modifier =
-                                        Modifier
-                                            .animateContentSize()
-                                            .fillMaxWidth()
-                                            .listCard()
-                                            .background(FluentTheme.colors.background.card.default)
-                                            .padding(8.dp)
-                                            .clickable {
-                                                tldrState.onError {
-                                                    state.refreshTldr()
-                                                }
-                                            },
-                                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                ) {
-                                    AnimatedContent(tldrState) {
-                                        it
-                                            .onSuccess {
-                                                Text(
-                                                    text = it,
-                                                    modifier =
-                                                        Modifier
-                                                            .padding(
-                                                                horizontal = screenHorizontalPadding,
-                                                                vertical = 8.dp,
-                                                            ),
-                                                )
-                                            }.onLoading {
-                                                ProgressRing(
-                                                    modifier =
-                                                        Modifier
-                                                            .padding(
-                                                                horizontal = screenHorizontalPadding,
-                                                                vertical = 8.dp,
-                                                            ),
-                                                )
-                                            }.onError {
-                                                Text(
-                                                    text = stringResource(Res.string.rss_detail_tldr_error),
-                                                    modifier =
-                                                        Modifier
-                                                            .padding(
-                                                                horizontal = screenHorizontalPadding,
-                                                                vertical = 8.dp,
-                                                            ),
-                                                )
-                                            }
-                                    }
-                                }
-                            }
-                        }
-                        state.translateState?.translatedHtml?.onLoading {
-                            ProgressBar(
-                                modifier =
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = screenHorizontalPadding),
-                            )
-                        }
-                        SelectionContainer {
-                            val displayData =
-                                state.translateState?.translatedHtml?.let { htmlState ->
-                                    when (htmlState) {
-                                        is UiState.Success -> data.copy(content = htmlState.data)
-                                        else -> data
-                                    }
-                                } ?: data
-                            RssRichText(
-                                element = displayData.element,
-                                modifier = Modifier.fillMaxWidth(),
-                            )
-                        }
-                        state.translateState?.translatedHtml?.onError {
-                            Text(
-                                text = it.message ?: "Translation failed",
-                                modifier =
-                                    Modifier
-                                        .padding(horizontal = screenHorizontalPadding)
-                                        .clickable { state.refreshTranslate() },
-                            )
-                        }
-                    }
+                }
             }
         }
     }
@@ -329,7 +345,8 @@ private fun presenter(
         } else {
             null
         }
-    val isAutoTranslate = preTranslate is UiState.Success && (preTranslate as UiState.Success<Boolean>).data
+    val isAutoTranslate =
+        preTranslate is UiState.Success && (preTranslate as UiState.Success<Boolean>).data
     val shouldTranslate = isAutoTranslate || enableTranslate
     val translateState: RssDetailTranslatePresenter.State? =
         if (shouldTranslate) {

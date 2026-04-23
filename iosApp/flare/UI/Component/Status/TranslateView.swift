@@ -5,6 +5,8 @@ struct StatusTranslateView: View {
     @Environment(\.aiConfig) private var aiConfig
     let content: UiRichText
     let contentWarning: UiRichText?
+    var onSizeChange: ((CGSize) -> Void)?
+    var onLayoutChange: (() -> Void)?
     @State private var enableTranslate: Bool = false
     @State private var enableTLDR: Bool = false
 
@@ -17,6 +19,7 @@ struct StatusTranslateView: View {
                 HStack {
                     Button {
                         enableTranslate.toggle()
+                        onLayoutChange?()
                     } label: {
                         Text("status_translate")
                     }
@@ -24,6 +27,7 @@ struct StatusTranslateView: View {
                     if content.isLongText, aiConfig.tldr {
                         Button {
                             enableTLDR.toggle()
+                            onLayoutChange?()
                         } label: {
                             Text("status_tldr")
                         }
@@ -42,7 +46,30 @@ struct StatusTranslateView: View {
                 }
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background {
+            GeometryReader { proxy in
+                Color.clear.preference(key: StatusTranslateSizePreferenceKey.self, value: proxy.size)
+            }
+        }
+        .onPreferenceChange(StatusTranslateSizePreferenceKey.self) { size in
+            onSizeChange?(size)
+        }
+        .onChange(of: enableTranslate) {
+            onLayoutChange?()
+        }
+        .onChange(of: enableTLDR) {
+            onLayoutChange?()
+        }
         
+    }
+}
+
+private struct StatusTranslateSizePreferenceKey: PreferenceKey {
+    static var defaultValue: CGSize = .zero
+
+    static func reduce(value: inout CGSize, nextValue: () -> CGSize) {
+        value = nextValue()
     }
 }
 
@@ -64,11 +91,16 @@ struct TLDRView: View {
     var body: some View {
         StateView(state: presenter.state) { text in
             Text(String(text))
+                .lineLimit(nil)
+                .fixedSize(horizontal: false, vertical: true)
         } errorContent: { error in
             Text(error.message ?? "Unknown Error")
+                .lineLimit(nil)
+                .fixedSize(horizontal: false, vertical: true)
         } loadingContent: {
             ProgressView()
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 
@@ -84,11 +116,16 @@ struct TranslateTextView: View {
     var body: some View {
         StateView(state: presenter.state) { text in
             RichText(text: text)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .fixedSize(horizontal: false, vertical: true)
         } errorContent: { error in
             Text(error.message ?? "Unknown Error")
+                .lineLimit(nil)
+                .fixedSize(horizontal: false, vertical: true)
         } loadingContent: {
             ProgressView()
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 
@@ -105,10 +142,15 @@ struct TLDRTextView: View {
     var body: some View {
         StateView(state: presenter.state) { text in
             Text(String(text))
+                .lineLimit(nil)
+                .fixedSize(horizontal: false, vertical: true)
         } errorContent: { error in
             Text(error.message ?? "Unknown Error")
+                .lineLimit(nil)
+                .fixedSize(horizontal: false, vertical: true)
         } loadingContent: {
             ProgressView()
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }

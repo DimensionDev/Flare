@@ -864,9 +864,10 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
             id = id,
             host = accountKey.host,
         )
+    val sourceLanguages = listOfNotNull(lang).toPersistentList()
     return UiProfile(
         avatar = avatarUrl.orEmpty(),
-        nameInternal = parseName(name.orEmpty(), accountKey, emojis),
+        nameInternal = parseName(name.orEmpty(), accountKey, emojis, sourceLanguages),
         handle =
             UiHandle(
                 raw = username.orEmpty(),
@@ -876,9 +877,9 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
         banner = bannerUrl,
         description =
             description?.let {
-                parseMisskeyText(it, accountKey, emojis, remoteHost)
+                parseMisskeyText(it, accountKey, emojis, remoteHost, sourceLanguages)
             },
-        sourceLanguages = listOfNotNull(lang).toPersistentList(),
+        sourceLanguages = sourceLanguages,
         matrices =
             UiProfile.Matrices(
                 fansCount = followersCount.toLong(),
@@ -960,11 +961,12 @@ private fun parseName(
     name: String,
     accountKey: MicroBlogKey,
     emojis: Map<String, String>,
+    sourceLanguages: List<String> = emptyList(),
 ): UiRichText {
     if (name.isEmpty()) {
-        return "".toUiPlainText()
+        return "".toUiPlainText(sourceLanguages)
     }
-    return misskeyNameParser.parse(name).toUiRichText(accountKey, emojis, accountKey.host)
+    return misskeyNameParser.parse(name).toUiRichText(accountKey, emojis, accountKey.host, sourceLanguages)
 }
 
 private fun parseMisskeyText(
@@ -972,14 +974,16 @@ private fun parseMisskeyText(
     accountKey: MicroBlogKey,
     emojis: Map<String, String>,
     remoteHost: String,
-): UiRichText = misskeyParser.parse(text).toUiRichText(accountKey, emojis, remoteHost)
+    sourceLanguages: List<String> = emptyList(),
+): UiRichText = misskeyParser.parse(text).toUiRichText(accountKey, emojis, remoteHost, sourceLanguages)
 
 private fun moe.tlaster.mfm.parser.tree.Node.toUiRichText(
     accountKey: MicroBlogKey,
     emojis: Map<String, String>,
     remoteHost: String,
+    sourceLanguages: List<String> = emptyList(),
 ): UiRichText {
-    val builder = MisskeyRichTextBuilder(accountKey, emojis, remoteHost)
+    val builder = MisskeyRichTextBuilder(accountKey, emojis, remoteHost, sourceLanguages)
     builder.renderNode(this, RenderTextStyle(), RenderBlockStyle())
     return builder.build()
 }
@@ -988,6 +992,7 @@ private class MisskeyRichTextBuilder(
     private val accountKey: MicroBlogKey,
     private val emojis: Map<String, String>,
     private val remoteHost: String,
+    private val sourceLanguages: List<String>,
 ) {
     private val contents = mutableListOf<RenderContent>()
     private val currentRuns = mutableListOf<RenderRun>()
@@ -996,7 +1001,7 @@ private class MisskeyRichTextBuilder(
 
     fun build(): UiRichText {
         flushTextContent()
-        return uiRichTextOf(contents)
+        return uiRichTextOf(contents, sourceLanguages = sourceLanguages)
     }
 
     fun renderNode(

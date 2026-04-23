@@ -7,12 +7,12 @@ import kotlin.native.HiddenFromObjC
 
 @OptIn(ExperimentalObjCRefinement::class)
 @HiddenFromObjC
-public fun Element.toUi(): UiRichText {
+public fun Element.toUi(sourceLanguages: List<String> = emptyList()): UiRichText {
     val result = mapHtmlToRenderResult(this)
     val innerText = wholeText()
     return UiRichText(
         renderRuns = result.contents,
-        isRtl = innerText.isRtl(),
+        isRtl = innerText.resolveRtl(sourceLanguages),
         raw = result.raw,
         innerText = innerText,
         imageUrls = result.imageUrls,

@@ -22,79 +22,74 @@ struct StatusMediaScreen: View {
     @State private var currentTime: CMTime = .zero
     @State var opacity: CGFloat = 1 // Dismiss gesture background opacity
     @State var showData = true
-    @State var canShow = false
+    @State private var protectInitialPagerSelection: Bool = false
     var body: some View {
         ZStack {
-            if canShow {
-                if medias.isEmpty {
-                    if let preview {
-                        AdaptiveKFImage(data: preview, placeholder: nil)
-                    } else {
-                        ProgressView()
-                    }
+            if medias.isEmpty {
+                if let preview {
+                    AdaptiveKFImage(data: preview, placeholder: nil)
                 } else {
-                    LazyPager(data: medias, page: $selectedIndex) { media in
-                        switch onEnum(of: media) {
-                        case .image(let image):
-                            AdaptiveKFImage(data: image.url, placeholder: image.previewUrl)
-                        case .video(let video):
-                            if selectedIndex == medias.firstIndex(where: { $0.url == video.url }) {
-                                StatusMediaVideoView(data: video, play: $isPlaying, videoState: $videoState, time: $currentTime)
-                            } else {
-                                NetworkImage(data: video.thumbnailUrl)
-                                    .scaledToFit()
-                            }
-                        case .gif(let gif):
-                            NetworkImage(data: gif.url, placeholder: gif.previewUrl)
-                                .scaledToFit()
-                        case .audio(let audio):
-                            EmptyView()
-                        }
-                    }
-                    .onDismiss(backgroundOpacity: $opacity) {
-                        dismiss()
-                    }
-                    .onTap {
-                        withAnimation {
-                            showData = !showData
-                        }
-                    }
-                    .zoomable { item in
-                        if case .video = onEnum(of: item) {
-                            return .disabled
+                    ProgressView()
+                }
+            } else {
+                LazyPager(data: medias, page: pagerSelectedIndex) { media in
+                    switch onEnum(of: media) {
+                    case .image(let image):
+                        AdaptiveKFImage(data: image.url, placeholder: image.previewUrl)
+                    case .video(let video):
+                        if selectedIndex == medias.firstIndex(where: { $0.url == video.url }) {
+                            StatusMediaVideoView(data: video, play: $isPlaying, videoState: $videoState, time: $currentTime)
                         } else {
-                            return .custom(min: 1, max: 5, doubleTap: .scale(2))
+                            NetworkImage(data: video.thumbnailUrl)
+                                .scaledToFit()
                         }
+                    case .gif(let gif):
+                        NetworkImage(data: gif.url, placeholder: gif.previewUrl)
+                            .scaledToFit()
+                    case .audio(let audio):
+                        EmptyView()
                     }
-                    .settings { config in
-                        config.preloadAmount = 99
+                }
+                .onDismiss(backgroundOpacity: $opacity) {
+                    dismiss()
+                }
+                .onTap {
+                    withAnimation {
+                        showData = !showData
                     }
-                    .overlay(alignment: .bottom) {
-                        if showData {
-                            if #available(iOS 26.0, *) {
-                                statusView
-                                    .padding()
-                                    .backport
-                                    .glassEffect(.tinted(.init(.systemGroupedBackground).opacity(0.5)), in: .rect(corners: .concentric, isUniform: true), fallbackBackground: .regularMaterial)
-                                    .padding()
-                                    .transition(.move(edge: .bottom).combined(with: .opacity))
-                            } else {
-                                statusView
-                                    .padding()
-                                    .safeAreaPadding(.bottom)
-                                    .backport
-                                    .glassEffect(.regular, in: .rect(), fallbackBackground: .regularMaterial)
-                                    .transition(.move(edge: .bottom).combined(with: .opacity))
-                            }
+                }
+                .onDrag {
+                    protectInitialPagerSelection = false
+                }
+                .zoomable { item in
+                    if case .video = onEnum(of: item) {
+                        return .disabled
+                    } else {
+                        return .custom(min: 1, max: 5, doubleTap: .scale(2))
+                    }
+                }
+                .settings { config in
+                    config.preloadAmount = 99
+                }
+                .overlay(alignment: .bottom) {
+                    if showData {
+                        if #available(iOS 26.0, *) {
+                            statusView
+                                .padding()
+                                .backport
+                                .glassEffect(.tinted(.init(.systemGroupedBackground).opacity(0.5)), in: .rect(corners: .concentric, isUniform: true), fallbackBackground: .regularMaterial)
+                                .padding()
+                                .transition(.move(edge: .bottom).combined(with: .opacity))
+                        } else {
+                            statusView
+                                .padding()
+                                .safeAreaPadding(.bottom)
+                                .backport
+                                .glassEffect(.regular, in: .rect(), fallbackBackground: .regularMaterial)
+                                .transition(.move(edge: .bottom).combined(with: .opacity))
                         }
                     }
                 }
-            } else {
-                Color.clear
-                    .onAppear {
-                        selectedIndex = initialIndex
-                        canShow = true
-                    }
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -107,8 +102,12 @@ struct StatusMediaScreen: View {
             if medias.isEmpty,
                case .success(let success) = onEnum(of: newValue),
                let content = success.data as? UiTimelineV2.Post {
+                let contentMedias = Array(content.images)
+                let initialSelection = clampedIndex(initialIndex, count: contentMedias.count)
+                selectedIndex = initialSelection
+                protectInitialPagerSelection = initialSelection > 0
                 withAnimation {
-                    medias = Array(content.images)
+                    medias = contentMedias
                 }
             }
         }
@@ -124,8 +123,7 @@ struct StatusMediaScreen: View {
                 }
             }
             if !medias.isEmpty {
-                let selectedMedia = medias[selectedIndex]
-                if case .image = onEnum(of: selectedMedia) {
+                if let selectedMedia, case .image = onEnum(of: selectedMedia) {
                     ToolbarItem(placement: .primaryAction) {
                         Button {
                             MediaSaver.shared.saveImage(url: selectedMedia.url)
@@ -137,6 +135,38 @@ struct StatusMediaScreen: View {
             }
         }
     }
+
+    private var pagerSelectedIndex: Binding<Int> {
+        Binding(
+            get: {
+                selectedIndex
+            },
+            set: { newValue in
+                let nextIndex = clampedIndex(newValue, count: medias.count)
+                if protectInitialPagerSelection,
+                   selectedIndex > 0,
+                   nextIndex < selectedIndex {
+                    return
+                }
+                protectInitialPagerSelection = false
+                selectedIndex = nextIndex
+            }
+        )
+    }
+
+    private var selectedMedia: (any UiMedia)? {
+        guard medias.indices.contains(selectedIndex) else {
+            return nil
+        }
+        return medias[selectedIndex]
+    }
+
+    private func clampedIndex(_ index: Int, count: Int) -> Int {
+        guard count > 0 else {
+            return 0
+        }
+        return min(max(index, 0), count - 1)
+    }
     
     var statusView: some View {
         VStack(
@@ -146,8 +176,7 @@ struct StatusMediaScreen: View {
                 LazyPagerIndicator(count: medias.count, page: $selectedIndex)
             }
             
-            if !medias.isEmpty {
-                let selectedMedia = medias[selectedIndex]
+            if let selectedMedia {
                 if case .video = onEnum(of: selectedMedia) {
                     VideoControlView(isPlaying: $isPlaying, currentTime: $currentTime, videoState: videoState)
                 }
@@ -266,6 +295,8 @@ extension StatusMediaScreen {
         self.statusKey = statusKey
         self.initialIndex = initialIndex
         self.preview = preview
+        self._selectedIndex = .init(initialValue: max(0, initialIndex))
+        self._protectInitialPagerSelection = .init(initialValue: initialIndex > 0)
         self._presenter = .init(wrappedValue: .init(presenter: StatusPresenter(accountType: accountType, statusKey: statusKey)))
     }
 }

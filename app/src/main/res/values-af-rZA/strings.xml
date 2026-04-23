@@ -37,6 +37,8 @@
     <string name="settings_accounts_title">Rekeningbestuur</string>
     <string name="settings_appearance_title">Uiterlik</string>
     <string name="settings_appearance_subtitle">Pas die voorkoms van Flare aan</string>
+    <string name="settings_appearance_theme_group_title">Tema</string>
+    <string name="settings_appearance_media_group_title">Media</string>
     <string name="settings_storage_title">Berging</string>
     <string name="settings_storage_subtitle">Bestuur Flare se berging</string>
     <string name="settings_about_title">Oor</string>
@@ -57,6 +59,7 @@
     <string name="settings_ai_config_server">Bediener URL</string>
     <string name="settings_ai_config_server_hint">Voer die bediener URL in</string>
     <string name="settings_ai_config_server_self_host_description">Jy kan die amptelike bediener gebruik of jou eie bediener self aanloop</string>
+    <string name="settings_ai_config_reasoning_effort_default">Standaard</string>
     <string name="settings_ai_config_entable_translation">Aktiveer AI vertaling</string>
     <string name="settings_ai_config_translation_description">Vervang Google Translate met AI vertaling, mag langer neem</string>
     <string name="settings_ai_config_enable_tldr">Aktiveer AI Samevatting</string>
@@ -98,12 +101,14 @@
     <string name="discover_users">Raadpleeg Gebruikers</string>
     <string name="discover_hashtags">Tendense Hashtags</string>
     <string name="search_users">Gebruikers</string>
+    <string name="search_status">Status</string>
     <string name="quick_menu_add_account">Voeg rekening by</string>
     <string name="settings_appearance_generic">Generies</string>
     <string name="settings_appearance_show_actions">Wys aksies</string>
     <string name="settings_appearance_show_media">Wys media</string>
     <string name="settings_appearance_show_numbers">Wys nommers</string>
     <string name="settings_appearance_show_cw_img">Wys sensitiewe inhoud</string>
+    <string name="settings_appearance_show_cw_img_description">Wys altyd sensitiewe inhoud in die status</string>
     <string name="settings_appearance_expand_media">Strek media na volle grootte</string>
     <string name="settings_appearance_expand_media_description">Hou die verhouding van die media in tydlyn</string>
     <string name="settings_appearance_video_autoplay">Video outomaties speel</string>
@@ -219,7 +224,10 @@
     <string name="following_title">Volgendes</string>
     <string name="fans_title">Volger</string>
     <string name="local_history_search_placeholder">Soek plaaslike kas</string>
+    <string name="local_history_search_status_title">Status</string>
     <string name="local_history_search_user_title">Gebruiker</string>
+    <string name="add_rss_source">Voeg by</string>
+    <string name="edit_rss_source">Bewerk Rss Bron</string>
     <string name="rss_sources_title_label">Titel</string>
     <string name="rss_sources_url_label">Url</string>
     <string name="rss_sources_open_in_browser">Open in blaai</string>
@@ -230,8 +238,6 @@
     <string name="rss_detail_tldr_loading">Opsom…</string>
     <string name="emoji_picker_recent">Onlangse</string>
     <string name="emoji_picker_search">Soek</string>
-    <string name="changelog_title">Welkom terug!</string>
-    <string name="changelog_message">Ons het \'n paar veranderinge gemaak sedert jy laas ingelog het. Hier is die besonderhede:</string>
     <string name="podcast_host">Gasheer</string>
     <string name="podcast_title">Podcast</string>
     <string name="podcast_speaker">Spreker</string>

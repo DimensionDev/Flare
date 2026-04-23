@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="changelog_title">Velkommen tilbage!</string>
+    <string name="changelog_message">Vi har foretaget nogle ændringer siden du sidst er logget ind. Her er detaljerne:</string>
+    <string name="changelog_current"><![CDATA[            <span>Version %1$s:</span>
+            <ul>
+                <li>Tilføjet nye tidslinje visningstilstande, herunder et Galleri layout.</li>
+                <li>Forbedret RSS-læsning, deling, oversættelse og resuméer.</li>
+                <li>Omorganiseret udseende indstillinger for lettere tilpasning.</li>
+                <li>Fejlrettelser og forbedringer af ydeevnen.</li>
+            </ul>
+        ]]></string>
+</resources>

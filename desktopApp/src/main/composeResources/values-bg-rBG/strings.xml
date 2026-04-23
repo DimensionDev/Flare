@@ -88,6 +88,8 @@
     <string name="settings_accounts_title">Управление на акаунти</string>
     <string name="settings_appearance_title">Облик</string>
     <string name="settings_appearance_subtitle">Персонализиране на външния вид и усещането на Flare</string>
+    <string name="settings_appearance_theme_group_title">Тема</string>
+    <string name="settings_appearance_media_group_title">Медия</string>
     <string name="settings_storage_title">Съхранение</string>
     <string name="settings_storage_subtitle">Управление на съхранението на Flare</string>
     <string name="settings_about_title">Относно</string>
@@ -99,8 +101,10 @@
     <string name="settings_local_history_title">Тукашна история</string>
     <string name="settings_local_history_description">Преглед или търсене в историята на сърфиране</string>
     <string name="settings_ai_config_title">Конфигурация на ИИ</string>
+    <string name="settings_ai_config_description">Конфигуриране на настройките за ИИ</string>
     <string name="settings_ai_config_server">Адрес на сървъра</string>
     <string name="settings_ai_config_server_hint">Въведете URL адреса на сървъра</string>
+    <string name="settings_ai_config_reasoning_effort_default">По подразбиране</string>
     <string name="settings_ai_config_entable_translation">Включване на превеждането с ИИ</string>
     <string name="settings_ai_config_enable_tldr">Включване на обобщаването с ИИ</string>
     <string name="settings_appearance_show_actions">Показване на действия</string>
@@ -157,9 +161,14 @@
     <string name="misskey_visibility_home">Начало</string>
     <string name="misskey_visibility_followers">Последователи</string>
     <string name="misskey_visibility_specified">Определени</string>
+    <string name="add_rss_source">Добавяне</string>
     <string name="rss_sources_title_label">Заглавие</string>
     <string name="rss_sources_url_label">Url</string>
     <string name="rss_sources_discovered_rss_sources">Открити източници на Rss</string>
+    <string name="rss_sources_open_in_browser">Отваряне в браузър</string>
+    <string name="rss_detail_open_in_browser">Отваряне в браузър</string>
+    <string name="rss_detail_tldr">Обобщаване</string>
+    <string name="rss_detail_tldr_error">Неуспешно обобщаване</string>
     <string name="tab_settings_add">Добавяне</string>
     <string name="tab_settings_edit">Редактиране</string>
     <string name="tab_settings_remove">Премахване</string>
@@ -181,6 +190,7 @@
     <string name="edit_tab_with_avatar">С аватар</string>
     <string name="edit">Редактиране</string>
     <string name="local_history_search_placeholder">Търсене в локалния кеш</string>
+    <string name="local_history_search_status_title">Състояние</string>
     <string name="local_history_search_user_title">Потребител</string>
     <string name="settings_storage_clear_image_cache">Изчистване на кеша на изображенията</string>
     <string name="draft_box_retry">Повторен опит</string>

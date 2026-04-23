@@ -17,13 +17,16 @@
     <string name="mastodon_notification_item_poll_ended">你參與的投票已結束</string>
     <string name="mastodon_notification_item_mentioned_you">提到你</string>
     <string name="mastodon_notification_item_requested_follow">請求追蹤你</string>
+    <string name="mastodon_notification_item_updated_status">已更新提要</string>
     <string name="mastodon_item_show_more">顯示更多</string>
     <string name="mastodon_item_show_less">顯示更少</string>
+    <string name="mastodon_item_pinned">置頂的吐槽</string>
     <string name="bluesky_notification_item_followed_you">已追蹤你</string>
     <string name="bluesky_notification_item_favourited_your_status">已加喜愛</string>
     <string name="bluesky_notification_item_reblogged_your_status">已重貼</string>
     <string name="bluesky_notification_item_poll_ended">你參與的投票已結束</string>
     <string name="bluesky_notification_item_mentioned_you">提到你</string>
+    <string name="bluesky_item_reblogged_status">已重貼一條狀態</string>
     <string name="bluesky_notification_item_replied_to_you">已回覆你</string>
     <string name="bluesky_notification_item_quoted_your_status">引用</string>
     <string name="bluesky_notification_item_starterpack_joined">加入起始包</string>
@@ -40,6 +43,7 @@
     <string name="misskey_notification_item_followed_you">已追蹤你</string>
     <string name="misskey_notification_item_requested_follow">請求追蹤你</string>
     <string name="misskey_notification_unknwon">未知通知 %1$s</string>
+    <string name="misskey_item_reblogged_status">已重貼一條狀態</string>
     <string name="xqt_item_reblogged_status">已轉發</string>
     <string name="xqt_item_mention_status">提到你</string>
     <string name="mastodon_visibility_public">公開</string>
@@ -83,6 +87,7 @@
     <string name="reply">回覆</string>
     <string name="report">報告</string>
     <string name="retweet">轉發</string>
+    <string name="retweet_remove">刪除轉發</string>
     <string name="share">分享</string>
     <string name="comment">評論</string>
     <string name="user_report">報告</string>
@@ -99,6 +104,7 @@
     <string name="date_format_year_month_day">dd MMM yy</string>
     <string name="date_format_month_day">dd MMM</string>
     <string name="date_format_full">dd MMM yy HH:mm</string>
+    <string name="vvo_notification_like">喜歡你的狀態</string>
     <string name="user_follow_edit_list">添加/刪除列表</string>
     <string name="list_empty">沒有列表</string>
     <string name="list_error">無法加載列表</string>
@@ -303,6 +309,8 @@
     <string name="list_add">添加清單</string>
     <string name="list_edit">編輯清單</string>
     <string name="list_delete">刪除清單</string>
+    <string name="add_rss_source">添加</string>
+    <string name="edit_rss_source">編輯Rss來源</string>
     <string name="rss_sources_title_label">標題</string>
     <string name="rss_sources_url_label">網址</string>
     <string name="service_select_welcome_title">歡迎來到Flare</string>

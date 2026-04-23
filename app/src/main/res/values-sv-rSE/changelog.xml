@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="changelog_title">Välkommen tillbaka!</string>
+    <string name="changelog_message">Vi har gjort några ändringar sedan du senast loggade in. Här är detaljerna:</string>
+    <string name="changelog_current"><![CDATA[            <span>Version %1$s:</span>
+            <ul>
+                <li>Lade till nya tidslinjevisningslägen, inklusive en Galleri layout.</li>
+                <li>Förbättrad RSS-läsning, dela, översättning och sammanfattningar.</li>
+                <li>Omorganiserade Utseendeinställningar för enklare anpassning.</li>
+                <li>Felrättelser och prestandaförbättringar.</li>
+            </ul>
+        ]]></string>
+</resources>

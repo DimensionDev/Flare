@@ -48,6 +48,14 @@
     <string name="settings_accounts_title">Account beheer</string>
     <string name="settings_appearance_title">Uiterlijk</string>
     <string name="settings_appearance_subtitle">Pas het uiterlijk en gevoel van Flare aan</string>
+    <string name="settings_appearance_theme_group_title">Thema</string>
+    <string name="settings_appearance_theme_group_subtitle">Kleuren, lettergrootte en avatar vorm</string>
+    <string name="settings_appearance_layout_group_title">Indeling</string>
+    <string name="settings_appearance_layout_group_subtitle">Tijdlijn, navigatiebalk en artikel lay-out</string>
+    <string name="settings_appearance_display_group_title">Weergeven</string>
+    <string name="settings_appearance_display_group_subtitle">Tijdstempels, platformlogo\'s en voorbeeld links</string>
+    <string name="settings_appearance_media_group_title">Medium</string>
+    <string name="settings_appearance_media_group_subtitle">Afbeeldingen, video\'s en gevoelige inhoud</string>
     <string name="settings_storage_title">Opslagruimte</string>
     <string name="settings_storage_subtitle">Beheer Flare\'s opslag</string>
     <string name="settings_about_title">Informatie</string>
@@ -67,15 +75,15 @@
     <string name="settings_ai_config_title">AI configuratie</string>
     <string name="settings_ai_config_server">Server URL</string>
     <string name="settings_ai_config_server_hint">Voer de server-URL in</string>
-    <string name="settings_ai_config_server_url_requirement">De server-URL moet eindigen met een slash aan het einde en de OpenAI-compatibele v1/chat/aanvullingen API ondersteunen.</string>
+    <string name="settings_ai_config_server_url_requirement">Server-URL moet eindigen met een slash aan het einde en de AI-compatibele v1/chat/aanvullingen API ondersteunen.</string>
     <string name="settings_ai_config_server_self_host_description">U kunt de officiële server gebruiken of zelf uw eigen server organiseren</string>
     <string name="settings_ai_config_type">AI Type</string>
     <string name="settings_ai_config_type_description">Tik om het AI backend type te kiezen</string>
     <string name="settings_ai_config_type_select">Selecteren</string>
     <string name="settings_ai_config_type_on_device">On-apparaat AI</string>
     <string name="settings_ai_config_type_on_device_description">Gebruik lokale AI uitvoering op het huidige apparaat</string>
-    <string name="settings_ai_config_type_openai">OpenAI compatibele API</string>
-    <string name="settings_ai_config_type_openai_description">Gebruik een OpenAI-compatibel eindpunt voor AI functies</string>
+    <string name="settings_ai_config_type_openai">AI Compatible API</string>
+    <string name="settings_ai_config_type_openai_description">Gebruik een AI-compatibel eindpunt voor AI functies</string>
     <string name="settings_ai_config_value_empty_placeholder">Niet ingesteld</string>
     <string name="settings_ai_config_api_key">API Sleutel</string>
     <string name="settings_ai_config_api_key_hint">Voer API key in</string>
@@ -85,6 +93,12 @@
     <string name="settings_ai_config_model_error">modellen laden mislukt</string>
     <string name="settings_ai_config_model_no_models">Geen modellen</string>
     <string name="settings_ai_config_model_manual_input">Voer model handmatig in</string>
+    <string name="settings_ai_config_reasoning_effort">Redenen inspanning</string>
+    <string name="settings_ai_config_reasoning_effort_description">Kies hoeveel moeite het model besteedt aan redenering. Standaard gebruikt het standaard gedrag van de provider.</string>
+    <string name="settings_ai_config_reasoning_effort_default">Standaard</string>
+    <string name="settings_ai_config_reasoning_effort_low">laag</string>
+    <string name="settings_ai_config_reasoning_effort_medium">Middelgroot</string>
+    <string name="settings_ai_config_reasoning_effort_high">hoog</string>
     <string name="settings_ai_config_tap_to_edit">Tik om te bewerken</string>
     <string name="settings_ai_config_entable_translation">AI vertaling inschakelen</string>
     <string name="settings_ai_config_translation_description">Vervang Google Translate door AI vertaling, dit kan langer duren</string>
@@ -198,6 +212,11 @@
     <string name="settings_appearance_avatar_shape_description">De vorm van de avatar wijzigen</string>
     <string name="settings_appearance_avatar_shape_round">Ronde</string>
     <string name="settings_appearance_avatar_shape_square">Vierkant</string>
+    <string name="settings_appearance_timeline_display_mode">Timeline weergavemodus</string>
+    <string name="settings_appearance_timeline_display_mode_description">Kies hoe items worden weergegeven in tijdlijnen</string>
+    <string name="settings_appearance_timeline_display_mode_card">Creditcard</string>
+    <string name="settings_appearance_timeline_display_mode_plain">Plain (enkele kolom)</string>
+    <string name="settings_appearance_timeline_display_mode_gallery">Galerij (alleen starttijdlijn)</string>
     <string name="settings_appearance_theme">Thema</string>
     <string name="settings_appearance_theme_description">Verander het thema van de app</string>
     <string name="settings_appearance_theme_light">Licht</string>
@@ -246,8 +265,10 @@
     <string name="media_viewer_title">Media viewer</string>
     <string name="settings_accounts_remove">Verwijderen</string>
     <string name="settings_accounts_remove_confirm">Weet u zeker dat u account %1$s wilt verwijderen van dit apparaat?</string>
-    <string name="media_menu_save">Schermafdruk opslaan</string>
-    <string name="media_menu_share_image">Schermafdruk delen</string>
+    <string name="media_menu_save">Afbeelding opslaan</string>
+    <string name="media_menu_share_image">Deel afbeelding</string>
+    <string name="media_menu_copy_link">Koppeling kopiëren</string>
+    <string name="media_menu_media_link">Media link</string>
     <string name="status_menu_share_via_fxembed">Delen via FxEmbed</string>
     <string name="status_menu_share_via_fixvx">Delen via Fixvx</string>
     <string name="media_save_success">Opgeslagen in Downloads</string>
@@ -355,11 +376,14 @@
     <string name="rss_sources_pinned_in_tabs">Vastmaken aan home tabbladen</string>
     <string name="rss_sources_open_in_browser">Openen in browser</string>
     <string name="rss_sources_open_in_app">Openen in app</string>
+    <string name="rss_sources_full_content">Volledige inhoud</string>
+    <string name="rss_sources_description_only">Alleen beschrijving</string>
     <string name="mastodon_available_timelines">Beschikbare tijdlijnen</string>
     <string name="mastodon_trending_statuses">Trending statuses</string>
     <string name="mastodon_federated_timeline">Federale tijdlijn</string>
     <string name="mastodon_local_timeline">Lokale tijdlijn</string>
     <string name="subscription_url_hint">Ondersteunt RSS feeds en Mastodon instanties</string>
+    <string name="rss_sources_display_mode">Weergave modus</string>
     <string name="rss_detail_open_in_browser">Openen in browser</string>
     <string name="rss_detail_share">Link delen</string>
     <string name="rss_detail_tldr">Summarize</string>
@@ -370,8 +394,6 @@
     <string name="rss_detail_translate_error">Vertalen mislukt</string>
     <string name="emoji_picker_recent">Recentelijk</string>
     <string name="emoji_picker_search">Zoeken</string>
-    <string name="changelog_title">Welkom terug!</string>
-    <string name="changelog_message">We hebben enkele wijzigingen aangebracht sinds de laatste keer dat u bent ingelogd. Hier zijn de details:</string>
     <string name="podcast_host">Hostnaam</string>
     <string name="podcast_title">Potcast</string>
     <string name="podcast_speaker">Spreker</string>
@@ -413,14 +435,6 @@
     <string name="import_error">Gegevens importeren mislukt</string>
     <string name="import_confirmation_title">Import bevestigen</string>
     <string name="import_confirmation_message">Dit zal gegevens uit het bestand importeren. Bestaande records met bijpassende IDs zullen worden vervangen. Wilt u doorgaan?</string>
-    <string name="changelog_current"><![CDATA[            <span>Versie %1$s:</span>
-            <ul>
-                <li>Ondersteuning voor X-artikelen met een speciale leeservaring toegevoegd.</li>
-                <li>Automatische vertaling instellen met uitgesloten talen en snelle vertaaltests.</li>
-                <li>RSS parsing is nu veel sneller, met het sneller laden van artikelen en betere compatibiliteit van de voeding.</li>
-                <li>bugfixes en prestatieverbeteringen.</li>
-            </ul>
-        ]]></string>
     <string name="tab_settings_add_group">Groep toevoegen</string>
     <string name="tab_settings_add_tab">Tabblad toevoegen</string>
     <string name="tab_settings_edit_group">Groep bewerken</string>

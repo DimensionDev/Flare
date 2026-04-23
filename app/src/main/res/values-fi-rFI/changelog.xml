@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="changelog_title">Tervetuloa takaisin!</string>
+    <string name="changelog_message">Olemme tehneet joitakin muutoksia, koska olet viimeksi kirjautunut sisään. Tässä on yksityiskohdat:</string>
+    <string name="changelog_current"><![CDATA[            <span>Versio %1$s:</span>
+            <ul>
+                <li>Lisätty uusia aikajanan näyttötiloja, mukaan lukien gallerian asettelu.</li>
+                <li>Parannettu RSS-lukema, jakaminen, kääntäminen ja yhteenvedot.</li>
+                <li>Järjestä uudelleen ulkoasun asetukset helpommin muokattavaksi.</li>
+                <li>Virheenkorjauksia ja suorituskyvyn parannuksia.</li>
+            </ul>
+        ]]></string>
+</resources>

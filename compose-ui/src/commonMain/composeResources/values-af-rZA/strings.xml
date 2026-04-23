@@ -17,13 +17,16 @@
     <string name="mastodon_notification_item_poll_ended">‘n opname waaraan jy deelgeneem het, is beëindig</string>
     <string name="mastodon_notification_item_mentioned_you">het jou genoem</string>
     <string name="mastodon_notification_item_requested_follow">versoek om jou te volg</string>
+    <string name="mastodon_notification_item_updated_status">het ‘n toot opgedateer</string>
     <string name="mastodon_item_show_more">Show more</string>
     <string name="mastodon_item_show_less">Show less</string>
+    <string name="mastodon_item_pinned">Gepinde toot</string>
     <string name="bluesky_notification_item_followed_you">het jou gevolg</string>
     <string name="bluesky_notification_item_favourited_your_status">gegunsteling gemaak</string>
     <string name="bluesky_notification_item_reblogged_your_status">herblogged</string>
     <string name="bluesky_notification_item_poll_ended">‘n opname waaraan jy deelgeneem het, is beëindig</string>
     <string name="bluesky_notification_item_mentioned_you">het jou genoem</string>
+    <string name="bluesky_item_reblogged_status">het ‘n toot geboom</string>
     <string name="bluesky_notification_item_replied_to_you">het jou geantwoord</string>
     <string name="bluesky_notification_item_quoted_your_status">geciteer</string>
     <string name="bluesky_notification_item_starterpack_joined">Starterpakket Joined</string>
@@ -40,6 +43,7 @@
     <string name="misskey_notification_item_followed_you">het jou gevolg</string>
     <string name="misskey_notification_item_requested_follow">het aansoek gedoen om jou te volg</string>
     <string name="misskey_notification_unknwon">Onbekende kennisgewing %1$s</string>
+    <string name="misskey_item_reblogged_status">het ‘n toot geboom</string>
     <string name="xqt_item_reblogged_status">het geretweet</string>
     <string name="xqt_item_mention_status">noem jou</string>
     <string name="mastodon_visibility_public">Openbaar</string>
@@ -81,6 +85,7 @@
     <string name="reply">Antwoord</string>
     <string name="report">Verslag</string>
     <string name="retweet">Herpost</string>
+    <string name="retweet_remove">Verwyder retweet</string>
     <string name="share">Deel</string>
     <string name="comment">Kommentaar</string>
     <string name="user_report">Verslag</string>
@@ -95,6 +100,7 @@
     <string name="date_format_year_month_day">dd MMM yy</string>
     <string name="date_format_month_day">dd MMM</string>
     <string name="date_format_full">dd MMM yy HH:mm</string>
+    <string name="vvo_notification_like">Het jou status graag</string>
     <string name="user_follow_edit_list">Voeg by/verwyder van lys</string>
     <string name="list_empty">Geen lyste</string>
     <string name="list_error">Kon nie lyste laai nie</string>
@@ -299,6 +305,8 @@
     <string name="list_add">Voeg lys by</string>
     <string name="list_edit">Bewerk lys</string>
     <string name="list_delete">Verwyder lys</string>
+    <string name="add_rss_source">Voeg by</string>
+    <string name="edit_rss_source">Bewerk Rss Bron</string>
     <string name="rss_sources_title_label">Titel</string>
     <string name="rss_sources_url_label">Url</string>
     <string name="service_select_welcome_title">Welkom by Flare</string>

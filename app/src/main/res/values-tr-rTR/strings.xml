@@ -42,6 +42,8 @@
     <string name="settings_accounts_title">Hesap Yönetimi</string>
     <string name="settings_appearance_title">Görünüm</string>
     <string name="settings_appearance_subtitle">Flare’in görünümünü ve hissini özelleştirin</string>
+    <string name="settings_appearance_theme_group_title">Tema</string>
+    <string name="settings_appearance_media_group_title">Medya</string>
     <string name="settings_storage_title">Depolama</string>
     <string name="settings_storage_subtitle">Flare\'ın depolamasını yönet</string>
     <string name="settings_about_title">Hakkında</string>
@@ -67,8 +69,6 @@
     <string name="settings_ai_config_type_select">Seç</string>
     <string name="settings_ai_config_type_on_device">Cihaz içi yapay zeka</string>
     <string name="settings_ai_config_type_on_device_description">Mevcut cihazda yerel yapay zeka yürütmesini kullanın</string>
-    <string name="settings_ai_config_type_openai">OpenAI Uyumlu API</string>
-    <string name="settings_ai_config_type_openai_description">Yapay zeka özellikleri için OpenAI uyumlu bir uç nokta kullanın</string>
     <string name="settings_ai_config_value_empty_placeholder">Ayarlanmadı</string>
     <string name="settings_ai_config_api_key">API Anahtarı</string>
     <string name="settings_ai_config_api_key_hint">API anahtarını girin</string>
@@ -78,6 +78,7 @@
     <string name="settings_ai_config_model_loading">Modeller yükleniyor…</string>
     <string name="settings_ai_config_model_error">Modeller yüklenemedi</string>
     <string name="settings_ai_config_model_no_models">Model yok</string>
+    <string name="settings_ai_config_reasoning_effort_default">Varsayılan</string>
     <string name="settings_ai_config_tap_to_edit">Düzenlemek için dokunun</string>
     <string name="settings_ai_config_entable_translation">Yapay Zeka çevirisini etkinleştir</string>
     <string name="settings_ai_config_translation_description">Google Çeviri\'yi yapay zeka çevirisi ile değiştirin, daha uzun sürebilir</string>
@@ -87,6 +88,7 @@
     <string name="settings_ai_config_tldr_prompt">Özet Promptu</string>
     <string name="settings_language_title">Dil</string>
     <string name="settings_language_description">Uygulamanın dilini değiştirin</string>
+    <string name="settings_rss_management_title">RSS Yönetimi</string>
     <string name="status_loadmore_error_retry">Yeniden dene</string>
     <string name="login_expired">Giriş oturumu süresi doldu</string>
     <string name="login_expired_message">Yeniden giriş yapmak için tıklayın</string>
@@ -208,8 +210,6 @@
     <string name="service_select_empty_message">Hiçbir örnek bulunamadı</string>
     <string name="media_viewer_title">Medya görüntüleyici</string>
     <string name="settings_accounts_remove">Kaldır</string>
-    <string name="media_menu_save">Ekran görüntüsünü kaydet</string>
-    <string name="media_menu_share_image">Ekran görüntüsünü paylaş</string>
     <string name="status_menu_share_via_fxembed">FxEmbed aracılığıyla paylaş</string>
     <string name="status_menu_share_via_fixvx">Fixvx üzerinden paylaş</string>
     <string name="media_save_success">İndirilenlere kaydedildi</string>
@@ -300,6 +300,8 @@
     <string name="local_history_search_placeholder">Yerel önbellekte ara</string>
     <string name="local_history_search_status_title">Gönderi</string>
     <string name="local_history_search_user_title">Kullanıcı</string>
+    <string name="add_rss_source">Ekle</string>
+    <string name="edit_rss_source">Rss Kaynağını Düzenle</string>
     <string name="opml_import">OPML\'den içe aktar</string>
     <string name="opml_export">OPML\'ye aktar</string>
     <string name="export_completed">Dışa aktarma tamamlandı</string>
@@ -319,8 +321,6 @@
     <string name="rss_detail_tldr_loading">Özetleniyor…</string>
     <string name="emoji_picker_recent">Son</string>
     <string name="emoji_picker_search">Ara</string>
-    <string name="changelog_title">Hoş geldiniz!</string>
-    <string name="changelog_message">Son giriş yaptığınızdan beri bazı değişiklikler yaptık. İşte detaylar:</string>
     <string name="podcast_host">Anahtar</string>
     <string name="podcast_title">Podcast</string>
     <string name="podcast_speaker">Konuşmacı</string>

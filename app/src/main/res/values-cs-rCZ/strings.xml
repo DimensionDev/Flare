@@ -50,6 +50,14 @@
     <string name="settings_accounts_title">Správa účtů</string>
     <string name="settings_appearance_title">Vzhled</string>
     <string name="settings_appearance_subtitle">Přizpůsobit vzhled a pocit Flare</string>
+    <string name="settings_appearance_theme_group_title">Téma</string>
+    <string name="settings_appearance_theme_group_subtitle">Barvy, velikost písma a tvar avataru</string>
+    <string name="settings_appearance_layout_group_title">Rozložení</string>
+    <string name="settings_appearance_layout_group_subtitle">Rozložení časového pásma, navigačního panelu a příspěvku</string>
+    <string name="settings_appearance_display_group_title">Zobrazení</string>
+    <string name="settings_appearance_display_group_subtitle">Časová razítka, loga platformy a náhledy odkazů</string>
+    <string name="settings_appearance_media_group_title">Média</string>
+    <string name="settings_appearance_media_group_subtitle">Obrázky, videa a citlivý obsah</string>
     <string name="settings_storage_title">Úložiště</string>
     <string name="settings_storage_subtitle">Správa Flareho úložiště</string>
     <string name="settings_about_title">O aplikaci</string>
@@ -69,15 +77,15 @@
     <string name="settings_ai_config_title">Nastavení AI</string>
     <string name="settings_ai_config_server">URL serveru</string>
     <string name="settings_ai_config_server_hint">Zadejte URL serveru</string>
-    <string name="settings_ai_config_server_url_requirement">Adresa URL serveru musí skončit koncovým lomítkem a musí podporovat API kompatibilní s OpenAI v1/chat/dokončení.</string>
+    <string name="settings_ai_config_server_url_requirement">URL serveru musí skončit koncovým lomítkem a podporovat API kompatibilní s AI v1/chat/dokončení.</string>
     <string name="settings_ai_config_server_self_host_description">Můžete použít oficiální server nebo hostit vlastní server</string>
     <string name="settings_ai_config_type">AI Type</string>
     <string name="settings_ai_config_type_description">Klepnutím vyberte typ AI backendu</string>
     <string name="settings_ai_config_type_select">Vybrat</string>
     <string name="settings_ai_config_type_on_device">Na zařízení AI</string>
     <string name="settings_ai_config_type_on_device_description">Použít místní spuštění AI na aktuálním zařízení</string>
-    <string name="settings_ai_config_type_openai">OpenAI kompatibilní API</string>
-    <string name="settings_ai_config_type_openai_description">Použít koncový bod pro funkce AI kompatibilní s OpenAI</string>
+    <string name="settings_ai_config_type_openai">AI Compatible API</string>
+    <string name="settings_ai_config_type_openai_description">Použít koncový bod pro funkce AI kompatibilní s AI</string>
     <string name="settings_ai_config_value_empty_placeholder">Nenastaveno</string>
     <string name="settings_ai_config_api_key">API klíč</string>
     <string name="settings_ai_config_api_key_hint">Zadejte klíč API</string>
@@ -88,6 +96,12 @@
     <string name="settings_ai_config_model_error">Nepodařilo se načíst modely</string>
     <string name="settings_ai_config_model_no_models">Žádné modely</string>
     <string name="settings_ai_config_model_manual_input">Zadejte model ručně</string>
+    <string name="settings_ai_config_reasoning_effort">Odůvodnění intenzity</string>
+    <string name="settings_ai_config_reasoning_effort_description">Zvolte, kolik úsilí model vynaloží na zdůvodnění. Výchozí nastavení používá výchozí chování poskytovatele.</string>
+    <string name="settings_ai_config_reasoning_effort_default">Výchozí</string>
+    <string name="settings_ai_config_reasoning_effort_low">Nízká</string>
+    <string name="settings_ai_config_reasoning_effort_medium">Střední</string>
+    <string name="settings_ai_config_reasoning_effort_high">Vysoká</string>
     <string name="settings_ai_config_tap_to_edit">Klepnutím upravíte</string>
     <string name="settings_ai_config_entable_translation">Povolit překlad AI</string>
     <string name="settings_ai_config_translation_description">Nahradit Google překlad AI překladem, může trvat déle</string>
@@ -201,6 +215,11 @@
     <string name="settings_appearance_avatar_shape_description">Změnit tvar avataru</string>
     <string name="settings_appearance_avatar_shape_round">Kolo</string>
     <string name="settings_appearance_avatar_shape_square">Čtverec</string>
+    <string name="settings_appearance_timeline_display_mode">Režim zobrazení časové osy</string>
+    <string name="settings_appearance_timeline_display_mode_description">Zvolte, jak jsou položky zobrazeny v časové ose</string>
+    <string name="settings_appearance_timeline_display_mode_card">Karta</string>
+    <string name="settings_appearance_timeline_display_mode_plain">Jednoduchý (jen jeden sloupec)</string>
+    <string name="settings_appearance_timeline_display_mode_gallery">Galerie (pouze časová osa domů)</string>
     <string name="settings_appearance_theme">Téma</string>
     <string name="settings_appearance_theme_description">Změnit motiv aplikace</string>
     <string name="settings_appearance_theme_light">Světlý</string>
@@ -249,8 +268,10 @@
     <string name="media_viewer_title">Prohlížeč médií</string>
     <string name="settings_accounts_remove">Odebrat</string>
     <string name="settings_accounts_remove_confirm">Jste si jisti, že chcete odstranit účet %1$s z tohoto zařízení?</string>
-    <string name="media_menu_save">Uložit snímek obrazovky</string>
-    <string name="media_menu_share_image">Sdílet snímek obrazovky</string>
+    <string name="media_menu_save">Uložit obrázek</string>
+    <string name="media_menu_share_image">Sdílet obrázek</string>
+    <string name="media_menu_copy_link">Kopírovat odkaz</string>
+    <string name="media_menu_media_link">Odkaz na média</string>
     <string name="status_menu_share_via_fxembed">Sdílet přes FxEmbed</string>
     <string name="status_menu_share_via_fixvx">Sdílet přes Fixvx</string>
     <string name="media_save_success">Uloženo do souborů</string>
@@ -358,11 +379,14 @@
     <string name="rss_sources_pinned_in_tabs">Připnout na domovské panely</string>
     <string name="rss_sources_open_in_browser">Otevřít v prohlížeči</string>
     <string name="rss_sources_open_in_app">Otevřít v aplikaci</string>
+    <string name="rss_sources_full_content">Plný obsah</string>
+    <string name="rss_sources_description_only">Pouze popis</string>
     <string name="mastodon_available_timelines">Dostupné časové osy</string>
     <string name="mastodon_trending_statuses">Trending statuses</string>
     <string name="mastodon_federated_timeline">Federovaná časová osa</string>
     <string name="mastodon_local_timeline">Místní časová osa</string>
     <string name="subscription_url_hint">Podporuje RSS kanály a Mastodon instance</string>
+    <string name="rss_sources_display_mode">Režim zobrazení</string>
     <string name="rss_detail_open_in_browser">Otevřít v prohlížeči</string>
     <string name="rss_detail_share">Sdílet odkaz</string>
     <string name="rss_detail_tldr">Summarize</string>
@@ -373,8 +397,6 @@
     <string name="rss_detail_translate_error">Překlad se nezdařil</string>
     <string name="emoji_picker_recent">Nedávné</string>
     <string name="emoji_picker_search">Hledat</string>
-    <string name="changelog_title">Vítejte zpět!</string>
-    <string name="changelog_message">Od posledního přihlášení jsme provedli nějaké změny. Zde jsou detaily:</string>
     <string name="podcast_host">Hostitel</string>
     <string name="podcast_title">Vysílání</string>
     <string name="podcast_speaker">Reproduktor</string>
@@ -416,14 +438,6 @@
     <string name="import_error">Import dat se nezdařil</string>
     <string name="import_confirmation_title">Potvrdit import</string>
     <string name="import_confirmation_message">Toto importuje data ze souboru. Existující záznamy s odpovídajícími ID budou nahrazeny. Chcete pokračovat?</string>
-    <string name="changelog_current"><![CDATA[            <span>Verze %1$s:</span>
-            <ul>
-                <li>Přidána podpora pro X články se zážitkem pro čtení.</li>
-                <li>Vyčistit automatický překlad s vyloučením jazyků a testování rychlého překladu.</li>
-                <li>RSS analýza je nyní mnohem rychlejší, s rychlejším načítáním článku a lepší kompatibilitou krmiva.</li>
-                <li>Opravy chyb a zlepšení výkonu.</li>
-            </ul>
-        ]]></string>
     <string name="tab_settings_add_group">Přidat skupinu</string>
     <string name="tab_settings_add_tab">Přidat záložku</string>
     <string name="tab_settings_edit_group">Upravit skupinu</string>

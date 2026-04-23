@@ -50,6 +50,14 @@
     <string name="settings_accounts_title">Zarządzanie kontem</string>
     <string name="settings_appearance_title">Wygląd</string>
     <string name="settings_appearance_subtitle">Dostosuj wygląd Flary</string>
+    <string name="settings_appearance_theme_group_title">Motyw</string>
+    <string name="settings_appearance_theme_group_subtitle">Kolory, rozmiar czcionki i kształt awatara</string>
+    <string name="settings_appearance_layout_group_title">Układ</string>
+    <string name="settings_appearance_layout_group_subtitle">Oś czasu, pasek nawigacji i układ postów</string>
+    <string name="settings_appearance_display_group_title">Wyświetlanie</string>
+    <string name="settings_appearance_display_group_subtitle">Ośrodki czasowe, logo platformy i podglądy linków</string>
+    <string name="settings_appearance_media_group_title">Media</string>
+    <string name="settings_appearance_media_group_subtitle">Zdjęcia, filmy i poufne treści</string>
     <string name="settings_storage_title">Pamięć</string>
     <string name="settings_storage_subtitle">Zarządzaj pamięcią Flara</string>
     <string name="settings_about_title">O programie</string>
@@ -69,15 +77,15 @@
     <string name="settings_ai_config_title">Konfiguracja SI</string>
     <string name="settings_ai_config_server">Adres URL serwera</string>
     <string name="settings_ai_config_server_hint">Wprowadź adres URL serwera</string>
-    <string name="settings_ai_config_server_url_requirement">Adres URL serwera musi kończyć się ukośnikiem i obsługiwać API zgodne z OpenAI v1/chat/completions API.</string>
+    <string name="settings_ai_config_server_url_requirement">Adres URL serwera musi kończyć się ukośnikiem i obsługiwać API kompatybilne z AI v1/chat/completions API.</string>
     <string name="settings_ai_config_server_self_host_description">Możesz użyć oficjalnego serwera lub własnego serwera</string>
     <string name="settings_ai_config_type">AI Type</string>
     <string name="settings_ai_config_type_description">Dotknij, aby wybrać typ zaplecza AI</string>
     <string name="settings_ai_config_type_select">Wybierz</string>
     <string name="settings_ai_config_type_on_device">AI na urządzeniu</string>
     <string name="settings_ai_config_type_on_device_description">Użyj lokalnego wykonywania AI na bieżącym urządzeniu</string>
-    <string name="settings_ai_config_type_openai">Kompatybilne API OpenAI</string>
-    <string name="settings_ai_config_type_openai_description">Użyj punktu końcowego kompatybilnego z OpenAI dla funkcji AI</string>
+    <string name="settings_ai_config_type_openai">AI Compatible API</string>
+    <string name="settings_ai_config_type_openai_description">Użyj punktu końcowego kompatybilnego z AI dla funkcji AI</string>
     <string name="settings_ai_config_value_empty_placeholder">Nie ustawiono</string>
     <string name="settings_ai_config_api_key">Klucz API</string>
     <string name="settings_ai_config_api_key_hint">Wprowadź klucz API</string>
@@ -88,6 +96,12 @@
     <string name="settings_ai_config_model_error">Nie udało się załadować modeli</string>
     <string name="settings_ai_config_model_no_models">Brak modeli</string>
     <string name="settings_ai_config_model_manual_input">Wprowadź model ręcznie</string>
+    <string name="settings_ai_config_reasoning_effort">Uzasadnienie nakład</string>
+    <string name="settings_ai_config_reasoning_effort_description">Wybierz jak duży wysiłek model wydaje na argumentację. Domyślnie używa domyślnego zachowania dostawcy.</string>
+    <string name="settings_ai_config_reasoning_effort_default">Domyślny</string>
+    <string name="settings_ai_config_reasoning_effort_low">Niski</string>
+    <string name="settings_ai_config_reasoning_effort_medium">Średni</string>
+    <string name="settings_ai_config_reasoning_effort_high">Wysoka</string>
     <string name="settings_ai_config_tap_to_edit">Dotknij, aby edytować</string>
     <string name="settings_ai_config_entable_translation">Włącz tłumaczenie AI</string>
     <string name="settings_ai_config_translation_description">Zastąp Google Translate tłumaczeniem AI może zająć więcej czasu</string>
@@ -201,6 +215,11 @@
     <string name="settings_appearance_avatar_shape_description">Zmień kształt awatara</string>
     <string name="settings_appearance_avatar_shape_round">Runda</string>
     <string name="settings_appearance_avatar_shape_square">Kwadratowy</string>
+    <string name="settings_appearance_timeline_display_mode">Tryb wyświetlania osi czasu</string>
+    <string name="settings_appearance_timeline_display_mode_description">Wybierz sposób wyświetlania elementów na osi czasu</string>
+    <string name="settings_appearance_timeline_display_mode_card">Karta</string>
+    <string name="settings_appearance_timeline_display_mode_plain">Zwykły (tylko jedna kolumna)</string>
+    <string name="settings_appearance_timeline_display_mode_gallery">Galeria (tylko główna oś czasu)</string>
     <string name="settings_appearance_theme">Motyw</string>
     <string name="settings_appearance_theme_description">Zmień motyw aplikacji</string>
     <string name="settings_appearance_theme_light">Światło</string>
@@ -249,8 +268,10 @@
     <string name="media_viewer_title">Przeglądarka mediów</string>
     <string name="settings_accounts_remove">Usuń</string>
     <string name="settings_accounts_remove_confirm">Czy na pewno chcesz usunąć konto %1$s z tego urządzenia?</string>
-    <string name="media_menu_save">Zapisz zrzut ekranu</string>
-    <string name="media_menu_share_image">Udostępnij zrzut ekranu</string>
+    <string name="media_menu_save">Zapisz obraz</string>
+    <string name="media_menu_share_image">Udostępnij obraz</string>
+    <string name="media_menu_copy_link">Kopiuj link</string>
+    <string name="media_menu_media_link">Link do mediów</string>
     <string name="status_menu_share_via_fxembed">Udostępnij przez FxEmbed</string>
     <string name="status_menu_share_via_fixvx">Udostępnij przez Fixvx</string>
     <string name="media_save_success">Zapisano do pobrania</string>
@@ -358,11 +379,14 @@
     <string name="rss_sources_pinned_in_tabs">Przypnij do zakładek domowych</string>
     <string name="rss_sources_open_in_browser">Otwórz w przeglądarce</string>
     <string name="rss_sources_open_in_app">Otwórz w aplikacji</string>
+    <string name="rss_sources_full_content">Pełna treść</string>
+    <string name="rss_sources_description_only">Tylko opis</string>
     <string name="mastodon_available_timelines">Dostępna oś czasu</string>
     <string name="mastodon_trending_statuses">Trending statuses</string>
     <string name="mastodon_federated_timeline">Sfederowana oś czasu</string>
     <string name="mastodon_local_timeline">Lokalna oś czasu</string>
     <string name="subscription_url_hint">Obsługuje kanały RSS i instancje Mastodon</string>
+    <string name="rss_sources_display_mode">Tryb wyświetlania</string>
     <string name="rss_detail_open_in_browser">Otwórz w przeglądarce</string>
     <string name="rss_detail_share">Udostępnij link</string>
     <string name="rss_detail_tldr">Summarize</string>
@@ -373,8 +397,6 @@
     <string name="rss_detail_translate_error">Nie udało się przetłumaczyć</string>
     <string name="emoji_picker_recent">Najnowsze</string>
     <string name="emoji_picker_search">Szukaj</string>
-    <string name="changelog_title">Witaj ponownie!</string>
-    <string name="changelog_message">Wprowadziliśmy pewne zmiany od ostatniego logowania. Oto szczegóły:</string>
     <string name="podcast_host">Host</string>
     <string name="podcast_title">Podcast</string>
     <string name="podcast_speaker">Głośnik</string>
@@ -416,14 +438,6 @@
     <string name="import_error">Nie udało się zaimportować danych</string>
     <string name="import_confirmation_title">Potwierdź import</string>
     <string name="import_confirmation_message">Spowoduje to zaimportowanie danych z pliku. Istniejące rekordy z pasującymi identyfikatorami zostaną zastąpione. Czy chcesz kontynuować?</string>
-    <string name="changelog_current"><![CDATA[            <span>Wersja %1$s:</span>
-            <ul>
-                <li>Dodano wsparcie dla artykułów X ze specjalnym doświadczeniem w czytaniu.</li>
-                <li>Dopasuj automatyczne tłumaczenie z wykluczonymi językami i sprawdzenie szybkiego tłumaczenia.</li>
-                <li>Parsowanie RSS jest teraz znacznie szybsze, szybsze ładowanie artykułów i lepsza kompatybilność pasz.</li>
-                <li>Poprawki błędów i ulepszenia wydajności.</li>
-            </ul>
-        ]]></string>
     <string name="tab_settings_add_group">Dodaj grupę</string>
     <string name="tab_settings_add_tab">Dodaj kartę</string>
     <string name="tab_settings_edit_group">Edytuj grupę</string>

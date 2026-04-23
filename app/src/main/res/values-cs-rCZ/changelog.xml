@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="changelog_title">Vítejte zpět!</string>
+    <string name="changelog_message">Od posledního přihlášení jsme provedli nějaké změny. Zde jsou detaily:</string>
+</resources>

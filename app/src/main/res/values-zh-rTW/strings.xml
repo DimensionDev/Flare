@@ -38,6 +38,8 @@
     <string name="settings_accounts_title">帳號管理</string>
     <string name="settings_appearance_title">外觀</string>
     <string name="settings_appearance_subtitle">自訂Flare的外觀和感受</string>
+    <string name="settings_appearance_theme_group_title">主題</string>
+    <string name="settings_appearance_media_group_title">媒體</string>
     <string name="settings_storage_title">儲存</string>
     <string name="settings_storage_subtitle">管理Flare的儲存空間</string>
     <string name="settings_about_title">關於</string>
@@ -58,10 +60,13 @@
     <string name="settings_ai_config_server">伺服器網址</string>
     <string name="settings_ai_config_server_hint">輸入伺服器網址</string>
     <string name="settings_ai_config_server_self_host_description">您可以使用官方伺服器或自行架設伺服器</string>
+    <string name="settings_ai_config_reasoning_effort_default">預設</string>
     <string name="settings_ai_config_entable_translation">啟用AI翻譯</string>
     <string name="settings_ai_config_translation_description">將Google翻譯替換為AI翻譯，可能需要更長時間</string>
     <string name="settings_ai_config_enable_tldr">啟用AI總結</string>
     <string name="settings_ai_config_tldr_description">啟用長帖子總結，只適用於長度超過500個字符的帖子</string>
+    <string name="settings_ai_config_enable_pre_translation">啟用預翻譯</string>
+    <string name="settings_ai_config_pre_translation_description">在背景翻譯並快取新載入的時間線和個人資料內容。這會消耗大量 token。</string>
     <string name="status_loadmore_error_retry">重試</string>
     <string name="login_expired">登入會話已過期</string>
     <string name="login_expired_message">點擊重新登入</string>
@@ -102,12 +107,14 @@
     <string name="discover_status">熱門貼文</string>
     <string name="discover_hashtags">熱門標籤</string>
     <string name="search_users">用戶</string>
+    <string name="search_status">狀態</string>
     <string name="quick_menu_add_account">添加帳號</string>
     <string name="settings_appearance_generic">通用</string>
     <string name="settings_appearance_show_actions">顯示操作</string>
     <string name="settings_appearance_show_media">顯示媒體</string>
     <string name="settings_appearance_show_numbers">顯示數字</string>
     <string name="settings_appearance_show_cw_img">顯示敏感內容</string>
+    <string name="settings_appearance_show_cw_img_description">總是顯示狀態中的敏感內容</string>
     <string name="settings_appearance_expand_media">擴展媒體至全尺寸</string>
     <string name="settings_appearance_expand_media_description">在時間線中保持媒體的長寬比例</string>
     <string name="settings_appearance_video_autoplay">視頻自動播放</string>
@@ -152,6 +159,7 @@
     <string name="service_select_empty_message">未找到任何實例</string>
     <string name="media_viewer_title">媒體查看器</string>
     <string name="settings_accounts_remove">移除</string>
+    <string name="media_menu_share_image">分享圖片</string>
     <string name="media_save_success">已保存到下載</string>
     <string name="media_save_fail">保存失敗</string>
     <string name="media_alt_text">替代文字</string>
@@ -237,7 +245,10 @@
     <string name="following_title">追蹤中</string>
     <string name="fans_title">粉絲</string>
     <string name="local_history_search_placeholder">搜尋本地快取</string>
+    <string name="local_history_search_status_title">狀態</string>
     <string name="local_history_search_user_title">用戶</string>
+    <string name="add_rss_source">添加</string>
+    <string name="edit_rss_source">編輯Rss來源</string>
     <string name="rss_sources_title_label">標題</string>
     <string name="rss_sources_url_label">網址</string>
     <string name="rss_sources_pinned_in_tabs">釘選到首頁標籤</string>
@@ -250,8 +261,6 @@
     <string name="rss_detail_tldr_loading">正在總結…</string>
     <string name="emoji_picker_recent">最近</string>
     <string name="emoji_picker_search">搜尋</string>
-    <string name="changelog_title">歡迎回來！</string>
-    <string name="changelog_message">自您上次登入以來，我們已經進行了一些更改。這裡是詳細信息：</string>
     <string name="podcast_host">主機</string>
     <string name="podcast_title">播客</string>
     <string name="podcast_speaker">發言者</string>

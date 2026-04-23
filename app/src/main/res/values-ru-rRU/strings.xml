@@ -50,6 +50,14 @@
     <string name="settings_accounts_title">Управление аккаунтом</string>
     <string name="settings_appearance_title">Внешний вид</string>
     <string name="settings_appearance_subtitle">Настройте внешний вид Flare</string>
+    <string name="settings_appearance_theme_group_title">Тема</string>
+    <string name="settings_appearance_theme_group_subtitle">Цвета, размер шрифта и форма аватара</string>
+    <string name="settings_appearance_layout_group_title">Макет</string>
+    <string name="settings_appearance_layout_group_subtitle">Лента времени, панель навигации и раскладка записей</string>
+    <string name="settings_appearance_display_group_title">Отображение</string>
+    <string name="settings_appearance_display_group_subtitle">Отметки времени, логотипы платформы и превью ссылок</string>
+    <string name="settings_appearance_media_group_title">Медиа</string>
+    <string name="settings_appearance_media_group_subtitle">Изображения, видео и конфиденциальный контент</string>
     <string name="settings_storage_title">Хранилище</string>
     <string name="settings_storage_subtitle">Управление хранилищем Flare</string>
     <string name="settings_about_title">О программе</string>
@@ -69,15 +77,15 @@
     <string name="settings_ai_config_title">Конфигурация ИИ</string>
     <string name="settings_ai_config_server">URL сервера</string>
     <string name="settings_ai_config_server_hint">Введите URL сервера</string>
-    <string name="settings_ai_config_server_url_requirement">URL сервера должен заканчиваться конечной слэшем и поддерживать OpenAI-совместимый v1/chat/completions API.</string>
+    <string name="settings_ai_config_server_url_requirement">URL сервера должен заканчиваться с конечной косой чертой и поддержкой AI-совместимого API чата.</string>
     <string name="settings_ai_config_server_self_host_description">Вы можете использовать официальный сервер или собственный сервер</string>
     <string name="settings_ai_config_type">AI Type</string>
     <string name="settings_ai_config_type_description">Нажмите, чтобы выбрать тип AI бэкэнда</string>
     <string name="settings_ai_config_type_select">Выбрать</string>
     <string name="settings_ai_config_type_on_device">На устройстве ИИ</string>
     <string name="settings_ai_config_type_on_device_description">Использовать локальную обработку ИИ на текущем устройстве</string>
-    <string name="settings_ai_config_type_openai">Совместимый с OpenAI API</string>
-    <string name="settings_ai_config_type_openai_description">Использовать OpenAI-совместимую конечную точку для функций AI</string>
+    <string name="settings_ai_config_type_openai">AI Compatible API</string>
+    <string name="settings_ai_config_type_openai_description">Использовать AI-совместимую конечную точку для ИИ</string>
     <string name="settings_ai_config_value_empty_placeholder">Не задано</string>
     <string name="settings_ai_config_api_key">Ключ API</string>
     <string name="settings_ai_config_api_key_hint">Введите ключ API</string>
@@ -88,6 +96,12 @@
     <string name="settings_ai_config_model_error">Не удалось загрузить модели</string>
     <string name="settings_ai_config_model_no_models">Нет моделей</string>
     <string name="settings_ai_config_model_manual_input">Введите модель вручную</string>
+    <string name="settings_ai_config_reasoning_effort">Разумный Усилий</string>
+    <string name="settings_ai_config_reasoning_effort_description">Выберите, сколько усилий использует модель по умолчанию.</string>
+    <string name="settings_ai_config_reasoning_effort_default">По умолчанию</string>
+    <string name="settings_ai_config_reasoning_effort_low">Низкий</string>
+    <string name="settings_ai_config_reasoning_effort_medium">Средний</string>
+    <string name="settings_ai_config_reasoning_effort_high">Высокий</string>
     <string name="settings_ai_config_tap_to_edit">Нажмите, чтобы изменить</string>
     <string name="settings_ai_config_entable_translation">Включить перевод ИИ</string>
     <string name="settings_ai_config_translation_description">Замена перевода Google с помощью ИИ перевода, может занять больше времени</string>
@@ -201,6 +215,11 @@
     <string name="settings_appearance_avatar_shape_description">Изменить форму аватара</string>
     <string name="settings_appearance_avatar_shape_round">Круглая</string>
     <string name="settings_appearance_avatar_shape_square">Квадратная</string>
+    <string name="settings_appearance_timeline_display_mode">Режим отображения временной шкалы</string>
+    <string name="settings_appearance_timeline_display_mode_description">Выберите, как элементы отображаются в графике</string>
+    <string name="settings_appearance_timeline_display_mode_card">Карта</string>
+    <string name="settings_appearance_timeline_display_mode_plain">Простой (только одна колонка)</string>
+    <string name="settings_appearance_timeline_display_mode_gallery">Галерея (только домашняя шкала времени)</string>
     <string name="settings_appearance_theme">Тема</string>
     <string name="settings_appearance_theme_description">Изменить тему приложения</string>
     <string name="settings_appearance_theme_light">Светлая</string>
@@ -249,8 +268,10 @@
     <string name="media_viewer_title">Просмотрщик медиа</string>
     <string name="settings_accounts_remove">Удалить</string>
     <string name="settings_accounts_remove_confirm">Вы уверены, что хотите удалить учетную запись %1$s с этого устройства?</string>
-    <string name="media_menu_save">Сохранить скриншот</string>
-    <string name="media_menu_share_image">Поделиться скриншотом</string>
+    <string name="media_menu_save">Сохранить изображение</string>
+    <string name="media_menu_share_image">Поделиться изображением</string>
+    <string name="media_menu_copy_link">Копировать ссылку</string>
+    <string name="media_menu_media_link">Ссылка на медиа</string>
     <string name="status_menu_share_via_fxembed">Поделиться через FxEmbed</string>
     <string name="status_menu_share_via_fixvx">Поделиться через Fixvx</string>
     <string name="media_save_success">Сохранено в Загрузках</string>
@@ -358,11 +379,14 @@
     <string name="rss_sources_pinned_in_tabs">Закрепить как вкладку на Главной</string>
     <string name="rss_sources_open_in_browser">Открывать в браузере</string>
     <string name="rss_sources_open_in_app">Открывать в приложении</string>
+    <string name="rss_sources_full_content">Полный контент</string>
+    <string name="rss_sources_description_only">Только описание</string>
     <string name="mastodon_available_timelines">Доступные графики</string>
     <string name="mastodon_trending_statuses">Trending statuses</string>
     <string name="mastodon_federated_timeline">Федеративная шкала времени</string>
     <string name="mastodon_local_timeline">Локальная лента</string>
     <string name="subscription_url_hint">Поддерживает RSS-каналы и экземпляры Mastodon</string>
+    <string name="rss_sources_display_mode">Режим отображения</string>
     <string name="rss_detail_open_in_browser">Открыть в браузере</string>
     <string name="rss_detail_share">Поделиться ссылкой</string>
     <string name="rss_detail_tldr">Пересказать</string>
@@ -373,8 +397,6 @@
     <string name="rss_detail_translate_error">Не удалось перевести</string>
     <string name="emoji_picker_recent">Недавние</string>
     <string name="emoji_picker_search">Искать</string>
-    <string name="changelog_title">С возвращением!</string>
-    <string name="changelog_message">Мы внесли некоторые изменения с момента последнего входа. Ниже приведены подробности:</string>
     <string name="podcast_host">Хост</string>
     <string name="podcast_title">Подкаст</string>
     <string name="podcast_speaker">Спикер</string>
@@ -416,14 +438,6 @@
     <string name="import_error">Не удалось импортировать данные</string>
     <string name="import_confirmation_title">Подтвердить импорт</string>
     <string name="import_confirmation_message">Это импортирует данные из файла. Существующие записи с соответствующими идентификаторами будут заменены. Вы хотите продолжить?</string>
-    <string name="changelog_current"><![CDATA[            <span>Версия %1$s:</span>
-            <ul>
-                <li>Добавлена поддержка для X статей с особым опытом чтения.</li>
-                <li>Автоматический перевод с исключенными языками и быстрым тестированием.</li>
-                <li>RSS разбор теперь намного быстрее, с более быстрой загрузкой статьи и лучшей совместимостью с кормом.</li>
-                <li>Исправления ошибок и улучшения производительности.</li>
-            </ul>
-        ]]></string>
     <string name="tab_settings_add_group">Добавить группу</string>
     <string name="tab_settings_add_tab">Добавить вкладку</string>
     <string name="tab_settings_edit_group">Изменить группу</string>

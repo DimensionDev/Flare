@@ -60,6 +60,7 @@
     <string name="reply">תגובה</string>
     <string name="report">דווח</string>
     <string name="retweet">שיתוף מחדש</string>
+    <string name="retweet_remove">הסר שיתוף מחדש</string>
     <string name="status_loadmore_error_retry">ניסיון שוב</string>
     <string name="status_detail_comment">תגובה</string>
     <string name="status_detail_repost">שיתוף מחדש</string>
@@ -110,6 +111,8 @@
     <string name="settings_accounts_title">ניהול חשבון</string>
     <string name="settings_appearance_title">מראה</string>
     <string name="settings_appearance_subtitle">התאמה אישית של המראה והתחושה של Flare</string>
+    <string name="settings_appearance_theme_group_title">נושא</string>
+    <string name="settings_appearance_media_group_title">מדיה</string>
     <string name="settings_storage_title">אחסון</string>
     <string name="settings_storage_subtitle">נהל את אחסון Flare</string>
     <string name="settings_about_title">אודות</string>
@@ -127,9 +130,11 @@
     <string name="settings_app_logging_clear">נקה יומן</string>
     <string name="settings_app_logging_enable_network_logging">הפעל רישום רשת</string>
     <string name="settings_ai_config_title">הגדרת AI</string>
+    <string name="settings_ai_config_description">הגדר את הגדרות ה-AI</string>
     <string name="settings_ai_config_server">כתובת URL של השרת</string>
     <string name="settings_ai_config_server_hint">הכנס את כתובת ה-URL של השרת</string>
     <string name="settings_ai_config_server_self_host_description">תוכל להשתמש בשרת הרשמי או לארח את השרת שלך</string>
+    <string name="settings_ai_config_reasoning_effort_default">ברירת מחדל</string>
     <string name="settings_ai_config_entable_translation">אפשר תרגום AI</string>
     <string name="settings_ai_config_translation_description">החלף את Google Translate בתרגום AI, יכול לקחת יותר זמן</string>
     <string name="settings_ai_config_enable_tldr">אפשר סיכום AI</string>
@@ -139,6 +144,7 @@
     <string name="settings_appearance_show_media">הראה מדיה</string>
     <string name="settings_appearance_show_numbers">הראה מספרים</string>
     <string name="settings_appearance_show_cw_img">הראה תוכן רגיש</string>
+    <string name="settings_appearance_show_cw_img_description">מוצג תמיד תוכן רגיש בסטטוס</string>
     <string name="settings_appearance_expand_media">הרחב מדיה לגודל מלא</string>
     <string name="settings_appearance_expand_media_description">שמור את יחס המדיה בטיימליין</string>
     <string name="settings_appearance_video_autoplay">ניגון אוטומטי של וידאו</string>
@@ -188,8 +194,14 @@
     <string name="misskey_visibility_home">בית</string>
     <string name="misskey_visibility_followers">עוקבים</string>
     <string name="misskey_visibility_specified">נבחרים</string>
+    <string name="add_rss_source">הוסף</string>
+    <string name="edit_rss_source">ערוך מקור Rss</string>
     <string name="rss_sources_title_label">כותרת</string>
     <string name="rss_sources_url_label">כתובת URL</string>
+    <string name="rss_sources_open_in_browser">פתח בדפדפן</string>
+    <string name="rss_detail_open_in_browser">פתח בדפדפן</string>
+    <string name="rss_detail_tldr">סכם</string>
+    <string name="rss_detail_tldr_error">ניסיון לסכם נכשל</string>
     <string name="tab_settings_add">הוסף</string>
     <string name="tab_settings_drag">גרור</string>
     <string name="tab_settings_edit">ערוך</string>
@@ -215,6 +227,7 @@
     <string name="edit_tab_with_avatar">עם אווטאר</string>
     <string name="edit">ערוך</string>
     <string name="local_history_search_placeholder">חפש במטמון המקומי</string>
+    <string name="local_history_search_status_title">סטטוס</string>
     <string name="local_history_search_user_title">משתמש</string>
     <string name="settings_storage_clear_image_cache">נקה את מטמון התמונות</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB של תמונות יוסרו</string>

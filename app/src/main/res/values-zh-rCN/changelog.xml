@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="changelog_title">欢迎回来！</string>
+    <string name="changelog_message">自您上次登录以来，我们已经做了一些更改。以下是详细信息：</string>
+    <string name="changelog_current"><![CDATA[            <span> %1$s版本：</span>
+            <ul>
+                <li>添加了新的时间线显示模式， 包括图库布局。</li>
+                <li>改进RSS阅读， 分享、翻译和摘要。</li>
+                <li>更容易自定义的重整外观设置。</li>
+                <li>Bug 修复和性能改进。</li>
+            </ul>
+        ]]></string>
+</resources>

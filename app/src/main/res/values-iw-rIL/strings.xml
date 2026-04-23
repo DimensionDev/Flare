@@ -37,6 +37,8 @@
     <string name="settings_accounts_title">ניהול חשבון</string>
     <string name="settings_appearance_title">מראה</string>
     <string name="settings_appearance_subtitle">התאמה אישית של המראה והתחושה של Flare</string>
+    <string name="settings_appearance_theme_group_title">נושא</string>
+    <string name="settings_appearance_media_group_title">מדיה</string>
     <string name="settings_storage_title">אחסון</string>
     <string name="settings_storage_subtitle">נהל את אחסון Flare</string>
     <string name="settings_about_title">אודות</string>
@@ -57,6 +59,7 @@
     <string name="settings_ai_config_server">כתובת URL של השרת</string>
     <string name="settings_ai_config_server_hint">הכנס את כתובת ה-URL של השרת</string>
     <string name="settings_ai_config_server_self_host_description">תוכל להשתמש בשרת הרשמי או לארח את השרת שלך</string>
+    <string name="settings_ai_config_reasoning_effort_default">ברירת מחדל</string>
     <string name="settings_ai_config_entable_translation">אפשר תרגום AI</string>
     <string name="settings_ai_config_translation_description">החלף את Google Translate בתרגום AI, יכול לקחת יותר זמן</string>
     <string name="settings_ai_config_enable_tldr">אפשר סיכום AI</string>
@@ -98,12 +101,14 @@
     <string name="discover_users">המלץ על משתמשים</string>
     <string name="discover_hashtags">האשטגים חמים</string>
     <string name="search_users">משתמשים</string>
+    <string name="search_status">סטטוס</string>
     <string name="quick_menu_add_account">הוסף חשבון</string>
     <string name="settings_appearance_generic">כללי</string>
     <string name="settings_appearance_show_actions">הראה פעולות</string>
     <string name="settings_appearance_show_media">הראה מדיה</string>
     <string name="settings_appearance_show_numbers">הראה מספרים</string>
     <string name="settings_appearance_show_cw_img">הראה תוכן רגיש</string>
+    <string name="settings_appearance_show_cw_img_description">מוצג תמיד תוכן רגיש בסטטוס</string>
     <string name="settings_appearance_expand_media">הרחב מדיה לגודל מלא</string>
     <string name="settings_appearance_expand_media_description">שמור את יחס המדיה בטיימליין</string>
     <string name="settings_appearance_video_autoplay">ניגון אוטומטי של וידאו</string>
@@ -219,7 +224,10 @@
     <string name="following_title">עוקב</string>
     <string name="fans_title">עוקב</string>
     <string name="local_history_search_placeholder">חפש במטמון המקומי</string>
+    <string name="local_history_search_status_title">סטטוס</string>
     <string name="local_history_search_user_title">משתמש</string>
+    <string name="add_rss_source">הוסף</string>
+    <string name="edit_rss_source">ערוך מקור Rss</string>
     <string name="rss_sources_title_label">כותרת</string>
     <string name="rss_sources_url_label">כתובת URL</string>
     <string name="rss_sources_open_in_browser">פתח בדפדפן</string>
@@ -230,8 +238,6 @@
     <string name="rss_detail_tldr_loading">מסכם…</string>
     <string name="emoji_picker_recent">עדכניים</string>
     <string name="emoji_picker_search">חיפוש</string>
-    <string name="changelog_title">ברוך שובך!</string>
-    <string name="changelog_message">עשינו כמה שינויים מאז ההתחברות האחרונה שלך. הנה הפרטים:</string>
     <string name="podcast_host">מארח</string>
     <string name="podcast_title">פודקאסט</string>
     <string name="podcast_speaker">דובר</string>

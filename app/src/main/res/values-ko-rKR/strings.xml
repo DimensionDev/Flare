@@ -37,6 +37,8 @@
     <string name="settings_accounts_title">계정 관리</string>
     <string name="settings_appearance_title">모양</string>
     <string name="settings_appearance_subtitle">Flare의 모양과 느낌을_customize합니다.</string>
+    <string name="settings_appearance_theme_group_title">테마</string>
+    <string name="settings_appearance_media_group_title">미디어</string>
     <string name="settings_storage_title">저장소</string>
     <string name="settings_storage_subtitle">Flare의 저장소 관리</string>
     <string name="settings_about_title">정보</string>
@@ -57,6 +59,7 @@
     <string name="settings_ai_config_server">서버 URL</string>
     <string name="settings_ai_config_server_hint">서버 URL을 입력하세요</string>
     <string name="settings_ai_config_server_self_host_description">공식 서버를 사용하거나 자체 서버를 호스팅할 수 있습니다</string>
+    <string name="settings_ai_config_reasoning_effort_default">기본값</string>
     <string name="settings_ai_config_entable_translation">AI 번역 활성화</string>
     <string name="settings_ai_config_translation_description">구글 번역을 AI 번역으로 대체합니다. 시간이 더 소요될 수 있습니다.</string>
     <string name="settings_ai_config_enable_tldr">AI 요약 기능 활성화</string>
@@ -98,12 +101,14 @@
     <string name="discover_users">사용자 추천</string>
     <string name="discover_hashtags">트렌딩 해시태그</string>
     <string name="search_users">사용자</string>
+    <string name="search_status">상태</string>
     <string name="quick_menu_add_account">계정 추가</string>
     <string name="settings_appearance_generic">일반</string>
     <string name="settings_appearance_show_actions">행동 표시</string>
     <string name="settings_appearance_show_media">미디어 표시</string>
     <string name="settings_appearance_show_numbers">숫자 표시</string>
     <string name="settings_appearance_show_cw_img">민감한 콘텐츠 표시</string>
+    <string name="settings_appearance_show_cw_img_description">상태에서 항상 민감한 콘텐츠 표시</string>
     <string name="settings_appearance_expand_media">미디어를 전체 크기로 확장</string>
     <string name="settings_appearance_expand_media_description">타임라인의 미디어 비율 유지</string>
     <string name="settings_appearance_video_autoplay">비디오 자동 재생</string>
@@ -219,7 +224,10 @@
     <string name="following_title">팔로잉</string>
     <string name="fans_title">팔로워</string>
     <string name="local_history_search_placeholder">로컬 캐시 검색</string>
+    <string name="local_history_search_status_title">상태</string>
     <string name="local_history_search_user_title"> 사용자</string>
+    <string name="add_rss_source">추가</string>
+    <string name="edit_rss_source">RSS 소스 편집</string>
     <string name="rss_sources_title_label">제목</string>
     <string name="rss_sources_url_label">URL</string>
     <string name="rss_sources_pinned_in_tabs">홈 탭에 고정</string>
@@ -231,8 +239,6 @@
     <string name="rss_detail_tldr_loading">요약 중…</string>
     <string name="emoji_picker_recent">최근</string>
     <string name="emoji_picker_search">검색</string>
-    <string name="changelog_title">다시 돌아오신 것을 환영합니다!</string>
-    <string name="changelog_message">지난번 로그인 이후 몇 가지 변경 사항이 있었습니다. 다음은 세부사항입니다:</string>
     <string name="podcast_host">호스트</string>
     <string name="podcast_title">팟캐스트</string>
     <string name="podcast_speaker">발표자</string>

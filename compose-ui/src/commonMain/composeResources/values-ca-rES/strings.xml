@@ -17,13 +17,16 @@
     <string name="mastodon_notification_item_poll_ended">Una enquesta en la qual participaves ha acabat</string>
     <string name="mastodon_notification_item_mentioned_you">t\'ha mencionat</string>
     <string name="mastodon_notification_item_requested_follow">sol·licitud per seguir-te</string>
+    <string name="mastodon_notification_item_updated_status">ha actualitzat un toot</string>
     <string name="mastodon_item_show_more">Mostrar més</string>
     <string name="mastodon_item_show_less">Mostrar menys</string>
+    <string name="mastodon_item_pinned">Toot fixat</string>
     <string name="bluesky_notification_item_followed_you">t\'ha seguit</string>
     <string name="bluesky_notification_item_favourited_your_status">favorit</string>
     <string name="bluesky_notification_item_reblogged_your_status">reblogat</string>
     <string name="bluesky_notification_item_poll_ended">Una enquesta en la qual participaves ha acabat</string>
     <string name="bluesky_notification_item_mentioned_you">t\'ha mencionat</string>
+    <string name="bluesky_item_reblogged_status">ha impulsat un toot</string>
     <string name="bluesky_notification_item_replied_to_you">t\'ha respost</string>
     <string name="bluesky_notification_item_quoted_your_status">citada</string>
     <string name="bluesky_notification_item_starterpack_joined">Paquet d\'Inici</string>
@@ -40,6 +43,7 @@
     <string name="misskey_notification_item_followed_you">t\'ha seguit</string>
     <string name="misskey_notification_item_requested_follow">sol·licitud per seguir-te</string>
     <string name="misskey_notification_unknwon">notificació desconeguda %1$s</string>
+    <string name="misskey_item_reblogged_status">ha impulsat un toot</string>
     <string name="xqt_item_reblogged_status">retuitat</string>
     <string name="xqt_item_mention_status">et menciona</string>
     <string name="mastodon_visibility_public">Públic</string>
@@ -81,6 +85,7 @@
     <string name="reply">Respondre</string>
     <string name="report">Informar</string>
     <string name="retweet">Republiqui</string>
+    <string name="retweet_remove">Eliminar retweet</string>
     <string name="share">Compartir</string>
     <string name="comment">Comenta</string>
     <string name="user_report">Informar</string>
@@ -95,6 +100,7 @@
     <string name="date_format_year_month_day">dd MMM aa</string>
     <string name="date_format_month_day">dd MMM</string>
     <string name="date_format_full">dd MMM aa HH:mm</string>
+    <string name="vvo_notification_like">T\'agrada el teu estat</string>
     <string name="user_follow_edit_list">Afegir/eliminar de la llista</string>
     <string name="list_empty">Sense llistes</string>
     <string name="list_error">Error en carregar les llistes</string>
@@ -299,6 +305,8 @@
     <string name="list_add">Afegir llista</string>
     <string name="list_edit">Editar llista</string>
     <string name="list_delete">Esborrar llista</string>
+    <string name="add_rss_source">Afegir</string>
+    <string name="edit_rss_source">Editar font Rss</string>
     <string name="rss_sources_title_label">Títol</string>
     <string name="rss_sources_url_label">Url</string>
     <string name="service_select_welcome_title">Benvingut a Flare</string>

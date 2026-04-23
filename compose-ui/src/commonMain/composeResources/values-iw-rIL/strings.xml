@@ -17,13 +17,16 @@
     <string name="mastodon_notification_item_poll_ended">הסקר שבו השתתפת הסתיים</string>
     <string name="mastodon_notification_item_mentioned_you">אתה מוזכר</string>
     <string name="mastodon_notification_item_requested_follow">בקשה לעקוב אחריך</string>
+    <string name="mastodon_notification_item_updated_status">עודכן טוויט</string>
     <string name="mastodon_item_show_more">הצג עוד</string>
     <string name="mastodon_item_show_less">הצג פחות</string>
+    <string name="mastodon_item_pinned">טוט פיני</string>
     <string name="bluesky_notification_item_followed_you">עקבו אחריך</string>
     <string name="bluesky_notification_item_favourited_your_status">סימן אהבה לסטטוס שלך</string>
     <string name="bluesky_notification_item_reblogged_your_status">שיתף</string>
     <string name="bluesky_notification_item_poll_ended">הסקר שבו השתתפת הסתיים</string>
     <string name="bluesky_notification_item_mentioned_you">אתה מוזכר</string>
+    <string name="bluesky_item_reblogged_status">שיתף סטטוס</string>
     <string name="bluesky_notification_item_replied_to_you">ענה לך</string>
     <string name="bluesky_notification_item_quoted_your_status">צוטט</string>
     <string name="bluesky_notification_item_starterpack_joined">הצטרפתי לאריזת התחלה</string>
@@ -40,6 +43,7 @@
     <string name="misskey_notification_item_followed_you">עקבו אחריך</string>
     <string name="misskey_notification_item_requested_follow">בקשה לעקוב אחריך</string>
     <string name="misskey_notification_unknwon">התראה לא ידועה %1$s</string>
+    <string name="misskey_item_reblogged_status">שיתף סטטוס</string>
     <string name="xqt_item_reblogged_status">שיתף</string>
     <string name="xqt_item_mention_status">מוזכר אותך</string>
     <string name="mastodon_visibility_public">ציבורי</string>
@@ -81,6 +85,7 @@
     <string name="reply">תגובה</string>
     <string name="report">דווח</string>
     <string name="retweet">שיתוף מחדש</string>
+    <string name="retweet_remove">הסר שיתוף מחדש</string>
     <string name="share">שתף</string>
     <string name="comment">תגובה</string>
     <string name="user_report">דווח</string>
@@ -95,6 +100,7 @@
     <string name="date_format_year_month_day">dd MMM yy</string>
     <string name="date_format_month_day">dd MMM</string>
     <string name="date_format_full">dd MMM yy HH:mm</string>
+    <string name="vvo_notification_like">אהבת את הסטטוס שלך</string>
     <string name="user_follow_edit_list">הוסף/הסר מהרשימה</string>
     <string name="list_empty">אין רשימות</string>
     <string name="list_error">שגיאה בטעינת הרשימות</string>
@@ -299,6 +305,8 @@
     <string name="list_add">הוסף רשימה</string>
     <string name="list_edit">ערוך רשימה</string>
     <string name="list_delete">מחק רשימה</string>
+    <string name="add_rss_source">הוסף</string>
+    <string name="edit_rss_source">ערוך מקור Rss</string>
     <string name="rss_sources_title_label">כותרת</string>
     <string name="rss_sources_url_label">כתובת URL</string>
     <string name="service_select_welcome_title">ברוך הבא ל-Flare</string>

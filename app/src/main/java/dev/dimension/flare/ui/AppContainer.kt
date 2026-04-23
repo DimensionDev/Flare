@@ -106,9 +106,13 @@ private fun openInBrowser(
     fallbackOpenUrl: (String) -> Unit,
 ) {
     if (inAppBrowser) {
-        val builder = CustomTabsIntent.Builder()
-        val customTabsIntent = builder.build()
-        customTabsIntent.launchUrl(context, url.toUri())
+        runCatching {
+            val builder = CustomTabsIntent.Builder()
+            val customTabsIntent = builder.build()
+            customTabsIntent.launchUrl(context, url.toUri())
+        }.onFailure {
+            fallbackOpenUrl.invoke(url)
+        }
     } else {
         fallbackOpenUrl.invoke(url)
     }

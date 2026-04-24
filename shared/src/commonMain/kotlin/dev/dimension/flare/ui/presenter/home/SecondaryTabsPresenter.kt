@@ -19,8 +19,9 @@ import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.mapNotNull
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -49,7 +50,19 @@ public class SecondaryTabsPresenter :
                             service.userHandler
                                 .userById(service.accountKey.id)
                                 .toUi()
-                                .map { userState ->
+                                .distinctUntilChangedBy {
+                                    it.takeSuccess()?.let {
+                                        buildString {
+                                            append(it.key)
+                                            append("-")
+                                            append(it.name.raw)
+                                            append("-")
+                                            append(it.avatar)
+                                            append("-")
+                                            append(it.handle.raw)
+                                        }
+                                    }
+                                }.map { userState ->
                                     userState.takeSuccess()?.let { user ->
                                         Item(
                                             user = userState,
@@ -75,7 +88,7 @@ public class SecondaryTabsPresenter :
             }.combineLatestFlowLists()
             .map {
                 it.filterNotNull().toImmutableList()
-            }
+            }.distinctUntilChanged()
     }
 
     @Composable

@@ -354,7 +354,10 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
             content: content,
             attributedText: attributedText
         )
-        let measurement = RichTextTextMeasurement(attributedText: attributedText)
+        let measurement = RichTextTextMeasurement(
+            attributedText: attributedText,
+            fallbackTextStyle: baseTextStyle
+        )
         textBlocks.append(RenderedTextBlock(content: content, renderer: renderer, measurement: measurement))
 
         if content.block.isBlockQuote {
@@ -658,10 +661,12 @@ private enum RichTextMeasurementBlock {
 
 private final class RichTextTextMeasurement {
     private var attributedText: NSAttributedString
+    private let fallbackTextStyle: UIFont.TextStyle
     private var measuredSizeCache: [MeasurementKey: CGSize] = [:]
 
-    init(attributedText: NSAttributedString) {
+    init(attributedText: NSAttributedString, fallbackTextStyle: UIFont.TextStyle) {
         self.attributedText = attributedText
+        self.fallbackTextStyle = fallbackTextStyle
     }
 
     func update(attributedText: NSAttributedString) {
@@ -700,7 +705,7 @@ private final class RichTextTextMeasurement {
     }
 
     private func maxLineHeight() -> CGFloat {
-        var lineHeight = UIFont.preferredFont(forTextStyle: .body).lineHeight
+        var lineHeight = UIFont.preferredFont(forTextStyle: fallbackTextStyle).lineHeight
         attributedText.enumerateAttribute(.font, in: NSRange(location: 0, length: attributedText.length)) { value, _, _ in
             if let font = value as? UIFont {
                 lineHeight = max(lineHeight, font.lineHeight)

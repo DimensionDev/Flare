@@ -124,33 +124,62 @@ final class StatusTopMessageUIView: UIView, ManualLayoutMeasurable, TimelineHeig
         var x: CGFloat = 0
         let visibleName = !nameView.isHidden
         let visibleText = !textLabel.isHidden
-        let contentHeight = preferredContentHeight(width: max(width, 1))
+        let contentWidth = max(width, 1)
+        let nameWidth = visibleName ? preferredNameWidth(maxWidth: max(contentWidth - iconSize - spacing, 1)) : 0
+        let nameHeight = visibleName ? childHeight(of: nameView, for: max(nameWidth, 1)) : 0
+        let nameBaselineOffset = visibleName ? preferredTextFont().ascender : 0
 
-        let iconFrame = CGRect(x: x, y: (contentHeight - iconSize) / 2, width: iconSize, height: iconSize)
+        let textWidth: CGFloat
+        let textHeight: CGFloat
+        let textBaselineOffset: CGFloat
+        if visibleText {
+            let leadingWidth = iconSize + (visibleName ? spacing + nameWidth : 0)
+            let interItemSpacing = leadingWidth > 0 ? spacing : 0
+            textWidth = max(contentWidth - leadingWidth - interItemSpacing, 1)
+            textHeight = ceil(textLabel.sizeThatFits(CGSize(width: textWidth, height: CGFloat.greatestFiniteMagnitude)).height)
+            textBaselineOffset = textLabel.font?.ascender ?? preferredTextFont().ascender
+        } else {
+            textWidth = 0
+            textHeight = 0
+            textBaselineOffset = 0
+        }
+
+        let baselineTop = max(nameBaselineOffset, textBaselineOffset)
+        let baselineBottom = max(nameHeight - nameBaselineOffset, textHeight - textBaselineOffset)
+        let textContentHeight = ceil(baselineTop + baselineBottom)
+        let contentHeight = max(ceil(iconSize), textContentHeight)
+        let baselineY = ((contentHeight - textContentHeight) / 2) + baselineTop
+        let referenceFont = textLabel.font ?? preferredTextFont()
+        let firstLineCenterY = (baselineY - referenceFont.ascender) + (referenceFont.lineHeight / 2)
+
+        let iconFrame = CGRect(x: x, y: firstLineCenterY - (iconSize / 2), width: iconSize, height: iconSize)
         if assignFrames { iconView.frame = iconFrame.integral }
         x += iconSize
 
-        let remainingAfterIcon = max(width - x, 0)
-        let nameWidth: CGFloat
         if visibleName {
             x += spacing
-            nameWidth = preferredNameWidth(maxWidth: max(remainingAfterIcon - spacing, 1))
-            let nameHeight = childHeight(of: nameView, for: max(nameWidth, 1))
             if assignFrames {
-                nameView.frame = CGRect(x: x, y: (contentHeight - nameHeight) / 2, width: nameWidth, height: nameHeight).integral
+                nameView.frame = CGRect(
+                    x: x,
+                    y: baselineY - nameBaselineOffset,
+                    width: nameWidth,
+                    height: nameHeight
+                ).integral
             }
             x += nameWidth
-        } else {
-            nameWidth = 0
-            if assignFrames { nameView.frame = .zero }
+        } else if assignFrames {
+            nameView.frame = .zero
         }
 
         if visibleText {
             if x > 0 { x += spacing }
-            let textWidth = max(width - x, 1)
-            let textHeight = textLabel.sizeThatFits(CGSize(width: textWidth, height: CGFloat.greatestFiniteMagnitude)).height
             if assignFrames {
-                textLabel.frame = CGRect(x: x, y: (contentHeight - textHeight) / 2, width: textWidth, height: ceil(textHeight)).integral
+                textLabel.frame = CGRect(
+                    x: x,
+                    y: baselineY - textBaselineOffset,
+                    width: textWidth,
+                    height: textHeight
+                ).integral
             }
         } else if assignFrames {
             textLabel.frame = .zero
@@ -160,16 +189,7 @@ final class StatusTopMessageUIView: UIView, ManualLayoutMeasurable, TimelineHeig
     }
 
     private func preferredContentHeight(width: CGFloat) -> CGFloat {
-        var height = preferredIconSize()
-        if !nameView.isHidden {
-            let nameWidth = preferredNameWidth(maxWidth: width)
-            height = max(height, childHeight(of: nameView, for: max(nameWidth, 1)))
-        }
-        if !textLabel.isHidden {
-            let textWidth = max(width - preferredIconSize() - 8 - (!nameView.isHidden ? preferredNameWidth(maxWidth: width) + 8 : 0), 1)
-            height = max(height, textLabel.sizeThatFits(CGSize(width: textWidth, height: CGFloat.greatestFiniteMagnitude)).height)
-        }
-        return ceil(height)
+        ceil(layout(width: width, assignFrames: false))
     }
 
     private func preferredWidth() -> CGFloat {
@@ -194,6 +214,10 @@ final class StatusTopMessageUIView: UIView, ManualLayoutMeasurable, TimelineHeig
 
     private func preferredIconSize() -> CGFloat {
         UIFontMetrics(forTextStyle: topMessageOnly ? .body : .caption1).scaledValue(for: 15)
+    }
+
+    private func preferredTextFont() -> UIFont {
+        .preferredFont(forTextStyle: topMessageOnly ? .body : .caption1)
     }
 
     @objc private func onTapped() {

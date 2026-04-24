@@ -4,7 +4,7 @@ import KotlinSharedUI
 import SwiftUI
 
 /// Pure-UIKit renderer for the iOS `RichText` SwiftUI view.
-final class RichTextUIView: UIView {
+final class RichTextUIView: UIView, TimelineHeightProviding {
     // MARK: - Public inputs
 
     var text: UiRichText? { didSet { if !isBatchUpdating { update() } } }
@@ -49,6 +49,7 @@ final class RichTextUIView: UIView {
 
     private var inlineImages: [String: UIImage] = [:]
     private var textBlocks: [RenderedTextBlock] = []
+    private var measurementBlocks: [RichTextMeasurementBlock] = []
     private var renderGeneration = 0
     private var lastLayoutWidth: CGFloat = 0
     private var isBatchUpdating = false
@@ -181,6 +182,8 @@ final class RichTextUIView: UIView {
 
     private func clearStack() {
         textBlocks = []
+        measurementBlocks = []
+        lastLayoutWidth = 0
         stack.arrangedSubviews.forEach {
             stack.removeArrangedSubview($0)
             $0.removeFromSuperview()
@@ -189,6 +192,9 @@ final class RichTextUIView: UIView {
 
     func prepareForFitting(width: CGFloat) {
         guard width.isFinite, width > 0 else { return }
+        let widthKey = Self.measurementWidthKey(width)
+        guard widthKey != Self.measurementWidthKey(lastLayoutWidth) else { return }
+        lastLayoutWidth = width
         bounds = CGRect(x: bounds.minX, y: bounds.minY, width: width, height: bounds.height)
         stack.bounds = CGRect(x: 0, y: 0, width: width, height: stack.bounds.height)
         for subview in stack.arrangedSubviews {
@@ -203,6 +209,7 @@ final class RichTextUIView: UIView {
             fittingView.prepareForFitting(width: width)
             return
         }
+        guard Self.measurementWidthKey(view.bounds.width) != Self.measurementWidthKey(width) else { return }
         view.bounds = CGRect(x: view.bounds.minX, y: view.bounds.minY, width: width, height: view.bounds.height)
         for subview in view.subviews {
             prepareSubview(subview, forFittingWidth: width)
@@ -240,12 +247,7 @@ final class RichTextUIView: UIView {
 
     private func measuredStackSize(for proposedWidth: CGFloat, exposesWidth: Bool) -> CGSize {
         if exposesWidth {
-            let size = stack.systemLayoutSizeFitting(
-                UIView.layoutFittingCompressedSize,
-                withHorizontalFittingPriority: .fittingSizeLevel,
-                verticalFittingPriority: .fittingSizeLevel
-            )
-            return size
+            return measuredSingleLineStackSize()
         }
 
         let width = proposedWidth.isFinite && proposedWidth > 0
@@ -255,13 +257,8 @@ final class RichTextUIView: UIView {
 
         var height: CGFloat = 0
         var measuredWidth: CGFloat = 0
-        let visibleSubviews = stack.arrangedSubviews.filter { !$0.isHidden }
-        for (index, subview) in visibleSubviews.enumerated() {
-            let size = subview.systemLayoutSizeFitting(
-                CGSize(width: width, height: UIView.layoutFittingCompressedSize.height),
-                withHorizontalFittingPriority: .required,
-                verticalFittingPriority: .fittingSizeLevel
-            )
+        for (index, block) in measurementBlocks.enumerated() {
+            let size = block.measuredSize(width: width, lineLimit: lineLimit)
             if index > 0 {
                 height += stack.spacing
             }
@@ -275,12 +272,16 @@ final class RichTextUIView: UIView {
         measuredSingleLineStackSize()
     }
 
+    func timelineHeight(for width: CGFloat) -> CGFloat? {
+        guard width.isFinite, width > 0 else { return nil }
+        return ceil(measuredStackSize(for: width, exposesWidth: false).height)
+    }
+
     private func measuredSingleLineStackSize() -> CGSize {
         var height: CGFloat = 0
         var measuredWidth: CGFloat = 0
-        let visibleSubviews = stack.arrangedSubviews.filter { !$0.isHidden }
-        for (index, subview) in visibleSubviews.enumerated() {
-            let size = singleLineSize(of: subview)
+        for (index, block) in measurementBlocks.enumerated() {
+            let size = block.singleLineSize(lineLimit: lineLimit)
             if index > 0 {
                 height += stack.spacing
             }
@@ -288,24 +289,6 @@ final class RichTextUIView: UIView {
             measuredWidth = max(measuredWidth, size.width)
         }
         return CGSize(width: measuredWidth, height: height)
-    }
-
-    private func singleLineSize(of view: UIView) -> CGSize {
-        if let provider = view as? RichTextSingleLineSizeProviding {
-            return provider.singleLineSize()
-        }
-        let size = view.sizeThatFits(
-            CGSize(width: Self.singleLineMeasurementWidth, height: CGFloat.greatestFiniteMagnitude)
-        )
-        if size.width > 0, size.width.isFinite, size.height > 0, size.height.isFinite {
-            return CGSize(width: ceil(size.width), height: ceil(size.height))
-        }
-        let fittingSize = view.systemLayoutSizeFitting(
-            UIView.layoutFittingCompressedSize,
-            withHorizontalFittingPriority: .fittingSizeLevel,
-            verticalFittingPriority: .fittingSizeLevel
-        )
-        return CGSize(width: ceil(max(fittingSize.width, 0)), height: ceil(max(fittingSize.height, 0)))
     }
 
 //    override func layoutSubviews() {
@@ -329,6 +312,11 @@ final class RichTextUIView: UIView {
     }
 
     fileprivate static let singleLineMeasurementWidth: CGFloat = 10_000
+
+    fileprivate static func measurementWidthKey(_ width: CGFloat) -> Int {
+        guard width.isFinite, width > 0 else { return 0 }
+        return Int((width * UIScreen.main.scale).rounded(.toNearestOrAwayFromZero))
+    }
 
     private func updateHorizontalLayoutPolicy() {
         setContentHuggingPriority(exposesHorizontalIntrinsicSize ? .required : .defaultLow, for: .horizontal)
@@ -361,24 +349,36 @@ final class RichTextUIView: UIView {
     }
 
     private func addTextContent(_ content: RenderContent.Text) {
+        let attributedText = attributedString(for: content)
         let renderer = makeTextRenderer(
             content: content,
-            attributedText: attributedString(for: content)
+            attributedText: attributedText
         )
-        textBlocks.append(RenderedTextBlock(content: content, renderer: renderer))
+        let measurement = RichTextTextMeasurement(attributedText: attributedText)
+        textBlocks.append(RenderedTextBlock(content: content, renderer: renderer, measurement: measurement))
 
         if content.block.isBlockQuote {
             stack.addArrangedSubview(RichTextQuoteBlockView(contentView: renderer.renderedView))
+            measurementBlocks.append(.quote(measurement))
         } else {
             stack.addArrangedSubview(renderer.renderedView)
+            measurementBlocks.append(.text(measurement))
         }
     }
 
     private func addBlockImage(url: String, href: String?) {
         guard URL(string: url) != nil else { return }
         let imageView = RichTextBlockImageView(url: url, href: href)
+        let measurement = RichTextBlockImageMeasurement()
         imageView.onOpenURL = onOpenURL
+        imageView.onAspectRatioChanged = { [weak self, measurement] ratio in
+            measurement.update(aspectRatio: ratio)
+            self?.lastLayoutWidth = 0
+            self?.invalidateIntrinsicContentSize()
+            self?.setNeedsLayout()
+        }
         stack.addArrangedSubview(imageView)
+        measurementBlocks.append(.blockImage(measurement))
     }
 
     private func attributedString(for content: RenderContent.Text) -> NSAttributedString {
@@ -434,8 +434,11 @@ final class RichTextUIView: UIView {
 
     private func refreshTextBlocks() {
         for block in textBlocks {
-            block.renderer.applyAttributedText(attributedString(for: block.content))
+            let attributedText = attributedString(for: block.content)
+            block.renderer.applyAttributedText(attributedText)
+            block.measurement.update(attributedText: attributedText)
         }
+        lastLayoutWidth = 0
         invalidateIntrinsicContentSize()
     }
 
@@ -540,13 +543,17 @@ final class RichTextUIView: UIView {
     // MARK: - Text view configuration
 
     private func makeTextRenderer(content: RenderContent.Text, attributedText: NSAttributedString) -> RichTextTextRendering {
-        if isTextSelectionEnabled || hasLinks(in: content) {
-            return makeTextView(
-                attributedText: attributedText,
-                alignment: textAlignment(for: content.block)
-            )
-        }
-        return makeLabel(
+//        if isTextSelectionEnabled || hasLinks(in: content) {
+//            return makeTextView(
+//                attributedText: attributedText,
+//                alignment: textAlignment(for: content.block)
+//            )
+//        }
+//        return makeLabel(
+//            attributedText: attributedText,
+//            alignment: textAlignment(for: content.block)
+//        )
+        return makeTextView(
             attributedText: attributedText,
             alignment: textAlignment(for: content.block)
         )
@@ -592,6 +599,7 @@ final class RichTextUIView: UIView {
                 imageView.onOpenURL = onOpenURL
             }
         }
+        lastLayoutWidth = 0
         invalidateIntrinsicContentSize()
     }
 
@@ -611,6 +619,114 @@ final class RichTextUIView: UIView {
 private struct RenderedTextBlock {
     let content: RenderContent.Text
     let renderer: RichTextTextRendering
+    let measurement: RichTextTextMeasurement
+}
+
+private enum RichTextMeasurementBlock {
+    case text(RichTextTextMeasurement)
+    case quote(RichTextTextMeasurement)
+    case blockImage(RichTextBlockImageMeasurement)
+
+    func measuredSize(width: CGFloat, lineLimit: Int?) -> CGSize {
+        switch self {
+        case .text(let text):
+            return text.measuredSize(width: width, lineLimit: lineLimit)
+        case .quote(let text):
+            let contentWidth = max(width - RichTextQuoteBlockView.horizontalInset, 1)
+            let size = text.measuredSize(width: contentWidth, lineLimit: lineLimit)
+            return CGSize(width: width, height: ceil(size.height + RichTextQuoteBlockView.verticalInset * 2))
+        case .blockImage(let image):
+            return image.measuredSize(width: width)
+        }
+    }
+
+    func singleLineSize(lineLimit: Int?) -> CGSize {
+        switch self {
+        case .text(let text):
+            return text.singleLineSize(lineLimit: lineLimit)
+        case .quote(let text):
+            let size = text.singleLineSize(lineLimit: lineLimit)
+            return CGSize(
+                width: ceil(size.width + RichTextQuoteBlockView.horizontalInset),
+                height: ceil(size.height + RichTextQuoteBlockView.verticalInset * 2)
+            )
+        case .blockImage(let image):
+            return image.measuredSize(width: RichTextUIView.singleLineMeasurementWidth)
+        }
+    }
+}
+
+private final class RichTextTextMeasurement {
+    private var attributedText: NSAttributedString
+    private var measuredSizeCache: [MeasurementKey: CGSize] = [:]
+
+    init(attributedText: NSAttributedString) {
+        self.attributedText = attributedText
+    }
+
+    func update(attributedText: NSAttributedString) {
+        self.attributedText = attributedText
+        measuredSizeCache.removeAll(keepingCapacity: true)
+    }
+
+    func measuredSize(width: CGFloat, lineLimit: Int?) -> CGSize {
+        guard width.isFinite, width > 0 else { return .zero }
+        let key = MeasurementKey(widthKey: RichTextUIView.measurementWidthKey(width), lineLimit: lineLimit ?? -1)
+        if let cached = measuredSizeCache[key] {
+            return cached
+        }
+
+        let size = measure(width: width, lineLimit: lineLimit)
+        measuredSizeCache[key] = size
+        return size
+    }
+
+    func singleLineSize(lineLimit: Int?) -> CGSize {
+        measuredSize(width: RichTextUIView.singleLineMeasurementWidth, lineLimit: lineLimit ?? 1)
+    }
+
+    private func measure(width: CGFloat, lineLimit: Int?) -> CGSize {
+        guard attributedText.length > 0 else { return .zero }
+        let boundingSize = CGSize(width: width, height: CGFloat.greatestFiniteMagnitude)
+        let rect = attributedText.boundingRect(
+            with: boundingSize,
+            options: [.usesLineFragmentOrigin, .usesFontLeading],
+            context: nil
+        )
+        let lineHeight = maxLineHeight()
+        let maxHeight = lineLimit.map { CGFloat(max($0, 1)) * lineHeight } ?? CGFloat.greatestFiniteMagnitude
+        let height = min(ceil(max(rect.height, lineHeight)), ceil(maxHeight))
+        return CGSize(width: min(ceil(max(rect.width, 0)), width), height: height)
+    }
+
+    private func maxLineHeight() -> CGFloat {
+        var lineHeight = UIFont.preferredFont(forTextStyle: .body).lineHeight
+        attributedText.enumerateAttribute(.font, in: NSRange(location: 0, length: attributedText.length)) { value, _, _ in
+            if let font = value as? UIFont {
+                lineHeight = max(lineHeight, font.lineHeight)
+            }
+        }
+        return lineHeight
+    }
+
+    private struct MeasurementKey: Hashable {
+        let widthKey: Int
+        let lineLimit: Int
+    }
+}
+
+private final class RichTextBlockImageMeasurement {
+    private var aspectRatio: CGFloat = 9.0 / 16.0
+
+    func update(aspectRatio: CGFloat) {
+        guard aspectRatio.isFinite, aspectRatio > 0 else { return }
+        self.aspectRatio = aspectRatio
+    }
+
+    func measuredSize(width: CGFloat) -> CGSize {
+        guard width.isFinite, width > 0 else { return .zero }
+        return CGSize(width: width, height: ceil(width * aspectRatio))
+    }
 }
 
 private protocol RichTextTextRendering: AnyObject {
@@ -623,11 +739,7 @@ private protocol RichTextFittingPreparing: AnyObject {
     func prepareForFitting(width: CGFloat)
 }
 
-private protocol RichTextSingleLineSizeProviding: AnyObject {
-    func singleLineSize() -> CGSize
-}
-
-private final class RichTextLabel: UILabel, RichTextTextRendering, RichTextFittingPreparing, RichTextSingleLineSizeProviding {
+private final class RichTextLabel: UILabel, RichTextTextRendering, RichTextFittingPreparing {
     private var lastLayoutWidth: CGFloat = 0
     var renderedView: UIView { self }
 
@@ -653,6 +765,7 @@ private final class RichTextLabel: UILabel, RichTextTextRendering, RichTextFitti
 
     func applyAttributedText(_ attributedText: NSAttributedString) {
         self.attributedText = attributedText
+        lastLayoutWidth = 0
         setNeedsLayout()
         invalidateIntrinsicContentSize()
     }
@@ -661,24 +774,21 @@ private final class RichTextLabel: UILabel, RichTextTextRendering, RichTextFitti
         numberOfLines = lineLimit ?? 0
         lineBreakMode = lineLimit == nil ? .byWordWrapping : .byTruncatingTail
         setContentHuggingPriority(lineLimit == 1 ? .required : .defaultLow, for: .horizontal)
+        lastLayoutWidth = 0
         setNeedsLayout()
         invalidateIntrinsicContentSize()
     }
 
     func prepareForFitting(width: CGFloat) {
         guard width.isFinite, width > 0 else { return }
+        let widthKey = RichTextUIView.measurementWidthKey(width)
+        guard widthKey != RichTextUIView.measurementWidthKey(lastLayoutWidth) else { return }
+        lastLayoutWidth = width
         bounds = CGRect(x: bounds.minX, y: bounds.minY, width: width, height: bounds.height)
         guard numberOfLines != 1 else { return }
         preferredMaxLayoutWidth = width
         invalidateIntrinsicContentSize()
         setNeedsLayout()
-    }
-
-    func singleLineSize() -> CGSize {
-        let size = sizeThatFits(
-            CGSize(width: RichTextUIView.singleLineMeasurementWidth, height: CGFloat.greatestFiniteMagnitude)
-        )
-        return CGSize(width: ceil(max(size.width, 0)), height: ceil(max(size.height, 0)))
     }
 
 //    override var intrinsicContentSize: CGSize {
@@ -716,7 +826,7 @@ private final class RichTextLabel: UILabel, RichTextTextRendering, RichTextFitti
     }
 }
 
-private final class RichTextTextView: UITextView, UITextViewDelegate, RichTextTextRendering, RichTextFittingPreparing, RichTextSingleLineSizeProviding {
+private final class RichTextTextView: UITextView, UITextViewDelegate, RichTextTextRendering, RichTextFittingPreparing {
     private var linkHandler: ((URL) -> Void)?
     private var selectionEnabled = false
     private var lastLayoutWidth: CGFloat = 0
@@ -761,6 +871,7 @@ private final class RichTextTextView: UITextView, UITextViewDelegate, RichTextTe
 
     func applyAttributedText(_ attributedText: NSAttributedString) {
         self.attributedText = attributedText
+        lastLayoutWidth = 0
         invalidateIntrinsicContentSize()
     }
 
@@ -787,6 +898,7 @@ private final class RichTextTextView: UITextView, UITextViewDelegate, RichTextTe
         if !selectionEnabled {
             selectedTextRange = nil
         }
+        lastLayoutWidth = 0
         invalidateIntrinsicContentSize()
     }
 
@@ -804,24 +916,14 @@ private final class RichTextTextView: UITextView, UITextViewDelegate, RichTextTe
 
     func prepareForFitting(width: CGFloat) {
         guard width.isFinite, width > 0 else { return }
+        let widthKey = RichTextUIView.measurementWidthKey(width)
+        guard widthKey != RichTextUIView.measurementWidthKey(lastLayoutWidth) else { return }
+        lastLayoutWidth = width
         bounds = CGRect(x: bounds.minX, y: bounds.minY, width: width, height: bounds.height)
         invalidateIntrinsicContentSize()
         setNeedsLayout()
     }
 
-    func singleLineSize() -> CGSize {
-        let boundingSize = CGSize(
-            width: RichTextUIView.singleLineMeasurementWidth,
-            height: CGFloat.greatestFiniteMagnitude
-        )
-        let rect = attributedText.boundingRect(
-            with: boundingSize,
-            options: [.usesLineFragmentOrigin, .usesFontLeading],
-            context: nil
-        )
-        let height = max(rect.height, font?.lineHeight ?? 0)
-        return CGSize(width: ceil(max(rect.width, 0)), height: ceil(max(height, 0)))
-    }
 //
 //    override var intrinsicContentSize: CGSize {
 //        let width = bounds.width > 0 ? bounds.width : UIScreen.main.bounds.width
@@ -904,14 +1006,15 @@ private final class RichTextTextView: UITextView, UITextViewDelegate, RichTextTe
 }
 
 private final class RichTextQuoteBlockView: UIView, RichTextFittingPreparing {
+    static var barWidth: CGFloat { UIFontMetrics(forTextStyle: .body).scaledValue(for: 3) }
+    static var horizontalInset: CGFloat { 12 + barWidth + 11 + 12 }
+    static let verticalInset: CGFloat = 8
+
     private let contentView: UIView
-    private let horizontalInset: CGFloat
-    private let verticalInset: CGFloat = 8
+    private var lastLayoutWidth: CGFloat = 0
 
     init(contentView: UIView) {
         self.contentView = contentView
-        let barWidth = UIFontMetrics(forTextStyle: .body).scaledValue(for: 3)
-        self.horizontalInset = 12 + barWidth + 11 + 12
         super.init(frame: .zero)
         backgroundColor = UIColor.secondaryLabel.withAlphaComponent(0.08)
         layer.cornerRadius = 8
@@ -929,7 +1032,7 @@ private final class RichTextQuoteBlockView: UIView, RichTextFittingPreparing {
             bar.topAnchor.constraint(equalTo: topAnchor, constant: 8),
             bar.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 12),
             bar.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -8),
-            bar.widthAnchor.constraint(equalToConstant: barWidth),
+            bar.widthAnchor.constraint(equalToConstant: Self.barWidth),
 
             contentView.topAnchor.constraint(equalTo: topAnchor, constant: 8),
             contentView.leadingAnchor.constraint(equalTo: bar.trailingAnchor, constant: 11),
@@ -943,12 +1046,16 @@ private final class RichTextQuoteBlockView: UIView, RichTextFittingPreparing {
     }
 
     func prepareForFitting(width: CGFloat) {
-        guard width.isFinite, width > horizontalInset else { return }
+        guard width.isFinite, width > Self.horizontalInset else { return }
+        let widthKey = RichTextUIView.measurementWidthKey(width)
+        guard widthKey != RichTextUIView.measurementWidthKey(lastLayoutWidth) else { return }
+        lastLayoutWidth = width
         bounds = CGRect(x: bounds.minX, y: bounds.minY, width: width, height: bounds.height)
-        let contentWidth = width - horizontalInset
+        let contentWidth = width - Self.horizontalInset
         if let fittingView = contentView as? RichTextFittingPreparing {
             fittingView.prepareForFitting(width: contentWidth)
         } else {
+            guard RichTextUIView.measurementWidthKey(contentView.bounds.width) != RichTextUIView.measurementWidthKey(contentWidth) else { return }
             contentView.bounds = CGRect(
                 x: contentView.bounds.minX,
                 y: contentView.bounds.minY,
@@ -970,7 +1077,7 @@ private final class RichTextQuoteBlockView: UIView, RichTextFittingPreparing {
         let width = targetSize.width.isFinite && targetSize.width > 0
             ? targetSize.width
             : bounds.width
-        guard width > horizontalInset else {
+        guard width > Self.horizontalInset else {
             return super.systemLayoutSizeFitting(
                 targetSize,
                 withHorizontalFittingPriority: horizontalFittingPriority,
@@ -978,27 +1085,29 @@ private final class RichTextQuoteBlockView: UIView, RichTextFittingPreparing {
             )
         }
         prepareForFitting(width: width)
-        let contentWidth = width - horizontalInset
+        let contentWidth = width - Self.horizontalInset
         let contentSize = contentView.systemLayoutSizeFitting(
             CGSize(width: contentWidth, height: UIView.layoutFittingCompressedSize.height),
             withHorizontalFittingPriority: .required,
             verticalFittingPriority: .fittingSizeLevel
         )
         return CGSize(
-            width: horizontalFittingPriority == .required ? targetSize.width : contentSize.width + horizontalInset,
-            height: ceil(contentSize.height + verticalInset * 2)
+            width: horizontalFittingPriority == .required ? targetSize.width : contentSize.width + Self.horizontalInset,
+            height: ceil(contentSize.height + Self.verticalInset * 2)
         )
     }
 }
 
 private final class RichTextBlockImageView: UIView, RichTextFittingPreparing {
     var onOpenURL: ((URL) -> Void)?
+    var onAspectRatioChanged: ((CGFloat) -> Void)?
 
     private let url: String
     private let href: String?
     private let imageView = UIImageView()
     private var aspectConstraint: NSLayoutConstraint?
     private var aspectRatio: CGFloat?
+    private var lastLayoutWidth: CGFloat = 0
 
     init(url: String, href: String?) {
         self.url = url
@@ -1047,14 +1156,25 @@ private final class RichTextBlockImageView: UIView, RichTextFittingPreparing {
         aspectRatio = ratio
         aspectConstraint = heightAnchor.constraint(equalTo: widthAnchor, multiplier: ratio)
         aspectConstraint?.isActive = true
+        lastLayoutWidth = 0
         invalidateIntrinsicContentSize()
+        onAspectRatioChanged?(ratio)
     }
 
     func prepareForFitting(width: CGFloat) {
         guard width.isFinite, width > 0 else { return }
+        let widthKey = RichTextUIView.measurementWidthKey(width)
+        guard widthKey != RichTextUIView.measurementWidthKey(lastLayoutWidth) else { return }
+        lastLayoutWidth = width
         bounds = CGRect(x: bounds.minX, y: bounds.minY, width: width, height: bounds.height)
         invalidateIntrinsicContentSize()
         setNeedsLayout()
+    }
+
+    func measuredSize(width: CGFloat) -> CGSize {
+        guard width.isFinite, width > 0 else { return .zero }
+        let ratio = aspectRatio ?? 9.0 / 16.0
+        return CGSize(width: width, height: ceil(width * ratio))
     }
 
     override func systemLayoutSizeFitting(
@@ -1072,11 +1192,8 @@ private final class RichTextBlockImageView: UIView, RichTextFittingPreparing {
                 verticalFittingPriority: verticalFittingPriority
             )
         }
-        let ratio = aspectRatio ?? 9.0 / 16.0
-        return CGSize(
-            width: horizontalFittingPriority == .required ? targetSize.width : width,
-            height: ceil(width * ratio)
-        )
+        let size = measuredSize(width: width)
+        return CGSize(width: horizontalFittingPriority == .required ? targetSize.width : size.width, height: size.height)
     }
 
     @objc private func onTapped() {

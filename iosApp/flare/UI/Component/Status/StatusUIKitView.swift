@@ -219,7 +219,12 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
             showTranslate: showTranslate,
             showParents: showParents
         )
+        let signatureUnchanged = lastConfigureSignature == signature
         self.data = data
+        if signatureUnchanged {
+            forwardOpenURL()
+            return
+        }
         self.isDetail = isDetail
         self.isQuote = isQuote
         self.withLeadingPadding = withLeadingPadding
@@ -230,10 +235,6 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
         self.showTranslate = showTranslate
         self.showParents = showParents
         self.appearance = appearance
-        guard lastConfigureSignature != signature else {
-            forwardOpenURL()
-            return
-        }
         lastConfigureSignature = signature
         rebuild()
     }

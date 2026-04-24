@@ -4,11 +4,22 @@ import KotlinSharedUI
 /// UIKit port of `TimelineView`. Manual frame-based layout.
 final class TimelineUIView: UIView, ManualLayoutMeasurable, TimelineHeightProviding {
     var appearance = StatusUIKitAppearance(settings: AppearanceSettings.companion.Default) {
-        didSet { if !isBatchConfiguring, data != nil { rebuild() } }
+        didSet {
+            guard appearance != oldValue else { return }
+            rebuildIfNeeded()
+        }
     }
-    var detailStatusKey: MicroBlogKey?
+    var detailStatusKey: MicroBlogKey? {
+        didSet {
+            guard String(describing: detailStatusKey) != String(describing: oldValue) else { return }
+            rebuildIfNeeded()
+        }
+    }
     var showTranslate: Bool = true {
-        didSet { if !isBatchConfiguring, data != nil { rebuild() } }
+        didSet {
+            guard showTranslate != oldValue else { return }
+            rebuildIfNeeded()
+        }
     }
     var onOpenURL: ((URL) -> Void)? {
         didSet { if !isBatchConfiguring { forwardOpenURL() } }
@@ -150,6 +161,11 @@ final class TimelineUIView: UIView, ManualLayoutMeasurable, TimelineHeightProvid
             return
         }
         lastRenderSignature = signature
+        rebuild()
+    }
+
+    private func rebuildIfNeeded() {
+        guard !isBatchConfiguring, data != nil else { return }
         rebuild()
     }
 

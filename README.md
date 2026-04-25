@@ -57,24 +57,6 @@ Here're some features we're planning to implement in the future.
  - open `iosApp/Flare.xcodeproj` in Xcode
  - Build and run the app
 
-### Server
- - Flare Server uses Ktor with Kotlin Native, which only works on Linux X64 and MacOS X64/ARM64
- - Make sure you have JDK 25 installed
- - Run `./gradlew :server:runDebugExecutableMacosArm64 -PrunArgs="--config-path=path/to/server/src/commonMain/resources/application.yaml"` to build and run the server, remember to replace `path/to/server/src/commonMain/resources/application.yaml` with the path to your config file
- - The server will run on `http://localhost:8080` by default
-#### Docker
-If you prefer using Docker, you can use Docker Compose to run prebuild Server Image.
- - Rename `.env.sample` to `.env`, and update the environment variables in the file.
- - If you're deploying into a production server, you might need to update the `docker-compose.yml` file with these lines:
-   ```diff
-   environment:
-   -   # STAGE: local
-   +   STAGE: 'production'
-   -   DOMAINS: api.flareapp.moe -> http://flare-backend:8080
-   +   DOMAINS: your_domain_here -> http://flare-backend:8080
-   ```
- - Run `docker compose up -d`
-
 ### Desktop
  - Make sure you have JDK 25 installed
  - Run `./gradlew run` to build and run the debug version of the desktop app.

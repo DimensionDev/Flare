@@ -16,7 +16,12 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
         didSet {
             guard !isBatchUpdating, oldValue != lineLimit else { return }
             updateHorizontalLayoutPolicy()
-            updateTextViews()
+            let wasUsingHardTruncatedText = oldValue != nil && hasHardTruncatedText
+            if wasUsingHardTruncatedText || usesHardTruncatedText {
+                update()
+            } else {
+                updateTextViews()
+            }
         }
     }
     var isTextSelectionEnabled: Bool = false {
@@ -62,11 +67,13 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
         let isTextSelectionEnabled: Bool
         let baseTextStyle: UIFont.TextStyle
         let baseTextColor: UIColor
+        let usesHardTruncatedText: Bool
 
         static func == (lhs: StructuralSignature, rhs: StructuralSignature) -> Bool {
             guard lhs.isTextSelectionEnabled == rhs.isTextSelectionEnabled,
                   lhs.baseTextStyle == rhs.baseTextStyle,
-                  lhs.baseTextColor.isEqual(rhs.baseTextColor) else {
+                  lhs.baseTextColor.isEqual(rhs.baseTextColor),
+                  lhs.usesHardTruncatedText == rhs.usesHardTruncatedText else {
                 return false
             }
             if let l = lhs.contentKey, let r = rhs.contentKey {
@@ -148,7 +155,8 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
             text: text,
             isTextSelectionEnabled: isTextSelectionEnabled,
             baseTextStyle: baseTextStyle,
-            baseTextColor: baseTextColor
+            baseTextColor: baseTextColor,
+            usesHardTruncatedText: usesHardTruncatedText
         )
         guard force || lastStructuralSignature != structuralSignature else {
             updateTextViews()
@@ -163,7 +171,7 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
             return
         }
 
-        if let truncatedText = text.truncatedText, !truncatedText.isEmpty {
+        if usesHardTruncatedText, let truncatedText = text.truncatedText {
             inlineImages.removeAll(keepingCapacity: true)
             addPlainTextContent(truncatedText)
             invalidateIntrinsicContentSize()
@@ -317,6 +325,15 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
 
     private var exposesHorizontalIntrinsicSize: Bool {
         lineLimit == 1
+    }
+
+    private var usesHardTruncatedText: Bool {
+        lineLimit != nil && hasHardTruncatedText
+    }
+
+    private var hasHardTruncatedText: Bool {
+        guard let truncatedText = text?.truncatedText else { return false }
+        return !truncatedText.isEmpty
     }
 
     fileprivate static let singleLineMeasurementWidth: CGFloat = 10_000

@@ -97,6 +97,7 @@ public data class UiRichText(
             }
         }
     public val isLongText: Boolean = innerText.codePointCount() > 500
+    public val truncatedText: String? = if (isLongText) innerText.take(500) + "…" else null
     public val platformText: PlatformText by lazy {
         renderPlatformText(renderRuns)
     }

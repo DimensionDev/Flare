@@ -16,7 +16,12 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
         didSet {
             guard !isBatchUpdating, oldValue != lineLimit else { return }
             updateHorizontalLayoutPolicy()
-            updateTextViews()
+            let wasUsingHardTruncatedText = oldValue != nil && hasHardTruncatedText
+            if wasUsingHardTruncatedText || usesHardTruncatedText {
+                update()
+            } else {
+                updateTextViews()
+            }
         }
     }
     var isTextSelectionEnabled: Bool = false {
@@ -62,11 +67,13 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
         let isTextSelectionEnabled: Bool
         let baseTextStyle: UIFont.TextStyle
         let baseTextColor: UIColor
+        let usesHardTruncatedText: Bool
 
         static func == (lhs: StructuralSignature, rhs: StructuralSignature) -> Bool {
             guard lhs.isTextSelectionEnabled == rhs.isTextSelectionEnabled,
                   lhs.baseTextStyle == rhs.baseTextStyle,
-                  lhs.baseTextColor.isEqual(rhs.baseTextColor) else {
+                  lhs.baseTextColor.isEqual(rhs.baseTextColor),
+                  lhs.usesHardTruncatedText == rhs.usesHardTruncatedText else {
                 return false
             }
             if let l = lhs.contentKey, let r = rhs.contentKey {
@@ -148,7 +155,8 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
             text: text,
             isTextSelectionEnabled: isTextSelectionEnabled,
             baseTextStyle: baseTextStyle,
-            baseTextColor: baseTextColor
+            baseTextColor: baseTextColor,
+            usesHardTruncatedText: usesHardTruncatedText
         )
         guard force || lastStructuralSignature != structuralSignature else {
             updateTextViews()
@@ -163,13 +171,21 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
             return
         }
 
+        if usesHardTruncatedText, let truncatedText = text.truncatedText {
+            inlineImages.removeAll(keepingCapacity: true)
+            addPlainTextContent(truncatedText)
+            invalidateIntrinsicContentSize()
+            return
+        }
+
         inlineImages = inlineImages.filter { text.imageUrls.contains($0.key) }
         let generation = renderGeneration
-        for content in text.renderRuns {
+        let contents = (text.platformText as? NSArray)?.compactMap { $0 as? PlatformTextContent } ?? []
+        for content in contents {
             switch content {
-            case let textContent as RenderContent.Text:
+            case let textContent as PlatformTextTextContent:
                 addTextContent(textContent)
-            case let imageContent as RenderContent.BlockImage:
+            case let imageContent as PlatformTextBlockImageContent:
                 addBlockImage(url: imageContent.url, href: imageContent.href)
             default:
                 continue
@@ -311,6 +327,15 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
         lineLimit == 1
     }
 
+    private var usesHardTruncatedText: Bool {
+        lineLimit != nil && hasHardTruncatedText
+    }
+
+    private var hasHardTruncatedText: Bool {
+        guard let truncatedText = text?.truncatedText else { return false }
+        return !truncatedText.isEmpty
+    }
+
     fileprivate static let singleLineMeasurementWidth: CGFloat = 10_000
 
     fileprivate static func measurementWidthKey(_ width: CGFloat) -> Int {
@@ -348,6 +373,42 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
         return nil
     }
 
+    private func addTextContent(_ content: PlatformTextTextContent) {
+        let attributedText = attributedString(for: content)
+        let renderer = makeTextRenderer(
+            content: content,
+            attributedText: attributedText
+        )
+        let measurement = RichTextTextMeasurement(
+            attributedText: attributedText,
+            fallbackTextStyle: baseTextStyle
+        )
+        textBlocks.append(RenderedTextBlock(content: .platform(content), renderer: renderer, measurement: measurement))
+
+        if content.isBlockQuote {
+            stack.addArrangedSubview(RichTextQuoteBlockView(contentView: renderer.renderedView))
+            measurementBlocks.append(.quote(measurement))
+        } else {
+            stack.addArrangedSubview(renderer.renderedView)
+            measurementBlocks.append(.text(measurement))
+        }
+    }
+
+    private func addPlainTextContent(_ text: String) {
+        let attributedText = NSAttributedString(string: text, attributes: baseAttributes())
+        let renderer = makeTextView(
+            attributedText: attributedText,
+            alignment: .natural
+        )
+        let measurement = RichTextTextMeasurement(
+            attributedText: attributedText,
+            fallbackTextStyle: baseTextStyle
+        )
+        textBlocks.append(RenderedTextBlock(content: .plain(text), renderer: renderer, measurement: measurement))
+        stack.addArrangedSubview(renderer.renderedView)
+        measurementBlocks.append(.text(measurement))
+    }
+
     private func addTextContent(_ content: RenderContent.Text) {
         let attributedText = attributedString(for: content)
         let renderer = makeTextRenderer(
@@ -358,7 +419,7 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
             attributedText: attributedText,
             fallbackTextStyle: baseTextStyle
         )
-        textBlocks.append(RenderedTextBlock(content: content, renderer: renderer, measurement: measurement))
+        textBlocks.append(RenderedTextBlock(content: .render(content), renderer: renderer, measurement: measurement))
 
         if content.block.isBlockQuote {
             stack.addArrangedSubview(RichTextQuoteBlockView(contentView: renderer.renderedView))
@@ -404,6 +465,79 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
         return result
     }
 
+    private func attributedString(for content: PlatformTextTextContent) -> NSAttributedString {
+        let result = NSMutableAttributedString()
+        for run in content.runs {
+            switch run {
+            case let attributedRun as PlatformTextAttributedRun:
+                result.append(resolvedAttributedString(from: attributedRun.attributedText))
+            case let imageRun as PlatformTextImageRun:
+                result.append(attributedImageRun(imageRun))
+            default:
+                continue
+            }
+        }
+        return result
+    }
+
+    private func resolvedAttributedString(from template: NSAttributedString) -> NSAttributedString {
+        let result = NSMutableAttributedString(attributedString: template)
+        let fullRange = NSRange(location: 0, length: result.length)
+        var descriptors: [(PlatformTextStyleDescriptor?, NSRange)] = []
+        result.enumerateAttribute(.platformTextStyleDescriptor, in: fullRange) { value, range, _ in
+            descriptors.append((value as? PlatformTextStyleDescriptor, range))
+        }
+        for (descriptor, range) in descriptors {
+            result.removeAttribute(.platformTextStyleDescriptor, range: range)
+            result.addAttributes(resolvedAttributes(for: descriptor), range: range)
+        }
+        return result
+    }
+
+    private func resolvedAttributes(for descriptor: PlatformTextStyleDescriptor?) -> [NSAttributedString.Key: Any] {
+        guard let descriptor else {
+            return baseAttributes()
+        }
+
+        var attributes = baseAttributes(
+            font: font(for: descriptor),
+            color: color(for: descriptor)
+        )
+
+        if let link = descriptor.link, let url = URL(string: link) {
+            attributes[.link] = url
+            attributes[.foregroundColor] = linkColor()
+        }
+        if descriptor.strikethrough {
+            attributes[.strikethroughStyle] = NSUnderlineStyle.single.rawValue
+        }
+        if descriptor.underline {
+            attributes[.underlineStyle] = NSUnderlineStyle.single.rawValue
+        }
+        if descriptor.time {
+            attributes[.foregroundColor] = UIColor.secondaryLabel
+            attributes[.backgroundColor] = UIColor.secondaryLabel.withAlphaComponent(0.08)
+        }
+
+        return attributes
+    }
+
+    private func attributedImageRun(_ run: PlatformTextImageRun) -> NSAttributedString {
+        guard let image = inlineImages[run.url] else {
+            return NSAttributedString(
+                string: run.alt.isEmpty ? run.url : run.alt,
+                attributes: baseAttributes()
+            )
+        }
+
+        let targetHeight = UIFontMetrics(forTextStyle: .body).scaledValue(for: 17)
+        let ratio = image.size.width / max(image.size.height, 1)
+        let attachment = NSTextAttachment()
+        attachment.image = image
+        attachment.bounds = CGRect(x: 0, y: -3, width: targetHeight * ratio, height: targetHeight)
+        return NSAttributedString(attachment: attachment)
+    }
+
     private func attributedImageRun(_ run: RenderRun.Image) -> NSAttributedString {
         guard let image = inlineImages[run.url] else {
             return NSAttributedString(
@@ -437,7 +571,15 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
 
     private func refreshTextBlocks() {
         for block in textBlocks {
-            let attributedText = attributedString(for: block.content)
+            let attributedText: NSAttributedString
+            switch block.content {
+            case .plain(let text):
+                attributedText = NSAttributedString(string: text, attributes: baseAttributes())
+            case .platform(let content):
+                attributedText = attributedString(for: content)
+            case .render(let content):
+                attributedText = attributedString(for: content)
+            }
             block.renderer.applyAttributedText(attributedText)
             block.measurement.update(attributedText: attributedText)
         }
@@ -477,6 +619,13 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
 
     private func color(for style: RenderTextStyle, block: RenderBlockStyle) -> UIColor {
         if block.isBlockQuote || style.small {
+            return baseTextColor.withAlphaComponent(0.7)
+        }
+        return baseTextColor
+    }
+
+    private func color(for descriptor: PlatformTextStyleDescriptor) -> UIColor {
+        if descriptor.isBlockQuote || descriptor.small {
             return baseTextColor.withAlphaComponent(0.7)
         }
         return baseTextColor
@@ -528,6 +677,51 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
         return UIFont(descriptor: descriptor, size: baseFont.pointSize)
     }
 
+    private func font(for descriptor: PlatformTextStyleDescriptor) -> UIFont {
+        if let headingLevel = descriptor.headingLevel {
+            switch headingLevel {
+            case 1:
+                return .preferredFont(forTextStyle: .title1)
+            case 2:
+                return .preferredFont(forTextStyle: .title2)
+            case 3:
+                return .preferredFont(forTextStyle: .title3)
+            case 4:
+                return .preferredFont(forTextStyle: .headline)
+            case 5:
+                return .preferredFont(forTextStyle: .subheadline)
+            default:
+                return .preferredFont(forTextStyle: .body)
+            }
+        }
+
+        let baseSize = UIFont.preferredFont(forTextStyle: baseTextStyle).pointSize
+        let baseFont: UIFont
+        if descriptor.code || descriptor.monospace {
+            baseFont = UIFont.monospacedSystemFont(
+                ofSize: descriptor.small ? baseSize * 0.8 : baseSize,
+                weight: descriptor.bold ? .bold : .regular
+            )
+        } else if descriptor.small {
+            baseFont = UIFont.systemFont(ofSize: baseSize * 0.8)
+        } else {
+            baseFont = UIFont.preferredFont(forTextStyle: baseTextStyle)
+        }
+
+        var traits: UIFontDescriptor.SymbolicTraits = []
+        if descriptor.bold {
+            traits.insert(.traitBold)
+        }
+        if descriptor.italic || descriptor.isBlockQuote || descriptor.isFigCaption {
+            traits.insert(.traitItalic)
+        }
+        guard !traits.isEmpty,
+              let fontDescriptor = baseFont.fontDescriptor.withSymbolicTraits(traits) else {
+            return baseFont
+        }
+        return UIFont(descriptor: fontDescriptor, size: baseFont.pointSize)
+    }
+
     private func linkColor() -> UIColor {
         traitCollection.userInterfaceStyle == .dark
             ? UIColor(red: 0.60, green: 0.76, blue: 1.00, alpha: 1.00)
@@ -538,6 +732,17 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
         switch block.textAlignment {
         case .center:
             return .center
+        default:
+            return .natural
+        }
+    }
+
+    private func textAlignment(from alignment: TextAlignment?) -> NSTextAlignment {
+        switch alignment {
+        case .center:
+            return .center
+        case .trailing:
+            return .right
         default:
             return .natural
         }
@@ -559,6 +764,13 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
         return makeTextView(
             attributedText: attributedText,
             alignment: textAlignment(for: content.block)
+        )
+    }
+
+    private func makeTextRenderer(content: PlatformTextTextContent, attributedText: NSAttributedString) -> RichTextTextRendering {
+        makeTextView(
+            attributedText: attributedText,
+            alignment: textAlignment(from: content.alignment)
         )
     }
 
@@ -620,9 +832,15 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
 }
 
 private struct RenderedTextBlock {
-    let content: RenderContent.Text
+    let content: RenderedTextBlockContent
     let renderer: RichTextTextRendering
     let measurement: RichTextTextMeasurement
+}
+
+private enum RenderedTextBlockContent {
+    case plain(String)
+    case platform(PlatformTextTextContent)
+    case render(RenderContent.Text)
 }
 
 private enum RichTextMeasurementBlock {
@@ -660,9 +878,13 @@ private enum RichTextMeasurementBlock {
 }
 
 private final class RichTextTextMeasurement {
+    private static let prefixCharactersPerLimitedLine = 480
+    private static let prefixOverflowLineAllowance = 1
+
     private var attributedText: NSAttributedString
     private let fallbackTextStyle: UIFont.TextStyle
     private var measuredSizeCache: [MeasurementKey: CGSize] = [:]
+    private var maxLineHeightCache: CGFloat?
 
     init(attributedText: NSAttributedString, fallbackTextStyle: UIFont.TextStyle) {
         self.attributedText = attributedText
@@ -672,6 +894,7 @@ private final class RichTextTextMeasurement {
     func update(attributedText: NSAttributedString) {
         self.attributedText = attributedText
         measuredSizeCache.removeAll(keepingCapacity: true)
+        maxLineHeightCache = nil
     }
 
     func measuredSize(width: CGFloat, lineLimit: Int?) -> CGSize {
@@ -692,25 +915,66 @@ private final class RichTextTextMeasurement {
 
     private func measure(width: CGFloat, lineLimit: Int?) -> CGSize {
         guard attributedText.length > 0 else { return .zero }
-        let boundingSize = CGSize(width: width, height: CGFloat.greatestFiniteMagnitude)
+        let lineHeight = maxLineHeight()
+        let maxHeight = lineLimit.map { CGFloat(max($0, 1)) * lineHeight } ?? CGFloat.greatestFiniteMagnitude
+        let boundingHeight = lineLimit == nil ? CGFloat.greatestFiniteMagnitude : ceil(maxHeight + lineHeight)
+        let boundingSize = CGSize(width: width, height: boundingHeight)
+        if let lineLimit,
+           let prefix = limitedMeasurementPrefix(lineLimit: lineLimit),
+           let prefixSize = measuredLimitedPrefixSize(prefix, boundingSize: boundingSize, lineHeight: lineHeight, maxHeight: maxHeight),
+           prefixSize.height >= ceil(maxHeight) {
+            return prefixSize
+        }
+
+        return measuredSize(for: attributedText, boundingSize: boundingSize, lineHeight: lineHeight, maxHeight: maxHeight)
+    }
+
+    private func measuredLimitedPrefixSize(
+        _ prefix: NSAttributedString,
+        boundingSize: CGSize,
+        lineHeight: CGFloat,
+        maxHeight: CGFloat
+    ) -> CGSize? {
+        let size = measuredSize(for: prefix, boundingSize: boundingSize, lineHeight: lineHeight, maxHeight: maxHeight)
+        return size.height >= ceil(maxHeight) ? size : nil
+    }
+
+    private func measuredSize(
+        for attributedText: NSAttributedString,
+        boundingSize: CGSize,
+        lineHeight: CGFloat,
+        maxHeight: CGFloat
+    ) -> CGSize {
         let rect = attributedText.boundingRect(
             with: boundingSize,
             options: [.usesLineFragmentOrigin, .usesFontLeading],
             context: nil
         )
-        let lineHeight = maxLineHeight()
-        let maxHeight = lineLimit.map { CGFloat(max($0, 1)) * lineHeight } ?? CGFloat.greatestFiniteMagnitude
         let height = min(ceil(max(rect.height, lineHeight)), ceil(maxHeight))
-        return CGSize(width: min(ceil(max(rect.width, 0)), width), height: height)
+        return CGSize(width: min(ceil(max(rect.width, 0)), boundingSize.width), height: height)
+    }
+
+    private func limitedMeasurementPrefix(lineLimit: Int) -> NSAttributedString? {
+        let characterLimit = max(lineLimit + Self.prefixOverflowLineAllowance, 1) * Self.prefixCharactersPerLimitedLine
+        guard attributedText.length > characterLimit else { return nil }
+        let string = attributedText.string as NSString
+        let roughRange = NSRange(location: 0, length: min(characterLimit, string.length))
+        let safeRange = string.rangeOfComposedCharacterSequences(for: roughRange)
+        guard safeRange.length > 0, safeRange.length < attributedText.length else { return nil }
+        return attributedText.attributedSubstring(from: safeRange)
     }
 
     private func maxLineHeight() -> CGFloat {
+        if let maxLineHeightCache {
+            return maxLineHeightCache
+        }
         var lineHeight = UIFont.preferredFont(forTextStyle: fallbackTextStyle).lineHeight
         attributedText.enumerateAttribute(.font, in: NSRange(location: 0, length: attributedText.length)) { value, _, _ in
             if let font = value as? UIFont {
                 lineHeight = max(lineHeight, font.lineHeight)
             }
         }
+        maxLineHeightCache = lineHeight
         return lineHeight
     }
 
@@ -834,6 +1098,7 @@ private final class RichTextLabel: UILabel, RichTextTextRendering, RichTextFitti
 private final class RichTextTextView: UITextView, UITextViewDelegate, RichTextTextRendering, RichTextFittingPreparing {
     private var linkHandler: ((URL) -> Void)?
     private var selectionEnabled = false
+    private var lineLimit: Int?
     private var lastLayoutWidth: CGFloat = 0
     var renderedView: UIView { self }
 
@@ -887,6 +1152,7 @@ private final class RichTextTextView: UITextView, UITextViewDelegate, RichTextTe
         onOpenURL: ((URL) -> Void)?
     ) {
         self.selectionEnabled = selectionEnabled
+        self.lineLimit = lineLimit
         linkHandler = onOpenURL
         isSelectable = true
         linkTextAttributes = [
@@ -951,8 +1217,24 @@ private final class RichTextTextView: UITextView, UITextViewDelegate, RichTextTe
     }
 
     private func measuredSize(for width: CGFloat) -> CGSize {
-        let size = sizeThatFits(CGSize(width: width, height: .greatestFiniteMagnitude))
+        let height: CGFloat
+        if let lineLimit {
+            height = ceil(maxLineHeight() * CGFloat(max(lineLimit, 1)) + maxLineHeight())
+        } else {
+            height = .greatestFiniteMagnitude
+        }
+        let size = sizeThatFits(CGSize(width: width, height: height))
         return CGSize(width: UIView.noIntrinsicMetric, height: ceil(size.height))
+    }
+
+    private func maxLineHeight() -> CGFloat {
+        var lineHeight = UIFont.preferredFont(forTextStyle: .body).lineHeight
+        attributedText.enumerateAttribute(.font, in: NSRange(location: 0, length: attributedText.length)) { value, _, _ in
+            if let font = value as? UIFont {
+                lineHeight = max(lineHeight, font.lineHeight)
+            }
+        }
+        return lineHeight
     }
 
     func textView(_ textView: UITextView, primaryActionFor textItem: UITextItem, defaultAction: UIAction) -> UIAction? {

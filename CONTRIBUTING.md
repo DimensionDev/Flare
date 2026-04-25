@@ -37,12 +37,6 @@ Flare uses [ktlint](https://github.com/pinterest/ktlint) to check the code style
  - open `iosApp/Flare.xcodeproj` in Xcode
  - Build and run the app
 
-### Server
- - Flare Server uses Ktor with Kotlin Native, which only works on Linux X64 and MacOS X64/ARM64
- - Make sure you have JDK 25 installed
- - Run `./gradlew :server:runDebugExecutableMacosArm64 -PrunArgs="--config-path=path/to/server/src/commonMain/resources/application.yaml"` to build and run the server, remember to replace `path/to/server/src/commonMain/resources/application.yaml` with the path to your config file
- - The server will run on `http://localhost:8080` by default
-
 ### Desktop
  - Make sure you have JDK 25 installed.
  - Run `./gradlew run` to build and run the debug version of the desktop app.
@@ -50,12 +44,9 @@ Flare uses [ktlint](https://github.com/pinterest/ktlint) to check the code style
 ### Project structure
 The project is split into theses parts:
  - `shared`: The common code, including bussiness logic.
-   - `shared/commonMain`: Bussiness logic without any UI.
-   - `shared/api`: Shared API definition for the server and client
  - `compose-ui`: The Compose UI code that shared between Android, iOS, Desktop.
  - `app`: The Android app.
  - `iosApp`: The iOS app.
- - `server`: The server.
  - `desktopApp`: The desktop app for Windows/macOS.  
 
 Most of the business logic is in `shared`, and the platform specific code and UI is in `app` and `iosApp`.

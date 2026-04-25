@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 @preconcurrency import KotlinSharedUI
 
 class PlatformTextContent: NSObject {}
@@ -30,12 +31,49 @@ final class PlatformTextBlockImageContent: PlatformTextContent {
 class PlatformTextRun: NSObject {}
 
 final class PlatformTextAttributedRun: PlatformTextRun {
+    let attributedText: NSAttributedString
     let text: AttributedString
 
-    init(text: AttributedString) {
+    init(attributedText: NSAttributedString, text: AttributedString) {
+        self.attributedText = attributedText
         self.text = text
         super.init()
     }
+}
+
+final class PlatformTextStyleDescriptor: NSObject {
+    let link: String?
+    let bold: Bool
+    let italic: Bool
+    let strikethrough: Bool
+    let monospace: Bool
+    let code: Bool
+    let underline: Bool
+    let small: Bool
+    let time: Bool
+    let headingLevel: Int?
+    let isBlockQuote: Bool
+    let isFigCaption: Bool
+
+    init(style: RenderTextStyle, block: RenderBlockStyle) {
+        link = style.link
+        bold = style.bold
+        italic = style.italic
+        strikethrough = style.strikethrough
+        monospace = style.monospace
+        code = style.code
+        underline = style.underline
+        small = style.small
+        time = style.time
+        headingLevel = block.headingLevel?.intValue
+        isBlockQuote = block.isBlockQuote
+        isFigCaption = block.isFigCaption
+        super.init()
+    }
+}
+
+extension NSAttributedString.Key {
+    static let platformTextStyleDescriptor = NSAttributedString.Key("dev.dimension.flare.platformTextStyleDescriptor")
 }
 
 final class PlatformTextImageRun: PlatformTextRun {
@@ -86,12 +124,19 @@ private final class RenderContext {
     func appendTextContent(_ content: RenderContent.Text) {
         let runCount = content.runs.count
         var renderedRuns: [PlatformTextRun] = []
-        var attributedBuffer = AttributedString()
+        let attributedBuffer = NSMutableAttributedString()
+        var swiftBuffer = AttributedString()
 
         func commitAttributedBuffer() {
-            guard !attributedBuffer.characters.isEmpty else { return }
-            renderedRuns.append(PlatformTextAttributedRun(text: attributedBuffer))
-            attributedBuffer = AttributedString()
+            guard attributedBuffer.length > 0 else { return }
+            renderedRuns.append(
+                PlatformTextAttributedRun(
+                    attributedText: attributedBuffer.copy() as! NSAttributedString,
+                    text: swiftBuffer
+                )
+            )
+            attributedBuffer.deleteCharacters(in: NSRange(location: 0, length: attributedBuffer.length))
+            swiftBuffer = AttributedString()
         }
 
         for index in 0..<runCount {
@@ -99,9 +144,18 @@ private final class RenderContext {
 
             switch run {
             case let textRun as RenderRun.Text:
-                attributedBuffer += AttributedString(
+                attributedBuffer.append(
+                    NSAttributedString(
+                        string: textRun.text,
+                        attributes: templateAttributes(
+                            for: textRun.style,
+                            block: content.block
+                        )
+                    )
+                )
+                swiftBuffer += AttributedString(
                     textRun.text,
-                    attributes: attributes(
+                    attributes: swiftAttributes(
                         for: textRun.style,
                         block: content.block
                     )
@@ -135,7 +189,20 @@ private final class RenderContext {
         contents.append(PlatformTextBlockImageContent(url: url, href: href))
     }
 
-    private func attributes(
+    private func templateAttributes(
+        for style: RenderTextStyle,
+        block: RenderBlockStyle
+    ) -> [NSAttributedString.Key: Any] {
+        var attributes: [NSAttributedString.Key: Any] = [
+            .platformTextStyleDescriptor: PlatformTextStyleDescriptor(style: style, block: block),
+        ]
+        if let link = style.link, let url = URL(string: link) {
+            attributes[.link] = url
+        }
+        return attributes
+    }
+
+    private func swiftAttributes(
         for style: RenderTextStyle,
         block: RenderBlockStyle
     ) -> AttributeContainer {

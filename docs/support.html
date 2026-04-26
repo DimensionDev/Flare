@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    <link rel="manifest" href="site.webmanifest">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Support - Flare</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+            background-color: #F6F8FA;
+            color: #24292F;
+        }
+        .gradient-text {
+            background: linear-gradient(90deg, #30C5B3, #21B7A4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .support-card {
+            background-color: #FFFFFF;
+            border: 1px solid #D0D7DE;
+            border-radius: 16px;
+        }
+        a.link {
+            color: #21B7A4;
+            text-decoration: none;
+        }
+        a.link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+<div class="container mx-auto px-6 py-12 md:py-20 max-w-3xl">
+    <div class="mb-8">
+        <a href="index.html" class="link inline-flex items-center gap-2">
+            <img src="flare_logo.svg" alt="Flare" class="h-8">
+        </a>
+    </div>
+
+    <h1 class="text-4xl md:text-5xl font-bold tracking-tight mb-6">
+        <span class="gradient-text">Support</span>
+    </h1>
+
+    <div class="support-card p-8 space-y-6">
+        <p class="text-lg text-gray-700">
+            For general support, please contact:
+            <a href="mailto:tlaster@mask.io" class="link font-semibold">tlaster@mask.io</a>
+        </p>
+
+        <p class="text-lg text-gray-700">
+            Flare is an open-source project. Bug reports and feature requests can also be submitted on GitHub:
+        </p>
+
+        <p>
+            <a href="https://github.com/DimensionDev/Flare/issues" target="_blank" class="link font-semibold break-all">
+                https://github.com/DimensionDev/Flare/issues
+            </a>
+        </p>
+    </div>
+</div>
+
+<footer class="text-center py-8">
+    <p class="text-gray-500 text-sm" id="footer-copyright"></p>
+    <p class="text-gray-500 text-sm mt-1">Flare is an open-source project.</p>
+</footer>
+
+<script>
+    document.getElementById('footer-copyright').textContent =
+        `© ${new Date().getFullYear()} DimensionDev. All rights reserved.`;
+</script>
+</body>
+</html>

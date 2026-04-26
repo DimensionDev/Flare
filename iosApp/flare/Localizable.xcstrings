@@ -86044,7 +86044,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "AI kompatibel"
+            "value" : "KI kompatibel"
           }
         },
         "el" : {
@@ -86168,7 +86168,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "AI-Modell für Übersetzung und Zusammenfassung"
+            "value" : "KI-Modell für Übersetzung und Zusammenfassung"
           }
         },
         "el" : {
@@ -96781,7 +96781,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Server-URL muss mit '/' enden und die AI-kompatible v1/chat/completions API unterstützen."
+            "value" : "Die Server-URL muss mit '/' enden und die KI-kompatible v1/chat/completions-API unterstützen."
           }
         },
         "el" : {

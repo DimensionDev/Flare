@@ -657,12 +657,6 @@
             "value" : "Learn more about Flare"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ラーン モア アバウト フレア"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -851,12 +845,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "About"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "アバウト"
           }
         },
         "es" : {
@@ -1599,12 +1587,6 @@
             "value" : "Retry"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "リトライ"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1795,12 +1777,6 @@
             "value" : "Add"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "アド"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1967,12 +1943,6 @@
             "value" : "Προσθήκη ρελέ"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "アド リレー"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2119,12 +2089,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Add Subscription"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "アド サブスクリプション"
           }
         },
         "es" : {
@@ -2294,12 +2258,6 @@
             "value" : "AI"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "エーアイ"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2422,12 +2380,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Δοκιμή μετάφρασης τεχνητής νοημοσύνης"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "エーアイ トランスレーション テスト"
           }
         },
         "es" : {
@@ -2558,12 +2510,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "AI Type"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "エーアイ タイプ"
           }
         },
         "es" : {
@@ -2724,12 +2670,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Configure AI backend and features"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "コンフィギュア エーアイ バックエンド アンド フィーチャーズ"
           }
         },
         "es" : {
@@ -3047,12 +2987,6 @@
             "value" : "Enable auto translate"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "イネーブル オート トランスレート"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3193,12 +3127,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Automatically translate and cache newly loaded timeline and profile content in the background. This can consume a large amount of tokens."
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "オートマティカリー トランスレート アンド キャッシュ ニューリー ローデッド タイムライン アンド プロファイル コンテント イン ザ バックグラウンド. ディス キャン コンシューム ア ラージ アマウント オブ トークンズ."
           }
         },
         "es" : {
@@ -3354,12 +3282,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Enter the server URL"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "エンター ザ サーバー ユーアールエル"
           }
         },
         "es" : {
@@ -3553,12 +3475,6 @@
             "value" : "Server URL"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "サーバー ユーアールエル"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3749,12 +3665,6 @@
             "value" : "Enable AI Summarization"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "イネーブル エーアイ サマリゼーション"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3943,12 +3853,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "AI Configuration"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "エーアイ コンフィギュレーション"
           }
         },
         "es" : {
@@ -4332,12 +4236,6 @@
             "value" : "Discover feeds"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ディスカバー フェエデス"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4526,12 +4424,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "My feeds"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ムイ フェエデス"
           }
         },
         "es" : {
@@ -4860,12 +4752,6 @@
             "value" : "List"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "リステ"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5036,12 +4922,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "All Subscriptions"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "オール サブスクリプションズ"
           }
         },
         "es" : {
@@ -5316,12 +5196,6 @@
             "value" : "Antenna"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "アンテッナ"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5512,12 +5386,6 @@
             "value" : "Antenna"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "アンテッナ"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5690,12 +5558,6 @@
             "value" : "API Key"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "エーピーアイ キー"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5842,12 +5704,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "App logging"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "アプリ ロギング"
           }
         },
         "es" : {
@@ -6034,12 +5890,6 @@
             "value" : "Enable network logging"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "イネーブル ネットワーク ロギング"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -6212,12 +6062,6 @@
             "value" : "Absolute timestamp"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "アブソリュート タイムスタンプ"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -6352,12 +6196,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Display absolute timestamps on posts"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ディスプレイ アブソリュート ティメスタンプス オン ポスト"
           }
         },
         "es" : {
@@ -6512,12 +6350,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Avatar shape"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "アバター シェイプ"
           }
         },
         "es" : {
@@ -6710,12 +6542,6 @@
             "value" : "Round"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ラウンド"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -6906,12 +6732,6 @@
             "value" : "Change the shape of the avatar"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "チェンジ ザ シェイプ オブ ザ アバター"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -7100,12 +6920,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Square"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "スクエア"
           }
         },
         "es" : {
@@ -7619,12 +7433,6 @@
             "value" : "Customize the look and feel of Flare"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "カスタマイズ ザ ルック アンド フィール オブ フレア"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -8075,12 +7883,6 @@
             "value" : "Expand media to full size"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "エクスパンド メディア トゥ フル サイズ"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -8263,12 +8065,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Keep the aspectradio of the media in timeline"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ケエプ ザ アスペクテラディオ オブ ザ メディア イン タイムライン"
           }
         },
         "es" : {
@@ -8579,12 +8375,6 @@
             "value" : "Full width post"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "フル ヰデテー ポスト"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -8719,12 +8509,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Show the post in full width"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ショー ザ ポスト イン フル ヰデテー"
           }
         },
         "es" : {
@@ -8869,12 +8653,6 @@
             "value" : "In-app browser"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "イン-アプリ ブロウセル"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -9015,12 +8793,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Open links in the in-app browser"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "オペン リンクス イン ザ イン-アプリ ブロウセル"
           }
         },
         "es" : {
@@ -9567,12 +9339,6 @@
             "value" : "Media"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "メディア"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -9743,12 +9509,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Post action style"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ポスト アクション スタイル"
           }
         },
         "es" : {
@@ -10017,12 +9777,6 @@
             "value" : "Hidden"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ヒドゥン"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -10163,12 +9917,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Left aligned"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "レフト アラインド"
           }
         },
         "es" : {
@@ -10313,12 +10061,6 @@
             "value" : "Right aligned"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ライト アラインド"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -10459,12 +10201,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Stretch"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ストレッチ"
           }
         },
         "es" : {
@@ -10619,12 +10355,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Show link previews"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ショー リンク プレヸエウス"
           }
         },
         "es" : {
@@ -10953,12 +10683,6 @@
             "value" : "Show media"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ショー メディア"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -11285,12 +11009,6 @@
             "value" : "Show numbers"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ショー ナンバーズ"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -11599,12 +11317,6 @@
             "value" : "Show platform logo"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ショー プラットフォーム ロゴ"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -11895,12 +11607,6 @@
             "value" : "Show sensitive content"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ショー センシティブ コンテント"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -12083,12 +11789,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Always show sensitive content in the post"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "オールウェイズ ショー センシティブ コンテント イン ザ ポスト"
           }
         },
         "es" : {
@@ -12281,12 +11981,6 @@
             "value" : "Theme"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "テーマ"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -12477,12 +12171,6 @@
             "value" : "Dark"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ダーク"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -12671,12 +12359,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Change the theme of the app"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "チェンジ ザ テーマ オブ ザ アプリ"
           }
         },
         "es" : {
@@ -12999,12 +12681,6 @@
             "value" : "Theme"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "テーマ"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -13193,12 +12869,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Light"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ライト"
           }
         },
         "es" : {
@@ -14226,12 +13896,6 @@
             "value" : "Appearance"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "アピアランス"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -14682,12 +14346,6 @@
             "value" : "Video autoplay"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ビデオ オートプレイ"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -14876,12 +14534,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Always"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "オールウェイズ"
           }
         },
         "es" : {
@@ -15210,12 +14862,6 @@
             "value" : "Never"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ネバー"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -15404,12 +15050,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Wi-Fi only"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ワイファイ オンリー"
           }
         },
         "es" : {
@@ -15826,12 +15466,6 @@
             "value" : "Αυτόματη μετάφραση εξαιρουμένων γλωσσών"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "オート-トランスレート エクスクルーデッド ランゲージズ"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -16152,12 +15786,6 @@
             "value" : "Are you sure you want to block this user?"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "アー ユー シュア ユー ウォント トゥ ブロック ディス ユーザー?"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -16292,12 +15920,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Block user"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ブロック ユーザー"
           }
         },
         "es" : {
@@ -16582,12 +16204,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Feeds"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "フェエデス"
           }
         },
         "es" : {
@@ -17921,12 +17537,6 @@
             "value" : "reposted a post"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "リポステッド ア ポスト"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -18486,12 +18096,6 @@
             "value" : "Report"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "レポート"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -18674,12 +18278,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "What's the issue with this post?"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ウハテ'ス ザ イッスエ ウィズ ディス ポスト?"
           }
         },
         "es" : {
@@ -18866,12 +18464,6 @@
             "value" : "Misleading"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ミスリーディング"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -19054,12 +18646,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "This post is misleading"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ディス ポスト イス ミスリーディング"
           }
         },
         "es" : {
@@ -19246,12 +18832,6 @@
             "value" : "Other"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "アザー"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -19434,12 +19014,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "An issue not included in these options"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "アン イッスエ ノット インクルーデッド イン ジーズ オプティオンス"
           }
         },
         "es" : {
@@ -19626,12 +19200,6 @@
             "value" : "Anti-Social Behavior"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "アンチソーシャル ビヘイビア"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -19814,12 +19382,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Harassment, trolling, or intolerance"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ハラスメント, トローリング, オア イントレランス"
           }
         },
         "es" : {
@@ -20006,12 +19568,6 @@
             "value" : "Unwanted Sexual Content"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "アンウォンテッド セクシュアル コンテント"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -20194,12 +19750,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nudity or pornography not labeled as such"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ヌーディティ オア ポルノグラフィー ノット ラベルド アズ サッチ"
           }
         },
         "es" : {
@@ -20392,12 +19942,6 @@
             "value" : "Spam"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "スパム"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -20580,12 +20124,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Excessive mentions or replies"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "エクセシブ メンションズ オア リプライズ"
           }
         },
         "es" : {
@@ -20772,12 +20310,6 @@
             "value" : "Illegal and Urgent"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "イリーガル アンド アージェント"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -20960,12 +20492,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Glaring violations of law or terms of service"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "グラリング バイオレーションズ オブ ロー オア タームズ オブ サービス"
           }
         },
         "es" : {
@@ -21538,12 +21064,6 @@
             "value" : "Cancel"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "キャンセル"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -21716,12 +21236,6 @@
             "value" : "Channel"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "チャンネル"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -21856,12 +21370,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Channels"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "チャッネルス"
           }
         },
         "es" : {
@@ -22116,12 +21624,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Επιλέξτε ποια υπηρεσία χειρίζεται μετάφραση"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "チューズ ウィッチ サービス ハンドルズ トランスレーション"
           }
         },
         "es" : {
@@ -22462,12 +21964,6 @@
             "value" : "Comment"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "コメント"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -22794,12 +22290,6 @@
             "value" : "Send"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "センド"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -22988,12 +22478,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Content warning"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "コンテント ワーニング"
           }
         },
         "es" : {
@@ -23186,12 +22670,6 @@
             "value" : "Mark media as sensitive"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "マーク メディア アズ センシティブ"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -23380,12 +22858,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "What's happening?"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ウハテ'ス ハプニング?"
           }
         },
         "es" : {
@@ -23974,12 +23446,6 @@
             "value" : "Multiple choice"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "マルチプル チョイス"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -24170,12 +23636,6 @@
             "value" : "Single choice"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "シングル チョイス"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -24364,12 +23824,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Compose"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "コンポーズ"
           }
         },
         "es" : {
@@ -24942,12 +24396,6 @@
             "value" : "Dark"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ダーク"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -25138,12 +24586,6 @@
             "value" : "Open in browser"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "オペン イン ブロウセル"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -25316,12 +24758,6 @@
             "value" : "Select account"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "セレクト アカウント"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -25452,12 +24888,6 @@
             "value" : "DeepL"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ディープエル"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -25580,12 +25010,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "DeepL Api Κλειδί"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ディープエル エーピーアイ キー"
           }
         },
         "es" : {
@@ -25854,12 +25278,6 @@
             "value" : "Προεπιλογή"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "デファウルテ"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -26048,12 +25466,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Delete"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "デリート"
           }
         },
         "es" : {
@@ -26246,12 +25658,6 @@
             "value" : "Delete"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "デリート"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -26440,12 +25846,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Delete"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "デリート"
           }
         },
         "es" : {
@@ -26768,12 +26168,6 @@
             "value" : "Delete list"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "デリート リステ"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -26956,12 +26350,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Are you sure you want to delete this?"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "アレ ユー スレ ユー ワンテ トゥ デリート ディス?"
           }
         },
         "es" : {
@@ -27562,12 +26950,6 @@
             "value" : "Trending Hashtags"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "トレンディング ハッシュタグズ"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -27759,12 +27141,6 @@
             "value" : "Discover"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ディスカバー"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -27953,12 +27329,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Recommend Users"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "レコメンド ユーザーズ"
           }
         },
         "es" : {
@@ -28903,12 +28273,6 @@
             "value" : "Πρόχειρα"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ドラフツ"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -29061,12 +28425,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Edit"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "エディット"
           }
         },
         "es" : {
@@ -29251,12 +28609,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Επεξεργασία"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "エディット"
           }
         },
         "es" : {
@@ -29579,12 +28931,6 @@
             "value" : "Edit list"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "エディット リステ"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -29767,12 +29113,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Edit Subscription"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "エディット サブスクリプション"
           }
         },
         "es" : {
@@ -30539,12 +29879,6 @@
             "value" : "Εισάγετε URL ρελέ"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "エンター リレー ユーアールエル"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -30691,12 +30025,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Error"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "エッロル"
           }
         },
         "es" : {
@@ -30887,12 +30215,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Error"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "エッロル"
           }
         },
         "es" : {
@@ -31458,12 +30780,6 @@
             "value" : "Failed to load models"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "フェイルド トゥ ロアデ モデルズ"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -31606,12 +30922,6 @@
             "value" : "Share via FxEmbed"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "シェア ヴィア エフエックスエンベッド"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -31742,12 +31052,6 @@
             "value" : "Κλειδί Google Cloud Api"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "グーグル クラウド エーピーアイ キー"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -31872,12 +31176,6 @@
             "value" : "Μετάφραση Google Cloud"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "グーグル クラウド トランスレート"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -32000,12 +31298,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Μετάφραση Google (Ιστός)"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "グーグル トランスレート (ヱブ)"
           }
         },
         "es" : {
@@ -32286,12 +31578,6 @@
             "value" : "Bookmarks"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ボオクマルクス"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -32480,12 +31766,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Discover"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ディスカバー"
           }
         },
         "es" : {
@@ -32820,12 +32100,6 @@
             "value" : "Featured"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "フェアテゥレデ"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -33014,12 +32288,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Feeds"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "フェエデス"
           }
         },
         "es" : {
@@ -33212,12 +32480,6 @@
             "value" : "Home"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ホーム"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -33408,12 +32670,6 @@
             "value" : "List"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "リステ"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -33602,12 +32858,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Me"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ミー"
           }
         },
         "es" : {
@@ -33918,12 +33168,6 @@
             "value" : "Import completed"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "インポート コンプリーテッド"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -34058,12 +33302,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "This will import data from the file. Existing records with matching IDs will be replaced. Do you want to continue?"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ディス ウィル インポート データ フロム ザ ファイル. エクセィスティング レコルデス ウィズ マッチング イデス ウィル ビー レプラセデ. ド ユー ウォント トゥ コンティヌエ?"
           }
         },
         "es" : {
@@ -34202,12 +33440,6 @@
             "value" : "Confirm Import"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "コンフィルム インポート"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -34344,12 +33576,6 @@
             "value" : "Failed to import data"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "フェイルド トゥ インポート データ"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -34480,12 +33706,6 @@
             "value" : "LibreTranslate"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "リブレテランスラテ"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -34610,12 +33830,6 @@
             "value" : "LibreTranslate Api Κλειδί"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "リブレテランスラテ エーピーアイ キー"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -34738,12 +33952,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "LibreTranslate Base URL"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "リブレテランスラテ バセ ユーアールエル"
           }
         },
         "es" : {
@@ -34892,12 +34100,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Light"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ライト"
           }
         },
         "es" : {
@@ -35262,12 +34464,6 @@
             "value" : "Liked"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ライクド"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -35414,12 +34610,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "List description"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "リステ デスクリプティオン"
           }
         },
         "es" : {
@@ -35742,12 +34932,6 @@
             "value" : "List description"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "リステ デスクリプティオン"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -35936,12 +35120,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Edit list members"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "エディット リステ メンベルス"
           }
         },
         "es" : {
@@ -36134,12 +35312,6 @@
             "value" : "List name"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "リステ ナメ"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -36328,12 +35500,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Edit list"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "エディット リステ"
           }
         },
         "es" : {
@@ -36656,12 +35822,6 @@
             "value" : "Members"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "メンベルス"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -36850,12 +36010,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "List name"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "リステ ナメ"
           }
         },
         "es" : {
@@ -37178,12 +36332,6 @@
             "value" : "List description"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "リステ デスクリプティオン"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -37372,12 +36520,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "List description"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "リステ デスクリプティオン"
           }
         },
         "es" : {
@@ -37570,12 +36712,6 @@
             "value" : "List name"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "リステ ナメ"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -37766,12 +36902,6 @@
             "value" : "List name"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "リステ ナメ"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -37960,12 +37090,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Create list"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "クレアテ リステ"
           }
         },
         "es" : {
@@ -38424,12 +37548,6 @@
             "value" : "Delete"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "デリート"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -38620,12 +37738,6 @@
             "value" : "Local filter settings for timeline"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ローカル フィルター セッティングス フォー タイムライン"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -38814,12 +37926,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Edit"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "エディット"
           }
         },
         "es" : {
@@ -39146,12 +38252,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Keyword"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ケイヲルデ"
           }
         },
         "es" : {
@@ -40000,12 +39100,6 @@
             "value" : "Local filter"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ローカル フィルター"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -40195,12 +39289,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "View or search your browsing history"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ビュー オア サーチ ユア ブラウジング ヒストリー"
           }
         },
         "es" : {
@@ -40511,12 +39599,6 @@
             "value" : "Posts"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ポスト"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -40705,12 +39787,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Local history"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ローカル ヒストリー"
           }
         },
         "es" : {
@@ -40903,12 +39979,6 @@
             "value" : "Users"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ユーザーズ"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -41099,12 +40169,6 @@
             "value" : "Login"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ロギン"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -41293,12 +40357,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Login"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ロギン"
           }
         },
         "es" : {
@@ -41725,12 +40783,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Διαχείριση ρελέ"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "マネージ リレーズ"
           }
         },
         "es" : {
@@ -42263,12 +41315,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pinned post"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ピンド ポスト"
           }
         },
         "es" : {
@@ -44105,12 +43151,6 @@
             "value" : "reposted a post"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "リポステッド ア ポスト"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -44295,12 +43335,6 @@
             "value" : "updated a post"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ウプダテデ ア ポスト"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -44483,12 +43517,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Are you sure you want to report this?"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "アレ ユー スレ ユー ワンテ トゥ レポート ディス?"
           }
         },
         "es" : {
@@ -44679,12 +43707,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Report"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "レポート"
           }
         },
         "es" : {
@@ -45285,12 +44307,6 @@
             "value" : "Followers"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "フォロワーズ"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -45479,12 +44495,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Following"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "フォッロヰング"
           }
         },
         "es" : {
@@ -78068,12 +77078,6 @@
             "value" : "Favorites"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ファヺリテス"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -78226,12 +77230,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Featured"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "フェアテゥレデ"
           }
         },
         "es" : {
@@ -78424,12 +77422,6 @@
             "value" : "Following"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "フォッロヰング"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -78602,12 +77594,6 @@
             "value" : "Owned"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "オウネデ"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -78744,12 +77730,6 @@
             "value" : "Unfavourite"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ウンファヺウリテ"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -78884,12 +77864,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Unfollow"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ウンフォッロウ"
           }
         },
         "es" : {
@@ -81240,12 +80214,6 @@
             "value" : "What's the issue with this post?"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ウハテ'ス ザ イッスエ ウィズ ディス ポスト?"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -81566,12 +80534,6 @@
             "value" : "Report"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "レポート"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -81762,12 +80724,6 @@
             "value" : "Mixed"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ミクセデ"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -81940,12 +80896,6 @@
             "value" : "Model"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "モデル"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -82098,12 +81048,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "More"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "モア"
           }
         },
         "es" : {
@@ -82295,12 +81239,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "More"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "モア"
           }
         },
         "es" : {
@@ -82665,12 +81603,6 @@
             "value" : "Are you sure you want to mute this user?"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "アー ユー シュア ユー ウォント トゥ ミュート ディス ユーザー?"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -82805,12 +81737,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mute user"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ミュート ユーザー"
           }
         },
         "es" : {
@@ -83317,12 +82243,6 @@
             "value" : "No models available"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ノー モデルズ アヷイラブレ"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -83445,12 +82365,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Δεν έχουν ρυθμιστεί ρελέ"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ノー リレーズ コンフィグレデ"
           }
         },
         "es" : {
@@ -83693,12 +82607,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Δεν έχει οριστεί"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ノット セット"
           }
         },
         "es" : {
@@ -84589,12 +83497,6 @@
             "value" : "All"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "オール"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -84783,12 +83685,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Comment"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "コメント"
           }
         },
         "es" : {
@@ -85437,12 +84333,6 @@
             "value" : "OK"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "オーケー"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -85625,12 +84515,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Εντάξει"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "オーケー"
           }
         },
         "es" : {
@@ -86313,12 +85197,6 @@
             "value" : "Import from OPML"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "インポルテ フロム オーピーエムエル"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -86453,12 +85331,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Import from OPML"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "インポルテ フロム オーピーエムエル"
           }
         },
         "es" : {
@@ -86597,12 +85469,6 @@
             "value" : "You need re-login in order to access this page"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ユー ニード re-ログイン イン オルデル トゥ アッセッス ディス パゲ"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -86731,12 +85597,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Permission Denied"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ペルミッセィオン デニエデ"
           }
         },
         "es" : {
@@ -87391,12 +86251,6 @@
             "value" : "Posts"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ポスト"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -87585,12 +86439,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Likes"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ライクス"
           }
         },
         "es" : {
@@ -87783,12 +86631,6 @@
             "value" : "Media"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "メディア"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -87979,12 +86821,6 @@
             "value" : "Posts and replies"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ポスト アンド リプライズ"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -88173,12 +87009,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Posts"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ポスト"
           }
         },
         "es" : {
@@ -89629,12 +88459,6 @@
             "value" : "Following"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "フォッロヰング"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -90579,12 +89403,6 @@
             "value" : "Report"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "レポート"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -90769,12 +89587,6 @@
             "value" : "Επανάληψη"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "リトライ"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -90941,12 +89753,6 @@
             "value" : "Επανάληψη μετάφρασης"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "リトライ トランスレーション"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -91093,12 +89899,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Repost"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "リポスト"
           }
         },
         "es" : {
@@ -91283,12 +90083,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Remove repost"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "リムーブ リポスト"
           }
         },
         "es" : {
@@ -91479,12 +90273,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Add Subscription"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "アド サブスクリプション"
           }
         },
         "es" : {
@@ -91789,12 +90577,6 @@
             "value" : "You need to set the RssHub host if you want to use RssHub, or select the public RssHub server"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ユー ニード トゥ セット ザ アールエスエスハブ ホスト イフ ユー ウォント トゥ ユーズ アールエスエスハブ, オア セレクト ザ パブリック アールエスエスハブ サーバー"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -92077,12 +90859,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "RssHub Host"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "アールエスエスハブ ホスト"
           }
         },
         "es" : {
@@ -93087,12 +91863,6 @@
             "value" : "Discovered Rss Sources"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ディスコヹレデ アールエスエス ソウルセス"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -93265,12 +92035,6 @@
             "value" : "Open in browser"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "オペン イン ブロウセル"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -93441,12 +92205,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Subscriptions"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "サブスクリプションズ"
           }
         },
         "es" : {
@@ -93839,12 +92597,6 @@
             "value" : "Εκτελέστε ένα σύντομο δείγμα πλούσιου κειμένου μέσω της τρέχουσας εγκατάστασης μετάφρασης τεχνητής νοημοσύνης."
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ラン ア ショート リッチテキスト サンプル スルー ザ カレント エーアイ トランスレーション セットアップ."
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -93967,12 +92719,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Δείγμα κειμένου"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "サンプル テキスト"
           }
         },
         "es" : {
@@ -94353,12 +93099,6 @@
             "value" : "Save completed"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "セーブ コンプリーテッド"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -94495,12 +93235,6 @@
             "value" : "Failed to save data"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "フェイルド トゥ セーブ データ"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -94635,12 +93369,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Save screenshot"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "セーブ スクリーンショット"
           }
         },
         "es" : {
@@ -94795,12 +93523,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Search"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "サーチ"
           }
         },
         "es" : {
@@ -95117,12 +93839,6 @@
             "value" : "Posts"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ポスト"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -95313,12 +94029,6 @@
             "value" : "Search"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "サーチ"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -95507,12 +94217,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Users"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ユーザーズ"
           }
         },
         "es" : {
@@ -95941,12 +94645,6 @@
             "value" : "Επιλογή μοντέλου"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "セレクト モデル"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -96093,12 +94791,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Αποστολή"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "センド"
           }
         },
         "es" : {
@@ -96618,12 +95310,6 @@
             "value" : "Server URL"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "サーバー ユーアールエル"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -97051,12 +95737,6 @@
             "value" : "Subscription Management"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "サブスクリプション マネジメント"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -97191,12 +95871,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Export Data"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "エクスポート データ"
           }
         },
         "es" : {
@@ -97465,12 +96139,6 @@
             "value" : "Import Data"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "インポート データ"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -97605,12 +96273,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Import data from file (merges with existing data, replaces duplicates)"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "インポート データ フロム ファイル (メルゲス ウィズ エクセィスティング データ, レプラセス デゥプリカテス)"
           }
         },
         "es" : {
@@ -97765,12 +96427,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Settings"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "セッティングス"
           }
         },
         "es" : {
@@ -98073,12 +96729,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Translation"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "トランスレーション"
           }
         },
         "es" : {
@@ -98538,12 +97188,6 @@
             "value" : "Share link"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "シェア リンク"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -98680,12 +97324,6 @@
             "value" : "Share screenshot"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "シェア スクリーンショット"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -98820,12 +97458,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Share via Fixvx"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "シェア ヴィア フィクスヴクス"
           }
         },
         "es" : {
@@ -98970,12 +97602,6 @@
             "value" : "Share via FxEmbed"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "シェア ヴィア エフエックスエンベッド"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -99104,12 +97730,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Εμφάνιση αρχικού"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ショー オリジナル"
           }
         },
         "es" : {
@@ -99259,12 +97879,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Show media"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ショー メディア"
           }
         },
         "es" : {
@@ -99443,12 +98057,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Social"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ソーシャル"
           }
         },
         "es" : {
@@ -100215,12 +98823,6 @@
             "value" : "Followers"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "フォロワーズ"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -100393,12 +98995,6 @@
             "value" : "Only followers can see this post"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "オンリー フォロワーズ キャン シー ディス ポスト"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -100551,12 +99147,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Home"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ホーム"
           }
         },
         "es" : {
@@ -100731,12 +99321,6 @@
             "value" : "Only users on this instance can see this post"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "オンリー ユーザーズ オン ディス インスタンス キャン シー ディス ポスト"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -100889,12 +99473,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Public"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "パブリック"
           }
         },
         "es" : {
@@ -101217,12 +99795,6 @@
             "value" : "Specified"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "スペシファイド"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -101393,12 +99965,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Only mentioned users can see this post"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "オンリー メンションド ユーザーズ キャン シー ディス ポスト"
           }
         },
         "es" : {
@@ -101815,12 +100381,6 @@
             "value" : "Clear image cache"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "クリア イマゲ キャッシュ"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -102147,12 +100707,6 @@
             "value" : "Manage Flare's storage"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "マネージ フレア'ス ストレージ"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -102343,12 +100897,6 @@
             "value" : "Storage"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ストレージ"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -102533,12 +101081,6 @@
             "value" : "App logging"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "アプリ ロギング"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -102709,12 +101251,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Supports RSS feeds and Mastodon instances"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "スッポルテス アールエスエス フィード アンド マストドン インスタンシズ"
           }
         },
         "es" : {
@@ -102981,12 +101517,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Summarize"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "スッマリゼ"
           }
         },
         "es" : {
@@ -103420,12 +101950,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Summary Prompt"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "サマリー プロンプト"
           }
         },
         "es" : {
@@ -104008,12 +102532,6 @@
             "value" : "Add Group"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "アド グループ"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -104148,12 +102666,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Add Tab"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "アド タブ"
           }
         },
         "es" : {
@@ -104308,12 +102820,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Delete"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "デリート"
           }
         },
         "es" : {
@@ -104506,12 +103012,6 @@
             "value" : "Edit"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "エディット"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -104682,12 +103182,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Edit Group"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "エディット グループ"
           }
         },
         "es" : {
@@ -105376,12 +103870,6 @@
             "value" : "Mixed timeline will mix all tabs timeline result in one tab"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ミクセデ タイムライン ヰッル ミクス オール タブス タイムライン レスルテ イン オネ タブ"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -105684,12 +104172,6 @@
             "value" : "Group"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "グループ"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -105818,12 +104300,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "No tabs in this group"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ノー タブズ イン ディス グループ"
           }
         },
         "es" : {
@@ -105960,12 +104436,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Group Name"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "グループ ネーム"
           }
         },
         "es" : {
@@ -106251,12 +104721,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tab settings"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "タブ セッティングス"
           }
         },
         "es" : {
@@ -106549,12 +105013,6 @@
             "value" : "Δοκιμή μετάφρασης"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "テスト トランスレーション"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -106701,12 +105159,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Theme"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "テーマ"
           }
         },
         "es" : {
@@ -107005,12 +105457,6 @@
             "value" : "Translate Prompt"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "トランスレート プロンプト"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -107266,12 +105712,6 @@
             "value" : "Μεταφρασμένο κείμενο"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "トランスレーテッド テキスト"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -107394,12 +105834,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Πάροχος Μετάφρασης"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "トランスレーション プロバイダー"
           }
         },
         "es" : {
@@ -108238,12 +106672,6 @@
             "value" : "Follower"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "フォッロヱル"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -108434,12 +106862,6 @@
             "value" : "Following"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "フォッロヰング"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -108607,12 +107029,6 @@
             "value" : "Προβολή και διαχείριση αποθηκευμένων προσχεδίων"
           }
         },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ビュー アンド マネージ セーブド ドラフツ"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -108766,12 +107182,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Liked your post"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ライクド ユア ポスト"
           }
         },
         "es" : {
@@ -108962,12 +107372,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Comments"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "コメントズ"
           }
         },
         "es" : {
@@ -109288,12 +107692,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Post"
-          }
-        },
-        "en-JA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ポスト"
           }
         },
         "es" : {

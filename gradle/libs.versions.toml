@@ -205,7 +205,7 @@ precompose-molecule = { module = "moe.tlaster:precompose-molecule", version = "1
 
 xmlUtil = { module = "io.github.pdvrieze.xmlutil:serialization", version = "0.91.3" }
 
-fluent-ui = { module = "io.github.compose-fluent:fluent", version = "0.2.0-SNAPSHOT" }
+fluent-ui = { module = "io.github.compose-fluent:fluent", version = "v0.1.0" }
 
 commons-lang3 = { module = "org.apache.commons:commons-lang3", version = "3.20.0" }
 
@@ -246,7 +246,7 @@ kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref 
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
-ktorfit = { id = "de.jensklingenberg.ktorfit", version = "2.7.2" }
+ktorfit = { id = "de.jensklingenberg.ktorfit", version = "2.7.3" }
 ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlintPlugin" }
 skie = { id = "co.touchlab.skie", version.ref = "skie" }
 ben-manes-versions = { id = "com.github.ben-manes.versions", version.ref = "versionUpdate" }

@@ -26,7 +26,7 @@ kotlinx-datetime = "0.7.1"
 kotlinx-collections-immutable = "0.4.0"
 kotlinx-serialization = "1.11.0"
 coil3 = "3.4.0"
-ktorfit = "2.7.3"
+ktorfit = "2.7.4-SNAPSHOT"
 ktor = "3.4.3"
 prettytime = "5.0.9.Final"
 readability = "1.0.0"
@@ -160,9 +160,9 @@ zoomable = { group = "me.saket.telephoto", name = "zoomable", version.ref = "zoo
 
 ktorfit-lib = { group = "de.jensklingenberg.ktorfit", name = "ktorfit-lib", version.ref = "ktorfit" }
 ktorfit-ksp = { group = "de.jensklingenberg.ktorfit", name = "ktorfit-ksp", version.ref = "ktorfit" }
-ktorfit-converters-response = { group = "de.jensklingenberg.ktorfit", name = "ktorfit-converters-response", version = "2.7.2" }
-ktorfit-converters-call = { group = "de.jensklingenberg.ktorfit", name = "ktorfit-converters-call", version = "2.7.2" }
-ktorfit-converters-flow = { group = "de.jensklingenberg.ktorfit", name = "ktorfit-converters-flow", version = "2.7.2" }
+ktorfit-converters-response = { group = "de.jensklingenberg.ktorfit", name = "ktorfit-converters-response", version.ref = "ktorfit" }
+ktorfit-converters-call = { group = "de.jensklingenberg.ktorfit", name = "ktorfit-converters-call", version.ref = "ktorfit" }
+ktorfit-converters-flow = { group = "de.jensklingenberg.ktorfit", name = "ktorfit-converters-flow", version.ref = "ktorfit" }
 
 ktor-client-content-negotiation = { group = "io.ktor", name = "ktor-client-content-negotiation", version.ref = "ktor" }
 ktor-serialization-kotlinx-json = { group = "io.ktor", name = "ktor-serialization-kotlinx-json", version.ref = "ktor" }
@@ -246,7 +246,7 @@ kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref 
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
-ktorfit = { id = "de.jensklingenberg.ktorfit", version.ref = "ktorfit" }
+ktorfit = { id = "de.jensklingenberg.ktorfit", version = "2.7.3" }
 ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlintPlugin" }
 skie = { id = "co.touchlab.skie", version.ref = "skie" }
 ben-manes-versions = { id = "com.github.ben-manes.versions", version.ref = "versionUpdate" }

@@ -53,6 +53,7 @@ final class StatusTranslateUIView: UIView, TimelineHeightProviding {
         commonInit()
     }
 
+    @MainActor
     deinit {
         cancellables.removeAll()
         translationPresenter = nil

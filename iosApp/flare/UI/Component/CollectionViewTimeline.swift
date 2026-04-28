@@ -389,8 +389,8 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
         Int((width * UIScreen.main.scale).rounded(.toNearestOrAwayFromZero))
     }
 
-    private func timelineHeightCacheKey(itemID: String, renderHash: Int32, localState: Int = 0, width: CGFloat) -> String {
-        "\(itemID):\(renderHash):\(localState):\(heightCacheWidthKey(for: width))"
+    private func timelineHeightCacheKey(itemID: String, renderHash: Int32, width: CGFloat) -> String {
+        "\(itemID):\(renderHash):\(heightCacheWidthKey(for: width))"
     }
 
     private func measuredCompressedCardHeight(_ card: UIView, width: CGFloat) -> CGFloat {
@@ -440,12 +440,11 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
     private func applyMeasuredHeightCorrection(
         itemID: String,
         renderHash: Int32,
-        localState: Int = 0,
         width: CGFloat,
         height: CGFloat
     ) {
         guard width > 1, height.isFinite else { return }
-        let key = timelineHeightCacheKey(itemID: itemID, renderHash: renderHash, localState: localState, width: width)
+        let key = timelineHeightCacheKey(itemID: itemID, renderHash: renderHash, width: width)
         let correctedHeight = max(ceil(height), 1)
         if let cachedHeight = heightCache[key],
            abs(cachedHeight - correctedHeight) <= 1 {
@@ -599,16 +598,15 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
         let totalCount = Int(success.itemCount)
         let item = (index >= 0 && index < totalCount) ? success.peek(index: Int32(index)) : nil
         if let item {
-            cell.cachedPreferredHeight = { [weak self] width, localState in
+            cell.cachedPreferredHeight = { [weak self] width in
                 guard let self, self.columnCount == 1 else { return nil }
-                let key = self.timelineHeightCacheKey(itemID: itemID, renderHash: item.renderHash, localState: localState, width: width)
+                let key = self.timelineHeightCacheKey(itemID: itemID, renderHash: item.renderHash, width: width)
                 return self.heightCache[key]
             }
-            cell.onPreferredHeightChanged = { [weak self] width, height, localState in
+            cell.onPreferredHeightChanged = { [weak self] width, height in
                 self?.applyMeasuredHeightCorrection(
                     itemID: itemID,
                     renderHash: item.renderHash,
-                    localState: localState,
                     width: width,
                     height: height
                 )
@@ -1555,8 +1553,8 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
 }
 
 private final class TimelineUIKitCollectionViewCell: UICollectionViewCell {
-    var onPreferredHeightChanged: ((CGFloat, CGFloat, Int) -> Void)?
-    var cachedPreferredHeight: ((CGFloat, Int) -> CGFloat?)?
+    var onPreferredHeightChanged: ((CGFloat, CGFloat) -> Void)?
+    var cachedPreferredHeight: ((CGFloat) -> CGFloat?)?
 
     private var hostedView: UIView?
     private var hostedConstraints: [NSLayoutConstraint] = []
@@ -1573,7 +1571,7 @@ private final class TimelineUIKitCollectionViewCell: UICollectionViewCell {
     private var lastDetailStatusKey: String?
     private var lastAiTldrEnabled: Bool?
     private var lastPreferredHeightReport: (widthKey: Int, height: CGFloat)?
-    private var localHeightState = 0
+    private var pendingFreshMeasurement = false
     private var usesWaterfallLayout = false
 
     override init(frame: CGRect) {
@@ -1594,7 +1592,7 @@ private final class TimelineUIKitCollectionViewCell: UICollectionViewCell {
         onPreferredHeightChanged = nil
         cachedPreferredHeight = nil
         lastPreferredHeightReport = nil
-        localHeightState = 0
+        pendingFreshMeasurement = false
         usesWaterfallLayout = false
     }
 
@@ -1738,8 +1736,9 @@ private final class TimelineUIKitCollectionViewCell: UICollectionViewCell {
     private func measuredHostedHeight(width: CGFloat) -> CGFloat {
         guard let hostedView else { return 0 }
 
-        if hostedView === timelineCardStorage,
-           let cachedHeight = cachedPreferredHeight?(width, localHeightState),
+        if !pendingFreshMeasurement,
+           hostedView === timelineCardStorage,
+           let cachedHeight = cachedPreferredHeight?(width),
            cachedHeight > 0,
            cachedHeight.isFinite {
             return cachedHeight
@@ -1756,7 +1755,8 @@ private final class TimelineUIKitCollectionViewCell: UICollectionViewCell {
         let height = childHeight(of: hostedView, for: width)
         let preferredHeight = max(ceil(height) + 1, 1)
         if hostedView === timelineCardStorage {
-            onPreferredHeightChanged?(width, preferredHeight, localHeightState)
+            pendingFreshMeasurement = false
+            onPreferredHeightChanged?(width, preferredHeight)
         }
         return preferredHeight
     }
@@ -1779,11 +1779,14 @@ private final class TimelineUIKitCollectionViewCell: UICollectionViewCell {
             return
         }
         lastPreferredHeightReport = (widthKey, preferredHeight)
-        onPreferredHeightChanged(width, preferredHeight, localHeightState)
+        onPreferredHeightChanged(width, preferredHeight)
     }
 
     private func handleLocalTimelineHeightInvalidated() {
-        localHeightState &+= 1
+        // Cache is keyed by item+width only; we must skip the cached lookup once
+        // so the next measurement reflects the new local UI state (expanded
+        // content warning, show-more, summary) before refreshing the cache.
+        pendingFreshMeasurement = true
         lastPreferredHeightReport = nil
         contentView.invalidateIntrinsicContentSize()
         contentView.setNeedsLayout()

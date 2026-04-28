@@ -16,6 +16,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
 
     /// Forwarded to all URL-clicking machinery.
     var openURL: ((URL) -> Void)?
+    var onLocalHeightInvalidated: (() -> Void)?
 
     // MARK: - SwiftUI `var` parameters
 
@@ -395,6 +396,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
 
         mediaViewStorage?.prepareForPoolRemoval()
         actionsViewStorage?.prepareForPoolRemoval()
+        translateViewStorage?.prepareForPoolRemoval()
 
         // Remove all managed children
         for view in contentColumnChildren { view.removeFromSuperview() }
@@ -718,6 +720,9 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
             let translateView = resolvedTranslateView()
             translateView.content = data.content
             translateView.contentWarning = data.contentWarning
+            translateView.onLocalHeightInvalidated = { [weak self] in
+                self?.notifyLocalHeightInvalidated()
+            }
             items.append(translateView)
         }
 
@@ -765,6 +770,9 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
                 if let url = URL(string: route.toUri()) {
                     self?.openURL?(url)
                 }
+            }
+            mediaView.onLocalHeightInvalidated = { [weak self] in
+                self?.notifyLocalHeightInvalidated()
             }
             items.append(mediaView)
         }
@@ -856,6 +864,9 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
         for (i, parent) in parentData.enumerated() {
             let container = parentContainers[i]
             container.child.openURL = openURL
+            container.child.onLocalHeightInvalidated = { [weak self] in
+                self?.notifyLocalHeightInvalidated()
+            }
             container.child.configure(data: parent, appearance: appearance, withLeadingPadding: true)
         }
         return Array(parentContainers.prefix(parentData.count))
@@ -874,6 +885,9 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
         for (i, quote) in quotes.enumerated() {
             let child = quoteChildren[i]
             child.openURL = openURL
+            child.onLocalHeightInvalidated = { [weak self] in
+                self?.notifyLocalHeightInvalidated()
+            }
             child.configure(data: quote, appearance: appearance, isQuote: true, forceHideActions: true)
             desired.append(child)
             if i != quotes.count - 1 {
@@ -908,6 +922,9 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
         } else {
             actionsViewStorage?.prepareForPoolRemoval()
         }
+        if !(data != nil && isDetail && showTranslate) {
+            translateViewStorage?.prepareForPoolRemoval()
+        }
         trimParentContainers(activeCount: activeParentCount)
         trimQuoteChildren(activeCount: activeQuoteCount)
         trimQuoteDividers(activeCount: max(0, activeQuoteCount - 1))
@@ -941,6 +958,9 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
             actionsViewStorage?.performDeferredPoolCleanup()
         } else {
             actionsViewStorage?.prepareForPoolRemoval()
+        }
+        if !(data != nil && isDetail && showTranslate) {
+            translateViewStorage?.prepareForPoolRemoval()
         }
         trimParentContainers(activeCount: activeParentCount)
         trimQuoteChildren(activeCount: activeQuoteCount)
@@ -1054,6 +1074,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
             guard let self = self else { return }
             self.expand.toggle()
             self.rebuild()
+            self.notifyLocalHeightInvalidated()
             self.layoutIfNeeded()
         } completion: { [weak self] _ in
             self?.invalidateContainingCollectionLayout()
@@ -1065,6 +1086,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
             guard let self = self else { return }
             self.expand = true
             self.rebuild()
+            self.notifyLocalHeightInvalidated()
             self.layoutIfNeeded()
         } completion: { [weak self] _ in
             self?.invalidateContainingCollectionLayout()
@@ -1091,6 +1113,13 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
             }
             responder = current.next
         }
+    }
+
+    private func notifyLocalHeightInvalidated() {
+        lastPreparedFittingWidthKey = nil
+        invalidateIntrinsicContentSize()
+        setNeedsLayout()
+        onLocalHeightInvalidated?()
     }
 
     fileprivate func makeLauncher() -> AppleUriLauncher {

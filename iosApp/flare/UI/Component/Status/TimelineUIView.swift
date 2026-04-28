@@ -24,6 +24,7 @@ final class TimelineUIView: UIView, ManualLayoutMeasurable, TimelineHeightProvid
     var onOpenURL: ((URL) -> Void)? {
         didSet { if !isBatchConfiguring { forwardOpenURL() } }
     }
+    var onLocalHeightInvalidated: (() -> Void)?
 
     private var data: UiTimelineV2?
     private var isBatchConfiguring = false
@@ -192,6 +193,9 @@ final class TimelineUIView: UIView, ManualLayoutMeasurable, TimelineHeightProvid
                 desired.append(messageContainer)
             }
             statusView.openURL = onOpenURL
+            statusView.onLocalHeightInvalidated = { [weak self] in
+                self?.handleLocalHeightInvalidated()
+            }
             statusView.configure(
                 data: post,
                 appearance: appearance,
@@ -230,6 +234,13 @@ final class TimelineUIView: UIView, ManualLayoutMeasurable, TimelineHeightProvid
         lastPreparedFittingWidthKey = nil
         invalidateIntrinsicContentSize()
         setNeedsLayout()
+    }
+
+    private func handleLocalHeightInvalidated() {
+        lastPreparedFittingWidthKey = nil
+        invalidateIntrinsicContentSize()
+        setNeedsLayout()
+        onLocalHeightInvalidated?()
     }
 
     func prepareForReuse() {

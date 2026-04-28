@@ -6,6 +6,7 @@ struct SearchScreen: View {
     @StateObject private var searchPresenter: KotlinPresenter<SearchState>
     @StateObject private var searchHistoryPresenter: KotlinPresenter<SearchHistoryState>
     @State var searchText = ""
+    @State private var committedSearchText: String
     @State private var isSearchPresented = false
     @State private var didRecordInitialQuery = false
     
@@ -13,6 +14,7 @@ struct SearchScreen: View {
         self._searchPresenter = .init(wrappedValue: .init(presenter: SearchPresenter(accountType: accountType, initialQuery: initialQuery)))
         self._searchHistoryPresenter = .init(wrappedValue: .init(presenter: SearchHistoryPresenter()))
         self._searchText = .init(initialValue: initialQuery)
+        self._committedSearchText = .init(initialValue: initialQuery)
     }
     
     var body: some View {
@@ -127,8 +129,13 @@ struct SearchScreen: View {
         }
         .detectScrolling()
         .onChange(of: searchText) {
-            if searchText.isEmpty {
+            if isSearchPresented && searchText.isEmpty {
+                committedSearchText = ""
                 searchPresenter.state.search(new: "")
+            } else if !isSearchPresented && searchText.isEmpty && !committedSearchText.isEmpty {
+                DispatchQueue.main.async {
+                    searchText = committedSearchText
+                }
             }
         }
         .onAppear {
@@ -146,6 +153,7 @@ struct SearchScreen: View {
         guard !query.isEmpty else { return }
 
         searchText = query
+        committedSearchText = query
         searchHistoryPresenter.state.addSearchHistory(keyword: query)
         searchPresenter.state.search(new: query)
         isSearchPresented = false

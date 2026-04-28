@@ -421,6 +421,60 @@ class MixedRemoteMediatorTest : RobolectricTest() {
             assertEquals(listOf(postA.statusKey, postB.statusKey), post.parents.map { it.statusKey })
         }
 
+    @Test
+    fun timelineDoesNotOverflowWhenReplyChainContainsCycle() =
+        runTest {
+            val accountKey = MicroBlogKey("mastodon.example", "timeline")
+            val accountType = AccountType.Specific(accountKey)
+            val user = profile(MicroBlogKey("mastodon.example", "user"), "User")
+            val postAWithoutParent =
+                createPost(
+                    accountType = accountType,
+                    user = user,
+                    statusKey = MicroBlogKey("mastodon.example", "a"),
+                    text = "A",
+                )
+            val postB =
+                createPost(
+                    accountType = accountType,
+                    user = user,
+                    statusKey = MicroBlogKey("mastodon.example", "b"),
+                    text = "B",
+                    parents = listOf(postAWithoutParent),
+                )
+            val postA =
+                postAWithoutParent.copy(
+                    parents = persistentListOf(postB),
+                )
+            val loader =
+                FakeLoader("cyclic_reply_chain") { request ->
+                    when (request) {
+                        PagingRequest.Refresh -> {
+                            PagingResult(
+                                data = listOf(postA, postB),
+                                nextKey = null,
+                            )
+                        }
+
+                        is PagingRequest.Append -> {
+                            error("No append expected")
+                        }
+
+                        is PagingRequest.Prepend -> {
+                            error("No prepend expected")
+                        }
+                    }
+                }
+
+            val mediator = TimelineRemoteMediator(loader = loader, database = db, allowLongText = false)
+
+            val result = mediator.timeline(pageSize = 20, request = PagingRequest.Refresh)
+
+            val collapsedPost = assertIs<UiTimelineV2.Post>(result.data.single())
+            assertEquals(postA.statusKey, collapsedPost.statusKey)
+            assertEquals(listOf(postB.statusKey), collapsedPost.parents.map { it.statusKey })
+        }
+
     @OptIn(ExperimentalPagingApi::class)
     @Test
     fun refreshSchedulesPreTranslationForRootAndReplyReference() =

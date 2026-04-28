@@ -9,6 +9,17 @@ import KotlinSharedUI
 final class StatusTranslateUIView: UIView, TimelineHeightProviding {
     var content: UiRichText? { didSet { configureIfNeeded() } }
     var contentWarning: UiRichText? { didSet { configureIfNeeded() } }
+    var isSummaryAvailable = false {
+        didSet {
+            guard isSummaryAvailable != oldValue else { return }
+            if !isSummaryAvailable {
+                isSummaryExpanded = false
+                summaryPresenter = nil
+            }
+            updateButtonVisibility()
+            setNeedsHeightUpdate()
+        }
+    }
     var onLocalHeightInvalidated: (() -> Void)?
 
     private let buttonRow = UIView()
@@ -157,10 +168,10 @@ final class StatusTranslateUIView: UIView, TimelineHeightProviding {
         let hasContent = content?.isEmpty == false
         buttonRow.isHidden = !hasContent
         translateButton.isHidden = !hasContent
-        tldrButton.isHidden = !(hasContent && content?.isLongText == true && AppSettings.AiConfig.companion.default.tldr)
+        tldrButton.isHidden = !(hasContent && content?.isLongText == true && isSummaryAvailable)
         contentWarningTranslation.isHidden = !isTranslateExpanded || contentWarning == nil
         contentTranslation.isHidden = !isTranslateExpanded
-        summaryResult.isHidden = !isSummaryExpanded
+        summaryResult.isHidden = !isSummaryExpanded || !isSummaryAvailable
     }
 
     @objc private func toggleTranslate() {
@@ -174,6 +185,7 @@ final class StatusTranslateUIView: UIView, TimelineHeightProviding {
     }
 
     @objc private func toggleSummary() {
+        guard isSummaryAvailable else { return }
         isSummaryExpanded.toggle()
         updateButtonVisibility()
         if isSummaryExpanded {

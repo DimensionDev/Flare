@@ -30,6 +30,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
     private var showExpandTextButton: Bool = true
     private var forceHideActions: Bool = false
     private var showTranslate: Bool = true
+    private var aiTldrEnabled: Bool = false
     private var showParents: Bool = true
     private var appearance = StatusUIKitAppearance(settings: AppearanceSettings.companion.Default)
     private var lastConfigureSignature: ConfigureSignature?
@@ -46,6 +47,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
         let showExpandTextButton: Bool
         let forceHideActions: Bool
         let showTranslate: Bool
+        let aiTldrEnabled: Bool
         let showParents: Bool
         let appearance: StatusUIKitAppearance
 
@@ -60,6 +62,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
             showExpandTextButton: Bool,
             forceHideActions: Bool,
             showTranslate: Bool,
+            aiTldrEnabled: Bool,
             showParents: Bool
         ) {
             statusKey = String(describing: data.statusKey)
@@ -72,6 +75,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
             self.showExpandTextButton = showExpandTextButton
             self.forceHideActions = forceHideActions
             self.showTranslate = showTranslate
+            self.aiTldrEnabled = aiTldrEnabled
             self.showParents = showParents
             self.appearance = appearance
         }
@@ -346,6 +350,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
         showExpandTextButton: Bool = true,
         forceHideActions: Bool = false,
         showTranslate: Bool = true,
+        aiTldrEnabled: Bool = false,
         showParents: Bool = true
     ) {
         let newStatusKey = String(describing: data.statusKey)
@@ -364,6 +369,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
             showExpandTextButton: showExpandTextButton,
             forceHideActions: forceHideActions,
             showTranslate: showTranslate,
+            aiTldrEnabled: aiTldrEnabled,
             showParents: showParents
         )
         let signatureUnchanged = lastConfigureSignature == signature
@@ -380,6 +386,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
         self.showExpandTextButton = showExpandTextButton
         self.forceHideActions = forceHideActions
         self.showTranslate = showTranslate
+        self.aiTldrEnabled = aiTldrEnabled
         self.showParents = showParents
         self.appearance = appearance
         lastConfigureSignature = signature
@@ -720,6 +727,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
             let translateView = resolvedTranslateView()
             translateView.content = data.content
             translateView.contentWarning = data.contentWarning
+            translateView.isSummaryAvailable = aiTldrEnabled
             translateView.onLocalHeightInvalidated = { [weak self] in
                 self?.notifyLocalHeightInvalidated()
             }

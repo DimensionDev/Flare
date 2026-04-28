@@ -13,6 +13,7 @@ struct CollectionViewTimelineView: UIViewControllerRepresentable {
     let accessoryItems: [CollectionViewTimelineAccessoryItem]
     let suppressInitialRefreshIndicator: Bool
     @Environment(\.appearanceSettings) private var appearanceSettings
+    @Environment(\.aiConfig) private var aiConfig
     @Environment(\.networkKind) private var networkKind
     @Environment(\.openURL) private var openURL
     @Environment(\.refresh) private var refreshAction: RefreshAction?
@@ -40,6 +41,7 @@ struct CollectionViewTimelineView: UIViewControllerRepresentable {
         }
         controller.topContentInset = topContentInset
         controller.appearance = TimelineUIKitAppearance(settings: appearanceSettings)
+        controller.aiTldrEnabled = aiConfig.tldr
         controller.openURL = { url in
             openURL.callAsFunction(url)
         }
@@ -57,6 +59,7 @@ struct CollectionViewTimelineView: UIViewControllerRepresentable {
         }
         controller.topContentInset = topContentInset
         controller.appearance = TimelineUIKitAppearance(settings: appearanceSettings)
+        controller.aiTldrEnabled = aiConfig.tldr
         controller.openURL = { url in
             openURL.callAsFunction(url)
         }
@@ -107,6 +110,13 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
             reconfigureVisibleCells()
             handleAutoplayAvailabilityChanged()
             updateBackgroundColors()
+        }
+    }
+    var aiTldrEnabled = false {
+        didSet {
+            guard oldValue != aiTldrEnabled, isViewLoaded else { return }
+            clearAllHeightCache()
+            reconfigureVisibleCells()
         }
     }
     var networkKind: NetworkKind = .cellular {
@@ -609,6 +619,7 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
                 totalCount: totalCount,
                 appearance: appearance,
                 detailStatusKey: detailStatusKey,
+                aiTldrEnabled: aiTldrEnabled,
                 isMultipleColumn: columnCount > 1,
                 openURL: openURL
             )
@@ -1445,6 +1456,7 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
                 data: item,
                 appearance: appearance.status,
                 detailStatusKey: detailStatusKey,
+                aiTldrEnabled: aiTldrEnabled,
                 onOpenURL: nil
             )
             let contentWidth = max(width - 32, 1)
@@ -1559,6 +1571,7 @@ private final class TimelineUIKitCollectionViewCell: UICollectionViewCell {
     private var lastItemKey: String?
     private var lastAppearance: TimelineUIKitAppearance?
     private var lastDetailStatusKey: String?
+    private var lastAiTldrEnabled: Bool?
     private var lastPreferredHeightReport: (widthKey: Int, height: CGFloat)?
     private var localHeightState = 0
     private var usesWaterfallLayout = false
@@ -1611,6 +1624,7 @@ private final class TimelineUIKitCollectionViewCell: UICollectionViewCell {
         lastItemKey = nil
         lastAppearance = nil
         lastDetailStatusKey = nil
+        lastAiTldrEnabled = nil
     }
 
     func configureTimeline(
@@ -1619,6 +1633,7 @@ private final class TimelineUIKitCollectionViewCell: UICollectionViewCell {
         totalCount: Int,
         appearance: TimelineUIKitAppearance,
         detailStatusKey: MicroBlogKey?,
+        aiTldrEnabled: Bool,
         isMultipleColumn: Bool,
         openURL: ((URL) -> Void)?
     ) {
@@ -1639,17 +1654,20 @@ private final class TimelineUIKitCollectionViewCell: UICollectionViewCell {
             lastRenderHash == data.renderHash &&
             lastItemKey == itemKey &&
             lastAppearance == appearance &&
-            lastDetailStatusKey == detailKeyStr
+            lastDetailStatusKey == detailKeyStr &&
+            lastAiTldrEnabled == aiTldrEnabled
 
         if !dataUnchanged {
             lastRenderHash = data.renderHash
             lastItemKey = itemKey
             lastAppearance = appearance
             lastDetailStatusKey = detailKeyStr
+            lastAiTldrEnabled = aiTldrEnabled
             timelineView.configure(
                 data: data,
                 appearance: appearance.status,
                 detailStatusKey: detailStatusKey,
+                aiTldrEnabled: aiTldrEnabled,
                 onOpenURL: openURL
             )
         } else {

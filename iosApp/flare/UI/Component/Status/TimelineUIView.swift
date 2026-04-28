@@ -21,6 +21,12 @@ final class TimelineUIView: UIView, ManualLayoutMeasurable, TimelineHeightProvid
             rebuildIfNeeded()
         }
     }
+    var aiTldrEnabled: Bool = false {
+        didSet {
+            guard aiTldrEnabled != oldValue else { return }
+            rebuildIfNeeded()
+        }
+    }
     var onOpenURL: ((URL) -> Void)? {
         didSet { if !isBatchConfiguring { forwardOpenURL() } }
     }
@@ -40,19 +46,22 @@ final class TimelineUIView: UIView, ManualLayoutMeasurable, TimelineHeightProvid
         let renderHash: Int32
         let detailStatusKey: String
         let showTranslate: Bool
+        let aiTldrEnabled: Bool
         let appearance: StatusUIKitAppearance
 
         init(
             data: UiTimelineV2,
             appearance: StatusUIKitAppearance,
             detailStatusKey: MicroBlogKey?,
-            showTranslate: Bool
+            showTranslate: Bool,
+            aiTldrEnabled: Bool
         ) {
             itemKey = data.itemKey ?? ""
             itemType = data.itemType
             renderHash = data.renderHash
             self.detailStatusKey = detailStatusKey.map { String(describing: $0) } ?? ""
             self.showTranslate = showTranslate
+            self.aiTldrEnabled = aiTldrEnabled
             self.appearance = appearance
         }
     }
@@ -127,7 +136,8 @@ final class TimelineUIView: UIView, ManualLayoutMeasurable, TimelineHeightProvid
             data: data,
             appearance: appearance,
             detailStatusKey: detailStatusKey,
-            showTranslate: showTranslate
+            showTranslate: showTranslate,
+            aiTldrEnabled: aiTldrEnabled
         )
         self.data = data
         guard lastRenderSignature != signature else {
@@ -144,12 +154,14 @@ final class TimelineUIView: UIView, ManualLayoutMeasurable, TimelineHeightProvid
         appearance: StatusUIKitAppearance,
         detailStatusKey: MicroBlogKey?,
         showTranslate: Bool = true,
+        aiTldrEnabled: Bool = false,
         onOpenURL: ((URL) -> Void)?
     ) {
         isBatchConfiguring = true
         self.appearance = appearance
         self.detailStatusKey = detailStatusKey
         self.showTranslate = showTranslate
+        self.aiTldrEnabled = aiTldrEnabled
         self.onOpenURL = onOpenURL
         self.data = data
         isBatchConfiguring = false
@@ -157,7 +169,8 @@ final class TimelineUIView: UIView, ManualLayoutMeasurable, TimelineHeightProvid
             data: data,
             appearance: appearance,
             detailStatusKey: detailStatusKey,
-            showTranslate: showTranslate
+            showTranslate: showTranslate,
+            aiTldrEnabled: aiTldrEnabled
         )
         guard lastRenderSignature != signature else {
             forwardOpenURL()
@@ -201,6 +214,7 @@ final class TimelineUIView: UIView, ManualLayoutMeasurable, TimelineHeightProvid
                 appearance: appearance,
                 isDetail: detailStatusKey == post.statusKey,
                 showTranslate: showTranslate,
+                aiTldrEnabled: aiTldrEnabled,
             )
             desired.append(statusView)
 

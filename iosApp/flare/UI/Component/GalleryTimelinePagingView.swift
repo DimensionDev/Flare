@@ -1082,7 +1082,7 @@ private final class GalleryNetworkImageView: UIImageView {
             image = nil
             return
         }
-        var options: KingfisherOptionsInfo = [.transition(.fade(0.25)), .cacheOriginalImage]
+        var options: KingfisherOptionsInfo = [.transition(.fade(0.25)), .cacheOriginalImage, .backgroundDecode]
         if let customHeaders, !customHeaders.isEmpty {
             options.append(.requestModifier(AnyModifier { request in
                 var request = request

@@ -31,6 +31,14 @@ protocol TimelineHeightProviding: AnyObject {
 
 /// Syncs `current` managed subview array to match `desired`, adding/removing from `parent`.
 func syncManagedSubviews(parent: UIView, current: inout [UIView], desired: [UIView]) {
+    if current.count == desired.count,
+       zip(current, desired).allSatisfy({ $0 === $1 }) {
+        for view in desired where view.superview !== parent {
+            parent.addSubview(view)
+        }
+        return
+    }
+
     let desiredIDs = Set(desired.map { ObjectIdentifier($0) })
     for view in current where !desiredIDs.contains(ObjectIdentifier(view)) {
         view.removeFromSuperview()

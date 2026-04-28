@@ -88,7 +88,7 @@ struct RssScreen: View {
         }
         .sheet(item: $selectedEditItem) { item in
             NavigationStack {
-                EditRssSheet(id: Int(item.id), initialUrl: item.url, onImportOPML: { url in
+                EditRssSheet(id: Int(item.id), initialUrl: item.url, initialDisplayMode: item.displayMode, onImportOPML: { url in
                     importOpmlUrl = url
                 })
             }
@@ -328,6 +328,7 @@ struct EditRssSheet: View {
         .onChange(of: presenter.state.data, { oldValue, newValue in
             if case .success(let success) = onEnum(of: newValue) {
                 title = success.data.title ?? ""
+                displayMode = success.data.displayMode
             }
         })
         .navigationTitle(id == nil ? "add_rss_title" : "edit_rss_title")
@@ -385,10 +386,11 @@ struct EditRssSheet: View {
 }
 
 extension EditRssSheet {
-    init(id: Int?, initialUrl: String? = nil, onImportOPML: @escaping (URL) -> Void) {
+    init(id: Int?, initialUrl: String? = nil, initialDisplayMode: RssDisplayMode? = nil, onImportOPML: @escaping (URL) -> Void) {
         self.id = id
         self.onImportOPML = onImportOPML
         self.url = initialUrl ?? ""
+        self._displayMode = State(initialValue: initialDisplayMode ?? .fullContent)
         let kotlinId = id.map { KotlinInt(value: Int32($0)) }
         self._presenter = .init(wrappedValue: .init(presenter: EditRssSourcePresenter(id: kotlinId)))
     }

@@ -32,6 +32,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
     private var showParents: Bool = true
     private var appearance = StatusUIKitAppearance(settings: AppearanceSettings.companion.Default)
     private var lastConfigureSignature: ConfigureSignature?
+    private var lastPreparedFittingWidthKey: Int?
 
     private struct ConfigureSignature: Equatable {
         let statusKey: String
@@ -99,43 +100,39 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
     private static let replyIconSize: CGFloat = 12
     private static let sourceIconSize: CGFloat = 12
 
-    // MARK: - Cached leaves (built once, reconfigured per `rebuild`)
+    // MARK: - Cached leaves (created on first use, reconfigured per `rebuild`)
 
-    private let avatarView = AvatarUIView()
-    private let userHeaderFull = UserOnelineUIView(showAvatar: false)
-    private let userHeaderQuote = UserOnelineUIView(showAvatar: true)
-    private let userHeaderCompat = UserCompatUIView()
-    private let topEndView = StatusTopEndView()
+    private var avatarViewStorage: AvatarUIView?
+    private var userHeaderFullStorage: UserOnelineUIView?
+    private var userHeaderQuoteStorage: UserOnelineUIView?
+    private var userHeaderCompatStorage: UserCompatUIView?
+    private var topEndViewStorage: StatusTopEndView?
 
-    private let replyToContainer = ReplyToRowView()
+    private var replyToContainerStorage: ReplyToRowView?
 
-    private let contentWarningText = RichTextUIView()
-    private let contentWarningToggle = UIButton(type: .system)
+    private var contentWarningTextStorage: RichTextUIView?
+    private var contentWarningToggleStorage: UIButton?
 
-    private let bodyText = RichTextUIView()
-    private let expandMoreButton = UIButton(type: .system)
+    private var bodyTextStorage: RichTextUIView?
+    private var expandMoreButtonStorage: UIButton?
 
-    private let translateView = StatusTranslateUIView()
-    private let pollView = StatusPollUIView()
-    private let mediaView = StatusMediaContentUIView()
-    private let normalCardView = StatusCardUIView(cornerRadius: 16)
-    private let compatCardView = StatusCompatCardUIView(cornerRadius: 16)
+    private var translateViewStorage: StatusTranslateUIView?
+    private var pollViewStorage: StatusPollUIView?
+    private var mediaViewStorage: StatusMediaContentUIView?
+    private var normalCardViewStorage: StatusCardUIView?
+    private var compatCardViewStorage: StatusCompatCardUIView?
 
-    private let quotesContainer = QuotesContainerView()
+    private var quotesContainerStorage: QuotesContainerView?
     private var quoteChildren: [StatusUIKitView] = []
     private var quoteDividers: [UIView] = []
 
-    private let sourceChannelContainer = SourceChannelRowView()
+    private var sourceChannelContainerStorage: SourceChannelRowView?
 
-    private let reactionView = StatusReactionUIView()
-    private let detailTimestampView: DateTimeUILabel = {
-        let v = DateTimeUILabel()
-        v.fullTime = true
-        return v
-    }()
+    private var reactionViewStorage: StatusReactionUIView?
+    private var detailTimestampViewStorage: DateTimeUILabel?
 
-    private let actionsView = StatusActionsUIView()
-    private let actionsContainer = ActionsContainerView()
+    private var actionsViewStorage: StatusActionsUIView?
+    private var actionsContainerStorage: ActionsContainerView?
 
     private var parentContainers: [ParentContainerView] = []
 
@@ -151,25 +148,21 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
     }
 
     private func commonInit() {
-        actionsContainer.content = actionsView
-
-        setupAvatar()
-        setupContentWarningToggle()
-        setupExpandMoreButton()
-
         let tap = UITapGestureRecognizer(target: self, action: #selector(onRootTapped))
         tap.cancelsTouchesInView = false
         tap.delegate = self
         addGestureRecognizer(tap)
     }
 
-    private func setupAvatar() {
+    private func setupAvatar(_ avatarView: AvatarUIView) {
+        guard avatarView.gestureRecognizers?.isEmpty ?? true else { return }
         avatarView.isUserInteractionEnabled = true
         let tap = UITapGestureRecognizer(target: self, action: #selector(onAvatarTapped))
         avatarView.addGestureRecognizer(tap)
     }
 
-    private func setupContentWarningToggle() {
+    private func setupContentWarningToggle(_ contentWarningToggle: UIButton) {
+        guard contentWarningToggle.actions(forTarget: nil, forControlEvent: .touchUpInside)?.isEmpty ?? true else { return }
         contentWarningToggle.contentHorizontalAlignment = .leading
         contentWarningToggle.addAction(
             UIAction { [weak self] _ in self?.toggleExpand() },
@@ -177,13 +170,166 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
         )
     }
 
-    private func setupExpandMoreButton() {
+    private func setupExpandMoreButton(_ expandMoreButton: UIButton) {
+        guard expandMoreButton.actions(forTarget: nil, forControlEvent: .touchUpInside)?.isEmpty ?? true else { return }
         expandMoreButton.contentHorizontalAlignment = .leading
         expandMoreButton.setTitle(String(localized: "mastodon_item_show_more"), for: .normal)
         expandMoreButton.addAction(
             UIAction { [weak self] _ in self?.expandOnly() },
             for: .touchUpInside
         )
+    }
+
+    private func resolvedAvatarView() -> AvatarUIView {
+        if let avatarViewStorage { return avatarViewStorage }
+        let view = AvatarUIView()
+        setupAvatar(view)
+        avatarViewStorage = view
+        return view
+    }
+
+    private func resolvedUserHeaderFull() -> UserOnelineUIView {
+        if let userHeaderFullStorage { return userHeaderFullStorage }
+        let view = UserOnelineUIView(showAvatar: false)
+        userHeaderFullStorage = view
+        return view
+    }
+
+    private func resolvedUserHeaderQuote() -> UserOnelineUIView {
+        if let userHeaderQuoteStorage { return userHeaderQuoteStorage }
+        let view = UserOnelineUIView(showAvatar: true)
+        userHeaderQuoteStorage = view
+        return view
+    }
+
+    private func resolvedUserHeaderCompat() -> UserCompatUIView {
+        if let userHeaderCompatStorage { return userHeaderCompatStorage }
+        let view = UserCompatUIView()
+        userHeaderCompatStorage = view
+        return view
+    }
+
+    private func resolvedTopEndView() -> StatusTopEndView {
+        if let topEndViewStorage { return topEndViewStorage }
+        let view = StatusTopEndView()
+        topEndViewStorage = view
+        return view
+    }
+
+    private func resolvedReplyToContainer() -> ReplyToRowView {
+        if let replyToContainerStorage { return replyToContainerStorage }
+        let view = ReplyToRowView()
+        replyToContainerStorage = view
+        return view
+    }
+
+    private func resolvedContentWarningText() -> RichTextUIView {
+        if let contentWarningTextStorage { return contentWarningTextStorage }
+        let view = RichTextUIView()
+        contentWarningTextStorage = view
+        return view
+    }
+
+    private func resolvedContentWarningToggle() -> UIButton {
+        if let contentWarningToggleStorage { return contentWarningToggleStorage }
+        let button = UIButton(type: .system)
+        setupContentWarningToggle(button)
+        contentWarningToggleStorage = button
+        return button
+    }
+
+    private func resolvedBodyText() -> RichTextUIView {
+        if let bodyTextStorage { return bodyTextStorage }
+        let view = RichTextUIView()
+        bodyTextStorage = view
+        return view
+    }
+
+    private func resolvedExpandMoreButton() -> UIButton {
+        if let expandMoreButtonStorage { return expandMoreButtonStorage }
+        let button = UIButton(type: .system)
+        setupExpandMoreButton(button)
+        expandMoreButtonStorage = button
+        return button
+    }
+
+    private func resolvedTranslateView() -> StatusTranslateUIView {
+        if let translateViewStorage { return translateViewStorage }
+        let view = StatusTranslateUIView()
+        translateViewStorage = view
+        return view
+    }
+
+    private func resolvedPollView() -> StatusPollUIView {
+        if let pollViewStorage { return pollViewStorage }
+        let view = StatusPollUIView()
+        pollViewStorage = view
+        return view
+    }
+
+    private func resolvedMediaView() -> StatusMediaContentUIView {
+        if let mediaViewStorage { return mediaViewStorage }
+        let view = StatusMediaContentUIView()
+        mediaViewStorage = view
+        return view
+    }
+
+    private func resolvedNormalCardView(cornerRadius: CGFloat) -> StatusCardUIView {
+        if let normalCardViewStorage { return normalCardViewStorage }
+        let view = StatusCardUIView(cornerRadius: cornerRadius)
+        normalCardViewStorage = view
+        return view
+    }
+
+    private func resolvedCompatCardView(cornerRadius: CGFloat) -> StatusCompatCardUIView {
+        if let compatCardViewStorage { return compatCardViewStorage }
+        let view = StatusCompatCardUIView(cornerRadius: cornerRadius)
+        compatCardViewStorage = view
+        return view
+    }
+
+    private func resolvedQuotesContainer() -> QuotesContainerView {
+        if let quotesContainerStorage { return quotesContainerStorage }
+        let view = QuotesContainerView()
+        quotesContainerStorage = view
+        return view
+    }
+
+    private func resolvedSourceChannelContainer() -> SourceChannelRowView {
+        if let sourceChannelContainerStorage { return sourceChannelContainerStorage }
+        let view = SourceChannelRowView()
+        sourceChannelContainerStorage = view
+        return view
+    }
+
+    private func resolvedReactionView() -> StatusReactionUIView {
+        if let reactionViewStorage { return reactionViewStorage }
+        let view = StatusReactionUIView()
+        reactionViewStorage = view
+        return view
+    }
+
+    private func resolvedDetailTimestampView() -> DateTimeUILabel {
+        if let detailTimestampViewStorage { return detailTimestampViewStorage }
+        let view = DateTimeUILabel()
+        view.fullTime = true
+        detailTimestampViewStorage = view
+        return view
+    }
+
+    private func resolvedActionsView() -> StatusActionsUIView {
+        if let actionsViewStorage { return actionsViewStorage }
+        let view = StatusActionsUIView()
+        actionsViewStorage = view
+        return view
+    }
+
+    private func resolvedActionsContainer() -> ActionsContainerView {
+        if let actionsContainerStorage { return actionsContainerStorage }
+        let container = ActionsContainerView()
+        container.content = resolvedActionsView()
+        actionsContainerStorage = container
+        return container
     }
 
     // MARK: - Public API
@@ -236,24 +382,26 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
         self.showParents = showParents
         self.appearance = appearance
         lastConfigureSignature = signature
+        lastPreparedFittingWidthKey = nil
         rebuild()
     }
 
     func prepareForPoolRemoval() {
         data = nil
         lastConfigureSignature = nil
+        lastPreparedFittingWidthKey = nil
         boundStatusKey = nil
         expand = false
 
-        mediaView.prepareForPoolRemoval()
-        actionsView.prepareForPoolRemoval()
+        mediaViewStorage?.prepareForPoolRemoval()
+        actionsViewStorage?.prepareForPoolRemoval()
 
         // Remove all managed children
         for view in contentColumnChildren { view.removeFromSuperview() }
         contentColumnChildren = []
         currentHeaderView?.removeFromSuperview()
         currentHeaderView = nil
-        avatarView.removeFromSuperview()
+        avatarViewStorage?.removeFromSuperview()
         wantsAvatar = false
 
         for parent in activeParents { parent.removeFromSuperview() }
@@ -282,27 +430,42 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
 
     func prepareForFitting(width: CGFloat) {
         guard width.isFinite, width > 0 else { return }
+        let widthKey = Self.fittingWidthKey(width)
+        guard lastPreparedFittingWidthKey != widthKey else { return }
+        lastPreparedFittingWidthKey = widthKey
         bounds = CGRect(x: bounds.minX, y: bounds.minY, width: width, height: bounds.height)
 
         let contentWidth = fittingContentColumnWidth(for: width)
-        contentWarningText.prepareForFitting(width: contentWidth)
-        bodyText.prepareForFitting(width: contentWidth)
-        mediaView.bounds = CGRect(x: 0, y: 0, width: contentWidth, height: mediaView.bounds.height)
-        normalCardView.bounds = CGRect(x: 0, y: 0, width: contentWidth, height: normalCardView.bounds.height)
-        compatCardView.bounds = CGRect(x: 0, y: 0, width: contentWidth, height: compatCardView.bounds.height)
+        contentWarningTextStorage?.prepareForFitting(width: contentWidth)
+        bodyTextStorage?.prepareForFitting(width: contentWidth)
+        if let mediaViewStorage {
+            mediaViewStorage.bounds = CGRect(x: 0, y: 0, width: contentWidth, height: mediaViewStorage.bounds.height)
+        }
+        if let normalCardViewStorage {
+            normalCardViewStorage.bounds = CGRect(x: 0, y: 0, width: contentWidth, height: normalCardViewStorage.bounds.height)
+        }
+        if let compatCardViewStorage {
+            compatCardViewStorage.bounds = CGRect(x: 0, y: 0, width: contentWidth, height: compatCardViewStorage.bounds.height)
+        }
 
         for container in parentContainers where container.superview != nil {
             container.prepareForFitting(width: width)
         }
 
         let quoteWidth = max(contentWidth - 16, 1)
-        quotesContainer.bounds = CGRect(x: 0, y: 0, width: contentWidth, height: quotesContainer.bounds.height)
+        if let quotesContainerStorage {
+            quotesContainerStorage.bounds = CGRect(x: 0, y: 0, width: contentWidth, height: quotesContainerStorage.bounds.height)
+        }
         for child in quoteChildren where child.superview != nil {
             child.prepareForFitting(width: quoteWidth)
         }
 
         invalidateIntrinsicContentSize()
         setNeedsLayout()
+    }
+
+    private static func fittingWidthKey(_ width: CGFloat) -> Int {
+        Int((width * UIScreen.main.scale).rounded(.toNearestOrAwayFromZero))
     }
 
     // MARK: - Layout
@@ -366,7 +529,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
         let contentX: CGFloat = wantsAvatar ? Self.avatarSize + Self.mainRowSpacing : 0
         let contentWidth = max(width - contentX, 1)
 
-        if wantsAvatar && assignFrames {
+        if wantsAvatar, let avatarView = avatarViewStorage, assignFrames {
             avatarView.frame = CGRect(x: 0, y: y, width: Self.avatarSize, height: Self.avatarSize)
         }
 
@@ -415,11 +578,12 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
         // Avatar
         let newWantsAvatar = showAsFullWidth && data.user != nil
         if newWantsAvatar, let user = data.user {
+            let avatarView = resolvedAvatarView()
             avatarView.avatarShape = appearance.avatarShape
             avatarView.set(url: user.avatar)
             if avatarView.superview !== self { addSubview(avatarView) }
-        } else if avatarView.superview === self {
-            avatarView.removeFromSuperview()
+        } else if avatarViewStorage?.superview === self {
+            avatarViewStorage?.removeFromSuperview()
         }
         wantsAvatar = newWantsAvatar
 
@@ -439,6 +603,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
         let parents = resolveActiveParentContainers(data: data)
         syncManagedSubviews(parent: self, current: &activeParents, desired: parents)
 
+        lastPreparedFittingWidthKey = nil
         invalidateIntrinsicContentSize()
         setNeedsLayout()
     }
@@ -448,16 +613,18 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
         contentColumnChildren = []
         currentHeaderView?.removeFromSuperview()
         currentHeaderView = nil
-        avatarView.removeFromSuperview()
+        avatarViewStorage?.removeFromSuperview()
         wantsAvatar = false
         for parent in activeParents { parent.removeFromSuperview() }
         activeParents = []
+        lastPreparedFittingWidthKey = nil
         invalidateIntrinsicContentSize()
         setNeedsLayout()
     }
 
     private func selectAndConfigureHeader(data: UiTimelineV2.Post) -> UIView? {
         guard let user = data.user else { return nil }
+        let topEndView = resolvedTopEndView()
         topEndView.configure(
             post: data,
             showPlatformLogo: appearance.showPlatformLogo,
@@ -467,14 +634,17 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
         let onClicked: () -> Void = { [weak self] in self?.onUserTapped() }
 
         if showAsFullWidth {
+            let userHeaderFull = resolvedUserHeaderFull()
             userHeaderFull.avatar.avatarShape = appearance.avatarShape
             userHeaderFull.configure(data: user, trailing: topEndView, onClicked: onClicked)
             return userHeaderFull
         } else if isQuote {
+            let userHeaderQuote = resolvedUserHeaderQuote()
             userHeaderQuote.avatar.avatarShape = appearance.avatarShape
             userHeaderQuote.configure(data: user, trailing: topEndView, onClicked: onClicked)
             return userHeaderQuote
         } else {
+            let userHeaderCompat = resolvedUserHeaderCompat()
             userHeaderCompat.avatar.avatarShape = appearance.avatarShape
             userHeaderCompat.configure(data: user, trailing: topEndView, onClicked: onClicked)
             return userHeaderCompat
@@ -486,6 +656,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
 
         // reply-to
         if let replyToHandle = data.replyToHandle {
+            let replyToContainer = resolvedReplyToContainer()
             replyToContainer.configure(text: String(localized: "Reply to \(replyToHandle)"))
             items.append(replyToContainer)
         }
@@ -493,6 +664,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
         // content warning
         let hasCW = (data.contentWarning != nil) && (data.contentWarning?.isEmpty == false)
         if hasCW, let cw = data.contentWarning {
+            let contentWarningText = resolvedContentWarningText()
             contentWarningText.configure(
                 text: cw,
                 lineLimit: nil,
@@ -501,6 +673,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
                 contentKey: Int(data.renderHash)
             )
             items.append(contentWarningText)
+            let contentWarningToggle = resolvedContentWarningToggle()
             contentWarningToggle.setTitle(
                 expand
                     ? String(localized: "mastodon_item_show_less")
@@ -513,6 +686,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
         // main body
         if expand || !hasCW {
             if !data.content.isEmpty {
+                let bodyText = resolvedBodyText()
                 let bodyLineLimit: Int?
                 let bodySelectionEnabled: Bool
                 if isDetail {
@@ -534,13 +708,14 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
                 )
                 items.append(bodyText)
                 if !data.shouldExpandTextByDefault, !isDetail, !expand, showExpandTextButton {
-                    items.append(expandMoreButton)
+                    items.append(resolvedExpandMoreButton())
                 }
             }
         }
 
         // translate (detail-only)
         if isDetail, showTranslate {
+            let translateView = resolvedTranslateView()
             translateView.content = data.content
             translateView.contentWarning = data.contentWarning
             items.append(translateView)
@@ -548,6 +723,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
 
         // poll
         if let poll = data.poll, showMediaInput {
+            let pollView = resolvedPollView()
             pollView.configure(data: poll, absoluteTimestamp: appearance.absoluteTimestamp)
             pollView.onVote = { [weak self] indices in
                 guard let self = self else { return }
@@ -564,6 +740,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
             let corner: CGFloat = isQuote ? 12 : 16
             let statusKey = data.statusKey
             let accountType = data.accountType
+            let mediaView = resolvedMediaView()
             mediaView.configure(
                 data: data.images,
                 sensitive: data.sensitive,
@@ -600,11 +777,13 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
            appearance.showLinkPreview {
             let corner: CGFloat = isQuote ? 12 : 16
             if appearance.compatLinkPreview {
+                let compatCardView = resolvedCompatCardView(cornerRadius: corner)
                 compatCardView.layer.cornerRadius = corner
                 compatCardView.configure(data: card)
                 compatCardView.onOpenURL = { [weak self] in self?.openURL?($0) }
                 items.append(compatCardView)
             } else {
+                let normalCardView = resolvedNormalCardView(cornerRadius: corner)
                 normalCardView.layer.cornerRadius = corner
                 normalCardView.configure(data: card)
                 normalCardView.onOpenURL = { [weak self] in self?.openURL?($0) }
@@ -615,7 +794,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
         // quotes (not when self is quote)
         if !data.quote.isEmpty, !isQuote {
             updateQuotes(quotes: data.quote)
-            items.append(quotesContainer)
+            items.append(resolvedQuotesContainer())
         } else {
             updateQuotes(quotes: [])
         }
@@ -623,10 +802,12 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
         // source channel + reactions
         if showMediaInput, !isQuote {
             if let channel = data.sourceChannel {
+                let sourceChannelContainer = resolvedSourceChannelContainer()
                 sourceChannelContainer.configure(text: channel.name)
                 items.append(sourceChannelContainer)
             }
             if !data.emojiReactions.isEmpty {
+                let reactionView = resolvedReactionView()
                 reactionView.configure(data: Array(data.emojiReactions), isDetail: isDetail)
                 reactionView.onReactionTapped = { [weak self] reaction in
                     guard let self = self else { return }
@@ -638,6 +819,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
 
         // detail-only full timestamp
         if isDetail {
+            let detailTimestampView = resolvedDetailTimestampView()
             detailTimestampView.absoluteTimestamp = appearance.absoluteTimestamp
             detailTimestampView.set(data: data.createdAt)
             items.append(detailTimestampView)
@@ -646,6 +828,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
         // actions
         let hideActions = (appearance.postActionStyle == .hidden && !isDetail) || forceHideActions
         if !hideActions {
+            let actionsView = resolvedActionsView()
             actionsView.onOpenURL = { [weak self] in self?.openURL?($0) }
             actionsView.configure(
                 data: Array(data.actions),
@@ -655,6 +838,8 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
                 showNumbers: appearance.showNumbers,
                 isDetail: isDetail
             )
+            let actionsContainer = resolvedActionsContainer()
+            actionsContainer.content = actionsView
             items.append(actionsContainer)
         }
 
@@ -695,7 +880,9 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
                 desired.append(quoteDividers[i])
             }
         }
-        quotesContainer.setChildren(desired)
+        if !desired.isEmpty || quotesContainerStorage != nil {
+            resolvedQuotesContainer().setChildren(desired)
+        }
     }
 
     func performLightweightPoolCleanup() {
@@ -710,16 +897,16 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
         }
 
         if let data, !data.images.isEmpty, showMediaInput {
-            mediaView.performLightweightPoolCleanup()
+            mediaViewStorage?.performLightweightPoolCleanup()
         } else {
-            mediaView.prepareForPoolRemoval()
+            mediaViewStorage?.prepareForPoolRemoval()
         }
 
         let hideActions = (appearance.postActionStyle == .hidden && !isDetail) || forceHideActions
         if data != nil, !hideActions {
-            actionsView.performLightweightPoolCleanup()
+            actionsViewStorage?.performLightweightPoolCleanup()
         } else {
-            actionsView.prepareForPoolRemoval()
+            actionsViewStorage?.prepareForPoolRemoval()
         }
         trimParentContainers(activeCount: activeParentCount)
         trimQuoteChildren(activeCount: activeQuoteCount)
@@ -744,16 +931,16 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
             child.performDeferredPoolCleanup()
         }
         if let data, !data.images.isEmpty, showMediaInput {
-            mediaView.performDeferredPoolCleanup()
+            mediaViewStorage?.performDeferredPoolCleanup()
         } else {
-            mediaView.prepareForPoolRemoval()
+            mediaViewStorage?.prepareForPoolRemoval()
         }
 
         let hideActions = (appearance.postActionStyle == .hidden && !isDetail) || forceHideActions
         if data != nil, !hideActions {
-            actionsView.performDeferredPoolCleanup()
+            actionsViewStorage?.performDeferredPoolCleanup()
         } else {
-            actionsView.prepareForPoolRemoval()
+            actionsViewStorage?.prepareForPoolRemoval()
         }
         trimParentContainers(activeCount: activeParentCount)
         trimQuoteChildren(activeCount: activeQuoteCount)
@@ -787,11 +974,11 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
     }
 
     private func forwardOpenURL() {
-        contentWarningText.onOpenURL = openURL
-        bodyText.onOpenURL = openURL
-        normalCardView.onOpenURL = { [weak self] in self?.openURL?($0) }
-        compatCardView.onOpenURL = { [weak self] in self?.openURL?($0) }
-        actionsView.onOpenURL = { [weak self] in self?.openURL?($0) }
+        contentWarningTextStorage?.onOpenURL = openURL
+        bodyTextStorage?.onOpenURL = openURL
+        normalCardViewStorage?.onOpenURL = { [weak self] in self?.openURL?($0) }
+        compatCardViewStorage?.onOpenURL = { [weak self] in self?.openURL?($0) }
+        actionsViewStorage?.onOpenURL = { [weak self] in self?.openURL?($0) }
         for container in parentContainers {
             container.child.openURL = openURL
             container.child.forwardOpenURL()
@@ -809,7 +996,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
         var candidates: [TimelineVideoAutoplayCandidate] = []
 
         if showMediaInput {
-            candidates.append(contentsOf: mediaView.autoplayCandidates(prefix: statusPrefix))
+            candidates.append(contentsOf: mediaViewStorage?.autoplayCandidates(prefix: statusPrefix) ?? [])
         }
 
         if showParents {
@@ -1047,8 +1234,9 @@ private final class SourceChannelRowView: UIView, ManualLayoutMeasurable, Timeli
 private final class ActionsContainerView: UIView, ManualLayoutMeasurable, TimelineHeightProviding {
     var content: UIView? {
         didSet {
+            guard oldValue !== content else { return }
             oldValue?.removeFromSuperview()
-            if let c = content { addSubview(c) }
+            if let c = content, c.superview !== self { addSubview(c) }
             setNeedsLayout()
         }
     }

@@ -28,6 +28,7 @@ final class TimelineUIView: UIView, ManualLayoutMeasurable, TimelineHeightProvid
     private var data: UiTimelineV2?
     private var isBatchConfiguring = false
     private var lastRenderSignature: RenderSignature?
+    private var lastPreparedFittingWidthKey: Int?
     private var statusViewPreparedForReuse = true
     private var userViewPreparedForReuse = true
     private var userListViewPreparedForReuse = true
@@ -133,6 +134,7 @@ final class TimelineUIView: UIView, ManualLayoutMeasurable, TimelineHeightProvid
             return
         }
         lastRenderSignature = signature
+        lastPreparedFittingWidthKey = nil
         rebuild()
     }
 
@@ -161,6 +163,7 @@ final class TimelineUIView: UIView, ManualLayoutMeasurable, TimelineHeightProvid
             return
         }
         lastRenderSignature = signature
+        lastPreparedFittingWidthKey = nil
         rebuild()
     }
 
@@ -224,6 +227,7 @@ final class TimelineUIView: UIView, ManualLayoutMeasurable, TimelineHeightProvid
             desired.append(messageContainer)
         }
         syncManagedSubviews(parent: self, current: &managedChildren, desired: desired)
+        lastPreparedFittingWidthKey = nil
         invalidateIntrinsicContentSize()
         setNeedsLayout()
     }
@@ -231,6 +235,7 @@ final class TimelineUIView: UIView, ManualLayoutMeasurable, TimelineHeightProvid
     func prepareForReuse() {
         data = nil
         lastRenderSignature = nil
+        lastPreparedFittingWidthKey = nil
         invalidateIntrinsicContentSize()
         setNeedsLayout()
     }
@@ -238,6 +243,7 @@ final class TimelineUIView: UIView, ManualLayoutMeasurable, TimelineHeightProvid
     func prepareForDeferredReuseCleanup() {
         data = nil
         lastRenderSignature = nil
+        lastPreparedFittingWidthKey = nil
         syncManagedSubviews(parent: self, current: &managedChildren, desired: [])
         performDeferredPoolCleanup()
         invalidateIntrinsicContentSize()
@@ -372,6 +378,9 @@ final class TimelineUIView: UIView, ManualLayoutMeasurable, TimelineHeightProvid
 
     func prepareForFitting(width: CGFloat) {
         guard let data else { return }
+        let widthKey = Self.fittingWidthKey(width)
+        guard lastPreparedFittingWidthKey != widthKey else { return }
+        lastPreparedFittingWidthKey = widthKey
         bounds = CGRect(x: bounds.minX, y: bounds.minY, width: width, height: bounds.height)
         switch onEnum(of: data) {
         case .feed:
@@ -383,6 +392,10 @@ final class TimelineUIView: UIView, ManualLayoutMeasurable, TimelineHeightProvid
         default:
             break
         }
+    }
+
+    private static func fittingWidthKey(_ width: CGFloat) -> Int {
+        Int((width * UIScreen.main.scale).rounded(.toNearestOrAwayFromZero))
     }
 
     func estimatedHeightForFitting(width: CGFloat) -> CGFloat? {

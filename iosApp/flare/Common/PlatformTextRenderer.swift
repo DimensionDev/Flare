@@ -8,11 +8,28 @@ final class PlatformTextTextContent: PlatformTextContent {
     let runs: [PlatformTextRun]
     let alignment: TextAlignment?
     let isBlockQuote: Bool
+    /// `true` when any run carries a tappable link. UIKit renderers use this
+    /// to decide whether the block needs a `UITextView` (link interaction)
+    /// or can fall back to a plain `UILabel`.
+    let hasLink: Bool
+    /// `true` when any run is an inline image (custom emoji, inline image).
+    /// `UILabel` *can* render `NSTextAttachment`, but to keep the fast path
+    /// simple and predictable we still route these blocks through
+    /// `UITextView`.
+    let hasInlineImage: Bool
 
-    init(runs: [PlatformTextRun], alignment: TextAlignment?, isBlockQuote: Bool) {
+    init(
+        runs: [PlatformTextRun],
+        alignment: TextAlignment?,
+        isBlockQuote: Bool,
+        hasLink: Bool,
+        hasInlineImage: Bool
+    ) {
         self.runs = runs
         self.alignment = alignment
         self.isBlockQuote = isBlockQuote
+        self.hasLink = hasLink
+        self.hasInlineImage = hasInlineImage
         super.init()
     }
 }
@@ -180,7 +197,9 @@ private final class RenderContext {
             PlatformTextTextContent(
                 runs: renderedRuns,
                 alignment: textAlignment(from: content.block),
-                isBlockQuote: content.block.isBlockQuote
+                isBlockQuote: content.block.isBlockQuote,
+                hasLink: content.hasLink,
+                hasInlineImage: content.hasInlineImage
             )
         )
     }

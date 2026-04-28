@@ -245,12 +245,12 @@ final class MediaUIView: UIView {
 
     private func loadImage(url: String?) {
         guard let u = url.flatMap(URL.init(string:)) else { return }
-        imageView.kf.setImage(with: u, options: [.transition(.fade(0.25)), .cacheOriginalImage])
+        imageView.kf.setImage(with: u, options: [.transition(.fade(0.25)), .cacheOriginalImage, .backgroundDecode])
     }
 
     private func loadGif(url: String?) {
         guard let u = url.flatMap(URL.init(string:)) else { return }
-        imageView.kf.setImage(with: u, options: [.transition(.fade(0.25))])
+        imageView.kf.setImage(with: u, options: [.transition(.fade(0.25)), .backgroundDecode])
     }
 }
 

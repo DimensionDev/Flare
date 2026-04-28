@@ -18,7 +18,25 @@ public sealed class RenderContent {
     public data class Text(
         val runs: SerializableImmutableList<RenderRun>,
         val block: RenderBlockStyle = RenderBlockStyle(),
-    ) : RenderContent()
+    ) : RenderContent() {
+        /**
+         * `true` when any text run carries a non-empty `link`. Used by platform
+         * renderers to decide whether the block needs a tappable text widget
+         * (`UITextView` on iOS) or can fall back to a cheaper plain label.
+         */
+        public val hasLink: Boolean =
+            runs.any { run ->
+                run is RenderRun.Text && !run.style.link.isNullOrEmpty()
+            }
+
+        /**
+         * `true` when the block contains any inline image (custom emoji, inline
+         * image runs). Platform renderers that fall back to a plain label can
+         * use this to switch back to a richer text widget capable of rendering
+         * inline `NSTextAttachment`s / drawables.
+         */
+        public val hasInlineImage: Boolean = runs.any { it is RenderRun.Image }
+    }
 
     @Serializable
     public data class BlockImage(

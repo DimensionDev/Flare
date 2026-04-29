@@ -318,7 +318,7 @@ private fun GroupConfigPresenter(
     var showAddTab by remember { mutableStateOf(false) }
     var showIconPicker by remember { mutableStateOf(false) }
     var selectedEditTab by remember { mutableStateOf<TimelineTabItem?>(null) }
-    val allTabs = remember { AllTabsPresenter(filterIsTimeline = true) }.invoke()
+    val allTabs = remember { AllTabsPresenter() }.invoke()
 
     object {
         val name = name

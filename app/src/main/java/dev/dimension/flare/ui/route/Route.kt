@@ -15,39 +15,30 @@ import kotlinx.serialization.Serializable
 @Serializable
 internal sealed interface Route : NavKey {
     @Serializable
-    sealed interface WithAccountType : Route {
-        val accountType: AccountType
-    }
-
-    @Serializable
     sealed interface Status : Route {
         @Serializable
         data class Detail(
             val statusKey: MicroBlogKey,
-            override val accountType: AccountType,
-        ) : Status,
-            WithAccountType
+            val accountType: AccountType,
+        ) : Status
 
         @Serializable
         data class VVOComment(
             val commentKey: MicroBlogKey,
-            override val accountType: AccountType,
-        ) : Status,
-            WithAccountType
+            val accountType: AccountType,
+        ) : Status
 
         @Serializable
         data class VVOStatus(
             val statusKey: MicroBlogKey,
-            override val accountType: AccountType,
-        ) : Status,
-            WithAccountType
+            val accountType: AccountType,
+        ) : Status
 
         @Serializable
         data class AddReaction(
             val statusKey: MicroBlogKey,
-            override val accountType: AccountType,
-        ) : Status,
-            WithAccountType
+            val accountType: AccountType,
+        ) : Status
 
         @Serializable
         data class AltText(
@@ -57,42 +48,37 @@ internal sealed interface Route : NavKey {
         @Serializable
         data class BlueskyReport(
             val statusKey: MicroBlogKey,
-            override val accountType: AccountType,
-        ) : Status,
-            WithAccountType
+            val accountType: AccountType,
+        ) : Status
 
         @Serializable
         data class DeleteConfirm(
             val statusKey: MicroBlogKey,
-            override val accountType: AccountType,
-        ) : Status,
-            WithAccountType
+            val accountType: AccountType,
+        ) : Status
 
         @Serializable
         data class MastodonReport(
             val userKey: MicroBlogKey,
             val statusKey: MicroBlogKey?,
-            override val accountType: AccountType,
-        ) : Status,
-            WithAccountType
+            val accountType: AccountType,
+        ) : Status
 
         @Serializable
         data class MisskeyReport(
             val userKey: MicroBlogKey,
             val statusKey: MicroBlogKey?,
-            override val accountType: AccountType,
-        ) : Status,
-            WithAccountType
+            val accountType: AccountType,
+        ) : Status
 
         @Serializable
         data class ShareSheet(
             val statusKey: MicroBlogKey,
-            override val accountType: AccountType,
+            val accountType: AccountType,
             val shareUrl: String,
             val fxShareUrl: String? = null,
             val fixvxShareUrl: String? = null,
-        ) : Status,
-            WithAccountType
+        ) : Status
     }
 
     @Serializable
@@ -120,9 +106,6 @@ internal sealed interface Route : NavKey {
 
         @Serializable
         data object About : Settings
-
-        @Serializable
-        data object TabCustomization : Settings
 
         @Serializable
         data object LocalFilter : Settings
@@ -191,17 +174,12 @@ internal sealed interface Route : NavKey {
     }
 
     @Serializable
-    data class Home(
-        override val accountType: AccountType,
-    ) : Route,
-        WithAccountType
+    data object Home : Route
 
     @Serializable
     data class Timeline(
-        override val accountType: AccountType,
         val tabItem: TimelineTabItem,
-    ) : Route,
-        WithAccountType
+    ) : Route
 
     @Serializable
     sealed interface ServiceSelect : Route {
@@ -233,38 +211,33 @@ internal sealed interface Route : NavKey {
     sealed interface Profile : Route {
         @Serializable
         data class User(
-            override val accountType: AccountType,
+            val accountType: AccountType,
             val userKey: MicroBlogKey,
-        ) : Profile,
-            WithAccountType
+        ) : Profile
 
         @Serializable
         data class UserNameWithHost(
-            override val accountType: AccountType,
+            val accountType: AccountType,
             val name: String,
             val host: String,
-        ) : Profile,
-            WithAccountType
+        ) : Profile
 
         @Serializable
         data class Following(
-            override val accountType: AccountType,
+            val accountType: AccountType,
             val userKey: MicroBlogKey,
-        ) : Profile,
-            WithAccountType
+        ) : Profile
 
         @Serializable
         data class Fans(
-            override val accountType: AccountType,
+            val accountType: AccountType,
             val userKey: MicroBlogKey,
-        ) : Profile,
-            WithAccountType
+        ) : Profile
 
         @Serializable
         data class Me(
-            override val accountType: AccountType,
-        ) : Profile,
-            WithAccountType
+            val accountType: AccountType,
+        ) : Profile
     }
 
     @Serializable
@@ -272,131 +245,114 @@ internal sealed interface Route : NavKey {
 
     @Serializable
     data class Search(
-        override val accountType: AccountType,
+        val accountType: AccountType,
         val query: String,
-    ) : Route,
-        WithAccountType
+    ) : Route
 
     @Serializable
     sealed interface Lists : Route {
         @Serializable
         data class List(
-            override val accountType: AccountType,
-        ) : Lists,
-            WithAccountType
+            val accountType: AccountType,
+        ) : Lists
 
         @Serializable
         data class Detail(
-            override val accountType: AccountType,
+            val accountType: AccountType,
             val listId: String,
             val title: String,
-        ) : Lists,
-            WithAccountType
+        ) : Lists
 
         @Serializable
         data class Create(
-            override val accountType: AccountType,
-        ) : Lists,
-            WithAccountType
+            val accountType: AccountType,
+        ) : Lists
 
         @Serializable
         data class Edit(
-            override val accountType: AccountType,
+            val accountType: AccountType,
             val listId: String,
-        ) : Lists,
-            WithAccountType
+        ) : Lists
 
         @Serializable
         data class EditMember(
-            override val accountType: AccountType,
+            val accountType: AccountType,
             val listId: String,
-        ) : Lists,
-            WithAccountType
+        ) : Lists
 
         @Serializable
         data class EditAccountList(
-            override val accountType: AccountType,
+            val accountType: AccountType,
             val userKey: MicroBlogKey,
-        ) : Lists,
-            WithAccountType
+        ) : Lists
 
         @Serializable
         data class Delete(
-            override val accountType: AccountType,
+            val accountType: AccountType,
             val listId: String,
             val title: String?,
-        ) : Lists,
-            WithAccountType
+        ) : Lists
     }
 
     @Serializable
     sealed interface DM : Route {
         @Serializable
         data class List(
-            override val accountType: AccountType,
-        ) : DM,
-            WithAccountType
+            val accountType: AccountType,
+        ) : DM
 
         @Serializable
         data class Conversation(
-            override val accountType: AccountType,
+            val accountType: AccountType,
             val roomKey: MicroBlogKey,
-        ) : DM,
-            WithAccountType
+        ) : DM
 
         @Serializable
         data class UserConversation(
-            override val accountType: AccountType,
+            val accountType: AccountType,
             val userKey: MicroBlogKey,
-        ) : DM,
-            WithAccountType
+        ) : DM
     }
 
     @Serializable
     sealed interface Bluesky : Route {
         @Serializable
         data class Feed(
-            override val accountType: AccountType,
-        ) : Bluesky,
-            WithAccountType
+            val accountType: AccountType,
+        ) : Bluesky
 
         @Serializable
         data class FeedDetail(
-            override val accountType: AccountType,
+            val accountType: AccountType,
             val feedId: String,
-        ) : Bluesky,
-            WithAccountType
+        ) : Bluesky
     }
 
     @Serializable
     sealed interface Misskey : Route {
         @Serializable
         data class AntennasList(
-            override val accountType: AccountType,
-        ) : Misskey,
-            WithAccountType
+            val accountType: AccountType,
+        ) : Misskey
 
         @Serializable
         data class AntennaTimeline(
-            override val accountType: AccountType,
+            val accountType: AccountType,
             val antennaId: String,
             val title: String,
-        ) : Misskey,
-            WithAccountType
+        ) : Misskey
 
         @Serializable
         data class ChannelList(
-            override val accountType: AccountType,
-        ) : Misskey,
-            WithAccountType
+            val accountType: AccountType,
+        ) : Misskey
 
         @Serializable
         data class ChannelTimeline(
-            override val accountType: AccountType,
+            val accountType: AccountType,
             val channelId: String,
             val title: String,
-        ) : Misskey,
-            WithAccountType
+        ) : Misskey
     }
 
     @Serializable
@@ -440,18 +396,16 @@ internal sealed interface Route : NavKey {
         @Serializable
         data class StatusMedia(
             val statusKey: MicroBlogKey,
-            override val accountType: AccountType,
+            val accountType: AccountType,
             val index: Int,
             val preview: String?,
-        ) : Media,
-            WithAccountType
+        ) : Media
 
         @Serializable
         data class Podcast(
-            override val accountType: AccountType,
+            val accountType: AccountType,
             val id: String,
-        ) : Media,
-            WithAccountType
+        ) : Media
     }
 
     @Serializable
@@ -465,11 +419,10 @@ internal sealed interface Route : NavKey {
 
     @Serializable
     data class TwitterArticle(
-        override val accountType: AccountType,
+        val accountType: AccountType,
         val tweetId: String,
         val articleId: String? = null,
-    ) : Route,
-        WithAccountType
+    ) : Route
 
     @Serializable
     data class BlockUser(
@@ -511,7 +464,6 @@ internal sealed interface Route : NavKey {
             return when (deeplinkRoute) {
                 is DeeplinkRoute.Timeline.XQTDeviceFollow -> {
                     Route.Timeline(
-                        accountType = deeplinkRoute.accountType,
                         tabItem =
                             XQT.DeviceFollowTimelineTabItem(
                                 account = deeplinkRoute.accountType,
@@ -753,9 +705,3 @@ internal sealed interface Route : NavKey {
         }
     }
 }
-
-internal fun Route.accountTypeOr(default: AccountType): AccountType =
-    when (this) {
-        is Route.WithAccountType -> this.accountType
-        else -> default
-    }

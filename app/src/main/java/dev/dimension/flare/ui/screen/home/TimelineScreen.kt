@@ -16,6 +16,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import dev.dimension.flare.R
 import dev.dimension.flare.data.model.TimelineTabItem
+import dev.dimension.flare.data.model.WithAccountTabItem
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FlareLargeFlexibleTopAppBar
 import dev.dimension.flare.ui.component.FlareScaffold
@@ -36,12 +37,6 @@ internal fun TimelineScreen(
     val state by producePresenter(key = "timeline_screen_${tabItem.key}") {
         timelinePresenter(tabItem)
     }
-//    RegisterTabCallback(
-//        lazyListState = state.lazyListState,
-//        onRefresh = {
-//            state.refreshSync()
-//        },
-//    )
     val scope = rememberCoroutineScope()
     val listState = rememberLazyStaggeredGridState()
     val topAppBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
@@ -57,8 +52,9 @@ internal fun TimelineScreen(
                 },
                 actions = {
                     if (toLogin != null) {
-                        state.user
-                            .onError {
+                        state
+                            ?.user
+                            ?.onError {
                                 TextButton(onClick = toLogin) {
                                     Text(text = stringResource(id = R.string.login_button))
                                 }
@@ -98,10 +94,14 @@ internal fun TimelineScreen(
 @Composable
 private fun timelinePresenter(tabItem: TimelineTabItem) =
     run {
-        remember(tabItem.account) {
-            UserPresenter(
-                accountType = tabItem.account,
-                userKey = null,
-            )
-        }.invoke()
+        if (tabItem is WithAccountTabItem) {
+            remember(tabItem.account) {
+                UserPresenter(
+                    accountType = tabItem.account,
+                    userKey = null,
+                )
+            }.invoke()
+        } else {
+            null
+        }
     }

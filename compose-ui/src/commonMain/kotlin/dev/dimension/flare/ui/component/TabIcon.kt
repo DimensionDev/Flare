@@ -16,6 +16,9 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import compose.icons.FontAwesomeIcons
+import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.CircleUser
 import dev.dimension.flare.compose.ui.Res
 import dev.dimension.flare.compose.ui.all_rss_feeds_title
 import dev.dimension.flare.compose.ui.antenna_title
@@ -41,6 +44,7 @@ import dev.dimension.flare.compose.ui.social_title
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.TabItem
 import dev.dimension.flare.data.model.TitleType
+import dev.dimension.flare.data.model.WithAccountTabItem
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.component.platform.PlatformTextStyle
@@ -83,15 +87,20 @@ public fun TabTitle(
 @Composable
 public fun TabIcon(
     tabItem: TabItem,
+    icon: IconType = tabItem.metaData.icon,
+    title: TitleType = tabItem.metaData.title,
+    accountType: AccountType? = if (tabItem is WithAccountTabItem) tabItem.account else null,
     modifier: Modifier = Modifier,
+    size: Dp = 24.dp,
     iconOnly: Boolean = false,
     color: Color = PlatformContentColor.current,
 ) {
     TabIcon(
-        accountType = tabItem.account,
-        icon = tabItem.metaData.icon,
-        title = tabItem.metaData.title,
+        icon = icon,
+        title = title,
         modifier = modifier,
+        size = size,
+        accountType = accountType,
         iconOnly = iconOnly,
         color = color,
     )
@@ -100,30 +109,45 @@ public fun TabIcon(
 @HiddenFromObjC
 @Composable
 public fun TabIcon(
-    accountType: AccountType,
     icon: IconType,
     title: TitleType,
     modifier: Modifier = Modifier,
     iconOnly: Boolean = false,
     color: Color = PlatformContentColor.current,
+    accountType: AccountType? = null,
     size: Dp = 24.dp,
 ) {
     when (icon) {
         is IconType.Avatar -> {
-            val userState by producePresenter(key = "$accountType:${icon.userKey}") {
-                remember(accountType, icon.userKey) {
-                    UserPresenter(
-                        accountType,
-                        icon.userKey,
-                    )
-                }.invoke()
-            }
-            userState.user
-                .onSuccess {
-                    AvatarComponent(it.avatar, size = size, modifier = modifier)
-                }.onLoading {
-                    AvatarComponent(null, size = size, modifier = modifier.placeholder(true))
+            if (accountType != null) {
+                val userState by producePresenter(key = "$accountType:${icon.userKey}") {
+                    remember(accountType, icon.userKey) {
+                        UserPresenter(
+                            accountType,
+                            icon.userKey,
+                        )
+                    }.invoke()
                 }
+                userState.user
+                    .onSuccess {
+                        AvatarComponent(it.avatar, size = size, modifier = modifier)
+                    }.onLoading {
+                        AvatarComponent(null, size = size, modifier = modifier.placeholder(true))
+                    }
+            } else {
+                FAIcon(
+                    imageVector = FontAwesomeIcons.Solid.CircleUser,
+                    contentDescription =
+                        when (title) {
+                            is TitleType.Localized -> stringResource(title.res)
+                            is TitleType.Text -> title.content
+                        },
+                    modifier =
+                        modifier
+                            .size(size),
+                    tint = color,
+                )
+            }
         }
 
         is IconType.Material -> {
@@ -142,7 +166,7 @@ public fun TabIcon(
         }
 
         is IconType.Mixed -> {
-            if (iconOnly) {
+            if (iconOnly || accountType == null) {
                 FAIcon(
                     imageVector = icon.icon.toImageVector(),
                     contentDescription =

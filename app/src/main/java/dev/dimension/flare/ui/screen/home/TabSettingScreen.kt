@@ -243,7 +243,7 @@ private fun presenter(
 ) = run {
     val scope = rememberCoroutineScope()
     var selectedEditTab by remember { mutableStateOf<TabItem?>(null) }
-    val allTabsState = remember { AllTabsPresenter(filterIsTimeline = true) }.invoke()
+    val allTabsState = remember { AllTabsPresenter() }.invoke()
     val tabSettings by settingsRepository.tabSettings.collectAsUiState()
     val cacheTabs =
         remember {

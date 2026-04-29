@@ -3,6 +3,7 @@ package dev.dimension.flare.data.repository
 import dev.dimension.flare.data.model.MixedTimelineTabItem
 import dev.dimension.flare.data.model.TabSettings
 import dev.dimension.flare.data.model.TimelineTabItem
+import dev.dimension.flare.data.model.WithAccountTabItem
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.spec
@@ -105,7 +106,7 @@ internal class AccountTabSyncCoordinator(
             }
 
             else -> {
-                val accountKey = (account as? AccountType.Specific)?.accountKey ?: return this
+                val accountKey = ((this as? WithAccountTabItem)?.account as? AccountType.Specific)?.accountKey ?: return this
                 val shouldRetain = accountKey in accountKeys
                 if (shouldRetain == retainAccounts) {
                     this

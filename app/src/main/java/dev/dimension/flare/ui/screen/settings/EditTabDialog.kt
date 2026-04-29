@@ -33,6 +33,7 @@ import androidx.compose.ui.window.PopupProperties
 import dev.dimension.flare.R
 import dev.dimension.flare.data.model.TabItem
 import dev.dimension.flare.data.model.TitleType
+import dev.dimension.flare.data.model.WithAccountTabItem
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.component.TabIcon
 import dev.dimension.flare.ui.model.onSuccess
@@ -77,7 +78,7 @@ internal fun EditTabDialog(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 TabIcon(
-                    accountType = tabItem.account,
+                    tabItem = tabItem,
                     icon = state.icon,
                     title = tabItem.metaData.title,
                     size = 64.dp,
@@ -116,7 +117,7 @@ internal fun EditTabDialog(
                             ) {
                                 items(state.availableIcons) { icon ->
                                     TabIcon(
-                                        accountType = tabItem.account,
+                                        tabItem = tabItem,
                                         icon = icon,
                                         title = tabItem.metaData.title,
                                         modifier =
@@ -134,7 +135,7 @@ internal fun EditTabDialog(
                     }
                 }
 
-                if (tabItem.account is AccountType.Specific) {
+                if (tabItem is WithAccountTabItem && tabItem.account is AccountType.Specific) {
                     Row(
                         modifier =
                             Modifier

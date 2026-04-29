@@ -21,6 +21,7 @@ import dev.dimension.flare.Res
 import dev.dimension.flare.cancel
 import dev.dimension.flare.data.model.TabItem
 import dev.dimension.flare.data.model.TitleType
+import dev.dimension.flare.data.model.WithAccountTabItem
 import dev.dimension.flare.edit_tab_name
 import dev.dimension.flare.edit_tab_name_placeholder
 import dev.dimension.flare.edit_tab_title
@@ -100,7 +101,7 @@ internal fun EditTabDialog(
                                     modifier = Modifier.padding(4.dp),
                                 ) {
                                     TabIcon(
-                                        accountType = tabItem.account,
+                                        tabItem = tabItem,
                                         icon = icon,
                                         title = tabItem.metaData.title,
                                     )
@@ -117,14 +118,14 @@ internal fun EditTabDialog(
                         iconOnly = true,
                     ) {
                         TabIcon(
-                            accountType = tabItem.account,
+                            tabItem = tabItem,
                             icon = state.icon,
                             title = tabItem.metaData.title,
                             size = 64.dp,
                         )
                     }
                 }
-                if (tabItem.account is AccountType.Specific) {
+                if (tabItem is WithAccountTabItem && tabItem.account is AccountType.Specific) {
                     Row(
                         modifier =
                             Modifier

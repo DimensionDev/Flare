@@ -5,6 +5,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.isRefreshing
 import dev.dimension.flare.data.model.TimelineTabItem
+import dev.dimension.flare.data.model.WithAccountTabItem
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.presenter.home.NotificationBadgePresenter
 import kotlinx.coroutines.launch
@@ -27,13 +28,17 @@ public class TimelineItemPresenter(
     }
 
     private val badgePresenter by lazy {
-        NotificationBadgePresenter(timelineTabItem.account)
+        if (timelineTabItem is WithAccountTabItem) {
+            NotificationBadgePresenter(timelineTabItem.account)
+        } else {
+            null
+        }
     }
 
     @Composable
     override fun body(): State {
         val state = timelinePresenter.body()
-        val badge = badgePresenter.body()
+        val badge = badgePresenter?.body()
         val scope = rememberCoroutineScope()
         return object : State {
             override val listState = state.listState
@@ -43,12 +48,12 @@ public class TimelineItemPresenter(
                 scope.launch {
                     state.refresh()
                 }
-                badge.refresh()
+                badge?.refresh()
             }
 
             override suspend fun refreshSuspend() {
                 state.refresh()
-                badge.refresh()
+                badge?.refresh()
             }
         }
     }

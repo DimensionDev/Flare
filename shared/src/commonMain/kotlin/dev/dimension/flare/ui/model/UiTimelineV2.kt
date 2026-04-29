@@ -102,7 +102,6 @@ public sealed class UiTimelineV2 {
                     Repost,
                     Follow,
                     FollowRequest,
-                    Like,
                     Favourite,
                     PollEnded,
                     PostUpdated,
@@ -114,6 +113,7 @@ public sealed class UiTimelineV2 {
                     App,
                     StarterpackJoined,
                     Pinned,
+                    Like,
                 }
             }
         }

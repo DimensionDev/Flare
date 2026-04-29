@@ -49,7 +49,6 @@ public enum class UiIcon {
     UnBlock,
     Follow,
     Favourite,
-    UnFavourite,
     Mention,
     Poll,
     Edit,
@@ -59,4 +58,5 @@ public enum class UiIcon {
     Nostr,
     X,
     Translate,
+    UnFavourite,
 }

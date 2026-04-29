@@ -94,7 +94,12 @@ internal fun Feed.Rss20.Item.render(
         description?.let {
             Ksoup.parse(it)
         }
-    val img = mediaContent?.url ?: descHtml?.select("img")?.firstOrNull()?.attr("src")
+    val img =
+        descHtml
+            ?.select("img")
+            ?.firstOrNull()
+            ?.attr("src")
+            ?.takeIf { it.isNotEmpty() } ?: mediaContent?.url
     return UiTimelineV2.Feed(
         title = title,
         description = descHtml?.text(),

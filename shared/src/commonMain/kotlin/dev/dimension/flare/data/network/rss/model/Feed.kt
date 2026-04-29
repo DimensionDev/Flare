@@ -358,6 +358,15 @@ internal sealed interface Feed {
             val pubDate: String? = null,
             @XmlElement(true)
             val source: Source? = null,
+            @XmlElement(true)
+            @XmlSerialName(value = "content", prefix = "media", namespace = "http://search.yahoo.com/mrss/")
+            val mediaContent: Media? = null,
+        )
+
+        @Serializable
+        data class Media(
+            @XmlElement(false)
+            val url: String,
         )
 
         @Serializable

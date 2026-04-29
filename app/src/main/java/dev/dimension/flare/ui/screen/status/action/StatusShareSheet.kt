@@ -38,6 +38,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -99,6 +100,7 @@ internal fun StatusShareSheet(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val previewGraphicsLayer = rememberGraphicsLayer()
+    var captureRequested by remember { mutableStateOf(false) }
     var previewTheme by remember { mutableStateOf(SharePreviewTheme.Light) }
     val state by producePresenter("status_share_sheet_${statusKey}_$shareUrl") {
         StatusPresenter(accountType = accountType, statusKey = statusKey).invoke()
@@ -124,8 +126,10 @@ internal fun StatusShareSheet(
                     modifier =
                         Modifier
                             .drawWithContent {
-                                previewGraphicsLayer.record {
-                                    this@drawWithContent.drawContent()
+                                if (captureRequested) {
+                                    previewGraphicsLayer.record {
+                                        this@drawWithContent.drawContent()
+                                    }
                                 }
                                 drawContent()
                             },
@@ -194,7 +198,15 @@ internal fun StatusShareSheet(
             FilledTonalButton(
                 onClick = {
                     scope.launch {
-                        val bitmap = captureShareBitmap(previewGraphicsLayer)
+                        val bitmap =
+                            try {
+                                captureRequested = true
+                                withFrameNanos { }
+                                withFrameNanos { }
+                                captureShareBitmap(previewGraphicsLayer)
+                            } finally {
+                                captureRequested = false
+                            }
                         if (bitmap == null) {
                             Toast
                                 .makeText(context, R.string.media_save_fail, Toast.LENGTH_SHORT)
@@ -248,7 +260,15 @@ internal fun StatusShareSheet(
             FilledTonalButton(
                 onClick = {
                     scope.launch {
-                        val bitmap = captureShareBitmap(previewGraphicsLayer)
+                        val bitmap =
+                            try {
+                                captureRequested = true
+                                withFrameNanos { }
+                                withFrameNanos { }
+                                captureShareBitmap(previewGraphicsLayer)
+                            } finally {
+                                captureRequested = false
+                            }
                         if (bitmap == null) {
                             Toast
                                 .makeText(context, R.string.media_save_fail, Toast.LENGTH_SHORT)

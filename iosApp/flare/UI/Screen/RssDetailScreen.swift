@@ -306,6 +306,18 @@ struct HtmlWebView: UIViewRepresentable {
             decisionHandler(.cancel)
         }
         
+        func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
+            webView.evaluateJavaScript("document.documentElement.scrollHeight") { height, _ in
+                DispatchQueue.main.async {
+                    if let h = height as? CGFloat {
+                        self.parent.dynamicHeight = h
+                    } else if let d = height as? Double {
+                        self.parent.dynamicHeight = CGFloat(d)
+                    }
+                }
+            }
+        }
+        
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
             webView.evaluateJavaScript("document.documentElement.scrollHeight") { height, _ in
                 DispatchQueue.main.async {

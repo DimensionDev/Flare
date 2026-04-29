@@ -161,7 +161,7 @@ private final class ReactionChipView: UIControl, ManualLayoutMeasurable, Timelin
             imageView.kf.cancelDownloadTask()
             imageView.image = nil
             if let url = URL(string: item.url) {
-                imageView.kf.setImage(with: url)
+                imageView.kf.setImage(with: url, options: [.backgroundDecode])
             }
         }
 

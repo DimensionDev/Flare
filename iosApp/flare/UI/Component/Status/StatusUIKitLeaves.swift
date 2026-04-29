@@ -27,7 +27,7 @@ final class AvatarUIView: UIView {
         imageView.kf.cancelDownloadTask()
         imageView.image = nil
         if let url = url.flatMap(URL.init(string:)) {
-            imageView.kf.setImage(with: url, options: [.transition(.fade(0.25)), .cacheOriginalImage])
+            imageView.kf.setImage(with: url, options: [.transition(.fade(0.25)), .cacheOriginalImage, .backgroundDecode])
         }
     }
 

@@ -21,13 +21,21 @@ final class TimelineUIView: UIView, ManualLayoutMeasurable, TimelineHeightProvid
             rebuildIfNeeded()
         }
     }
+    var aiTldrEnabled: Bool = false {
+        didSet {
+            guard aiTldrEnabled != oldValue else { return }
+            rebuildIfNeeded()
+        }
+    }
     var onOpenURL: ((URL) -> Void)? {
         didSet { if !isBatchConfiguring { forwardOpenURL() } }
     }
+    var onLocalHeightInvalidated: (() -> Void)?
 
     private var data: UiTimelineV2?
     private var isBatchConfiguring = false
     private var lastRenderSignature: RenderSignature?
+    private var lastPreparedFittingWidthKey: Int?
     private var statusViewPreparedForReuse = true
     private var userViewPreparedForReuse = true
     private var userListViewPreparedForReuse = true
@@ -38,19 +46,22 @@ final class TimelineUIView: UIView, ManualLayoutMeasurable, TimelineHeightProvid
         let renderHash: Int32
         let detailStatusKey: String
         let showTranslate: Bool
+        let aiTldrEnabled: Bool
         let appearance: StatusUIKitAppearance
 
         init(
             data: UiTimelineV2,
             appearance: StatusUIKitAppearance,
             detailStatusKey: MicroBlogKey?,
-            showTranslate: Bool
+            showTranslate: Bool,
+            aiTldrEnabled: Bool
         ) {
             itemKey = data.itemKey ?? ""
             itemType = data.itemType
             renderHash = data.renderHash
             self.detailStatusKey = detailStatusKey.map { String(describing: $0) } ?? ""
             self.showTranslate = showTranslate
+            self.aiTldrEnabled = aiTldrEnabled
             self.appearance = appearance
         }
     }
@@ -125,7 +136,8 @@ final class TimelineUIView: UIView, ManualLayoutMeasurable, TimelineHeightProvid
             data: data,
             appearance: appearance,
             detailStatusKey: detailStatusKey,
-            showTranslate: showTranslate
+            showTranslate: showTranslate,
+            aiTldrEnabled: aiTldrEnabled
         )
         self.data = data
         guard lastRenderSignature != signature else {
@@ -133,6 +145,7 @@ final class TimelineUIView: UIView, ManualLayoutMeasurable, TimelineHeightProvid
             return
         }
         lastRenderSignature = signature
+        lastPreparedFittingWidthKey = nil
         rebuild()
     }
 
@@ -141,12 +154,14 @@ final class TimelineUIView: UIView, ManualLayoutMeasurable, TimelineHeightProvid
         appearance: StatusUIKitAppearance,
         detailStatusKey: MicroBlogKey?,
         showTranslate: Bool = true,
+        aiTldrEnabled: Bool = false,
         onOpenURL: ((URL) -> Void)?
     ) {
         isBatchConfiguring = true
         self.appearance = appearance
         self.detailStatusKey = detailStatusKey
         self.showTranslate = showTranslate
+        self.aiTldrEnabled = aiTldrEnabled
         self.onOpenURL = onOpenURL
         self.data = data
         isBatchConfiguring = false
@@ -154,13 +169,15 @@ final class TimelineUIView: UIView, ManualLayoutMeasurable, TimelineHeightProvid
             data: data,
             appearance: appearance,
             detailStatusKey: detailStatusKey,
-            showTranslate: showTranslate
+            showTranslate: showTranslate,
+            aiTldrEnabled: aiTldrEnabled
         )
         guard lastRenderSignature != signature else {
             forwardOpenURL()
             return
         }
         lastRenderSignature = signature
+        lastPreparedFittingWidthKey = nil
         rebuild()
     }
 
@@ -189,11 +206,15 @@ final class TimelineUIView: UIView, ManualLayoutMeasurable, TimelineHeightProvid
                 desired.append(messageContainer)
             }
             statusView.openURL = onOpenURL
+            statusView.onLocalHeightInvalidated = { [weak self] in
+                self?.handleLocalHeightInvalidated()
+            }
             statusView.configure(
                 data: post,
                 appearance: appearance,
                 isDetail: detailStatusKey == post.statusKey,
                 showTranslate: showTranslate,
+                aiTldrEnabled: aiTldrEnabled,
             )
             desired.append(statusView)
 
@@ -224,13 +245,22 @@ final class TimelineUIView: UIView, ManualLayoutMeasurable, TimelineHeightProvid
             desired.append(messageContainer)
         }
         syncManagedSubviews(parent: self, current: &managedChildren, desired: desired)
+        lastPreparedFittingWidthKey = nil
         invalidateIntrinsicContentSize()
         setNeedsLayout()
+    }
+
+    private func handleLocalHeightInvalidated() {
+        lastPreparedFittingWidthKey = nil
+        invalidateIntrinsicContentSize()
+        setNeedsLayout()
+        onLocalHeightInvalidated?()
     }
 
     func prepareForReuse() {
         data = nil
         lastRenderSignature = nil
+        lastPreparedFittingWidthKey = nil
         invalidateIntrinsicContentSize()
         setNeedsLayout()
     }
@@ -238,6 +268,7 @@ final class TimelineUIView: UIView, ManualLayoutMeasurable, TimelineHeightProvid
     func prepareForDeferredReuseCleanup() {
         data = nil
         lastRenderSignature = nil
+        lastPreparedFittingWidthKey = nil
         syncManagedSubviews(parent: self, current: &managedChildren, desired: [])
         performDeferredPoolCleanup()
         invalidateIntrinsicContentSize()
@@ -372,6 +403,9 @@ final class TimelineUIView: UIView, ManualLayoutMeasurable, TimelineHeightProvid
 
     func prepareForFitting(width: CGFloat) {
         guard let data else { return }
+        let widthKey = Self.fittingWidthKey(width)
+        guard lastPreparedFittingWidthKey != widthKey else { return }
+        lastPreparedFittingWidthKey = widthKey
         bounds = CGRect(x: bounds.minX, y: bounds.minY, width: width, height: bounds.height)
         switch onEnum(of: data) {
         case .feed:
@@ -383,6 +417,10 @@ final class TimelineUIView: UIView, ManualLayoutMeasurable, TimelineHeightProvid
         default:
             break
         }
+    }
+
+    private static func fittingWidthKey(_ width: CGFloat) -> Int {
+        Int((width * UIScreen.main.scale).rounded(.toNearestOrAwayFromZero))
     }
 
     func estimatedHeightForFitting(width: CGFloat) -> CGFloat? {

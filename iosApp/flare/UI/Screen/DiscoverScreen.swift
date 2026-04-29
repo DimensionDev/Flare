@@ -8,6 +8,7 @@ struct DiscoverScreen: View {
     @StateObject private var searchPresenter: KotlinPresenter<SearchState>
     @StateObject private var searchHistoryPresenter: KotlinPresenter<SearchHistoryState>
     @State var searchText = ""
+    @State private var committedSearchText = ""
     @State private var isSearchPresented = false
     
     init() {
@@ -92,8 +93,13 @@ struct DiscoverScreen: View {
             commitSearch(searchText)
         }
         .onChange(of: searchText) {
-            if searchText.isEmpty {
+            if isSearchPresented && searchText.isEmpty {
+                committedSearchText = ""
                 searchPresenter.state.search(new: "")
+            } else if !isSearchPresented && searchText.isEmpty && !committedSearchText.isEmpty {
+                DispatchQueue.main.async {
+                    searchText = committedSearchText
+                }
             }
         }
         .onChange(of: presenter.state.selectedAccount) { newAccount in
@@ -239,6 +245,7 @@ struct DiscoverScreen: View {
         guard !query.isEmpty else { return }
 
         searchText = query
+        committedSearchText = query
         searchHistoryPresenter.state.addSearchHistory(keyword: query)
         searchPresenter.state.search(new: query)
         isSearchPresented = false

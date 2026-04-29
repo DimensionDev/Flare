@@ -245,12 +245,12 @@ final class MediaUIView: UIView {
 
     private func loadImage(url: String?) {
         guard let u = url.flatMap(URL.init(string:)) else { return }
-        imageView.kf.setImage(with: u, options: [.transition(.fade(0.25)), .cacheOriginalImage])
+        imageView.kf.setImage(with: u, options: [.transition(.fade(0.25)), .cacheOriginalImage, .backgroundDecode])
     }
 
     private func loadGif(url: String?) {
         guard let u = url.flatMap(URL.init(string:)) else { return }
-        imageView.kf.setImage(with: u, options: [.transition(.fade(0.25))])
+        imageView.kf.setImage(with: u, options: [.transition(.fade(0.25)), .backgroundDecode])
     }
 }
 
@@ -752,6 +752,7 @@ private final class AltTextButton: UIButton {
 // is off, renders a show-media button; after tapping, shows the grid.
 final class StatusMediaContentUIView: UIView, TimelineHeightProviding {
     var onMediaClicked: ((UiMedia, Int) -> Void)?
+    var onLocalHeightInvalidated: (() -> Void)?
 
     private let grid = StatusMediaUIView()
     private let showButton = UIButton(type: .system)
@@ -952,6 +953,7 @@ final class StatusMediaContentUIView: UIView, TimelineHeightProviding {
     @objc private func onShowTapped() {
         expanded = true
         applyVisibility()
+        onLocalHeightInvalidated?()
         invalidateContainingCollectionLayout()
         UIView.animate(withDuration: 0.2) { [weak self] in
             guard let self = self else { return }

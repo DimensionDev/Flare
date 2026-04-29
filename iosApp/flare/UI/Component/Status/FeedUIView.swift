@@ -304,7 +304,7 @@ final class FeedUIView: UIView, ManualLayoutMeasurable, TimelineHeightProviding 
 
         if let icon = data.source.icon, !icon.isEmpty, let url = URL(string: icon) {
             sourceIcon.isHidden = false
-            sourceIcon.kf.setImage(with: url, options: [.transition(.fade(0.25)), .cacheOriginalImage])
+            sourceIcon.kf.setImage(with: url, options: [.transition(.fade(0.25)), .cacheOriginalImage, .backgroundDecode])
         } else {
             sourceIcon.isHidden = true
             sourceIcon.image = nil
@@ -344,7 +344,7 @@ final class FeedUIView: UIView, ManualLayoutMeasurable, TimelineHeightProviding 
 
         if let media = data.media, let url = URL(string: media.url) {
             mediaView.isHidden = false
-            mediaView.kf.setImage(with: url, options: [.transition(.fade(0.25)), .cacheOriginalImage])
+            mediaView.kf.setImage(with: url, options: [.transition(.fade(0.25)), .cacheOriginalImage, .backgroundDecode])
         } else {
             mediaView.isHidden = true
             mediaView.image = nil

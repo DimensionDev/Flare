@@ -160,7 +160,6 @@ internal fun GroupConfigScreen(
                 ) {
                     Box {
                         TabIcon(
-                            accountType = AccountType.Guest,
                             icon = state.icon,
                             title = TitleType.Text(state.name.text.toString()),
                             size = 64.dp,
@@ -293,7 +292,7 @@ private fun GroupConfigPresenter(initialItem: MixedTimelineTabItem?) =
         var showAddTab by remember { mutableStateOf(false) }
         var showIconPicker by remember { mutableStateOf(false) }
         var selectedEditTab by remember { mutableStateOf<TimelineTabItem?>(null) }
-        val allTabs = remember { AllTabsPresenter(filterIsTimeline = true) }.invoke()
+        val allTabs = remember { AllTabsPresenter() }.invoke()
 
         object {
             val name = name

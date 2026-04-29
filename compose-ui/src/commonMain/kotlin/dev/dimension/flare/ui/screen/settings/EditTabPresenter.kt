@@ -10,6 +10,7 @@ import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.RssTimelineTabItem
 import dev.dimension.flare.data.model.TabItem
 import dev.dimension.flare.data.model.TitleType
+import dev.dimension.flare.data.model.WithAccountTabItem
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.component.res
 import dev.dimension.flare.ui.model.UiState
@@ -56,28 +57,26 @@ public class EditTabPresenter(
             override val withAvatar: Boolean = withAvatar
             override val availableIcons: ImmutableList<IconType> =
                 run {
-                    when (val account = tabItem.account) {
-                        is AccountType.Specific -> {
-                            listOf(
-                                IconType.Avatar(account.accountKey),
-                                IconType.FavIcon(account.accountKey.host),
-                            )
-                        }
-
-                        else -> {
-                            emptyList()
-                        }
-                    } +
+                    if (tabItem is WithAccountTabItem && tabItem.account is AccountType.Specific) {
+                        listOf(
+                            IconType.Avatar((tabItem.account as AccountType.Specific).accountKey),
+                            IconType.FavIcon((tabItem.account as AccountType.Specific).accountKey.host),
+                        )
+                    } else {
+                        emptyList()
+                    }.plus(
                         dev.dimension.flare.ui.model.UiIcon.entries.map {
                             IconType.Material(it)
-                        } +
+                        },
+                    ).plus(
                         if (tabItem is RssTimelineTabItem) {
                             listOfNotNull(
                                 tabItem.favIcon?.let { IconType.Url(it) },
                             )
                         } else {
                             emptyList()
-                        }
+                        },
+                    )
                 }.toPersistentList()
             override val icon = icon
 
@@ -87,7 +86,12 @@ public class EditTabPresenter(
             }
 
             override fun setIcon(value: IconType) {
-                val account = tabItem.account
+                val account =
+                    if (tabItem is WithAccountTabItem) {
+                        tabItem.account
+                    } else {
+                        null
+                    }
                 icon =
                     if (withAvatar && account is AccountType.Specific) {
                         when (value) {

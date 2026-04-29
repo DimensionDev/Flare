@@ -57,6 +57,7 @@ import dev.dimension.flare.data.model.AllNotificationTabItem
 import dev.dimension.flare.data.model.Bluesky
 import dev.dimension.flare.data.model.DirectMessageTabItem
 import dev.dimension.flare.data.model.DiscoverTabItem
+import dev.dimension.flare.data.model.HomeTabItem
 import dev.dimension.flare.data.model.HomeTimelineTabItem
 import dev.dimension.flare.data.model.Misskey
 import dev.dimension.flare.data.model.NotificationTabItem
@@ -238,11 +239,7 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                                     }
                                 },
                                 icon = {
-                                    TabIcon(
-                                        accountType = tab.account,
-                                        icon = tab.metaData.icon,
-                                        title = tab.metaData.title,
-                                    )
+                                    TabIcon(tabItem = tab)
                                 },
                                 label = {
                                     TabTitle(
@@ -250,7 +247,7 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                                     )
                                 },
                                 badge =
-                                    if (tab is AllNotificationTabItem || tab is NotificationTabItem) {
+                                    if (tab is AllNotificationTabItem) {
                                         {
                                             if (state.notificationState.count > 0) {
                                                 Badge {
@@ -345,19 +342,17 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                                     children = {
                                         item.tabs.forEach {
                                             item(
-                                                selected = currentRoute == getDirection(it, it.account),
+                                                selected = currentRoute == getDirection(it),
                                                 onClick = {
-                                                    if (currentRoute == getDirection(it, it.account)) {
+                                                    if (currentRoute == getDirection(it)) {
                                                         state.scrollToTopRegistry.scrollToTop()
                                                     } else {
-                                                        state.navigate(getDirection(it, it.account))
+                                                        state.navigate(getDirection(it))
                                                     }
                                                 },
                                                 icon = {
                                                     TabIcon(
-                                                        accountType = it.account,
-                                                        icon = it.metaData.icon,
-                                                        title = it.metaData.title,
+                                                        tabItem = it,
                                                         iconOnly = true,
                                                     )
                                                 },
@@ -367,7 +362,7 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                                                     )
                                                 },
                                                 badge =
-                                                    if (it is AllNotificationTabItem || it is NotificationTabItem) {
+                                                    if (it is AllNotificationTabItem) {
                                                         {
                                                             if (state.notificationState.count > 0) {
                                                                 Badge {
@@ -483,23 +478,20 @@ internal fun HomeScreen(afterInit: () -> Unit) {
         }
 }
 
-private fun getDirection(
-    tab: TabItem,
-    accountType: AccountType = tab.account,
-): Route =
+private fun getDirection(tab: TabItem): Route =
     when (tab) {
         is DiscoverTabItem -> Route.Discover
-        is ProfileTabItem -> Route.Profile.Me(accountType)
-        is HomeTimelineTabItem -> Route.Home(accountType)
-        is TimelineTabItem -> Route.Timeline(accountType, tab)
+        is ProfileTabItem -> Route.Profile.Me(tab.account)
+        HomeTabItem -> Route.Home
+        is TimelineTabItem -> Route.Timeline(tab)
         is NotificationTabItem, AllNotificationTabItem -> Route.Notification
         SettingsTabItem -> Route.Settings.Main
-        is AllListTabItem -> Route.Lists.List(accountType)
-        is Bluesky.FeedsTabItem -> Route.Bluesky.Feed(accountType)
-        is DirectMessageTabItem -> Route.DM.List(accountType)
+        is AllListTabItem -> Route.Lists.List(tab.account)
+        is Bluesky.FeedsTabItem -> Route.Bluesky.Feed(tab.account)
+        is DirectMessageTabItem -> Route.DM.List(tab.account)
         is RssTabItem -> Route.Rss.Sources
-        is Misskey.AntennasListTabItem -> Route.Misskey.AntennasList(accountType)
-        is Misskey.ChannelListTabItem -> Route.Misskey.ChannelList(accountType)
+        is Misskey.AntennasListTabItem -> Route.Misskey.AntennasList(tab.account)
+        is Misskey.ChannelListTabItem -> Route.Misskey.ChannelList(tab.account)
     }
 
 @Composable

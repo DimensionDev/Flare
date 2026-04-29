@@ -24,7 +24,6 @@ internal fun EntryProviderScope<NavKey>.homeEntryBuilder(
         )
     ) { args ->
         HomeTimelineScreen(
-            accountType = args.accountType,
             toCompose = {
                 navigate(Route.Compose.New)
             },

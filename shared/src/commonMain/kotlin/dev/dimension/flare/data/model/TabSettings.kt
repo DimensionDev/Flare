@@ -37,6 +37,7 @@ import dev.dimension.flare.ui.presenter.list.ChannelTimelinePresenter
 import dev.dimension.flare.ui.presenter.list.ListTimelinePresenter
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
@@ -65,10 +66,21 @@ public sealed class TabItem {
         key
     }
     public abstract val metaData: TabMetaData
-    public abstract val account: AccountType
     public abstract val key: String
 
     public abstract fun update(metaData: TabMetaData = this.metaData): TabItem
+}
+
+public interface WithAccountTabItem {
+    public val account: AccountType
+}
+
+@Immutable
+@Serializable
+public sealed class AccountTabItem :
+    TabItem(),
+    WithAccountTabItem {
+    public abstract override val account: AccountType
 }
 
 @Immutable
@@ -159,7 +171,6 @@ public data object AllNotificationTabItem : TabItem() {
             title = TitleType.Localized(TitleType.Localized.LocalizedKey.Notifications),
             icon = IconType.Material(dev.dimension.flare.ui.model.UiIcon.Notification),
         )
-    override val account: AccountType = AccountType.Guest
     override val key: String = "all_notification"
 
     override fun update(metaData: TabMetaData): TabItem = this
@@ -171,7 +182,7 @@ public data object AllNotificationTabItem : TabItem() {
 public data class NotificationTabItem(
     override val account: AccountType,
     override val metaData: TabMetaData,
-) : TabItem() {
+) : AccountTabItem() {
     override val key: String = "notification_$account"
 
     override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
@@ -183,100 +194,47 @@ public sealed class TimelineTabItem : TabItem() {
     public abstract fun createPresenter(): TimelinePresenter
 
     internal companion object {
-        internal fun default(accountKey: MicroBlogKey?): ImmutableList<TabItem> =
-            accountKey?.let {
-                val accountType = AccountType.Specific(it)
-                persistentListOf(
-                    HomeTimelineTabItem(
-                        account = accountType,
-                        metaData =
-                            TabMetaData(
-                                title = TitleType.Localized(TitleType.Localized.LocalizedKey.Home),
-                                icon = IconType.Material(dev.dimension.flare.ui.model.UiIcon.Home),
-                            ),
-                    ),
-                    NotificationTabItem(
-                        account = accountType,
-                        metaData =
-                            TabMetaData(
-                                title = TitleType.Localized(TitleType.Localized.LocalizedKey.Notifications),
-                                icon = IconType.Material(dev.dimension.flare.ui.model.UiIcon.Notification),
-                            ),
-                    ),
-                    DiscoverTabItem(
-                        account = accountType,
-                        metaData =
-                            TabMetaData(
-                                title = TitleType.Localized(TitleType.Localized.LocalizedKey.Discover),
-                                icon = IconType.Material(dev.dimension.flare.ui.model.UiIcon.Search),
-                            ),
-                    ),
-                )
-            } ?: guest
-
-        internal fun mainSidePanel(accountKey: MicroBlogKey?): ImmutableList<TabItem> =
-            accountKey?.let {
-                val accountType = AccountType.Specific(it)
-                persistentListOf(
-                    HomeTimelineTabItem(
-                        account = accountType,
-                        metaData =
-                            TabMetaData(
-                                title = TitleType.Localized(TitleType.Localized.LocalizedKey.Home),
-                                icon = IconType.Material(dev.dimension.flare.ui.model.UiIcon.Home),
-                            ),
-                    ),
-                    NotificationTabItem(
-                        account = accountType,
-                        metaData =
-                            TabMetaData(
-                                title = TitleType.Localized(TitleType.Localized.LocalizedKey.Notifications),
-                                icon = IconType.Material(dev.dimension.flare.ui.model.UiIcon.Notification),
-                            ),
-                    ),
-                    RssTabItem(
-                        metaData =
-                            TabMetaData(
-                                title = TitleType.Localized(TitleType.Localized.LocalizedKey.Rss),
-                                icon = IconType.Material(dev.dimension.flare.ui.model.UiIcon.Rss),
-                            ),
-                    ),
-                    DiscoverTabItem(
-                        account = accountType,
-                        metaData =
-                            TabMetaData(
-                                title = TitleType.Localized(TitleType.Localized.LocalizedKey.Discover),
-                                icon = IconType.Material(dev.dimension.flare.ui.model.UiIcon.Search),
-                            ),
-                    ),
-                )
-            } ?: guest
+        internal val default: ImmutableList<TabItem> =
+            persistentListOf(
+                HomeTabItem,
+                AllNotificationTabItem,
+                DiscoverTabItem,
+            )
 
         internal val guest: ImmutableList<TabItem> =
             persistentListOf(
+                HomeTabItem,
+                DiscoverTabItem,
+            )
+
+        internal fun secondaryFor(
+            platformType: PlatformType,
+            accountKey: MicroBlogKey,
+        ): ImmutableList<TabItem> =
+            persistentListOf(
                 HomeTimelineTabItem(
-                    account = AccountType.Guest,
+                    account = AccountType.Specific(accountKey),
                     metaData =
                         TabMetaData(
                             title = TitleType.Localized(TitleType.Localized.LocalizedKey.Home),
                             icon = IconType.Material(dev.dimension.flare.ui.model.UiIcon.Home),
                         ),
                 ),
-                DiscoverTabItem(
-                    account = AccountType.Guest,
-                    metaData =
-                        TabMetaData(
-                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Discover),
-                            icon = IconType.Material(dev.dimension.flare.ui.model.UiIcon.Search),
-                        ),
-                ),
-            )
-
-        internal fun secondaryFor(
-            platformType: PlatformType,
-            accountKey: MicroBlogKey,
-        ): ImmutableList<TabItem> = platformType.spec.secondary(accountKey)
+            ).plus(platformType.spec.secondary(accountKey)).toImmutableList()
     }
+}
+
+@Immutable
+@Serializable
+public data object HomeTabItem : TabItem() {
+    override val metaData: TabMetaData =
+        TabMetaData(
+            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Home),
+            icon = IconType.Material(dev.dimension.flare.ui.model.UiIcon.Home),
+        )
+    override val key: String = "home"
+
+    override fun update(metaData: TabMetaData): TabItem = this
 }
 
 @Immutable
@@ -284,12 +242,14 @@ public sealed class TimelineTabItem : TabItem() {
 public data class HomeTimelineTabItem(
     override val metaData: TabMetaData,
     override val account: AccountType,
-) : TimelineTabItem() {
+) : TimelineTabItem(),
+    WithAccountTabItem {
     override val key: String = "home_$account"
 
     override fun createPresenter(): TimelinePresenter = HomeTimelinePresenter(account)
 
     override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
+
     public constructor(accountType: AccountType) :
         this(
             account = accountType,
@@ -300,7 +260,11 @@ public data class HomeTimelineTabItem(
                 ),
         )
 
-    public constructor(accountKey: MicroBlogKey, title: String, icon: IconType = IconType.FavIcon(accountKey.host)) :
+    public constructor(
+        accountKey: MicroBlogKey,
+        title: String,
+        icon: IconType = IconType.FavIcon(accountKey.host),
+    ) :
         this(
             account = AccountType.Specific(accountKey),
             metaData =
@@ -323,8 +287,6 @@ public data class MixedTimelineTabItem(
 ) : TimelineTabItem() {
     override fun createPresenter(): TimelinePresenter = MixedTimelinePresenter(subTimelineTabItem.map { it.createPresenter() })
 
-    override val account: AccountType
-        get() = AccountType.Guest
     override val key: String
         get() =
             buildString {
@@ -344,7 +306,8 @@ public data class ListTimelineTabItem(
     override val account: AccountType,
     val listId: String,
     override val metaData: TabMetaData,
-) : TimelineTabItem() {
+) : TimelineTabItem(),
+    WithAccountTabItem {
     public constructor(accountKey: MicroBlogKey, data: UiList) : this(
         listId = data.id,
         account = AccountType.Specific(accountKey),
@@ -371,7 +334,7 @@ public data class ListTimelineTabItem(
 public data class AllListTabItem(
     override val account: AccountType,
     override val metaData: TabMetaData,
-) : TabItem() {
+) : AccountTabItem() {
     override val key: String = "list_$account"
 
     override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
@@ -383,7 +346,8 @@ public object Mastodon {
     public data class LocalTimelineTabItem(
         override val account: AccountType,
         override val metaData: TabMetaData,
-    ) : TimelineTabItem() {
+    ) : TimelineTabItem(),
+        WithAccountTabItem {
         override val key: String = "local_$account"
 
         override fun createPresenter(): TimelinePresenter = MastodonLocalTimelinePresenter(account)
@@ -396,7 +360,8 @@ public object Mastodon {
     public data class PublicTimelineTabItem(
         override val account: AccountType,
         override val metaData: TabMetaData,
-    ) : TimelineTabItem() {
+    ) : TimelineTabItem(),
+        WithAccountTabItem {
         override val key: String = "public_$account"
 
         override fun createPresenter(): TimelinePresenter = MastodonPublicTimelinePresenter(account)
@@ -409,7 +374,8 @@ public object Mastodon {
     public data class BookmarkTimelineTabItem(
         override val account: AccountType,
         override val metaData: TabMetaData,
-    ) : TimelineTabItem() {
+    ) : TimelineTabItem(),
+        WithAccountTabItem {
         override val key: String = "bookmark_$account"
 
         override fun createPresenter(): TimelinePresenter = MastodonBookmarkTimelinePresenter(account)
@@ -422,7 +388,8 @@ public object Mastodon {
     public data class FavouriteTimelineTabItem(
         override val account: AccountType,
         override val metaData: TabMetaData,
-    ) : TimelineTabItem() {
+    ) : TimelineTabItem(),
+        WithAccountTabItem {
         override val key: String = "favourite_$account"
 
         override fun createPresenter(): TimelinePresenter = MastodonFavouriteTimelinePresenter(account)
@@ -437,7 +404,8 @@ public object Misskey {
     public data class LocalTimelineTabItem(
         override val account: AccountType,
         override val metaData: TabMetaData,
-    ) : TimelineTabItem() {
+    ) : TimelineTabItem(),
+        WithAccountTabItem {
         override val key: String = "local_$account"
 
         override fun createPresenter(): TimelinePresenter = MissKeyLocalTimelinePresenter(account)
@@ -450,7 +418,8 @@ public object Misskey {
     public data class GlobalTimelineTabItem(
         override val account: AccountType,
         override val metaData: TabMetaData,
-    ) : TimelineTabItem() {
+    ) : TimelineTabItem(),
+        WithAccountTabItem {
         override val key: String = "global_$account"
 
         override fun createPresenter(): TimelinePresenter = MissKeyPublicTimelinePresenter(account)
@@ -463,7 +432,8 @@ public object Misskey {
     public data class HybridTimelineTabItem(
         override val account: AccountType,
         override val metaData: TabMetaData,
-    ) : TimelineTabItem() {
+    ) : TimelineTabItem(),
+        WithAccountTabItem {
         override val key: String = "hybrid_$account"
 
         override fun createPresenter(): TimelinePresenter = MisskeyHybridTimelinePresenter(account)
@@ -476,7 +446,8 @@ public object Misskey {
     public data class FavouriteTimelineTabItem(
         override val account: AccountType,
         override val metaData: TabMetaData,
-    ) : TimelineTabItem() {
+    ) : TimelineTabItem(),
+        WithAccountTabItem {
         override val key: String = "favourite_$account"
 
         override fun createPresenter(): TimelinePresenter = MisskeyFavouriteTimelinePresenter(account)
@@ -489,7 +460,7 @@ public object Misskey {
     public data class AntennasListTabItem(
         override val account: AccountType,
         override val metaData: TabMetaData,
-    ) : TabItem() {
+    ) : AccountTabItem() {
         override val key: String = "antennas_$account"
 
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
@@ -501,7 +472,8 @@ public object Misskey {
         val antennasId: String,
         override val account: AccountType,
         override val metaData: TabMetaData,
-    ) : TimelineTabItem() {
+    ) : TimelineTabItem(),
+        WithAccountTabItem {
         public constructor(accountKey: MicroBlogKey, data: UiList) : this(
             antennasId = data.id,
             account = AccountType.Specific(accountKey),
@@ -529,7 +501,8 @@ public object Misskey {
         val channelId: String,
         override val account: AccountType,
         override val metaData: TabMetaData,
-    ) : TimelineTabItem() {
+    ) : TimelineTabItem(),
+        WithAccountTabItem {
         public constructor(accountKey: MicroBlogKey, data: UiList) : this(
             channelId = data.id,
             account = AccountType.Specific(accountKey),
@@ -556,7 +529,7 @@ public object Misskey {
     public data class ChannelListTabItem(
         override val account: AccountType,
         override val metaData: TabMetaData,
-    ) : TabItem() {
+    ) : AccountTabItem() {
         override val key: String = "channels_$account"
 
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
@@ -569,7 +542,8 @@ public object XQT {
     public data class FeaturedTimelineTabItem(
         override val account: AccountType,
         override val metaData: TabMetaData,
-    ) : TimelineTabItem() {
+    ) : TimelineTabItem(),
+        WithAccountTabItem {
         override val key: String = "featured_$account"
 
         override fun createPresenter(): TimelinePresenter = XQTFeaturedTimelinePresenter(account)
@@ -582,7 +556,8 @@ public object XQT {
     public data class BookmarkTimelineTabItem(
         override val account: AccountType,
         override val metaData: TabMetaData,
-    ) : TimelineTabItem() {
+    ) : TimelineTabItem(),
+        WithAccountTabItem {
         override val key: String = "bookmark_$account"
 
         override fun createPresenter(): TimelinePresenter = XQTBookmarkTimelinePresenter(account)
@@ -599,7 +574,8 @@ public object XQT {
                 title = TitleType.Localized(TitleType.Localized.LocalizedKey.Posts),
                 icon = IconType.Material(dev.dimension.flare.ui.model.UiIcon.List),
             ),
-    ) : TimelineTabItem() {
+    ) : TimelineTabItem(),
+        WithAccountTabItem {
         override val key: String = "device_follow_$account"
 
         override fun createPresenter(): TimelinePresenter = XQTDeviceFollowTimelinePresenter(account)
@@ -614,7 +590,7 @@ public object Bluesky {
     public data class FeedsTabItem(
         override val account: AccountType,
         override val metaData: TabMetaData,
-    ) : TabItem() {
+    ) : AccountTabItem() {
         override val key: String = "feeds_$account"
 
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
@@ -626,7 +602,8 @@ public object Bluesky {
         override val account: AccountType,
         val uri: String,
         override val metaData: TabMetaData,
-    ) : TimelineTabItem() {
+    ) : TimelineTabItem(),
+        WithAccountTabItem {
         public constructor(accountKey: MicroBlogKey, data: UiList) : this(
             uri = data.id,
             account = AccountType.Specific(accountKey),
@@ -653,7 +630,8 @@ public object Bluesky {
     public data class BookmarkTimelineTabItem(
         override val account: AccountType,
         override val metaData: TabMetaData,
-    ) : TimelineTabItem() {
+    ) : TimelineTabItem(),
+        WithAccountTabItem {
         override val key: String = "bookmark_$account"
 
         override fun createPresenter(): TimelinePresenter = BlueskyBookmarkTimelinePresenter(account)
@@ -678,7 +656,8 @@ public object VVo {
     public data class FeaturedTimelineTabItem(
         override val account: AccountType,
         override val metaData: TabMetaData,
-    ) : TimelineTabItem() {
+    ) : TimelineTabItem(),
+        WithAccountTabItem {
         override val key: String = "featured_$account"
 
         override fun createPresenter(): TimelinePresenter = DiscoverStatusTimelinePresenter(account)
@@ -691,7 +670,8 @@ public object VVo {
     public data class FavoriteTimelineTabItem(
         override val account: AccountType,
         override val metaData: TabMetaData,
-    ) : TimelineTabItem() {
+    ) : TimelineTabItem(),
+        WithAccountTabItem {
         override val key: String = "favorite_$account"
 
         override fun createPresenter(): TimelinePresenter = VVOFavouriteTimelinePresenter(account)
@@ -704,7 +684,8 @@ public object VVo {
     public data class LikedTimelineTabItem(
         override val account: AccountType,
         override val metaData: TabMetaData,
-    ) : TimelineTabItem() {
+    ) : TimelineTabItem(),
+        WithAccountTabItem {
         override val key: String = "liked_$account"
 
         override fun createPresenter(): TimelinePresenter = VVOLikeTimelinePresenter(account)
@@ -720,8 +701,6 @@ public data class RssTimelineTabItem(
     override val metaData: TabMetaData,
     val favIcon: String? = null,
 ) : TimelineTabItem() {
-    // This is a special case for RSS feeds, which are not tied to a specific account.
-    override val account: AccountType = AccountType.Guest
     override val key: String = "rss_$feedUrl"
 
     override fun createPresenter(): TimelinePresenter = RssTimelinePresenter(feedUrl)
@@ -735,22 +714,11 @@ public data class RssTimelineTabItem(
             TabMetaData(
                 title = TitleType.Text(data.title ?: data.url),
                 icon =
-                    data.favIcon ?.let {
+                    data.favIcon?.let {
                         IconType.Url(it)
                     } ?: IconType.Material(dev.dimension.flare.ui.model.UiIcon.Rss),
             ),
     )
-//    public constructor(
-//        feedUrl: String,
-//        title: String,
-//    ) : this(
-//        feedUrl,
-//        metaData =
-//            TabMetaData(
-//                title = TitleType.Text(title),
-//                icon = IconType.Url(UiRssSource.favIconUrl(feedUrl)),
-//            ),
-//    )
 }
 
 @Immutable
@@ -761,7 +729,6 @@ public data class AllRssTimelineTabItem(
             title = TitleType.Localized(TitleType.Localized.LocalizedKey.AllRssFeeds),
             icon = IconType.Material(dev.dimension.flare.ui.model.UiIcon.Rss),
         ),
-    override val account: AccountType = AccountType.Guest,
 ) : TimelineTabItem() {
     override val key: String = "all_rss"
 
@@ -778,7 +745,6 @@ public data class SubscriptionTimelineTabItem(
     override val metaData: TabMetaData,
     val favIcon: String? = null,
 ) : TimelineTabItem() {
-    override val account: AccountType = AccountType.Guest
     override val key: String = "subscription_${subscriptionType.name}_$subscriptionUrl"
 
     override fun createPresenter(): TimelinePresenter = SubscriptionTimelinePresenter(subscriptionType, subscriptionUrl)
@@ -809,7 +775,7 @@ public data class ProfileTabItem(
     override val account: AccountType,
     val userKey: AccountType,
     override val metaData: TabMetaData,
-) : TabItem() {
+) : AccountTabItem() {
     public constructor(
         accountKey: MicroBlogKey,
         userKey: MicroBlogKey,
@@ -830,19 +796,20 @@ public data class ProfileTabItem(
 
 @Immutable
 @Serializable
-public data class DiscoverTabItem(
-    override val account: AccountType,
-    override val metaData: TabMetaData,
-) : TabItem() {
-    override val key: String = "discover_$account"
+public data object DiscoverTabItem : TabItem() {
+    override val metaData: TabMetaData
+        get() =
+            TabMetaData(
+                title = TitleType.Localized(TitleType.Localized.LocalizedKey.Discover),
+                icon = IconType.Material(dev.dimension.flare.ui.model.UiIcon.Search),
+            )
+    override val key: String = "discover"
 
-    override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
+    override fun update(metaData: TabMetaData): TabItem = this
 }
 
 @Serializable
 public data object SettingsTabItem : TabItem() {
-    override val account: AccountType
-        get() = AccountType.Guest
     override val key: String
         get() = "settings"
     override val metaData: TabMetaData
@@ -860,7 +827,7 @@ public data object SettingsTabItem : TabItem() {
 public data class DirectMessageTabItem(
     override val account: AccountType,
     override val metaData: TabMetaData,
-) : TabItem() {
+) : AccountTabItem() {
     override val key: String = "dm_$account"
 
     override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
@@ -868,13 +835,16 @@ public data class DirectMessageTabItem(
 
 @Immutable
 @Serializable
-public data class RssTabItem(
-    override val metaData: TabMetaData,
-    override val account: AccountType = AccountType.Guest,
-) : TabItem() {
+public data object RssTabItem : TabItem() {
     override val key: String = "rss"
+    override val metaData: TabMetaData
+        get() =
+            TabMetaData(
+                title = TitleType.Localized(TitleType.Localized.LocalizedKey.Rss),
+                icon = IconType.Material(dev.dimension.flare.ui.model.UiIcon.Rss),
+            )
 
-    override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
+    override fun update(metaData: TabMetaData): TabItem = this
 }
 
 @OptIn(ExperimentalSerializationApi::class)

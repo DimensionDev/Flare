@@ -59,7 +59,6 @@ import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.data.model.BottomBarBehavior
 import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.data.model.TimelineTabItem
-import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
@@ -90,14 +89,13 @@ import moe.tlaster.precompose.molecule.producePresenter
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
 internal fun HomeTimelineScreen(
-    accountType: AccountType,
     toCompose: () -> Unit,
     toQuickMenu: () -> Unit,
     toLogin: () -> Unit,
     toTabSettings: () -> Unit,
 ) {
-    val state by producePresenter(key = "home_timeline_$accountType") {
-        timelinePresenter(accountType)
+    val state by producePresenter(key = "home_timeline") {
+        timelinePresenter()
     }
     val loggedInState = remember { LoggedInPresenter() }.invoke()
     val scope = rememberCoroutineScope()
@@ -159,11 +157,7 @@ internal fun HomeTimelineScreen(
                                                     )
                                                 },
                                                 icon = {
-                                                    TabIcon(
-                                                        accountType = tab.account,
-                                                        icon = tab.metaData.icon,
-                                                        title = tab.metaData.title,
-                                                    )
+                                                    TabIcon(tab)
                                                 },
 //                                                colors = FilterChipDefaults.filterChipColors(
 //                                                    containerColor = MaterialTheme.colorScheme.surface,
@@ -416,9 +410,9 @@ internal fun TimelineItemContent(
 }
 
 @Composable
-private fun timelinePresenter(accountType: AccountType) =
+private fun timelinePresenter() =
     run {
-        val state = remember(accountType) { HomeTimelineWithTabsPresenter(accountType) }.invoke()
+        val state = remember { HomeTimelineWithTabsPresenter() }.invoke()
 
         val pagerState =
             state.tabState.map {

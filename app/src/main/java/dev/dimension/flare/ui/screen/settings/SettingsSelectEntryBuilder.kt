@@ -42,26 +42,14 @@ internal fun EntryProviderScope<NavKey>.settingsSelectEntryBuilder(
             toAbout = {
                 navigate(Route.Settings.About)
             },
-            toTabCustomization = {
-                navigate(Route.Settings.TabCustomization)
-            },
             toLocalFilter = {
                 navigate(Route.Settings.LocalFilter)
-            },
-            toLocalHistory = {
-                navigate(Route.Settings.LocalHistory)
-            },
-            toDraftBox = {
-                navigate(Route.DraftBox)
             },
             toAiConfig = {
                 navigate(Route.Settings.AiConfig)
             },
             toColorSpace = {
                 navigate(Route.Settings.ColorSpace)
-            },
-            toRSSManagement = {
-                navigate(Route.Rss.Sources)
             },
             toTranslationConfig = {
                 navigate(Route.Settings.TranslationConfig)
@@ -149,19 +137,6 @@ internal fun EntryProviderScope<NavKey>.settingsSelectEntryBuilder(
     ) {
         AboutScreen(
             onBack = onBack
-        )
-    }
-
-    entry<Route.Settings.TabCustomization>(
-        metadata = ListDetailSceneStrategy.detailPane(
-            sceneKey = "Settings"
-        )
-    ) {
-        TabCustomizeScreen(
-            onBack = onBack,
-            toAddRssSource = {
-                navigate(Route.Rss.Create)
-            }
         )
     }
 

@@ -24,7 +24,7 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 
 public class AllTabsPresenter(
-    private val filterIsTimeline: Boolean = false,
+//    private val filterIsTimeline: Boolean = false,
 ) : PresenterBase<AllTabsPresenter.State>() {
     @Composable
     override fun body(): State {
@@ -37,24 +37,15 @@ public class AllTabsPresenter(
                     .map { user ->
                         val tabs =
                             remember(user.key) {
-                                (
-                                    TimelineTabItem.default(user.key) +
-                                        TimelineTabItem.secondaryFor(
-                                            user.platformType,
-                                            user.key,
-                                        )
-                                ).let {
-                                    if (filterIsTimeline) {
-                                        it.filterIsInstance<TimelineTabItem>()
-                                    } else {
-                                        it
-                                    }
-                                }
+                                TimelineTabItem.secondaryFor(
+                                    user.platformType,
+                                    user.key,
+                                )
                             }
                         val extraTabs = listTabPresenter(accountKey = user.key).tabs.takeSuccess()
                         State.AccountTabs(
                             profile = user,
-                            tabs = tabs.toImmutableList(),
+                            tabs = tabs,
                             extraTabs = extraTabs?.toImmutableList() ?: persistentListOf(),
                         )
                     }.toImmutableList()
@@ -85,22 +76,6 @@ public class AllTabsPresenter(
             }
 
         return object : State {
-            val defaultAccountKey =
-                accountTabs
-                    .takeSuccess()
-                    ?.firstOrNull()
-                    ?.profile
-                    ?.key
-            override val defaultTabs =
-                TimelineTabItem
-                    .mainSidePanel(defaultAccountKey)
-                    .let {
-                        if (filterIsTimeline) {
-                            it.filterIsInstance<TimelineTabItem>()
-                        } else {
-                            it
-                        }
-                    }.toImmutableList()
             override val accountTabs = accountTabs
             override val rssTabs = rssTabs
         }
@@ -116,7 +91,6 @@ public class AllTabsPresenter(
 
     @Immutable
     public interface State {
-        public val defaultTabs: ImmutableList<TabItem>
         public val rssTabs: ImmutableList<TimelineTabItem>
         public val accountTabs: UiState<ImmutableList<AccountTabs>>
 

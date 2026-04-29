@@ -87,13 +87,9 @@ internal fun SettingsScreen(
     toStorage: () -> Unit,
     toAbout: () -> Unit,
     toColorSpace: () -> Unit,
-    toTabCustomization: () -> Unit,
     toLocalFilter: () -> Unit,
-    toLocalHistory: () -> Unit,
-    toDraftBox: () -> Unit,
     toAiConfig: () -> Unit,
     toTranslationConfig: () -> Unit,
-    toRSSManagement: () -> Unit,
     onBack: () -> Unit,
 ) {
     val context = LocalContext.current

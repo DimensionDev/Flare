@@ -13,6 +13,7 @@ import compose.icons.fontawesomeicons.brands.XTwitter
 import compose.icons.fontawesomeicons.regular.Bookmark
 import compose.icons.fontawesomeicons.regular.CommentDots
 import compose.icons.fontawesomeicons.regular.Heart
+import compose.icons.fontawesomeicons.regular.Star
 import compose.icons.fontawesomeicons.solid.At
 import compose.icons.fontawesomeicons.solid.Bell
 import compose.icons.fontawesomeicons.solid.Bookmark
@@ -38,6 +39,7 @@ import compose.icons.fontawesomeicons.solid.Retweet
 import compose.icons.fontawesomeicons.solid.ShareNodes
 import compose.icons.fontawesomeicons.solid.SquarePollHorizontal
 import compose.icons.fontawesomeicons.solid.SquareRss
+import compose.icons.fontawesomeicons.solid.Star
 import compose.icons.fontawesomeicons.solid.Thumbtack
 import compose.icons.fontawesomeicons.solid.Trash
 import compose.icons.fontawesomeicons.solid.Tv
@@ -74,7 +76,8 @@ public fun UiIcon.toImageVector(): ImageVector =
         UiIcon.Block -> FontAwesomeIcons.Solid.UserSlash
         UiIcon.UnBlock -> FontAwesomeIcons.Solid.UserSlash
         UiIcon.Follow -> FontAwesomeIcons.Solid.UserPlus
-        UiIcon.Favourite -> FontAwesomeIcons.Solid.Heart
+        UiIcon.Favourite -> FontAwesomeIcons.Solid.Star
+        UiIcon.UnFavourite -> FontAwesomeIcons.Regular.Star
         UiIcon.Mention -> FontAwesomeIcons.Solid.At
         UiIcon.Poll -> FontAwesomeIcons.Solid.SquarePollHorizontal
         UiIcon.Edit -> FontAwesomeIcons.Solid.Pen

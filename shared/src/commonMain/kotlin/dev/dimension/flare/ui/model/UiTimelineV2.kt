@@ -113,6 +113,7 @@ public sealed class UiTimelineV2 {
                     App,
                     StarterpackJoined,
                     Pinned,
+                    Like,
                 }
             }
         }

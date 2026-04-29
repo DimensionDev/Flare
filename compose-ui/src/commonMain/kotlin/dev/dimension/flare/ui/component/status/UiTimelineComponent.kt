@@ -198,6 +198,7 @@ import dev.dimension.flare.compose.ui.misskey_notification_item_follow_request_a
 import dev.dimension.flare.compose.ui.misskey_notification_item_reacted_to_your_status
 import dev.dimension.flare.compose.ui.notification_item_accept_follow_request
 import dev.dimension.flare.compose.ui.notification_item_reject_follow_request
+import dev.dimension.flare.compose.ui.vvo_notification_like
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.model.PostActionStyle
 import dev.dimension.flare.model.MicroBlogKey
@@ -659,6 +660,10 @@ private fun TopMessageComponent(
 
                     UiTimelineV2.Message.Type.Localized.MessageId.Pinned -> {
                         stringResource(resource = Res.string.mastodon_item_pinned)
+                    }
+
+                    UiTimelineV2.Message.Type.Localized.MessageId.Like -> {
+                        stringResource(resource = Res.string.vvo_notification_like)
                     }
                 }
             }

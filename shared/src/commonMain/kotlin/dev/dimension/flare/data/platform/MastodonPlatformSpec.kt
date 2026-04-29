@@ -80,7 +80,7 @@ internal data object MastodonPlatformSpec : PlatformSpec {
                 AccountType.Specific(accountKey),
                 TabMetaData(
                     title = TitleType.Localized(TitleType.Localized.LocalizedKey.Favourite),
-                    icon = IconType.Mixed(dev.dimension.flare.ui.model.UiIcon.Heart, accountKey),
+                    icon = IconType.Mixed(dev.dimension.flare.ui.model.UiIcon.Favourite, accountKey),
                 ),
             ),
             AllListTabItem(

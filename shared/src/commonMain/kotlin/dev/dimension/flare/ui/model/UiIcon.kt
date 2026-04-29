@@ -58,4 +58,5 @@ public enum class UiIcon {
     Nostr,
     X,
     Translate,
+    UnFavourite,
 }

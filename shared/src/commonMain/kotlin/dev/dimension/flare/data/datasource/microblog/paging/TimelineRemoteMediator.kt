@@ -134,37 +134,55 @@ private fun List<UiTimelineV2>.collapseReplyChains(): List<UiTimelineV2> {
 
     val collapsedPosts = mutableMapOf<Pair<AccountType, MicroBlogKey>, UiTimelineV2.Post>()
     val ancestorKeys = mutableSetOf<Pair<AccountType, MicroBlogKey>>()
+    val collapsingKeys = mutableSetOf<Pair<AccountType, MicroBlogKey>>()
 
     fun collapse(post: UiTimelineV2.Post): UiTimelineV2.Post {
         val key = post.accountType to post.statusKey
         collapsedPosts[key]?.let {
             return it
         }
+        if (!collapsingKeys.add(key)) {
+            return post
+        }
 
-        val directParent =
-            post.parents
-                .lastOrNull()
-                ?.takeIf { rootPosts.containsKey(it.accountType to it.statusKey) }
-                ?.let { rootPosts.getValue(it.accountType to it.statusKey) }
+        try {
+            val directParentKey =
+                post.parents
+                    .lastOrNull()
+                    ?.let { it.accountType to it.statusKey }
+                    ?.takeIf { rootPosts.containsKey(it) }
+            val directParent =
+                directParentKey
+                    ?.takeUnless { it in collapsingKeys }
+                    ?.let { rootPosts.getValue(it) }
 
-        val collapsed =
-            if (directParent == null || directParent.accountType != post.accountType) {
-                post
-            } else {
-                ancestorKeys += directParent.accountType to directParent.statusKey
-                val collapsedParent = collapse(directParent)
-                post.copy(
-                    parents =
-                        (
-                            collapsedParent.parents +
-                                listOf(collapsedParent) +
-                                post.parents.dropLast(1)
-                        ).distinctBy { it.statusKey }
-                            .toImmutableList(),
-                )
-            }
-        collapsedPosts[key] = collapsed
-        return collapsed
+            val collapsed =
+                if (directParent == null || directParent.accountType != post.accountType) {
+                    if (directParentKey in collapsingKeys) {
+                        post.copy(
+                            parents = post.parents.dropLast(1).toImmutableList(),
+                        )
+                    } else {
+                        post
+                    }
+                } else {
+                    ancestorKeys += directParent.accountType to directParent.statusKey
+                    val collapsedParent = collapse(directParent)
+                    post.copy(
+                        parents =
+                            (
+                                collapsedParent.parents +
+                                    listOf(collapsedParent) +
+                                    post.parents.dropLast(1)
+                            ).distinctBy { it.statusKey }
+                                .toImmutableList(),
+                    )
+                }
+            collapsedPosts[key] = collapsed
+            return collapsed
+        } finally {
+            collapsingKeys -= key
+        }
     }
 
     return mapNotNull { item ->

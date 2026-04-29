@@ -108,6 +108,8 @@ public sealed class ActionMenu {
                     RetryTranslation,
                     Translate,
                     ShowOriginal,
+                    Favorite,
+                    UnFavorite,
                 }
             }
         }

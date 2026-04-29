@@ -111,6 +111,8 @@
     <string name="bookmark_add">Add bookmark</string>
     <string name="like">Like</string>
     <string name="unlike">Unlike</string>
+    <string name="favourite">Favourite</string>
+    <string name="unfavourite">Unfavourite</string>
     <string name="more">More</string>
     <string name="quote">Quote</string>
     <string name="reaction_add">Add reaction</string>

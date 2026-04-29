@@ -248,6 +248,8 @@ extension ActionMenuItemText {
             case .retryTranslation: return "Retry translation"
             case .translate: return "Translate"
             case .showOriginal: return "Show original"
+            case .favorite: return "Favourite"
+            case .unFavorite: return "Unfavourite"
             }
         }
     }
@@ -301,7 +303,8 @@ extension UiIcon {
         case .block: return "fa-user-slash"
         case .unBlock: return "fa-user-slash"
         case .follow: return "fa-user-plus"
-        case .favourite: return "fa-heart"
+        case .favourite: return "fa-star-fill"
+        case .unFavourite: return "fa-star"
         case .mention: return "fa-at"
         case .poll: return "fa-square-poll-horizontal"
         case .edit: return "fa-pen"

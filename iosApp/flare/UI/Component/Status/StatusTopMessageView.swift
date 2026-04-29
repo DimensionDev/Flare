@@ -76,6 +76,8 @@ extension UiTimelineV2.MessageType {
                 String(localized: "bluesky_notification_starterpackJoined")
             case .pinned:
                 String(localized: "mastodon_item_pinned")
+            case .like:
+                String(localized: "bluesky_notification_like")
             }
         }
         return nil

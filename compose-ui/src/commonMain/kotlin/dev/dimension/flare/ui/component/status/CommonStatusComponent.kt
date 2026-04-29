@@ -63,6 +63,7 @@ import dev.dimension.flare.compose.ui.bookmark_remove
 import dev.dimension.flare.compose.ui.channel_title
 import dev.dimension.flare.compose.ui.comment
 import dev.dimension.flare.compose.ui.delete
+import dev.dimension.flare.compose.ui.favourite
 import dev.dimension.flare.compose.ui.fx_share
 import dev.dimension.flare.compose.ui.hide_media
 import dev.dimension.flare.compose.ui.like
@@ -90,6 +91,7 @@ import dev.dimension.flare.compose.ui.status_detail_tldr
 import dev.dimension.flare.compose.ui.status_detail_translate
 import dev.dimension.flare.compose.ui.translation_retry
 import dev.dimension.flare.compose.ui.translation_show_original
+import dev.dimension.flare.compose.ui.unfavourite
 import dev.dimension.flare.compose.ui.unlike
 import dev.dimension.flare.compose.ui.user_block
 import dev.dimension.flare.compose.ui.user_block_with_parameter
@@ -1041,6 +1043,8 @@ private fun ActionMenu.Item.Text.asString(): String =
                     ActionMenu.Item.Text.Localized.Type.RetryTranslation -> Res.string.translation_retry
                     ActionMenu.Item.Text.Localized.Type.Translate -> Res.string.status_detail_translate
                     ActionMenu.Item.Text.Localized.Type.ShowOriginal -> Res.string.translation_show_original
+                    ActionMenu.Item.Text.Localized.Type.Favorite -> Res.string.favourite
+                    ActionMenu.Item.Text.Localized.Type.UnFavorite -> Res.string.unfavourite
                 }
             stringResource(resource, *parameters.toTypedArray())
         }

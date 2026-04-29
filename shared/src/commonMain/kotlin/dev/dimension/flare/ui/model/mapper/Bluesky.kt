@@ -416,7 +416,7 @@ private fun List<Token>.toUiRichText(accountKey: MicroBlogKey): UiRichText {
 private val ListNotificationsNotificationReason.icon: UiIcon
     get() =
         when (this) {
-            ListNotificationsNotificationReason.Like -> UiIcon.Favourite
+            ListNotificationsNotificationReason.Like -> UiIcon.Like
             ListNotificationsNotificationReason.Repost -> UiIcon.Retweet
             ListNotificationsNotificationReason.Follow -> UiIcon.Follow
             ListNotificationsNotificationReason.Mention -> UiIcon.Mention
@@ -426,7 +426,7 @@ private val ListNotificationsNotificationReason.icon: UiIcon
             ListNotificationsNotificationReason.StarterpackJoined -> UiIcon.Info
             ListNotificationsNotificationReason.Unverified -> UiIcon.Info
             ListNotificationsNotificationReason.Verified -> UiIcon.Info
-            ListNotificationsNotificationReason.LikeViaRepost -> UiIcon.Favourite
+            ListNotificationsNotificationReason.LikeViaRepost -> UiIcon.Like
             ListNotificationsNotificationReason.RepostViaRepost -> UiIcon.Retweet
             ListNotificationsNotificationReason.SubscribedPost -> UiIcon.Info
             ListNotificationsNotificationReason.ContactMatch -> UiIcon.Info
@@ -437,7 +437,7 @@ private val ListNotificationsNotificationReason.type: UiTimelineV2.Message.Type
         when (this) {
             ListNotificationsNotificationReason.Like -> {
                 UiTimelineV2.Message.Type.Localized(
-                    UiTimelineV2.Message.Type.Localized.MessageId.Favourite,
+                    UiTimelineV2.Message.Type.Localized.MessageId.Like,
                 )
             }
 
@@ -497,7 +497,7 @@ private val ListNotificationsNotificationReason.type: UiTimelineV2.Message.Type
 
             ListNotificationsNotificationReason.LikeViaRepost -> {
                 UiTimelineV2.Message.Type.Localized(
-                    UiTimelineV2.Message.Type.Localized.MessageId.Favourite,
+                    UiTimelineV2.Message.Type.Localized.MessageId.Like,
                 )
             }
 

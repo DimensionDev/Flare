@@ -2293,10 +2293,10 @@ internal class NostrService(
                             actor = profiles[pubKey] ?: profileOf(pubKey, null),
                             statusKey = MicroBlogKey(id, NOSTR_HOST),
                             createdAt = createdAt,
-                            icon = UiIcon.Favourite,
+                            icon = UiIcon.Like,
                             type =
                                 UiTimelineV2.Message.Type.Localized(
-                                    UiTimelineV2.Message.Type.Localized.MessageId.Favourite,
+                                    UiTimelineV2.Message.Type.Localized.MessageId.Like,
                                 ),
                         ),
                 )

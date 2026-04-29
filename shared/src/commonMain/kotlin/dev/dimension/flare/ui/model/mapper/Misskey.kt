@@ -152,7 +152,7 @@ internal fun Notification.render(accountKey: MicroBlogKey): UiTimelineV2 {
                     NotificationType.Reply -> UiIcon.Reply
                     NotificationType.Renote -> UiIcon.Retweet
                     NotificationType.Quote -> UiIcon.Quote
-                    NotificationType.Reaction -> UiIcon.Favourite
+                    NotificationType.Reaction -> UiIcon.Like
                     NotificationType.PollEnded -> UiIcon.Poll
                     NotificationType.ReceiveFollowRequest -> UiIcon.Follow
                     NotificationType.FollowRequestAccepted -> UiIcon.Follow
@@ -761,13 +761,13 @@ internal fun ActionMenu.Companion.misskeyFavourite(
 ): ActionMenu.Item =
     ActionMenu.Item(
         updateKey = "misskey_favourite_$postKey",
-        icon = if (favourited) UiIcon.Unlike else UiIcon.Like,
+        icon = if (favourited) UiIcon.Favourite else UiIcon.UnFavourite,
         text =
             ActionMenu.Item.Text.Localized(
                 if (favourited) {
-                    ActionMenu.Item.Text.Localized.Type.Unlike
+                    ActionMenu.Item.Text.Localized.Type.UnFavorite
                 } else {
-                    ActionMenu.Item.Text.Localized.Type.Like
+                    ActionMenu.Item.Text.Localized.Type.Favorite
                 },
             ),
         count = UiNumber(0),

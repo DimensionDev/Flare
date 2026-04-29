@@ -102,6 +102,7 @@ public sealed class UiTimelineV2 {
                     Repost,
                     Follow,
                     FollowRequest,
+                    Like,
                     Favourite,
                     PollEnded,
                     PostUpdated,

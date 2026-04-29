@@ -46,7 +46,7 @@ internal fun Attitude.render(accountKey: MicroBlogKey): UiTimelineV2 {
                 user = user,
                 statusKey = MicroBlogKey(id.toString(), accountKey.host),
                 icon = UiIcon.Like,
-                type = UiTimelineV2.Message.Type.Localized(UiTimelineV2.Message.Type.Localized.MessageId.Favourite),
+                type = UiTimelineV2.Message.Type.Localized(UiTimelineV2.Message.Type.Localized.MessageId.Like),
                 createdAt = createdAt?.toUi() ?: Clock.System.now().toUi(),
                 clickEvent =
                     if (user != null) {

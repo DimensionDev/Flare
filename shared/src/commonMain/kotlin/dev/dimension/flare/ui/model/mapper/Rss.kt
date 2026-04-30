@@ -53,11 +53,12 @@ internal fun Feed.Atom.Entry.render(
             Ksoup.parse(it)
         }
     val img = descHtml?.select("img")?.firstOrNull()?.attr("src") ?: media?.thumbnail?.url
+    val link = links.firstOrNull()?.href?.replace("http://", "https://") ?: id
     return UiTimelineV2.Feed(
         title = title?.value?.takeIf { it.isNotEmpty() && it.isNotBlank() },
         description = descHtml?.text(),
         descriptionHtml = rawHtml,
-        url = links.first().href.replace("http://", "https://"),
+        url = link,
         sourceLanguages = listOfNotNull(sourceLanguage).toPersistentList(),
         source =
             UiTimelineV2.Feed.Source(
@@ -70,7 +71,7 @@ internal fun Feed.Atom.Entry.render(
                     url = it,
                     customHeaders =
                         persistentMapOf(
-                            "Referer" to "https://${Url(links.first().href).host}/",
+                            "Referer" to "https://${Url(link).host}/",
                         ),
                 )
             },
@@ -93,7 +94,12 @@ internal fun Feed.Rss20.Item.render(
         description?.let {
             Ksoup.parse(it)
         }
-    val img = descHtml?.select("img")?.firstOrNull()?.attr("src")
+    val img =
+        descHtml
+            ?.select("img")
+            ?.firstOrNull()
+            ?.attr("src")
+            ?.takeIf { it.isNotEmpty() } ?: mediaContent?.url
     return UiTimelineV2.Feed(
         title = title,
         description = descHtml?.text(),

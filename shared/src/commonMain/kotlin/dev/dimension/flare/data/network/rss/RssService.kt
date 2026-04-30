@@ -78,7 +78,7 @@ internal object RssService {
         if (feedIcon != null) {
             return feedIcon
         }
-        val feedLink = feed?.link ?: url
+        val feedLink = (feed?.link ?: url).replace("http://", "https://", ignoreCase = true)
         val parsedUrl = Url(feedLink)
         val html =
             if (feed?.link != null && feed.link != url) {

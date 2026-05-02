@@ -94,6 +94,8 @@
     <string name="bookmark_add">Lägg till bokmärke</string>
     <string name="like">Gilla</string>
     <string name="unlike">Ogilla</string>
+    <string name="favourite">Favorit</string>
+    <string name="unfavourite">Unfavourite</string>
     <string name="more">Mer</string>
     <string name="quote">Offert</string>
     <string name="reaction_add">Lägg till reaktion</string>

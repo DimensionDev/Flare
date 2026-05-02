@@ -94,6 +94,8 @@
     <string name="bookmark_add">Lisää kirjanmerkki</string>
     <string name="like">Tykkää</string>
     <string name="unlike">Toisin</string>
+    <string name="favourite">Suosikki</string>
+    <string name="unfavourite">Unfavourite</string>
     <string name="more">Lisää</string>
     <string name="quote">Tarjous</string>
     <string name="reaction_add">Lisää reaktio</string>

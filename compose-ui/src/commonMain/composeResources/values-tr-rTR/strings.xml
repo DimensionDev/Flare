@@ -82,6 +82,8 @@
     <string name="bookmark_add">Yerimi ekle</string>
     <string name="like">Beğen</string>
     <string name="unlike">Beğenme</string>
+    <string name="favourite">Favori</string>
+    <string name="unfavourite">Favorilerden Çıkar</string>
     <string name="more">Daha fazlası</string>
     <string name="quote">Alıntı</string>
     <string name="reaction_add">Tepki Ekle</string>

@@ -94,6 +94,8 @@
     <string name="bookmark_add">إضافة إشارة مرجعية</string>
     <string name="like">إعجاب</string>
     <string name="unlike">خلافا</string>
+    <string name="favourite">المفضلة</string>
+    <string name="unfavourite">Unfavourite</string>
     <string name="more">المزيد</string>
     <string name="quote">اقتباس</string>
     <string name="reaction_add">إضافة رد فعل</string>

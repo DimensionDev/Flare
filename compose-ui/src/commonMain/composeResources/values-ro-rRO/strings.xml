@@ -94,6 +94,8 @@
     <string name="bookmark_add">Adaugă marcaj</string>
     <string name="like">Apreciere</string>
     <string name="unlike">Spre deosebire</string>
+    <string name="favourite">Favorit</string>
+    <string name="unfavourite">Unfavourite</string>
     <string name="more">Mai</string>
     <string name="quote">Ofertă</string>
     <string name="reaction_add">Adaugă reacţie</string>

@@ -94,6 +94,8 @@
     <string name="bookmark_add">Добавить закладку</string>
     <string name="like">Нравится</string>
     <string name="unlike">Не нравится</string>
+    <string name="favourite">Избранное</string>
+    <string name="unfavourite">Unfavourite</string>
     <string name="more">Ещё</string>
     <string name="quote">Цитата</string>
     <string name="reaction_add">Добавить реакцию</string>

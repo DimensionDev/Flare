@@ -94,6 +94,8 @@
     <string name="bookmark_add">Bladwijzer toevoegen</string>
     <string name="like">vind-ik-leuk</string>
     <string name="unlike">Anders dan</string>
+    <string name="favourite">Favoriete</string>
+    <string name="unfavourite">Unfavourite</string>
     <string name="more">Meer</string>
     <string name="quote">Offerte</string>
     <string name="reaction_add">Reactie toevoegen</string>

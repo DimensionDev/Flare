@@ -94,6 +94,8 @@
     <string name="bookmark_add">ブックマークを追加</string>
     <string name="like">いいね！</string>
     <string name="unlike">いいね！を解除</string>
+    <string name="favourite">お気に入り</string>
+    <string name="unfavourite">Unfavourite</string>
     <string name="more">もっと見る</string>
     <string name="quote">引用</string>
     <string name="reaction_add">リアクションを追加</string>

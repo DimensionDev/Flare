@@ -94,6 +94,8 @@
     <string name="bookmark_add">Añadir marcador</string>
     <string name="like">Me gusta</string>
     <string name="unlike">A diferencia de</string>
+    <string name="favourite">Favorito</string>
+    <string name="unfavourite">Unfavourite</string>
     <string name="more">Más</string>
     <string name="quote">Cotización</string>
     <string name="reaction_add">Añadir reacción</string>

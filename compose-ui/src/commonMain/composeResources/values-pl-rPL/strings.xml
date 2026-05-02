@@ -94,6 +94,8 @@
     <string name="bookmark_add">Dodaj zakładkę</string>
     <string name="like">Lubię</string>
     <string name="unlike">Nie lubię</string>
+    <string name="favourite">Ulubione</string>
+    <string name="unfavourite">Unfavourite</string>
     <string name="more">Więcej</string>
     <string name="quote">Oferta</string>
     <string name="reaction_add">Dodaj reakcję</string>

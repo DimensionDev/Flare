@@ -94,6 +94,8 @@
     <string name="bookmark_add">添加书签</string>
     <string name="like">点赞</string>
     <string name="unlike">取消点赞</string>
+    <string name="favourite">收藏夹</string>
+    <string name="unfavourite">Unfavourite</string>
     <string name="more">更多</string>
     <string name="quote">引用</string>
     <string name="reaction_add">添加反应</string>

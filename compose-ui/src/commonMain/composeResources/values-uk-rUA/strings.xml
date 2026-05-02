@@ -94,6 +94,8 @@
     <string name="bookmark_add">Додати до закладок</string>
     <string name="like">Подобається</string>
     <string name="unlike">На відміну від</string>
+    <string name="favourite">Вибране</string>
+    <string name="unfavourite">Unfavourite</string>
     <string name="more">Більше</string>
     <string name="quote">Цитувати</string>
     <string name="reaction_add">Додати реакцію</string>

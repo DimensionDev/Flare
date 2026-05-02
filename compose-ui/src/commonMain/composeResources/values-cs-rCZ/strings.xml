@@ -94,6 +94,8 @@
     <string name="bookmark_add">Přidat záložku</string>
     <string name="like">Líbí se mi</string>
     <string name="unlike">Nelíbí se mi</string>
+    <string name="favourite">Oblíbená</string>
+    <string name="unfavourite">Unfavourite</string>
     <string name="more">Více</string>
     <string name="quote">Cenová nabídka</string>
     <string name="reaction_add">Přidat reakci</string>

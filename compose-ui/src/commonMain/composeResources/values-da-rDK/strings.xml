@@ -94,6 +94,8 @@
     <string name="bookmark_add">Tilføj bogmærke</string>
     <string name="like">Ligesom</string>
     <string name="unlike">I modsætning</string>
+    <string name="favourite">Favorit</string>
+    <string name="unfavourite">Unfavourite</string>
     <string name="more">Mere</string>
     <string name="quote">Tilbud</string>
     <string name="reaction_add">Tilføj reaktion</string>

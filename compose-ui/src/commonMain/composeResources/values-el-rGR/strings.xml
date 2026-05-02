@@ -92,6 +92,8 @@
     <string name="bookmark_add">Προσθήκη σελιδοδείκτη</string>
     <string name="like">Αρέσει</string>
     <string name="unlike">Σε αντίθεση</string>
+    <string name="favourite">Αγαπημένο</string>
+    <string name="unfavourite">Unfavourite</string>
     <string name="more">Περισσότερα</string>
     <string name="quote">Παράθεση</string>
     <string name="reaction_add">Προσθήκη αντίδρασης</string>

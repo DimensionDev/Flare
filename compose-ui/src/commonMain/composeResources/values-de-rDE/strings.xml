@@ -94,6 +94,8 @@
     <string name="bookmark_add">Lesezeichen hinzufügen</string>
     <string name="like">Gefällt mir</string>
     <string name="unlike">Gefällt mir nicht</string>
+    <string name="favourite">Favorit</string>
+    <string name="unfavourite">Unfavourite</string>
     <string name="more">Mehr</string>
     <string name="quote">Zitat</string>
     <string name="reaction_add">Antwort hinzufügen</string>

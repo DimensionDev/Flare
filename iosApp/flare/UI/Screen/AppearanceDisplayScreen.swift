@@ -14,9 +14,7 @@ struct AppearanceDisplayScreen: View {
                     Toggle(isOn: Binding(get: {
                         appearance.absoluteTimestamp
                     }, set: { newValue in
-                        presenter.state.updateAppearanceSettings { settings in
-                            settings.copy(absoluteTimestamp: newValue)
-                        }
+                        presenter.state.updateAbsoluteTimestamp(value: newValue)
                     })) {
                         Text("appearance_absolute_timestamp")
                         Text("appearance_absolute_timestamp_description")
@@ -24,9 +22,7 @@ struct AppearanceDisplayScreen: View {
                     Toggle(isOn: Binding(get: {
                         appearance.showPlatformLogo
                     }, set: { newValue in
-                        presenter.state.updateAppearanceSettings { settings in
-                            settings.copy(showPlatformLogo: newValue)
-                        }
+                        presenter.state.updateShowPlatformLogo(value: newValue)
                     })) {
                         Text("appearance_show_platform_logo")
                         Text("appearance_show_platform_logo_description")
@@ -34,9 +30,7 @@ struct AppearanceDisplayScreen: View {
                     Toggle(isOn: Binding(get: {
                         appearance.showLinkPreview
                     }, set: { newValue in
-                        presenter.state.updateAppearanceSettings { settings in
-                            settings.copy(showLinkPreview: newValue)
-                        }
+                        presenter.state.updateShowLinkPreview(value: newValue)
                     })) {
                         Text("appearance_show_link_preview")
                         Text("appearance_show_link_preview_description")
@@ -45,9 +39,7 @@ struct AppearanceDisplayScreen: View {
                         Toggle(isOn: Binding(get: {
                             appearance.compatLinkPreview
                         }, set: { newValue in
-                            presenter.state.updateAppearanceSettings { settings in
-                                settings.copy(compatLinkPreview: newValue)
-                            }
+                            presenter.state.updateCompatLinkPreview(value: newValue)
                         })) {
                             Text("appearance_compat_link_preview")
                             Text("appearance_compat_link_preview_description")
@@ -56,9 +48,7 @@ struct AppearanceDisplayScreen: View {
                     Toggle(isOn: Binding(get: {
                         appearance.inAppBrowser
                     }, set: { newValue in
-                        presenter.state.updateAppearanceSettings { settings in
-                            settings.copy(inAppBrowser: newValue)
-                        }
+                        presenter.state.updateInAppBrowser(value: newValue)
                     })) {
                         Text("appearance_in_app_browser")
                         Text("appearance_in_app_browser_description")

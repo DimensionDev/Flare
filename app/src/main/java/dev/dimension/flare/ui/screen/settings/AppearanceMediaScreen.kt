@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import dev.dimension.flare.R
 import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.data.model.VideoAutoplay
+import dev.dimension.flare.data.model.appearance.AppearanceKeys
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FlareLargeFlexibleTopAppBar
 import dev.dimension.flare.ui.component.FlareScaffold
@@ -85,9 +86,7 @@ internal fun AppearanceMediaScreen(onBack: () -> Unit) {
             }
             SegmentedListItem(
                 onClick = {
-                    state.updateSettings {
-                        copy(showMedia = !showMedia)
-                    }
+                    state.update(AppearanceKeys.ShowMedia, !appearanceSettings.showMedia)
                 },
                 shapes =
                     when {
@@ -106,9 +105,7 @@ internal fun AppearanceMediaScreen(onBack: () -> Unit) {
                     Switch(
                         checked = appearanceSettings.showMedia,
                         onCheckedChange = {
-                            state.updateSettings {
-                                copy(showMedia = it)
-                            }
+                            state.update(AppearanceKeys.ShowMedia, it)
                         },
                     )
                 },
@@ -116,9 +113,7 @@ internal fun AppearanceMediaScreen(onBack: () -> Unit) {
             AnimatedVisibility(appearanceSettings.showMedia) {
                 SegmentedListItem(
                     onClick = {
-                        state.updateSettings {
-                            copy(showSensitiveContent = !showSensitiveContent)
-                        }
+                        state.update(AppearanceKeys.ShowSensitiveContent, !appearanceSettings.showSensitiveContent)
                     },
                     shapes = ListItemDefaults.item(),
                     content = {
@@ -131,9 +126,7 @@ internal fun AppearanceMediaScreen(onBack: () -> Unit) {
                         Switch(
                             checked = appearanceSettings.showSensitiveContent,
                             onCheckedChange = {
-                                state.updateSettings {
-                                    copy(showSensitiveContent = it)
-                                }
+                                state.update(AppearanceKeys.ShowSensitiveContent, it)
                             },
                         )
                     },
@@ -142,9 +135,7 @@ internal fun AppearanceMediaScreen(onBack: () -> Unit) {
             AnimatedVisibility(appearanceSettings.showMedia) {
                 SegmentedListItem(
                     onClick = {
-                        state.updateSettings {
-                            copy(expandMediaSize = !expandMediaSize)
-                        }
+                        state.update(AppearanceKeys.ExpandMediaSize, !appearanceSettings.expandMediaSize)
                     },
                     shapes = ListItemDefaults.item(),
                     content = {
@@ -157,9 +148,7 @@ internal fun AppearanceMediaScreen(onBack: () -> Unit) {
                         Switch(
                             checked = appearanceSettings.expandMediaSize,
                             onCheckedChange = {
-                                state.updateSettings {
-                                    copy(expandMediaSize = it)
-                                }
+                                state.update(AppearanceKeys.ExpandMediaSize, it)
                             },
                         )
                     },
@@ -177,9 +166,7 @@ internal fun AppearanceMediaScreen(onBack: () -> Unit) {
                         ),
                     selected = appearanceSettings.videoAutoplay,
                     onSelected = {
-                        state.updateSettings {
-                            copy(videoAutoplay = it)
-                        }
+                        state.update(AppearanceKeys.VideoAutoplay, it)
                     },
                     shapes = ListItemDefaults.last(),
                 )

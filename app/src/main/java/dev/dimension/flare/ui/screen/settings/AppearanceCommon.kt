@@ -17,10 +17,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import dev.dimension.flare.data.model.AppearanceSettings
+import dev.dimension.flare.data.model.appearance.AppearanceKey
+import dev.dimension.flare.data.model.appearance.AppearancePatch
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.ui.component.FlareDropdownMenu
 import dev.dimension.flare.ui.component.platform.isBigScreen
+import dev.dimension.flare.ui.model.UiState
+import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.AppearancePresenter
 import dev.dimension.flare.ui.presenter.settings.AppearanceState
@@ -97,7 +100,16 @@ internal fun <T> SingleChoiceSettingsItem(
 }
 
 internal interface AppearanceSettingsUpdater : AppearanceState {
-    fun updateSettings(block: AppearanceSettings.() -> AppearanceSettings)
+    val appearance: UiState<AppearancePatch>
+
+    fun <T : Any> update(
+        key: AppearanceKey<T>,
+        value: T,
+    )
+
+    fun clear(key: AppearanceKey<*>)
+
+    fun updateFontScale(fontSizeDiff: Float)
 }
 
 @Composable
@@ -106,11 +118,32 @@ internal fun appearancePresenter(): AppearanceSettingsUpdater =
         val scope = rememberCoroutineScope()
         val settingsRepository = koinInject<SettingsRepository>()
         val appearanceState = remember { AppearancePresenter() }.invoke()
+        val appearance by settingsRepository.appearancePatch.collectAsUiState()
 
         object : AppearanceSettingsUpdater, AppearanceState by appearanceState {
-            override fun updateSettings(block: AppearanceSettings.() -> AppearanceSettings) {
+            override val appearance: UiState<AppearancePatch> = appearance
+
+            override fun <T : Any> update(
+                key: AppearanceKey<T>,
+                value: T,
+            ) {
                 scope.launch {
-                    settingsRepository.updateAppearanceSettings(block)
+                    settingsRepository.updateAppearance(key, value)
+                }
+            }
+
+            override fun clear(key: AppearanceKey<*>) {
+                scope.launch {
+                    settingsRepository.clearAppearance(key)
+                }
+            }
+
+            override fun updateFontScale(fontSizeDiff: Float) {
+                scope.launch {
+                    settingsRepository.updateAppearance {
+                        set(dev.dimension.flare.data.model.appearance.AppearanceKeys.FontSizeDiff, fontSizeDiff)
+                            .set(dev.dimension.flare.data.model.appearance.AppearanceKeys.LineHeightDiff, fontSizeDiff * 2)
+                    }
                 }
             }
         }

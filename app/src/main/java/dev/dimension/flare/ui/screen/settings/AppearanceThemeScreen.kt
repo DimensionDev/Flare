@@ -42,6 +42,7 @@ import dev.dimension.flare.R
 import dev.dimension.flare.data.model.AvatarShape
 import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.data.model.Theme
+import dev.dimension.flare.data.model.appearance.AppearanceKeys
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareLargeFlexibleTopAppBar
@@ -98,17 +99,13 @@ internal fun AppearanceThemeScreen(
                     ),
                 selected = appearanceSettings.theme,
                 onSelected = {
-                    state.updateSettings {
-                        copy(theme = it)
-                    }
+                    state.update(AppearanceKeys.Theme, it)
                 },
                 shapes = ListItemDefaults.first(),
             )
             SegmentedListItem(
                 onClick = {
-                    state.updateSettings {
-                        copy(pureColorMode = !pureColorMode)
-                    }
+                    state.update(AppearanceKeys.PureColorMode, !appearanceSettings.pureColorMode)
                 },
                 shapes = ListItemDefaults.item(),
                 content = {
@@ -121,9 +118,7 @@ internal fun AppearanceThemeScreen(
                     Switch(
                         checked = appearanceSettings.pureColorMode,
                         onCheckedChange = {
-                            state.updateSettings {
-                                copy(pureColorMode = it)
-                            }
+                            state.update(AppearanceKeys.PureColorMode, it)
                         },
                     )
                 },
@@ -131,9 +126,7 @@ internal fun AppearanceThemeScreen(
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 SegmentedListItem(
                     onClick = {
-                        state.updateSettings {
-                            copy(dynamicTheme = !dynamicTheme)
-                        }
+                        state.update(AppearanceKeys.DynamicTheme, !appearanceSettings.dynamicTheme)
                     },
                     shapes = ListItemDefaults.item(),
                     content = {
@@ -146,9 +139,7 @@ internal fun AppearanceThemeScreen(
                         Switch(
                             checked = appearanceSettings.dynamicTheme,
                             onCheckedChange = {
-                                state.updateSettings {
-                                    copy(dynamicTheme = it)
-                                }
+                                state.update(AppearanceKeys.DynamicTheme, it)
                             },
                         )
                     },
@@ -188,9 +179,7 @@ internal fun AppearanceThemeScreen(
                     ),
                 selected = appearanceSettings.avatarShape,
                 onSelected = {
-                    state.updateSettings {
-                        copy(avatarShape = it)
-                    }
+                    state.update(AppearanceKeys.AvatarShape, it)
                 },
                 shapes = ListItemDefaults.item(),
             )
@@ -221,12 +210,7 @@ internal fun AppearanceThemeScreen(
                                     if (fontSizeDiff > -4f) {
                                         fontSizeDiff -= 1f
                                         hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentTick)
-                                        state.updateSettings {
-                                            copy(
-                                                fontSizeDiff = fontSizeDiff,
-                                                lineHeightDiff = fontSizeDiff * 2,
-                                            )
-                                        }
+                                        state.updateFontScale(fontSizeDiff)
                                     }
                                 },
                                 enabled = fontSizeDiff > -4f,
@@ -243,12 +227,7 @@ internal fun AppearanceThemeScreen(
                                     hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentTick)
                                 },
                                 onValueChangeFinished = {
-                                    state.updateSettings {
-                                        copy(
-                                            fontSizeDiff = fontSizeDiff,
-                                            lineHeightDiff = fontSizeDiff * 2,
-                                        )
-                                    }
+                                    state.updateFontScale(fontSizeDiff)
                                 },
                                 valueRange = -4f..4f,
                                 steps = 7,
@@ -261,12 +240,7 @@ internal fun AppearanceThemeScreen(
                                     if (fontSizeDiff < 4f) {
                                         fontSizeDiff += 1f
                                         hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentTick)
-                                        state.updateSettings {
-                                            copy(
-                                                fontSizeDiff = fontSizeDiff,
-                                                lineHeightDiff = fontSizeDiff * 2,
-                                            )
-                                        }
+                                        state.updateFontScale(fontSizeDiff)
                                     }
                                 },
                                 enabled = fontSizeDiff < 4f,

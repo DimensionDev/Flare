@@ -1,16 +1,6 @@
 package dev.dimension.flare.data.model
 
-import androidx.datastore.core.okio.OkioSerializer
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
-import kotlinx.coroutines.withContext
-import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.decodeFromByteArray
-import kotlinx.serialization.encodeToByteArray
-import kotlinx.serialization.protobuf.ProtoBuf
-import okio.BufferedSink
-import okio.BufferedSource
 
 @Serializable
 public data class AppearanceSettings(
@@ -50,6 +40,7 @@ public data class AppearanceSettings(
     }
 }
 
+@Serializable
 public enum class PostActionStyle {
     Hidden,
     LeftAligned,
@@ -57,11 +48,13 @@ public enum class PostActionStyle {
     Stretch,
 }
 
+@Serializable
 public enum class BottomBarStyle {
     Floating,
     Classic,
 }
 
+@Serializable
 public enum class BottomBarBehavior {
     AlwaysShow,
     HideOnScroll,
@@ -93,24 +86,4 @@ public enum class TimelineDisplayMode {
     Card,
     Plain,
     Gallery,
-}
-
-@OptIn(ExperimentalSerializationApi::class)
-internal object AccountPreferencesSerializer : OkioSerializer<AppearanceSettings> {
-    override val defaultValue: AppearanceSettings
-        get() = AppearanceSettings()
-
-    override suspend fun readFrom(source: BufferedSource): AppearanceSettings =
-        withContext(Dispatchers.IO) {
-            ProtoBuf.decodeFromByteArray(source.readByteArray())
-        }
-
-    override suspend fun writeTo(
-        t: AppearanceSettings,
-        sink: BufferedSink,
-    ) {
-        withContext(Dispatchers.IO) {
-            sink.write(ProtoBuf.encodeToByteArray(t))
-        }
-    }
 }

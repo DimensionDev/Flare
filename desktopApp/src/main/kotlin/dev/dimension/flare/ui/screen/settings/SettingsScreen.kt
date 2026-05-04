@@ -56,13 +56,14 @@ import dev.dimension.flare.action_import
 import dev.dimension.flare.add_account
 import dev.dimension.flare.app_name
 import dev.dimension.flare.cancel
-import dev.dimension.flare.data.model.AppearanceSettings
 import dev.dimension.flare.data.model.AvatarShape
 import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.data.model.PostActionStyle
 import dev.dimension.flare.data.model.Theme
 import dev.dimension.flare.data.model.TimelineDisplayMode
 import dev.dimension.flare.data.model.VideoAutoplay
+import dev.dimension.flare.data.model.appearance.AppearanceKey
+import dev.dimension.flare.data.model.appearance.AppearanceKeys
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.delete
 import dev.dimension.flare.edit
@@ -602,9 +603,7 @@ internal fun SettingsScreen(
                                 MenuFlyoutItem(
                                     text = { Text(stringResource(Res.string.settings_appearance_theme_auto)) },
                                     onClick = {
-                                        state.appearanceState.updateSettings {
-                                            copy(theme = Theme.SYSTEM)
-                                        }
+                                        state.appearanceState.update(AppearanceKeys.Theme, Theme.SYSTEM)
                                         isFlyoutVisible = false
                                     },
                                 )
@@ -612,18 +611,14 @@ internal fun SettingsScreen(
                                     text = { Text(stringResource(Res.string.settings_appearance_theme_dark)) },
                                     onClick = {
                                         isFlyoutVisible = false
-                                        state.appearanceState.updateSettings {
-                                            copy(theme = Theme.DARK)
-                                        }
+                                        state.appearanceState.update(AppearanceKeys.Theme, Theme.DARK)
                                     },
                                 )
                                 MenuFlyoutItem(
                                     text = { Text(stringResource(Res.string.settings_appearance_theme_light)) },
                                     onClick = {
                                         isFlyoutVisible = false
-                                        state.appearanceState.updateSettings {
-                                            copy(theme = Theme.LIGHT)
-                                        }
+                                        state.appearanceState.update(AppearanceKeys.Theme, Theme.LIGHT)
                                     },
                                 )
                             },
@@ -660,18 +655,14 @@ internal fun SettingsScreen(
                                 MenuFlyoutItem(
                                     text = { Text(stringResource(Res.string.settings_appearance_avatar_shape_round)) },
                                     onClick = {
-                                        state.appearanceState.updateSettings {
-                                            copy(avatarShape = AvatarShape.CIRCLE)
-                                        }
+                                        state.appearanceState.update(AppearanceKeys.AvatarShape, AvatarShape.CIRCLE)
                                         isFlyoutVisible = false
                                     },
                                 )
                                 MenuFlyoutItem(
                                     text = { Text(stringResource(Res.string.settings_appearance_avatar_shape_square)) },
                                     onClick = {
-                                        state.appearanceState.updateSettings {
-                                            copy(avatarShape = AvatarShape.SQUARE)
-                                        }
+                                        state.appearanceState.update(AppearanceKeys.AvatarShape, AvatarShape.SQUARE)
                                         isFlyoutVisible = false
                                     },
                                 )
@@ -728,9 +719,7 @@ internal fun SettingsScreen(
                         Switcher(
                             checked = LocalAppearanceSettings.current.showComposeInHomeTimeline,
                             {
-                                state.appearanceState.updateSettings {
-                                    copy(showComposeInHomeTimeline = it)
-                                }
+                                state.appearanceState.update(AppearanceKeys.ShowComposeInHomeTimeline, it)
                             },
                             textBefore = true,
                         )
@@ -758,9 +747,7 @@ internal fun SettingsScreen(
                                 items.forEach { (key, value) ->
                                     MenuFlyoutItem(
                                         onClick = {
-                                            state.appearanceState.updateSettings {
-                                                copy(timelineDisplayMode = key)
-                                            }
+                                            state.appearanceState.update(AppearanceKeys.TimelineDisplayMode, key)
                                             isFlyoutVisible = false
                                         },
                                         text = { Text(stringResource(value)) },
@@ -794,9 +781,7 @@ internal fun SettingsScreen(
                         Switcher(
                             checked = LocalAppearanceSettings.current.fullWidthPost,
                             {
-                                state.appearanceState.updateSettings {
-                                    copy(fullWidthPost = it)
-                                }
+                                state.appearanceState.update(AppearanceKeys.FullWidthPost, it)
                             },
                             textBefore = true,
                         )
@@ -825,9 +810,7 @@ internal fun SettingsScreen(
                                 items.forEach { (key, value) ->
                                     MenuFlyoutItem(
                                         onClick = {
-                                            state.appearanceState.updateSettings {
-                                                copy(postActionStyle = key)
-                                            }
+                                            state.appearanceState.update(AppearanceKeys.PostActionStyle, key)
                                             isFlyoutVisible = false
                                         },
                                         text = { Text(stringResource(value)) },
@@ -863,9 +846,7 @@ internal fun SettingsScreen(
                                 Switcher(
                                     checked = LocalAppearanceSettings.current.showNumbers,
                                     {
-                                        state.appearanceState.updateSettings {
-                                            copy(showNumbers = it)
-                                        }
+                                        state.appearanceState.update(AppearanceKeys.ShowNumbers, it)
                                     },
                                     textBefore = true,
                                 )
@@ -898,9 +879,7 @@ internal fun SettingsScreen(
                         Switcher(
                             checked = LocalAppearanceSettings.current.absoluteTimestamp,
                             {
-                                state.appearanceState.updateSettings {
-                                    copy(absoluteTimestamp = it)
-                                }
+                                state.appearanceState.update(AppearanceKeys.AbsoluteTimestamp, it)
                             },
                             textBefore = true,
                         )
@@ -918,9 +897,7 @@ internal fun SettingsScreen(
                         Switcher(
                             checked = LocalAppearanceSettings.current.showPlatformLogo,
                             {
-                                state.appearanceState.updateSettings {
-                                    copy(showPlatformLogo = it)
-                                }
+                                state.appearanceState.update(AppearanceKeys.ShowPlatformLogo, it)
                             },
                             textBefore = true,
                         )
@@ -938,9 +915,7 @@ internal fun SettingsScreen(
                         Switcher(
                             checked = LocalAppearanceSettings.current.showLinkPreview,
                             {
-                                state.appearanceState.updateSettings {
-                                    copy(showLinkPreview = it)
-                                }
+                                state.appearanceState.update(AppearanceKeys.ShowLinkPreview, it)
                             },
                             textBefore = true,
                         )
@@ -960,9 +935,7 @@ internal fun SettingsScreen(
                                 Switcher(
                                     checked = LocalAppearanceSettings.current.compatLinkPreview,
                                     {
-                                        state.appearanceState.updateSettings {
-                                            copy(compatLinkPreview = it)
-                                        }
+                                        state.appearanceState.update(AppearanceKeys.CompatLinkPreview, it)
                                     },
                                     textBefore = true,
                                 )
@@ -995,9 +968,7 @@ internal fun SettingsScreen(
                         Switcher(
                             checked = LocalAppearanceSettings.current.showMedia,
                             {
-                                state.appearanceState.updateSettings {
-                                    copy(showMedia = it)
-                                }
+                                state.appearanceState.update(AppearanceKeys.ShowMedia, it)
                             },
                             textBefore = true,
                         )
@@ -1017,9 +988,7 @@ internal fun SettingsScreen(
                                 Switcher(
                                     checked = LocalAppearanceSettings.current.showSensitiveContent,
                                     {
-                                        state.appearanceState.updateSettings {
-                                            copy(showSensitiveContent = it)
-                                        }
+                                        state.appearanceState.update(AppearanceKeys.ShowSensitiveContent, it)
                                     },
                                     textBefore = true,
                                 )
@@ -1041,9 +1010,7 @@ internal fun SettingsScreen(
                                 Switcher(
                                     checked = LocalAppearanceSettings.current.expandMediaSize,
                                     {
-                                        state.appearanceState.updateSettings {
-                                            copy(expandMediaSize = it)
-                                        }
+                                        state.appearanceState.update(AppearanceKeys.ExpandMediaSize, it)
                                     },
                                     textBefore = true,
                                 )
@@ -1063,9 +1030,10 @@ internal fun SettingsScreen(
                         Switcher(
                             checked = LocalAppearanceSettings.current.videoAutoplay == VideoAutoplay.ALWAYS,
                             {
-                                state.appearanceState.updateSettings {
-                                    copy(videoAutoplay = if (it) VideoAutoplay.ALWAYS else VideoAutoplay.NEVER)
-                                }
+                                state.appearanceState.update(
+                                    AppearanceKeys.VideoAutoplay,
+                                    if (it) VideoAutoplay.ALWAYS else VideoAutoplay.NEVER,
+                                )
                             },
                             textBefore = true,
                         )
@@ -2310,9 +2278,12 @@ private fun appearancePresenter() =
                 expanded = value
             }
 
-            fun updateSettings(block: AppearanceSettings.() -> AppearanceSettings) {
+            fun <T : Any> update(
+                key: AppearanceKey<T>,
+                value: T,
+            ) {
                 scope.launch {
-                    settingsRepository.updateAppearanceSettings(block)
+                    settingsRepository.updateAppearance(key, value)
                 }
             }
         }

@@ -9,9 +9,7 @@ struct AppearanceThemeScreen: View {
                 Picker(selection: Binding(get: {
                     appearance.theme
                 }, set: { newValue in
-                    presenter.state.updateAppearanceSettings { settings in
-                        settings.copy(theme: newValue)
-                    }
+                    presenter.state.updateTheme(value: newValue)
                 })) {
                     Text("appearance_theme_system").tag(Theme.system)
                     Text("appearance_theme_light").tag(Theme.light)
@@ -23,9 +21,7 @@ struct AppearanceThemeScreen: View {
                 Picker(selection: Binding(get: {
                     appearance.avatarShape
                 }, set: { newValue in
-                    presenter.state.updateAppearanceSettings { settings in
-                        settings.copy(avatarShape: newValue)
-                    }
+                    presenter.state.updateAvatarShape(value: newValue)
                 })) {
                     Text("appearance_avatar_shape_circle").tag(AvatarShape.circle)
                     Text("appearance_avatar_shape_square").tag(AvatarShape.square)
@@ -38,9 +34,7 @@ struct AppearanceThemeScreen: View {
                     Slider(value: Binding(get: {
                         appearance.fontSizeDiff
                     }, set: { newValue in
-                        presenter.state.updateAppearanceSettings { settings in
-                            settings.copy(fontSizeDiff: newValue)
-                        }
+                        presenter.state.updateFontScale(fontSizeDiff: newValue)
                     }), in: -2...4, step: 1) {
                         Text("appearance_font_size_diff")
                     } minimumValueLabel: {

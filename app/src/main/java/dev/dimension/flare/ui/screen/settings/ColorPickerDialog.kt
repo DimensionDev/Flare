@@ -26,6 +26,7 @@ import com.github.skydoves.colorpicker.compose.HsvColorPicker
 import com.github.skydoves.colorpicker.compose.rememberColorPickerController
 import dev.dimension.flare.R
 import dev.dimension.flare.data.model.LocalAppearanceSettings
+import dev.dimension.flare.data.model.appearance.AppearanceKeys
 import dev.dimension.flare.data.repository.SettingsRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -109,9 +110,7 @@ private fun presenter(
 
         fun confirm() {
             coroutineScope.launch {
-                settingsRepository.updateAppearanceSettings {
-                    copy(colorSeed = selectedColor.value)
-                }
+                settingsRepository.updateAppearance(AppearanceKeys.ColorSeed, selectedColor.value)
             }
         }
     }

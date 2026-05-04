@@ -5,7 +5,7 @@ import Combine
 
 struct FlareTheme<Content: View>: View {
     @ViewBuilder let content: () -> Content
-    @StateObject private var presenter = KotlinPresenter(presenter: SettingsPresenter())
+    @StateObject private var presenter = KotlinPresenter(presenter: EnvironmentSettingsPresenter())
     @State private var openedURL: URL? = nil
     @State private var appSettings: AppSettings = AppSettings(version: "0")
     @State private var appearance: AppearanceSettings = AppearanceSettings.companion.Default
@@ -40,7 +40,7 @@ struct FlareTheme<Content: View>: View {
             .onSuccessOf(of: presenter.state.appSettings) { newValue in
                 appSettings = newValue
             }
-            .onSuccessOf(of: presenter.state.appearance) { newValue in
+            .onSuccessOf(of: presenter.state.appearanceSettings) { newValue in
                 appearance = newValue
             }
     }

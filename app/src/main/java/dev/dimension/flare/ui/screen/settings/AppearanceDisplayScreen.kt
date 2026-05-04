@@ -24,6 +24,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.R
 import dev.dimension.flare.data.model.LocalAppearanceSettings
+import dev.dimension.flare.data.model.appearance.AppearanceKeys
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FlareLargeFlexibleTopAppBar
 import dev.dimension.flare.ui.component.FlareScaffold
@@ -82,9 +83,7 @@ internal fun AppearanceDisplayScreen(onBack: () -> Unit) {
             }
             SegmentedListItem(
                 onClick = {
-                    state.updateSettings {
-                        copy(absoluteTimestamp = !absoluteTimestamp)
-                    }
+                    state.update(AppearanceKeys.AbsoluteTimestamp, !appearanceSettings.absoluteTimestamp)
                 },
                 shapes =
                     if (state.sampleStatus.isSuccess) {
@@ -102,18 +101,14 @@ internal fun AppearanceDisplayScreen(onBack: () -> Unit) {
                     Switch(
                         checked = appearanceSettings.absoluteTimestamp,
                         onCheckedChange = {
-                            state.updateSettings {
-                                copy(absoluteTimestamp = it)
-                            }
+                            state.update(AppearanceKeys.AbsoluteTimestamp, it)
                         },
                     )
                 },
             )
             SegmentedListItem(
                 onClick = {
-                    state.updateSettings {
-                        copy(showPlatformLogo = !showPlatformLogo)
-                    }
+                    state.update(AppearanceKeys.ShowPlatformLogo, !appearanceSettings.showPlatformLogo)
                 },
                 shapes = ListItemDefaults.item(),
                 content = {
@@ -126,18 +121,14 @@ internal fun AppearanceDisplayScreen(onBack: () -> Unit) {
                     Switch(
                         checked = appearanceSettings.showPlatformLogo,
                         onCheckedChange = {
-                            state.updateSettings {
-                                copy(showPlatformLogo = it)
-                            }
+                            state.update(AppearanceKeys.ShowPlatformLogo, it)
                         },
                     )
                 },
             )
             SegmentedListItem(
                 onClick = {
-                    state.updateSettings {
-                        copy(showLinkPreview = !showLinkPreview)
-                    }
+                    state.update(AppearanceKeys.ShowLinkPreview, !appearanceSettings.showLinkPreview)
                 },
                 shapes = ListItemDefaults.item(),
                 content = {
@@ -150,9 +141,7 @@ internal fun AppearanceDisplayScreen(onBack: () -> Unit) {
                     Switch(
                         checked = appearanceSettings.showLinkPreview,
                         onCheckedChange = {
-                            state.updateSettings {
-                                copy(showLinkPreview = it)
-                            }
+                            state.update(AppearanceKeys.ShowLinkPreview, it)
                         },
                     )
                 },
@@ -160,9 +149,7 @@ internal fun AppearanceDisplayScreen(onBack: () -> Unit) {
             AnimatedVisibility(visible = appearanceSettings.showLinkPreview) {
                 SegmentedListItem(
                     onClick = {
-                        state.updateSettings {
-                            copy(compatLinkPreview = !compatLinkPreview)
-                        }
+                        state.update(AppearanceKeys.CompatLinkPreview, !appearanceSettings.compatLinkPreview)
                     },
                     shapes = ListItemDefaults.item(),
                     content = {
@@ -175,9 +162,7 @@ internal fun AppearanceDisplayScreen(onBack: () -> Unit) {
                         Switch(
                             checked = appearanceSettings.compatLinkPreview,
                             onCheckedChange = {
-                                state.updateSettings {
-                                    copy(compatLinkPreview = it)
-                                }
+                                state.update(AppearanceKeys.CompatLinkPreview, it)
                             },
                         )
                     },
@@ -185,9 +170,7 @@ internal fun AppearanceDisplayScreen(onBack: () -> Unit) {
             }
             SegmentedListItem(
                 onClick = {
-                    state.updateSettings {
-                        copy(inAppBrowser = !inAppBrowser)
-                    }
+                    state.update(AppearanceKeys.InAppBrowser, !appearanceSettings.inAppBrowser)
                 },
                 shapes = ListItemDefaults.last(),
                 content = {
@@ -200,9 +183,7 @@ internal fun AppearanceDisplayScreen(onBack: () -> Unit) {
                     Switch(
                         checked = appearanceSettings.inAppBrowser,
                         onCheckedChange = {
-                            state.updateSettings {
-                                copy(inAppBrowser = it)
-                            }
+                            state.update(AppearanceKeys.InAppBrowser, it)
                         },
                     )
                 },

@@ -12,9 +12,7 @@ struct AppearanceLayoutScreen: View {
                     Picker(selection: Binding(get: {
                         appearance.timelineDisplayMode
                     }, set: { newValue in
-                        presenter.state.updateAppearanceSettings { settings in
-                            settings.copy(timelineDisplayMode: newValue)
-                        }
+                        presenter.state.updateTimelineDisplayMode(value: newValue)
                     })) {
                         Text("appearance_timeline_display_mode_card").tag(TimelineDisplayMode.card)
                         Text("appearance_timeline_display_mode_plain").tag(TimelineDisplayMode.plain)
@@ -37,9 +35,7 @@ struct AppearanceLayoutScreen: View {
                     Toggle(isOn: Binding(get: {
                         appearance.fullWidthPost
                     }, set: { newValue in
-                        presenter.state.updateAppearanceSettings { settings in
-                            settings.copy(fullWidthPost: newValue)
-                        }
+                        presenter.state.updateFullWidthPost(value: newValue)
                     })) {
                         Text("appearance_fullWidthPost")
                         Text("appearance_fullWidthPost_description")
@@ -47,9 +43,7 @@ struct AppearanceLayoutScreen: View {
                     Picker(selection: Binding(get: {
                         appearance.postActionStyle
                     }, set: { newValue in
-                        presenter.state.updateAppearanceSettings { settings in
-                            settings.copy(postActionStyle: newValue)
-                        }
+                        presenter.state.updatePostActionStyle(value: newValue)
                     })) {
                         Text("appearance_post_action_style_hidden").tag(PostActionStyle.hidden)
                         Text("appearance_post_action_style_left_aligned").tag(PostActionStyle.leftAligned)
@@ -63,9 +57,7 @@ struct AppearanceLayoutScreen: View {
                         Toggle(isOn: Binding(get: {
                             appearance.showNumbers
                         }, set: { newValue in
-                            presenter.state.updateAppearanceSettings { settings in
-                                settings.copy(showNumbers: newValue)
-                            }
+                            presenter.state.updateShowNumbers(value: newValue)
                         })) {
                             Text("appearance_show_numbers")
                             Text("appearance_show_numbers_description")

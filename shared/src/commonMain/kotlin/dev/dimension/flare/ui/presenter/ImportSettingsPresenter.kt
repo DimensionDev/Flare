@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.presenter
 import androidx.compose.runtime.Composable
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.data.model.SettingsExport
+import dev.dimension.flare.data.model.appearance.toPatch
 import dev.dimension.flare.data.repository.SettingsRepository
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -24,9 +25,7 @@ public class ImportSettingsPresenter(
     public suspend fun import() {
         val export = jsonContent.decodeJson(SettingsExport.serializer())
 
-        settingsRepository.updateAppearanceSettings {
-            export.appearanceSettings
-        }
+        settingsRepository.replaceAppearance(export.appearanceSettings.toPatch())
 
         settingsRepository.updateAppSettings {
             export.appSettings

@@ -14,9 +14,7 @@ struct AppearanceMediaScreen: View {
                     Toggle(isOn: Binding(get: {
                         appearance.showMedia
                     }, set: { newValue in
-                        presenter.state.updateAppearanceSettings { settings in
-                            settings.copy(showMedia: newValue)
-                        }
+                        presenter.state.updateShowMedia(value: newValue)
                     })) {
                         Text("appearance_show_media")
                         Text("appearance_show_media_description")
@@ -25,9 +23,7 @@ struct AppearanceMediaScreen: View {
                         Toggle(isOn: Binding(get: {
                             appearance.expandMediaSize
                         }, set: { newValue in
-                            presenter.state.updateAppearanceSettings { settings in
-                                settings.copy(expandMediaSize: newValue)
-                            }
+                            presenter.state.updateExpandMediaSize(value: newValue)
                         })) {
                             Text("appearance_expand_media_size")
                             Text("appearance_expand_media_size_description")
@@ -35,9 +31,7 @@ struct AppearanceMediaScreen: View {
                         Toggle(isOn: Binding(get: {
                             appearance.showSensitiveContent
                         }, set: { newValue in
-                            presenter.state.updateAppearanceSettings { settings in
-                                settings.copy(showSensitiveContent: newValue)
-                            }
+                            presenter.state.updateShowSensitiveContent(value: newValue)
                         })) {
                             Text("appearance_show_sensitive_content")
                             Text("appearance_show_sensitive_content_description")
@@ -45,9 +39,7 @@ struct AppearanceMediaScreen: View {
                         Picker(selection: Binding(get: {
                             appearance.videoAutoplay
                         }, set: { newValue in
-                            presenter.state.updateAppearanceSettings { settings in
-                                settings.copy(videoAutoplay: newValue)
-                            }
+                            presenter.state.updateVideoAutoplay(value: newValue)
                         })) {
                             Text("appearance_video_autoplay_never").tag(VideoAutoplay.never)
                             Text("appearance_video_autoplay_wifi").tag(VideoAutoplay.wifi)

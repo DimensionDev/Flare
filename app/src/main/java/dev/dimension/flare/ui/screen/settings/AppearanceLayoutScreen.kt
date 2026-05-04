@@ -28,6 +28,7 @@ import dev.dimension.flare.data.model.BottomBarStyle
 import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.data.model.PostActionStyle
 import dev.dimension.flare.data.model.TimelineDisplayMode
+import dev.dimension.flare.data.model.appearance.AppearanceKeys
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FlareLargeFlexibleTopAppBar
 import dev.dimension.flare.ui.component.FlareScaffold
@@ -84,9 +85,7 @@ internal fun AppearanceLayoutScreen(onBack: () -> Unit) {
                         ),
                     selected = appearanceSettings.bottomBarStyle,
                     onSelected = {
-                        state.updateSettings {
-                            copy(bottomBarStyle = it)
-                        }
+                        state.update(AppearanceKeys.BottomBarStyle, it)
                     },
                     shapes = ListItemDefaults.first(),
                 )
@@ -103,9 +102,7 @@ internal fun AppearanceLayoutScreen(onBack: () -> Unit) {
                         ),
                     selected = appearanceSettings.bottomBarBehavior,
                     onSelected = {
-                        state.updateSettings {
-                            copy(bottomBarBehavior = it)
-                        }
+                        state.update(AppearanceKeys.BottomBarBehavior, it)
                     },
                     shapes = ListItemDefaults.item(),
                 )
@@ -120,9 +117,7 @@ internal fun AppearanceLayoutScreen(onBack: () -> Unit) {
                         ),
                     selected = appearanceSettings.timelineDisplayMode,
                     onSelected = {
-                        state.updateSettings {
-                            copy(timelineDisplayMode = it)
-                        }
+                        state.update(AppearanceKeys.TimelineDisplayMode, it)
                     },
                     shapes = ListItemDefaults.last(),
                 )
@@ -147,9 +142,7 @@ internal fun AppearanceLayoutScreen(onBack: () -> Unit) {
                 }
                 SegmentedListItem(
                     onClick = {
-                        state.updateSettings {
-                            copy(fullWidthPost = !fullWidthPost)
-                        }
+                        state.update(AppearanceKeys.FullWidthPost, !appearanceSettings.fullWidthPost)
                     },
                     shapes =
                         if (state.sampleStatus.isSuccess) {
@@ -167,9 +160,7 @@ internal fun AppearanceLayoutScreen(onBack: () -> Unit) {
                         Switch(
                             checked = appearanceSettings.fullWidthPost,
                             onCheckedChange = {
-                                state.updateSettings {
-                                    copy(fullWidthPost = it)
-                                }
+                                state.update(AppearanceKeys.FullWidthPost, it)
                             },
                         )
                     },
@@ -188,9 +179,7 @@ internal fun AppearanceLayoutScreen(onBack: () -> Unit) {
                         ),
                     selected = appearanceSettings.postActionStyle,
                     onSelected = {
-                        state.updateSettings {
-                            copy(postActionStyle = it)
-                        }
+                        state.update(AppearanceKeys.PostActionStyle, it)
                     },
                     shapes =
                         if (appearanceSettings.postActionStyle != PostActionStyle.Hidden) {
@@ -202,9 +191,7 @@ internal fun AppearanceLayoutScreen(onBack: () -> Unit) {
                 AnimatedVisibility(appearanceSettings.postActionStyle != PostActionStyle.Hidden) {
                     SegmentedListItem(
                         onClick = {
-                            state.updateSettings {
-                                copy(showNumbers = !showNumbers)
-                            }
+                            state.update(AppearanceKeys.ShowNumbers, !appearanceSettings.showNumbers)
                         },
                         shapes = ListItemDefaults.last(),
                         content = {
@@ -217,9 +204,7 @@ internal fun AppearanceLayoutScreen(onBack: () -> Unit) {
                             Switch(
                                 checked = appearanceSettings.showNumbers,
                                 onCheckedChange = {
-                                    state.updateSettings {
-                                        copy(showNumbers = it)
-                                    }
+                                    state.update(AppearanceKeys.ShowNumbers, it)
                                 },
                             )
                         },

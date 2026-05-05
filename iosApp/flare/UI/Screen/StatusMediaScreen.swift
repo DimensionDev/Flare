@@ -6,6 +6,7 @@ import Photos
 import Kingfisher
 import SwiftUIBackports
 import VideoPlayer
+import Combine
 
 struct StatusMediaScreen: View {
     @Environment(\.appearanceSettings) private var appearanceSettings
@@ -297,7 +298,11 @@ struct VideoControlView: View {
     @State private var sliderValue: Double = 0
     @State private var isSeeking = false
     @State private var wasPlayingBeforeSeek = false
-    
+    @State private var baselineSeconds: Double = 0
+    @State private var baselineDate: Date = Date()
+
+    private let progressTimer = Timer.publish(every: 0.1, on: .main, in: .common).autoconnect()
+
     var duration: Double {
         switch videoState {
         case .playing(let d), .paused(let d): return d
@@ -320,7 +325,7 @@ struct VideoControlView: View {
                 .backport
                 .glassButtonStyle(fallbackStyle: .plain)
                 
-                Text(formatTime(isSeeking ? sliderValue : currentTime.seconds))
+                Text(formatTime(sliderValue))
                     .font(.caption)
                     .monospacedDigit()
                 
@@ -331,6 +336,8 @@ struct VideoControlView: View {
                         isPlaying = false
                     } else {
                         currentTime = CMTime(seconds: sliderValue, preferredTimescale: 600)
+                        baselineSeconds = sliderValue
+                        baselineDate = Date()
                         if wasPlayingBeforeSeek {
                             isPlaying = true
                         }
@@ -343,16 +350,34 @@ struct VideoControlView: View {
             }
         }
         .onAppear {
-            sliderValue = currentTime.seconds
+            let seconds = currentTime.seconds.isFinite ? currentTime.seconds : 0
+            sliderValue = seconds
+            baselineSeconds = seconds
+            baselineDate = Date()
         }
         .onChange(of: currentTime.seconds) { _, newValue in
-            if !isSeeking {
-                sliderValue = newValue
+            guard !isSeeking, newValue.isFinite else { return }
+            baselineSeconds = newValue
+            baselineDate = Date()
+            sliderValue = newValue
+        }
+        .onChange(of: isPlaying) { _, playing in
+            if playing {
+                baselineSeconds = sliderValue
+                baselineDate = Date()
             }
         }
         .onChange(of: duration) { _, newValue in
             if sliderValue > newValue {
                 sliderValue = newValue
+            }
+        }
+        .onReceive(progressTimer) { _ in
+            guard !isSeeking, isPlaying, duration > 0 else { return }
+            let elapsed = Date().timeIntervalSince(baselineDate)
+            let projected = min(baselineSeconds + elapsed, duration)
+            if projected != sliderValue {
+                sliderValue = projected
             }
         }
     }

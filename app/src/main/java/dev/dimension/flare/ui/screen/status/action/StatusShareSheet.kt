@@ -372,6 +372,8 @@ private suspend fun captureShareBitmap(graphicsLayer: androidx.compose.ui.graphi
         graphicsLayer.toImageBitmap().asAndroidBitmap()
     }.getOrNull()
 
+private fun String.sanitizeForFileName(): String = replace(Regex("[^A-Za-z0-9._-]"), "_")
+
 private fun saveBitmapToDownloads(
     context: Context,
     bitmap: Bitmap,
@@ -382,7 +384,7 @@ private fun saveBitmapToDownloads(
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
             stream.toByteArray()
         }
-    val fileName = "status_${statusKey}_${System.currentTimeMillis()}.png"
+    val fileName = "status_${statusKey.sanitizeForFileName()}_${System.currentTimeMillis()}.png"
     saveByteArrayToDownloads(
         context = context,
         byteArray = bytes,
@@ -402,7 +404,7 @@ private fun shareBitmapAsImage(
     if (bitmap.width <= 0 || bitmap.height <= 0) {
         return null
     }
-    val file = File(context.cacheDir, "status_share_${statusKey}_${System.currentTimeMillis()}.png")
+    val file = File(context.cacheDir, "status_share_${statusKey.sanitizeForFileName()}_${System.currentTimeMillis()}.png")
     FileOutputStream(file).use {
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
     }

@@ -25,6 +25,7 @@ struct StatusMediaScreen: View {
     @State private var protectInitialPagerSelection: Bool = false
     @State private var shareImage: UIImage?
     @State private var shareImageURL: String?
+    @State private var holdsPlaybackSession: Bool = false
 
     var body: some View {
         ZStack {
@@ -103,6 +104,15 @@ struct StatusMediaScreen: View {
             isPlaying = true
             videoState = .idle
             currentTime = .zero
+        }
+        .onChange(of: isVideoActivelyPlaying) { _, newValue in
+            updatePlaybackSession(playing: newValue)
+        }
+        .onDisappear {
+            if holdsPlaybackSession {
+                AudioSessionManager.shared.endPlayback()
+                holdsPlaybackSession = false
+            }
         }
         .onChange(of: presenter.state.status) { oldValue, newValue in
             if medias.isEmpty,
@@ -195,6 +205,21 @@ struct StatusMediaScreen: View {
             return image.url
         case .video, .gif, .audio:
             return nil
+        }
+    }
+
+    private var isVideoActivelyPlaying: Bool {
+        if case .playing = videoState { return true }
+        return false
+    }
+
+    private func updatePlaybackSession(playing: Bool) {
+        if playing, !holdsPlaybackSession {
+            AudioSessionManager.shared.beginPlayback()
+            holdsPlaybackSession = true
+        } else if !playing, holdsPlaybackSession {
+            AudioSessionManager.shared.endPlayback()
+            holdsPlaybackSession = false
         }
     }
 

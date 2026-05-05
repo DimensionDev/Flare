@@ -224,7 +224,7 @@ internal fun StatusShareSheet(
                     onClick = {
                         scope.launch {
                             val image = capturePreviewImage(previewGraphicsLayer) ?: return@launch
-                            saveImageWithDialog(window, image, "status_$statusKey.png")
+                            saveImageWithDialog(window, image, "status_${statusKey.toString().replace(Regex("[^A-Za-z0-9._-]"), "_")}.png")
                         }
                     },
                 ) {

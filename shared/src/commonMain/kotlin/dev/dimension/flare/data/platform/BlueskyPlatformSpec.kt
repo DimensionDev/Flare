@@ -3,15 +3,10 @@ package dev.dimension.flare.data.platform
 import dev.dimension.flare.common.deeplink.DeepLinkMapping
 import dev.dimension.flare.common.deeplink.DeepLinkPattern
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
-import dev.dimension.flare.data.model.AllListTabItem
-import dev.dimension.flare.data.model.Bluesky
-import dev.dimension.flare.data.model.DirectMessageTabItem
-import dev.dimension.flare.data.model.HomeTimelineTabItem
 import dev.dimension.flare.data.model.IconType
-import dev.dimension.flare.data.model.TabItem
-import dev.dimension.flare.data.model.TabMetaData
-import dev.dimension.flare.data.model.TimelineTabItem
-import dev.dimension.flare.data.model.TitleType
+import dev.dimension.flare.data.model.tab.ShortcutSpec
+import dev.dimension.flare.data.model.tab.TimelineSpec
+import dev.dimension.flare.data.model.tab.TimelineTargetRef
 import dev.dimension.flare.data.network.bluesky.BlueskyPlatformDetector
 import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
 import dev.dimension.flare.model.AccountType
@@ -21,6 +16,11 @@ import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.PlatformTypeMetadata
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiInstanceMetadata
+import dev.dimension.flare.ui.model.UiStrings
+import dev.dimension.flare.ui.model.asType
+import dev.dimension.flare.ui.presenter.home.bluesky.BlueskyBookmarkTimelinePresenter
+import dev.dimension.flare.ui.presenter.home.bluesky.BlueskyFeedTimelinePresenter
+import dev.dimension.flare.ui.route.DeeplinkRoute
 import io.ktor.http.Url
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -47,37 +47,79 @@ internal data object BlueskyPlatformSpec : PlatformSpec {
             }
         }.toImmutableList()
 
-    override fun defaultTimelineTabs(accountKey: MicroBlogKey): ImmutableList<TimelineTabItem> =
+    private val bookmarkTimelineSpec =
+        TimelineSpec(
+            id = "bluesky.bookmark",
+            title = UiStrings.Bookmark,
+            icon = UiIcon.Bookmark.asType(),
+            serializer = TimelineSpec.AccountBasedData.serializer(),
+            targetId = { it.accountKey.toString() },
+            presenterFactory = {
+                BlueskyBookmarkTimelinePresenter(
+                    AccountType.Specific(it.accountKey),
+                )
+            },
+        )
+
+    private val feedTimelineSpec =
+        TimelineSpec(
+            id = "bluesky.feed",
+            title = UiStrings.Feeds,
+            icon = UiIcon.Feeds.asType(),
+            serializer = TimelineSpec.AccountResourceData.serializer(),
+            targetId = { "${it.accountKey}:${it.resourceId}" },
+            presenterFactory = {
+                BlueskyFeedTimelinePresenter(
+                    accountType = AccountType.Specific(it.accountKey),
+                    uri = it.resourceId,
+                )
+            },
+        )
+
+    override val timelineSpecs: ImmutableList<TimelineSpec<out TimelineSpec.Data>> =
         persistentListOf(
-            HomeTimelineTabItem(
-                accountKey = accountKey,
-                title = "Bluesky",
+            CommonTimelineSpecs.home,
+            CommonTimelineSpecs.list,
+            bookmarkTimelineSpec,
+            feedTimelineSpec,
+        )
+
+    override fun defaultTabs(accountKey: MicroBlogKey): ImmutableList<TimelineTargetRef> =
+        persistentListOf(
+            CommonTimelineSpecs.home.target(
+                data = TimelineSpec.AccountBasedData(accountKey),
                 icon = IconType.FavIcon(accountKey.host),
             ),
         )
 
-    override fun secondary(accountKey: MicroBlogKey): ImmutableList<TabItem> =
+    override fun shortcuts(accountKey: MicroBlogKey): ImmutableList<ShortcutSpec> =
         persistentListOf(
-            AllListTabItem(
-                AccountType.Specific(accountKey),
-                TabMetaData(
-                    title = TitleType.Localized(TitleType.Localized.LocalizedKey.List),
-                    icon = IconType.Mixed(dev.dimension.flare.ui.model.UiIcon.List, accountKey),
+            ShortcutSpec(
+                title = UiStrings.List,
+                icon = UiIcon.List,
+                target = ShortcutSpec.Target.Route(
+                    DeeplinkRoute.AllLists(accountKey)
                 ),
             ),
-            Bluesky.FeedsTabItem(
-                AccountType.Specific(accountKey),
-                TabMetaData(
-                    title = TitleType.Localized(TitleType.Localized.LocalizedKey.Feeds),
-                    icon = IconType.Mixed(dev.dimension.flare.ui.model.UiIcon.Feeds, accountKey),
+            ShortcutSpec(
+                title = UiStrings.Feeds,
+                icon = UiIcon.Feeds,
+                target = ShortcutSpec.Target.Route(
+                    DeeplinkRoute.Bluesky.AllFeeds(accountKey)
                 ),
             ),
-            Bluesky.BookmarkTimelineTabItem(AccountType.Specific(accountKey)),
-            DirectMessageTabItem(
-                AccountType.Specific(accountKey),
-                TabMetaData(
-                    title = TitleType.Localized(TitleType.Localized.LocalizedKey.DirectMessage),
-                    icon = IconType.Mixed(dev.dimension.flare.ui.model.UiIcon.Messages, accountKey),
+            ShortcutSpec(
+                title = UiStrings.Bookmark,
+                icon = UiIcon.Bookmark,
+                target = ShortcutSpec.Target.Timeline(
+                    bookmarkTimelineSpec.target(TimelineSpec.AccountBasedData(accountKey)),
+                ),
+            ),
+            ShortcutSpec(
+                title = UiStrings.DirectMessage,
+                icon = UiIcon.Messages,
+                target = ShortcutSpec.Target.Route(
+                    DeeplinkRoute.AllDirectMessages(accountKey)
                 ),
             ),
         )

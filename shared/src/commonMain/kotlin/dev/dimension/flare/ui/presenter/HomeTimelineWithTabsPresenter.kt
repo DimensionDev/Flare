@@ -3,8 +3,8 @@ package dev.dimension.flare.ui.presenter
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import dev.dimension.flare.data.model.MixedTimelineTabItem
-import dev.dimension.flare.data.model.TimelineTabItem
+import dev.dimension.flare.data.model.tab.TimelineResolver
+import dev.dimension.flare.data.model.tab.UiTimelineItem
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
@@ -20,29 +20,20 @@ import org.koin.core.component.inject
 public class HomeTimelineWithTabsPresenter :
     PresenterBase<HomeTimelineWithTabsPresenter.State>(),
     KoinComponent {
+    private val resolver: TimelineResolver by inject()
     private val settingsRepository by inject<SettingsRepository>()
 
     public interface State : UserState {
-        public val tabState: UiState<ImmutableList<TimelineTabItem>>
+        public val tabState: UiState<ImmutableList<UiTimelineItem>>
     }
 
     private val tabsState by lazy {
-        settingsRepository.tabSettings
-            .distinctUntilChangedBy { it.mainTabs + it.enableMixedTimeline }
-            .map { settings ->
-                listOfNotNull(
-                    if (settings.enableMixedTimeline && settings.mainTabs.size > 1) {
-                        MixedTimelineTabItem(
-                            subTimelineTabItem = settings.mainTabs,
-                        )
-                    } else {
-                        null
-                    },
-                ).plus(
-                    settings.mainTabs,
-                )
-            }.map {
-                it.toImmutableList()
+        settingsRepository.tabSettingsV2
+            .distinctUntilChangedBy { it.homeSlots }
+            .map {
+                it.homeSlots.map {
+                    resolver.toUi(it)
+                }.toImmutableList()
             }
     }
 

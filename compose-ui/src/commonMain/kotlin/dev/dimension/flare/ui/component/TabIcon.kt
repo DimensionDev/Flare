@@ -16,9 +16,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
-import compose.icons.FontAwesomeIcons
-import compose.icons.fontawesomeicons.Solid
-import compose.icons.fontawesomeicons.solid.CircleUser
 import dev.dimension.flare.compose.ui.Res
 import dev.dimension.flare.compose.ui.all_rss_feeds_title
 import dev.dimension.flare.compose.ui.antenna_title
@@ -42,12 +39,12 @@ import dev.dimension.flare.compose.ui.rss_title
 import dev.dimension.flare.compose.ui.settings_title
 import dev.dimension.flare.compose.ui.social_title
 import dev.dimension.flare.data.model.IconType
-import dev.dimension.flare.data.model.TabItem
-import dev.dimension.flare.data.model.TitleType
-import dev.dimension.flare.data.model.WithAccountTabItem
+import dev.dimension.flare.data.model.tab.UiTimelineItem
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.component.platform.PlatformTextStyle
+import dev.dimension.flare.ui.model.UiStrings
+import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.FavIconPresenter
@@ -55,15 +52,15 @@ import dev.dimension.flare.ui.presenter.home.UserPresenter
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.theme.PlatformContentColor
 import dev.dimension.flare.ui.theme.PlatformTheme
+import kotlin.native.HiddenFromObjC
 import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
-import kotlin.native.HiddenFromObjC
 
 @HiddenFromObjC
 @Composable
-public fun TabTitle(
-    title: TitleType,
+public fun Text(
+    text: UiText,
     modifier: Modifier = Modifier,
     color: Color = Color.Unspecified,
     fontSize: TextUnit = TextUnit.Unspecified,
@@ -71,9 +68,9 @@ public fun TabTitle(
 ) {
     PlatformText(
         text =
-            when (title) {
-                is TitleType.Localized -> stringResource(title.res)
-                is TitleType.Text -> title.content
+            when (text) {
+                is UiText.Localized -> stringResource(text.string.res)
+                is UiText.Raw -> text.string
             },
         modifier = modifier,
         color = color,
@@ -86,10 +83,9 @@ public fun TabTitle(
 @HiddenFromObjC
 @Composable
 public fun TabIcon(
-    tabItem: TabItem,
-    icon: IconType = tabItem.metaData.icon,
-    title: TitleType = tabItem.metaData.title,
-    accountType: AccountType? = if (tabItem is WithAccountTabItem) tabItem.account else null,
+    tabItem: UiTimelineItem,
+    icon: IconType = tabItem.icon,
+    title: UiText = tabItem.title,
     modifier: Modifier = Modifier,
     size: Dp = 24.dp,
     iconOnly: Boolean = false,
@@ -100,7 +96,6 @@ public fun TabIcon(
         title = title,
         modifier = modifier,
         size = size,
-        accountType = accountType,
         iconOnly = iconOnly,
         color = color,
     )
@@ -110,54 +105,38 @@ public fun TabIcon(
 @Composable
 public fun TabIcon(
     icon: IconType,
-    title: TitleType,
+    title: UiText,
     modifier: Modifier = Modifier,
     iconOnly: Boolean = false,
     color: Color = PlatformContentColor.current,
-    accountType: AccountType? = null,
     size: Dp = 24.dp,
 ) {
+    val text = when (title) {
+        is UiText.Localized -> stringResource(title.string.res)
+        is UiText.Raw -> title.string
+    }
     when (icon) {
         is IconType.Avatar -> {
-            if (accountType != null) {
-                val userState by producePresenter(key = "$accountType:${icon.userKey}") {
-                    remember(accountType, icon.userKey) {
-                        UserPresenter(
-                            accountType,
-                            icon.userKey,
-                        )
-                    }.invoke()
-                }
-                userState.user
-                    .onSuccess {
-                        AvatarComponent(it.avatar, size = size, modifier = modifier)
-                    }.onLoading {
-                        AvatarComponent(null, size = size, modifier = modifier.placeholder(true))
-                    }
-            } else {
-                FAIcon(
-                    imageVector = FontAwesomeIcons.Solid.CircleUser,
-                    contentDescription =
-                        when (title) {
-                            is TitleType.Localized -> stringResource(title.res)
-                            is TitleType.Text -> title.content
-                        },
-                    modifier =
-                        modifier
-                            .size(size),
-                    tint = color,
-                )
+            val userState by producePresenter(key = "avatar:${icon.accountKey}") {
+                remember(icon.accountKey) {
+                    UserPresenter(
+                        AccountType.Specific(icon.accountKey),
+                        icon.accountKey,
+                    )
+                }.invoke()
             }
+            userState.user
+                .onSuccess {
+                    AvatarComponent(it.avatar, size = size, modifier = modifier)
+                }.onLoading {
+                    AvatarComponent(null, size = size, modifier = modifier.placeholder(true))
+                }
         }
 
         is IconType.Material -> {
             FAIcon(
                 imageVector = icon.icon.toImageVector(),
-                contentDescription =
-                    when (title) {
-                        is TitleType.Localized -> stringResource(title.res)
-                        is TitleType.Text -> title.content
-                    },
+                contentDescription = text,
                 modifier =
                     modifier
                         .size(size),
@@ -166,25 +145,21 @@ public fun TabIcon(
         }
 
         is IconType.Mixed -> {
-            if (iconOnly || accountType == null) {
+            if (iconOnly) {
                 FAIcon(
                     imageVector = icon.icon.toImageVector(),
-                    contentDescription =
-                        when (title) {
-                            is TitleType.Localized -> stringResource(title.res)
-                            is TitleType.Text -> title.content
-                        },
+                    contentDescription = text,
                     modifier =
                         modifier
                             .size(size),
                     tint = color,
                 )
             } else {
-                val userState by producePresenter(key = "$accountType:${icon.userKey}") {
-                    remember(accountType, icon.userKey) {
+                val userState by producePresenter(key = "avatar:${icon.accountKey}") {
+                    remember(icon.accountKey) {
                         UserPresenter(
-                            accountType,
-                            icon.userKey,
+                            AccountType.Specific(icon.accountKey),
+                            icon.accountKey,
                         )
                     }.invoke()
                 }
@@ -203,11 +178,7 @@ public fun TabIcon(
                         }
                     FAIcon(
                         imageVector = icon.icon.toImageVector(),
-                        contentDescription =
-                            when (title) {
-                                is TitleType.Localized -> stringResource(title.res)
-                                is TitleType.Text -> title.content
-                            },
+                        contentDescription = text,
                         modifier =
                             Modifier
                                 .size(size / 2)
@@ -222,11 +193,7 @@ public fun TabIcon(
         is IconType.Url -> {
             NetworkImage(
                 icon.url,
-                contentDescription =
-                    when (title) {
-                        is TitleType.Localized -> stringResource(title.res)
-                        is TitleType.Text -> title.content
-                    },
+                contentDescription = text,
                 modifier =
                     modifier
                         .size(size),
@@ -240,11 +207,12 @@ public fun TabIcon(
     }
 }
 
+@HiddenFromObjC
 @Composable
 public fun FavIcon(
     host: String,
     modifier: Modifier = Modifier,
-    title: TitleType? = null,
+    title: UiText? = null,
     size: Dp = 24.dp,
 ) {
     val iconState by producePresenter(key = "fav:$host") {
@@ -260,8 +228,8 @@ public fun FavIcon(
                 it,
                 contentDescription =
                     when (title) {
-                        is TitleType.Localized -> stringResource(title.res)
-                        is TitleType.Text -> title.content
+                        is UiText.Localized -> stringResource(title.string.res)
+                        is UiText.Raw -> title.string
                         null -> null
                     },
                 modifier =
@@ -278,28 +246,28 @@ public fun FavIcon(
         }
 }
 
-internal val TitleType.Localized.res: StringResource
+internal val UiStrings.res: StringResource
     get() =
-        when (key) {
-            TitleType.Localized.LocalizedKey.Home -> Res.string.home_tab_home_title
-            TitleType.Localized.LocalizedKey.Notifications -> Res.string.home_tab_notifications_title
-            TitleType.Localized.LocalizedKey.Discover -> Res.string.home_tab_discover_title
-            TitleType.Localized.LocalizedKey.Me -> Res.string.home_tab_me_title
-            TitleType.Localized.LocalizedKey.Settings -> Res.string.settings_title
-            TitleType.Localized.LocalizedKey.MastodonLocal -> Res.string.mastodon_tab_local_title
-            TitleType.Localized.LocalizedKey.MastodonPublic -> Res.string.mastodon_tab_public_title
-            TitleType.Localized.LocalizedKey.Featured -> Res.string.home_tab_featured_title
-            TitleType.Localized.LocalizedKey.Bookmark -> Res.string.home_tab_bookmarks_title
-            TitleType.Localized.LocalizedKey.Favourite -> Res.string.home_tab_favorite_title
-            TitleType.Localized.LocalizedKey.List -> Res.string.home_tab_list_title
-            TitleType.Localized.LocalizedKey.Feeds -> Res.string.home_tab_feeds_title
-            TitleType.Localized.LocalizedKey.DirectMessage -> Res.string.dm_list_title
-            TitleType.Localized.LocalizedKey.Rss -> Res.string.rss_title
-            TitleType.Localized.LocalizedKey.Social -> Res.string.social_title
-            TitleType.Localized.LocalizedKey.Antenna -> Res.string.antenna_title
-            TitleType.Localized.LocalizedKey.MixedTimeline -> Res.string.mixed_timeline_title
-            TitleType.Localized.LocalizedKey.Liked -> Res.string.liked_title
-            TitleType.Localized.LocalizedKey.AllRssFeeds -> Res.string.all_rss_feeds_title
-            TitleType.Localized.LocalizedKey.Posts -> Res.string.posts_title
-            TitleType.Localized.LocalizedKey.Channel -> Res.string.channel_title
+        when (this) {
+            UiStrings.Home -> Res.string.home_tab_home_title
+            UiStrings.Notifications -> Res.string.home_tab_notifications_title
+            UiStrings.Discover -> Res.string.home_tab_discover_title
+            UiStrings.Me -> Res.string.home_tab_me_title
+            UiStrings.Settings -> Res.string.settings_title
+            UiStrings.MastodonLocal -> Res.string.mastodon_tab_local_title
+            UiStrings.MastodonPublic -> Res.string.mastodon_tab_public_title
+            UiStrings.Featured -> Res.string.home_tab_featured_title
+            UiStrings.Bookmark -> Res.string.home_tab_bookmarks_title
+            UiStrings.Favourite -> Res.string.home_tab_favorite_title
+            UiStrings.List -> Res.string.home_tab_list_title
+            UiStrings.Feeds -> Res.string.home_tab_feeds_title
+            UiStrings.DirectMessage -> Res.string.dm_list_title
+            UiStrings.Rss -> Res.string.rss_title
+            UiStrings.Social -> Res.string.social_title
+            UiStrings.Antenna -> Res.string.antenna_title
+            UiStrings.MixedTimeline -> Res.string.mixed_timeline_title
+            UiStrings.Liked -> Res.string.liked_title
+            UiStrings.AllRssFeeds -> Res.string.all_rss_feeds_title
+            UiStrings.Posts -> Res.string.posts_title
+            UiStrings.Channel -> Res.string.channel_title
         }

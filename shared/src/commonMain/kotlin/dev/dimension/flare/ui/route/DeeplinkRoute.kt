@@ -230,6 +230,35 @@ public sealed class DeeplinkRoute {
         val userKey: MicroBlogKey,
     ) : DeeplinkRoute()
 
+    @Serializable
+    public data class AllLists(
+        val accountKey: MicroBlogKey,
+    ) : DeeplinkRoute()
+
+    @Serializable
+    public data class AllDirectMessages(
+        val accountKey: MicroBlogKey,
+    ) : DeeplinkRoute()
+
+    public object Bluesky {
+        @Serializable
+        public data class AllFeeds(
+            val accountKey: MicroBlogKey,
+        ) : DeeplinkRoute()
+    }
+
+    public object Misskey {
+        @Serializable
+        public data class AllAntennas(
+            val accountKey: MicroBlogKey,
+        ) : DeeplinkRoute()
+
+        @Serializable
+        public data class AllChannels(
+            val accountKey: MicroBlogKey,
+        ) : DeeplinkRoute()
+    }
+
     public companion object Companion {
         public object Callback {
             public const val MASTODON: String = "$APPSCHEMA://Callback/SignIn/Mastodon"

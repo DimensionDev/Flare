@@ -481,6 +481,18 @@ internal sealed interface Route : NavKey {
                     null
                 }
 
+                is DeeplinkRoute.Misskey.AllAntennas -> {
+                    MisskeyAntennas(
+                        accountType = AccountType.Specific(deeplinkRoute.accountKey),
+                    )
+                }
+
+                is DeeplinkRoute.Misskey.AllChannels -> {
+                    MisskeyChannelList(
+                        accountType = AccountType.Specific(deeplinkRoute.accountKey),
+                    )
+                }
+
                 is DeeplinkRoute.MuteUser -> {
                     Route.MuteUser(
                         accountType = deeplinkRoute.accountKey?.let { AccountType.Specific(it) },

@@ -7,6 +7,7 @@ import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoade
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.datasource.microblog.paging.ReportableRemoteLoader
+import dev.dimension.flare.data.model.tab.TimelineMergePolicy
 import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -15,6 +16,7 @@ import kotlinx.coroutines.coroutineScope
 internal class MixedRemoteMediator(
     private val database: CacheDatabase,
     private val mediators: List<CacheableRemoteLoader<UiTimelineV2>>,
+    private val mergePolicy: TimelineMergePolicy = TimelineMergePolicy.TimePerPage,
 ) : CacheableRemoteLoader<UiTimelineV2>,
     ReportableRemoteLoader {
     override val pagingKey =

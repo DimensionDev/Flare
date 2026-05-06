@@ -4,14 +4,10 @@ import dev.dimension.flare.common.deeplink.DeepLinkMapping
 import dev.dimension.flare.common.deeplink.DeepLinkPattern
 import dev.dimension.flare.data.datasource.guest.mastodon.GuestMastodonDataSource
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
-import dev.dimension.flare.data.model.AllListTabItem
-import dev.dimension.flare.data.model.HomeTimelineTabItem
 import dev.dimension.flare.data.model.IconType
-import dev.dimension.flare.data.model.Mastodon
-import dev.dimension.flare.data.model.TabItem
-import dev.dimension.flare.data.model.TabMetaData
-import dev.dimension.flare.data.model.TimelineTabItem
-import dev.dimension.flare.data.model.TitleType
+import dev.dimension.flare.data.model.tab.ShortcutSpec
+import dev.dimension.flare.data.model.tab.TimelineSpec
+import dev.dimension.flare.data.model.tab.TimelineTargetRef
 import dev.dimension.flare.data.network.mastodon.MastodonInstanceService
 import dev.dimension.flare.data.network.mastodon.MastodonPlatformDetector
 import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
@@ -22,7 +18,14 @@ import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.PlatformTypeMetadata
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiInstanceMetadata
+import dev.dimension.flare.ui.model.UiStrings
+import dev.dimension.flare.ui.model.asType
 import dev.dimension.flare.ui.model.mapper.render
+import dev.dimension.flare.ui.presenter.home.mastodon.MastodonBookmarkTimelinePresenter
+import dev.dimension.flare.ui.presenter.home.mastodon.MastodonFavouriteTimelinePresenter
+import dev.dimension.flare.ui.presenter.home.mastodon.MastodonLocalTimelinePresenter
+import dev.dimension.flare.ui.presenter.home.mastodon.MastodonPublicTimelinePresenter
+import dev.dimension.flare.ui.route.DeeplinkRoute
 import io.ktor.http.Url
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -40,59 +43,131 @@ internal data object MastodonPlatformSpec : PlatformSpec {
 
     override fun deepLinkPatterns(host: String): ImmutableList<DeepLinkPattern<out DeepLinkMapping.Type>> =
         persistentListOf(
-            DeepLinkPattern(DeepLinkMapping.Type.Profile.serializer(), Url("https://$host/@{handle}")),
-            DeepLinkPattern(DeepLinkMapping.Type.Post.serializer(), Url("https://$host/@{handle}/{id}")),
+            DeepLinkPattern(
+                DeepLinkMapping.Type.Profile.serializer(),
+                Url("https://$host/@{handle}"),
+            ),
+            DeepLinkPattern(
+                DeepLinkMapping.Type.Post.serializer(),
+                Url("https://$host/@{handle}/{id}"),
+            ),
         )
 
-    override fun defaultTimelineTabs(accountKey: MicroBlogKey): ImmutableList<TimelineTabItem> =
+    private val localTimelineSpec =
+        TimelineSpec(
+            id = "mastodon.local",
+            title = UiStrings.MastodonLocal,
+            icon = UiIcon.Local.asType(),
+            serializer = TimelineSpec.AccountBasedData.serializer(),
+            targetId = { it.accountKey.toString() },
+            presenterFactory = {
+                MastodonLocalTimelinePresenter(
+                    AccountType.Specific(it.accountKey),
+                )
+            },
+        )
+
+    private val publicTimelineSpec =
+        TimelineSpec(
+            id = "mastodon.public",
+            title = UiStrings.MastodonPublic,
+            icon = UiIcon.World.asType(),
+            serializer = TimelineSpec.AccountBasedData.serializer(),
+            targetId = { it.accountKey.toString() },
+            presenterFactory = {
+                MastodonPublicTimelinePresenter(
+                    AccountType.Specific(it.accountKey),
+                )
+            },
+        )
+
+    private val bookmarkTimelineSpec =
+        TimelineSpec(
+            id = "mastodon.bookmark",
+            title = UiStrings.Bookmark,
+            icon = UiIcon.Bookmark.asType(),
+            serializer = TimelineSpec.AccountBasedData.serializer(),
+            targetId = { it.accountKey.toString() },
+            presenterFactory = {
+                MastodonBookmarkTimelinePresenter(
+                    AccountType.Specific(it.accountKey),
+                )
+            },
+        )
+
+    private val favouriteTimelineSpec =
+        TimelineSpec(
+            id = "mastodon.favourite",
+            title = UiStrings.Favourite,
+            icon = UiIcon.Favourite.asType(),
+            serializer = TimelineSpec.AccountBasedData.serializer(),
+            targetId = { it.accountKey.toString() },
+            presenterFactory = {
+                MastodonFavouriteTimelinePresenter(
+                    AccountType.Specific(it.accountKey),
+                )
+            },
+        )
+
+    override val timelineSpecs: ImmutableList<TimelineSpec<out TimelineSpec.Data>> =
         persistentListOf(
-            HomeTimelineTabItem(
-                accountKey = accountKey,
-                title = "Mastodon",
+            CommonTimelineSpecs.home,
+            CommonTimelineSpecs.list,
+            localTimelineSpec,
+            publicTimelineSpec,
+            bookmarkTimelineSpec,
+            favouriteTimelineSpec,
+        )
+
+    override fun defaultTabs(accountKey: MicroBlogKey): ImmutableList<TimelineTargetRef> =
+        persistentListOf(
+            CommonTimelineSpecs.home.target(
+                data = TimelineSpec.AccountBasedData(accountKey),
                 icon = IconType.FavIcon(accountKey.host),
             ),
         )
 
-    override fun secondary(accountKey: MicroBlogKey): ImmutableList<TabItem> =
+    override fun shortcuts(accountKey: MicroBlogKey): ImmutableList<ShortcutSpec> =
         persistentListOf(
-            Mastodon.LocalTimelineTabItem(
-                AccountType.Specific(accountKey),
-                TabMetaData(
-                    title = TitleType.Localized(TitleType.Localized.LocalizedKey.MastodonLocal),
-                    icon = IconType.Mixed(dev.dimension.flare.ui.model.UiIcon.Local, accountKey),
+            ShortcutSpec(
+                title = UiStrings.MastodonLocal,
+                icon = UiIcon.Local,
+                target = ShortcutSpec.Target.Timeline(
+                    localTimelineSpec.target(TimelineSpec.AccountBasedData(accountKey)),
                 ),
             ),
-            Mastodon.PublicTimelineTabItem(
-                AccountType.Specific(accountKey),
-                TabMetaData(
-                    title = TitleType.Localized(TitleType.Localized.LocalizedKey.MastodonPublic),
-                    icon = IconType.Mixed(dev.dimension.flare.ui.model.UiIcon.World, accountKey),
+            ShortcutSpec(
+                title = UiStrings.MastodonPublic,
+                icon = UiIcon.World,
+                target = ShortcutSpec.Target.Timeline(
+                    publicTimelineSpec.target(TimelineSpec.AccountBasedData(accountKey)),
                 ),
             ),
-            Mastodon.BookmarkTimelineTabItem(
-                AccountType.Specific(accountKey),
-                TabMetaData(
-                    title = TitleType.Localized(TitleType.Localized.LocalizedKey.Bookmark),
-                    icon = IconType.Mixed(dev.dimension.flare.ui.model.UiIcon.Bookmark, accountKey),
+            ShortcutSpec(
+                title = UiStrings.Bookmark,
+                icon = UiIcon.Bookmark,
+                target = ShortcutSpec.Target.Timeline(
+                    bookmarkTimelineSpec.target(TimelineSpec.AccountBasedData(accountKey)),
                 ),
             ),
-            Mastodon.FavouriteTimelineTabItem(
-                AccountType.Specific(accountKey),
-                TabMetaData(
-                    title = TitleType.Localized(TitleType.Localized.LocalizedKey.Favourite),
-                    icon = IconType.Mixed(dev.dimension.flare.ui.model.UiIcon.Favourite, accountKey),
+            ShortcutSpec(
+                title = UiStrings.Favourite,
+                icon = UiIcon.Favourite,
+                target = ShortcutSpec.Target.Timeline(
+                    favouriteTimelineSpec.target(TimelineSpec.AccountBasedData(accountKey)),
                 ),
             ),
-            AllListTabItem(
-                AccountType.Specific(accountKey),
-                TabMetaData(
-                    title = TitleType.Localized(TitleType.Localized.LocalizedKey.List),
-                    icon = IconType.Mixed(dev.dimension.flare.ui.model.UiIcon.List, accountKey),
+            ShortcutSpec(
+                title = UiStrings.List,
+                icon = UiIcon.List,
+                target = ShortcutSpec.Target.Route(
+                    DeeplinkRoute.AllLists(accountKey),
                 ),
             ),
         )
 
-    override suspend fun instanceMetadata(host: String): UiInstanceMetadata = MastodonInstanceService("https://$host/").instance().render()
+    override suspend fun instanceMetadata(host: String): UiInstanceMetadata =
+        MastodonInstanceService("https://$host/").instance().render()
 
     override fun guestDataSource(
         host: String,

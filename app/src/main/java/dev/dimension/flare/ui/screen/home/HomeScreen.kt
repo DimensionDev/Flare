@@ -37,6 +37,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalUriHandler
@@ -46,26 +47,16 @@ import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Bars
+import compose.icons.fontawesomeicons.solid.Bell
 import compose.icons.fontawesomeicons.solid.ClockRotateLeft
 import compose.icons.fontawesomeicons.solid.Gear
+import compose.icons.fontawesomeicons.solid.House
+import compose.icons.fontawesomeicons.solid.MagnifyingGlass
 import compose.icons.fontawesomeicons.solid.Pen
 import compose.icons.fontawesomeicons.solid.PenToSquare
 import compose.icons.fontawesomeicons.solid.SquareRss
 import dev.dimension.flare.R
-import dev.dimension.flare.data.model.AllListTabItem
-import dev.dimension.flare.data.model.AllNotificationTabItem
-import dev.dimension.flare.data.model.Bluesky
-import dev.dimension.flare.data.model.DirectMessageTabItem
-import dev.dimension.flare.data.model.DiscoverTabItem
-import dev.dimension.flare.data.model.HomeTabItem
-import dev.dimension.flare.data.model.HomeTimelineTabItem
-import dev.dimension.flare.data.model.Misskey
-import dev.dimension.flare.data.model.NotificationTabItem
-import dev.dimension.flare.data.model.ProfileTabItem
-import dev.dimension.flare.data.model.RssTabItem
-import dev.dimension.flare.data.model.SettingsTabItem
-import dev.dimension.flare.data.model.TabItem
-import dev.dimension.flare.data.model.TimelineTabItem
+import dev.dimension.flare.data.model.tab.ShortcutSpec
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.common.OnNewIntent
 import dev.dimension.flare.ui.component.AvatarComponent
@@ -74,8 +65,9 @@ import dev.dimension.flare.ui.component.InAppNotificationComponent
 import dev.dimension.flare.ui.component.NavigationSuiteScaffold2
 import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.component.TabIcon
-import dev.dimension.flare.ui.component.TabTitle
 import dev.dimension.flare.ui.component.TopLevelBackStack
+import dev.dimension.flare.ui.model.asText
+import dev.dimension.flare.ui.model.asType
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
@@ -111,7 +103,7 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                     tabs,
                     state.topLevelBackStack.takeSuccess()?.topLevelKey,
                 ) {
-                    state.topLevelBackStack.takeSuccess()?.topLevelKey ?: getDirection(tabs.all.first())
+                    state.topLevelBackStack.takeSuccess()?.topLevelKey ?: tabs.first().route
                 }
             OnNewIntent(
                 withOnCreateIntent = true,
@@ -228,26 +220,29 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                         }
                     },
                     navigationSuiteItems = {
-                        tabs.primary.forEach { tab ->
+                        tabs.forEach { tab ->
                             item(
-                                selected = currentRoute == getDirection(tab),
+                                selected = currentRoute == tab.route,
                                 onClick = {
-                                    if (currentRoute == getDirection(tab)) {
+                                    if (currentRoute == tab.route) {
                                         state.scrollToTopRegistry.scrollToTop()
                                     } else {
-                                        state.navigate(getDirection(tab))
+                                        state.navigate(tab.route)
                                     }
                                 },
                                 icon = {
-                                    TabIcon(tabItem = tab)
+                                    FAIcon(
+                                        imageVector = tab.icon,
+                                        contentDescription = stringResource(id = tab.title),
+                                    )
                                 },
                                 label = {
-                                    TabTitle(
-                                        title = tab.metaData.title,
+                                    Text(
+                                        text = stringResource(id = tab.title),
                                     )
                                 },
                                 badge =
-                                    if (tab is AllNotificationTabItem) {
+                                    if (tab == HomeTabsPresenter.State.HomeTabs.Notifications) {
                                         {
                                             if (state.notificationState.count > 0) {
                                                 Badge {
@@ -259,7 +254,7 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                                         null
                                     },
                                 onLongClick =
-                                    if (tab is HomeTimelineTabItem || tab is ProfileTabItem) {
+                                    if (tab == HomeTabsPresenter.State.HomeTabs.Home) {
                                         {
                                             hapticFeedback.performHapticFeedback(
                                                 HapticFeedbackType.LongPress,
@@ -341,39 +336,43 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                                     },
                                     children = {
                                         item.tabs.forEach {
-                                            item(
-                                                selected = currentRoute == getDirection(it),
-                                                onClick = {
-                                                    if (currentRoute == getDirection(it)) {
-                                                        state.scrollToTopRegistry.scrollToTop()
-                                                    } else {
-                                                        state.navigate(getDirection(it))
-                                                    }
-                                                },
-                                                icon = {
-                                                    TabIcon(
-                                                        tabItem = it,
-                                                        iconOnly = true,
-                                                    )
-                                                },
-                                                label = {
-                                                    TabTitle(
-                                                        title = it.metaData.title,
-                                                    )
-                                                },
-                                                badge =
-                                                    if (it is AllNotificationTabItem) {
-                                                        {
-                                                            if (state.notificationState.count > 0) {
-                                                                Badge {
-                                                                    Text(text = state.notificationState.count.toString())
-                                                                }
-                                                            }
+                                            val direction = getDirection(it)
+                                            if (direction != null) {
+                                                item(
+                                                    selected = currentRoute == direction,
+                                                    onClick = {
+                                                        if (currentRoute == direction) {
+                                                            state.scrollToTopRegistry.scrollToTop()
+                                                        } else {
+                                                            state.navigate(direction)
                                                         }
-                                                    } else {
-                                                        null
                                                     },
-                                            )
+                                                    icon = {
+                                                        TabIcon(
+                                                            icon = it.icon.asType(),
+                                                            title = it.title.asText(),
+                                                            iconOnly = true,
+                                                        )
+                                                    },
+                                                    label = {
+                                                        dev.dimension.flare.ui.component.Text(
+                                                            text = it.title.asText(),
+                                                        )
+                                                    },
+//                                                badge =
+//                                                    if (it is AllNotificationTabItem) {
+//                                                        {
+//                                                            if (state.notificationState.count > 0) {
+//                                                                Badge {
+//                                                                    Text(text = state.notificationState.count.toString())
+//                                                                }
+//                                                            }
+//                                                        }
+//                                                    } else {
+//                                                        null
+//                                                    },
+                                                )
+                                            }
                                         }
                                     },
                                 )
@@ -478,21 +477,35 @@ internal fun HomeScreen(afterInit: () -> Unit) {
         }
 }
 
-private fun getDirection(tab: TabItem): Route =
-    when (tab) {
-        is DiscoverTabItem -> Route.Discover
-        is ProfileTabItem -> Route.Profile.Me(tab.account)
-        HomeTabItem -> Route.Home
-        is TimelineTabItem -> Route.Timeline(tab)
-        is NotificationTabItem, AllNotificationTabItem -> Route.Notification
-        SettingsTabItem -> Route.Settings.Main
-        is AllListTabItem -> Route.Lists.List(tab.account)
-        is Bluesky.FeedsTabItem -> Route.Bluesky.Feed(tab.account)
-        is DirectMessageTabItem -> Route.DM.List(tab.account)
-        is RssTabItem -> Route.Rss.Sources
-        is Misskey.AntennasListTabItem -> Route.Misskey.AntennasList(tab.account)
-        is Misskey.ChannelListTabItem -> Route.Misskey.ChannelList(tab.account)
+private fun getDirection(data: ShortcutSpec): Route? {
+    return when (val target = data.target) {
+        is ShortcutSpec.Target.Route -> Route.from(target.route)
+        is ShortcutSpec.Target.Timeline -> Route.Timeline(target.target)
     }
+}
+
+private val HomeTabsPresenter.State.HomeTabs.route: Route
+    get() =
+        when (this) {
+            HomeTabsPresenter.State.HomeTabs.Home -> Route.Home
+            HomeTabsPresenter.State.HomeTabs.Notifications -> Route.Notification
+            HomeTabsPresenter.State.HomeTabs.Discover -> Route.Discover
+        }
+private val HomeTabsPresenter.State.HomeTabs.title: Int
+    get() =
+        when (this) {
+            HomeTabsPresenter.State.HomeTabs.Home -> R.string.home_tab_home_title
+            HomeTabsPresenter.State.HomeTabs.Notifications -> R.string.home_tab_notifications_title
+            HomeTabsPresenter.State.HomeTabs.Discover -> R.string.home_tab_discover_title
+        }
+
+private val HomeTabsPresenter.State.HomeTabs.icon: ImageVector
+    get() =
+        when (this) {
+            HomeTabsPresenter.State.HomeTabs.Home -> FontAwesomeIcons.Solid.House
+            HomeTabsPresenter.State.HomeTabs.Notifications -> FontAwesomeIcons.Solid.Bell
+            HomeTabsPresenter.State.HomeTabs.Discover -> FontAwesomeIcons.Solid.MagnifyingGlass
+        }
 
 @Composable
 private fun presenter(uriHandler: UriHandler) =
@@ -519,7 +532,7 @@ private fun presenter(uriHandler: UriHandler) =
         val firstDirection =
             remember(tabs.tabs) {
                 tabs.tabs.map {
-                    getDirection(it.all.first())
+                    it.first().route
                 }
             }
         val topLevelBackStack =
@@ -531,7 +544,7 @@ private fun presenter(uriHandler: UriHandler) =
         val topLevelRoutes =
             remember(tabs.tabs) {
                 tabs.tabs.map { state ->
-                    state.all.map { getDirection(it) }.toSet() +
+                    state.map { it.route }.toSet() +
                         setOf(
                             Route.Settings.Main,
                             Route.DraftBox,

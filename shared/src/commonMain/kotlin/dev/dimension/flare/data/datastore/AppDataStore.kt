@@ -3,12 +3,10 @@ package dev.dimension.flare.data.datastore
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.DataStoreFactory
 import androidx.datastore.core.okio.OkioStorage
+import dev.dimension.flare.common.protobufSerializer
 import dev.dimension.flare.data.datastore.model.AppSettings
-import dev.dimension.flare.data.datastore.model.AppSettingsSerializer
 import dev.dimension.flare.data.datastore.model.ComposeConfigData
-import dev.dimension.flare.data.datastore.model.ComposeConfigDataSerializer
 import dev.dimension.flare.data.datastore.model.FlareConfig
-import dev.dimension.flare.data.datastore.model.FlareConfigSerializer
 import dev.dimension.flare.data.io.PlatformPathProducer
 import okio.FileSystem
 import okio.SYSTEM
@@ -21,7 +19,7 @@ internal class AppDataStore(
             storage =
                 OkioStorage(
                     fileSystem = FileSystem.SYSTEM,
-                    serializer = FlareConfigSerializer,
+                    serializer = protobufSerializer(FlareConfig()),
                     producePath = {
                         platformPathProducer.dataStoreFile("flare_config.pb")
                     },
@@ -34,7 +32,7 @@ internal class AppDataStore(
             storage =
                 OkioStorage(
                     fileSystem = FileSystem.SYSTEM,
-                    serializer = ComposeConfigDataSerializer,
+                    serializer = protobufSerializer(ComposeConfigData()),
                     producePath = {
                         platformPathProducer.dataStoreFile("compose_config.pb")
                     },
@@ -47,7 +45,7 @@ internal class AppDataStore(
             storage =
                 OkioStorage(
                     fileSystem = FileSystem.SYSTEM,
-                    serializer = AppSettingsSerializer,
+                    serializer = protobufSerializer(AppSettings(version = "")),
                     producePath = {
                         platformPathProducer.dataStoreFile("app_settings.pb")
                     },

@@ -81,7 +81,7 @@ public object AppearanceKeys {
         AppearanceTimelineDisplayMode.serializer(),
     )
 
-    public val all: List<AppearanceKey<*>> =
+    internal val all: List<AppearanceKey<*>> =
         listOf(
             Theme,
             DynamicTheme,
@@ -110,7 +110,7 @@ public object AppearanceKeys {
 
     private val byId: Map<String, AppearanceKey<*>> = all.associateBy { it.id }
 
-    public fun byId(id: String): AppearanceKey<*>? = byId[id]
+    public operator fun get(id: String): AppearanceKey<*>? = byId[id]
 
     public abstract class Global<T : Any>(
         final override val id: String,

@@ -3,13 +3,10 @@ package dev.dimension.flare.data.platform
 import dev.dimension.flare.common.deeplink.DeepLinkMapping
 import dev.dimension.flare.common.deeplink.DeepLinkPattern
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
-import dev.dimension.flare.data.model.HomeTimelineTabItem
 import dev.dimension.flare.data.model.IconType
-import dev.dimension.flare.data.model.TabItem
-import dev.dimension.flare.data.model.TabMetaData
-import dev.dimension.flare.data.model.TimelineTabItem
-import dev.dimension.flare.data.model.TitleType
-import dev.dimension.flare.data.model.VVo
+import dev.dimension.flare.data.model.tab.ShortcutSpec
+import dev.dimension.flare.data.model.tab.TimelineSpec
+import dev.dimension.flare.data.model.tab.TimelineTargetRef
 import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
 import dev.dimension.flare.data.network.vvo.VVOPlatformDetector
 import dev.dimension.flare.model.AccountType
@@ -20,6 +17,11 @@ import dev.dimension.flare.model.PlatformTypeMetadata
 import dev.dimension.flare.model.vvo
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiInstanceMetadata
+import dev.dimension.flare.ui.model.UiStrings
+import dev.dimension.flare.ui.model.asType
+import dev.dimension.flare.ui.presenter.home.DiscoverStatusTimelinePresenter
+import dev.dimension.flare.ui.presenter.home.vvo.VVOFavouriteTimelinePresenter
+import dev.dimension.flare.ui.presenter.home.vvo.VVOLikeTimelinePresenter
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
@@ -36,37 +38,89 @@ internal data object VvoPlatformSpec : PlatformSpec {
 
     override fun deepLinkPatterns(host: String): ImmutableList<DeepLinkPattern<out DeepLinkMapping.Type>> = persistentListOf()
 
-    override fun defaultTimelineTabs(accountKey: MicroBlogKey): ImmutableList<TimelineTabItem> =
+    private val featuredTimelineSpec =
+        TimelineSpec(
+            id = "vvo.featured",
+            title = UiStrings.Featured,
+            icon = UiIcon.Featured.asType(),
+            serializer = TimelineSpec.AccountBasedData.serializer(),
+            targetId = { it.accountKey.toString() },
+            presenterFactory = {
+                DiscoverStatusTimelinePresenter(
+                    AccountType.Specific(it.accountKey),
+                )
+            },
+        )
+
+    private val favoriteTimelineSpec =
+        TimelineSpec(
+            id = "vvo.favorite",
+            title = UiStrings.Bookmark,
+            icon = UiIcon.Bookmark.asType(),
+            serializer = TimelineSpec.AccountBasedData.serializer(),
+            targetId = { it.accountKey.toString() },
+            presenterFactory = {
+                VVOFavouriteTimelinePresenter(
+                    AccountType.Specific(it.accountKey),
+                )
+            },
+        )
+
+    private val likedTimelineSpec =
+        TimelineSpec(
+            id = "vvo.liked",
+            title = UiStrings.Liked,
+            icon = UiIcon.Heart.asType(),
+            serializer = TimelineSpec.AccountBasedData.serializer(),
+            targetId = { it.accountKey.toString() },
+            presenterFactory = {
+                VVOLikeTimelinePresenter(
+                    AccountType.Specific(it.accountKey),
+                )
+            },
+        )
+
+    override val timelineSpecs: ImmutableList<TimelineSpec<out TimelineSpec.Data>> =
         persistentListOf(
-            HomeTimelineTabItem(
-                accountKey = accountKey,
-                title = vvo,
+            CommonTimelineSpecs.home,
+            featuredTimelineSpec,
+            favoriteTimelineSpec,
+            likedTimelineSpec,
+        )
+
+    override fun defaultTabs(accountKey: MicroBlogKey): ImmutableList<TimelineTargetRef> =
+        persistentListOf(
+            CommonTimelineSpecs.home.target(
+                data = TimelineSpec.AccountBasedData(accountKey),
                 icon = IconType.Material(UiIcon.Weibo),
             ),
         )
 
-    override fun secondary(accountKey: MicroBlogKey): ImmutableList<TabItem> =
+    override fun shortcuts(accountKey: MicroBlogKey): ImmutableList<ShortcutSpec> =
         persistentListOf(
-            VVo.FeaturedTimelineTabItem(
-                AccountType.Specific(accountKey),
-                TabMetaData(
-                    title = TitleType.Localized(TitleType.Localized.LocalizedKey.Featured),
-                    icon = IconType.Mixed(dev.dimension.flare.ui.model.UiIcon.Featured, accountKey),
-                ),
+            ShortcutSpec(
+                title = UiStrings.Featured,
+                icon = UiIcon.Featured,
+                target =
+                    ShortcutSpec.Target.Timeline(
+                        featuredTimelineSpec.target(TimelineSpec.AccountBasedData(accountKey)),
+                    ),
             ),
-            VVo.FavoriteTimelineTabItem(
-                AccountType.Specific(accountKey),
-                TabMetaData(
-                    title = TitleType.Localized(TitleType.Localized.LocalizedKey.Bookmark),
-                    icon = IconType.Mixed(dev.dimension.flare.ui.model.UiIcon.Bookmark, accountKey),
-                ),
+            ShortcutSpec(
+                title = UiStrings.Bookmark,
+                icon = UiIcon.Bookmark,
+                target =
+                    ShortcutSpec.Target.Timeline(
+                        favoriteTimelineSpec.target(TimelineSpec.AccountBasedData(accountKey)),
+                    ),
             ),
-            VVo.LikedTimelineTabItem(
-                AccountType.Specific(accountKey),
-                TabMetaData(
-                    title = TitleType.Localized(TitleType.Localized.LocalizedKey.Liked),
-                    icon = IconType.Mixed(dev.dimension.flare.ui.model.UiIcon.Heart, accountKey),
-                ),
+            ShortcutSpec(
+                title = UiStrings.Liked,
+                icon = UiIcon.Heart,
+                target =
+                    ShortcutSpec.Target.Timeline(
+                        likedTimelineSpec.target(TimelineSpec.AccountBasedData(accountKey)),
+                    ),
             ),
         )
 

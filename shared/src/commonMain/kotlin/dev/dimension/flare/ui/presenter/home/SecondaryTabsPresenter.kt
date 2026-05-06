@@ -6,17 +6,20 @@ import androidx.compose.runtime.getValue
 import dev.dimension.flare.common.combineLatestFlowLists
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
-import dev.dimension.flare.data.model.ProfileTabItem
-import dev.dimension.flare.data.model.TabItem
-import dev.dimension.flare.data.model.TimelineTabItem
+import dev.dimension.flare.data.model.tab.ShortcutSpec
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.allAccountServicesFlow
+import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.model.spec
+import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiState
+import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
+import dev.dimension.flare.ui.route.DeeplinkRoute
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -36,7 +39,7 @@ public class SecondaryTabsPresenter :
     @Immutable
     public class Item(
         public val user: UiState<UiProfile>,
-        public val tabs: ImmutableList<TabItem>,
+        public val tabs: ImmutableList<ShortcutSpec>,
     )
 
     private val accountRepository: AccountRepository by inject()
@@ -68,15 +71,20 @@ public class SecondaryTabsPresenter :
                                             user = userState,
                                             tabs =
                                                 listOf(
-                                                    ProfileTabItem(
-                                                        accountKey = service.accountKey,
-                                                        userKey = service.accountKey,
+                                                    ShortcutSpec(
+                                                        title = UiStrings.Me,
+                                                        icon = UiIcon.Profile,
+                                                        target = ShortcutSpec.Target.Route(
+                                                            DeeplinkRoute.Profile.User(
+                                                                accountType = AccountType.Specific(service.accountKey),
+                                                                userKey = user.key,
+                                                            )
+                                                        )
                                                     ),
                                                 ).plus(
-                                                    TimelineTabItem.secondaryFor(
-                                                        user.platformType,
+                                                    user.platformType.spec.shortcuts(
                                                         service.accountKey,
-                                                    ),
+                                                    )
                                                 ).toImmutableList(),
                                         )
                                     }

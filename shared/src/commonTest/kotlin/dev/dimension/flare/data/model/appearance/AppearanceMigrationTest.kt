@@ -2,11 +2,16 @@ package dev.dimension.flare.data.model.appearance
 
 import androidx.datastore.core.DataStoreFactory
 import androidx.datastore.core.okio.OkioStorage
+import dev.dimension.flare.common.protobufSerializer
 import dev.dimension.flare.data.io.PlatformPathProducer
 import dev.dimension.flare.data.model.AppearanceSettings
 import dev.dimension.flare.data.model.PostActionStyle
 import dev.dimension.flare.data.model.Theme
 import dev.dimension.flare.data.model.VideoAutoplay
+import kotlin.random.Random
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -16,10 +21,6 @@ import okio.FileSystem
 import okio.Path
 import okio.Path.Companion.toPath
 import okio.SYSTEM
-import kotlin.random.Random
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
 
 class AppearanceMigrationTest {
     @OptIn(ExperimentalSerializationApi::class)
@@ -54,7 +55,7 @@ class AppearanceMigrationTest {
                     storage =
                         OkioStorage(
                             fileSystem = fs,
-                            serializer = AppearanceBagSerializer,
+                            serializer = protobufSerializer(AppearanceBag()),
                             producePath = { pathProducer.dataStoreFile("appearance_bag.pb") },
                         ),
                 )

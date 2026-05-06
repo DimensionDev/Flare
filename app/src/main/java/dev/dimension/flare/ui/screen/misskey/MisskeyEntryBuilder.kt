@@ -20,11 +20,12 @@ import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.SquareRss
 import compose.icons.fontawesomeicons.solid.List
 import dev.dimension.flare.data.model.IconType
-import dev.dimension.flare.data.model.Misskey
-import dev.dimension.flare.data.model.TabMetaData
-import dev.dimension.flare.data.model.TitleType
+import dev.dimension.flare.data.model.tab.UiTimelineItem
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
+import dev.dimension.flare.ui.model.UiText
+import dev.dimension.flare.ui.presenter.list.AntennasTimelinePresenter
+import dev.dimension.flare.ui.presenter.list.ChannelTimelinePresenter
 import dev.dimension.flare.ui.route.Route
 import dev.dimension.flare.ui.screen.home.TimelineScreen
 
@@ -57,13 +58,16 @@ internal fun EntryProviderScope<NavKey>.misskeyEntryBuilder(
     ) { args ->
         TimelineScreen(
             tabItem = remember(args) {
-                Misskey.AntennasTimelineTabItem(
-                    account = args.accountType,
-                    antennasId = args.antennaId,
-                    metaData = TabMetaData(
-                        title = TitleType.Text(args.title),
-                        icon = IconType.Material(dev.dimension.flare.ui.model.UiIcon.Rss),
-                    ),
+                UiTimelineItem(
+                    id = "antennas_${args.accountType}_${args.antennaId}",
+                    title = UiText.Raw(args.title),
+                    icon = IconType.Material(dev.dimension.flare.ui.model.UiIcon.Rss),
+                    createPresenter = {
+                        AntennasTimelinePresenter(
+                            accountType = args.accountType,
+                            id = args.antennaId,
+                        )
+                    },
                 )
             },
             onBack = onBack,
@@ -94,13 +98,16 @@ internal fun EntryProviderScope<NavKey>.misskeyEntryBuilder(
     ) { args ->
         TimelineScreen(
             tabItem = remember(args) {
-                Misskey.ChannelTimelineTabItem(
-                    channelId = args.channelId,
-                    account = args.accountType,
-                    metaData = TabMetaData(
-                        title = TitleType.Text(args.title),
-                        icon = IconType.Material(dev.dimension.flare.ui.model.UiIcon.List),
-                    ),
+                UiTimelineItem(
+                    id = "channel_${args.accountType}_${args.channelId}",
+                    title = UiText.Raw(args.title),
+                    icon = IconType.Material(dev.dimension.flare.ui.model.UiIcon.List),
+                    createPresenter = {
+                        ChannelTimelinePresenter(
+                            accountType = args.accountType,
+                            id = args.channelId,
+                        )
+                    },
                 )
             },
             onBack = onBack,

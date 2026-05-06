@@ -8,7 +8,7 @@ import kotlinx.serialization.protobuf.ProtoNumber
 @Serializable
 internal data class AppearanceBag(
     @ProtoNumber(1)
-    val entries: Map<String, ByteArray> = emptyMap(),
-    @ProtoNumber(2)
     val schemaVersion: Int = 2,
+    @ProtoNumber(2)
+    val entries: Map<String, String> = emptyMap(),
 )

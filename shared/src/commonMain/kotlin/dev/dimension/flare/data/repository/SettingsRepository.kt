@@ -4,6 +4,7 @@ import androidx.compose.runtime.Stable
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.DataStoreFactory
 import androidx.datastore.core.okio.OkioStorage
+import dev.dimension.flare.common.protobufSerializer
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.io.PlatformPathProducer
@@ -18,6 +19,7 @@ import dev.dimension.flare.data.model.appearance.migrateAppearanceV1ToV2
 import dev.dimension.flare.data.model.appearance.toAppearanceSettings
 import dev.dimension.flare.data.model.appearance.toBag
 import dev.dimension.flare.data.model.appearance.toPatch
+import dev.dimension.flare.data.model.tab.TabSettingsV2
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emitAll
@@ -36,7 +38,7 @@ public class SettingsRepository internal constructor(
     private val appearanceBagStore by lazy {
         createDataStore(
             name = "appearance_bag.pb",
-            serializer = AppearanceBagSerializer,
+            serializer = protobufSerializer(AppearanceBag()),
         )
     }
 
@@ -108,6 +110,21 @@ public class SettingsRepository internal constructor(
 
     public suspend fun updateTabSettings(block: TabSettings.() -> TabSettings) {
         tabSettingsStore.updateData(block)
+    }
+
+    private val tabSettingsV2Store by lazy {
+        createDataStore(
+            name = "tab_settings_v2.pb",
+            serializer = protobufSerializer(TabSettingsV2()),
+        )
+    }
+
+    public val tabSettingsV2: Flow<TabSettingsV2> by lazy {
+        tabSettingsV2Store.data
+    }
+
+    public suspend fun updateTabSettingsV2(block: TabSettingsV2.() -> TabSettingsV2) {
+        tabSettingsV2Store.updateData(block)
     }
 
     public suspend fun updateAppSettings(block: AppSettings.() -> AppSettings) {

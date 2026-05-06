@@ -5,6 +5,7 @@ import androidx.navigation3.runtime.NavKey
 import dev.dimension.flare.data.model.MixedTimelineTabItem
 import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.data.model.XQT
+import dev.dimension.flare.data.model.tab.TimelineTargetRef
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import kotlinx.collections.immutable.ImmutableMap
@@ -178,7 +179,7 @@ internal sealed interface Route : NavKey {
 
     @Serializable
     data class Timeline(
-        val tabItem: TimelineTabItem,
+        val tabItem: TimelineTargetRef,
     ) : Route
 
     @Serializable
@@ -678,6 +679,18 @@ internal sealed interface Route : NavKey {
                     Lists.EditAccountList(
                         accountType = AccountType.Specific(deeplinkRoute.accountKey),
                         userKey = deeplinkRoute.userKey,
+                    )
+                }
+
+                is DeeplinkRoute.Misskey.AllAntennas -> {
+                    Misskey.AntennasList(
+                        accountType = AccountType.Specific(deeplinkRoute.accountKey),
+                    )
+                }
+
+                is DeeplinkRoute.Misskey.AllChannels -> {
+                    Misskey.ChannelList(
+                        accountType = AccountType.Specific(deeplinkRoute.accountKey),
                     )
                 }
 

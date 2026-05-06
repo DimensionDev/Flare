@@ -3,8 +3,8 @@ package dev.dimension.flare.data.model.appearance
 import dev.dimension.flare.data.model.AppearanceSettings
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
-import kotlinx.serialization.decodeFromByteArray
-import kotlinx.serialization.encodeToByteArray
+import kotlinx.serialization.decodeFromHexString
+import kotlinx.serialization.encodeToHexString
 import kotlinx.serialization.protobuf.ProtoBuf
 
 internal fun AppearancePatch.toAppearanceSettings(): AppearanceSettings =
@@ -64,11 +64,10 @@ internal fun AppearanceSettings.toPatch(): AppearancePatch =
 internal fun AppearanceBag.toPatch(): AppearancePatch {
     var patch = AppearancePatch.EMPTY
     for ((id, bytes) in entries) {
-        val key = AppearanceKeys.byId(id) ?: continue
+        val key = AppearanceKeys[id] ?: continue
         val value =
             runCatching {
-                @Suppress("UNCHECKED_CAST")
-                ProtoBuf.decodeFromByteArray(key.serializer as KSerializer<Any>, bytes)
+                ProtoBuf.decodeFromHexString(key.serializer, bytes)
             }.getOrNull() ?: continue
         @Suppress("UNCHECKED_CAST")
         patch = patch.set(key as AppearanceKey<Any>, value)
@@ -82,8 +81,8 @@ internal fun AppearancePatch.toBag(): AppearanceBag =
         entries =
             explicitEntries
                 .mapNotNull { (id, value) ->
-                    val key = AppearanceKeys.byId(id) ?: return@mapNotNull null
+                    val key = AppearanceKeys[id] ?: return@mapNotNull null
                     @Suppress("UNCHECKED_CAST")
-                    id to ProtoBuf.encodeToByteArray(key.serializer as KSerializer<Any>, value)
+                    id to ProtoBuf.encodeToHexString(key.serializer as KSerializer<Any>, value)
                 }.toMap(),
     )

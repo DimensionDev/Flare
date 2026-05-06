@@ -58,7 +58,7 @@ import dev.dimension.flare.R
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.data.model.BottomBarBehavior
 import dev.dimension.flare.data.model.LocalAppearanceSettings
-import dev.dimension.flare.data.model.TimelineTabItem
+import dev.dimension.flare.data.model.tab.UiTimelineItem
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
@@ -68,7 +68,6 @@ import dev.dimension.flare.ui.component.LocalBottomBarShowing
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.TabIcon
 import dev.dimension.flare.ui.component.TabRowIndicator
-import dev.dimension.flare.ui.component.TabTitle
 import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.component.status.AdaptiveCard
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
@@ -149,8 +148,8 @@ internal fun HomeTimelineScreen(
                                                     }
                                                 },
                                                 text = {
-                                                    TabTitle(
-                                                        tab.metaData.title,
+                                                    dev.dimension.flare.ui.component.Text(
+                                                        tab.title,
 //                                                        modifier =
 //                                                            Modifier
 //                                                                .padding(8.dp),
@@ -246,7 +245,7 @@ internal fun HomeTimelineScreen(
                 HorizontalPager(
                     state = pagerState,
                     key = { index ->
-                        tabState.getOrNull(index)?.key ?: "timeline_$index"
+                        tabState.getOrNull(index)?.id ?: "timeline_$index"
                     },
                 ) { index ->
                     val item = tabState.getOrNull(index)
@@ -267,7 +266,7 @@ internal fun HomeTimelineScreen(
 
 @Composable
 internal fun TimelineItemContent(
-    item: TimelineTabItem,
+    item: UiTimelineItem,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(0.dp),
     changeLogState: ChangeLogState? = null,

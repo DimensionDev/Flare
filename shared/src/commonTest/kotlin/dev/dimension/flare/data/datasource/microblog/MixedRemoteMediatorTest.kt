@@ -854,13 +854,15 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                         ),
                 )
             }
+            val scope = CoroutineScope(Dispatchers.Unconfined + Job())
             val preTranslationService: PreTranslationService =
                 OnlinePreTranslationService(
                     database = db,
                     appDataStore = appDataStore,
                     aiCompletionService = AiCompletionService(OpenAIService(), SkippingOnDeviceAI()),
-                    coroutineScope = CoroutineScope(Dispatchers.Unconfined),
+                    coroutineScope = scope,
                 )
+            try {
             val accountKey = MicroBlogKey(id = "account-ai-skipped", host = "test.social")
             val post =
                 createPost(
@@ -912,16 +914,21 @@ class MixedRemoteMediatorTest : RobolectricTest() {
             val savedStatus = db.statusDao().get(post.statusKey, AccountType.Specific(accountKey)).first()
             assertNotNull(savedStatus)
             val translation =
-                db
-                    .translationDao()
-                    .find(
-                        entityType = TranslationEntityType.Status,
-                        entityKey = savedStatus.id,
-                        targetLanguage = Locale.language,
-                    ).filterNotNull()
-                    .first()
+                withTimeout(5_000) {
+                    db
+                        .translationDao()
+                        .find(
+                            entityType = TranslationEntityType.Status,
+                            entityKey = savedStatus.id,
+                            targetLanguage = Locale.language,
+                        ).filterNotNull()
+                        .first { it.status == TranslationStatus.Skipped }
+                }
             assertEquals(TranslationStatus.Skipped, translation.status)
             assertEquals("same_language", translation.statusReason)
+            } finally {
+                scope.coroutineContext[Job]?.cancelAndJoin()
+            }
         }
 
     @OptIn(ExperimentalPagingApi::class)

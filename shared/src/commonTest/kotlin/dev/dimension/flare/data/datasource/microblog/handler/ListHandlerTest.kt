@@ -70,8 +70,11 @@ class ListHandlerTest : RobolectricTest() {
 
     @AfterTest
     fun tearDown() {
-        db.close()
-        stopKoin()
+        try {
+            db.close()
+        } finally {
+            stopKoin()
+        }
     }
 
     @Test

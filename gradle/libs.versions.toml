@@ -220,7 +220,7 @@ androidx-lifecycle-viewmodel-navigation3 = { module = "androidx.lifecycle:lifecy
 cupertino = { group = "io.github.schott12521", name = "cupertino", version.ref = "cupertino" }
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
 
-navigation3-desktop = { module = "org.jetbrains.androidx.navigation3:navigation3-ui", version = "1.1.0" }
+navigation3-desktop = { module = "org.jetbrains.androidx.navigation3:navigation3-ui", version = "1.1.1" }
 
 ### Server ###
 ktor-client-resources = { module = "io.ktor:ktor-client-resources", version.ref = "ktor" }

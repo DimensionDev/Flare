@@ -11,6 +11,7 @@ import dev.dimension.flare.ui.render.UiRichText
 import dev.dimension.flare.ui.render.toUiPlainText
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
+import kotlinx.collections.immutable.toPersistentMap
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 
@@ -68,7 +69,7 @@ public data class UiProfile internal constructor(
             sourceLanguages = if (sourceLanguages.isEmpty()) existing.sourceLanguages else sourceLanguages,
             matrices = matrices.mergeWith(existing.matrices),
             mark = (existing.mark + mark).distinct().toPersistentList(),
-            bottomContent = bottomContent ?: existing.bottomContent,
+            bottomContent = mergeBottomContent(bottomContent, existing.bottomContent),
         )
 
     private fun isNostrFallbackHandle(): Boolean =
@@ -164,6 +165,33 @@ public fun createSampleUser(): UiProfile =
         mark = persistentListOf(),
         bottomContent = null,
     )
+
+// Embedded user objects in timeline responses sometimes omit fields like
+// `location` that are present in dedicated profile responses. Falling back to
+// `new ?: existing` would let a slim payload erase richer cached data and make
+// the UI flicker. Merge per-field when both sides expose the same shape.
+private fun mergeBottomContent(
+    new: UiProfile.BottomContent?,
+    existing: UiProfile.BottomContent?,
+): UiProfile.BottomContent? {
+    if (new == null) return existing
+    if (existing == null) return new
+    return when {
+        new is UiProfile.BottomContent.Iconify && existing is UiProfile.BottomContent.Iconify -> {
+            UiProfile.BottomContent.Iconify(
+                items = (existing.items + new.items).toPersistentMap(),
+            )
+        }
+
+        new is UiProfile.BottomContent.Fields && existing is UiProfile.BottomContent.Fields -> {
+            UiProfile.BottomContent.Fields(
+                fields = (existing.fields + new.fields).toPersistentMap(),
+            )
+        }
+
+        else -> new
+    }
+}
 
 private fun UiProfile.Matrices.mergeWith(existing: UiProfile.Matrices): UiProfile.Matrices =
     UiProfile.Matrices(

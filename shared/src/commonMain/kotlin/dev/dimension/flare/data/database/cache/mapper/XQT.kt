@@ -203,23 +203,24 @@ internal fun List<InstructionUnion>.tweets(includePin: Boolean = true): List<XQT
 
             is TimelineAddToModule -> {
                 union.moduleItems.mapNotNull {
-                    if (it.item.itemContent is TimelineTweet &&
-                        it.item.itemContent.tweetResults.result is Tweet
-                    ) {
-                        TimelineAddEntry(
-                            content =
-                                TimelineTimelineModule(
-                                    items =
-                                        listOf(
-                                            it,
-                                        ),
-                                ),
-                            entryId = it.entryId,
-                            sortIndex = it.item.itemContent.tweetResults.result.restId,
-                        )
-                    } else {
-                        null
+                    val itemContent = it.item.itemContent
+                    if (itemContent !is TimelineTweet) {
+                        return@mapNotNull null
                     }
+                    val sortIndex =
+                        when (val result = itemContent.tweetResults.result) {
+                            is Tweet -> result.restId
+                            is TweetWithVisibilityResults -> result.tweet.restId
+                            else -> return@mapNotNull null
+                        }
+                    TimelineAddEntry(
+                        content =
+                            TimelineTimelineModule(
+                                items = listOf(it),
+                            ),
+                        entryId = it.entryId,
+                        sortIndex = sortIndex,
+                    )
                 }
             }
 

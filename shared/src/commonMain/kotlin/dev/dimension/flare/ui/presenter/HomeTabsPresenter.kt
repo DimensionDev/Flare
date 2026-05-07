@@ -21,9 +21,12 @@ public class HomeTabsPresenter :
         public val tabs: UiState<ImmutableList<HomeTabs>>
 
         public enum class HomeTabs {
-            Home, Notifications, Discover
+            Home,
+            Notifications,
+            Discover,
         }
     }
+
     private val accountRepository by inject<AccountRepository>()
     private val tabsFlow by lazy {
         activeAccountFlow(accountRepository)
@@ -46,9 +49,9 @@ public class HomeTabsPresenter :
     @Composable
     override fun body(): State {
         val tabs by
-        remember(tabsFlow) {
-            tabsFlow
-        }.collectAsUiState()
+            remember(tabsFlow) {
+                tabsFlow
+            }.collectAsUiState()
 
         return object : State {
             override val tabs = tabs

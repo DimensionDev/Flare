@@ -1,12 +1,12 @@
 package dev.dimension.flare.data.repository
 
+import dev.dimension.flare.data.datasource.microblog.datasource.TimelineTabConfigurationDataSource
 import dev.dimension.flare.data.model.MixedTimelineTabItem
 import dev.dimension.flare.data.model.TabSettings
 import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.data.model.WithAccountTabItem
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.spec
 import dev.dimension.flare.ui.model.UiAccount
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
@@ -45,7 +45,10 @@ internal class AccountTabSyncCoordinator(
     }
 
     private suspend fun addDefaultTabs(account: UiAccount) {
-        val defaultSlots = account.platformType.spec.defaultTabs(account.accountKey)
+        val defaultSlots =
+            (accountRepository.getOrCreateDataSource(account) as? TimelineTabConfigurationDataSource)
+                ?.defaultTabs
+                .orEmpty()
         if (defaultSlots.isEmpty()) {
             return
         }

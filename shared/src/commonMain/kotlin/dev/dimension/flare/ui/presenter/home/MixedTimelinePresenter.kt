@@ -13,7 +13,7 @@ import org.koin.core.component.inject
 
 public class MixedTimelinePresenter(
     private val subTimelinePresenter: List<TimelinePresenter>,
-    private val mergePolicy: TimelineMergePolicy
+    private val mergePolicy: TimelineMergePolicy,
 ) : TimelinePresenter(),
     KoinComponent {
     private val database: CacheDatabase by inject()

@@ -18,13 +18,10 @@ internal inline fun <reified T> ByteArray.decodeProtobuf(): T = ProtoBuf.decodeF
 internal inline fun <reified T> String.decodeProtobuf(): T = ProtoBuf.decodeFromHexString(this)
 
 @OptIn(ExperimentalSerializationApi::class)
-internal inline fun <reified T> String.decodeProtobuf(serializer: KSerializer<T>): T =
-    ProtoBuf.decodeFromHexString(serializer, this)
+internal inline fun <reified T> String.decodeProtobuf(serializer: KSerializer<T>): T = ProtoBuf.decodeFromHexString(serializer, this)
 
 @OptIn(ExperimentalSerializationApi::class)
-internal inline fun <reified T> T.encodeProtobufToString(): String =
-    ProtoBuf.encodeToHexString(this)
+internal inline fun <reified T> T.encodeProtobufToString(): String = ProtoBuf.encodeToHexString(this)
 
 @OptIn(ExperimentalSerializationApi::class)
-internal inline fun <reified T> T.encodeProtobufToString(serializer: KSerializer<T>): String =
-    ProtoBuf.encodeToHexString(serializer, this)
+internal inline fun <reified T> T.encodeProtobufToString(serializer: KSerializer<T>): String = ProtoBuf.encodeToHexString(serializer, this)

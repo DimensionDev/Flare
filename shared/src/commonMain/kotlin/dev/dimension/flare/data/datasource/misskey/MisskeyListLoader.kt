@@ -21,11 +21,11 @@ import kotlinx.collections.immutable.toImmutableList
 internal class MisskeyListLoader(
     private val service: MisskeyService,
     private val accountKey: MicroBlogKey,
-) : ListLoader {
+) : ListLoader<UiList.List> {
     override suspend fun load(
         pageSize: Int,
         request: PagingRequest,
-    ): PagingResult<UiList> {
+    ): PagingResult<UiList.List> {
         if (request is PagingRequest.Prepend) {
             return PagingResult()
         }
@@ -44,7 +44,7 @@ internal class MisskeyListLoader(
         )
     }
 
-    override suspend fun info(listId: String): UiList =
+    override suspend fun info(listId: String): UiList.List =
         service
             .usersListsShow(
                 UsersListsShowRequest(
@@ -52,7 +52,7 @@ internal class MisskeyListLoader(
                 ),
             ).render()
 
-    override suspend fun create(metaData: ListMetaData): UiList {
+    override suspend fun create(metaData: ListMetaData): UiList.List {
         val response =
             service.usersListsCreate(
                 UsersListsCreateRequest(
@@ -71,7 +71,7 @@ internal class MisskeyListLoader(
     override suspend fun update(
         listId: String,
         metaData: ListMetaData,
-    ): UiList =
+    ): UiList.List =
         service
             .usersListsUpdate(
                 UsersListsUpdateRequest(

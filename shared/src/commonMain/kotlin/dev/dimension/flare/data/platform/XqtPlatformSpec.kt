@@ -3,15 +3,10 @@ package dev.dimension.flare.data.platform
 import dev.dimension.flare.common.deeplink.DeepLinkMapping
 import dev.dimension.flare.common.deeplink.DeepLinkPattern
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
-import dev.dimension.flare.data.model.IconType
-import dev.dimension.flare.data.model.tab.ShortcutSpec
 import dev.dimension.flare.data.model.tab.TimelineSpec
-import dev.dimension.flare.data.model.tab.TimelineSlot
-import dev.dimension.flare.data.model.tab.toSlot
 import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
 import dev.dimension.flare.data.network.xqt.XQTPlatformDetector
 import dev.dimension.flare.model.AccountType
-import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformSpec
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.PlatformTypeMetadata
@@ -24,7 +19,6 @@ import dev.dimension.flare.ui.model.asType
 import dev.dimension.flare.ui.presenter.home.xqt.XQTBookmarkTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.xqt.XQTDeviceFollowTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.xqt.XQTFeaturedTimelinePresenter
-import dev.dimension.flare.ui.route.DeeplinkRoute
 import io.ktor.http.Url
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -70,7 +64,7 @@ internal data object XqtPlatformSpec : PlatformSpec {
         ).toImmutableList()
     }
 
-    private val featuredTimelineSpec =
+    internal val featuredTimelineSpec =
         TimelineSpec(
             id = "xqt.featured",
             title = UiStrings.Featured,
@@ -84,7 +78,7 @@ internal data object XqtPlatformSpec : PlatformSpec {
             },
         )
 
-    private val bookmarkTimelineSpec =
+    internal val bookmarkTimelineSpec =
         TimelineSpec(
             id = "xqt.bookmark",
             title = UiStrings.Bookmark,
@@ -98,7 +92,7 @@ internal data object XqtPlatformSpec : PlatformSpec {
             },
         )
 
-    private val deviceFollowTimelineSpec =
+    internal val deviceFollowTimelineSpec =
         TimelineSpec(
             id = "xqt.device_follow",
             title = UiStrings.Posts,
@@ -119,54 +113,6 @@ internal data object XqtPlatformSpec : PlatformSpec {
             featuredTimelineSpec,
             bookmarkTimelineSpec,
             deviceFollowTimelineSpec,
-        )
-
-    override fun defaultTabs(accountKey: MicroBlogKey): ImmutableList<TimelineSlot> =
-        persistentListOf(
-            CommonTimelineSpecs.home.target(
-                data = TimelineSpec.AccountBasedData(accountKey),
-                icon = IconType.FavIcon(accountKey.host),
-            ).toSlot(),
-            featuredTimelineSpec.target(
-                data = TimelineSpec.AccountBasedData(accountKey),
-                icon = IconType.FavIcon(accountKey.host),
-            ).toSlot(),
-        )
-
-    override fun shortcuts(accountKey: MicroBlogKey): ImmutableList<ShortcutSpec> =
-        persistentListOf(
-            ShortcutSpec(
-                title = UiStrings.Featured,
-                icon = UiIcon.Featured,
-                target =
-                    ShortcutSpec.Target.Timeline(
-                        featuredTimelineSpec.target(TimelineSpec.AccountBasedData(accountKey)),
-                    ),
-            ),
-            ShortcutSpec(
-                title = UiStrings.Bookmark,
-                icon = UiIcon.Bookmark,
-                target =
-                    ShortcutSpec.Target.Timeline(
-                        bookmarkTimelineSpec.target(TimelineSpec.AccountBasedData(accountKey)),
-                    ),
-            ),
-            ShortcutSpec(
-                title = UiStrings.List,
-                icon = UiIcon.List,
-                target =
-                    ShortcutSpec.Target.Route(
-                        DeeplinkRoute.AllLists(accountKey),
-                    ),
-            ),
-            ShortcutSpec(
-                title = UiStrings.DirectMessage,
-                icon = UiIcon.Messages,
-                target =
-                    ShortcutSpec.Target.Route(
-                        DeeplinkRoute.AllDirectMessages(accountKey),
-                    ),
-            ),
         )
 
     override suspend fun instanceMetadata(host: String): UiInstanceMetadata =

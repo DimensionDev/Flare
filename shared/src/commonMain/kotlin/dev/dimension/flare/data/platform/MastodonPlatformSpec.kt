@@ -4,16 +4,11 @@ import dev.dimension.flare.common.deeplink.DeepLinkMapping
 import dev.dimension.flare.common.deeplink.DeepLinkPattern
 import dev.dimension.flare.data.datasource.guest.mastodon.GuestMastodonDataSource
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
-import dev.dimension.flare.data.model.IconType
-import dev.dimension.flare.data.model.tab.ShortcutSpec
 import dev.dimension.flare.data.model.tab.TimelineSpec
-import dev.dimension.flare.data.model.tab.TimelineSlot
-import dev.dimension.flare.data.model.tab.toSlot
 import dev.dimension.flare.data.network.mastodon.MastodonInstanceService
 import dev.dimension.flare.data.network.mastodon.MastodonPlatformDetector
 import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
 import dev.dimension.flare.model.AccountType
-import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformSpec
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.PlatformTypeMetadata
@@ -26,7 +21,6 @@ import dev.dimension.flare.ui.presenter.home.mastodon.MastodonBookmarkTimelinePr
 import dev.dimension.flare.ui.presenter.home.mastodon.MastodonFavouriteTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.mastodon.MastodonLocalTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.mastodon.MastodonPublicTimelinePresenter
-import dev.dimension.flare.ui.route.DeeplinkRoute
 import io.ktor.http.Url
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -54,7 +48,7 @@ internal data object MastodonPlatformSpec : PlatformSpec {
             ),
         )
 
-    private val localTimelineSpec =
+    internal val localTimelineSpec =
         TimelineSpec(
             id = "mastodon.local",
             title = UiStrings.MastodonLocal,
@@ -68,7 +62,7 @@ internal data object MastodonPlatformSpec : PlatformSpec {
             },
         )
 
-    private val publicTimelineSpec =
+    internal val publicTimelineSpec =
         TimelineSpec(
             id = "mastodon.public",
             title = UiStrings.MastodonPublic,
@@ -82,7 +76,7 @@ internal data object MastodonPlatformSpec : PlatformSpec {
             },
         )
 
-    private val bookmarkTimelineSpec =
+    internal val bookmarkTimelineSpec =
         TimelineSpec(
             id = "mastodon.bookmark",
             title = UiStrings.Bookmark,
@@ -96,7 +90,7 @@ internal data object MastodonPlatformSpec : PlatformSpec {
             },
         )
 
-    private val favouriteTimelineSpec =
+    internal val favouriteTimelineSpec =
         TimelineSpec(
             id = "mastodon.favourite",
             title = UiStrings.Favourite,
@@ -120,55 +114,7 @@ internal data object MastodonPlatformSpec : PlatformSpec {
             favouriteTimelineSpec,
         )
 
-    override fun defaultTabs(accountKey: MicroBlogKey): ImmutableList<TimelineSlot> =
-        persistentListOf(
-            CommonTimelineSpecs.home.target(
-                data = TimelineSpec.AccountBasedData(accountKey),
-                icon = IconType.FavIcon(accountKey.host),
-            ).toSlot(),
-        )
-
-    override fun shortcuts(accountKey: MicroBlogKey): ImmutableList<ShortcutSpec> =
-        persistentListOf(
-            ShortcutSpec(
-                title = UiStrings.MastodonLocal,
-                icon = UiIcon.Local,
-                target = ShortcutSpec.Target.Timeline(
-                    localTimelineSpec.target(TimelineSpec.AccountBasedData(accountKey)),
-                ),
-            ),
-            ShortcutSpec(
-                title = UiStrings.MastodonPublic,
-                icon = UiIcon.World,
-                target = ShortcutSpec.Target.Timeline(
-                    publicTimelineSpec.target(TimelineSpec.AccountBasedData(accountKey)),
-                ),
-            ),
-            ShortcutSpec(
-                title = UiStrings.Bookmark,
-                icon = UiIcon.Bookmark,
-                target = ShortcutSpec.Target.Timeline(
-                    bookmarkTimelineSpec.target(TimelineSpec.AccountBasedData(accountKey)),
-                ),
-            ),
-            ShortcutSpec(
-                title = UiStrings.Favourite,
-                icon = UiIcon.Favourite,
-                target = ShortcutSpec.Target.Timeline(
-                    favouriteTimelineSpec.target(TimelineSpec.AccountBasedData(accountKey)),
-                ),
-            ),
-            ShortcutSpec(
-                title = UiStrings.List,
-                icon = UiIcon.List,
-                target = ShortcutSpec.Target.Route(
-                    DeeplinkRoute.AllLists(accountKey),
-                ),
-            ),
-        )
-
-    override suspend fun instanceMetadata(host: String): UiInstanceMetadata =
-        MastodonInstanceService("https://$host/").instance().render()
+    override suspend fun instanceMetadata(host: String): UiInstanceMetadata = MastodonInstanceService("https://$host/").instance().render()
 
     override fun guestDataSource(
         host: String,

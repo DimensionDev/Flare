@@ -27,8 +27,11 @@ import dev.dimension.flare.data.datasource.microblog.ProfileTab
 import dev.dimension.flare.data.datasource.microblog.createSendingDirectMessage
 import dev.dimension.flare.data.datasource.microblog.datasource.ListDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.NotificationDataSource
+import dev.dimension.flare.data.datasource.microblog.datasource.PinnableTimelineTabDataSource
+import dev.dimension.flare.data.datasource.microblog.datasource.PinnableTimelineTabSection
 import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.RelationDataSource
+import dev.dimension.flare.data.datasource.microblog.datasource.TimelineTabConfigurationDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
 import dev.dimension.flare.data.datasource.microblog.handler.ListHandler
 import dev.dimension.flare.data.datasource.microblog.handler.ListMemberHandler
@@ -40,6 +43,10 @@ import dev.dimension.flare.data.datasource.microblog.handler.UserHandler
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.notSupported
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
+import dev.dimension.flare.data.model.IconType
+import dev.dimension.flare.data.model.tab.ShortcutSpec
+import dev.dimension.flare.data.model.tab.TimelineSpec
+import dev.dimension.flare.data.model.tab.toSlot
 import dev.dimension.flare.data.network.xqt.XQTService
 import dev.dimension.flare.data.network.xqt.model.AddToConversationRequest
 import dev.dimension.flare.data.network.xqt.model.CreateBookmarkRequest
@@ -62,6 +69,9 @@ import dev.dimension.flare.data.network.xqt.model.PostFavoriteTweetRequest
 import dev.dimension.flare.data.network.xqt.model.PostMediaMetadataCreateRequest
 import dev.dimension.flare.data.network.xqt.model.PostUnfavoriteTweetRequest
 import dev.dimension.flare.data.network.xqt.model.TweetUnion
+import dev.dimension.flare.data.platform.CommonTimelineSpecs
+import dev.dimension.flare.data.platform.XqtPlatformSpec
+import dev.dimension.flare.data.platform.toTimelineTabItemV2
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.model.AccountType
@@ -70,12 +80,17 @@ import dev.dimension.flare.shared.image.ImageCompressor
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiDMItem
 import dev.dimension.flare.ui.model.UiDMRoom
+import dev.dimension.flare.ui.model.UiIcon
+import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiPodcast
 import dev.dimension.flare.ui.model.UiState
+import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
+import dev.dimension.flare.ui.route.DeeplinkRoute
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.CoroutineScope
@@ -109,6 +124,8 @@ internal class XQTDataSource(
     PostDataSource,
     KoinComponent,
     ListDataSource,
+    PinnableTimelineTabDataSource,
+    TimelineTabConfigurationDataSource,
     DirectMessageDataSource,
     RelationDataSource,
     PostEventHandler.Handler {
@@ -272,12 +289,91 @@ internal class XQTDataSource(
         }
     }
 
-    override val listHandler =
+    override val listHandler: ListHandler<UiList.List> =
         ListHandler(
             pagingKey = "list_$accountKey",
             accountKey = accountKey,
             loader = listLoader,
         )
+
+    override val pinnableTimelineTabs: List<PinnableTimelineTabSection> by lazy {
+        listOf(
+            PinnableTimelineTabSection(
+                title = UiStrings.List,
+                data =
+                    listHandler.data.map { paging ->
+                        paging.map { it.toTimelineTabItemV2(accountKey) }
+                    },
+            ),
+        )
+    }
+
+    override val defaultTabs by lazy {
+        persistentListOf(
+            CommonTimelineSpecs.home
+                .target(
+                    data = TimelineSpec.AccountBasedData(accountKey),
+                    icon = IconType.FavIcon(accountKey.host),
+                ).toSlot(),
+            XqtPlatformSpec.featuredTimelineSpec
+                .target(
+                    data = TimelineSpec.AccountBasedData(accountKey),
+                    icon = IconType.FavIcon(accountKey.host),
+                ).toSlot(),
+        )
+    }
+
+    override val builtInTimelineTabs by lazy {
+        persistentListOf(
+            CommonTimelineSpecs.home.tabItem(
+                data = TimelineSpec.AccountBasedData(accountKey),
+                icon = IconType.FavIcon(accountKey.host),
+            ),
+            XqtPlatformSpec.featuredTimelineSpec.tabItem(
+                data = TimelineSpec.AccountBasedData(accountKey),
+                icon = IconType.FavIcon(accountKey.host),
+            ),
+            XqtPlatformSpec.bookmarkTimelineSpec.tabItem(TimelineSpec.AccountBasedData(accountKey)),
+            XqtPlatformSpec.deviceFollowTimelineSpec.tabItem(TimelineSpec.AccountBasedData(accountKey)),
+        )
+    }
+
+    override val shortcuts by lazy {
+        persistentListOf(
+            ShortcutSpec(
+                title = UiStrings.Featured,
+                icon = UiIcon.Featured,
+                target =
+                    ShortcutSpec.Target.Timeline(
+                        XqtPlatformSpec.featuredTimelineSpec.target(TimelineSpec.AccountBasedData(accountKey)),
+                    ),
+            ),
+            ShortcutSpec(
+                title = UiStrings.Bookmark,
+                icon = UiIcon.Bookmark,
+                target =
+                    ShortcutSpec.Target.Timeline(
+                        XqtPlatformSpec.bookmarkTimelineSpec.target(TimelineSpec.AccountBasedData(accountKey)),
+                    ),
+            ),
+            ShortcutSpec(
+                title = UiStrings.List,
+                icon = UiIcon.List,
+                target =
+                    ShortcutSpec.Target.Route(
+                        DeeplinkRoute.AllLists(accountKey),
+                    ),
+            ),
+            ShortcutSpec(
+                title = UiStrings.DirectMessage,
+                icon = UiIcon.Messages,
+                target =
+                    ShortcutSpec.Target.Route(
+                        DeeplinkRoute.AllDirectMessages(accountKey),
+                    ),
+            ),
+        )
+    }
 
     override val listMemberHandler =
         ListMemberHandler(

@@ -36,7 +36,7 @@ import kotlin.test.assertTrue
 class ListHandlerTest : RobolectricTest() {
     private lateinit var db: CacheDatabase
     private lateinit var fakeLoader: FakeListLoader
-    private lateinit var handler: ListHandler
+    private lateinit var handler: ListHandler<UiList.List>
 
     private val accountKey = MicroBlogKey(id = "testuser", host = "test.social")
     private val pagingKey = "test_lists"
@@ -336,12 +336,12 @@ class ListHandlerTest : RobolectricTest() {
         }
 }
 
-private class FakeListLoader : ListLoader {
-    var nextCreateResult: UiList = UiList.List(id = "default", title = "Default")
-    var nextUpdateResult: UiList = UiList.List(id = "default", title = "Default")
+private class FakeListLoader : ListLoader<UiList.List> {
+    var nextCreateResult: UiList.List = UiList.List(id = "default", title = "Default")
+    var nextUpdateResult: UiList.List = UiList.List(id = "default", title = "Default")
     var shouldFail: Boolean = false
 
-    private val items = mutableListOf<UiList>()
+    private val items = mutableListOf<UiList.List>()
 
     override val supportedMetaData: ImmutableList<ListMetaDataType> =
         persistentListOf(ListMetaDataType.TITLE, ListMetaDataType.DESCRIPTION)
@@ -349,15 +349,15 @@ private class FakeListLoader : ListLoader {
     override suspend fun load(
         pageSize: Int,
         request: PagingRequest,
-    ): PagingResult<UiList> =
+    ): PagingResult<UiList.List> =
         PagingResult(
             data = items.toList(),
             endOfPaginationReached = true,
         )
 
-    override suspend fun info(listId: String): UiList = items.first { it.id == listId }
+    override suspend fun info(listId: String): UiList.List = items.first { it.id == listId }
 
-    override suspend fun create(metaData: ListMetaData): UiList {
+    override suspend fun create(metaData: ListMetaData): UiList.List {
         if (shouldFail) throw RuntimeException("Fake loader failure")
         items.add(nextCreateResult)
         return nextCreateResult
@@ -367,7 +367,7 @@ private class FakeListLoader : ListLoader {
     override suspend fun update(
         listId: String,
         metaData: ListMetaData,
-    ): UiList {
+    ): UiList.List {
         if (shouldFail) throw RuntimeException("Fake loader failure")
         items.replaceAll { if (it.id == listId) nextUpdateResult else it }
         return nextUpdateResult

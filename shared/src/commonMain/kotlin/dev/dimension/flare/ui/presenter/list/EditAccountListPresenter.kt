@@ -110,7 +110,7 @@ public interface EditAccountListState {
     /**
      * All lists.
      */
-    public val lists: PagingState<UiList>
+    public val lists: PagingState<UiList.List>
 
     /**
      * Lists that the user is a member of.

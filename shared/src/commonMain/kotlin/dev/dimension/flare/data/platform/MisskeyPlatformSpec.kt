@@ -4,10 +4,9 @@ import dev.dimension.flare.common.deeplink.DeepLinkMapping
 import dev.dimension.flare.common.deeplink.DeepLinkPattern
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.model.IconType
-import dev.dimension.flare.data.model.tab.ShortcutSpec
+import dev.dimension.flare.data.model.tab.SourceTimelineTabItemV2
 import dev.dimension.flare.data.model.tab.TimelineSpec
-import dev.dimension.flare.data.model.tab.TimelineSlot
-import dev.dimension.flare.data.model.tab.toSlot
+import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.data.network.misskey.MisskeyPlatformDetector
 import dev.dimension.flare.data.network.misskey.MisskeyService
 import dev.dimension.flare.data.network.misskey.api.model.MetaRequest
@@ -19,7 +18,9 @@ import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.PlatformTypeMetadata
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiInstanceMetadata
+import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiStrings
+import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.model.asType
 import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.presenter.home.misskey.MissKeyLocalTimelinePresenter
@@ -28,7 +29,6 @@ import dev.dimension.flare.ui.presenter.home.misskey.MisskeyFavouriteTimelinePre
 import dev.dimension.flare.ui.presenter.home.misskey.MisskeyHybridTimelinePresenter
 import dev.dimension.flare.ui.presenter.list.AntennasTimelinePresenter
 import dev.dimension.flare.ui.presenter.list.ChannelTimelinePresenter
-import dev.dimension.flare.ui.route.DeeplinkRoute
 import io.ktor.http.Url
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -50,7 +50,7 @@ internal data object MisskeyPlatformSpec : PlatformSpec {
             DeepLinkPattern(DeepLinkMapping.Type.Post.serializer(), Url("https://$host/notes/{id}")),
         )
 
-    private val favouriteTimelineSpec =
+    internal val favouriteTimelineSpec =
         TimelineSpec(
             id = "misskey.favourite",
             title = UiStrings.Favourite,
@@ -64,7 +64,7 @@ internal data object MisskeyPlatformSpec : PlatformSpec {
             },
         )
 
-    private val hybridTimelineSpec =
+    internal val hybridTimelineSpec =
         TimelineSpec(
             id = "misskey.hybrid",
             title = UiStrings.Social,
@@ -78,7 +78,7 @@ internal data object MisskeyPlatformSpec : PlatformSpec {
             },
         )
 
-    private val localTimelineSpec =
+    internal val localTimelineSpec =
         TimelineSpec(
             id = "misskey.local",
             title = UiStrings.MastodonLocal,
@@ -92,7 +92,7 @@ internal data object MisskeyPlatformSpec : PlatformSpec {
             },
         )
 
-    private val globalTimelineSpec =
+    internal val globalTimelineSpec =
         TimelineSpec(
             id = "misskey.global",
             title = UiStrings.MastodonPublic,
@@ -106,7 +106,7 @@ internal data object MisskeyPlatformSpec : PlatformSpec {
             },
         )
 
-    private val antennaTimelineSpec =
+    internal val antennaTimelineSpec =
         TimelineSpec(
             id = "misskey.antenna",
             title = UiStrings.Antenna,
@@ -121,7 +121,7 @@ internal data object MisskeyPlatformSpec : PlatformSpec {
             },
         )
 
-    private val channelTimelineSpec =
+    internal val channelTimelineSpec =
         TimelineSpec(
             id = "misskey.channel",
             title = UiStrings.Channel,
@@ -148,67 +148,6 @@ internal data object MisskeyPlatformSpec : PlatformSpec {
             channelTimelineSpec,
         )
 
-    override fun defaultTabs(accountKey: MicroBlogKey): ImmutableList<TimelineSlot> =
-        persistentListOf(
-            CommonTimelineSpecs.home.target(
-                data = TimelineSpec.AccountBasedData(accountKey),
-                icon = IconType.FavIcon(accountKey.host),
-            ).toSlot(),
-        )
-
-    override fun shortcuts(accountKey: MicroBlogKey): ImmutableList<ShortcutSpec> =
-        persistentListOf(
-            ShortcutSpec(
-                title = UiStrings.Favourite,
-                icon = UiIcon.Favourite,
-                target = ShortcutSpec.Target.Timeline(
-                    favouriteTimelineSpec.target(TimelineSpec.AccountBasedData(accountKey)),
-                ),
-            ),
-            ShortcutSpec(
-                title = UiStrings.List,
-                icon = UiIcon.List,
-                target = ShortcutSpec.Target.Route(
-                    DeeplinkRoute.AllLists(accountKey),
-                ),
-            ),
-            ShortcutSpec(
-                title = UiStrings.Social,
-                icon = UiIcon.Featured,
-                target = ShortcutSpec.Target.Timeline(
-                    hybridTimelineSpec.target(TimelineSpec.AccountBasedData(accountKey)),
-                ),
-            ),
-            ShortcutSpec(
-                title = UiStrings.MastodonLocal,
-                icon = UiIcon.Local,
-                target = ShortcutSpec.Target.Timeline(
-                    localTimelineSpec.target(TimelineSpec.AccountBasedData(accountKey)),
-                ),
-            ),
-            ShortcutSpec(
-                title = UiStrings.MastodonPublic,
-                icon = UiIcon.World,
-                target = ShortcutSpec.Target.Timeline(
-                    globalTimelineSpec.target(TimelineSpec.AccountBasedData(accountKey)),
-                ),
-            ),
-            ShortcutSpec(
-                title = UiStrings.Antenna,
-                icon = UiIcon.Rss,
-                target = ShortcutSpec.Target.Route(
-                    DeeplinkRoute.Misskey.AllAntennas(accountKey),
-                ),
-            ),
-            ShortcutSpec(
-                title = UiStrings.Channel,
-                icon = UiIcon.Channel,
-                target = ShortcutSpec.Target.Route(
-                    DeeplinkRoute.Misskey.AllChannels(accountKey),
-                ),
-            ),
-        )
-
     override suspend fun instanceMetadata(host: String): UiInstanceMetadata =
         MisskeyService("https://$host/api/").meta(MetaRequest()).render()
 
@@ -216,4 +155,28 @@ internal data object MisskeyPlatformSpec : PlatformSpec {
         host: String,
         locale: String,
     ): MicroblogDataSource = throw UnsupportedOperationException("${type.name} guest data source is not supported yet")
+}
+
+internal fun UiList.Antenna.toTimelineTabItemV2(accountKey: MicroBlogKey): TimelineTabItemV2 {
+    val source =
+        MisskeyPlatformSpec.antennaTimelineSpec.target(
+            data = TimelineSpec.AccountResourceData(accountKey, id),
+            title = UiText.Raw(title),
+            icon = UiIcon.Rss.asType(),
+        )
+    return SourceTimelineTabItemV2.fromSource(source) {
+        MisskeyPlatformSpec.antennaTimelineSpec.createPresenter(source.data)
+    }
+}
+
+internal fun UiList.Channel.toTimelineTabItemV2(accountKey: MicroBlogKey): TimelineTabItemV2 {
+    val source =
+        MisskeyPlatformSpec.channelTimelineSpec.target(
+            data = TimelineSpec.AccountResourceData(accountKey, id),
+            title = UiText.Raw(title),
+            icon = banner?.let { IconType.Url(it) } ?: UiIcon.Channel.asType(),
+        )
+    return SourceTimelineTabItemV2.fromSource(source) {
+        MisskeyPlatformSpec.channelTimelineSpec.createPresenter(source.data)
+    }
 }

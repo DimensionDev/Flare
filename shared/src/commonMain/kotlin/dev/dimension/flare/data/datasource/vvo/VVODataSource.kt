@@ -17,6 +17,7 @@ import dev.dimension.flare.data.datasource.microblog.ProfileTab
 import dev.dimension.flare.data.datasource.microblog.datasource.NotificationDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.RelationDataSource
+import dev.dimension.flare.data.datasource.microblog.datasource.TimelineTabConfigurationDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
 import dev.dimension.flare.data.datasource.microblog.handler.EmojiHandler
 import dev.dimension.flare.data.datasource.microblog.handler.NotificationHandler
@@ -27,8 +28,14 @@ import dev.dimension.flare.data.datasource.microblog.handler.UserHandler
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
+import dev.dimension.flare.data.model.IconType
+import dev.dimension.flare.data.model.tab.ShortcutSpec
+import dev.dimension.flare.data.model.tab.TimelineSpec
+import dev.dimension.flare.data.model.tab.toSlot
 import dev.dimension.flare.data.network.vvo.VVOService
 import dev.dimension.flare.data.network.vvo.model.StatusDetailItem
+import dev.dimension.flare.data.platform.CommonTimelineSpecs
+import dev.dimension.flare.data.platform.VvoPlatformSpec
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.model.AccountType
@@ -37,8 +44,10 @@ import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.shared.image.ImageCompressor
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiHashtag
+import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiState
+import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.model.toUi
@@ -58,6 +67,7 @@ internal class VVODataSource(
     NotificationDataSource,
     UserDataSource,
     RelationDataSource,
+    TimelineTabConfigurationDataSource,
     PostDataSource,
     PostEventHandler.Handler {
     private val accountRepository: AccountRepository by inject()
@@ -82,6 +92,57 @@ internal class VVODataSource(
         VVONotificationBadgeStore(loader) { total ->
             notificationHandler.update(total)
         }
+    }
+
+    override val defaultTabs by lazy {
+        persistentListOf(
+            CommonTimelineSpecs.home
+                .target(
+                    data = TimelineSpec.AccountBasedData(accountKey),
+                    icon = IconType.Material(UiIcon.Weibo),
+                ).toSlot(),
+        )
+    }
+
+    override val builtInTimelineTabs by lazy {
+        persistentListOf(
+            CommonTimelineSpecs.home.tabItem(
+                data = TimelineSpec.AccountBasedData(accountKey),
+                icon = IconType.Material(UiIcon.Weibo),
+            ),
+            VvoPlatformSpec.featuredTimelineSpec.tabItem(TimelineSpec.AccountBasedData(accountKey)),
+            VvoPlatformSpec.favoriteTimelineSpec.tabItem(TimelineSpec.AccountBasedData(accountKey)),
+            VvoPlatformSpec.likedTimelineSpec.tabItem(TimelineSpec.AccountBasedData(accountKey)),
+        )
+    }
+
+    override val shortcuts by lazy {
+        persistentListOf(
+            ShortcutSpec(
+                title = UiStrings.Featured,
+                icon = UiIcon.Featured,
+                target =
+                    ShortcutSpec.Target.Timeline(
+                        VvoPlatformSpec.featuredTimelineSpec.target(TimelineSpec.AccountBasedData(accountKey)),
+                    ),
+            ),
+            ShortcutSpec(
+                title = UiStrings.Bookmark,
+                icon = UiIcon.Bookmark,
+                target =
+                    ShortcutSpec.Target.Timeline(
+                        VvoPlatformSpec.favoriteTimelineSpec.target(TimelineSpec.AccountBasedData(accountKey)),
+                    ),
+            ),
+            ShortcutSpec(
+                title = UiStrings.Liked,
+                icon = UiIcon.Heart,
+                target =
+                    ShortcutSpec.Target.Timeline(
+                        VvoPlatformSpec.likedTimelineSpec.target(TimelineSpec.AccountBasedData(accountKey)),
+                    ),
+            ),
+        )
     }
 
     private val emojiHandler by lazy {

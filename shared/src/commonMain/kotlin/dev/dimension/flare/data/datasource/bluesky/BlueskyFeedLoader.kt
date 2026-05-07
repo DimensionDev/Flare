@@ -32,11 +32,11 @@ import kotlin.uuid.Uuid
 internal class BlueskyFeedLoader(
     private val getService: suspend () -> BlueskyService,
     private val accountKey: MicroBlogKey,
-) : ListLoader {
+) : ListLoader<UiList.Feed> {
     override suspend fun load(
         pageSize: Int,
         request: PagingRequest,
-    ): PagingResult<UiList> {
+    ): PagingResult<UiList.Feed> {
         val service = getService()
         val cursor =
             when (request) {
@@ -93,7 +93,7 @@ internal class BlueskyFeedLoader(
         )
     }
 
-    override suspend fun info(listId: String): UiList =
+    override suspend fun info(listId: String): UiList.Feed =
         getService()
             .getFeedGenerator(
                 GetFeedGeneratorQueryParams(
@@ -106,12 +106,12 @@ internal class BlueskyFeedLoader(
     override val supportedMetaData: ImmutableList<ListMetaDataType>
         get() = persistentListOf()
 
-    override suspend fun create(metaData: ListMetaData): UiList = throw UnsupportedOperationException("Create feed is not supported")
+    override suspend fun create(metaData: ListMetaData): UiList.Feed = throw UnsupportedOperationException("Create feed is not supported")
 
     override suspend fun update(
         listId: String,
         metaData: ListMetaData,
-    ): UiList = throw UnsupportedOperationException("Update feed is not supported")
+    ): UiList.Feed = throw UnsupportedOperationException("Update feed is not supported")
 
     override suspend fun delete(listId: String) {
         val service = getService()

@@ -25,6 +25,7 @@ public enum class UiStrings {
     AllRssFeeds,
     Posts,
     Channel,
+    Default,
 }
 
 public fun UiStrings.asText(): UiText = UiText.Localized(this)
@@ -32,7 +33,12 @@ public fun UiStrings.asText(): UiText = UiText.Localized(this)
 @Serializable
 public sealed interface UiText {
     @Serializable
-    public data class Localized(val string: UiStrings) : UiText
+    public data class Localized(
+        val string: UiStrings,
+    ) : UiText
+
     @Serializable
-    public data class Raw(val string: String) : UiText
+    public data class Raw(
+        val string: String,
+    ) : UiText
 }

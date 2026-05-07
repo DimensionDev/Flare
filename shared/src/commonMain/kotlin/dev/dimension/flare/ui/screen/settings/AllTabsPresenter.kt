@@ -7,7 +7,6 @@ import dev.dimension.flare.data.database.app.model.SubscriptionType
 import dev.dimension.flare.data.model.AllRssTimelineTabItem
 import dev.dimension.flare.data.model.RssTimelineTabItem
 import dev.dimension.flare.data.model.SubscriptionTimelineTabItem
-import dev.dimension.flare.data.model.TabItem
 import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -35,18 +34,10 @@ public class AllTabsPresenter(
                     .toImmutableList()
                     .mapNotNull { it.profile.takeSuccess() }
                     .map { user ->
-                        val tabs =
-                            remember(user.key) {
-                                TimelineTabItem.secondaryFor(
-                                    user.platformType,
-                                    user.key,
-                                )
-                            }
-                        val extraTabs = listTabPresenter(accountKey = user.key).tabs.takeSuccess()
+                        val tabs = listTabPresenter(accountKey = user.key).tabs.takeSuccess()
                         State.AccountTabs(
                             profile = user,
-                            tabs = tabs,
-                            extraTabs = extraTabs?.toImmutableList() ?: persistentListOf(),
+                            tabs = tabs?.toImmutableList() ?: persistentListOf(),
                         )
                     }.toImmutableList()
             }
@@ -97,8 +88,7 @@ public class AllTabsPresenter(
         @Immutable
         public data class AccountTabs(
             val profile: UiProfile,
-            val tabs: ImmutableList<TabItem>,
-            val extraTabs: ImmutableList<PinnableTimelineTabPresenter.State.Tab>,
+            val tabs: ImmutableList<PinnableTimelineTabPresenter.PinnableTimelineTab>,
         )
     }
 }

@@ -49,7 +49,8 @@ internal fun TimelineScreen(
         topBar = {
             FlareLargeFlexibleTopAppBar(
                 title = {
-                    dev.dimension.flare.ui.component.Text(tabItem.title)
+                    dev.dimension.flare.ui.component
+                        .Text(tabItem.title)
                 },
                 scrollBehavior = topAppBarScrollBehavior,
                 navigationIcon = {

@@ -52,10 +52,10 @@ import dev.dimension.flare.ui.presenter.home.UserPresenter
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.theme.PlatformContentColor
 import dev.dimension.flare.ui.theme.PlatformTheme
-import kotlin.native.HiddenFromObjC
 import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
+import kotlin.native.HiddenFromObjC
 
 @HiddenFromObjC
 @Composable
@@ -111,10 +111,11 @@ public fun TabIcon(
     color: Color = PlatformContentColor.current,
     size: Dp = 24.dp,
 ) {
-    val text = when (title) {
-        is UiText.Localized -> stringResource(title.string.res)
-        is UiText.Raw -> title.string
-    }
+    val text =
+        when (title) {
+            is UiText.Localized -> stringResource(title.string.res)
+            is UiText.Raw -> title.string
+        }
     when (icon) {
         is IconType.Avatar -> {
             val userState by producePresenter(key = "avatar:${icon.accountKey}") {
@@ -249,6 +250,7 @@ public fun FavIcon(
 internal val UiStrings.res: StringResource
     get() =
         when (this) {
+            UiStrings.Default -> Res.string.tab_settings_default
             UiStrings.Home -> Res.string.home_tab_home_title
             UiStrings.Notifications -> Res.string.home_tab_notifications_title
             UiStrings.Discover -> Res.string.home_tab_discover_title

@@ -4,10 +4,9 @@ import dev.dimension.flare.common.deeplink.DeepLinkMapping
 import dev.dimension.flare.common.deeplink.DeepLinkPattern
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.model.IconType
-import dev.dimension.flare.data.model.tab.ShortcutSpec
+import dev.dimension.flare.data.model.tab.SourceTimelineTabItemV2
 import dev.dimension.flare.data.model.tab.TimelineSpec
-import dev.dimension.flare.data.model.tab.TimelineSlot
-import dev.dimension.flare.data.model.tab.toSlot
+import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.data.network.bluesky.BlueskyPlatformDetector
 import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
 import dev.dimension.flare.model.AccountType
@@ -17,11 +16,12 @@ import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.PlatformTypeMetadata
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiInstanceMetadata
+import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiStrings
+import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.model.asType
 import dev.dimension.flare.ui.presenter.home.bluesky.BlueskyBookmarkTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.bluesky.BlueskyFeedTimelinePresenter
-import dev.dimension.flare.ui.route.DeeplinkRoute
 import io.ktor.http.Url
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -48,7 +48,7 @@ internal data object BlueskyPlatformSpec : PlatformSpec {
             }
         }.toImmutableList()
 
-    private val bookmarkTimelineSpec =
+    internal val bookmarkTimelineSpec =
         TimelineSpec(
             id = "bluesky.bookmark",
             title = UiStrings.Bookmark,
@@ -62,7 +62,7 @@ internal data object BlueskyPlatformSpec : PlatformSpec {
             },
         )
 
-    private val feedTimelineSpec =
+    internal val feedTimelineSpec =
         TimelineSpec(
             id = "bluesky.feed",
             title = UiStrings.Feeds,
@@ -85,46 +85,6 @@ internal data object BlueskyPlatformSpec : PlatformSpec {
             feedTimelineSpec,
         )
 
-    override fun defaultTabs(accountKey: MicroBlogKey): ImmutableList<TimelineSlot> =
-        persistentListOf(
-            CommonTimelineSpecs.home.target(
-                data = TimelineSpec.AccountBasedData(accountKey),
-                icon = IconType.FavIcon(accountKey.host),
-            ).toSlot(),
-        )
-
-    override fun shortcuts(accountKey: MicroBlogKey): ImmutableList<ShortcutSpec> =
-        persistentListOf(
-            ShortcutSpec(
-                title = UiStrings.List,
-                icon = UiIcon.List,
-                target = ShortcutSpec.Target.Route(
-                    DeeplinkRoute.AllLists(accountKey)
-                ),
-            ),
-            ShortcutSpec(
-                title = UiStrings.Feeds,
-                icon = UiIcon.Feeds,
-                target = ShortcutSpec.Target.Route(
-                    DeeplinkRoute.Bluesky.AllFeeds(accountKey)
-                ),
-            ),
-            ShortcutSpec(
-                title = UiStrings.Bookmark,
-                icon = UiIcon.Bookmark,
-                target = ShortcutSpec.Target.Timeline(
-                    bookmarkTimelineSpec.target(TimelineSpec.AccountBasedData(accountKey)),
-                ),
-            ),
-            ShortcutSpec(
-                title = UiStrings.DirectMessage,
-                icon = UiIcon.Messages,
-                target = ShortcutSpec.Target.Route(
-                    DeeplinkRoute.AllDirectMessages(accountKey)
-                ),
-            ),
-        )
-
     override suspend fun instanceMetadata(host: String): UiInstanceMetadata =
         throw UnsupportedOperationException("${type.name} is not supported yet")
 
@@ -132,4 +92,16 @@ internal data object BlueskyPlatformSpec : PlatformSpec {
         host: String,
         locale: String,
     ): MicroblogDataSource = throw UnsupportedOperationException("${type.name} guest data source is not supported yet")
+}
+
+internal fun UiList.Feed.toTimelineTabItemV2(accountKey: MicroBlogKey): TimelineTabItemV2 {
+    val source =
+        BlueskyPlatformSpec.feedTimelineSpec.target(
+            data = TimelineSpec.AccountResourceData(accountKey, id),
+            title = UiText.Raw(title),
+            icon = avatar?.let { IconType.Url(it) } ?: UiIcon.Feeds.asType(),
+        )
+    return SourceTimelineTabItemV2.fromSource(source) {
+        BlueskyPlatformSpec.feedTimelineSpec.createPresenter(source.data)
+    }
 }

@@ -5,12 +5,12 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import dev.dimension.flare.common.combineLatestFlowLists
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
+import dev.dimension.flare.data.datasource.microblog.datasource.TimelineTabConfigurationDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
 import dev.dimension.flare.data.model.tab.ShortcutSpec
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.allAccountServicesFlow
 import dev.dimension.flare.model.AccountType
-import dev.dimension.flare.model.spec
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiState
@@ -74,17 +74,18 @@ public class SecondaryTabsPresenter :
                                                     ShortcutSpec(
                                                         title = UiStrings.Me,
                                                         icon = UiIcon.Profile,
-                                                        target = ShortcutSpec.Target.Route(
-                                                            DeeplinkRoute.Profile.User(
-                                                                accountType = AccountType.Specific(service.accountKey),
-                                                                userKey = user.key,
-                                                            )
-                                                        )
+                                                        target =
+                                                            ShortcutSpec.Target.Route(
+                                                                DeeplinkRoute.Profile.User(
+                                                                    accountType = AccountType.Specific(service.accountKey),
+                                                                    userKey = user.key,
+                                                                ),
+                                                            ),
                                                     ),
                                                 ).plus(
-                                                    user.platformType.spec.shortcuts(
-                                                        service.accountKey,
-                                                    )
+                                                    (service as? TimelineTabConfigurationDataSource)
+                                                        ?.shortcuts
+                                                        .orEmpty(),
                                                 ).toImmutableList(),
                                         )
                                     }

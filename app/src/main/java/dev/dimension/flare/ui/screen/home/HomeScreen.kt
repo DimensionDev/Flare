@@ -477,12 +477,11 @@ internal fun HomeScreen(afterInit: () -> Unit) {
         }
 }
 
-private fun getDirection(data: ShortcutSpec): Route? {
-    return when (val target = data.target) {
+private fun getDirection(data: ShortcutSpec): Route? =
+    when (val target = data.target) {
         is ShortcutSpec.Target.Route -> Route.from(target.route)
         is ShortcutSpec.Target.Timeline -> Route.Timeline(target.source)
     }
-}
 
 private val HomeTabsPresenter.State.HomeTabs.route: Route
     get() =

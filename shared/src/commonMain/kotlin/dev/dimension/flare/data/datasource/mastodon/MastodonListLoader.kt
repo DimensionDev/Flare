@@ -16,11 +16,11 @@ import kotlinx.collections.immutable.persistentListOf
 internal class MastodonListLoader(
     private val service: MastodonService,
     private val accountKey: MicroBlogKey,
-) : ListLoader {
+) : ListLoader<UiList.List> {
     override suspend fun load(
         pageSize: Int,
         request: PagingRequest,
-    ): PagingResult<UiList> {
+    ): PagingResult<UiList.List> {
         if (request is PagingRequest.Prepend) {
             return PagingResult()
         }
@@ -30,11 +30,11 @@ internal class MastodonListLoader(
         )
     }
 
-    override suspend fun info(listId: String): UiList =
+    override suspend fun info(listId: String): UiList.List =
         service.getList(listId).toUiList(accountKey)
             ?: error("Failed to parse list info")
 
-    override suspend fun create(metaData: ListMetaData): UiList =
+    override suspend fun create(metaData: ListMetaData): UiList.List =
         service
             .createList(PostList(title = metaData.title))
             .toUiList(accountKey)
@@ -43,7 +43,7 @@ internal class MastodonListLoader(
     override suspend fun update(
         listId: String,
         metaData: ListMetaData,
-    ): UiList =
+    ): UiList.List =
         service
             .updateList(listId, PostList(title = metaData.title))
             .toUiList(accountKey)

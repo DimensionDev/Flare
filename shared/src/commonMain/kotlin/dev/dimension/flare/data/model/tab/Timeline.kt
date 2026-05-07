@@ -139,15 +139,17 @@ internal data class TimelineSlot(
     val content: TimelineSlotContent,
     val presentation: TimelinePresentation = TimelinePresentation(),
 ) {
-    val title: UiText = presentation.titleOverride?.let { UiText.Raw(it) } ?: when (content) {
-        is TimelineSlotContent.Source -> content.source.title
-        is TimelineSlotContent.Group -> UiStrings.MixedTimeline.asText()
-    }
+    val title: UiText =
+        presentation.titleOverride?.let { UiText.Raw(it) } ?: when (content) {
+            is TimelineSlotContent.Source -> content.source.title
+            is TimelineSlotContent.Group -> UiStrings.MixedTimeline.asText()
+        }
 
-    val icon: IconType = presentation.iconOverride ?: when (content) {
-        is TimelineSlotContent.Source -> content.source.icon
-        is TimelineSlotContent.Group -> UiIcon.Rss.asType()
-    }
+    val icon: IconType =
+        presentation.iconOverride ?: when (content) {
+            is TimelineSlotContent.Source -> content.source.icon
+            is TimelineSlotContent.Group -> UiIcon.Rss.asType()
+        }
 }
 
 @Immutable
@@ -257,6 +259,22 @@ public data class TimelineSpec<T : TimelineSpec.Data>(
             data = ProtoBuf.encodeToHexString(serializer, data),
         )
 
+    public fun tabItem(
+        data: T,
+        title: UiText = this.title.asText(),
+        icon: IconType = this.icon,
+    ): SourceTimelineTabItemV2 {
+        val source =
+            target(
+                data = data,
+                title = title,
+                icon = icon,
+            )
+        return SourceTimelineTabItemV2.fromSource(source) {
+            createPresenter(source.data)
+        }
+    }
+
     @OptIn(ExperimentalSerializationApi::class)
     public fun createPresenter(encodedData: String): TimelinePresenter {
         val data = ProtoBuf.decodeFromHexString(serializer, encodedData)
@@ -264,6 +282,7 @@ public data class TimelineSpec<T : TimelineSpec.Data>(
     }
 
     public interface Data
+
     public interface AccountData : Data {
         public val accountKey: MicroBlogKey
     }
@@ -286,8 +305,13 @@ public data class ShortcutSpec(
     val target: Target,
 ) {
     public sealed interface Target {
-        public data class Timeline(val source: TimelineSourceRef) : Target
-        public data class Route(val route: DeeplinkRoute) : Target
+        public data class Timeline(
+            val source: TimelineSourceRef,
+        ) : Target
+
+        public data class Route(
+            val route: DeeplinkRoute,
+        ) : Target
     }
 }
 
@@ -301,14 +325,15 @@ public class TimelineResolver {
 
     internal fun toTabItem(slot: TimelineSlot): TimelineTabItemV2 =
         when (val content = slot.content) {
-            is TimelineSlotContent.Source ->
+            is TimelineSlotContent.Source -> {
                 SourceTimelineTabItemV2.fromSlot(
                     slot = slot,
                     source = content.source,
                     presenterFactory = { resolvePresenter(content.source) },
                 )
+            }
 
-            is TimelineSlotContent.Group ->
+            is TimelineSlotContent.Group -> {
                 GroupTimelineTabItemV2(
                     id = slot.id,
                     children = content.children.map { toTabItem(it) }.filter { it.enabled },
@@ -320,6 +345,7 @@ public class TimelineResolver {
                     appearancePatch = slot.presentation.appearance,
                     enabled = slot.presentation.enabled,
                 )
+            }
         }
 
     public fun toTabItem(source: TimelineSourceRef): SourceTimelineTabItemV2 =
@@ -340,7 +366,7 @@ public class TimelineResolver {
                 )
             }
 
-            is GroupTimelineTabItemV2 ->
+            is GroupTimelineTabItemV2 -> {
                 TimelineSlot(
                     id = item.id,
                     content =
@@ -351,10 +377,10 @@ public class TimelineResolver {
                         ),
                     presentation = item.presentation,
                 )
+            }
         }
 
-    public fun resolvePresenter(source: TimelineSourceRef): TimelinePresenter =
-        resolveSpec(source).createPresenter(source.data)
+    public fun resolvePresenter(source: TimelineSourceRef): TimelinePresenter = resolveSpec(source).createPresenter(source.data)
 
     internal fun resolvePresenter(slot: TimelineSlot): TimelinePresenter = toTabItem(slot).createPresenter()
 

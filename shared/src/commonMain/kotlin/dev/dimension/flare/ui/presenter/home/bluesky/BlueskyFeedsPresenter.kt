@@ -90,7 +90,7 @@ public class BlueskyFeedsPresenter(
 
 @Immutable
 public interface BlueskyFeedsState {
-    public val myFeeds: PagingState<UiList>
+    public val myFeeds: PagingState<UiList.Feed>
     public val popularFeeds: PagingState<Pair<UiList.Feed, Boolean>>
 
     public fun search(value: String)

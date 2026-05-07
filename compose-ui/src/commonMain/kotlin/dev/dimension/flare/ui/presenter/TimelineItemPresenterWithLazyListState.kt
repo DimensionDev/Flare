@@ -13,10 +13,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
-import kotlin.native.HiddenFromObjC
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.mapNotNull
+import kotlin.native.HiddenFromObjC
 
 @HiddenFromObjC
 public class TimelineItemPresenterWithLazyListState(

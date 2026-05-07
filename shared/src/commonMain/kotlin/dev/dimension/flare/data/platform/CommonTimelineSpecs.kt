@@ -1,9 +1,15 @@
 package dev.dimension.flare.data.platform
 
+import dev.dimension.flare.data.model.IconType
+import dev.dimension.flare.data.model.tab.SourceTimelineTabItemV2
 import dev.dimension.flare.data.model.tab.TimelineSpec
+import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiIcon
+import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiStrings
+import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.model.asType
 import dev.dimension.flare.ui.presenter.home.HomeTimelinePresenter
 import dev.dimension.flare.ui.presenter.list.ListTimelinePresenter
@@ -37,4 +43,16 @@ internal object CommonTimelineSpecs {
                 )
             },
         )
+}
+
+internal fun UiList.List.toTimelineTabItemV2(accountKey: MicroBlogKey): TimelineTabItemV2 {
+    val source =
+        CommonTimelineSpecs.list.target(
+            data = TimelineSpec.AccountResourceData(accountKey, id),
+            title = UiText.Raw(title),
+            icon = avatar?.let { IconType.Url(it) } ?: UiIcon.List.asType(),
+        )
+    return SourceTimelineTabItemV2.fromSource(source) {
+        CommonTimelineSpecs.list.createPresenter(source.data)
+    }
 }

@@ -33,19 +33,19 @@ public class MisskeyChannelListPresenter(
 
     public interface State {
         public val type: Type
-        public val data: PagingState<UiList>
+        public val data: PagingState<UiList.Channel>
 
         public suspend fun refreshSuspend()
 
         public fun refresh()
 
-        public fun follow(list: UiList)
+        public fun follow(list: UiList.Channel)
 
-        public fun unfollow(list: UiList)
+        public fun unfollow(list: UiList.Channel)
 
-        public fun favorite(list: UiList)
+        public fun favorite(list: UiList.Channel)
 
-        public fun unfavorite(list: UiList)
+        public fun unfavorite(list: UiList.Channel)
 
         public fun setType(data: Type)
 
@@ -95,7 +95,7 @@ public class MisskeyChannelListPresenter(
                 }
             }
 
-            override fun follow(list: UiList) {
+            override fun follow(list: UiList.Channel) {
                 serviceState.onSuccess {
                     scope.launch {
                         require(it is MisskeyDataSource)
@@ -104,7 +104,7 @@ public class MisskeyChannelListPresenter(
                 }
             }
 
-            override fun unfollow(list: UiList) {
+            override fun unfollow(list: UiList.Channel) {
                 serviceState.onSuccess {
                     scope.launch {
                         require(it is MisskeyDataSource)
@@ -113,7 +113,7 @@ public class MisskeyChannelListPresenter(
                 }
             }
 
-            override fun favorite(list: UiList) {
+            override fun favorite(list: UiList.Channel) {
                 serviceState.onSuccess {
                     scope.launch {
                         require(it is MisskeyDataSource)
@@ -122,7 +122,7 @@ public class MisskeyChannelListPresenter(
                 }
             }
 
-            override fun unfavorite(list: UiList) {
+            override fun unfavorite(list: UiList.Channel) {
                 serviceState.onSuccess {
                     scope.launch {
                         require(it is MisskeyDataSource)

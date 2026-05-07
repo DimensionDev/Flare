@@ -1,6 +1,7 @@
 package dev.dimension.flare.data.datasource.mastodon
 
 import androidx.paging.ExperimentalPagingApi
+import androidx.paging.map
 import dev.dimension.flare.common.FileType
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
@@ -12,8 +13,11 @@ import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
 import dev.dimension.flare.data.datasource.microblog.datasource.ListDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.NotificationDataSource
+import dev.dimension.flare.data.datasource.microblog.datasource.PinnableTimelineTabDataSource
+import dev.dimension.flare.data.datasource.microblog.datasource.PinnableTimelineTabSection
 import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.RelationDataSource
+import dev.dimension.flare.data.datasource.microblog.datasource.TimelineTabConfigurationDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
 import dev.dimension.flare.data.datasource.microblog.handler.EmojiHandler
 import dev.dimension.flare.data.datasource.microblog.handler.ListHandler
@@ -28,12 +32,19 @@ import dev.dimension.flare.data.datasource.microblog.loader.ListMemberLoader
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.notSupported
 import dev.dimension.flare.data.datasource.pleroma.PleromaDataSource
+import dev.dimension.flare.data.model.IconType
+import dev.dimension.flare.data.model.tab.ShortcutSpec
+import dev.dimension.flare.data.model.tab.TimelineSpec
+import dev.dimension.flare.data.model.tab.toSlot
 import dev.dimension.flare.data.network.mastodon.MastodonService
 import dev.dimension.flare.data.network.mastodon.api.model.PostPoll
 import dev.dimension.flare.data.network.mastodon.api.model.PostReport
 import dev.dimension.flare.data.network.mastodon.api.model.PostStatus
 import dev.dimension.flare.data.network.mastodon.api.model.PostVote
 import dev.dimension.flare.data.network.mastodon.api.model.Visibility
+import dev.dimension.flare.data.platform.CommonTimelineSpecs
+import dev.dimension.flare.data.platform.MastodonPlatformSpec
+import dev.dimension.flare.data.platform.toTimelineTabItemV2
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.model.AccountType
@@ -41,10 +52,15 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.shared.image.ImageCompressor
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiHashtag
+import dev.dimension.flare.ui.model.UiIcon
+import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiProfile
+import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
+import dev.dimension.flare.ui.route.DeeplinkRoute
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.map
 import org.koin.core.component.KoinComponent
@@ -61,6 +77,8 @@ internal open class MastodonDataSource(
     PostDataSource,
     KoinComponent,
     ListDataSource,
+    PinnableTimelineTabDataSource,
+    TimelineTabConfigurationDataSource,
     RelationDataSource,
     PostEventHandler.Handler {
     private val accountRepository: AccountRepository by inject()
@@ -445,7 +463,7 @@ internal open class MastodonDataSource(
             language = ComposeConfig.Language(1),
         )
 
-    val listLoader: ListLoader by lazy {
+    val listLoader: ListLoader<UiList.List> by lazy {
         MastodonListLoader(
             service = service,
             accountKey = accountKey,
@@ -459,11 +477,91 @@ internal open class MastodonDataSource(
         )
     }
 
-    override val listHandler: ListHandler by lazy {
+    override val listHandler: ListHandler<UiList.List> by lazy {
         ListHandler(
             pagingKey = "lists_$accountKey",
             accountKey = accountKey,
             loader = listLoader,
+        )
+    }
+
+    override val pinnableTimelineTabs: List<PinnableTimelineTabSection> by lazy {
+        listOf(
+            PinnableTimelineTabSection(
+                title = UiStrings.List,
+                data =
+                    listHandler.data.map { paging ->
+                        paging.map { it.toTimelineTabItemV2(accountKey) }
+                    },
+            ),
+        )
+    }
+
+    override val defaultTabs by lazy {
+        persistentListOf(
+            CommonTimelineSpecs.home
+                .target(
+                    data = TimelineSpec.AccountBasedData(accountKey),
+                    icon = IconType.FavIcon(accountKey.host),
+                ).toSlot(),
+        )
+    }
+
+    override val builtInTimelineTabs by lazy {
+        persistentListOf(
+            CommonTimelineSpecs.home.tabItem(
+                data = TimelineSpec.AccountBasedData(accountKey),
+                icon = IconType.FavIcon(accountKey.host),
+            ),
+            MastodonPlatformSpec.localTimelineSpec.tabItem(TimelineSpec.AccountBasedData(accountKey)),
+            MastodonPlatformSpec.publicTimelineSpec.tabItem(TimelineSpec.AccountBasedData(accountKey)),
+            MastodonPlatformSpec.bookmarkTimelineSpec.tabItem(TimelineSpec.AccountBasedData(accountKey)),
+            MastodonPlatformSpec.favouriteTimelineSpec.tabItem(TimelineSpec.AccountBasedData(accountKey)),
+        )
+    }
+
+    override val shortcuts by lazy {
+        persistentListOf(
+            ShortcutSpec(
+                title = UiStrings.MastodonLocal,
+                icon = UiIcon.Local,
+                target =
+                    ShortcutSpec.Target.Timeline(
+                        MastodonPlatformSpec.localTimelineSpec.target(TimelineSpec.AccountBasedData(accountKey)),
+                    ),
+            ),
+            ShortcutSpec(
+                title = UiStrings.MastodonPublic,
+                icon = UiIcon.World,
+                target =
+                    ShortcutSpec.Target.Timeline(
+                        MastodonPlatformSpec.publicTimelineSpec.target(TimelineSpec.AccountBasedData(accountKey)),
+                    ),
+            ),
+            ShortcutSpec(
+                title = UiStrings.Bookmark,
+                icon = UiIcon.Bookmark,
+                target =
+                    ShortcutSpec.Target.Timeline(
+                        MastodonPlatformSpec.bookmarkTimelineSpec.target(TimelineSpec.AccountBasedData(accountKey)),
+                    ),
+            ),
+            ShortcutSpec(
+                title = UiStrings.Favourite,
+                icon = UiIcon.Favourite,
+                target =
+                    ShortcutSpec.Target.Timeline(
+                        MastodonPlatformSpec.favouriteTimelineSpec.target(TimelineSpec.AccountBasedData(accountKey)),
+                    ),
+            ),
+            ShortcutSpec(
+                title = UiStrings.List,
+                icon = UiIcon.List,
+                target =
+                    ShortcutSpec.Target.Route(
+                        DeeplinkRoute.AllLists(accountKey),
+                    ),
+            ),
         )
     }
 

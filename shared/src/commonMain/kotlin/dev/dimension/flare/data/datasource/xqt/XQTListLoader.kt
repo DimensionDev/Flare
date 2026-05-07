@@ -20,11 +20,11 @@ import kotlinx.collections.immutable.persistentListOf
 internal class XQTListLoader(
     private val service: XQTService,
     private val accountKey: MicroBlogKey,
-) : ListLoader {
+) : ListLoader<UiList.List> {
     override suspend fun load(
         pageSize: Int,
         request: PagingRequest,
-    ): PagingResult<UiList> {
+    ): PagingResult<UiList.List> {
         val cursor = (request as? PagingRequest.Append)?.nextKey
         val response =
             service
@@ -57,7 +57,7 @@ internal class XQTListLoader(
         )
     }
 
-    override suspend fun info(listId: String): UiList =
+    override suspend fun info(listId: String): UiList.List =
         service
             .getListByRestId(
                 variables = "{\"listId\":\"${listId}\"}",
@@ -67,7 +67,7 @@ internal class XQTListLoader(
             ?.render(accountKey = accountKey)
             ?: throw Exception("List not found")
 
-    override suspend fun create(metaData: ListMetaData): UiList {
+    override suspend fun create(metaData: ListMetaData): UiList.List {
         val response =
             service.createList(
                 request =
@@ -98,7 +98,7 @@ internal class XQTListLoader(
     override suspend fun update(
         listId: String,
         metaData: ListMetaData,
-    ): UiList {
+    ): UiList.List {
         service.updateList(
             request =
                 UpdateListRequest(
@@ -111,16 +111,10 @@ internal class XQTListLoader(
                         ),
                 ),
         )
-        return info(listId).let {
-            if (it is UiList.List) {
-                it.copy(
-                    title = metaData.title,
-                    description = metaData.description,
-                )
-            } else {
-                it
-            }
-        }
+        return info(listId).copy(
+            title = metaData.title,
+            description = metaData.description,
+        )
     }
 
     override suspend fun delete(listId: String) {

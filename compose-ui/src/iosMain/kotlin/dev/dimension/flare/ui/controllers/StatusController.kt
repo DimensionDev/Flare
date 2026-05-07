@@ -56,14 +56,14 @@ import dev.dimension.flare.ui.component.rememberPullToRefreshState
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.model.UiTimelineV2
-import dev.dimension.flare.ui.presenter.TimelineItemPresenterWithLazyListState
+import dev.dimension.flare.ui.presenter.TimelineWithLazyListState
 import dev.dimension.flare.ui.theme.FlareTheme
 import kotlinx.coroutines.launch
 import platform.UIKit.UIViewController
 
 @Suppress("FunctionName")
 public fun TimelineItemController(
-    state: ComposeUIStateProxy<TimelineItemPresenterWithLazyListState.State>,
+    state: ComposeUIStateProxy<TimelineWithLazyListState>,
     topPadding: Int,
     onExpand: () -> Unit,
     onCollapse: () -> Unit,

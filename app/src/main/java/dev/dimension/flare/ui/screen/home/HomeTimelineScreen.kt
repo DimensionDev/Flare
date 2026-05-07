@@ -80,9 +80,9 @@ import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.presenter.HomeTimelineWithTabsPresenter
-import dev.dimension.flare.ui.presenter.TimelineItemPresenterWithLazyListState
 import dev.dimension.flare.ui.presenter.home.LoggedInPresenter
 import dev.dimension.flare.ui.presenter.invoke
+import dev.dimension.flare.ui.presenter.rememberTimelineItemPresenterWithLazyListState
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
@@ -288,12 +288,11 @@ internal fun TimelineItemContent(
             start = contentPadding.calculateStartPadding(layoutDirection),
             end = contentPadding.calculateEndPadding(layoutDirection),
         )
-    val state by producePresenter(
-        "timeline_${item.key}",
-    ) {
-        remember { TimelineItemPresenterWithLazyListState(item, lazyStaggeredGridState) }
-            .invoke()
-    }
+    val state =
+        rememberTimelineItemPresenterWithLazyListState(
+            item = item,
+            lazyStaggeredGridState = lazyStaggeredGridState,
+        )
     if (isCurrentlyVisible) {
         RegisterTabCallback(
             lazyListState = state.lazyListState,

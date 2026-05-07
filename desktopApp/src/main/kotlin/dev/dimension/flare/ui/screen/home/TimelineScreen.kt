@@ -37,13 +37,12 @@ import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScrollBar
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.status
-import dev.dimension.flare.ui.presenter.TimelineItemPresenterWithLazyListState
-import dev.dimension.flare.ui.presenter.invoke
+import dev.dimension.flare.ui.presenter.TimelineWithLazyListState
+import dev.dimension.flare.ui.presenter.rememberTimelineItemPresenterWithLazyListState
 import io.github.composefluent.component.AccentButton
 import io.github.composefluent.component.ProgressBar
 import io.github.composefluent.component.Text
 import kotlinx.coroutines.launch
-import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.pluralStringResource
 
 @Composable
@@ -54,11 +53,7 @@ internal fun TimelineScreen(
     header: @Composable (() -> Unit)? = null,
     onScrollToTop: (() -> Unit)? = null,
 ) {
-    val state by producePresenter(
-        "timeline_$tabItem",
-    ) {
-        presenter(tabItem)
-    }
+    val state = rememberTimelineItemPresenterWithLazyListState(tabItem)
     TimelineContent(
         state = state,
         modifier = modifier,
@@ -70,7 +65,7 @@ internal fun TimelineScreen(
 
 @Composable
 internal fun TimelineContent(
-    state: TimelineItemPresenterWithLazyListState.State,
+    state: TimelineWithLazyListState,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(0.dp),
     header: @Composable (() -> Unit)? = null,
@@ -169,11 +164,3 @@ internal fun TimelineContent(
         }
     }
 }
-
-@Composable
-private fun presenter(tabItem: TimelineTabItem) =
-    run {
-        remember(tabItem.key) {
-            TimelineItemPresenterWithLazyListState(tabItem)
-        }.invoke()
-    }

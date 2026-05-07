@@ -16,12 +16,10 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.supervisorScope
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.withTimeout
 import sh.christian.ozone.BlueskyJson
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -103,8 +101,7 @@ class BlueskyAuthPluginTest {
                         refreshToken = "refresh-old",
                     ),
                 )
-            val firstExpiredReachedMock = CompletableDeferred<Unit>()
-            val secondExpiredReachedMock = CompletableDeferred<Unit>()
+            val bothExpiredReachedMock = CompletableDeferred<Unit>()
             var expiredCalls = 0
             var refreshCalls = 0
 
@@ -144,15 +141,14 @@ class BlueskyAuthPluginTest {
                                     val callIndex = ++expiredCalls
                                     when (callIndex) {
                                         1 -> {
-                                            firstExpiredReachedMock.complete(Unit)
-                                            // Wait until the second concurrent request also
-                                            // reaches the mock so both observe an expired token
-                                            // before either gets to refresh.
-                                            secondExpiredReachedMock.await()
+                                            // Park the first request inside the mock until the
+                                            // second one also arrives, so both observe an expired
+                                            // token before either of them gets to refresh.
+                                            bothExpiredReachedMock.await()
                                         }
 
                                         2 -> {
-                                            secondExpiredReachedMock.complete(Unit)
+                                            bothExpiredReachedMock.complete(Unit)
                                         }
 
                                         else -> error("Unexpected expired call count: $callIndex")
@@ -181,15 +177,11 @@ class BlueskyAuthPluginTest {
             val results =
                 supervisorScope {
                     val requestOne =
-                        async(start = CoroutineStart.UNDISPATCHED) {
+                        async {
                             client.get("https://bsky.social/xrpc/app.bsky.feed.getTimeline").bodyAsText()
                         }
-                    // Make sure request one is parked inside the mock before we launch
-                    // request two, so the relative ordering of the two mock invocations is
-                    // fully deterministic regardless of the test scheduler.
-                    withTimeout(5_000) { firstExpiredReachedMock.await() }
                     val requestTwo =
-                        async(start = CoroutineStart.UNDISPATCHED) {
+                        async {
                             client.get("https://bsky.social/xrpc/app.bsky.actor.getProfile").bodyAsText()
                         }
                     listOf(

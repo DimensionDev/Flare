@@ -20,7 +20,7 @@ import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.SquareRss
 import dev.dimension.flare.data.model.IconType
-import dev.dimension.flare.data.model.tab.UiTimelineItem
+import dev.dimension.flare.data.model.tab.SourceTimelineTabItemV2
 import dev.dimension.flare.ui.component.BottomSheetSceneStrategy
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
@@ -72,7 +72,7 @@ internal fun EntryProviderScope<NavKey>.rssEntryBuilder(
     ) { args ->
         TimelineScreen(
             tabItem = remember(args) {
-                UiTimelineItem(
+                SourceTimelineTabItemV2.runtime(
                     id = "rss_${args.url}",
                     title = UiText.Raw(args.title ?: args.url),
                     icon =

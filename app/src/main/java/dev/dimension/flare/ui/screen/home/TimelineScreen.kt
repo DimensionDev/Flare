@@ -12,8 +12,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import dev.dimension.flare.data.model.tab.TimelineResolver
-import dev.dimension.flare.data.model.tab.TimelineTargetRef
-import dev.dimension.flare.data.model.tab.UiTimelineItem
+import dev.dimension.flare.data.model.tab.TimelineSourceRef
+import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FlareLargeFlexibleTopAppBar
 import dev.dimension.flare.ui.component.FlareScaffold
@@ -23,12 +23,12 @@ import org.koin.compose.koinInject
 
 @Composable
 internal fun TimelineScreen(
-    tabItem: TimelineTargetRef,
+    source: TimelineSourceRef,
     onBack: () -> Unit,
 ) {
-    val state by producePresenter("uitimeline:${tabItem.id}") {
+    val state by producePresenter("timeline-source:${source.id}") {
         val resolver: TimelineResolver = koinInject()
-        resolver.toUi(tabItem)
+        resolver.toTabItem(source)
     }
     TimelineScreen(
         tabItem = state,
@@ -39,7 +39,7 @@ internal fun TimelineScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun TimelineScreen(
-    tabItem: UiTimelineItem,
+    tabItem: TimelineTabItemV2,
     onBack: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()

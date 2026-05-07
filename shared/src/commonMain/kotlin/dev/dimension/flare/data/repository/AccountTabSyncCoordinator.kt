@@ -45,15 +45,15 @@ internal class AccountTabSyncCoordinator(
     }
 
     private suspend fun addDefaultTabs(account: UiAccount) {
-        val defaultTabs = account.platformType.spec.defaultTimelineTabs(account.accountKey)
-        if (defaultTabs.isEmpty()) {
+        val defaultSlots = account.platformType.spec.defaultTabs(account.accountKey)
+        if (defaultSlots.isEmpty()) {
             return
         }
-        settingsRepository.updateTabSettings {
-            val newTabs =
-                (mainTabs + defaultTabs)
-                    .distinctBy { it.key }
-            val newSettings = copy(mainTabs = newTabs).sanitizeDuplicateTabKeys()
+        settingsRepository.updateTabSettingsV2 {
+            val newSlots =
+                (homeSlots + defaultSlots)
+                    .distinctBy { it.id }
+            val newSettings = copy(homeSlots = newSlots)
             if (newSettings == this) {
                 this
             } else {

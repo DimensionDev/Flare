@@ -39,7 +39,7 @@ import dev.dimension.flare.compose.ui.rss_title
 import dev.dimension.flare.compose.ui.settings_title
 import dev.dimension.flare.compose.ui.social_title
 import dev.dimension.flare.data.model.IconType
-import dev.dimension.flare.data.model.tab.UiTimelineItem
+import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.component.platform.PlatformTextStyle
@@ -83,7 +83,7 @@ public fun Text(
 @HiddenFromObjC
 @Composable
 public fun TabIcon(
-    tabItem: UiTimelineItem,
+    tabItem: TimelineTabItemV2,
     icon: IconType = tabItem.icon,
     title: UiText = tabItem.title,
     modifier: Modifier = Modifier,

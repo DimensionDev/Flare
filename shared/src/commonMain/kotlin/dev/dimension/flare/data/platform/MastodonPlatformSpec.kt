@@ -7,7 +7,8 @@ import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.tab.ShortcutSpec
 import dev.dimension.flare.data.model.tab.TimelineSpec
-import dev.dimension.flare.data.model.tab.TimelineTargetRef
+import dev.dimension.flare.data.model.tab.TimelineSlot
+import dev.dimension.flare.data.model.tab.toSlot
 import dev.dimension.flare.data.network.mastodon.MastodonInstanceService
 import dev.dimension.flare.data.network.mastodon.MastodonPlatformDetector
 import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
@@ -119,12 +120,12 @@ internal data object MastodonPlatformSpec : PlatformSpec {
             favouriteTimelineSpec,
         )
 
-    override fun defaultTabs(accountKey: MicroBlogKey): ImmutableList<TimelineTargetRef> =
+    override fun defaultTabs(accountKey: MicroBlogKey): ImmutableList<TimelineSlot> =
         persistentListOf(
             CommonTimelineSpecs.home.target(
                 data = TimelineSpec.AccountBasedData(accountKey),
                 icon = IconType.FavIcon(accountKey.host),
-            ),
+            ).toSlot(),
         )
 
     override fun shortcuts(accountKey: MicroBlogKey): ImmutableList<ShortcutSpec> =

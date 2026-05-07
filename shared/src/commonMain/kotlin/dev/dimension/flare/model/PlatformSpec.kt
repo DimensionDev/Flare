@@ -5,7 +5,7 @@ import dev.dimension.flare.common.deeplink.DeepLinkPattern
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.model.tab.ShortcutSpec
 import dev.dimension.flare.data.model.tab.TimelineSpec
-import dev.dimension.flare.data.model.tab.TimelineTargetRef
+import dev.dimension.flare.data.model.tab.TimelineSlot
 import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
 import dev.dimension.flare.data.platform.BlueskyPlatformSpec
 import dev.dimension.flare.data.platform.MastodonPlatformSpec
@@ -27,7 +27,7 @@ internal interface PlatformSpec {
 
     fun deepLinkPatterns(host: String): ImmutableList<DeepLinkPattern<out DeepLinkMapping.Type>>
 
-    fun defaultTabs(accountKey: MicroBlogKey): ImmutableList<TimelineTargetRef>
+    fun defaultTabs(accountKey: MicroBlogKey): ImmutableList<TimelineSlot>
 
     fun shortcuts(accountKey: MicroBlogKey): ImmutableList<ShortcutSpec>
 

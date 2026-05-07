@@ -480,7 +480,7 @@ internal fun HomeScreen(afterInit: () -> Unit) {
 private fun getDirection(data: ShortcutSpec): Route? {
     return when (val target = data.target) {
         is ShortcutSpec.Target.Route -> Route.from(target.route)
-        is ShortcutSpec.Target.Timeline -> Route.Timeline(target.target)
+        is ShortcutSpec.Target.Timeline -> Route.Timeline(target.source)
     }
 }
 

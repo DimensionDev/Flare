@@ -20,8 +20,11 @@ import dev.dimension.flare.data.model.appearance.toAppearanceSettings
 import dev.dimension.flare.data.model.appearance.toBag
 import dev.dimension.flare.data.model.appearance.toPatch
 import dev.dimension.flare.data.model.tab.TabSettingsV2
+import dev.dimension.flare.data.model.tab.TimelineResolver
+import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
@@ -34,6 +37,7 @@ import okio.SYSTEM
 public class SettingsRepository internal constructor(
     private val pathProducer: PlatformPathProducer,
     private val appDataStore: AppDataStore,
+    private val timelineResolver: TimelineResolver,
 ) {
     private val appearanceBagStore by lazy {
         createDataStore(
@@ -119,11 +123,21 @@ public class SettingsRepository internal constructor(
         )
     }
 
-    public val tabSettingsV2: Flow<TabSettingsV2> by lazy {
+    internal val tabSettingsV2: Flow<TabSettingsV2> by lazy {
         tabSettingsV2Store.data
     }
 
-    public suspend fun updateTabSettingsV2(block: TabSettingsV2.() -> TabSettingsV2) {
+    public val homeTimelineTabs: Flow<List<TimelineTabItemV2>> by lazy {
+        tabSettingsV2
+            .distinctUntilChangedBy { it.homeSlots }
+            .map { settings ->
+                settings.homeSlots
+                    .map { timelineResolver.toTabItem(it) }
+                    .filter { it.enabled }
+            }
+    }
+
+    internal suspend fun updateTabSettingsV2(block: TabSettingsV2.() -> TabSettingsV2) {
         tabSettingsV2Store.updateData(block)
     }
 

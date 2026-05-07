@@ -26,38 +26,128 @@ import kotlinx.serialization.protobuf.ProtoBuf
 
 @Immutable
 @Serializable
-public data class TabSettingsV2(
+internal data class TabSettingsV2(
     val homeSlots: List<TimelineSlot> = emptyList(),
 )
 
 @Immutable
-public data class UiTimelineItem(
-    val id: String,
-    val title: UiText,
-    val icon: IconType,
-    val appearancePatch: AppearancePatch? = null,
-    val createPresenter: () -> TimelinePresenter,
-)
+public sealed interface TimelineTabItemV2 {
+    public val id: String
+    public val title: UiText
+    public val icon: IconType
+    public val appearancePatch: AppearancePatch?
+    public val enabled: Boolean
+
+    // for iOS and Compose call sites
+    public val key: String get() = id
+
+    public fun createPresenter(): TimelinePresenter
+}
+
+@Immutable
+public class SourceTimelineTabItemV2 private constructor(
+    override val id: String,
+    public val source: TimelineSourceRef?,
+    internal val presentation: TimelinePresentation?,
+    override val title: UiText,
+    override val icon: IconType,
+    override val appearancePatch: AppearancePatch?,
+    override val enabled: Boolean,
+    private val presenterFactory: () -> TimelinePresenter,
+) : TimelineTabItemV2 {
+    override fun createPresenter(): TimelinePresenter = presenterFactory()
+
+    public companion object {
+        public fun runtime(
+            id: String,
+            title: UiText,
+            icon: IconType,
+            appearancePatch: AppearancePatch? = null,
+            enabled: Boolean = true,
+            createPresenter: () -> TimelinePresenter,
+        ): SourceTimelineTabItemV2 =
+            SourceTimelineTabItemV2(
+                id = id,
+                source = null,
+                presentation = null,
+                title = title,
+                icon = icon,
+                appearancePatch = appearancePatch,
+                enabled = enabled,
+                presenterFactory = createPresenter,
+            )
+
+        internal fun fromSlot(
+            slot: TimelineSlot,
+            source: TimelineSourceRef,
+            presenterFactory: () -> TimelinePresenter,
+        ): SourceTimelineTabItemV2 =
+            SourceTimelineTabItemV2(
+                id = slot.id,
+                source = source,
+                presentation = slot.presentation,
+                title = slot.title,
+                icon = slot.icon,
+                appearancePatch = slot.presentation.appearance,
+                enabled = slot.presentation.enabled,
+                presenterFactory = presenterFactory,
+            )
+
+        internal fun fromSource(
+            source: TimelineSourceRef,
+            presenterFactory: () -> TimelinePresenter,
+        ): SourceTimelineTabItemV2 =
+            SourceTimelineTabItemV2(
+                id = source.id,
+                source = source,
+                presentation = null,
+                title = source.title,
+                icon = source.icon,
+                appearancePatch = null,
+                enabled = true,
+                presenterFactory = presenterFactory,
+            )
+    }
+}
+
+@Immutable
+public class GroupTimelineTabItemV2 internal constructor(
+    override val id: String,
+    public val children: List<TimelineTabItemV2>,
+    public val mergePolicy: TimelineMergePolicy,
+    internal val source: GroupSource,
+    internal val presentation: TimelinePresentation,
+    override val title: UiText,
+    override val icon: IconType,
+    override val appearancePatch: AppearancePatch?,
+    override val enabled: Boolean,
+) : TimelineTabItemV2 {
+    override fun createPresenter(): TimelinePresenter =
+        MixedTimelinePresenter(
+            subTimelinePresenter =
+                children
+                    .filter { it.enabled }
+                    .map { it.createPresenter() },
+            mergePolicy = mergePolicy,
+        )
+}
 
 @Immutable
 @Serializable
-public data class TimelineSlot(
+internal data class TimelineSlot(
     val id: String,
     val content: TimelineSlotContent,
     val presentation: TimelinePresentation = TimelinePresentation(),
 ) {
     val title: UiText = presentation.titleOverride?.let { UiText.Raw(it) } ?: when (content) {
-        is TimelineSlotContent.Source -> content.target.title
+        is TimelineSlotContent.Source -> content.source.title
         is TimelineSlotContent.Group -> UiStrings.MixedTimeline.asText()
     }
 
     val icon: IconType = presentation.iconOverride ?: when (content) {
-        is TimelineSlotContent.Source -> content.target.icon
+        is TimelineSlotContent.Source -> content.source.icon
         is TimelineSlotContent.Group -> UiIcon.Rss.asType()
     }
-
-    // for iOS and Compose call sites
-    public val key: String get() = id
 }
 
 @Immutable
@@ -75,18 +165,19 @@ public data class TimelinePresentation internal constructor(
 
 @Immutable
 @Serializable
-public sealed interface TimelineSlotContent {
+internal sealed interface TimelineSlotContent {
     @Immutable
     @Serializable
     @SerialName("source")
-    public data class Source(
-        val target: TimelineTargetRef,
+    data class Source(
+        @SerialName("target")
+        val source: TimelineSourceRef,
     ) : TimelineSlotContent
 
     @Immutable
     @Serializable
     @SerialName("group")
-    public data class Group(
+    data class Group(
         val children: List<TimelineSlot> = emptyList(),
         val source: GroupSource = GroupSource.Manual,
         val mergePolicy: TimelineMergePolicy = TimelineMergePolicy.Time,
@@ -97,7 +188,7 @@ public sealed interface TimelineSlotContent {
 @Serializable
 public enum class GroupSource {
     Manual,
-    SystemHome
+    SystemHome,
 }
 
 @Immutable
@@ -110,13 +201,39 @@ public enum class TimelineMergePolicy {
 
 @Immutable
 @Serializable
-public data class TimelineTargetRef(
+public data class TimelineSourceRef(
     val id: String,
     val specId: String,
     val title: UiText,
     val icon: IconType,
     val data: String,
-)
+) {
+    public companion object {
+        @OptIn(ExperimentalSerializationApi::class)
+        public fun xqtDeviceFollow(accountKey: MicroBlogKey): TimelineSourceRef =
+            TimelineSourceRef(
+                id = "xqt.device_follow:$accountKey",
+                specId = "xqt.device_follow",
+                title = UiStrings.Posts.asText(),
+                icon = UiIcon.List.asType(),
+                data =
+                    ProtoBuf.encodeToHexString(
+                        TimelineSpec.AccountBasedData.serializer(),
+                        TimelineSpec.AccountBasedData(accountKey),
+                    ),
+            )
+    }
+}
+
+internal fun TimelineSourceRef.toSlot(
+    slotId: String = id,
+    presentation: TimelinePresentation = TimelinePresentation(),
+): TimelineSlot =
+    TimelineSlot(
+        id = slotId,
+        content = TimelineSlotContent.Source(this),
+        presentation = presentation,
+    )
 
 public data class TimelineSpec<T : TimelineSpec.Data>(
     val id: String,
@@ -131,8 +248,8 @@ public data class TimelineSpec<T : TimelineSpec.Data>(
         data: T,
         title: UiText = this.title.asText(),
         icon: IconType = this.icon,
-    ): TimelineTargetRef =
-        TimelineTargetRef(
+    ): TimelineSourceRef =
+        TimelineSourceRef(
             id = "$id:${targetId(data)}",
             specId = id,
             title = title,
@@ -169,128 +286,93 @@ public data class ShortcutSpec(
     val target: Target,
 ) {
     public sealed interface Target {
-        public data class Timeline(val target: TimelineTargetRef) : Target
+        public data class Timeline(val source: TimelineSourceRef) : Target
         public data class Route(val route: DeeplinkRoute) : Target
     }
 }
 
 public class TimelineResolver {
-
-    public fun toUi(slot: TimelineSlot): UiTimelineItem {
-        return UiTimelineItem(
-            id = slot.id,
-            title = slot.title,
-            icon = slot.icon,
-            appearancePatch = slot.presentation.appearance,
-            createPresenter = { resolvePresenter(slot) },
-        )
-    }
-
-    public fun toUi(ref: TimelineTargetRef): UiTimelineItem {
-        return UiTimelineItem(
-            id = ref.id,
-            title = ref.title,
-            icon = ref.icon,
-            createPresenter = { resolvePresenter(ref) },
-        )
-    }
-
-    public fun resolvePresenter(ref: TimelineTargetRef): TimelinePresenter {
-        val spec = PlatformType.entries
+    private val specs: Map<String, TimelineSpec<out TimelineSpec.Data>> by lazy {
+        PlatformType.entries
             .flatMap { it.spec.timelineSpecs }
             .distinctBy { it.id }
-            .find { it.id == ref.specId }
-            ?: throw IllegalArgumentException("No timeline spec found for source ID: ${ref.specId}")
-        return spec.createPresenter(ref.data)
+            .associateBy { it.id }
     }
 
-    public fun resolvePresenter(slot: TimelineSlot): TimelinePresenter {
-        return when (val content = slot.content) {
-            is TimelineSlotContent.Source -> {
-                resolvePresenter(content.target)
-            }
+    internal fun toTabItem(slot: TimelineSlot): TimelineTabItemV2 =
+        when (val content = slot.content) {
+            is TimelineSlotContent.Source ->
+                SourceTimelineTabItemV2.fromSlot(
+                    slot = slot,
+                    source = content.source,
+                    presenterFactory = { resolvePresenter(content.source) },
+                )
 
-            is TimelineSlotContent.Group -> {
-                MixedTimelinePresenter(
-                    subTimelinePresenter =
-                        content.children.map {
-                            resolvePresenter(it)
-                        },
+            is TimelineSlotContent.Group ->
+                GroupTimelineTabItemV2(
+                    id = slot.id,
+                    children = content.children.map { toTabItem(it) }.filter { it.enabled },
                     mergePolicy = content.mergePolicy,
+                    source = content.source,
+                    presentation = slot.presentation,
+                    title = slot.title,
+                    icon = slot.icon,
+                    appearancePatch = slot.presentation.appearance,
+                    enabled = slot.presentation.enabled,
+                )
+        }
+
+    public fun toTabItem(source: TimelineSourceRef): SourceTimelineTabItemV2 =
+        SourceTimelineTabItemV2.fromSource(
+            source = source,
+            presenterFactory = { resolvePresenter(source) },
+        )
+
+    internal fun toSlot(item: TimelineTabItemV2): TimelineSlot =
+        when (item) {
+            is SourceTimelineTabItemV2 -> {
+                val source =
+                    item.source
+                        ?: throw IllegalArgumentException("Runtime timeline tab cannot be persisted: ${item.id}")
+                source.toSlot(
+                    slotId = item.id,
+                    presentation = item.presentation ?: TimelinePresentation(),
                 )
             }
+
+            is GroupTimelineTabItemV2 ->
+                TimelineSlot(
+                    id = item.id,
+                    content =
+                        TimelineSlotContent.Group(
+                            children = item.children.map { toSlot(it) },
+                            source = item.source,
+                            mergePolicy = item.mergePolicy,
+                        ),
+                    presentation = item.presentation,
+                )
         }
-    }
+
+    public fun resolvePresenter(source: TimelineSourceRef): TimelinePresenter =
+        resolveSpec(source).createPresenter(source.data)
+
+    internal fun resolvePresenter(slot: TimelineSlot): TimelinePresenter = toTabItem(slot).createPresenter()
 
     @OptIn(ExperimentalSerializationApi::class)
-    public fun resolveAccountKey(slot: TimelineSlot): MicroBlogKey? {
-        return when (val content = slot.content) {
-            is TimelineSlotContent.Source -> {
-                val spec = PlatformType.entries
-                    .flatMap { it.spec.timelineSpecs }
-                    .distinctBy { it.id }
-                    .find { it.id == content.target.specId } ?: return null
-                val data = ProtoBuf.decodeFromHexString(spec.serializer, content.target.data)
-                if (data is TimelineSpec.AccountData) {
-                    data.accountKey
-                } else {
-                    null
-                }
-            }
-
-            is TimelineSlotContent.Group -> {
-                // For group slots, we can decide on a policy. Here we return null, but we could also check child slots.
-                null
-            }
+    internal fun resolveAccountKey(slot: TimelineSlot): MicroBlogKey? =
+        when (val content = slot.content) {
+            is TimelineSlotContent.Source -> resolveAccountKey(content.source)
+            is TimelineSlotContent.Group -> null
         }
+
+    @OptIn(ExperimentalSerializationApi::class)
+    public fun resolveAccountKey(source: TimelineSourceRef): MicroBlogKey? {
+        val spec = resolveSpec(source)
+        val data = ProtoBuf.decodeFromHexString(spec.serializer, source.data)
+        return (data as? TimelineSpec.AccountData)?.accountKey
     }
 
+    private fun resolveSpec(source: TimelineSourceRef): TimelineSpec<out TimelineSpec.Data> =
+        specs[source.specId]
+            ?: throw IllegalArgumentException("No timeline spec found for source ID: ${source.specId}")
 }
-
-//public fun TimelineTargetRef.resolvePresenter(): TimelinePresenter {
-//    return resolvePresenterForTimelineTargetRef(this, PlatformType.entries.flatMap { it.spec.timelineSpecs }.distinctBy { it.id })
-//}
-//
-//public fun TimelineTargetRef.resolveSpec(): TimelineSpec<out TimelineSpec.Data> {
-//    val spec = PlatformType.entries
-//        .flatMap { it.spec.timelineSpecs }
-//        .distinctBy { it.id }
-//        .find { it.id == specId }
-//        ?: throw IllegalArgumentException("No timeline spec found for source ID: $specId")
-//    return spec
-//}
-//
-//public fun TimelineTargetRef.resolveAccountKey(): MicroBlogKey? {
-//    val spec = resolveSpec()
-//    return spec.resolveAccountKey(this)
-//}
-//
-//public fun resolvePresenterForTimelineTargetRef(
-//    targetRef: TimelineTargetRef,
-//    timelineSpecs: List<TimelineSpec<out TimelineSpec.Data>>,
-//): TimelinePresenter {
-//    val spec = timelineSpecs.find { it.id == targetRef.specId }
-//        ?: throw IllegalArgumentException("No timeline spec found for source ID: ${targetRef.specId}")
-//    return spec.createPresenter(targetRef.data)
-//}
-//
-//public fun resolvePresenterForTimelineSlot(
-//    slot: TimelineSlot,
-//    timelineSpecs: List<TimelineSpec<out TimelineSpec.Data>>,
-//): TimelinePresenter {
-//    return when (val content = slot.content) {
-//        is TimelineSlotContent.Source -> {
-//            resolvePresenterForTimelineTargetRef(content.target, timelineSpecs)
-//        }
-//
-//        is TimelineSlotContent.Group -> {
-//            MixedTimelinePresenter(
-//                subTimelinePresenter =
-//                    content.children.map {
-//                        resolvePresenterForTimelineSlot(it, timelineSpecs)
-//                    },
-//                mergePolicy = content.mergePolicy,
-//            )
-//        }
-//    }
-//}

@@ -43,7 +43,7 @@ internal fun EntryProviderScope<NavKey>.homeEntryBuilder(
     }
     entry<Route.Timeline> { args ->
         TimelineScreen(
-            tabItem = args.tabItem,
+            source = args.source,
             onBack = onBack,
         )
     }

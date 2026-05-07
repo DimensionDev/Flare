@@ -15,6 +15,7 @@ struct ComposeScreen: View {
     @State private var viewModel = ComposeInputViewModel()
     @State private var uiTextView: UITextView?
     @State private var pendingCursor: Int?
+    @State private var initialTextApplied = false
     @State private var showDraftSheet = false
     @State private var showDraftConfirmation = false
 
@@ -46,7 +47,9 @@ struct ComposeScreen: View {
                     .textFieldStyle(.plain)
                     .focused($keyboardFocused)
                     .onAppear {
-                        keyboardFocused = true
+                        if initialTextApplied {
+                            keyboardFocused = true
+                        }
                     }
                     Spacer()
                     if viewModel.mediaViewModel.items.count > 0 {
@@ -296,10 +299,14 @@ struct ComposeScreen: View {
             }
             
         }
-        .onChange(of: presenter.state.initialTextState) { oldValue, newValue in
+        .onChange(of: presenter.state.initialTextState) { _, newValue in
+            guard !initialTextApplied else { return }
             if case .success(let initialText) = onEnum(of: newValue) {
-                viewModel.text = initialText.data.text
+                initialTextApplied = true
+                let prefill = initialText.data.text
+                viewModel.text = prefill
                 pendingCursor = Int(initialText.data.cursorPosition)
+                keyboardFocused = true
                 applyCursorIfPossible()
             }
         }
@@ -317,6 +324,11 @@ struct ComposeScreen: View {
         }
         .onChange(of: viewModel.text) { oldValue, newValue in
             presenter.state.setText(value: newValue)
+        }
+        .onChange(of: keyboardFocused) { _, isFocused in
+            if isFocused {
+                applyCursorIfPossible()
+            }
         }
         .onChange(of: viewModel.mediaViewModel.items.count) { _, newValue in
             presenter.state.setMediaSize(value: Int32(newValue))
@@ -446,13 +458,18 @@ struct ComposeScreen: View {
     }
     
     private func applyCursorIfPossible() {
-        guard let textView = uiTextView, textView.isFirstResponder, let pendingCursor else { return }
-        let length = textView.text.count
-        let clamped = NSRange(location: max(0, min(pendingCursor, length)),
-                              length: 0)
-        textView.selectedRange = clamped
-        textView.scrollRangeToVisible(clamped)
-        self.pendingCursor = nil
+        guard uiTextView != nil, pendingCursor != nil else { return }
+        DispatchQueue.main.async {
+            guard let textView = uiTextView, let pendingCursor else { return }
+            let length = (textView.text as NSString).length
+            let clamped = NSRange(location: max(0, min(pendingCursor, length)),
+                                  length: 0)
+            textView.selectedRange = clamped
+            textView.scrollRangeToVisible(clamped)
+            if textView.isFirstResponder {
+                self.pendingCursor = nil
+            }
+        }
     }
     
     private func insert(_ s: String) {

@@ -63,7 +63,7 @@ internal suspend fun migrateTabSettingsV1ToV2(
             }.getOrNull()
 
         if (v1 != null) {
-            val migratedSlots = v1.mainTabs.toTimelineSlots()
+            val migratedSlots = v1.toTabSettingsV2().homeSlots
             if (migratedSlots.isNotEmpty()) {
                 tabSettingsV2Store.updateData { current ->
                     if (current.homeSlots.isEmpty()) {
@@ -77,6 +77,11 @@ internal suspend fun migrateTabSettingsV1ToV2(
         runCatching { fs.delete(v1Path) }
     }
 }
+
+internal fun TabSettings.toTabSettingsV2(): TabSettingsV2 =
+    TabSettingsV2(
+        homeSlots = mainTabs.toTimelineSlots(),
+    )
 
 internal fun List<TimelineTabItem>.toTimelineSlots(): List<TimelineSlot> =
     mapNotNull { it.toTimelineSlotOrNull() }

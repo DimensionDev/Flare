@@ -32,7 +32,7 @@ import org.koin.dsl.module
 internal val commonModule =
     module {
         singleOf(::AccountRepository)
-        single(createdAtStart = true) { AccountTabSyncCoordinator(get(), get(), get()) }
+        single(createdAtStart = true) { AccountTabSyncCoordinator(get(), get(), get(), get()) }
         singleOf(::provideAppDatabase)
         singleOf(::provideCacheDatabase)
         single<NostrCache> { DatabaseNostrCache(get()) }

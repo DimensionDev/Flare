@@ -24,7 +24,7 @@ public class ExportSettingsPresenter :
             SettingsExport(
                 appearanceSettings = settingsRepository.appearanceSettings.first(),
                 appSettings = settingsRepository.appSettings.first(),
-                tabSettings = settingsRepository.tabSettings.first(),
+                tabSettingsV2 = settingsRepository.tabSettingsV2.first(),
             )
         return export.encodeJson(SettingsExport.serializer())
     }

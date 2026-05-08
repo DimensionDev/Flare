@@ -6,7 +6,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.model.AvatarShape
 import dev.dimension.flare.data.model.PostActionStyle
-import dev.dimension.flare.data.model.TabSettings
 import dev.dimension.flare.data.model.Theme
 import dev.dimension.flare.data.model.TimelineDisplayMode
 import dev.dimension.flare.data.model.VideoAutoplay
@@ -32,11 +31,9 @@ public class SettingsPresenter :
         val scope = rememberCoroutineScope()
         val appearancePatch by repository.appearancePatch.collectAsUiState()
         val appSettings by repository.appSettings.collectAsUiState()
-        val tabSettings by repository.tabSettings.collectAsUiState()
         return object : State {
             override val appearance: UiState<AppearancePatch> = appearancePatch
             override val appSettings: UiState<AppSettings> = appSettings
-            override val tabSettings: UiState<TabSettings> = tabSettings
 
             override fun <T : Any> update(
                 key: AppearanceKey<T>,
@@ -105,21 +102,12 @@ public class SettingsPresenter :
                     }
                 }
             }
-
-            override fun updateTabSettings(block: TabSettings.() -> TabSettings) {
-                scope.launch {
-                    withContext(Dispatchers.Main) {
-                        repository.updateTabSettings(block)
-                    }
-                }
-            }
         }
     }
 
     public interface State {
         public val appearance: UiState<AppearancePatch>
         public val appSettings: UiState<AppSettings>
-        public val tabSettings: UiState<TabSettings>
 
         public fun <T : Any> update(
             key: AppearanceKey<T>,
@@ -161,7 +149,5 @@ public class SettingsPresenter :
         public fun updateShowNumbers(value: Boolean)
 
         public fun updateAppSettings(block: AppSettings.() -> AppSettings)
-
-        public fun updateTabSettings(block: TabSettings.() -> TabSettings)
     }
 }

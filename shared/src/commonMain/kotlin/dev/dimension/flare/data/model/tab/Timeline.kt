@@ -5,6 +5,7 @@ import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.appearance.AppearanceBag
 import dev.dimension.flare.data.model.appearance.AppearancePatch
 import dev.dimension.flare.data.model.appearance.toPatch
+import dev.dimension.flare.data.platform.RssTimelineSpecs
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.spec
@@ -134,7 +135,7 @@ public class GroupTimelineTabItemV2 internal constructor(
 
 @Immutable
 @Serializable
-internal data class TimelineSlot(
+public data class TimelineSlot(
     val id: String,
     val content: TimelineSlotContent,
     val presentation: TimelinePresentation = TimelinePresentation(),
@@ -167,22 +168,22 @@ public data class TimelinePresentation internal constructor(
 
 @Immutable
 @Serializable
-internal sealed interface TimelineSlotContent {
+public sealed interface TimelineSlotContent {
     @Immutable
     @Serializable
     @SerialName("source")
-    data class Source(
+    public data class Source(
         @SerialName("target")
-        val source: TimelineSourceRef,
+        public val source: TimelineSourceRef,
     ) : TimelineSlotContent
 
     @Immutable
     @Serializable
     @SerialName("group")
-    data class Group(
-        val children: List<TimelineSlot> = emptyList(),
-        val source: GroupSource = GroupSource.Manual,
-        val mergePolicy: TimelineMergePolicy = TimelineMergePolicy.Time,
+    public data class Group(
+        public val children: List<TimelineSlot> = emptyList(),
+        public val source: GroupSource = GroupSource.Manual,
+        public val mergePolicy: TimelineMergePolicy = TimelineMergePolicy.Time,
     ) : TimelineSlotContent
 }
 
@@ -317,9 +318,11 @@ public data class ShortcutSpec(
 
 public class TimelineResolver {
     private val specs: Map<String, TimelineSpec<out TimelineSpec.Data>> by lazy {
-        PlatformType.entries
-            .flatMap { it.spec.timelineSpecs }
-            .distinctBy { it.id }
+        (
+            PlatformType.entries
+                .flatMap { it.spec.timelineSpecs } +
+                RssTimelineSpecs.timelineSpecs
+        ).distinctBy { it.id }
             .associateBy { it.id }
     }
 
@@ -380,9 +383,7 @@ public class TimelineResolver {
             }
         }
 
-    public fun resolvePresenter(source: TimelineSourceRef): TimelinePresenter = resolveSpec(source).createPresenter(source.data)
-
-    internal fun resolvePresenter(slot: TimelineSlot): TimelinePresenter = toTabItem(slot).createPresenter()
+    private fun resolvePresenter(source: TimelineSourceRef): TimelinePresenter = resolveSpec(source).createPresenter(source.data)
 
     @OptIn(ExperimentalSerializationApi::class)
     internal fun resolveAccountKey(slot: TimelineSlot): MicroBlogKey? =
@@ -392,7 +393,7 @@ public class TimelineResolver {
         }
 
     @OptIn(ExperimentalSerializationApi::class)
-    public fun resolveAccountKey(source: TimelineSourceRef): MicroBlogKey? {
+    private fun resolveAccountKey(source: TimelineSourceRef): MicroBlogKey? {
         val spec = resolveSpec(source)
         val data = ProtoBuf.decodeFromHexString(spec.serializer, source.data)
         return (data as? TimelineSpec.AccountData)?.accountKey

@@ -3,12 +3,14 @@ package dev.dimension.flare.ui.screen.list
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import dev.dimension.flare.data.model.IconType
-import dev.dimension.flare.data.model.ListTimelineTabItem
-import dev.dimension.flare.data.model.TabMetaData
-import dev.dimension.flare.data.model.TimelineTabItem
-import dev.dimension.flare.data.model.TitleType
+import dev.dimension.flare.data.model.tab.TimelineSlot
+import dev.dimension.flare.data.model.tab.TimelineSpec
+import dev.dimension.flare.data.model.tab.toSlot
+import dev.dimension.flare.data.platform.CommonTimelineSpecs
 import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiList
+import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.presenter.PinTabsPresenter
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.presenter.invoke
@@ -20,32 +22,16 @@ public class AllListWithTabsPresenter(
 ) : PresenterBase<AllListWithTabsPresenter.State>() {
     private val pinTabsPresenter by lazy {
         object : PinTabsPresenter<UiList>() {
-            override fun List<TimelineTabItem>.filterPinned(): List<String> =
-                filterIsInstance<ListTimelineTabItem>()
-                    .map { it.listId }
-
-            override fun getTimelineTabItem(item: UiList): TimelineTabItem =
-                ListTimelineTabItem(
-                    account = accountType,
-                    listId = item.id,
-                    metaData =
-                        TabMetaData(
-                            title = TitleType.Text(item.title),
-                            icon =
-                                item.let { it as? UiList.List }?.avatar?.let {
-                                    IconType.Url(it)
-                                } ?: IconType.Material(dev.dimension.flare.ui.model.UiIcon.List),
-                        ),
-                )
-
-            override fun List<TimelineTabItem>.filter(item: UiList): List<TimelineTabItem> =
-                filter {
-                    if (it is ListTimelineTabItem) {
-                        it.listId != item.id
-                    } else {
-                        true
-                    }
-                }
+            override fun getTimelineTabItem(item: UiList): TimelineSlot =
+                CommonTimelineSpecs.list
+                    .target(
+                        data = TimelineSpec.AccountResourceData(specificAccountKey(), item.id),
+                        title = UiText.Raw(item.title),
+                        icon =
+                            (item as? UiList.List)?.avatar?.let {
+                                IconType.Url(it)
+                            } ?: IconType.Material(UiIcon.List),
+                    ).toSlot()
         }
     }
 
@@ -68,4 +54,7 @@ public class AllListWithTabsPresenter(
     public interface State :
         AllListState,
         PinTabsPresenter.State<UiList>
+
+    private fun specificAccountKey() =
+        (accountType as AccountType.Specific).accountKey
 }

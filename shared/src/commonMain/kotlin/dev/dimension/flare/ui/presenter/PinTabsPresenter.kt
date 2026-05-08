@@ -2,17 +2,22 @@ package dev.dimension.flare.ui.presenter
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import dev.dimension.flare.data.model.TimelineTabItem
+import dev.dimension.flare.data.model.tab.TimelineSlot
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.map
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+
+public class PinTabs<T> internal constructor(
+    private val slots: List<TimelineSlot>,
+    private val matches: (TimelineSlot, T) -> Boolean,
+) {
+    public fun contains(item: T): Boolean = slots.any { matches(it, item) }
+}
 
 public abstract class PinTabsPresenter<T> :
     PresenterBase<PinTabsPresenter.State<T>>(),
@@ -21,7 +26,7 @@ public abstract class PinTabsPresenter<T> :
     private val appScope: CoroutineScope by inject()
 
     public interface State<T> {
-        public val currentTabs: UiState<ImmutableList<String>>
+        public val pins: UiState<PinTabs<T>>
 
         public fun pinTab(item: T)
 
@@ -30,23 +35,24 @@ public abstract class PinTabsPresenter<T> :
 
     @Composable
     override fun body(): State<T> {
-        val tabSettings by settingsRepository.tabSettings.collectAsUiState()
-        val currentTabs =
+        val tabSettings by settingsRepository.tabSettingsV2.collectAsUiState()
+        val pins =
             tabSettings.map {
-                it.mainTabs
-                    .filterPinned()
-                    .toImmutableList()
+                PinTabs(it.homeSlots, ::matches)
             }
 
         return object : State<T> {
-            override val currentTabs = currentTabs
+            override val pins = pins
 
             override fun pinTab(item: T) {
                 appScope.launch {
-                    settingsRepository.updateTabSettings {
+                    settingsRepository.updateTabSettingsV2 {
+                        if (homeSlots.any { matches(it, item) }) {
+                            return@updateTabSettingsV2 this
+                        }
                         copy(
-                            mainTabs =
-                                mainTabs + getTimelineTabItem(item),
+                            homeSlots =
+                                homeSlots + getTimelineTabItem(item),
                         )
                     }
                 }
@@ -54,9 +60,9 @@ public abstract class PinTabsPresenter<T> :
 
             override fun unpinTab(item: T) {
                 appScope.launch {
-                    settingsRepository.updateTabSettings {
+                    settingsRepository.updateTabSettingsV2 {
                         copy(
-                            mainTabs = mainTabs.filter(item),
+                            homeSlots = homeSlots.filterNot { matches(it, item) },
                         )
                     }
                 }
@@ -64,9 +70,10 @@ public abstract class PinTabsPresenter<T> :
         }
     }
 
-    protected abstract fun List<TimelineTabItem>.filterPinned(): List<String>
+    protected abstract fun getTimelineTabItem(item: T): TimelineSlot
 
-    protected abstract fun getTimelineTabItem(item: T): TimelineTabItem
-
-    protected abstract fun List<TimelineTabItem>.filter(item: T): List<TimelineTabItem>
+    protected open fun matches(
+        slot: TimelineSlot,
+        item: T,
+    ): Boolean = slot.id == getTimelineTabItem(item).id
 }

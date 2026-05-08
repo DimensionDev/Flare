@@ -59,7 +59,7 @@ public class BlueskyFeedPresenter(
                 require(it is BlueskyDataSource)
                 it.feedHandler.listInfo(uri).toUi()
             }.map {
-                it.mapNotNull { it as? UiList.Feed }
+                it.mapNotNull { it }
             }
     }
 

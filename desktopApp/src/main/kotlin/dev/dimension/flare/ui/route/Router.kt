@@ -26,7 +26,6 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import dev.dimension.flare.common.OnDeepLink
 import dev.dimension.flare.data.model.Bluesky.FeedTabItem
-import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.IconType.Material
 import dev.dimension.flare.data.model.ListTimelineTabItem
 import dev.dimension.flare.data.model.Misskey
@@ -879,7 +878,7 @@ internal fun WindowScope.Router(
                                         metaData =
                                             TabMetaData(
                                                 title = TitleType.Text(it.title),
-                                                icon = IconType.Material(dev.dimension.flare.ui.model.UiIcon.Rss),
+                                                icon = Material(dev.dimension.flare.ui.model.UiIcon.Rss),
                                             ),
                                     ),
                                 ),
@@ -1023,7 +1022,7 @@ internal fun WindowScope.Router(
                                     metaData =
                                         TabMetaData(
                                             title = TitleType.Text(args.title),
-                                            icon = IconType.Material(dev.dimension.flare.ui.model.UiIcon.Channel),
+                                            icon = Material(dev.dimension.flare.ui.model.UiIcon.Channel),
                                         ),
                                 )
                             },

@@ -6,13 +6,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import dev.dimension.flare.data.model.Bluesky
 import dev.dimension.flare.data.model.IconType
-import dev.dimension.flare.data.model.TabMetaData
-import dev.dimension.flare.data.model.TimelineTabItem
-import dev.dimension.flare.data.model.TitleType
+import dev.dimension.flare.data.model.tab.TimelineSlot
+import dev.dimension.flare.data.model.tab.TimelineSpec
+import dev.dimension.flare.data.model.tab.toSlot
+import dev.dimension.flare.data.platform.BlueskyPlatformSpec
 import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiList
+import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.presenter.PinTabsPresenter
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.presenter.home.bluesky.BlueskyFeedsPresenter
@@ -25,30 +27,16 @@ public class BlueskyFeedsWithTabsPresenter(
 ) : PresenterBase<BlueskyFeedsWithTabsPresenter.State>() {
     private val pinTabsPresenter by lazy {
         object : PinTabsPresenter<UiList>() {
-            override fun List<TimelineTabItem>.filterPinned(): List<String> = filterIsInstance<Bluesky.FeedTabItem>().map { it.uri }
-
-            override fun getTimelineTabItem(item: UiList): TimelineTabItem =
-                Bluesky.FeedTabItem(
-                    account = accountType,
-                    uri = item.id,
-                    metaData =
-                        TabMetaData(
-                            title = TitleType.Text(item.title),
-                            icon =
-                                item.let { it as? UiList.Feed }?.avatar?.let {
-                                    IconType.Url(it)
-                                } ?: IconType.Material(dev.dimension.flare.ui.model.UiIcon.Feeds),
-                        ),
-                )
-
-            override fun List<TimelineTabItem>.filter(item: UiList): List<TimelineTabItem> =
-                filter {
-                    if (it is Bluesky.FeedTabItem) {
-                        it.uri != item.id
-                    } else {
-                        true
-                    }
-                }
+            override fun getTimelineTabItem(item: UiList): TimelineSlot =
+                BlueskyPlatformSpec.feedTimelineSpec
+                    .target(
+                        data = TimelineSpec.AccountResourceData(specificAccountKey(), item.id),
+                        title = UiText.Raw(item.title),
+                        icon =
+                            (item as? UiList.Feed)?.avatar?.let {
+                                IconType.Url(it)
+                            } ?: IconType.Material(UiIcon.Feeds),
+                    ).toSlot()
         }
     }
 
@@ -82,4 +70,7 @@ public class BlueskyFeedsWithTabsPresenter(
 
         public fun refresh()
     }
+
+    private fun specificAccountKey() =
+        (accountType as AccountType.Specific).accountKey
 }

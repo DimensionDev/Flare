@@ -12,6 +12,7 @@ import dev.dimension.flare.data.model.TitleType
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.component.MasterDetailView
 import dev.dimension.flare.ui.component.MasterDetailViewState
+import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.screen.home.TimelineScreen
 import moe.tlaster.precompose.molecule.producePresenter
@@ -47,7 +48,7 @@ internal fun FeedScreen(accountType: AccountType) {
                                 metaData =
                                     TabMetaData(
                                         title = TitleType.Text(it.title),
-                                        icon = IconType.Material(dev.dimension.flare.ui.model.UiIcon.Feeds),
+                                        icon = IconType.Material(UiIcon.Feeds),
                                     ),
                             )
                         },

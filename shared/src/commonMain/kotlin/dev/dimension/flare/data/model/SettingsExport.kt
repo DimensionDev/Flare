@@ -4,7 +4,7 @@ import dev.dimension.flare.data.datastore.model.AppSettings
 import kotlinx.serialization.Serializable
 
 @Serializable
-public data class SettingsExport(
+internal data class SettingsExport(
     val appearanceSettings: AppearanceSettings,
     val appSettings: AppSettings,
     val tabSettings: TabSettings,

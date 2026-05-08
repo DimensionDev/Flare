@@ -372,13 +372,9 @@ internal class MisskeyDataSource(
                     channelHandler.cacheData,
                 ) { featured, followed ->
                     featured.map { item ->
-                        if (item is UiList.Channel) {
-                            item.copy(
-                                isFollowing = followed.any { it.id == item.id },
-                            )
-                        } else {
-                            item
-                        }
+                        item.copy(
+                            isFollowing = followed.any { it.id == item.id },
+                        )
                     }
                 }
             }.cachedIn(scope)

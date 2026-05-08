@@ -59,7 +59,7 @@ public class MisskeyChannelPresenter(
                 require(it is MisskeyDataSource)
                 it.channelHandler.listInfo(channelId).toUi()
             }.map {
-                it.mapNotNull { it as? UiList.Channel }
+                it.mapNotNull { it }
             }
     }
 

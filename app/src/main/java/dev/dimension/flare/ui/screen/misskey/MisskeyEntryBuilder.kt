@@ -23,6 +23,7 @@ import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.tab.SourceTimelineTabItemV2
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
+import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.presenter.list.AntennasTimelinePresenter
 import dev.dimension.flare.ui.presenter.list.ChannelTimelinePresenter
@@ -61,7 +62,7 @@ internal fun EntryProviderScope<NavKey>.misskeyEntryBuilder(
                 SourceTimelineTabItemV2.runtime(
                     id = "antennas_${args.accountType}_${args.antennaId}",
                     title = UiText.Raw(args.title),
-                    icon = IconType.Material(dev.dimension.flare.ui.model.UiIcon.Rss),
+                    icon = IconType.Material(UiIcon.Rss),
                     createPresenter = {
                         AntennasTimelinePresenter(
                             accountType = args.accountType,
@@ -101,7 +102,7 @@ internal fun EntryProviderScope<NavKey>.misskeyEntryBuilder(
                 SourceTimelineTabItemV2.runtime(
                     id = "channel_${args.accountType}_${args.channelId}",
                     title = UiText.Raw(args.title),
-                    icon = IconType.Material(dev.dimension.flare.ui.model.UiIcon.List),
+                    icon = IconType.Material(UiIcon.List),
                     createPresenter = {
                         ChannelTimelinePresenter(
                             accountType = args.accountType,

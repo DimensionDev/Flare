@@ -9,10 +9,7 @@ import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.io.PlatformPathProducer
 import dev.dimension.flare.data.model.AppearanceSettings
-import dev.dimension.flare.data.model.TabSettings
-import dev.dimension.flare.data.model.TabSettingsSerializer
 import dev.dimension.flare.data.model.appearance.AppearanceBag
-import dev.dimension.flare.data.model.appearance.AppearanceBagSerializer
 import dev.dimension.flare.data.model.appearance.AppearanceKey
 import dev.dimension.flare.data.model.appearance.AppearancePatch
 import dev.dimension.flare.data.model.appearance.migrateAppearanceV1ToV2
@@ -22,6 +19,7 @@ import dev.dimension.flare.data.model.appearance.toPatch
 import dev.dimension.flare.data.model.tab.TabSettingsV2
 import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
+import dev.dimension.flare.data.model.tab.migrateTabSettingsV1ToV2
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.distinctUntilChangedBy
@@ -48,6 +46,8 @@ public class SettingsRepository internal constructor(
 
     private val appearanceMigrationMutex = Mutex()
     private var appearanceMigrationCompleted = false
+    private val tabSettingsMigrationMutex = Mutex()
+    private var tabSettingsMigrationCompleted = false
 
     public val appearancePatch: Flow<AppearancePatch> by lazy {
         flow {
@@ -101,20 +101,20 @@ public class SettingsRepository internal constructor(
         appearanceBagStore.updateData { patch.toBag() }
     }
 
-    private val tabSettingsStore by lazy {
-        createDataStore(
-            name = "tab_settings.pb",
-            serializer = TabSettingsSerializer,
-        )
-    }
+//    private val tabSettingsStore by lazy {
+//        createDataStore(
+//            name = "tab_settings.pb",
+//            serializer = protobufSerializer(TabSettings()),
+//        )
+//    }
 
-    public val tabSettings: Flow<TabSettings> by lazy {
-        tabSettingsStore.data
-    }
-
-    public suspend fun updateTabSettings(block: TabSettings.() -> TabSettings) {
-        tabSettingsStore.updateData(block)
-    }
+//    public val tabSettings: Flow<TabSettings> by lazy {
+//        tabSettingsStore.data
+//    }
+//
+//    public suspend fun updateTabSettings(block: TabSettings.() -> TabSettings) {
+//        tabSettingsStore.updateData(block)
+//    }
 
     private val tabSettingsV2Store by lazy {
         createDataStore(
@@ -124,7 +124,10 @@ public class SettingsRepository internal constructor(
     }
 
     internal val tabSettingsV2: Flow<TabSettingsV2> by lazy {
-        tabSettingsV2Store.data
+        flow {
+            ensureTabSettingsMigrated()
+            emitAll(tabSettingsV2Store.data)
+        }
     }
 
     public val homeTimelineTabs: Flow<List<TimelineTabItemV2>> by lazy {
@@ -138,7 +141,20 @@ public class SettingsRepository internal constructor(
     }
 
     internal suspend fun updateTabSettingsV2(block: TabSettingsV2.() -> TabSettingsV2) {
+        ensureTabSettingsMigrated()
         tabSettingsV2Store.updateData(block)
+    }
+
+    public suspend fun ensureTabSettingsMigrated() {
+        if (tabSettingsMigrationCompleted) return
+        tabSettingsMigrationMutex.withLock {
+            if (tabSettingsMigrationCompleted) return
+            migrateTabSettingsV1ToV2(
+                pathProducer = pathProducer,
+                tabSettingsV2Store = tabSettingsV2Store,
+            )
+            tabSettingsMigrationCompleted = true
+        }
     }
 
     public suspend fun updateAppSettings(block: AppSettings.() -> AppSettings) {

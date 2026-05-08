@@ -59,6 +59,7 @@ import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareLargeFlexibleTopAppBar
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.TabIcon
+import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.screen.settings.AllTabsPresenter
 import dev.dimension.flare.ui.screen.settings.EditTabDialog
@@ -278,7 +279,7 @@ private fun GroupConfigPresenter(initialItem: MixedTimelineTabItem?) =
                 } ?: "",
             )
         var icon by remember(initialItem) {
-            mutableStateOf<IconType>(initialItem?.metaData?.icon ?: IconType.Material(dev.dimension.flare.ui.model.UiIcon.Rss))
+            mutableStateOf<IconType>(initialItem?.metaData?.icon ?: IconType.Material(UiIcon.Rss))
         }
         val tabs =
             remember(initialItem) {

@@ -22,7 +22,7 @@ public fun UiList.toTabItem(accountKey: MicroBlogKey): TabItem =
                         icon =
                             avatar?.let {
                                 IconType.Url(it)
-                            } ?: IconType.Material(dev.dimension.flare.ui.model.UiIcon.List),
+                            } ?: IconType.Material(UiIcon.List),
                     ),
             )
         }
@@ -37,7 +37,7 @@ public fun UiList.toTabItem(accountKey: MicroBlogKey): TabItem =
                         icon =
                             avatar?.let {
                                 IconType.Url(it)
-                            } ?: IconType.Material(dev.dimension.flare.ui.model.UiIcon.Feeds),
+                            } ?: IconType.Material(UiIcon.Feeds),
                     ),
             )
         }
@@ -49,7 +49,7 @@ public fun UiList.toTabItem(accountKey: MicroBlogKey): TabItem =
                 metaData =
                     TabMetaData(
                         title = TitleType.Text(title),
-                        icon = IconType.Material(dev.dimension.flare.ui.model.UiIcon.List),
+                        icon = IconType.Material(UiIcon.List),
                     ),
             )
         }
@@ -61,7 +61,7 @@ public fun UiList.toTabItem(accountKey: MicroBlogKey): TabItem =
                 metaData =
                     TabMetaData(
                         title = TitleType.Text(title),
-                        icon = IconType.Material(dev.dimension.flare.ui.model.UiIcon.List),
+                        icon = IconType.Material(UiIcon.List),
                     ),
             )
         }

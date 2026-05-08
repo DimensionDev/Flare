@@ -1,5 +1,6 @@
 package dev.dimension.flare.data.network.mastodon
 
+import dev.dimension.flare.common.MimeTypes
 import dev.dimension.flare.data.network.ktorfit
 import dev.dimension.flare.data.network.mastodon.api.AccountResources
 import dev.dimension.flare.data.network.mastodon.api.FriendshipResources
@@ -89,7 +90,13 @@ internal class MastodonService(
         data: ByteArray,
         name: String,
         description: String?,
+        mimeType: String? = null,
     ): UploadResponse {
+        val resolvedMime =
+            MimeTypes.detectFromBytes(data)
+                ?: mimeType?.takeIf { it.isNotBlank() }
+                ?: "application/octet-stream"
+        val safeName = ensureFileName(name, resolvedMime)
         val multipart =
             MultiPartFormDataContent(
                 formData {
@@ -97,7 +104,11 @@ internal class MastodonService(
                         "file",
                         data,
                         Headers.build {
-                            append(HttpHeaders.ContentDisposition, "filename=$name")
+                            append(
+                                HttpHeaders.ContentDisposition,
+                                "filename=\"${safeName.escapeQuotedString()}\"",
+                            )
+                            append(HttpHeaders.ContentType, resolvedMime)
                         },
                     )
                     if (description != null) {
@@ -108,3 +119,24 @@ internal class MastodonService(
         return upload(multipart)
     }
 }
+
+private fun ensureFileName(
+    name: String,
+    mimeType: String,
+): String {
+    val sanitized =
+        name
+            .replace('\\', '_')
+            .replace('/', '_')
+            .replace(':', '_')
+            .replace('"', '_')
+            .ifBlank { "upload" }
+    val ext = MimeTypes.extensionFor(mimeType)
+    return if (ext != null && !MimeTypes.hasExtension(sanitized)) {
+        "$sanitized.$ext"
+    } else {
+        sanitized
+    }
+}
+
+private fun String.escapeQuotedString(): String = replace("\\", "\\\\").replace("\"", "\\\"")

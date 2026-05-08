@@ -279,6 +279,7 @@ internal open class MastodonDataSource(
                             finalBytes,
                             name = file.name ?: "unknown",
                             description = altText,
+                            mimeType = file.mimeType,
                         ).also {
                             progress()
                         }

@@ -8,13 +8,15 @@ public actual class FileItem {
     private val source: Source
     internal actual val name: String?
     internal actual val type: FileType
+    internal actual val mimeType: String?
 
     public constructor(
         context: Context,
         uri: Uri,
     ) {
         this.name = uri.lastPathSegment
-        this.type = resolveType(context = context, uri = uri)
+        this.mimeType = context.contentResolver.getType(uri)
+        this.type = resolveType(this.mimeType, uri)
         this.source = Source.UriSource(context, uri)
     }
 
@@ -22,10 +24,12 @@ public actual class FileItem {
         name: String?,
         type: FileType,
         source: Source,
+        mimeType: String? = null,
     ) {
         this.name = name
         this.type = type
         this.source = source
+        this.mimeType = mimeType
     }
 
     internal actual suspend fun readBytes(): ByteArray = source.readBytes()
@@ -52,11 +56,10 @@ public actual class FileItem {
 
     private companion object {
         fun resolveType(
-            context: Context,
+            mimeType: String?,
             uri: Uri,
-        ): FileType {
-            val mimeType = context.contentResolver.getType(uri)
-            return when {
+        ): FileType =
+            when {
                 mimeType?.startsWith("image/") == true -> {
                     FileType.Image
                 }
@@ -78,6 +81,5 @@ public actual class FileItem {
                     }
                 }
             }
-        }
     }
 }

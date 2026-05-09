@@ -5,4 +5,5 @@ public expect class FileItem {
 
     internal val name: String?
     internal val type: FileType
+    internal val mimeType: String?
 }

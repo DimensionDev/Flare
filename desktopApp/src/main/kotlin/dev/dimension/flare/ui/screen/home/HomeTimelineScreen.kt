@@ -33,7 +33,7 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.refresh
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.TabIcon
-import dev.dimension.flare.ui.component.TabTitle
+import dev.dimension.flare.ui.component.Text as UiText
 import dev.dimension.flare.ui.component.floatingToolbarVerticalNestedScroll
 import dev.dimension.flare.ui.component.status.AdaptiveCard
 import dev.dimension.flare.ui.model.map
@@ -65,7 +65,7 @@ internal fun HomeTimelineScreen(
     state.tabState.onSuccess { tabState ->
         state.selectedTab.onSuccess { currentTab ->
             val currentTabTimelineState =
-                key(currentTab.key) {
+                key(currentTab.id) {
                     rememberTimelineItemPresenterWithLazyListState(currentTab)
                 }
             Box {
@@ -147,9 +147,9 @@ internal fun HomeTimelineScreen(
                             ) {
                                 tabState.forEachIndexed { index, tab ->
                                     PillButton(
-                                        selected = tab.key == currentTab.key,
+                                        selected = tab.id == currentTab.id,
                                         onSelectedChanged = {
-                                            if (tab.key == currentTab.key) {
+                                            if (tab.id == currentTab.id) {
                                                 if (currentTabTimelineState.lazyListState.firstVisibleItemIndex == 0) {
                                                     currentTabTimelineState.refreshSync()
                                                 } else {
@@ -165,9 +165,7 @@ internal fun HomeTimelineScreen(
                                         TabIcon(
                                             tabItem = tab,
                                         )
-                                        TabTitle(
-                                            title = tab.metaData.title,
-                                        )
+                                        UiText(tab.title)
                                     }
                                 }
                                 PillButton(
@@ -215,7 +213,7 @@ internal fun HomeTimelineScreen(
 private fun presenter(accountType: AccountType) =
     run {
         var isTopBarExpanded by remember { mutableStateOf(true) }
-        val state = remember(accountType) { HomeTimelineWithTabsPresenter(accountType) }.invoke()
+        val state = remember { HomeTimelineWithTabsPresenter() }.invoke()
         var selectedIndex by remember {
             mutableStateOf(0)
         }

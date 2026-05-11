@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -31,26 +32,19 @@ import compose.icons.fontawesomeicons.solid.CirclePlus
 import compose.icons.fontawesomeicons.solid.Plus
 import dev.dimension.flare.Res
 import dev.dimension.flare.add_rss_source
-import dev.dimension.flare.antenna_title
-import dev.dimension.flare.channel_title
-import dev.dimension.flare.data.model.TabItem
+import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.ok
 import dev.dimension.flare.rss_title
 import dev.dimension.flare.tab_settings_add
-import dev.dimension.flare.tab_settings_default
-import dev.dimension.flare.tab_settings_feed
-import dev.dimension.flare.tab_settings_list
 import dev.dimension.flare.tab_settings_remove
 import dev.dimension.flare.ui.common.itemsIndexed
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.component.TabIcon
-import dev.dimension.flare.ui.component.TabTitle
 import dev.dimension.flare.ui.component.listCard
+import dev.dimension.flare.ui.model.asText
 import dev.dimension.flare.ui.model.onSuccess
-import dev.dimension.flare.ui.model.toTabItem
-import dev.dimension.flare.ui.presenter.list.PinnableTimelineTabPresenter
 import dev.dimension.flare.ui.screen.settings.AllTabsPresenter
 import io.github.composefluent.FluentTheme
 import io.github.composefluent.component.AccentButton
@@ -63,15 +57,16 @@ import io.github.composefluent.component.SubtleButton
 import io.github.composefluent.component.Text
 import kotlinx.collections.immutable.ImmutableList
 import org.jetbrains.compose.resources.stringResource
+import dev.dimension.flare.ui.component.Text as UiText
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 internal fun AddTabDialog(
     visible: Boolean,
     onDismiss: () -> Unit,
-    tabs: ImmutableList<TabItem>,
+    tabs: ImmutableList<TimelineTabItemV2>,
     allTabs: AllTabsPresenter.State,
-    onAddTab: (TabItem) -> Unit,
+    onAddTab: (TimelineTabItemV2) -> Unit,
     onDeleteTab: (String) -> Unit,
     toAddRssSource: () -> Unit,
 ) {
@@ -85,16 +80,16 @@ internal fun AddTabDialog(
         content = {
             @Composable
             fun TabItem(
-                tabItem: TabItem,
+                tabItem: TimelineTabItemV2,
                 modifier: Modifier = Modifier,
             ) {
                 ListTabItem(
                     data = tabItem,
-                    isAdded = tabs.any { tab -> tabItem.key == tab.key },
+                    isAdded = tabs.any { tab -> tabItem.id == tab.id },
                     modifier =
                         modifier.clickable {
-                            if (tabs.any { tab -> tabItem.key == tab.key }) {
-                                onDeleteTab(tabItem.key)
+                            if (tabs.any { tab -> tabItem.id == tab.id }) {
+                                onDeleteTab(tabItem.id)
                             } else {
                                 onAddTab(tabItem)
                             }
@@ -105,8 +100,8 @@ internal fun AddTabDialog(
                 modifier = Modifier.heightIn(max = 480.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                allTabs.accountTabs.onSuccess { tabs ->
-                    var selectedPage by remember(tabs) { mutableStateOf(0) }
+                allTabs.accountTabs.onSuccess { accountTabGroups ->
+                    var selectedPage by remember(accountTabGroups) { mutableIntStateOf(0) }
                     Row(
                         modifier =
                             Modifier
@@ -138,7 +133,7 @@ internal fun AddTabDialog(
                                     )
                                 }
                             }
-                            itemsIndexed(tabs) { index, tab ->
+                            itemsIndexed(accountTabGroups) { index, tab ->
                                 SubtleButton(
                                     buttonColors =
                                         if (selectedPage == index + 1) {
@@ -195,9 +190,9 @@ internal fun AddTabDialog(
                                 ) {
                                     itemsIndexed(
                                         allTabs.rssTabs,
-                                    ) { index, it ->
+                                    ) { index, tab ->
                                         TabItem(
-                                            it,
+                                            tab,
                                             modifier =
                                                 Modifier
                                                     .listCard(
@@ -234,92 +229,39 @@ internal fun AddTabDialog(
                                     verticalArrangement = Arrangement.spacedBy(2.dp),
                                     modifier = Modifier.fillMaxWidth(),
                                 ) {
-                                    val tab = tabs[selectedPage - 1]
-                                    var selectedIndex by remember(tab.profile.key) {
-                                        mutableStateOf(
-                                            0,
-                                        )
+                                    val accountTabs = accountTabGroups[selectedPage - 1]
+                                    var selectedIndex by remember(accountTabs.profile.key) {
+                                        mutableIntStateOf(0)
                                     }
-                                    if (tab.extraTabs.any()) {
-                                        val items =
-                                            listOf(
-                                                stringResource(Res.string.tab_settings_default),
-                                            ) +
-                                                tab.extraTabs
-                                                    .map {
-                                                        when (it) {
-                                                            is PinnableTimelineTabPresenter.State.Tab.Feed -> {
-                                                                Res.string.tab_settings_feed
-                                                            }
-
-                                                            is PinnableTimelineTabPresenter.State.Tab.List -> {
-                                                                Res.string.tab_settings_list
-                                                            }
-
-                                                            is PinnableTimelineTabPresenter.State.Tab.Antenna -> {
-                                                                Res.string.antenna_title
-                                                            }
-
-                                                            is PinnableTimelineTabPresenter.State.Tab.Channel -> {
-                                                                Res.string.channel_title
-                                                            }
-                                                        }
-                                                    }.map { stringResource(it) }
+                                    if (accountTabs.tabs.size > 1) {
                                         LiteFilter(
                                             modifier = Modifier.fillMaxWidth(),
                                         ) {
-                                            items.forEachIndexed { index, text ->
+                                            accountTabs.tabs.forEachIndexed { index, section ->
                                                 PillButton(
                                                     selected = selectedIndex == index,
                                                     onSelectedChanged = { selectedIndex = index },
                                                 ) {
-                                                    Text(text = text)
+                                                    UiText(section.title.asText())
                                                 }
                                             }
                                         }
                                     }
-                                    when (selectedIndex) {
-                                        0 -> {
-                                            LazyColumn(
-                                                verticalArrangement = Arrangement.spacedBy(2.dp),
-                                            ) {
-                                                itemsIndexed(tab.tabs) { index, it ->
-                                                    TabItem(
-                                                        it,
-                                                        modifier =
-                                                            Modifier
-                                                                .listCard(
-                                                                    index = index,
-                                                                    totalCount = tab.tabs.size,
-                                                                ),
-                                                    )
-                                                }
-                                            }
-                                        }
-
-                                        else -> {
-                                            LazyColumn(
-                                                verticalArrangement = Arrangement.spacedBy(2.dp),
-                                            ) {
-                                                val data =
-                                                    tab.extraTabs.elementAtOrNull(selectedIndex - 1)?.data
-                                                if (data != null) {
-                                                    itemsIndexed(data) { index, totalCount, item ->
-                                                        TabItem(
-                                                            remember(item) {
-                                                                item.toTabItem(
-                                                                    accountKey = tab.profile.key,
-                                                                )
-                                                            },
-                                                            modifier =
-                                                                Modifier
-                                                                    .listCard(
-                                                                        index = index,
-                                                                        totalCount = totalCount,
-                                                                    ),
-                                                        )
-                                                    }
-                                                }
+                                    val section = accountTabs.tabs.elementAtOrNull(selectedIndex)
+                                    if (section != null) {
+                                        LazyColumn(
+                                            verticalArrangement = Arrangement.spacedBy(2.dp),
+                                        ) {
+                                            itemsIndexed(section.data) { index, totalCount, item ->
+                                                TabItem(
+                                                    item,
+                                                    modifier =
+                                                        Modifier
+                                                            .listCard(
+                                                                index = index,
+                                                                totalCount = totalCount,
+                                                            ),
+                                                )
                                             }
                                         }
                                     }
@@ -335,13 +277,13 @@ internal fun AddTabDialog(
 
 @Composable
 internal fun ListTabItem(
-    data: TabItem,
+    data: TimelineTabItemV2,
     isAdded: Boolean,
     modifier: Modifier = Modifier,
 ) {
     CardExpanderItem(
         heading = {
-            TabTitle(data.metaData.title)
+            UiText(data.title)
         },
         icon = {
             TabIcon(data)

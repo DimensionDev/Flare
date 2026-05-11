@@ -37,6 +37,7 @@ import dev.dimension.flare.compose.ui.settings_about_source_code
 import dev.dimension.flare.compose.ui.settings_about_telegram
 import dev.dimension.flare.compose.ui.settings_about_telegram_description
 import dev.dimension.flare.compose.ui.settings_privacy_policy
+import dev.dimension.flare.model.ilink
 import dev.dimension.flare.ui.component.platform.PlatformIcon
 import dev.dimension.flare.ui.component.platform.PlatformSegmentedListItem
 import dev.dimension.flare.ui.component.platform.PlatformText
@@ -127,7 +128,7 @@ public fun AboutScreenContent(
                     )
                 },
                 onClick = {
-                    uriHandler.openUri("https://t.me/+0UtcP6_qcDoyOWE1")
+                    uriHandler.openUri(ilink)
                 },
                 index = 1,
                 totalCount = 5,

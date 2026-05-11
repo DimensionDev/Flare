@@ -17,7 +17,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.ExperimentalMediaQueryApi
+import androidx.compose.ui.LocalUiMediaScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.UiMediaScope
 import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
@@ -25,7 +28,11 @@ import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.node.DelegatableNode
 import androidx.compose.ui.node.DrawModifierNode
 import androidx.compose.ui.node.invalidateDraw
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.toSize
 import androidx.compose.ui.window.FrameWindowScope
 import androidx.compose.ui.window.WindowScope
 import dev.dimension.flare.LocalWindowPadding
@@ -60,7 +67,7 @@ internal val LocalComposeWindow =
         error("No ComposeWindow provided")
     }
 
-@OptIn(ExperimentalFluentApi::class)
+@OptIn(ExperimentalFluentApi::class, ExperimentalMediaQueryApi::class)
 @Composable
 internal fun FlareTheme(
     isDarkTheme: Boolean = isDarkTheme(),
@@ -79,12 +86,36 @@ internal fun FlareTheme(
                 darkMode = isDarkTheme,
             ),
     ) {
+        val density = LocalDensity.current
+        val windowInfo = LocalWindowInfo.current
+        val size = with(density) { windowInfo.containerSize.toSize().toDpSize() }
         CompositionLocalProvider(
             LocalIndication provides
                 FluentIndication(
                     hover = Color.Transparent,
                     pressed = Color.Transparent,
                 ),
+            LocalUiMediaScope provides remember(size) {
+                // TODO: remove this 
+                object : UiMediaScope {
+                    override val windowPosture: UiMediaScope.Posture
+                        get() = TODO("Not yet implemented")
+                    override val windowWidth: Dp
+                        get() = size.width
+                    override val windowHeight: Dp
+                        get() = size.height
+                    override val pointerPrecision: UiMediaScope.PointerPrecision
+                        get() = TODO("Not yet implemented")
+                    override val keyboardKind: UiMediaScope.KeyboardKind
+                        get() = TODO("Not yet implemented")
+                    override val hasMicrophone: Boolean
+                        get() = TODO("Not yet implemented")
+                    override val hasCamera: Boolean
+                        get() = TODO("Not yet implemented")
+                    override val viewingDistance: UiMediaScope.ViewingDistance
+                        get() = TODO("Not yet implemented")
+                }
+            }
         ) {
             Box(
                 modifier =

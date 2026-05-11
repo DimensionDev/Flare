@@ -14,19 +14,18 @@ import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.Res
 import dev.dimension.flare.cancel
-import dev.dimension.flare.data.model.TabItem
-import dev.dimension.flare.data.model.TitleType
-import dev.dimension.flare.data.model.WithAccountTabItem
+import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.edit_tab_name
 import dev.dimension.flare.edit_tab_name_placeholder
 import dev.dimension.flare.edit_tab_title
 import dev.dimension.flare.edit_tab_with_avatar
-import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ok
 import dev.dimension.flare.ui.component.TabIcon
 import dev.dimension.flare.ui.model.onSuccess
@@ -35,7 +34,7 @@ import dev.dimension.flare.ui.screen.settings.EditTabPresenter
 import io.github.composefluent.component.CheckBox
 import io.github.composefluent.component.ContentDialog
 import io.github.composefluent.component.ContentDialogButton
-import io.github.composefluent.component.FlyoutContainer
+import io.github.composefluent.component.Flyout
 import io.github.composefluent.component.FlyoutPlacement
 import io.github.composefluent.component.SubtleButton
 import io.github.composefluent.component.Text
@@ -46,9 +45,9 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 internal fun EditTabDialog(
     visible: Boolean,
-    tabItem: TabItem,
+    tabItem: TimelineTabItemV2,
     onDismissRequest: () -> Unit,
-    onConfirm: (TabItem) -> Unit,
+    onConfirm: (TimelineTabItemV2) -> Unit,
 ) {
     val state by producePresenter(key = "EditTabSheet_$tabItem") {
         presenter(tabItem = tabItem)
@@ -61,15 +60,14 @@ internal fun EditTabDialog(
         onButtonClick = {
             when (it) {
                 ContentDialogButton.Primary -> {
-                    tabItem.metaData
-                        .copy(
-                            title = TitleType.Text(state.text.text.toString()),
-                            icon = state.icon,
-                        ).let {
-                            if (state.canConfirm) {
-                                onConfirm(tabItem.update(metaData = it))
-                            }
-                        }
+                    if (state.canConfirm) {
+                        onConfirm(
+                            tabItem.withPresentationOverrides(
+                                title = state.text.text.toString(),
+                                icon = state.icon,
+                            ),
+                        )
+                    }
                 }
 
                 ContentDialogButton.Secondary -> {
@@ -86,46 +84,49 @@ internal fun EditTabDialog(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally,
             ) {
-                FlyoutContainer(
-                    flyout = {
-                        LazyVerticalGrid(
-                            columns = GridCells.FixedSize(48.dp),
-                            modifier = Modifier.heightIn(max = 120.dp),
-                        ) {
-                            items(state.availableIcons) { icon ->
-                                SubtleButton(
-                                    onClick = {
-                                        state.setIcon(icon)
-                                    },
-                                    iconOnly = true,
-                                    modifier = Modifier.padding(4.dp),
-                                ) {
-                                    TabIcon(
-                                        tabItem = tabItem,
-                                        icon = icon,
-                                        title = tabItem.metaData.title,
-                                    )
-                                }
-                            }
-                        }
+                SubtleButton(
+                    onClick = {
+                        state.setShowIconPicker(true)
+                    },
+                    iconOnly = true,
+                ) {
+                    TabIcon(
+                        tabItem = tabItem,
+                        icon = state.icon,
+                        title = tabItem.title,
+                        size = 64.dp,
+                    )
+                }
+                Flyout(
+                    visible = state.showIconPicker,
+                    onDismissRequest = {
+                        state.setShowIconPicker(false)
                     },
                     placement = FlyoutPlacement.Bottom,
                 ) {
-                    SubtleButton(
-                        onClick = {
-                            isFlyoutVisible = true
-                        },
-                        iconOnly = true,
+                    LazyVerticalGrid(
+                        columns = GridCells.FixedSize(48.dp),
+                        modifier = Modifier.heightIn(max = 120.dp),
                     ) {
-                        TabIcon(
-                            tabItem = tabItem,
-                            icon = state.icon,
-                            title = tabItem.metaData.title,
-                            size = 64.dp,
-                        )
+                        items(state.availableIcons) { icon ->
+                            SubtleButton(
+                                onClick = {
+                                    state.setIcon(icon)
+                                    state.setShowIconPicker(false)
+                                },
+                                iconOnly = true,
+                                modifier = Modifier.padding(4.dp),
+                            ) {
+                                TabIcon(
+                                    tabItem = tabItem,
+                                    icon = icon,
+                                    title = tabItem.title,
+                                )
+                            }
+                        }
                     }
                 }
-                if (tabItem is WithAccountTabItem && tabItem.account is AccountType.Specific) {
+                if (state.canUseAvatar) {
                     Row(
                         modifier =
                             Modifier
@@ -158,13 +159,14 @@ internal fun EditTabDialog(
 }
 
 @Composable
-private fun presenter(tabItem: TabItem) =
+private fun presenter(tabItem: TimelineTabItemV2) =
     run {
         val text = rememberTextFieldState()
         val state =
             remember(tabItem) {
                 EditTabPresenter(tabItem)
             }.invoke()
+        var showIconPicker by remember { mutableStateOf(false) }
         state.initialText.onSuccess {
             LaunchedEffect(it) {
                 text.edit {
@@ -175,5 +177,10 @@ private fun presenter(tabItem: TabItem) =
         object : EditTabPresenter.State by state {
             val text = text
             val canConfirm = text.text.isNotEmpty()
+            val showIconPicker = showIconPicker
+
+            fun setShowIconPicker(value: Boolean) {
+                showIconPicker = value
+            }
         }
     }

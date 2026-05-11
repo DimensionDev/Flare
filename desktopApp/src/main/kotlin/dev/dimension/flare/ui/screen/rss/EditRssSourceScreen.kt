@@ -35,9 +35,6 @@ import dev.dimension.flare.add_rss_source
 import dev.dimension.flare.cancel
 import dev.dimension.flare.data.database.app.model.RssDisplayMode
 import dev.dimension.flare.data.database.app.model.SubscriptionType
-import dev.dimension.flare.data.model.RssTimelineTabItem
-import dev.dimension.flare.data.model.SubscriptionTimelineTabItem
-import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.edit_rss_source
 import dev.dimension.flare.mastodon_available_timelines
 import dev.dimension.flare.mastodon_federated_timeline
@@ -60,7 +57,6 @@ import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.listCard
 import dev.dimension.flare.ui.model.UiRssSource
-import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.isSuccess
 import dev.dimension.flare.ui.model.map
@@ -83,14 +79,10 @@ import io.github.composefluent.component.MenuFlyoutItem
 import io.github.composefluent.component.ProgressRing
 import io.github.composefluent.component.Text
 import io.github.composefluent.component.TextField
-import kotlinx.collections.immutable.toImmutableList
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.stringResource
-import org.koin.compose.koinInject
 import java.io.File
 
 @Composable
@@ -582,11 +574,9 @@ fun EditRssSourceScreen(
 private fun presenter(
     id: Int?,
     initialUrl: String?,
-    settingsRepository: SettingsRepository = koinInject(),
-    appScope: CoroutineScope = koinInject(),
 ) = run {
-    val tabSettings by settingsRepository.tabSettings.collectAsUiState()
     val state = remember(id) { EditRssSourcePresenter(id) }.invoke()
+    val tabState = remember { RssListWithTabsPresenter() }.invoke()
     val titleText = rememberTextFieldState()
     val urlText = rememberTextFieldState(initialText = initialUrl.orEmpty())
     val rssHubHostText = rememberTextFieldState()
@@ -607,27 +597,16 @@ private fun presenter(
     }
 
     val currentTabs =
-        remember(state.data, tabSettings) {
+        remember(state.data, tabState.pins) {
             state.data.flatMap { rssSource ->
-                tabSettings.map {
-                    val rssMatches =
-                        it.mainTabs
-                            .filterIsInstance<RssTimelineTabItem>()
-                            .filter { tab -> tab.feedUrl == rssSource.url }
-                    val subscriptionMatches =
-                        it.mainTabs
-                            .filterIsInstance<SubscriptionTimelineTabItem>()
-                            .filter { tab ->
-                                tab.subscriptionUrl == rssSource.url &&
-                                    tab.subscriptionType == rssSource.type
-                            }
-                    (rssMatches + subscriptionMatches).toImmutableList()
+                tabState.pins.map {
+                    it.contains(rssSource)
                 }
             }
         }
     currentTabs.onSuccess {
         LaunchedEffect(it) {
-            pinnedInTabs = it.isNotEmpty()
+            pinnedInTabs = it
         }
     }
     state.checkState.onSuccess {
@@ -687,44 +666,11 @@ private fun presenter(
         }
 
         fun save(sources: List<UiRssSource>) {
-            appScope.launch {
-                settingsRepository.updateTabSettings {
-                    if (pinnedInTabs) {
-                        copy(
-                            mainTabs =
-                                mainTabs
-                                    .filterNot { tab ->
-                                        (tab is RssTimelineTabItem && sources.any { it.url == tab.feedUrl }) ||
-                                            (
-                                                tab is SubscriptionTimelineTabItem &&
-                                                    sources.any {
-                                                        it.url == tab.subscriptionUrl && it.type == tab.subscriptionType
-                                                    }
-                                            )
-                                    } +
-                                    sources.map { source ->
-                                        if (source.type == SubscriptionType.RSS) {
-                                            RssTimelineTabItem(source)
-                                        } else {
-                                            SubscriptionTimelineTabItem(source)
-                                        }
-                                    },
-                        )
-                    } else {
-                        copy(
-                            mainTabs =
-                                mainTabs
-                                    .filterNot { tab ->
-                                        (tab is RssTimelineTabItem && sources.any { it.url == tab.feedUrl }) ||
-                                            (
-                                                tab is SubscriptionTimelineTabItem &&
-                                                    sources.any {
-                                                        it.url == tab.subscriptionUrl && it.type == tab.subscriptionType
-                                                    }
-                                            )
-                                    },
-                        )
-                    }
+            sources.forEach {
+                if (pinnedInTabs) {
+                    tabState.pinTab(it)
+                } else {
+                    tabState.unpinTab(it)
                 }
             }
         }

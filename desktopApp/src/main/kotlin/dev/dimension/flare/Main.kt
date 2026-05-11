@@ -10,8 +10,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ComposeUiFlags
 import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.ExperimentalMediaQueryApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
@@ -46,7 +46,9 @@ import kotlin.system.exitProcess
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.toJavaDuration
 
-@OptIn(ExperimentalCoilApi::class, ExperimentalComposeUiApi::class, ExperimentalComposeApi::class)
+@OptIn(ExperimentalCoilApi::class, ExperimentalComposeUiApi::class, ExperimentalComposeApi::class,
+    ExperimentalMediaQueryApi::class
+)
 fun main(args: Array<String>) {
     if (AotRuntime.isTraining()) {
         Thread({
@@ -64,6 +66,7 @@ fun main(args: Array<String>) {
             }
         }
     }
+    ComposeRuntimeFlags.isLinkBufferComposerEnabled = true
     val restoreRequestFlow = MutableStateFlow(0)
     DeepLinkHandler.register(args) { uri ->
         DeeplinkHandler.handleDeeplink(uri.toString())
@@ -84,8 +87,6 @@ fun main(args: Array<String>) {
             desktopModule + KoinHelper.modules(),
         )
     }
-    ComposeUiFlags.isMediaQueryIntegrationEnabled = true
-    ComposeRuntimeFlags.isLinkBufferComposerEnabled = true
     application {
         setSingletonImageLoaderFactory { context ->
             ImageLoader

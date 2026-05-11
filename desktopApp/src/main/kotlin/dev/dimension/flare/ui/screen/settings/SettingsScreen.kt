@@ -74,6 +74,7 @@ import dev.dimension.flare.import_confirmation_title
 import dev.dimension.flare.import_error
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.model.ilink
 import dev.dimension.flare.ok
 import dev.dimension.flare.remove_account
 import dev.dimension.flare.save_completed
@@ -2005,10 +2006,10 @@ internal fun SettingsScreen(
                     },
                     trailing = {
                         HyperlinkButton(
-                            "https://t.me/+0UtcP6_qcDoyOWE1",
+                            ilink,
                         ) {
                             Text(
-                                text = "https://t.me/+0UtcP6_qcDoyOWE1",
+                                text = ilink,
                                 maxLines = 1,
                             )
                         }

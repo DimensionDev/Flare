@@ -34,31 +34,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowScope
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.Bell
 import compose.icons.fontawesomeicons.solid.Gear
+import compose.icons.fontawesomeicons.solid.House
+import compose.icons.fontawesomeicons.solid.MagnifyingGlass
 import compose.icons.fontawesomeicons.solid.Pen
 import compose.icons.fontawesomeicons.solid.UserPlus
-import dev.dimension.flare.data.model.AllListTabItem
-import dev.dimension.flare.data.model.AllNotificationTabItem
-import dev.dimension.flare.data.model.Bluesky
-import dev.dimension.flare.data.model.DirectMessageTabItem
-import dev.dimension.flare.data.model.DiscoverTabItem
-import dev.dimension.flare.data.model.HomeTimelineTabItem
-import dev.dimension.flare.data.model.Misskey
-import dev.dimension.flare.data.model.NotificationTabItem
-import dev.dimension.flare.data.model.ProfileTabItem
-import dev.dimension.flare.data.model.RssTabItem
-import dev.dimension.flare.data.model.SettingsTabItem
-import dev.dimension.flare.data.model.TabItem
-import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.component.AvatarComponent
+import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.InAppNotificationComponent
-import dev.dimension.flare.ui.component.TabIcon
-import dev.dimension.flare.ui.component.TabTitle
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onSuccess
@@ -82,6 +72,7 @@ import io.github.composefluent.component.Text
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -181,7 +172,7 @@ internal fun WindowScope.FlareApp(backButtonState: NavigationBackButtonState) {
                     }
 
                 @Composable
-                fun buildMenuItem(tab: TabItem) {
+                fun buildMenuItem(tab: HomeTabsPresenter.State.HomeTabs) {
                     val selected = currentRoute == getRoute(tab)
                     val color by animateColorAsState(
                         targetValue =
@@ -200,24 +191,25 @@ internal fun WindowScope.FlareApp(backButtonState: NavigationBackButtonState) {
                             }
                         },
                         icon = {
-                            TabIcon(
-                                tab,
-                                iconOnly = tabs.secondaryIconOnly,
-                                color = color,
+                            FAIcon(
+                                imageVector = tab.icon,
+                                contentDescription = stringResource(tab.title),
+                                tint = color,
                                 modifier =
                                     Modifier
                                         .size(24.dp),
                             )
                         },
                         text = {
-                            TabTitle(
-                                tab.metaData.title,
+                            Text(
+                                stringResource(tab.title),
+                                maxLines = 1,
                                 color = color,
                                 style = FluentTheme.typography.caption,
                             )
                         },
                         badge =
-                            if (tab is NotificationTabItem || tab is AllNotificationTabItem) {
+                            if (tab == HomeTabsPresenter.State.HomeTabs.Notifications) {
                                 if (state.notificationState.count > 0) {
                                     {
                                         Text(state.notificationState.count.toString())
@@ -230,13 +222,8 @@ internal fun WindowScope.FlareApp(backButtonState: NavigationBackButtonState) {
                             },
                     )
                 }
-                tabs.primary.forEachIndexed { _, tab ->
+                tabs.forEach { tab ->
                     buildMenuItem(tab)
-                }
-                if (tabs.secondary.any()) {
-                    tabs.secondary.forEachIndexed { _, tab ->
-                        buildMenuItem(tab)
-                    }
                 }
                 val selected = currentRoute == Route.Settings
                 val color by animateColorAsState(
@@ -354,21 +341,28 @@ private fun NavigationItemIcon(
     }
 }
 
-private fun getRoute(tab: TabItem): Route =
+private fun getRoute(tab: HomeTabsPresenter.State.HomeTabs): Route =
     when (tab) {
-        is DiscoverTabItem -> Route.Discover
-        is ProfileTabItem -> Route.MeRoute(tab.account)
-        is HomeTimelineTabItem -> Route.Home(tab.account)
-        is TimelineTabItem -> Route.Timeline(tab)
-        AllNotificationTabItem, is NotificationTabItem -> Route.Notification
-        SettingsTabItem -> Route.Settings
-        is AllListTabItem -> Route.AllLists(tab.account)
-        is Bluesky.FeedsTabItem -> Route.BlueskyFeeds(tab.account)
-        is DirectMessageTabItem -> Route.DmList(tab.account)
-        is RssTabItem -> Route.RssList
-        is Misskey.AntennasListTabItem -> Route.MisskeyAntennas(tab.account)
-        is Misskey.ChannelListTabItem -> Route.MisskeyChannelList(tab.account)
+        HomeTabsPresenter.State.HomeTabs.Home -> Route.Home(AccountType.Guest)
+        HomeTabsPresenter.State.HomeTabs.Notifications -> Route.Notification
+        HomeTabsPresenter.State.HomeTabs.Discover -> Route.Discover
     }
+
+private val HomeTabsPresenter.State.HomeTabs.title: StringResource
+    get() =
+        when (this) {
+            HomeTabsPresenter.State.HomeTabs.Home -> Res.string.home_tab_home_title
+            HomeTabsPresenter.State.HomeTabs.Notifications -> Res.string.home_tab_notifications_title
+            HomeTabsPresenter.State.HomeTabs.Discover -> Res.string.home_tab_discover_title
+        }
+
+private val HomeTabsPresenter.State.HomeTabs.icon: ImageVector
+    get() =
+        when (this) {
+            HomeTabsPresenter.State.HomeTabs.Home -> FontAwesomeIcons.Solid.House
+            HomeTabsPresenter.State.HomeTabs.Notifications -> FontAwesomeIcons.Solid.Bell
+            HomeTabsPresenter.State.HomeTabs.Discover -> FontAwesomeIcons.Solid.MagnifyingGlass
+        }
 
 @Composable
 private fun presenter(uriHandler: UriHandler) =
@@ -383,9 +377,9 @@ private fun presenter(uriHandler: UriHandler) =
         val topLevelBackStack =
             remember(tabState.tabs) {
                 tabState.tabs.map {
-                    TopLevelBackStack(
-                        getRoute(it.all.first()),
-                        topLevelRoutes = it.all.map { getRoute(it) },
+                        TopLevelBackStack(
+                        getRoute(it.first()),
+                        topLevelRoutes = it.map { getRoute(it) },
                     )
                 }
             }

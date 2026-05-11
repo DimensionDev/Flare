@@ -2,7 +2,6 @@ package dev.dimension.flare.ui.controllers
 
 import androidx.compose.runtime.ComposeRuntimeFlags
 import androidx.compose.runtime.ExperimentalComposeApi
-import androidx.compose.ui.ComposeUiFlags
 import androidx.compose.ui.ExperimentalComposeUiApi
 import coil3.ImageLoader
 import coil3.SingletonImageLoader
@@ -53,7 +52,6 @@ public object ComposeUIHelper {
                 },
             )
         }
-        ComposeUiFlags.isMediaQueryIntegrationEnabled = true
         ComposeRuntimeFlags.isLinkBufferComposerEnabled = true
         SingletonImageLoader.setSafe { context ->
             ImageLoader

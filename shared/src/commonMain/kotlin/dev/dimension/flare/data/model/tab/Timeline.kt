@@ -229,7 +229,7 @@ public fun List<TimelineTabItemV2>.withSystemHomeMixedTimelineEnabled(enabled: B
         }
 }
 
-private const val SystemHomeMixedTimelineId = "mixed_timeline_system_home"
+internal const val SystemHomeMixedTimelineId = "mixed_timeline_system_home"
 
 @Immutable
 @Serializable
@@ -426,7 +426,7 @@ public data class ShortcutSpec(
     }
 }
 
-public class TimelineResolver {
+public class TimelineResolver internal constructor(){
     private val specs: Map<String, TimelineSpec<out TimelineSpec.Data>> by lazy {
         (
             PlatformType.entries

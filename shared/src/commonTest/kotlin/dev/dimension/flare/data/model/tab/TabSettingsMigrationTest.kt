@@ -113,6 +113,45 @@ class TabSettingsMigrationTest {
     }
 
     @Test
+    fun enabledLegacyMixedTimelineMigratesToSystemHomeGroup() {
+        val settings =
+            TabSettings(
+                enableMixedTimeline = true,
+                mainTabs =
+                    listOf(
+                        Mastodon.LocalTimelineTabItem(
+                            account = account,
+                            metaData =
+                                TabMetaData(
+                                    title = TitleType.Text("Local"),
+                                    icon = IconType.Material(UiIcon.Local),
+                                ),
+                        ),
+                        RssTimelineTabItem(
+                            feedUrl = "https://example.com/rss.xml",
+                            metaData =
+                                TabMetaData(
+                                    title = TitleType.Text("RSS"),
+                                    icon = IconType.Material(UiIcon.Rss),
+                                ),
+                        ),
+                    ),
+            )
+
+        val migrated = settings.toTabSettingsV2()
+
+        assertEquals(3, migrated.homeSlots.size)
+        val systemHomeGroup = migrated.homeSlots.first()
+        val group = assertIs<TimelineSlotContent.Group>(systemHomeGroup.content)
+        assertEquals(GroupSource.SystemHome, group.source)
+        assertEquals(TimelineMergePolicy.TimePerPage, group.mergePolicy)
+        assertEquals(
+            listOf("mastodon.local:$accountKey", "rss.feed:https://example.com/rss.xml"),
+            group.children.map { it.id },
+        )
+    }
+
+    @Test
     fun rssTimelineTypesMigrateWithoutLoss() {
         val slots =
             listOf(
@@ -229,7 +268,14 @@ class TabSettingsMigrationTest {
             migrateTabSettingsV1ToV2(pathProducer, store)
 
             val settings = store.data.first()
-            assertEquals(listOf("mastodon.local:$accountKey", "rss.feed:https://example.com/rss.xml"), settings.homeSlots.map { it.id })
+            assertEquals(
+                listOf(
+                    SystemHomeMixedTimelineId,
+                    "mastodon.local:$accountKey",
+                    "rss.feed:https://example.com/rss.xml",
+                ),
+                settings.homeSlots.map { it.id },
+            )
             assertFalse(fs.exists(oldPath))
             fs.deleteRecursively(root)
         }

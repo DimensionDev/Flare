@@ -84,12 +84,29 @@ internal suspend fun migrateTabSettingsV1ToV2(
 
 internal fun TabSettings.toTabSettingsV2(): TabSettingsV2 =
     TabSettingsV2(
-        homeSlots = mainTabs.toTimelineSlots(),
+        homeSlots = mainTabs.toTimelineSlots().withLegacySystemHomeMixedTimeline(enableMixedTimeline),
     )
 
 internal fun List<TimelineTabItem>.toTimelineSlots(): List<TimelineSlot> =
     mapNotNull { it.toTimelineSlotOrNull() }
         .distinctBy { it.id }
+
+private fun List<TimelineSlot>.withLegacySystemHomeMixedTimeline(enabled: Boolean): List<TimelineSlot> {
+    if (!enabled || size < 2 || any { it.id == SystemHomeMixedTimelineId }) {
+        return this
+    }
+    val systemHomeGroup =
+        TimelineSlot(
+            id = SystemHomeMixedTimelineId,
+            content =
+                TimelineSlotContent.Group(
+                    children = this,
+                    source = GroupSource.SystemHome,
+                    mergePolicy = TimelineMergePolicy.TimePerPage,
+                ),
+        )
+    return listOf(systemHomeGroup) + this
+}
 
 internal fun TimelineTabItem.toTimelineSlotOrNull(): TimelineSlot? =
     when (this) {

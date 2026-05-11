@@ -273,6 +273,7 @@ internal fun TimelineItemContent(
     isCurrentlyVisible: Boolean = true,
     lazyStaggeredGridState: LazyStaggeredGridState = rememberLazyStaggeredGridState(),
 ) {
+    val isBigScreen by isBigScreen()
     val layoutDirection = LocalLayoutDirection.current
     val paddingWithStatusBar =
         PaddingValues(
@@ -348,7 +349,7 @@ internal fun TimelineItemContent(
                                             }
                                         }
                                     }
-                                    if (!isBigScreen()) {
+                                    if (!isBigScreen) {
                                         Spacer(modifier = Modifier.height(12.dp))
                                     }
                                 }

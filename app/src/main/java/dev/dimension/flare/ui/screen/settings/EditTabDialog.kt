@@ -31,10 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import dev.dimension.flare.R
-import dev.dimension.flare.data.model.TabItem
-import dev.dimension.flare.data.model.TitleType
-import dev.dimension.flare.data.model.WithAccountTabItem
-import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.ui.component.TabIcon
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.invoke
@@ -42,9 +39,9 @@ import moe.tlaster.precompose.molecule.producePresenter
 
 @Composable
 internal fun EditTabDialog(
-    tabItem: TabItem,
+    tabItem: TimelineTabItemV2,
     onDismissRequest: () -> Unit,
-    onConfirm: (TabItem) -> Unit,
+    onConfirm: (TimelineTabItemV2) -> Unit,
 ) {
     val state by producePresenter(key = "EditTabSheet_$tabItem") {
         presenter(tabItem = tabItem)
@@ -55,13 +52,12 @@ internal fun EditTabDialog(
             TextButton(
                 enabled = state.canConfirm,
                 onClick = {
-                    tabItem.metaData
-                        .copy(
-                            title = TitleType.Text(state.text.text.toString()),
+                    onConfirm(
+                        tabItem.withPresentationOverrides(
+                            title = state.text.text.toString(),
                             icon = state.icon,
-                        ).let {
-                            onConfirm(tabItem.update(metaData = it))
-                        }
+                        ),
+                    )
                 },
             ) {
                 Text(text = stringResource(id = android.R.string.ok))
@@ -80,7 +76,7 @@ internal fun EditTabDialog(
                 TabIcon(
                     tabItem = tabItem,
                     icon = state.icon,
-                    title = tabItem.metaData.title,
+                    title = tabItem.title,
                     size = 64.dp,
                     modifier =
                         Modifier
@@ -119,7 +115,7 @@ internal fun EditTabDialog(
                                     TabIcon(
                                         tabItem = tabItem,
                                         icon = icon,
-                                        title = tabItem.metaData.title,
+                                        title = tabItem.title,
                                         modifier =
                                             Modifier
                                                 .padding(4.dp)
@@ -135,7 +131,7 @@ internal fun EditTabDialog(
                     }
                 }
 
-                if (tabItem is WithAccountTabItem && tabItem.account is AccountType.Specific) {
+                if (state.canUseAvatar) {
                     Row(
                         modifier =
                             Modifier
@@ -172,7 +168,7 @@ internal fun EditTabDialog(
 }
 
 @Composable
-private fun presenter(tabItem: TabItem) =
+private fun presenter(tabItem: TimelineTabItemV2) =
     run {
         val text = rememberTextFieldState()
         val state =

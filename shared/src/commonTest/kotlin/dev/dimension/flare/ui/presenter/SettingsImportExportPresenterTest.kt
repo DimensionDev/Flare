@@ -90,7 +90,10 @@ class SettingsImportExportPresenterTest {
             assertFalse("tabSettings" in root)
             assertEquals(
                 listOf(slot.id),
-                json.decodeFromString<SettingsExport>(exported).tabSettingsV2.homeSlots.map { it.id },
+                json
+                    .decodeFromString<SettingsExport>(exported)
+                    .tabSettingsV2.homeSlots
+                    .map { it.id },
             )
         }
 
@@ -158,11 +161,11 @@ class SettingsImportExportPresenterTest {
             ?: error("Home slot should be migratable")
 
     private fun localSlot() =
-        Mastodon.LocalTimelineTabItem(
-            account = AccountType.Specific(MicroBlogKey(id = "local", host = "example.com")),
-            metaData = localMetaData(),
-        )
-            .toTimelineSlotOrNull()
+        Mastodon
+            .LocalTimelineTabItem(
+                account = AccountType.Specific(MicroBlogKey(id = "local", host = "example.com")),
+                metaData = localMetaData(),
+            ).toTimelineSlotOrNull()
             ?: error("Local slot should be migratable")
 
     private fun localMetaData() =

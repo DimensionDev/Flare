@@ -69,7 +69,7 @@ internal fun EntryProviderScope<NavKey>.homeEntryBuilder(
     entry<Route.TabSettings>(
         metadata = ListDetailSceneStrategy.extraPane(
             "home",
-        )
+        ),
     ) { args ->
         TabSettingScreen(
             onBack = onBack,
@@ -77,17 +77,17 @@ internal fun EntryProviderScope<NavKey>.homeEntryBuilder(
                 navigate(Route.Rss.Create)
             },
             toGroupConfig = {
-                navigate(Route.TabGroupConfig(it))
-            }
+                navigate(Route.TabGroupConfig(it?.id))
+            },
         )
     }
     entry<Route.TabGroupConfig>(
         metadata = ListDetailSceneStrategy.extraPane(
             "home",
-        )
+        ),
     ) { args ->
         GroupConfigScreen(
-            item = args.item,
+            groupId = args.groupId,
             onBack = onBack,
             toAddRssSource = {
                 navigate(Route.Rss.Create)

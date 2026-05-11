@@ -71,6 +71,5 @@ public class BlueskyFeedsWithTabsPresenter(
         public fun refresh()
     }
 
-    private fun specificAccountKey() =
-        (accountType as AccountType.Specific).accountKey
+    private fun specificAccountKey() = (accountType as AccountType.Specific).accountKey
 }

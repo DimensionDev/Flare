@@ -15,6 +15,7 @@ import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -107,7 +108,7 @@ internal fun WindowScope.Router(
 ) {
     val listDetailStrategy = rememberListDetailSceneStrategy<Route>()
 
-    val isBigScreen = isBigScreen()
+    val isBigScreen by isBigScreen()
     OnDeepLink {
         val route = Route.parse(it)
         if (route != null) {

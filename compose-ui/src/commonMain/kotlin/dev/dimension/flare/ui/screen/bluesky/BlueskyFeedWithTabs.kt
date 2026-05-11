@@ -34,13 +34,13 @@ public fun LazyListScope.myBlueskyFeedWithTabs(
         state.myFeeds,
         onClicked = toFeed,
         trailingContent = { item ->
-            state.currentTabs.onSuccess { currentTabs ->
+            state.pins.onSuccess { currentTabs ->
                 val isPinned =
                     remember(
                         item,
                         currentTabs,
                     ) {
-                        currentTabs.contains(item.id)
+                        currentTabs.contains(item)
                     }
                 PlatformIconButton(
                     onClick = {

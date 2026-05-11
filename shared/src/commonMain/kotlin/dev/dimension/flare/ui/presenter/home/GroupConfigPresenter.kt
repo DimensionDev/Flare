@@ -23,7 +23,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-internal class GroupConfigPresenter :
+public class GroupConfigPresenter :
     PresenterBase<GroupConfigPresenter.State>(),
     KoinComponent {
     private val settingsRepository: SettingsRepository by inject()
@@ -64,10 +64,10 @@ internal class GroupConfigPresenter :
     }
 
     @Immutable
-    internal interface State {
-        val availableIcons: ImmutableList<IconType>
+    public interface State {
+        public val availableIcons: ImmutableList<IconType>
 
-        fun commit(
+        public fun commit(
             initialItem: GroupTimelineTabItemV2?,
             name: String,
             icon: IconType,
@@ -163,5 +163,7 @@ private fun TimelineSlot.sanitizeDuplicateSlotKeys(): TimelineSlot? =
             }
         }
 
-        else -> this
+        else -> {
+            this
+        }
     }

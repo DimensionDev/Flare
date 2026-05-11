@@ -148,5 +148,7 @@ private fun TimelineTabItem.sanitizeDuplicateTabKeys(): TimelineTabItem? =
             }
         }
 
-        else -> this
+        else -> {
+            this
+        }
     }

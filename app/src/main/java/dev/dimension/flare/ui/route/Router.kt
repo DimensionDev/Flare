@@ -6,6 +6,7 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.platform.LocalUriHandler
@@ -50,7 +51,7 @@ internal fun Router(
 ) {
     val listDetailStrategy = rememberListDetailSceneStrategy<NavKey>()
     val uriHandler = LocalUriHandler.current
-    val isBigScreen = isBigScreen()
+    val isBigScreen by isBigScreen()
     NavDisplay(
         sceneStrategies =
             remember {

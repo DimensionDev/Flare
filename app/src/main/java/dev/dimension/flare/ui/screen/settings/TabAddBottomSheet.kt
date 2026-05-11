@@ -68,32 +68,31 @@ import compose.icons.fontawesomeicons.solid.Pen
 import compose.icons.fontawesomeicons.solid.Plus
 import compose.icons.fontawesomeicons.solid.Trash
 import dev.dimension.flare.R
-import dev.dimension.flare.data.model.TabItem
+import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.ui.common.itemsIndexed
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.component.TabIcon
 import dev.dimension.flare.ui.component.TabRowIndicator
-import dev.dimension.flare.ui.component.TabTitle
 import dev.dimension.flare.ui.component.listCard
+import dev.dimension.flare.ui.model.asText
 import dev.dimension.flare.ui.model.onSuccess
-import dev.dimension.flare.ui.model.toTabItem
-import dev.dimension.flare.ui.presenter.list.PinnableTimelineTabPresenter
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.ReorderableLazyListState
+import dev.dimension.flare.ui.component.Text as UiText
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun TabAddBottomSheet(
-    tabs: ImmutableList<TabItem>,
+    tabs: ImmutableList<TimelineTabItemV2>,
     allTabs: AllTabsPresenter.State,
     onDismissRequest: () -> Unit,
-    onAddTab: (TabItem) -> Unit,
+    onAddTab: (TimelineTabItemV2) -> Unit,
     onDeleteTab: (String) -> Unit,
     toAddRssSource: () -> Unit,
 ) {
@@ -102,16 +101,16 @@ internal fun TabAddBottomSheet(
     ) {
         @Composable
         fun TabItem(
-            tabItem: TabItem,
+            tabItem: TimelineTabItemV2,
             modifier: Modifier = Modifier,
         ) {
             ListTabItem(
                 data = tabItem,
-                isAdded = tabs.any { tab -> tabItem.key == tab.key },
+                isAdded = tabs.any { tab -> tabItem.id == tab.id },
                 modifier =
                     modifier.clickable {
-                        if (tabs.any { tab -> tabItem.key == tab.key }) {
-                            onDeleteTab(tabItem.key)
+                        if (tabs.any { tab -> tabItem.id == tab.id }) {
+                            onDeleteTab(tabItem.id)
                         } else {
                             onAddTab(tabItem)
                         }
@@ -122,10 +121,10 @@ internal fun TabAddBottomSheet(
             modifier = Modifier.fillMaxHeight(),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            allTabs.accountTabs.onSuccess { tabs ->
+            allTabs.accountTabs.onSuccess { accountTabGroups ->
                 val pagerState =
                     rememberPagerState {
-                        tabs.size + 1
+                        accountTabGroups.size + 1
                     }
                 val scope = rememberCoroutineScope()
                 SecondaryScrollableTabRow(
@@ -150,7 +149,7 @@ internal fun TabAddBottomSheet(
                         },
                         modifier = Modifier.clip(CircleShape),
                     )
-                    tabs.forEachIndexed { index, tab ->
+                    accountTabGroups.forEachIndexed { index, tab ->
                         LeadingIconTab(
                             modifier = Modifier.clip(CircleShape),
                             selected = pagerState.currentPage == index + 1,
@@ -238,87 +237,41 @@ internal fun TabAddBottomSheet(
                             verticalArrangement = Arrangement.spacedBy(8.dp),
                             modifier = Modifier.fillMaxWidth(),
                         ) {
-                            val tab = tabs[it - 1]
+                            val accountTabs = accountTabGroups[it - 1]
                             var selectedIndex by remember { mutableIntStateOf(0) }
-                            if (tab.extraTabs.any()) {
-                                val items =
-                                    listOf(
-                                        stringResource(id = R.string.tab_settings_default),
-                                    ) +
-                                        tab.extraTabs
-                                            .map {
-                                                when (it) {
-                                                    is PinnableTimelineTabPresenter.State.Tab.Feed -> {
-                                                        R.string.tab_settings_feed
-                                                    }
-
-                                                    is PinnableTimelineTabPresenter.State.Tab.List -> {
-                                                        R.string.tab_settings_list
-                                                    }
-
-                                                    is PinnableTimelineTabPresenter.State.Tab.Antenna -> {
-                                                        R.string.home_tab_antennas_title
-                                                    }
-
-                                                    is PinnableTimelineTabPresenter.State.Tab.Channel -> {
-                                                        R.string.channel_title
-                                                    }
-                                                }
-                                            }.map { stringResource(id = it) }
+                            if (accountTabs.tabs.size > 1) {
                                 Row(
                                     horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally),
                                     modifier = Modifier.fillMaxWidth(),
                                 ) {
-                                    items.forEachIndexed { index, text ->
+                                    accountTabs.tabs.forEachIndexed { index, section ->
                                         FilterChip(
                                             selected = selectedIndex == index,
                                             onClick = { selectedIndex = index },
                                             label = {
-                                                Text(text)
+                                                UiText(section.title.asText())
                                             },
                                         )
                                     }
                                 }
                             }
                             when (selectedIndex) {
-                                0 -> {
+                                in accountTabs.tabs.indices -> {
+                                    val section = accountTabs.tabs[selectedIndex]
                                     LazyColumn(
                                         contentPadding = PaddingValues(horizontal = screenHorizontalPadding),
                                         verticalArrangement = Arrangement.spacedBy(2.dp),
                                     ) {
-                                        itemsIndexed(tab.tabs) { index, it ->
+                                        itemsIndexed(section.data) { index, totalCount, item ->
                                             TabItem(
-                                                it,
+                                                item,
                                                 modifier =
                                                     Modifier
                                                         .listCard(
                                                             index = index,
-                                                            totalCount = tab.tabs.size,
+                                                            totalCount = totalCount,
                                                         ),
                                             )
-                                        }
-                                    }
-                                }
-
-                                else -> {
-                                    LazyColumn(
-                                        contentPadding = PaddingValues(horizontal = screenHorizontalPadding),
-                                        verticalArrangement = Arrangement.spacedBy(2.dp),
-                                    ) {
-                                        val data =
-                                            tab.extraTabs.elementAtOrNull(selectedIndex - 1)?.data
-                                        if (data != null) {
-                                            itemsIndexed(data) { index, totalCount, item ->
-                                                TabItem(
-                                                    remember(item) { item.toTabItem(accountKey = tab.profile.key) },
-                                                    modifier =
-                                                        Modifier
-                                                            .listCard(
-                                                                index = index,
-                                                                totalCount = totalCount,
-                                                            ),
-                                                )
-                                            }
                                         }
                                     }
                                 }
@@ -333,13 +286,13 @@ internal fun TabAddBottomSheet(
 
 @Composable
 internal fun ListTabItem(
-    data: TabItem,
+    data: TimelineTabItemV2,
     isAdded: Boolean,
     modifier: Modifier = Modifier,
 ) {
     ListItem(
         headlineContent = {
-            TabTitle(data.metaData.title)
+            UiText(data.title)
         },
         leadingContent = {
             TabIcon(data)
@@ -364,10 +317,10 @@ internal fun ListTabItem(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 internal fun LazyItemScope.TabCustomItem(
-    item: TabItem,
+    item: TimelineTabItemV2,
     isEditing: Boolean,
-    deleteTab: (TabItem) -> Unit,
-    editTab: (TabItem) -> Unit,
+    deleteTab: (TimelineTabItemV2) -> Unit,
+    editTab: (TimelineTabItemV2) -> Unit,
     reorderableLazyColumnState: ReorderableLazyListState,
     canSwipeToDelete: Boolean,
     modifier: Modifier = Modifier,
@@ -383,7 +336,7 @@ internal fun LazyItemScope.TabCustomItem(
             deleteTab(item)
         }
     }
-    ReorderableItem(reorderableLazyColumnState, key = item.key, modifier = modifier) { isDragging ->
+    ReorderableItem(reorderableLazyColumnState, key = item.id, modifier = modifier) { isDragging ->
         AnimatedVisibility(
             visible = swipeState.settledValue == SwipeToDismissBoxValue.Settled,
             exit =
@@ -432,7 +385,7 @@ internal fun LazyItemScope.TabCustomItem(
                     onClick = {},
                     shapes = shapes,
                     content = {
-                        TabTitle(item.metaData.title)
+                        UiText(item.title)
                     },
                     leadingContent = {
                         TabIcon(

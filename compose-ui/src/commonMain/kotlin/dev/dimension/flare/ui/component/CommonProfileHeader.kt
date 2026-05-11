@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,6 +45,7 @@ internal fun CommonProfileHeader(
     handleTrailing: @Composable RowScope.() -> Unit = {},
     content: @Composable ColumnScope.() -> Unit = {},
 ) {
+    val isBigScreen by isBigScreen()
     val statusBarHeight =
         with(LocalDensity.current) {
             WindowInsets.statusBars.getTop(this).toDp()
@@ -161,7 +163,7 @@ internal fun CommonProfileHeader(
                 modifier =
                     Modifier
                         .let {
-                            if (isBigScreen()) {
+                            if (isBigScreen) {
                                 it
                             } else {
                                 it

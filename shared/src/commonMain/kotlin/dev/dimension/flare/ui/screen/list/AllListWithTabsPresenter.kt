@@ -55,6 +55,5 @@ public class AllListWithTabsPresenter(
         AllListState,
         PinTabsPresenter.State<UiList>
 
-    private fun specificAccountKey() =
-        (accountType as AccountType.Specific).accountKey
+    private fun specificAccountKey() = (accountType as AccountType.Specific).accountKey
 }

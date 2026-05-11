@@ -44,14 +44,15 @@ class TabSettingsMigrationTest {
     @Test
     fun accountTimelineMigratesToExpectedSource() {
         val slot =
-            Mastodon.LocalTimelineTabItem(
-                account = account,
-                metaData =
-                    TabMetaData(
-                        title = TitleType.Text("Local custom"),
-                        icon = IconType.FavIcon("example.com"),
-                    ),
-            ).toTimelineSlotOrNull()
+            Mastodon
+                .LocalTimelineTabItem(
+                    account = account,
+                    metaData =
+                        TabMetaData(
+                            title = TitleType.Text("Local custom"),
+                            icon = IconType.FavIcon("example.com"),
+                        ),
+                ).toTimelineSlotOrNull()
 
         assertNotNull(slot)
         val source = assertIs<TimelineSlotContent.Source>(slot.content).source

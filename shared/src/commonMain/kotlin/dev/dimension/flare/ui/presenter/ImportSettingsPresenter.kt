@@ -41,6 +41,7 @@ public class ImportSettingsPresenter(
                         tabSettingsV2 = export.tabSettingsV2,
                     )
                 }
+
                 "tabSettings" in root -> {
                     val export = jsonContent.decodeJson(LegacySettingsExport.serializer())
                     ImportedSettings(
@@ -49,7 +50,10 @@ public class ImportSettingsPresenter(
                         tabSettingsV2 = export.tabSettings.toTabSettingsV2(),
                     )
                 }
-                else -> error("Unsupported settings export format")
+
+                else -> {
+                    error("Unsupported settings export format")
+                }
             }
 
         settingsRepository.replaceAppearance(imported.appearanceSettings.toPatch())

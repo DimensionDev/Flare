@@ -9,9 +9,13 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.runtime.ComposeRuntimeFlags
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.ExperimentalComposeApi
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.ComposeUiFlags
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import dev.dimension.flare.common.VideoDownloadHelper
 import dev.dimension.flare.ui.AppContainer
@@ -27,9 +31,12 @@ class MainActivity : ComponentActivity() {
         observeWifiStateAsFlow()
     }
 
+    @OptIn(ExperimentalComposeUiApi::class, ExperimentalComposeApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen().setKeepOnScreenCondition { keepSplashOnScreen }
         enableEdgeToEdge()
+        ComposeUiFlags.isMediaQueryIntegrationEnabled = true
+        ComposeRuntimeFlags.isLinkBufferComposerEnabled = true
         super.onCreate(savedInstanceState)
         setContent {
             val wifiState by wifiStateFlow.collectAsState(false)

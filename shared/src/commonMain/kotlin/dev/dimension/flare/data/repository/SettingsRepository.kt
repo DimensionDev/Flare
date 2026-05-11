@@ -19,7 +19,9 @@ import dev.dimension.flare.data.model.appearance.toPatch
 import dev.dimension.flare.data.model.tab.TabSettingsV2
 import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
+import dev.dimension.flare.data.model.tab.isSystemHomeMixedTimeline
 import dev.dimension.flare.data.model.tab.migrateTabSettingsV1ToV2
+import dev.dimension.flare.data.model.tab.withSystemHomeMixedTimelineEnabled
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.distinctUntilChangedBy
@@ -134,15 +136,34 @@ public class SettingsRepository internal constructor(
         tabSettingsV2
             .distinctUntilChangedBy { it.homeSlots }
             .map { settings ->
-                settings.homeSlots
+                val tabs =
+                    settings.homeSlots
                     .map { timelineResolver.toTabItem(it) }
                     .filter { it.enabled }
+                tabs.withSystemHomeMixedTimelineEnabled(
+                    enabled = tabs.any { it.isSystemHomeMixedTimeline },
+                )
             }
     }
 
     internal suspend fun updateTabSettingsV2(block: TabSettingsV2.() -> TabSettingsV2) {
         ensureTabSettingsMigrated()
         tabSettingsV2Store.updateData(block)
+    }
+
+    internal suspend fun replaceHomeTimelineTabs(tabs: List<TimelineTabItemV2>) {
+        updateTabSettingsV2 {
+            val normalizedTabs =
+                tabs.withSystemHomeMixedTimelineEnabled(
+                    enabled = tabs.any { it.isSystemHomeMixedTimeline },
+                )
+            copy(
+                homeSlots =
+                    normalizedTabs
+                        .distinctBy { it.id }
+                        .map { timelineResolver.toSlot(it) },
+            )
+        }
     }
 
     public suspend fun ensureTabSettingsMigrated() {

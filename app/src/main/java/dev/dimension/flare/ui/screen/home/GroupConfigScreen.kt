@@ -28,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -49,17 +50,17 @@ import compose.icons.fontawesomeicons.solid.Plus
 import compose.icons.fontawesomeicons.solid.TableList
 import dev.dimension.flare.R
 import dev.dimension.flare.data.model.IconType
-import dev.dimension.flare.data.model.MixedTimelineTabItem
-import dev.dimension.flare.data.model.TabItem
-import dev.dimension.flare.data.model.TimelineTabItem
-import dev.dimension.flare.data.model.TitleType
-import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.data.model.tab.GroupTimelineTabItemV2
+import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareLargeFlexibleTopAppBar
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.TabIcon
 import dev.dimension.flare.ui.model.UiIcon
+import dev.dimension.flare.ui.model.UiText
+import dev.dimension.flare.ui.model.onSuccess
+import dev.dimension.flare.ui.presenter.home.HomeTabSettingsPresenter
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.screen.settings.AllTabsPresenter
 import dev.dimension.flare.ui.screen.settings.EditTabDialog
@@ -75,13 +76,13 @@ import dev.dimension.flare.ui.presenter.home.GroupConfigPresenter as SharedGroup
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 internal fun GroupConfigScreen(
-    item: MixedTimelineTabItem?,
+    groupId: String?,
     onBack: () -> Unit,
     toAddRssSource: () -> Unit,
 ) {
     val topAppBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val haptics = LocalHapticFeedback.current
-    val state by producePresenter(key = item?.key ?: "new_group") { GroupConfigPresenter(item) }
+    val state by producePresenter(key = groupId ?: "new_group") { presenter(groupId) }
 
     DisposableEffect(Unit) {
         onDispose {
@@ -96,9 +97,7 @@ internal fun GroupConfigScreen(
             },
             onConfirm = { updatedTab ->
                 state.setEditTab(null)
-                if (updatedTab is TimelineTabItem) {
-                    state.updateTab(updatedTab)
-                }
+                state.updateTab(updatedTab)
             },
         )
     }
@@ -109,7 +108,7 @@ internal fun GroupConfigScreen(
                 title = {
                     Text(
                         text =
-                            if (item ==
+                            if (groupId ==
                                 null
                             ) {
                                 stringResource(R.string.tab_settings_add_group)
@@ -162,7 +161,7 @@ internal fun GroupConfigScreen(
                     Box {
                         TabIcon(
                             icon = state.icon,
-                            title = TitleType.Text(state.name.text.toString()),
+                            title = UiText.Raw(state.name.text.toString()),
                             size = 64.dp,
                             modifier = Modifier.clickable { state.setShowIconPicker(true) },
                         )
@@ -180,9 +179,8 @@ internal fun GroupConfigScreen(
                                     LazyVerticalGrid(columns = GridCells.FixedSize(48.dp)) {
                                         items(state.availableIcons) { selectedIcon ->
                                             TabIcon(
-                                                accountType = AccountType.Guest,
                                                 icon = selectedIcon,
-                                                title = TitleType.Text(state.name.text.toString()),
+                                                title = UiText.Raw(state.name.text.toString()),
                                                 modifier =
                                                     Modifier.padding(4.dp).clickable {
                                                         state.setIcon(selectedIcon)
@@ -231,15 +229,13 @@ internal fun GroupConfigScreen(
                 }
             }
 
-            itemsIndexed(state.tabs, key = { _, item -> item.key }) { index, item ->
+            itemsIndexed(state.tabs, key = { _, item -> item.id }) { index, item ->
                 TabCustomItem(
                     item = item,
                     shapes = ListItemDefaults.segmentedShapes2(index, state.tabs.size),
                     deleteTab = { state.deleteTab(item) },
                     editTab = {
-                        if (it is TimelineTabItem) {
-                            state.setEditTab(it)
-                        }
+                        state.setEditTab(it)
                     },
                     reorderableLazyColumnState = reorderableLazyColumnState,
                     canSwipeToDelete = true,
@@ -255,9 +251,7 @@ internal fun GroupConfigScreen(
             allTabs = state.allTabs,
             onDismissRequest = { state.setAddTab(false) },
             onAddTab = { tabItem ->
-                if (tabItem is TimelineTabItem) {
-                    state.addTab(tabItem)
-                }
+                state.addTab(tabItem)
             },
             onDeleteTab = state::deleteTab,
             toAddRssSource = toAddRssSource,
@@ -266,33 +260,41 @@ internal fun GroupConfigScreen(
 }
 
 @Composable
-private fun GroupConfigPresenter(initialItem: MixedTimelineTabItem?) =
+private fun presenter(groupId: String?) =
     run {
         val sharedState = remember { SharedGroupConfigPresenter() }.invoke()
-        val name =
-            rememberTextFieldState(
-                initialItem?.metaData?.title?.let {
-                    when (it) {
-                        is TitleType.Text -> it.content
-                        is TitleType.Localized -> ""
-                    }
-                } ?: "",
-            )
-        var icon by remember(initialItem) {
-            mutableStateOf<IconType>(initialItem?.metaData?.icon ?: IconType.Material(UiIcon.Rss))
-        }
-        val tabs =
-            remember(initialItem) {
-                mutableStateListOf<TimelineTabItem>().apply {
-                    initialItem
-                        ?.subTimelineTabItem
-                        ?.distinctBy { it.key }
-                        ?.let(::addAll)
+        val tabSettingsState = remember { HomeTabSettingsPresenter() }.invoke()
+        var initialItem by remember(groupId) { mutableStateOf<GroupTimelineTabItemV2?>(null) }
+        tabSettingsState.homeTimelineTabs
+            .onSuccess { tabs ->
+                LaunchedEffect(groupId, tabs) {
+                    initialItem = tabs.filterIsInstance<GroupTimelineTabItemV2>().firstOrNull { it.id == groupId }
                 }
             }
+        val name =
+            rememberTextFieldState()
+        var icon by remember {
+            mutableStateOf<IconType>(IconType.Material(UiIcon.Rss))
+        }
+        val tabs =
+            remember {
+                mutableStateListOf<TimelineTabItemV2>()
+            }
+        var initializedGroupId by remember(groupId) { mutableStateOf<String?>(null) }
+        LaunchedEffect(initialItem?.id) {
+            val item = initialItem ?: return@LaunchedEffect
+            if (initializedGroupId == item.id) return@LaunchedEffect
+            name.edit {
+                replace(0, length, item.title.editableText)
+            }
+            icon = item.icon
+            tabs.clear()
+            tabs.addAll(item.children.distinctBy { it.id })
+            initializedGroupId = item.id
+        }
         var showAddTab by remember { mutableStateOf(false) }
         var showIconPicker by remember { mutableStateOf(false) }
-        var selectedEditTab by remember { mutableStateOf<TimelineTabItem?>(null) }
+        var selectedEditTab by remember { mutableStateOf<TimelineTabItemV2?>(null) }
         val allTabs = remember { AllTabsPresenter() }.invoke()
 
         object {
@@ -317,26 +319,26 @@ private fun GroupConfigPresenter(initialItem: MixedTimelineTabItem?) =
                 showIconPicker = show
             }
 
-            fun setEditTab(tab: TimelineTabItem?) {
+            fun setEditTab(tab: TimelineTabItemV2?) {
                 selectedEditTab = tab
             }
 
-            fun addTab(tab: TimelineTabItem) {
-                if (tabs.none { it.key == tab.key }) {
+            fun addTab(tab: TimelineTabItemV2) {
+                if (tabs.none { it.id == tab.id }) {
                     tabs.add(tab)
                 }
             }
 
-            fun deleteTab(tab: TabItem) {
-                tabs.removeIf { it.key == tab.key }
+            fun deleteTab(tab: TimelineTabItemV2) {
+                tabs.removeIf { it.id == tab.id }
             }
 
             fun deleteTab(key: String) {
-                tabs.removeIf { it.key == key }
+                tabs.removeIf { it.id == key }
             }
 
-            fun updateTab(tab: TimelineTabItem) {
-                val index = tabs.indexOfFirst { it.key == tab.key }
+            fun updateTab(tab: TimelineTabItemV2) {
+                val index = tabs.indexOfFirst { it.id == tab.id }
                 if (index != -1) {
                     tabs[index] = tab
                 }
@@ -346,8 +348,8 @@ private fun GroupConfigPresenter(initialItem: MixedTimelineTabItem?) =
                 from: Any,
                 to: Any,
             ) {
-                val fromIndex = tabs.indexOfFirst { it.key == from }
-                val toIndex = tabs.indexOfFirst { it.key == to }
+                val fromIndex = tabs.indexOfFirst { it.id == from }
+                val toIndex = tabs.indexOfFirst { it.id == to }
                 if (fromIndex != -1 && toIndex != -1) {
                     tabs.add(toIndex, tabs.removeAt(fromIndex))
                 }
@@ -364,3 +366,10 @@ private fun GroupConfigPresenter(initialItem: MixedTimelineTabItem?) =
             }
         }
     }
+
+private val UiText.editableText: String
+    get() =
+        when (this) {
+            is UiText.Raw -> string
+            is UiText.Localized -> ""
+        }

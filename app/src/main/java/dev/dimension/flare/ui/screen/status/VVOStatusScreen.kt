@@ -15,7 +15,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
@@ -41,12 +40,13 @@ import dev.dimension.flare.data.model.BottomBarBehavior
 import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.common.isExpanded
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.component.LocalComponentAppearance
+import dev.dimension.flare.ui.component.platform.adaptiveSideContentSize
+import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.component.status.AdaptiveCard
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.StatusItem
@@ -75,7 +75,6 @@ internal fun VVOStatusScreen(
             accountType = accountType,
         )
     }
-    val windowInfo = currentWindowAdaptiveInfoV2()
     val windowSize =
         with(LocalDensity.current) {
             LocalWindowInfo.current.containerSize
@@ -88,7 +87,7 @@ internal fun VVOStatusScreen(
         } else {
             TopAppBarDefaults.enterAlwaysScrollBehavior()
         }
-    val bigScreen = windowInfo.windowSizeClass.isExpanded()
+    val bigScreen by isBigScreen()
     FlareScaffold(
         topBar = {
             FlareTopAppBar(
@@ -105,11 +104,7 @@ internal fun VVOStatusScreen(
     ) { contentPadding ->
         Row {
             if (bigScreen) {
-                val width =
-                    when (windowSize.width) {
-                        in 840.dp..1024.dp -> 332.dp
-                        else -> 432.dp
-                    }
+                val width by adaptiveSideContentSize()
                 AdaptiveCard(
                     modifier =
                         Modifier

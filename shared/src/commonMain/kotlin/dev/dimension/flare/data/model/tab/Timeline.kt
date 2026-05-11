@@ -15,6 +15,7 @@ import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.model.asText
 import dev.dimension.flare.ui.model.asType
 import dev.dimension.flare.ui.presenter.home.MixedTimelinePresenter
+import dev.dimension.flare.ui.presenter.home.SystemHomeMixedTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.TimelinePresenter
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -43,6 +44,11 @@ public sealed interface TimelineTabItemV2 {
     public val key: String get() = id
 
     public fun createPresenter(): TimelinePresenter
+
+    public fun withPresentationOverrides(
+        title: String,
+        icon: IconType,
+    ): TimelineTabItemV2
 }
 
 @Immutable
@@ -57,6 +63,32 @@ public class SourceTimelineTabItemV2 private constructor(
     private val presenterFactory: () -> TimelinePresenter,
 ) : TimelineTabItemV2 {
     override fun createPresenter(): TimelinePresenter = presenterFactory()
+
+    override fun withPresentationOverrides(
+        title: String,
+        icon: IconType,
+    ): TimelineTabItemV2 {
+        val updatedPresentation =
+            presentation?.withOverrides(
+                titleOverride = title,
+                iconOverride = icon,
+                enabled = enabled,
+            ) ?: TimelinePresentation(
+                titleOverride = title,
+                iconOverride = icon,
+                enabled = enabled,
+            )
+        return SourceTimelineTabItemV2(
+            id = id,
+            source = source,
+            presentation = updatedPresentation,
+            title = UiText.Raw(title),
+            icon = icon,
+            appearancePatch = updatedPresentation.appearance,
+            enabled = enabled,
+            presenterFactory = presenterFactory,
+        )
+    }
 
     public companion object {
         public fun runtime(
@@ -124,14 +156,80 @@ public class GroupTimelineTabItemV2 internal constructor(
     override val enabled: Boolean,
 ) : TimelineTabItemV2 {
     override fun createPresenter(): TimelinePresenter =
-        MixedTimelinePresenter(
-            subTimelinePresenter =
-                children
-                    .filter { it.enabled }
-                    .map { it.createPresenter() },
+        when (source) {
+            GroupSource.SystemHome -> {
+                SystemHomeMixedTimelinePresenter(mergePolicy = mergePolicy)
+            }
+
+            GroupSource.Manual -> {
+                MixedTimelinePresenter(
+                    subTimelinePresenter =
+                        children
+                            .filter { it.enabled }
+                            .map { it.createPresenter() },
+                    mergePolicy = mergePolicy,
+                )
+            }
+        }
+
+    override fun withPresentationOverrides(
+        title: String,
+        icon: IconType,
+    ): TimelineTabItemV2 {
+        val updatedPresentation =
+            presentation.withOverrides(
+                titleOverride = title,
+                iconOverride = icon,
+                enabled = enabled,
+            )
+        return GroupTimelineTabItemV2(
+            id = id,
+            children = children,
             mergePolicy = mergePolicy,
+            source = source,
+            presentation = updatedPresentation,
+            title = UiText.Raw(title),
+            icon = icon,
+            appearancePatch = updatedPresentation.appearance,
+            enabled = enabled,
         )
+    }
 }
+
+public val TimelineTabItemV2.isSystemHomeMixedTimeline: Boolean
+    get() = this is GroupTimelineTabItemV2 && source == GroupSource.SystemHome
+
+public fun List<TimelineTabItemV2>.withSystemHomeMixedTimelineEnabled(enabled: Boolean): List<TimelineTabItemV2> {
+    val existingGroup = filterIsInstance<GroupTimelineTabItemV2>().firstOrNull { it.source == GroupSource.SystemHome }
+    val tabsWithoutSystemGroup = filterNot { it.isSystemHomeMixedTimeline }
+    if (!enabled || tabsWithoutSystemGroup.size < 2) {
+        return tabsWithoutSystemGroup
+    }
+
+    val systemGroup =
+        GroupTimelineTabItemV2(
+            id = SystemHomeMixedTimelineId,
+            children = tabsWithoutSystemGroup,
+            mergePolicy = existingGroup?.mergePolicy ?: TimelineMergePolicy.TimePerPage,
+            source = GroupSource.SystemHome,
+            presentation = existingGroup?.presentation ?: TimelinePresentation(),
+            title = existingGroup?.title ?: UiStrings.MixedTimeline.asText(),
+            icon = existingGroup?.icon ?: UiIcon.Rss.asType(),
+            appearancePatch = existingGroup?.appearancePatch,
+            enabled = existingGroup?.enabled ?: true,
+        )
+    val targetIndex =
+        indexOfFirst { it.isSystemHomeMixedTimeline }
+            .takeIf { it >= 0 }
+            ?: 0
+    return tabsWithoutSystemGroup
+        .toMutableList()
+        .apply {
+            add(minOf(targetIndex, size), systemGroup)
+        }
+}
+
+private const val SystemHomeMixedTimelineId = "mixed_timeline_system_home"
 
 @Immutable
 @Serializable
@@ -164,6 +262,18 @@ public data class TimelinePresentation internal constructor(
     public val appearance: AppearancePatch? by lazy {
         appearanceOverride?.toPatch()
     }
+
+    internal fun withOverrides(
+        titleOverride: String?,
+        iconOverride: IconType?,
+        enabled: Boolean,
+    ): TimelinePresentation =
+        TimelinePresentation(
+            titleOverride = titleOverride,
+            iconOverride = iconOverride,
+            appearanceOverride = appearanceOverride,
+            enabled = enabled,
+        )
 }
 
 @Immutable
@@ -384,6 +494,13 @@ public class TimelineResolver {
         }
 
     private fun resolvePresenter(source: TimelineSourceRef): TimelinePresenter = resolveSpec(source).createPresenter(source.data)
+
+    @OptIn(ExperimentalSerializationApi::class)
+    public fun resolveAccountKey(item: TimelineTabItemV2): MicroBlogKey? =
+        when (item) {
+            is SourceTimelineTabItemV2 -> item.source?.let(::resolveAccountKey)
+            is GroupTimelineTabItemV2 -> null
+        }
 
     @OptIn(ExperimentalSerializationApi::class)
     internal fun resolveAccountKey(slot: TimelineSlot): MicroBlogKey? =

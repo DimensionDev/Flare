@@ -48,6 +48,5 @@ public class MisskeyAntennasListWithTabsPresenter(
         PinTabsPresenter.State<UiList>,
         AntennasListPresenter.State
 
-    private fun specificAccountKey() =
-        (accountType as AccountType.Specific).accountKey
+    private fun specificAccountKey() = (accountType as AccountType.Specific).accountKey
 }

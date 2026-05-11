@@ -38,6 +38,7 @@ import dev.dimension.flare.compose.ui.posts_title
 import dev.dimension.flare.compose.ui.rss_title
 import dev.dimension.flare.compose.ui.settings_title
 import dev.dimension.flare.compose.ui.social_title
+import dev.dimension.flare.compose.ui.tab_settings_default
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.model.AccountType

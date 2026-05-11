@@ -1,10 +1,11 @@
 package dev.dimension.flare.data.model.tab
 
 import androidx.datastore.core.DataStore
+import dev.dimension.flare.data.io.PlatformPathProducer
 import dev.dimension.flare.data.model.AllRssTimelineTabItem
 import dev.dimension.flare.data.model.Bluesky
-import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.HomeTimelineTabItem
+import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.ListTimelineTabItem
 import dev.dimension.flare.data.model.Mastodon
 import dev.dimension.flare.data.model.Misskey
@@ -24,7 +25,6 @@ import dev.dimension.flare.data.platform.MisskeyPlatformSpec
 import dev.dimension.flare.data.platform.RssTimelineSpecs
 import dev.dimension.flare.data.platform.VvoPlatformSpec
 import dev.dimension.flare.data.platform.XqtPlatformSpec
-import dev.dimension.flare.data.io.PlatformPathProducer
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiStrings
@@ -50,7 +50,11 @@ internal suspend fun migrateTabSettingsV1ToV2(
         val fs = FileSystem.SYSTEM
         if (!fs.exists(v1Path)) return@withContext
 
-        if (tabSettingsV2Store.data.first().homeSlots.isNotEmpty()) {
+        if (tabSettingsV2Store.data
+                .first()
+                .homeSlots
+                .isNotEmpty()
+        ) {
             runCatching { fs.delete(v1Path) }
             return@withContext
         }
@@ -89,7 +93,7 @@ internal fun List<TimelineTabItem>.toTimelineSlots(): List<TimelineSlot> =
 
 internal fun TimelineTabItem.toTimelineSlotOrNull(): TimelineSlot? =
     when (this) {
-        is HomeTimelineTabItem ->
+        is HomeTimelineTabItem -> {
             account.specificAccountKey()?.let { accountKey ->
                 CommonTimelineSpecs.home
                     .target(
@@ -98,8 +102,9 @@ internal fun TimelineTabItem.toTimelineSlotOrNull(): TimelineSlot? =
                         icon = metaData.icon,
                     ).toSlot(presentation = metaData.toPresentation())
             }
+        }
 
-        is ListTimelineTabItem ->
+        is ListTimelineTabItem -> {
             account.specificAccountKey()?.let { accountKey ->
                 CommonTimelineSpecs.list
                     .target(
@@ -108,153 +113,174 @@ internal fun TimelineTabItem.toTimelineSlotOrNull(): TimelineSlot? =
                         icon = metaData.icon,
                     ).toSlot(presentation = metaData.toPresentation())
             }
+        }
 
-        is Mastodon.LocalTimelineTabItem ->
+        is Mastodon.LocalTimelineTabItem -> {
             account.toAccountBasedSlot(
                 spec = MastodonPlatformSpec.localTimelineSpec,
                 metaData = metaData,
                 fallbackTitle = UiStrings.MastodonLocal,
             )
+        }
 
-        is Mastodon.PublicTimelineTabItem ->
+        is Mastodon.PublicTimelineTabItem -> {
             account.toAccountBasedSlot(
                 spec = MastodonPlatformSpec.publicTimelineSpec,
                 metaData = metaData,
                 fallbackTitle = UiStrings.MastodonPublic,
             )
+        }
 
-        is Mastodon.BookmarkTimelineTabItem ->
+        is Mastodon.BookmarkTimelineTabItem -> {
             account.toAccountBasedSlot(
                 spec = MastodonPlatformSpec.bookmarkTimelineSpec,
                 metaData = metaData,
                 fallbackTitle = UiStrings.Bookmark,
             )
+        }
 
-        is Mastodon.FavouriteTimelineTabItem ->
+        is Mastodon.FavouriteTimelineTabItem -> {
             account.toAccountBasedSlot(
                 spec = MastodonPlatformSpec.favouriteTimelineSpec,
                 metaData = metaData,
                 fallbackTitle = UiStrings.Favourite,
             )
+        }
 
-        is Misskey.LocalTimelineTabItem ->
+        is Misskey.LocalTimelineTabItem -> {
             account.toAccountBasedSlot(
                 spec = MisskeyPlatformSpec.localTimelineSpec,
                 metaData = metaData,
                 fallbackTitle = UiStrings.MastodonLocal,
             )
+        }
 
-        is Misskey.GlobalTimelineTabItem ->
+        is Misskey.GlobalTimelineTabItem -> {
             account.toAccountBasedSlot(
                 spec = MisskeyPlatformSpec.globalTimelineSpec,
                 metaData = metaData,
                 fallbackTitle = UiStrings.MastodonPublic,
             )
+        }
 
-        is Misskey.HybridTimelineTabItem ->
+        is Misskey.HybridTimelineTabItem -> {
             account.toAccountBasedSlot(
                 spec = MisskeyPlatformSpec.hybridTimelineSpec,
                 metaData = metaData,
                 fallbackTitle = UiStrings.Social,
             )
+        }
 
-        is Misskey.FavouriteTimelineTabItem ->
+        is Misskey.FavouriteTimelineTabItem -> {
             account.toAccountBasedSlot(
                 spec = MisskeyPlatformSpec.favouriteTimelineSpec,
                 metaData = metaData,
                 fallbackTitle = UiStrings.Favourite,
             )
+        }
 
-        is Misskey.AntennasTimelineTabItem ->
+        is Misskey.AntennasTimelineTabItem -> {
             account.toAccountResourceSlot(
                 spec = MisskeyPlatformSpec.antennaTimelineSpec,
                 resourceId = antennasId,
                 metaData = metaData,
                 fallbackTitle = UiStrings.Antenna,
             )
+        }
 
-        is Misskey.ChannelTimelineTabItem ->
+        is Misskey.ChannelTimelineTabItem -> {
             account.toAccountResourceSlot(
                 spec = MisskeyPlatformSpec.channelTimelineSpec,
                 resourceId = channelId,
                 metaData = metaData,
                 fallbackTitle = UiStrings.Channel,
             )
+        }
 
-        is XQT.FeaturedTimelineTabItem ->
+        is XQT.FeaturedTimelineTabItem -> {
             account.toAccountBasedSlot(
                 spec = XqtPlatformSpec.featuredTimelineSpec,
                 metaData = metaData,
                 fallbackTitle = UiStrings.Featured,
             )
+        }
 
-        is XQT.BookmarkTimelineTabItem ->
+        is XQT.BookmarkTimelineTabItem -> {
             account.toAccountBasedSlot(
                 spec = XqtPlatformSpec.bookmarkTimelineSpec,
                 metaData = metaData,
                 fallbackTitle = UiStrings.Bookmark,
             )
+        }
 
-        is XQT.DeviceFollowTimelineTabItem ->
+        is XQT.DeviceFollowTimelineTabItem -> {
             account.toAccountBasedSlot(
                 spec = XqtPlatformSpec.deviceFollowTimelineSpec,
                 metaData = metaData,
                 fallbackTitle = UiStrings.Posts,
             )
+        }
 
-        is Bluesky.FeedTabItem ->
+        is Bluesky.FeedTabItem -> {
             account.toAccountResourceSlot(
                 spec = BlueskyPlatformSpec.feedTimelineSpec,
                 resourceId = uri,
                 metaData = metaData,
                 fallbackTitle = UiStrings.Feeds,
             )
+        }
 
-        is Bluesky.BookmarkTimelineTabItem ->
+        is Bluesky.BookmarkTimelineTabItem -> {
             account.toAccountBasedSlot(
                 spec = BlueskyPlatformSpec.bookmarkTimelineSpec,
                 metaData = metaData,
                 fallbackTitle = UiStrings.Bookmark,
             )
+        }
 
-        is VVo.FeaturedTimelineTabItem ->
+        is VVo.FeaturedTimelineTabItem -> {
             account.toAccountBasedSlot(
                 spec = VvoPlatformSpec.featuredTimelineSpec,
                 metaData = metaData,
                 fallbackTitle = UiStrings.Featured,
             )
+        }
 
-        is VVo.FavoriteTimelineTabItem ->
+        is VVo.FavoriteTimelineTabItem -> {
             account.toAccountBasedSlot(
                 spec = VvoPlatformSpec.favoriteTimelineSpec,
                 metaData = metaData,
                 fallbackTitle = UiStrings.Bookmark,
             )
+        }
 
-        is VVo.LikedTimelineTabItem ->
+        is VVo.LikedTimelineTabItem -> {
             account.toAccountBasedSlot(
                 spec = VvoPlatformSpec.likedTimelineSpec,
                 metaData = metaData,
                 fallbackTitle = UiStrings.Liked,
             )
+        }
 
-        is RssTimelineTabItem ->
+        is RssTimelineTabItem -> {
             RssTimelineSpecs.rss
                 .target(
                     data = RssTimelineSpecs.RssData(feedUrl),
                     title = metaData.title.toUiText(UiStrings.Rss.asText()),
                     icon = metaData.icon,
                 ).toSlot(presentation = metaData.toPresentation())
+        }
 
-        is AllRssTimelineTabItem ->
+        is AllRssTimelineTabItem -> {
             RssTimelineSpecs.allRss
                 .target(
                     data = RssTimelineSpecs.AllRssData,
                     title = metaData.title.toUiText(UiStrings.AllRssFeeds.asText()),
                     icon = metaData.icon,
                 ).toSlot(presentation = metaData.toPresentation())
+        }
 
-        is SubscriptionTimelineTabItem ->
+        is SubscriptionTimelineTabItem -> {
             RssTimelineSpecs.subscription
                 .target(
                     data =
@@ -265,6 +291,7 @@ internal fun TimelineTabItem.toTimelineSlotOrNull(): TimelineSlot? =
                     title = metaData.title.toUiText(UiStrings.Rss.asText()),
                     icon = metaData.icon,
                 ).toSlot(presentation = metaData.toPresentation())
+        }
 
         is MixedTimelineTabItem -> {
             val children = subTimelineTabItem.toTimelineSlots()

@@ -1,6 +1,8 @@
 package dev.dimension.flare
 
 import androidx.compose.foundation.layout.width
+import androidx.compose.runtime.ComposeRuntimeFlags
+import androidx.compose.runtime.ExperimentalComposeApi
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -8,6 +10,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ComposeUiFlags
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
@@ -42,7 +46,7 @@ import kotlin.system.exitProcess
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.toJavaDuration
 
-@OptIn(ExperimentalCoilApi::class)
+@OptIn(ExperimentalCoilApi::class, ExperimentalComposeUiApi::class, ExperimentalComposeApi::class)
 fun main(args: Array<String>) {
     if (AotRuntime.isTraining()) {
         Thread({
@@ -80,6 +84,8 @@ fun main(args: Array<String>) {
             desktopModule + KoinHelper.modules(),
         )
     }
+    ComposeUiFlags.isMediaQueryIntegrationEnabled = true
+    ComposeRuntimeFlags.isLinkBufferComposerEnabled = true
     application {
         setSingletonImageLoaderFactory { context ->
             ImageLoader

@@ -2,7 +2,6 @@ package dev.dimension.flare.ui.route
 
 import androidx.compose.runtime.Immutable
 import androidx.navigation3.runtime.NavKey
-import dev.dimension.flare.data.model.MixedTimelineTabItem
 import dev.dimension.flare.data.model.tab.TimelineSourceRef
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -197,7 +196,7 @@ internal sealed interface Route : NavKey {
 
     @Serializable
     data class TabGroupConfig(
-        val item: MixedTimelineTabItem? = null,
+        val groupId: String? = null,
     ) : Route
 
     @Serializable
@@ -677,6 +676,24 @@ internal sealed interface Route : NavKey {
                     Lists.EditAccountList(
                         accountType = AccountType.Specific(deeplinkRoute.accountKey),
                         userKey = deeplinkRoute.userKey,
+                    )
+                }
+
+                is DeeplinkRoute.AllLists -> {
+                    Lists.List(
+                        accountType = AccountType.Specific(deeplinkRoute.accountKey),
+                    )
+                }
+
+                is DeeplinkRoute.AllDirectMessages -> {
+                    DM.List(
+                        accountType = AccountType.Specific(deeplinkRoute.accountKey),
+                    )
+                }
+
+                is DeeplinkRoute.Bluesky.AllFeeds -> {
+                    Bluesky.Feed(
+                        accountType = AccountType.Specific(deeplinkRoute.accountKey),
                     )
                 }
 

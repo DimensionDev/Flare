@@ -27,7 +27,7 @@ import kotlinx.collections.immutable.toImmutableList
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-internal class AllTabsPresenter(
+public class AllTabsPresenter(
 //    private val filterIsTimeline: Boolean = false,
 ) : PresenterBase<AllTabsPresenter.State>(),
     KoinComponent {
@@ -87,9 +87,9 @@ internal class AllTabsPresenter(
         }
 
     @Immutable
-    internal interface State {
-        val rssTabs: ImmutableList<TimelineTabItemV2>
-        val accountTabs: UiState<ImmutableList<AccountTabs>>
+    public interface State {
+        public val rssTabs: ImmutableList<TimelineTabItemV2>
+        public val accountTabs: UiState<ImmutableList<AccountTabs>>
 
         @Immutable
         public data class AccountTabs(

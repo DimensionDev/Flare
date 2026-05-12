@@ -4,7 +4,10 @@ import androidx.compose.runtime.Immutable
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.appearance.AppearanceBag
 import dev.dimension.flare.data.model.appearance.AppearancePatch
+import dev.dimension.flare.data.model.appearance.TimelineAppearance
+import dev.dimension.flare.data.model.appearance.toBag
 import dev.dimension.flare.data.model.appearance.toPatch
+import dev.dimension.flare.data.model.appearance.withPatch
 import dev.dimension.flare.data.platform.RssTimelineSpecs
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
@@ -48,8 +51,12 @@ public sealed interface TimelineTabItemV2 {
     public fun withPresentationOverrides(
         title: String,
         icon: IconType,
+        appearancePatch: AppearancePatch? = this.appearancePatch,
+        enabled: Boolean = this.enabled,
     ): TimelineTabItemV2
 }
+
+public fun TimelineTabItemV2.resolveTimelineAppearance(base: TimelineAppearance): TimelineAppearance = base.withPatch(appearancePatch)
 
 @Immutable
 public class SourceTimelineTabItemV2 private constructor(
@@ -67,15 +74,19 @@ public class SourceTimelineTabItemV2 private constructor(
     override fun withPresentationOverrides(
         title: String,
         icon: IconType,
+        appearancePatch: AppearancePatch?,
+        enabled: Boolean,
     ): TimelineTabItemV2 {
         val updatedPresentation =
             presentation?.withOverrides(
                 titleOverride = title,
                 iconOverride = icon,
+                appearancePatch = appearancePatch,
                 enabled = enabled,
             ) ?: TimelinePresentation(
                 titleOverride = title,
                 iconOverride = icon,
+                appearanceOverride = appearancePatch?.takeUnless { it == AppearancePatch.EMPTY }?.toBag(),
                 enabled = enabled,
             )
         return SourceTimelineTabItemV2(
@@ -85,7 +96,7 @@ public class SourceTimelineTabItemV2 private constructor(
             title = UiText.Raw(title),
             icon = icon,
             appearancePatch = updatedPresentation.appearance,
-            enabled = enabled,
+            enabled = updatedPresentation.enabled,
             presenterFactory = presenterFactory,
         )
     }
@@ -175,11 +186,14 @@ public class GroupTimelineTabItemV2 internal constructor(
     override fun withPresentationOverrides(
         title: String,
         icon: IconType,
+        appearancePatch: AppearancePatch?,
+        enabled: Boolean,
     ): TimelineTabItemV2 {
         val updatedPresentation =
             presentation.withOverrides(
                 titleOverride = title,
                 iconOverride = icon,
+                appearancePatch = appearancePatch,
                 enabled = enabled,
             )
         return GroupTimelineTabItemV2(
@@ -191,7 +205,7 @@ public class GroupTimelineTabItemV2 internal constructor(
             title = UiText.Raw(title),
             icon = icon,
             appearancePatch = updatedPresentation.appearance,
-            enabled = enabled,
+            enabled = updatedPresentation.enabled,
         )
     }
 }
@@ -266,12 +280,13 @@ public data class TimelinePresentation internal constructor(
     internal fun withOverrides(
         titleOverride: String?,
         iconOverride: IconType?,
+        appearancePatch: AppearancePatch?,
         enabled: Boolean,
     ): TimelinePresentation =
         TimelinePresentation(
             titleOverride = titleOverride,
             iconOverride = iconOverride,
-            appearanceOverride = appearanceOverride,
+            appearanceOverride = appearancePatch?.takeUnless { it == AppearancePatch.EMPTY }?.toBag(),
             enabled = enabled,
         )
 }

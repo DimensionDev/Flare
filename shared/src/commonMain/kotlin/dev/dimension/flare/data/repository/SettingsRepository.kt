@@ -162,7 +162,7 @@ public class SettingsRepository internal constructor(
                 val tabs =
                     settings.homeSlots
                         .map { timelineResolver.toTabItem(it) }
-                        .filter { it.enabled }
+//                        .filter { it.enabled }
                 tabs.withSystemHomeMixedTimelineEnabled(
                     enabled = tabs.any { it.isSystemHomeMixedTimeline },
                 )

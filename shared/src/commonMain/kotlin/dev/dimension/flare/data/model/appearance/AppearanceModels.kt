@@ -89,6 +89,25 @@ public fun AppearancePatch.toTimelineAppearance(override: AppearancePatch?): Tim
         timelineDisplayMode = getTimelineValue(AppearanceKeys.TimelineDisplayMode, override),
     )
 
+public fun TimelineAppearance.withPatch(patch: AppearancePatch?): TimelineAppearance {
+    if (patch == null) return this
+    return copy(
+        avatarShape = patch.getTimelineValue(AppearanceKeys.AvatarShape, avatarShape),
+        showMedia = patch.getTimelineValue(AppearanceKeys.ShowMedia, showMedia),
+        showSensitiveContent = patch.getTimelineValue(AppearanceKeys.ShowSensitiveContent, showSensitiveContent),
+        expandMediaSize = patch.getTimelineValue(AppearanceKeys.ExpandMediaSize, expandMediaSize),
+        videoAutoplay = patch.getTimelineValue(AppearanceKeys.VideoAutoplay, videoAutoplay),
+        showLinkPreview = patch.getTimelineValue(AppearanceKeys.ShowLinkPreview, showLinkPreview),
+        compatLinkPreview = patch.getTimelineValue(AppearanceKeys.CompatLinkPreview, compatLinkPreview),
+        showNumbers = patch.getTimelineValue(AppearanceKeys.ShowNumbers, showNumbers),
+        postActionStyle = patch.getTimelineValue(AppearanceKeys.PostActionStyle, postActionStyle),
+        fullWidthPost = patch.getTimelineValue(AppearanceKeys.FullWidthPost, fullWidthPost),
+        absoluteTimestamp = patch.getTimelineValue(AppearanceKeys.AbsoluteTimestamp, absoluteTimestamp),
+        showPlatformLogo = patch.getTimelineValue(AppearanceKeys.ShowPlatformLogo, showPlatformLogo),
+        timelineDisplayMode = patch.getTimelineValue(AppearanceKeys.TimelineDisplayMode, timelineDisplayMode),
+    )
+}
+
 private fun <T : Any> AppearancePatch.getTimelineValue(
     key: PerTimelineAppearanceKey<T>,
     override: AppearancePatch?,
@@ -97,4 +116,14 @@ private fun <T : Any> AppearancePatch.getTimelineValue(
         override[key]
     } else {
         this[key]
+    }
+
+private fun <T : Any> AppearancePatch.getTimelineValue(
+    key: PerTimelineAppearanceKey<T>,
+    fallback: T,
+): T =
+    if (contains(key)) {
+        this[key]
+    } else {
+        fallback
     }

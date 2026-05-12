@@ -36,6 +36,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -58,6 +59,7 @@ import dev.dimension.flare.R
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.data.model.BottomBarBehavior
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
+import dev.dimension.flare.data.model.tab.resolveTimelineAppearance
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
@@ -251,13 +253,24 @@ internal fun HomeTimelineScreen(
                 ) { index ->
                     val item = tabState.getOrNull(index)
                     if (item != null) {
-                        TimelineItemContent(
-                            item = item,
-                            contentPadding = contentPadding,
-                            modifier = Modifier.fillMaxWidth(),
-                            changeLogState = state.changeLogState,
-                            isCurrentlyVisible = pagerState.currentPage == index,
-                        )
+                        val timelineAppearance = LocalTimelineAppearance.current
+                        CompositionLocalProvider(
+                            LocalTimelineAppearance provides
+                                remember(
+                                    item.appearancePatch,
+                                    timelineAppearance,
+                                ) {
+                                    item.resolveTimelineAppearance(timelineAppearance)
+                                },
+                        ) {
+                            TimelineItemContent(
+                                item = item,
+                                contentPadding = contentPadding,
+                                modifier = Modifier.fillMaxWidth(),
+                                changeLogState = state.changeLogState,
+                                isCurrentlyVisible = pagerState.currentPage == index,
+                            )
+                        }
                     }
                 }
             }

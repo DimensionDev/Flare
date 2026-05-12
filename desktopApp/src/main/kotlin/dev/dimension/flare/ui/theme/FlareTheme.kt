@@ -388,7 +388,7 @@ private fun isDarkTheme(): Boolean =
 
 @Composable
 internal fun ProvideThemeSettings(content: @Composable () -> Unit) {
-    val state by producePresenter { EnvironmentSettingsPresenter().invoke() }
+    val state by producePresenter("env") { EnvironmentSettingsPresenter().invoke() }
     val globalAppearance = state.globalAppearance.takeSuccessOr(GlobalAppearance.Default)
     val timelineAppearance =
         remember(state.timelineAppearance) {

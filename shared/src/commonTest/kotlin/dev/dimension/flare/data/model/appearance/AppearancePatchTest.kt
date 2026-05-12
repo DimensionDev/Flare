@@ -4,10 +4,15 @@ import dev.dimension.flare.data.model.AppearanceSettings
 import dev.dimension.flare.data.model.AvatarShape
 import dev.dimension.flare.data.model.BottomBarBehavior
 import dev.dimension.flare.data.model.BottomBarStyle
+import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.PostActionStyle
 import dev.dimension.flare.data.model.Theme
 import dev.dimension.flare.data.model.TimelineDisplayMode
 import dev.dimension.flare.data.model.VideoAutoplay
+import dev.dimension.flare.data.model.tab.SourceTimelineTabItemV2
+import dev.dimension.flare.data.model.tab.resolveTimelineAppearance
+import dev.dimension.flare.ui.model.UiIcon
+import dev.dimension.flare.ui.model.UiText
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -74,6 +79,66 @@ class AppearancePatchTest {
                 showNumbers = false,
             ),
             globalPatch.toTimelineAppearance(timelinePatch),
+        )
+    }
+
+    @Test
+    fun timelineAppearanceWithPatchPreservesNonPatchFields() {
+        val base =
+            TimelineAppearance(
+                showMedia = false,
+                showNumbers = false,
+                aiConfig = TimelineAppearance.AiConfig(translation = true, tldr = true),
+                lineLimit = 9,
+                showTranslateButton = false,
+            )
+        val patch =
+            AppearancePatch.EMPTY
+                .set(AppearanceKeys.ShowMedia, true)
+                .set(AppearanceKeys.TimelineDisplayMode, TimelineDisplayMode.Gallery)
+
+        assertEquals(
+            TimelineAppearance(
+                showMedia = true,
+                showNumbers = false,
+                timelineDisplayMode = TimelineDisplayMode.Gallery,
+                aiConfig = TimelineAppearance.AiConfig(translation = true, tldr = true),
+                lineLimit = 9,
+                showTranslateButton = false,
+            ),
+            base.withPatch(patch),
+        )
+    }
+
+    @Test
+    fun timelineTabItemV2ResolvesTimelineAppearanceFromItemPatch() {
+        val item =
+            SourceTimelineTabItemV2.runtime(
+                id = "test",
+                title = UiText.Raw("Test"),
+                icon = IconType.Material(UiIcon.List),
+                appearancePatch =
+                    AppearancePatch.EMPTY
+                        .set(AppearanceKeys.ShowNumbers, false)
+                        .set(AppearanceKeys.AbsoluteTimestamp, true),
+                createPresenter = { error("unused in test") },
+            )
+        val base =
+            TimelineAppearance(
+                showNumbers = true,
+                absoluteTimestamp = false,
+                aiConfig = TimelineAppearance.AiConfig(translation = true),
+                lineLimit = 7,
+            )
+
+        assertEquals(
+            TimelineAppearance(
+                showNumbers = false,
+                absoluteTimestamp = true,
+                aiConfig = TimelineAppearance.AiConfig(translation = true),
+                lineLimit = 7,
+            ),
+            item.resolveTimelineAppearance(base),
         )
     }
 

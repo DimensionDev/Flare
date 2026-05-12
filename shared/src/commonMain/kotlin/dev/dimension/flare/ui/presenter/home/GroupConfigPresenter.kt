@@ -4,6 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import dev.dimension.flare.data.model.IconType
+import dev.dimension.flare.data.model.appearance.AppearancePatch
+import dev.dimension.flare.data.model.appearance.toBag
 import dev.dimension.flare.data.model.tab.GroupSource
 import dev.dimension.flare.data.model.tab.GroupTimelineTabItemV2
 import dev.dimension.flare.data.model.tab.TabSettingsV2
@@ -44,6 +46,8 @@ public class GroupConfigPresenter :
                 initialItem: GroupTimelineTabItemV2?,
                 name: String,
                 icon: IconType,
+                appearancePatch: AppearancePatch?,
+                enabled: Boolean,
                 tabs: List<TimelineTabItemV2>,
                 defaultGroupName: String,
             ) {
@@ -53,6 +57,8 @@ public class GroupConfigPresenter :
                             initialItem = initialItem,
                             name = name,
                             icon = icon,
+                            appearancePatch = appearancePatch,
+                            enabled = enabled,
                             tabs = tabs,
                             defaultGroupName = defaultGroupName,
                             timelineResolver = timelineResolver,
@@ -71,6 +77,8 @@ public class GroupConfigPresenter :
             initialItem: GroupTimelineTabItemV2?,
             name: String,
             icon: IconType,
+            appearancePatch: AppearancePatch?,
+            enabled: Boolean,
             tabs: List<TimelineTabItemV2>,
             defaultGroupName: String,
         )
@@ -81,6 +89,8 @@ internal fun TabSettingsV2.upsertGroupConfig(
     initialItem: GroupTimelineTabItemV2?,
     name: String,
     icon: IconType,
+    appearancePatch: AppearancePatch?,
+    enabled: Boolean,
     tabs: List<TimelineTabItemV2>,
     defaultGroupName: String,
     timelineResolver: TimelineResolver,
@@ -99,7 +109,7 @@ internal fun TabSettingsV2.upsertGroupConfig(
     }
 
     val childSlots = deduplicatedTabs.map { timelineResolver.toSlot(it) }
-    val newGroup = buildGroupSlot(name, icon, defaultGroupName, childSlots)
+    val newGroup = buildGroupSlot(name, icon, appearancePatch, enabled, defaultGroupName, childSlots)
     val currentSlots = homeSlots.toMutableList()
     val targetIndex =
         initialItem
@@ -116,6 +126,8 @@ internal fun TabSettingsV2.upsertGroupConfig(
 private fun buildGroupSlot(
     name: String,
     icon: IconType,
+    appearancePatch: AppearancePatch?,
+    enabled: Boolean,
     defaultGroupName: String,
     childSlots: List<TimelineSlot>,
 ): TimelineSlot {
@@ -132,6 +144,8 @@ private fun buildGroupSlot(
             TimelinePresentation(
                 titleOverride = title,
                 iconOverride = icon,
+                appearanceOverride = appearancePatch?.takeUnless { it == AppearancePatch.EMPTY }?.toBag(),
+                enabled = enabled,
             ),
     )
 }

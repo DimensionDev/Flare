@@ -6,21 +6,16 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -42,6 +37,9 @@ import compose.icons.fontawesomeicons.solid.Trash
 import dev.dimension.flare.LocalWindowPadding
 import dev.dimension.flare.Res
 import dev.dimension.flare.data.model.IconType
+import dev.dimension.flare.data.model.appearance.AppearancePatch
+import dev.dimension.flare.data.model.appearance.TimelineAppearance
+import dev.dimension.flare.data.model.appearance.withPatch
 import dev.dimension.flare.data.model.tab.GroupTimelineTabItemV2
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.tab_settings_add
@@ -52,6 +50,7 @@ import dev.dimension.flare.tab_settings_group_name_placeholder
 import dev.dimension.flare.tab_settings_remove
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScrollBar
+import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.TabIcon
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiText
@@ -63,11 +62,8 @@ import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.composefluent.FluentTheme
 import io.github.composefluent.component.AccentButton
 import io.github.composefluent.component.CardExpanderItem
-import io.github.composefluent.component.Flyout
-import io.github.composefluent.component.FlyoutPlacement
 import io.github.composefluent.component.SubtleButton
 import io.github.composefluent.component.Text
-import io.github.composefluent.component.TextField
 import kotlinx.collections.immutable.toImmutableList
 import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.stringResource
@@ -83,7 +79,10 @@ internal fun GroupConfigScreen(
 ) {
     val haptics = LocalHapticFeedback.current
     val defaultGroupName = stringResource(Res.string.tab_settings_group_default_name)
-    val state by producePresenter(key = groupId ?: "new_group") { presenter(groupId, defaultGroupName) }
+    val appearance = LocalTimelineAppearance.current
+    val state by producePresenter(key = groupId ?: "new_group") {
+        presenter(groupId, defaultGroupName, appearance)
+    }
 
     DisposableEffect(Unit) {
         onDispose {
@@ -140,50 +139,27 @@ internal fun GroupConfigScreen(
             }
 
             item {
-                Row(
+                TimelinePresentationEditor(
+                    text = state.name,
+                    icon = state.icon,
+                    availableIcons = state.availableIcons,
+                    showIconPicker = state.showIconPicker,
+                    onShowIconPickerChange = state::setShowIconPicker,
+                    withAvatar = false,
+                    canUseAvatar = false,
+                    onWithAvatarChange = {},
+                    enabled = state.enabled,
+                    onEnabledChange = state::setEnabled,
+                    timelineAppearance = state.timelineAppearance,
+                    appearancePatch = state.appearancePatch,
+                    onAppearancePatchChange = state::setAppearancePatch,
+                    onIconChange = state::setIcon,
                     modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Box {
-                        TabIcon(
-                            icon = state.icon,
-                            title = UiText.Raw(state.name.text.toString()),
-                            size = 36.dp,
-                            modifier = Modifier.clickable { state.setShowIconPicker(true) },
-                        )
-                        Flyout(
-                            visible = state.showIconPicker,
-                            onDismissRequest = { state.setShowIconPicker(false) },
-                            placement = FlyoutPlacement.BottomAlignedStart,
-                        ) {
-                            LazyVerticalGrid(
-                                columns = GridCells.FixedSize(48.dp),
-                                modifier = Modifier.heightIn(max = 300.dp).widthIn(max = 300.dp),
-                            ) {
-                                items(state.availableIcons) { selectedIcon ->
-                                    TabIcon(
-                                        icon = selectedIcon,
-                                        title = UiText.Raw(state.name.text.toString()),
-                                        modifier =
-                                            Modifier.padding(4.dp).clickable {
-                                                state.setIcon(selectedIcon)
-                                                state.setShowIconPicker(false)
-                                            },
-                                        size = 48.dp,
-                                    )
-                                }
-                            }
-                        }
-                    }
-
-                    TextField(
-                        state = state.name,
-                        modifier = Modifier.weight(1f),
-                        placeholder = { Text(stringResource(Res.string.tab_settings_group_name_placeholder)) },
-                        lineLimits = TextFieldLineLimits.SingleLine,
-                    )
-                }
+                    header = null,
+                    placeholder = {
+                        Text(stringResource(Res.string.tab_settings_group_name_placeholder))
+                    },
+                )
             }
 
             if (state.tabs.isEmpty()) {
@@ -288,6 +264,7 @@ internal fun GroupConfigScreen(
 private fun presenter(
     groupId: String?,
     defaultGroupName: String,
+    appearance: TimelineAppearance,
 ) = run {
     val sharedState = remember { SharedGroupConfigPresenter() }.invoke()
     val tabSettingsState = remember { HomeTabSettingsPresenter() }.invoke()
@@ -303,6 +280,13 @@ private fun presenter(
     var icon by remember {
         mutableStateOf<IconType>(IconType.Material(UiIcon.Rss))
     }
+    var enabled by remember(groupId) { mutableStateOf(true) }
+    var appearancePatch by remember(groupId) { mutableStateOf(AppearancePatch.EMPTY) }
+    val timelineAppearance by remember {
+        derivedStateOf {
+            appearance.withPatch(appearancePatch)
+        }
+    }
     val tabs =
         remember {
             mutableStateListOf<TimelineTabItemV2>()
@@ -315,6 +299,8 @@ private fun presenter(
             replace(0, length, item.title.editableText)
         }
         icon = item.icon
+        enabled = item.enabled
+        appearancePatch = item.appearancePatch ?: AppearancePatch.EMPTY
         tabs.clear()
         tabs.addAll(item.children.distinctBy { it.id })
         initializedGroupId = item.id
@@ -327,6 +313,9 @@ private fun presenter(
     object {
         val name = name
         val icon = icon
+        val enabled = enabled
+        val appearancePatch = appearancePatch
+        val timelineAppearance = timelineAppearance
         val tabs = tabs
         val showAddTab = showAddTab
         val showIconPicker = showIconPicker
@@ -336,6 +325,14 @@ private fun presenter(
 
         fun setIcon(value: IconType) {
             icon = value
+        }
+
+        fun setEnabled(value: Boolean) {
+            enabled = value
+        }
+
+        fun setAppearancePatch(value: AppearancePatch) {
+            appearancePatch = value
         }
 
         fun setAddTab(show: Boolean) {
@@ -387,6 +384,8 @@ private fun presenter(
                 initialItem = initialItem,
                 name = name.text.toString(),
                 icon = icon,
+                appearancePatch = appearancePatch,
+                enabled = enabled,
                 tabs = tabs.toList(),
                 defaultGroupName = defaultGroupName,
             )

@@ -1,7 +1,6 @@
 package dev.dimension.flare
 
 import androidx.compose.foundation.layout.width
-import androidx.compose.runtime.ComposeRuntimeFlags
 import androidx.compose.runtime.ExperimentalComposeApi
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -69,7 +68,6 @@ fun main(args: Array<String>) {
             }
         }
     }
-    ComposeRuntimeFlags.isLinkBufferComposerEnabled = true
     val restoreRequestFlow = MutableStateFlow(0)
     DeepLinkHandler.register(args) { uri ->
         DeeplinkHandler.handleDeeplink(uri.toString())

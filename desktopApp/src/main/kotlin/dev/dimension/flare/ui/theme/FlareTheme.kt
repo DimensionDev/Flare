@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
@@ -57,7 +56,6 @@ import io.github.kdroidfilter.nucleus.window.DecoratedWindowDefaults
 import io.github.kdroidfilter.nucleus.window.NucleusDecoratedWindowTheme
 import io.github.kdroidfilter.nucleus.window.styling.LocalTitleBarStyle
 import kotlinx.coroutines.launch
-import moe.tlaster.precompose.molecule.producePresenter
 import org.apache.commons.lang3.SystemUtils
 import java.util.Locale
 
@@ -388,7 +386,7 @@ private fun isDarkTheme(): Boolean =
 
 @Composable
 internal fun ProvideThemeSettings(content: @Composable () -> Unit) {
-    val state by producePresenter("env") { EnvironmentSettingsPresenter().invoke() }
+    val state = remember { EnvironmentSettingsPresenter() }.invoke()
     val globalAppearance = state.globalAppearance.takeSuccessOr(GlobalAppearance.Default)
     val timelineAppearance =
         remember(state.timelineAppearance) {

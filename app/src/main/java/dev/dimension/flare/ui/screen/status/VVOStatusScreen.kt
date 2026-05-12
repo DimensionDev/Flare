@@ -37,14 +37,14 @@ import compose.icons.fontawesomeicons.solid.FileCircleExclamation
 import dev.dimension.flare.R
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.data.model.BottomBarBehavior
-import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
-import dev.dimension.flare.ui.component.LocalComponentAppearance
+import dev.dimension.flare.ui.component.LocalGlobalAppearance
+import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.platform.adaptiveSideContentSize
 import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.component.status.AdaptiveCard
@@ -82,7 +82,7 @@ internal fun VVOStatusScreen(
                 .toDpSize()
         }
     val topAppBarScrollBehavior =
-        if (LocalAppearanceSettings.current.bottomBarBehavior == BottomBarBehavior.AlwaysShow) {
+        if (LocalGlobalAppearance.current.bottomBarBehavior == BottomBarBehavior.AlwaysShow) {
             TopAppBarDefaults.pinnedScrollBehavior()
         } else {
             TopAppBarDefaults.enterAlwaysScrollBehavior()
@@ -120,8 +120,8 @@ internal fun VVOStatusScreen(
                 }
             }
             CompositionLocalProvider(
-                LocalComponentAppearance provides
-                    LocalComponentAppearance.current.copy(
+                LocalTimelineAppearance provides
+                    LocalTimelineAppearance.current.copy(
                         lineLimit = Int.MAX_VALUE,
                     ),
             ) {

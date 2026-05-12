@@ -33,7 +33,7 @@ import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.ui.component.AnimatedNumber
 import dev.dimension.flare.ui.component.FAIcon
-import dev.dimension.flare.ui.component.LocalComponentAppearance
+import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.platform.PlatformDropdownMenu
 import dev.dimension.flare.ui.component.platform.PlatformDropdownMenuScope
 import dev.dimension.flare.ui.component.platform.PlatformText
@@ -57,7 +57,7 @@ public fun StatusActionButton(
     withTextMinWidth: Boolean = false,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
-    val appearanceSettings = LocalComponentAppearance.current
+    val appearanceSettings = LocalTimelineAppearance.current
     Row(
         modifier =
             modifier

@@ -12,10 +12,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import dev.dimension.flare.common.isRefreshing
 import dev.dimension.flare.data.model.BottomBarBehavior
-import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
+import dev.dimension.flare.ui.component.LocalGlobalAppearance
+import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.status
@@ -36,7 +37,7 @@ internal fun RssTimelineScreen(
     val scope = rememberCoroutineScope()
     val state by producePresenter("rss_timeline_$id") { presenter(id) }
     val topAppBarScrollBehavior =
-        if (LocalAppearanceSettings.current.bottomBarBehavior == BottomBarBehavior.AlwaysShow) {
+        if (LocalGlobalAppearance.current.bottomBarBehavior == BottomBarBehavior.AlwaysShow) {
             TopAppBarDefaults.pinnedScrollBehavior()
         } else {
             TopAppBarDefaults.enterAlwaysScrollBehavior()

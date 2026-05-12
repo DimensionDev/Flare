@@ -111,7 +111,7 @@ import dev.dimension.flare.ui.component.EmojiImage
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareDividerDefaults
 import dev.dimension.flare.ui.component.HorizontalDivider
-import dev.dimension.flare.ui.component.LocalComponentAppearance
+import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.component.placeholder
 import dev.dimension.flare.ui.component.platform.PlatformCard
@@ -159,7 +159,7 @@ public fun CommonStatusComponent(
     showExpandButton: Boolean = true,
 ) {
     val uriHandler = LocalUriHandler.current
-    val appearanceSettings = LocalComponentAppearance.current
+    val appearanceSettings = LocalTimelineAppearance.current
     val showAsFullWidth = !appearanceSettings.fullWidthPost && !isQuote && !isDetail
     Row(
         modifier =
@@ -447,7 +447,7 @@ internal fun StatusMediasComponent(
     isQuote: Boolean,
     onMediaClick: (UiMedia) -> Unit,
 ) {
-    val appearanceSettings = LocalComponentAppearance.current
+    val appearanceSettings = LocalTimelineAppearance.current
     var showMedia by remember { mutableStateOf(false) }
     if (appearanceSettings.showMedia || showMedia) {
         if (!appearanceSettings.showMedia) {
@@ -535,8 +535,8 @@ private fun StatusQuoteComponent(
     ) {
         Column {
             CompositionLocalProvider(
-                LocalComponentAppearance provides
-                    LocalComponentAppearance.current.copy(
+                LocalTimelineAppearance provides
+                    LocalTimelineAppearance.current.copy(
                         postActionStyle = PostActionStyle.Hidden,
                     ),
             ) {
@@ -718,7 +718,7 @@ private fun TranslationComponent(
     rawContent: String,
     content: UiRichText,
 ) {
-    val componentAppearance = LocalComponentAppearance.current
+    val timelineAppearance = LocalTimelineAppearance.current
     var enabledTranslate by rememberSaveable("translate-$statusKey") {
         mutableStateOf(false)
     }
@@ -740,7 +740,7 @@ private fun TranslationComponent(
                     ),
             )
         }
-        if (componentAppearance.aiConfig.tldr && content.isLongText) {
+        if (timelineAppearance.aiConfig.tldr && content.isLongText) {
             PlatformTextButton(
                 onClick = {
                     if (!enabledTldr) {
@@ -783,7 +783,7 @@ private fun TranslationComponent(
     if (enabledTranslate) {
         Spacer(modifier = Modifier.height(4.dp))
         val state by producePresenter(
-            "translate_${contentWarning}_${rawContent}_${Locale.current.language}_${componentAppearance.aiConfig.translation}",
+            "translate_${contentWarning}_${rawContent}_${Locale.current.language}_${timelineAppearance.aiConfig.translation}",
         ) {
             statusTranslatePresenter(
                 item = item,
@@ -883,7 +883,7 @@ internal fun StatusActions(
     items: ImmutableList<ActionMenu>,
     modifier: Modifier = Modifier,
 ) {
-    val appearanceSettings = LocalComponentAppearance.current
+    val appearanceSettings = LocalTimelineAppearance.current
     val haptics = LocalHapticFeedback.current
     val launcher = LocalUriHandler.current
     Row(
@@ -1348,7 +1348,7 @@ private fun StatusCardComponent(
     card: UiCard,
     modifier: Modifier = Modifier,
 ) {
-    val appearanceSettings = LocalComponentAppearance.current
+    val appearanceSettings = LocalTimelineAppearance.current
     if (appearanceSettings.compatLinkPreview) {
         CompatCard(
             card = card,
@@ -1367,7 +1367,7 @@ private fun ExpandedCard(
     card: UiCard,
     modifier: Modifier = Modifier,
 ) {
-    val appearanceSettings = LocalComponentAppearance.current
+    val appearanceSettings = LocalTimelineAppearance.current
     Column(
         modifier = modifier,
     ) {

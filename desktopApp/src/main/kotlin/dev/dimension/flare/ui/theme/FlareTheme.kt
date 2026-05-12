@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
@@ -36,18 +35,18 @@ import androidx.compose.ui.unit.toSize
 import androidx.compose.ui.window.FrameWindowScope
 import androidx.compose.ui.window.WindowScope
 import dev.dimension.flare.LocalWindowPadding
-import dev.dimension.flare.data.model.AppearanceSettings
-import dev.dimension.flare.data.model.AvatarShape
-import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.data.model.Theme
 import dev.dimension.flare.data.model.VideoAutoplay
-import dev.dimension.flare.data.repository.SettingsRepository
-import dev.dimension.flare.ui.component.ComponentAppearance
-import dev.dimension.flare.ui.component.LocalComponentAppearance
+import dev.dimension.flare.data.model.appearance.GlobalAppearance
+import dev.dimension.flare.data.model.appearance.TimelineAppearance
+import dev.dimension.flare.ui.component.LocalGlobalAppearance
+import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.platform.LocalWifiState
 import dev.dimension.flare.ui.humanizer.updateTimeFormatterLocale
-import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.onSuccess
+import dev.dimension.flare.ui.model.takeSuccessOr
+import dev.dimension.flare.ui.presenter.EnvironmentSettingsPresenter
+import dev.dimension.flare.ui.presenter.invoke
 import io.github.composefluent.Colors
 import io.github.composefluent.ExperimentalFluentApi
 import io.github.composefluent.FluentTheme
@@ -58,8 +57,8 @@ import io.github.kdroidfilter.nucleus.window.DecoratedWindowDefaults
 import io.github.kdroidfilter.nucleus.window.NucleusDecoratedWindowTheme
 import io.github.kdroidfilter.nucleus.window.styling.LocalTitleBarStyle
 import kotlinx.coroutines.launch
+import moe.tlaster.precompose.molecule.producePresenter
 import org.apache.commons.lang3.SystemUtils
-import org.koin.compose.koinInject
 import java.util.Locale
 
 internal val LocalComposeWindow =
@@ -384,17 +383,26 @@ private class FluentIndication(
 
 @Composable
 private fun isDarkTheme(): Boolean =
-    LocalAppearanceSettings.current.theme == Theme.DARK ||
-        (LocalAppearanceSettings.current.theme == Theme.SYSTEM && isSystemInDarkMode())
+    LocalGlobalAppearance.current.theme == Theme.DARK ||
+        (LocalGlobalAppearance.current.theme == Theme.SYSTEM && isSystemInDarkMode())
 
 @Composable
 internal fun ProvideThemeSettings(content: @Composable () -> Unit) {
-    val settingsRepository = koinInject<SettingsRepository>()
-    val appearanceSettings by settingsRepository.appearanceSettings.collectAsState(
-        AppearanceSettings(),
-    )
-    val appSettings by settingsRepository.appSettings.collectAsUiState()
-    appSettings.onSuccess { appSettings ->
+    val state by producePresenter { EnvironmentSettingsPresenter().invoke() }
+    val globalAppearance = state.globalAppearance.takeSuccessOr(GlobalAppearance.Default)
+    val timelineAppearance =
+        remember(state.timelineAppearance) {
+            state.timelineAppearance
+                .takeSuccessOr(TimelineAppearance.Default)
+                .let {
+                    if (it.videoAutoplay == VideoAutoplay.WIFI) {
+                        it.copy(videoAutoplay = VideoAutoplay.NEVER)
+                    } else {
+                        it
+                    }
+                }
+        }
+    state.appSettings.onSuccess { appSettings ->
         LaunchedEffect(appSettings.language) {
             if (appSettings.language.isNotEmpty()) {
                 val locale = Locale.forLanguageTag(appSettings.language)
@@ -403,37 +411,15 @@ internal fun ProvideThemeSettings(content: @Composable () -> Unit) {
             }
         }
         CompositionLocalProvider(
-            LocalAppearanceSettings provides appearanceSettings,
-            LocalComponentAppearance provides
-                remember(appearanceSettings, appSettings.translateConfig, appSettings.aiConfig.tldr) {
-                    ComponentAppearance(
-                        dynamicTheme = appearanceSettings.dynamicTheme,
-                        avatarShape =
-                            when (appearanceSettings.avatarShape) {
-                                AvatarShape.CIRCLE -> ComponentAppearance.AvatarShape.CIRCLE
-                                AvatarShape.SQUARE -> ComponentAppearance.AvatarShape.SQUARE
-                            },
-                        showNumbers = appearanceSettings.showNumbers,
-                        showLinkPreview = appearanceSettings.showLinkPreview,
-                        showMedia = appearanceSettings.showMedia,
-                        showSensitiveContent = appearanceSettings.showSensitiveContent,
-                        videoAutoplay =
-                            when (appearanceSettings.videoAutoplay) {
-                                VideoAutoplay.ALWAYS -> ComponentAppearance.VideoAutoplay.ALWAYS
-                                VideoAutoplay.WIFI -> ComponentAppearance.VideoAutoplay.NEVER
-                                VideoAutoplay.NEVER -> ComponentAppearance.VideoAutoplay.NEVER
-                            },
-                        expandMediaSize = appearanceSettings.expandMediaSize,
-                        compatLinkPreview = appearanceSettings.compatLinkPreview,
+            LocalGlobalAppearance provides globalAppearance,
+            LocalTimelineAppearance provides
+                remember(globalAppearance, timelineAppearance, appSettings.translateConfig, appSettings.aiConfig.tldr) {
+                    timelineAppearance.copy(
                         aiConfig =
-                            ComponentAppearance.AiConfig(
+                            TimelineAppearance.AiConfig(
                                 translation = true,
                                 tldr = appSettings.aiConfig.tldr,
                             ),
-                        fullWidthPost = appearanceSettings.fullWidthPost,
-                        postActionStyle = appearanceSettings.postActionStyle,
-                        absoluteTimestamp = appearanceSettings.absoluteTimestamp,
-                        showPlatformLogo = appearanceSettings.showPlatformLogo,
                     )
                 },
             LocalWifiState provides true,

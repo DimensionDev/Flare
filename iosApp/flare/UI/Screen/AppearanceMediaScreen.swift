@@ -4,7 +4,7 @@ import KotlinSharedUI
 struct AppearanceMediaScreen: View {
     @StateObject private var statusPresenter = KotlinPresenter(presenter: AppearancePresenter())
     @StateObject private var presenter = KotlinPresenter(presenter: SettingsPresenter())
-    @Environment(\.appearanceSettings) private var appearance
+    @Environment(\.timelineAppearance) private var appearance
     var body: some View {
         List {
             Section {

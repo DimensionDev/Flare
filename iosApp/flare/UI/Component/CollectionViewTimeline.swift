@@ -12,7 +12,7 @@ struct CollectionViewTimelineView: UIViewControllerRepresentable {
     let columnCount: Int
     let accessoryItems: [CollectionViewTimelineAccessoryItem]
     let suppressInitialRefreshIndicator: Bool
-    @Environment(\.appearanceSettings) private var appearanceSettings
+    @Environment(\.timelineAppearance) private var timelineAppearance
     @Environment(\.aiConfig) private var aiConfig
     @Environment(\.networkKind) private var networkKind
     @Environment(\.openURL) private var openURL
@@ -40,7 +40,7 @@ struct CollectionViewTimelineView: UIViewControllerRepresentable {
             { await action() }
         }
         controller.topContentInset = topContentInset
-        controller.appearance = TimelineUIKitAppearance(settings: appearanceSettings)
+        controller.appearance = TimelineUIKitAppearance(timeline: timelineAppearance)
         controller.aiTldrEnabled = aiConfig.tldr
         controller.openURL = { url in
             openURL.callAsFunction(url)
@@ -58,7 +58,7 @@ struct CollectionViewTimelineView: UIViewControllerRepresentable {
             { await action() }
         }
         controller.topContentInset = topContentInset
-        controller.appearance = TimelineUIKitAppearance(settings: appearanceSettings)
+        controller.appearance = TimelineUIKitAppearance(timeline: timelineAppearance)
         controller.aiTldrEnabled = aiConfig.tldr
         controller.openURL = { url in
             openURL.callAsFunction(url)
@@ -99,7 +99,7 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
     var refreshCallback: (() async -> Void)?
     var openURL: ((URL) -> Void)?
     var suppressInitialRefreshIndicator = false
-    var appearance = TimelineUIKitAppearance(settings: AppearanceSettings.companion.Default) {
+    var appearance = TimelineUIKitAppearance(timeline: TimelineAppearance.companion.Default) {
         didSet {
             guard isViewLoaded else { return }
             guard oldValue != appearance else {

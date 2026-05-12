@@ -17,8 +17,8 @@ public object AppearanceKeys {
 
     public object ColorSeed : Global<ULong>("app.color_seed", 0x02EBD2u, ULong.serializer())
 
-    public object AvatarShape : Global<AppearanceAvatarShape>(
-        "app.avatar_shape",
+    public object AvatarShape : PerTimeline<AppearanceAvatarShape>(
+        "timeline.avatar_shape",
         AppearanceAvatarShape.CIRCLE,
         AppearanceAvatarShape.serializer(),
     )

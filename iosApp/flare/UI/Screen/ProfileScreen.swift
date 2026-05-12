@@ -15,7 +15,7 @@ struct ProfileScreen: View {
     @State private var showToolbarTabPicker = false
     @State private var isProfileHeaderVisible = true
     @State private var isInlineTabPickerVisible = true
-    @Environment(\.appearanceSettings.timelineDisplayMode) private var timelineDisplayMode
+    @Environment(\.timelineAppearance.timelineDisplayMode) private var timelineDisplayMode
     
     var body: some View {
         ZStack {
@@ -237,7 +237,7 @@ private struct ProfileCompatTimelineView: UIViewControllerRepresentable {
     let onHeaderVisibilityChanged: (Bool) -> Void
     let onPickerVisibilityChanged: (Bool) -> Void
 
-    @Environment(\.appearanceSettings) private var appearanceSettings
+    @Environment(\.timelineAppearance) private var timelineAppearance
     @Environment(\.networkKind) private var networkKind
     @Environment(\.openURL) private var openURL
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
@@ -263,7 +263,7 @@ private struct ProfileCompatTimelineView: UIViewControllerRepresentable {
     }
 
     private func apply(to controller: CollectionViewTimelineController, context: Context) {
-        controller.appearance = TimelineUIKitAppearance(settings: appearanceSettings)
+        controller.appearance = TimelineUIKitAppearance(timeline: timelineAppearance)
         controller.networkKind = networkKind
         controller.columnCount = 1
         controller.extendsContentUnderTopBars = true
@@ -272,7 +272,7 @@ private struct ProfileCompatTimelineView: UIViewControllerRepresentable {
             profileState: profileState,
             tabs: tabs,
             selectedTab: $selectedTab,
-            appearanceSettings: appearanceSettings,
+            timelineAppearance: timelineAppearance,
             openURL: openURL,
             horizontalSizeClass: horizontalSizeClass,
             onFollowClick: onFollowClick,
@@ -323,7 +323,7 @@ private struct ProfileCompatTimelineView: UIViewControllerRepresentable {
             profileState: ProfileState,
             tabs: [ProfileState.Tab],
             selectedTab: Binding<Int>,
-            appearanceSettings: AppearanceSettings,
+            timelineAppearance: TimelineAppearance,
             openURL: OpenURLAction,
             horizontalSizeClass: UserInterfaceSizeClass?,
             onFollowClick: @escaping (UiProfile, UiRelation) -> Void,
@@ -335,7 +335,7 @@ private struct ProfileCompatTimelineView: UIViewControllerRepresentable {
             var changed = false
             let newHeaderSignature = ProfileHeaderAccessorySignature(
                 profileState: profileState,
-                appearanceSettings: appearanceSettings,
+                timelineAppearance: timelineAppearance,
                 horizontalSizeClass: horizontalSizeClass
             )
             if headerSignature != newHeaderSignature {
@@ -351,7 +351,7 @@ private struct ProfileCompatTimelineView: UIViewControllerRepresentable {
                             onFollowingClick: onFollowingClick,
                             onFansClick: onFansClick
                         )
-                        .environment(\.appearanceSettings, appearanceSettings)
+                        .environment(\.timelineAppearance, timelineAppearance)
                         .environment(\.openURL, openURL)
                         .environment(\.horizontalSizeClass, horizontalSizeClass)
                     )
@@ -370,7 +370,7 @@ private struct ProfileCompatTimelineView: UIViewControllerRepresentable {
                 let newPickerSignature = ProfilePickerAccessorySignature(
                     tabs: tabs,
                     selectedTab: selectedTab.wrappedValue,
-                    appearanceSettings: appearanceSettings,
+                    timelineAppearance: timelineAppearance,
                     horizontalSizeClass: horizontalSizeClass
                 )
                 if pickerSignature != newPickerSignature {
@@ -381,7 +381,7 @@ private struct ProfileCompatTimelineView: UIViewControllerRepresentable {
                             ProfileTabPicker(tabs: tabs, selectedTab: selectedTab)
                                 .pickerStyle(.segmented)
                                 .padding()
-                                .environment(\.appearanceSettings, appearanceSettings)
+                                .environment(\.timelineAppearance, timelineAppearance)
                                 .environment(\.openURL, openURL)
                                 .environment(\.horizontalSizeClass, horizontalSizeClass)
                         )
@@ -484,13 +484,13 @@ private struct ProfileHeaderAccessorySignature: Equatable {
 
     init(
         profileState: ProfileState,
-        appearanceSettings: AppearanceSettings,
+        timelineAppearance: TimelineAppearance,
         horizontalSizeClass: UserInterfaceSizeClass?
     ) {
         userState = Self.userStateSignature(profileState.userState)
         relationState = Self.relationStateSignature(profileState.relationState)
         isMeState = Self.isMeStateSignature(profileState.isMe)
-        appearance = TimelineUIKitAppearance(settings: appearanceSettings)
+        appearance = TimelineUIKitAppearance(timeline: timelineAppearance)
         self.horizontalSizeClass = horizontalSizeClass
     }
 
@@ -557,12 +557,12 @@ private struct ProfilePickerAccessorySignature: Equatable {
     init(
         tabs: [ProfileState.Tab],
         selectedTab: Int,
-        appearanceSettings: AppearanceSettings,
+        timelineAppearance: TimelineAppearance,
         horizontalSizeClass: UserInterfaceSizeClass?
     ) {
         self.tabs = tabs.map(profileTimelineID(for:))
         self.selectedTab = selectedTab
-        appearance = TimelineUIKitAppearance(settings: appearanceSettings)
+        appearance = TimelineUIKitAppearance(timeline: timelineAppearance)
         self.horizontalSizeClass = horizontalSizeClass
     }
 }

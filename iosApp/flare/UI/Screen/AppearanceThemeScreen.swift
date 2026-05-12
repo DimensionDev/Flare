@@ -3,11 +3,12 @@ import KotlinSharedUI
 
 struct AppearanceThemeScreen: View {
     @StateObject private var presenter = KotlinPresenter(presenter: SettingsPresenter())
-    @Environment(\.appearanceSettings) private var appearance
+    @Environment(\.globalAppearance) private var globalAppearance
+    @Environment(\.timelineAppearance) private var timelineAppearance
     var body: some View {
         List {
             Picker(selection: Binding(get: {
-                appearance.theme
+                globalAppearance.theme
             }, set: { newValue in
                 presenter.state.updateTheme(value: newValue)
             })) {
@@ -19,7 +20,7 @@ struct AppearanceThemeScreen: View {
                 Text("appearance_theme_description")
             }
             Picker(selection: Binding(get: {
-                appearance.avatarShape
+                timelineAppearance.avatarShape
             }, set: { newValue in
                 presenter.state.updateAvatarShape(value: newValue)
             })) {
@@ -32,7 +33,7 @@ struct AppearanceThemeScreen: View {
             VStack(alignment: .leading) {
                 Text("appearance_font_size_diff")
                 Slider(value: Binding(get: {
-                    appearance.fontSizeDiff
+                    globalAppearance.fontSizeDiff
                 }, set: { newValue in
                     presenter.state.updateFontScale(fontSizeDiff: newValue)
                 }), in: -2...4, step: 1) {

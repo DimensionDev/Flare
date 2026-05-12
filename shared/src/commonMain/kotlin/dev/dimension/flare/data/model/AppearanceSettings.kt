@@ -3,7 +3,7 @@ package dev.dimension.flare.data.model
 import kotlinx.serialization.Serializable
 
 @Serializable
-public data class AppearanceSettings(
+internal data class AppearanceSettings(
     val theme: Theme = Theme.SYSTEM,
     val dynamicTheme: Boolean = true,
     val colorSeed: ULong = 0x02EBD2u,
@@ -34,9 +34,9 @@ public data class AppearanceSettings(
     val showPlatformLogo: Boolean = true,
     val timelineDisplayMode: TimelineDisplayMode = TimelineDisplayMode.Card,
 ) {
-    public companion object {
+    companion object {
         // for iOS
-        public val Default: AppearanceSettings = AppearanceSettings()
+        val Default: AppearanceSettings = AppearanceSettings()
     }
 }
 

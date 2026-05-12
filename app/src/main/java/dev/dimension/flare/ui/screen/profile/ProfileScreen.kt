@@ -61,13 +61,13 @@ import dev.dimension.flare.common.onLoading
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.common.refreshSuspend
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
+import dev.dimension.flare.data.model.VideoAutoplay
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.BackButton
-import dev.dimension.flare.ui.component.ComponentAppearance
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
-import dev.dimension.flare.ui.component.LocalComponentAppearance
+import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.ProfileHeader
 import dev.dimension.flare.ui.component.ProfileHeaderLoading
 import dev.dimension.flare.ui.component.ProfileMenu
@@ -528,9 +528,9 @@ private fun ProfileMediaTab(
 ) {
     val isBigScreen by isBigScreen()
     CompositionLocalProvider(
-        LocalComponentAppearance provides
-            LocalComponentAppearance.current.copy(
-                videoAutoplay = ComponentAppearance.VideoAutoplay.NEVER,
+        LocalTimelineAppearance provides
+            LocalTimelineAppearance.current.copy(
+                videoAutoplay = VideoAutoplay.NEVER,
             ),
     ) {
         val size =

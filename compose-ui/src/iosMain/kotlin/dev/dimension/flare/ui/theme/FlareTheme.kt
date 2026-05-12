@@ -7,12 +7,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import com.slapps.cupertino.theme.CupertinoTheme
 import dev.dimension.flare.data.datastore.model.AppSettings
-import dev.dimension.flare.data.model.AppearanceSettings
-import dev.dimension.flare.data.model.AvatarShape
-import dev.dimension.flare.data.model.LocalAppearanceSettings
+import dev.dimension.flare.data.model.VideoAutoplay
+import dev.dimension.flare.data.model.appearance.GlobalAppearance
+import dev.dimension.flare.data.model.appearance.TimelineAppearance
 import dev.dimension.flare.data.repository.SettingsRepository
-import dev.dimension.flare.ui.component.ComponentAppearance
-import dev.dimension.flare.ui.component.LocalComponentAppearance
+import dev.dimension.flare.ui.component.LocalGlobalAppearance
+import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import org.koin.compose.koinInject
 
 @Composable
@@ -27,36 +27,27 @@ internal fun FlareTheme(content: @Composable () -> Unit) {
 @Composable
 internal fun ProvideThemeSettings(content: @Composable () -> Unit) {
     val settingsRepository = koinInject<SettingsRepository>()
-    val appearanceSettings by settingsRepository.appearanceSettings.collectAsState(
-        AppearanceSettings(),
+    val globalAppearance by settingsRepository.globalAppearance.collectAsState(
+        GlobalAppearance(),
     )
+    val baseTimelineAppearance by settingsRepository.timelineAppearance.collectAsState(
+        TimelineAppearance(),
+    )
+    val timelineAppearance =
+        remember(baseTimelineAppearance) {
+            baseTimelineAppearance.copy(videoAutoplay = VideoAutoplay.NEVER)
+        }
     val appSettings by settingsRepository.appSettings.collectAsState(AppSettings(""))
     CompositionLocalProvider(
-        LocalAppearanceSettings provides appearanceSettings,
-        LocalComponentAppearance provides
-            remember(appearanceSettings, appSettings.translateConfig, appSettings.aiConfig.tldr) {
-                ComponentAppearance(
-                    dynamicTheme = appearanceSettings.dynamicTheme,
-                    avatarShape =
-                        when (appearanceSettings.avatarShape) {
-                            AvatarShape.CIRCLE -> ComponentAppearance.AvatarShape.CIRCLE
-                            AvatarShape.SQUARE -> ComponentAppearance.AvatarShape.SQUARE
-                        },
-                    showNumbers = appearanceSettings.showNumbers,
-                    showLinkPreview = appearanceSettings.showLinkPreview,
-                    showMedia = appearanceSettings.showMedia,
-                    showSensitiveContent = appearanceSettings.showSensitiveContent,
-                    videoAutoplay = ComponentAppearance.VideoAutoplay.NEVER,
-                    expandMediaSize = appearanceSettings.expandMediaSize,
-                    compatLinkPreview = appearanceSettings.compatLinkPreview,
+        LocalGlobalAppearance provides globalAppearance,
+        LocalTimelineAppearance provides
+            remember(globalAppearance, timelineAppearance, appSettings.translateConfig, appSettings.aiConfig.tldr) {
+                timelineAppearance.copy(
                     aiConfig =
-                        ComponentAppearance.AiConfig(
+                        TimelineAppearance.AiConfig(
                             translation = true,
                             tldr = appSettings.aiConfig.tldr,
                         ),
-                    fullWidthPost = appearanceSettings.fullWidthPost,
-                    postActionStyle = appearanceSettings.postActionStyle,
-                    showPlatformLogo = appearanceSettings.showPlatformLogo,
                 )
             },
         content = content,

@@ -8,8 +8,8 @@ import UIKit
 // instead of duplicating them in every child view instance.
 
 struct StatusActionsView: View {
-    @Environment(\.appearanceSettings.postActionStyle) private var postActionStyle
-    @Environment(\.appearanceSettings.showNumbers) private var showNumbers
+    @Environment(\.timelineAppearance.postActionStyle) private var postActionStyle
+    @Environment(\.timelineAppearance.showNumbers) private var showNumbers
     @Environment(\.openURL) private var openURL
     @ScaledMetric(relativeTo: .footnote) var fontSize = 13
     let data: [ActionMenu]

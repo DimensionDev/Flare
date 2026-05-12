@@ -230,50 +230,50 @@ internal fun WindowScope.FlareApp(backButtonState: NavigationBackButtonState) {
                                 placement = FlyoutPlacement.EndAlignedTop,
                                 adaptivePlacement = true,
                             ) {
-                                state.user.onSuccess {
-                                    Box(
-                                        modifier =
-                                            Modifier
-                                                .fillMaxWidth(),
-                                        contentAlignment = Alignment.Center,
-                                    ) {
-                                        AvatarComponent(
-                                            data = it.avatar,
+                                state.user
+                                    .onSuccess {
+                                        Box(
                                             modifier =
                                                 Modifier
-                                                    .clickable {
-                                                        isFlyoutVisible = !isFlyoutVisible
-                                                    }
-                                                    .aspectRatio(1f),
-                                        )
-                                    }
-                                }.onLoading {
-                                    SubtleButton(
-                                        onClick = {
-                                            isFlyoutVisible = !isFlyoutVisible
-                                        },
-                                        modifier = Modifier.fillMaxWidth(),
-                                    ) {
-                                        FAIcon(
-                                            imageVector = FontAwesomeIcons.Solid.Bars,
-                                            contentDescription = stringResource(Res.string.home_settings),
+                                                    .fillMaxWidth(),
+                                            contentAlignment = Alignment.Center,
+                                        ) {
+                                            AvatarComponent(
+                                                data = it.avatar,
+                                                modifier =
+                                                    Modifier
+                                                        .clickable {
+                                                            isFlyoutVisible = !isFlyoutVisible
+                                                        }.aspectRatio(1f),
+                                            )
+                                        }
+                                    }.onLoading {
+                                        SubtleButton(
+                                            onClick = {
+                                                isFlyoutVisible = !isFlyoutVisible
+                                            },
+                                            modifier = Modifier.fillMaxWidth(),
+                                        ) {
+                                            FAIcon(
+                                                imageVector = FontAwesomeIcons.Solid.Bars,
+                                                contentDescription = stringResource(Res.string.home_settings),
 //                                        modifier = Modifier.size(16.dp),
-                                        )
-                                    }
-                                }.onError {
-                                    SubtleButton(
-                                        onClick = {
-                                            isFlyoutVisible = !isFlyoutVisible
-                                        },
-                                        modifier = Modifier.fillMaxWidth(),
-                                    ) {
-                                        FAIcon(
-                                            imageVector = FontAwesomeIcons.Solid.Bars,
-                                            contentDescription = stringResource(Res.string.home_settings),
+                                            )
+                                        }
+                                    }.onError {
+                                        SubtleButton(
+                                            onClick = {
+                                                isFlyoutVisible = !isFlyoutVisible
+                                            },
+                                            modifier = Modifier.fillMaxWidth(),
+                                        ) {
+                                            FAIcon(
+                                                imageVector = FontAwesomeIcons.Solid.Bars,
+                                                contentDescription = stringResource(Res.string.home_settings),
 //                                        modifier = Modifier.size(16.dp),
-                                        )
+                                            )
+                                        }
                                     }
-                                }
                             }
 
                             Spacer(modifier = Modifier.height(8.dp))
@@ -558,7 +558,11 @@ private val HomeTabsPresenter.State.HomeTabs.icon: ImageVector
 @Composable
 private fun presenter(uriHandler: UriHandler) =
     run {
-        val activeAccountPresenter = remember { dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter() }.invoke()
+        val activeAccountPresenter =
+            remember {
+                dev.dimension.flare.ui.presenter.home
+                    .ActiveAccountPresenter()
+            }.invoke()
         val secondaryTabsPresenter = remember { SecondaryTabsPresenter() }.invoke()
         val loginState = remember { LoggedInPresenter() }.invoke()
         val tabState = remember { HomeTabsPresenter() }.invoke()
@@ -602,7 +606,8 @@ private fun presenter(uriHandler: UriHandler) =
         object :
             LoggedInState by loginState,
             HomeTabsPresenter.State by tabState,
-            SecondaryTabsPresenter.State by secondaryTabsPresenter, UserState by activeAccountPresenter {
+            SecondaryTabsPresenter.State by secondaryTabsPresenter,
+            UserState by activeAccountPresenter {
             val notificationState = allNotificationState
             val scrollToTopRegistry = scrollToTopRegistry
             val deeplinkPresenter = deeplinkPresenter

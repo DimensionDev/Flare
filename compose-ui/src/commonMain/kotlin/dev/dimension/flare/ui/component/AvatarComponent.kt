@@ -8,6 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import dev.dimension.flare.data.model.AvatarShape
 import kotlin.native.HiddenFromObjC
 
 @HiddenFromObjC
@@ -17,7 +18,7 @@ public fun AvatarComponent(
     modifier: Modifier = Modifier,
     size: Dp = AvatarComponentDefaults.size,
 ) {
-    val appearanceSettings = LocalComponentAppearance.current
+    val appearanceSettings = LocalTimelineAppearance.current
     NetworkImage(
         model = data,
         contentDescription = null,
@@ -26,11 +27,11 @@ public fun AvatarComponent(
                 .size(size)
                 .clip(
                     when (appearanceSettings.avatarShape) {
-                        ComponentAppearance.AvatarShape.CIRCLE -> {
+                        AvatarShape.CIRCLE -> {
                             CircleShape
                         }
 
-                        ComponentAppearance.AvatarShape.SQUARE -> {
+                        AvatarShape.SQUARE -> {
                             RoundedCornerShape(4.dp)
                         }
                     },

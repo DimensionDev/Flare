@@ -35,6 +35,7 @@ import compose.icons.fontawesomeicons.solid.Link
 import dev.dimension.flare.Res
 import dev.dimension.flare.cancel
 import dev.dimension.flare.copied_to_clipboard
+import dev.dimension.flare.data.model.VideoAutoplay
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.settings_appearance_theme_dark
@@ -44,10 +45,9 @@ import dev.dimension.flare.status_share_image
 import dev.dimension.flare.status_share_save_screenshot
 import dev.dimension.flare.status_share_via_fixvx
 import dev.dimension.flare.status_share_via_fxembed
-import dev.dimension.flare.ui.component.ComponentAppearance
 import dev.dimension.flare.ui.component.ComposeInAppNotification
 import dev.dimension.flare.ui.component.FAIcon
-import dev.dimension.flare.ui.component.LocalComponentAppearance
+import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.ViewBox
 import dev.dimension.flare.ui.component.status.StatusItem
 import dev.dimension.flare.ui.model.takeSuccess
@@ -161,10 +161,10 @@ internal fun StatusShareSheet(
                                     elevation = 32.dp,
                                 ) {
                                     CompositionLocalProvider(
-                                        LocalComponentAppearance provides
-                                            LocalComponentAppearance.current.copy(
+                                        LocalTimelineAppearance provides
+                                            LocalTimelineAppearance.current.copy(
                                                 showTranslateButton = false,
-                                                videoAutoplay = ComponentAppearance.VideoAutoplay.NEVER,
+                                                videoAutoplay = VideoAutoplay.NEVER,
                                             ),
                                         LocalContentColor provides FluentTheme.colors.text.text.primary,
                                         LocalTextStyle provides LocalTextStyle.current.copy(Color.Unspecified),

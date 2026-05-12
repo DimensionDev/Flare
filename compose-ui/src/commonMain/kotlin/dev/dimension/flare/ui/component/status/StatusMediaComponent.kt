@@ -35,11 +35,11 @@ import compose.icons.fontawesomeicons.solid.EyeSlash
 import dev.dimension.flare.common.SystemUtils
 import dev.dimension.flare.compose.ui.Res
 import dev.dimension.flare.compose.ui.status_sensitive_media
+import dev.dimension.flare.data.model.VideoAutoplay
 import dev.dimension.flare.ui.component.AdaptiveGrid
 import dev.dimension.flare.ui.component.AudioPlayer
-import dev.dimension.flare.ui.component.ComponentAppearance
 import dev.dimension.flare.ui.component.FAIcon
-import dev.dimension.flare.ui.component.LocalComponentAppearance
+import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.platform.LocalWifiState
 import dev.dimension.flare.ui.component.platform.PlatformCircularProgressIndicator
@@ -65,7 +65,7 @@ internal fun StatusMediaComponent(
     modifier: Modifier = Modifier,
 ) {
     val uriHandler = LocalUriHandler.current
-    val appearanceSettings = LocalComponentAppearance.current
+    val appearanceSettings = LocalTimelineAppearance.current
     var hideSensitive by remember(appearanceSettings.showSensitiveContent) {
         mutableStateOf(sensitive && !appearanceSettings.showSensitiveContent)
     }
@@ -78,16 +78,15 @@ internal fun StatusMediaComponent(
                 data.fastForEach { media ->
                     Box {
                         CompositionLocalProvider(
-                            LocalComponentAppearance provides
-                                appearanceSettings
-                                    .copy(
-                                        videoAutoplay =
-                                            if (hideSensitive) {
-                                                ComponentAppearance.VideoAutoplay.NEVER
-                                            } else {
-                                                appearanceSettings.videoAutoplay
-                                            },
-                                    ),
+                            LocalTimelineAppearance provides
+                                appearanceSettings.copy(
+                                    videoAutoplay =
+                                        if (hideSensitive) {
+                                            VideoAutoplay.NEVER
+                                        } else {
+                                            appearanceSettings.videoAutoplay
+                                        },
+                                ),
                         ) {
                             MediaItem(
                                 media = media,
@@ -246,7 +245,7 @@ public fun MediaItem(
     showCountdown: Boolean = true,
     contentScale: ContentScale = ContentScale.Crop,
 ) {
-    val appearanceSettings = LocalComponentAppearance.current
+    val appearanceSettings = LocalTimelineAppearance.current
     when (media) {
         is UiMedia.Image -> {
             NetworkImage(
@@ -274,8 +273,8 @@ public fun MediaItem(
             val wifiState = LocalWifiState.current
             val shouldPlay =
                 remember(appearanceSettings.videoAutoplay, wifiState) {
-                    appearanceSettings.videoAutoplay == ComponentAppearance.VideoAutoplay.ALWAYS ||
-                        (appearanceSettings.videoAutoplay == ComponentAppearance.VideoAutoplay.WIFI && wifiState)
+                    appearanceSettings.videoAutoplay == VideoAutoplay.ALWAYS ||
+                        (appearanceSettings.videoAutoplay == VideoAutoplay.WIFI && wifiState)
                 }
             if (shouldPlay) {
                 PlatformVideoPlayer(

@@ -33,6 +33,50 @@ class AppearancePatchTest {
         assertFalse(cleared.contains(AppearanceKeys.Theme))
     }
 
+    @Test
+    fun patchSynthesizesGlobalAndTimelineAppearanceModels() {
+        val patch =
+            AppearancePatch.EMPTY
+                .set(AppearanceKeys.Theme, Theme.DARK)
+                .set(AppearanceKeys.AvatarShape, AvatarShape.SQUARE)
+                .set(AppearanceKeys.ShowMedia, false)
+                .set(AppearanceKeys.TimelineDisplayMode, TimelineDisplayMode.Gallery)
+
+        assertEquals(
+            GlobalAppearance(
+                theme = Theme.DARK,
+            ),
+            patch.toGlobalAppearance(),
+        )
+        assertEquals(
+            TimelineAppearance(
+                avatarShape = AvatarShape.SQUARE,
+                showMedia = false,
+                timelineDisplayMode = TimelineDisplayMode.Gallery,
+            ),
+            patch.toTimelineAppearance(),
+        )
+    }
+
+    @Test
+    fun timelineOverrideFallsBackToGlobalTimelineDefaults() {
+        val globalPatch =
+            AppearancePatch.EMPTY
+                .set(AppearanceKeys.ShowMedia, false)
+                .set(AppearanceKeys.ShowNumbers, false)
+        val timelinePatch =
+            AppearancePatch.EMPTY
+                .set(AppearanceKeys.ShowMedia, true)
+
+        assertEquals(
+            TimelineAppearance(
+                showMedia = true,
+                showNumbers = false,
+            ),
+            globalPatch.toTimelineAppearance(timelinePatch),
+        )
+    }
+
     @OptIn(ExperimentalSerializationApi::class)
     @Test
     fun activeAppearanceSettingsFieldsAreCoveredByCatalog() {

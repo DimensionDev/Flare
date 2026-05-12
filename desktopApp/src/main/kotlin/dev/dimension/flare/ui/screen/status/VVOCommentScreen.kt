@@ -20,7 +20,7 @@ import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.FlareScrollBar
-import dev.dimension.flare.ui.component.LocalComponentAppearance
+import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.StatusItem
 import dev.dimension.flare.ui.component.status.status
@@ -52,8 +52,8 @@ internal fun VVOCommentScreen(
                 .fillMaxSize(),
     ) {
         CompositionLocalProvider(
-            LocalComponentAppearance provides
-                LocalComponentAppearance.current.copy(
+            LocalTimelineAppearance provides
+                LocalTimelineAppearance.current.copy(
                     lineLimit = Int.MAX_VALUE,
                 ),
         ) {

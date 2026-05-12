@@ -15,20 +15,20 @@ struct StatusUIKitAppearance: Equatable {
     let compatLinkPreview: Bool
     let expandMediaSize: Bool
 
-    init(settings: AppearanceSettings) {
-        fullWidthPost = settings.fullWidthPost
-        avatarShape = settings.avatarShape
-        avatarShapeID = settings.avatarShape.name
-        showPlatformLogo = settings.showPlatformLogo
-        absoluteTimestamp = settings.absoluteTimestamp
-        postActionStyle = settings.postActionStyle
-        postActionStyleID = settings.postActionStyle.name
-        showNumbers = settings.showNumbers
-        showMedia = settings.showMedia
-        showSensitiveContent = settings.showSensitiveContent
-        showLinkPreview = settings.showLinkPreview
-        compatLinkPreview = settings.compatLinkPreview
-        expandMediaSize = settings.expandMediaSize
+    init(timeline: TimelineAppearance) {
+        fullWidthPost = timeline.fullWidthPost
+        avatarShape = timeline.avatarShape
+        avatarShapeID = timeline.avatarShape.name
+        showPlatformLogo = timeline.showPlatformLogo
+        absoluteTimestamp = timeline.absoluteTimestamp
+        postActionStyle = timeline.postActionStyle
+        postActionStyleID = timeline.postActionStyle.name
+        showNumbers = timeline.showNumbers
+        showMedia = timeline.showMedia
+        showSensitiveContent = timeline.showSensitiveContent
+        showLinkPreview = timeline.showLinkPreview
+        compatLinkPreview = timeline.compatLinkPreview
+        expandMediaSize = timeline.expandMediaSize
     }
 
     static func == (lhs: Self, rhs: Self) -> Bool {
@@ -61,12 +61,12 @@ struct TimelineUIKitAppearance: Equatable {
         timelineDisplayMode == .card
     }
 
-    init(settings: AppearanceSettings) {
-        status = StatusUIKitAppearance(settings: settings)
-        timelineDisplayMode = settings.timelineDisplayMode
-        timelineDisplayModeID = settings.timelineDisplayMode.name
-        videoAutoplay = settings.videoAutoplay
-        videoAutoplayID = settings.videoAutoplay.name
+    init(timeline: TimelineAppearance) {
+        status = StatusUIKitAppearance(timeline: timeline)
+        timelineDisplayMode = timeline.timelineDisplayMode
+        timelineDisplayModeID = timeline.timelineDisplayMode.name
+        videoAutoplay = timeline.videoAutoplay
+        videoAutoplayID = timeline.videoAutoplay.name
     }
 
     static func == (lhs: Self, rhs: Self) -> Bool {
@@ -81,10 +81,10 @@ struct GalleryUIKitAppearance: Equatable {
     let avatarShape: AvatarShape
     let avatarShapeID: String
 
-    init(settings: AppearanceSettings) {
-        showMedia = settings.showMedia
-        avatarShape = settings.avatarShape
-        avatarShapeID = settings.avatarShape.name
+    init(timeline: TimelineAppearance) {
+        showMedia = timeline.showMedia
+        avatarShape = timeline.avatarShape
+        avatarShapeID = timeline.avatarShape.name
     }
 
     static func == (lhs: Self, rhs: Self) -> Bool {

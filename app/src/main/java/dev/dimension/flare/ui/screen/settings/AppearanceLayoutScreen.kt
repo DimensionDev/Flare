@@ -25,13 +25,14 @@ import androidx.compose.ui.unit.dp
 import dev.dimension.flare.R
 import dev.dimension.flare.data.model.BottomBarBehavior
 import dev.dimension.flare.data.model.BottomBarStyle
-import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.data.model.PostActionStyle
 import dev.dimension.flare.data.model.TimelineDisplayMode
 import dev.dimension.flare.data.model.appearance.AppearanceKeys
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FlareLargeFlexibleTopAppBar
 import dev.dimension.flare.ui.component.FlareScaffold
+import dev.dimension.flare.ui.component.LocalGlobalAppearance
+import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.status.StatusItem
 import dev.dimension.flare.ui.model.isSuccess
 import dev.dimension.flare.ui.model.onSuccess
@@ -47,7 +48,8 @@ import moe.tlaster.precompose.molecule.producePresenter
 internal fun AppearanceLayoutScreen(onBack: () -> Unit) {
     val topAppBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val state by producePresenter { appearancePresenter() }
-    val appearanceSettings = LocalAppearanceSettings.current
+    val globalAppearance = LocalGlobalAppearance.current
+    val timelineAppearance = LocalTimelineAppearance.current
     FlareScaffold(
         topBar = {
             FlareLargeFlexibleTopAppBar(
@@ -83,7 +85,7 @@ internal fun AppearanceLayoutScreen(onBack: () -> Unit) {
                             BottomBarStyle.Floating to stringResource(id = R.string.settings_appearance_bottombar_style_floating),
                             BottomBarStyle.Classic to stringResource(id = R.string.settings_appearance_bottombar_style_classic),
                         ),
-                    selected = appearanceSettings.bottomBarStyle,
+                    selected = globalAppearance.bottomBarStyle,
                     onSelected = {
                         state.update(AppearanceKeys.BottomBarStyle, it)
                     },
@@ -100,7 +102,7 @@ internal fun AppearanceLayoutScreen(onBack: () -> Unit) {
                             BottomBarBehavior.HideOnScroll to
                                 stringResource(id = R.string.settings_appearance_bottombar_behavior_hide_on_scroll),
                         ),
-                    selected = appearanceSettings.bottomBarBehavior,
+                    selected = globalAppearance.bottomBarBehavior,
                     onSelected = {
                         state.update(AppearanceKeys.BottomBarBehavior, it)
                     },
@@ -115,7 +117,7 @@ internal fun AppearanceLayoutScreen(onBack: () -> Unit) {
                             TimelineDisplayMode.Plain to stringResource(id = R.string.settings_appearance_timeline_display_mode_plain),
                             TimelineDisplayMode.Gallery to stringResource(id = R.string.settings_appearance_timeline_display_mode_gallery),
                         ),
-                    selected = appearanceSettings.timelineDisplayMode,
+                    selected = timelineAppearance.timelineDisplayMode,
                     onSelected = {
                         state.update(AppearanceKeys.TimelineDisplayMode, it)
                     },
@@ -142,7 +144,7 @@ internal fun AppearanceLayoutScreen(onBack: () -> Unit) {
                 }
                 SegmentedListItem(
                     onClick = {
-                        state.update(AppearanceKeys.FullWidthPost, !appearanceSettings.fullWidthPost)
+                        state.update(AppearanceKeys.FullWidthPost, !timelineAppearance.fullWidthPost)
                     },
                     shapes =
                         if (state.sampleStatus.isSuccess) {
@@ -158,7 +160,7 @@ internal fun AppearanceLayoutScreen(onBack: () -> Unit) {
                     },
                     trailingContent = {
                         Switch(
-                            checked = appearanceSettings.fullWidthPost,
+                            checked = timelineAppearance.fullWidthPost,
                             onCheckedChange = {
                                 state.update(AppearanceKeys.FullWidthPost, it)
                             },
@@ -177,21 +179,21 @@ internal fun AppearanceLayoutScreen(onBack: () -> Unit) {
                                 stringResource(id = R.string.settings_appearance_post_action_style_right_aligned),
                             PostActionStyle.Stretch to stringResource(id = R.string.settings_appearance_post_action_style_stretch),
                         ),
-                    selected = appearanceSettings.postActionStyle,
+                    selected = timelineAppearance.postActionStyle,
                     onSelected = {
                         state.update(AppearanceKeys.PostActionStyle, it)
                     },
                     shapes =
-                        if (appearanceSettings.postActionStyle != PostActionStyle.Hidden) {
+                        if (timelineAppearance.postActionStyle != PostActionStyle.Hidden) {
                             ListItemDefaults.item()
                         } else {
                             ListItemDefaults.last()
                         },
                 )
-                AnimatedVisibility(appearanceSettings.postActionStyle != PostActionStyle.Hidden) {
+                AnimatedVisibility(timelineAppearance.postActionStyle != PostActionStyle.Hidden) {
                     SegmentedListItem(
                         onClick = {
-                            state.update(AppearanceKeys.ShowNumbers, !appearanceSettings.showNumbers)
+                            state.update(AppearanceKeys.ShowNumbers, !timelineAppearance.showNumbers)
                         },
                         shapes = ListItemDefaults.last(),
                         content = {
@@ -202,7 +204,7 @@ internal fun AppearanceLayoutScreen(onBack: () -> Unit) {
                         },
                         trailingContent = {
                             Switch(
-                                checked = appearanceSettings.showNumbers,
+                                checked = timelineAppearance.showNumbers,
                                 onCheckedChange = {
                                     state.update(AppearanceKeys.ShowNumbers, it)
                                 },

@@ -61,11 +61,11 @@ import compose.icons.fontawesomeicons.solid.Download
 import compose.icons.fontawesomeicons.solid.Image
 import compose.icons.fontawesomeicons.solid.Link
 import dev.dimension.flare.R
+import dev.dimension.flare.data.model.VideoAutoplay
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.component.ComponentAppearance
 import dev.dimension.flare.ui.component.FAIcon
-import dev.dimension.flare.ui.component.LocalComponentAppearance
+import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.ViewBox
 import dev.dimension.flare.ui.component.status.StatusItem
 import dev.dimension.flare.ui.model.takeSuccess
@@ -147,10 +147,10 @@ internal fun StatusShareSheet(
                         ) {
                             Box {
                                 CompositionLocalProvider(
-                                    LocalComponentAppearance provides
-                                        LocalComponentAppearance.current.copy(
+                                    LocalTimelineAppearance provides
+                                        LocalTimelineAppearance.current.copy(
                                             showTranslateButton = false,
-                                            videoAutoplay = ComponentAppearance.VideoAutoplay.NEVER,
+                                            videoAutoplay = VideoAutoplay.NEVER,
                                         ),
                                 ) {
                                     StatusItem(

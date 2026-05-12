@@ -9,7 +9,6 @@ import VideoPlayer
 import Combine
 
 struct StatusMediaScreen: View {
-    @Environment(\.appearanceSettings) private var appearanceSettings
     @Environment(\.dismiss) var dismiss
     let accountType: AccountType
     let statusKey: MicroBlogKey

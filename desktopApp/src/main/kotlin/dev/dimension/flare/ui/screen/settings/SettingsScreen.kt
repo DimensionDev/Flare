@@ -57,7 +57,6 @@ import dev.dimension.flare.add_account
 import dev.dimension.flare.app_name
 import dev.dimension.flare.cancel
 import dev.dimension.flare.data.model.AvatarShape
-import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.data.model.PostActionStyle
 import dev.dimension.flare.data.model.Theme
 import dev.dimension.flare.data.model.TimelineDisplayMode
@@ -220,6 +219,8 @@ import dev.dimension.flare.ui.component.ComposeInAppNotification
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScrollBar
 import dev.dimension.flare.ui.component.Header
+import dev.dimension.flare.ui.component.LocalGlobalAppearance
+import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.isSuccess
@@ -628,7 +629,7 @@ internal fun SettingsScreen(
                                     onClick = { isFlyoutVisible = !isFlyoutVisible },
                                     content = {
                                         Text(
-                                            when (LocalAppearanceSettings.current.theme) {
+                                            when (LocalGlobalAppearance.current.theme) {
                                                 Theme.SYSTEM -> stringResource(Res.string.settings_appearance_theme_auto)
                                                 Theme.DARK -> stringResource(Res.string.settings_appearance_theme_dark)
                                                 Theme.LIGHT -> stringResource(Res.string.settings_appearance_theme_light)
@@ -673,7 +674,7 @@ internal fun SettingsScreen(
                                     onClick = { isFlyoutVisible = !isFlyoutVisible },
                                     content = {
                                         Text(
-                                            when (LocalAppearanceSettings.current.avatarShape) {
+                                            when (LocalTimelineAppearance.current.avatarShape) {
                                                 AvatarShape.CIRCLE -> {
                                                     stringResource(
                                                         Res.string.settings_appearance_avatar_shape_round,
@@ -718,7 +719,7 @@ internal fun SettingsScreen(
                     },
                     trailing = {
                         Switcher(
-                            checked = LocalAppearanceSettings.current.showComposeInHomeTimeline,
+                            checked = LocalGlobalAppearance.current.showComposeInHomeTimeline,
                             {
                                 state.appearanceState.update(AppearanceKeys.ShowComposeInHomeTimeline, it)
                             },
@@ -759,7 +760,7 @@ internal fun SettingsScreen(
                                 DropDownButton(
                                     onClick = { isFlyoutVisible = !isFlyoutVisible },
                                     content = {
-                                        items[LocalAppearanceSettings.current.timelineDisplayMode]?.let {
+                                        items[LocalTimelineAppearance.current.timelineDisplayMode]?.let {
                                             Text(stringResource(it))
                                         }
                                     },
@@ -780,7 +781,7 @@ internal fun SettingsScreen(
                     },
                     trailing = {
                         Switcher(
-                            checked = LocalAppearanceSettings.current.fullWidthPost,
+                            checked = LocalTimelineAppearance.current.fullWidthPost,
                             {
                                 state.appearanceState.update(AppearanceKeys.FullWidthPost, it)
                             },
@@ -822,7 +823,7 @@ internal fun SettingsScreen(
                                 DropDownButton(
                                     onClick = { isFlyoutVisible = !isFlyoutVisible },
                                     content = {
-                                        items[LocalAppearanceSettings.current.postActionStyle]?.let {
+                                        items[LocalTimelineAppearance.current.postActionStyle]?.let {
                                             Text(stringResource(it))
                                         }
                                     },
@@ -833,7 +834,7 @@ internal fun SettingsScreen(
                         )
                     },
                 )
-                AnimatedVisibility(LocalAppearanceSettings.current.postActionStyle != PostActionStyle.Hidden) {
+                AnimatedVisibility(LocalTimelineAppearance.current.postActionStyle != PostActionStyle.Hidden) {
                     Column {
                         ExpanderItemSeparator()
                         ExpanderItem(
@@ -845,7 +846,7 @@ internal fun SettingsScreen(
                             },
                             trailing = {
                                 Switcher(
-                                    checked = LocalAppearanceSettings.current.showNumbers,
+                                    checked = LocalTimelineAppearance.current.showNumbers,
                                     {
                                         state.appearanceState.update(AppearanceKeys.ShowNumbers, it)
                                     },
@@ -878,7 +879,7 @@ internal fun SettingsScreen(
                     },
                     trailing = {
                         Switcher(
-                            checked = LocalAppearanceSettings.current.absoluteTimestamp,
+                            checked = LocalTimelineAppearance.current.absoluteTimestamp,
                             {
                                 state.appearanceState.update(AppearanceKeys.AbsoluteTimestamp, it)
                             },
@@ -896,7 +897,7 @@ internal fun SettingsScreen(
                     },
                     trailing = {
                         Switcher(
-                            checked = LocalAppearanceSettings.current.showPlatformLogo,
+                            checked = LocalTimelineAppearance.current.showPlatformLogo,
                             {
                                 state.appearanceState.update(AppearanceKeys.ShowPlatformLogo, it)
                             },
@@ -914,7 +915,7 @@ internal fun SettingsScreen(
                     },
                     trailing = {
                         Switcher(
-                            checked = LocalAppearanceSettings.current.showLinkPreview,
+                            checked = LocalTimelineAppearance.current.showLinkPreview,
                             {
                                 state.appearanceState.update(AppearanceKeys.ShowLinkPreview, it)
                             },
@@ -922,7 +923,7 @@ internal fun SettingsScreen(
                         )
                     },
                 )
-                AnimatedVisibility(LocalAppearanceSettings.current.showLinkPreview) {
+                AnimatedVisibility(LocalTimelineAppearance.current.showLinkPreview) {
                     Column {
                         ExpanderItemSeparator()
                         ExpanderItem(
@@ -934,7 +935,7 @@ internal fun SettingsScreen(
                             },
                             trailing = {
                                 Switcher(
-                                    checked = LocalAppearanceSettings.current.compatLinkPreview,
+                                    checked = LocalTimelineAppearance.current.compatLinkPreview,
                                     {
                                         state.appearanceState.update(AppearanceKeys.CompatLinkPreview, it)
                                     },
@@ -967,7 +968,7 @@ internal fun SettingsScreen(
                     },
                     trailing = {
                         Switcher(
-                            checked = LocalAppearanceSettings.current.showMedia,
+                            checked = LocalTimelineAppearance.current.showMedia,
                             {
                                 state.appearanceState.update(AppearanceKeys.ShowMedia, it)
                             },
@@ -975,7 +976,7 @@ internal fun SettingsScreen(
                         )
                     },
                 )
-                AnimatedVisibility(LocalAppearanceSettings.current.showMedia) {
+                AnimatedVisibility(LocalTimelineAppearance.current.showMedia) {
                     Column {
                         ExpanderItemSeparator()
                         ExpanderItem(
@@ -987,7 +988,7 @@ internal fun SettingsScreen(
                             },
                             trailing = {
                                 Switcher(
-                                    checked = LocalAppearanceSettings.current.showSensitiveContent,
+                                    checked = LocalTimelineAppearance.current.showSensitiveContent,
                                     {
                                         state.appearanceState.update(AppearanceKeys.ShowSensitiveContent, it)
                                     },
@@ -997,7 +998,7 @@ internal fun SettingsScreen(
                         )
                     }
                 }
-                AnimatedVisibility(LocalAppearanceSettings.current.showMedia) {
+                AnimatedVisibility(LocalTimelineAppearance.current.showMedia) {
                     Column {
                         ExpanderItemSeparator()
                         ExpanderItem(
@@ -1009,7 +1010,7 @@ internal fun SettingsScreen(
                             },
                             trailing = {
                                 Switcher(
-                                    checked = LocalAppearanceSettings.current.expandMediaSize,
+                                    checked = LocalTimelineAppearance.current.expandMediaSize,
                                     {
                                         state.appearanceState.update(AppearanceKeys.ExpandMediaSize, it)
                                     },
@@ -1029,7 +1030,7 @@ internal fun SettingsScreen(
                     },
                     trailing = {
                         Switcher(
-                            checked = LocalAppearanceSettings.current.videoAutoplay == VideoAutoplay.ALWAYS,
+                            checked = LocalTimelineAppearance.current.videoAutoplay == VideoAutoplay.ALWAYS,
                             {
                                 state.appearanceState.update(
                                     AppearanceKeys.VideoAutoplay,

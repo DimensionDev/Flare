@@ -40,13 +40,14 @@ import compose.icons.fontawesomeicons.solid.Minus
 import compose.icons.fontawesomeicons.solid.Plus
 import dev.dimension.flare.R
 import dev.dimension.flare.data.model.AvatarShape
-import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.data.model.Theme
 import dev.dimension.flare.data.model.appearance.AppearanceKeys
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareLargeFlexibleTopAppBar
 import dev.dimension.flare.ui.component.FlareScaffold
+import dev.dimension.flare.ui.component.LocalGlobalAppearance
+import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.theme.first
 import dev.dimension.flare.ui.theme.item
 import dev.dimension.flare.ui.theme.last
@@ -63,7 +64,8 @@ internal fun AppearanceThemeScreen(
     val topAppBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val state by producePresenter { appearancePresenter() }
     val hapticFeedback = LocalHapticFeedback.current
-    val appearanceSettings = LocalAppearanceSettings.current
+    val globalAppearance = LocalGlobalAppearance.current
+    val timelineAppearance = LocalTimelineAppearance.current
     FlareScaffold(
         topBar = {
             FlareLargeFlexibleTopAppBar(
@@ -97,7 +99,7 @@ internal fun AppearanceThemeScreen(
                         Theme.SYSTEM to stringResource(id = R.string.settings_appearance_theme_auto),
                         Theme.DARK to stringResource(id = R.string.settings_appearance_theme_dark),
                     ),
-                selected = appearanceSettings.theme,
+                selected = globalAppearance.theme,
                 onSelected = {
                     state.update(AppearanceKeys.Theme, it)
                 },
@@ -105,7 +107,7 @@ internal fun AppearanceThemeScreen(
             )
             SegmentedListItem(
                 onClick = {
-                    state.update(AppearanceKeys.PureColorMode, !appearanceSettings.pureColorMode)
+                    state.update(AppearanceKeys.PureColorMode, !globalAppearance.pureColorMode)
                 },
                 shapes = ListItemDefaults.item(),
                 content = {
@@ -116,7 +118,7 @@ internal fun AppearanceThemeScreen(
                 },
                 trailingContent = {
                     Switch(
-                        checked = appearanceSettings.pureColorMode,
+                        checked = globalAppearance.pureColorMode,
                         onCheckedChange = {
                             state.update(AppearanceKeys.PureColorMode, it)
                         },
@@ -126,7 +128,7 @@ internal fun AppearanceThemeScreen(
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 SegmentedListItem(
                     onClick = {
-                        state.update(AppearanceKeys.DynamicTheme, !appearanceSettings.dynamicTheme)
+                        state.update(AppearanceKeys.DynamicTheme, !globalAppearance.dynamicTheme)
                     },
                     shapes = ListItemDefaults.item(),
                     content = {
@@ -137,7 +139,7 @@ internal fun AppearanceThemeScreen(
                     },
                     trailingContent = {
                         Switch(
-                            checked = appearanceSettings.dynamicTheme,
+                            checked = globalAppearance.dynamicTheme,
                             onCheckedChange = {
                                 state.update(AppearanceKeys.DynamicTheme, it)
                             },
@@ -145,7 +147,7 @@ internal fun AppearanceThemeScreen(
                     },
                 )
             }
-            AnimatedVisibility(visible = !appearanceSettings.dynamicTheme || Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+            AnimatedVisibility(visible = !globalAppearance.dynamicTheme || Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
                 SegmentedListItem(
                     onClick = {
                         toColorPicker.invoke()
@@ -177,14 +179,14 @@ internal fun AppearanceThemeScreen(
                         AvatarShape.CIRCLE to stringResource(id = R.string.settings_appearance_avatar_shape_round),
                         AvatarShape.SQUARE to stringResource(id = R.string.settings_appearance_avatar_shape_square),
                     ),
-                selected = appearanceSettings.avatarShape,
+                selected = timelineAppearance.avatarShape,
                 onSelected = {
                     state.update(AppearanceKeys.AvatarShape, it)
                 },
                 shapes = ListItemDefaults.item(),
             )
 
-            var fontSizeDiff by remember { mutableFloatStateOf(appearanceSettings.fontSizeDiff) }
+            var fontSizeDiff by remember { mutableFloatStateOf(globalAppearance.fontSizeDiff) }
             SegmentedListItem(
                 onClick = {},
                 shapes = ListItemDefaults.last(),

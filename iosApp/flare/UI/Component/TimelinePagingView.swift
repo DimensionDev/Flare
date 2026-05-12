@@ -63,7 +63,7 @@ struct TimelinePagingContent: View {
     @AppStorage("pref_timeline_use_compose_view") private var useComposeView: Bool = false
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @Environment(\.openURL) private var openURL
-    @Environment(\.appearanceSettings.timelineDisplayMode) private var timelineDisplayMode
+    @Environment(\.timelineAppearance.timelineDisplayMode) private var timelineDisplayMode
     @Environment(\.refresh) private var refreshAction: RefreshAction?
     let data: PagingState<UiTimelineV2>
     let detailStatusKey: MicroBlogKey?

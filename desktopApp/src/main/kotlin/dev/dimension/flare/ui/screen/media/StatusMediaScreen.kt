@@ -70,12 +70,12 @@ import dev.dimension.flare.Res
 import dev.dimension.flare.common.DesktopDownloadManager
 import dev.dimension.flare.common.FlareHardwareShortcutDetector
 import dev.dimension.flare.common.FlareHardwareShortcutsElement
+import dev.dimension.flare.data.model.VideoAutoplay
 import dev.dimension.flare.media_save
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.component.ComponentAppearance
 import dev.dimension.flare.ui.component.FAIcon
-import dev.dimension.flare.ui.component.LocalComponentAppearance
+import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.status.MediaItem
 import dev.dimension.flare.ui.humanizer.humanize
@@ -229,11 +229,11 @@ internal fun StatusMediaScreen(
 
                     else -> {
                         CompositionLocalProvider(
-                            LocalComponentAppearance provides
-                                LocalComponentAppearance
+                            LocalTimelineAppearance provides
+                                LocalTimelineAppearance
                                     .current
                                     .copy(
-                                        videoAutoplay = ComponentAppearance.VideoAutoplay.ALWAYS,
+                                        videoAutoplay = VideoAutoplay.ALWAYS,
                                     ),
                         ) {
                             MediaItem(

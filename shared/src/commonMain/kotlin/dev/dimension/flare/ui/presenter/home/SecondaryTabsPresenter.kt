@@ -134,17 +134,20 @@ public class SecondaryTabsPresenter :
 
     private fun toTab(shortcut: ShortcutSpec): Tab? =
         when (val target = shortcut.target) {
-            is ShortcutSpec.Target.Route ->
+            is ShortcutSpec.Target.Route -> {
                 Tab(
                     title = shortcut.title,
                     icon = shortcut.icon,
                     destination = Destination.Route(target.route),
                 )
-            is ShortcutSpec.Target.Timeline ->
+            }
+
+            is ShortcutSpec.Target.Timeline -> {
                 Tab(
                     title = shortcut.title,
                     icon = shortcut.icon,
                     destination = Destination.Timeline(timelineResolver.toTabItem(target.source)),
                 )
+            }
         }
 }

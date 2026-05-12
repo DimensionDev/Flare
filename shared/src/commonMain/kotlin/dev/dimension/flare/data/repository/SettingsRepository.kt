@@ -12,10 +12,13 @@ import dev.dimension.flare.data.model.AppearanceSettings
 import dev.dimension.flare.data.model.appearance.AppearanceBag
 import dev.dimension.flare.data.model.appearance.AppearanceKey
 import dev.dimension.flare.data.model.appearance.AppearancePatch
+import dev.dimension.flare.data.model.appearance.GlobalAppearance
+import dev.dimension.flare.data.model.appearance.TimelineAppearance
 import dev.dimension.flare.data.model.appearance.migrateAppearanceV1ToV2
-import dev.dimension.flare.data.model.appearance.toAppearanceSettings
 import dev.dimension.flare.data.model.appearance.toBag
+import dev.dimension.flare.data.model.appearance.toGlobalAppearance
 import dev.dimension.flare.data.model.appearance.toPatch
+import dev.dimension.flare.data.model.appearance.toTimelineAppearance
 import dev.dimension.flare.data.model.tab.TabSettingsV2
 import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
@@ -51,19 +54,29 @@ public class SettingsRepository internal constructor(
     private val tabSettingsMigrationMutex = Mutex()
     private var tabSettingsMigrationCompleted = false
 
-    public val appearancePatch: Flow<AppearancePatch> by lazy {
+    internal val appearanceBag: Flow<AppearanceBag> by lazy {
         flow {
             ensureAppearanceMigrated()
             emitAll(
                 appearanceBagStore.data
-                    .map { it.toPatch() }
                     .distinctUntilChanged(),
             )
         }
     }
-    public val appearanceSettings: Flow<AppearanceSettings> by lazy {
+
+    public val appearancePatch: Flow<AppearancePatch> by lazy {
+        appearanceBag
+            .map { it.toPatch() }
+            .distinctUntilChanged()
+    }
+    public val globalAppearance: Flow<GlobalAppearance> by lazy {
         appearancePatch
-            .map { it.toAppearanceSettings() }
+            .map { it.toGlobalAppearance() }
+            .distinctUntilChanged()
+    }
+    public val timelineAppearance: Flow<TimelineAppearance> by lazy {
+        appearancePatch
+            .map { it.toTimelineAppearance() }
             .distinctUntilChanged()
     }
     private val appSettingsStore: DataStore<AppSettings> by lazy { appDataStore.appSettingsStore }
@@ -101,6 +114,16 @@ public class SettingsRepository internal constructor(
     public suspend fun replaceAppearance(patch: AppearancePatch) {
         ensureAppearanceMigrated()
         appearanceBagStore.updateData { patch.toBag() }
+    }
+
+    internal suspend fun replaceAppearance(bag: AppearanceBag) {
+        ensureAppearanceMigrated()
+        appearanceBagStore.updateData { bag }
+    }
+
+    internal suspend fun replaceAppearance(settings: AppearanceSettings) {
+        ensureAppearanceMigrated()
+        appearanceBagStore.updateData { settings.toPatch().toBag() }
     }
 
 //    private val tabSettingsStore by lazy {

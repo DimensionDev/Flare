@@ -479,7 +479,10 @@ internal fun HomeScreen(afterInit: () -> Unit) {
 
 private fun getDirection(data: SecondaryTabsPresenter.Tab): Route? =
     when (val target = data.destination) {
-        is SecondaryTabsPresenter.Destination.Route -> Route.from(target.route)
+        is SecondaryTabsPresenter.Destination.Route -> {
+            Route.from(target.route)
+        }
+
         is SecondaryTabsPresenter.Destination.Timeline -> {
             (target.tabItem as? SourceTimelineTabItemV2)?.source?.let { Route.Timeline(it) }
         }

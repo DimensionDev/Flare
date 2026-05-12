@@ -2,7 +2,7 @@ import SwiftUI
 import KotlinSharedUI
 
 struct VVOStatusScreen: View {
-    @Environment(\.appearanceSettings.timelineDisplayMode) private var timelineDisplayMode
+    @Environment(\.timelineAppearance.timelineDisplayMode) private var timelineDisplayMode
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     let statusKey: MicroBlogKey
     let accountType: AccountType

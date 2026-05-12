@@ -40,7 +40,7 @@ private enum FollowButtonState: Equatable {
 }
 
 struct CommonProfileHeader: View {
-    @Environment(\.appearanceSettings.timelineDisplayMode) private var timelineDisplayMode
+    @Environment(\.timelineAppearance.timelineDisplayMode) private var timelineDisplayMode
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @Environment(\.openURL) private var openURL
     let user: UiProfile

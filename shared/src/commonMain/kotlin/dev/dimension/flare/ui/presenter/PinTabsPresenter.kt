@@ -2,8 +2,8 @@ package dev.dimension.flare.ui.presenter
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import dev.dimension.flare.data.model.tab.TimelineSlot
 import dev.dimension.flare.data.model.tab.TimelineResolver
+import dev.dimension.flare.data.model.tab.TimelineSlot
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.ui.model.UiState
@@ -73,8 +73,7 @@ public abstract class PinTabsPresenter<T> :
                 }
             }
 
-            override fun timelineTabItem(item: T): TimelineTabItemV2 =
-                timelineResolver.toTabItem(getTimelineTabItem(item))
+            override fun timelineTabItem(item: T): TimelineTabItemV2 = timelineResolver.toTabItem(getTimelineTabItem(item))
         }
     }
 

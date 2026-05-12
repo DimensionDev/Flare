@@ -22,7 +22,7 @@ public class ExportSettingsPresenter :
     public suspend fun export(): String {
         val export =
             SettingsExport(
-                appearanceSettings = settingsRepository.appearanceSettings.first(),
+                appearanceBag = settingsRepository.appearanceBag.first(),
                 appSettings = settingsRepository.appSettings.first(),
                 tabSettingsV2 = settingsRepository.tabSettingsV2.first(),
             )

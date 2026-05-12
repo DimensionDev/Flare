@@ -3,7 +3,7 @@ import KotlinSharedUI
 
 /// UIKit port of `TimelineView`. Manual frame-based layout.
 final class TimelineUIView: UIView, ManualLayoutMeasurable, TimelineHeightProviding {
-    var appearance = StatusUIKitAppearance(settings: AppearanceSettings.companion.Default) {
+    var appearance = StatusUIKitAppearance(timeline: TimelineAppearance.companion.Default) {
         didSet {
             guard appearance != oldValue else { return }
             rebuildIfNeeded()

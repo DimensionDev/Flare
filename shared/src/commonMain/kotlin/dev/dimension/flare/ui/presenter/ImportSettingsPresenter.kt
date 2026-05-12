@@ -5,9 +5,11 @@ import dev.dimension.flare.common.JSON
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.model.AppearanceSettings
+import dev.dimension.flare.data.model.LegacyAppearanceSettingsAndTabsExport
+import dev.dimension.flare.data.model.LegacyAppearanceSettingsExport
 import dev.dimension.flare.data.model.LegacySettingsExport
 import dev.dimension.flare.data.model.SettingsExport
-import dev.dimension.flare.data.model.appearance.toPatch
+import dev.dimension.flare.data.model.appearance.AppearanceBag
 import dev.dimension.flare.data.model.tab.TabSettingsV2
 import dev.dimension.flare.data.model.tab.toTabSettingsV2
 import dev.dimension.flare.data.repository.SettingsRepository
@@ -33,19 +35,37 @@ public class ImportSettingsPresenter(
         val root = JSON.parseToJsonElement(jsonContent).jsonObject
         val imported =
             when {
-                "tabSettingsV2" in root -> {
+                "tabSettingsV2" in root && "appearanceBag" in root -> {
                     val export = jsonContent.decodeJson(SettingsExport.serializer())
                     ImportedSettings(
-                        appearanceSettings = export.appearanceSettings,
+                        appearance = ImportedAppearance.Bag(export.appearanceBag),
                         appSettings = export.appSettings,
                         tabSettingsV2 = export.tabSettingsV2,
                     )
                 }
 
-                "tabSettings" in root -> {
+                "tabSettingsV2" in root && "appearanceSettings" in root -> {
+                    val export = jsonContent.decodeJson(LegacyAppearanceSettingsExport.serializer())
+                    ImportedSettings(
+                        appearance = ImportedAppearance.Settings(export.appearanceSettings),
+                        appSettings = export.appSettings,
+                        tabSettingsV2 = export.tabSettingsV2,
+                    )
+                }
+
+                "tabSettings" in root && "appearanceBag" in root -> {
                     val export = jsonContent.decodeJson(LegacySettingsExport.serializer())
                     ImportedSettings(
-                        appearanceSettings = export.appearanceSettings,
+                        appearance = ImportedAppearance.Bag(export.appearanceBag),
+                        appSettings = export.appSettings,
+                        tabSettingsV2 = export.tabSettings.toTabSettingsV2(),
+                    )
+                }
+
+                "tabSettings" in root && "appearanceSettings" in root -> {
+                    val export = jsonContent.decodeJson(LegacyAppearanceSettingsAndTabsExport.serializer())
+                    ImportedSettings(
+                        appearance = ImportedAppearance.Settings(export.appearanceSettings),
                         appSettings = export.appSettings,
                         tabSettingsV2 = export.tabSettings.toTabSettingsV2(),
                     )
@@ -56,7 +76,10 @@ public class ImportSettingsPresenter(
                 }
             }
 
-        settingsRepository.replaceAppearance(imported.appearanceSettings.toPatch())
+        when (val appearance = imported.appearance) {
+            is ImportedAppearance.Bag -> settingsRepository.replaceAppearance(appearance.value)
+            is ImportedAppearance.Settings -> settingsRepository.replaceAppearance(appearance.value)
+        }
 
         settingsRepository.updateAppSettings {
             imported.appSettings
@@ -68,8 +91,18 @@ public class ImportSettingsPresenter(
     }
 
     private data class ImportedSettings(
-        val appearanceSettings: AppearanceSettings,
+        val appearance: ImportedAppearance,
         val appSettings: AppSettings,
         val tabSettingsV2: TabSettingsV2,
     )
+
+    private sealed interface ImportedAppearance {
+        data class Bag(
+            val value: AppearanceBag,
+        ) : ImportedAppearance
+
+        data class Settings(
+            val value: AppearanceSettings,
+        ) : ImportedAppearance
+    }
 }

@@ -2,7 +2,7 @@ import SwiftUI
 import KotlinSharedUI
 
 struct DateTimeText: View {
-    @Environment(\.appearanceSettings.absoluteTimestamp) private var absoluteTimestamp
+    @Environment(\.timelineAppearance.absoluteTimestamp) private var absoluteTimestamp
     let data: UiDateTime
     let fullTime: Bool
 

@@ -40,7 +40,7 @@ struct MediaView: View {
 }
 
 struct MediaVideoView: View {
-    @Environment(\.appearanceSettings.videoAutoplay) private var videoAutoplay
+    @Environment(\.timelineAppearance.videoAutoplay) private var videoAutoplay
     @Environment(\.networkKind) private var networkKind
     @Environment(\.isScrolling) private var isScrolling
     @Environment(\.isScrollingState) private var isScrollingState

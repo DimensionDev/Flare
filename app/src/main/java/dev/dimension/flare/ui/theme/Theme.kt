@@ -25,8 +25,9 @@ import androidx.core.view.WindowCompat
 import com.materialkolor.PaletteStyle
 import com.materialkolor.dynamiccolor.ColorSpec
 import com.materialkolor.rememberDynamicColorScheme
-import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.data.model.Theme
+import dev.dimension.flare.ui.component.LocalGlobalAppearance
+import dev.dimension.flare.ui.component.LocalTimelineAppearance
 
 private object MoreColors {
     val Gray50 = Color(0xFFFAFAFA)
@@ -78,14 +79,14 @@ private fun ColorScheme.withPureColorDarkMode(): ColorScheme =
 fun FlareTheme(
     darkTheme: Boolean = isDarkTheme(),
     // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = LocalAppearanceSettings.current.dynamicTheme,
+    dynamicColor: Boolean = LocalGlobalAppearance.current.dynamicTheme,
     content: @Composable () -> Unit,
 ) {
     val context = LocalContext.current
-    val fontSizeDiff = LocalAppearanceSettings.current.fontSizeDiff
-    val lineHeightDiff = LocalAppearanceSettings.current.lineHeightDiff
-    val seed = Color(LocalAppearanceSettings.current.colorSeed)
-    val pureColorMode = LocalAppearanceSettings.current.pureColorMode
+    val fontSizeDiff = LocalGlobalAppearance.current.fontSizeDiff
+    val lineHeightDiff = LocalGlobalAppearance.current.lineHeightDiff
+    val seed = Color(LocalGlobalAppearance.current.colorSeed)
+    val pureColorMode = LocalGlobalAppearance.current.pureColorMode
     val colorScheme =
         if (dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             remember(
@@ -172,8 +173,8 @@ fun FlareTheme(
 
 @Composable
 private fun isDarkTheme(): Boolean =
-    LocalAppearanceSettings.current.theme == Theme.DARK ||
-        (LocalAppearanceSettings.current.theme == Theme.SYSTEM && isSystemInDarkTheme())
+    LocalGlobalAppearance.current.theme == Theme.DARK ||
+        (LocalGlobalAppearance.current.theme == Theme.SYSTEM && isSystemInDarkTheme())
 
 @Composable
 private fun ApplyCaptionBarAppearance(

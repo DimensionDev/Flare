@@ -4,12 +4,14 @@ import SwiftUIBackports
 
 struct GroupConfigScreen: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.timelineAppearance) private var baseTimelineAppearance
     let item: GroupTimelineTabItemV2?
     @State private var name: String
     @State private var icon: IconType
+    @State private var enabled: Bool
+    @State private var appearancePatch: AppearancePatch
     @State private var tabs: [TimelineTabItemV2]
     @State private var showAddTabSheet = false
-    @State private var showIconPicker = false
     @State private var editItem: TimelineTabItemV2? = nil
     @StateObject private var presenter: KotlinPresenter<GroupConfigPresenterState>
 
@@ -17,6 +19,10 @@ struct GroupConfigScreen: View {
         self.item = item
         _name = State(initialValue: item?.title.text ?? "")
         _icon = State(initialValue: item?.icon ?? IconType.Material(icon: .rss))
+        _enabled = State(initialValue: item?.enabled ?? true)
+        _appearancePatch = State(
+            initialValue: item?.appearancePatch ?? TimelinePresentationAppearancePatchHelper.shared.empty
+        )
         _tabs = State(initialValue: Array((item?.children ?? []).reduce(into: [TimelineTabItemV2]()) { result, tab in
             if !result.contains(where: { $0.id == tab.id }) {
                 result.append(tab)
@@ -31,15 +37,22 @@ struct GroupConfigScreen: View {
     
     var body: some View {
         List {
-            Section {
-                HStack {
-                    TabIcon(icon: icon, accountType: AccountType.Guest.shared, size: 36)
-                        .onTapGesture {
-                            showIconPicker = true
-                        }
-                    TextField("tab_settings_group_name_placeholder", text: $name)
-                }
-            }
+            TimelinePresentationEditor(
+                text: $name,
+                icon: $icon,
+                availableIcons: presenter.state.availableIcons,
+                withAvatar: false,
+                canUseAvatar: false,
+                onWithAvatarChange: { _ in },
+                enabled: $enabled,
+                showEnabled: true,
+                timelineAppearance: TimelinePresentationAppearancePatchHelper.shared.resolve(
+                    base: baseTimelineAppearance,
+                    patch: appearancePatch
+                ),
+                appearancePatch: $appearancePatch,
+                titlePlaceholder: "tab_settings_group_name_placeholder"
+            )
             
             if tabs.isEmpty {
                 Section {
@@ -95,14 +108,6 @@ struct GroupConfigScreen: View {
                 )
             }
         }
-        .sheet(isPresented: $showIconPicker) {
-            NavigationStack {
-                IconPicker(
-                    selectedIcon: icon,
-                    onSelect: { icon = $0 }
-                )
-            }
-        }
         .sheet(isPresented: Binding(get: {
             editItem != nil
         }, set: { value in
@@ -141,6 +146,8 @@ struct GroupConfigScreen: View {
                         initialItem: item,
                         name: name,
                         icon: icon,
+                        appearancePatch: appearancePatch,
+                        enabled: enabled,
                         tabs: tabs,
                         defaultGroupName: NSLocalizedString("tab_settings_group_default_name", comment: "")
                     )
@@ -165,9 +172,8 @@ struct GroupConfigScreen: View {
 struct IconPicker: View {
     @Environment(\.dismiss) private var dismiss
     let selectedIcon: IconType
+    let availableIcons: [IconType]
     let onSelect: (IconType) -> Void
-    
-    let availableIcons: [IconType] = UiIcon.allCases.map { IconType.Material(icon: $0) }
     
     var body: some View {
         ScrollView {

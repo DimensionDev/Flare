@@ -198,59 +198,48 @@ struct TabSettingsScreen: View {
 
 struct EditTabSheet: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.timelineAppearance) private var baseTimelineAppearance
     let onConfirm: (TimelineTabItemV2) -> Void
     let tabItem: TimelineTabItemV2
     @StateObject private var presenter: KotlinPresenter<EditTabPresenterState>
     @State private var text: String = ""
-    @State private var showPicker = false
+    @State private var enabled: Bool
+    @State private var appearancePatch: AppearancePatch
     
     init(onConfirm: @escaping (TimelineTabItemV2) -> Void, tabItem: TimelineTabItemV2) {
         self.onConfirm = onConfirm
         self.tabItem = tabItem
         self._presenter = .init(wrappedValue: .init(presenter: EditTabPresenter(tabItem: tabItem)))
+        self._enabled = State(initialValue: tabItem.enabled)
+        self._appearancePatch = State(
+            initialValue: tabItem.appearancePatch ?? TimelinePresentationAppearancePatchHelper.shared.empty
+        )
     }
     
     var body: some View {
         Form {
-            Section {
-                TabIcon(icon: presenter.state.icon, accountType: nil, size: 64)
-                    .onTapGesture {
-                        showPicker = true
-                    }
-                    .popover(isPresented: $showPicker) {
-                        ScrollView {
-                            LazyVGrid(columns: [GridItem(.adaptive(minimum: 48))], spacing: 8) {
-                                ForEach(presenter.state.availableIcons, id: \.description) { item in
-                                    TabIcon(icon: item, accountType: nil, size: 48)
-                                        .padding(4)
-                                        .onTapGesture {
-                                            presenter.state.setIcon(value: item)
-                                            showPicker = false
-                                        }
-                                }
-                            }
-                            .padding()
-                        }
-                    }
-                    .frame(maxWidth: .infinity, alignment: .center)
-                
-                Toggle(isOn: Binding(get: {
-                    presenter.state.withAvatar
+            TimelinePresentationEditor(
+                text: $text,
+                icon: Binding(get: {
+                    presenter.state.icon
                 }, set: { value in
+                    presenter.state.setIcon(value: value)
+                }),
+                availableIcons: presenter.state.availableIcons,
+                withAvatar: presenter.state.withAvatar,
+                canUseAvatar: presenter.state.canUseAvatar,
+                onWithAvatarChange: { value in
                     presenter.state.setWithAvatar(value: value)
-                })) {
-                    Text("tab_settings_edit_use_avatar")
-                }
-                .disabled(!presenter.state.canUseAvatar)
-            } header: {
-                Text("tab_settings_edit_icon_header")
-            }
-            
-            Section {
-                TextField("tab_settings_edit_title_placeholder", text: $text)
-            } header: {
-                Text("tab_settings_edit_title_header")
-            }
+                },
+                enabled: $enabled,
+                showEnabled: !tabItem.isSystemHomeMixedTimeline,
+                timelineAppearance: TimelinePresentationAppearancePatchHelper.shared.resolve(
+                    base: baseTimelineAppearance,
+                    patch: appearancePatch
+                ),
+                appearancePatch: $appearancePatch,
+                titlePlaceholder: "tab_settings_edit_title_placeholder"
+            )
         }
         .onChange(of: presenter.state.initialText) { oldValue, newValue in
             if case .success(let success) = onEnum(of: newValue) {
@@ -273,7 +262,14 @@ struct EditTabSheet: View {
                 Button(
 //                    role: .confirm
                 ) {
-                    onConfirm(tabItem.withPresentationOverrides(title: text, icon: presenter.state.icon))
+                    onConfirm(
+                        tabItem.withPresentationOverrides(
+                            title: text,
+                            icon: presenter.state.icon,
+                            appearancePatch: appearancePatch,
+                            enabled: enabled
+                        )
+                    )
                     dismiss()
                 } label: {
                     Label {

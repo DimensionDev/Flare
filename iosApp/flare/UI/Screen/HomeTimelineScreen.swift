@@ -8,6 +8,7 @@ struct HomeTimelineScreen: View {
     let toTabSetting: () -> Void
     let toSecondaryMenu: () -> Void
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @Environment(\.timelineAppearance) private var timelineAppearance
     @Environment(\.openURL) private var openURL
     @State private var selectedTabIndex = 0
     @StateObject private var presenter: KotlinPresenter<HomeTimelineWithTabsPresenterState>
@@ -47,6 +48,7 @@ struct HomeTimelineScreen: View {
                     let tab = tabs[min(max(selectedTabIndex, 0), tabs.count - 1)]
                     ZStack {
                         TimelineScreen(tabItem: tab, allowGalleryMode: true)
+                            .environment(\.timelineAppearance, tab.resolveTimelineAppearance(base: timelineAppearance))
                             .id(tab.id)
                     }
                     .onChange(of: state.count, { oldValue, newValue in

@@ -73,8 +73,8 @@ import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.stringResource
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
-import dev.dimension.flare.ui.presenter.home.GroupConfigPresenter as SharedGroupConfigPresenter
 import dev.dimension.flare.ui.component.Text as UiTextComponent
+import dev.dimension.flare.ui.presenter.home.GroupConfigPresenter as SharedGroupConfigPresenter
 
 @Composable
 internal fun GroupConfigScreen(

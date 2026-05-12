@@ -119,7 +119,9 @@ public class EditTabPresenter(
 private fun IconType.accountKeyOrNull(): MicroBlogKey? =
     when (this) {
         is IconType.Avatar -> accountKey
+
         is IconType.Mixed -> accountKey
+
         is IconType.FavIcon,
         is IconType.Material,
         is IconType.Url,

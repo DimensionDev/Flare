@@ -13,6 +13,7 @@ import dev.dimension.flare.data.model.SettingsExport
 import dev.dimension.flare.data.model.TabMetaData
 import dev.dimension.flare.data.model.TabSettings
 import dev.dimension.flare.data.model.TitleType
+import dev.dimension.flare.data.model.tab.SYSTEM_HOME_MIXED_TIMELINE_ID
 import dev.dimension.flare.data.model.tab.TabSettingsV2
 import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.model.tab.toTimelineSlotOrNull
@@ -121,7 +122,7 @@ class SettingsImportExportPresenterTest {
         }
 
     @Test
-    fun importLegacyV1SettingsMigratesTabsToV2() =
+    fun importLegacyV1SettingsMigratesTabsToV2WithMixedTimelineDisabled() =
         runTest {
             val accountKey = MicroBlogKey(id = "alice", host = "example.com")
             val exported =
@@ -131,6 +132,7 @@ class SettingsImportExportPresenterTest {
                         appSettings = AppSettings(version = "v1"),
                         tabSettings =
                             TabSettings(
+                                enableMixedTimeline = false,
                                 mainTabs =
                                     listOf(
                                         HomeTimelineTabItem(AccountType.Specific(accountKey)),
@@ -148,6 +150,43 @@ class SettingsImportExportPresenterTest {
             val settings = settingsRepository.tabSettingsV2.first()
             assertEquals(
                 listOf(
+                    "common.home:$accountKey",
+                    "mastodon.local:$accountKey",
+                ),
+                settings.homeSlots.map { it.id },
+            )
+        }
+
+    @Test
+    fun importLegacyV1SettingsMigratesTabsToV2WithMixedTimelineEnabled() =
+        runTest {
+            val accountKey = MicroBlogKey(id = "alice", host = "example.com")
+            val exported =
+                json.encodeToString(
+                    LegacySettingsExport(
+                        appearanceSettings = AppearanceSettings(),
+                        appSettings = AppSettings(version = "v1"),
+                        tabSettings =
+                            TabSettings(
+                                enableMixedTimeline = true,
+                                mainTabs =
+                                    listOf(
+                                        HomeTimelineTabItem(AccountType.Specific(accountKey)),
+                                        Mastodon.LocalTimelineTabItem(
+                                            account = AccountType.Specific(accountKey),
+                                            metaData = localMetaData(),
+                                        ),
+                                    ),
+                            ),
+                    ),
+                )
+
+            ImportSettingsPresenter(exported).import()
+
+            val settings = settingsRepository.tabSettingsV2.first()
+            assertEquals(
+                listOf(
+                    SYSTEM_HOME_MIXED_TIMELINE_ID,
                     "common.home:$accountKey",
                     "mastodon.local:$accountKey",
                 ),

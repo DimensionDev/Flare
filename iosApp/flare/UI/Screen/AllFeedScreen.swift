@@ -16,8 +16,8 @@ struct AllFeedScreen: View {
                 PagingView(data: presenter.state.myFeeds) { item in
                     NavigationLink(
                         value: Route
-                            .tabItem(
-                                Bluesky.FeedTabItem(account: accountType, uri: item.id, metaData: .init(title: TitleType.Text(content: item.title), icon: IconType.Material(icon: .feeds)))
+                            .timeline(
+                                presenter.state.timelineTabItem(item: item)
                             )
                     ) {
                         UiListView(data: item)
@@ -34,8 +34,8 @@ struct AllFeedScreen: View {
                     if let item = pair.first {
                         NavigationLink(
                             value: Route
-                                .tabItem(
-                                    Bluesky.FeedTabItem(account: accountType, uri: item.id, metaData: .init(title: TitleType.Text(content: item.title), icon: IconType.Material(icon: .feeds)))
+                                    .timeline(
+                                    presenter.state.timelineTabItem(item: item)
                                 )
                         ) {
                             UiListView(data: item)

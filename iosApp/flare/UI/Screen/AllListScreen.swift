@@ -18,15 +18,8 @@ struct AllListScreen: View {
             PagingView(data: presenter.state.items) { item in
                 NavigationLink(
                     value: Route
-                        .tabItem(
-                            ListTimelineTabItem(
-                                account: accountType,
-                                listId: item.id,
-                                metaData: TabMetaData(
-                                    title: TitleType.Text(content: item.title),
-                                    icon: IconType.Material(icon: .list)
-                                )
-                            )
+                        .timeline(
+                            presenter.state.timelineTabItem(item: item)
                         )
                 ) {
                     UiListView(data: item)

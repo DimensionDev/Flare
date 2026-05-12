@@ -7,7 +7,27 @@ enum Route: Hashable, Identifiable {
     }
     
     static func == (lhs: Route, rhs: Route) -> Bool {
-        return lhs.hashValue == rhs.hashValue
+        switch (lhs, rhs) {
+        case (.timeline(let lhs), .timeline(let rhs)):
+            return lhs.id == rhs.id
+        case (.tabGroupConfig(let lhs), .tabGroupConfig(let rhs)):
+            return lhs?.id == rhs?.id
+        default:
+            return lhs.hashValue == rhs.hashValue
+        }
+    }
+
+    func hash(into hasher: inout Hasher) {
+        switch self {
+        case .timeline(let item):
+            hasher.combine("timeline")
+            hasher.combine(item.id)
+        case .tabGroupConfig(let item):
+            hasher.combine("tabGroupConfig")
+            hasher.combine(item?.id)
+        default:
+            hasher.combine(String(describing: self))
+        }
     }
 
     @MainActor
@@ -17,16 +37,10 @@ enum Route: Hashable, Identifiable {
         clearToHome: @escaping () -> Void
     ) -> some View {
         switch self {
-        case .home(let accountType): HomeTimelineScreen(accountType: accountType, toServiceSelect: { onNavigate(.serviceSelect) }, toCompose: { onNavigate(.composeNew) }, toTabSetting: { onNavigate(.tabSettings) }, toSecondaryMenu: { onNavigate(.secondaryMenu) })
+        case .home: HomeTimelineScreen(toServiceSelect: { onNavigate(.serviceSelect) }, toCompose: { onNavigate(.composeNew) }, toTabSetting: { onNavigate(.tabSettings) }, toSecondaryMenu: { onNavigate(.secondaryMenu) })
         case .timeline(let item):
-            switch onEnum(of: item) {
-            case .ListTimelineTabItem(let listTabItem):
-                ListTimelineScreen(tabItem: listTabItem)
-                    .navigationTitle(item.metaData.title.text)
-            default:
-                TimelineScreen(tabItem: item)
-                    .navigationTitle(item.metaData.title.text)
-            }
+            TimelineScreen(tabItem: item)
+                .navigationTitle(item.title.text)
         case .serviceSelect:
             ServiceSelectionScreen(toHome: { clearToHome() })
         case .statusDetail(let accountType, let statusKey):
@@ -35,8 +49,10 @@ enum Route: Hashable, Identifiable {
             ProfileScreen(accountType: accountType, userKey: userKey, onFollowingClick: { key in onNavigate(.userFollowing(accountType, key)) }, onFansClick: { key in onNavigate(.userFans(accountType, key)) })
         case .settings:
             SettingsScreen()
-        case .tabItem(let tabItem):
-            tabItem.view(onNavigate: onNavigate)
+        case .notification:
+            NotificationScreen()
+        case .discover:
+            DiscoverScreen()
         case .accountManagement:
             AccountManagementScreen()
         case .nostrRelays(let accountKey):
@@ -114,6 +130,16 @@ enum Route: Hashable, Identifiable {
             EditUserInListScreen(accountType: accountType, userKey: userKey)
         case .userDirectMessages(let accountType, let userKey):
             UserDMConversationScreen(accountType: accountType, userKey: userKey)
+        case .allLists(let accountType):
+            AllListScreen(accountType: accountType)
+        case .allFeeds(let accountType):
+            AllFeedScreen(accountType: accountType)
+        case .allAntennas(let accountType):
+            AntennasListScreen(accountType: accountType)
+        case .allChannels(let accountType):
+            ChannelListScreen(accountType: accountType)
+        case .allDirectMessages(let accountType):
+            DMListScreen(accountType: accountType)
         case .rssManagement:
             RssScreen()
         case .draftBox:
@@ -121,14 +147,14 @@ enum Route: Hashable, Identifiable {
                 onNavigate(.composeDraft(groupId))
             }
         case .secondaryMenu:
-            SecondaryTabsScreen(onTabSelected: { it in onNavigate(.tabItem(it)) })
+            SecondaryTabsScreen(onTabSelected: onNavigate)
         default:
             Text("Not done yet for \(self)")
         }
     }
 
-    case home(AccountType)
-    case timeline(TimelineTabItem)
+    case home
+    case timeline(TimelineTabItemV2)
     case composeNew
     case composeDraft(String)
     case composeQuote(AccountType, MicroBlogKey)
@@ -167,7 +193,8 @@ enum Route: Hashable, Identifiable {
     case appearanceMedia
     case settings
     case about
-    case tabItem(TabItem)
+    case notification
+    case discover
     case tabSettings
     case userFollowing(AccountType, MicroBlogKey)
     case userFans(AccountType, MicroBlogKey)
@@ -181,7 +208,12 @@ enum Route: Hashable, Identifiable {
     case reportUser(AccountType?, MicroBlogKey)
     case editUserList(AccountType, MicroBlogKey)
     case userDirectMessages(AccountType, MicroBlogKey)
-    case tabGroupConfig(MixedTimelineTabItem?)
+    case allLists(AccountType)
+    case allFeeds(AccountType)
+    case allAntennas(AccountType)
+    case allChannels(AccountType)
+    case allDirectMessages(AccountType)
+    case tabGroupConfig(GroupTimelineTabItemV2?)
     case rssManagement
     case draftBox
     case secondaryMenu
@@ -313,10 +345,20 @@ enum Route: Hashable, Identifiable {
             } else {
                 return .reportUser(nil, data.userKey)
             }
+        case .allDirectMessages(let data):
+            return .allDirectMessages(.Specific(accountKey: data.accountKey))
+        case .allLists(let data):
+            return .allLists(.Specific(accountKey: data.accountKey))
+        case .allFeeds(let data):
+            return .allFeeds(.Specific(accountKey: data.accountKey))
+        case .allAntennas(let data):
+            return .allAntennas(.Specific(accountKey: data.accountKey))
+        case .allChannels(let data):
+            return .allChannels(.Specific(accountKey: data.accountKey))
         case .timeline(let data):
             switch onEnum(of: data) {
             case .xQTDeviceFollow(let data):
-                return .timeline(XQT.DeviceFollowTimelineTabItem(account: data.accountType))
+                return nil
             }
         }
     }

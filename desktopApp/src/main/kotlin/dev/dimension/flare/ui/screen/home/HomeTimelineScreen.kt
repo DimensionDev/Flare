@@ -33,7 +33,6 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.refresh
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.TabIcon
-import dev.dimension.flare.ui.component.Text as UiText
 import dev.dimension.flare.ui.component.floatingToolbarVerticalNestedScroll
 import dev.dimension.flare.ui.component.status.AdaptiveCard
 import dev.dimension.flare.ui.model.map
@@ -52,6 +51,7 @@ import io.github.composefluent.component.ProgressBar
 import io.github.composefluent.component.SubtleButton
 import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.stringResource
+import dev.dimension.flare.ui.component.Text as UiText
 
 @Composable
 internal fun HomeTimelineScreen(

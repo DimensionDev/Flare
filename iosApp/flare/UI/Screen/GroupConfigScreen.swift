@@ -4,21 +4,21 @@ import SwiftUIBackports
 
 struct GroupConfigScreen: View {
     @Environment(\.dismiss) private var dismiss
-    let item: MixedTimelineTabItem?
+    let item: GroupTimelineTabItemV2?
     @State private var name: String
     @State private var icon: IconType
-    @State private var tabs: [TimelineTabItem]
+    @State private var tabs: [TimelineTabItemV2]
     @State private var showAddTabSheet = false
     @State private var showIconPicker = false
-    @State private var editItem: TimelineTabItem? = nil
+    @State private var editItem: TimelineTabItemV2? = nil
     @StateObject private var presenter: KotlinPresenter<GroupConfigPresenterState>
 
-    init(item: MixedTimelineTabItem? = nil) {
+    init(item: GroupTimelineTabItemV2? = nil) {
         self.item = item
-        _name = State(initialValue: item?.metaData.title.text ?? "")
-        _icon = State(initialValue: item?.metaData.icon ?? IconType.Material(icon: .rss))
-        _tabs = State(initialValue: Array((item?.subTimelineTabItem ?? []).reduce(into: [TimelineTabItem]()) { result, tab in
-            if !result.contains(where: { $0.key == tab.key }) {
+        _name = State(initialValue: item?.title.text ?? "")
+        _icon = State(initialValue: item?.icon ?? IconType.Material(icon: .rss))
+        _tabs = State(initialValue: Array((item?.children ?? []).reduce(into: [TimelineTabItemV2]()) { result, tab in
+            if !result.contains(where: { $0.id == tab.id }) {
                 result.append(tab)
             }
         }))
@@ -57,12 +57,12 @@ struct GroupConfigScreen: View {
                 }
             } else {
                 Section {
-                    ForEach(tabs, id: \.key) { tab in
+                    ForEach(tabs, id: \.id) { tab in
                         HStack {
                             Label {
-                                TabTitle(title: tab.metaData.title)
+                                TimelineTabTitle(title: tab.title)
                             } icon: {
-                                TabIcon(icon: tab.metaData.icon, accountType: tab.account)
+                                TabIcon(tabItem: tab)
                             }
                             Spacer()
                             Button {
@@ -85,13 +85,11 @@ struct GroupConfigScreen: View {
                     selectedTabs: tabs,
                     filterIsTimeline: true,
                     onDelete: { tab in
-                        tabs.removeAll { $0.key == tab.key }
+                        tabs.removeAll { $0.id == tab.id }
                     },
                     onAdd: { tab in
-                        if let timelineTab = tab as? TimelineTabItem {
-                            if !tabs.contains(where: { $0.key == timelineTab.key }) {
-                                tabs.append(timelineTab)
-                            }
+                        if !tabs.contains(where: { $0.id == tab.id }) {
+                            tabs.append(tab)
                         }
                     }
                 )
@@ -105,13 +103,21 @@ struct GroupConfigScreen: View {
                 )
             }
         }
-        .sheet(item: $editItem) { item in
+        .sheet(isPresented: Binding(get: {
+            editItem != nil
+        }, set: { value in
+            if !value {
+                editItem = nil
+            }
+        })) {
             NavigationStack {
-                EditTabSheet(onConfirm: { updated in
-                    if let index = tabs.firstIndex(where: { $0.key == updated.key }), let updated = updated as? TimelineTabItem {
-                        tabs[index] = updated
-                    }
-                }, tabItem: item)
+                if let item = editItem {
+                    EditTabSheet(onConfirm: { updated in
+                        if let index = tabs.firstIndex(where: { $0.id == updated.id }) {
+                            tabs[index] = updated
+                        }
+                    }, tabItem: item)
+                }
             }
         }
         .toolbar {

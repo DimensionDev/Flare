@@ -46,8 +46,11 @@ import kotlin.system.exitProcess
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.toJavaDuration
 
-@OptIn(ExperimentalCoilApi::class, ExperimentalComposeUiApi::class, ExperimentalComposeApi::class,
-    ExperimentalMediaQueryApi::class
+@OptIn(
+    ExperimentalCoilApi::class,
+    ExperimentalComposeUiApi::class,
+    ExperimentalComposeApi::class,
+    ExperimentalMediaQueryApi::class,
 )
 fun main(args: Array<String>) {
     if (AotRuntime.isTraining()) {

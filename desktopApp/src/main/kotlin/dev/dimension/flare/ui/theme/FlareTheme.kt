@@ -95,27 +95,28 @@ internal fun FlareTheme(
                     hover = Color.Transparent,
                     pressed = Color.Transparent,
                 ),
-            LocalUiMediaScope provides remember(size) {
-                // TODO: remove this 
-                object : UiMediaScope {
-                    override val windowPosture: UiMediaScope.Posture
-                        get() = TODO("Not yet implemented")
-                    override val windowWidth: Dp
-                        get() = size.width
-                    override val windowHeight: Dp
-                        get() = size.height
-                    override val pointerPrecision: UiMediaScope.PointerPrecision
-                        get() = TODO("Not yet implemented")
-                    override val keyboardKind: UiMediaScope.KeyboardKind
-                        get() = TODO("Not yet implemented")
-                    override val hasMicrophone: Boolean
-                        get() = TODO("Not yet implemented")
-                    override val hasCamera: Boolean
-                        get() = TODO("Not yet implemented")
-                    override val viewingDistance: UiMediaScope.ViewingDistance
-                        get() = TODO("Not yet implemented")
-                }
-            }
+            LocalUiMediaScope provides
+                remember(size) {
+                    // TODO: remove this
+                    object : UiMediaScope {
+                        override val windowPosture: UiMediaScope.Posture
+                            get() = TODO("Not yet implemented")
+                        override val windowWidth: Dp
+                            get() = size.width
+                        override val windowHeight: Dp
+                            get() = size.height
+                        override val pointerPrecision: UiMediaScope.PointerPrecision
+                            get() = TODO("Not yet implemented")
+                        override val keyboardKind: UiMediaScope.KeyboardKind
+                            get() = TODO("Not yet implemented")
+                        override val hasMicrophone: Boolean
+                            get() = TODO("Not yet implemented")
+                        override val hasCamera: Boolean
+                            get() = TODO("Not yet implemented")
+                        override val viewingDistance: UiMediaScope.ViewingDistance
+                            get() = TODO("Not yet implemented")
+                    }
+                },
         ) {
             Box(
                 modifier =

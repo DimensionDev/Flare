@@ -56,7 +56,7 @@ import compose.icons.fontawesomeicons.solid.Pen
 import compose.icons.fontawesomeicons.solid.PenToSquare
 import compose.icons.fontawesomeicons.solid.SquareRss
 import dev.dimension.flare.R
-import dev.dimension.flare.data.model.tab.ShortcutSpec
+import dev.dimension.flare.data.model.tab.SourceTimelineTabItemV2
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.common.OnNewIntent
 import dev.dimension.flare.ui.component.AvatarComponent
@@ -477,10 +477,12 @@ internal fun HomeScreen(afterInit: () -> Unit) {
         }
 }
 
-private fun getDirection(data: ShortcutSpec): Route? =
-    when (val target = data.target) {
-        is ShortcutSpec.Target.Route -> Route.from(target.route)
-        is ShortcutSpec.Target.Timeline -> Route.Timeline(target.source)
+private fun getDirection(data: SecondaryTabsPresenter.Tab): Route? =
+    when (val target = data.destination) {
+        is SecondaryTabsPresenter.Destination.Route -> Route.from(target.route)
+        is SecondaryTabsPresenter.Destination.Timeline -> {
+            (target.tabItem as? SourceTimelineTabItemV2)?.source?.let { Route.Timeline(it) }
+        }
     }
 
 private val HomeTabsPresenter.State.HomeTabs.route: Route

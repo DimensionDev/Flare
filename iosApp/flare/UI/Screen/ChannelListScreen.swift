@@ -14,14 +14,7 @@ struct ChannelListScreen: View {
         List {
             PagingView(data: presenter.state.data) { item in
                  NavigationLink(value: Route.timeline(
-                     Misskey.ChannelTimelineTabItem(
-                         channelId: item.id,
-                         account: accountType,
-                         metaData: TabMetaData(
-                             title: TitleType.Text(content: item.title),
-                             icon: IconType.Material(icon: .list)
-                         )
-                     )
+                     presenter.state.timelineTabItem(item: item)
                  )) {
                      UiListView(data: item)
                          .contextMenu {

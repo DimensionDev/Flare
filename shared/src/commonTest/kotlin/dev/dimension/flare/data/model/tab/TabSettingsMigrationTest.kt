@@ -270,7 +270,7 @@ class TabSettingsMigrationTest {
             val settings = store.data.first()
             assertEquals(
                 listOf(
-                    SystemHomeMixedTimelineId,
+                    SYSTEM_HOME_MIXED_TIMELINE_ID,
                     "mastodon.local:$accountKey",
                     "rss.feed:https://example.com/rss.xml",
                 ),

@@ -32,11 +32,11 @@ import dev.dimension.flare.data.model.tab.SourceTimelineTabItemV2
 import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.model.AccountType.Specific
+import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiRssSource
 import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.model.asType
-import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus.Quote
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus.Reply
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus.VVOComment

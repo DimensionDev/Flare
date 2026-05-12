@@ -12,33 +12,31 @@ struct FlareRoot: View {
     
     var body: some View {
         StateView(state: homeTabsPresenter.state.tabs) { tabs in
+            let items = tabs.cast(HomeTabsPresenterStateHomeTabs.self)
             TabView(selection: $selectedTab) {
-                ForEach(tabs.primary, id: \.key) { data in
-                    let badge = if data is NotificationTabItem || data is AllNotificationTabItem {
-                        Int(notificationBadgePresenter.state.count)
-                    } else {
-                        0
-                    }
-                    Tab(value: data.key, role: data is DiscoverTabItem ? .some(.search) : .none) {
+                ForEach(items, id: \.name) { tab in
+                    Tab(value: homeTabKey(tab), role: homeTabRoute(tab) == .discover ? .some(.search) : .none) {
                         Router { onNavigate in
-                            data.view(onNavigate: onNavigate)
+                            homeTabRoute(tab).view(onNavigate: onNavigate, clearToHome: {})
                         }
                     } label: {
                         Label {
-                            TabTitle(title: data.metaData.title)
+                            Text(homeTabTitle(tab))
                         } icon: {
-                            TabIcon(icon: data.metaData.icon, accountType: data.account, iconOnly: true)
+                            Image(homeTabIconName(tab))
                         }
                     }
-                    .badge(badge)
+                    .badge(homeTabRoute(tab) == .notification ? Int(notificationBadgePresenter.state.count) : 0)
                 }
                 if horizontalSizeClass == .regular {
                     if case .success(let data) = onEnum(of: secondaryTabsPresenter.state.items) {
                         let items = data.data.cast(SecondaryTabsPresenter.Item.self)
                         ForEach(Array(items.enumerated()), id: \.offset) { _, item in
                             TabSection {
-                                ForEach(item.tabs, id: \.key) { tab in
-                                    secondarySidebarTab(tab)
+                                ForEach(item.tabs, id: \.self) { tab in
+                                    if let route = route(for: tab) {
+                                        secondarySidebarShortcut(tab, route: route)
+                                    }
                                 }
                             } header: {
                                 StateView(state: item.user) { user in
@@ -67,16 +65,14 @@ struct FlareRoot: View {
     }
 
     @TabContentBuilder<String?>
-    private func secondarySidebarTab(_ tab: TabItem) -> some TabContent<String?> {
-        Tab(value: "secondary:\(tab.key)") {
-            Router { onNavigate in
-                tab.view(onNavigate: onNavigate)
-            }
+    private func secondarySidebarShortcut(_ tab: SecondaryTabsPresenter.Tab, route: Route) -> some TabContent<String?> {
+        Tab(value: "secondary:\(tab.hashValue)") {
+            SidebarRouteScreen(route: route)
         } label: {
             Label {
-                TabTitle(title: tab.metaData.title)
+                Text(tab.title.text)
             } icon: {
-                TabIcon(icon: tab.metaData.icon, accountType: tab.account, iconOnly: true)
+                Image(tab.icon.imageName)
             }
         }
         .tabPlacement(.sidebarOnly)
@@ -105,31 +101,64 @@ struct BackportFlareRoot: View {
     
     var body: some View {
         StateView(state: homeTabsPresenter.state.tabs) { tabs in
+            let items = tabs.cast(HomeTabsPresenterStateHomeTabs.self)
             TabView(selection: $selectedTab) {
-                ForEach(tabs.primary, id: \.key) { data in
-                    let badge = if data is NotificationTabItem || data is AllNotificationTabItem {
-                        Int(notificationBadgePresenter.state.count)
-                    } else {
-                        0
-                    }
+                ForEach(items, id: \.name) { tab in
                     Router { onNavigate in
-                        data.view(onNavigate: onNavigate)
+                        homeTabRoute(tab).view(onNavigate: onNavigate, clearToHome: {})
                     }
                     .tabItem {
                         Label {
-                            TabTitle(title: data.metaData.title)
+                            Text(homeTabTitle(tab))
                         } icon: {
-                            TabIcon(icon: data.metaData.icon, accountType: data.account, iconOnly: true)
+                            Image(homeTabIconName(tab))
                         }
                     }
-                    .badge(badge)
-                    .tag(data.key)
+                    .badge(homeTabRoute(tab) == .notification ? Int(notificationBadgePresenter.state.count) : 0)
+                    .tag(homeTabKey(tab))
                 }
             }
             .background(Color(.systemGroupedBackground))
         } loadingContent: {
             SplashScreen()
         }
+    }
+}
+
+private func homeTabKey(_ tab: HomeTabsPresenterStateHomeTabs) -> String {
+    tab.name.lowercased()
+}
+
+private func homeTabRoute(_ tab: HomeTabsPresenterStateHomeTabs) -> Route {
+    switch tab {
+    case .notifications:
+        return .notification
+    case .discover:
+        return .discover
+    case .home:
+        return .home
+    }
+}
+
+private func homeTabTitle(_ tab: HomeTabsPresenterStateHomeTabs) -> LocalizedStringKey {
+    switch tab {
+    case .notifications:
+        return "home_tab_notifications_title"
+    case .discover:
+        return "home_tab_discover_title"
+    case .home:
+        return "home_tab_home_title"
+    }
+}
+
+private func homeTabIconName(_ tab: HomeTabsPresenterStateHomeTabs) -> String {
+    switch tab {
+    case .notifications:
+        return "fa-bell"
+    case .discover:
+        return "fa-magnifying-glass"
+    case .home:
+        return "fa-house"
     }
 }
 

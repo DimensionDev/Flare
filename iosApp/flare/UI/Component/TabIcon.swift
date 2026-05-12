@@ -2,49 +2,62 @@ import SwiftUI
 import KotlinSharedUI
 
 struct TabTitle: View {
-    let title: TitleType
+    let title: Any
+    var body: some View {
+        Text(String(describing: title))
+    }
+}
+
+struct TimelineTabTitle: View {
+    let title: UiText
     var body: some View {
         Text(title.text)
     }
 }
 
-extension TitleType {
+extension UiText {
     var text: String {
         switch onEnum(of: self) {
         case .localized(let localized):
-            let text = switch localized.key {
-            case .home: String(localized: "home_tab_home_title")
-            case .notifications: String(localized: "home_tab_notifications_title")
-            case .discover: String(localized: "home_tab_discover_title")
-            case .me: String(localized: "home_tab_me_title")
-            case .settings: String(localized: "settings_title")
-            case .mastodonLocal: String(localized: "mastodon_tab_local_title")
-            case .mastodonPublic: String(localized: "mastodon_tab_public_title")
-            case .featured: String(localized: "home_tab_featured_title")
-            case .bookmark: String(localized: "home_tab_bookmarks_title")
-            case .favourite: String(localized: "home_tab_favorite_title")
-            case .list: String(localized: "home_tab_list_title")
-            case .feeds: String(localized: "home_tab_feeds_title")
-            case .directMessage: String(localized: "dm_list_title")
-            case .rss: String(localized: "rss_title")
-            case .social: String(localized: "social_title")
-            case .antenna: String(localized: "antenna_title")
-            case .mixedTimeline: String(localized: "mixed_timeline_title")
-            case .liked: String(localized: "liked_tab_title")
-            case .allRssFeeds: String(localized: "all_rss_feeds_title")
-            case .posts: String(localized: "posts_title")
-            case .channel: String(localized: "channel_title")
-            }
-            return text
-        case .text(let text):
-            return text.content
+            return localized.string.text
+        case .raw(let raw):
+            return raw.string
+        }
+    }
+}
+
+extension UiStrings {
+    var text: String {
+        switch self {
+        case .home: String(localized: "home_tab_home_title")
+        case .notifications: String(localized: "home_tab_notifications_title")
+        case .discover: String(localized: "home_tab_discover_title")
+        case .me: String(localized: "home_tab_me_title")
+        case .settings: String(localized: "settings_title")
+        case .mastodonLocal: String(localized: "mastodon_tab_local_title")
+        case .mastodonPublic: String(localized: "mastodon_tab_public_title")
+        case .featured: String(localized: "home_tab_featured_title")
+        case .bookmark: String(localized: "home_tab_bookmarks_title")
+        case .favourite: String(localized: "home_tab_favorite_title")
+        case .list: String(localized: "home_tab_list_title")
+        case .feeds: String(localized: "home_tab_feeds_title")
+        case .directMessage: String(localized: "dm_list_title")
+        case .rss: String(localized: "rss_title")
+        case .social: String(localized: "social_title")
+        case .antenna: String(localized: "antenna_title")
+        case .mixedTimeline: String(localized: "mixed_timeline_title")
+        case .liked: String(localized: "liked_tab_title")
+        case .allRssFeeds: String(localized: "all_rss_feeds_title")
+        case .posts: String(localized: "posts_title")
+        case .channel: String(localized: "channel_title")
+        case .default: String(localized: "tab_settings_default")
         }
     }
 }
 
 struct TabIcon: View {
     let icon: IconType
-    let accountType: AccountType
+    let accountType: AccountType?
     let size: CGFloat
     let iconOnly: Bool
     var body: some View {
@@ -53,7 +66,7 @@ struct TabIcon: View {
             MaterialTabIcon(icon: material.icon)
                 .frame(width: size, height: size)
         case .avatar(let avatar):
-            AvatarTabIcon(userKey: avatar.userKey, accountType: accountType)
+            AvatarTabIcon(userKey: avatar.accountKey, accountType: accountType ?? AccountType.Specific(accountKey: avatar.accountKey))
                 .frame(width: size, height: size)
         case .url(let url):
             NetworkImage(data: url.url)
@@ -66,8 +79,13 @@ struct TabIcon: View {
                 ZStack(
                     alignment: .bottomTrailing
                 ) {
-                    AvatarTabIcon(userKey: mixed.userKey, accountType: accountType)
-                        .frame(width: size, height: size)
+                    if let accountType {
+                        AvatarTabIcon(userKey: mixed.accountKey, accountType: accountType)
+                            .frame(width: size, height: size)
+                    } else {
+                        MaterialTabIcon(icon: mixed.icon)
+                            .frame(width: size, height: size)
+                    }
                     MaterialTabIcon(icon: mixed.icon)
                         .padding(2)
                         .background(Color.white)
@@ -85,6 +103,22 @@ struct TabIcon: View {
 }
 
 extension TabIcon {
+    init(
+        tabItem: TimelineTabItemV2,
+        size: CGFloat = 20,
+        iconOnly: Bool = false
+    ) {
+        self.init(icon: tabItem.icon, accountType: nil, size: size, iconOnly: iconOnly)
+    }
+
+    init(
+        icon: IconType,
+        accountType: AccountType?,
+        size: CGFloat
+    ) {
+        self.init(icon: icon, accountType: accountType, size: size, iconOnly: false)
+    }
+
     init(
         icon: IconType,
         accountType: AccountType,

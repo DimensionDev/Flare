@@ -1,17 +1,18 @@
 import SwiftUI
 import KotlinSharedUI
 struct TabSettingsScreen: View {
-    @StateObject private var presenter = KotlinPresenter(presenter: SettingsPresenter())
+    @StateObject private var presenter = KotlinPresenter(presenter: HomeTabSettingsPresenter())
     @Environment(\.dismiss) private var dismiss
     @State private var enableMixedTimeline: Bool = false
-    @State private var tabItems: [TimelineTabItem] = []
+    @State private var tabItems: [TimelineTabItemV2] = []
+    @State private var loadedTabs = false
     @State private var showAddTabSheet = false
-    @State private var editItem: TabItem? = nil
-    @State private var editGroup: MixedTimelineTabItem? = nil
+    @State private var editItem: TimelineTabItemV2? = nil
+    @State private var editGroup: GroupTimelineTabItemV2? = nil
     @State private var showCreateGroup = false
     var body: some View {
         List {
-            if tabItems.count > 1 {
+            if tabItems.filter({ !isSystemHomeMixedTimeline($0) }).count > 1 {
                 Section {
                     Toggle(isOn: $enableMixedTimeline) {
                         Text("tab_settings_enable_mixed_timeline_title")
@@ -19,21 +20,24 @@ struct TabSettingsScreen: View {
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
+                    .onChange(of: enableMixedTimeline) { _, value in
+                        tabItems = withSystemHomeMixedTimelineEnabled(tabItems, enabled: value)
+                    }
                 }
             }
             Section {
-                ForEach(tabItems, id: \.key) { item in
+                ForEach(tabItems, id: \.id) { item in
                     HStack(
                         spacing: 8
                     ) {
                         Label {
-                            TabTitle(title: item.metaData.title)
+                            TimelineTabTitle(title: item.title)
                         } icon: {
-                            TabIcon(icon: item.metaData.icon, accountType: item.account)
+                            TabIcon(tabItem: item)
                         }
                         Spacer()
                         Button {
-                            if let group = item as? MixedTimelineTabItem {
+                            if let group = item as? GroupTimelineTabItemV2, !isSystemHomeMixedTimeline(item) {
                                 editGroup = group
                             } else {
                                 editItem = item
@@ -47,7 +51,7 @@ struct TabSettingsScreen: View {
                     }
                     .swipeActions(edge: .leading) {
                         Button {
-                            if let group = item as? MixedTimelineTabItem {
+                            if let group = item as? GroupTimelineTabItemV2, !isSystemHomeMixedTimeline(item) {
                                 editGroup = group
                             } else {
                                 editItem = item
@@ -62,7 +66,7 @@ struct TabSettingsScreen: View {
                     }
                     .swipeActions {
                         Button(role: .destructive) {
-                            if let index = tabItems.firstIndex(where: { $0.key == item.key }) {
+                            if let index = tabItems.firstIndex(where: { $0.id == item.id }) {
                                 tabItems.remove(at: index)
                             }
                         } label: {
@@ -77,10 +81,11 @@ struct TabSettingsScreen: View {
                 .onMove(perform: move)
             }
         }
-        .onChange(of: presenter.state.tabSettings) { oldValue, newValue in
-            if case .success(let tabSettings) = onEnum(of: newValue) {
-                enableMixedTimeline = tabSettings.data.enableMixedTimeline
-                tabItems = tabSettings.data.mainTabs
+        .onChange(of: presenter.state.homeTimelineTabs) { oldValue, newValue in
+            if !loadedTabs, case .success(let tabs) = onEnum(of: newValue) {
+                tabItems = tabs.data.cast(TimelineTabItemV2.self)
+                enableMixedTimeline = tabItems.contains { isSystemHomeMixedTimeline($0) }
+                loadedTabs = true
             }
         }
         .navigationTitle("tab_settings_title")
@@ -112,9 +117,7 @@ struct TabSettingsScreen: View {
                 Button(
 //                    role: .confirm
                 ) {
-                    presenter.state.updateTabSettings { current in
-                        current.doCopy(secondaryItems: current.secondaryItems, enableMixedTimeline: enableMixedTimeline, mainTabs: tabItems)
-                    }
+                    presenter.state.replaceHomeTimelineTabs(tabs: tabItems)
                     dismiss()
                 } label: {
                     Image("fa-check")
@@ -127,22 +130,30 @@ struct TabSettingsScreen: View {
                     selectedTabs: tabItems,
                     filterIsTimeline: true,
                     onDelete: { item in
-                        if let index = tabItems.firstIndex(where: { $0.key == item.key }) {
+                        if let index = tabItems.firstIndex(where: { $0.id == item.id }) {
                             tabItems.remove(at: index)
                         }
                     },
                     onAdd: { item in
-                        if !tabItems.contains(where: { $0.key == item.key }), let tabItem = item as? TimelineTabItem {
-                            tabItems.append(tabItem)
+                        if !tabItems.contains(where: { $0.id == item.id }) {
+                            tabItems.append(item)
                         }
                     },
                 )
             }
         }
 
-        .sheet(item: $editGroup) { item in
+        .sheet(isPresented: Binding(get: {
+            editGroup != nil
+        }, set: { value in
+            if !value {
+                editGroup = nil
+            }
+        })) {
             NavigationStack {
-                GroupConfigScreen(item: item)
+                if let item = editGroup {
+                    GroupConfigScreen(item: item)
+                }
             }
         }
         .sheet(isPresented: $showCreateGroup) {
@@ -150,13 +161,21 @@ struct TabSettingsScreen: View {
                 GroupConfigScreen(item: nil)
             }
         }
-        .sheet(item: $editItem) { item in
+        .sheet(isPresented: Binding(get: {
+            editItem != nil
+        }, set: { value in
+            if !value {
+                editItem = nil
+            }
+        })) {
             NavigationStack {
-                EditTabSheet(onConfirm: { updated in
-                    if let index = tabItems.firstIndex(where: { $0.key == updated.key }), let updated = updated as? TimelineTabItem {
-                        tabItems[index] = updated
-                    }
-                }, tabItem: item)
+                if let item = editItem {
+                    EditTabSheet(onConfirm: { updated in
+                        if let index = tabItems.firstIndex(where: { $0.id == updated.id }) {
+                            tabItems[index] = updated
+                        }
+                    }, tabItem: item)
+                }
             }
         }
     }
@@ -165,21 +184,27 @@ struct TabSettingsScreen: View {
     func move(from source: IndexSet, to destination: Int) {
         tabItems.move(fromOffsets: source, toOffset: destination)
     }
-}
 
-extension TabItem: Identifiable {
-    
+    private func isSystemHomeMixedTimeline(_ item: TimelineTabItemV2) -> Bool {
+        item.isSystemHomeMixedTimeline
+    }
+
+    private func withSystemHomeMixedTimelineEnabled(_ tabs: [TimelineTabItemV2], enabled: Bool) -> [TimelineTabItemV2] {
+//        tabs.withSystemHomeMixedTimelineEnabled(enabled: enabled)
+        TimelineTabItemV2Helpers.shared
+            .withSystemHomeMixedTimelineEnabled(tabs: tabs, enabled: enabled)
+    }
 }
 
 struct EditTabSheet: View {
     @Environment(\.dismiss) private var dismiss
-    let onConfirm: (TabItem) -> Void
-    let tabItem: TabItem
+    let onConfirm: (TimelineTabItemV2) -> Void
+    let tabItem: TimelineTabItemV2
     @StateObject private var presenter: KotlinPresenter<EditTabPresenterState>
     @State private var text: String = ""
     @State private var showPicker = false
     
-    init(onConfirm: @escaping (TabItem) -> Void, tabItem: TabItem) {
+    init(onConfirm: @escaping (TimelineTabItemV2) -> Void, tabItem: TimelineTabItemV2) {
         self.onConfirm = onConfirm
         self.tabItem = tabItem
         self._presenter = .init(wrappedValue: .init(presenter: EditTabPresenter(tabItem: tabItem)))
@@ -188,7 +213,7 @@ struct EditTabSheet: View {
     var body: some View {
         Form {
             Section {
-                TabIcon(icon: presenter.state.icon, accountType: tabItem.account, size: 64)
+                TabIcon(icon: presenter.state.icon, accountType: nil, size: 64)
                     .onTapGesture {
                         showPicker = true
                     }
@@ -196,7 +221,7 @@ struct EditTabSheet: View {
                         ScrollView {
                             LazyVGrid(columns: [GridItem(.adaptive(minimum: 48))], spacing: 8) {
                                 ForEach(presenter.state.availableIcons, id: \.description) { item in
-                                    TabIcon(icon: item, accountType: tabItem.account, size: 48)
+                                    TabIcon(icon: item, accountType: nil, size: 48)
                                         .padding(4)
                                         .onTapGesture {
                                             presenter.state.setIcon(value: item)
@@ -216,6 +241,7 @@ struct EditTabSheet: View {
                 })) {
                     Text("tab_settings_edit_use_avatar")
                 }
+                .disabled(!presenter.state.canUseAvatar)
             } header: {
                 Text("tab_settings_edit_icon_header")
             }
@@ -247,7 +273,7 @@ struct EditTabSheet: View {
                 Button(
 //                    role: .confirm
                 ) {
-                    onConfirm(tabItem.update(metaData: .init(title: .Text(content: text), icon: presenter.state.icon)))
+                    onConfirm(tabItem.withPresentationOverrides(title: text, icon: presenter.state.icon))
                     dismiss()
                 } label: {
                     Label {
@@ -264,9 +290,9 @@ struct EditTabSheet: View {
 struct AddTabSheet: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject private var presenter: KotlinPresenter<AllTabsPresenterState>
-    let selectedTabs: [TabItem]
-    let onDelete: (TabItem) -> Void
-    let onAdd: (TabItem) -> Void
+    let selectedTabs: [TimelineTabItemV2]
+    let onDelete: (TimelineTabItemV2) -> Void
+    let onAdd: (TimelineTabItemV2) -> Void
     @State private var showAddRssSource = false
     @State private var importOpmlUrl: URL? = nil
     @State private var expandedSections: Set<String> = ["rss"]
@@ -274,10 +300,10 @@ struct AddTabSheet: View {
         List {
             Section {
                 DisclosureGroup(isExpanded: binding(for: "rss")) {
-                    ForEach(presenter.state.rssTabs) { tabItem in
+                    ForEach(presenter.state.rssTabs, id: \.id) { tabItem in
                         AddTabRow(
                             tabItem: tabItem,
-                            isSelected: selectedTabs.contains(where: { $0.key == tabItem.key }),
+                            isSelected: selectedTabs.contains(where: { $0.id == tabItem.id }),
                             onDelete: onDelete,
                             onAdd: onAdd
                         )
@@ -369,30 +395,23 @@ struct AddTabSheet: View {
 
 struct AccountTabListView: View {
     let accountTabs: AllTabsPresenterStateAccountTabs
-    let selectedTabs: [TabItem]
+    let selectedTabs: [TimelineTabItemV2]
     @Binding var expandedSections: Set<String>
-    let onDelete: (TabItem) -> Void
-    let onAdd: (TabItem) -> Void
+    let onDelete: (TimelineTabItemV2) -> Void
+    let onAdd: (TimelineTabItemV2) -> Void
     var body: some View {
-        if !accountTabs.tabs.isEmpty {
-            ForEach(accountTabs.tabs, id: \.key) { tab in
-                AddTabRow(
-                    tabItem: tab,
-                    isSelected: selectedTabs.contains(where: { $0.key == tab.key }),
-                    onDelete: onDelete,
-                    onAdd: onAdd
-                )
-            }
-        }
-        ForEach(0..<accountTabs.extraTabs.count, id: \.self) { index in
-            let tabItem = accountTabs.extraTabs[index]
+        ForEach(0..<accountTabs.tabs.count, id: \.self) { index in
+            let tabItem = accountTabs.tabs[index]
             DisclosureGroup(isExpanded: binding(for: "account-\(accountTabs.profile.key)-extra-\(index)")) {
-                PagingView(data: tabItem.data) { tab in
-                    let item = tab.toTabItem(accountKey: accountTabs.profile.key)
+                PagingView(data: tabItem.data) { item in
                     HStack {
-                        UiListView(data: tab)
+                        Label {
+                            TimelineTabTitle(title: item.title)
+                        } icon: {
+                            TabIcon(tabItem: item)
+                        }
                         Spacer()
-                        if selectedTabs.contains(where: { $0.key == item.key }) {
+                        if selectedTabs.contains(where: { $0.id == item.id }) {
                             Button {
                                 onDelete(item)
                             } label: {
@@ -433,32 +452,22 @@ struct AccountTabListView: View {
     }
     
     private func title(at index: Int) -> LocalizedStringKey {
-        let tabItem = accountTabs.extraTabs[index]
-        switch onEnum(of: tabItem) {
-        case .antenna:
-            return "antenna_title"
-        case .feed:
-            return "bluesky_feeds_title"
-        case .list:
-            return "all_lists_title"
-        case .channel:
-            return "channels_title"
-        }
+        LocalizedStringKey(accountTabs.tabs[index].title.text)
     }
 }
 
 private struct AddTabRow: View {
-    let tabItem: TabItem
+    let tabItem: TimelineTabItemV2
     let isSelected: Bool
-    let onDelete: (TabItem) -> Void
-    let onAdd: (TabItem) -> Void
+    let onDelete: (TimelineTabItemV2) -> Void
+    let onAdd: (TimelineTabItemV2) -> Void
     
     var body: some View {
         HStack {
             Label {
-                TabTitle(title: tabItem.metaData.title)
+                TimelineTabTitle(title: tabItem.title)
             } icon: {
-                TabIcon(icon: tabItem.metaData.icon, accountType: tabItem.account)
+                TabIcon(tabItem: tabItem)
             }
             Spacer()
             if isSelected {
@@ -484,14 +493,14 @@ private struct AddTabRow: View {
 
 extension AddTabSheet {
     init(
-        selectedTabs: [TabItem],
+        selectedTabs: [TimelineTabItemV2],
         filterIsTimeline: Bool,
-        onDelete: @escaping (TabItem) -> Void,
-        onAdd: @escaping (TabItem) -> Void,
+        onDelete: @escaping (TimelineTabItemV2) -> Void,
+        onAdd: @escaping (TimelineTabItemV2) -> Void,
     ) {
         self.selectedTabs = selectedTabs
         self.onDelete = onDelete
         self.onAdd = onAdd
-        self._presenter = .init(wrappedValue: .init(presenter: AllTabsPresenter(filterIsTimeline: filterIsTimeline)))
+        self._presenter = .init(wrappedValue: .init(presenter: AllTabsPresenter()))
     }
 }

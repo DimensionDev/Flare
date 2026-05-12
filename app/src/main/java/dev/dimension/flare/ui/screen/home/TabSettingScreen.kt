@@ -221,97 +221,97 @@ internal fun TabSettingScreen(
 }
 
 @Composable
-private fun presenter(
-) = run {
-    var selectedEditTab by remember { mutableStateOf<TimelineTabItemV2?>(null) }
-    val tabSettingsState = remember { HomeTabSettingsPresenter() }.invoke()
-    val allTabsState = remember { AllTabsPresenter() }.invoke()
-    val cacheTabs =
-        remember {
-            mutableStateListOf<TimelineTabItemV2>()
-        }
-    var loadedTabs by remember { mutableStateOf(false) }
-    tabSettingsState.homeTimelineTabs
-        .onSuccess {
-            LaunchedEffect(it) {
+private fun presenter() =
+    run {
+        var selectedEditTab by remember { mutableStateOf<TimelineTabItemV2?>(null) }
+        val tabSettingsState = remember { HomeTabSettingsPresenter() }.invoke()
+        val allTabsState = remember { AllTabsPresenter() }.invoke()
+        val cacheTabs =
+            remember {
+                mutableStateListOf<TimelineTabItemV2>()
+            }
+        var loadedTabs by remember { mutableStateOf(false) }
+        tabSettingsState.homeTimelineTabs
+            .onSuccess {
+                LaunchedEffect(it) {
+                    cacheTabs.clear()
+                    cacheTabs.addAll(it)
+                    loadedTabs = true
+                }
+            }
+        var showAddTab by remember { mutableStateOf(false) }
+        object {
+            val currentTabs = cacheTabs
+            val allTabsState = allTabsState
+            val canSwipeToDelete = true
+            val showAddTab = showAddTab
+            val selectedEditTab = selectedEditTab
+            val enableMixedTimeline = cacheTabs.any { it.isSystemHomeMixedTimeline }
+            val canShowMixedTimelineSetting = cacheTabs.filterNot { it.isSystemHomeMixedTimeline }.size > 1
+
+            fun setEnableMixedTimeline(enable: Boolean) {
+                replaceTabs(cacheTabs.toList().withSystemHomeMixedTimelineEnabled(enable))
+            }
+
+            fun setEditTab(tab: TimelineTabItemV2?) {
+                selectedEditTab = tab
+            }
+
+            fun updateTab(tab: TimelineTabItemV2) {
+                val index = cacheTabs.indexOfFirst { it.id == tab.id }
+                if (index != -1) {
+                    cacheTabs[index] = tab
+                    syncSystemHomeMixedTimeline()
+                }
+            }
+
+            fun moveTab(
+                from: Any,
+                to: Any,
+            ) {
+                val fromIndex = cacheTabs.indexOfFirst { it.id == from }
+                val toIndex = cacheTabs.indexOfFirst { it.id == to }
+                if (fromIndex != -1 && toIndex != -1) {
+                    cacheTabs.add(toIndex, cacheTabs.removeAt(fromIndex))
+                    syncSystemHomeMixedTimeline()
+                }
+            }
+
+            fun commit() {
+                if (!loadedTabs) return
+                tabSettingsState.replaceHomeTimelineTabs(cacheTabs)
+            }
+
+            fun deleteTab(tab: TimelineTabItemV2) {
+                cacheTabs.removeIf { it.id == tab.id }
+                syncSystemHomeMixedTimeline()
+            }
+
+            fun deleteTab(key: String) {
+                cacheTabs.removeIf { it.id == key }
+                syncSystemHomeMixedTimeline()
+            }
+
+            fun addTab(tab: TimelineTabItemV2) {
+                if (cacheTabs.none { it.id == tab.id }) {
+                    cacheTabs.add(tab)
+                    syncSystemHomeMixedTimeline()
+                }
+            }
+
+            fun setAddTab(value: Boolean) {
+                showAddTab = value
+            }
+
+            private fun syncSystemHomeMixedTimeline() {
+                if (cacheTabs.any { it.isSystemHomeMixedTimeline }) {
+                    replaceTabs(cacheTabs.toList().withSystemHomeMixedTimelineEnabled(true))
+                }
+            }
+
+            private fun replaceTabs(tabs: List<TimelineTabItemV2>) {
                 cacheTabs.clear()
-                cacheTabs.addAll(it)
-                loadedTabs = true
+                cacheTabs.addAll(tabs)
             }
-        }
-    var showAddTab by remember { mutableStateOf(false) }
-    object {
-        val currentTabs = cacheTabs
-        val allTabsState = allTabsState
-        val canSwipeToDelete = true
-        val showAddTab = showAddTab
-        val selectedEditTab = selectedEditTab
-        val enableMixedTimeline = cacheTabs.any { it.isSystemHomeMixedTimeline }
-        val canShowMixedTimelineSetting = cacheTabs.filterNot { it.isSystemHomeMixedTimeline }.size > 1
-
-        fun setEnableMixedTimeline(enable: Boolean) {
-            replaceTabs(cacheTabs.toList().withSystemHomeMixedTimelineEnabled(enable))
-        }
-
-        fun setEditTab(tab: TimelineTabItemV2?) {
-            selectedEditTab = tab
-        }
-
-        fun updateTab(tab: TimelineTabItemV2) {
-            val index = cacheTabs.indexOfFirst { it.id == tab.id }
-            if (index != -1) {
-                cacheTabs[index] = tab
-                syncSystemHomeMixedTimeline()
-            }
-        }
-
-        fun moveTab(
-            from: Any,
-            to: Any,
-        ) {
-            val fromIndex = cacheTabs.indexOfFirst { it.id == from }
-            val toIndex = cacheTabs.indexOfFirst { it.id == to }
-            if (fromIndex != -1 && toIndex != -1) {
-                cacheTabs.add(toIndex, cacheTabs.removeAt(fromIndex))
-                syncSystemHomeMixedTimeline()
-            }
-        }
-
-        fun commit() {
-            if (!loadedTabs) return
-            tabSettingsState.replaceHomeTimelineTabs(cacheTabs)
-        }
-
-        fun deleteTab(tab: TimelineTabItemV2) {
-            cacheTabs.removeIf { it.id == tab.id }
-            syncSystemHomeMixedTimeline()
-        }
-
-        fun deleteTab(key: String) {
-            cacheTabs.removeIf { it.id == key }
-            syncSystemHomeMixedTimeline()
-        }
-
-        fun addTab(tab: TimelineTabItemV2) {
-            if (cacheTabs.none { it.id == tab.id }) {
-                cacheTabs.add(tab)
-                syncSystemHomeMixedTimeline()
-            }
-        }
-
-        fun setAddTab(value: Boolean) {
-            showAddTab = value
-        }
-
-        private fun syncSystemHomeMixedTimeline() {
-            if (cacheTabs.any { it.isSystemHomeMixedTimeline }) {
-                replaceTabs(cacheTabs.toList().withSystemHomeMixedTimelineEnabled(true))
-            }
-        }
-
-        private fun replaceTabs(tabs: List<TimelineTabItemV2>) {
-            cacheTabs.clear()
-            cacheTabs.addAll(tabs)
         }
     }
-}

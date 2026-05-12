@@ -208,7 +208,7 @@ public fun List<TimelineTabItemV2>.withSystemHomeMixedTimelineEnabled(enabled: B
 
     val systemGroup =
         GroupTimelineTabItemV2(
-            id = SystemHomeMixedTimelineId,
+            id = SYSTEM_HOME_MIXED_TIMELINE_ID,
             children = tabsWithoutSystemGroup,
             mergePolicy = existingGroup?.mergePolicy ?: TimelineMergePolicy.TimePerPage,
             source = GroupSource.SystemHome,
@@ -229,7 +229,7 @@ public fun List<TimelineTabItemV2>.withSystemHomeMixedTimelineEnabled(enabled: B
         }
 }
 
-internal const val SystemHomeMixedTimelineId = "mixed_timeline_system_home"
+internal const val SYSTEM_HOME_MIXED_TIMELINE_ID = "mixed_timeline_system_home"
 
 @Immutable
 @Serializable
@@ -426,7 +426,7 @@ public data class ShortcutSpec(
     }
 }
 
-public class TimelineResolver internal constructor(){
+public class TimelineResolver internal constructor() {
     private val specs: Map<String, TimelineSpec<out TimelineSpec.Data>> by lazy {
         (
             PlatformType.entries

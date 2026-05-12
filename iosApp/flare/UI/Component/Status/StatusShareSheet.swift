@@ -130,7 +130,6 @@ struct StatusShareSheet: View {
             .padding(64)
             .background(Color(.systemGroupedBackground))
             .environment(\.colorScheme, theme ?? colorScheme)
-            .environment(\.appearanceSettings, appearanceSettings.copy(videoAutoplay: .never))
     }
     
     

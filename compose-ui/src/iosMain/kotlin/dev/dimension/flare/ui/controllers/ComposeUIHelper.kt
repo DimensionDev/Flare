@@ -24,8 +24,10 @@ import org.koin.dsl.bind
 import org.koin.dsl.module
 
 public object ComposeUIHelper {
-    @OptIn(ExperimentalCoilApi::class, ExperimentalComposeUiApi::class,
-        ExperimentalComposeApi::class
+    @OptIn(
+        ExperimentalCoilApi::class,
+        ExperimentalComposeUiApi::class,
+        ExperimentalComposeApi::class,
     )
     public fun initialize(
         inAppNotification: InAppNotification,

@@ -95,12 +95,13 @@ public class RssSourcesPresenter :
 private suspend fun SettingsRepository.removeHomeTimelineTabForRssSource(source: DbRssSources) {
     val sourceId =
         when (source.type) {
-            SubscriptionType.RSS ->
+            SubscriptionType.RSS -> {
                 RssTimelineSpecs.rss
                     .target(RssTimelineSpecs.RssData(source.url))
                     .id
+            }
 
-            else ->
+            else -> {
                 RssTimelineSpecs.subscription
                     .target(
                         RssTimelineSpecs.SubscriptionData(
@@ -108,6 +109,7 @@ private suspend fun SettingsRepository.removeHomeTimelineTabForRssSource(source:
                             subscriptionType = source.type,
                         ),
                     ).id
+            }
         }
     updateTabSettingsV2 {
         copy(

@@ -11,11 +11,18 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.refreshSuspend
 import dev.dimension.flare.common.toPagingState
+import dev.dimension.flare.data.model.IconType
+import dev.dimension.flare.data.model.tab.TimelineResolver
+import dev.dimension.flare.data.model.tab.TimelineSpec
+import dev.dimension.flare.data.model.tab.TimelineTabItemV2
+import dev.dimension.flare.data.platform.MisskeyPlatformSpec
 import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiList
+import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.PresenterBase
@@ -30,6 +37,7 @@ public class MisskeyChannelListPresenter(
 ) : PresenterBase<MisskeyChannelListPresenter.State>(),
     KoinComponent {
     private val accountRepository: AccountRepository by inject()
+    private val timelineResolver: TimelineResolver by inject()
 
     public interface State {
         public val type: Type
@@ -48,6 +56,8 @@ public class MisskeyChannelListPresenter(
         public fun unfavorite(list: UiList.Channel)
 
         public fun setType(data: Type)
+
+        public fun timelineTabItem(item: UiList.Channel): TimelineTabItemV2
 
         public val allTypes: ImmutableList<Type> get() = Type.entries.toImmutableList()
 
@@ -84,6 +94,15 @@ public class MisskeyChannelListPresenter(
             override fun setType(data: State.Type) {
                 type = data
             }
+
+            override fun timelineTabItem(item: UiList.Channel): TimelineTabItemV2 =
+                timelineResolver.toTabItem(
+                    MisskeyPlatformSpec.channelTimelineSpec.target(
+                        data = TimelineSpec.AccountResourceData((accountType as AccountType.Specific).accountKey, item.id),
+                        title = UiText.Raw(item.title),
+                        icon = item.banner?.let { IconType.Url(it) } ?: IconType.Material(UiIcon.Channel),
+                    ),
+                )
 
             override suspend fun refreshSuspend() {
                 data.refreshSuspend()

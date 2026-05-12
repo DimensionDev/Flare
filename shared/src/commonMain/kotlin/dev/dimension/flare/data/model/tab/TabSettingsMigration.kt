@@ -5,7 +5,6 @@ import dev.dimension.flare.data.io.PlatformPathProducer
 import dev.dimension.flare.data.model.AllRssTimelineTabItem
 import dev.dimension.flare.data.model.Bluesky
 import dev.dimension.flare.data.model.HomeTimelineTabItem
-import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.ListTimelineTabItem
 import dev.dimension.flare.data.model.Mastodon
 import dev.dimension.flare.data.model.Misskey
@@ -92,12 +91,12 @@ internal fun List<TimelineTabItem>.toTimelineSlots(): List<TimelineSlot> =
         .distinctBy { it.id }
 
 private fun List<TimelineSlot>.withLegacySystemHomeMixedTimeline(enabled: Boolean): List<TimelineSlot> {
-    if (!enabled || size < 2 || any { it.id == SystemHomeMixedTimelineId }) {
+    if (!enabled || size < 2 || any { it.id == SYSTEM_HOME_MIXED_TIMELINE_ID }) {
         return this
     }
     val systemHomeGroup =
         TimelineSlot(
-            id = SystemHomeMixedTimelineId,
+            id = SYSTEM_HOME_MIXED_TIMELINE_ID,
             content =
                 TimelineSlotContent.Group(
                     children = this,

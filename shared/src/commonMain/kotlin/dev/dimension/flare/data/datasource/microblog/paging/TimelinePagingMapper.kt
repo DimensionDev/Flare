@@ -1,5 +1,6 @@
 package dev.dimension.flare.data.datasource.microblog.paging
 
+import dev.dimension.flare.common.SerializableImmutableList
 import dev.dimension.flare.common.SnowflakeIdGenerator
 import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
@@ -152,39 +153,54 @@ internal object TimelinePagingMapper {
         }
     }
 
-    private fun UiTimelineV2.Post.resolveReferences(references: List<Pair<ReferenceType, UiTimelineV2>>): UiTimelineV2.Post =
-        copy(
-            parents = resolveReferencePosts(ReferenceType.Reply, references, parents),
-            quote = resolveReferencePosts(ReferenceType.Quote, references, quote),
+    private fun UiTimelineV2.Post.resolveReferences(
+        references: List<Pair<ReferenceType, UiTimelineV2>>,
+        visited: Set<MicroBlogKey> = emptySet(),
+    ): UiTimelineV2.Post {
+        if (statusKey in visited) {
+            return this
+        }
+        val nextVisited = visited + statusKey
+        return copy(
+            parents = resolveReferencePosts(ReferenceType.Reply, references, parents, nextVisited),
+            quote = resolveReferencePosts(ReferenceType.Quote, references, quote, nextVisited),
             internalRepost =
                 resolveReferencePosts(
                     type = ReferenceType.Retweet,
                     references = references,
                     current = internalRepost?.let(::listOf).orEmpty(),
+                    visited = nextVisited,
                 ).firstOrNull(),
         )
+    }
 
     private fun UiTimelineV2.Post.resolveReferencePosts(
         type: ReferenceType,
         references: List<Pair<ReferenceType, UiTimelineV2>>,
         current: List<UiTimelineV2.Post>,
-    ) = if (current.isNotEmpty()) {
-        current
-            .map { currentPost ->
-                references
-                    .find { it.first == type && it.second.statusKey == currentPost.statusKey }
-                    ?.second as? UiTimelineV2.Post ?: currentPost
+        visited: Set<MicroBlogKey>,
+    ): SerializableImmutableList<UiTimelineV2.Post> {
+        val resolvedPosts =
+            if (current.isNotEmpty()) {
+                current.map { currentPost ->
+                    references
+                        .find { it.first == type && it.second.statusKey == currentPost.statusKey }
+                        ?.second as? UiTimelineV2.Post ?: currentPost
+                }
+            } else {
+                this.references
+                    .asSequence()
+                    .filter { it.type == type }
+                    .mapNotNull { reference ->
+                        references
+                            .find { it.first == type && it.second.statusKey == reference.statusKey }
+                            ?.second as? UiTimelineV2.Post
+                    }.toList()
+            }
+        return resolvedPosts
+            .map { post ->
+                post.resolveReferences(references, visited)
             }.toImmutableList()
-    } else {
-        this.references
-            .asSequence()
-            .filter { it.type == type }
-            .mapNotNull { reference ->
-                references
-                    .find { it.first == type && it.second.statusKey == reference.statusKey }
-                    ?.second as? UiTimelineV2.Post
-            }.toList()
-            .toImmutableList()
     }
 
     private fun uiTimelineToDbStatusReferenceWithStatus(

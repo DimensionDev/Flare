@@ -277,6 +277,55 @@ class MicroblogTest : RobolectricTest() {
         }
 
     @Test
+    fun toUiResolvesQuoteNestedInsideParentReference() =
+        runTest {
+            val accountKey = MicroBlogKey(id = "account", host = "test.com")
+            val childUser = createUser(MicroBlogKey(id = "child-user", host = "test.com"), "Child User")
+            val parentUser = createUser(MicroBlogKey(id = "parent-user", host = "test.com"), "Parent User")
+            val quotedUser = createUser(MicroBlogKey(id = "quoted-user", host = "test.com"), "Quoted User")
+
+            val quotedPost =
+                createPost(
+                    accountKey = accountKey,
+                    user = quotedUser,
+                    statusKey = MicroBlogKey(id = "quoted-status", host = "test.com"),
+                    text = "quoted status",
+                )
+            val parentPost =
+                createPost(
+                    accountKey = accountKey,
+                    user = parentUser,
+                    statusKey = MicroBlogKey(id = "parent-status", host = "test.com"),
+                    text = "parent status",
+                    quote = listOf(quotedPost),
+                )
+            val childPost =
+                createPost(
+                    accountKey = accountKey,
+                    user = childUser,
+                    statusKey = MicroBlogKey(id = "child-status", host = "test.com"),
+                    text = "child status",
+                    parents = listOf(parentPost),
+                )
+
+            val mapped = TimelinePagingMapper.toDb(childPost, pagingKey = "home")
+            val rendered =
+                TimelinePagingMapper.toUi(mapped, pagingKey = "home", translationDisplayOptions())
+                    as UiTimelineV2.Post
+            val renderedParent = rendered.parents.single()
+
+            assertEquals(parentPost.statusKey, renderedParent.statusKey)
+            assertEquals(1, renderedParent.quote.size)
+            assertEquals(quotedPost.statusKey, renderedParent.quote.first().statusKey)
+            assertEquals(
+                "quoted status",
+                renderedParent.quote
+                    .first()
+                    .content.raw,
+            )
+        }
+
+    @Test
     fun saveToDatabaseStillPersistsUsersForPostUserAndUserListTimeline() =
         runTest {
             val accountKey = MicroBlogKey(id = "account", host = "test.com")

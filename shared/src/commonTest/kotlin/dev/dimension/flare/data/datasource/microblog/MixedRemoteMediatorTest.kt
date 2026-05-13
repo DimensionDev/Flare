@@ -605,6 +605,54 @@ class MixedRemoteMediatorTest : RobolectricTest() {
             assertEquals(listOf(postB.statusKey), collapsedPost.parents.map { it.statusKey })
         }
 
+    @Test
+    fun timelineDoesNotOverflowWhenReplyChainIsVeryLong() =
+        runTest {
+            val accountKey = MicroBlogKey("mastodon.example", "timeline")
+            val accountType = AccountType.Specific(accountKey)
+            val user = profile(MicroBlogKey("mastodon.example", "user"), "User")
+            var parent: UiTimelineV2.Post? = null
+            val posts =
+                (0 until 6_000).map { index ->
+                    createPost(
+                        accountType = accountType,
+                        user = user,
+                        statusKey = MicroBlogKey("mastodon.example", "long-$index"),
+                        text = "Long $index",
+                        parents = listOfNotNull(parent),
+                    ).also {
+                        parent = it
+                    }
+                }
+            val loader =
+                FakeLoader("long_reply_chain") { request ->
+                    when (request) {
+                        PagingRequest.Refresh -> {
+                            PagingResult(
+                                data = posts.asReversed(),
+                                nextKey = null,
+                            )
+                        }
+
+                        is PagingRequest.Append -> {
+                            error("No append expected")
+                        }
+
+                        is PagingRequest.Prepend -> {
+                            error("No prepend expected")
+                        }
+                    }
+                }
+
+            val mediator = TimelineRemoteMediator(loader = loader, database = db, allowLongText = false)
+
+            val result = mediator.timeline(pageSize = 20, request = PagingRequest.Refresh)
+
+            val collapsedPost = assertIs<UiTimelineV2.Post>(result.data.single())
+            assertEquals(posts.last().statusKey, collapsedPost.statusKey)
+            assertEquals(posts.dropLast(1).map { it.statusKey }, collapsedPost.parents.map { it.statusKey })
+        }
+
     @OptIn(ExperimentalPagingApi::class)
     @Test
     fun refreshSchedulesPreTranslationForRootAndReplyReference() =

@@ -72,6 +72,8 @@ public class ComposePresenter(
     private val restoreDraftUseCase: RestoreDraftUseCase by inject()
     private val draftRepository: DraftRepository by inject()
     private val ioScope: CoroutineScope by inject()
+    private val shouldPersistSelectedAccounts: Boolean =
+        accountType == null && status == null && draftGroupId == null
 
     private val showDraftFlow by lazy {
         combine(draftRepository.visibleDrafts, draftRepository.sendingDrafts) { visible, sending ->
@@ -393,13 +395,15 @@ public class ComposePresenter(
 
         DisposableEffect(Unit) {
             onDispose {
-                ioScope.launch {
-                    val accounts = selectedAccountsKeyFlow.value
-                    if (accounts.isNotEmpty()) {
-                        appDataStore.composeConfigData.updateData {
-                            it.copy(
-                                lastAccounts = accounts,
-                            )
+                if (shouldPersistSelectedAccounts) {
+                    ioScope.launch {
+                        val accounts = selectedAccountsKeyFlow.value
+                        if (accounts.isNotEmpty()) {
+                            appDataStore.composeConfigData.updateData {
+                                it.copy(
+                                    lastAccounts = accounts,
+                                )
+                            }
                         }
                     }
                 }

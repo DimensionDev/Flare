@@ -1,6 +1,28 @@
 import KotlinSharedUI
+import UIKit
+
+private func contentSizeCategory(fontSizeDiff: Float) -> UIContentSizeCategory {
+    switch Int(fontSizeDiff.rounded()) {
+    case ...(-2):
+        return .extraSmall
+    case -1:
+        return .small
+    case 0:
+        return .medium
+    case 1:
+        return .large
+    case 2:
+        return .extraLarge
+    case 3:
+        return .extraExtraLarge
+    default:
+        return .extraExtraExtraLarge
+    }
+}
 
 struct StatusUIKitAppearance: Equatable {
+    let preferredContentSizeCategory: UIContentSizeCategory
+    let preferredContentSizeCategoryID: String
     let fullWidthPost: Bool
     let avatarShape: AvatarShape
     let avatarShapeID: String
@@ -15,7 +37,9 @@ struct StatusUIKitAppearance: Equatable {
     let compatLinkPreview: Bool
     let expandMediaSize: Bool
 
-    init(timeline: TimelineAppearance) {
+    init(timeline: TimelineAppearance, fontSizeDiff: Float = 0) {
+        preferredContentSizeCategory = contentSizeCategory(fontSizeDiff: fontSizeDiff)
+        preferredContentSizeCategoryID = preferredContentSizeCategory.rawValue
         fullWidthPost = timeline.fullWidthPost
         avatarShape = timeline.avatarShape
         avatarShapeID = timeline.avatarShape.name
@@ -32,7 +56,8 @@ struct StatusUIKitAppearance: Equatable {
     }
 
     static func == (lhs: Self, rhs: Self) -> Bool {
-        lhs.fullWidthPost == rhs.fullWidthPost &&
+        lhs.preferredContentSizeCategoryID == rhs.preferredContentSizeCategoryID &&
+            lhs.fullWidthPost == rhs.fullWidthPost &&
             lhs.avatarShapeID == rhs.avatarShapeID &&
             lhs.showPlatformLogo == rhs.showPlatformLogo &&
             lhs.absoluteTimestamp == rhs.absoluteTimestamp &&
@@ -61,8 +86,8 @@ struct TimelineUIKitAppearance: Equatable {
         timelineDisplayMode == .card
     }
 
-    init(timeline: TimelineAppearance) {
-        status = StatusUIKitAppearance(timeline: timeline)
+    init(timeline: TimelineAppearance, fontSizeDiff: Float = 0) {
+        status = StatusUIKitAppearance(timeline: timeline, fontSizeDiff: fontSizeDiff)
         timelineDisplayMode = timeline.timelineDisplayMode
         timelineDisplayModeID = timeline.timelineDisplayMode.name
         videoAutoplay = timeline.videoAutoplay

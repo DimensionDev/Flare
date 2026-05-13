@@ -679,6 +679,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
                 lineLimit: nil,
                 isTextSelectionEnabled: isDetail,
                 onOpenURL: openURL,
+                preferredContentSizeCategory: appearance.preferredContentSizeCategory,
                 contentKey: Int(data.renderHash)
             )
             items.append(contentWarningText)
@@ -713,6 +714,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
                     lineLimit: bodyLineLimit,
                     isTextSelectionEnabled: bodySelectionEnabled,
                     onOpenURL: openURL,
+                    preferredContentSizeCategory: appearance.preferredContentSizeCategory,
                     contentKey: Int(data.renderHash)
                 )
                 items.append(bodyText)

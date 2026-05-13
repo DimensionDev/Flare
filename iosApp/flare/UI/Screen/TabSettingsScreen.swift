@@ -245,6 +245,7 @@ struct EditTabSheet: View {
         self.tabItem = tabItem
         self.titleAndIconOnly = titleAndIconOnly
         self._presenter = .init(wrappedValue: .init(presenter: EditTabPresenter(tabItem: tabItem)))
+        self._text = State(initialValue: tabItem.title.text)
         self._enabled = State(initialValue: tabItem.enabled)
         self._filterConfig = State(initialValue: tabItem.filterConfig)
         self._appearancePatch = State(
@@ -282,11 +283,6 @@ struct EditTabSheet: View {
                 appearancePatch: $appearancePatch,
                 titlePlaceholder: "tab_settings_edit_title_placeholder"
             )
-        }
-        .onChange(of: presenter.state.initialText) { oldValue, newValue in
-            if case .success(let success) = onEnum(of: newValue) {
-                text = String(success.data)
-            }
         }
         .sheet(isPresented: $showFilterSheet) {
             NavigationStack {

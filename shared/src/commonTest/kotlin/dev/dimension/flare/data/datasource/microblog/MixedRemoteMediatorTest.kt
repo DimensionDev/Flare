@@ -842,7 +842,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
     @OptIn(ExperimentalPagingApi::class)
     @Test
     fun homeTimelineAcceptsAiSkippedTranslationResult() =
-        runTest {
+        runBlocking {
             val appDataStore = AppDataStore(pathProducer)
             appDataStore.appSettingsStore.updateData {
                 it.copy(
@@ -854,7 +854,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                         ),
                 )
             }
-            val scope = CoroutineScope(Dispatchers.Unconfined + Job())
+            val scope = CoroutineScope(Dispatchers.Unconfined + SupervisorJob())
             val preTranslationService: PreTranslationService =
                 OnlinePreTranslationService(
                     database = db,
@@ -863,69 +863,69 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                     coroutineScope = scope,
                 )
             try {
-            val accountKey = MicroBlogKey(id = "account-ai-skipped", host = "test.social")
-            val post =
-                createPost(
-                    accountType = AccountType.Specific(accountKey),
-                    user = profile(MicroBlogKey("user-ai-skipped", "test.social"), "User"),
-                    statusKey = MicroBlogKey("status-ai-skipped", "test.social"),
-                    text = "already target language",
-                )
-            val loader =
-                FakeLoader("home") { request ->
-                    when (request) {
-                        PagingRequest.Refresh -> {
-                            PagingResult(
-                                data = listOf(post),
-                                nextKey = null,
-                            )
-                        }
+                val accountKey = MicroBlogKey(id = "account-ai-skipped", host = "test.social")
+                val post =
+                    createPost(
+                        accountType = AccountType.Specific(accountKey),
+                        user = profile(MicroBlogKey("user-ai-skipped", "test.social"), "User"),
+                        statusKey = MicroBlogKey("status-ai-skipped", "test.social"),
+                        text = "already target language",
+                    )
+                val loader =
+                    FakeLoader("home") { request ->
+                        when (request) {
+                            PagingRequest.Refresh -> {
+                                PagingResult(
+                                    data = listOf(post),
+                                    nextKey = null,
+                                )
+                            }
 
-                        is PagingRequest.Append -> {
-                            error("No append expected")
-                        }
+                            is PagingRequest.Append -> {
+                                error("No append expected")
+                            }
 
-                        is PagingRequest.Prepend -> {
-                            error("No prepend expected")
+                            is PagingRequest.Prepend -> {
+                                error("No prepend expected")
+                            }
                         }
                     }
-                }
-            val mediator =
-                TimelineRemoteMediator(
-                    loader = loader,
-                    database = db,
-                    allowLongText = false,
-                    preTranslationService = preTranslationService,
-                )
+                val mediator =
+                    TimelineRemoteMediator(
+                        loader = loader,
+                        database = db,
+                        allowLongText = false,
+                        preTranslationService = preTranslationService,
+                    )
 
-            val mediatorResult =
-                mediator.load(
-                    loadType = LoadType.REFRESH,
-                    state =
-                        PagingState(
-                            pages = emptyList(),
-                            anchorPosition = null,
-                            config = PagingConfig(pageSize = 20),
-                            leadingPlaceholderCount = 0,
-                        ),
-                )
-            assertTrue(mediatorResult is androidx.paging.RemoteMediator.MediatorResult.Success)
+                val mediatorResult =
+                    mediator.load(
+                        loadType = LoadType.REFRESH,
+                        state =
+                            PagingState(
+                                pages = emptyList(),
+                                anchorPosition = null,
+                                config = PagingConfig(pageSize = 20),
+                                leadingPlaceholderCount = 0,
+                            )
+                    )
+                assertTrue(mediatorResult is androidx.paging.RemoteMediator.MediatorResult.Success)
 
-            val savedStatus = db.statusDao().get(post.statusKey, AccountType.Specific(accountKey)).first()
-            assertNotNull(savedStatus)
-            val translation =
-                withTimeout(5_000) {
-                    db
-                        .translationDao()
-                        .find(
-                            entityType = TranslationEntityType.Status,
-                            entityKey = savedStatus.id,
-                            targetLanguage = Locale.language,
-                        ).filterNotNull()
-                        .first { it.status == TranslationStatus.Skipped }
-                }
-            assertEquals(TranslationStatus.Skipped, translation.status)
-            assertEquals("same_language", translation.statusReason)
+                val savedStatus = db.statusDao().get(post.statusKey, AccountType.Specific(accountKey)).first()
+                assertNotNull(savedStatus)
+                val translation =
+                    withTimeout(5_000) {
+                        db
+                            .translationDao()
+                            .find(
+                                entityType = TranslationEntityType.Status,
+                                entityKey = savedStatus.id,
+                                targetLanguage = Locale.language,
+                            ).filterNotNull()
+                            .first { it.status == TranslationStatus.Skipped }
+                    }
+                assertEquals(TranslationStatus.Skipped, translation.status)
+                assertEquals("same_language", translation.statusReason)
             } finally {
                 scope.coroutineContext[Job]?.cancelAndJoin()
             }

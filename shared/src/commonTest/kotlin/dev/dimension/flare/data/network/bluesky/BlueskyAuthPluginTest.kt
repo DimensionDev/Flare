@@ -16,10 +16,13 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.supervisorScope
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withTimeout
 import sh.christian.ozone.BlueskyJson
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -144,7 +147,9 @@ class BlueskyAuthPluginTest {
                                             // Park the first request inside the mock until the
                                             // second one also arrives, so both observe an expired
                                             // token before either of them gets to refresh.
-                                            bothExpiredReachedMock.await()
+                                            withTimeout(5_000) {
+                                                bothExpiredReachedMock.await()
+                                            }
                                         }
 
                                         2 -> {
@@ -177,22 +182,18 @@ class BlueskyAuthPluginTest {
             val results =
                 supervisorScope {
                     val requestOne =
-                        async {
+                        async(start = CoroutineStart.UNDISPATCHED) {
                             client.get("https://bsky.social/xrpc/app.bsky.feed.getTimeline").bodyAsText()
                         }
                     val requestTwo =
-                        async {
+                        async(start = CoroutineStart.UNDISPATCHED) {
                             client.get("https://bsky.social/xrpc/app.bsky.actor.getProfile").bodyAsText()
                         }
-                    listOf(
-                        runCatching { requestOne.await() },
-                        runCatching { requestTwo.await() },
-                    )
+                    runCatching { awaitAll(requestOne, requestTwo) }
                 }
 
             assertEquals(1, refreshCalls)
-            assertEquals(2, results.count { it.isSuccess })
-            assertEquals(listOf("""{"ok":true}""", """{"ok":true}"""), results.map { it.getOrThrow() })
+            assertEquals(listOf("""{"ok":true}""", """{"ok":true}"""), results.getOrThrow())
             assertEquals("access-new", credentialFlow.value.accessToken)
             assertEquals("refresh-new", credentialFlow.value.refreshToken)
         }

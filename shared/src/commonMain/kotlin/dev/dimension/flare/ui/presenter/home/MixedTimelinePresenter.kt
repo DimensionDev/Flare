@@ -5,6 +5,7 @@ import dev.dimension.flare.data.datasource.microblog.MixedRemoteMediator
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.notSupported
+import dev.dimension.flare.data.model.tab.GroupTimelineTabItemV2
 import dev.dimension.flare.data.model.tab.TimelineMergePolicy
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.data.model.tab.isSystemHomeMixedTimeline
@@ -21,51 +22,131 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 public class MixedTimelinePresenter(
-    private val subTimelinePresenter: List<TimelinePresenter>,
-    private val mergePolicy: TimelineMergePolicy = TimelineMergePolicy.TimePerPage,
+    id: String,
+    private val fallbackSubTimelinePresenter: List<TimelinePresenter> = emptyList(),
+    private val fallbackMergePolicy: TimelineMergePolicy = TimelineMergePolicy.TimePerPage,
 ) : TimelinePresenter(),
     KoinComponent {
+    private val groupId = id
+
+    public constructor(
+        subTimelinePresenter: List<TimelinePresenter>,
+        mergePolicy: TimelineMergePolicy = TimelineMergePolicy.TimePerPage,
+    ) : this(
+        id = "legacy_mixed_timeline",
+        fallbackSubTimelinePresenter = subTimelinePresenter,
+        fallbackMergePolicy = mergePolicy,
+    )
+
     private val database: CacheDatabase by inject()
+    private val settingsRepository: SettingsRepository by inject()
+
+    init {
+        bindTimelineTabItemId(id)
+    }
+
+    private val groupTabFlow: Flow<GroupTimelineTabItemV2?> by lazy {
+        settingsRepository
+            .homeTimelineTab(groupId)
+            .map { it as? GroupTimelineTabItemV2 }
+    }
+
+    private val mergePolicyFlow: Flow<TimelineMergePolicy> by lazy {
+        groupTabFlow
+            .map { it?.mergePolicy ?: fallbackMergePolicy }
+            .distinctUntilChanged()
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private val subTimelineLoadersFlow: Flow<List<RemoteLoader<UiTimelineV2>>> by lazy {
+        groupTabFlow
+            .map { group ->
+                group
+                    ?.children
+                    ?.filter { it.enabled }
+            }.distinctUntilChanged { old, new ->
+                old.orEmpty().map { it.id } == new.orEmpty().map { it.id }
+            }.flatMapLatest { tabs ->
+                val presenters = tabs?.map { it.createPresenter() } ?: fallbackSubTimelinePresenter
+                if (presenters.isEmpty()) {
+                    flowOf(emptyList())
+                } else {
+                    combine(presenters.map { it.loader }) { it.toList() }
+                }
+            }
+    }
+
     override val loader: Flow<RemoteLoader<UiTimelineV2>>
         get() =
-            combine(subTimelinePresenter.map { it.loader }) {
-                MixedRemoteMediator(
-                    database = database,
-                    mediators = it.filterIsInstance<CacheableRemoteLoader<UiTimelineV2>>(),
-                    mergePolicy = mergePolicy,
-                )
+            combine(subTimelineLoadersFlow, mergePolicyFlow) { loaders, mergePolicy ->
+                if (loaders.isEmpty()) {
+                    notSupported()
+                } else {
+                    MixedRemoteMediator(
+                        database = database,
+                        mediators = loaders.filterIsInstance<CacheableRemoteLoader<UiTimelineV2>>(),
+                        mergePolicy = mergePolicy,
+                    )
+                }
             }
 }
 
 public class SystemHomeMixedTimelinePresenter(
-    private val mergePolicy: TimelineMergePolicy = TimelineMergePolicy.TimePerPage,
+    id: String,
 ) : TimelinePresenter(),
     KoinComponent {
+    private val groupId = id
+
     private val database: CacheDatabase by inject()
     private val settingsRepository: SettingsRepository by inject()
 
+    init {
+        bindTimelineTabItemId(id)
+    }
+
+    private val groupTabFlow: Flow<GroupTimelineTabItemV2?> by lazy {
+        settingsRepository
+            .homeTimelineTab(groupId)
+            .map { it as? GroupTimelineTabItemV2 }
+    }
+
+    private val mergePolicyFlow: Flow<TimelineMergePolicy> by lazy {
+        groupTabFlow
+            .map { it?.mergePolicy ?: TimelineMergePolicy.TimePerPage }
+            .distinctUntilChanged()
+    }
+
     @OptIn(ExperimentalCoroutinesApi::class)
+    private val subTimelineLoadersFlow: Flow<List<RemoteLoader<UiTimelineV2>>> by lazy {
+        settingsRepository.homeTimelineTabs
+            .map { tabs ->
+                tabs
+                    .filterNot { it.isSystemHomeMixedTimeline }
+                    .filter { it.enabled }
+            }.distinctUntilChangedByTabIds()
+            .flatMapLatest { tabs ->
+                val presenters = tabs.map { it.createPresenter() }
+                if (presenters.isEmpty()) {
+                    flowOf(emptyList())
+                } else {
+                    combine(presenters.map { it.loader }) { it.toList() }
+                }
+            }
+    }
+
     override val loader: Flow<RemoteLoader<UiTimelineV2>>
         get() =
-            settingsRepository.homeTimelineTabs
-                .map { tabs ->
-                    tabs
-                        .filterNot { it.isSystemHomeMixedTimeline }
-                        .filter { it.enabled }
-                }.distinctUntilChangedByTabIds()
-                .flatMapLatest { tabs ->
-                    if (tabs.isEmpty()) {
-                        flowOf(notSupported())
-                    } else {
-                        combine(tabs.map { it.createPresenter().loader }) {
-                            MixedRemoteMediator(
-                                database = database,
-                                mediators = it.filterIsInstance<CacheableRemoteLoader<UiTimelineV2>>(),
-                                mergePolicy = mergePolicy,
-                            )
-                        }
-                    }
+            combine(subTimelineLoadersFlow, mergePolicyFlow) { loaders, mergePolicy ->
+                if (loaders.isEmpty()) {
+                    notSupported()
+                } else {
+                    MixedRemoteMediator(
+                        database = database,
+                        mediators = loaders.filterIsInstance<CacheableRemoteLoader<UiTimelineV2>>(),
+                        mergePolicy = mergePolicy,
+                    )
                 }
+            }
 }
 
 private fun Flow<List<TimelineTabItemV2>>.distinctUntilChangedByTabIds(): Flow<List<TimelineTabItemV2>> =

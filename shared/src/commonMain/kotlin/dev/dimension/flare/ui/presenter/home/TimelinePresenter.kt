@@ -34,6 +34,7 @@ import dev.dimension.flare.data.model.tab.TimelinePostContent
 import dev.dimension.flare.data.model.tab.TimelinePostKind
 import dev.dimension.flare.data.repository.LocalFilterRepository
 import dev.dimension.flare.data.repository.LoginExpiredException
+import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.data.translation.PreTranslationService
 import dev.dimension.flare.data.translation.TranslationSettingsSupport
 import dev.dimension.flare.ui.model.UiMedia
@@ -45,8 +46,11 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
@@ -59,6 +63,7 @@ public abstract class TimelinePresenter :
     private val database: CacheDatabase by inject()
     private val appDataStore: AppDataStore by inject()
     private val preTranslationService: PreTranslationService by inject()
+    private val settingsRepository: SettingsRepository by inject()
 
     private val localFilterRepository: LocalFilterRepository by inject()
     private val inAppNotification: InAppNotification by inject()
@@ -67,7 +72,16 @@ public abstract class TimelinePresenter :
         localFilterRepository.getFlow(forTimeline = true)
     }
 
-    internal var timelineFilterConfig: TimelineFilterConfig = TimelineFilterConfig()
+    private var timelineTabItemId: String? = null
+
+    private val timelineFilterConfigFlow: Flow<TimelineFilterConfig> by lazy {
+        timelineTabItemId?.let { id ->
+            settingsRepository
+                .homeTimelineTab(id)
+                .map { it?.filterConfig ?: TimelineFilterConfig() }
+                .distinctUntilChanged()
+        } ?: flowOf(TimelineFilterConfig())
+    }
 
     private val translationSettingsFlow: Flow<TranslationDisplayOptions> by lazy {
         TranslationSettingsSupport.displayOptionsFlow(appDataStore)
@@ -109,7 +123,7 @@ public abstract class TimelinePresenter :
                         ).cachedIn(scope)
                     }
                 }.flatMapLatest { pager ->
-                    filterFlow.map { filterList ->
+                    combine(filterFlow, timelineFilterConfigFlow) { filterList, timelineFilterConfig ->
                         pager
                             .filter { item ->
                                 item.matchesKeywordFilters(filterList) && item.matchesTimelineFilter(timelineFilterConfig)
@@ -178,6 +192,10 @@ public abstract class TimelinePresenter :
                     }
             }
         }
+    }
+
+    internal fun bindTimelineTabItemId(id: String) {
+        timelineTabItemId = id
     }
 
     internal abstract val loader: Flow<RemoteLoader<UiTimelineV2>>

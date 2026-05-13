@@ -22,6 +22,7 @@ import dev.dimension.flare.data.model.appearance.toTimelineAppearance
 import dev.dimension.flare.data.model.tab.TabSettingsV2
 import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
+import dev.dimension.flare.data.model.tab.findById
 import dev.dimension.flare.data.model.tab.isSystemHomeMixedTimeline
 import dev.dimension.flare.data.model.tab.migrateTabSettingsV1ToV2
 import dev.dimension.flare.data.model.tab.withSystemHomeMixedTimelineEnabled
@@ -168,6 +169,11 @@ public class SettingsRepository internal constructor(
                 )
             }
     }
+
+    internal fun homeTimelineTab(id: String): Flow<TimelineTabItemV2?> =
+        homeTimelineTabs.map { tabs ->
+            tabs.findById(id)
+        }
 
     internal suspend fun updateTabSettingsV2(block: TabSettingsV2.() -> TabSettingsV2) {
         ensureTabSettingsMigrated()

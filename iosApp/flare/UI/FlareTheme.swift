@@ -24,6 +24,9 @@ struct FlareTheme<Content: View>: View {
             )
             .dynamicTypeSize(sizes[min(max(Int(globalAppearance.fontSizeDiff) + 2, 0), sizes.count - 1)])
             .environment(\.openURL, OpenURLAction { url in
+                guard url.isWebURL else {
+                    return .systemAction(url)
+                }
                 if #available(iOS 26.0, *) {
                     return .systemAction(url, prefersInApp: globalAppearance.inAppBrowser)
                 } else if globalAppearance.inAppBrowser {
@@ -48,6 +51,13 @@ struct FlareTheme<Content: View>: View {
             .onSuccessOf(of: presenter.state.timelineAppearance) { newValue in
                 timelineAppearance = newValue
             }
+    }
+}
+
+private extension URL {
+    var isWebURL: Bool {
+        guard let scheme = scheme?.lowercased() else { return false }
+        return scheme == "http" || scheme == "https"
     }
 }
 

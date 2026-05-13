@@ -22,6 +22,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.content.TextContent
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.put
 import kotlin.time.Duration.Companion.minutes
 
@@ -41,27 +42,7 @@ internal class OpenAIService {
         config: AppSettings.AiConfig.Type.OpenAI,
         prompt: String,
     ): String {
-        val body =
-            buildJsonObject {
-                put("model", config.model)
-                put(
-                    "messages",
-                    buildJsonArray {
-                        add(
-                            buildJsonObject {
-                                put("role", "user")
-                                put("content", prompt)
-                            },
-                        )
-                    },
-                )
-                config.reasoningEffort
-                    .takeIf { it.isNotBlank() }
-                    ?.let { put("reasoning_effort", it) }
-                config.extraBody
-                    .takeIf { it.isNotBlank() }
-                    ?.let { put("extra_body", JSON.parseToJsonElement(it)) }
-            }
+        val body = buildChatCompletionBody(config = config, prompt = prompt)
         val url = "${config.serverUrl.trimEnd('/')}/chat/completions"
         return ktorClient {
             install(HttpTimeout) {
@@ -84,6 +65,31 @@ internal class OpenAIService {
             ?.content
             .orEmpty()
             .trim()
+    }
+
+    internal fun buildChatCompletionBody(
+        config: AppSettings.AiConfig.Type.OpenAI,
+        prompt: String,
+    ) = buildJsonObject {
+        config.extraBody
+            .takeIf { it.isNotBlank() }
+            ?.let { JSON.parseToJsonElement(it).jsonObject }
+            ?.forEach { (key, value) -> put(key, value) }
+        put("model", config.model)
+        put(
+            "messages",
+            buildJsonArray {
+                add(
+                    buildJsonObject {
+                        put("role", "user")
+                        put("content", prompt)
+                    },
+                )
+            },
+        )
+        config.reasoningEffort
+            .takeIf { it.isNotBlank() }
+            ?.let { put("reasoning_effort", it) }
     }
 
     suspend fun chatCompletionOrNull(

@@ -93,6 +93,7 @@ import dev.dimension.flare.settings_ai_config_api_key_hint
 import dev.dimension.flare.settings_ai_config_description
 import dev.dimension.flare.settings_ai_config_enable_pre_translation
 import dev.dimension.flare.settings_ai_config_enable_tldr
+import dev.dimension.flare.settings_ai_config_extra_body
 import dev.dimension.flare.settings_ai_config_model
 import dev.dimension.flare.settings_ai_config_model_description
 import dev.dimension.flare.settings_ai_config_model_loading
@@ -1392,6 +1393,7 @@ internal fun SettingsScreen(
                 val serverRequirementHint = stringResource(Res.string.settings_ai_config_server_url_requirement)
                 val apiKeyTitle = stringResource(Res.string.settings_ai_config_api_key)
                 val apiKeyHint = stringResource(Res.string.settings_ai_config_api_key_hint)
+                val extraBodyTitle = stringResource(Res.string.settings_ai_config_extra_body)
                 val modelTitle = stringResource(Res.string.settings_ai_config_model)
                 val modelPlaceholder = stringResource(Res.string.settings_ai_config_model_select)
                 val tldrPromptTitle = stringResource(Res.string.settings_ai_config_tldr_prompt)
@@ -1614,6 +1616,32 @@ internal fun SettingsScreen(
                                             },
                                         )
                                     }
+                                }
+                            },
+                        )
+                        ExpanderItemSeparator()
+                        ExpanderItem(
+                            heading = { Text(extraBodyTitle) },
+                            caption = {
+                                if (state.aiConfigState.openAIExtraBody.isNotBlank()) {
+                                    Text(state.aiConfigState.openAIExtraBody)
+                                }
+                            },
+                            trailing = {
+                                Button(
+                                    onClick = {
+                                        state.aiConfigState.setTextEditDialog(
+                                            TextEditDialogState(
+                                                title = extraBodyTitle,
+                                                placeholder = "",
+                                                value = state.aiConfigState.openAIExtraBody,
+                                                hint = "{\"thinking\": {\"type\": \"enabled\"}}",
+                                                onConfirm = state.aiConfigState::setOpenAIExtraBody,
+                                            ),
+                                        )
+                                    },
+                                ) {
+                                    Text(stringResource(Res.string.edit))
                                 }
                             },
                         )

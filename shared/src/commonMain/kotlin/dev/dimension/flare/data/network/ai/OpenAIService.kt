@@ -1,20 +1,29 @@
 package dev.dimension.flare.data.network.ai
 
-import com.aallam.openai.api.chat.ChatCompletionRequest
-import com.aallam.openai.api.chat.ChatMessage
-import com.aallam.openai.api.chat.ChatRole
-import com.aallam.openai.api.chat.Effort
+import com.aallam.openai.api.chat.ChatCompletion
 import com.aallam.openai.api.http.Timeout
-import com.aallam.openai.api.model.ModelId
 import com.aallam.openai.client.OpenAI
 import com.aallam.openai.client.OpenAIConfig
 import com.aallam.openai.client.OpenAIHost
 import dev.dimension.flare.common.BuildConfig
+import dev.dimension.flare.common.JSON
 import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.network.FlareLogger
 import dev.dimension.flare.data.network.httpClientEngine
+import dev.dimension.flare.data.network.ktorClient
+import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logging
+import io.ktor.client.request.bearerAuth
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.client.statement.bodyAsText
+import io.ktor.http.ContentType
+import io.ktor.http.content.TextContent
+import kotlinx.serialization.json.buildJsonArray
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.put
 import kotlin.time.Duration.Companion.minutes
 
 internal class OpenAIService {
@@ -32,29 +41,56 @@ internal class OpenAIService {
     suspend fun chatCompletion(
         config: AppSettings.AiConfig.Type.OpenAI,
         prompt: String,
-    ): String =
-        createClient(
-            serverUrl = config.serverUrl,
-            apiKey = config.apiKey,
-        ).chatCompletion(
-            request =
-                ChatCompletionRequest(
-                    model = ModelId(config.model),
-                    messages =
-                        listOf(
-                            ChatMessage(
-                                role = ChatRole.User,
-                                content = prompt,
-                            ),
-                        ),
-                    reasoningEffort = config.reasoningEffort.takeIf { it.isNotBlank() }?.let(::Effort),
-                ),
-        ).choices
-            .firstOrNull()
+    ): String {
+        val body = buildChatCompletionBody(config = config, prompt = prompt)
+        val url = "${config.serverUrl.trimEnd('/')}/chat/completions"
+        return ktorClient {
+            install(HttpTimeout) {
+                requestTimeoutMillis = 1.minutes.inWholeMilliseconds
+                socketTimeoutMillis = 1.minutes.inWholeMilliseconds
+                connectTimeoutMillis = 1.minutes.inWholeMilliseconds
+            }
+        }.use { client ->
+            val response =
+                client
+                    .post(url) {
+                        bearerAuth(config.apiKey)
+                        setBody(TextContent(body.toString(), ContentType.Application.Json))
+                    }.bodyAsText()
+            JSON
+                .decodeFromString(ChatCompletion.serializer(), response)
+                .choices
+        }.firstOrNull()
             ?.message
             ?.content
             .orEmpty()
             .trim()
+    }
+
+    internal fun buildChatCompletionBody(
+        config: AppSettings.AiConfig.Type.OpenAI,
+        prompt: String,
+    ) = buildJsonObject {
+        config.extraBody
+            .takeIf { it.isNotBlank() }
+            ?.let { JSON.parseToJsonElement(it).jsonObject }
+            ?.forEach { (key, value) -> put(key, value) }
+        put("model", config.model)
+        put(
+            "messages",
+            buildJsonArray {
+                add(
+                    buildJsonObject {
+                        put("role", "user")
+                        put("content", prompt)
+                    },
+                )
+            },
+        )
+        config.reasoningEffort
+            .takeIf { it.isNotBlank() }
+            ?.let { put("reasoning_effort", it) }
+    }
 
     suspend fun chatCompletionOrNull(
         config: AppSettings.AiConfig.Type.OpenAI,

@@ -103,6 +103,8 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
             val serverRequirementHint = stringResource(id = R.string.settings_ai_config_server_url_requirement)
             val apiKeyTitle = stringResource(id = R.string.settings_ai_config_api_key)
             val apiKeyHint = stringResource(id = R.string.settings_ai_config_api_key_hint)
+            val extraBodyTitle = stringResource(id = R.string.settings_ai_config_extra_body)
+            val extraBodyHint = stringResource(id = R.string.settings_ai_config_extra_body_hint)
             val modelTitle = stringResource(id = R.string.settings_ai_config_model)
             val modelPlaceholder = stringResource(id = R.string.settings_ai_config_model_select)
             val tldrPromptTitle = stringResource(id = R.string.settings_ai_config_tldr_prompt)
@@ -300,6 +302,43 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
                             }
                         }
                     },
+                )
+            }
+            AnimatedVisibility(visible = state.aiType == AiTypeOption.OpenAI) {
+                SegmentedListItem(
+                    checked = state.textEditDialog?.field == AiConfigEditField.ExtraBody,
+                    onCheckedChange = { checked ->
+                        if (checked) {
+                            state.setTextEditDialog(
+                                TextEditDialogState(
+                                    field = AiConfigEditField.ExtraBody,
+                                    title = extraBodyTitle,
+                                    placeholder = extraBodyHint,
+                                    value = state.openAIExtraBody,
+                                    onConfirm = { newValue ->
+                                        state.setOpenAIExtraBody(newValue)
+                                    },
+                                ),
+                            )
+                        } else if (state.textEditDialog?.field == AiConfigEditField.ExtraBody) {
+                            state.setTextEditDialog(null)
+                        }
+                    },
+                    shapes = ListItemDefaults.item(),
+                    content = {
+                        Text(text = extraBodyTitle)
+                    },
+                    supportingContent =
+                        if (state.openAIExtraBody.isBlank()) {
+                            null
+                        } else {
+                            {
+                                Text(
+                                    text = state.openAIExtraBody,
+                                    style = MaterialTheme.typography.bodySmall,
+                                )
+                            }
+                        },
                 )
             }
             AnimatedVisibility(visible = state.aiType == AiTypeOption.OpenAI && !shouldShowManualModelInput) {
@@ -550,6 +589,7 @@ private data class TextEditDialogState(
 private enum class AiConfigEditField {
     ServerUrl,
     ApiKey,
+    ExtraBody,
     Model,
     TldrPrompt,
 }

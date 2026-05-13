@@ -9,6 +9,7 @@ struct AiConfigScreen: View {
     private enum EditableField: String, Identifiable {
         case serverUrl
         case apiKey
+        case extraBody
         case model
         case tldrPrompt
 
@@ -86,6 +87,26 @@ struct AiConfigScreen: View {
                         Text("Reasoning Effort")
                         Text("Choose how much effort the model spends on reasoning. Default uses the provider's default behavior.")
                     }
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+                }
+
+                if presenter.state.aiType == .openAi {
+                    Button {
+                        beginEditing(
+                            field: .extraBody,
+                            value: presenter.state.openAIExtraBody
+                        )
+                    } label: {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Extra Body")
+                            if !presenter.state.openAIExtraBody.isEmpty {
+                                Text(presenter.state.openAIExtraBody)
+                                    .foregroundStyle(.secondary)
+                                    .font(.subheadline)
+                            }
+                        }
+                    }
+                    .buttonStyle(.plain)
                     .transition(.opacity.combined(with: .move(edge: .top)))
                 }
 
@@ -180,7 +201,7 @@ struct AiConfigScreen: View {
             NavigationStack {
                 Form {
                     Section {
-                        if field == .tldrPrompt {
+                        if field == .tldrPrompt || field == .extraBody {
                             TextEditor(text: $editingText)
                                 .frame(minHeight: 180)
                         } else {
@@ -189,6 +210,9 @@ struct AiConfigScreen: View {
                     } footer: {
                         if field == .serverUrl {
                             Text(serverUrlHint)
+                                .font(.footnote)
+                        } else if field == .extraBody {
+                            Text(extraBodyHint)
                                 .font(.footnote)
                         }
                     }
@@ -279,6 +303,10 @@ struct AiConfigScreen: View {
         "Server URL must end with '/' and support the AI-compatible v1/chat/completions API."
     }
 
+    private var extraBodyHint: String {
+        "{\"thinking\": {\"type\": \"enabled\"}}"
+    }
+
     private var serverSuggestions: [String] {
         (presenter.state.serverSuggestions as NSArray).cast(NSString.self).map(String.init)
     }
@@ -303,6 +331,8 @@ struct AiConfigScreen: View {
             return "Server URL"
         case .apiKey:
             return "API Key"
+        case .extraBody:
+            return "Extra Body"
         case .model:
             return "Manual Model"
         case .tldrPrompt:
@@ -316,6 +346,8 @@ struct AiConfigScreen: View {
             return "https://api.example.com/v1/"
         case .apiKey:
             return "sk-..."
+        case .extraBody:
+            return extraBodyHint
         case .model:
             return "model-name"
         case .tldrPrompt:
@@ -329,6 +361,8 @@ struct AiConfigScreen: View {
             presenter.state.setOpenAIServerUrl(value: value)
         case .apiKey:
             presenter.state.setOpenAIApiKey(value: value)
+        case .extraBody:
+            presenter.state.setOpenAIExtraBody(value: value)
         case .model:
             presenter.state.setOpenAIModel(value: value)
         case .tldrPrompt:

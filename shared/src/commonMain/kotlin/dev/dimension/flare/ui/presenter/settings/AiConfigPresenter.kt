@@ -67,6 +67,7 @@ public class AiConfigPresenter :
         public val openAIApiKey: String
         public val openAIModel: String
         public val openAIReasoningEffort: AiReasoningEffortOption
+        public val openAIExtraBody: String
         public val translateProvider: TranslateProviderOption
         public val deepLApiKey: String
         public val deepLUsePro: Boolean
@@ -99,6 +100,8 @@ public class AiConfigPresenter :
         public fun setOpenAIModel(value: String)
 
         public fun setOpenAIReasoningEffort(value: AiReasoningEffortOption)
+
+        public fun setOpenAIExtraBody(value: String)
 
         public fun setDeepLApiKey(value: String)
 
@@ -265,6 +268,9 @@ public class AiConfigPresenter :
                     it.value == (appSettings.aiConfig.type as? AppSettings.AiConfig.Type.OpenAI)?.reasoningEffort.orEmpty()
                 } ?: AiReasoningEffortOption.Default
 
+            override val openAIExtraBody: String =
+                (appSettings.aiConfig.type as? AppSettings.AiConfig.Type.OpenAI)?.extraBody ?: ""
+
             override val aiTldr: Boolean = appSettings.aiConfig.tldr
             override val translatePrompt: String = appSettings.aiConfig.translatePrompt
             override val tldrPrompt: String = appSettings.aiConfig.tldrPrompt
@@ -327,6 +333,7 @@ public class AiConfigPresenter :
                                         apiKey = "",
                                         model = "",
                                         reasoningEffort = "",
+                                        extraBody = "",
                                     )
                                 }
                             },
@@ -343,6 +350,7 @@ public class AiConfigPresenter :
                                 apiKey = openAIApiKey,
                                 model = openAIModel,
                                 reasoningEffort = openAIReasoningEffort.value,
+                                extraBody = openAIExtraBody,
                             ),
                     )
                 }
@@ -357,6 +365,7 @@ public class AiConfigPresenter :
                                 apiKey = value,
                                 model = openAIModel,
                                 reasoningEffort = openAIReasoningEffort.value,
+                                extraBody = openAIExtraBody,
                             ),
                     )
                 }
@@ -371,6 +380,7 @@ public class AiConfigPresenter :
                                 apiKey = openAIApiKey,
                                 model = value,
                                 reasoningEffort = openAIReasoningEffort.value,
+                                extraBody = openAIExtraBody,
                             ),
                     )
                 }
@@ -385,6 +395,22 @@ public class AiConfigPresenter :
                                 apiKey = openAIApiKey,
                                 model = openAIModel,
                                 reasoningEffort = value.value,
+                                extraBody = openAIExtraBody,
+                            ),
+                    )
+                }
+            }
+
+            override fun setOpenAIExtraBody(value: String) {
+                update {
+                    copy(
+                        type =
+                            AppSettings.AiConfig.Type.OpenAI(
+                                serverUrl = openAIServerUrl,
+                                apiKey = openAIApiKey,
+                                model = openAIModel,
+                                reasoningEffort = openAIReasoningEffort.value,
+                                extraBody = value,
                             ),
                     )
                 }
@@ -489,6 +515,7 @@ public class AiConfigPresenter :
                                             apiKey = "",
                                             model = "",
                                             reasoningEffort = "",
+                                            extraBody = "",
                                         ),
                             )
                         }

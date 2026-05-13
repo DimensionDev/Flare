@@ -9,6 +9,7 @@ import dev.dimension.flare.data.model.appearance.toBag
 import dev.dimension.flare.data.model.tab.GroupSource
 import dev.dimension.flare.data.model.tab.GroupTimelineTabItemV2
 import dev.dimension.flare.data.model.tab.TabSettingsV2
+import dev.dimension.flare.data.model.tab.TimelineFilterConfig
 import dev.dimension.flare.data.model.tab.TimelineMergePolicy
 import dev.dimension.flare.data.model.tab.TimelinePresentation
 import dev.dimension.flare.data.model.tab.TimelineResolver
@@ -50,6 +51,7 @@ public class GroupConfigPresenter :
                 enabled: Boolean,
                 tabs: List<TimelineTabItemV2>,
                 mergePolicy: TimelineMergePolicy,
+                filterConfig: TimelineFilterConfig,
                 defaultGroupName: String,
             ) {
                 appScope.launch {
@@ -62,6 +64,7 @@ public class GroupConfigPresenter :
                             enabled = enabled,
                             tabs = tabs,
                             mergePolicy = mergePolicy,
+                            filterConfig = filterConfig,
                             defaultGroupName = defaultGroupName,
                             timelineResolver = timelineResolver,
                         )
@@ -83,6 +86,7 @@ public class GroupConfigPresenter :
             enabled: Boolean,
             tabs: List<TimelineTabItemV2>,
             mergePolicy: TimelineMergePolicy = initialItem?.mergePolicy ?: TimelineMergePolicy.TimePerPage,
+            filterConfig: TimelineFilterConfig = initialItem?.filterConfig ?: TimelineFilterConfig(),
             defaultGroupName: String,
         )
     }
@@ -96,6 +100,7 @@ internal fun TabSettingsV2.upsertGroupConfig(
     enabled: Boolean,
     tabs: List<TimelineTabItemV2>,
     mergePolicy: TimelineMergePolicy = initialItem?.mergePolicy ?: TimelineMergePolicy.TimePerPage,
+    filterConfig: TimelineFilterConfig = initialItem?.filterConfig ?: TimelineFilterConfig(),
     defaultGroupName: String,
     timelineResolver: TimelineResolver,
 ): TabSettingsV2 {
@@ -113,7 +118,7 @@ internal fun TabSettingsV2.upsertGroupConfig(
     }
 
     val childSlots = deduplicatedTabs.map { timelineResolver.toSlot(it) }
-    val newGroup = buildGroupSlot(name, icon, appearancePatch, enabled, mergePolicy, defaultGroupName, childSlots)
+    val newGroup = buildGroupSlot(name, icon, appearancePatch, enabled, mergePolicy, filterConfig, defaultGroupName, childSlots)
     val currentSlots = homeSlots.toMutableList()
     val targetIndex =
         initialItem
@@ -133,6 +138,7 @@ private fun buildGroupSlot(
     appearancePatch: AppearancePatch?,
     enabled: Boolean,
     mergePolicy: TimelineMergePolicy,
+    filterConfig: TimelineFilterConfig,
     defaultGroupName: String,
     childSlots: List<TimelineSlot>,
 ): TimelineSlot {
@@ -151,6 +157,7 @@ private fun buildGroupSlot(
                 iconOverride = icon,
                 appearanceOverride = appearancePatch?.takeUnless { it == AppearancePatch.EMPTY }?.toBag(),
                 enabled = enabled,
+                filterConfig = filterConfig,
             ),
     )
 }

@@ -46,8 +46,11 @@ import dev.dimension.flare.data.model.appearance.AppearanceKey
 import dev.dimension.flare.data.model.appearance.AppearanceKeys
 import dev.dimension.flare.data.model.appearance.AppearancePatch
 import dev.dimension.flare.data.model.appearance.TimelineAppearance
+import dev.dimension.flare.data.model.tab.TimelineFilterConfig
 import dev.dimension.flare.ui.component.TabIcon
 import dev.dimension.flare.ui.model.UiText
+import dev.dimension.flare.ui.screen.home.TimelineFilterDialog
+import dev.dimension.flare.ui.screen.home.TimelineFilterSettingsItem
 import dev.dimension.flare.ui.theme.first
 import dev.dimension.flare.ui.theme.item
 import dev.dimension.flare.ui.theme.last
@@ -68,6 +71,8 @@ internal fun TimelinePresentationEditor(
     onWithAvatarChange: (Boolean) -> Unit,
     enabled: Boolean,
     onEnabledChange: (Boolean) -> Unit,
+    filterConfig: TimelineFilterConfig,
+    onFilterConfigChange: (TimelineFilterConfig) -> Unit,
     timelineAppearance: TimelineAppearance,
     appearancePatch: AppearancePatch,
     onAppearancePatchChange: (AppearancePatch) -> Unit,
@@ -95,6 +100,7 @@ internal fun TimelinePresentationEditor(
             appearancePatch.contains(AppearanceKeys.ExpandMediaSize) ||
             appearancePatch.contains(AppearanceKeys.VideoAutoplay)
     val themeOverridesEnabled = appearancePatch.contains(AppearanceKeys.AvatarShape)
+    var showFilterDialog by remember { mutableStateOf(false) }
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -118,7 +124,12 @@ internal fun TimelinePresentationEditor(
                 if (canUseAvatar) {
                     SegmentedListItem(
                         onClick = { onWithAvatarChange(!withAvatar) },
-                        shapes = if (showEnabled) ListItemDefaults.first() else ListItemDefaults.single(),
+                        shapes =
+                            if (showEnabled || behaviorContent == null) {
+                                ListItemDefaults.first()
+                            } else {
+                                ListItemDefaults.single()
+                            },
                         content = { Text(text = stringResource(id = R.string.edit_tab_with_avatar)) },
                         trailingContent = {
                             Checkbox(
@@ -131,7 +142,12 @@ internal fun TimelinePresentationEditor(
                 if (showEnabled) {
                     SegmentedListItem(
                         onClick = { onEnabledChange(!enabled) },
-                        shapes = if (canUseAvatar) ListItemDefaults.last() else ListItemDefaults.single(),
+                        shapes =
+                            when {
+                                canUseAvatar -> ListItemDefaults.item()
+                                behaviorContent == null -> ListItemDefaults.first()
+                                else -> ListItemDefaults.first()
+                            },
                         content = { Text(text = stringResource(id = R.string.edit_tab_enabled)) },
                         supportingContent = { Text(text = stringResource(id = R.string.edit_tab_enabled_description)) },
                         trailingContent = {
@@ -142,14 +158,43 @@ internal fun TimelinePresentationEditor(
                         },
                     )
                 }
+                if (behaviorContent == null) {
+                    TimelineFilterSettingsItem(
+                        filterConfig = filterConfig,
+                        onClick = { showFilterDialog = true },
+                        shapes =
+                            if (canUseAvatar || showEnabled) {
+                                ListItemDefaults.last()
+                            } else {
+                                ListItemDefaults.single()
+                            },
+                    )
+                } else {
+                    behaviorContent()
+                    TimelineFilterSettingsItem(
+                        filterConfig = filterConfig,
+                        onClick = { showFilterDialog = true },
+                        shapes = ListItemDefaults.last(),
+                    )
+                }
             }
-        }
-        behaviorContent?.let {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
-            ) {
-                it()
-            }
+        } else {
+            behaviorContent?.let {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
+                ) {
+                    it()
+                    TimelineFilterSettingsItem(
+                        filterConfig = filterConfig,
+                        onClick = { showFilterDialog = true },
+                        shapes = ListItemDefaults.last(),
+                    )
+                }
+            } ?: TimelineFilterSettingsItem(
+                filterConfig = filterConfig,
+                onClick = { showFilterDialog = true },
+                shapes = ListItemDefaults.single(),
+            )
         }
         if (showAppearanceOverrides) {
             Column(
@@ -493,6 +538,16 @@ internal fun TimelinePresentationEditor(
                 }
             }
         }
+    }
+    if (showFilterDialog) {
+        TimelineFilterDialog(
+            filterConfig = filterConfig,
+            onDismissRequest = { showFilterDialog = false },
+            onConfirm = {
+                onFilterConfigChange(it)
+                showFilterDialog = false
+            },
+        )
     }
 }
 

@@ -10,9 +10,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.runtime.Composable
@@ -25,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.Res
+import dev.dimension.flare.cancel
 import dev.dimension.flare.data.model.AvatarShape
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.PostActionStyle
@@ -34,8 +37,12 @@ import dev.dimension.flare.data.model.appearance.AppearanceKey
 import dev.dimension.flare.data.model.appearance.AppearanceKeys
 import dev.dimension.flare.data.model.appearance.AppearancePatch
 import dev.dimension.flare.data.model.appearance.TimelineAppearance
+import dev.dimension.flare.data.model.tab.TimelineFilterConfig
+import dev.dimension.flare.data.model.tab.TimelinePostContent
+import dev.dimension.flare.data.model.tab.TimelinePostKind
 import dev.dimension.flare.edit_tab_enabled
 import dev.dimension.flare.edit_tab_with_avatar
+import dev.dimension.flare.ok
 import dev.dimension.flare.settings_appearance_absolute_timestamp
 import dev.dimension.flare.settings_appearance_absolute_timestamp_description
 import dev.dimension.flare.settings_appearance_avatar_shape
@@ -82,9 +89,22 @@ import dev.dimension.flare.settings_appearance_video_autoplay_always
 import dev.dimension.flare.settings_appearance_video_autoplay_description
 import dev.dimension.flare.settings_appearance_video_autoplay_never
 import dev.dimension.flare.settings_appearance_video_autoplay_wifi
+import dev.dimension.flare.tab_settings_filter_content_group
+import dev.dimension.flare.tab_settings_filter_desc
+import dev.dimension.flare.tab_settings_filter_image
+import dev.dimension.flare.tab_settings_filter_kind_group
+import dev.dimension.flare.tab_settings_filter_quote
+import dev.dimension.flare.tab_settings_filter_reply
+import dev.dimension.flare.tab_settings_filter_repost
+import dev.dimension.flare.tab_settings_filter_text_only
+import dev.dimension.flare.tab_settings_filter_title
+import dev.dimension.flare.tab_settings_filter_video
 import dev.dimension.flare.ui.component.TabIcon
 import dev.dimension.flare.ui.model.UiText
+import io.github.composefluent.component.CardExpanderItem
 import io.github.composefluent.component.CheckBox
+import io.github.composefluent.component.ContentDialog
+import io.github.composefluent.component.ContentDialogButton
 import io.github.composefluent.component.DropDownButton
 import io.github.composefluent.component.Expander
 import io.github.composefluent.component.ExpanderItem
@@ -113,6 +133,8 @@ internal fun TimelinePresentationEditor(
     onWithAvatarChange: (Boolean) -> Unit,
     enabled: Boolean,
     onEnabledChange: (Boolean) -> Unit,
+    filterConfig: TimelineFilterConfig,
+    onFilterConfigChange: (TimelineFilterConfig) -> Unit,
     timelineAppearance: TimelineAppearance,
     appearancePatch: AppearancePatch,
     onAppearancePatchChange: (AppearancePatch) -> Unit,
@@ -140,6 +162,7 @@ internal fun TimelinePresentationEditor(
             appearancePatch.contains(AppearanceKeys.ExpandMediaSize) ||
             appearancePatch.contains(AppearanceKeys.VideoAutoplay)
     val themeOverridesEnabled = appearancePatch.contains(AppearanceKeys.AvatarShape)
+    var showFilterDialog by remember { mutableStateOf(false) }
 
     Column(
         modifier = modifier,
@@ -156,36 +179,35 @@ internal fun TimelinePresentationEditor(
             placeholder = placeholder,
         )
 
-        if (canUseAvatar || showEnabled) {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                if (canUseAvatar) {
-                    Row(
-                        modifier = Modifier.clickable { onWithAvatarChange(!withAvatar) },
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        CheckBox(
-                            checked = withAvatar,
-                            onCheckStateChange = onWithAvatarChange,
-                        )
-                        Text(text = stringResource(Res.string.edit_tab_with_avatar))
-                    }
-                }
-                if (showEnabled) {
-                    Switcher(
-                        checked = enabled,
-                        onCheckStateChange = onEnabledChange,
-                        textBefore = true,
-                        text = stringResource(Res.string.edit_tab_enabled),
-                    )
-                }
+        if (canUseAvatar) {
+            Row(
+                modifier = Modifier.clickable { onWithAvatarChange(!withAvatar) },
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                CheckBox(
+                    checked = withAvatar,
+                    onCheckStateChange = onWithAvatarChange,
+                )
+                Text(text = stringResource(Res.string.edit_tab_with_avatar))
             }
+        }
+        if (showEnabled) {
+            Switcher(
+                checked = enabled,
+                onCheckStateChange = onEnabledChange,
+                textBefore = true,
+                text = stringResource(Res.string.edit_tab_enabled),
+            )
         }
         Column(
             verticalArrangement = Arrangement.spacedBy(2.dp),
         ) {
-            behaviorContent?.invoke()
             if (showAppearanceOverrides) {
+                behaviorContent?.invoke()
+                TimelineFilterSettingsItem(
+                    onClick = { showFilterDialog = true },
+                )
                 AppearanceOverrideExpander(
                     title = stringResource(Res.string.settings_appearance_layout_group_title),
                     subtitle = stringResource(Res.string.settings_appearance_layout_group_subtitle),
@@ -518,7 +540,177 @@ internal fun TimelinePresentationEditor(
             }
         }
     }
+    TimelineFilterDialog(
+        visible = showFilterDialog,
+        filterConfig = filterConfig,
+        onDismissRequest = { showFilterDialog = false },
+        onConfirm = {
+            onFilterConfigChange(it)
+            showFilterDialog = false
+        },
+    )
 }
+
+@Composable
+private fun TimelineFilterSettingsItem(onClick: () -> Unit) {
+    CardExpanderItem(
+        icon = null,
+        heading = {
+            Text(stringResource(Res.string.tab_settings_filter_title))
+        },
+        caption = {
+            Text(stringResource(Res.string.tab_settings_filter_desc))
+        },
+        modifier = Modifier.clickable(onClick = onClick),
+    )
+}
+
+@Composable
+private fun TimelineFilterDialog(
+    visible: Boolean,
+    filterConfig: TimelineFilterConfig,
+    onDismissRequest: () -> Unit,
+    onConfirm: (TimelineFilterConfig) -> Unit,
+) {
+    val kindOptions =
+        remember {
+            listOf(
+                TimelinePostKind.Reply,
+                TimelinePostKind.Repost,
+                TimelinePostKind.Quote,
+            )
+        }
+    val contentOptions =
+        remember {
+            listOf(
+                TimelinePostContent.Text,
+                TimelinePostContent.Image,
+                TimelinePostContent.Video,
+            )
+        }
+    var selectedKinds by remember(filterConfig) {
+        mutableStateOf(kindOptions.filterNot { it in filterConfig.excludedKinds }.toSet())
+    }
+    var selectedContents by remember(filterConfig) {
+        mutableStateOf(contentOptions.filterNot { it in filterConfig.excludedContents }.toSet())
+    }
+    ContentDialog(
+        visible = visible,
+        title = stringResource(Res.string.tab_settings_filter_title),
+        primaryButtonText = stringResource(Res.string.ok),
+        closeButtonText = stringResource(Res.string.cancel),
+        onButtonClick = {
+            when (it) {
+                ContentDialogButton.Primary -> {
+                    onConfirm(
+                        TimelineFilterConfig(
+                            excludedKinds = kindOptions.filterNot { option -> option in selectedKinds },
+                            excludedContents = contentOptions.filterNot { option -> option in selectedContents },
+                        ),
+                    )
+                }
+
+                ContentDialogButton.Secondary,
+                ContentDialogButton.Close,
+                -> {
+                    onDismissRequest()
+                }
+            }
+        },
+        content = {
+            Column(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 420.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                FilterSection(
+                    title = stringResource(Res.string.tab_settings_filter_kind_group),
+                    options = kindOptions,
+                    selected = selectedKinds,
+                    label = ::filterKindLabel,
+                    onToggle = { option ->
+                        selectedKinds =
+                            if (option in selectedKinds) {
+                                selectedKinds - option
+                            } else {
+                                selectedKinds + option
+                            }
+                    },
+                )
+                FilterSection(
+                    title = stringResource(Res.string.tab_settings_filter_content_group),
+                    options = contentOptions,
+                    selected = selectedContents,
+                    label = ::filterContentLabel,
+                    onToggle = { option ->
+                        selectedContents =
+                            if (option in selectedContents) {
+                                selectedContents - option
+                            } else {
+                                selectedContents + option
+                            }
+                    },
+                )
+            }
+        },
+    )
+}
+
+@Composable
+private fun <T> FilterSection(
+    title: String,
+    options: List<T>,
+    selected: Set<T>,
+    label: @Composable (T) -> String,
+    onToggle: (T) -> Unit,
+) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        Text(title)
+        LazyColumn(
+            modifier = Modifier.heightIn(max = 160.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            items(options) { option ->
+                Row(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .clickable { onToggle(option) },
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    CheckBox(
+                        checked = option in selected,
+                        onCheckStateChange = { onToggle(option) },
+                    )
+                    Text(label(option))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun filterKindLabel(kind: TimelinePostKind): String =
+    when (kind) {
+        TimelinePostKind.Reply -> stringResource(Res.string.tab_settings_filter_reply)
+        TimelinePostKind.Repost -> stringResource(Res.string.tab_settings_filter_repost)
+        TimelinePostKind.Quote -> stringResource(Res.string.tab_settings_filter_quote)
+        TimelinePostKind.Original -> error("Original is not exposed in timeline filter UI")
+    }
+
+@Composable
+private fun filterContentLabel(content: TimelinePostContent): String =
+    when (content) {
+        TimelinePostContent.Text -> stringResource(Res.string.tab_settings_filter_text_only)
+        TimelinePostContent.Image -> stringResource(Res.string.tab_settings_filter_image)
+        TimelinePostContent.Video -> stringResource(Res.string.tab_settings_filter_video)
+        TimelinePostContent.Other -> error("Other is not exposed in timeline filter UI")
+    }
 
 @Composable
 internal fun TimelinePresentationHeaderEditor(

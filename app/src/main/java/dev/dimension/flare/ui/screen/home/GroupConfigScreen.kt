@@ -43,6 +43,7 @@ import dev.dimension.flare.data.model.appearance.AppearancePatch
 import dev.dimension.flare.data.model.appearance.TimelineAppearance
 import dev.dimension.flare.data.model.appearance.withPatch
 import dev.dimension.flare.data.model.tab.GroupTimelineTabItemV2
+import dev.dimension.flare.data.model.tab.TimelineFilterConfig
 import dev.dimension.flare.data.model.tab.TimelineMergePolicy
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.ui.component.BackButton
@@ -60,6 +61,9 @@ import dev.dimension.flare.ui.screen.settings.EditTabDialog
 import dev.dimension.flare.ui.screen.settings.TabAddBottomSheet
 import dev.dimension.flare.ui.screen.settings.TabCustomItem
 import dev.dimension.flare.ui.screen.settings.TimelinePresentationEditor
+import dev.dimension.flare.ui.theme.first
+import dev.dimension.flare.ui.theme.item
+import dev.dimension.flare.ui.theme.last
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import dev.dimension.flare.ui.theme.segmentedShapes2
 import dev.dimension.flare.ui.theme.single
@@ -162,6 +166,8 @@ internal fun GroupConfigScreen(
                     onWithAvatarChange = {},
                     enabled = state.enabled,
                     onEnabledChange = state::setEnabled,
+                    filterConfig = state.filterConfig,
+                    onFilterConfigChange = state::setFilterConfig,
                     timelineAppearance = state.timelineAppearance,
                     appearancePatch = state.appearancePatch,
                     onAppearancePatchChange = state::setAppearancePatch,
@@ -169,7 +175,7 @@ internal fun GroupConfigScreen(
                         MergePolicySettingsItem(
                             selected = state.mergePolicy,
                             onSelected = state::setMergePolicy,
-                            shapes = ListItemDefaults.single(),
+                            shapes = ListItemDefaults.item(),
                         )
                     },
                     label = { Text(stringResource(R.string.tab_settings_group_name_placeholder)) },
@@ -257,6 +263,7 @@ private fun presenter(
     }
     var enabled by remember(groupId) { mutableStateOf(true) }
     var mergePolicy by remember(groupId) { mutableStateOf(TimelineMergePolicy.TimePerPage) }
+    var filterConfig by remember(groupId) { mutableStateOf(TimelineFilterConfig()) }
     var appearancePatch by remember(groupId) { mutableStateOf(AppearancePatch.EMPTY) }
     val timelineAppearance by remember {
         derivedStateOf {
@@ -277,6 +284,7 @@ private fun presenter(
         icon = item.icon
         enabled = item.enabled
         mergePolicy = item.mergePolicy
+        filterConfig = item.filterConfig
         appearancePatch = item.appearancePatch ?: AppearancePatch.EMPTY
         tabs.clear()
         tabs.addAll(item.children.distinctBy { it.id })
@@ -294,6 +302,7 @@ private fun presenter(
         val enabled = enabled
         val mergePolicy = mergePolicy
         val appearancePatch = appearancePatch
+        val filterConfig = filterConfig
         val timelineAppearance = timelineAppearance
         val tabs = tabs
         val showAddTab = showAddTab
@@ -316,6 +325,10 @@ private fun presenter(
 
         fun setAppearancePatch(value: AppearancePatch) {
             appearancePatch = value
+        }
+
+        fun setFilterConfig(value: TimelineFilterConfig) {
+            filterConfig = value
         }
 
         fun setAddTab(show: Boolean) {
@@ -371,6 +384,7 @@ private fun presenter(
                 enabled = enabled,
                 tabs = tabs.toList(),
                 mergePolicy = mergePolicy,
+                filterConfig = filterConfig,
                 defaultGroupName = "Group",
             )
         }

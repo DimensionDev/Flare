@@ -10,9 +10,11 @@ struct GroupConfigScreen: View {
     @State private var icon: IconType
     @State private var enabled: Bool
     @State private var mergePolicy: TimelineMergePolicy
+    @State private var filterConfig: TimelineFilterConfig
     @State private var appearancePatch: AppearancePatch
     @State private var tabs: [TimelineTabItemV2]
     @State private var showAddTabSheet = false
+    @State private var showFilterSheet = false
     @State private var editItem: TimelineTabItemV2? = nil
     @StateObject private var presenter: KotlinPresenter<GroupConfigPresenterState>
 
@@ -22,6 +24,7 @@ struct GroupConfigScreen: View {
         _icon = State(initialValue: item?.icon ?? IconType.Material(icon: .rss))
         _enabled = State(initialValue: item?.enabled ?? true)
         _mergePolicy = State(initialValue: item?.mergePolicy ?? .timePerPage)
+        _filterConfig = State(initialValue: item?.filterConfig ?? TimelineFilterConfig())
         _appearancePatch = State(
             initialValue: item?.appearancePatch ?? TimelinePresentationAppearancePatchHelper.shared.empty
         )
@@ -47,6 +50,10 @@ struct GroupConfigScreen: View {
                 canUseAvatar: false,
                 onWithAvatarChange: { _ in },
                 enabled: $enabled,
+                filterConfig: $filterConfig,
+                onEditFilter: {
+                    showFilterSheet = true
+                },
                 showEnabled: true,
                 showAppearanceOverrides: true,
                 timelineAppearance: TimelinePresentationAppearancePatchHelper.shared.resolve(
@@ -54,11 +61,7 @@ struct GroupConfigScreen: View {
                     patch: appearancePatch
                 ),
                 appearancePatch: $appearancePatch,
-                behaviorContent: AnyView(
-                    Section {
-                        MergePolicySettingsItem(selected: $mergePolicy)
-                    }
-                ),
+                behaviorContent: AnyView(MergePolicySettingsItem(selected: $mergePolicy)),
                 titlePlaceholder: "tab_settings_group_name_placeholder"
             )
             
@@ -116,6 +119,20 @@ struct GroupConfigScreen: View {
                 )
             }
         }
+        .sheet(isPresented: $showFilterSheet) {
+            NavigationStack {
+                TimelineFilterSheet(
+                    initialFilterConfig: filterConfig,
+                    onCancel: {
+                        showFilterSheet = false
+                    },
+                    onConfirm: { updated in
+                        filterConfig = updated
+                        showFilterSheet = false
+                    }
+                )
+            }
+        }
         .sheet(isPresented: Binding(get: {
             editItem != nil
         }, set: { value in
@@ -158,6 +175,7 @@ struct GroupConfigScreen: View {
                         enabled: enabled,
                         tabs: tabs,
                         mergePolicy: mergePolicy,
+                        filterConfig: filterConfig,
                         defaultGroupName: NSLocalizedString("tab_settings_group_default_name", comment: "")
                     )
                     dismiss()

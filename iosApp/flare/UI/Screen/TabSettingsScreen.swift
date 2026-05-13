@@ -236,7 +236,9 @@ struct EditTabSheet: View {
     @StateObject private var presenter: KotlinPresenter<EditTabPresenterState>
     @State private var text: String = ""
     @State private var enabled: Bool
+    @State private var filterConfig: TimelineFilterConfig
     @State private var appearancePatch: AppearancePatch
+    @State private var showFilterSheet = false
     
     init(onConfirm: @escaping (TimelineTabItemV2) -> Void, tabItem: TimelineTabItemV2, titleAndIconOnly: Bool = false) {
         self.onConfirm = onConfirm
@@ -244,6 +246,7 @@ struct EditTabSheet: View {
         self.titleAndIconOnly = titleAndIconOnly
         self._presenter = .init(wrappedValue: .init(presenter: EditTabPresenter(tabItem: tabItem)))
         self._enabled = State(initialValue: tabItem.enabled)
+        self._filterConfig = State(initialValue: tabItem.filterConfig)
         self._appearancePatch = State(
             initialValue: tabItem.appearancePatch ?? TimelinePresentationAppearancePatchHelper.shared.empty
         )
@@ -265,7 +268,12 @@ struct EditTabSheet: View {
                     presenter.state.setWithAvatar(value: value)
                 },
                 enabled: $enabled,
+                filterConfig: $filterConfig,
+                onEditFilter: {
+                    showFilterSheet = true
+                },
                 showEnabled: !titleAndIconOnly && !tabItem.isSystemHomeMixedTimeline,
+                showFilter: !titleAndIconOnly,
                 showAppearanceOverrides: !titleAndIconOnly,
                 timelineAppearance: TimelinePresentationAppearancePatchHelper.shared.resolve(
                     base: baseTimelineAppearance,
@@ -278,6 +286,20 @@ struct EditTabSheet: View {
         .onChange(of: presenter.state.initialText) { oldValue, newValue in
             if case .success(let success) = onEnum(of: newValue) {
                 text = String(success.data)
+            }
+        }
+        .sheet(isPresented: $showFilterSheet) {
+            NavigationStack {
+                TimelineFilterSheet(
+                    initialFilterConfig: filterConfig,
+                    onCancel: {
+                        showFilterSheet = false
+                    },
+                    onConfirm: { updated in
+                        filterConfig = updated
+                        showFilterSheet = false
+                    }
+                )
             }
         }
         .toolbar {
@@ -301,7 +323,8 @@ struct EditTabSheet: View {
                             title: text,
                             icon: presenter.state.icon,
                             appearancePatch: appearancePatch,
-                            enabled: enabled
+                            enabled: enabled,
+                            filterConfig: filterConfig
                         )
                     )
                     dismiss()

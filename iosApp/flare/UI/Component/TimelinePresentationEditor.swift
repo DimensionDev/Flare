@@ -9,7 +9,10 @@ struct TimelinePresentationEditor: View {
     let canUseAvatar: Bool
     let onWithAvatarChange: (Bool) -> Void
     @Binding var enabled: Bool
+    @Binding var filterConfig: TimelineFilterConfig
+    let onEditFilter: () -> Void
     let showEnabled: Bool
+    let showFilter: Bool
     let showAppearanceOverrides: Bool
     let timelineAppearance: TimelineAppearance
     @Binding var appearancePatch: AppearancePatch
@@ -26,7 +29,10 @@ struct TimelinePresentationEditor: View {
         canUseAvatar: Bool,
         onWithAvatarChange: @escaping (Bool) -> Void,
         enabled: Binding<Bool>,
+        filterConfig: Binding<TimelineFilterConfig>,
+        onEditFilter: @escaping () -> Void = {},
         showEnabled: Bool,
+        showFilter: Bool = true,
         showAppearanceOverrides: Bool,
         timelineAppearance: TimelineAppearance,
         appearancePatch: Binding<AppearancePatch>,
@@ -40,7 +46,10 @@ struct TimelinePresentationEditor: View {
         self.canUseAvatar = canUseAvatar
         self.onWithAvatarChange = onWithAvatarChange
         self._enabled = enabled
+        self._filterConfig = filterConfig
+        self.onEditFilter = onEditFilter
         self.showEnabled = showEnabled
+        self.showFilter = showFilter
         self.showAppearanceOverrides = showAppearanceOverrides
         self.timelineAppearance = timelineAppearance
         self._appearancePatch = appearancePatch
@@ -49,58 +58,222 @@ struct TimelinePresentationEditor: View {
     }
 
     var body: some View {
-        TimelinePresentationHeaderEditor(
-            text: $text,
-            icon: $icon,
-            availableIcons: availableIcons,
-            titlePlaceholder: titlePlaceholder
-        )
+        Group {
+            TimelinePresentationHeaderEditor(
+                text: $text,
+                icon: $icon,
+                availableIcons: availableIcons,
+                titlePlaceholder: titlePlaceholder
+            )
 
-        if canUseAvatar || showEnabled {
+            if canUseAvatar || showEnabled {
+                Section {
+                    if canUseAvatar {
+                        Toggle(isOn: Binding(get: {
+                            withAvatar
+                        }, set: { value in
+                            onWithAvatarChange(value)
+                        })) {
+                            Text("tab_settings_edit_use_avatar")
+                        }
+                    }
+                    if showEnabled {
+                        Toggle(isOn: $enabled) {
+                            Text("Enabled")
+                            Text("Show this timeline in mixed and group timelines.")
+                        }
+                    }
+                    if showFilter && behaviorContent == nil {
+                        TimelineFilterSettingsItem {
+                            onEditFilter()
+                        }
+                    } else if let behaviorContent {
+                        behaviorContent
+                        if showFilter {
+                            TimelineFilterSettingsItem {
+                                onEditFilter()
+                            }
+                        }
+                    }
+                }
+            } else if let behaviorContent {
+                Section {
+                    behaviorContent
+                    if showFilter {
+                        TimelineFilterSettingsItem {
+                            onEditFilter()
+                        }
+                    }
+                }
+            } else if showFilter {
+                Section {
+                    TimelineFilterSettingsItem {
+                        onEditFilter()
+                    }
+                }
+            }
+
+            if showAppearanceOverrides {
+                Section {
+                    LayoutAppearanceOverrideGroup(
+                        timelineAppearance: timelineAppearance,
+                        appearancePatch: $appearancePatch
+                    )
+                    DisplayAppearanceOverrideGroup(
+                        timelineAppearance: timelineAppearance,
+                        appearancePatch: $appearancePatch
+                    )
+                    MediaAppearanceOverrideGroup(
+                        timelineAppearance: timelineAppearance,
+                        appearancePatch: $appearancePatch
+                    )
+                    ThemeAppearanceOverrideGroup(
+                        timelineAppearance: timelineAppearance,
+                        appearancePatch: $appearancePatch
+                    )
+                } header: {
+                    Text("appearance_title")
+                }
+            }
+        }
+    }
+}
+
+private struct TimelineFilterSettingsItem: View {
+    let onTap: () -> Void
+
+    var body: some View {
+        Button(action: onTap) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text("tab_settings_filter_title")
+                    .foregroundColor(.primary)
+                Text("tab_settings_filter_desc")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+struct TimelineFilterSheet: View {
+    @State private var selectedKinds: Set<TimelinePostKind>
+    @State private var selectedContents: Set<TimelinePostContent>
+    let onCancel: () -> Void
+    let onConfirm: (TimelineFilterConfig) -> Void
+
+    private let kindOptions: [TimelinePostKind] = [.reply, .repost, .quote]
+    private let contentOptions: [TimelinePostContent] = [.text, .image, .video]
+
+    init(
+        initialFilterConfig: TimelineFilterConfig,
+        onCancel: @escaping () -> Void,
+        onConfirm: @escaping (TimelineFilterConfig) -> Void
+    ) {
+        self.onCancel = onCancel
+        self.onConfirm = onConfirm
+        let current = initialFilterConfig
+        self._selectedKinds = State(initialValue: Set(kindOptions.filter { !current.excludedKinds.contains($0) }))
+        self._selectedContents = State(initialValue: Set(contentOptions.filter { !current.excludedContents.contains($0) }))
+    }
+
+    var body: some View {
+        Form {
             Section {
-                if canUseAvatar {
+                ForEach(kindOptions, id: \.self) { kind in
                     Toggle(isOn: Binding(get: {
-                        withAvatar
-                    }, set: { value in
-                        onWithAvatarChange(value)
+                        selectedKinds.contains(kind)
+                    }, set: { enabled in
+                        if enabled {
+                            selectedKinds.insert(kind)
+                        } else {
+                            selectedKinds.remove(kind)
+                        }
                     })) {
-                        Text("tab_settings_edit_use_avatar")
+                        Text(kind.titleKey)
                     }
                 }
-                if showEnabled {
-                    Toggle(isOn: $enabled) {
-                        Text("Enabled")
-                        Text("Show this timeline in mixed and group timelines.")
-                    }
-                }
-            }
-        }
-
-        if let behaviorContent {
-            behaviorContent
-        }
-
-        if showAppearanceOverrides {
-            Section {
-                LayoutAppearanceOverrideGroup(
-                    timelineAppearance: timelineAppearance,
-                    appearancePatch: $appearancePatch
-                )
-                DisplayAppearanceOverrideGroup(
-                    timelineAppearance: timelineAppearance,
-                    appearancePatch: $appearancePatch
-                )
-                MediaAppearanceOverrideGroup(
-                    timelineAppearance: timelineAppearance,
-                    appearancePatch: $appearancePatch
-                )
-                ThemeAppearanceOverrideGroup(
-                    timelineAppearance: timelineAppearance,
-                    appearancePatch: $appearancePatch
-                )
             } header: {
-                Text("appearance_title")
+                Text("tab_settings_filter_kind_group")
             }
+
+            Section {
+                ForEach(contentOptions, id: \.self) { content in
+                    Toggle(isOn: Binding(get: {
+                        selectedContents.contains(content)
+                    }, set: { enabled in
+                        if enabled {
+                            selectedContents.insert(content)
+                        } else {
+                            selectedContents.remove(content)
+                        }
+                    })) {
+                        Text(content.titleKey)
+                    }
+                }
+            } header: {
+                Text("tab_settings_filter_content_group")
+            }
+        }
+        .navigationTitle("tab_settings_filter_title")
+        .toolbar {
+            ToolbarItem(placement: .cancellationAction) {
+                Button {
+                    onCancel()
+                } label: {
+                    Label {
+                        Text("Close")
+                    } icon: {
+                        Image("fa-xmark")
+                    }
+                }
+            }
+            ToolbarItem(placement: .confirmationAction) {
+                Button {
+                    onConfirm(
+                        TimelineFilterConfig(
+                            excludedKinds: kindOptions.filter { !selectedKinds.contains($0) },
+                            excludedContents: contentOptions.filter { !selectedContents.contains($0) }
+                        )
+                    )
+                } label: {
+                    Label {
+                        Text("Done")
+                    } icon: {
+                        Image("fa-check")
+                    }
+                }
+            }
+        }
+    }
+}
+
+private extension TimelinePostKind {
+    var titleKey: LocalizedStringKey {
+        switch self {
+        case .reply:
+            return "tab_settings_filter_reply"
+        case .repost:
+            return "tab_settings_filter_repost"
+        case .quote:
+            return "tab_settings_filter_quote"
+        default:
+            return "tab_settings_filter_reply"
+        }
+    }
+}
+
+private extension TimelinePostContent {
+    var titleKey: LocalizedStringKey {
+        switch self {
+        case .text:
+            return "tab_settings_filter_text_only"
+        case .image:
+            return "tab_settings_filter_image"
+        case .video:
+            return "tab_settings_filter_video"
+        default:
+            return "tab_settings_filter_text_only"
         }
     }
 }

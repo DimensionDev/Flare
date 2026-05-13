@@ -36,12 +36,38 @@ internal data class TabSettingsV2(
 )
 
 @Immutable
+@Serializable
+public data class TimelineFilterConfig(
+    val excludedKinds: List<TimelinePostKind> = emptyList(),
+    val excludedContents: List<TimelinePostContent> = emptyList(),
+)
+
+@Immutable
+@Serializable
+public enum class TimelinePostKind {
+    Original,
+    Reply,
+    Repost,
+    Quote,
+}
+
+@Immutable
+@Serializable
+public enum class TimelinePostContent {
+    Text,
+    Image,
+    Video,
+    Other,
+}
+
+@Immutable
 public sealed interface TimelineTabItemV2 {
     public val id: String
     public val title: UiText
     public val icon: IconType
     public val appearancePatch: AppearancePatch?
     public val enabled: Boolean
+    public val filterConfig: TimelineFilterConfig
 
     // for iOS and Compose call sites
     public val key: String get() = id
@@ -55,6 +81,7 @@ public sealed interface TimelineTabItemV2 {
         icon: IconType,
         appearancePatch: AppearancePatch? = this.appearancePatch,
         enabled: Boolean = this.enabled,
+        filterConfig: TimelineFilterConfig = this.filterConfig,
     ): TimelineTabItemV2
 }
 
@@ -71,15 +98,25 @@ public class SourceTimelineTabItemV2 private constructor(
     override val enabled: Boolean,
     private val presenterFactory: () -> TimelinePresenter,
 ) : TimelineTabItemV2 {
-    override fun createPresenter(): TimelinePresenter = presenterFactory()
+    override val filterConfig: TimelineFilterConfig
+        get() = presentation?.filterConfig ?: TimelineFilterConfig()
 
-    override val presenterId: String = id
+    override fun createPresenter(): TimelinePresenter = presenterFactory().also { it.timelineFilterConfig = filterConfig }
+
+    override val presenterId: String
+        get() =
+            buildString {
+                append(id)
+                append(":")
+                append(filterConfig.hashCode())
+            }
 
     override fun withPresentationOverrides(
         title: String,
         icon: IconType,
         appearancePatch: AppearancePatch?,
         enabled: Boolean,
+        filterConfig: TimelineFilterConfig,
     ): TimelineTabItemV2 {
         val updatedPresentation =
             presentation?.withOverrides(
@@ -87,11 +124,13 @@ public class SourceTimelineTabItemV2 private constructor(
                 iconOverride = icon,
                 appearancePatch = appearancePatch,
                 enabled = enabled,
+                filterConfig = filterConfig,
             ) ?: TimelinePresentation(
                 titleOverride = title,
                 iconOverride = icon,
                 appearanceOverride = appearancePatch?.takeUnless { it == AppearancePatch.EMPTY }?.toBag(),
                 enabled = enabled,
+                filterConfig = filterConfig,
             )
         return SourceTimelineTabItemV2(
             id = id,
@@ -170,11 +209,16 @@ public class GroupTimelineTabItemV2 internal constructor(
     override val appearancePatch: AppearancePatch?,
     override val enabled: Boolean,
 ) : TimelineTabItemV2 {
+    override val filterConfig: TimelineFilterConfig
+        get() = presentation.filterConfig
+
     override val presenterId: String
         get() =
             buildString {
                 append(id)
                 append(mergePolicy.name)
+                append(filterConfig.hashCode())
+                children.forEach { append(it.presenterId) }
             }
 
     override fun createPresenter(): TimelinePresenter =
@@ -192,13 +236,14 @@ public class GroupTimelineTabItemV2 internal constructor(
                     mergePolicy = mergePolicy,
                 )
             }
-        }
+        }.also { it.timelineFilterConfig = filterConfig }
 
     override fun withPresentationOverrides(
         title: String,
         icon: IconType,
         appearancePatch: AppearancePatch?,
         enabled: Boolean,
+        filterConfig: TimelineFilterConfig,
     ): TimelineTabItemV2 {
         val updatedPresentation =
             presentation.withOverrides(
@@ -206,6 +251,7 @@ public class GroupTimelineTabItemV2 internal constructor(
                 iconOverride = icon,
                 appearancePatch = appearancePatch,
                 enabled = enabled,
+                filterConfig = filterConfig,
             )
         return GroupTimelineTabItemV2(
             id = id,
@@ -227,6 +273,7 @@ public val TimelineTabItemV2.isSystemHomeMixedTimeline: Boolean
 public fun List<TimelineTabItemV2>.withSystemHomeMixedTimelineEnabled(
     enabled: Boolean,
     mergePolicy: TimelineMergePolicy? = null,
+    filterConfig: TimelineFilterConfig? = null,
 ): List<TimelineTabItemV2> {
     val existingGroup = filterIsInstance<GroupTimelineTabItemV2>().firstOrNull { it.source == GroupSource.SystemHome }
     val tabsWithoutSystemGroup = filterNot { it.isSystemHomeMixedTimeline }
@@ -240,7 +287,10 @@ public fun List<TimelineTabItemV2>.withSystemHomeMixedTimelineEnabled(
             children = tabsWithoutSystemGroup,
             mergePolicy = mergePolicy ?: existingGroup?.mergePolicy ?: TimelineMergePolicy.TimePerPage,
             source = GroupSource.SystemHome,
-            presentation = existingGroup?.presentation ?: TimelinePresentation(),
+            presentation =
+                (existingGroup?.presentation ?: TimelinePresentation()).copy(
+                    filterConfig = filterConfig ?: existingGroup?.filterConfig ?: TimelineFilterConfig(),
+                ),
             title = existingGroup?.title ?: UiStrings.MixedTimeline.asText(),
             icon = existingGroup?.icon ?: UiIcon.Rss.asType(),
             appearancePatch = existingGroup?.appearancePatch,
@@ -286,6 +336,7 @@ public data class TimelinePresentation internal constructor(
     val iconOverride: IconType? = null,
     private val appearanceOverride: AppearanceBag? = null,
     val enabled: Boolean = true,
+    val filterConfig: TimelineFilterConfig = TimelineFilterConfig(),
 ) {
     public val appearance: AppearancePatch? by lazy {
         appearanceOverride?.toPatch()
@@ -296,12 +347,14 @@ public data class TimelinePresentation internal constructor(
         iconOverride: IconType?,
         appearancePatch: AppearancePatch?,
         enabled: Boolean,
+        filterConfig: TimelineFilterConfig,
     ): TimelinePresentation =
         TimelinePresentation(
             titleOverride = titleOverride,
             iconOverride = iconOverride,
             appearanceOverride = appearancePatch?.takeUnless { it == AppearancePatch.EMPTY }?.toBag(),
             enabled = enabled,
+            filterConfig = filterConfig,
         )
 }
 

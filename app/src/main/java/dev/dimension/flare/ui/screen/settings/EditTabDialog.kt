@@ -22,6 +22,7 @@ import dev.dimension.flare.R
 import dev.dimension.flare.data.model.appearance.AppearancePatch
 import dev.dimension.flare.data.model.appearance.TimelineAppearance
 import dev.dimension.flare.data.model.appearance.withPatch
+import dev.dimension.flare.data.model.tab.TimelineFilterConfig
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.data.model.tab.isSystemHomeMixedTimeline
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
@@ -52,6 +53,7 @@ internal fun EditTabDialog(
                             icon = state.icon,
                             appearancePatch = state.appearancePatch,
                             enabled = state.enabled,
+                            filterConfig = state.filterConfig,
                         ),
                     )
                 },
@@ -76,6 +78,8 @@ internal fun EditTabDialog(
                 onWithAvatarChange = state::setWithAvatar,
                 enabled = state.enabled,
                 onEnabledChange = state::setEnabled,
+                filterConfig = state.filterConfig,
+                onFilterConfigChange = state::setFilterConfig,
                 timelineAppearance = state.timelineAppearance,
                 appearancePatch = state.appearancePatch,
                 onAppearancePatchChange = state::setAppearancePatch,
@@ -107,6 +111,7 @@ private fun presenter(
         }.invoke()
     var showIconPicker by remember { mutableStateOf(false) }
     var enabled by remember(tabItem) { mutableStateOf(tabItem.enabled) }
+    var filterConfig by remember(tabItem) { mutableStateOf(tabItem.filterConfig) }
     var appearancePatch by remember(tabItem) { mutableStateOf(tabItem.appearancePatch ?: AppearancePatch.EMPTY) }
     val timelineAppearance by remember {
         derivedStateOf {
@@ -125,6 +130,7 @@ private fun presenter(
         val canConfirm = text.text.isNotEmpty()
         val showIconPicker = showIconPicker
         val enabled = enabled
+        val filterConfig = filterConfig
         val appearancePatch = appearancePatch
         val timelineAppearance = timelineAppearance
 
@@ -134,6 +140,10 @@ private fun presenter(
 
         fun setEnabled(value: Boolean) {
             enabled = value
+        }
+
+        fun setFilterConfig(value: TimelineFilterConfig) {
+            filterConfig = value
         }
 
         fun setAppearancePatch(value: AppearancePatch) {

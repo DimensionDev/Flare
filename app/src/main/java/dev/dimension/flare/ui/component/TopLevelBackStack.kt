@@ -33,22 +33,6 @@ internal class TopLevelBackStack<T : NavKey>(
             currentKey = last()
         }
 
-    private fun removeNonTopLevelOccurrences(
-        key: T,
-        keepCurrentLast: Boolean = false,
-    ) {
-        topLevelStacks.values.forEach { stack ->
-            for (index in stack.lastIndex downTo 1) {
-                val isCurrentLast =
-                    stack === topLevelStacks[topLevelKey] &&
-                        index == stack.lastIndex
-                if (stack[index] == key && !(keepCurrentLast && isCurrentLast)) {
-                    stack.removeAt(index)
-                }
-            }
-        }
-    }
-
     fun addTopLevel(key: T) {
         // If the top level doesn't exist, add it
         if (topLevelStacks[key] == null) {
@@ -71,17 +55,14 @@ internal class TopLevelBackStack<T : NavKey>(
     }
 
     fun add(key: T) {
-        val stack =
-            topLevelStacks[topLevelKey]
+        val last =
+            topLevelStacks[topLevelKey]?.lastOrNull()
                 ?: throw IllegalStateException("No stack found for top level key: $topLevelKey")
-        val last = stack.lastOrNull()
         if (last == key) {
-            removeNonTopLevelOccurrences(key, keepCurrentLast = true)
-            updateBackStack()
+            // If the key is already the last one, do nothing
             return
         }
-        removeNonTopLevelOccurrences(key)
-        stack.add(key)
+        topLevelStacks[topLevelKey]?.add(key)
         updateBackStack()
     }
 

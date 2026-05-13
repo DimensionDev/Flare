@@ -203,6 +203,7 @@
     <string name="settings_ai_config_reasoning_effort_low">Low</string>
     <string name="settings_ai_config_reasoning_effort_medium">Medium</string>
     <string name="settings_ai_config_reasoning_effort_high">High</string>
+    <string name="settings_ai_config_extra_body">Extra Body</string>
     <string name="settings_ai_config_translate_prompt">Translate Prompt</string>
     <string name="settings_ai_config_tldr_prompt">Summary Prompt</string>
     <string name="settings_ai_config_value_empty_placeholder">Tap to edit</string>

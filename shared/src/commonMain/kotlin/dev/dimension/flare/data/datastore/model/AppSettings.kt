@@ -78,6 +78,7 @@ public data class AppSettings(
                 val apiKey: String,
                 val model: String = "",
                 val reasoningEffort: String = "",
+                val extraBody: String = "",
             ) : Type
         }
     }

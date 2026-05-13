@@ -25,7 +25,7 @@ internal data class AppearanceSettings(
     val fontSizeDiff: Float = 0f,
     val lineHeightDiff: Float = 0f,
     val showComposeInHomeTimeline: Boolean = true,
-    val bottomBarStyle: BottomBarStyle = BottomBarStyle.Floating,
+    val bottomBarStyle: BottomBarStyle = BottomBarStyle.Classic,
     val bottomBarBehavior: BottomBarBehavior = BottomBarBehavior.MinimizeOnScroll,
     val inAppBrowser: Boolean = true,
     val fullWidthPost: Boolean = false,

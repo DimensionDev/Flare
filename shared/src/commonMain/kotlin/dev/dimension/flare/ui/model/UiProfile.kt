@@ -11,6 +11,7 @@ import dev.dimension.flare.ui.render.UiRichText
 import dev.dimension.flare.ui.render.toUiPlainText
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
+import kotlinx.collections.immutable.toPersistentMap
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 
@@ -68,7 +69,7 @@ public data class UiProfile internal constructor(
             sourceLanguages = if (sourceLanguages.isEmpty()) existing.sourceLanguages else sourceLanguages,
             matrices = matrices.mergeWith(existing.matrices),
             mark = (existing.mark + mark).distinct().toPersistentList(),
-            bottomContent = bottomContent ?: existing.bottomContent,
+            bottomContent = bottomContent.mergeWith(existing.bottomContent),
         )
 
     private fun isNostrFallbackHandle(): Boolean =
@@ -172,3 +173,30 @@ private fun UiProfile.Matrices.mergeWith(existing: UiProfile.Matrices): UiProfil
         statusesCount = statusesCount.takeUnless { it == 0L && existing.statusesCount > 0L } ?: existing.statusesCount,
         platformFansCount = platformFansCount ?: existing.platformFansCount,
     )
+
+private fun UiProfile.BottomContent?.mergeWith(existing: UiProfile.BottomContent?): UiProfile.BottomContent? =
+    when {
+        this == null -> {
+            existing
+        }
+
+        existing == null -> {
+            this
+        }
+
+        this is UiProfile.BottomContent.Fields && existing is UiProfile.BottomContent.Fields -> {
+            UiProfile.BottomContent.Fields(
+                fields = (existing.fields + fields).toPersistentMap(),
+            )
+        }
+
+        this is UiProfile.BottomContent.Iconify && existing is UiProfile.BottomContent.Iconify -> {
+            UiProfile.BottomContent.Iconify(
+                items = (existing.items + items).toPersistentMap(),
+            )
+        }
+
+        else -> {
+            this
+        }
+    }

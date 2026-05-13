@@ -5,6 +5,7 @@ import SwiftUIBackports
 @available(iOS 18.0, *)
 struct FlareRoot: View {
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @Environment(\.globalAppearance) private var globalAppearance
     @StateObject private var homeTabsPresenter = KotlinPresenter(presenter: HomeTabsPresenter())
     @StateObject private var notificationBadgePresenter = KotlinPresenter(presenter: AllNotificationBadgePresenter())
     @StateObject private var secondaryTabsPresenter = KotlinPresenter(presenter: SecondaryTabsPresenter())
@@ -25,6 +26,7 @@ struct FlareRoot: View {
                         } icon: {
                             Image(homeTabIconName(tab))
                         }
+                        .adaptiveLabelStyle(globalAppearance.showBottomBarLabels)
                     }
                     .badge(homeTabRoute(tab) == .notification ? Int(notificationBadgePresenter.state.count) : 0)
                 }
@@ -92,9 +94,19 @@ struct FlareRoot: View {
         .tabPlacement(.sidebarOnly)
     }
 }
-
+private extension View {
+    @ViewBuilder
+    func adaptiveLabelStyle(_ showLabel: Bool) -> some View {
+        if showLabel {
+            self.labelStyle(.automatic)
+        } else {
+            self.labelStyle(.iconOnly)
+        }
+    }
+}
 struct BackportFlareRoot: View {
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @Environment(\.globalAppearance) private var globalAppearance
     @StateObject private var homeTabsPresenter = KotlinPresenter(presenter: HomeTabsPresenter())
     @StateObject private var notificationBadgePresenter = KotlinPresenter(presenter: AllNotificationBadgePresenter())
     @State var selectedTab: String?
@@ -113,6 +125,7 @@ struct BackportFlareRoot: View {
                         } icon: {
                             Image(homeTabIconName(tab))
                         }
+                        .adaptiveLabelStyle(globalAppearance.showBottomBarLabels)
                     }
                     .badge(homeTabRoute(tab) == .notification ? Int(notificationBadgePresenter.state.count) : 0)
                     .tag(homeTabKey(tab))

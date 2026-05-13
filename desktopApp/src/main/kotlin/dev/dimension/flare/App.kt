@@ -56,6 +56,7 @@ import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScrollBar
 import dev.dimension.flare.ui.component.InAppNotificationComponent
+import dev.dimension.flare.ui.component.LocalGlobalAppearance
 import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.component.toImageVector
 import dev.dimension.flare.ui.model.asText
@@ -91,7 +92,6 @@ import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
-import org.koin.compose.koinInject
 
 @Composable
 internal fun WindowScope.FlareApp(backButtonState: NavigationBackButtonState) {
@@ -110,6 +110,7 @@ internal fun WindowScope.FlareApp(backButtonState: NavigationBackButtonState) {
             }
         }
         val currentRoute = state.topLevelBackStack.takeSuccess()?.currentRoute
+        val showNavigationLabels = LocalGlobalAppearance.current.showBottomBarLabels
 
         Row {
             Column(
@@ -215,7 +216,10 @@ internal fun WindowScope.FlareApp(backButtonState: NavigationBackButtonState) {
                                                                         FAIcon(
                                                                             imageVector = shortcut.icon.toImageVector(),
                                                                             contentDescription = null,
-                                                                            modifier = Modifier.size(16.dp),
+                                                                            modifier =
+                                                                                Modifier.size(
+                                                                                    16.dp,
+                                                                                ),
                                                                         )
                                                                     },
                                                                 )
@@ -385,14 +389,19 @@ internal fun WindowScope.FlareApp(backButtonState: NavigationBackButtonState) {
                                         .size(24.dp),
                             )
                         },
-                        text = {
-                            Text(
-                                stringResource(tab.title),
-                                maxLines = 1,
-                                color = color,
-                                style = FluentTheme.typography.caption,
-                            )
-                        },
+                        text =
+                            if (showNavigationLabels) {
+                                {
+                                    Text(
+                                        stringResource(tab.title),
+                                        maxLines = 1,
+                                        color = color,
+                                        style = FluentTheme.typography.caption,
+                                    )
+                                }
+                            } else {
+                                null
+                            },
                         badge =
                             if (tab == HomeTabsPresenter.State.HomeTabs.Notifications) {
                                 if (state.notificationState.count > 0) {
@@ -429,14 +438,19 @@ internal fun WindowScope.FlareApp(backButtonState: NavigationBackButtonState) {
                             tint = color,
                         )
                     },
-                    text = {
-                        Text(
-                            stringResource(Res.string.home_settings),
-                            maxLines = 1,
-                            style = FluentTheme.typography.caption,
-                            color = color,
-                        )
-                    },
+                    text =
+                        if (showNavigationLabels) {
+                            {
+                                Text(
+                                    stringResource(Res.string.home_settings),
+                                    maxLines = 1,
+                                    style = FluentTheme.typography.caption,
+                                    color = color,
+                                )
+                            }
+                        } else {
+                            null
+                        },
                     onClick = {
                         state.navigate(Route.Settings)
                     },
@@ -488,7 +502,7 @@ private fun getDirection(data: SecondaryTabsPresenter.Tab): Route? =
 @Composable
 private fun NavigationItem(
     icon: @Composable () -> Unit,
-    text: @Composable () -> Unit,
+    text: (@Composable () -> Unit)?,
     badge: @Composable (() -> Unit)? = null,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -498,15 +512,29 @@ private fun NavigationItem(
         modifier = modifier,
     ) {
         Column(
-            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+                    .let {
+                        if (text != null) {
+                            it
+                        } else {
+                            it.height(40.dp)
+                        }
+                    },
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(4.dp),
+            verticalArrangement =
+                Arrangement.spacedBy(
+                    if (text != null) 4.dp else 0.dp,
+                    Alignment.CenterVertically,
+                ),
         ) {
             NavigationItemIcon(
                 icon = icon,
                 badge = badge,
             )
-            text.invoke()
+            text?.invoke()
         }
     }
 }

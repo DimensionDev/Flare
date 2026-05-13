@@ -11533,6 +11533,62 @@
         }
       }
     },
+    "appearance_show_bottom_bar_labels" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Show bottom bar text"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "下部バーの文字を表示"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "显示底部栏文字"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "顯示底部欄文字"
+          }
+        }
+      }
+    },
+    "appearance_show_bottom_bar_labels_description" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Show text labels in the bottom bar and sidebar navigation"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "下部バーとサイドバーのナビゲーションに文字ラベルを表示"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "在底部栏和侧边栏导航中显示文字标签"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "在底部欄和側邊欄導覽中顯示文字標籤"
+          }
+        }
+      }
+    },
     "appearance_show_platform_logo" : {
       "localizations" : {
         "ar" : {

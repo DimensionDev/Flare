@@ -108,6 +108,26 @@ internal fun AppearanceLayoutScreen(onBack: () -> Unit) {
                     },
                     shapes = ListItemDefaults.item(),
                 )
+                SegmentedListItem(
+                    onClick = {
+                        state.update(AppearanceKeys.ShowBottomBarLabels, !globalAppearance.showBottomBarLabels)
+                    },
+                    shapes = ListItemDefaults.item(),
+                    content = {
+                        Text(text = stringResource(id = R.string.settings_appearance_show_bottom_bar_labels))
+                    },
+                    supportingContent = {
+                        Text(text = stringResource(id = R.string.settings_appearance_show_bottom_bar_labels_description))
+                    },
+                    trailingContent = {
+                        Switch(
+                            checked = globalAppearance.showBottomBarLabels,
+                            onCheckedChange = {
+                                state.update(AppearanceKeys.ShowBottomBarLabels, it)
+                            },
+                        )
+                    },
+                )
                 SingleChoiceSettingsItem(
                     headline = { Text(text = stringResource(id = R.string.settings_appearance_timeline_display_mode)) },
                     supporting = { Text(text = stringResource(id = R.string.settings_appearance_timeline_display_mode_description)) },

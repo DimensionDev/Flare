@@ -62,6 +62,7 @@ import dev.dimension.flare.ui.common.OnNewIntent
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.InAppNotificationComponent
+import dev.dimension.flare.ui.component.LocalGlobalAppearance
 import dev.dimension.flare.ui.component.NavigationSuiteScaffold2
 import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.component.TabIcon
@@ -117,6 +118,7 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                 NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(
                     currentWindowAdaptiveInfoV2(),
                 )
+            val showNavigationLabels = LocalGlobalAppearance.current.showBottomBarLabels
             Box {
                 NavigationSuiteScaffold2(
                     wideNavigationRailState = state.wideNavigationRailState,
@@ -458,7 +460,11 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                         Router(
                             backStack =
                                 state.topLevelBackStack.takeSuccess()?.backStack
-                                    ?: remember { androidx.compose.runtime.mutableStateListOf(currentRoute) },
+                                    ?: remember {
+                                        androidx.compose.runtime.mutableStateListOf(
+                                            currentRoute,
+                                        )
+                                    },
                             navigationState = state.navigationState,
                             openDrawer = {
                                 state.openDrawer()

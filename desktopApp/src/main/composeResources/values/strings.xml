@@ -238,6 +238,8 @@
     <string name="settings_appearance_generic">Generic</string>
     <string name="settings_appearance_show_compose_in_home_timeline">Show compose box in home timeline</string>
     <string name="settings_appearance_show_compose_in_home_timeline_description">Show compose box in the top of home timeline</string>
+    <string name="settings_appearance_show_bottom_bar_labels">Show bottom bar text</string>
+    <string name="settings_appearance_show_bottom_bar_labels_description">Show text labels in the bottom bar and sidebar navigation</string>
     <string name="settings_appearance_show_actions">Show actions</string>
     <string name="settings_appearance_show_actions_description">Show actions on the bottom of the post</string>
     <string name="settings_appearance_show_media">Show media</string>

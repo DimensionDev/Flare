@@ -5,6 +5,7 @@ struct AppearanceLayoutScreen: View {
     @AppStorage("pref_timeline_use_compose_view") private var useComposeView: Bool = false
     @StateObject private var statusPresenter = KotlinPresenter(presenter: AppearancePresenter())
     @StateObject private var presenter = KotlinPresenter(presenter: SettingsPresenter())
+    @Environment(\.globalAppearance) private var globalAppearance
     @Environment(\.timelineAppearance) private var appearance
     var body: some View {
         List {
@@ -24,6 +25,14 @@ struct AppearanceLayoutScreen: View {
                 Toggle(isOn: $useComposeView) {
                     Text("appearance_use_compose_view")
                     Text("appearance_use_compose_view_description")
+                }
+                Toggle(isOn: Binding(get: {
+                    globalAppearance.showBottomBarLabels
+                }, set: { newValue in
+                    presenter.state.updateShowBottomBarLabels(value: newValue)
+                })) {
+                    Text("appearance_show_bottom_bar_labels")
+                    Text("appearance_show_bottom_bar_labels_description")
                 }
             }
             Section {

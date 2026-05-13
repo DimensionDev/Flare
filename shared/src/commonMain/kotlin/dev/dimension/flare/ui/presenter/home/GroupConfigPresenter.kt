@@ -49,6 +49,7 @@ public class GroupConfigPresenter :
                 appearancePatch: AppearancePatch?,
                 enabled: Boolean,
                 tabs: List<TimelineTabItemV2>,
+                mergePolicy: TimelineMergePolicy,
                 defaultGroupName: String,
             ) {
                 appScope.launch {
@@ -60,6 +61,7 @@ public class GroupConfigPresenter :
                             appearancePatch = appearancePatch,
                             enabled = enabled,
                             tabs = tabs,
+                            mergePolicy = mergePolicy,
                             defaultGroupName = defaultGroupName,
                             timelineResolver = timelineResolver,
                         )
@@ -80,6 +82,7 @@ public class GroupConfigPresenter :
             appearancePatch: AppearancePatch?,
             enabled: Boolean,
             tabs: List<TimelineTabItemV2>,
+            mergePolicy: TimelineMergePolicy = initialItem?.mergePolicy ?: TimelineMergePolicy.TimePerPage,
             defaultGroupName: String,
         )
     }
@@ -92,6 +95,7 @@ internal fun TabSettingsV2.upsertGroupConfig(
     appearancePatch: AppearancePatch?,
     enabled: Boolean,
     tabs: List<TimelineTabItemV2>,
+    mergePolicy: TimelineMergePolicy = initialItem?.mergePolicy ?: TimelineMergePolicy.TimePerPage,
     defaultGroupName: String,
     timelineResolver: TimelineResolver,
 ): TabSettingsV2 {
@@ -109,7 +113,7 @@ internal fun TabSettingsV2.upsertGroupConfig(
     }
 
     val childSlots = deduplicatedTabs.map { timelineResolver.toSlot(it) }
-    val newGroup = buildGroupSlot(name, icon, appearancePatch, enabled, defaultGroupName, childSlots)
+    val newGroup = buildGroupSlot(name, icon, appearancePatch, enabled, mergePolicy, defaultGroupName, childSlots)
     val currentSlots = homeSlots.toMutableList()
     val targetIndex =
         initialItem
@@ -128,6 +132,7 @@ private fun buildGroupSlot(
     icon: IconType,
     appearancePatch: AppearancePatch?,
     enabled: Boolean,
+    mergePolicy: TimelineMergePolicy,
     defaultGroupName: String,
     childSlots: List<TimelineSlot>,
 ): TimelineSlot {
@@ -138,7 +143,7 @@ private fun buildGroupSlot(
             TimelineSlotContent.Group(
                 children = childSlots,
                 source = GroupSource.Manual,
-                mergePolicy = TimelineMergePolicy.TimePerPage,
+                mergePolicy = mergePolicy,
             ),
         presentation =
             TimelinePresentation(

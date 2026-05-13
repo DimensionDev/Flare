@@ -50,6 +50,7 @@ struct HomeTimelineScreen: View {
                         TimelineScreen(tabItem: tab, allowGalleryMode: true)
                             .environment(\.timelineAppearance, tab.resolveTimelineAppearance(base: timelineAppearance))
                             .id(tab.id)
+                            .id(tab.presenterId)
                     }
                     .onChange(of: state.count, { oldValue, newValue in
                         if !(tabs.indices.contains(selectedTabIndex)) {

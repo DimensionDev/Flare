@@ -9,6 +9,7 @@ struct GroupConfigScreen: View {
     @State private var name: String
     @State private var icon: IconType
     @State private var enabled: Bool
+    @State private var mergePolicy: TimelineMergePolicy
     @State private var appearancePatch: AppearancePatch
     @State private var tabs: [TimelineTabItemV2]
     @State private var showAddTabSheet = false
@@ -20,6 +21,7 @@ struct GroupConfigScreen: View {
         _name = State(initialValue: item?.title.text ?? "")
         _icon = State(initialValue: item?.icon ?? IconType.Material(icon: .rss))
         _enabled = State(initialValue: item?.enabled ?? true)
+        _mergePolicy = State(initialValue: item?.mergePolicy ?? .timePerPage)
         _appearancePatch = State(
             initialValue: item?.appearancePatch ?? TimelinePresentationAppearancePatchHelper.shared.empty
         )
@@ -46,11 +48,17 @@ struct GroupConfigScreen: View {
                 onWithAvatarChange: { _ in },
                 enabled: $enabled,
                 showEnabled: true,
+                showAppearanceOverrides: true,
                 timelineAppearance: TimelinePresentationAppearancePatchHelper.shared.resolve(
                     base: baseTimelineAppearance,
                     patch: appearancePatch
                 ),
                 appearancePatch: $appearancePatch,
+                behaviorContent: AnyView(
+                    Section {
+                        MergePolicySettingsItem(selected: $mergePolicy)
+                    }
+                ),
                 titlePlaceholder: "tab_settings_group_name_placeholder"
             )
             
@@ -121,7 +129,7 @@ struct GroupConfigScreen: View {
                         if let index = tabs.firstIndex(where: { $0.id == updated.id }) {
                             tabs[index] = updated
                         }
-                    }, tabItem: item)
+                    }, tabItem: item, titleAndIconOnly: true)
                 }
             }
         }
@@ -149,6 +157,7 @@ struct GroupConfigScreen: View {
                         appearancePatch: appearancePatch,
                         enabled: enabled,
                         tabs: tabs,
+                        mergePolicy: mergePolicy,
                         defaultGroupName: NSLocalizedString("tab_settings_group_default_name", comment: "")
                     )
                     dismiss()

@@ -6,5 +6,10 @@ public object TimelineTabItemV2Helpers {
     public fun withSystemHomeMixedTimelineEnabled(
         tabs: List<TimelineTabItemV2>,
         enabled: Boolean,
-    ): List<TimelineTabItemV2> = tabs.withSystemHomeMixedTimelineEnabled(enabled)
+        mergePolicy: TimelineMergePolicy? = null,
+    ): List<TimelineTabItemV2> =
+        tabs.withSystemHomeMixedTimelineEnabled(
+            enabled = enabled,
+            mergePolicy = mergePolicy,
+        )
 }

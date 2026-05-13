@@ -62,6 +62,7 @@ internal class TimelineRemoteMediator(
                 TimelinePagingMapper.toDb(
                     data = it,
                     pagingKey = pagingKey,
+                    sortId = (loader as? SortIdProvider)?.sortId(it),
                 )
             }
         return PagingResult(

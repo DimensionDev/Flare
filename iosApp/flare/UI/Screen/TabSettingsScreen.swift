@@ -23,6 +23,19 @@ struct TabSettingsScreen: View {
                     .onChange(of: enableMixedTimeline) { _, value in
                         tabItems = withSystemHomeMixedTimelineEnabled(tabItems, enabled: value)
                     }
+                    if enableMixedTimeline {
+                        MergePolicySettingsItem(
+                            selected: Binding(get: {
+                                systemHomeMergePolicy
+                            }, set: { value in
+                                tabItems = withSystemHomeMixedTimelineEnabled(
+                                    tabItems,
+                                    enabled: true,
+                                    mergePolicy: value
+                                )
+                            })
+                        )
+                    }
                 }
             }
             Section {
@@ -190,9 +203,27 @@ struct TabSettingsScreen: View {
     }
 
     private func withSystemHomeMixedTimelineEnabled(_ tabs: [TimelineTabItemV2], enabled: Bool) -> [TimelineTabItemV2] {
-//        tabs.withSystemHomeMixedTimelineEnabled(enabled: enabled)
+        withSystemHomeMixedTimelineEnabled(tabs, enabled: enabled, mergePolicy: nil)
+    }
+
+    private func withSystemHomeMixedTimelineEnabled(
+        _ tabs: [TimelineTabItemV2],
+        enabled: Bool,
+        mergePolicy: TimelineMergePolicy?
+    ) -> [TimelineTabItemV2] {
         TimelineTabItemV2Helpers.shared
-            .withSystemHomeMixedTimelineEnabled(tabs: tabs, enabled: enabled)
+            .withSystemHomeMixedTimelineEnabled(
+                tabs: tabs,
+                enabled: enabled,
+                mergePolicy: mergePolicy
+            )
+    }
+
+    private var systemHomeMergePolicy: TimelineMergePolicy {
+        tabItems
+            .compactMap { $0 as? GroupTimelineTabItemV2 }
+            .first(where: { isSystemHomeMixedTimeline($0) })?
+            .mergePolicy ?? .timePerPage
     }
 }
 
@@ -201,14 +232,16 @@ struct EditTabSheet: View {
     @Environment(\.timelineAppearance) private var baseTimelineAppearance
     let onConfirm: (TimelineTabItemV2) -> Void
     let tabItem: TimelineTabItemV2
+    let titleAndIconOnly: Bool
     @StateObject private var presenter: KotlinPresenter<EditTabPresenterState>
     @State private var text: String = ""
     @State private var enabled: Bool
     @State private var appearancePatch: AppearancePatch
     
-    init(onConfirm: @escaping (TimelineTabItemV2) -> Void, tabItem: TimelineTabItemV2) {
+    init(onConfirm: @escaping (TimelineTabItemV2) -> Void, tabItem: TimelineTabItemV2, titleAndIconOnly: Bool = false) {
         self.onConfirm = onConfirm
         self.tabItem = tabItem
+        self.titleAndIconOnly = titleAndIconOnly
         self._presenter = .init(wrappedValue: .init(presenter: EditTabPresenter(tabItem: tabItem)))
         self._enabled = State(initialValue: tabItem.enabled)
         self._appearancePatch = State(
@@ -227,12 +260,13 @@ struct EditTabSheet: View {
                 }),
                 availableIcons: presenter.state.availableIcons,
                 withAvatar: presenter.state.withAvatar,
-                canUseAvatar: presenter.state.canUseAvatar,
+                canUseAvatar: !titleAndIconOnly && presenter.state.canUseAvatar,
                 onWithAvatarChange: { value in
                     presenter.state.setWithAvatar(value: value)
                 },
                 enabled: $enabled,
-                showEnabled: !tabItem.isSystemHomeMixedTimeline,
+                showEnabled: !titleAndIconOnly && !tabItem.isSystemHomeMixedTimeline,
+                showAppearanceOverrides: !titleAndIconOnly,
                 timelineAppearance: TimelinePresentationAppearancePatchHelper.shared.resolve(
                     base: baseTimelineAppearance,
                     patch: appearancePatch

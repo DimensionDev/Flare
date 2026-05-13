@@ -15,6 +15,7 @@ import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.createTestRootPath
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.model.DbStatusWithReference
 import dev.dimension.flare.data.database.cache.model.TranslationDisplayOptions
 import dev.dimension.flare.data.database.cache.model.TranslationEntityType
 import dev.dimension.flare.data.database.cache.model.TranslationStatus
@@ -26,6 +27,7 @@ import dev.dimension.flare.data.datasource.microblog.paging.TimelineRemoteMediat
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.io.PlatformPathProducer
+import dev.dimension.flare.data.model.tab.TimelineMergePolicy
 import dev.dimension.flare.data.network.ai.AiCompletionService
 import dev.dimension.flare.data.network.ai.OpenAIService
 import dev.dimension.flare.data.translation.OnlinePreTranslationService
@@ -324,6 +326,134 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                     "https://example.com/a_1000",
                 ),
                 urls,
+            )
+        }
+
+    @Test
+    fun staggeredMergePolicyInterleavesSubTimelinePages() =
+        runTest {
+            val first =
+                FakeLoader("a") { request ->
+                    when (request) {
+                        PagingRequest.Refresh -> {
+                            PagingResult(
+                                data =
+                                    listOf(
+                                        feed("https://example.com/a_1", 1000L),
+                                        feed("https://example.com/a_2", 4000L),
+                                    ),
+                                nextKey = null,
+                            )
+                        }
+
+                        is PagingRequest.Append -> {
+                            error("No append expected")
+                        }
+
+                        is PagingRequest.Prepend -> {
+                            error("No prepend expected")
+                        }
+                    }
+                }
+            val second =
+                FakeLoader("b") { request ->
+                    when (request) {
+                        PagingRequest.Refresh -> {
+                            PagingResult(
+                                data =
+                                    listOf(
+                                        feed("https://example.com/b_1", 3000L),
+                                        feed("https://example.com/b_2", 2000L),
+                                    ),
+                                nextKey = null,
+                            )
+                        }
+
+                        is PagingRequest.Append -> {
+                            error("No append expected")
+                        }
+
+                        is PagingRequest.Prepend -> {
+                            error("No prepend expected")
+                        }
+                    }
+                }
+
+            val mediator = MixedRemoteMediator(db, listOf(first, second), TimelineMergePolicy.Staggered)
+            val result = mediator.load(pageSize = 20, request = PagingRequest.Refresh)
+
+            assertEquals(
+                listOf(
+                    "https://example.com/a_1",
+                    "https://example.com/b_1",
+                    "https://example.com/a_2",
+                    "https://example.com/b_2",
+                ),
+                result.data.mapNotNull { (it as? UiTimelineV2.Feed)?.url },
+            )
+        }
+
+    @OptIn(ExperimentalPagingApi::class)
+    @Test
+    fun timeMergePolicyPersistsGlobalTimeOrderAcrossAppends() =
+        runTest {
+            val loader =
+                FakeLoader("a") { request ->
+                    when (request) {
+                        PagingRequest.Refresh -> {
+                            PagingResult(
+                                data = listOf(feed("https://example.com/refresh_old", 1000L)),
+                                nextKey = "a_next",
+                            )
+                        }
+
+                        is PagingRequest.Append -> {
+                            assertEquals("a_next", request.nextKey)
+                            PagingResult(
+                                data = listOf(feed("https://example.com/append_new", 3000L)),
+                                nextKey = null,
+                            )
+                        }
+
+                        is PagingRequest.Prepend -> {
+                            error("No prepend expected")
+                        }
+                    }
+                }
+
+            val mixed = MixedRemoteMediator(db, listOf(loader), TimelineMergePolicy.Time)
+            val timelineRemoteMediator = TimelineRemoteMediator(loader = mixed, database = db, allowLongText = false)
+            val state =
+                PagingState<Int, DbStatusWithReference>(
+                    pages = emptyList(),
+                    anchorPosition = null,
+                    config = PagingConfig(pageSize = 20),
+                    leadingPlaceholderCount = 0,
+                )
+
+            val refreshResult = timelineRemoteMediator.load(loadType = LoadType.REFRESH, state = state)
+            assertTrue(refreshResult is androidx.paging.RemoteMediator.MediatorResult.Success)
+            val appendResult = timelineRemoteMediator.load(loadType = LoadType.APPEND, state = state)
+            assertTrue(appendResult is androidx.paging.RemoteMediator.MediatorResult.Success)
+
+            val pagingSource = db.pagingTimelineDao().getPagingSource(timelineRemoteMediator.pagingKey)
+            val page =
+                pagingSource.load(
+                    PagingSource.LoadParams.Refresh(
+                        key = null,
+                        loadSize = 20,
+                        placeholdersEnabled = false,
+                    ),
+                )
+            assertTrue(page is PagingSource.LoadResult.Page)
+            assertEquals(
+                listOf(
+                    "https://example.com/append_new",
+                    "https://example.com/refresh_old",
+                ),
+                page.data.mapNotNull {
+                    (it.status.data.content as? UiTimelineV2.Feed)?.url
+                },
             )
         }
 

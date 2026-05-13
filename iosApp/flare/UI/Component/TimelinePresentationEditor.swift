@@ -10,11 +10,43 @@ struct TimelinePresentationEditor: View {
     let onWithAvatarChange: (Bool) -> Void
     @Binding var enabled: Bool
     let showEnabled: Bool
+    let showAppearanceOverrides: Bool
     let timelineAppearance: TimelineAppearance
     @Binding var appearancePatch: AppearancePatch
+    let behaviorContent: AnyView?
     let titlePlaceholder: LocalizedStringKey
 
     @State private var showIconPicker = false
+
+    init(
+        text: Binding<String>,
+        icon: Binding<IconType>,
+        availableIcons: [IconType],
+        withAvatar: Bool,
+        canUseAvatar: Bool,
+        onWithAvatarChange: @escaping (Bool) -> Void,
+        enabled: Binding<Bool>,
+        showEnabled: Bool,
+        showAppearanceOverrides: Bool,
+        timelineAppearance: TimelineAppearance,
+        appearancePatch: Binding<AppearancePatch>,
+        behaviorContent: AnyView? = nil,
+        titlePlaceholder: LocalizedStringKey
+    ) {
+        self._text = text
+        self._icon = icon
+        self.availableIcons = availableIcons
+        self.withAvatar = withAvatar
+        self.canUseAvatar = canUseAvatar
+        self.onWithAvatarChange = onWithAvatarChange
+        self._enabled = enabled
+        self.showEnabled = showEnabled
+        self.showAppearanceOverrides = showAppearanceOverrides
+        self.timelineAppearance = timelineAppearance
+        self._appearancePatch = appearancePatch
+        self.behaviorContent = behaviorContent
+        self.titlePlaceholder = titlePlaceholder
+    }
 
     var body: some View {
         TimelinePresentationHeaderEditor(
@@ -44,25 +76,31 @@ struct TimelinePresentationEditor: View {
             }
         }
 
-        Section {
-            LayoutAppearanceOverrideGroup(
-                timelineAppearance: timelineAppearance,
-                appearancePatch: $appearancePatch
-            )
-            DisplayAppearanceOverrideGroup(
-                timelineAppearance: timelineAppearance,
-                appearancePatch: $appearancePatch
-            )
-            MediaAppearanceOverrideGroup(
-                timelineAppearance: timelineAppearance,
-                appearancePatch: $appearancePatch
-            )
-            ThemeAppearanceOverrideGroup(
-                timelineAppearance: timelineAppearance,
-                appearancePatch: $appearancePatch
-            )
-        } header: {
-            Text("appearance_title")
+        if let behaviorContent {
+            behaviorContent
+        }
+
+        if showAppearanceOverrides {
+            Section {
+                LayoutAppearanceOverrideGroup(
+                    timelineAppearance: timelineAppearance,
+                    appearancePatch: $appearancePatch
+                )
+                DisplayAppearanceOverrideGroup(
+                    timelineAppearance: timelineAppearance,
+                    appearancePatch: $appearancePatch
+                )
+                MediaAppearanceOverrideGroup(
+                    timelineAppearance: timelineAppearance,
+                    appearancePatch: $appearancePatch
+                )
+                ThemeAppearanceOverrideGroup(
+                    timelineAppearance: timelineAppearance,
+                    appearancePatch: $appearancePatch
+                )
+            } header: {
+                Text("appearance_title")
+            }
         }
     }
 }

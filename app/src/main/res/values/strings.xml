@@ -509,6 +509,12 @@
     <string name="tab_settings_group_empty">No tabs in this group</string>
     <string name="tab_settings_group_name_placeholder">Group name</string>
     <string name="tab_settings_group_default_name">New Group</string>
+    <string name="tab_settings_behavior_group_title">Behavior</string>
+    <string name="tab_settings_merge_policy">Merge policy</string>
+    <string name="tab_settings_merge_policy_desc">Choose how items from each timeline are combined.</string>
+    <string name="tab_settings_merge_policy_time">Chronological</string>
+    <string name="tab_settings_merge_policy_time_per_page">Page by page</string>
+    <string name="tab_settings_merge_policy_staggered">Interleaved</string>
     <string name="status_share_sheet_theme_title">Theme</string>
     <string name="channel_title">Channel</string>
     <string name="channel_item_follow">Follow</string>

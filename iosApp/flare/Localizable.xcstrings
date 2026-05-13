@@ -104281,6 +104281,86 @@
         }
       }
     },
+    "tab_settings_merge_policy" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Merge policy"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "合并策略"
+          }
+        }
+      }
+    },
+    "tab_settings_merge_policy_desc" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose how items from each timeline are combined."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "选择各时间线的内容如何合并。"
+          }
+        }
+      }
+    },
+    "tab_settings_merge_policy_staggered" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Interleaved"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "交错合并"
+          }
+        }
+      }
+    },
+    "tab_settings_merge_policy_time" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chronological"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "按时间排序"
+          }
+        }
+      }
+    },
+    "tab_settings_merge_policy_time_per_page" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Page by page"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "按页合并"
+          }
+        }
+      }
+    },
     "tab_settings_group_empty" : {
       "localizations" : {
         "ar" : {

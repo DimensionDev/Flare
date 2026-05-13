@@ -41,6 +41,7 @@ import dev.dimension.flare.data.model.appearance.AppearancePatch
 import dev.dimension.flare.data.model.appearance.TimelineAppearance
 import dev.dimension.flare.data.model.appearance.withPatch
 import dev.dimension.flare.data.model.tab.GroupTimelineTabItemV2
+import dev.dimension.flare.data.model.tab.TimelineMergePolicy
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.tab_settings_add
 import dev.dimension.flare.tab_settings_drag
@@ -100,6 +101,7 @@ internal fun GroupConfigScreen(
                 state.setEditTab(null)
                 state.updateTab(updatedTab)
             },
+            titleAndIconOnly = true,
         )
     }
 
@@ -154,6 +156,12 @@ internal fun GroupConfigScreen(
                     appearancePatch = state.appearancePatch,
                     onAppearancePatchChange = state::setAppearancePatch,
                     onIconChange = state::setIcon,
+                    behaviorContent = {
+                        MergePolicySettingsItem(
+                            selected = state.mergePolicy,
+                            onSelected = state::setMergePolicy,
+                        )
+                    },
                     modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
                     header = null,
                     placeholder = {
@@ -281,6 +289,7 @@ private fun presenter(
         mutableStateOf<IconType>(IconType.Material(UiIcon.Rss))
     }
     var enabled by remember(groupId) { mutableStateOf(true) }
+    var mergePolicy by remember(groupId) { mutableStateOf(TimelineMergePolicy.TimePerPage) }
     var appearancePatch by remember(groupId) { mutableStateOf(AppearancePatch.EMPTY) }
     val timelineAppearance by remember {
         derivedStateOf {
@@ -300,6 +309,7 @@ private fun presenter(
         }
         icon = item.icon
         enabled = item.enabled
+        mergePolicy = item.mergePolicy
         appearancePatch = item.appearancePatch ?: AppearancePatch.EMPTY
         tabs.clear()
         tabs.addAll(item.children.distinctBy { it.id })
@@ -314,6 +324,7 @@ private fun presenter(
         val name = name
         val icon = icon
         val enabled = enabled
+        val mergePolicy = mergePolicy
         val appearancePatch = appearancePatch
         val timelineAppearance = timelineAppearance
         val tabs = tabs
@@ -329,6 +340,10 @@ private fun presenter(
 
         fun setEnabled(value: Boolean) {
             enabled = value
+        }
+
+        fun setMergePolicy(value: TimelineMergePolicy) {
+            mergePolicy = value
         }
 
         fun setAppearancePatch(value: AppearancePatch) {
@@ -387,6 +402,7 @@ private fun presenter(
                 appearancePatch = appearancePatch,
                 enabled = enabled,
                 tabs = tabs.toList(),
+                mergePolicy = mergePolicy,
                 defaultGroupName = defaultGroupName,
             )
         }

@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.mapNotNull
 import moe.tlaster.precompose.molecule.producePresenter
 import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 @Immutable
 public interface TimelineWithLazyListState : TimelineItemPresenter.State {
     public val showNewToots: Boolean
@@ -43,7 +44,7 @@ public fun rememberTimelineItemPresenterWithLazyListState(
     item: TimelineTabItemV2,
     lazyStaggeredGridState: LazyStaggeredGridState = rememberLazyStaggeredGridState(),
 ): TimelineWithLazyListState {
-    val baseState by producePresenter("timeline_${item.id}") {
+    val baseState by producePresenter("timeline_${item.presenterId}") {
         remember { TimelineItemPresenter(item) }.invoke()
     }
     return rememberTimelineWithLazyListState(baseState, lazyStaggeredGridState)

@@ -74,6 +74,8 @@ internal fun TimelinePresentationEditor(
     onIconChange: (IconType) -> Unit,
     modifier: Modifier = Modifier,
     showEnabled: Boolean = true,
+    showAppearanceOverrides: Boolean = true,
+    behaviorContent: (@Composable ColumnScope.() -> Unit)? = null,
     label: @Composable (() -> Unit)? = { Text(text = stringResource(id = R.string.edit_tab_name)) },
     placeholder: @Composable (() -> Unit)? = { Text(text = stringResource(id = R.string.edit_tab_name_placeholder)) },
 ) {
@@ -109,327 +111,151 @@ internal fun TimelinePresentationEditor(
             placeholder = placeholder,
         )
 
-        Column(
-            verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
-        ) {
-            if (canUseAvatar) {
-                SegmentedListItem(
-                    onClick = { onWithAvatarChange(!withAvatar) },
-                    shapes = if (showEnabled) ListItemDefaults.first() else ListItemDefaults.single(),
-                    content = { Text(text = stringResource(id = R.string.edit_tab_with_avatar)) },
-                    trailingContent = {
-                        Checkbox(
-                            checked = withAvatar,
-                            onCheckedChange = onWithAvatarChange,
-                        )
-                    },
-                )
-            }
-            if (showEnabled) {
-                SegmentedListItem(
-                    onClick = { onEnabledChange(!enabled) },
-                    shapes = if (canUseAvatar) ListItemDefaults.last() else ListItemDefaults.single(),
-                    content = { Text(text = stringResource(id = R.string.edit_tab_enabled)) },
-                    supportingContent = { Text(text = stringResource(id = R.string.edit_tab_enabled_description)) },
-                    trailingContent = {
-                        Switch(
-                            checked = enabled,
-                            onCheckedChange = onEnabledChange,
-                        )
-                    },
-                )
+        if (canUseAvatar || showEnabled) {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
+            ) {
+                if (canUseAvatar) {
+                    SegmentedListItem(
+                        onClick = { onWithAvatarChange(!withAvatar) },
+                        shapes = if (showEnabled) ListItemDefaults.first() else ListItemDefaults.single(),
+                        content = { Text(text = stringResource(id = R.string.edit_tab_with_avatar)) },
+                        trailingContent = {
+                            Checkbox(
+                                checked = withAvatar,
+                                onCheckedChange = onWithAvatarChange,
+                            )
+                        },
+                    )
+                }
+                if (showEnabled) {
+                    SegmentedListItem(
+                        onClick = { onEnabledChange(!enabled) },
+                        shapes = if (canUseAvatar) ListItemDefaults.last() else ListItemDefaults.single(),
+                        content = { Text(text = stringResource(id = R.string.edit_tab_enabled)) },
+                        supportingContent = { Text(text = stringResource(id = R.string.edit_tab_enabled_description)) },
+                        trailingContent = {
+                            Switch(
+                                checked = enabled,
+                                onCheckedChange = onEnabledChange,
+                            )
+                        },
+                    )
+                }
             }
         }
-        Column(
-            verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
-        ) {
-            AppearanceExpander(
-                title = stringResource(id = R.string.settings_appearance_layout_group_title),
-                shapes = ListItemDefaults.first(),
-                overridesEnabled = layoutOverridesEnabled,
-                onOverridesEnabledChange = {
-                    onAppearancePatchChange(
-                        if (it) {
-                            appearancePatch
-                                .set(
+        behaviorContent?.let {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
+            ) {
+                it()
+            }
+        }
+        if (showAppearanceOverrides) {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
+            ) {
+                AppearanceExpander(
+                    title = stringResource(id = R.string.settings_appearance_layout_group_title),
+                    shapes = ListItemDefaults.first(),
+                    overridesEnabled = layoutOverridesEnabled,
+                    onOverridesEnabledChange = {
+                        onAppearancePatchChange(
+                            if (it) {
+                                appearancePatch
+                                    .set(
+                                        AppearanceKeys.TimelineDisplayMode,
+                                        timelineAppearance.timelineDisplayMode,
+                                    ).set(AppearanceKeys.FullWidthPost, timelineAppearance.fullWidthPost)
+                                    .set(
+                                        AppearanceKeys.PostActionStyle,
+                                        timelineAppearance.postActionStyle,
+                                    ).set(AppearanceKeys.ShowNumbers, timelineAppearance.showNumbers)
+                            } else {
+                                appearancePatch.clearAll(
                                     AppearanceKeys.TimelineDisplayMode,
-                                    timelineAppearance.timelineDisplayMode,
-                                ).set(AppearanceKeys.FullWidthPost, timelineAppearance.fullWidthPost)
-                                .set(
+                                    AppearanceKeys.FullWidthPost,
                                     AppearanceKeys.PostActionStyle,
-                                    timelineAppearance.postActionStyle,
-                                ).set(AppearanceKeys.ShowNumbers, timelineAppearance.showNumbers)
-                        } else {
-                            appearancePatch.clearAll(
-                                AppearanceKeys.TimelineDisplayMode,
-                                AppearanceKeys.FullWidthPost,
-                                AppearanceKeys.PostActionStyle,
-                                AppearanceKeys.ShowNumbers,
-                            )
-                        },
-                    )
-                },
-            ) {
-                SingleChoiceSettingsItem(
-                    headline = { Text(text = stringResource(id = R.string.settings_appearance_timeline_display_mode)) },
-                    supporting = { Text(text = stringResource(id = R.string.settings_appearance_timeline_display_mode_description)) },
-                    items =
-                        persistentMapOf(
-                            TimelineDisplayMode.Card to stringResource(id = R.string.settings_appearance_timeline_display_mode_card),
-                            TimelineDisplayMode.Plain to stringResource(id = R.string.settings_appearance_timeline_display_mode_plain),
-                            TimelineDisplayMode.Gallery to stringResource(id = R.string.settings_appearance_timeline_display_mode_gallery),
-                        ),
-                    selected = timelineAppearance.timelineDisplayMode,
-                    onSelected = {
-                        onAppearancePatchChange(
-                            appearancePatch.set(
-                                AppearanceKeys.TimelineDisplayMode,
-                                it,
-                            ),
-                        )
-                    },
-                    shapes = ListItemDefaults.first(),
-                )
-                SwitchSettingsItem(
-                    title = stringResource(id = R.string.settings_appearance_full_width_post),
-                    description = stringResource(id = R.string.settings_appearance_full_width_post_description),
-                    checked = timelineAppearance.fullWidthPost,
-                    onCheckedChange = {
-                        onAppearancePatchChange(
-                            appearancePatch.set(
-                                AppearanceKeys.FullWidthPost,
-                                it,
-                            ),
-                        )
-                    },
-                    shapes = ListItemDefaults.item(),
-                )
-                SingleChoiceSettingsItem(
-                    headline = { Text(text = stringResource(id = R.string.settings_appearance_post_action_style)) },
-                    supporting = { Text(text = stringResource(id = R.string.settings_appearance_post_action_style_description)) },
-                    items =
-                        persistentMapOf(
-                            PostActionStyle.Hidden to stringResource(id = R.string.settings_appearance_post_action_style_hidden),
-                            PostActionStyle.LeftAligned to stringResource(id = R.string.settings_appearance_post_action_style_left_aligned),
-                            PostActionStyle.RightAligned to
-                                stringResource(id = R.string.settings_appearance_post_action_style_right_aligned),
-                            PostActionStyle.Stretch to stringResource(id = R.string.settings_appearance_post_action_style_stretch),
-                        ),
-                    selected = timelineAppearance.postActionStyle,
-                    onSelected = {
-                        onAppearancePatchChange(
-                            appearancePatch.set(
-                                AppearanceKeys.PostActionStyle,
-                                it,
-                            ),
-                        )
-                    },
-                    shapes =
-                        if (timelineAppearance.postActionStyle ==
-                            PostActionStyle.Hidden
-                        ) {
-                            ListItemDefaults.last()
-                        } else {
-                            ListItemDefaults.item()
-                        },
-                )
-                AnimatedVisibility(timelineAppearance.postActionStyle != PostActionStyle.Hidden) {
-                    SwitchSettingsItem(
-                        title = stringResource(id = R.string.settings_appearance_show_numbers),
-                        description = stringResource(id = R.string.settings_appearance_show_numbers_description),
-                        checked = timelineAppearance.showNumbers,
-                        onCheckedChange = {
-                            onAppearancePatchChange(
-                                appearancePatch.set(
                                     AppearanceKeys.ShowNumbers,
+                                )
+                            },
+                        )
+                    },
+                ) {
+                    SingleChoiceSettingsItem(
+                        headline = { Text(text = stringResource(id = R.string.settings_appearance_timeline_display_mode)) },
+                        supporting = { Text(text = stringResource(id = R.string.settings_appearance_timeline_display_mode_description)) },
+                        items =
+                            persistentMapOf(
+                                TimelineDisplayMode.Card to stringResource(id = R.string.settings_appearance_timeline_display_mode_card),
+                                TimelineDisplayMode.Plain to stringResource(id = R.string.settings_appearance_timeline_display_mode_plain),
+                                TimelineDisplayMode.Gallery to
+                                    stringResource(id = R.string.settings_appearance_timeline_display_mode_gallery),
+                            ),
+                        selected = timelineAppearance.timelineDisplayMode,
+                        onSelected = {
+                            onAppearancePatchChange(
+                                appearancePatch.set(
+                                    AppearanceKeys.TimelineDisplayMode,
                                     it,
                                 ),
                             )
                         },
-                        shapes = ListItemDefaults.last(),
+                        shapes = ListItemDefaults.first(),
                     )
-                }
-            }
-
-            AppearanceExpander(
-                title = stringResource(id = R.string.settings_appearance_display_group_title),
-                shapes = ListItemDefaults.item(),
-                overridesEnabled = displayOverridesEnabled,
-                onOverridesEnabledChange = {
-                    onAppearancePatchChange(
-                        if (it) {
-                            appearancePatch
-                                .set(
-                                    AppearanceKeys.AbsoluteTimestamp,
-                                    timelineAppearance.absoluteTimestamp,
-                                ).set(
-                                    AppearanceKeys.ShowPlatformLogo,
-                                    timelineAppearance.showPlatformLogo,
-                                ).set(
-                                    AppearanceKeys.ShowLinkPreview,
-                                    timelineAppearance.showLinkPreview,
-                                ).set(
-                                    AppearanceKeys.CompatLinkPreview,
-                                    timelineAppearance.compatLinkPreview,
-                                )
-                        } else {
-                            appearancePatch.clearAll(
-                                AppearanceKeys.AbsoluteTimestamp,
-                                AppearanceKeys.ShowPlatformLogo,
-                                AppearanceKeys.ShowLinkPreview,
-                                AppearanceKeys.CompatLinkPreview,
-                            )
-                        },
-                    )
-                },
-            ) {
-                SwitchSettingsItem(
-                    title = stringResource(id = R.string.settings_appearance_absolute_timestamp),
-                    description = stringResource(id = R.string.settings_appearance_absolute_timestamp_description),
-                    checked = timelineAppearance.absoluteTimestamp,
-                    onCheckedChange = {
-                        onAppearancePatchChange(
-                            appearancePatch.set(
-                                AppearanceKeys.AbsoluteTimestamp,
-                                it,
-                            ),
-                        )
-                    },
-                    shapes = ListItemDefaults.first(),
-                )
-                SwitchSettingsItem(
-                    title = stringResource(id = R.string.settings_appearance_show_platform_logo),
-                    description = stringResource(id = R.string.settings_appearance_show_platform_logo_description),
-                    checked = timelineAppearance.showPlatformLogo,
-                    onCheckedChange = {
-                        onAppearancePatchChange(
-                            appearancePatch.set(
-                                AppearanceKeys.ShowPlatformLogo,
-                                it,
-                            ),
-                        )
-                    },
-                    shapes = ListItemDefaults.item(),
-                )
-                SwitchSettingsItem(
-                    title = stringResource(id = R.string.settings_appearance_show_link_previews),
-                    description = stringResource(id = R.string.settings_appearance_show_link_previews_description),
-                    checked = timelineAppearance.showLinkPreview,
-                    onCheckedChange = {
-                        onAppearancePatchChange(
-                            appearancePatch.set(
-                                AppearanceKeys.ShowLinkPreview,
-                                it,
-                            ),
-                        )
-                    },
-                    shapes = if (timelineAppearance.showLinkPreview) ListItemDefaults.item() else ListItemDefaults.last(),
-                )
-                AnimatedVisibility(timelineAppearance.showLinkPreview) {
                     SwitchSettingsItem(
-                        title = stringResource(id = R.string.settings_appearance_compat_link_previews),
-                        description = stringResource(id = R.string.settings_appearance_compat_link_previews_description),
-                        checked = timelineAppearance.compatLinkPreview,
+                        title = stringResource(id = R.string.settings_appearance_full_width_post),
+                        description = stringResource(id = R.string.settings_appearance_full_width_post_description),
+                        checked = timelineAppearance.fullWidthPost,
                         onCheckedChange = {
                             onAppearancePatchChange(
                                 appearancePatch.set(
-                                    AppearanceKeys.CompatLinkPreview,
+                                    AppearanceKeys.FullWidthPost,
                                     it,
                                 ),
                             )
                         },
-                        shapes = ListItemDefaults.last(),
+                        shapes = ListItemDefaults.item(),
                     )
-                }
-            }
-
-            AppearanceExpander(
-                title = stringResource(id = R.string.settings_appearance_media_group_title),
-                shapes = ListItemDefaults.item(),
-                overridesEnabled = mediaOverridesEnabled,
-                onOverridesEnabledChange = {
-                    onAppearancePatchChange(
-                        if (it) {
-                            appearancePatch
-                                .set(AppearanceKeys.ShowMedia, timelineAppearance.showMedia)
-                                .set(
-                                    AppearanceKeys.ShowSensitiveContent,
-                                    timelineAppearance.showSensitiveContent,
-                                ).set(
-                                    AppearanceKeys.ExpandMediaSize,
-                                    timelineAppearance.expandMediaSize,
-                                ).set(AppearanceKeys.VideoAutoplay, timelineAppearance.videoAutoplay)
-                        } else {
-                            appearancePatch.clearAll(
-                                AppearanceKeys.ShowMedia,
-                                AppearanceKeys.ShowSensitiveContent,
-                                AppearanceKeys.ExpandMediaSize,
-                                AppearanceKeys.VideoAutoplay,
+                    SingleChoiceSettingsItem(
+                        headline = { Text(text = stringResource(id = R.string.settings_appearance_post_action_style)) },
+                        supporting = { Text(text = stringResource(id = R.string.settings_appearance_post_action_style_description)) },
+                        items =
+                            persistentMapOf(
+                                PostActionStyle.Hidden to stringResource(id = R.string.settings_appearance_post_action_style_hidden),
+                                PostActionStyle.LeftAligned to
+                                    stringResource(id = R.string.settings_appearance_post_action_style_left_aligned),
+                                PostActionStyle.RightAligned to
+                                    stringResource(id = R.string.settings_appearance_post_action_style_right_aligned),
+                                PostActionStyle.Stretch to stringResource(id = R.string.settings_appearance_post_action_style_stretch),
+                            ),
+                        selected = timelineAppearance.postActionStyle,
+                        onSelected = {
+                            onAppearancePatchChange(
+                                appearancePatch.set(
+                                    AppearanceKeys.PostActionStyle,
+                                    it,
+                                ),
                             )
                         },
+                        shapes =
+                            if (timelineAppearance.postActionStyle ==
+                                PostActionStyle.Hidden
+                            ) {
+                                ListItemDefaults.last()
+                            } else {
+                                ListItemDefaults.item()
+                            },
                     )
-                },
-            ) {
-                SwitchSettingsItem(
-                    title = stringResource(id = R.string.settings_appearance_show_media),
-                    description = stringResource(id = R.string.settings_appearance_show_media_description),
-                    checked = timelineAppearance.showMedia,
-                    onCheckedChange = {
-                        onAppearancePatchChange(
-                            appearancePatch.set(
-                                AppearanceKeys.ShowMedia,
-                                it,
-                            ),
-                        )
-                    },
-                    shapes = if (timelineAppearance.showMedia) ListItemDefaults.first() else ListItemDefaults.single(),
-                )
-                AnimatedVisibility(timelineAppearance.showMedia) {
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
-                    ) {
+                    AnimatedVisibility(timelineAppearance.postActionStyle != PostActionStyle.Hidden) {
                         SwitchSettingsItem(
-                            title = stringResource(id = R.string.settings_appearance_show_cw_img),
-                            description = stringResource(id = R.string.settings_appearance_show_cw_img_description),
-                            checked = timelineAppearance.showSensitiveContent,
+                            title = stringResource(id = R.string.settings_appearance_show_numbers),
+                            description = stringResource(id = R.string.settings_appearance_show_numbers_description),
+                            checked = timelineAppearance.showNumbers,
                             onCheckedChange = {
                                 onAppearancePatchChange(
                                     appearancePatch.set(
-                                        AppearanceKeys.ShowSensitiveContent,
-                                        it,
-                                    ),
-                                )
-                            },
-                            shapes = ListItemDefaults.item(),
-                        )
-                        SwitchSettingsItem(
-                            title = stringResource(id = R.string.settings_appearance_expand_media),
-                            description = stringResource(id = R.string.settings_appearance_expand_media_description),
-                            checked = timelineAppearance.expandMediaSize,
-                            onCheckedChange = {
-                                onAppearancePatchChange(
-                                    appearancePatch.set(
-                                        AppearanceKeys.ExpandMediaSize,
-                                        it,
-                                    ),
-                                )
-                            },
-                            shapes = ListItemDefaults.item(),
-                        )
-                        SingleChoiceSettingsItem(
-                            headline = { Text(text = stringResource(id = R.string.settings_appearance_video_autoplay)) },
-                            supporting = { Text(text = stringResource(id = R.string.settings_appearance_video_autoplay_description)) },
-                            items =
-                                persistentMapOf(
-                                    VideoAutoplay.WIFI to stringResource(id = R.string.settings_appearance_video_autoplay_wifi),
-                                    VideoAutoplay.ALWAYS to stringResource(id = R.string.settings_appearance_video_autoplay_always),
-                                    VideoAutoplay.NEVER to stringResource(id = R.string.settings_appearance_video_autoplay_never),
-                                ),
-                            selected = timelineAppearance.videoAutoplay,
-                            onSelected = {
-                                onAppearancePatchChange(
-                                    appearancePatch.set(
-                                        AppearanceKeys.VideoAutoplay,
+                                        AppearanceKeys.ShowNumbers,
                                         it,
                                     ),
                                 )
@@ -438,44 +264,233 @@ internal fun TimelinePresentationEditor(
                         )
                     }
                 }
-            }
 
-            AppearanceExpander(
-                title = stringResource(id = R.string.settings_appearance_theme_group_title),
-                shapes = ListItemDefaults.last(),
-                overridesEnabled = themeOverridesEnabled,
-                onOverridesEnabledChange = {
-                    onAppearancePatchChange(
-                        if (it) {
-                            appearancePatch.set(
-                                AppearanceKeys.AvatarShape,
-                                timelineAppearance.avatarShape,
-                            )
-                        } else {
-                            appearancePatch.clear(AppearanceKeys.AvatarShape)
-                        },
-                    )
-                },
-            ) {
-                SingleChoiceSettingsItem(
-                    headline = { Text(text = stringResource(id = R.string.settings_appearance_avatar_shape)) },
-                    supporting = { Text(text = stringResource(id = R.string.settings_appearance_avatar_shape_description)) },
-                    items =
-                        persistentMapOf(
-                            AvatarShape.CIRCLE to stringResource(id = R.string.settings_appearance_avatar_shape_round),
-                            AvatarShape.SQUARE to stringResource(id = R.string.settings_appearance_avatar_shape_square),
-                        ),
-                    selected = timelineAppearance.avatarShape,
-                    onSelected = {
+                AppearanceExpander(
+                    title = stringResource(id = R.string.settings_appearance_display_group_title),
+                    shapes = ListItemDefaults.item(),
+                    overridesEnabled = displayOverridesEnabled,
+                    onOverridesEnabledChange = {
                         onAppearancePatchChange(
-                            appearancePatch.set(
-                                AppearanceKeys.AvatarShape,
-                                it,
-                            ),
+                            if (it) {
+                                appearancePatch
+                                    .set(
+                                        AppearanceKeys.AbsoluteTimestamp,
+                                        timelineAppearance.absoluteTimestamp,
+                                    ).set(
+                                        AppearanceKeys.ShowPlatformLogo,
+                                        timelineAppearance.showPlatformLogo,
+                                    ).set(
+                                        AppearanceKeys.ShowLinkPreview,
+                                        timelineAppearance.showLinkPreview,
+                                    ).set(
+                                        AppearanceKeys.CompatLinkPreview,
+                                        timelineAppearance.compatLinkPreview,
+                                    )
+                            } else {
+                                appearancePatch.clearAll(
+                                    AppearanceKeys.AbsoluteTimestamp,
+                                    AppearanceKeys.ShowPlatformLogo,
+                                    AppearanceKeys.ShowLinkPreview,
+                                    AppearanceKeys.CompatLinkPreview,
+                                )
+                            },
                         )
                     },
-                    shapes = ListItemDefaults.single(),
-                )
+                ) {
+                    SwitchSettingsItem(
+                        title = stringResource(id = R.string.settings_appearance_absolute_timestamp),
+                        description = stringResource(id = R.string.settings_appearance_absolute_timestamp_description),
+                        checked = timelineAppearance.absoluteTimestamp,
+                        onCheckedChange = {
+                            onAppearancePatchChange(
+                                appearancePatch.set(
+                                    AppearanceKeys.AbsoluteTimestamp,
+                                    it,
+                                ),
+                            )
+                        },
+                        shapes = ListItemDefaults.first(),
+                    )
+                    SwitchSettingsItem(
+                        title = stringResource(id = R.string.settings_appearance_show_platform_logo),
+                        description = stringResource(id = R.string.settings_appearance_show_platform_logo_description),
+                        checked = timelineAppearance.showPlatformLogo,
+                        onCheckedChange = {
+                            onAppearancePatchChange(
+                                appearancePatch.set(
+                                    AppearanceKeys.ShowPlatformLogo,
+                                    it,
+                                ),
+                            )
+                        },
+                        shapes = ListItemDefaults.item(),
+                    )
+                    SwitchSettingsItem(
+                        title = stringResource(id = R.string.settings_appearance_show_link_previews),
+                        description = stringResource(id = R.string.settings_appearance_show_link_previews_description),
+                        checked = timelineAppearance.showLinkPreview,
+                        onCheckedChange = {
+                            onAppearancePatchChange(
+                                appearancePatch.set(
+                                    AppearanceKeys.ShowLinkPreview,
+                                    it,
+                                ),
+                            )
+                        },
+                        shapes = if (timelineAppearance.showLinkPreview) ListItemDefaults.item() else ListItemDefaults.last(),
+                    )
+                    AnimatedVisibility(timelineAppearance.showLinkPreview) {
+                        SwitchSettingsItem(
+                            title = stringResource(id = R.string.settings_appearance_compat_link_previews),
+                            description = stringResource(id = R.string.settings_appearance_compat_link_previews_description),
+                            checked = timelineAppearance.compatLinkPreview,
+                            onCheckedChange = {
+                                onAppearancePatchChange(
+                                    appearancePatch.set(
+                                        AppearanceKeys.CompatLinkPreview,
+                                        it,
+                                    ),
+                                )
+                            },
+                            shapes = ListItemDefaults.last(),
+                        )
+                    }
+                }
+
+                AppearanceExpander(
+                    title = stringResource(id = R.string.settings_appearance_media_group_title),
+                    shapes = ListItemDefaults.item(),
+                    overridesEnabled = mediaOverridesEnabled,
+                    onOverridesEnabledChange = {
+                        onAppearancePatchChange(
+                            if (it) {
+                                appearancePatch
+                                    .set(AppearanceKeys.ShowMedia, timelineAppearance.showMedia)
+                                    .set(
+                                        AppearanceKeys.ShowSensitiveContent,
+                                        timelineAppearance.showSensitiveContent,
+                                    ).set(
+                                        AppearanceKeys.ExpandMediaSize,
+                                        timelineAppearance.expandMediaSize,
+                                    ).set(AppearanceKeys.VideoAutoplay, timelineAppearance.videoAutoplay)
+                            } else {
+                                appearancePatch.clearAll(
+                                    AppearanceKeys.ShowMedia,
+                                    AppearanceKeys.ShowSensitiveContent,
+                                    AppearanceKeys.ExpandMediaSize,
+                                    AppearanceKeys.VideoAutoplay,
+                                )
+                            },
+                        )
+                    },
+                ) {
+                    SwitchSettingsItem(
+                        title = stringResource(id = R.string.settings_appearance_show_media),
+                        description = stringResource(id = R.string.settings_appearance_show_media_description),
+                        checked = timelineAppearance.showMedia,
+                        onCheckedChange = {
+                            onAppearancePatchChange(
+                                appearancePatch.set(
+                                    AppearanceKeys.ShowMedia,
+                                    it,
+                                ),
+                            )
+                        },
+                        shapes = if (timelineAppearance.showMedia) ListItemDefaults.first() else ListItemDefaults.single(),
+                    )
+                    AnimatedVisibility(timelineAppearance.showMedia) {
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
+                        ) {
+                            SwitchSettingsItem(
+                                title = stringResource(id = R.string.settings_appearance_show_cw_img),
+                                description = stringResource(id = R.string.settings_appearance_show_cw_img_description),
+                                checked = timelineAppearance.showSensitiveContent,
+                                onCheckedChange = {
+                                    onAppearancePatchChange(
+                                        appearancePatch.set(
+                                            AppearanceKeys.ShowSensitiveContent,
+                                            it,
+                                        ),
+                                    )
+                                },
+                                shapes = ListItemDefaults.item(),
+                            )
+                            SwitchSettingsItem(
+                                title = stringResource(id = R.string.settings_appearance_expand_media),
+                                description = stringResource(id = R.string.settings_appearance_expand_media_description),
+                                checked = timelineAppearance.expandMediaSize,
+                                onCheckedChange = {
+                                    onAppearancePatchChange(
+                                        appearancePatch.set(
+                                            AppearanceKeys.ExpandMediaSize,
+                                            it,
+                                        ),
+                                    )
+                                },
+                                shapes = ListItemDefaults.item(),
+                            )
+                            SingleChoiceSettingsItem(
+                                headline = { Text(text = stringResource(id = R.string.settings_appearance_video_autoplay)) },
+                                supporting = { Text(text = stringResource(id = R.string.settings_appearance_video_autoplay_description)) },
+                                items =
+                                    persistentMapOf(
+                                        VideoAutoplay.WIFI to stringResource(id = R.string.settings_appearance_video_autoplay_wifi),
+                                        VideoAutoplay.ALWAYS to stringResource(id = R.string.settings_appearance_video_autoplay_always),
+                                        VideoAutoplay.NEVER to stringResource(id = R.string.settings_appearance_video_autoplay_never),
+                                    ),
+                                selected = timelineAppearance.videoAutoplay,
+                                onSelected = {
+                                    onAppearancePatchChange(
+                                        appearancePatch.set(
+                                            AppearanceKeys.VideoAutoplay,
+                                            it,
+                                        ),
+                                    )
+                                },
+                                shapes = ListItemDefaults.last(),
+                            )
+                        }
+                    }
+                }
+
+                AppearanceExpander(
+                    title = stringResource(id = R.string.settings_appearance_theme_group_title),
+                    shapes = ListItemDefaults.last(),
+                    overridesEnabled = themeOverridesEnabled,
+                    onOverridesEnabledChange = {
+                        onAppearancePatchChange(
+                            if (it) {
+                                appearancePatch.set(
+                                    AppearanceKeys.AvatarShape,
+                                    timelineAppearance.avatarShape,
+                                )
+                            } else {
+                                appearancePatch.clear(AppearanceKeys.AvatarShape)
+                            },
+                        )
+                    },
+                ) {
+                    SingleChoiceSettingsItem(
+                        headline = { Text(text = stringResource(id = R.string.settings_appearance_avatar_shape)) },
+                        supporting = { Text(text = stringResource(id = R.string.settings_appearance_avatar_shape_description)) },
+                        items =
+                            persistentMapOf(
+                                AvatarShape.CIRCLE to stringResource(id = R.string.settings_appearance_avatar_shape_round),
+                                AvatarShape.SQUARE to stringResource(id = R.string.settings_appearance_avatar_shape_square),
+                            ),
+                        selected = timelineAppearance.avatarShape,
+                        onSelected = {
+                            onAppearancePatchChange(
+                                appearancePatch.set(
+                                    AppearanceKeys.AvatarShape,
+                                    it,
+                                ),
+                            )
+                        },
+                        shapes = ListItemDefaults.single(),
+                    )
+                }
             }
         }
     }

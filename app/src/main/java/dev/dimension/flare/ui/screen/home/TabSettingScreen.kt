@@ -1,9 +1,9 @@
 package dev.dimension.flare.ui.screen.home
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -14,8 +14,8 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.SegmentedListItem
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -38,6 +38,7 @@ import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Plus
 import dev.dimension.flare.R
 import dev.dimension.flare.data.model.tab.GroupTimelineTabItemV2
+import dev.dimension.flare.data.model.tab.TimelineMergePolicy
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.data.model.tab.isSystemHomeMixedTimeline
 import dev.dimension.flare.data.model.tab.withSystemHomeMixedTimelineEnabled
@@ -45,7 +46,6 @@ import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareLargeFlexibleTopAppBar
 import dev.dimension.flare.ui.component.FlareScaffold
-import dev.dimension.flare.ui.component.listCard
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.HomeTabSettingsPresenter
 import dev.dimension.flare.ui.presenter.invoke
@@ -53,8 +53,11 @@ import dev.dimension.flare.ui.screen.settings.AllTabsPresenter
 import dev.dimension.flare.ui.screen.settings.EditTabDialog
 import dev.dimension.flare.ui.screen.settings.TabAddBottomSheet
 import dev.dimension.flare.ui.screen.settings.TabCustomItem
+import dev.dimension.flare.ui.theme.first
+import dev.dimension.flare.ui.theme.last
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import dev.dimension.flare.ui.theme.segmentedShapes2
+import dev.dimension.flare.ui.theme.single
 import kotlinx.collections.immutable.toImmutableList
 import moe.tlaster.precompose.molecule.producePresenter
 import sh.calvin.reorderable.rememberReorderableLazyListState
@@ -154,29 +157,45 @@ internal fun TabSettingScreen(
         ) {
             if (state.canShowMixedTimelineSetting) {
                 item("header") {
-                    ListItem(
-                        headlineContent = {
-                            Text(stringResource(R.string.tab_settings_mixed_timeline))
-                        },
-                        trailingContent = {
-                            Switch(
-                                checked = state.enableMixedTimeline,
-                                onCheckedChange = {
-                                    state.setEnableMixedTimeline(it)
-                                },
-                            )
-                        },
-                        supportingContent = {
-                            Text(stringResource(R.string.tab_settings_mixed_timeline_desc))
-                        },
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
                         modifier =
                             Modifier
-                                .animateItem()
-                                .listCard()
-                                .clickable {
-                                    state.setEnableMixedTimeline(!state.enableMixedTimeline)
+                                .animateItem(),
+                    ) {
+                        SegmentedListItem(
+                            onClick = {
+                                state.setEnableMixedTimeline(!state.enableMixedTimeline)
+                            },
+                            shapes =
+                                if (state.enableMixedTimeline) {
+                                    ListItemDefaults.first()
+                                } else {
+                                    ListItemDefaults.single()
                                 },
-                    )
+                            content = {
+                                Text(stringResource(R.string.tab_settings_mixed_timeline))
+                            },
+                            trailingContent = {
+                                Switch(
+                                    checked = state.enableMixedTimeline,
+                                    onCheckedChange = {
+                                        state.setEnableMixedTimeline(it)
+                                    },
+                                )
+                            },
+                            supportingContent = {
+                                Text(stringResource(R.string.tab_settings_mixed_timeline_desc))
+                            },
+                        )
+                        if (state.enableMixedTimeline) {
+                            MergePolicySettingsItem(
+                                selected = state.systemHomeMergePolicy,
+                                onSelected = state::setSystemHomeMergePolicy,
+                                shapes = ListItemDefaults.last(),
+                            )
+                        }
+                    }
                 }
             }
             item {
@@ -248,9 +267,26 @@ private fun presenter() =
             val selectedEditTab = selectedEditTab
             val enableMixedTimeline = cacheTabs.any { it.isSystemHomeMixedTimeline }
             val canShowMixedTimelineSetting = cacheTabs.filterNot { it.isSystemHomeMixedTimeline }.size > 1
+            val systemHomeMergePolicy =
+                cacheTabs
+                    .filterIsInstance<GroupTimelineTabItemV2>()
+                    .firstOrNull { it.isSystemHomeMixedTimeline }
+                    ?.mergePolicy
+                    ?: TimelineMergePolicy.TimePerPage
 
             fun setEnableMixedTimeline(enable: Boolean) {
                 replaceTabs(cacheTabs.toList().withSystemHomeMixedTimelineEnabled(enable))
+            }
+
+            fun setSystemHomeMergePolicy(mergePolicy: TimelineMergePolicy) {
+                replaceTabs(
+                    cacheTabs
+                        .toList()
+                        .withSystemHomeMixedTimelineEnabled(
+                            enabled = true,
+                            mergePolicy = mergePolicy,
+                        ),
+                )
             }
 
             fun setEditTab(tab: TimelineTabItemV2?) {

@@ -46,6 +46,8 @@ public sealed interface TimelineTabItemV2 {
     // for iOS and Compose call sites
     public val key: String get() = id
 
+    public val presenterId: String
+
     public fun createPresenter(): TimelinePresenter
 
     public fun withPresentationOverrides(
@@ -70,6 +72,8 @@ public class SourceTimelineTabItemV2 private constructor(
     private val presenterFactory: () -> TimelinePresenter,
 ) : TimelineTabItemV2 {
     override fun createPresenter(): TimelinePresenter = presenterFactory()
+
+    override val presenterId: String = id
 
     override fun withPresentationOverrides(
         title: String,
@@ -166,6 +170,13 @@ public class GroupTimelineTabItemV2 internal constructor(
     override val appearancePatch: AppearancePatch?,
     override val enabled: Boolean,
 ) : TimelineTabItemV2 {
+    override val presenterId: String
+        get() =
+            buildString {
+                append(id)
+                append(mergePolicy.name)
+            }
+
     override fun createPresenter(): TimelinePresenter =
         when (source) {
             GroupSource.SystemHome -> {
@@ -213,7 +224,10 @@ public class GroupTimelineTabItemV2 internal constructor(
 public val TimelineTabItemV2.isSystemHomeMixedTimeline: Boolean
     get() = this is GroupTimelineTabItemV2 && source == GroupSource.SystemHome
 
-public fun List<TimelineTabItemV2>.withSystemHomeMixedTimelineEnabled(enabled: Boolean): List<TimelineTabItemV2> {
+public fun List<TimelineTabItemV2>.withSystemHomeMixedTimelineEnabled(
+    enabled: Boolean,
+    mergePolicy: TimelineMergePolicy? = null,
+): List<TimelineTabItemV2> {
     val existingGroup = filterIsInstance<GroupTimelineTabItemV2>().firstOrNull { it.source == GroupSource.SystemHome }
     val tabsWithoutSystemGroup = filterNot { it.isSystemHomeMixedTimeline }
     if (!enabled || tabsWithoutSystemGroup.size < 2) {
@@ -224,7 +238,7 @@ public fun List<TimelineTabItemV2>.withSystemHomeMixedTimelineEnabled(enabled: B
         GroupTimelineTabItemV2(
             id = SYSTEM_HOME_MIXED_TIMELINE_ID,
             children = tabsWithoutSystemGroup,
-            mergePolicy = existingGroup?.mergePolicy ?: TimelineMergePolicy.TimePerPage,
+            mergePolicy = mergePolicy ?: existingGroup?.mergePolicy ?: TimelineMergePolicy.TimePerPage,
             source = GroupSource.SystemHome,
             presentation = existingGroup?.presentation ?: TimelinePresentation(),
             title = existingGroup?.title ?: UiStrings.MixedTimeline.asText(),

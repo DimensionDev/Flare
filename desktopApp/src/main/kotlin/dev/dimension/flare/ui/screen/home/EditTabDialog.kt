@@ -40,6 +40,7 @@ internal fun EditTabDialog(
     tabItem: TimelineTabItemV2,
     onDismissRequest: () -> Unit,
     onConfirm: (TimelineTabItemV2) -> Unit,
+    titleAndIconOnly: Boolean = false,
 ) {
     val appearance = LocalTimelineAppearance.current
     val state by producePresenter(key = "EditTabSheet_$tabItem") {
@@ -86,7 +87,7 @@ internal fun EditTabDialog(
                     showIconPicker = state.showIconPicker,
                     onShowIconPickerChange = state::setShowIconPicker,
                     withAvatar = state.withAvatar,
-                    canUseAvatar = state.canUseAvatar,
+                    canUseAvatar = !titleAndIconOnly && state.canUseAvatar,
                     onWithAvatarChange = state::setWithAvatar,
                     enabled = state.enabled,
                     onEnabledChange = state::setEnabled,
@@ -94,7 +95,8 @@ internal fun EditTabDialog(
                     appearancePatch = state.appearancePatch,
                     onAppearancePatchChange = state::setAppearancePatch,
                     onIconChange = state::setIcon,
-                    showEnabled = !tabItem.isSystemHomeMixedTimeline,
+                    showEnabled = !titleAndIconOnly && !tabItem.isSystemHomeMixedTimeline,
+                    showAppearanceOverrides = !titleAndIconOnly,
                     modifier = Modifier.fillMaxWidth(),
                     header = {
                         Text(text = stringResource(Res.string.edit_tab_name))

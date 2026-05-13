@@ -390,6 +390,11 @@
     <string name="tab_settings_group_empty">No tabs in this group</string>
     <string name="tab_settings_group_name_placeholder">Group Name</string>
     <string name="tab_settings_group_default_name">Group</string>
+    <string name="tab_settings_merge_policy">Merge policy</string>
+    <string name="tab_settings_merge_policy_desc">Choose how items from each timeline are combined.</string>
+    <string name="tab_settings_merge_policy_time">Chronological</string>
+    <string name="tab_settings_merge_policy_time_per_page">Page by page</string>
+    <string name="tab_settings_merge_policy_staggered">Interleaved</string>
 
     <string name="edit_tab_title">Edit tab</string>
     <string name="edit_tab_name">Name</string>

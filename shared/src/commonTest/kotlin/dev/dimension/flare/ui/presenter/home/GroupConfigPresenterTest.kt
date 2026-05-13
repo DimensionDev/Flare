@@ -7,6 +7,7 @@ import dev.dimension.flare.data.model.TabMetaData
 import dev.dimension.flare.data.model.TitleType
 import dev.dimension.flare.data.model.tab.GroupTimelineTabItemV2
 import dev.dimension.flare.data.model.tab.TabSettingsV2
+import dev.dimension.flare.data.model.tab.TimelineMergePolicy
 import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.model.tab.toTimelineSlotOrNull
 import dev.dimension.flare.model.AccountType
@@ -60,6 +61,7 @@ class GroupConfigPresenterTest {
                     appearancePatch = null,
                     enabled = true,
                     tabs = listOf(homeTab, homeTab, listTab),
+                    mergePolicy = TimelineMergePolicy.Staggered,
                     defaultGroupName = "Group",
                     timelineResolver = timelineResolver,
                 )
@@ -71,5 +73,6 @@ class GroupConfigPresenterTest {
             listOf(homeTab.id, listTab.id),
             updatedGroup.children.map { it.id },
         )
+        assertEquals(TimelineMergePolicy.Staggered, updatedGroup.mergePolicy)
     }
 }

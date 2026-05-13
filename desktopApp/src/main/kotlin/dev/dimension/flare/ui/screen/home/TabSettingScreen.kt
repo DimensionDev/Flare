@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.screen.home
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -32,6 +33,7 @@ import compose.icons.fontawesomeicons.solid.Trash
 import dev.dimension.flare.LocalWindowPadding
 import dev.dimension.flare.Res
 import dev.dimension.flare.data.model.tab.GroupTimelineTabItemV2
+import dev.dimension.flare.data.model.tab.TimelineMergePolicy
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.data.model.tab.isSystemHomeMixedTimeline
 import dev.dimension.flare.data.model.tab.withSystemHomeMixedTimelineEnabled
@@ -99,31 +101,41 @@ internal fun TabSettingScreen(
         ) {
             if (state.canShowMixedTimelineSetting) {
                 item("header") {
-                    CardExpanderItem(
-                        heading = {
-                            Text(stringResource(Res.string.tab_settings_mixed_timeline))
-                        },
-                        trailing = {
-                            Switcher(
-                                checked = state.enableMixedTimeline,
-                                onCheckStateChange = {
-                                    state.setEnableMixedTimeline(it)
-                                },
-                            )
-                        },
-                        icon = {
-                            FAIcon(
-                                FontAwesomeIcons.Solid.Rss,
-                                contentDescription = null,
-                            )
-                        },
-                        caption = {
-                            Text(stringResource(Res.string.tab_settings_mixed_timeline_desc))
-                        },
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(2.dp),
                         modifier =
                             Modifier
                                 .animateItem(),
-                    )
+                    ) {
+                        CardExpanderItem(
+                            heading = {
+                                Text(stringResource(Res.string.tab_settings_mixed_timeline))
+                            },
+                            trailing = {
+                                Switcher(
+                                    checked = state.enableMixedTimeline,
+                                    onCheckStateChange = {
+                                        state.setEnableMixedTimeline(it)
+                                    },
+                                )
+                            },
+                            icon = {
+                                FAIcon(
+                                    FontAwesomeIcons.Solid.Rss,
+                                    contentDescription = null,
+                                )
+                            },
+                            caption = {
+                                Text(stringResource(Res.string.tab_settings_mixed_timeline_desc))
+                            },
+                        )
+                        if (state.enableMixedTimeline) {
+                            MergePolicySettingsItem(
+                                selected = state.systemHomeMergePolicy,
+                                onSelected = state::setSystemHomeMergePolicy,
+                            )
+                        }
+                    }
                 }
                 item {
                     Spacer(modifier = Modifier.height(12.dp))
@@ -299,9 +311,26 @@ private fun presenter() =
             val selectedEditTab = selectedEditTab
             val enableMixedTimeline = cacheTabs.any { it.isSystemHomeMixedTimeline }
             val canShowMixedTimelineSetting = cacheTabs.filterNot { it.isSystemHomeMixedTimeline }.size > 1
+            val systemHomeMergePolicy =
+                cacheTabs
+                    .filterIsInstance<GroupTimelineTabItemV2>()
+                    .firstOrNull { it.isSystemHomeMixedTimeline }
+                    ?.mergePolicy
+                    ?: TimelineMergePolicy.TimePerPage
 
             fun setEnableMixedTimeline(enable: Boolean) {
                 replaceTabs(cacheTabs.toList().withSystemHomeMixedTimelineEnabled(enable))
+            }
+
+            fun setSystemHomeMergePolicy(mergePolicy: TimelineMergePolicy) {
+                replaceTabs(
+                    cacheTabs
+                        .toList()
+                        .withSystemHomeMixedTimelineEnabled(
+                            enabled = true,
+                            mergePolicy = mergePolicy,
+                        ),
+                )
             }
 
             fun setEditTab(tab: TimelineTabItemV2?) {

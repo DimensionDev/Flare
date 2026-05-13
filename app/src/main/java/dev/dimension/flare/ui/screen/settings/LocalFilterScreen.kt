@@ -84,9 +84,12 @@ internal fun LocalFilterScreen(
                         content = {
                             Text(text = item.keyword)
                         },
-//                        supportingContent = {
-//                            Text(text = item.humanizedExpiredAt ?: stringResource(id = R.string.local_filter_no_expiration))
-//                        },
+                        supportingContent =
+                            item.isRegex.takeIf { it }?.let {
+                                {
+                                    Text(text = stringResource(id = R.string.local_filter_regex))
+                                }
+                            },
                         trailingContent = {
                             IconButton(onClick = {
                                 edit(item.keyword)

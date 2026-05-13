@@ -10,4 +10,5 @@ public data class UiKeywordFilter(
     val forNotification: Boolean,
     val forSearch: Boolean,
     val expiredAt: Instant?,
+    val isRegex: Boolean = false,
 )

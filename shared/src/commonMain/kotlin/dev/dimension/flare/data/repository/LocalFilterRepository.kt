@@ -21,16 +21,7 @@ internal class LocalFilterRepository(
             .map {
                 it
                     .map {
-                        UiKeywordFilter(
-                            keyword = it.keyword,
-                            forTimeline = it.for_timeline == 1L,
-                            forNotification = it.for_notification == 1L,
-                            forSearch = it.for_search == 1L,
-                            expiredAt =
-                                it.expired_at
-                                    .takeIf { it > 0L }
-                                    ?.let { Instant.fromEpochMilliseconds(it) },
-                        )
+                        it.toUiKeywordFilter()
                     }.toImmutableList()
             }
 
@@ -46,9 +37,7 @@ internal class LocalFilterRepository(
             forNotification = if (forNotification) 1L else 0L,
             forSearch = if (forSearch) 1L else 0L,
         ).map {
-            it.map {
-                it.keyword
-            }
+            it.map(DbKeywordFilter::toKeywordFilterPattern)
         }
 
     fun add(
@@ -57,6 +46,7 @@ internal class LocalFilterRepository(
         forNotification: Boolean,
         forSearch: Boolean,
         expiredAt: Instant?,
+        isRegex: Boolean,
     ) = coroutineScope.launch {
         database.keywordFilterDao().insert(
             DbKeywordFilter(
@@ -65,6 +55,7 @@ internal class LocalFilterRepository(
                 for_notification = if (forNotification) 1L else 0L,
                 for_search = if (forSearch) 1L else 0L,
                 expired_at = expiredAt?.toEpochMilliseconds() ?: 0L,
+                is_regex = if (isRegex) 1L else 0L,
             ),
         )
     }
@@ -75,12 +66,14 @@ internal class LocalFilterRepository(
         forNotification: Boolean,
         forSearch: Boolean,
         expiredAt: Instant?,
+        isRegex: Boolean,
     ) = coroutineScope.launch {
         database.keywordFilterDao().update(
             forTimeline = if (forTimeline) 1L else 0L,
             forNotification = if (forNotification) 1L else 0L,
             forSearch = if (forSearch) 1L else 0L,
             expiredAt = expiredAt?.toEpochMilliseconds() ?: 0L,
+            isRegex = if (isRegex) 1L else 0L,
             keyword = keyword,
         )
     }
@@ -95,3 +88,38 @@ internal class LocalFilterRepository(
             database.keywordFilterDao().deleteAll()
         }
 }
+
+internal data class KeywordFilterPattern(
+    val keyword: String,
+    val isRegex: Boolean,
+    val regex: Regex? = null,
+)
+
+private fun DbKeywordFilter.toUiKeywordFilter() =
+    UiKeywordFilter(
+        keyword = keyword,
+        forTimeline = for_timeline == 1L,
+        forNotification = for_notification == 1L,
+        forSearch = for_search == 1L,
+        expiredAt =
+            expired_at
+                .takeIf { it > 0L }
+                ?.let { Instant.fromEpochMilliseconds(it) },
+        isRegex = is_regex == 1L,
+    )
+
+private fun DbKeywordFilter.toKeywordFilterPattern(): KeywordFilterPattern {
+    val isRegex = is_regex == 1L
+    return KeywordFilterPattern(
+        keyword = keyword,
+        isRegex = isRegex,
+        regex = if (isRegex) keyword.toRegexOrNull() else null,
+    )
+}
+
+private fun String.toRegexOrNull(): Regex? =
+    try {
+        Regex(this, setOf(RegexOption.IGNORE_CASE))
+    } catch (_: IllegalArgumentException) {
+        null
+    }

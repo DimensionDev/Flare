@@ -329,6 +329,7 @@
     <string name="local_filter_for_timeline">Filter in timeline</string>
     <string name="local_filter_for_notification">Filter in notification</string>
     <string name="local_filter_for_search">Filter in search</string>
+    <string name="local_filter_regex">Use regular expression</string>
     <string name="local_filter_delete">Delete Filter</string>
 
     <string name="delete">Delete</string>

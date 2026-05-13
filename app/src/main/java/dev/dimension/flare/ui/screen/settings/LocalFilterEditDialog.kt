@@ -147,7 +147,7 @@ internal fun LocalFilterEditDialog(
                     onClick = {
                         state.setForSearch(!state.forSearch)
                     },
-                    shapes = ListItemDefaults.last(),
+                    shapes = ListItemDefaults.item(),
                     content = {
                         Text(text = stringResource(id = R.string.local_filter_for_search))
                     },
@@ -155,6 +155,21 @@ internal fun LocalFilterEditDialog(
                         Switch(
                             checked = state.forSearch,
                             onCheckedChange = state::setForSearch,
+                        )
+                    },
+                )
+                SegmentedListItem(
+                    onClick = {
+                        state.setIsRegex(!state.isRegex)
+                    },
+                    shapes = ListItemDefaults.last(),
+                    content = {
+                        Text(text = stringResource(id = R.string.local_filter_regex))
+                    },
+                    trailingContent = {
+                        Switch(
+                            checked = state.isRegex,
+                            onCheckedChange = state::setIsRegex,
                         )
                     },
                 )
@@ -194,6 +209,7 @@ private fun presenter(keyword: String?) =
         var forTimeline by remember { mutableStateOf(true) }
         var forNotification by remember { mutableStateOf(true) }
         var forSearch by remember { mutableStateOf(true) }
+        var isRegex by remember { mutableStateOf(false) }
 //    var expiredAt by remember { mutableStateOf<Instant?>(null) }
         val state =
             remember {
@@ -206,6 +222,7 @@ private fun presenter(keyword: String?) =
                     forTimeline = item.forTimeline
                     forNotification = item.forNotification
                     forSearch = item.forSearch
+                    isRegex = item.isRegex
 //                expiredAt = item.expiredAt
                 }
             }
@@ -216,6 +233,7 @@ private fun presenter(keyword: String?) =
             val forTimeline = forTimeline
             val forNotification = forNotification
             val forSearch = forSearch
+            val isRegex = isRegex
 
             fun setForTimeline(value: Boolean) {
                 forTimeline = value
@@ -229,6 +247,10 @@ private fun presenter(keyword: String?) =
                 forSearch = value
             }
 
+            fun setIsRegex(value: Boolean) {
+                isRegex = value
+            }
+
             fun save() {
                 state.add(
                     item =
@@ -238,6 +260,7 @@ private fun presenter(keyword: String?) =
                             forNotification = forNotification,
                             forSearch = forSearch,
                             expiredAt = null,
+                            isRegex = isRegex,
                         ),
                 )
             }

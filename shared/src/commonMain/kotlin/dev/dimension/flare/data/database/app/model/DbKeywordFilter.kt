@@ -13,4 +13,5 @@ internal data class DbKeywordFilter(
     val for_notification: Long,
     val for_search: Long,
     val expired_at: Long,
+    val is_regex: Long = 0,
 )

@@ -31,6 +31,7 @@ public class LocalFilterPresenter :
                     forNotification = item.forNotification,
                     forSearch = item.forSearch,
                     expiredAt = item.expiredAt,
+                    isRegex = item.isRegex,
                 )
             }
 
@@ -45,6 +46,7 @@ public class LocalFilterPresenter :
                     forNotification = item.forNotification,
                     forSearch = item.forSearch,
                     expiredAt = item.expiredAt,
+                    isRegex = item.isRegex,
                 )
             }
         }

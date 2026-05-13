@@ -15,6 +15,10 @@ internal data object MastodonPlatformDetector : PlatformDetector {
                 NodeInfoService.fetchNodeInfo(host)
             }.getOrNull()
 
+        if (NodeInfoService.isUnsupportedSoftware(nodeInfo)) {
+            return null
+        }
+
         if (nodeInfo?.equals("mastodon", ignoreCase = true) == true) {
             return NodeData(
                 host = host,

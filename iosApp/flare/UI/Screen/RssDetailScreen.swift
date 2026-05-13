@@ -269,11 +269,14 @@ struct HtmlWebView: UIViewRepresentable {
     let htmlString: String?
     let baseURL: URL?
     let onOpenURL: ((URL) -> Void)?
+    private let heightMessageName = "flareHeight"
     
     var forceColorScheme: ColorScheme? = nil
     
-    class Coordinator: NSObject, WKNavigationDelegate {
+    class Coordinator: NSObject, WKNavigationDelegate, WKScriptMessageHandler {
         var parent: HtmlWebView
+        var renderedHTML: String?
+        var renderedBaseURL: URL?
         init(_ parent: HtmlWebView) { self.parent = parent }
 
         @MainActor
@@ -307,26 +310,49 @@ struct HtmlWebView: UIViewRepresentable {
         }
         
         func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
-            webView.evaluateJavaScript("document.documentElement.scrollHeight") { height, _ in
+            updateHeight(from: webView)
+        }
+        
+        func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+            updateHeight(from: webView)
+        }
+        
+        func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+            guard message.name == parent.heightMessageName else { return }
+            setHeight(message.body)
+        }
+        
+        func updateHeight(from webView: WKWebView) {
+            webView.evaluateJavaScript("""
+                Math.max(
+                  document.body.scrollHeight,
+                  document.body.offsetHeight,
+                  document.documentElement.clientHeight,
+                  document.documentElement.scrollHeight,
+                  document.documentElement.offsetHeight
+                )
+                """) { height, _ in
                 DispatchQueue.main.async {
-                    if let h = height as? CGFloat {
-                        self.parent.dynamicHeight = h
-                    } else if let d = height as? Double {
-                        self.parent.dynamicHeight = CGFloat(d)
-                    }
+                    self.setHeight(height)
                 }
             }
         }
         
-        func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-            webView.evaluateJavaScript("document.documentElement.scrollHeight") { height, _ in
-                DispatchQueue.main.async {
-                    if let h = height as? CGFloat {
-                        self.parent.dynamicHeight = h
-                    } else if let d = height as? Double {
-                        self.parent.dynamicHeight = CGFloat(d)
-                    }
-                }
+        private func setHeight(_ height: Any?) {
+            let newHeight: CGFloat?
+            if let h = height as? CGFloat {
+                newHeight = h
+            } else if let d = height as? Double {
+                newHeight = CGFloat(d)
+            } else if let i = height as? Int {
+                newHeight = CGFloat(i)
+            } else {
+                newHeight = nil
+            }
+            
+            guard let newHeight, newHeight.isFinite, newHeight > 0 else { return }
+            if abs(parent.dynamicHeight - newHeight) > 1 {
+                parent.dynamicHeight = newHeight
             }
         }
     }
@@ -335,6 +361,7 @@ struct HtmlWebView: UIViewRepresentable {
     
     func makeUIView(context: Context) -> WKWebView {
         let config = WKWebViewConfiguration()
+        config.userContentController.add(context.coordinator, name: heightMessageName)
         let webview = WKWebView(frame: .zero, configuration: config)
         webview.navigationDelegate = context.coordinator
         webview.scrollView.bounces = false
@@ -346,19 +373,32 @@ struct HtmlWebView: UIViewRepresentable {
         
         applyStyleOverride(to: webview)
         
-        if let html = htmlString {
-            webview.loadHTMLString(getHtmlData(html: html, scheme: (forceColorScheme ?? colorScheme)),
-                                   baseURL: baseURL)
-        }
+        loadHTMLIfNeeded(in: webview, context: context)
         return webview
     }
     
     func updateUIView(_ uiView: WKWebView, context: Context) {
+        context.coordinator.parent = self
         applyStyleOverride(to: uiView)
-        if let html = htmlString {
-            uiView.loadHTMLString(getHtmlData(html: html, scheme: (forceColorScheme ?? colorScheme)),
-                                  baseURL: baseURL)
+        loadHTMLIfNeeded(in: uiView, context: context)
+    }
+    
+    static func dismantleUIView(_ uiView: WKWebView, coordinator: Coordinator) {
+        uiView.configuration.userContentController.removeScriptMessageHandler(forName: coordinator.parent.heightMessageName)
+    }
+    
+    private func loadHTMLIfNeeded(in webview: WKWebView, context: Context) {
+        guard let html = htmlString else { return }
+        let renderedHTML = getHtmlData(html: html, scheme: (forceColorScheme ?? colorScheme))
+        guard context.coordinator.renderedHTML != renderedHTML ||
+                context.coordinator.renderedBaseURL != baseURL else {
+            return
         }
+        
+        context.coordinator.renderedHTML = renderedHTML
+        context.coordinator.renderedBaseURL = baseURL
+        dynamicHeight = 1
+        webview.loadHTMLString(renderedHTML, baseURL: baseURL)
     }
     
     private func applyStyleOverride(to webview: WKWebView) {
@@ -398,9 +438,27 @@ struct HtmlWebView: UIViewRepresentable {
         
           </style>
           <script>
+            function reportFlareHeight() {
+              window.requestAnimationFrame(function() {
+                const height = Math.max(
+                  document.body.scrollHeight,
+                  document.body.offsetHeight,
+                  document.documentElement.clientHeight,
+                  document.documentElement.scrollHeight,
+                  document.documentElement.offsetHeight
+                );
+                if (height > 0 && window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.\(heightMessageName)) {
+                  window.webkit.messageHandlers.\(heightMessageName).postMessage(height);
+                }
+              });
+            }
+
             function bindFlareImageClicks() {
               const images = document.querySelectorAll('.markdown-body img');
               images.forEach((img) => {
+                img.loading = 'lazy';
+                img.addEventListener('load', reportFlareHeight, { once: false });
+                img.addEventListener('error', reportFlareHeight, { once: false });
                 if (img.dataset.flareClickable === 'true') {
                   return;
                 }
@@ -415,9 +473,14 @@ struct HtmlWebView: UIViewRepresentable {
                   window.location.href = 'flare-media-image://open?url=' + encodeURIComponent(src);
                 });
               });
+              reportFlareHeight();
             }
 
-            document.addEventListener('DOMContentLoaded', bindFlareImageClicks);
+            document.addEventListener('DOMContentLoaded', function() {
+              bindFlareImageClicks();
+              reportFlareHeight();
+            });
+            window.addEventListener('load', reportFlareHeight);
           </script>
         </head>
         <body>
@@ -426,6 +489,12 @@ struct HtmlWebView: UIViewRepresentable {
         </article>
         <script>
           bindFlareImageClicks();
+          if (window.ResizeObserver) {
+            const observer = new ResizeObserver(reportFlareHeight);
+            observer.observe(document.documentElement);
+            observer.observe(document.body);
+          }
+          reportFlareHeight();
         </script>
         </body>
         </html>

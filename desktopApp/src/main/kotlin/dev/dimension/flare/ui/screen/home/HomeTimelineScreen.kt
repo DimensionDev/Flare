@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -28,12 +29,13 @@ import compose.icons.fontawesomeicons.solid.ArrowsRotate
 import compose.icons.fontawesomeicons.solid.Plus
 import dev.dimension.flare.LocalWindowPadding
 import dev.dimension.flare.Res
-import dev.dimension.flare.data.model.LocalAppearanceSettings
+import dev.dimension.flare.data.model.tab.resolveTimelineAppearance
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.refresh
 import dev.dimension.flare.ui.component.FAIcon
+import dev.dimension.flare.ui.component.LocalGlobalAppearance
+import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.TabIcon
-import dev.dimension.flare.ui.component.TabTitle
 import dev.dimension.flare.ui.component.floatingToolbarVerticalNestedScroll
 import dev.dimension.flare.ui.component.status.AdaptiveCard
 import dev.dimension.flare.ui.model.map
@@ -52,6 +54,7 @@ import io.github.composefluent.component.ProgressBar
 import io.github.composefluent.component.SubtleButton
 import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.stringResource
+import dev.dimension.flare.ui.component.Text as UiText
 
 @Composable
 internal fun HomeTimelineScreen(
@@ -65,146 +68,155 @@ internal fun HomeTimelineScreen(
     state.tabState.onSuccess { tabState ->
         state.selectedTab.onSuccess { currentTab ->
             val currentTabTimelineState =
-                key(currentTab.key) {
+                key(currentTab.id) {
                     rememberTimelineItemPresenterWithLazyListState(currentTab)
                 }
-            Box {
-                TimelineContent(
-                    state = currentTabTimelineState,
-                    modifier =
-                        Modifier
-                            .floatingToolbarVerticalNestedScroll(
-                                expanded = state.isTopBarExpanded,
-                                onExpand = {
-                                    state.setTopBarExpanded(true)
-                                },
-                                onCollapse = {
-                                    state.setTopBarExpanded(false)
-                                },
-                            ),
-                    contentPadding = PaddingValues(top = 48.dp),
-                    allowGalleryMode = true,
-                    onScrollToTop = {
-                        state.setTopBarExpanded(true)
+            val timelineAppearance = LocalTimelineAppearance.current
+            CompositionLocalProvider(
+                LocalTimelineAppearance provides
+                    remember(
+                        currentTab.appearancePatch,
+                        timelineAppearance,
+                    ) {
+                        currentTab.resolveTimelineAppearance(timelineAppearance)
                     },
-                    header =
-                        if (LocalAppearanceSettings.current.showComposeInHomeTimeline &&
-                            loggedInState.isLoggedIn.takeSuccess() == true
-                        ) {
-                            {
-                                Box(
-                                    contentAlignment = Alignment.Center,
-                                ) {
-                                    AdaptiveCard(
-                                        modifier =
-                                            Modifier
-                                                .widthIn(max = 600.dp),
+            ) {
+                Box {
+                    TimelineContent(
+                        state = currentTabTimelineState,
+                        modifier =
+                            Modifier
+                                .floatingToolbarVerticalNestedScroll(
+                                    expanded = state.isTopBarExpanded,
+                                    onExpand = {
+                                        state.setTopBarExpanded(true)
+                                    },
+                                    onCollapse = {
+                                        state.setTopBarExpanded(false)
+                                    },
+                                ),
+                        contentPadding = PaddingValues(top = 48.dp),
+                        allowGalleryMode = true,
+                        onScrollToTop = {
+                            state.setTopBarExpanded(true)
+                        },
+                        header =
+                            if (LocalGlobalAppearance.current.showComposeInHomeTimeline &&
+                                loggedInState.isLoggedIn.takeSuccess() == true
+                            ) {
+                                {
+                                    Box(
+                                        contentAlignment = Alignment.Center,
                                     ) {
-                                        ComposeDialog(
-                                            onBack = null,
-                                            accountType = accountType,
-                                            focusOnOpen = false,
-                                            modifier = Modifier.padding(top = 16.dp),
-                                        )
+                                        AdaptiveCard(
+                                            modifier =
+                                                Modifier
+                                                    .widthIn(max = 600.dp),
+                                        ) {
+                                            ComposeDialog(
+                                                onBack = null,
+                                                accountType = accountType,
+                                                focusOnOpen = false,
+                                                modifier = Modifier.padding(top = 16.dp),
+                                            )
+                                        }
                                     }
                                 }
-                            }
-                        } else {
-                            null
-                        },
-                )
-                AnimatedVisibility(
-                    visible = state.isTopBarExpanded,
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                // prevent click through
+                            } else {
+                                null
                             },
-                    enter = slideInVertically { -it },
-                    exit = slideOutVertically { -it },
-                ) {
-                    Box {
-                        Box(
-                            modifier =
-                                Modifier
-                                    .matchParentSize()
-                                    .background(FluentTheme.colors.background.mica.base)
-                                    .blur(32.dp),
-                        )
-                        Row(
-                            modifier =
-                                Modifier
-                                    .fillMaxWidth(1f)
-                                    .padding(LocalWindowPadding.current)
-                                    .padding(horizontal = screenHorizontalPadding),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            LiteFilter(
+                    )
+                    AnimatedVisibility(
+                        visible = state.isTopBarExpanded,
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    // prevent click through
+                                },
+                        enter = slideInVertically { -it },
+                        exit = slideOutVertically { -it },
+                    ) {
+                        Box {
+                            Box(
                                 modifier =
                                     Modifier
-                                        .weight(1f),
+                                        .matchParentSize()
+                                        .background(FluentTheme.colors.background.mica.base)
+                                        .blur(32.dp),
+                            )
+                            Row(
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth(1f)
+                                        .padding(LocalWindowPadding.current)
+                                        .padding(horizontal = screenHorizontalPadding),
+                                verticalAlignment = Alignment.CenterVertically,
                             ) {
-                                tabState.forEachIndexed { index, tab ->
-                                    PillButton(
-                                        selected = tab.key == currentTab.key,
-                                        onSelectedChanged = {
-                                            if (tab.key == currentTab.key) {
-                                                if (currentTabTimelineState.lazyListState.firstVisibleItemIndex == 0) {
-                                                    currentTabTimelineState.refreshSync()
+                                LiteFilter(
+                                    modifier =
+                                        Modifier
+                                            .weight(1f),
+                                ) {
+                                    tabState.forEachIndexed { index, tab ->
+                                        PillButton(
+                                            selected = tab.id == currentTab.id,
+                                            onSelectedChanged = {
+                                                if (tab.id == currentTab.id) {
+                                                    if (currentTabTimelineState.lazyListState.firstVisibleItemIndex == 0) {
+                                                        currentTabTimelineState.refreshSync()
+                                                    } else {
+                                                        currentTabTimelineState.lazyListState.requestScrollToItem(
+                                                            0,
+                                                        )
+                                                    }
                                                 } else {
-                                                    currentTabTimelineState.lazyListState.requestScrollToItem(
-                                                        0,
-                                                    )
+                                                    state.setSelectedIndex(index)
                                                 }
-                                            } else {
-                                                state.setSelectedIndex(index)
-                                            }
+                                            },
+                                        ) {
+                                            TabIcon(
+                                                tabItem = tab,
+                                            )
+                                            UiText(tab.title)
+                                        }
+                                    }
+                                    PillButton(
+                                        selected = false,
+                                        onSelectedChanged = {
+                                            onAddTab.invoke()
                                         },
                                     ) {
-                                        TabIcon(
-                                            tabItem = tab,
-                                        )
-                                        TabTitle(
-                                            title = tab.metaData.title,
+                                        FAIcon(
+                                            FontAwesomeIcons.Solid.Plus,
+                                            contentDescription = null,
                                         )
                                     }
                                 }
-                                PillButton(
-                                    selected = false,
-                                    onSelectedChanged = {
-                                        onAddTab.invoke()
-                                    },
-                                ) {
+
+                                SubtleButton(onClick = {
+                                    currentTabTimelineState.refreshSync()
+                                }) {
                                     FAIcon(
-                                        FontAwesomeIcons.Solid.Plus,
-                                        contentDescription = null,
+                                        imageVector = FontAwesomeIcons.Solid.ArrowsRotate,
+                                        contentDescription = stringResource(Res.string.refresh),
                                     )
                                 }
                             }
-
-                            SubtleButton(onClick = {
-                                currentTabTimelineState.refreshSync()
-                            }) {
-                                FAIcon(
-                                    imageVector = FontAwesomeIcons.Solid.ArrowsRotate,
-                                    contentDescription = stringResource(Res.string.refresh),
-                                )
-                            }
                         }
                     }
-                }
-                AnimatedVisibility(
-                    currentTabTimelineState.isRefreshing,
-                    enter = slideInVertically { -it },
-                    exit = slideOutVertically { -it },
-                ) {
-                    ProgressBar(
-                        modifier =
-                            Modifier
-                                .align(Alignment.TopCenter)
-                                .fillMaxWidth(),
-                    )
+                    AnimatedVisibility(
+                        currentTabTimelineState.isRefreshing,
+                        enter = slideInVertically { -it },
+                        exit = slideOutVertically { -it },
+                    ) {
+                        ProgressBar(
+                            modifier =
+                                Modifier
+                                    .align(Alignment.TopCenter)
+                                    .fillMaxWidth(),
+                        )
+                    }
                 }
             }
         }
@@ -215,7 +227,7 @@ internal fun HomeTimelineScreen(
 private fun presenter(accountType: AccountType) =
     run {
         var isTopBarExpanded by remember { mutableStateOf(true) }
-        val state = remember(accountType) { HomeTimelineWithTabsPresenter(accountType) }.invoke()
+        val state = remember { HomeTimelineWithTabsPresenter() }.invoke()
         var selectedIndex by remember {
             mutableStateOf(0)
         }

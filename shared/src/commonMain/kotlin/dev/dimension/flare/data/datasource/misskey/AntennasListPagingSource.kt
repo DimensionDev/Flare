@@ -10,11 +10,11 @@ import dev.dimension.flare.ui.model.mapper.render
 
 internal class AntennasListPagingSource(
     private val service: MisskeyService,
-) : RemoteLoader<UiList> {
+) : RemoteLoader<UiList.Antenna> {
     override suspend fun load(
         pageSize: Int,
         request: PagingRequest,
-    ): PagingResult<UiList> {
+    ): PagingResult<UiList.Antenna> {
         if (request is PagingRequest.Prepend || request is PagingRequest.Append) {
             return PagingResult(
                 endOfPaginationReached = true,

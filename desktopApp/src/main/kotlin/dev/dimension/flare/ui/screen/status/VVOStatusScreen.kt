@@ -37,7 +37,7 @@ import dev.dimension.flare.status_detail_repost
 import dev.dimension.flare.status_loadmore_error_retry
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScrollBar
-import dev.dimension.flare.ui.component.LocalComponentAppearance
+import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.StatusItem
@@ -69,10 +69,10 @@ internal fun VVOStatusScreen(
             accountType = accountType,
         )
     }
-    val bigScreen = isBigScreen()
+    val bigScreen by isBigScreen()
     CompositionLocalProvider(
-        LocalComponentAppearance provides
-            LocalComponentAppearance.current.copy(
+        LocalTimelineAppearance provides
+            LocalTimelineAppearance.current.copy(
                 lineLimit = Int.MAX_VALUE,
             ),
     ) {

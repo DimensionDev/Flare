@@ -1,360 +1,629 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
-    <link rel="manifest" href="site.webmanifest">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title data-i18n-key="metaTitle">Flare - 聚合你的所有社交信息流</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Inter', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
-            background-color: #F6F8FA; /* Light gray background */
-            color: #24292F; /* Dark text */
-        }
-        .gradient-text {
-            background: linear-gradient(90deg, #30C5B3, #21B7A4);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .cta-button {
-            transition: all 0.3s ease;
-        }
-        .cta-button:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 20px rgba(45, 212, 191, 0.5);
-        }
-        .glow-effect {
-            position: absolute;
-            top: 20%;
-            left: 50%;
-            width: 1000px;
-            height: 1000px;
-            background: radial-gradient(circle, rgba(45, 212, 191, 0.1) 0%, rgba(45, 212, 191, 0) 50%);
-            transform: translate(-50%, -50%);
-            z-index: -1;
-            pointer-events: none;
-        }
-        .screenshot-glow {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        .screenshot-glow:hover {
-            transform: scale(1.03);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
-        }
-        .feature-card-compact {
-            background-color: #FFFFFF;
-            border: 1px solid #D0D7DE;
-            border-radius: 16px;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            overflow: hidden; /* Important for borderless image */
-        }
-        .feature-card-compact:hover {
-             transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-        }
-        .social-button {
-            transition: all 0.2s ease;
-        }
-        .social-button:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-        }
-    </style>
-</head>
-<body>
-<div class="relative overflow-hidden">
-    <!-- Main Content -->
-    <div class="container mx-auto px-6 py-12 md:py-20 relative z-10">
-
-        <!-- Language Switcher -->
-        <div class="absolute top-6 right-6 z-20">
-            <select id="language-switcher" class="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-teal-500 focus:border-teal-500 p-2 shadow-sm">
-                <option value="zh">简体中文</option>
-                <option value="en">English</option>
-                <option value="ja">日本語</option>
-            </select>
-        </div>
-
-        <!-- New Hero Section -->
-        <section class="flex flex-col md:flex-row items-center justify-between gap-12 pt-12 md:pt-0">
-            <!-- Left Column: Text Content -->
-            <div class="md:w-1/2 text-center md:text-left">
-                <h1 class="text-lg md:text-xl text-gray-600 max-w-xl mx-auto md:mx-0 mb-4">
-                    <img src="flare_logo.svg" alt="Flare" class="text-lg md:text-xl text-gray-600 max-w-xl mx-auto md:mx-0 mb-4">
-                </h1>
-                <p class="text-lg md:text-xl text-gray-600 max-w-xl mx-auto md:mx-0 mb-4" data-i18n-key="heroSubtitle">
-                    聚合你的所有社交信息流。
-                </p>
-                <p class="text-sm text-gray-500 max-w-xl mx-auto md:mx-0 mb-8" data-i18n-key="heroSubtext">
-                    没有 waitlist，无需订阅，完全开源。立即下载 Flare，体验下一代社交网络。
-                </p>
-                <!-- Download Buttons -->
-                <div>
-                    <div class="flex flex-wrap justify-center md:justify-start gap-4 p-2">
-                        <a href='https://play.google.com/store/apps/details?id=dev.dimension.flare'><img alt='Get it on Google Play' src='GetItOnGooglePlay_Badge_Web_color_English.svg' width=170/></a>
-                        <a href='https://apps.apple.com/us/app/flare-social-network-client/id6476077738'><img alt='Get it on App Store' src='https://developer.apple.com/app-store/marketing/guidelines/images/badge-example-preferred_2x.png' width=150/></a>
-                        <a href="https://apps.microsoft.com/detail/9NLRN0BKZ357?referrer=appbadge&mode=direct">
-                            <img src="https://get.microsoft.com/images/en-us%20dark.svg" width="200"/>
-                        </a>
-                        <a href="https://github.com/DimensionDev/Flare" target="_blank" class="cta-button bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-6 rounded-lg inline-flex items-center" width=150 height=50>
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Octicons-mark-github.svg/1024px-Octicons-mark-github.svg.png" alt="GitHub Icon" class="w-6 h-6 mr-2">
-                            <span data-i18n-key="githubButton">GitHub</span>
-                        </a>
-                    </div>
-                    <div class="flex flex-wrap justify-center md:justify-start gap-4">
-                            <a href='https://f-droid.org/packages/dev.dimension.flare'><img alt='Get it on F-Droid' src='https://f-droid.org/badge/get-it-on.svg' width=190/></a>
-                            <a href='https://github.com/DimensionDev/Flare/releases/latest'><img alt='Download AppImage' src='appimage_badge.svg' width=162/></a>
-                    </div>
-                </div>
-            </div>
-            <!-- Right Column: App Screenshot -->
-            <div class="md:w-1/2 mt-8 md:mt-0">
-                <div class="p-4">
-                    <img src="cover1.png" alt="App Screenshot" class="rounded-lg w-full aspect-square object-contain">
-                </div>
-            </div>
-        </section>
-
-        <!-- Compact Features Section -->
-        <section class="py-16 md:py-24">
-            <div class="text-center mb-12">
-                <h2 class="text-3xl md:text-4xl font-bold tracking-tight" data-i18n-key="featuresTitle">强大功能，一站式体验</h2>
-                <p class="text-gray-600 mt-2 max-w-2xl mx-auto" data-i18n-key="featuresSubtitle">Flare 不仅仅是一个客户端，更是一个全新的社交中心。</p>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- Feature Card 1 -->
-                <div class="feature-card-compact">
-                    <img src="feature2.png" class="w-full aspect-[4/3] object-cover">
-                    <div class="p-6">
-                        <h3 class="text-xl font-bold mb-2 gradient-text" data-i18n-key="feature1Title">聚合多平台</h3>
-                        <p class="text-gray-600" data-i18n-key="feature1Desc">同时支持 Mastodon、Misskey、Bluesky、X 等多个平台，告别平台间的隔阂。</p>
-                    </div>
-                </div>
-
-                <!-- Feature Card 2 -->
-                <div class="feature-card-compact">
-                    <img src="feature3.png" class="w-full aspect-[4/3] object-cover">
-                    <div class="p-6">
-                        <h3 class="text-xl font-bold mb-2 gradient-text" data-i18n-key="feature2Title">混合时间线</h3>
-                        <p class="text-gray-600" data-i18n-key="feature2Desc">将不同平台的时间线混合为一条，无需切换，尽览所有动态。</p>
-                    </div>
-                </div>
-
-                <!-- Feature Card 3 -->
-                <div class="feature-card-compact">
-                    <img src="feature5.png" class="w-full aspect-[4/3] object-cover">
-                    <div class="p-6">
-                        <h3 class="text-xl font-bold mb-2 gradient-text" data-i18n-key="feature3Title">本地历史记录</h3>
-                        <p class="text-gray-600" data-i18n-key="feature3Desc">内置本地历史记录，随时找回您错过的内容。</p>
-                    </div>
-                </div>
-
-                <!-- Feature Card 4 -->
-                <div class="feature-card-compact">
-                    <img src="feature6.png" class="w-full aspect-[4/3] object-cover">
-                    <div class="p-6">
-                        <h3 class="text-xl font-bold mb-2 gradient-text" data-i18n-key="feature4Title">内置 RSS 阅读器</h3>
-                        <p class="text-gray-600" data-i18n-key="feature4Desc">内置强大的 RSS 支持，可当作一个功能全面的 RSS 阅读器使用。</p>
-                    </div>
-                </div>
-
-                <!-- Feature Card 5 -->
-                <div class="feature-card-compact">
-                    <img src="feature7.png" class="w-full aspect-[4/3] object-cover">
-                    <div class="p-6">
-                        <h3 class="text-xl font-bold mb-2 gradient-text" data-i18n-key="feature5Title">优化的大屏体验</h3>
-                        <p class="text-gray-600" data-i18n-key="feature5Desc">为平板和桌面端专门优化了界面，带来更佳的浏览体验。</p>
-                    </div>
-                </div>
-
-                <!-- Feature Card 6 -->
-                <div class="feature-card-compact">
-                    <img src="feature8.png" class="w-full aspect-[4/3] object-cover">
-                    <div class="p-6">
-                        <h3 class="text-xl font-bold mb-2 gradient-text" data-i18n-key="feature6Title">桌面版，现已推出</h3>
-                        <p class="text-gray-600" data-i18n-key="feature6Desc">桌面客户端已经开放测试，在您的电脑上享受无缝的社交体验。</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </div>
-
-    <!-- Background Glow -->
-    <div class="glow-effect"></div>
-</div>
-
-<!-- Join Community Section -->
-<section class="bg-white border-y border-gray-200">
-    <div class="container mx-auto px-6 text-center py-16">
-        <h2 class="text-3xl md:text-4xl font-bold tracking-tight mb-4" data-i18n-key="communityTitle">加入我们的社区</h2>
-        <p class="text-gray-600 max-w-xl mx-auto mb-8" data-i18n-key="communitySubtitle">获取最新动态，参与讨论，与我们共同成长。</p>
-        <div class="flex flex-wrap justify-center gap-4 md:gap-6">
-            <a href="https://x.com/flareapp_moe" target="_blank" class="social-button inline-flex items-center justify-center gap-3 font-semibold text-gray-800 bg-white hover:bg-gray-100 border border-gray-200 px-6 py-3 rounded-lg shadow-sm">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/c/ce/X_logo_2023.svg" alt="X Icon" class="w-5 h-5">
-                <span data-i18n-key="communityButtonX">关注 X</span>
-            </a>
-            <a href="https://bsky.app/profile/flareapp.moe" target="_blank" class="social-button inline-flex items-center justify-center gap-3 font-semibold text-gray-800 bg-white hover:bg-gray-100 border border-gray-200 px-6 py-3 rounded-lg shadow-sm">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/7/7a/Bluesky_Logo.svg" alt="Bluesky Icon" class="w-5 h-5">
-                <span data-i18n-key="communityButtonBluesky">关注 Bluesky</span>
-            </a>
-            <a href="https://discord.gg/De9NhXBryT" target="_blank" class="social-button inline-flex items-center justify-center gap-3 font-semibold text-gray-800 bg-white hover:bg-gray-100 border border-gray-200 px-6 py-3 rounded-lg shadow-sm">
-                <img src="https://cdn.prod.website-files.com/6257adef93867e50d84d30e2/66e3d80db9971f10a9757c99_Symbol.svg" alt="Discord Icon" class="w-5 h-5">
-                <span data-i18n-key="communityButtonDiscord">加入 Discord</span>
-            </a>
-            <a href="https://t.me/+0UtcP6_qcDoyOWE1" target="_blank" class="social-button inline-flex items-center justify-center gap-3 font-semibold text-gray-800 bg-white hover:bg-gray-100 border border-gray-200 px-6 py-3 rounded-lg shadow-sm">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg" alt="Telegram Icon" class="w-5 h-5">
-                <span data-i18n-key="communityButtonTelegram">加入 Telegram</span>
-            </a>
-        </div>
-    </div>
-</section>
-
-<!-- Footer -->
-<footer class="text-center py-8">
-    <p class="text-gray-500" data-i18n-key="footerCopyright"></p>
-    <p class="text-gray-500 text-sm mt-1" data-i18n-key="footerSubtitle">Flare is an open-source project.</p>
-</footer>
-
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const currentYear = new Date().getFullYear();
-        const translations = {
-            en: {
-                metaTitle: "Flare - All your social feeds, unified",
-                heroSubtitle: "All your social feeds, unified.",
-                heroSubtext: "No waitlist, no subscription, completely open-source. Download Flare now and experience the next generation of social networking.",
-                googlePlayButton: "Google Play",
-                testFlightButton: "TestFlight",
-                githubButton: "GitHub",
-                featuresTitle: "Powerful Features, All in One Place",
-                featuresSubtitle: "Flare is more than just a client; it's a whole new social hub.",
-                feature1Title: "Multi-Platform Aggregation",
-                feature1Desc: "Supports Mastodon, Misskey, Bluesky, X, and more, breaking down the barriers between platforms.",
-                feature2Title: "Unified Timeline",
-                feature2Desc: "Merge timelines from different platforms into one, browse all updates without switching.",
-                feature3Title: "Local History",
-                feature3Desc: "Built-in local history allows you to find content you've missed at any time.",
-                feature4Title: "Built-in RSS Reader",
-                feature4Desc: "With powerful built-in RSS support, it can be used as a full-featured RSS reader.",
-                feature5Title: "Optimized Large-Screen Experience",
-                feature5Desc: "Specially optimized interface for tablets and desktops for a better browsing experience.",
-                feature6Title: "Desktop Version, Available Now",
-                feature6Desc: "The desktop client is now in open beta. Enjoy a seamless social experience on your computer.",
-                communityTitle: "Join Our Community",
-                communitySubtitle: "Get the latest updates, join the discussion, and grow with us.",
-                communityButtonX: "Follow on X",
-                communityButtonBluesky: "Follow on Bluesky",
-                communityButtonDiscord: "Join Discord",
-                communityButtonTelegram: "Join Telegram",
-                footerCopyright: `© ${currentYear} DimensionDev. All rights reserved.`,
-                footerSubtitle: "Flare is an open-source project.",
-            },
-            ja: {
-                metaTitle: "Flare - すべてのソーシャルフィードを一つに",
-                heroSubtitle: "すべてのソーシャルフィードを一つに。",
-                heroSubtext: "ウェイトリストなし、サブスクリプション不要、完全にオープンソース。今すぐFlareをダウンロードして、次世代のソーシャルネットワーキングを体験してください。",
-                googlePlayButton: "Google Play",
-                testFlightButton: "TestFlight",
-                githubButton: "GitHub",
-                featuresTitle: "強力な機能を、一つに",
-                featuresSubtitle: "Flareは単なるクライアントではなく、全く新しいソーシャルハブです。",
-                feature1Title: "マルチプラットフォーム集約",
-                feature1Desc: "Mastodon、Misskey、Bluesky、Xなどを同時にサポートし、プラットフォーム間の壁を取り払います。",
-                feature2Title: "統合タイムライン",
-                feature2Desc: "異なるプラットフォームのタイムラインを一つに統合し、切り替えることなくすべての更新を閲覧できます。",
-                feature3Title: "ローカル履歴",
-                feature3Desc: "内蔵のローカル履歴で、見逃したコンテンツをいつでも見つけることができます。",
-                feature4Title: "内蔵RSSリーダー",
-                feature4Desc: "強力なRSSサポートを内蔵しており、多機能なRSSリーダーとして使用できます。",
-                feature5Title: "最適化された大画面体験",
-                feature5Desc: "タブレットとデスクトップ向けに特別に最適化されたインターフェースで、より良いブラウジング体験を提供します。",
-                feature6Title: "デスクトップ版、公開中",
-                feature6Desc: "デスクトップクライアントは現在オープンベータテスト中です。お使いのコンピュータでシームレスなソーシャル体験をお楽しみください。",
-                communityTitle: "コミュニティに参加",
-                communitySubtitle: "最新情報を入手し、ディスカッションに参加し、私たちと一緒に成長しましょう。",
-                communityButtonX: "Xでフォロー",
-                communityButtonBluesky: "Blueskyでフォロー",
-                communityButtonDiscord: "Discordに参加",
-                communityButtonTelegram: "Telegramに参加",
-                footerCopyright: `© ${currentYear} DimensionDev. All rights reserved.`,
-                footerSubtitle: "Flareはオープンソースプロジェクトです。",
-            },
-            zh: {
-                metaTitle: "Flare - 聚合你的所有社交信息流",
-                heroSubtitle: "聚合你的所有社交信息流。",
-                heroSubtext: "没有 waitlist，无需订阅，完全开源。立即下载 Flare，体验下一代社交网络。",
-                googlePlayButton: "Google Play",
-                testFlightButton: "TestFlight",
-                githubButton: "GitHub",
-                featuresTitle: "强大功能，一站式体验",
-                featuresSubtitle: "Flare 不仅仅是一个客户端，更是一个全新的社交中心。",
-                feature1Title: "聚合多平台",
-                feature1Desc: "同时支持 Mastodon、Misskey、Bluesky、X 等多个平台，告别平台间的隔阂。",
-                feature2Title: "混合时间线",
-                feature2Desc: "将不同平台的时间线混合为一条，无需切换，尽览所有动态。",
-                feature3Title: "本地历史记录",
-                feature3Desc: "内置本地历史记录，随时找回您错过的内容。",
-                feature4Title: "内置 RSS 阅读器",
-                feature4Desc: "内置强大的 RSS 支持，可当作一个功能全面的 RSS 阅读器使用。",
-                feature5Title: "优化的大屏体验",
-                feature5Desc: "为平板和桌面端专门优化了界面，带来更佳的浏览体验。",
-                feature6Title: "桌面版，现已推出",
-                feature6Desc: "桌面客户端已经开放测试，在您的电脑上享受无缝的社交体验。",
-                communityTitle: "加入我们的社区",
-                communitySubtitle: "获取最新动态，参与讨论，与我们共同成长。",
-                communityButtonX: "关注 X",
-                communityButtonBluesky: "关注 Bluesky",
-                communityButtonDiscord: "加入 Discord",
-                communityButtonTelegram: "加入 Telegram",
-                footerCopyright: `© ${currentYear} DimensionDev. All rights reserved.`,
-                footerSubtitle: "Flare is an open-source project.",
+    <head>
+        <meta charset="UTF-8" />
+        <link
+            rel="apple-touch-icon"
+            sizes="180x180"
+            href="apple-touch-icon.png"
+        />
+        <link
+            rel="icon"
+            type="image/png"
+            sizes="32x32"
+            href="favicon-32x32.png"
+        />
+        <link
+            rel="icon"
+            type="image/png"
+            sizes="16x16"
+            href="favicon-16x16.png"
+        />
+        <link rel="manifest" href="site.webmanifest" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title data-i18n-key="metaTitle">Flare - 聚合你的所有社交信息流</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap"
+            rel="stylesheet"
+        />
+        <style>
+            body {
+                font-family:
+                    "Inter", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+                background-color: #f6f8fa; /* Light gray background */
+                color: #24292f; /* Dark text */
             }
-        };
+            .gradient-text {
+                background: linear-gradient(90deg, #30c5b3, #21b7a4);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+            }
+            .cta-button {
+                transition: all 0.3s ease;
+            }
+            .cta-button:hover {
+                transform: scale(1.05);
+                box-shadow: 0 0 20px rgba(45, 212, 191, 0.5);
+            }
+            .glow-effect {
+                position: absolute;
+                top: 20%;
+                left: 50%;
+                width: 1000px;
+                height: 1000px;
+                background: radial-gradient(
+                    circle,
+                    rgba(45, 212, 191, 0.1) 0%,
+                    rgba(45, 212, 191, 0) 50%
+                );
+                transform: translate(-50%, -50%);
+                z-index: -1;
+                pointer-events: none;
+            }
+            .screenshot-glow {
+                transition:
+                    transform 0.3s ease,
+                    box-shadow 0.3s ease;
+            }
+            .screenshot-glow:hover {
+                transform: scale(1.03);
+                box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+            }
+            .feature-card-compact {
+                background-color: #ffffff;
+                border: 1px solid #d0d7de;
+                border-radius: 16px;
+                transition:
+                    transform 0.3s ease,
+                    box-shadow 0.3s ease;
+                overflow: hidden; /* Important for borderless image */
+            }
+            .feature-card-compact:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+            }
+            .social-button {
+                transition: all 0.2s ease;
+            }
+            .social-button:hover {
+                transform: scale(1.05);
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            }
+        </style>
+    </head>
+    <body>
+        <div class="relative overflow-hidden">
+            <!-- Main Content -->
+            <div class="container mx-auto px-6 py-12 md:py-20 relative z-10">
+                <!-- Language Switcher -->
+                <div class="absolute top-6 right-6 z-20">
+                    <select
+                        id="language-switcher"
+                        class="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-teal-500 focus:border-teal-500 p-2 shadow-sm"
+                    >
+                        <option value="zh">简体中文</option>
+                        <option value="en">English</option>
+                        <option value="ja">日本語</option>
+                    </select>
+                </div>
 
-        const languageSwitcher = document.getElementById('language-switcher');
+                <!-- New Hero Section -->
+                <section
+                    class="flex flex-col md:flex-row items-center justify-between gap-12 pt-12 md:pt-0"
+                >
+                    <!-- Left Column: Text Content -->
+                    <div class="md:w-1/2 text-center md:text-left">
+                        <h1
+                            class="text-lg md:text-xl text-gray-600 max-w-xl mx-auto md:mx-0 mb-4"
+                        >
+                            <img
+                                src="flare_logo.svg"
+                                alt="Flare"
+                                class="text-lg md:text-xl text-gray-600 max-w-xl mx-auto md:mx-0 mb-4"
+                            />
+                        </h1>
+                        <p
+                            class="text-lg md:text-xl text-gray-600 max-w-xl mx-auto md:mx-0 mb-4"
+                            data-i18n-key="heroSubtitle"
+                        >
+                            聚合你的所有社交信息流。
+                        </p>
+                        <p
+                            class="text-sm text-gray-500 max-w-xl mx-auto md:mx-0 mb-8"
+                            data-i18n-key="heroSubtext"
+                        >
+                            没有 waitlist，无需订阅，完全开源。立即下载
+                            Flare，体验下一代社交网络。
+                        </p>
+                        <!-- Download Buttons -->
+                        <div>
+                            <div
+                                class="flex flex-wrap justify-center md:justify-start gap-4 p-2"
+                            >
+                                <a
+                                    href="https://play.google.com/store/apps/details?id=dev.dimension.flare"
+                                    ><img
+                                        alt="Get it on Google Play"
+                                        src="GetItOnGooglePlay_Badge_Web_color_English.svg"
+                                        width="170"
+                                /></a>
+                                <a
+                                    href="https://apps.apple.com/us/app/flare-social-network-client/id6476077738"
+                                    ><img
+                                        alt="Get it on App Store"
+                                        src="https://developer.apple.com/app-store/marketing/guidelines/images/badge-example-preferred_2x.png"
+                                        width="150"
+                                /></a>
+                                <a
+                                    href="https://apps.microsoft.com/detail/9NLRN0BKZ357?referrer=appbadge&mode=direct"
+                                >
+                                    <img
+                                        src="https://get.microsoft.com/images/en-us%20dark.svg"
+                                        width="200"
+                                    />
+                                </a>
+                                <a
+                                    href="https://github.com/DimensionDev/Flare"
+                                    target="_blank"
+                                    class="cta-button bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-6 rounded-lg inline-flex items-center"
+                                    width="150"
+                                    height="50"
+                                >
+                                    <img
+                                        src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Octicons-mark-github.svg/1024px-Octicons-mark-github.svg.png"
+                                        alt="GitHub Icon"
+                                        class="w-6 h-6 mr-2"
+                                    />
+                                    <span data-i18n-key="githubButton"
+                                        >GitHub</span
+                                    >
+                                </a>
+                            </div>
+                            <div
+                                class="flex flex-wrap justify-center md:justify-start gap-4"
+                            >
+                                <a
+                                    href="https://f-droid.org/packages/dev.dimension.flare"
+                                    ><img
+                                        alt="Get it on F-Droid"
+                                        src="https://f-droid.org/badge/get-it-on.svg"
+                                        width="190"
+                                /></a>
+                                <a
+                                    href="https://github.com/DimensionDev/Flare/releases/latest"
+                                    ><img
+                                        alt="Download AppImage"
+                                        src="appimage_badge.svg"
+                                        width="162"
+                                /></a>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Right Column: App Screenshot -->
+                    <div class="md:w-1/2 mt-8 md:mt-0">
+                        <div class="p-4">
+                            <img
+                                src="cover1.png"
+                                alt="App Screenshot"
+                                class="rounded-lg w-full aspect-square object-contain"
+                            />
+                        </div>
+                    </div>
+                </section>
 
-        const setLanguage = (lang) => {
-            if (!translations[lang]) return;
+                <!-- Compact Features Section -->
+                <section class="py-16 md:py-24">
+                    <div class="text-center mb-12">
+                        <h2
+                            class="text-3xl md:text-4xl font-bold tracking-tight"
+                            data-i18n-key="featuresTitle"
+                        >
+                            强大功能，一站式体验
+                        </h2>
+                        <p
+                            class="text-gray-600 mt-2 max-w-2xl mx-auto"
+                            data-i18n-key="featuresSubtitle"
+                        >
+                            Flare 不仅仅是一个客户端，更是一个全新的社交中心。
+                        </p>
+                    </div>
 
-            document.querySelectorAll('[data-i18n-key]').forEach(element => {
-                const key = element.getAttribute('data-i18n-key');
-                if (translations[lang][key]) {
-                    element.textContent = translations[lang][key];
-                }
+                    <div
+                        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+                    >
+                        <!-- Feature Card 1 -->
+                        <div class="feature-card-compact">
+                            <img
+                                src="feature2.png"
+                                class="w-full aspect-[4/3] object-cover"
+                            />
+                            <div class="p-6">
+                                <h3
+                                    class="text-xl font-bold mb-2 gradient-text"
+                                    data-i18n-key="feature1Title"
+                                >
+                                    聚合多平台
+                                </h3>
+                                <p
+                                    class="text-gray-600"
+                                    data-i18n-key="feature1Desc"
+                                >
+                                    同时支持 Mastodon、Misskey、Bluesky、X
+                                    等多个平台，告别平台间的隔阂。
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Feature Card 2 -->
+                        <div class="feature-card-compact">
+                            <img
+                                src="feature3.png"
+                                class="w-full aspect-[4/3] object-cover"
+                            />
+                            <div class="p-6">
+                                <h3
+                                    class="text-xl font-bold mb-2 gradient-text"
+                                    data-i18n-key="feature2Title"
+                                >
+                                    混合时间线
+                                </h3>
+                                <p
+                                    class="text-gray-600"
+                                    data-i18n-key="feature2Desc"
+                                >
+                                    将不同平台的时间线混合为一条，无需切换，尽览所有动态。
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Feature Card 3 -->
+                        <div class="feature-card-compact">
+                            <img
+                                src="feature5.png"
+                                class="w-full aspect-[4/3] object-cover"
+                            />
+                            <div class="p-6">
+                                <h3
+                                    class="text-xl font-bold mb-2 gradient-text"
+                                    data-i18n-key="feature3Title"
+                                >
+                                    本地历史记录
+                                </h3>
+                                <p
+                                    class="text-gray-600"
+                                    data-i18n-key="feature3Desc"
+                                >
+                                    内置本地历史记录，随时找回您错过的内容。
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Feature Card 4 -->
+                        <div class="feature-card-compact">
+                            <img
+                                src="feature6.png"
+                                class="w-full aspect-[4/3] object-cover"
+                            />
+                            <div class="p-6">
+                                <h3
+                                    class="text-xl font-bold mb-2 gradient-text"
+                                    data-i18n-key="feature4Title"
+                                >
+                                    内置 RSS 阅读器
+                                </h3>
+                                <p
+                                    class="text-gray-600"
+                                    data-i18n-key="feature4Desc"
+                                >
+                                    内置强大的 RSS 支持，可当作一个功能全面的
+                                    RSS 阅读器使用。
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Feature Card 5 -->
+                        <div class="feature-card-compact">
+                            <img
+                                src="feature7.png"
+                                class="w-full aspect-[4/3] object-cover"
+                            />
+                            <div class="p-6">
+                                <h3
+                                    class="text-xl font-bold mb-2 gradient-text"
+                                    data-i18n-key="feature5Title"
+                                >
+                                    优化的大屏体验
+                                </h3>
+                                <p
+                                    class="text-gray-600"
+                                    data-i18n-key="feature5Desc"
+                                >
+                                    为平板和桌面端专门优化了界面，带来更佳的浏览体验。
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Feature Card 6 -->
+                        <div class="feature-card-compact">
+                            <img
+                                src="feature8.png"
+                                class="w-full aspect-[4/3] object-cover"
+                            />
+                            <div class="p-6">
+                                <h3
+                                    class="text-xl font-bold mb-2 gradient-text"
+                                    data-i18n-key="feature6Title"
+                                >
+                                    桌面版，现已推出
+                                </h3>
+                                <p
+                                    class="text-gray-600"
+                                    data-i18n-key="feature6Desc"
+                                >
+                                    桌面客户端已经开放测试，在您的电脑上享受无缝的社交体验。
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Background Glow -->
+            <div class="glow-effect"></div>
+        </div>
+
+        <!-- Join Community Section -->
+        <section class="bg-white border-y border-gray-200">
+            <div class="container mx-auto px-6 text-center py-16">
+                <h2
+                    class="text-3xl md:text-4xl font-bold tracking-tight mb-4"
+                    data-i18n-key="communityTitle"
+                >
+                    加入我们的社区
+                </h2>
+                <p
+                    class="text-gray-600 max-w-xl mx-auto mb-8"
+                    data-i18n-key="communitySubtitle"
+                >
+                    获取最新动态，参与讨论，与我们共同成长。
+                </p>
+                <div class="flex flex-wrap justify-center gap-4 md:gap-6">
+                    <a
+                        href="https://x.com/flareapp_moe"
+                        target="_blank"
+                        class="social-button inline-flex items-center justify-center gap-3 font-semibold text-gray-800 bg-white hover:bg-gray-100 border border-gray-200 px-6 py-3 rounded-lg shadow-sm"
+                    >
+                        <img
+                            src="https://upload.wikimedia.org/wikipedia/commons/c/ce/X_logo_2023.svg"
+                            alt="X Icon"
+                            class="w-5 h-5"
+                        />
+                        <span data-i18n-key="communityButtonX">关注 X</span>
+                    </a>
+                    <a
+                        href="https://bsky.app/profile/flareapp.moe"
+                        target="_blank"
+                        class="social-button inline-flex items-center justify-center gap-3 font-semibold text-gray-800 bg-white hover:bg-gray-100 border border-gray-200 px-6 py-3 rounded-lg shadow-sm"
+                    >
+                        <img
+                            src="https://upload.wikimedia.org/wikipedia/commons/7/7a/Bluesky_Logo.svg"
+                            alt="Bluesky Icon"
+                            class="w-5 h-5"
+                        />
+                        <span data-i18n-key="communityButtonBluesky"
+                            >关注 Bluesky</span
+                        >
+                    </a>
+                    <a
+                        href="https://discord.gg/De9NhXBryT"
+                        target="_blank"
+                        class="social-button inline-flex items-center justify-center gap-3 font-semibold text-gray-800 bg-white hover:bg-gray-100 border border-gray-200 px-6 py-3 rounded-lg shadow-sm"
+                    >
+                        <img
+                            src="https://cdn.prod.website-files.com/6257adef93867e50d84d30e2/66e3d80db9971f10a9757c99_Symbol.svg"
+                            alt="Discord Icon"
+                            class="w-5 h-5"
+                        />
+                        <span data-i18n-key="communityButtonDiscord"
+                            >加入 Discord</span
+                        >
+                    </a>
+                    <a
+                        href="https://t.me/+fEJ2UYnOlVM0NmM1"
+                        target="_blank"
+                        class="social-button inline-flex items-center justify-center gap-3 font-semibold text-gray-800 bg-white hover:bg-gray-100 border border-gray-200 px-6 py-3 rounded-lg shadow-sm"
+                    >
+                        <img
+                            src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg"
+                            alt="Telegram Icon"
+                            class="w-5 h-5"
+                        />
+                        <span data-i18n-key="communityButtonTelegram"
+                            >加入 Telegram</span
+                        >
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="text-center py-8">
+            <p class="text-gray-500" data-i18n-key="footerCopyright"></p>
+            <p
+                class="text-gray-500 text-sm mt-1"
+                data-i18n-key="footerSubtitle"
+            >
+                Flare is an open-source project.
+            </p>
+        </footer>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", () => {
+                const currentYear = new Date().getFullYear();
+                const translations = {
+                    en: {
+                        metaTitle: "Flare - All your social feeds, unified",
+                        heroSubtitle: "All your social feeds, unified.",
+                        heroSubtext:
+                            "No waitlist, no subscription, completely open-source. Download Flare now and experience the next generation of social networking.",
+                        googlePlayButton: "Google Play",
+                        testFlightButton: "TestFlight",
+                        githubButton: "GitHub",
+                        featuresTitle: "Powerful Features, All in One Place",
+                        featuresSubtitle:
+                            "Flare is more than just a client; it's a whole new social hub.",
+                        feature1Title: "Multi-Platform Aggregation",
+                        feature1Desc:
+                            "Supports Mastodon, Misskey, Bluesky, X, and more, breaking down the barriers between platforms.",
+                        feature2Title: "Unified Timeline",
+                        feature2Desc:
+                            "Merge timelines from different platforms into one, browse all updates without switching.",
+                        feature3Title: "Local History",
+                        feature3Desc:
+                            "Built-in local history allows you to find content you've missed at any time.",
+                        feature4Title: "Built-in RSS Reader",
+                        feature4Desc:
+                            "With powerful built-in RSS support, it can be used as a full-featured RSS reader.",
+                        feature5Title: "Optimized Large-Screen Experience",
+                        feature5Desc:
+                            "Specially optimized interface for tablets and desktops for a better browsing experience.",
+                        feature6Title: "Desktop Version, Available Now",
+                        feature6Desc:
+                            "The desktop client is now in open beta. Enjoy a seamless social experience on your computer.",
+                        communityTitle: "Join Our Community",
+                        communitySubtitle:
+                            "Get the latest updates, join the discussion, and grow with us.",
+                        communityButtonX: "Follow on X",
+                        communityButtonBluesky: "Follow on Bluesky",
+                        communityButtonDiscord: "Join Discord",
+                        communityButtonTelegram: "Join Telegram",
+                        footerCopyright: `© ${currentYear} DimensionDev. All rights reserved.`,
+                        footerSubtitle: "Flare is an open-source project.",
+                    },
+                    ja: {
+                        metaTitle: "Flare - すべてのソーシャルフィードを一つに",
+                        heroSubtitle: "すべてのソーシャルフィードを一つに。",
+                        heroSubtext:
+                            "ウェイトリストなし、サブスクリプション不要、完全にオープンソース。今すぐFlareをダウンロードして、次世代のソーシャルネットワーキングを体験してください。",
+                        googlePlayButton: "Google Play",
+                        testFlightButton: "TestFlight",
+                        githubButton: "GitHub",
+                        featuresTitle: "強力な機能を、一つに",
+                        featuresSubtitle:
+                            "Flareは単なるクライアントではなく、全く新しいソーシャルハブです。",
+                        feature1Title: "マルチプラットフォーム集約",
+                        feature1Desc:
+                            "Mastodon、Misskey、Bluesky、Xなどを同時にサポートし、プラットフォーム間の壁を取り払います。",
+                        feature2Title: "統合タイムライン",
+                        feature2Desc:
+                            "異なるプラットフォームのタイムラインを一つに統合し、切り替えることなくすべての更新を閲覧できます。",
+                        feature3Title: "ローカル履歴",
+                        feature3Desc:
+                            "内蔵のローカル履歴で、見逃したコンテンツをいつでも見つけることができます。",
+                        feature4Title: "内蔵RSSリーダー",
+                        feature4Desc:
+                            "強力なRSSサポートを内蔵しており、多機能なRSSリーダーとして使用できます。",
+                        feature5Title: "最適化された大画面体験",
+                        feature5Desc:
+                            "タブレットとデスクトップ向けに特別に最適化されたインターフェースで、より良いブラウジング体験を提供します。",
+                        feature6Title: "デスクトップ版、公開中",
+                        feature6Desc:
+                            "デスクトップクライアントは現在オープンベータテスト中です。お使いのコンピュータでシームレスなソーシャル体験をお楽しみください。",
+                        communityTitle: "コミュニティに参加",
+                        communitySubtitle:
+                            "最新情報を入手し、ディスカッションに参加し、私たちと一緒に成長しましょう。",
+                        communityButtonX: "Xでフォロー",
+                        communityButtonBluesky: "Blueskyでフォロー",
+                        communityButtonDiscord: "Discordに参加",
+                        communityButtonTelegram: "Telegramに参加",
+                        footerCopyright: `© ${currentYear} DimensionDev. All rights reserved.`,
+                        footerSubtitle:
+                            "Flareはオープンソースプロジェクトです。",
+                    },
+                    zh: {
+                        metaTitle: "Flare - 聚合你的所有社交信息流",
+                        heroSubtitle: "聚合你的所有社交信息流。",
+                        heroSubtext:
+                            "没有 waitlist，无需订阅，完全开源。立即下载 Flare，体验下一代社交网络。",
+                        googlePlayButton: "Google Play",
+                        testFlightButton: "TestFlight",
+                        githubButton: "GitHub",
+                        featuresTitle: "强大功能，一站式体验",
+                        featuresSubtitle:
+                            "Flare 不仅仅是一个客户端，更是一个全新的社交中心。",
+                        feature1Title: "聚合多平台",
+                        feature1Desc:
+                            "同时支持 Mastodon、Misskey、Bluesky、X 等多个平台，告别平台间的隔阂。",
+                        feature2Title: "混合时间线",
+                        feature2Desc:
+                            "将不同平台的时间线混合为一条，无需切换，尽览所有动态。",
+                        feature3Title: "本地历史记录",
+                        feature3Desc:
+                            "内置本地历史记录，随时找回您错过的内容。",
+                        feature4Title: "内置 RSS 阅读器",
+                        feature4Desc:
+                            "内置强大的 RSS 支持，可当作一个功能全面的 RSS 阅读器使用。",
+                        feature5Title: "优化的大屏体验",
+                        feature5Desc:
+                            "为平板和桌面端专门优化了界面，带来更佳的浏览体验。",
+                        feature6Title: "桌面版，现已推出",
+                        feature6Desc:
+                            "桌面客户端已经开放测试，在您的电脑上享受无缝的社交体验。",
+                        communityTitle: "加入我们的社区",
+                        communitySubtitle:
+                            "获取最新动态，参与讨论，与我们共同成长。",
+                        communityButtonX: "关注 X",
+                        communityButtonBluesky: "关注 Bluesky",
+                        communityButtonDiscord: "加入 Discord",
+                        communityButtonTelegram: "加入 Telegram",
+                        footerCopyright: `© ${currentYear} DimensionDev. All rights reserved.`,
+                        footerSubtitle: "Flare is an open-source project.",
+                    },
+                };
+
+                const languageSwitcher =
+                    document.getElementById("language-switcher");
+
+                const setLanguage = (lang) => {
+                    if (!translations[lang]) return;
+
+                    document
+                        .querySelectorAll("[data-i18n-key]")
+                        .forEach((element) => {
+                            const key = element.getAttribute("data-i18n-key");
+                            if (translations[lang][key]) {
+                                element.textContent = translations[lang][key];
+                            }
+                        });
+                    document.documentElement.lang = lang.startsWith("zh")
+                        ? "zh-CN"
+                        : lang;
+                    localStorage.setItem("language", lang);
+                    languageSwitcher.value = lang;
+                };
+
+                languageSwitcher.addEventListener("change", (event) => {
+                    setLanguage(event.target.value);
+                });
+
+                const getInitialLanguage = () => {
+                    const savedLang = localStorage.getItem("language");
+                    if (savedLang && translations[savedLang]) {
+                        return savedLang;
+                    }
+                    const browserLang = navigator.language.split("-")[0];
+                    if (translations[browserLang]) {
+                        return browserLang;
+                    }
+                    return "zh"; // Default language
+                };
+
+                const initialLang = getInitialLanguage();
+                setLanguage(initialLang);
             });
-            document.documentElement.lang = lang.startsWith('zh') ? 'zh-CN' : lang;
-            localStorage.setItem('language', lang);
-            languageSwitcher.value = lang;
-        };
-
-        languageSwitcher.addEventListener('change', (event) => {
-            setLanguage(event.target.value);
-        });
-
-        const getInitialLanguage = () => {
-            const savedLang = localStorage.getItem('language');
-            if (savedLang && translations[savedLang]) {
-                return savedLang;
-            }
-            const browserLang = navigator.language.split('-')[0];
-            if (translations[browserLang]) {
-                return browserLang;
-            }
-            return 'zh'; // Default language
-        };
-
-        const initialLang = getInitialLanguage();
-        setLanguage(initialLang);
-    });
-</script>
-
-</body>
+        </script>
+    </body>
 </html>

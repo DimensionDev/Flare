@@ -61,13 +61,13 @@ import dev.dimension.flare.common.onLoading
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.common.refreshSuspend
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
+import dev.dimension.flare.data.model.VideoAutoplay
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.BackButton
-import dev.dimension.flare.ui.component.ComponentAppearance
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
-import dev.dimension.flare.ui.component.LocalComponentAppearance
+import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.ProfileHeader
 import dev.dimension.flare.ui.component.ProfileHeaderLoading
 import dev.dimension.flare.ui.component.ProfileMenu
@@ -75,6 +75,7 @@ import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.component.TabRowIndicator
 import dev.dimension.flare.ui.component.placeholder
+import dev.dimension.flare.ui.component.platform.adaptiveSideContentSize
 import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.component.status.AdaptiveCard
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
@@ -239,7 +240,7 @@ internal fun ProfileScreen(
                 .toSize()
                 .toDpSize()
         }
-    val bigScreen = isBigScreen()
+    val bigScreen by isBigScreen()
     val scrollBehavior =
         if (bigScreen) {
             TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
@@ -336,11 +337,7 @@ internal fun ProfileScreen(
     ) {
         Row {
             if (bigScreen) {
-                val width =
-                    when (windowSize.width) {
-                        in 840.dp..1024.dp -> 332.dp
-                        else -> 432.dp
-                    }
+                val width by adaptiveSideContentSize()
                 Column(
                     modifier =
                         Modifier
@@ -529,14 +526,15 @@ private fun ProfileMediaTab(
     onItemClicked: (statusKey: MicroBlogKey, index: Int, preview: String?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val isBigScreen by isBigScreen()
     CompositionLocalProvider(
-        LocalComponentAppearance provides
-            LocalComponentAppearance.current.copy(
-                videoAutoplay = ComponentAppearance.VideoAutoplay.NEVER,
+        LocalTimelineAppearance provides
+            LocalTimelineAppearance.current.copy(
+                videoAutoplay = VideoAutoplay.NEVER,
             ),
     ) {
         val size =
-            if (isBigScreen()) {
+            if (isBigScreen) {
                 240.dp
             } else {
                 120.dp

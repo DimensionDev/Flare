@@ -9,7 +9,7 @@ struct StatusMediaView: View {
     let sensitive: Bool
     let onMediaClicked: (any UiMedia, Int) -> Void
     let cornerRadius: CGFloat
-    @Environment(\.appearanceSettings.expandMediaSize) private var expandMediaSize
+    @Environment(\.timelineAppearance.expandMediaSize) private var expandMediaSize
     @State private var isBlur: Bool
 //    @State private var selectedIndex: Int? = nil
 

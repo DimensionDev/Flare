@@ -24,9 +24,9 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.data.model.TimelineDisplayMode
 import dev.dimension.flare.ui.common.plus
+import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.theme.PlatformTheme
 import dev.dimension.flare.ui.theme.isLightTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
@@ -57,7 +57,7 @@ public fun LazyStatusVerticalStaggeredGrid(
     allowGalleryMode: Boolean = false,
     content: LazyStaggeredGridScope.() -> Unit,
 ) {
-    val displayMode = LocalAppearanceSettings.current.timelineDisplayMode
+    val displayMode = LocalTimelineAppearance.current.timelineDisplayMode
     val effectiveMode =
         when {
             allowGalleryMode -> displayMode

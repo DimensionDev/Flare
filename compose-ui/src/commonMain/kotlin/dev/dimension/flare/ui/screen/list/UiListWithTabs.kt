@@ -43,13 +43,13 @@ public fun LazyListScope.uiListWithTabs(
         state.items,
         toList,
         trailingContent = { item ->
-            state.currentTabs.onSuccess { currentTabs ->
+            state.pins.onSuccess { currentTabs ->
                 val isPinned =
                     remember(
                         item,
                         currentTabs,
                     ) {
-                        currentTabs.contains(item.id)
+                        currentTabs.contains(item)
                     }
                 PlatformIconButton(
                     onClick = {

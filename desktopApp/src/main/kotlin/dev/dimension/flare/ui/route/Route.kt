@@ -1,8 +1,8 @@
 package dev.dimension.flare.ui.route
 
 import androidx.navigation3.runtime.NavKey
-import dev.dimension.flare.data.model.TimelineTabItem
-import dev.dimension.flare.data.model.XQT
+import dev.dimension.flare.data.model.tab.TimelineSourceRef
+import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiRssSource
@@ -27,7 +27,11 @@ internal sealed interface Route : NavKey {
     }
 
     data class Timeline(
-        val tabItem: TimelineTabItem,
+        val tabItem: TimelineTabItemV2,
+    ) : ScreenRoute
+
+    data class TimelineSource(
+        val source: TimelineSourceRef,
     ) : ScreenRoute
 
     data class Home(
@@ -224,7 +228,7 @@ internal sealed interface Route : NavKey {
     data object TabSetting : ScreenRoute
 
     data class TabGroupConfig(
-        val item: dev.dimension.flare.data.model.MixedTimelineTabItem? = null,
+        val groupId: String? = null,
     ) : ScreenRoute
 
     data object LocalCache : ScreenRoute
@@ -292,11 +296,9 @@ internal sealed interface Route : NavKey {
         public fun from(deeplinkRoute: DeeplinkRoute): Route? {
             return when (deeplinkRoute) {
                 is DeeplinkRoute.Timeline.XQTDeviceFollow -> {
-                    Route.Timeline(
-                        tabItem =
-                            XQT.DeviceFollowTimelineTabItem(
-                                account = deeplinkRoute.accountType,
-                            ),
+                    val accountKey = (deeplinkRoute.accountType as? AccountType.Specific)?.accountKey ?: return null
+                    Route.TimelineSource(
+                        source = TimelineSourceRef.xqtDeviceFollow(accountKey),
                     )
                 }
 
@@ -477,8 +479,38 @@ internal sealed interface Route : NavKey {
                     )
                 }
 
+                is DeeplinkRoute.AllLists -> {
+                    AllLists(
+                        accountType = AccountType.Specific(deeplinkRoute.accountKey),
+                    )
+                }
+
+                is DeeplinkRoute.AllDirectMessages -> {
+                    DmList(
+                        accountType = AccountType.Specific(deeplinkRoute.accountKey),
+                    )
+                }
+
+                is DeeplinkRoute.Bluesky.AllFeeds -> {
+                    BlueskyFeeds(
+                        accountType = AccountType.Specific(deeplinkRoute.accountKey),
+                    )
+                }
+
                 is DeeplinkRoute.EditUserList -> {
                     null
+                }
+
+                is DeeplinkRoute.Misskey.AllAntennas -> {
+                    MisskeyAntennas(
+                        accountType = AccountType.Specific(deeplinkRoute.accountKey),
+                    )
+                }
+
+                is DeeplinkRoute.Misskey.AllChannels -> {
+                    MisskeyChannelList(
+                        accountType = AccountType.Specific(deeplinkRoute.accountKey),
+                    )
                 }
 
                 is DeeplinkRoute.MuteUser -> {

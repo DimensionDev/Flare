@@ -23,6 +23,7 @@ internal object TimelinePagingMapper {
     suspend fun toDb(
         data: UiTimelineV2,
         pagingKey: String,
+        sortId: Long? = null,
     ): DbPagingTimelineWithStatus {
         val rootStatus = uiTimelineToDbStatusWithUser(data, sanitizePostReferences = true)
         return DbPagingTimelineWithStatus(
@@ -30,7 +31,7 @@ internal object TimelinePagingMapper {
                 DbPagingTimeline(
                     pagingKey = pagingKey,
                     statusId = rootStatus.data.id,
-                    sortId = SnowflakeIdGenerator.nextId(),
+                    sortId = sortId ?: SnowflakeIdGenerator.nextId(),
                 ),
             status =
                 DbStatusWithReference(

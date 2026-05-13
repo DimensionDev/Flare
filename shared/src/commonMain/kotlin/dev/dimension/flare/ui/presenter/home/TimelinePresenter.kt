@@ -29,10 +29,14 @@ import dev.dimension.flare.data.datasource.microblog.paging.TimelineRemoteMediat
 import dev.dimension.flare.data.datasource.microblog.paging.toPagingSource
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
 import dev.dimension.flare.data.datastore.AppDataStore
+import dev.dimension.flare.data.model.tab.TimelineFilterConfig
+import dev.dimension.flare.data.model.tab.TimelinePostContent
+import dev.dimension.flare.data.model.tab.TimelinePostKind
 import dev.dimension.flare.data.repository.LocalFilterRepository
 import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.data.translation.PreTranslationService
 import dev.dimension.flare.data.translation.TranslationSettingsSupport
+import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.CoroutineScope
@@ -62,6 +66,8 @@ public abstract class TimelinePresenter :
     private val filterFlow: Flow<List<String>> by lazy {
         localFilterRepository.getFlow(forTimeline = true)
     }
+
+    internal var timelineFilterConfig: TimelineFilterConfig = TimelineFilterConfig()
 
     private val translationSettingsFlow: Flow<TranslationDisplayOptions> by lazy {
         TranslationSettingsSupport.displayOptionsFlow(appDataStore)
@@ -106,15 +112,7 @@ public abstract class TimelinePresenter :
                     filterFlow.map { filterList ->
                         pager
                             .filter { item ->
-                                if (filterList.isEmpty()) {
-                                    true
-                                } else {
-                                    !filterList.any { filter ->
-                                        item.searchText
-                                            .orEmpty()
-                                            .contains(filter, ignoreCase = true)
-                                    }
-                                }
+                                item.matchesKeywordFilters(filterList) && item.matchesTimelineFilter(timelineFilterConfig)
                             }.map {
                                 transform(it)
                             }
@@ -190,4 +188,68 @@ public interface TimelineState {
     public val listState: PagingState<UiTimelineV2>
 
     public suspend fun refresh()
+}
+
+private fun UiTimelineV2.matchesKeywordFilters(filters: List<String>): Boolean =
+    if (filters.isEmpty()) {
+        true
+    } else {
+        !filters.any { filter ->
+            searchText
+                .orEmpty()
+                .contains(filter, ignoreCase = true)
+        }
+    }
+
+internal fun UiTimelineV2.matchesTimelineFilter(filterConfig: TimelineFilterConfig): Boolean {
+    if (filterConfig.excludedKinds.isEmpty() && filterConfig.excludedContents.isEmpty()) {
+        return true
+    }
+    val post = this as? UiTimelineV2.Post ?: return true
+    val traits = post.traits()
+    return filterConfig.excludedKinds.none(traits.kinds::contains) &&
+        filterConfig.excludedContents.none(traits.contents::contains)
+}
+
+internal data class TimelinePostTraits(
+    val kinds: Set<TimelinePostKind>,
+    val contents: Set<TimelinePostContent>,
+)
+
+internal fun UiTimelineV2.Post.traits(): TimelinePostTraits {
+    val kinds =
+        buildSet {
+            if (replyToHandle != null) {
+                add(TimelinePostKind.Reply)
+            }
+            if (internalRepost != null) {
+                add(TimelinePostKind.Repost)
+            }
+            if (quote.isNotEmpty()) {
+                add(TimelinePostKind.Quote)
+            }
+            if (isEmpty()) {
+                add(TimelinePostKind.Original)
+            }
+        }
+    val contents =
+        buildSet {
+            val hasVisualMedia = images.any { it is UiMedia.Image || it is UiMedia.Gif || it is UiMedia.Video }
+            if (content.raw.isNotBlank() && !hasVisualMedia) {
+                add(TimelinePostContent.Text)
+            }
+            if (images.any { it is UiMedia.Image || it is UiMedia.Gif }) {
+                add(TimelinePostContent.Image)
+            }
+            if (images.any { it is UiMedia.Video }) {
+                add(TimelinePostContent.Video)
+            }
+            if (isEmpty()) {
+                add(TimelinePostContent.Other)
+            }
+        }
+    return TimelinePostTraits(
+        kinds = kinds,
+        contents = contents,
+    )
 }

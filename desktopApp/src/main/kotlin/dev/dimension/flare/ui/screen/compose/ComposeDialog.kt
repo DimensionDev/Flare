@@ -98,7 +98,7 @@ import dev.dimension.flare.ok
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.EmojiPicker
 import dev.dimension.flare.ui.component.FAIcon
-import dev.dimension.flare.ui.component.LocalComponentAppearance
+import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.status.CommonStatusComponent
 import dev.dimension.flare.ui.component.status.StatusVisibilityComponent
@@ -675,8 +675,8 @@ fun ComposeDialog(
                                     .sizeIn(maxWidth = 300.dp),
                         ) {
                             CompositionLocalProvider(
-                                LocalComponentAppearance provides
-                                    LocalComponentAppearance.current.copy(
+                                LocalTimelineAppearance provides
+                                    LocalTimelineAppearance.current.copy(
                                         showMedia = false,
                                         expandMediaSize = false,
                                         postActionStyle = PostActionStyle.Hidden,

@@ -32,7 +32,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
     private var showTranslate: Bool = true
     private var aiTldrEnabled: Bool = false
     private var showParents: Bool = true
-    private var appearance = StatusUIKitAppearance(settings: AppearanceSettings.companion.Default)
+    private var appearance = StatusUIKitAppearance(timeline: TimelineAppearance.companion.Default)
     private var lastConfigureSignature: ConfigureSignature?
     private var lastPreparedFittingWidthKey: Int?
 

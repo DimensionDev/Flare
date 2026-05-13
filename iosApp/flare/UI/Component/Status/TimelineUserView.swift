@@ -3,7 +3,7 @@ import KotlinSharedUI
 
 struct TimelineUserView: View {
     @Environment(\.openURL) private var openURL
-    @Environment(\.appearanceSettings.showNumbers) private var showNumbers
+    @Environment(\.timelineAppearance.showNumbers) private var showNumbers
     @ScaledMetric(relativeTo: .footnote) var fontSize = 13
     let data: UiTimelineV2.User
     var body: some View {

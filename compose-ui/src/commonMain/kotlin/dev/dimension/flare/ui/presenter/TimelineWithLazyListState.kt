@@ -12,13 +12,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import dev.dimension.flare.common.onSuccess
-import dev.dimension.flare.data.model.TimelineTabItem
+import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.mapNotNull
 import moe.tlaster.precompose.molecule.producePresenter
 import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 @Immutable
 public interface TimelineWithLazyListState : TimelineItemPresenter.State {
     public val showNewToots: Boolean
@@ -40,10 +41,10 @@ public interface TimelineWithLazyListState : TimelineItemPresenter.State {
 @HiddenFromObjC
 @Composable
 public fun rememberTimelineItemPresenterWithLazyListState(
-    item: TimelineTabItem,
+    item: TimelineTabItemV2,
     lazyStaggeredGridState: LazyStaggeredGridState = rememberLazyStaggeredGridState(),
 ): TimelineWithLazyListState {
-    val baseState by producePresenter("timeline_${item.key}") {
+    val baseState by producePresenter("timeline_${item.presenterId}") {
         remember { TimelineItemPresenter(item) }.invoke()
     }
     return rememberTimelineWithLazyListState(baseState, lazyStaggeredGridState)

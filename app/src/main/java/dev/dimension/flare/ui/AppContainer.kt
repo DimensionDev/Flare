@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
@@ -12,17 +11,17 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
 import androidx.core.net.toUri
 import dev.dimension.flare.data.datastore.model.AppSettings
-import dev.dimension.flare.data.model.AppearanceSettings
-import dev.dimension.flare.data.model.AvatarShape
-import dev.dimension.flare.data.model.LocalAppearanceSettings
-import dev.dimension.flare.data.model.VideoAutoplay
-import dev.dimension.flare.data.repository.SettingsRepository
+import dev.dimension.flare.data.model.appearance.GlobalAppearance
+import dev.dimension.flare.data.model.appearance.TimelineAppearance
 import dev.dimension.flare.ui.common.BindAmberSignerLauncher
-import dev.dimension.flare.ui.component.ComponentAppearance
-import dev.dimension.flare.ui.component.LocalComponentAppearance
+import dev.dimension.flare.ui.component.LocalGlobalAppearance
+import dev.dimension.flare.ui.component.LocalTimelineAppearance
+import dev.dimension.flare.ui.model.takeSuccessOr
+import dev.dimension.flare.ui.presenter.EnvironmentSettingsPresenter
+import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.screen.home.HomeScreen
 import dev.dimension.flare.ui.theme.FlareTheme
-import org.koin.compose.koinInject
+import moe.tlaster.precompose.molecule.producePresenter
 
 @Composable
 fun AppContainer(afterInit: () -> Unit) {
@@ -38,18 +37,17 @@ fun AppContainer(afterInit: () -> Unit) {
 @Composable
 fun FlareApp(content: @Composable () -> Unit) {
     BindAmberSignerLauncher()
-    val settingsRepository = koinInject<SettingsRepository>()
-    val appearanceSettings by settingsRepository.appearanceSettings.collectAsState(
-        AppearanceSettings(),
-    )
+    val state by producePresenter("env") { EnvironmentSettingsPresenter().invoke() }
+    val globalAppearance = state.globalAppearance.takeSuccessOr(GlobalAppearance.Default)
+    val timelineAppearance = state.timelineAppearance.takeSuccessOr(TimelineAppearance.Default)
     val originalUriHandler = LocalUriHandler.current
     val context = LocalContext.current
     val uriHandler =
-        remember(appearanceSettings.inAppBrowser) {
+        remember(globalAppearance.inAppBrowser) {
             object : UriHandler {
                 override fun openUri(uri: String) {
                     if (uri.startsWith("http://") || uri.startsWith("https://")) {
-                        openInBrowser(context, uri, appearanceSettings.inAppBrowser) {
+                        openInBrowser(context, uri, globalAppearance.inAppBrowser) {
                             originalUriHandler.openUri(uri)
                         }
                     } else {
@@ -59,40 +57,18 @@ fun FlareApp(content: @Composable () -> Unit) {
             }
         }
 
-    val appSettings by settingsRepository.appSettings.collectAsState(AppSettings(""))
+    val appSettings = state.appSettings.takeSuccessOr(AppSettings(""))
     CompositionLocalProvider(
         LocalUriHandler provides uriHandler,
-        LocalAppearanceSettings provides appearanceSettings,
-        LocalComponentAppearance provides
-            remember(appearanceSettings, appSettings.translateConfig, appSettings.aiConfig.tldr) {
-                ComponentAppearance(
-                    dynamicTheme = appearanceSettings.dynamicTheme,
-                    avatarShape =
-                        when (appearanceSettings.avatarShape) {
-                            AvatarShape.CIRCLE -> ComponentAppearance.AvatarShape.CIRCLE
-                            AvatarShape.SQUARE -> ComponentAppearance.AvatarShape.SQUARE
-                        },
-                    showNumbers = appearanceSettings.showNumbers,
-                    showLinkPreview = appearanceSettings.showLinkPreview,
-                    showMedia = appearanceSettings.showMedia,
-                    showSensitiveContent = appearanceSettings.showSensitiveContent,
-                    videoAutoplay =
-                        when (appearanceSettings.videoAutoplay) {
-                            VideoAutoplay.ALWAYS -> ComponentAppearance.VideoAutoplay.ALWAYS
-                            VideoAutoplay.WIFI -> ComponentAppearance.VideoAutoplay.WIFI
-                            VideoAutoplay.NEVER -> ComponentAppearance.VideoAutoplay.NEVER
-                        },
-                    expandMediaSize = appearanceSettings.expandMediaSize,
-                    compatLinkPreview = appearanceSettings.compatLinkPreview,
+        LocalGlobalAppearance provides globalAppearance,
+        LocalTimelineAppearance provides
+            remember(globalAppearance, timelineAppearance, appSettings.translateConfig, appSettings.aiConfig.tldr) {
+                timelineAppearance.copy(
                     aiConfig =
-                        ComponentAppearance.AiConfig(
+                        TimelineAppearance.AiConfig(
                             translation = true,
                             tldr = appSettings.aiConfig.tldr,
                         ),
-                    fullWidthPost = appearanceSettings.fullWidthPost,
-                    postActionStyle = appearanceSettings.postActionStyle,
-                    absoluteTimestamp = appearanceSettings.absoluteTimestamp,
-                    showPlatformLogo = appearanceSettings.showPlatformLogo,
                 )
             },
         content = content,

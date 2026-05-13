@@ -4,6 +4,7 @@ import dev.dimension.flare.data.database.provideAppDatabase
 import dev.dimension.flare.data.database.provideCacheDatabase
 import dev.dimension.flare.data.datasource.nostr.DatabaseNostrCache
 import dev.dimension.flare.data.datasource.nostr.NostrCache
+import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.network.ai.AiCompletionService
 import dev.dimension.flare.data.network.ai.OpenAIService
 import dev.dimension.flare.data.network.rss.Readability
@@ -31,7 +32,7 @@ import org.koin.dsl.module
 internal val commonModule =
     module {
         singleOf(::AccountRepository)
-        single(createdAtStart = true) { AccountTabSyncCoordinator(get(), get(), get()) }
+        single(createdAtStart = true) { AccountTabSyncCoordinator(get(), get(), get(), get()) }
         singleOf(::provideAppDatabase)
         singleOf(::provideCacheDatabase)
         single<NostrCache> { DatabaseNostrCache(get()) }
@@ -64,4 +65,5 @@ internal val commonModule =
         singleOf(::OpenAIService)
         singleOf(::AiCompletionService)
         single<PreTranslationService> { OnlinePreTranslationService(get(), get(), get(), get()) }
+        singleOf(::TimelineResolver)
     }

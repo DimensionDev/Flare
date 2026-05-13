@@ -27,13 +27,13 @@ public fun LazyListScope.misskeyAntennasWithTabs(
         state.data,
         onClick,
         trailingContent = { item ->
-            state.currentTabs.onSuccess { currentTabs ->
+            state.pins.onSuccess { currentTabs ->
                 val isPinned =
                     remember(
                         item,
                         currentTabs,
                     ) {
-                        currentTabs.contains(item.id)
+                        currentTabs.contains(item)
                     }
                 PlatformIconButton(
                     onClick = {

@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.model
 
 import androidx.compose.runtime.Immutable
+import dev.dimension.flare.data.model.IconType
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -60,3 +61,5 @@ public enum class UiIcon {
     Translate,
     UnFavourite,
 }
+
+public fun UiIcon.asType(): IconType = IconType.Material(this)

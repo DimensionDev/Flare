@@ -23,10 +23,12 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.R
-import dev.dimension.flare.data.model.LocalAppearanceSettings
+import dev.dimension.flare.data.model.appearance.AppearanceKeys
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FlareLargeFlexibleTopAppBar
 import dev.dimension.flare.ui.component.FlareScaffold
+import dev.dimension.flare.ui.component.LocalGlobalAppearance
+import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.status.StatusItem
 import dev.dimension.flare.ui.model.isSuccess
 import dev.dimension.flare.ui.model.onSuccess
@@ -41,7 +43,8 @@ import moe.tlaster.precompose.molecule.producePresenter
 internal fun AppearanceDisplayScreen(onBack: () -> Unit) {
     val topAppBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val state by producePresenter { appearancePresenter() }
-    val appearanceSettings = LocalAppearanceSettings.current
+    val globalAppearance = LocalGlobalAppearance.current
+    val timelineAppearance = LocalTimelineAppearance.current
     FlareScaffold(
         topBar = {
             FlareLargeFlexibleTopAppBar(
@@ -82,9 +85,7 @@ internal fun AppearanceDisplayScreen(onBack: () -> Unit) {
             }
             SegmentedListItem(
                 onClick = {
-                    state.updateSettings {
-                        copy(absoluteTimestamp = !absoluteTimestamp)
-                    }
+                    state.update(AppearanceKeys.AbsoluteTimestamp, !timelineAppearance.absoluteTimestamp)
                 },
                 shapes =
                     if (state.sampleStatus.isSuccess) {
@@ -100,20 +101,16 @@ internal fun AppearanceDisplayScreen(onBack: () -> Unit) {
                 },
                 trailingContent = {
                     Switch(
-                        checked = appearanceSettings.absoluteTimestamp,
+                        checked = timelineAppearance.absoluteTimestamp,
                         onCheckedChange = {
-                            state.updateSettings {
-                                copy(absoluteTimestamp = it)
-                            }
+                            state.update(AppearanceKeys.AbsoluteTimestamp, it)
                         },
                     )
                 },
             )
             SegmentedListItem(
                 onClick = {
-                    state.updateSettings {
-                        copy(showPlatformLogo = !showPlatformLogo)
-                    }
+                    state.update(AppearanceKeys.ShowPlatformLogo, !timelineAppearance.showPlatformLogo)
                 },
                 shapes = ListItemDefaults.item(),
                 content = {
@@ -124,20 +121,16 @@ internal fun AppearanceDisplayScreen(onBack: () -> Unit) {
                 },
                 trailingContent = {
                     Switch(
-                        checked = appearanceSettings.showPlatformLogo,
+                        checked = timelineAppearance.showPlatformLogo,
                         onCheckedChange = {
-                            state.updateSettings {
-                                copy(showPlatformLogo = it)
-                            }
+                            state.update(AppearanceKeys.ShowPlatformLogo, it)
                         },
                     )
                 },
             )
             SegmentedListItem(
                 onClick = {
-                    state.updateSettings {
-                        copy(showLinkPreview = !showLinkPreview)
-                    }
+                    state.update(AppearanceKeys.ShowLinkPreview, !timelineAppearance.showLinkPreview)
                 },
                 shapes = ListItemDefaults.item(),
                 content = {
@@ -148,21 +141,17 @@ internal fun AppearanceDisplayScreen(onBack: () -> Unit) {
                 },
                 trailingContent = {
                     Switch(
-                        checked = appearanceSettings.showLinkPreview,
+                        checked = timelineAppearance.showLinkPreview,
                         onCheckedChange = {
-                            state.updateSettings {
-                                copy(showLinkPreview = it)
-                            }
+                            state.update(AppearanceKeys.ShowLinkPreview, it)
                         },
                     )
                 },
             )
-            AnimatedVisibility(visible = appearanceSettings.showLinkPreview) {
+            AnimatedVisibility(visible = timelineAppearance.showLinkPreview) {
                 SegmentedListItem(
                     onClick = {
-                        state.updateSettings {
-                            copy(compatLinkPreview = !compatLinkPreview)
-                        }
+                        state.update(AppearanceKeys.CompatLinkPreview, !timelineAppearance.compatLinkPreview)
                     },
                     shapes = ListItemDefaults.item(),
                     content = {
@@ -173,11 +162,9 @@ internal fun AppearanceDisplayScreen(onBack: () -> Unit) {
                     },
                     trailingContent = {
                         Switch(
-                            checked = appearanceSettings.compatLinkPreview,
+                            checked = timelineAppearance.compatLinkPreview,
                             onCheckedChange = {
-                                state.updateSettings {
-                                    copy(compatLinkPreview = it)
-                                }
+                                state.update(AppearanceKeys.CompatLinkPreview, it)
                             },
                         )
                     },
@@ -185,9 +172,7 @@ internal fun AppearanceDisplayScreen(onBack: () -> Unit) {
             }
             SegmentedListItem(
                 onClick = {
-                    state.updateSettings {
-                        copy(inAppBrowser = !inAppBrowser)
-                    }
+                    state.update(AppearanceKeys.InAppBrowser, !globalAppearance.inAppBrowser)
                 },
                 shapes = ListItemDefaults.last(),
                 content = {
@@ -198,11 +183,9 @@ internal fun AppearanceDisplayScreen(onBack: () -> Unit) {
                 },
                 trailingContent = {
                     Switch(
-                        checked = appearanceSettings.inAppBrowser,
+                        checked = globalAppearance.inAppBrowser,
                         onCheckedChange = {
-                            state.updateSettings {
-                                copy(inAppBrowser = it)
-                            }
+                            state.update(AppearanceKeys.InAppBrowser, it)
                         },
                     )
                 },

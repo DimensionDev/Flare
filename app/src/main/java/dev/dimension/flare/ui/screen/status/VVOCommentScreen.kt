@@ -18,13 +18,13 @@ import androidx.compose.ui.res.stringResource
 import dev.dimension.flare.R
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.data.model.BottomBarBehavior
-import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
-import dev.dimension.flare.ui.component.LocalComponentAppearance
+import dev.dimension.flare.ui.component.LocalGlobalAppearance
+import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.StatusItem
@@ -50,7 +50,7 @@ internal fun VVOCommentScreen(
         )
     }
     val topAppBarScrollBehavior =
-        if (LocalAppearanceSettings.current.bottomBarBehavior == BottomBarBehavior.AlwaysShow) {
+        if (LocalGlobalAppearance.current.bottomBarBehavior == BottomBarBehavior.AlwaysShow) {
             TopAppBarDefaults.pinnedScrollBehavior()
         } else {
             TopAppBarDefaults.enterAlwaysScrollBehavior()
@@ -70,8 +70,8 @@ internal fun VVOCommentScreen(
         modifier = Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection),
     ) { contentPadding ->
         CompositionLocalProvider(
-            LocalComponentAppearance provides
-                LocalComponentAppearance.current.copy(
+            LocalTimelineAppearance provides
+                LocalTimelineAppearance.current.copy(
                     lineLimit = Int.MAX_VALUE,
                 ),
         ) {

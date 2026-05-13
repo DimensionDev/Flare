@@ -2,7 +2,7 @@ import SwiftUI
 @preconcurrency import KotlinSharedUI
 
 struct StatusDetailScreen: View {
-    @Environment(\.appearanceSettings.timelineDisplayMode) private var timelineDisplayMode
+    @Environment(\.timelineAppearance.timelineDisplayMode) private var timelineDisplayMode
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @Environment(\.openURL) private var openURL
     @StateObject private var presenter: KotlinPresenter<StatusContextPresenterState>

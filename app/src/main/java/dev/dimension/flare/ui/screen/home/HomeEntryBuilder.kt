@@ -4,12 +4,15 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
+import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.ui.component.BottomSheetSceneStrategy
 import dev.dimension.flare.ui.route.Route
+import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3AdaptiveApi::class)
 internal fun EntryProviderScope<NavKey>.homeEntryBuilder(
@@ -24,7 +27,6 @@ internal fun EntryProviderScope<NavKey>.homeEntryBuilder(
         )
     ) { args ->
         HomeTimelineScreen(
-            accountType = args.accountType,
             toCompose = {
                 navigate(Route.Compose.New)
             },
@@ -41,10 +43,7 @@ internal fun EntryProviderScope<NavKey>.homeEntryBuilder(
     }
     entry<Route.Timeline> { args ->
         TimelineScreen(
-            tabItem = args.tabItem,
-            toLogin = {
-                navigate(Route.ServiceSelect.Selection)
-            },
+            source = args.source,
             onBack = onBack,
         )
     }
@@ -70,7 +69,7 @@ internal fun EntryProviderScope<NavKey>.homeEntryBuilder(
     entry<Route.TabSettings>(
         metadata = ListDetailSceneStrategy.extraPane(
             "home",
-        )
+        ),
     ) { args ->
         TabSettingScreen(
             onBack = onBack,
@@ -78,17 +77,17 @@ internal fun EntryProviderScope<NavKey>.homeEntryBuilder(
                 navigate(Route.Rss.Create)
             },
             toGroupConfig = {
-                navigate(Route.TabGroupConfig(it))
-            }
+                navigate(Route.TabGroupConfig(it?.id))
+            },
         )
     }
     entry<Route.TabGroupConfig>(
         metadata = ListDetailSceneStrategy.extraPane(
             "home",
-        )
+        ),
     ) { args ->
         GroupConfigScreen(
-            item = args.item,
+            groupId = args.groupId,
             onBack = onBack,
             toAddRssSource = {
                 navigate(Route.Rss.Create)

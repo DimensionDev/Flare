@@ -114,19 +114,13 @@ public fun LazyListScope.rssListWithTabs(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        state.currentTabs.onSuccess { currentTabs ->
-                            val pinKey =
-                                if (it.type == SubscriptionType.RSS) {
-                                    it.url
-                                } else {
-                                    "${it.type.name}:${it.url}"
-                                }
+                        state.pins.onSuccess { currentTabs ->
                             val isPinned =
                                 remember(
                                     it,
                                     currentTabs,
                                 ) {
-                                    currentTabs.contains(pinKey)
+                                    currentTabs.contains(it)
                                 }
                             PlatformIconButton(
                                 onClick = {

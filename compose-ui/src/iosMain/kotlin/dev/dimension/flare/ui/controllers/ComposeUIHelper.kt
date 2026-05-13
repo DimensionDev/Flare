@@ -1,5 +1,8 @@
 package dev.dimension.flare.ui.controllers
 
+import androidx.compose.runtime.ComposeRuntimeFlags
+import androidx.compose.runtime.ExperimentalComposeApi
+import androidx.compose.ui.ExperimentalComposeUiApi
 import coil3.ImageLoader
 import coil3.SingletonImageLoader
 import coil3.annotation.ExperimentalCoilApi
@@ -21,7 +24,11 @@ import org.koin.dsl.bind
 import org.koin.dsl.module
 
 public object ComposeUIHelper {
-    @OptIn(ExperimentalCoilApi::class)
+    @OptIn(
+        ExperimentalCoilApi::class,
+        ExperimentalComposeUiApi::class,
+        ExperimentalComposeApi::class,
+    )
     public fun initialize(
         inAppNotification: InAppNotification,
         swiftFormatter: SwiftFormatter,
@@ -47,6 +54,7 @@ public object ComposeUIHelper {
                 },
             )
         }
+        ComposeRuntimeFlags.isLinkBufferComposerEnabled = true
         SingletonImageLoader.setSafe { context ->
             ImageLoader
                 .Builder(context)

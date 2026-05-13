@@ -12,7 +12,7 @@ struct StatusShareSheet: View {
     
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.dismiss) private var dismiss
-    @Environment(\.appearanceSettings) private var appearanceSettings
+    @Environment(\.timelineAppearance) private var timelineAppearance
     @StateObject private var presenter: KotlinPresenter<StatusState>
     @State private var renderScale: CGFloat = 2.0
     @State private var theme: ColorScheme? = nil
@@ -130,7 +130,7 @@ struct StatusShareSheet: View {
             .padding(64)
             .background(Color(.systemGroupedBackground))
             .environment(\.colorScheme, theme ?? colorScheme)
-            .environment(\.appearanceSettings, appearanceSettings.copy(videoAutoplay: .never))
+            .environment(\.timelineAppearance, timelineAppearance.withVideoAutoplayNever())
     }
     
     
@@ -142,6 +142,29 @@ struct StatusShareSheet: View {
         guard let image = image else { return }
         UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil)
         dismiss()
+    }
+}
+
+private extension TimelineAppearance {
+    func withVideoAutoplayNever() -> TimelineAppearance {
+        doCopy(
+            avatarShape: avatarShape,
+            showMedia: showMedia,
+            showSensitiveContent: showSensitiveContent,
+            expandMediaSize: expandMediaSize,
+            videoAutoplay: .never,
+            showLinkPreview: showLinkPreview,
+            compatLinkPreview: compatLinkPreview,
+            showNumbers: showNumbers,
+            postActionStyle: postActionStyle,
+            fullWidthPost: fullWidthPost,
+            absoluteTimestamp: absoluteTimestamp,
+            showPlatformLogo: showPlatformLogo,
+            timelineDisplayMode: timelineDisplayMode,
+            aiConfig: aiConfig,
+            lineLimit: lineLimit,
+            showTranslateButton: showTranslateButton
+        )
     }
 }
 

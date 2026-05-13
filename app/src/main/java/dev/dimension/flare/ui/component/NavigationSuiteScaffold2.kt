@@ -89,7 +89,8 @@ import compose.icons.fontawesomeicons.solid.Pen
 import dev.dimension.flare.R
 import dev.dimension.flare.data.model.BottomBarBehavior
 import dev.dimension.flare.data.model.BottomBarStyle
-import dev.dimension.flare.data.model.LocalAppearanceSettings
+import dev.dimension.flare.ui.component.LocalGlobalAppearance
+import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.theme.segmentedShapes2
 import soup.compose.material.motion.animation.materialElevationScaleIn
 import soup.compose.material.motion.animation.materialElevationScaleOut
@@ -124,8 +125,8 @@ fun NavigationSuiteScaffold2(
 ) {
     var isPodcastShowing by remember { mutableStateOf(false) }
     var isBottomBarExpanded by remember { mutableStateOf(true) }
-    val bottomBarStyle = LocalAppearanceSettings.current.bottomBarStyle
-    val bottomBarBehavior = LocalAppearanceSettings.current.bottomBarBehavior
+    val bottomBarStyle = LocalGlobalAppearance.current.bottomBarStyle
+    val bottomBarBehavior = LocalGlobalAppearance.current.bottomBarBehavior
     val bottomBarState =
         remember(
             bottomBarStyle,

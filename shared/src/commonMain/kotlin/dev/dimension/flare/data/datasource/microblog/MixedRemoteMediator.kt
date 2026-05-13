@@ -7,6 +7,8 @@ import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoade
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.datasource.microblog.paging.ReportableRemoteLoader
+import dev.dimension.flare.data.datasource.microblog.paging.SortIdProvider
+import dev.dimension.flare.data.model.tab.TimelineMergePolicy
 import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -15,8 +17,10 @@ import kotlinx.coroutines.coroutineScope
 internal class MixedRemoteMediator(
     private val database: CacheDatabase,
     private val mediators: List<CacheableRemoteLoader<UiTimelineV2>>,
+    private val mergePolicy: TimelineMergePolicy = TimelineMergePolicy.TimePerPage,
 ) : CacheableRemoteLoader<UiTimelineV2>,
-    ReportableRemoteLoader {
+    ReportableRemoteLoader,
+    SortIdProvider {
     override val pagingKey =
         buildString {
             append("mixed_timeline")
@@ -57,18 +61,7 @@ internal class MixedRemoteMediator(
                             }
                         }.awaitAll()
 
-                val timelineResult = response.flatMap { it.result.data }
-
-                val mixedTimelineResult =
-                    timelineResult
-                        .sortedByDescending {
-                            it.createdAt.value.toEpochMilliseconds()
-                        }.distinctBy { item ->
-                            // A mixed timeline can receive the same logical item from multiple
-                            // sub timelines (for example home + list). Keep one copy so Compose
-                            // never receives duplicate lazy keys for the same item.
-                            item.itemKey ?: "${item.accountType}_${item.statusKey}"
-                        }
+                val mixedTimelineResult = merge(response)
 
                 database.connect {
                     response.forEach {
@@ -93,6 +86,48 @@ internal class MixedRemoteMediator(
                 )
             }
         }
+
+    override suspend fun sortId(data: UiTimelineV2): Long? =
+        if (mergePolicy == TimelineMergePolicy.Time) {
+            val createdAt = data.createdAt.value.toEpochMilliseconds()
+            val tieBreaker =
+                (itemIdentity(data).hashCode().toLong() - Int.MIN_VALUE.toLong()) % SORT_ID_TIE_BUCKET
+            -createdAt * SORT_ID_TIE_BUCKET + tieBreaker
+        } else {
+            null
+        }
+
+    private fun merge(response: List<SubResponse>): List<UiTimelineV2> =
+        when (mergePolicy) {
+            TimelineMergePolicy.Time,
+            TimelineMergePolicy.TimePerPage,
+            -> {
+                response
+                    .flatMap { it.result.data }
+                    .sortedByDescending {
+                        it.createdAt.value.toEpochMilliseconds()
+                    }
+            }
+
+            TimelineMergePolicy.Staggered -> {
+                response
+                    .map { it.result.data }
+                    .interleave()
+            }
+        }.distinctBy(::itemIdentity)
+
+    private fun List<List<UiTimelineV2>>.interleave(): List<UiTimelineV2> {
+        val maxSize = maxOfOrNull { it.size } ?: return emptyList()
+        return buildList {
+            repeat(maxSize) { index ->
+                this@interleave.forEach { items ->
+                    items.getOrNull(index)?.let(::add)
+                }
+            }
+        }
+    }
+
+    private fun itemIdentity(item: UiTimelineV2): String = item.itemKey ?: "${item.accountType}_${item.statusKey}"
 
     private suspend fun getSubRequest(
         request: PagingRequest,
@@ -162,4 +197,8 @@ internal class MixedRemoteMediator(
         val mediator: CacheableRemoteLoader<UiTimelineV2>,
         val result: PagingResult<UiTimelineV2>,
     )
+
+    private companion object {
+        private const val SORT_ID_TIE_BUCKET = 10_000L
+    }
 }

@@ -29,11 +29,11 @@ import kotlin.time.Clock
 internal class BlueskyListLoader(
     private val getService: suspend () -> BlueskyService,
     private val accountKey: MicroBlogKey,
-) : ListLoader {
+) : ListLoader<UiList.List> {
     override suspend fun load(
         pageSize: Int,
         request: PagingRequest,
-    ): PagingResult<UiList> {
+    ): PagingResult<UiList.List> {
         val service = getService()
         val cursor =
             when (request) {
@@ -63,7 +63,7 @@ internal class BlueskyListLoader(
         )
     }
 
-    override suspend fun info(listId: String): UiList =
+    override suspend fun info(listId: String): UiList.List =
         getService()
             .getList(
                 GetListQueryParams(
@@ -81,7 +81,7 @@ internal class BlueskyListLoader(
                 ListMetaDataType.AVATAR,
             )
 
-    override suspend fun create(metaData: ListMetaData): UiList =
+    override suspend fun create(metaData: ListMetaData): UiList.List =
         createList(
             title = metaData.title,
             description = metaData.description,
@@ -92,7 +92,7 @@ internal class BlueskyListLoader(
         title: String,
         description: String?,
         icon: FileItem?,
-    ): UiList {
+    ): UiList.List {
         val service = getService()
         val iconInfo =
             if (icon != null) {
@@ -134,7 +134,7 @@ internal class BlueskyListLoader(
     override suspend fun update(
         listId: String,
         metaData: ListMetaData,
-    ): UiList {
+    ): UiList.List {
         updateList(
             uri = listId,
             title = metaData.title,

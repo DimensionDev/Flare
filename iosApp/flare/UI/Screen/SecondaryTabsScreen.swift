@@ -3,7 +3,7 @@ import KotlinSharedUI
 
 struct SecondaryTabsScreen: View {
     @Environment(\.dismiss) private var dismiss
-    let onTabSelected: (TabItem) -> Void
+    let onTabSelected: (Route) -> Void
     @StateObject private var presenter = KotlinPresenter(presenter: SecondaryTabsPresenter())
     var body: some View {
         Router { _ in
@@ -12,19 +12,21 @@ struct SecondaryTabsScreen: View {
                     let items = data.cast(SecondaryTabsPresenter.Item.self)
                     if !items.isEmpty {
                         Section {
-                            ForEach(items, id: \.self) { item in
+                            ForEach(Array(items.enumerated()), id: \.offset) { _, item in
                                 DisclosureGroup {
-                                    ForEach(item.tabs) { tab in
-                                        Button {
-                                            onTabSelected(tab)
-                                        } label: {
-                                            Label {
-                                                TabTitle(title: tab.metaData.title)
-                                            } icon: {
-                                                TabIcon(icon: tab.metaData.icon, accountType: tab.account, iconOnly: true)
+                                    ForEach(item.tabs, id: \.self) { tab in
+                                        if let route = route(for: tab) {
+                                            Button {
+                                                onTabSelected(route)
+                                            } label: {
+                                                Label {
+                                                    Text(tab.title.text)
+                                                } icon: {
+                                                    Image(tab.icon.imageName)
+                                                }
                                             }
+                                            .buttonStyle(.plain)
                                         }
-                                        .buttonStyle(.plain)
                                     }
                                 } label: {
                                     StateView(state: item.user) { user in
@@ -79,5 +81,14 @@ struct SecondaryTabsScreen: View {
                 }
             }
         }
+    }
+}
+
+func route(for tab: SecondaryTabsPresenter.Tab) -> Route? {
+    switch onEnum(of: tab.destination) {
+    case .route(let destination):
+        return Route.fromDeepLinkRoute(deeplinkRoute: destination.route)
+    case .timeline(let destination):
+        return .timeline(destination.tabItem)
     }
 }

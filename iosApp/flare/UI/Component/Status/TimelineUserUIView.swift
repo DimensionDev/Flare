@@ -12,7 +12,7 @@ import KotlinSharedUI
 ///   }
 final class TimelineUserUIView: UIView {
     var onOpenURL: ((URL) -> Void)?
-    var appearance = StatusUIKitAppearance(settings: AppearanceSettings.companion.Default) {
+    var appearance = StatusUIKitAppearance(timeline: TimelineAppearance.companion.Default) {
         didSet { if data != nil { rebuild() } }
     }
 

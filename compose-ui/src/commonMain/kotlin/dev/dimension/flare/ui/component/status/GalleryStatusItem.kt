@@ -22,9 +22,9 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import dev.dimension.flare.data.model.VideoAutoplay
 import dev.dimension.flare.ui.component.AvatarComponent
-import dev.dimension.flare.ui.component.ComponentAppearance
-import dev.dimension.flare.ui.component.LocalComponentAppearance
+import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.component.placeholder
@@ -81,7 +81,7 @@ private fun GalleryPostTile(
     modifier: Modifier = Modifier,
 ) {
     val uriHandler = LocalUriHandler.current
-    val appearance = LocalComponentAppearance.current
+    val appearance = LocalTimelineAppearance.current
     Column(
         modifier =
             modifier
@@ -97,8 +97,8 @@ private fun GalleryPostTile(
         if (post.images.isNotEmpty() && appearance.showMedia) {
             val firstMedia = post.images.first()
             CompositionLocalProvider(
-                LocalComponentAppearance provides
-                    appearance.copy(videoAutoplay = ComponentAppearance.VideoAutoplay.NEVER),
+                LocalTimelineAppearance provides
+                    appearance.copy(videoAutoplay = VideoAutoplay.NEVER),
             ) {
                 MediaItem(
                     media = firstMedia,
@@ -162,7 +162,7 @@ private fun GalleryFeedTile(
     modifier: Modifier = Modifier,
 ) {
     val uriHandler = LocalUriHandler.current
-    val appearance = LocalComponentAppearance.current
+    val appearance = LocalTimelineAppearance.current
     Column(
         modifier =
             modifier

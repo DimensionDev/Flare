@@ -15,6 +15,7 @@ import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -25,19 +26,26 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import dev.dimension.flare.common.OnDeepLink
-import dev.dimension.flare.data.model.Bluesky.FeedTabItem
+import dev.dimension.flare.data.database.app.model.SubscriptionType
 import dev.dimension.flare.data.model.IconType
-import dev.dimension.flare.data.model.IconType.Material
-import dev.dimension.flare.data.model.ListTimelineTabItem
-import dev.dimension.flare.data.model.Misskey
-import dev.dimension.flare.data.model.RssTimelineTabItem
-import dev.dimension.flare.data.model.TabMetaData
-import dev.dimension.flare.data.model.TitleType
+import dev.dimension.flare.data.model.tab.SourceTimelineTabItemV2
+import dev.dimension.flare.data.model.tab.TimelineResolver
+import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.model.AccountType.Specific
 import dev.dimension.flare.ui.component.platform.isBigScreen
+import dev.dimension.flare.ui.model.UiIcon
+import dev.dimension.flare.ui.model.UiRssSource
+import dev.dimension.flare.ui.model.UiText
+import dev.dimension.flare.ui.model.asType
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus.Quote
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus.Reply
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus.VVOComment
+import dev.dimension.flare.ui.presenter.home.bluesky.BlueskyFeedTimelinePresenter
+import dev.dimension.flare.ui.presenter.home.rss.RssTimelinePresenter
+import dev.dimension.flare.ui.presenter.home.rss.SubscriptionTimelinePresenter
+import dev.dimension.flare.ui.presenter.list.AntennasTimelinePresenter
+import dev.dimension.flare.ui.presenter.list.ChannelTimelinePresenter
+import dev.dimension.flare.ui.presenter.list.ListTimelinePresenter
 import dev.dimension.flare.ui.route.FluentDialogSceneStrategy.Companion.dialog
 import dev.dimension.flare.ui.route.Route.EditRssSource
 import dev.dimension.flare.ui.route.Route.Profile
@@ -97,6 +105,7 @@ import io.github.composefluent.component.FluentDialog
 import io.github.composefluent.component.Flyout
 import io.github.composefluent.component.Text
 import kotlinx.collections.immutable.ImmutableList
+import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
@@ -108,7 +117,7 @@ internal fun WindowScope.Router(
 ) {
     val listDetailStrategy = rememberListDetailSceneStrategy<Route>()
 
-    val isBigScreen = isBigScreen()
+    val isBigScreen by isBigScreen()
     OnDeepLink {
         val route = Route.parse(it)
         if (route != null) {
@@ -438,14 +447,16 @@ internal fun WindowScope.Router(
                         toList = {
                             navigate(
                                 Timeline(
-                                    ListTimelineTabItem(
-                                        account = args.accountType,
-                                        listId = it.id,
-                                        metaData =
-                                            TabMetaData(
-                                                title = TitleType.Text(it.title),
-                                                icon = Material(dev.dimension.flare.ui.model.UiIcon.List),
-                                            ),
+                                    SourceTimelineTabItemV2.runtime(
+                                        id = "desktop.common.list:${args.accountType}:${it.id}",
+                                        title = UiText.Raw(it.title),
+                                        icon = UiIcon.List.asType(),
+                                        createPresenter = {
+                                            ListTimelinePresenter(
+                                                accountType = args.accountType,
+                                                listId = it.id,
+                                            )
+                                        },
                                     ),
                                 ),
                             )
@@ -463,14 +474,16 @@ internal fun WindowScope.Router(
                         toFeed = {
                             navigate(
                                 Timeline(
-                                    FeedTabItem(
-                                        account = args.accountType,
-                                        uri = it.id,
-                                        metaData =
-                                            TabMetaData(
-                                                title = TitleType.Text(it.title),
-                                                icon = Material(dev.dimension.flare.ui.model.UiIcon.Feeds),
-                                            ),
+                                    SourceTimelineTabItemV2.runtime(
+                                        id = "desktop.bluesky.feed:${args.accountType}:${it.id}",
+                                        title = UiText.Raw(it.title),
+                                        icon = UiIcon.Feeds.asType(),
+                                        createPresenter = {
+                                            BlueskyFeedTimelinePresenter(
+                                                accountType = args.accountType,
+                                                uri = it.id,
+                                            )
+                                        },
                                     ),
                                 ),
                             )
@@ -637,6 +650,13 @@ internal fun WindowScope.Router(
                     )
                 }
 
+                entry<Route.TimelineSource> { args ->
+                    val resolver = koinInject<TimelineResolver>()
+                    TimelineScreen(
+                        resolver.toTabItem(args.source),
+                    )
+                }
+
                 entry<Route.Home> { args ->
                     HomeTimelineScreen(
                         args.accountType,
@@ -657,7 +677,7 @@ internal fun WindowScope.Router(
                         },
                         toGroupConfig = {
                             navigate(
-                                Route.TabGroupConfig(it),
+                                Route.TabGroupConfig(it?.id),
                             )
                         },
                     )
@@ -665,7 +685,7 @@ internal fun WindowScope.Router(
 
                 entry<Route.TabGroupConfig> { args ->
                     GroupConfigScreen(
-                        item = args.item,
+                        groupId = args.groupId,
                         toAddRssSource = {
                             navigate(
                                 Route.CreateRssSource,
@@ -777,9 +797,7 @@ internal fun WindowScope.Router(
                         ),
                 ) { args ->
                     TimelineScreen(
-                        RssTimelineTabItem(
-                            args.data,
-                        ),
+                        args.data.toTimelineTabItem(),
                     )
                 }
 
@@ -873,14 +891,16 @@ internal fun WindowScope.Router(
                         toTimeline = {
                             navigate(
                                 Timeline(
-                                    Misskey.AntennasTimelineTabItem(
-                                        account = args.accountType,
-                                        antennasId = it.id,
-                                        metaData =
-                                            TabMetaData(
-                                                title = TitleType.Text(it.title),
-                                                icon = IconType.Material(dev.dimension.flare.ui.model.UiIcon.Rss),
-                                            ),
+                                    SourceTimelineTabItemV2.runtime(
+                                        id = "desktop.misskey.antenna:${args.accountType}:${it.id}",
+                                        title = UiText.Raw(it.title),
+                                        icon = UiIcon.Rss.asType(),
+                                        createPresenter = {
+                                            AntennasTimelinePresenter(
+                                                accountType = args.accountType,
+                                                id = it.id,
+                                            )
+                                        },
                                     ),
                                 ),
                             )
@@ -1017,14 +1037,16 @@ internal fun WindowScope.Router(
                     TimelineScreen(
                         tabItem =
                             remember(args) {
-                                Misskey.ChannelTimelineTabItem(
-                                    channelId = args.channelId,
-                                    account = args.accountType,
-                                    metaData =
-                                        TabMetaData(
-                                            title = TitleType.Text(args.title),
-                                            icon = IconType.Material(dev.dimension.flare.ui.model.UiIcon.Channel),
-                                        ),
+                                SourceTimelineTabItemV2.runtime(
+                                    id = "desktop.misskey.channel:${args.accountType}:${args.channelId}",
+                                    title = UiText.Raw(args.title),
+                                    icon = UiIcon.Channel.asType(),
+                                    createPresenter = {
+                                        ChannelTimelinePresenter(
+                                            accountType = args.accountType,
+                                            id = args.channelId,
+                                        )
+                                    },
                                 )
                             },
                     )
@@ -1032,3 +1054,16 @@ internal fun WindowScope.Router(
             },
     )
 }
+
+private fun UiRssSource.toTimelineTabItem(): TimelineTabItemV2 =
+    SourceTimelineTabItemV2.runtime(
+        id = "desktop.rss:${type.name}:$url",
+        title = UiText.Raw(title ?: host),
+        icon = favIcon?.let { IconType.Url(it) } ?: UiIcon.Rss.asType(),
+        createPresenter = {
+            when (type) {
+                SubscriptionType.RSS -> RssTimelinePresenter(url)
+                else -> SubscriptionTimelinePresenter(type, url)
+            }
+        },
+    )

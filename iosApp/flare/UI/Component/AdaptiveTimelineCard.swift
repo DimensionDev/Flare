@@ -2,7 +2,7 @@ import SwiftUI
 import KotlinSharedUI
 
 struct AdaptiveTimelineCard<Content: View>: View {
-    @Environment(\.appearanceSettings.timelineDisplayMode) private var timelineDisplayMode
+    @Environment(\.timelineAppearance.timelineDisplayMode) private var timelineDisplayMode
     @Environment(\.isMultipleColumn) private var isMultipleColumn
     let index: Int
     let totalCount: Int

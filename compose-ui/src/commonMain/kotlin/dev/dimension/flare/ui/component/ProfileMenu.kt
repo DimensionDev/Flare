@@ -18,8 +18,8 @@ public fun ProfileMenu(
 ) {
     if (!profileState.actions.isEmpty()) {
         CompositionLocalProvider(
-            LocalComponentAppearance provides
-                LocalComponentAppearance.current.copy(
+            LocalTimelineAppearance provides
+                LocalTimelineAppearance.current.copy(
                     postActionStyle = PostActionStyle.RightAligned,
                 ),
             PlatformTextStyle provides PlatformTheme.typography.title,

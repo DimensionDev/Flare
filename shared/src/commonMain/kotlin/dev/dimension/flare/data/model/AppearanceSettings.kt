@@ -1,19 +1,9 @@
 package dev.dimension.flare.data.model
 
-import androidx.datastore.core.okio.OkioSerializer
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
-import kotlinx.coroutines.withContext
-import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.decodeFromByteArray
-import kotlinx.serialization.encodeToByteArray
-import kotlinx.serialization.protobuf.ProtoBuf
-import okio.BufferedSink
-import okio.BufferedSource
 
 @Serializable
-public data class AppearanceSettings(
+internal data class AppearanceSettings(
     val theme: Theme = Theme.SYSTEM,
     val dynamicTheme: Boolean = true,
     val colorSeed: ULong = 0x02EBD2u,
@@ -44,12 +34,13 @@ public data class AppearanceSettings(
     val showPlatformLogo: Boolean = true,
     val timelineDisplayMode: TimelineDisplayMode = TimelineDisplayMode.Card,
 ) {
-    public companion object {
+    companion object {
         // for iOS
-        public val Default: AppearanceSettings = AppearanceSettings()
+        val Default: AppearanceSettings = AppearanceSettings()
     }
 }
 
+@Serializable
 public enum class PostActionStyle {
     Hidden,
     LeftAligned,
@@ -57,11 +48,13 @@ public enum class PostActionStyle {
     Stretch,
 }
 
+@Serializable
 public enum class BottomBarStyle {
     Floating,
     Classic,
 }
 
+@Serializable
 public enum class BottomBarBehavior {
     AlwaysShow,
     HideOnScroll,
@@ -93,24 +86,4 @@ public enum class TimelineDisplayMode {
     Card,
     Plain,
     Gallery,
-}
-
-@OptIn(ExperimentalSerializationApi::class)
-internal object AccountPreferencesSerializer : OkioSerializer<AppearanceSettings> {
-    override val defaultValue: AppearanceSettings
-        get() = AppearanceSettings()
-
-    override suspend fun readFrom(source: BufferedSource): AppearanceSettings =
-        withContext(Dispatchers.IO) {
-            ProtoBuf.decodeFromByteArray(source.readByteArray())
-        }
-
-    override suspend fun writeTo(
-        t: AppearanceSettings,
-        sink: BufferedSink,
-    ) {
-        withContext(Dispatchers.IO) {
-            sink.write(ProtoBuf.encodeToByteArray(t))
-        }
-    }
 }

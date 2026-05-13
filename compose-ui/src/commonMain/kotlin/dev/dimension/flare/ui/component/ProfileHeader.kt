@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -77,7 +78,30 @@ public fun ProfileHeader(
     onFollowListClick: (userKey: MicroBlogKey) -> Unit,
     onFansListClick: (userKey: MicroBlogKey) -> Unit,
     modifier: Modifier = Modifier,
-    isBigScreen: Boolean = isBigScreen(),
+) {
+    val isBigScreen: Boolean by isBigScreen()
+    ProfileHeader(
+        state,
+        modifier = modifier,
+        menu = menu,
+        isBigScreen = isBigScreen,
+        onAvatarClick = onAvatarClick,
+        onBannerClick = onBannerClick,
+        onFollowListClick = onFollowListClick,
+        onFansListClick = onFansListClick,
+    )
+}
+
+@Composable
+public fun ProfileHeader(
+    state: ProfileState,
+    onAvatarClick: () -> Unit,
+    onBannerClick: () -> Unit,
+    menu: @Composable RowScope.() -> Unit,
+    onFollowListClick: (userKey: MicroBlogKey) -> Unit,
+    onFansListClick: (userKey: MicroBlogKey) -> Unit,
+    modifier: Modifier = Modifier,
+    isBigScreen: Boolean = false,
 ) {
     when (val userState = state.userState) {
         is UiState.Loading -> {

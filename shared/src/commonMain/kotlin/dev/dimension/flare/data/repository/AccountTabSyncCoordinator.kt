@@ -1,11 +1,13 @@
 package dev.dimension.flare.data.repository
 
+import dev.dimension.flare.data.datasource.microblog.datasource.TimelineTabConfigurationDataSource
 import dev.dimension.flare.data.model.MixedTimelineTabItem
 import dev.dimension.flare.data.model.TabSettings
 import dev.dimension.flare.data.model.TimelineTabItem
-import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.data.model.tab.TimelineResolver
+import dev.dimension.flare.data.model.tab.TimelineSlot
+import dev.dimension.flare.data.model.tab.TimelineSlotContent
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.spec
 import dev.dimension.flare.ui.model.UiAccount
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
@@ -16,6 +18,7 @@ internal class AccountTabSyncCoordinator(
     private val accountRepository: AccountRepository,
     private val settingsRepository: SettingsRepository,
     private val coroutineScope: CoroutineScope,
+    private val timelineResolver: TimelineResolver,
 ) {
     init {
         coroutineScope.launch {
@@ -38,21 +41,29 @@ internal class AccountTabSyncCoordinator(
             accountRepository.allAccounts
                 .first()
                 .mapTo(linkedSetOf()) { it.accountKey }
-        settingsRepository.updateTabSettings {
-            cleanupForExistingAccounts(existingAccounts).sanitizeDuplicateTabKeys()
+        settingsRepository.updateTabSettingsV2 {
+            copy(
+                homeSlots =
+                    homeSlots
+                        .mapNotNull { it.cleanupForExistingAccounts(existingAccounts) }
+                        .distinctBy { it.id },
+            )
         }
     }
 
     private suspend fun addDefaultTabs(account: UiAccount) {
-        val defaultTabs = account.platformType.spec.defaultTimelineTabs(account.accountKey)
-        if (defaultTabs.isEmpty()) {
+        val defaultSlots =
+            (accountRepository.getOrCreateDataSource(account) as? TimelineTabConfigurationDataSource)
+                ?.defaultTabs
+                .orEmpty()
+        if (defaultSlots.isEmpty()) {
             return
         }
-        settingsRepository.updateTabSettings {
-            val newTabs =
-                (mainTabs + defaultTabs)
-                    .distinctBy { it.key }
-            val newSettings = copy(mainTabs = newTabs).sanitizeDuplicateTabKeys()
+        settingsRepository.updateTabSettingsV2 {
+            val newSlots =
+                (homeSlots + defaultSlots)
+                    .distinctBy { it.id }
+            val newSettings = copy(homeSlots = newSlots)
             if (newSettings == this) {
                 this
             } else {
@@ -62,55 +73,47 @@ internal class AccountTabSyncCoordinator(
     }
 
     private suspend fun removeTabsForAccount(accountKey: MicroBlogKey) {
-        settingsRepository.updateTabSettings {
-            cleanupForExistingAccounts(setOf(accountKey), retainAccounts = false).sanitizeDuplicateTabKeys()
+        settingsRepository.updateTabSettingsV2 {
+            copy(
+                homeSlots =
+                    homeSlots
+                        .mapNotNull { it.cleanupForRemovedAccount(accountKey) }
+                        .distinctBy { it.id },
+            )
         }
     }
 
-    private fun TabSettings.cleanupForExistingAccounts(
-        accountKeys: Set<MicroBlogKey>,
-        retainAccounts: Boolean = true,
-    ): TabSettings {
-        val newTabs =
-            mainTabs
-                .mapNotNull { tab ->
-                    tab.cleanup(accountKeys, retainAccounts)
-                }.distinctBy { it.key }
-        return if (newTabs == mainTabs) {
-            this
-        } else {
-            copy(mainTabs = newTabs)
+    private fun TimelineSlot.cleanupForExistingAccounts(accountKeys: Set<MicroBlogKey>): TimelineSlot? =
+        cleanupAccountSlots { accountKey ->
+            accountKey == null || accountKey in accountKeys
         }
-    }
 
-    private fun TimelineTabItem.cleanup(
-        accountKeys: Set<MicroBlogKey>,
-        retainAccounts: Boolean,
-    ): TimelineTabItem? =
-        when (this) {
-            is MixedTimelineTabItem -> {
-                val cleanedSubTabs =
-                    subTimelineTabItem
-                        .mapNotNull {
-                            it.cleanup(accountKeys, retainAccounts)
-                        }.distinctBy { it.key }
-                        .toImmutableList()
-                if (cleanedSubTabs.isEmpty()) {
-                    null
-                } else if (cleanedSubTabs == subTimelineTabItem) {
+    private fun TimelineSlot.cleanupForRemovedAccount(accountKey: MicroBlogKey): TimelineSlot? =
+        cleanupAccountSlots { slotAccountKey ->
+            slotAccountKey == null || slotAccountKey != accountKey
+        }
+
+    private fun TimelineSlot.cleanupAccountSlots(shouldKeep: (MicroBlogKey?) -> Boolean): TimelineSlot? =
+        when (val slotContent = content) {
+            is TimelineSlotContent.Source -> {
+                if (shouldKeep(timelineResolver.resolveAccountKey(this))) {
                     this
                 } else {
-                    copy(subTimelineTabItem = cleanedSubTabs)
+                    null
                 }
             }
 
-            else -> {
-                val accountKey = (account as? AccountType.Specific)?.accountKey ?: return this
-                val shouldRetain = accountKey in accountKeys
-                if (shouldRetain == retainAccounts) {
+            is TimelineSlotContent.Group -> {
+                val sanitizedChildren =
+                    slotContent.children
+                        .mapNotNull { it.cleanupAccountSlots(shouldKeep) }
+                        .distinctBy { it.id }
+                if (sanitizedChildren.isEmpty()) {
+                    null
+                } else if (sanitizedChildren == slotContent.children) {
                     this
                 } else {
-                    null
+                    copy(content = slotContent.copy(children = sanitizedChildren))
                 }
             }
         }

@@ -4,14 +4,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.isRefreshing
-import dev.dimension.flare.data.model.TimelineTabItem
+import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.ui.model.UiTimelineV2
-import dev.dimension.flare.ui.presenter.home.NotificationBadgePresenter
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinComponent
 
 public class TimelineItemPresenter(
-    private val timelineTabItem: TimelineTabItem,
-) : PresenterBase<TimelineItemPresenter.State>() {
+    private val timelineTabItem: TimelineTabItemV2,
+) : PresenterBase<TimelineItemPresenter.State>(),
+    KoinComponent {
     public interface State {
         public val listState: PagingState<UiTimelineV2>
 
@@ -26,14 +27,9 @@ public class TimelineItemPresenter(
         timelineTabItem.createPresenter()
     }
 
-    private val badgePresenter by lazy {
-        NotificationBadgePresenter(timelineTabItem.account)
-    }
-
     @Composable
     override fun body(): State {
         val state = timelinePresenter.body()
-        val badge = badgePresenter.body()
         val scope = rememberCoroutineScope()
         return object : State {
             override val listState = state.listState
@@ -43,12 +39,10 @@ public class TimelineItemPresenter(
                 scope.launch {
                     state.refresh()
                 }
-                badge.refresh()
             }
 
             override suspend fun refreshSuspend() {
                 state.refresh()
-                badge.refresh()
             }
         }
     }

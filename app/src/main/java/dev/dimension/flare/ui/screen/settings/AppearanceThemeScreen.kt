@@ -40,12 +40,14 @@ import compose.icons.fontawesomeicons.solid.Minus
 import compose.icons.fontawesomeicons.solid.Plus
 import dev.dimension.flare.R
 import dev.dimension.flare.data.model.AvatarShape
-import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.data.model.Theme
+import dev.dimension.flare.data.model.appearance.AppearanceKeys
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareLargeFlexibleTopAppBar
 import dev.dimension.flare.ui.component.FlareScaffold
+import dev.dimension.flare.ui.component.LocalGlobalAppearance
+import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.theme.first
 import dev.dimension.flare.ui.theme.item
 import dev.dimension.flare.ui.theme.last
@@ -62,7 +64,8 @@ internal fun AppearanceThemeScreen(
     val topAppBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val state by producePresenter { appearancePresenter() }
     val hapticFeedback = LocalHapticFeedback.current
-    val appearanceSettings = LocalAppearanceSettings.current
+    val globalAppearance = LocalGlobalAppearance.current
+    val timelineAppearance = LocalTimelineAppearance.current
     FlareScaffold(
         topBar = {
             FlareLargeFlexibleTopAppBar(
@@ -96,19 +99,15 @@ internal fun AppearanceThemeScreen(
                         Theme.SYSTEM to stringResource(id = R.string.settings_appearance_theme_auto),
                         Theme.DARK to stringResource(id = R.string.settings_appearance_theme_dark),
                     ),
-                selected = appearanceSettings.theme,
+                selected = globalAppearance.theme,
                 onSelected = {
-                    state.updateSettings {
-                        copy(theme = it)
-                    }
+                    state.update(AppearanceKeys.Theme, it)
                 },
                 shapes = ListItemDefaults.first(),
             )
             SegmentedListItem(
                 onClick = {
-                    state.updateSettings {
-                        copy(pureColorMode = !pureColorMode)
-                    }
+                    state.update(AppearanceKeys.PureColorMode, !globalAppearance.pureColorMode)
                 },
                 shapes = ListItemDefaults.item(),
                 content = {
@@ -119,11 +118,9 @@ internal fun AppearanceThemeScreen(
                 },
                 trailingContent = {
                     Switch(
-                        checked = appearanceSettings.pureColorMode,
+                        checked = globalAppearance.pureColorMode,
                         onCheckedChange = {
-                            state.updateSettings {
-                                copy(pureColorMode = it)
-                            }
+                            state.update(AppearanceKeys.PureColorMode, it)
                         },
                     )
                 },
@@ -131,9 +128,7 @@ internal fun AppearanceThemeScreen(
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 SegmentedListItem(
                     onClick = {
-                        state.updateSettings {
-                            copy(dynamicTheme = !dynamicTheme)
-                        }
+                        state.update(AppearanceKeys.DynamicTheme, !globalAppearance.dynamicTheme)
                     },
                     shapes = ListItemDefaults.item(),
                     content = {
@@ -144,17 +139,15 @@ internal fun AppearanceThemeScreen(
                     },
                     trailingContent = {
                         Switch(
-                            checked = appearanceSettings.dynamicTheme,
+                            checked = globalAppearance.dynamicTheme,
                             onCheckedChange = {
-                                state.updateSettings {
-                                    copy(dynamicTheme = it)
-                                }
+                                state.update(AppearanceKeys.DynamicTheme, it)
                             },
                         )
                     },
                 )
             }
-            AnimatedVisibility(visible = !appearanceSettings.dynamicTheme || Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+            AnimatedVisibility(visible = !globalAppearance.dynamicTheme || Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
                 SegmentedListItem(
                     onClick = {
                         toColorPicker.invoke()
@@ -186,16 +179,14 @@ internal fun AppearanceThemeScreen(
                         AvatarShape.CIRCLE to stringResource(id = R.string.settings_appearance_avatar_shape_round),
                         AvatarShape.SQUARE to stringResource(id = R.string.settings_appearance_avatar_shape_square),
                     ),
-                selected = appearanceSettings.avatarShape,
+                selected = timelineAppearance.avatarShape,
                 onSelected = {
-                    state.updateSettings {
-                        copy(avatarShape = it)
-                    }
+                    state.update(AppearanceKeys.AvatarShape, it)
                 },
                 shapes = ListItemDefaults.item(),
             )
 
-            var fontSizeDiff by remember { mutableFloatStateOf(appearanceSettings.fontSizeDiff) }
+            var fontSizeDiff by remember { mutableFloatStateOf(globalAppearance.fontSizeDiff) }
             SegmentedListItem(
                 onClick = {},
                 shapes = ListItemDefaults.last(),
@@ -221,12 +212,7 @@ internal fun AppearanceThemeScreen(
                                     if (fontSizeDiff > -4f) {
                                         fontSizeDiff -= 1f
                                         hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentTick)
-                                        state.updateSettings {
-                                            copy(
-                                                fontSizeDiff = fontSizeDiff,
-                                                lineHeightDiff = fontSizeDiff * 2,
-                                            )
-                                        }
+                                        state.updateFontScale(fontSizeDiff)
                                     }
                                 },
                                 enabled = fontSizeDiff > -4f,
@@ -243,12 +229,7 @@ internal fun AppearanceThemeScreen(
                                     hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentTick)
                                 },
                                 onValueChangeFinished = {
-                                    state.updateSettings {
-                                        copy(
-                                            fontSizeDiff = fontSizeDiff,
-                                            lineHeightDiff = fontSizeDiff * 2,
-                                        )
-                                    }
+                                    state.updateFontScale(fontSizeDiff)
                                 },
                                 valueRange = -4f..4f,
                                 steps = 7,
@@ -261,12 +242,7 @@ internal fun AppearanceThemeScreen(
                                     if (fontSizeDiff < 4f) {
                                         fontSizeDiff += 1f
                                         hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentTick)
-                                        state.updateSettings {
-                                            copy(
-                                                fontSizeDiff = fontSizeDiff,
-                                                lineHeightDiff = fontSizeDiff * 2,
-                                            )
-                                        }
+                                        state.updateFontScale(fontSizeDiff)
                                     }
                                 },
                                 enabled = fontSizeDiff < 4f,

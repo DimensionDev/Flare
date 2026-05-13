@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.screen.home
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -18,7 +19,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,10 +32,11 @@ import compose.icons.fontawesomeicons.solid.Rss
 import compose.icons.fontawesomeicons.solid.Trash
 import dev.dimension.flare.LocalWindowPadding
 import dev.dimension.flare.Res
-import dev.dimension.flare.data.model.MixedTimelineTabItem
-import dev.dimension.flare.data.model.TabItem
-import dev.dimension.flare.data.model.TimelineTabItem
-import dev.dimension.flare.data.repository.SettingsRepository
+import dev.dimension.flare.data.model.tab.GroupTimelineTabItemV2
+import dev.dimension.flare.data.model.tab.TimelineMergePolicy
+import dev.dimension.flare.data.model.tab.TimelineTabItemV2
+import dev.dimension.flare.data.model.tab.isSystemHomeMixedTimeline
+import dev.dimension.flare.data.model.tab.withSystemHomeMixedTimelineEnabled
 import dev.dimension.flare.tab_settings_add
 import dev.dimension.flare.tab_settings_add_group
 import dev.dimension.flare.tab_settings_add_tab
@@ -48,10 +49,8 @@ import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScrollBar
 import dev.dimension.flare.ui.component.TabIcon
-import dev.dimension.flare.ui.component.TabTitle
-import dev.dimension.flare.ui.model.collectAsUiState
-import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
+import dev.dimension.flare.ui.presenter.home.HomeTabSettingsPresenter
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.screen.settings.AllTabsPresenter
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
@@ -65,19 +64,16 @@ import io.github.composefluent.component.SubtleButton
 import io.github.composefluent.component.Switcher
 import io.github.composefluent.component.Text
 import kotlinx.collections.immutable.toImmutableList
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.stringResource
-import org.koin.compose.koinInject
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
+import dev.dimension.flare.ui.component.Text as UiText
 
 @Composable
 internal fun TabSettingScreen(
     toAddRssSource: () -> Unit,
-    toGroupConfig: (MixedTimelineTabItem?) -> Unit,
+    toGroupConfig: (GroupTimelineTabItemV2?) -> Unit,
 ) {
     val state by producePresenter {
         presenter()
@@ -103,16 +99,21 @@ internal fun TabSettingScreen(
                     .padding(horizontal = screenHorizontalPadding),
             verticalArrangement = Arrangement.spacedBy(2.dp),
         ) {
-            state.enableMixedTimeline.onSuccess { enabled ->
-                if (state.currentTabs.size > 1) {
-                    item("header") {
+            if (state.canShowMixedTimelineSetting) {
+                item("header") {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(2.dp),
+                        modifier =
+                            Modifier
+                                .animateItem(),
+                    ) {
                         CardExpanderItem(
                             heading = {
                                 Text(stringResource(Res.string.tab_settings_mixed_timeline))
                             },
                             trailing = {
                                 Switcher(
-                                    checked = enabled,
+                                    checked = state.enableMixedTimeline,
                                     onCheckStateChange = {
                                         state.setEnableMixedTimeline(it)
                                     },
@@ -127,14 +128,17 @@ internal fun TabSettingScreen(
                             caption = {
                                 Text(stringResource(Res.string.tab_settings_mixed_timeline_desc))
                             },
-                            modifier =
-                                Modifier
-                                    .animateItem(),
                         )
+                        if (state.enableMixedTimeline) {
+                            MergePolicySettingsItem(
+                                selected = state.systemHomeMergePolicy,
+                                onSelected = state::setSystemHomeMergePolicy,
+                            )
+                        }
                     }
-                    item {
-                        Spacer(modifier = Modifier.height(12.dp))
-                    }
+                }
+                item {
+                    Spacer(modifier = Modifier.height(12.dp))
                 }
             }
             item {
@@ -181,11 +185,11 @@ internal fun TabSettingScreen(
             item {
                 Spacer(modifier = Modifier.height(12.dp))
             }
-            itemsIndexed(state.currentTabs, key = { _, item -> item.key }) { index, item ->
-                ReorderableItem(reorderableLazyColumnState, key = item.key) { isDragging ->
+            itemsIndexed(state.currentTabs, key = { _, item -> item.id }) { index, item ->
+                ReorderableItem(reorderableLazyColumnState, key = item.id) { isDragging ->
                     CardExpanderItem(
                         heading = {
-                            TabTitle(item.metaData.title)
+                            UiText(item.title)
                         },
                         icon = {
                             TabIcon(item)
@@ -194,7 +198,7 @@ internal fun TabSettingScreen(
                             Row {
                                 SubtleButton(
                                     onClick = {
-                                        if (item is MixedTimelineTabItem) {
+                                        if (item is GroupTimelineTabItemV2 && !item.isSystemHomeMixedTimeline) {
                                             toGroupConfig(item)
                                         } else {
                                             state.setEditTab(item)
@@ -255,9 +259,7 @@ internal fun TabSettingScreen(
         tabs = state.currentTabs.toImmutableList(),
         allTabs = state.allTabsState,
         onAddTab = { tabItem ->
-            if (tabItem is TimelineTabItem) {
-                state.addTab(tabItem)
-            }
+            state.addTab(tabItem)
         },
         onDeleteTab = { key ->
             state.deleteTab(key)
@@ -273,9 +275,7 @@ internal fun TabSettingScreen(
             },
             onConfirm = {
                 state.setEditTab(null)
-                if (it is TimelineTabItem) {
-                    state.updateTab(it)
-                }
+                state.updateTab(it)
             },
             visible = true,
         )
@@ -283,101 +283,121 @@ internal fun TabSettingScreen(
 }
 
 @Composable
-private fun presenter(
-    settingsRepository: SettingsRepository = koinInject(),
-    appScope: CoroutineScope = koinInject(),
-) = run {
-    val scope = rememberCoroutineScope()
-    var selectedEditTab by remember { mutableStateOf<TabItem?>(null) }
-    val allTabsState = remember { AllTabsPresenter(filterIsTimeline = true) }.invoke()
-    val tabSettings by settingsRepository.tabSettings.collectAsUiState()
-    val cacheTabs =
-        remember {
-            mutableStateListOf<TimelineTabItem>()
-        }
-    val currentTabs =
-        remember(tabSettings) {
-            tabSettings.map {
-                it.mainTabs
-                    .toImmutableList()
+private fun presenter() =
+    run {
+        var selectedEditTab by remember { mutableStateOf<TimelineTabItemV2?>(null) }
+        val tabSettingsState = remember { HomeTabSettingsPresenter() }.invoke()
+        val allTabsState = remember { AllTabsPresenter() }.invoke()
+        val cacheTabs =
+            remember {
+                mutableStateListOf<TimelineTabItemV2>()
             }
-        }
-    currentTabs
-        .onSuccess {
-            LaunchedEffect(it) {
+        var loadedTabs by remember { mutableStateOf(false) }
+        tabSettingsState.homeTimelineTabs
+            .onSuccess {
+                LaunchedEffect(it) {
+                    cacheTabs.clear()
+                    cacheTabs.addAll(it)
+                    loadedTabs = true
+                }
+            }
+        var showAddTab by remember { mutableStateOf(false) }
+        object {
+            val currentTabs = cacheTabs
+
+            val allTabsState = allTabsState
+            val canSwipeToDelete = cacheTabs.size > 1
+            val showAddTab = showAddTab
+            val selectedEditTab = selectedEditTab
+            val enableMixedTimeline = cacheTabs.any { it.isSystemHomeMixedTimeline }
+            val canShowMixedTimelineSetting = cacheTabs.filterNot { it.isSystemHomeMixedTimeline }.size > 1
+            val systemHomeMergePolicy =
+                cacheTabs
+                    .filterIsInstance<GroupTimelineTabItemV2>()
+                    .firstOrNull { it.isSystemHomeMixedTimeline }
+                    ?.mergePolicy
+                    ?: TimelineMergePolicy.TimePerPage
+
+            fun setEnableMixedTimeline(enable: Boolean) {
+                replaceTabs(cacheTabs.toList().withSystemHomeMixedTimelineEnabled(enable))
+            }
+
+            fun setSystemHomeMergePolicy(mergePolicy: TimelineMergePolicy) {
+                replaceTabs(
+                    cacheTabs
+                        .toList()
+                        .withSystemHomeMixedTimelineEnabled(
+                            enabled = true,
+                            mergePolicy = mergePolicy,
+                        ),
+                )
+            }
+
+            fun setEditTab(tab: TimelineTabItemV2?) {
+                selectedEditTab = tab
+            }
+
+            fun updateTab(tab: TimelineTabItemV2) {
+                val index = cacheTabs.indexOfFirst { it.id == tab.id }
+                if (index != -1) {
+                    cacheTabs[index] = tab
+                    syncSystemHomeMixedTimeline()
+                }
+            }
+
+            fun moveTab(
+                from: Any,
+                to: Any,
+            ) {
+                val fromIndex = cacheTabs.indexOfFirst { it.id == from }
+                val toIndex = cacheTabs.indexOfFirst { it.id == to }
+                if (fromIndex != -1 && toIndex != -1) {
+                    cacheTabs.add(toIndex, cacheTabs.removeAt(fromIndex))
+                    syncSystemHomeMixedTimeline()
+                }
+            }
+
+            fun commit() {
+                if (!loadedTabs) return
+                tabSettingsState.replaceHomeTimelineTabs(cacheTabs)
+            }
+
+            fun deleteTab(tab: TimelineTabItemV2) {
+                if (cacheTabs.size <= 1) {
+                    return
+                }
+                cacheTabs.removeIf { it.id == tab.id }
+                syncSystemHomeMixedTimeline()
+            }
+
+            fun deleteTab(key: String) {
+                if (cacheTabs.size <= 1) {
+                    return
+                }
+                cacheTabs.removeIf { it.id == key }
+                syncSystemHomeMixedTimeline()
+            }
+
+            fun addTab(tab: TimelineTabItemV2) {
+                if (cacheTabs.none { it.id == tab.id }) {
+                    cacheTabs.add(tab)
+                    syncSystemHomeMixedTimeline()
+                }
+            }
+
+            fun setAddTab(value: Boolean) {
+                showAddTab = value
+            }
+
+            private fun syncSystemHomeMixedTimeline() {
+                if (cacheTabs.any { it.isSystemHomeMixedTimeline }) {
+                    replaceTabs(cacheTabs.toList().withSystemHomeMixedTimelineEnabled(true))
+                }
+            }
+
+            private fun replaceTabs(tabs: List<TimelineTabItemV2>) {
                 cacheTabs.clear()
-                cacheTabs.addAll(it)
+                cacheTabs.addAll(tabs)
             }
-        }
-    val enableMixedTimeline by remember {
-        settingsRepository.tabSettings.map { it.enableMixedTimeline }
-    }.collectAsUiState()
-    var showAddTab by remember { mutableStateOf(false) }
-    object {
-        val currentTabs = cacheTabs
-
-        val allTabsState = allTabsState
-        val canSwipeToDelete = cacheTabs.size > 1
-        val showAddTab = showAddTab
-        val selectedEditTab = selectedEditTab
-        val enableMixedTimeline = enableMixedTimeline
-
-        fun setEnableMixedTimeline(enable: Boolean) {
-            scope.launch {
-                settingsRepository.updateTabSettings {
-                    copy(enableMixedTimeline = enable)
-                }
-            }
-        }
-
-        fun setEditTab(tab: TimelineTabItem?) {
-            selectedEditTab = tab
-        }
-
-        fun updateTab(tab: TimelineTabItem) {
-            val index = cacheTabs.indexOfFirst { it.key == tab.key }
-            cacheTabs[index] = tab
-        }
-
-        fun moveTab(
-            from: Any,
-            to: Any,
-        ) {
-            val fromIndex = cacheTabs.indexOfFirst { it.key == from }
-            val toIndex = cacheTabs.indexOfFirst { it.key == to }
-            cacheTabs.add(toIndex, cacheTabs.removeAt(fromIndex))
-        }
-
-        fun commit() {
-            appScope.launch {
-                settingsRepository.updateTabSettings {
-                    copy(
-                        mainTabs = cacheTabs,
-                    )
-                }
-            }
-        }
-
-        fun deleteTab(tab: TimelineTabItem) {
-            if (cacheTabs.size <= 1) {
-                return
-            }
-            cacheTabs.removeIf { it.key == tab.key }
-        }
-
-        fun deleteTab(key: String) {
-            if (cacheTabs.size <= 1) {
-                return
-            }
-            cacheTabs.removeIf { it.key == key }
-        }
-
-        fun addTab(tab: TimelineTabItem) {
-            cacheTabs.add(tab)
-        }
-
-        fun setAddTab(value: Boolean) {
-            showAddTab = value
         }
     }
-}

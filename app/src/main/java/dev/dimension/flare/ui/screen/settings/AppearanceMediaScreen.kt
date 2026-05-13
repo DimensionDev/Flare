@@ -23,11 +23,13 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.R
-import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.data.model.VideoAutoplay
+import dev.dimension.flare.data.model.appearance.AppearanceKeys
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FlareLargeFlexibleTopAppBar
 import dev.dimension.flare.ui.component.FlareScaffold
+import dev.dimension.flare.ui.component.LocalGlobalAppearance
+import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.status.StatusItem
 import dev.dimension.flare.ui.model.isSuccess
 import dev.dimension.flare.ui.model.onSuccess
@@ -44,7 +46,8 @@ import moe.tlaster.precompose.molecule.producePresenter
 internal fun AppearanceMediaScreen(onBack: () -> Unit) {
     val topAppBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val state by producePresenter { appearancePresenter() }
-    val appearanceSettings = LocalAppearanceSettings.current
+    val globalAppearance = LocalGlobalAppearance.current
+    val timelineAppearance = LocalTimelineAppearance.current
     FlareScaffold(
         topBar = {
             FlareLargeFlexibleTopAppBar(
@@ -85,15 +88,13 @@ internal fun AppearanceMediaScreen(onBack: () -> Unit) {
             }
             SegmentedListItem(
                 onClick = {
-                    state.updateSettings {
-                        copy(showMedia = !showMedia)
-                    }
+                    state.update(AppearanceKeys.ShowMedia, !timelineAppearance.showMedia)
                 },
                 shapes =
                     when {
-                        !state.sampleStatus.isSuccess && !appearanceSettings.showMedia -> ListItemDefaults.single()
+                        !state.sampleStatus.isSuccess && !timelineAppearance.showMedia -> ListItemDefaults.single()
                         !state.sampleStatus.isSuccess -> ListItemDefaults.first()
-                        !appearanceSettings.showMedia -> ListItemDefaults.last()
+                        !timelineAppearance.showMedia -> ListItemDefaults.last()
                         else -> ListItemDefaults.item()
                     },
                 content = {
@@ -104,21 +105,17 @@ internal fun AppearanceMediaScreen(onBack: () -> Unit) {
                 },
                 trailingContent = {
                     Switch(
-                        checked = appearanceSettings.showMedia,
+                        checked = timelineAppearance.showMedia,
                         onCheckedChange = {
-                            state.updateSettings {
-                                copy(showMedia = it)
-                            }
+                            state.update(AppearanceKeys.ShowMedia, it)
                         },
                     )
                 },
             )
-            AnimatedVisibility(appearanceSettings.showMedia) {
+            AnimatedVisibility(timelineAppearance.showMedia) {
                 SegmentedListItem(
                     onClick = {
-                        state.updateSettings {
-                            copy(showSensitiveContent = !showSensitiveContent)
-                        }
+                        state.update(AppearanceKeys.ShowSensitiveContent, !timelineAppearance.showSensitiveContent)
                     },
                     shapes = ListItemDefaults.item(),
                     content = {
@@ -129,22 +126,18 @@ internal fun AppearanceMediaScreen(onBack: () -> Unit) {
                     },
                     trailingContent = {
                         Switch(
-                            checked = appearanceSettings.showSensitiveContent,
+                            checked = timelineAppearance.showSensitiveContent,
                             onCheckedChange = {
-                                state.updateSettings {
-                                    copy(showSensitiveContent = it)
-                                }
+                                state.update(AppearanceKeys.ShowSensitiveContent, it)
                             },
                         )
                     },
                 )
             }
-            AnimatedVisibility(appearanceSettings.showMedia) {
+            AnimatedVisibility(timelineAppearance.showMedia) {
                 SegmentedListItem(
                     onClick = {
-                        state.updateSettings {
-                            copy(expandMediaSize = !expandMediaSize)
-                        }
+                        state.update(AppearanceKeys.ExpandMediaSize, !timelineAppearance.expandMediaSize)
                     },
                     shapes = ListItemDefaults.item(),
                     content = {
@@ -155,17 +148,15 @@ internal fun AppearanceMediaScreen(onBack: () -> Unit) {
                     },
                     trailingContent = {
                         Switch(
-                            checked = appearanceSettings.expandMediaSize,
+                            checked = timelineAppearance.expandMediaSize,
                             onCheckedChange = {
-                                state.updateSettings {
-                                    copy(expandMediaSize = it)
-                                }
+                                state.update(AppearanceKeys.ExpandMediaSize, it)
                             },
                         )
                     },
                 )
             }
-            AnimatedVisibility(appearanceSettings.showMedia) {
+            AnimatedVisibility(timelineAppearance.showMedia) {
                 SingleChoiceSettingsItem(
                     headline = { Text(text = stringResource(id = R.string.settings_appearance_video_autoplay)) },
                     supporting = { Text(text = stringResource(id = R.string.settings_appearance_video_autoplay_description)) },
@@ -175,11 +166,9 @@ internal fun AppearanceMediaScreen(onBack: () -> Unit) {
                             VideoAutoplay.ALWAYS to stringResource(id = R.string.settings_appearance_video_autoplay_always),
                             VideoAutoplay.NEVER to stringResource(id = R.string.settings_appearance_video_autoplay_never),
                         ),
-                    selected = appearanceSettings.videoAutoplay,
+                    selected = timelineAppearance.videoAutoplay,
                     onSelected = {
-                        state.updateSettings {
-                            copy(videoAutoplay = it)
-                        }
+                        state.update(AppearanceKeys.VideoAutoplay, it)
                     },
                     shapes = ListItemDefaults.last(),
                 )

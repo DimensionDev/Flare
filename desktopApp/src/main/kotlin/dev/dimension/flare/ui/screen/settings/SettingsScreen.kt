@@ -56,13 +56,13 @@ import dev.dimension.flare.action_import
 import dev.dimension.flare.add_account
 import dev.dimension.flare.app_name
 import dev.dimension.flare.cancel
-import dev.dimension.flare.data.model.AppearanceSettings
 import dev.dimension.flare.data.model.AvatarShape
-import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.data.model.PostActionStyle
 import dev.dimension.flare.data.model.Theme
 import dev.dimension.flare.data.model.TimelineDisplayMode
 import dev.dimension.flare.data.model.VideoAutoplay
+import dev.dimension.flare.data.model.appearance.AppearanceKey
+import dev.dimension.flare.data.model.appearance.AppearanceKeys
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.delete
 import dev.dimension.flare.edit
@@ -73,6 +73,7 @@ import dev.dimension.flare.import_confirmation_title
 import dev.dimension.flare.import_error
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.model.ilink
 import dev.dimension.flare.ok
 import dev.dimension.flare.remove_account
 import dev.dimension.flare.save_completed
@@ -218,6 +219,8 @@ import dev.dimension.flare.ui.component.ComposeInAppNotification
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScrollBar
 import dev.dimension.flare.ui.component.Header
+import dev.dimension.flare.ui.component.LocalGlobalAppearance
+import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.isSuccess
@@ -602,9 +605,7 @@ internal fun SettingsScreen(
                                 MenuFlyoutItem(
                                     text = { Text(stringResource(Res.string.settings_appearance_theme_auto)) },
                                     onClick = {
-                                        state.appearanceState.updateSettings {
-                                            copy(theme = Theme.SYSTEM)
-                                        }
+                                        state.appearanceState.update(AppearanceKeys.Theme, Theme.SYSTEM)
                                         isFlyoutVisible = false
                                     },
                                 )
@@ -612,18 +613,14 @@ internal fun SettingsScreen(
                                     text = { Text(stringResource(Res.string.settings_appearance_theme_dark)) },
                                     onClick = {
                                         isFlyoutVisible = false
-                                        state.appearanceState.updateSettings {
-                                            copy(theme = Theme.DARK)
-                                        }
+                                        state.appearanceState.update(AppearanceKeys.Theme, Theme.DARK)
                                     },
                                 )
                                 MenuFlyoutItem(
                                     text = { Text(stringResource(Res.string.settings_appearance_theme_light)) },
                                     onClick = {
                                         isFlyoutVisible = false
-                                        state.appearanceState.updateSettings {
-                                            copy(theme = Theme.LIGHT)
-                                        }
+                                        state.appearanceState.update(AppearanceKeys.Theme, Theme.LIGHT)
                                     },
                                 )
                             },
@@ -632,7 +629,7 @@ internal fun SettingsScreen(
                                     onClick = { isFlyoutVisible = !isFlyoutVisible },
                                     content = {
                                         Text(
-                                            when (LocalAppearanceSettings.current.theme) {
+                                            when (LocalGlobalAppearance.current.theme) {
                                                 Theme.SYSTEM -> stringResource(Res.string.settings_appearance_theme_auto)
                                                 Theme.DARK -> stringResource(Res.string.settings_appearance_theme_dark)
                                                 Theme.LIGHT -> stringResource(Res.string.settings_appearance_theme_light)
@@ -660,18 +657,14 @@ internal fun SettingsScreen(
                                 MenuFlyoutItem(
                                     text = { Text(stringResource(Res.string.settings_appearance_avatar_shape_round)) },
                                     onClick = {
-                                        state.appearanceState.updateSettings {
-                                            copy(avatarShape = AvatarShape.CIRCLE)
-                                        }
+                                        state.appearanceState.update(AppearanceKeys.AvatarShape, AvatarShape.CIRCLE)
                                         isFlyoutVisible = false
                                     },
                                 )
                                 MenuFlyoutItem(
                                     text = { Text(stringResource(Res.string.settings_appearance_avatar_shape_square)) },
                                     onClick = {
-                                        state.appearanceState.updateSettings {
-                                            copy(avatarShape = AvatarShape.SQUARE)
-                                        }
+                                        state.appearanceState.update(AppearanceKeys.AvatarShape, AvatarShape.SQUARE)
                                         isFlyoutVisible = false
                                     },
                                 )
@@ -681,7 +674,7 @@ internal fun SettingsScreen(
                                     onClick = { isFlyoutVisible = !isFlyoutVisible },
                                     content = {
                                         Text(
-                                            when (LocalAppearanceSettings.current.avatarShape) {
+                                            when (LocalTimelineAppearance.current.avatarShape) {
                                                 AvatarShape.CIRCLE -> {
                                                     stringResource(
                                                         Res.string.settings_appearance_avatar_shape_round,
@@ -726,11 +719,9 @@ internal fun SettingsScreen(
                     },
                     trailing = {
                         Switcher(
-                            checked = LocalAppearanceSettings.current.showComposeInHomeTimeline,
+                            checked = LocalGlobalAppearance.current.showComposeInHomeTimeline,
                             {
-                                state.appearanceState.updateSettings {
-                                    copy(showComposeInHomeTimeline = it)
-                                }
+                                state.appearanceState.update(AppearanceKeys.ShowComposeInHomeTimeline, it)
                             },
                             textBefore = true,
                         )
@@ -758,9 +749,7 @@ internal fun SettingsScreen(
                                 items.forEach { (key, value) ->
                                     MenuFlyoutItem(
                                         onClick = {
-                                            state.appearanceState.updateSettings {
-                                                copy(timelineDisplayMode = key)
-                                            }
+                                            state.appearanceState.update(AppearanceKeys.TimelineDisplayMode, key)
                                             isFlyoutVisible = false
                                         },
                                         text = { Text(stringResource(value)) },
@@ -771,7 +760,7 @@ internal fun SettingsScreen(
                                 DropDownButton(
                                     onClick = { isFlyoutVisible = !isFlyoutVisible },
                                     content = {
-                                        items[LocalAppearanceSettings.current.timelineDisplayMode]?.let {
+                                        items[LocalTimelineAppearance.current.timelineDisplayMode]?.let {
                                             Text(stringResource(it))
                                         }
                                     },
@@ -792,11 +781,9 @@ internal fun SettingsScreen(
                     },
                     trailing = {
                         Switcher(
-                            checked = LocalAppearanceSettings.current.fullWidthPost,
+                            checked = LocalTimelineAppearance.current.fullWidthPost,
                             {
-                                state.appearanceState.updateSettings {
-                                    copy(fullWidthPost = it)
-                                }
+                                state.appearanceState.update(AppearanceKeys.FullWidthPost, it)
                             },
                             textBefore = true,
                         )
@@ -825,9 +812,7 @@ internal fun SettingsScreen(
                                 items.forEach { (key, value) ->
                                     MenuFlyoutItem(
                                         onClick = {
-                                            state.appearanceState.updateSettings {
-                                                copy(postActionStyle = key)
-                                            }
+                                            state.appearanceState.update(AppearanceKeys.PostActionStyle, key)
                                             isFlyoutVisible = false
                                         },
                                         text = { Text(stringResource(value)) },
@@ -838,7 +823,7 @@ internal fun SettingsScreen(
                                 DropDownButton(
                                     onClick = { isFlyoutVisible = !isFlyoutVisible },
                                     content = {
-                                        items[LocalAppearanceSettings.current.postActionStyle]?.let {
+                                        items[LocalTimelineAppearance.current.postActionStyle]?.let {
                                             Text(stringResource(it))
                                         }
                                     },
@@ -849,7 +834,7 @@ internal fun SettingsScreen(
                         )
                     },
                 )
-                AnimatedVisibility(LocalAppearanceSettings.current.postActionStyle != PostActionStyle.Hidden) {
+                AnimatedVisibility(LocalTimelineAppearance.current.postActionStyle != PostActionStyle.Hidden) {
                     Column {
                         ExpanderItemSeparator()
                         ExpanderItem(
@@ -861,11 +846,9 @@ internal fun SettingsScreen(
                             },
                             trailing = {
                                 Switcher(
-                                    checked = LocalAppearanceSettings.current.showNumbers,
+                                    checked = LocalTimelineAppearance.current.showNumbers,
                                     {
-                                        state.appearanceState.updateSettings {
-                                            copy(showNumbers = it)
-                                        }
+                                        state.appearanceState.update(AppearanceKeys.ShowNumbers, it)
                                     },
                                     textBefore = true,
                                 )
@@ -896,11 +879,9 @@ internal fun SettingsScreen(
                     },
                     trailing = {
                         Switcher(
-                            checked = LocalAppearanceSettings.current.absoluteTimestamp,
+                            checked = LocalTimelineAppearance.current.absoluteTimestamp,
                             {
-                                state.appearanceState.updateSettings {
-                                    copy(absoluteTimestamp = it)
-                                }
+                                state.appearanceState.update(AppearanceKeys.AbsoluteTimestamp, it)
                             },
                             textBefore = true,
                         )
@@ -916,11 +897,9 @@ internal fun SettingsScreen(
                     },
                     trailing = {
                         Switcher(
-                            checked = LocalAppearanceSettings.current.showPlatformLogo,
+                            checked = LocalTimelineAppearance.current.showPlatformLogo,
                             {
-                                state.appearanceState.updateSettings {
-                                    copy(showPlatformLogo = it)
-                                }
+                                state.appearanceState.update(AppearanceKeys.ShowPlatformLogo, it)
                             },
                             textBefore = true,
                         )
@@ -936,17 +915,15 @@ internal fun SettingsScreen(
                     },
                     trailing = {
                         Switcher(
-                            checked = LocalAppearanceSettings.current.showLinkPreview,
+                            checked = LocalTimelineAppearance.current.showLinkPreview,
                             {
-                                state.appearanceState.updateSettings {
-                                    copy(showLinkPreview = it)
-                                }
+                                state.appearanceState.update(AppearanceKeys.ShowLinkPreview, it)
                             },
                             textBefore = true,
                         )
                     },
                 )
-                AnimatedVisibility(LocalAppearanceSettings.current.showLinkPreview) {
+                AnimatedVisibility(LocalTimelineAppearance.current.showLinkPreview) {
                     Column {
                         ExpanderItemSeparator()
                         ExpanderItem(
@@ -958,11 +935,9 @@ internal fun SettingsScreen(
                             },
                             trailing = {
                                 Switcher(
-                                    checked = LocalAppearanceSettings.current.compatLinkPreview,
+                                    checked = LocalTimelineAppearance.current.compatLinkPreview,
                                     {
-                                        state.appearanceState.updateSettings {
-                                            copy(compatLinkPreview = it)
-                                        }
+                                        state.appearanceState.update(AppearanceKeys.CompatLinkPreview, it)
                                     },
                                     textBefore = true,
                                 )
@@ -993,17 +968,15 @@ internal fun SettingsScreen(
                     },
                     trailing = {
                         Switcher(
-                            checked = LocalAppearanceSettings.current.showMedia,
+                            checked = LocalTimelineAppearance.current.showMedia,
                             {
-                                state.appearanceState.updateSettings {
-                                    copy(showMedia = it)
-                                }
+                                state.appearanceState.update(AppearanceKeys.ShowMedia, it)
                             },
                             textBefore = true,
                         )
                     },
                 )
-                AnimatedVisibility(LocalAppearanceSettings.current.showMedia) {
+                AnimatedVisibility(LocalTimelineAppearance.current.showMedia) {
                     Column {
                         ExpanderItemSeparator()
                         ExpanderItem(
@@ -1015,11 +988,9 @@ internal fun SettingsScreen(
                             },
                             trailing = {
                                 Switcher(
-                                    checked = LocalAppearanceSettings.current.showSensitiveContent,
+                                    checked = LocalTimelineAppearance.current.showSensitiveContent,
                                     {
-                                        state.appearanceState.updateSettings {
-                                            copy(showSensitiveContent = it)
-                                        }
+                                        state.appearanceState.update(AppearanceKeys.ShowSensitiveContent, it)
                                     },
                                     textBefore = true,
                                 )
@@ -1027,7 +998,7 @@ internal fun SettingsScreen(
                         )
                     }
                 }
-                AnimatedVisibility(LocalAppearanceSettings.current.showMedia) {
+                AnimatedVisibility(LocalTimelineAppearance.current.showMedia) {
                     Column {
                         ExpanderItemSeparator()
                         ExpanderItem(
@@ -1039,11 +1010,9 @@ internal fun SettingsScreen(
                             },
                             trailing = {
                                 Switcher(
-                                    checked = LocalAppearanceSettings.current.expandMediaSize,
+                                    checked = LocalTimelineAppearance.current.expandMediaSize,
                                     {
-                                        state.appearanceState.updateSettings {
-                                            copy(expandMediaSize = it)
-                                        }
+                                        state.appearanceState.update(AppearanceKeys.ExpandMediaSize, it)
                                     },
                                     textBefore = true,
                                 )
@@ -1061,11 +1030,12 @@ internal fun SettingsScreen(
                     },
                     trailing = {
                         Switcher(
-                            checked = LocalAppearanceSettings.current.videoAutoplay == VideoAutoplay.ALWAYS,
+                            checked = LocalTimelineAppearance.current.videoAutoplay == VideoAutoplay.ALWAYS,
                             {
-                                state.appearanceState.updateSettings {
-                                    copy(videoAutoplay = if (it) VideoAutoplay.ALWAYS else VideoAutoplay.NEVER)
-                                }
+                                state.appearanceState.update(
+                                    AppearanceKeys.VideoAutoplay,
+                                    if (it) VideoAutoplay.ALWAYS else VideoAutoplay.NEVER,
+                                )
                             },
                             textBefore = true,
                         )
@@ -2037,10 +2007,10 @@ internal fun SettingsScreen(
                     },
                     trailing = {
                         HyperlinkButton(
-                            "https://t.me/+0UtcP6_qcDoyOWE1",
+                            ilink,
                         ) {
                             Text(
-                                text = "https://t.me/+0UtcP6_qcDoyOWE1",
+                                text = ilink,
                                 maxLines = 1,
                             )
                         }
@@ -2310,9 +2280,12 @@ private fun appearancePresenter() =
                 expanded = value
             }
 
-            fun updateSettings(block: AppearanceSettings.() -> AppearanceSettings) {
+            fun <T : Any> update(
+                key: AppearanceKey<T>,
+                value: T,
+            ) {
                 scope.launch {
-                    settingsRepository.updateAppearanceSettings(block)
+                    settingsRepository.updateAppearance(key, value)
                 }
             }
         }

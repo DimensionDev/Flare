@@ -4,15 +4,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import dev.dimension.flare.data.database.app.model.SubscriptionType
-import dev.dimension.flare.data.model.AllRssTimelineTabItem
-import dev.dimension.flare.data.model.RssTimelineTabItem
-import dev.dimension.flare.data.model.SubscriptionTimelineTabItem
-import dev.dimension.flare.data.model.TabItem
-import dev.dimension.flare.data.model.TimelineTabItem
+import dev.dimension.flare.data.model.IconType
+import dev.dimension.flare.data.model.tab.TimelineResolver
+import dev.dimension.flare.data.model.tab.TimelineTabItemV2
+import dev.dimension.flare.data.platform.RssTimelineSpecs
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiProfile
+import dev.dimension.flare.ui.model.UiRssSource
 import dev.dimension.flare.ui.model.UiState
+import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.presenter.PresenterBase
@@ -22,10 +24,15 @@ import dev.dimension.flare.ui.presenter.settings.AccountsPresenter
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 public class AllTabsPresenter(
-    private val filterIsTimeline: Boolean = false,
-) : PresenterBase<AllTabsPresenter.State>() {
+//    private val filterIsTimeline: Boolean = false,
+) : PresenterBase<AllTabsPresenter.State>(),
+    KoinComponent {
+    private val timelineResolver: TimelineResolver by inject()
+
     @Composable
     override fun body(): State {
         val accountState = remember { AccountsPresenter() }.body()
@@ -35,27 +42,10 @@ public class AllTabsPresenter(
                     .toImmutableList()
                     .mapNotNull { it.profile.takeSuccess() }
                     .map { user ->
-                        val tabs =
-                            remember(user.key) {
-                                (
-                                    TimelineTabItem.default(user.key) +
-                                        TimelineTabItem.secondaryFor(
-                                            user.platformType,
-                                            user.key,
-                                        )
-                                ).let {
-                                    if (filterIsTimeline) {
-                                        it.filterIsInstance<TimelineTabItem>()
-                                    } else {
-                                        it
-                                    }
-                                }
-                            }
-                        val extraTabs = listTabPresenter(accountKey = user.key).tabs.takeSuccess()
+                        val tabs = listTabPresenter(accountKey = user.key).tabs.takeSuccess()
                         State.AccountTabs(
                             profile = user,
-                            tabs = tabs.toImmutableList(),
-                            extraTabs = extraTabs?.toImmutableList() ?: persistentListOf(),
+                            tabs = tabs?.toImmutableList() ?: persistentListOf(),
                         )
                     }.toImmutableList()
             }
@@ -69,38 +59,20 @@ public class AllTabsPresenter(
                 (
                     listOfNotNull(
                         if (rssSources.sources.isNotEmpty()) {
-                            AllRssTimelineTabItem()
+                            timelineResolver.toTabItem(
+                                RssTimelineSpecs.allRss.target(
+                                    data = RssTimelineSpecs.AllRssData,
+                                ),
+                            )
                         } else {
                             null
                         },
                     ) +
-                        rssSources.sources.map { source ->
-                            if (source.type == SubscriptionType.RSS) {
-                                RssTimelineTabItem(source)
-                            } else {
-                                SubscriptionTimelineTabItem(source)
-                            }
-                        }
+                        rssSources.sources.map { source -> source.toTimelineTabItemV2(timelineResolver) }
                 ).toImmutableList()
             }
 
         return object : State {
-            val defaultAccountKey =
-                accountTabs
-                    .takeSuccess()
-                    ?.firstOrNull()
-                    ?.profile
-                    ?.key
-            override val defaultTabs =
-                TimelineTabItem
-                    .mainSidePanel(defaultAccountKey)
-                    .let {
-                        if (filterIsTimeline) {
-                            it.filterIsInstance<TimelineTabItem>()
-                        } else {
-                            it
-                        }
-                    }.toImmutableList()
             override val accountTabs = accountTabs
             override val rssTabs = rssTabs
         }
@@ -116,15 +88,43 @@ public class AllTabsPresenter(
 
     @Immutable
     public interface State {
-        public val defaultTabs: ImmutableList<TabItem>
-        public val rssTabs: ImmutableList<TimelineTabItem>
+        public val rssTabs: ImmutableList<TimelineTabItemV2>
         public val accountTabs: UiState<ImmutableList<AccountTabs>>
 
         @Immutable
         public data class AccountTabs(
             val profile: UiProfile,
-            val tabs: ImmutableList<TabItem>,
-            val extraTabs: ImmutableList<PinnableTimelineTabPresenter.State.Tab>,
+            val tabs: ImmutableList<PinnableTimelineTabPresenter.PinnableTimelineTab>,
         )
     }
+}
+
+private fun UiRssSource.toTimelineTabItemV2(timelineResolver: TimelineResolver): TimelineTabItemV2 {
+    val title = UiText.Raw(title ?: url)
+    val icon =
+        favIcon?.let { IconType.Url(it) }
+            ?: if (type == SubscriptionType.RSS) {
+                IconType.Material(UiIcon.Rss)
+            } else {
+                IconType.FavIcon(host)
+            }
+    val source =
+        if (type == SubscriptionType.RSS) {
+            RssTimelineSpecs.rss.target(
+                data = RssTimelineSpecs.RssData(url),
+                title = title,
+                icon = icon,
+            )
+        } else {
+            RssTimelineSpecs.subscription.target(
+                data =
+                    RssTimelineSpecs.SubscriptionData(
+                        subscriptionUrl = url,
+                        subscriptionType = type,
+                    ),
+                title = title,
+                icon = icon,
+            )
+        }
+    return timelineResolver.toTabItem(source)
 }

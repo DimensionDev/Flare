@@ -8,7 +8,7 @@ import CHTCollectionViewWaterfallLayout
 
 struct GalleryTimelinePagingView: UIViewControllerRepresentable {
     let data: PagingState<UiTimelineV2>
-    @Environment(\.appearanceSettings) private var appearanceSettings
+    @Environment(\.timelineAppearance) private var timelineAppearance
     @Environment(\.openURL) private var openURL
     @Environment(\.refresh) private var refreshAction: RefreshAction?
 
@@ -27,14 +27,14 @@ struct GalleryTimelinePagingView: UIViewControllerRepresentable {
         // Apply data before appearance so the appearance setter's reconfigure
         // sees a coherent itemIndexMap / currentSuccess pair.
         controller.update(data: data)
-        controller.appearance = GalleryUIKitAppearance(settings: appearanceSettings)
+        controller.appearance = GalleryUIKitAppearance(timeline: timelineAppearance)
     }
 
     private func apply(to controller: GalleryTimelineController) {
         controller.refreshCallback = refreshAction.map { action in
             { await action() }
         }
-        controller.appearance = GalleryUIKitAppearance(settings: appearanceSettings)
+        controller.appearance = GalleryUIKitAppearance(timeline: timelineAppearance)
         controller.openURL = { url in openURL.callAsFunction(url) }
     }
 }
@@ -64,7 +64,7 @@ final class GalleryTimelineController: UIViewController, UICollectionViewDelegat
 
     var refreshCallback: (() async -> Void)?
     var openURL: ((URL) -> Void)?
-    var appearance = GalleryUIKitAppearance(settings: AppearanceSettings.companion.Default) {
+    var appearance = GalleryUIKitAppearance(timeline: TimelineAppearance.companion.Default) {
         didSet {
             guard isViewLoaded else { return }
             guard oldValue != appearance else {

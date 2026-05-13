@@ -7,20 +7,20 @@ import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.ui.model.UiList
 import kotlinx.collections.immutable.ImmutableList
 
-internal interface ListLoader {
+internal interface ListLoader<T : UiList> {
     suspend fun load(
         pageSize: Int,
         request: PagingRequest,
-    ): PagingResult<UiList>
+    ): PagingResult<T>
 
-    suspend fun info(listId: String): UiList
+    suspend fun info(listId: String): T
 
-    suspend fun create(metaData: ListMetaData): UiList
+    suspend fun create(metaData: ListMetaData): T
 
     suspend fun update(
         listId: String,
         metaData: ListMetaData,
-    ): UiList
+    ): T
 
     suspend fun delete(listId: String)
 

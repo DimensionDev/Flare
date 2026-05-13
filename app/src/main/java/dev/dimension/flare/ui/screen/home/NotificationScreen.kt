@@ -18,7 +18,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SecondaryScrollableTabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -34,13 +33,14 @@ import dev.dimension.flare.R
 import dev.dimension.flare.common.isRefreshing
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.data.model.BottomBarBehavior
-import dev.dimension.flare.data.model.LocalAppearanceSettings
-import dev.dimension.flare.ui.common.isCompat
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
+import dev.dimension.flare.ui.component.LocalGlobalAppearance
+import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.TabRowIndicator
+import dev.dimension.flare.ui.component.platform.isCompatScreen
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.model.onSuccess
@@ -66,9 +66,9 @@ internal fun NotificationScreen() {
             state.refresh()
         },
     )
-    val windowInfo = currentWindowAdaptiveInfoV2()
+    val isCompatScreen by isCompatScreen()
     val topAppBarScrollBehavior =
-        if (LocalAppearanceSettings.current.bottomBarBehavior == BottomBarBehavior.AlwaysShow) {
+        if (LocalGlobalAppearance.current.bottomBarBehavior == BottomBarBehavior.AlwaysShow) {
             TopAppBarDefaults.pinnedScrollBehavior()
         } else {
             TopAppBarDefaults.enterAlwaysScrollBehavior()
@@ -138,7 +138,7 @@ internal fun NotificationScreen() {
                 },
                 scrollBehavior = topAppBarScrollBehavior,
                 actions = {
-                    if (!windowInfo.windowSizeClass.isCompat()) {
+                    if (!isCompatScreen) {
                         state.supportedNotificationFilters.onSuccess { filters ->
                             if (filters.size > 1) {
                                 NotificationFilterSelector(
@@ -168,7 +168,7 @@ internal fun NotificationScreen() {
                     state = lazyListState,
                     contentPadding = contentPadding,
                 ) {
-                    if (windowInfo.windowSizeClass.isCompat()) {
+                    if (isCompatScreen) {
                         state.supportedNotificationFilters.onSuccess {
                             if (it.size > 1) {
                                 item(

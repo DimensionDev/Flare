@@ -13,6 +13,7 @@ import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
 import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.RelationDataSource
+import dev.dimension.flare.data.datasource.microblog.datasource.TimelineTabConfigurationDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
 import dev.dimension.flare.data.datasource.microblog.handler.PostEventHandler
 import dev.dimension.flare.data.datasource.microblog.handler.PostHandler
@@ -24,12 +25,18 @@ import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.notSupported
+import dev.dimension.flare.data.model.IconType
+import dev.dimension.flare.data.model.tab.ShortcutSpec
+import dev.dimension.flare.data.model.tab.TimelineSpec
+import dev.dimension.flare.data.model.tab.toSlot
 import dev.dimension.flare.data.network.nostr.AmberSignerBridge
 import dev.dimension.flare.data.network.nostr.NostrService
+import dev.dimension.flare.data.platform.CommonTimelineSpecs
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiHashtag
+import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.nostrLike
@@ -53,6 +60,7 @@ internal class NostrDataSource(
 ) : AuthenticatedMicroblogDataSource,
     UserDataSource,
     RelationDataSource,
+    TimelineTabConfigurationDataSource,
     PostDataSource,
     PostEventHandler.Handler,
     KoinComponent,
@@ -69,6 +77,29 @@ internal class NostrDataSource(
             accountKey = accountKey,
             serviceManager = serviceManager,
         )
+    }
+
+    override val defaultTabs by lazy {
+        persistentListOf(
+            CommonTimelineSpecs.home
+                .target(
+                    data = TimelineSpec.AccountBasedData(accountKey),
+                    icon = IconType.Material(UiIcon.Nostr),
+                ).toSlot(),
+        )
+    }
+
+    override val builtInTimelineTabs by lazy {
+        persistentListOf(
+            CommonTimelineSpecs.home.tabItem(
+                data = TimelineSpec.AccountBasedData(accountKey),
+                icon = IconType.Material(UiIcon.Nostr),
+            ),
+        )
+    }
+
+    override val shortcuts by lazy {
+        persistentListOf<ShortcutSpec>()
     }
 
     private val serviceManager by lazy {

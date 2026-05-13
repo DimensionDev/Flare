@@ -108,7 +108,7 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.Glassify
-import dev.dimension.flare.ui.component.LocalComponentAppearance
+import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.SurfaceBindingManager
 import dev.dimension.flare.ui.component.VideoPlayer
 import dev.dimension.flare.ui.component.placeholder
@@ -533,8 +533,8 @@ internal fun StatusMediaScreen(
                                             }
                                             if (!isBigScreen) {
                                                 CompositionLocalProvider(
-                                                    LocalComponentAppearance provides
-                                                        LocalComponentAppearance.current.copy(
+                                                    LocalTimelineAppearance provides
+                                                        LocalTimelineAppearance.current.copy(
                                                             showMedia = false,
                                                             showLinkPreview = false,
                                                         ),
@@ -580,8 +580,8 @@ internal fun StatusMediaScreen(
                                     val content = it as? UiTimelineV2.Post
                                     if (content is UiTimelineV2.Post) {
                                         CompositionLocalProvider(
-                                            LocalComponentAppearance provides
-                                                LocalComponentAppearance.current.copy(
+                                            LocalTimelineAppearance provides
+                                                LocalTimelineAppearance.current.copy(
                                                     showMedia = false,
                                                     showLinkPreview = false,
                                                 ),

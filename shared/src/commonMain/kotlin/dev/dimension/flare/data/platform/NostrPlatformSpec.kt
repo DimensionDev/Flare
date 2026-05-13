@@ -3,13 +3,9 @@ package dev.dimension.flare.data.platform
 import dev.dimension.flare.common.deeplink.DeepLinkMapping
 import dev.dimension.flare.common.deeplink.DeepLinkPattern
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
-import dev.dimension.flare.data.model.HomeTimelineTabItem
-import dev.dimension.flare.data.model.IconType
-import dev.dimension.flare.data.model.TabItem
-import dev.dimension.flare.data.model.TimelineTabItem
+import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
 import dev.dimension.flare.data.network.nostr.NostrPlatformDetector
-import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformSpec
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.PlatformTypeMetadata
@@ -31,16 +27,10 @@ internal data object NostrPlatformSpec : PlatformSpec {
 
     override fun deepLinkPatterns(host: String): ImmutableList<DeepLinkPattern<out DeepLinkMapping.Type>> = persistentListOf()
 
-    override fun defaultTimelineTabs(accountKey: MicroBlogKey): ImmutableList<TimelineTabItem> =
+    override val timelineSpecs: ImmutableList<TimelineSpec<out TimelineSpec.Data>> =
         persistentListOf(
-            HomeTimelineTabItem(
-                accountKey = accountKey,
-                title = "Nostr",
-                icon = IconType.Material(UiIcon.Nostr),
-            ),
+            CommonTimelineSpecs.home,
         )
-
-    override fun secondary(accountKey: MicroBlogKey): ImmutableList<TabItem> = persistentListOf()
 
     override suspend fun instanceMetadata(host: String): UiInstanceMetadata =
         throw UnsupportedOperationException("${type.name} is not supported yet")

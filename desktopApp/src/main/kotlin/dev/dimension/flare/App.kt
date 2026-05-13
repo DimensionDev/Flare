@@ -2,6 +2,7 @@ package dev.dimension.flare
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,9 +14,11 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.rememberScrollState
@@ -27,46 +30,46 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.movableContentOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowScope
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.Bars
+import compose.icons.fontawesomeicons.solid.Bell
 import compose.icons.fontawesomeicons.solid.Gear
+import compose.icons.fontawesomeicons.solid.House
+import compose.icons.fontawesomeicons.solid.MagnifyingGlass
 import compose.icons.fontawesomeicons.solid.Pen
 import compose.icons.fontawesomeicons.solid.UserPlus
-import dev.dimension.flare.data.model.AllListTabItem
-import dev.dimension.flare.data.model.AllNotificationTabItem
-import dev.dimension.flare.data.model.Bluesky
-import dev.dimension.flare.data.model.DirectMessageTabItem
-import dev.dimension.flare.data.model.DiscoverTabItem
-import dev.dimension.flare.data.model.HomeTimelineTabItem
-import dev.dimension.flare.data.model.Misskey
-import dev.dimension.flare.data.model.NotificationTabItem
-import dev.dimension.flare.data.model.ProfileTabItem
-import dev.dimension.flare.data.model.RssTabItem
-import dev.dimension.flare.data.model.SettingsTabItem
-import dev.dimension.flare.data.model.TabItem
-import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.component.AvatarComponent
+import dev.dimension.flare.ui.component.FAIcon
+import dev.dimension.flare.ui.component.FlareScrollBar
 import dev.dimension.flare.ui.component.InAppNotificationComponent
-import dev.dimension.flare.ui.component.TabIcon
-import dev.dimension.flare.ui.component.TabTitle
+import dev.dimension.flare.ui.component.RichText
+import dev.dimension.flare.ui.component.toImageVector
+import dev.dimension.flare.ui.model.asText
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onError
+import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.presenter.HomeTabsPresenter
-import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
 import dev.dimension.flare.ui.presenter.home.AllNotificationBadgePresenter
 import dev.dimension.flare.ui.presenter.home.DeepLinkPresenter
+import dev.dimension.flare.ui.presenter.home.LoggedInPresenter
+import dev.dimension.flare.ui.presenter.home.LoggedInState
+import dev.dimension.flare.ui.presenter.home.SecondaryTabsPresenter
 import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.route.Route
@@ -76,13 +79,19 @@ import io.github.composefluent.FluentTheme
 import io.github.composefluent.background.Layer
 import io.github.composefluent.component.Badge
 import io.github.composefluent.component.Button
+import io.github.composefluent.component.CardExpanderItem
+import io.github.composefluent.component.Expander
+import io.github.composefluent.component.FlyoutContainer
+import io.github.composefluent.component.FlyoutPlacement
 import io.github.composefluent.component.Icon
 import io.github.composefluent.component.SubtleButton
 import io.github.composefluent.component.Text
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.koinInject
 
 @Composable
 internal fun WindowScope.FlareApp(backButtonState: NavigationBackButtonState) {
@@ -113,75 +122,242 @@ internal fun WindowScope.FlareApp(backButtonState: NavigationBackButtonState) {
                         .verticalScroll(rememberScrollState())
                         .padding(top = LocalWindowPadding.current.calculateTopPadding()),
             ) {
-                state.user
-                    .onSuccess { user ->
-                        SubtleButton(
-                            onClick = {
-                                state.navigate(Route.MeRoute(AccountType.Specific(user.key)))
-                            },
-                        ) {
-                            Column(
+                state.isLoggedIn
+                    .onSuccess { loggedIn ->
+                        if (!loggedIn) {
+                            Button(
+                                onClick = {
+                                    state.navigate(Route.ServiceSelect)
+                                },
                                 modifier =
                                     Modifier
+                                        .padding(vertical = 4.dp)
                                         .fillMaxWidth(),
-                                horizontalAlignment = Alignment.CenterHorizontally,
                             ) {
-                                AvatarComponent(
-                                    data = user.avatar,
+                                Column(
                                     modifier =
                                         Modifier
-                                            .aspectRatio(1f),
-                                )
+                                            .padding(vertical = 4.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                                ) {
+                                    Icon(
+                                        FontAwesomeIcons.Solid.UserPlus,
+                                        contentDescription = stringResource(Res.string.home_login),
+                                        modifier = Modifier.size(16.dp),
+                                    )
+                                    Text(stringResource(Res.string.home_login), maxLines = 1)
+                                }
                             }
-                        }
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Button(
-                            onClick = {
-                                state.navigate(
-                                    Route.Compose.New,
-                                )
-                            },
-                            modifier =
-                                Modifier
-                                    .padding(horizontal = 8.dp, vertical = 4.dp)
-                                    .fillMaxWidth(),
-                            iconOnly = true,
-                        ) {
-                            Icon(
-                                FontAwesomeIcons.Solid.Pen,
-                                contentDescription = stringResource(Res.string.home_compose),
-                                modifier = Modifier.size(16.dp),
-                            )
-                        }
-                    }.onError {
-                        Button(
-                            onClick = {
-                                state.navigate(Route.ServiceSelect)
-                            },
-                            modifier =
-                                Modifier
-                                    .padding(vertical = 4.dp)
-                                    .fillMaxWidth(),
-                        ) {
-                            Column(
+                        } else {
+                            FlyoutContainer(
+                                flyout = {
+                                    val scrollableState = rememberScrollState()
+                                    FlareScrollBar(
+                                        state = scrollableState,
+                                    ) {
+                                        Column(
+                                            modifier =
+                                                Modifier
+                                                    .widthIn(
+                                                        max = 320.dp,
+                                                    ).heightIn(
+                                                        max = 600.dp,
+                                                    ).verticalScroll(scrollableState),
+                                        ) {
+                                            state.items.onSuccess { items ->
+                                                items.forEach { item ->
+                                                    item.user.onSuccess { user ->
+                                                        var isSubMenuExpanded by remember {
+                                                            mutableStateOf(
+                                                                false,
+                                                            )
+                                                        }
+                                                        Expander(
+                                                            expanded = isSubMenuExpanded,
+                                                            onExpandedChanged = {
+                                                                isSubMenuExpanded = it
+                                                            },
+                                                            heading = {
+                                                                RichText(
+                                                                    text = user.name,
+                                                                    maxLines = 1,
+                                                                )
+                                                            },
+                                                            caption = {
+                                                                Text(
+                                                                    text = user.handle.canonical,
+                                                                    maxLines = 1,
+                                                                )
+                                                            },
+                                                            icon = {
+                                                                AvatarComponent(
+                                                                    data = user.avatar,
+                                                                    modifier =
+                                                                        Modifier
+                                                                            .aspectRatio(1f),
+                                                                    size = 24.dp,
+                                                                )
+                                                            },
+                                                        ) {
+                                                            item.tabs.forEach { shortcut ->
+                                                                CardExpanderItem(
+                                                                    onClick = {
+                                                                        state.navigate(shortcut)
+                                                                        isFlyoutVisible = false
+                                                                    },
+                                                                    heading = {
+                                                                        dev.dimension.flare.ui.component.Text(
+                                                                            shortcut.title.asText(),
+                                                                        )
+                                                                    },
+                                                                    icon = {
+                                                                        FAIcon(
+                                                                            imageVector = shortcut.icon.toImageVector(),
+                                                                            contentDescription = null,
+                                                                            modifier = Modifier.size(16.dp),
+                                                                        )
+                                                                    },
+                                                                )
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                placement = FlyoutPlacement.EndAlignedTop,
+                                adaptivePlacement = true,
+                            ) {
+                                state.user
+                                    .onSuccess {
+                                        Box(
+                                            modifier =
+                                                Modifier
+                                                    .fillMaxWidth(),
+                                            contentAlignment = Alignment.Center,
+                                        ) {
+                                            AvatarComponent(
+                                                data = it.avatar,
+                                                modifier =
+                                                    Modifier
+                                                        .clickable {
+                                                            isFlyoutVisible = !isFlyoutVisible
+                                                        }.aspectRatio(1f),
+                                            )
+                                        }
+                                    }.onLoading {
+                                        SubtleButton(
+                                            onClick = {
+                                                isFlyoutVisible = !isFlyoutVisible
+                                            },
+                                            modifier = Modifier.fillMaxWidth(),
+                                        ) {
+                                            FAIcon(
+                                                imageVector = FontAwesomeIcons.Solid.Bars,
+                                                contentDescription = stringResource(Res.string.home_settings),
+//                                        modifier = Modifier.size(16.dp),
+                                            )
+                                        }
+                                    }.onError {
+                                        SubtleButton(
+                                            onClick = {
+                                                isFlyoutVisible = !isFlyoutVisible
+                                            },
+                                            modifier = Modifier.fillMaxWidth(),
+                                        ) {
+                                            FAIcon(
+                                                imageVector = FontAwesomeIcons.Solid.Bars,
+                                                contentDescription = stringResource(Res.string.home_settings),
+//                                        modifier = Modifier.size(16.dp),
+                                            )
+                                        }
+                                    }
+                            }
+
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Button(
+                                onClick = {
+                                    state.navigate(
+                                        Route.Compose.New,
+                                    )
+                                },
                                 modifier =
                                     Modifier
-                                        .padding(vertical = 4.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.spacedBy(4.dp),
+                                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                                        .fillMaxWidth(),
+                                iconOnly = true,
                             ) {
                                 Icon(
-                                    FontAwesomeIcons.Solid.UserPlus,
-                                    contentDescription = stringResource(Res.string.home_login),
+                                    FontAwesomeIcons.Solid.Pen,
+                                    contentDescription = stringResource(Res.string.home_compose),
                                     modifier = Modifier.size(16.dp),
                                 )
-                                Text(stringResource(Res.string.home_login), maxLines = 1)
                             }
                         }
+//                        SubtleButton(
+//                            onClick = {
+// //                                state.navigate(Route.MeRoute(AccountType.Specific(user.key)))
+//                            },
+//                        ) {
+//                            Column(
+//                                modifier =
+//                                    Modifier
+//                                        .fillMaxWidth(),
+//                                horizontalAlignment = Alignment.CenterHorizontally,
+//                            ) {
+//                            }
+//                        }
+//                        FlyoutContainer(
+//                            flyout = {
+//                                Box(
+//                                    modifier = Modifier.size(200.dp)
+//                                )
+//                            },
+//                            placement = FlyoutPlacement.EndAlignedTop,
+//                            adaptivePlacement = true,
+//                        ) {
+//                            Box(
+//                                modifier =
+//                                    Modifier
+//                                        .fillMaxWidth(),
+//                                contentAlignment = Alignment.Center,
+//                            ) {
+//                                AvatarComponent(
+//                                    data = user.avatar,
+//                                    modifier =
+//                                        Modifier
+//                                            .clickable {
+//                                                isFlyoutVisible = !isFlyoutVisible
+//                                            }
+//                                            .aspectRatio(1f),
+//                                )
+//                            }
+//                        }
+//                        Spacer(modifier = Modifier.height(8.dp))
+//                        Button(
+//                            onClick = {
+//                                state.navigate(
+//                                    Route.Compose.New,
+//                                )
+//                            },
+//                            modifier =
+//                                Modifier
+//                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+//                                    .fillMaxWidth(),
+//                            iconOnly = true,
+//                        ) {
+//                            Icon(
+//                                FontAwesomeIcons.Solid.Pen,
+//                                contentDescription = stringResource(Res.string.home_compose),
+//                                modifier = Modifier.size(16.dp),
+//                            )
+//                        }
                     }
 
                 @Composable
-                fun buildMenuItem(tab: TabItem) {
+                fun buildMenuItem(tab: HomeTabsPresenter.State.HomeTabs) {
                     val selected = currentRoute == getRoute(tab)
                     val color by animateColorAsState(
                         targetValue =
@@ -200,24 +376,25 @@ internal fun WindowScope.FlareApp(backButtonState: NavigationBackButtonState) {
                             }
                         },
                         icon = {
-                            TabIcon(
-                                tab,
-                                iconOnly = tabs.secondaryIconOnly,
-                                color = color,
+                            FAIcon(
+                                imageVector = tab.icon,
+                                contentDescription = stringResource(tab.title),
+                                tint = color,
                                 modifier =
                                     Modifier
                                         .size(24.dp),
                             )
                         },
                         text = {
-                            TabTitle(
-                                tab.metaData.title,
+                            Text(
+                                stringResource(tab.title),
+                                maxLines = 1,
                                 color = color,
                                 style = FluentTheme.typography.caption,
                             )
                         },
                         badge =
-                            if (tab is NotificationTabItem || tab is AllNotificationTabItem) {
+                            if (tab == HomeTabsPresenter.State.HomeTabs.Notifications) {
                                 if (state.notificationState.count > 0) {
                                     {
                                         Text(state.notificationState.count.toString())
@@ -230,13 +407,8 @@ internal fun WindowScope.FlareApp(backButtonState: NavigationBackButtonState) {
                             },
                     )
                 }
-                tabs.primary.forEachIndexed { _, tab ->
+                tabs.forEach { tab ->
                     buildMenuItem(tab)
-                }
-                if (tabs.secondary.any()) {
-                    tabs.secondary.forEachIndexed { _, tab ->
-                        buildMenuItem(tab)
-                    }
                 }
                 val selected = currentRoute == Route.Settings
                 val color by animateColorAsState(
@@ -307,6 +479,12 @@ internal fun WindowScope.FlareApp(backButtonState: NavigationBackButtonState) {
     }
 }
 
+private fun getDirection(data: SecondaryTabsPresenter.Tab): Route? =
+    when (val target = data.destination) {
+        is SecondaryTabsPresenter.Destination.Route -> Route.from(target.route)
+        is SecondaryTabsPresenter.Destination.Timeline -> Route.Timeline(target.tabItem)
+    }
+
 @Composable
 private fun NavigationItem(
     icon: @Composable () -> Unit,
@@ -354,26 +532,39 @@ private fun NavigationItemIcon(
     }
 }
 
-private fun getRoute(tab: TabItem): Route =
+private fun getRoute(tab: HomeTabsPresenter.State.HomeTabs): Route =
     when (tab) {
-        is DiscoverTabItem -> Route.Discover
-        is ProfileTabItem -> Route.MeRoute(tab.account)
-        is HomeTimelineTabItem -> Route.Home(tab.account)
-        is TimelineTabItem -> Route.Timeline(tab)
-        AllNotificationTabItem, is NotificationTabItem -> Route.Notification
-        SettingsTabItem -> Route.Settings
-        is AllListTabItem -> Route.AllLists(tab.account)
-        is Bluesky.FeedsTabItem -> Route.BlueskyFeeds(tab.account)
-        is DirectMessageTabItem -> Route.DmList(tab.account)
-        is RssTabItem -> Route.RssList
-        is Misskey.AntennasListTabItem -> Route.MisskeyAntennas(tab.account)
-        is Misskey.ChannelListTabItem -> Route.MisskeyChannelList(tab.account)
+        HomeTabsPresenter.State.HomeTabs.Home -> Route.Home(AccountType.Guest)
+        HomeTabsPresenter.State.HomeTabs.Notifications -> Route.Notification
+        HomeTabsPresenter.State.HomeTabs.Discover -> Route.Discover
     }
+
+private val HomeTabsPresenter.State.HomeTabs.title: StringResource
+    get() =
+        when (this) {
+            HomeTabsPresenter.State.HomeTabs.Home -> Res.string.home_tab_home_title
+            HomeTabsPresenter.State.HomeTabs.Notifications -> Res.string.home_tab_notifications_title
+            HomeTabsPresenter.State.HomeTabs.Discover -> Res.string.home_tab_discover_title
+        }
+
+private val HomeTabsPresenter.State.HomeTabs.icon: ImageVector
+    get() =
+        when (this) {
+            HomeTabsPresenter.State.HomeTabs.Home -> FontAwesomeIcons.Solid.House
+            HomeTabsPresenter.State.HomeTabs.Notifications -> FontAwesomeIcons.Solid.Bell
+            HomeTabsPresenter.State.HomeTabs.Discover -> FontAwesomeIcons.Solid.MagnifyingGlass
+        }
 
 @Composable
 private fun presenter(uriHandler: UriHandler) =
     run {
-        val accountState = remember { ActiveAccountPresenter() }.invoke()
+        val activeAccountPresenter =
+            remember {
+                dev.dimension.flare.ui.presenter.home
+                    .ActiveAccountPresenter()
+            }.invoke()
+        val secondaryTabsPresenter = remember { SecondaryTabsPresenter() }.invoke()
+        val loginState = remember { LoggedInPresenter() }.invoke()
         val tabState = remember { HomeTabsPresenter() }.invoke()
         val allNotificationState = remember { AllNotificationBadgePresenter() }.invoke()
         val scrollToTopRegistry =
@@ -384,8 +575,8 @@ private fun presenter(uriHandler: UriHandler) =
             remember(tabState.tabs) {
                 tabState.tabs.map {
                     TopLevelBackStack(
-                        getRoute(it.all.first()),
-                        topLevelRoutes = it.all.map { getRoute(it) },
+                        getRoute(it.first()),
+                        topLevelRoutes = it.map { getRoute(it) },
                     )
                 }
             }
@@ -412,7 +603,11 @@ private fun presenter(uriHandler: UriHandler) =
                 )
             }.invoke()
 
-        object : UserState by accountState, HomeTabsPresenter.State by tabState {
+        object :
+            LoggedInState by loginState,
+            HomeTabsPresenter.State by tabState,
+            SecondaryTabsPresenter.State by secondaryTabsPresenter,
+            UserState by activeAccountPresenter {
             val notificationState = allNotificationState
             val scrollToTopRegistry = scrollToTopRegistry
             val deeplinkPresenter = deeplinkPresenter
@@ -427,6 +622,13 @@ private fun presenter(uriHandler: UriHandler) =
                     else -> {
                         topLevelBackStack.takeSuccess()?.push(route)
                     }
+                }
+            }
+
+            fun navigate(shortcut: SecondaryTabsPresenter.Tab) {
+                val route = getDirection(shortcut)
+                if (route != null) {
+                    navigate(route)
                 }
             }
 

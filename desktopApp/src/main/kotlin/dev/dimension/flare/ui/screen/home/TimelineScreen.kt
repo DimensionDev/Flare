@@ -30,7 +30,7 @@ import dev.dimension.flare.LocalWindowPadding
 import dev.dimension.flare.RegisterTabCallback
 import dev.dimension.flare.Res
 import dev.dimension.flare.common.isRefreshing
-import dev.dimension.flare.data.model.TimelineTabItem
+import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.home_timeline_new_toots
 import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.FAIcon
@@ -47,7 +47,7 @@ import org.jetbrains.compose.resources.pluralStringResource
 
 @Composable
 internal fun TimelineScreen(
-    tabItem: TimelineTabItem,
+    tabItem: TimelineTabItemV2,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(0.dp),
     header: @Composable (() -> Unit)? = null,

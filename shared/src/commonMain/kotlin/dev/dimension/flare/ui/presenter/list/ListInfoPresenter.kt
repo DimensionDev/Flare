@@ -45,5 +45,5 @@ public class ListInfoPresenter(
 
 @Immutable
 public interface ListInfoState {
-    public val listInfo: UiState<UiList>
+    public val listInfo: UiState<UiList.List>
 }

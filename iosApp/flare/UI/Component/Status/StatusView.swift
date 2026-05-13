@@ -3,11 +3,11 @@ import KotlinSharedUI
 import SwiftUIBackports
 
 struct StatusView: View {
-    @Environment(\.appearanceSettings.fullWidthPost) private var fullWidthPost
-    @Environment(\.appearanceSettings.showLinkPreview) private var showLinkPreview
-    @Environment(\.appearanceSettings.compatLinkPreview) private var compatLinkPreview
-    @Environment(\.appearanceSettings.postActionStyle) private var postActionStyle
-    @Environment(\.appearanceSettings.showPlatformLogo) private var showPlatformLogo
+    @Environment(\.timelineAppearance.fullWidthPost) private var fullWidthPost
+    @Environment(\.timelineAppearance.showLinkPreview) private var showLinkPreview
+    @Environment(\.timelineAppearance.compatLinkPreview) private var compatLinkPreview
+    @Environment(\.timelineAppearance.postActionStyle) private var postActionStyle
+    @Environment(\.timelineAppearance.showPlatformLogo) private var showPlatformLogo
     @Environment(\.openURL) private var openURL
     let data: UiTimelineV2.Post
     var isDetail: Bool = false
@@ -295,8 +295,8 @@ struct StatusView: View {
 }
 
 struct StatusMediaContent: View {
-    @Environment(\.appearanceSettings.showMedia) private var showMedia
-    @Environment(\.appearanceSettings.showSensitiveContent) private var showSensitiveContent
+    @Environment(\.timelineAppearance.showMedia) private var showMedia
+    @Environment(\.timelineAppearance.showSensitiveContent) private var showSensitiveContent
     @State private var expandMedia = false
     let data: [any UiMedia]
     let sensitive: Bool

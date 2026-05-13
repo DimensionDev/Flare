@@ -205,7 +205,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.AvatarComponentDefaults
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareDividerDefaults
-import dev.dimension.flare.ui.component.LocalComponentAppearance
+import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.VerticalDivider
 import dev.dimension.flare.ui.component.platform.PlatformButton
 import dev.dimension.flare.ui.component.platform.PlatformCard
@@ -433,8 +433,8 @@ private fun UserListContent(
         val status = data.post
         if (status != null) {
             CompositionLocalProvider(
-                LocalComponentAppearance provides
-                    LocalComponentAppearance.current.copy(
+                LocalTimelineAppearance provides
+                    LocalTimelineAppearance.current.copy(
                         postActionStyle = PostActionStyle.Hidden,
                     ),
             ) {
@@ -470,8 +470,8 @@ private fun StatusContent(
             Layout(
                 content = {
                     CompositionLocalProvider(
-                        LocalComponentAppearance provides
-                            LocalComponentAppearance.current.copy(
+                        LocalTimelineAppearance provides
+                            LocalTimelineAppearance.current.copy(
                                 fullWidthPost = false,
                             ),
                     ) {
@@ -570,7 +570,7 @@ private fun TopMessageComponent(
     topMessageOnly: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    val appearance = LocalComponentAppearance.current
+    val appearance = LocalTimelineAppearance.current
     val uriHandler = LocalUriHandler.current
     val icon = data.icon.toImageVector()
     val text: String? =

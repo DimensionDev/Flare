@@ -36,6 +36,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -57,19 +58,19 @@ import compose.icons.fontawesomeicons.solid.Sliders
 import dev.dimension.flare.R
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.data.model.BottomBarBehavior
-import dev.dimension.flare.data.model.LocalAppearanceSettings
-import dev.dimension.flare.data.model.TimelineTabItem
-import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.data.model.tab.TimelineTabItemV2
+import dev.dimension.flare.data.model.tab.resolveTimelineAppearance
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.component.Glassify
 import dev.dimension.flare.ui.component.LocalBottomBarShowing
+import dev.dimension.flare.ui.component.LocalGlobalAppearance
+import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.TabIcon
 import dev.dimension.flare.ui.component.TabRowIndicator
-import dev.dimension.flare.ui.component.TabTitle
 import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.component.status.AdaptiveCard
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
@@ -90,20 +91,19 @@ import moe.tlaster.precompose.molecule.producePresenter
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
 internal fun HomeTimelineScreen(
-    accountType: AccountType,
     toCompose: () -> Unit,
     toQuickMenu: () -> Unit,
     toLogin: () -> Unit,
     toTabSettings: () -> Unit,
 ) {
-    val state by producePresenter(key = "home_timeline_$accountType") {
-        timelinePresenter(accountType)
+    val state by producePresenter(key = "home_timeline") {
+        timelinePresenter()
     }
     val loggedInState = remember { LoggedInPresenter() }.invoke()
     val scope = rememberCoroutineScope()
 
     val topAppBarScrollBehavior =
-        if (LocalAppearanceSettings.current.bottomBarBehavior == BottomBarBehavior.AlwaysShow) {
+        if (LocalGlobalAppearance.current.bottomBarBehavior == BottomBarBehavior.AlwaysShow) {
             TopAppBarDefaults.pinnedScrollBehavior()
         } else {
             TopAppBarDefaults.enterAlwaysScrollBehavior()
@@ -151,19 +151,15 @@ internal fun HomeTimelineScreen(
                                                     }
                                                 },
                                                 text = {
-                                                    TabTitle(
-                                                        tab.metaData.title,
+                                                    dev.dimension.flare.ui.component.Text(
+                                                        tab.title,
 //                                                        modifier =
 //                                                            Modifier
 //                                                                .padding(8.dp),
                                                     )
                                                 },
                                                 icon = {
-                                                    TabIcon(
-                                                        accountType = tab.account,
-                                                        icon = tab.metaData.icon,
-                                                        title = tab.metaData.title,
-                                                    )
+                                                    TabIcon(tab)
                                                 },
 //                                                colors = FilterChipDefaults.filterChipColors(
 //                                                    containerColor = MaterialTheme.colorScheme.surface,
@@ -252,18 +248,29 @@ internal fun HomeTimelineScreen(
                 HorizontalPager(
                     state = pagerState,
                     key = { index ->
-                        tabState.getOrNull(index)?.key ?: "timeline_$index"
+                        tabState.getOrNull(index)?.id ?: "timeline_$index"
                     },
                 ) { index ->
                     val item = tabState.getOrNull(index)
                     if (item != null) {
-                        TimelineItemContent(
-                            item = item,
-                            contentPadding = contentPadding,
-                            modifier = Modifier.fillMaxWidth(),
-                            changeLogState = state.changeLogState,
-                            isCurrentlyVisible = pagerState.currentPage == index,
-                        )
+                        val timelineAppearance = LocalTimelineAppearance.current
+                        CompositionLocalProvider(
+                            LocalTimelineAppearance provides
+                                remember(
+                                    item.appearancePatch,
+                                    timelineAppearance,
+                                ) {
+                                    item.resolveTimelineAppearance(timelineAppearance)
+                                },
+                        ) {
+                            TimelineItemContent(
+                                item = item,
+                                contentPadding = contentPadding,
+                                modifier = Modifier.fillMaxWidth(),
+                                changeLogState = state.changeLogState,
+                                isCurrentlyVisible = pagerState.currentPage == index,
+                            )
+                        }
                     }
                 }
             }
@@ -273,13 +280,14 @@ internal fun HomeTimelineScreen(
 
 @Composable
 internal fun TimelineItemContent(
-    item: TimelineTabItem,
+    item: TimelineTabItemV2,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(0.dp),
     changeLogState: ChangeLogState? = null,
     isCurrentlyVisible: Boolean = true,
     lazyStaggeredGridState: LazyStaggeredGridState = rememberLazyStaggeredGridState(),
 ) {
+    val isBigScreen by isBigScreen()
     val layoutDirection = LocalLayoutDirection.current
     val paddingWithStatusBar =
         PaddingValues(
@@ -355,7 +363,7 @@ internal fun TimelineItemContent(
                                             }
                                         }
                                     }
-                                    if (!isBigScreen()) {
+                                    if (!isBigScreen) {
                                         Spacer(modifier = Modifier.height(12.dp))
                                     }
                                 }
@@ -415,9 +423,9 @@ internal fun TimelineItemContent(
 }
 
 @Composable
-private fun timelinePresenter(accountType: AccountType) =
+private fun timelinePresenter() =
     run {
-        val state = remember(accountType) { HomeTimelineWithTabsPresenter(accountType) }.invoke()
+        val state = remember { HomeTimelineWithTabsPresenter() }.invoke()
 
         val pagerState =
             state.tabState.map {

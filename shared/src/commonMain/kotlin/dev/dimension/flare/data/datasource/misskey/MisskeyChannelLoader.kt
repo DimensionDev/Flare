@@ -21,7 +21,7 @@ internal class MisskeyChannelLoader(
     private val service: MisskeyService,
     private val accountKey: MicroBlogKey,
     private val source: Source,
-) : ListLoader {
+) : ListLoader<UiList.Channel> {
     enum class Source {
         Followed,
         MyFavorites,
@@ -31,7 +31,7 @@ internal class MisskeyChannelLoader(
     override suspend fun load(
         pageSize: Int,
         request: PagingRequest,
-    ): PagingResult<UiList> {
+    ): PagingResult<UiList.Channel> {
         if (request is PagingRequest.Prepend) {
             return PagingResult()
         }
@@ -80,7 +80,7 @@ internal class MisskeyChannelLoader(
         )
     }
 
-    override suspend fun info(listId: String): UiList =
+    override suspend fun info(listId: String): UiList.Channel =
         service
             .channelsShow(
                 ChannelsFollowRequest(
@@ -88,7 +88,7 @@ internal class MisskeyChannelLoader(
                 ),
             ).render(accountKey)
 
-    override suspend fun create(metaData: ListMetaData): UiList =
+    override suspend fun create(metaData: ListMetaData): UiList.Channel =
         service
             .channelsCreate(
                 ChannelsCreateRequest(
@@ -100,7 +100,7 @@ internal class MisskeyChannelLoader(
     override suspend fun update(
         listId: String,
         metaData: ListMetaData,
-    ): UiList =
+    ): UiList.Channel =
         service
             .channelsUpdate(
                 ChannelsUpdateRequest(

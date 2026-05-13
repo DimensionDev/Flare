@@ -4,13 +4,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import dev.dimension.flare.data.model.IconType
-import dev.dimension.flare.data.model.MixedTimelineTabItem
-import dev.dimension.flare.data.model.TabMetaData
-import dev.dimension.flare.data.model.TabSettings
-import dev.dimension.flare.data.model.TimelineTabItem
-import dev.dimension.flare.data.model.TitleType
+import dev.dimension.flare.data.model.appearance.AppearancePatch
+import dev.dimension.flare.data.model.appearance.toBag
+import dev.dimension.flare.data.model.tab.GroupSource
+import dev.dimension.flare.data.model.tab.GroupTimelineTabItemV2
+import dev.dimension.flare.data.model.tab.TabSettingsV2
+import dev.dimension.flare.data.model.tab.TimelineFilterConfig
+import dev.dimension.flare.data.model.tab.TimelineMergePolicy
+import dev.dimension.flare.data.model.tab.TimelinePresentation
+import dev.dimension.flare.data.model.tab.TimelineResolver
+import dev.dimension.flare.data.model.tab.TimelineSlot
+import dev.dimension.flare.data.model.tab.TimelineSlotContent
+import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.data.repository.SettingsRepository
-import dev.dimension.flare.data.repository.sanitizeDuplicateTabKeys
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.collections.immutable.ImmutableList
@@ -25,6 +31,7 @@ public class GroupConfigPresenter :
     KoinComponent {
     private val settingsRepository: SettingsRepository by inject()
     private val appScope: CoroutineScope by inject()
+    private val timelineResolver: TimelineResolver by inject()
 
     @Composable
     override fun body(): State {
@@ -37,20 +44,29 @@ public class GroupConfigPresenter :
             override val availableIcons: ImmutableList<IconType> = availableIcons
 
             override fun commit(
-                initialItem: MixedTimelineTabItem?,
+                initialItem: GroupTimelineTabItemV2?,
                 name: String,
                 icon: IconType,
-                tabs: List<TimelineTabItem>,
+                appearancePatch: AppearancePatch?,
+                enabled: Boolean,
+                tabs: List<TimelineTabItemV2>,
+                mergePolicy: TimelineMergePolicy,
+                filterConfig: TimelineFilterConfig,
                 defaultGroupName: String,
             ) {
                 appScope.launch {
-                    settingsRepository.updateTabSettings {
+                    settingsRepository.updateTabSettingsV2 {
                         upsertGroupConfig(
                             initialItem = initialItem,
                             name = name,
                             icon = icon,
+                            appearancePatch = appearancePatch,
+                            enabled = enabled,
                             tabs = tabs,
+                            mergePolicy = mergePolicy,
+                            filterConfig = filterConfig,
                             defaultGroupName = defaultGroupName,
+                            timelineResolver = timelineResolver,
                         )
                     }
                 }
@@ -63,53 +79,117 @@ public class GroupConfigPresenter :
         public val availableIcons: ImmutableList<IconType>
 
         public fun commit(
-            initialItem: MixedTimelineTabItem?,
+            initialItem: GroupTimelineTabItemV2?,
             name: String,
             icon: IconType,
-            tabs: List<TimelineTabItem>,
+            appearancePatch: AppearancePatch?,
+            enabled: Boolean,
+            tabs: List<TimelineTabItemV2>,
+            mergePolicy: TimelineMergePolicy = initialItem?.mergePolicy ?: TimelineMergePolicy.TimePerPage,
+            filterConfig: TimelineFilterConfig = initialItem?.filterConfig ?: TimelineFilterConfig(),
             defaultGroupName: String,
         )
     }
 }
 
-internal fun TabSettings.upsertGroupConfig(
-    initialItem: MixedTimelineTabItem?,
+internal fun TabSettingsV2.upsertGroupConfig(
+    initialItem: GroupTimelineTabItemV2?,
     name: String,
     icon: IconType,
-    tabs: List<TimelineTabItem>,
+    appearancePatch: AppearancePatch?,
+    enabled: Boolean,
+    tabs: List<TimelineTabItemV2>,
+    mergePolicy: TimelineMergePolicy = initialItem?.mergePolicy ?: TimelineMergePolicy.TimePerPage,
+    filterConfig: TimelineFilterConfig = initialItem?.filterConfig ?: TimelineFilterConfig(),
     defaultGroupName: String,
-): TabSettings {
-    val deduplicatedTabs = tabs.distinctBy { it.key }
+    timelineResolver: TimelineResolver,
+): TabSettingsV2 {
+    val deduplicatedTabs = tabs.distinctBy { it.id }
     if (deduplicatedTabs.isEmpty()) {
         if (initialItem == null) {
             return this
         }
-        val filteredTabs = mainTabs.filterNot { it.key == initialItem.key }
-        return if (filteredTabs == mainTabs) {
+        val filteredSlots = homeSlots.filterNot { it.id == initialItem.id }
+        return if (filteredSlots == homeSlots) {
             this
         } else {
-            copy(mainTabs = filteredTabs).sanitizeDuplicateTabKeys()
+            copy(homeSlots = filteredSlots.sanitizeDuplicateSlotKeys())
         }
     }
 
-    val newGroup =
-        MixedTimelineTabItem(
-            subTimelineTabItem = deduplicatedTabs,
-            metaData =
-                TabMetaData(
-                    title = TitleType.Text(name.ifEmpty { defaultGroupName }),
-                    icon = icon,
-                ),
-        )
-    val currentTabs = mainTabs.toMutableList()
+    val childSlots = deduplicatedTabs.map { timelineResolver.toSlot(it) }
+    val newGroup = buildGroupSlot(name, icon, appearancePatch, enabled, mergePolicy, filterConfig, defaultGroupName, childSlots)
+    val currentSlots = homeSlots.toMutableList()
     val targetIndex =
         initialItem
-            ?.let { item -> currentTabs.indexOfFirst { it.key == item.key } }
+            ?.let { item -> currentSlots.indexOfFirst { it.id == item.id } }
             ?.takeIf { it >= 0 }
-            ?: currentTabs.size
-    currentTabs.removeAll {
-        it.key == newGroup.key || (initialItem != null && it.key == initialItem.key)
+            ?: currentSlots.size
+    currentSlots.removeAll {
+        it.id == newGroup.id || (initialItem != null && it.id == initialItem.id)
     }
-    currentTabs.add(minOf(targetIndex, currentTabs.size), newGroup)
-    return copy(mainTabs = currentTabs).sanitizeDuplicateTabKeys()
+    currentSlots.add(minOf(targetIndex, currentSlots.size), newGroup)
+    return copy(homeSlots = currentSlots.sanitizeDuplicateSlotKeys())
 }
+
+private fun buildGroupSlot(
+    name: String,
+    icon: IconType,
+    appearancePatch: AppearancePatch?,
+    enabled: Boolean,
+    mergePolicy: TimelineMergePolicy,
+    filterConfig: TimelineFilterConfig,
+    defaultGroupName: String,
+    childSlots: List<TimelineSlot>,
+): TimelineSlot {
+    val title = name.ifEmpty { defaultGroupName }
+    return TimelineSlot(
+        id = buildGroupSlotId(title, childSlots),
+        content =
+            TimelineSlotContent.Group(
+                children = childSlots,
+                source = GroupSource.Manual,
+                mergePolicy = mergePolicy,
+            ),
+        presentation =
+            TimelinePresentation(
+                titleOverride = title,
+                iconOverride = icon,
+                appearanceOverride = appearancePatch?.takeUnless { it == AppearancePatch.EMPTY }?.toBag(),
+                enabled = enabled,
+                filterConfig = filterConfig,
+            ),
+    )
+}
+
+private fun buildGroupSlotId(
+    title: String,
+    children: List<TimelineSlot>,
+): String =
+    buildString {
+        append("mixed_timeline")
+        append(title)
+        children.forEach { append(it.id) }
+    }
+
+private fun List<TimelineSlot>.sanitizeDuplicateSlotKeys(): List<TimelineSlot> =
+    mapNotNull { it.sanitizeDuplicateSlotKeys() }
+        .distinctBy { it.id }
+
+private fun TimelineSlot.sanitizeDuplicateSlotKeys(): TimelineSlot? =
+    when (val slotContent = content) {
+        is TimelineSlotContent.Group -> {
+            val sanitizedChildren = slotContent.children.sanitizeDuplicateSlotKeys()
+            if (sanitizedChildren.isEmpty()) {
+                null
+            } else if (sanitizedChildren == slotContent.children) {
+                this
+            } else {
+                copy(content = slotContent.copy(children = sanitizedChildren))
+            }
+        }
+
+        else -> {
+            this
+        }
+    }

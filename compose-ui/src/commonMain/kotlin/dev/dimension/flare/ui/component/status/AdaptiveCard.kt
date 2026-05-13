@@ -9,9 +9,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.data.model.TimelineDisplayMode
 import dev.dimension.flare.ui.component.HorizontalDivider
+import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.listCard
 import dev.dimension.flare.ui.component.platform.PlatformCard
 import dev.dimension.flare.ui.theme.PlatformTheme
@@ -28,7 +28,7 @@ public fun AdaptiveCard(
     content: @Composable () -> Unit,
 ) {
     val bigScreen = LocalMultipleColumns.current
-    val displayMode = LocalAppearanceSettings.current.timelineDisplayMode
+    val displayMode = LocalTimelineAppearance.current.timelineDisplayMode
     if (bigScreen) {
         PlatformCard(
             modifier =

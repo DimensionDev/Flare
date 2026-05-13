@@ -16,8 +16,11 @@ import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
 import dev.dimension.flare.data.datasource.microblog.ReactionDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.ListDataSource
+import dev.dimension.flare.data.datasource.microblog.datasource.PinnableTimelineTabDataSource
+import dev.dimension.flare.data.datasource.microblog.datasource.PinnableTimelineTabSection
 import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.RelationDataSource
+import dev.dimension.flare.data.datasource.microblog.datasource.TimelineTabConfigurationDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
 import dev.dimension.flare.data.datasource.microblog.handler.EmojiHandler
 import dev.dimension.flare.data.datasource.microblog.handler.ListHandler
@@ -34,6 +37,10 @@ import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.notSupported
 import dev.dimension.flare.data.datasource.microblog.paging.toPagingSource
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
+import dev.dimension.flare.data.model.IconType
+import dev.dimension.flare.data.model.tab.ShortcutSpec
+import dev.dimension.flare.data.model.tab.TimelineSpec
+import dev.dimension.flare.data.model.tab.toSlot
 import dev.dimension.flare.data.network.misskey.api.model.AdminAccountsDeleteRequest
 import dev.dimension.flare.data.network.misskey.api.model.ChannelsFeaturedRequest
 import dev.dimension.flare.data.network.misskey.api.model.ChannelsFollowRequest
@@ -42,6 +49,9 @@ import dev.dimension.flare.data.network.misskey.api.model.NotesCreateRequest
 import dev.dimension.flare.data.network.misskey.api.model.NotesCreateRequestPoll
 import dev.dimension.flare.data.network.misskey.api.model.NotesPollsVoteRequest
 import dev.dimension.flare.data.network.misskey.api.model.NotesReactionsCreateRequest
+import dev.dimension.flare.data.platform.CommonTimelineSpecs
+import dev.dimension.flare.data.platform.MisskeyPlatformSpec
+import dev.dimension.flare.data.platform.toTimelineTabItemV2
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.model.AccountType
@@ -50,13 +60,17 @@ import dev.dimension.flare.shared.image.ImageCompressor
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiHashtag
+import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiNumber
 import dev.dimension.flare.ui.model.UiProfile
+import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
+import dev.dimension.flare.ui.route.DeeplinkRoute
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.CoroutineScope
@@ -76,6 +90,8 @@ internal class MisskeyDataSource(
     PostDataSource,
     KoinComponent,
     ListDataSource,
+    PinnableTimelineTabDataSource,
+    TimelineTabConfigurationDataSource,
     ReactionDataSource,
     RelationDataSource,
     PostEventHandler.Handler {
@@ -313,20 +329,20 @@ internal class MisskeyDataSource(
             service,
         )
 
-    fun featuredChannels(scope: CoroutineScope): Flow<PagingData<UiList>> =
+    fun featuredChannels(scope: CoroutineScope): Flow<PagingData<UiList.Channel>> =
         Pager(
             config = pagingConfig,
         ) {
-            object : RemoteLoader<UiList> {
+            object : RemoteLoader<UiList.Channel> {
                 override suspend fun load(
                     pageSize: Int,
                     request: PagingRequest,
-                ): PagingResult<UiList> =
+                ): PagingResult<UiList.Channel> =
                     when (request) {
                         is PagingRequest.Prepend,
                         is PagingRequest.Append,
                         -> {
-                            PagingResult<UiList>(
+                            PagingResult<UiList.Channel>(
                                 endOfPaginationReached = true,
                             )
                         }
@@ -356,13 +372,9 @@ internal class MisskeyDataSource(
                     channelHandler.cacheData,
                 ) { featured, followed ->
                     featured.map { item ->
-                        if (item is UiList.Channel) {
-                            item.copy(
-                                isFollowing = followed.any { it.id == item.id },
-                            )
-                        } else {
-                            item
-                        }
+                        item.copy(
+                            isFollowing = followed.any { it.id == item.id },
+                        )
                     }
                 }
             }.cachedIn(scope)
@@ -651,7 +663,7 @@ internal class MisskeyDataSource(
             accountKey,
         )
 
-    val listLoader: ListLoader by lazy {
+    val listLoader: ListLoader<UiList.List> by lazy {
         MisskeyListLoader(
             service = service,
             accountKey = accountKey,
@@ -665,11 +677,121 @@ internal class MisskeyDataSource(
         )
     }
 
-    override val listHandler: ListHandler by lazy {
+    override val listHandler: ListHandler<UiList.List> by lazy {
         ListHandler(
             pagingKey = listKey,
             accountKey = accountKey,
             loader = listLoader,
+        )
+    }
+
+    override val pinnableTimelineTabs: List<PinnableTimelineTabSection> by lazy {
+        listOf(
+            PinnableTimelineTabSection(
+                title = UiStrings.List,
+                data =
+                    listHandler.data.map { paging ->
+                        paging.map { it.toTimelineTabItemV2(accountKey) }
+                    },
+            ),
+            PinnableTimelineTabSection(
+                title = UiStrings.Antenna,
+                data =
+                    antennasList().map { paging ->
+                        paging.map { it.toTimelineTabItemV2(accountKey) }
+                    },
+            ),
+            PinnableTimelineTabSection(
+                title = UiStrings.Channel,
+                data =
+                    channelHandler.data.map { paging ->
+                        paging.map { it.toTimelineTabItemV2(accountKey) }
+                    },
+            ),
+        )
+    }
+
+    override val defaultTabs by lazy {
+        persistentListOf(
+            CommonTimelineSpecs.home
+                .target(
+                    data = TimelineSpec.AccountBasedData(accountKey),
+                    icon = IconType.FavIcon(accountKey.host),
+                ).toSlot(),
+        )
+    }
+
+    override val builtInTimelineTabs by lazy {
+        persistentListOf(
+            CommonTimelineSpecs.home.tabItem(
+                data = TimelineSpec.AccountBasedData(accountKey),
+                icon = IconType.FavIcon(accountKey.host),
+            ),
+            MisskeyPlatformSpec.favouriteTimelineSpec.tabItem(TimelineSpec.AccountBasedData(accountKey)),
+            MisskeyPlatformSpec.hybridTimelineSpec.tabItem(TimelineSpec.AccountBasedData(accountKey)),
+            MisskeyPlatformSpec.localTimelineSpec.tabItem(TimelineSpec.AccountBasedData(accountKey)),
+            MisskeyPlatformSpec.globalTimelineSpec.tabItem(TimelineSpec.AccountBasedData(accountKey)),
+        )
+    }
+
+    override val shortcuts by lazy {
+        persistentListOf(
+            ShortcutSpec(
+                title = UiStrings.Favourite,
+                icon = UiIcon.Favourite,
+                target =
+                    ShortcutSpec.Target.Timeline(
+                        MisskeyPlatformSpec.favouriteTimelineSpec.target(TimelineSpec.AccountBasedData(accountKey)),
+                    ),
+            ),
+            ShortcutSpec(
+                title = UiStrings.List,
+                icon = UiIcon.List,
+                target =
+                    ShortcutSpec.Target.Route(
+                        DeeplinkRoute.AllLists(accountKey),
+                    ),
+            ),
+            ShortcutSpec(
+                title = UiStrings.Social,
+                icon = UiIcon.Featured,
+                target =
+                    ShortcutSpec.Target.Timeline(
+                        MisskeyPlatformSpec.hybridTimelineSpec.target(TimelineSpec.AccountBasedData(accountKey)),
+                    ),
+            ),
+            ShortcutSpec(
+                title = UiStrings.MastodonLocal,
+                icon = UiIcon.Local,
+                target =
+                    ShortcutSpec.Target.Timeline(
+                        MisskeyPlatformSpec.localTimelineSpec.target(TimelineSpec.AccountBasedData(accountKey)),
+                    ),
+            ),
+            ShortcutSpec(
+                title = UiStrings.MastodonPublic,
+                icon = UiIcon.World,
+                target =
+                    ShortcutSpec.Target.Timeline(
+                        MisskeyPlatformSpec.globalTimelineSpec.target(TimelineSpec.AccountBasedData(accountKey)),
+                    ),
+            ),
+            ShortcutSpec(
+                title = UiStrings.Antenna,
+                icon = UiIcon.Rss,
+                target =
+                    ShortcutSpec.Target.Route(
+                        DeeplinkRoute.Misskey.AllAntennas(accountKey),
+                    ),
+            ),
+            ShortcutSpec(
+                title = UiStrings.Channel,
+                icon = UiIcon.Channel,
+                target =
+                    ShortcutSpec.Target.Route(
+                        DeeplinkRoute.Misskey.AllChannels(accountKey),
+                    ),
+            ),
         )
     }
 
@@ -681,7 +803,7 @@ internal class MisskeyDataSource(
         )
     }
 
-    val channelHandler: ListHandler by lazy {
+    val channelHandler: ListHandler<UiList.Channel> by lazy {
         ListHandler(
             pagingKey = "followedChannels_$accountKey",
             accountKey = accountKey,
@@ -694,7 +816,7 @@ internal class MisskeyDataSource(
         )
     }
 
-    val myFavoriteChannelHandler: ListHandler by lazy {
+    val myFavoriteChannelHandler: ListHandler<UiList.Channel> by lazy {
         ListHandler(
             pagingKey = "myFavoriteChannels_$accountKey",
             accountKey = accountKey,
@@ -707,7 +829,7 @@ internal class MisskeyDataSource(
         )
     }
 
-    val ownedChannelHandler: ListHandler by lazy {
+    val ownedChannelHandler: ListHandler<UiList.Channel> by lazy {
         ListHandler(
             pagingKey = "ownedChannels_$accountKey",
             accountKey = accountKey,
@@ -756,7 +878,7 @@ internal class MisskeyDataSource(
         }
     }
 
-    fun antennasList(): Flow<PagingData<UiList>> =
+    fun antennasList(): Flow<PagingData<UiList.Antenna>> =
         Pager(
             config = pagingConfig,
         ) {

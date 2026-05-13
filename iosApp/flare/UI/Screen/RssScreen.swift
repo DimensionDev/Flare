@@ -12,9 +12,7 @@ struct RssScreen: View {
         List {
             ForEach(presenter.state.sources, id: \.id) { item in
                 NavigationLink(value: Route.timeline(
-                    item.type == SubscriptionType.rss
-                        ? RssTimelineTabItem(data: item) as TimelineTabItem
-                        : SubscriptionTimelineTabItem(data: item) as TimelineTabItem
+                    presenter.state.timelineTabItem(item: item)
                 )) {
                     HStack {
                         UiRssView(data: item)

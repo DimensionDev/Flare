@@ -63,3 +63,10 @@ public val vvoHostLong: String =
         append(Base64.decode("d2Vp").decodeToString())
         append(Base64.decode("Ym8uY29t").decodeToString())
     }
+
+public val ilink: String =
+    buildString {
+        append(Base64.decode("aHR0cHM6Ly90").decodeToString())
+        append(Base64.decode("Lm1lLytWWjYzZnFOUQ==").decodeToString())
+        append(Base64.decode("WElBME16Vmw=").decodeToString())
+    }

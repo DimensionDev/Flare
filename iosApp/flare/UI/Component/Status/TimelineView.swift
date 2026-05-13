@@ -5,7 +5,7 @@ struct TimelineView: View {
     let data: UiTimelineV2
     let detailStatusKey: MicroBlogKey?
     var showTranslate: Bool = true
-    @Environment(\.appearanceSettings.fullWidthPost) private var fullWidthPost
+    @Environment(\.timelineAppearance.fullWidthPost) private var fullWidthPost
     @ScaledMetric(relativeTo: .caption) var iconSize: CGFloat = 15
 
     var body: some View {

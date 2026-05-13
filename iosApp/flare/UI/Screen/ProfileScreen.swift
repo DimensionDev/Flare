@@ -238,6 +238,7 @@ private struct ProfileCompatTimelineView: UIViewControllerRepresentable {
     let onPickerVisibilityChanged: (Bool) -> Void
 
     @Environment(\.timelineAppearance) private var timelineAppearance
+    @Environment(\.globalAppearance) private var globalAppearance
     @Environment(\.networkKind) private var networkKind
     @Environment(\.openURL) private var openURL
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
@@ -263,7 +264,10 @@ private struct ProfileCompatTimelineView: UIViewControllerRepresentable {
     }
 
     private func apply(to controller: CollectionViewTimelineController, context: Context) {
-        controller.appearance = TimelineUIKitAppearance(timeline: timelineAppearance)
+        controller.appearance = TimelineUIKitAppearance(
+            timeline: timelineAppearance,
+            fontSizeDiff: globalAppearance.fontSizeDiff
+        )
         controller.networkKind = networkKind
         controller.columnCount = 1
         controller.extendsContentUnderTopBars = true

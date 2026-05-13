@@ -40,6 +40,12 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
     var onOpenURL: ((URL) -> Void)? { didSet { if !isBatchUpdating { updateTextViews() } } }
     var baseTextStyle: UIFont.TextStyle = .body { didSet { if !isBatchUpdating { update() } } }
     var baseTextColor: UIColor = .label { didSet { if !isBatchUpdating { update() } } }
+    var preferredContentSizeCategory: UIContentSizeCategory = .medium {
+        didSet {
+            guard !isBatchUpdating, oldValue != preferredContentSizeCategory else { return }
+            update(force: true)
+        }
+    }
 
     // MARK: - Private state
 
@@ -67,12 +73,14 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
         let isTextSelectionEnabled: Bool
         let baseTextStyle: UIFont.TextStyle
         let baseTextColor: UIColor
+        let preferredContentSizeCategory: UIContentSizeCategory
         let usesHardTruncatedText: Bool
 
         static func == (lhs: StructuralSignature, rhs: StructuralSignature) -> Bool {
             guard lhs.isTextSelectionEnabled == rhs.isTextSelectionEnabled,
                   lhs.baseTextStyle == rhs.baseTextStyle,
                   lhs.baseTextColor.isEqual(rhs.baseTextColor),
+                  lhs.preferredContentSizeCategory == rhs.preferredContentSizeCategory,
                   lhs.usesHardTruncatedText == rhs.usesHardTruncatedText else {
                 return false
             }
@@ -116,8 +124,11 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
         setContentHuggingPriority(.required, for: .vertical)
         setContentCompressionResistancePriority(.required, for: .vertical)
         updateHorizontalLayoutPolicy()
-        traitRegistration = registerForTraitChanges([UITraitUserInterfaceStyle.self]) { (view: RichTextUIView, _) in
-            view.updateTextViews()
+        traitRegistration = registerForTraitChanges([
+            UITraitUserInterfaceStyle.self,
+            UITraitPreferredContentSizeCategory.self,
+        ]) { (view: RichTextUIView, _) in
+            view.update(force: true)
         }
     }
 
@@ -130,6 +141,7 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
         onOpenURL: ((URL) -> Void)?,
         baseTextStyle: UIFont.TextStyle = .body,
         baseTextColor: UIColor = .label,
+        preferredContentSizeCategory: UIContentSizeCategory = .medium,
         contentKey: Int? = nil
     ) {
         let oldLineLimit = self.lineLimit
@@ -141,6 +153,7 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
         self.onOpenURL = onOpenURL
         self.baseTextStyle = baseTextStyle
         self.baseTextColor = baseTextColor
+        self.preferredContentSizeCategory = preferredContentSizeCategory
         isBatchUpdating = false
 
         if oldLineLimit != lineLimit {
@@ -156,6 +169,7 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
             isTextSelectionEnabled: isTextSelectionEnabled,
             baseTextStyle: baseTextStyle,
             baseTextColor: baseTextColor,
+            preferredContentSizeCategory: preferredContentSizeCategory,
             usesHardTruncatedText: usesHardTruncatedText
         )
         guard force || lastStructuralSignature != structuralSignature else {
@@ -523,7 +537,7 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
     }
 
     private var inlineImageTargetHeight: CGFloat {
-        UIFont.preferredFont(forTextStyle: baseTextStyle).pointSize
+        preferredFont(forTextStyle: baseTextStyle).pointSize
     }
 
     private func inlineImagePlaceholder(size: CGSize) -> UIImage {
@@ -628,9 +642,16 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
 
     private func baseAttributes(font: UIFont? = nil, color: UIColor? = nil) -> [NSAttributedString.Key: Any] {
         [
-            .font: font ?? UIFont.preferredFont(forTextStyle: baseTextStyle),
+            .font: font ?? preferredFont(forTextStyle: baseTextStyle),
             .foregroundColor: color ?? baseTextColor,
         ]
+    }
+
+    private func preferredFont(forTextStyle textStyle: UIFont.TextStyle) -> UIFont {
+        UIFont.preferredFont(
+            forTextStyle: textStyle,
+            compatibleWith: UITraitCollection(preferredContentSizeCategory: preferredContentSizeCategory)
+        )
     }
 
     private func color(for style: RenderTextStyle, block: RenderBlockStyle) -> UIColor {
@@ -651,22 +672,22 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
         if let headingLevel = block.headingLevel {
             switch headingLevel.intValue {
             case 1:
-                return .preferredFont(forTextStyle: .title1)
+                return preferredFont(forTextStyle: .title1)
             case 2:
-                return .preferredFont(forTextStyle: .title2)
+                return preferredFont(forTextStyle: .title2)
             case 3:
-                return .preferredFont(forTextStyle: .title3)
+                return preferredFont(forTextStyle: .title3)
             case 4:
-                return .preferredFont(forTextStyle: .headline)
+                return preferredFont(forTextStyle: .headline)
             case 5:
-                return .preferredFont(forTextStyle: .subheadline)
+                return preferredFont(forTextStyle: .subheadline)
             default:
-                return .preferredFont(forTextStyle: .body)
+                return preferredFont(forTextStyle: .body)
             }
         }
 
         let textStyle = baseTextStyle
-        let baseSize = UIFont.preferredFont(forTextStyle: textStyle).pointSize
+        let baseSize = preferredFont(forTextStyle: textStyle).pointSize
         let baseFont: UIFont
         if style.code || style.monospace {
             baseFont = UIFont.monospacedSystemFont(
@@ -676,7 +697,7 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
         } else if style.small {
             baseFont = UIFont.systemFont(ofSize: baseSize * 0.8)
         } else {
-            baseFont = UIFont.preferredFont(forTextStyle: textStyle)
+            baseFont = preferredFont(forTextStyle: textStyle)
         }
 
         var traits: UIFontDescriptor.SymbolicTraits = []
@@ -697,21 +718,21 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
         if let headingLevel = descriptor.headingLevel {
             switch headingLevel {
             case 1:
-                return .preferredFont(forTextStyle: .title1)
+                return preferredFont(forTextStyle: .title1)
             case 2:
-                return .preferredFont(forTextStyle: .title2)
+                return preferredFont(forTextStyle: .title2)
             case 3:
-                return .preferredFont(forTextStyle: .title3)
+                return preferredFont(forTextStyle: .title3)
             case 4:
-                return .preferredFont(forTextStyle: .headline)
+                return preferredFont(forTextStyle: .headline)
             case 5:
-                return .preferredFont(forTextStyle: .subheadline)
+                return preferredFont(forTextStyle: .subheadline)
             default:
-                return .preferredFont(forTextStyle: .body)
+                return preferredFont(forTextStyle: .body)
             }
         }
 
-        let baseSize = UIFont.preferredFont(forTextStyle: baseTextStyle).pointSize
+        let baseSize = preferredFont(forTextStyle: baseTextStyle).pointSize
         let baseFont: UIFont
         if descriptor.code || descriptor.monospace {
             baseFont = UIFont.monospacedSystemFont(
@@ -721,7 +742,7 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
         } else if descriptor.small {
             baseFont = UIFont.systemFont(ofSize: baseSize * 0.8)
         } else {
-            baseFont = UIFont.preferredFont(forTextStyle: baseTextStyle)
+            baseFont = preferredFont(forTextStyle: baseTextStyle)
         }
 
         var traits: UIFontDescriptor.SymbolicTraits = []

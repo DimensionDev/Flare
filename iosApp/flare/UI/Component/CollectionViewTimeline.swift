@@ -13,6 +13,7 @@ struct CollectionViewTimelineView: UIViewControllerRepresentable {
     let accessoryItems: [CollectionViewTimelineAccessoryItem]
     let suppressInitialRefreshIndicator: Bool
     @Environment(\.timelineAppearance) private var timelineAppearance
+    @Environment(\.globalAppearance) private var globalAppearance
     @Environment(\.aiConfig) private var aiConfig
     @Environment(\.networkKind) private var networkKind
     @Environment(\.openURL) private var openURL
@@ -40,7 +41,10 @@ struct CollectionViewTimelineView: UIViewControllerRepresentable {
             { await action() }
         }
         controller.topContentInset = topContentInset
-        controller.appearance = TimelineUIKitAppearance(timeline: timelineAppearance)
+        controller.appearance = TimelineUIKitAppearance(
+            timeline: timelineAppearance,
+            fontSizeDiff: globalAppearance.fontSizeDiff
+        )
         controller.aiTldrEnabled = aiConfig.tldr
         controller.openURL = { url in
             openURL.callAsFunction(url)
@@ -58,7 +62,10 @@ struct CollectionViewTimelineView: UIViewControllerRepresentable {
             { await action() }
         }
         controller.topContentInset = topContentInset
-        controller.appearance = TimelineUIKitAppearance(timeline: timelineAppearance)
+        controller.appearance = TimelineUIKitAppearance(
+            timeline: timelineAppearance,
+            fontSizeDiff: globalAppearance.fontSizeDiff
+        )
         controller.aiTldrEnabled = aiConfig.tldr
         controller.openURL = { url in
             openURL.callAsFunction(url)

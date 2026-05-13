@@ -77,7 +77,7 @@ private struct TimelinePresentationHeaderEditor: View {
     var body: some View {
         Section {
             HStack(spacing: 12) {
-                TabIcon(icon: icon, accountType: AccountType.Guest.shared, size: 36)
+                TabIcon(icon: icon, size: 36)
                     .onTapGesture {
                         showIconPicker = true
                     }

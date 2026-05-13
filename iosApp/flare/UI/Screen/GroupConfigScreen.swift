@@ -179,7 +179,7 @@ struct IconPicker: View {
         ScrollView {
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 48))], spacing: 8) {
                 ForEach(availableIcons, id: \.description) { item in
-                    TabIcon(icon: item, accountType: AccountType.Guest.shared, size: 48)
+                    TabIcon(icon: item, size: 48)
                         .padding(4)
                         .onTapGesture {
                             onSelect(item)

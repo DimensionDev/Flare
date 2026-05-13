@@ -57,16 +57,26 @@ extension UiStrings {
 
 struct TabIcon: View {
     let icon: IconType
-    let accountType: AccountType?
     let size: CGFloat
     let iconOnly: Bool
+
+    init(
+        icon: IconType,
+        size: CGFloat = 20,
+        iconOnly: Bool = false
+    ) {
+        self.icon = icon
+        self.size = size
+        self.iconOnly = iconOnly
+    }
+
     var body: some View {
         switch onEnum(of: icon) {
         case .material(let material):
             MaterialTabIcon(icon: material.icon)
                 .frame(width: size, height: size)
         case .avatar(let avatar):
-            AvatarTabIcon(userKey: avatar.accountKey, accountType: accountType ?? AccountType.Specific(accountKey: avatar.accountKey))
+            AvatarTabIcon(userKey: avatar.accountKey, accountType: AccountType.Specific(accountKey: avatar.accountKey))
                 .frame(width: size, height: size)
         case .url(let url):
             NetworkImage(data: url.url)
@@ -79,13 +89,8 @@ struct TabIcon: View {
                 ZStack(
                     alignment: .bottomTrailing
                 ) {
-                    if let accountType {
-                        AvatarTabIcon(userKey: mixed.accountKey, accountType: accountType)
-                            .frame(width: size, height: size)
-                    } else {
-                        MaterialTabIcon(icon: mixed.icon)
-                            .frame(width: size, height: size)
-                    }
+                    AvatarTabIcon(userKey: mixed.accountKey, accountType: AccountType.Specific(accountKey: mixed.accountKey))
+                        .frame(width: size, height: size)
                     MaterialTabIcon(icon: mixed.icon)
                         .padding(2)
                         .background(Color.white)
@@ -108,36 +113,7 @@ extension TabIcon {
         size: CGFloat = 20,
         iconOnly: Bool = false
     ) {
-        self.init(icon: tabItem.icon, accountType: nil, size: size, iconOnly: iconOnly)
-    }
-
-    init(
-        icon: IconType,
-        accountType: AccountType?,
-        size: CGFloat
-    ) {
-        self.init(icon: icon, accountType: accountType, size: size, iconOnly: false)
-    }
-
-    init(
-        icon: IconType,
-        accountType: AccountType,
-    ) {
-        self.init(icon: icon, accountType: accountType, size: 20)
-    }
-    init(
-        icon: IconType,
-        accountType: AccountType,
-        size: CGFloat
-    ) {
-        self.init(icon: icon, accountType: accountType, size: size, iconOnly: false)
-    }
-    init(
-        icon: IconType,
-        accountType: AccountType,
-        iconOnly: Bool
-    ) {
-        self.init(icon: icon, accountType: accountType, size: 20, iconOnly: iconOnly)
+        self.init(icon: tabItem.icon, size: size, iconOnly: iconOnly)
     }
 }
 

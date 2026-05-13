@@ -4,10 +4,6 @@ import dev.dimension.flare.data.model.AvatarShape
 import dev.dimension.flare.data.model.PostActionStyle
 import dev.dimension.flare.data.model.TimelineDisplayMode
 import dev.dimension.flare.data.model.VideoAutoplay
-import dev.dimension.flare.data.model.appearance.AppearanceKeys
-import dev.dimension.flare.data.model.appearance.AppearancePatch
-import dev.dimension.flare.data.model.appearance.TimelineAppearance
-import dev.dimension.flare.data.model.appearance.withPatch
 
 public object TimelinePresentationAppearancePatchHelper {
     public val empty: AppearancePatch = AppearancePatch.Companion.EMPTY
@@ -35,8 +31,7 @@ public object TimelinePresentationAppearancePatchHelper {
             patch.contains(AppearanceKeys.ExpandMediaSize) ||
             patch.contains(AppearanceKeys.VideoAutoplay)
 
-    public fun themeOverridesEnabled(patch: AppearancePatch): Boolean = patch.contains(
-        AppearanceKeys.AvatarShape)
+    public fun themeOverridesEnabled(patch: AppearancePatch): Boolean = patch.contains(AppearanceKeys.AvatarShape)
 
     public fun enableLayoutOverrides(
         patch: AppearancePatch,
@@ -94,8 +89,7 @@ public object TimelinePresentationAppearancePatchHelper {
         appearance: TimelineAppearance,
     ): AppearancePatch = patch.set(AppearanceKeys.AvatarShape, appearance.avatarShape)
 
-    public fun disableThemeOverrides(patch: AppearancePatch): AppearancePatch = patch.clear(
-        AppearanceKeys.AvatarShape)
+    public fun disableThemeOverrides(patch: AppearancePatch): AppearancePatch = patch.clear(AppearanceKeys.AvatarShape)
 
     public fun setTimelineDisplayMode(
         patch: AppearancePatch,

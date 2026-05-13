@@ -31,7 +31,7 @@ public object AppearanceKeys {
 
     public object BottomBarStyle : Global<AppearanceBottomBarStyle>(
         "app.bottom_bar_style",
-        AppearanceBottomBarStyle.Floating,
+        AppearanceBottomBarStyle.Classic,
         AppearanceBottomBarStyle.serializer(),
     )
 
@@ -44,6 +44,8 @@ public object AppearanceKeys {
     public object InAppBrowser : Global<Boolean>("app.in_app_browser", true, Boolean.serializer())
 
     public object ShowComposeInHomeTimeline : Global<Boolean>("app.show_compose_in_home_timeline", true, Boolean.serializer())
+
+    public object ShowBottomBarLabels : Global<Boolean>("app.show_bottom_bar_labels", false, Boolean.serializer())
 
     public object ShowMedia : PerTimeline<Boolean>("timeline.show_media", true, Boolean.serializer())
 
@@ -94,6 +96,7 @@ public object AppearanceKeys {
             BottomBarBehavior,
             InAppBrowser,
             ShowComposeInHomeTimeline,
+            ShowBottomBarLabels,
             ShowMedia,
             ShowSensitiveContent,
             ExpandMediaSize,

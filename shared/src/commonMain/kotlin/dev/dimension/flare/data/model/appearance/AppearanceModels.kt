@@ -21,6 +21,7 @@ public data class GlobalAppearance(
     val bottomBarBehavior: BottomBarBehavior = AppearanceKeys.BottomBarBehavior.default,
     val inAppBrowser: Boolean = AppearanceKeys.InAppBrowser.default,
     val showComposeInHomeTimeline: Boolean = AppearanceKeys.ShowComposeInHomeTimeline.default,
+    val showBottomBarLabels: Boolean = AppearanceKeys.ShowBottomBarLabels.default,
 ) {
     public companion object {
         public val Default: GlobalAppearance = GlobalAppearance()
@@ -68,6 +69,7 @@ public fun AppearancePatch.toGlobalAppearance(): GlobalAppearance =
         bottomBarBehavior = get(AppearanceKeys.BottomBarBehavior),
         inAppBrowser = get(AppearanceKeys.InAppBrowser),
         showComposeInHomeTimeline = get(AppearanceKeys.ShowComposeInHomeTimeline),
+        showBottomBarLabels = get(AppearanceKeys.ShowBottomBarLabels),
     )
 
 public fun AppearancePatch.toTimelineAppearance(): TimelineAppearance = toTimelineAppearance(override = null)

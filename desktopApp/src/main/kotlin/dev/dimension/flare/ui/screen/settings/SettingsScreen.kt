@@ -154,6 +154,8 @@ import dev.dimension.flare.settings_appearance_post_action_style_hidden
 import dev.dimension.flare.settings_appearance_post_action_style_left_aligned
 import dev.dimension.flare.settings_appearance_post_action_style_right_aligned
 import dev.dimension.flare.settings_appearance_post_action_style_stretch
+import dev.dimension.flare.settings_appearance_show_bottom_bar_labels
+import dev.dimension.flare.settings_appearance_show_bottom_bar_labels_description
 import dev.dimension.flare.settings_appearance_show_compose_in_home_timeline
 import dev.dimension.flare.settings_appearance_show_compose_in_home_timeline_description
 import dev.dimension.flare.settings_appearance_show_cw_img
@@ -722,6 +724,24 @@ internal fun SettingsScreen(
                             checked = LocalGlobalAppearance.current.showComposeInHomeTimeline,
                             {
                                 state.appearanceState.update(AppearanceKeys.ShowComposeInHomeTimeline, it)
+                            },
+                            textBefore = true,
+                        )
+                    },
+                )
+                ExpanderItemSeparator()
+                ExpanderItem(
+                    heading = {
+                        Text(stringResource(Res.string.settings_appearance_show_bottom_bar_labels))
+                    },
+                    caption = {
+                        Text(stringResource(Res.string.settings_appearance_show_bottom_bar_labels_description))
+                    },
+                    trailing = {
+                        Switcher(
+                            checked = LocalGlobalAppearance.current.showBottomBarLabels,
+                            {
+                                state.appearanceState.update(AppearanceKeys.ShowBottomBarLabels, it)
                             },
                             textBefore = true,
                         )

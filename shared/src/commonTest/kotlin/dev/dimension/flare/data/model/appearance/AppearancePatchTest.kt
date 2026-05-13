@@ -43,6 +43,7 @@ class AppearancePatchTest {
         val patch =
             AppearancePatch.EMPTY
                 .set(AppearanceKeys.Theme, Theme.DARK)
+                .set(AppearanceKeys.ShowBottomBarLabels, false)
                 .set(AppearanceKeys.AvatarShape, AvatarShape.SQUARE)
                 .set(AppearanceKeys.ShowMedia, false)
                 .set(AppearanceKeys.TimelineDisplayMode, TimelineDisplayMode.Gallery)
@@ -50,6 +51,7 @@ class AppearancePatchTest {
         assertEquals(
             GlobalAppearance(
                 theme = Theme.DARK,
+                showBottomBarLabels = false,
             ),
             patch.toGlobalAppearance(),
         )
@@ -146,6 +148,7 @@ class AppearancePatchTest {
     @Test
     fun activeAppearanceSettingsFieldsAreCoveredByCatalog() {
         val deprecatedFields = setOf("showActions")
+        val bagOnlyFields = setOf(AppearanceKeys.ShowBottomBarLabels)
         val activeFields =
             AppearanceSettings
                 .serializer()
@@ -156,7 +159,7 @@ class AppearancePatchTest {
                         .filterNot { it in deprecatedFields }
                 }
 
-        assertEquals(activeFields.size, AppearanceKeys.all.size)
+        assertEquals(activeFields.size + bagOnlyFields.size, AppearanceKeys.all.size)
     }
 
     @Test
@@ -196,6 +199,7 @@ class AppearancePatchTest {
         val patch =
             AppearancePatch.EMPTY
                 .set(AppearanceKeys.Theme, Theme.LIGHT)
+                .set(AppearanceKeys.ShowBottomBarLabels, false)
                 .set(AppearanceKeys.ShowMedia, false)
                 .set(AppearanceKeys.VideoAutoplay, VideoAutoplay.ALWAYS)
                 .set(AppearanceKeys.PostActionStyle, PostActionStyle.Stretch)

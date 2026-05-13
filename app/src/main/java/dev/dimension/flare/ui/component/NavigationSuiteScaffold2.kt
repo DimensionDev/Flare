@@ -89,8 +89,6 @@ import compose.icons.fontawesomeicons.solid.Pen
 import dev.dimension.flare.R
 import dev.dimension.flare.data.model.BottomBarBehavior
 import dev.dimension.flare.data.model.BottomBarStyle
-import dev.dimension.flare.ui.component.LocalGlobalAppearance
-import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.theme.segmentedShapes2
 import soup.compose.material.motion.animation.materialElevationScaleIn
 import soup.compose.material.motion.animation.materialElevationScaleOut
@@ -127,6 +125,15 @@ fun NavigationSuiteScaffold2(
     var isBottomBarExpanded by remember { mutableStateOf(true) }
     val bottomBarStyle = LocalGlobalAppearance.current.bottomBarStyle
     val bottomBarBehavior = LocalGlobalAppearance.current.bottomBarBehavior
+    val showBottomBarLabels = LocalGlobalAppearance.current.showBottomBarLabels
+    val bottomBarHeight =
+        remember(showBottomBarLabels) {
+            if (showBottomBarLabels) {
+                56.dp
+            } else {
+                48.dp
+            }
+        }
     val bottomBarState =
         remember(
             bottomBarStyle,
@@ -274,7 +281,7 @@ fun NavigationSuiteScaffold2(
                 CompositionLocalProvider(
                     LocalBottomBarHeight provides
                         if (isPodcastShowing) {
-                            56.dp
+                            bottomBarHeight
                         } else {
                             0.dp
                         } +
@@ -334,9 +341,9 @@ fun NavigationSuiteScaffold2(
                             ).let {
                                 if (!isHidden) {
                                     if (isFloating) {
-                                        it.padding(bottom = 56.dp)
+                                        it.padding(bottom = bottomBarHeight)
                                     } else {
-                                        it.padding(bottom = 80.dp, end = 56.dp)
+                                        it.padding(bottom = bottomBarHeight + 24.dp, end = bottomBarHeight)
                                     }
                                 } else {
                                     it
@@ -394,6 +401,7 @@ fun NavigationSuiteScaffold2(
                                     state = bottomBarState,
                                     provider = scope,
                                     animatedVisibilityScope = this@AnimatedContent,
+                                    showBottomBarLabels = showBottomBarLabels,
                                 )
                             }
                         }
@@ -422,7 +430,7 @@ fun NavigationSuiteScaffold2(
                                 ) { bottomBarState ->
                                     BottomFab(
                                         state = bottomBarState,
-                                        provider = scope,
+                                        bottomBarHeight = bottomBarHeight,
                                         animatedVisibilityScope = this@AnimatedContent,
                                         onFabClicked = onFabClicked,
                                     )
@@ -448,9 +456,9 @@ enum class BottomBarState {
 @Composable
 private fun SharedTransitionScope.BottomFab(
     state: BottomBarState,
-    provider: NavigationSuiteItemProvider,
     animatedVisibilityScope: AnimatedVisibilityScope,
     onFabClicked: () -> Unit,
+    bottomBarHeight: Dp,
     modifier: Modifier = Modifier,
 ) {
     val isFloating =
@@ -496,7 +504,7 @@ private fun SharedTransitionScope.BottomFab(
                         it
                     } else {
                         it.padding(
-                            bottom = 80.dp,
+                            bottom = bottomBarHeight + 24.dp,
                         )
                     }
                 }.size(
@@ -521,6 +529,7 @@ private fun SharedTransitionScope.BottomBar(
     state: BottomBarState,
     provider: NavigationSuiteItemProvider,
     animatedVisibilityScope: AnimatedVisibilityScope,
+    showBottomBarLabels: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val containerShape =
@@ -636,7 +645,7 @@ private fun SharedTransitionScope.BottomBar(
                             }
                         },
                         enabled = it.enabled,
-                        label = if (isExpanded) it.label else null,
+                        label = if (isExpanded && showBottomBarLabels) it.label else null,
                         interactionSource = it.interactionSource,
                     )
                 }

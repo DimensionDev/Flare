@@ -1085,7 +1085,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                                 anchorPosition = null,
                                 config = PagingConfig(pageSize = 20),
                                 leadingPlaceholderCount = 0,
-                            )
+                            ),
                     )
                 assertTrue(mediatorResult is androidx.paging.RemoteMediator.MediatorResult.Success)
 

@@ -156,7 +156,9 @@ class BlueskyAuthPluginTest {
                                             bothExpiredReachedMock.complete(Unit)
                                         }
 
-                                        else -> error("Unexpected expired call count: $callIndex")
+                                        else -> {
+                                            error("Unexpected expired call count: $callIndex")
+                                        }
                                     }
                                     jsonResponse(
                                         HttpStatusCode.Unauthorized,

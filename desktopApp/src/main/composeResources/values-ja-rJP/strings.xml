@@ -215,6 +215,8 @@
     <string name="settings_appearance_generic">全般</string>
     <string name="settings_appearance_show_compose_in_home_timeline">ホームタイムラインに作成ボックスを表示</string>
     <string name="settings_appearance_show_compose_in_home_timeline_description">ホームタイムライン上部にメッセージ作成ボックスを表示</string>
+    <string name="settings_appearance_show_bottom_bar_labels">下部バーの文字を表示</string>
+    <string name="settings_appearance_show_bottom_bar_labels_description">下部バーとサイドバーのナビゲーションに文字ラベルを表示</string>
     <string name="settings_appearance_show_actions">アクションを表示</string>
     <string name="settings_appearance_show_actions_description">投稿の下部にアクションを表示する</string>
     <string name="settings_appearance_show_media">メディアを表示</string>

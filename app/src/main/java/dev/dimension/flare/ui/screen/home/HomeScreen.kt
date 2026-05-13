@@ -118,7 +118,6 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                 NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(
                     currentWindowAdaptiveInfoV2(),
                 )
-            val showNavigationLabels = LocalGlobalAppearance.current.showBottomBarLabels
             Box {
                 NavigationSuiteScaffold2(
                     wideNavigationRailState = state.wideNavigationRailState,

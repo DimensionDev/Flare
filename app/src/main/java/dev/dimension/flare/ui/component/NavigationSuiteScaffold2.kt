@@ -343,7 +343,7 @@ fun NavigationSuiteScaffold2(
                                     if (isFloating) {
                                         it.padding(bottom = bottomBarHeight)
                                     } else {
-                                        it.padding(bottom = 80.dp, end = bottomBarHeight)
+                                        it.padding(bottom = bottomBarHeight + 24.dp, end = bottomBarHeight)
                                     }
                                 } else {
                                     it

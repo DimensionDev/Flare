@@ -115,17 +115,14 @@ internal object TimelinePagingMapper {
             }
 
             is UiTimelineV2.Post -> {
+                val referenceResolver = ReferenceResolver(references)
                 val resolvedRoot =
-                    root.resolveReferences(
-                        references = references,
-                    )
+                    referenceResolver.resolve(root)
                 val repost =
                     (references.find { it.first == ReferenceType.Retweet }?.second as? UiTimelineV2.Post)
                         ?: resolvedRoot.internalRepost
                 val resolvedRepost =
-                    repost?.resolveReferences(
-                        references = references,
-                    )
+                    repost?.let(referenceResolver::resolve)
                 if (resolvedRepost != null) {
                     resolvedRepost.copy(
                         internalRepost = resolvedRepost,
@@ -153,54 +150,104 @@ internal object TimelinePagingMapper {
         }
     }
 
-    private fun UiTimelineV2.Post.resolveReferences(
+    private class ReferenceResolver(
         references: List<Pair<ReferenceType, UiTimelineV2>>,
-        visited: Set<MicroBlogKey> = emptySet(),
-    ): UiTimelineV2.Post {
-        if (statusKey in visited) {
-            return this
-        }
-        val nextVisited = visited + statusKey
-        return copy(
-            parents = resolveReferencePosts(ReferenceType.Reply, references, parents, nextVisited),
-            quote = resolveReferencePosts(ReferenceType.Quote, references, quote, nextVisited),
-            internalRepost =
-                resolveReferencePosts(
-                    type = ReferenceType.Retweet,
-                    references = references,
-                    current = internalRepost?.let(::listOf).orEmpty(),
-                    visited = nextVisited,
-                ).firstOrNull(),
-        )
-    }
+    ) {
+        private val referencePosts =
+            references
+                .mapNotNull { (type, timeline) ->
+                    (timeline as? UiTimelineV2.Post)?.let { post ->
+                        type to post.statusKey to post
+                    }
+                }.toMap()
+        private val resolvedPosts = mutableMapOf<MicroBlogKey, UiTimelineV2.Post>()
+        private val resolvingKeys = mutableSetOf<MicroBlogKey>()
 
-    private fun UiTimelineV2.Post.resolveReferencePosts(
-        type: ReferenceType,
-        references: List<Pair<ReferenceType, UiTimelineV2>>,
-        current: List<UiTimelineV2.Post>,
-        visited: Set<MicroBlogKey>,
-    ): SerializableImmutableList<UiTimelineV2.Post> {
-        val resolvedPosts =
-            if (current.isNotEmpty()) {
+        fun resolve(post: UiTimelineV2.Post): UiTimelineV2.Post {
+            resolvedPosts[post.statusKey]?.let {
+                return it
+            }
+
+            val stack = mutableListOf(ResolveFrame(post))
+            while (stack.isNotEmpty()) {
+                val frame = stack.last()
+                val current = frame.post
+                val currentKey = current.statusKey
+                resolvedPosts[currentKey]?.let {
+                    resolvingKeys -= currentKey
+                    stack.removeLast()
+                    continue
+                }
+
+                if (!frame.expanded) {
+                    if (!resolvingKeys.add(currentKey)) {
+                        stack.removeLast()
+                        continue
+                    }
+                    frame.expanded = true
+                    current
+                        .directReferencePosts()
+                        .asReversed()
+                        .forEach { referencedPost ->
+                            val referencedKey = referencedPost.statusKey
+                            if (referencedKey !in resolvedPosts && referencedKey !in resolvingKeys) {
+                                stack += ResolveFrame(referencedPost)
+                            }
+                        }
+                    continue
+                }
+
+                val resolved =
+                    current.copy(
+                        parents = current.resolveReferencePosts(ReferenceType.Reply),
+                        quote = current.resolveReferencePosts(ReferenceType.Quote),
+                        internalRepost = current.resolveReferencePosts(ReferenceType.Retweet).firstOrNull(),
+                    )
+                resolvedPosts[currentKey] = resolved
+                resolvingKeys -= currentKey
+                stack.removeLast()
+            }
+
+            return resolvedPosts[post.statusKey] ?: post
+        }
+
+        private fun UiTimelineV2.Post.resolveReferencePosts(type: ReferenceType): SerializableImmutableList<UiTimelineV2.Post> =
+            directReferencePosts(type)
+                .map { referencedPost ->
+                    resolvedPosts[referencedPost.statusKey] ?: referencedPost
+                }.toImmutableList()
+
+        private fun UiTimelineV2.Post.directReferencePosts(): List<UiTimelineV2.Post> =
+            directReferencePosts(ReferenceType.Reply) +
+                directReferencePosts(ReferenceType.Quote) +
+                directReferencePosts(ReferenceType.Retweet)
+
+        private fun UiTimelineV2.Post.directReferencePosts(type: ReferenceType): List<UiTimelineV2.Post> {
+            val current =
+                when (type) {
+                    ReferenceType.Reply -> parents
+                    ReferenceType.Quote -> quote
+                    ReferenceType.Retweet -> internalRepost?.let(::listOf).orEmpty()
+                    ReferenceType.Notification -> emptyList()
+                }
+            return if (current.isNotEmpty()) {
                 current.map { currentPost ->
-                    references
-                        .find { it.first == type && it.second.statusKey == currentPost.statusKey }
-                        ?.second as? UiTimelineV2.Post ?: currentPost
+                    referencePosts[type to currentPost.statusKey] ?: currentPost
                 }
             } else {
-                this.references
+                references
                     .asSequence()
                     .filter { it.type == type }
                     .mapNotNull { reference ->
-                        references
-                            .find { it.first == type && it.second.statusKey == reference.statusKey }
-                            ?.second as? UiTimelineV2.Post
+                        referencePosts[type to reference.statusKey]
                     }.toList()
             }
-        return resolvedPosts
-            .map { post ->
-                post.resolveReferences(references, visited)
-            }.toImmutableList()
+        }
+
+        private data class ResolveFrame(
+            val post: UiTimelineV2.Post,
+            var expanded: Boolean = false,
+        )
     }
 
     private fun uiTimelineToDbStatusReferenceWithStatus(

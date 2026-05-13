@@ -10,6 +10,8 @@ import dev.dimension.flare.common.Locale
 import dev.dimension.flare.common.TestFormatter
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.model.DbStatus
+import dev.dimension.flare.data.database.cache.model.DbStatusReference
+import dev.dimension.flare.data.database.cache.model.DbStatusReferenceWithStatus
 import dev.dimension.flare.data.database.cache.model.DbStatusWithReference
 import dev.dimension.flare.data.database.cache.model.DbTranslation
 import dev.dimension.flare.data.database.cache.model.TranslationDisplayMode
@@ -273,6 +275,55 @@ class MicroblogTest : RobolectricTest() {
             assertEquals(
                 DbStatus.createId(AccountType.Specific(accountKey), refPost.statusKey),
                 savedReferences.first().referenceStatusId,
+            )
+        }
+
+    @Test
+    fun toUiResolvesQuoteNestedInsideParentReference() =
+        runTest {
+            val accountKey = MicroBlogKey(id = "account", host = "test.com")
+            val childUser = createUser(MicroBlogKey(id = "child-user", host = "test.com"), "Child User")
+            val parentUser = createUser(MicroBlogKey(id = "parent-user", host = "test.com"), "Parent User")
+            val quotedUser = createUser(MicroBlogKey(id = "quoted-user", host = "test.com"), "Quoted User")
+
+            val quotedPost =
+                createPost(
+                    accountKey = accountKey,
+                    user = quotedUser,
+                    statusKey = MicroBlogKey(id = "quoted-status", host = "test.com"),
+                    text = "quoted status",
+                )
+            val parentPost =
+                createPost(
+                    accountKey = accountKey,
+                    user = parentUser,
+                    statusKey = MicroBlogKey(id = "parent-status", host = "test.com"),
+                    text = "parent status",
+                    quote = listOf(quotedPost),
+                )
+            val childPost =
+                createPost(
+                    accountKey = accountKey,
+                    user = childUser,
+                    statusKey = MicroBlogKey(id = "child-status", host = "test.com"),
+                    text = "child status",
+                    parents = listOf(parentPost),
+                )
+
+            val mapped = TimelinePagingMapper.toDb(childPost, pagingKey = "home")
+            val rendered =
+                TimelinePagingMapper.toUi(mapped, pagingKey = "home", translationDisplayOptions())
+                    as UiTimelineV2.Post
+            val renderedParent = rendered.parents.single()
+
+            assertEquals(parentPost.statusKey, renderedParent.statusKey)
+            assertEquals(1, renderedParent.quote.size)
+            assertEquals(quotedPost.statusKey, renderedParent.quote.first().statusKey)
+            assertEquals(
+                "quoted status",
+                renderedParent.quote
+                    .first()
+                    .content.raw,
             )
         }
 
@@ -1942,6 +1993,68 @@ class MicroblogTest : RobolectricTest() {
             assertEquals("hello", savedProfile.description?.raw)
         }
 
+    @Test
+    fun cachedTimelineMapperDoesNotOverflowWhenReplyReferenceChainIsVeryLong() =
+        runTest {
+            val accountKey = MicroBlogKey(id = "account-long-cache", host = "test.com")
+            val accountType = AccountType.Specific(accountKey)
+            val user = createUser(MicroBlogKey(id = "user-long-cache", host = "test.com"), "User")
+            var previousKey: MicroBlogKey? = null
+            val posts =
+                (0 until 6_000).map { index ->
+                    val statusKey = MicroBlogKey(id = "cached-long-$index", host = "test.com")
+                    createPost(
+                        accountKey = accountKey,
+                        user = user,
+                        statusKey = statusKey,
+                        text = "Cached long $index",
+                        references =
+                            previousKey
+                                ?.let { key ->
+                                    listOf(
+                                        UiTimelineV2.Post.Reference(
+                                            statusKey = key,
+                                            type = ReferenceType.Reply,
+                                        ),
+                                    )
+                                }.orEmpty(),
+                    ).also {
+                        previousKey = it.statusKey
+                    }
+                }
+            val rootStatus = TimelinePagingMapper.toDb(posts.last(), pagingKey = "home").status.status
+            val cached =
+                DbStatusWithReference(
+                    status = rootStatus,
+                    references =
+                        posts.dropLast(1).map { post ->
+                            val dbPost = TimelinePagingMapper.toDb(post, pagingKey = "home").status.status
+                            DbStatusReferenceWithStatus(
+                                reference =
+                                    DbStatusReference(
+                                        _id = "${rootStatus.data.id}_${post.statusKey}",
+                                        referenceType = ReferenceType.Reply,
+                                        statusId = rootStatus.data.id,
+                                        referenceStatusId = DbStatus.createId(accountType, post.statusKey),
+                                    ),
+                                status = dbPost,
+                            )
+                        },
+                )
+
+            val resolved =
+                assertIs<UiTimelineV2.Post>(
+                    TimelinePagingMapper.toUi(
+                        item = cached,
+                        pagingKey = "home",
+                        translationDisplayOptions = translationDisplayOptions(),
+                    ),
+                )
+
+            assertEquals(posts.last().statusKey, resolved.statusKey)
+            assertEquals(listOf(posts[posts.lastIndex - 1].statusKey), resolved.parents.map { it.statusKey })
+        }
+
     private fun createUser(
         key: MicroBlogKey,
         name: String,
@@ -1977,6 +2090,7 @@ class MicroblogTest : RobolectricTest() {
         text: String,
         quote: List<UiTimelineV2.Post> = emptyList(),
         parents: List<UiTimelineV2.Post> = emptyList(),
+        references: List<UiTimelineV2.Post.Reference> = emptyList(),
     ): UiTimelineV2.Post =
         UiTimelineV2.Post(
             message = null,
@@ -1996,7 +2110,7 @@ class MicroblogTest : RobolectricTest() {
             sourceChannel = null,
             visibility = null,
             replyToHandle = null,
-            references = persistentListOf(),
+            references = references.toPersistentList(),
             parents = parents.toPersistentList(),
             clickEvent = ClickEvent.Noop,
             accountType = AccountType.Specific(accountKey),

@@ -28,6 +28,13 @@ internal data object NodeInfoService {
             "akkoma",
         )
 
+    private val unsupportedNodeInfoName =
+        listOf(
+            "wafrn",
+        )
+
+    internal fun isUnsupportedSoftware(name: String?): Boolean = unsupportedNodeInfoName.any { it.equals(name, ignoreCase = true) }
+
     internal fun normalizeHost(host: String): String =
         host
             .trim()

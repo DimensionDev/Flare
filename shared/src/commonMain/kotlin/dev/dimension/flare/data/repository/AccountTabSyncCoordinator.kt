@@ -4,6 +4,10 @@ import dev.dimension.flare.data.datasource.microblog.datasource.TimelineTabConfi
 import dev.dimension.flare.data.model.MixedTimelineTabItem
 import dev.dimension.flare.data.model.TabSettings
 import dev.dimension.flare.data.model.TimelineTabItem
+import dev.dimension.flare.data.model.tab.GroupSource
+import dev.dimension.flare.data.model.tab.SYSTEM_HOME_MIXED_TIMELINE_ID
+import dev.dimension.flare.data.model.tab.TimelineMergePolicy
+import dev.dimension.flare.data.model.tab.TimelinePresentation
 import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.model.tab.TimelineSlot
 import dev.dimension.flare.data.model.tab.TimelineSlotContent
@@ -46,7 +50,9 @@ internal class AccountTabSyncCoordinator(
                 homeSlots =
                     homeSlots
                         .mapNotNull { it.cleanupForExistingAccounts(existingAccounts) }
-                        .distinctBy { it.id },
+                        .normalizeSystemHomeMixedTimeline(
+                            enabled = homeSlots.anySystemHomeMixedTimeline(),
+                        ),
             )
         }
     }
@@ -60,9 +66,14 @@ internal class AccountTabSyncCoordinator(
             return
         }
         settingsRepository.updateTabSettingsV2 {
+            val shouldEnableSystemHomeMixedTimeline =
+                homeSlots.anySystemHomeMixedTimeline() ||
+                    homeSlots.countNonSystemHomeTabs() < 2
             val newSlots =
                 (homeSlots + defaultSlots)
-                    .distinctBy { it.id }
+                    .normalizeSystemHomeMixedTimeline(
+                        enabled = shouldEnableSystemHomeMixedTimeline,
+                    )
             val newSettings = copy(homeSlots = newSlots)
             if (newSettings == this) {
                 this
@@ -78,7 +89,9 @@ internal class AccountTabSyncCoordinator(
                 homeSlots =
                     homeSlots
                         .mapNotNull { it.cleanupForRemovedAccount(accountKey) }
-                        .distinctBy { it.id },
+                        .normalizeSystemHomeMixedTimeline(
+                            enabled = homeSlots.anySystemHomeMixedTimeline(),
+                        ),
             )
         }
     }
@@ -118,6 +131,41 @@ internal class AccountTabSyncCoordinator(
             }
         }
 }
+
+internal fun List<TimelineSlot>.normalizeSystemHomeMixedTimeline(enabled: Boolean): List<TimelineSlot> {
+    val deduplicatedSlots = distinctBy { it.id }
+    val existingSystemHomeGroup = deduplicatedSlots.firstOrNull { it.isSystemHomeMixedTimeline() }
+    val slotsWithoutSystemHomeGroup = deduplicatedSlots.filterNot { it.isSystemHomeMixedTimeline() }
+    if (!enabled || slotsWithoutSystemHomeGroup.size < 2) {
+        return slotsWithoutSystemHomeGroup
+    }
+
+    val systemHomeGroup =
+        TimelineSlot(
+            id = SYSTEM_HOME_MIXED_TIMELINE_ID,
+            content =
+                TimelineSlotContent.Group(
+                    children = slotsWithoutSystemHomeGroup,
+                    source = GroupSource.SystemHome,
+                    mergePolicy =
+                        (existingSystemHomeGroup?.content as? TimelineSlotContent.Group)?.mergePolicy
+                            ?: TimelineMergePolicy.TimePerPage,
+                ),
+            presentation = existingSystemHomeGroup?.presentation ?: TimelinePresentation(),
+        )
+    val targetIndex = deduplicatedSlots.indexOfFirst { it.isSystemHomeMixedTimeline() }.takeIf { it >= 0 } ?: 0
+    return slotsWithoutSystemHomeGroup
+        .toMutableList()
+        .apply {
+            add(minOf(targetIndex, size), systemHomeGroup)
+        }
+}
+
+private fun List<TimelineSlot>.anySystemHomeMixedTimeline(): Boolean = any { it.isSystemHomeMixedTimeline() }
+
+private fun List<TimelineSlot>.countNonSystemHomeTabs(): Int = count { !it.isSystemHomeMixedTimeline() }
+
+private fun TimelineSlot.isSystemHomeMixedTimeline(): Boolean = (content as? TimelineSlotContent.Group)?.source == GroupSource.SystemHome
 
 internal fun TabSettings.sanitizeDuplicateTabKeys(): TabSettings {
     val sanitizedTabs =

@@ -6,11 +6,11 @@ import androidx.compose.runtime.remember
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.collectAsUiState
+import dev.dimension.flare.ui.model.flattenUiState
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.presenter.guestMastodonHomeTimelineTab
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.map
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -29,11 +29,17 @@ public class HomeTabItemPresenter(
         val tabItem by
             remember(id) {
                 if (id == guestMastodonHomeTimelineTab.id) {
-                    flowOf(guestMastodonHomeTimelineTab)
+                    flowOf(UiState.Success(guestMastodonHomeTimelineTab))
                 } else {
-                    settingsRepository.homeTimelineTab(id).mapNotNull { it }
+                    settingsRepository.homeTimelineTab(id).map {
+                        if (it == null) {
+                            UiState.Error<TimelineTabItemV2>(Exception("Tab not found"))
+                        } else {
+                            UiState.Success(it)
+                        }
+                    }
                 }
-            }.collectAsUiState()
+            }.flattenUiState()
 
         return object : State {
             override val tabItem = tabItem

@@ -160,7 +160,7 @@ internal fun HomeTimelineScreen(
                     }
                     CompositionLocalProvider(
                         LocalUriHandler provides
-                            remember {
+                            remember(tabItemState) {
                                 object : UriHandler {
                                     override fun openUri(uri: String) {
                                         tabItemState.handle(uri)

@@ -59,6 +59,15 @@ public fun calculateWindowSizeClass(): State<WindowSizeClass> {
     }
 }
 
+public fun calculateWindowSizeClass(windowWidth: Dp): WindowSizeClass =
+    when {
+        windowWidth >= WIDTH_DP_EXTRA_LARGE_LOWER_BOUND.dp -> WindowSizeClass.ExtraLarge
+        windowWidth >= WIDTH_DP_LARGE_LOWER_BOUND.dp -> WindowSizeClass.Large
+        windowWidth >= WIDTH_DP_EXPANDED_LOWER_BOUND.dp -> WindowSizeClass.Expanded
+        windowWidth < WIDTH_DP_MEDIUM_LOWER_BOUND.dp -> WindowSizeClass.Compact
+        else -> WindowSizeClass.Medium
+    }
+
 @OptIn(ExperimentalMediaQueryApi::class)
 @Composable
 public fun isBigScreen(): Boolean =

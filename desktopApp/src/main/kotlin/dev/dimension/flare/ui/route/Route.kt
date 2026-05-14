@@ -34,6 +34,10 @@ internal sealed interface Route : NavKey {
         val source: TimelineSourceRef,
     ) : ScreenRoute
 
+    data class DeckTimeline(
+        val id: String,
+    ) : ScreenRoute
+
     data class Home(
         val accountType: AccountType,
     ) : ScreenRoute

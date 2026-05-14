@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.screen.compose
 
 import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.ui.window.DialogProperties
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.scene.DialogSceneStrategy
@@ -14,7 +15,11 @@ internal fun EntryProviderScope<NavKey>.composeEntryBuilder(
     onBack: () -> Unit,
 ) {
     entry<Route.Compose.New>(
-        metadata = DialogSceneStrategy.dialog()
+        metadata = DialogSceneStrategy.dialog(
+            dialogProperties = DialogProperties(
+                dismissOnClickOutside = false,
+            )
+        )
     ) {
         ComposeScreen(
             onBack = onBack,
@@ -26,7 +31,11 @@ internal fun EntryProviderScope<NavKey>.composeEntryBuilder(
     }
 
     entry<Route.Compose.Draft>(
-        metadata = DialogSceneStrategy.dialog()
+        metadata = DialogSceneStrategy.dialog(
+            dialogProperties = DialogProperties(
+                dismissOnClickOutside = false,
+            )
+        )
     ) { args ->
         ComposeScreen(
             onBack = onBack,
@@ -39,7 +48,11 @@ internal fun EntryProviderScope<NavKey>.composeEntryBuilder(
     }
 
     entry<Route.Compose.Reply>(
-        metadata = DialogSceneStrategy.dialog()
+        metadata = DialogSceneStrategy.dialog(
+            dialogProperties = DialogProperties(
+                dismissOnClickOutside = false,
+            )
+        )
     ) { args ->
         ComposeScreen(
             onBack = onBack,
@@ -52,7 +65,11 @@ internal fun EntryProviderScope<NavKey>.composeEntryBuilder(
     }
 
     entry<Route.Compose.Quote>(
-        metadata = DialogSceneStrategy.dialog()
+        metadata = DialogSceneStrategy.dialog(
+            dialogProperties = DialogProperties(
+                dismissOnClickOutside = false,
+            )
+        )
     ) { args ->
         ComposeScreen(
             onBack = onBack,
@@ -65,7 +82,11 @@ internal fun EntryProviderScope<NavKey>.composeEntryBuilder(
     }
 
     entry<Route.Compose.VVOReplyComment>(
-        metadata = DialogSceneStrategy.dialog()
+        metadata = DialogSceneStrategy.dialog(
+            dialogProperties = DialogProperties(
+                dismissOnClickOutside = false,
+            )
+        )
     ) { args ->
         ComposeScreen(
             onBack = onBack,

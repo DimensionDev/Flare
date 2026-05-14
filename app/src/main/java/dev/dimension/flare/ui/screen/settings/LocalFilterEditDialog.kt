@@ -81,7 +81,7 @@ internal fun LocalFilterEditDialog(
                             state.save()
                             onBack()
                         },
-                        enabled = state.input.text.isNotBlank() && state.input.text.isEmpty(),
+                        enabled = state.input.text.isNotBlank() || state.input.text.isEmpty(),
                     ) {
                         FAIcon(
                             FontAwesomeIcons.Solid.Check,

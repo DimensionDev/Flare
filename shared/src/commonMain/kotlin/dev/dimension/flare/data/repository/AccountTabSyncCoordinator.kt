@@ -7,6 +7,8 @@ import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.model.tab.TimelineSlot
 import dev.dimension.flare.data.model.tab.TimelineSlotContent
+import dev.dimension.flare.data.model.tab.isSystemHomeMixedTimeline
+import dev.dimension.flare.data.model.tab.withSystemHomeMixedTimelineEnabled
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiAccount
 import kotlinx.collections.immutable.toImmutableList
@@ -46,7 +48,10 @@ internal class AccountTabSyncCoordinator(
                 homeSlots =
                     homeSlots
                         .mapNotNull { it.cleanupForExistingAccounts(existingAccounts) }
-                        .distinctBy { it.id },
+                        .normalizeSystemHomeMixedTimeline(
+                            timelineResolver = timelineResolver,
+                            enabled = homeSlots.anySystemHomeMixedTimeline(timelineResolver),
+                        ),
             )
         }
     }
@@ -60,9 +65,15 @@ internal class AccountTabSyncCoordinator(
             return
         }
         settingsRepository.updateTabSettingsV2 {
+            val shouldEnableSystemHomeMixedTimeline =
+                homeSlots.anySystemHomeMixedTimeline(timelineResolver) ||
+                    homeSlots.countNonSystemHomeTabs(timelineResolver) < 2
             val newSlots =
                 (homeSlots + defaultSlots)
-                    .distinctBy { it.id }
+                    .normalizeSystemHomeMixedTimeline(
+                        timelineResolver = timelineResolver,
+                        enabled = shouldEnableSystemHomeMixedTimeline,
+                    )
             val newSettings = copy(homeSlots = newSlots)
             if (newSettings == this) {
                 this
@@ -78,7 +89,10 @@ internal class AccountTabSyncCoordinator(
                 homeSlots =
                     homeSlots
                         .mapNotNull { it.cleanupForRemovedAccount(accountKey) }
-                        .distinctBy { it.id },
+                        .normalizeSystemHomeMixedTimeline(
+                            timelineResolver = timelineResolver,
+                            enabled = homeSlots.anySystemHomeMixedTimeline(timelineResolver),
+                        ),
             )
         }
     }
@@ -118,6 +132,25 @@ internal class AccountTabSyncCoordinator(
             }
         }
 }
+
+internal fun List<TimelineSlot>.normalizeSystemHomeMixedTimeline(
+    timelineResolver: TimelineResolver,
+    enabled: Boolean,
+): List<TimelineSlot> {
+    val tabs =
+        distinctBy { it.id }
+            .map(timelineResolver::toTabItem)
+    return tabs
+        .withSystemHomeMixedTimelineEnabled(enabled = enabled)
+        .distinctBy { it.id }
+        .map(timelineResolver::toSlot)
+}
+
+private fun List<TimelineSlot>.anySystemHomeMixedTimeline(timelineResolver: TimelineResolver): Boolean =
+    any { timelineResolver.toTabItem(it).isSystemHomeMixedTimeline }
+
+private fun List<TimelineSlot>.countNonSystemHomeTabs(timelineResolver: TimelineResolver): Int =
+    count { !timelineResolver.toTabItem(it).isSystemHomeMixedTimeline }
 
 internal fun TabSettings.sanitizeDuplicateTabKeys(): TabSettings {
     val sanitizedTabs =

@@ -748,7 +748,7 @@ internal fun TranslationConfigScreen(onBack: () -> Unit) {
                     state.setPreTranslate(!state.preTranslate)
                 },
                 shapes =
-                    if (state.preTranslate) {
+                    if (state.preTranslate || hasProviderSettings) {
                         ListItemDefaults.item()
                     } else {
                         ListItemDefaults.last()

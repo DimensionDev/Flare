@@ -57,6 +57,14 @@ extension UiTimelineV2.MessageType {
                 String(localized: "misskey_notification_reaction")
             case .followRequestAccepted:
                 String(localized: "misskey_notification_follow_request_accepted")
+            case .scheduledNotePosted:
+                String(localized: "misskey_notification_scheduled_note_posted")
+            case .scheduledNotePostFailed:
+                String(localized: "misskey_notification_scheduled_note_post_failed")
+            case .roleAssigned:
+                String(localized: "misskey_notification_role_assigned")
+            case .chatRoomInvitationReceived:
+                String(localized: "misskey_notification_chat_room_invitation_received")
             case .achievementEarned:
                 if let rawAchievement = data.args.first,
                    let achievement = MisskeyAchievement.from(rawAchievement) {
@@ -72,6 +80,14 @@ extension UiTimelineV2.MessageType {
                 }
             case .app:
                 String(localized: "misskey_notification_app")
+            case .exportCompleted:
+                String(localized: "misskey_notification_export_completed")
+            case .test:
+                String(localized: "misskey_notification_test")
+            case .login:
+                String(localized: "misskey_notification_login")
+            case .createToken:
+                String(localized: "misskey_notification_create_token")
             case .starterpackJoined:
                 String(localized: "bluesky_notification_starterpackJoined")
             case .pinned:

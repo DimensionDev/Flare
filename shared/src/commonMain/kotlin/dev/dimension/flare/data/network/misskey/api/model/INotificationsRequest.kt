@@ -32,12 +32,15 @@ internal data class INotificationsRequest(
 ) {
     /**
      * *
-     * Values: Follow,Mention,Reply,Renote,Quote,Reaction,PollEnded,ReceiveFollowRequest,FollowRequestAccepted,AchievementEarned,App,PollVote,GroupInvited
+     * Values: Note,Follow,Mention,Reply,Renote,Quote,Reaction,PollEnded,ScheduledNotePosted,ScheduledNotePostFailed,ReceiveFollowRequest,FollowRequestAccepted,App,RoleAssigned,ChatRoomInvitationReceived,AchievementEarned,ExportCompleted,Test,Login,CreateToken,PollVote,GroupInvited
      */
     @Serializable
     enum class IncludeTypes(
         val value: kotlin.String,
     ) {
+        @SerialName(value = "note")
+        Note("note"),
+
         @SerialName(value = "follow")
         Follow("follow"),
 
@@ -59,6 +62,12 @@ internal data class INotificationsRequest(
         @SerialName(value = "pollEnded")
         PollEnded("pollEnded"),
 
+        @SerialName(value = "scheduledNotePosted")
+        ScheduledNotePosted("scheduledNotePosted"),
+
+        @SerialName(value = "scheduledNotePostFailed")
+        ScheduledNotePostFailed("scheduledNotePostFailed"),
+
         @SerialName(value = "receiveFollowRequest")
         ReceiveFollowRequest("receiveFollowRequest"),
 
@@ -71,21 +80,42 @@ internal data class INotificationsRequest(
         @SerialName(value = "app")
         App("app"),
 
+        @SerialName(value = "roleAssigned")
+        RoleAssigned("roleAssigned"),
+
+        @SerialName(value = "chatRoomInvitationReceived")
+        ChatRoomInvitationReceived("chatRoomInvitationReceived"),
+
         @SerialName(value = "pollVote")
         PollVote("pollVote"),
 
         @SerialName(value = "groupInvited")
         GroupInvited("groupInvited"),
+
+        @SerialName(value = "exportCompleted")
+        ExportCompleted("exportCompleted"),
+
+        @SerialName(value = "test")
+        Test("test"),
+
+        @SerialName(value = "login")
+        Login("login"),
+
+        @SerialName(value = "createToken")
+        CreateToken("createToken"),
     }
 
     /**
      * *
-     * Values: Follow,Mention,Reply,Renote,Quote,Reaction,PollEnded,ReceiveFollowRequest,FollowRequestAccepted,AchievementEarned,App,PollVote,GroupInvited
+     * Values: Note,Follow,Mention,Reply,Renote,Quote,Reaction,PollEnded,ScheduledNotePosted,ScheduledNotePostFailed,ReceiveFollowRequest,FollowRequestAccepted,App,RoleAssigned,ChatRoomInvitationReceived,AchievementEarned,ExportCompleted,Test,Login,CreateToken,PollVote,GroupInvited
      */
     @Serializable
     enum class ExcludeTypes(
         val value: kotlin.String,
     ) {
+        @SerialName(value = "note")
+        Note("note"),
+
         @SerialName(value = "follow")
         Follow("follow"),
 
@@ -107,6 +137,12 @@ internal data class INotificationsRequest(
         @SerialName(value = "pollEnded")
         PollEnded("pollEnded"),
 
+        @SerialName(value = "scheduledNotePosted")
+        ScheduledNotePosted("scheduledNotePosted"),
+
+        @SerialName(value = "scheduledNotePostFailed")
+        ScheduledNotePostFailed("scheduledNotePostFailed"),
+
         @SerialName(value = "receiveFollowRequest")
         ReceiveFollowRequest("receiveFollowRequest"),
 
@@ -119,10 +155,28 @@ internal data class INotificationsRequest(
         @SerialName(value = "app")
         App("app"),
 
+        @SerialName(value = "roleAssigned")
+        RoleAssigned("roleAssigned"),
+
+        @SerialName(value = "chatRoomInvitationReceived")
+        ChatRoomInvitationReceived("chatRoomInvitationReceived"),
+
         @SerialName(value = "pollVote")
         PollVote("pollVote"),
 
         @SerialName(value = "groupInvited")
         GroupInvited("groupInvited"),
+
+        @SerialName(value = "exportCompleted")
+        ExportCompleted("exportCompleted"),
+
+        @SerialName(value = "test")
+        Test("test"),
+
+        @SerialName(value = "login")
+        Login("login"),
+
+        @SerialName(value = "createToken")
+        CreateToken("createToken"),
     }
 }

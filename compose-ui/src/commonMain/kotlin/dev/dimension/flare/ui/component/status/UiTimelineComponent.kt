@@ -194,8 +194,16 @@ import dev.dimension.flare.compose.ui.misskey_achievement_view_instance_chart_de
 import dev.dimension.flare.compose.ui.misskey_achievement_view_instance_chart_title
 import dev.dimension.flare.compose.ui.misskey_notification_item_achievement_earned
 import dev.dimension.flare.compose.ui.misskey_notification_item_app
+import dev.dimension.flare.compose.ui.misskey_notification_item_chat_room_invitation_received
+import dev.dimension.flare.compose.ui.misskey_notification_item_create_token
+import dev.dimension.flare.compose.ui.misskey_notification_item_export_completed
 import dev.dimension.flare.compose.ui.misskey_notification_item_follow_request_accepted
+import dev.dimension.flare.compose.ui.misskey_notification_item_login
 import dev.dimension.flare.compose.ui.misskey_notification_item_reacted_to_your_status
+import dev.dimension.flare.compose.ui.misskey_notification_item_role_assigned
+import dev.dimension.flare.compose.ui.misskey_notification_item_scheduled_note_post_failed
+import dev.dimension.flare.compose.ui.misskey_notification_item_scheduled_note_posted
+import dev.dimension.flare.compose.ui.misskey_notification_item_test
 import dev.dimension.flare.compose.ui.notification_item_accept_follow_request
 import dev.dimension.flare.compose.ui.notification_item_reject_follow_request
 import dev.dimension.flare.compose.ui.vvo_notification_like
@@ -633,6 +641,22 @@ private fun TopMessageComponent(
                         stringResource(resource = Res.string.misskey_notification_item_follow_request_accepted)
                     }
 
+                    UiTimelineV2.Message.Type.Localized.MessageId.ScheduledNotePosted -> {
+                        stringResource(resource = Res.string.misskey_notification_item_scheduled_note_posted)
+                    }
+
+                    UiTimelineV2.Message.Type.Localized.MessageId.ScheduledNotePostFailed -> {
+                        stringResource(resource = Res.string.misskey_notification_item_scheduled_note_post_failed)
+                    }
+
+                    UiTimelineV2.Message.Type.Localized.MessageId.RoleAssigned -> {
+                        stringResource(resource = Res.string.misskey_notification_item_role_assigned)
+                    }
+
+                    UiTimelineV2.Message.Type.Localized.MessageId.ChatRoomInvitationReceived -> {
+                        stringResource(resource = Res.string.misskey_notification_item_chat_room_invitation_received)
+                    }
+
                     UiTimelineV2.Message.Type.Localized.MessageId.AchievementEarned -> {
                         runCatching {
                             MisskeyAchievement.valueOf(type.args.getOrNull(0).orEmpty())
@@ -652,6 +676,22 @@ private fun TopMessageComponent(
 
                     UiTimelineV2.Message.Type.Localized.MessageId.App -> {
                         stringResource(resource = Res.string.misskey_notification_item_app)
+                    }
+
+                    UiTimelineV2.Message.Type.Localized.MessageId.ExportCompleted -> {
+                        stringResource(resource = Res.string.misskey_notification_item_export_completed)
+                    }
+
+                    UiTimelineV2.Message.Type.Localized.MessageId.Test -> {
+                        stringResource(resource = Res.string.misskey_notification_item_test)
+                    }
+
+                    UiTimelineV2.Message.Type.Localized.MessageId.Login -> {
+                        stringResource(resource = Res.string.misskey_notification_item_login)
+                    }
+
+                    UiTimelineV2.Message.Type.Localized.MessageId.CreateToken -> {
+                        stringResource(resource = Res.string.misskey_notification_item_create_token)
                     }
 
                     UiTimelineV2.Message.Type.Localized.MessageId.StarterpackJoined -> {

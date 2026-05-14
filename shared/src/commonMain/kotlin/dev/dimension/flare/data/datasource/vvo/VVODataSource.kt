@@ -110,6 +110,10 @@ internal class VVODataSource(
                 data = TimelineSpec.AccountBasedData(accountKey),
                 icon = IconType.Material(UiIcon.Weibo),
             ),
+            CommonTimelineSpecs.discover.tabItem(
+                data = TimelineSpec.AccountBasedData(accountKey),
+                icon = IconType.Material(UiIcon.Weibo),
+            ),
             VvoPlatformSpec.featuredTimelineSpec.tabItem(TimelineSpec.AccountBasedData(accountKey)),
             VvoPlatformSpec.favoriteTimelineSpec.tabItem(TimelineSpec.AccountBasedData(accountKey)),
             VvoPlatformSpec.likedTimelineSpec.tabItem(TimelineSpec.AccountBasedData(accountKey)),

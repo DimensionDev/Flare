@@ -11,6 +11,7 @@ import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.model.asType
+import dev.dimension.flare.ui.presenter.home.DiscoverStatusTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.HomeTimelinePresenter
 import dev.dimension.flare.ui.presenter.list.ListTimelinePresenter
 
@@ -24,6 +25,20 @@ internal object CommonTimelineSpecs {
             targetId = { it.accountKey.toString() },
             presenterFactory = {
                 HomeTimelinePresenter(
+                    AccountType.Specific(it.accountKey),
+                )
+            },
+        )
+
+    val discover =
+        TimelineSpec(
+            id = "common.discover",
+            title = UiStrings.Discover,
+            icon = UiIcon.Search.asType(),
+            serializer = TimelineSpec.AccountBasedData.serializer(),
+            targetId = { it.accountKey.toString() },
+            presenterFactory = {
+                DiscoverStatusTimelinePresenter(
                     AccountType.Specific(it.accountKey),
                 )
             },

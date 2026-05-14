@@ -727,6 +727,10 @@ internal class MisskeyDataSource(
                 data = TimelineSpec.AccountBasedData(accountKey),
                 icon = IconType.FavIcon(accountKey.host),
             ),
+            CommonTimelineSpecs.discover.tabItem(
+                data = TimelineSpec.AccountBasedData(accountKey),
+                icon = IconType.FavIcon(accountKey.host),
+            ),
             MisskeyPlatformSpec.favouriteTimelineSpec.tabItem(TimelineSpec.AccountBasedData(accountKey)),
             MisskeyPlatformSpec.hybridTimelineSpec.tabItem(TimelineSpec.AccountBasedData(accountKey)),
             MisskeyPlatformSpec.localTimelineSpec.tabItem(TimelineSpec.AccountBasedData(accountKey)),

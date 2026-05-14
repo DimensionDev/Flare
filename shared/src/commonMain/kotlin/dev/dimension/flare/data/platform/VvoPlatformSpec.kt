@@ -79,6 +79,7 @@ internal data object VvoPlatformSpec : PlatformSpec {
     override val timelineSpecs: ImmutableList<TimelineSpec<out TimelineSpec.Data>> =
         persistentListOf(
             CommonTimelineSpecs.home,
+            CommonTimelineSpecs.discover,
             featuredTimelineSpec,
             favoriteTimelineSpec,
             likedTimelineSpec,

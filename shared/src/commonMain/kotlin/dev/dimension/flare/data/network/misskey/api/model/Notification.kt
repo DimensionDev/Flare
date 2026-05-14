@@ -48,8 +48,11 @@ internal data class Notification(
  * 	'quote',
  * 	'reaction',
  * 	'pollEnded',
+ * 	'scheduledNotePosted',
+ * 	'scheduledNotePostFailed',
  * 	'receiveFollowRequest',
  * 	'followRequestAccepted',
+ * 	'chatRoomInvitationReceived',
  * 	'roleAssigned',
  * 	'achievementEarned',
  * 	'exportCompleted',
@@ -86,11 +89,20 @@ internal enum class NotificationType(
     @SerialName("pollEnded")
     PollEnded("pollEnded"),
 
+    @SerialName("scheduledNotePosted")
+    ScheduledNotePosted("scheduledNotePosted"),
+
+    @SerialName("scheduledNotePostFailed")
+    ScheduledNotePostFailed("scheduledNotePostFailed"),
+
     @SerialName("receiveFollowRequest")
     ReceiveFollowRequest("receiveFollowRequest"),
 
     @SerialName("followRequestAccepted")
     FollowRequestAccepted("followRequestAccepted"),
+
+    @SerialName("chatRoomInvitationReceived")
+    ChatRoomInvitationReceived("chatRoomInvitationReceived"),
 
     @SerialName("roleAssigned")
     RoleAssigned("roleAssigned"),

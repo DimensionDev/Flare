@@ -95,6 +95,10 @@ internal fun Notification.render(accountKey: MicroBlogKey): UiTimelineV2 {
                 UiTimelineV2.Message.Type.Localized(UiTimelineV2.Message.Type.Localized.MessageId.Follow)
             }
 
+            NotificationType.Note -> {
+                UiTimelineV2.Message.Type.Localized(UiTimelineV2.Message.Type.Localized.MessageId.NewPost)
+            }
+
             NotificationType.Mention -> {
                 UiTimelineV2.Message.Type.Localized(UiTimelineV2.Message.Type.Localized.MessageId.Mention)
             }
@@ -119,12 +123,28 @@ internal fun Notification.render(accountKey: MicroBlogKey): UiTimelineV2 {
                 UiTimelineV2.Message.Type.Localized(UiTimelineV2.Message.Type.Localized.MessageId.PollEnded)
             }
 
+            NotificationType.ScheduledNotePosted -> {
+                UiTimelineV2.Message.Type.Localized(UiTimelineV2.Message.Type.Localized.MessageId.ScheduledNotePosted)
+            }
+
+            NotificationType.ScheduledNotePostFailed -> {
+                UiTimelineV2.Message.Type.Localized(UiTimelineV2.Message.Type.Localized.MessageId.ScheduledNotePostFailed)
+            }
+
             NotificationType.ReceiveFollowRequest -> {
                 UiTimelineV2.Message.Type.Localized(UiTimelineV2.Message.Type.Localized.MessageId.FollowRequest)
             }
 
             NotificationType.FollowRequestAccepted -> {
                 UiTimelineV2.Message.Type.Localized(UiTimelineV2.Message.Type.Localized.MessageId.FollowRequestAccepted)
+            }
+
+            NotificationType.RoleAssigned -> {
+                UiTimelineV2.Message.Type.Localized(UiTimelineV2.Message.Type.Localized.MessageId.RoleAssigned)
+            }
+
+            NotificationType.ChatRoomInvitationReceived -> {
+                UiTimelineV2.Message.Type.Localized(UiTimelineV2.Message.Type.Localized.MessageId.ChatRoomInvitationReceived)
             }
 
             NotificationType.AchievementEarned -> {
@@ -138,6 +158,22 @@ internal fun Notification.render(accountKey: MicroBlogKey): UiTimelineV2 {
                 UiTimelineV2.Message.Type.Localized(UiTimelineV2.Message.Type.Localized.MessageId.App)
             }
 
+            NotificationType.ExportCompleted -> {
+                UiTimelineV2.Message.Type.Localized(UiTimelineV2.Message.Type.Localized.MessageId.ExportCompleted)
+            }
+
+            NotificationType.Test -> {
+                UiTimelineV2.Message.Type.Localized(UiTimelineV2.Message.Type.Localized.MessageId.Test)
+            }
+
+            NotificationType.Login -> {
+                UiTimelineV2.Message.Type.Localized(UiTimelineV2.Message.Type.Localized.MessageId.Login)
+            }
+
+            NotificationType.CreateToken -> {
+                UiTimelineV2.Message.Type.Localized(UiTimelineV2.Message.Type.Localized.MessageId.CreateToken)
+            }
+
             else -> {
                 UiTimelineV2.Message.Type.Unknown(rawType = type)
             }
@@ -148,16 +184,25 @@ internal fun Notification.render(accountKey: MicroBlogKey): UiTimelineV2 {
             icon =
                 when (notificationType) {
                     NotificationType.Follow -> UiIcon.Follow
+                    NotificationType.Note -> UiIcon.Notification
                     NotificationType.Mention -> UiIcon.Mention
                     NotificationType.Reply -> UiIcon.Reply
                     NotificationType.Renote -> UiIcon.Retweet
                     NotificationType.Quote -> UiIcon.Quote
                     NotificationType.Reaction -> UiIcon.Like
                     NotificationType.PollEnded -> UiIcon.Poll
+                    NotificationType.ScheduledNotePosted -> UiIcon.Notification
+                    NotificationType.ScheduledNotePostFailed -> UiIcon.Notification
                     NotificationType.ReceiveFollowRequest -> UiIcon.Follow
                     NotificationType.FollowRequestAccepted -> UiIcon.Follow
+                    NotificationType.RoleAssigned -> UiIcon.Info
+                    NotificationType.ChatRoomInvitationReceived -> UiIcon.ChatMessage
                     NotificationType.AchievementEarned -> UiIcon.Info
                     NotificationType.App -> UiIcon.Info
+                    NotificationType.ExportCompleted -> UiIcon.Info
+                    NotificationType.Test -> UiIcon.Info
+                    NotificationType.Login -> UiIcon.Info
+                    NotificationType.CreateToken -> UiIcon.Info
                     else -> UiIcon.Info
                 },
             type = messageType,

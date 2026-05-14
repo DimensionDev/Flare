@@ -4,6 +4,7 @@ import dev.dimension.flare.common.TestFormatter
 import dev.dimension.flare.data.network.misskey.api.model.DriveFile
 import dev.dimension.flare.data.network.misskey.api.model.DriveFileProperties
 import dev.dimension.flare.data.network.misskey.api.model.Note
+import dev.dimension.flare.data.network.misskey.api.model.Notification
 import dev.dimension.flare.data.network.misskey.api.model.UserLite
 import dev.dimension.flare.data.network.misskey.api.model.Visibility
 import dev.dimension.flare.model.MicroBlogKey
@@ -228,6 +229,49 @@ class MisskeyRenderTest {
         val rendered = assertIs<UiTimelineV2.Post>(note.render(accountKey))
 
         assertEquals("beforequotedafter", rendered.content.innerText)
+    }
+
+    @Test
+    fun latestMisskeyNotificationTypesAreLocalized() {
+        val user = createUser("user-notification")
+
+        val cases =
+            listOf(
+                "scheduledNotePosted" to UiTimelineV2.Message.Type.Localized.MessageId.ScheduledNotePosted,
+                "scheduledNotePostFailed" to UiTimelineV2.Message.Type.Localized.MessageId.ScheduledNotePostFailed,
+                "roleAssigned" to UiTimelineV2.Message.Type.Localized.MessageId.RoleAssigned,
+                "chatRoomInvitationReceived" to UiTimelineV2.Message.Type.Localized.MessageId.ChatRoomInvitationReceived,
+                "exportCompleted" to UiTimelineV2.Message.Type.Localized.MessageId.ExportCompleted,
+                "test" to UiTimelineV2.Message.Type.Localized.MessageId.Test,
+                "login" to UiTimelineV2.Message.Type.Localized.MessageId.Login,
+                "createToken" to UiTimelineV2.Message.Type.Localized.MessageId.CreateToken,
+            )
+
+        cases.forEach { (type, expected) ->
+            val notification =
+                Notification(
+                    id = "notification-$type",
+                    createdAt = "2024-01-01T00:00:00Z",
+                    type = type,
+                    user = user,
+                )
+
+            val rendered = notification.render(accountKey)
+            val message =
+                when (rendered) {
+                    is UiTimelineV2.Message -> rendered
+
+                    is UiTimelineV2.Post -> assertNotNull(rendered.message)
+
+                    is UiTimelineV2.User -> assertNotNull(rendered.message)
+
+                    is UiTimelineV2.Feed,
+                    is UiTimelineV2.UserList,
+                    -> error("Unexpected rendered timeline item: ${rendered::class.simpleName}")
+                }
+            val localized = assertIs<UiTimelineV2.Message.Type.Localized>(message.type)
+            assertEquals(expected, localized.data)
+        }
     }
 
     private fun createUser(id: String): UserLite =

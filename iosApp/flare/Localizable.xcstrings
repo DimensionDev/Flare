@@ -78750,6 +78750,36 @@
         }
       }
     },
+    "misskey_notification_chat_room_invitation_received" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "invited you to a chat room"
+          }
+        }
+      }
+    },
+    "misskey_notification_create_token" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Access token created"
+          }
+        }
+      }
+    },
+    "misskey_notification_export_completed" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Export completed"
+          }
+        }
+      }
+    },
     "misskey_notification_follow" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -79687,6 +79717,56 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "引用"
+          }
+        }
+      }
+    },
+    "misskey_notification_login" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Login detected"
+          }
+        }
+      }
+    },
+    "misskey_notification_role_assigned" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Role assigned"
+          }
+        }
+      }
+    },
+    "misskey_notification_scheduled_note_post_failed" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scheduled note failed to post"
+          }
+        }
+      }
+    },
+    "misskey_notification_scheduled_note_posted" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scheduled note posted"
+          }
+        }
+      }
+    },
+    "misskey_notification_test" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Test notification"
           }
         }
       }

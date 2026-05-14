@@ -45,7 +45,7 @@ internal fun CommonProfileHeader(
     handleTrailing: @Composable RowScope.() -> Unit = {},
     content: @Composable ColumnScope.() -> Unit = {},
 ) {
-    val isBigScreen by isBigScreen()
+    val isBigScreen = isBigScreen()
     val statusBarHeight =
         with(LocalDensity.current) {
             WindowInsets.statusBars.getTop(this).toDp()

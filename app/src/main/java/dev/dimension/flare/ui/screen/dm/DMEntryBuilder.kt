@@ -5,13 +5,11 @@ import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import dev.dimension.flare.ui.route.Route
-import dev.dimension.flare.ui.screen.home.NavigationState
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 internal fun EntryProviderScope<NavKey>.dmEntryBuilder(
     navigate: (Route) -> Unit,
     onBack: () -> Unit,
-    navigationState: NavigationState,
 ) {
     entry<Route.DM.List>(
         metadata = ListDetailSceneStrategy.listPane(
@@ -39,7 +37,6 @@ internal fun EntryProviderScope<NavKey>.dmEntryBuilder(
             accountType = args.accountType,
             roomKey = args.roomKey,
             onBack = onBack,
-            navigationState = navigationState,
             toProfile = { userKey ->
                 navigate(Route.Profile.User(args.accountType, userKey))
             },
@@ -55,7 +52,6 @@ internal fun EntryProviderScope<NavKey>.dmEntryBuilder(
             accountType = args.accountType,
             userKey = args.userKey,
             onBack = onBack,
-            navigationState = navigationState,
             toProfile = { userKey ->
                 navigate(Route.Profile.User(args.accountType, userKey))
             },

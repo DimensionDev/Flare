@@ -16,6 +16,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -27,7 +28,8 @@ import com.materialkolor.dynamiccolor.ColorSpec
 import com.materialkolor.rememberDynamicColorScheme
 import dev.dimension.flare.data.model.Theme
 import dev.dimension.flare.ui.component.LocalGlobalAppearance
-import dev.dimension.flare.ui.component.LocalTimelineAppearance
+import dev.dimension.flare.ui.component.platform.LocalWindowSizeClass
+import dev.dimension.flare.ui.component.platform.calculateWindowSizeClass
 
 private object MoreColors {
     val Gray50 = Color(0xFFFAFAFA)
@@ -155,6 +157,7 @@ fun FlareTheme(
         }
         ApplyCaptionBarAppearance((view.context as Activity).window, darkTheme)
     }
+    val windowSize by calculateWindowSizeClass()
     MaterialExpressiveTheme(
         colorScheme = colorScheme,
         typography =
@@ -164,6 +167,7 @@ fun FlareTheme(
         content = {
             CompositionLocalProvider(
                 LocalIsLightTheme provides !darkTheme,
+                LocalWindowSizeClass provides windowSize,
             ) {
                 content.invoke()
             }

@@ -192,7 +192,7 @@ internal fun ProfileScreen(
     val listState = rememberLazyStaggeredGridState()
     val profileHeaderScrollState = rememberScrollState()
     RegisterTabCallback(listState, state::refresh)
-    val isBigScreen by isBigScreen()
+    val isBigScreen = isBigScreen()
     Box {
         Row {
             if (isBigScreen) {

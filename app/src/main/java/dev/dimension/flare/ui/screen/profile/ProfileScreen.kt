@@ -240,7 +240,7 @@ internal fun ProfileScreen(
                 .toSize()
                 .toDpSize()
         }
-    val bigScreen by isBigScreen()
+    val bigScreen = isBigScreen()
     val scrollBehavior =
         if (bigScreen) {
             TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
@@ -526,7 +526,7 @@ private fun ProfileMediaTab(
     onItemClicked: (statusKey: MicroBlogKey, index: Int, preview: String?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val isBigScreen by isBigScreen()
+    val isBigScreen = isBigScreen()
     CompositionLocalProvider(
         LocalTimelineAppearance provides
             LocalTimelineAppearance.current.copy(

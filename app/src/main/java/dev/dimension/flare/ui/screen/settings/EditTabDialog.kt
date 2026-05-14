@@ -9,6 +9,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -26,6 +27,8 @@ import dev.dimension.flare.data.model.tab.TimelineFilterConfig
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.data.model.tab.isSystemHomeMixedTimeline
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
+import dev.dimension.flare.ui.component.platform.LocalWindowSizeClass
+import dev.dimension.flare.ui.component.platform.WindowSizeClass
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.invoke
 import moe.tlaster.precompose.molecule.producePresenter
@@ -41,62 +44,66 @@ internal fun EditTabDialog(
     val state by producePresenter(key = "EditTabSheet_$tabItem") {
         presenter(tabItem = tabItem, appearance = appearance)
     }
-    AlertDialog(
-        onDismissRequest = onDismissRequest,
-        confirmButton = {
-            TextButton(
-                enabled = state.canConfirm,
-                onClick = {
-                    onConfirm(
-                        tabItem.withPresentationOverrides(
-                            title = state.text.text.toString(),
-                            icon = state.icon,
-                            appearancePatch = state.appearancePatch,
-                            enabled = state.enabled,
-                            filterConfig = state.filterConfig,
-                        ),
-                    )
-                },
-            ) {
-                Text(text = stringResource(id = android.R.string.ok))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismissRequest) {
-                Text(text = stringResource(id = android.R.string.cancel))
-            }
-        },
-        text = {
-            TimelinePresentationEditor(
-                text = state.text,
-                icon = state.icon,
-                availableIcons = state.availableIcons,
-                showIconPicker = state.showIconPicker,
-                onShowIconPickerChange = state::setShowIconPicker,
-                withAvatar = state.withAvatar,
-                canUseAvatar = !titleAndIconOnly && state.canUseAvatar,
-                onWithAvatarChange = state::setWithAvatar,
-                enabled = state.enabled,
-                onEnabledChange = state::setEnabled,
-                filterConfig = state.filterConfig,
-                onFilterConfigChange = state::setFilterConfig,
-                timelineAppearance = state.timelineAppearance,
-                appearancePatch = state.appearancePatch,
-                onAppearancePatchChange = state::setAppearancePatch,
-                onIconChange = state::setIcon,
-                showEnabled = !titleAndIconOnly && !tabItem.isSystemHomeMixedTimeline,
-                showAppearanceOverrides = !titleAndIconOnly,
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .heightIn(max = 560.dp)
-                        .verticalScroll(rememberScrollState()),
-            )
-        },
-        title = {
-            Text(text = stringResource(id = R.string.edit_tab_title))
-        },
-    )
+    CompositionLocalProvider(
+        LocalWindowSizeClass provides WindowSizeClass.Compact,
+    ) {
+        AlertDialog(
+            onDismissRequest = onDismissRequest,
+            confirmButton = {
+                TextButton(
+                    enabled = state.canConfirm,
+                    onClick = {
+                        onConfirm(
+                            tabItem.withPresentationOverrides(
+                                title = state.text.text.toString(),
+                                icon = state.icon,
+                                appearancePatch = state.appearancePatch,
+                                enabled = state.enabled,
+                                filterConfig = state.filterConfig,
+                            ),
+                        )
+                    },
+                ) {
+                    Text(text = stringResource(id = android.R.string.ok))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = onDismissRequest) {
+                    Text(text = stringResource(id = android.R.string.cancel))
+                }
+            },
+            text = {
+                TimelinePresentationEditor(
+                    text = state.text,
+                    icon = state.icon,
+                    availableIcons = state.availableIcons,
+                    showIconPicker = state.showIconPicker,
+                    onShowIconPickerChange = state::setShowIconPicker,
+                    withAvatar = state.withAvatar,
+                    canUseAvatar = !titleAndIconOnly && state.canUseAvatar,
+                    onWithAvatarChange = state::setWithAvatar,
+                    enabled = state.enabled,
+                    onEnabledChange = state::setEnabled,
+                    filterConfig = state.filterConfig,
+                    onFilterConfigChange = state::setFilterConfig,
+                    timelineAppearance = state.timelineAppearance,
+                    appearancePatch = state.appearancePatch,
+                    onAppearancePatchChange = state::setAppearancePatch,
+                    onIconChange = state::setIcon,
+                    showEnabled = !titleAndIconOnly && !tabItem.isSystemHomeMixedTimeline,
+                    showAppearanceOverrides = !titleAndIconOnly,
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .heightIn(max = 560.dp)
+                            .verticalScroll(rememberScrollState()),
+                )
+            },
+            title = {
+                Text(text = stringResource(id = R.string.edit_tab_title))
+            },
+        )
+    }
 }
 
 @Composable

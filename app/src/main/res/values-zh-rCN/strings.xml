@@ -188,6 +188,8 @@
     <string name="search_status">帖子</string>
     <string name="quick_menu_add_account">添加账户</string>
     <string name="settings_appearance_generic">通用</string>
+    <string name="settings_appearance_deck_mode">Deck 模式</string>
+    <string name="settings_appearance_deck_mode_description">在支持的场景下以 Deck 模式显示时间线</string>
     <string name="settings_appearance_show_actions">显示操作</string>
     <string name="settings_appearance_show_actions_description">在帖子底部显示动作</string>
     <string name="settings_appearance_post_action_style">发布动作样式</string>

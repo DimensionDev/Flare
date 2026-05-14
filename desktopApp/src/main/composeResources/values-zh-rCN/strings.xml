@@ -218,6 +218,8 @@
     <string name="settings_appearance_show_compose_in_home_timeline_description">在首页时间轴顶部显示撰写框</string>
     <string name="settings_appearance_show_bottom_bar_labels">显示底部栏文字</string>
     <string name="settings_appearance_show_bottom_bar_labels_description">在底部栏和侧边栏导航中显示文字标签</string>
+    <string name="settings_appearance_deck_mode">Deck 模式</string>
+    <string name="settings_appearance_deck_mode_description">在支持的场景下以 Deck 模式显示时间线</string>
     <string name="settings_appearance_show_actions">显示操作</string>
     <string name="settings_appearance_show_actions_description">在帖子底部显示动作</string>
     <string name="settings_appearance_show_media">显示媒体</string>

@@ -2,6 +2,10 @@ package dev.dimension.flare.data.model
 
 import kotlinx.serialization.Serializable
 
+/**
+ * Legacy v1 appearance settings model kept only for migrating old persisted data.
+ * New code should use the appearance bag / patch based settings model instead.
+ */
 @Serializable
 internal data class AppearanceSettings(
     val theme: Theme = Theme.SYSTEM,

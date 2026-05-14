@@ -6,9 +6,8 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavKey
@@ -21,7 +20,6 @@ import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.screen.bluesky.blueskyEntryBuilder
 import dev.dimension.flare.ui.screen.compose.composeEntryBuilder
 import dev.dimension.flare.ui.screen.dm.dmEntryBuilder
-import dev.dimension.flare.ui.screen.home.NavigationState
 import dev.dimension.flare.ui.screen.home.homeEntryBuilder
 import dev.dimension.flare.ui.screen.list.listEntryBuilder
 import dev.dimension.flare.ui.screen.media.mediaEntryBuilder
@@ -43,16 +41,17 @@ import soup.compose.material.motion.animation.translateXOut
 @OptIn(ExperimentalMaterial3AdaptiveApi::class, ExperimentalSharedTransitionApi::class)
 @Composable
 internal fun Router(
-    backStack: SnapshotStateList<Route>,
+    backStack: List<NavKey>,
     navigate: (Route) -> Unit,
     onBack: () -> Unit,
-    navigationState: NavigationState,
     openDrawer: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val listDetailStrategy = rememberListDetailSceneStrategy<NavKey>()
     val uriHandler = LocalUriHandler.current
-    val isBigScreen by isBigScreen()
+    val isBigScreen = isBigScreen()
     NavDisplay(
+        modifier = modifier,
         sceneStrategies =
             remember {
                 listOf(
@@ -97,7 +96,7 @@ internal fun Router(
                 homeEntryBuilder(navigate, onBack, openDrawer, uriHandler = uriHandler)
                 blueskyEntryBuilder(navigate, onBack)
                 composeEntryBuilder(navigate, onBack)
-                dmEntryBuilder(navigate, onBack, navigationState)
+                dmEntryBuilder(navigate, onBack)
                 listEntryBuilder(navigate, onBack)
                 mediaEntryBuilder(navigate, onBack, uriHandler = uriHandler)
                 profileEntryBuilder(navigate, onBack)

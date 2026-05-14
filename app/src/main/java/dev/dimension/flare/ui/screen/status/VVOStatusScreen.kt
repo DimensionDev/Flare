@@ -87,7 +87,7 @@ internal fun VVOStatusScreen(
         } else {
             TopAppBarDefaults.enterAlwaysScrollBehavior()
         }
-    val bigScreen by isBigScreen()
+    val bigScreen = isBigScreen()
     FlareScaffold(
         topBar = {
             FlareTopAppBar(

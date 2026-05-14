@@ -128,6 +128,26 @@ internal fun AppearanceLayoutScreen(onBack: () -> Unit) {
                         )
                     },
                 )
+                SegmentedListItem(
+                    onClick = {
+                        state.update(AppearanceKeys.DeckMode, !globalAppearance.deckMode)
+                    },
+                    shapes = ListItemDefaults.item(),
+                    content = {
+                        Text(text = stringResource(id = R.string.settings_appearance_deck_mode))
+                    },
+                    supportingContent = {
+                        Text(text = stringResource(id = R.string.settings_appearance_deck_mode_description))
+                    },
+                    trailingContent = {
+                        Switch(
+                            checked = globalAppearance.deckMode,
+                            onCheckedChange = {
+                                state.update(AppearanceKeys.DeckMode, it)
+                            },
+                        )
+                    },
+                )
                 SingleChoiceSettingsItem(
                     headline = { Text(text = stringResource(id = R.string.settings_appearance_timeline_display_mode)) },
                     supporting = { Text(text = stringResource(id = R.string.settings_appearance_timeline_display_mode_description)) },

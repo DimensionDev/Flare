@@ -142,73 +142,71 @@ internal fun ChannelListScreen(
                         items = state.data,
                         onClicked = toTimeline,
                         trailingContent = { item ->
-                            if (item is UiList.Channel) {
-                                var showMenu by remember { mutableStateOf(false) }
-                                IconButton(
-                                    onClick = {
-                                        showMenu = true
+                            var showMenu by remember { mutableStateOf(false) }
+                            IconButton(
+                                onClick = {
+                                    showMenu = true
+                                },
+                            ) {
+                                FAIcon(
+                                    FontAwesomeIcons.Solid.EllipsisVertical,
+                                    contentDescription = stringResource(R.string.more),
+                                )
+                                DropdownMenu(
+                                    expanded = showMenu,
+                                    onDismissRequest = {
+                                        showMenu = false
                                     },
                                 ) {
-                                    FAIcon(
-                                        FontAwesomeIcons.Solid.EllipsisVertical,
-                                        contentDescription = stringResource(R.string.more),
-                                    )
-                                    DropdownMenu(
-                                        expanded = showMenu,
-                                        onDismissRequest = {
-                                            showMenu = false
-                                        },
-                                    ) {
-                                        if (item.isFollowing == true) {
-                                            DropdownMenuItem(
-                                                text = {
-                                                    Text(stringResource(R.string.channel_item_unfollow))
-                                                },
-                                                onClick = {
-                                                    state.unfollow(item)
-                                                },
-                                                leadingIcon = {
-                                                    FAIcon(
-                                                        FontAwesomeIcons.Solid.Minus,
-                                                        contentDescription = stringResource(R.string.channel_item_unfollow),
-                                                    )
-                                                },
-                                            )
-                                        } else {
-                                            DropdownMenuItem(
-                                                text = { Text(stringResource(R.string.channel_item_follow)) },
-                                                onClick = { state.follow(item) },
-                                                leadingIcon = {
-                                                    FAIcon(
-                                                        FontAwesomeIcons.Solid.Plus,
-                                                        contentDescription = stringResource(R.string.channel_item_follow),
-                                                    )
-                                                },
-                                            )
-                                        }
-                                        if (item.isFavorited == true) {
-                                            DropdownMenuItem(
-                                                text = { Text(stringResource(R.string.channel_item_unfavourite)) },
-                                                onClick = { state.unfavorite(item) },
-                                                leadingIcon = {
-                                                    FAIcon(
-                                                        FontAwesomeIcons.Solid.HeartCircleMinus,
-                                                        contentDescription = stringResource(R.string.channel_item_unfavourite),
-                                                    )
-                                                },
-                                            )
-                                        } else {
-                                            DropdownMenuItem(
-                                                text = { Text(stringResource(R.string.channel_item_favourite)) },
-                                                onClick = { state.favorite(item) },
-                                                leadingIcon = {
-                                                    FAIcon(
-                                                        FontAwesomeIcons.Solid.HeartCirclePlus,
-                                                        contentDescription = stringResource(R.string.channel_item_favourite),
-                                                    )
-                                                },
-                                            )
-                                        }
+                                    if (item.isFollowing == true) {
+                                        DropdownMenuItem(
+                                            text = {
+                                                Text(stringResource(R.string.channel_item_unfollow))
+                                            },
+                                            onClick = {
+                                                state.unfollow(item)
+                                            },
+                                            leadingIcon = {
+                                                FAIcon(
+                                                    FontAwesomeIcons.Solid.Minus,
+                                                    contentDescription = stringResource(R.string.channel_item_unfollow),
+                                                )
+                                            },
+                                        )
+                                    } else {
+                                        DropdownMenuItem(
+                                            text = { Text(stringResource(R.string.channel_item_follow)) },
+                                            onClick = { state.follow(item) },
+                                            leadingIcon = {
+                                                FAIcon(
+                                                    FontAwesomeIcons.Solid.Plus,
+                                                    contentDescription = stringResource(R.string.channel_item_follow),
+                                                )
+                                            },
+                                        )
+                                    }
+                                    if (item.isFavorited == true) {
+                                        DropdownMenuItem(
+                                            text = { Text(stringResource(R.string.channel_item_unfavourite)) },
+                                            onClick = { state.unfavorite(item) },
+                                            leadingIcon = {
+                                                FAIcon(
+                                                    FontAwesomeIcons.Solid.HeartCircleMinus,
+                                                    contentDescription = stringResource(R.string.channel_item_unfavourite),
+                                                )
+                                            },
+                                        )
+                                    } else {
+                                        DropdownMenuItem(
+                                            text = { Text(stringResource(R.string.channel_item_favourite)) },
+                                            onClick = { state.favorite(item) },
+                                            leadingIcon = {
+                                                FAIcon(
+                                                    FontAwesomeIcons.Solid.HeartCirclePlus,
+                                                    contentDescription = stringResource(R.string.channel_item_favourite),
+                                                )
+                                            },
+                                        )
                                     }
                                 }
                             }

@@ -42,7 +42,7 @@ internal fun <T> SingleChoiceSettingsItem(
     shapes: ListItemShapes,
     modifier: Modifier = Modifier,
 ) {
-    val isBigScreen by isBigScreen()
+    val isBigScreen = isBigScreen()
     var showMenu by remember { mutableStateOf(false) }
     SegmentedListItem(
         modifier = modifier,

@@ -47,6 +47,8 @@ public object AppearanceKeys {
 
     public object ShowBottomBarLabels : Global<Boolean>("app.show_bottom_bar_labels", false, Boolean.serializer())
 
+    public object DeckMode : Global<Boolean>("app.deck_mode", false, Boolean.serializer())
+
     public object ShowMedia : PerTimeline<Boolean>("timeline.show_media", true, Boolean.serializer())
 
     public object ShowSensitiveContent : PerTimeline<Boolean>("timeline.show_sensitive_content", false, Boolean.serializer())
@@ -97,6 +99,7 @@ public object AppearanceKeys {
             InAppBrowser,
             ShowComposeInHomeTimeline,
             ShowBottomBarLabels,
+            DeckMode,
             ShowMedia,
             ShowSensitiveContent,
             ExpandMediaSize,

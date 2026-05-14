@@ -180,6 +180,11 @@ internal sealed interface Route : NavKey {
     ) : Route
 
     @Serializable
+    data class DeckTimeline(
+        val id: String,
+    ) : Route
+
+    @Serializable
     sealed interface ServiceSelect : Route {
         @Serializable
         data object Selection : ServiceSelect

@@ -117,7 +117,7 @@ internal fun WindowScope.Router(
 ) {
     val listDetailStrategy = rememberListDetailSceneStrategy<Route>()
 
-    val isBigScreen by isBigScreen()
+    val isBigScreen = isBigScreen()
     OnDeepLink {
         val route = Route.parse(it)
         if (route != null) {

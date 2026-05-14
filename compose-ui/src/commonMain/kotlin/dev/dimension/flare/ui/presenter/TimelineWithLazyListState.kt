@@ -44,7 +44,7 @@ public fun rememberTimelineItemPresenterWithLazyListState(
     item: TimelineTabItemV2,
     lazyStaggeredGridState: LazyStaggeredGridState = rememberLazyStaggeredGridState(),
 ): TimelineWithLazyListState {
-    val baseState by producePresenter("timeline_${item.presenterId}") {
+    val baseState by producePresenter("timeline_${item.id}") {
         remember { TimelineItemPresenter(item) }.invoke()
     }
     return rememberTimelineWithLazyListState(baseState, lazyStaggeredGridState)

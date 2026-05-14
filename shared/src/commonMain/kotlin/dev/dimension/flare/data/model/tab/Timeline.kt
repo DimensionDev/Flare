@@ -72,8 +72,6 @@ public sealed interface TimelineTabItemV2 {
     // for iOS and Compose call sites
     public val key: String get() = id
 
-    public val presenterId: String
-
     public fun createPresenter(): TimelinePresenter
 
     public fun withPresentationOverrides(
@@ -101,15 +99,7 @@ public class SourceTimelineTabItemV2 private constructor(
     override val filterConfig: TimelineFilterConfig
         get() = presentation?.filterConfig ?: TimelineFilterConfig()
 
-    override fun createPresenter(): TimelinePresenter = presenterFactory().also { it.timelineFilterConfig = filterConfig }
-
-    override val presenterId: String
-        get() =
-            buildString {
-                append(id)
-                append(":")
-                append(filterConfig.hashCode())
-            }
+    override fun createPresenter(): TimelinePresenter = presenterFactory().also { it.bindTimelineTabItemId(id) }
 
     override fun withPresentationOverrides(
         title: String,
@@ -212,31 +202,16 @@ public class GroupTimelineTabItemV2 internal constructor(
     override val filterConfig: TimelineFilterConfig
         get() = presentation.filterConfig
 
-    override val presenterId: String
-        get() =
-            buildString {
-                append(id)
-                append(mergePolicy.name)
-                append(filterConfig.hashCode())
-                children.forEach { append(it.presenterId) }
-            }
-
     override fun createPresenter(): TimelinePresenter =
         when (source) {
             GroupSource.SystemHome -> {
-                SystemHomeMixedTimelinePresenter(mergePolicy = mergePolicy)
+                SystemHomeMixedTimelinePresenter(id = id)
             }
 
             GroupSource.Manual -> {
-                MixedTimelinePresenter(
-                    subTimelinePresenter =
-                        children
-                            .filter { it.enabled }
-                            .map { it.createPresenter() },
-                    mergePolicy = mergePolicy,
-                )
+                MixedTimelinePresenter(id = id)
             }
-        }.also { it.timelineFilterConfig = filterConfig }
+        }
 
     override fun withPresentationOverrides(
         title: String,
@@ -269,6 +244,14 @@ public class GroupTimelineTabItemV2 internal constructor(
 
 public val TimelineTabItemV2.isSystemHomeMixedTimeline: Boolean
     get() = this is GroupTimelineTabItemV2 && source == GroupSource.SystemHome
+
+internal fun TimelineTabItemV2.findById(id: String): TimelineTabItemV2? =
+    when (this) {
+        is SourceTimelineTabItemV2 -> takeIf { this.id == id }
+        is GroupTimelineTabItemV2 -> takeIf { this.id == id } ?: children.firstNotNullOfOrNull { it.findById(id) }
+    }
+
+internal fun List<TimelineTabItemV2>.findById(id: String): TimelineTabItemV2? = firstNotNullOfOrNull { it.findById(id) }
 
 public fun List<TimelineTabItemV2>.withSystemHomeMixedTimelineEnabled(
     enabled: Boolean,

@@ -17,15 +17,25 @@ import dev.dimension.flare.data.model.TabSettings
 import dev.dimension.flare.data.model.Theme
 import dev.dimension.flare.data.model.TitleType
 import dev.dimension.flare.data.model.appearance.AppearanceBag
+import dev.dimension.flare.data.model.tab.GroupSource
+import dev.dimension.flare.data.model.tab.GroupTimelineTabItemV2
 import dev.dimension.flare.data.model.tab.SYSTEM_HOME_MIXED_TIMELINE_ID
 import dev.dimension.flare.data.model.tab.TabSettingsV2
+import dev.dimension.flare.data.model.tab.TimelineFilterConfig
+import dev.dimension.flare.data.model.tab.TimelineMergePolicy
+import dev.dimension.flare.data.model.tab.TimelinePostKind
+import dev.dimension.flare.data.model.tab.TimelinePresentation
 import dev.dimension.flare.data.model.tab.TimelineResolver
+import dev.dimension.flare.data.model.tab.TimelineSlot
+import dev.dimension.flare.data.model.tab.TimelineSlotContent
 import dev.dimension.flare.data.model.tab.toTimelineSlotOrNull
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.deleteTestRootPath
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiIcon
+import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.encodeToString
@@ -227,6 +237,89 @@ class SettingsImportExportPresenterTest {
                 ),
                 settings.homeSlots.map { it.id },
             )
+        }
+
+    @Test
+    fun homeTimelineTabResolvesNestedItemsByIdAndEmitsConfigUpdates() =
+        runTest {
+            val initialChild = homeSlot()
+            val initialGroup =
+                TimelineSlot(
+                    id = "manual_group",
+                    content =
+                        TimelineSlotContent.Group(
+                            children =
+                                listOf(
+                                    initialChild.copy(
+                                        presentation =
+                                            TimelinePresentation(
+                                                filterConfig =
+                                                    TimelineFilterConfig(
+                                                        excludedKinds = listOf(TimelinePostKind.Reply),
+                                                    ),
+                                            ),
+                                    ),
+                                ),
+                            source = GroupSource.Manual,
+                            mergePolicy = TimelineMergePolicy.Staggered,
+                        ),
+                    presentation =
+                        TimelinePresentation(
+                            filterConfig =
+                                TimelineFilterConfig(
+                                    excludedKinds = listOf(TimelinePostKind.Quote),
+                                ),
+                        ),
+                )
+            settingsRepository.updateTabSettingsV2 {
+                TabSettingsV2(homeSlots = listOf(initialGroup))
+            }
+
+            val groupItem = settingsRepository.homeTimelineTab(initialGroup.id).first() as? GroupTimelineTabItemV2
+            val childItem = settingsRepository.homeTimelineTab(initialChild.id).first()
+            assertEquals(TimelineMergePolicy.Staggered, groupItem?.mergePolicy)
+            assertEquals(listOf(TimelinePostKind.Quote), groupItem?.filterConfig?.excludedKinds)
+            assertEquals(listOf(TimelinePostKind.Reply), childItem?.filterConfig?.excludedKinds)
+
+            val updatedGroup =
+                initialGroup.copy(
+                    content =
+                        TimelineSlotContent.Group(
+                            children =
+                                listOf(
+                                    initialChild.copy(
+                                        presentation =
+                                            TimelinePresentation(
+                                                filterConfig =
+                                                    TimelineFilterConfig(
+                                                        excludedKinds = listOf(TimelinePostKind.Repost),
+                                                    ),
+                                            ),
+                                    ),
+                                ),
+                            source = GroupSource.Manual,
+                            mergePolicy = TimelineMergePolicy.TimePerPage,
+                        ),
+                    presentation =
+                        TimelinePresentation(
+                            filterConfig =
+                                TimelineFilterConfig(
+                                    excludedKinds = listOf(TimelinePostKind.Original),
+                                ),
+                        ),
+                )
+            val nextGroup = async { settingsRepository.homeTimelineTab(initialGroup.id).drop(1).first() as? GroupTimelineTabItemV2 }
+            val nextChild = async { settingsRepository.homeTimelineTab(initialChild.id).drop(1).first() }
+
+            settingsRepository.updateTabSettingsV2 {
+                TabSettingsV2(homeSlots = listOf(updatedGroup))
+            }
+
+            val updatedGroupItem = nextGroup.await()
+            val updatedChildItem = nextChild.await()
+            assertEquals(TimelineMergePolicy.TimePerPage, updatedGroupItem?.mergePolicy)
+            assertEquals(listOf(TimelinePostKind.Original), updatedGroupItem?.filterConfig?.excludedKinds)
+            assertEquals(listOf(TimelinePostKind.Repost), updatedChildItem?.filterConfig?.excludedKinds)
         }
 
     private fun homeSlot() =

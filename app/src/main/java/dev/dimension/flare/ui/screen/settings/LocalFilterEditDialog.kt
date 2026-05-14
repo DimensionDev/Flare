@@ -76,10 +76,13 @@ internal fun LocalFilterEditDialog(
                     BackButton(onBack = onBack)
                 },
                 actions = {
-                    IconButton(onClick = {
-                        state.save()
-                        onBack()
-                    }) {
+                    IconButton(
+                        onClick = {
+                            state.save()
+                            onBack()
+                        },
+                        enabled = state.input.text.isNotBlank() && state.input.text.isEmpty(),
+                    ) {
                         FAIcon(
                             FontAwesomeIcons.Solid.Check,
                             contentDescription = stringResource(id = android.R.string.ok),

@@ -6,42 +6,64 @@ struct LocalFilterScreen: View {
     @State private var selectedFilter: UiKeywordFilter? = nil
     @State private var showingAddFilter = false
     var body: some View {
-        List {
-            StateView(state: presenter.state.items) { filters in
-                let list = filters.cast(UiKeywordFilter.self)
-                ForEach(list, id: \.keyword) { item in
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(item.keyword)
-                        if item.isRegex {
-                            Text("local_filter_regex")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                    .swipeActions {
-                        Button(role: .destructive) {
-                            presenter.state.delete(keyword: item.keyword)
-                        } label: {
-                            Label {
-                                Text("local_filter_delete")
-                            } icon: {
-                                Image("fa-trash")
+        StateView(state: presenter.state.items) { filters in
+            let list = filters.cast(UiKeywordFilter.self)
+            if list.isEmpty {
+                ListEmptyView()
+            } else {
+                List {
+                    ForEach(list, id: \.keyword) { item in
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(item.keyword)
+                            if item.isRegex {
+                                Text("local_filter_regex")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
                             }
                         }
-                        Button {
-                            selectedFilter = item
-                            showingAddFilter = true
-                        } label: {
-                            Label {
-                                Text("local_filter_edit")
-                            } icon: {
-                                Image("fa-pen")
+                        .contextMenu {
+                            Button {
+                                selectedFilter = item
+                                showingAddFilter = true
+                            } label: {
+                                Label {
+                                    Text("local_filter_edit")
+                                } icon: {
+                                    Image("fa-pen")
+                                }
+                            }
+                            Button(role: .destructive) {
+                                presenter.state.delete(keyword: item.keyword)
+                            } label: {
+                                Label {
+                                    Text("local_filter_delete")
+                                } icon: {
+                                    Image("fa-trash")
+                                }
+                            }
+                        }
+                        .swipeActions {
+                            Button(role: .destructive) {
+                                presenter.state.delete(keyword: item.keyword)
+                            } label: {
+                                Label {
+                                    Text("local_filter_delete")
+                                } icon: {
+                                    Image("fa-trash")
+                                }
+                            }
+                            Button {
+                                selectedFilter = item
+                                showingAddFilter = true
+                            } label: {
+                                Label {
+                                    Text("local_filter_edit")
+                                } icon: {
+                                    Image("fa-pen")
+                                }
                             }
                         }
                     }
-                }
-                if list.isEmpty {
-                    ListEmptyView()
                 }
             }
         }

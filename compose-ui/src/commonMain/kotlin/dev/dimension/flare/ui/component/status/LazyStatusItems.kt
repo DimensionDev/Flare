@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -36,6 +37,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.ErrorContent
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.placeholder
+import dev.dimension.flare.ui.component.platform.PlatformLinearProgressIndicator
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.theme.PlatformTheme
@@ -65,19 +67,18 @@ public fun LazyStaggeredGridScope.status(
                 val mode = LocalEffectiveTimelineDisplayMode.current
                 if (mode == TimelineDisplayMode.Gallery) {
                     GalleryTimelineItem(item = item)
-                    return@items
-                }
-                AdaptiveCard(
+                } else {
+                    AdaptiveCard(
 //                    modifier =
 //                        Modifier
 //                            .animateItem(),
-                    index = index,
-                    totalCount = itemCount,
-                    respectTimelineMode = true,
-                    content = {
-                        StatusItem(
-                            item,
-                            detailStatusKey = detailStatusKey,
+                        index = index,
+                        totalCount = itemCount,
+                        respectTimelineMode = true,
+                        content = {
+                            StatusItem(
+                                item,
+                                detailStatusKey = detailStatusKey,
 //                        modifier =
 //                        Modifier
 //                            .let {
@@ -98,9 +99,10 @@ public fun LazyStaggeredGridScope.status(
 //                                }
 //                            }
 //                            .background(MaterialTheme.colorScheme.background),
-                        )
-                    },
-                )
+                            )
+                        },
+                    )
+                }
             }
             appendState
                 .onError {
@@ -114,17 +116,14 @@ public fun LazyStaggeredGridScope.status(
                         )
                     }
                 }.onLoading {
-                    items(
-                        10,
+                    item(
+                        span = StaggeredGridItemSpan.FullLine,
                     ) {
-                        AdaptiveCard(
-                            content = {
-                                OnLoading()
-                            },
-                            index = it,
-                            totalCount = 10,
-                            respectTimelineMode = true,
-//                            modifier = Modifier.animateItem(),
+                        PlatformLinearProgressIndicator(
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = screenHorizontalPadding),
                         )
                     }
                 }.onEndOfList {
@@ -152,6 +151,7 @@ public fun LazyStaggeredGridScope.status(
                 span = StaggeredGridItemSpan.FullLine,
             ) {
                 OnError(
+                    modifier = Modifier.fillMaxSize(),
 //                    modifier = Modifier.animateItem(),
                     error = it,
                     onRetry = onRetry,
@@ -177,29 +177,37 @@ public fun LazyStaggeredGridScope.status(
             item(
                 span = StaggeredGridItemSpan.FullLine,
             ) {
-                Column(
+                ListEmptyView(
                     modifier =
                         Modifier
+                            .fillMaxSize()
 //                            .animateItem()
                             .clickable {
                                 refresh()
                             },
-                    verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    FAIcon(
-                        imageVector = FontAwesomeIcons.Solid.File,
-                        contentDescription = null,
-                        modifier = Modifier.size(48.dp),
-                    )
-                    PlatformText(
-                        text = stringResource(resource = Res.string.status_empty),
-                        modifier = Modifier.padding(16.dp),
-                    )
-                }
+                )
             }
         }
     }
+
+@Composable
+public fun ListEmptyView(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        FAIcon(
+            imageVector = FontAwesomeIcons.Solid.File,
+            contentDescription = null,
+            modifier = Modifier.size(48.dp),
+        )
+        PlatformText(
+            text = stringResource(resource = Res.string.status_empty),
+            modifier = Modifier.padding(16.dp),
+        )
+    }
+}
 
 @Composable
 private fun OnLoading(modifier: Modifier = Modifier) {

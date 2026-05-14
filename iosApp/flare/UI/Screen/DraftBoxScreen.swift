@@ -14,7 +14,7 @@ struct DraftBoxScreen: View {
                     } icon: {
                         Image(.faInbox)
                     }
-                }             
+                }
             } else {
                 List {
                     ForEach(presenter.state.items, id: \.groupId) { draft in

@@ -4,11 +4,13 @@ import dev.dimension.flare.data.datasource.microblog.datasource.TimelineTabConfi
 import dev.dimension.flare.data.model.MixedTimelineTabItem
 import dev.dimension.flare.data.model.TabSettings
 import dev.dimension.flare.data.model.TimelineTabItem
+import dev.dimension.flare.data.model.tab.GroupSource
+import dev.dimension.flare.data.model.tab.SYSTEM_HOME_MIXED_TIMELINE_ID
+import dev.dimension.flare.data.model.tab.TimelineMergePolicy
+import dev.dimension.flare.data.model.tab.TimelinePresentation
 import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.model.tab.TimelineSlot
 import dev.dimension.flare.data.model.tab.TimelineSlotContent
-import dev.dimension.flare.data.model.tab.isSystemHomeMixedTimeline
-import dev.dimension.flare.data.model.tab.withSystemHomeMixedTimelineEnabled
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiAccount
 import kotlinx.collections.immutable.toImmutableList
@@ -49,8 +51,7 @@ internal class AccountTabSyncCoordinator(
                     homeSlots
                         .mapNotNull { it.cleanupForExistingAccounts(existingAccounts) }
                         .normalizeSystemHomeMixedTimeline(
-                            timelineResolver = timelineResolver,
-                            enabled = homeSlots.anySystemHomeMixedTimeline(timelineResolver),
+                            enabled = homeSlots.anySystemHomeMixedTimeline(),
                         ),
             )
         }
@@ -66,12 +67,11 @@ internal class AccountTabSyncCoordinator(
         }
         settingsRepository.updateTabSettingsV2 {
             val shouldEnableSystemHomeMixedTimeline =
-                homeSlots.anySystemHomeMixedTimeline(timelineResolver) ||
-                    homeSlots.countNonSystemHomeTabs(timelineResolver) < 2
+                homeSlots.anySystemHomeMixedTimeline() ||
+                    homeSlots.countNonSystemHomeTabs() < 2
             val newSlots =
                 (homeSlots + defaultSlots)
                     .normalizeSystemHomeMixedTimeline(
-                        timelineResolver = timelineResolver,
                         enabled = shouldEnableSystemHomeMixedTimeline,
                     )
             val newSettings = copy(homeSlots = newSlots)
@@ -90,8 +90,7 @@ internal class AccountTabSyncCoordinator(
                     homeSlots
                         .mapNotNull { it.cleanupForRemovedAccount(accountKey) }
                         .normalizeSystemHomeMixedTimeline(
-                            timelineResolver = timelineResolver,
-                            enabled = homeSlots.anySystemHomeMixedTimeline(timelineResolver),
+                            enabled = homeSlots.anySystemHomeMixedTimeline(),
                         ),
             )
         }
@@ -133,24 +132,40 @@ internal class AccountTabSyncCoordinator(
         }
 }
 
-internal fun List<TimelineSlot>.normalizeSystemHomeMixedTimeline(
-    timelineResolver: TimelineResolver,
-    enabled: Boolean,
-): List<TimelineSlot> {
-    val tabs =
-        distinctBy { it.id }
-            .map(timelineResolver::toTabItem)
-    return tabs
-        .withSystemHomeMixedTimelineEnabled(enabled = enabled)
-        .distinctBy { it.id }
-        .map(timelineResolver::toSlot)
+internal fun List<TimelineSlot>.normalizeSystemHomeMixedTimeline(enabled: Boolean): List<TimelineSlot> {
+    val deduplicatedSlots = distinctBy { it.id }
+    val existingSystemHomeGroup = deduplicatedSlots.firstOrNull { it.isSystemHomeMixedTimeline() }
+    val slotsWithoutSystemHomeGroup = deduplicatedSlots.filterNot { it.isSystemHomeMixedTimeline() }
+    if (!enabled || slotsWithoutSystemHomeGroup.size < 2) {
+        return slotsWithoutSystemHomeGroup
+    }
+
+    val systemHomeGroup =
+        TimelineSlot(
+            id = SYSTEM_HOME_MIXED_TIMELINE_ID,
+            content =
+                TimelineSlotContent.Group(
+                    children = slotsWithoutSystemHomeGroup,
+                    source = GroupSource.SystemHome,
+                    mergePolicy =
+                        (existingSystemHomeGroup?.content as? TimelineSlotContent.Group)?.mergePolicy
+                            ?: TimelineMergePolicy.TimePerPage,
+                ),
+            presentation = existingSystemHomeGroup?.presentation ?: TimelinePresentation(),
+        )
+    val targetIndex = deduplicatedSlots.indexOfFirst { it.isSystemHomeMixedTimeline() }.takeIf { it >= 0 } ?: 0
+    return slotsWithoutSystemHomeGroup
+        .toMutableList()
+        .apply {
+            add(minOf(targetIndex, size), systemHomeGroup)
+        }
 }
 
-private fun List<TimelineSlot>.anySystemHomeMixedTimeline(timelineResolver: TimelineResolver): Boolean =
-    any { timelineResolver.toTabItem(it).isSystemHomeMixedTimeline }
+private fun List<TimelineSlot>.anySystemHomeMixedTimeline(): Boolean = any { it.isSystemHomeMixedTimeline() }
 
-private fun List<TimelineSlot>.countNonSystemHomeTabs(timelineResolver: TimelineResolver): Int =
-    count { !timelineResolver.toTabItem(it).isSystemHomeMixedTimeline }
+private fun List<TimelineSlot>.countNonSystemHomeTabs(): Int = count { !it.isSystemHomeMixedTimeline() }
+
+private fun TimelineSlot.isSystemHomeMixedTimeline(): Boolean = (content as? TimelineSlotContent.Group)?.source == GroupSource.SystemHome
 
 internal fun TabSettings.sanitizeDuplicateTabKeys(): TabSettings {
     val sanitizedTabs =

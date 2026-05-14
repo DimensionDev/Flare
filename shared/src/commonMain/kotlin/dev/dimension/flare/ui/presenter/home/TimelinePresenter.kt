@@ -45,6 +45,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -72,15 +73,13 @@ public abstract class TimelinePresenter :
         localFilterRepository.getFlow(forTimeline = true)
     }
 
-    private var timelineTabItemId: String? = null
+    private val timelineTabItemIdFlow = MutableStateFlow<String?>(null)
 
     private val timelineFilterConfigFlow: Flow<TimelineFilterConfig> by lazy {
-        timelineTabItemId?.let { id ->
-            settingsRepository
-                .homeTimelineTab(id)
-                .map { it?.filterConfig ?: TimelineFilterConfig() }
-                .distinctUntilChanged()
-        } ?: flowOf(TimelineFilterConfig())
+        observeTimelineFilterConfig(
+            settingsRepository = settingsRepository,
+            timelineTabItemIdFlow = timelineTabItemIdFlow,
+        )
     }
 
     private val translationSettingsFlow: Flow<TranslationDisplayOptions> by lazy {
@@ -195,7 +194,7 @@ public abstract class TimelinePresenter :
     }
 
     internal fun bindTimelineTabItemId(id: String) {
-        timelineTabItemId = id
+        timelineTabItemIdFlow.value = id
     }
 
     internal abstract val loader: Flow<RemoteLoader<UiTimelineV2>>
@@ -271,3 +270,21 @@ internal fun UiTimelineV2.Post.traits(): TimelinePostTraits {
         contents = contents,
     )
 }
+
+@OptIn(ExperimentalCoroutinesApi::class)
+internal fun observeTimelineFilterConfig(
+    settingsRepository: SettingsRepository,
+    timelineTabItemIdFlow: Flow<String?>,
+): Flow<TimelineFilterConfig> =
+    timelineTabItemIdFlow
+        .distinctUntilChanged()
+        .flatMapLatest { id ->
+            if (id == null) {
+                flowOf(TimelineFilterConfig())
+            } else {
+                settingsRepository
+                    .homeTimelineTab(id)
+                    .map { it?.filterConfig ?: TimelineFilterConfig() }
+                    .distinctUntilChanged()
+            }
+        }.distinctUntilChanged()

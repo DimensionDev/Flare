@@ -18,9 +18,6 @@ internal class AntennasTimelineRemoteMediator(
 ) : CacheableRemoteLoader<UiTimelineV2> {
     override val pagingKey = "antennas_${id}_$accountKey"
 
-    override val supportPrepend: Boolean
-        get() = true
-
     override suspend fun load(
         pageSize: Int,
         request: PagingRequest,
@@ -38,14 +35,9 @@ internal class AntennasTimelineRemoteMediator(
                 }
 
                 is PagingRequest.Prepend -> {
-                    service
-                        .antennasNotes(
-                            AntennasNotesRequest(
-                                antennaId = id,
-                                limit = pageSize,
-                                sinceId = request.previousKey,
-                            ),
-                        )
+                    return PagingResult(
+                        endOfPaginationReached = true,
+                    )
                 }
 
                 is PagingRequest.Append -> {
@@ -65,7 +57,6 @@ internal class AntennasTimelineRemoteMediator(
             data =
                 response.render(accountKey),
             nextKey = response.lastOrNull()?.id,
-            previousKey = response.firstOrNull()?.id,
         )
     }
 }

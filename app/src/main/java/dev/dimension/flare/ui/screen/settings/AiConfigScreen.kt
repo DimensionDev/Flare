@@ -104,7 +104,7 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
             val apiKeyTitle = stringResource(id = R.string.settings_ai_config_api_key)
             val apiKeyHint = stringResource(id = R.string.settings_ai_config_api_key_hint)
             val extraBodyTitle = stringResource(id = R.string.settings_ai_config_extra_body)
-            val extraBodyHint = stringResource(id = R.string.settings_ai_config_extra_body_hint)
+            val extraBodyHint = """{"thinking": {"type": "enabled"}}"""
             val modelTitle = stringResource(id = R.string.settings_ai_config_model)
             val modelPlaceholder = stringResource(id = R.string.settings_ai_config_model_select)
             val tldrPromptTitle = stringResource(id = R.string.settings_ai_config_tldr_prompt)

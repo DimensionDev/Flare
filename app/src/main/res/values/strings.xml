@@ -109,7 +109,6 @@
     <string name="settings_ai_config_reasoning_effort_medium">Medium</string>
     <string name="settings_ai_config_reasoning_effort_high">High</string>
     <string name="settings_ai_config_extra_body">Extra Body</string>
-    <string name="settings_ai_config_extra_body_hint">{\"thinking\": {\"type\": \"enabled\"}}</string>
     <string name="settings_ai_config_tap_to_edit">Tap to edit</string>
     <string name="settings_ai_config_entable_translation">Enable AI translation</string>
     <string name="settings_ai_config_translation_description">Replace Google Translate with AI translation, might take longer time</string>

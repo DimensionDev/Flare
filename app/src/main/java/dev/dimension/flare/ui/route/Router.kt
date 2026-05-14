@@ -7,6 +7,7 @@ import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
@@ -41,7 +42,7 @@ import soup.compose.material.motion.animation.translateXOut
 @OptIn(ExperimentalMaterial3AdaptiveApi::class, ExperimentalSharedTransitionApi::class)
 @Composable
 internal fun Router(
-    backStack: List<NavKey>,
+    backStack: SnapshotStateList<Route>,
     navigate: (Route) -> Unit,
     onBack: () -> Unit,
     openDrawer: () -> Unit,

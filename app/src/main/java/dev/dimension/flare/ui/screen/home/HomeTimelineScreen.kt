@@ -50,6 +50,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -63,7 +64,6 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.navigation3.runtime.rememberNavBackStack
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.AnglesUp
@@ -138,11 +138,11 @@ internal fun HomeTimelineScreen(
         ) {
             state.tabState.onSuccess { tabs ->
                 items(tabs) { tab ->
-                    val backStack = rememberNavBackStack(Route.DeckTimeline(tab.id))
                     val tabItemState by producePresenter("tabItemState_${tab.id}") {
-//                        val backStack = remember {
-//                            mutableStateListOf<Route>(Route.DeckTimeline(id))
-//                        }
+                        val backStack =
+                            remember {
+                                mutableStateListOf<Route>(Route.DeckTimeline(tab.id))
+                            }
                         val state =
                             DeepLinkPresenter(
                                 onRoute = {
@@ -155,6 +155,7 @@ internal fun HomeTimelineScreen(
                                 },
                             ).invoke()
                         object : DeepLinkPresenter.State by state {
+                            val backStack = backStack
                         }
                     }
                     CompositionLocalProvider(
@@ -174,7 +175,7 @@ internal fun HomeTimelineScreen(
                                     Modifier
                                         .fillMaxHeight()
                                         .width(360.dp),
-                                backStack = backStack,
+                                backStack = tabItemState.backStack,
                                 openDrawer = {
                                     toQuickMenu.invoke()
                                 },
@@ -189,13 +190,13 @@ internal fun HomeTimelineScreen(
                                         }
 
                                         else -> {
-                                            backStack.add(it)
+                                            tabItemState.backStack.add(it)
                                         }
                                     }
                                 },
                                 onBack = {
-                                    if (backStack.size > 1) {
-                                        backStack.removeAt(backStack.lastIndex)
+                                    if (tabItemState.backStack.size > 1) {
+                                        tabItemState.backStack.removeAt(tabItemState.backStack.lastIndex)
                                     }
                                 },
                             )

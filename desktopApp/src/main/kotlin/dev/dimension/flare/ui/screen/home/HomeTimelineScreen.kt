@@ -64,6 +64,7 @@ import dev.dimension.flare.ui.screen.compose.ComposeDialog
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.composefluent.FluentTheme
 import io.github.composefluent.component.LiteFilter
+import io.github.composefluent.component.NavigationDefaults
 import io.github.composefluent.component.PillButton
 import io.github.composefluent.component.ProgressBar
 import io.github.composefluent.component.SubtleButton
@@ -96,11 +97,11 @@ internal fun HomeTimelineScreen(
                         items = tabs,
                         key = { it.id },
                     ) { tab ->
-                        val backStack =
-                            remember(tab.id) {
-                                mutableStateListOf<Route>(Route.DeckTimeline(tab.id))
-                            }
                         val deepLinkState by producePresenter("desktop_deck_timeline_${tab.id}") {
+                            val backStack =
+                                remember(tab.id) {
+                                    mutableStateListOf<Route>(Route.DeckTimeline(tab.id))
+                                }
                             val state =
                                 DeepLinkPresenter(
                                     onRoute = {
@@ -113,6 +114,7 @@ internal fun HomeTimelineScreen(
                                     },
                                 ).invoke()
                             object : DeepLinkPresenter.State by state {
+                                val backStack = backStack
                             }
                         }
                         CompositionLocalProvider(
@@ -127,30 +129,44 @@ internal fun HomeTimelineScreen(
                             LocalWindowSizeClass provides WindowSizeClass.Compact,
                         ) {
                             Row {
-                                Router(
-                                    modifier =
-                                        Modifier
-                                            .fillMaxHeight()
-                                            .width(360.dp),
-                                    backStack = backStack.toImmutableList(),
-                                    navigate = { route ->
-                                        when (route) {
-                                            Route.TabSetting -> {
-                                                onAddTab.invoke()
-                                            }
+                                Box {
+                                    Router(
+                                        modifier =
+                                            Modifier
+                                                .fillMaxHeight()
+                                                .width(360.dp),
+                                        backStack = deepLinkState.backStack.toImmutableList(),
+                                        navigate = { route ->
+                                            when (route) {
+                                                Route.TabSetting -> {
+                                                    onAddTab.invoke()
+                                                }
 
-                                            else -> {
-                                                backStack.add(route)
+                                                else -> {
+                                                    deepLinkState.backStack.add(route)
+                                                }
                                             }
-                                        }
-                                    },
-                                    onBack = {
-                                        if (backStack.size > 1) {
-                                            backStack.removeAt(backStack.lastIndex)
-                                        }
-                                    },
-                                    enableDeepLinkHandler = false,
-                                )
+                                        },
+                                        onBack = {
+                                            if (deepLinkState.backStack.size > 1) {
+                                                deepLinkState.backStack.removeAt(deepLinkState.backStack.lastIndex)
+                                            }
+                                        },
+                                        enableDeepLinkHandler = false,
+                                    )
+                                    if (deepLinkState.backStack.size > 1) {
+                                        NavigationDefaults.BackButton(
+                                            onClick = {
+                                                if (deepLinkState.backStack.size > 1) {
+                                                    deepLinkState.backStack.removeAt(deepLinkState.backStack.lastIndex)
+                                                }
+                                            },
+                                            modifier =
+                                                Modifier
+                                                    .align(Alignment.TopStart),
+                                        )
+                                    }
+                                }
                                 if (tab != tabs.last()) {
                                     Box(
                                         modifier =

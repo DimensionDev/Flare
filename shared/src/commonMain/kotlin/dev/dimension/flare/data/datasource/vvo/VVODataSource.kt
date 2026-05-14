@@ -114,7 +114,6 @@ internal class VVODataSource(
                 data = TimelineSpec.AccountBasedData(accountKey),
                 icon = IconType.Material(UiIcon.Weibo),
             ),
-            VvoPlatformSpec.featuredTimelineSpec.tabItem(TimelineSpec.AccountBasedData(accountKey)),
             VvoPlatformSpec.favoriteTimelineSpec.tabItem(TimelineSpec.AccountBasedData(accountKey)),
             VvoPlatformSpec.likedTimelineSpec.tabItem(TimelineSpec.AccountBasedData(accountKey)),
         )
@@ -127,7 +126,7 @@ internal class VVODataSource(
                 icon = UiIcon.Featured,
                 target =
                     ShortcutSpec.Target.Timeline(
-                        VvoPlatformSpec.featuredTimelineSpec.target(TimelineSpec.AccountBasedData(accountKey)),
+                        CommonTimelineSpecs.discover.target(TimelineSpec.AccountBasedData(accountKey)),
                     ),
             ),
             ShortcutSpec(

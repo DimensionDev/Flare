@@ -44,6 +44,7 @@ class AppearancePatchTest {
             AppearancePatch.EMPTY
                 .set(AppearanceKeys.Theme, Theme.DARK)
                 .set(AppearanceKeys.ShowBottomBarLabels, false)
+                .set(AppearanceKeys.DeckMode, true)
                 .set(AppearanceKeys.AvatarShape, AvatarShape.SQUARE)
                 .set(AppearanceKeys.ShowMedia, false)
                 .set(AppearanceKeys.TimelineDisplayMode, TimelineDisplayMode.Gallery)
@@ -52,6 +53,7 @@ class AppearancePatchTest {
             GlobalAppearance(
                 theme = Theme.DARK,
                 showBottomBarLabels = false,
+                deckMode = true,
             ),
             patch.toGlobalAppearance(),
         )
@@ -148,7 +150,7 @@ class AppearancePatchTest {
     @Test
     fun activeAppearanceSettingsFieldsAreCoveredByCatalog() {
         val deprecatedFields = setOf("showActions")
-        val bagOnlyFields = setOf(AppearanceKeys.ShowBottomBarLabels)
+        val bagOnlyFields = setOf(AppearanceKeys.ShowBottomBarLabels, AppearanceKeys.DeckMode)
         val activeFields =
             AppearanceSettings
                 .serializer()
@@ -200,6 +202,7 @@ class AppearancePatchTest {
             AppearancePatch.EMPTY
                 .set(AppearanceKeys.Theme, Theme.LIGHT)
                 .set(AppearanceKeys.ShowBottomBarLabels, false)
+                .set(AppearanceKeys.DeckMode, true)
                 .set(AppearanceKeys.ShowMedia, false)
                 .set(AppearanceKeys.VideoAutoplay, VideoAutoplay.ALWAYS)
                 .set(AppearanceKeys.PostActionStyle, PostActionStyle.Stretch)

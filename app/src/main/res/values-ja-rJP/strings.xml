@@ -186,6 +186,8 @@
     <string name="search_status">投稿</string>
     <string name="quick_menu_add_account">アカウントを追加</string>
     <string name="settings_appearance_generic">全般</string>
+    <string name="settings_appearance_deck_mode">デッキモード</string>
+    <string name="settings_appearance_deck_mode_description">対応している場合はタイムラインをデッキモードで表示します</string>
     <string name="settings_appearance_show_actions">アクションを表示</string>
     <string name="settings_appearance_show_actions_description">投稿の下部にアクションを表示する</string>
     <string name="settings_appearance_post_action_style">投稿アクションスタイル</string>

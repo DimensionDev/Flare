@@ -38,7 +38,6 @@ internal fun FlareScrollBar(
             Modifier.padding(
                 start = windowPadding.calculateLeftPadding(layoutDirection),
                 end = windowPadding.calculateRightPadding(layoutDirection),
-                bottom = windowPadding.calculateBottomPadding(),
             )
         }
     ScrollbarContainer(

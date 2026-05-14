@@ -68,7 +68,6 @@ import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.dm.DMConversationPresenter
 import dev.dimension.flare.ui.presenter.dm.DMConversationState
 import dev.dimension.flare.ui.presenter.invoke
-import dev.dimension.flare.ui.screen.home.NavigationState
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import moe.tlaster.precompose.molecule.producePresenter
 
@@ -81,17 +80,8 @@ internal fun DMConversationScreen(
     accountType: AccountType,
     roomKey: MicroBlogKey,
     onBack: () -> Unit,
-    navigationState: NavigationState,
     toProfile: (MicroBlogKey) -> Unit,
 ) {
-    DisposableEffect(Unit) {
-        navigationState.disableBottomBarAutoHide()
-        navigationState.hideBottomBarDivider()
-        onDispose {
-            navigationState.enableBottomBarAutoHide()
-            navigationState.showBottomBarDivider()
-        }
-    }
     val focusRequester = remember { FocusRequester() }
     LaunchedEffect(Unit) {
         focusRequester.requestFocus()
@@ -211,7 +201,7 @@ internal fun DMConversationScreen(
                                     bottom = LocalBottomBarHeight.current,
                                 ).windowInsetsPadding(
                                     WindowInsets.systemBars.only(
-                                        WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom,
+                                        WindowInsetsSides.Horizontal,
                                     ),
                                 ).consumeWindowInsets(
                                     PaddingValues(

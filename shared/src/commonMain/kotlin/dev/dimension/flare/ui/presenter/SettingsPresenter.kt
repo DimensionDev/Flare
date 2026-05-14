@@ -87,6 +87,8 @@ public class SettingsPresenter :
 
             override fun updateShowBottomBarLabels(value: Boolean) = update(AppearanceKeys.ShowBottomBarLabels, value)
 
+            override fun updateDeckMode(value: Boolean) = update(AppearanceKeys.DeckMode, value)
+
             override fun updateVideoAutoplay(value: VideoAutoplay) = update(AppearanceKeys.VideoAutoplay, value)
 
             override fun updateTimelineDisplayMode(value: TimelineDisplayMode) = update(AppearanceKeys.TimelineDisplayMode, value)
@@ -141,6 +143,8 @@ public class SettingsPresenter :
         public fun updateShowSensitiveContent(value: Boolean)
 
         public fun updateShowBottomBarLabels(value: Boolean)
+
+        public fun updateDeckMode(value: Boolean)
 
         public fun updateVideoAutoplay(value: VideoAutoplay)
 

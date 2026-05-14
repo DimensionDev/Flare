@@ -291,8 +291,8 @@ fun NavigationSuiteScaffold2(
                             } && layoutType == NavigationSuiteType.NavigationBar
                         ) {
                             when (bottomBarStyle) {
-                                BottomBarStyle.Floating -> 72.dp
-                                BottomBarStyle.Classic -> 64.dp
+                                BottomBarStyle.Floating -> bottomBarHeight + 16.dp
+                                BottomBarStyle.Classic -> bottomBarHeight + 8.dp
                             }
                         } else {
                             0.dp

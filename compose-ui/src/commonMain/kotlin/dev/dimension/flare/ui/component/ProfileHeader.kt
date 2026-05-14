@@ -79,7 +79,7 @@ public fun ProfileHeader(
     onFansListClick: (userKey: MicroBlogKey) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val isBigScreen: Boolean by isBigScreen()
+    val isBigScreen: Boolean = isBigScreen()
     ProfileHeader(
         state,
         modifier = modifier,

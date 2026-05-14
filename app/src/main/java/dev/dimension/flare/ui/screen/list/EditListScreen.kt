@@ -170,13 +170,7 @@ internal fun EditListScreen(
                                     } else {
                                         state.listInfo
                                             .onSuccess {
-                                                val avatar =
-                                                    when (it) {
-                                                        is dev.dimension.flare.ui.model.UiList.List -> it.avatar
-                                                        is dev.dimension.flare.ui.model.UiList.Feed -> it.avatar
-                                                        is dev.dimension.flare.ui.model.UiList.Channel -> it.banner
-                                                        is dev.dimension.flare.ui.model.UiList.Antenna -> null
-                                                    }
+                                                val avatar = it.avatar
                                                 if (avatar != null) {
                                                     NetworkImage(
                                                         model = avatar,
@@ -387,13 +381,7 @@ private fun presenter(
                 append(it.title)
             }
             description.edit {
-                val desc =
-                    when (it) {
-                        is dev.dimension.flare.ui.model.UiList.List -> it.description
-                        is dev.dimension.flare.ui.model.UiList.Feed -> it.description
-                        is dev.dimension.flare.ui.model.UiList.Channel -> null
-                        is dev.dimension.flare.ui.model.UiList.Antenna -> null
-                    }
+                val desc = it.description
                 if (desc != null) {
                     append(desc)
                 }

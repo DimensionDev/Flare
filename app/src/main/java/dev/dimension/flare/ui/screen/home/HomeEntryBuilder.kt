@@ -4,15 +4,14 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
-import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.ui.component.BottomSheetSceneStrategy
+import dev.dimension.flare.ui.component.platform.LocalWindowSizeClass
+import dev.dimension.flare.ui.component.platform.WindowSizeClass
 import dev.dimension.flare.ui.route.Route
-import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3AdaptiveApi::class)
 internal fun EntryProviderScope<NavKey>.homeEntryBuilder(
@@ -27,9 +26,6 @@ internal fun EntryProviderScope<NavKey>.homeEntryBuilder(
         )
     ) { args ->
         HomeTimelineScreen(
-            toCompose = {
-                navigate(Route.Compose.New)
-            },
             toQuickMenu = {
                 openDrawer.invoke()
             },
@@ -39,12 +35,27 @@ internal fun EntryProviderScope<NavKey>.homeEntryBuilder(
             toTabSettings = {
                 navigate(Route.TabSettings)
             },
+            uriHandler = uriHandler,
         )
     }
     entry<Route.Timeline> { args ->
         TimelineScreen(
             source = args.source,
             onBack = onBack,
+        )
+    }
+    entry<Route.DeckTimeline> { args ->
+        DeckTimelineScreen(
+            id = args.id,
+            toQuickMenu = {
+                openDrawer.invoke()
+            },
+            toLogin = {
+                navigate(Route.ServiceSelect.Selection)
+            },
+            toTabSettings = {
+                navigate(Route.TabSettings)
+            },
         )
     }
     entry<Route.Discover> { args ->
@@ -71,28 +82,36 @@ internal fun EntryProviderScope<NavKey>.homeEntryBuilder(
             "home",
         ),
     ) { args ->
-        TabSettingScreen(
-            onBack = onBack,
-            toAddRssSource = {
-                navigate(Route.Rss.Create)
-            },
-            toGroupConfig = {
-                navigate(Route.TabGroupConfig(it?.id))
-            },
-        )
+        CompositionLocalProvider(
+            LocalWindowSizeClass provides WindowSizeClass.Compact
+        ) {
+            TabSettingScreen(
+                onBack = onBack,
+                toAddRssSource = {
+                    navigate(Route.Rss.Create)
+                },
+                toGroupConfig = {
+                    navigate(Route.TabGroupConfig(it?.id))
+                },
+            )
+        }
     }
     entry<Route.TabGroupConfig>(
         metadata = ListDetailSceneStrategy.extraPane(
             "home",
         ),
     ) { args ->
-        GroupConfigScreen(
-            groupId = args.groupId,
-            onBack = onBack,
-            toAddRssSource = {
-                navigate(Route.Rss.Create)
-            },
-        )
+        CompositionLocalProvider(
+            LocalWindowSizeClass provides WindowSizeClass.Compact
+        ) {
+            GroupConfigScreen(
+                groupId = args.groupId,
+                onBack = onBack,
+                toAddRssSource = {
+                    navigate(Route.Rss.Create)
+                },
+            )
+        }
     }
     entry<Route.AccountSelection>(
         metadata = BottomSheetSceneStrategy.bottomSheet()

@@ -37,7 +37,6 @@ import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.component.LocalGlobalAppearance
-import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.TabRowIndicator
 import dev.dimension.flare.ui.component.platform.isCompatScreen
@@ -66,7 +65,7 @@ internal fun NotificationScreen() {
             state.refresh()
         },
     )
-    val isCompatScreen by isCompatScreen()
+    val isCompatScreen = isCompatScreen()
     val topAppBarScrollBehavior =
         if (LocalGlobalAppearance.current.bottomBarBehavior == BottomBarBehavior.AlwaysShow) {
             TopAppBarDefaults.pinnedScrollBehavior()

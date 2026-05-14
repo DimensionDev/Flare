@@ -10,15 +10,25 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.displayCutout
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContent
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.union
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.foundation.pager.HorizontalPager
@@ -35,10 +45,12 @@ import androidx.compose.material3.SecondaryScrollableTabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -48,6 +60,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
@@ -71,6 +85,8 @@ import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.TabIcon
 import dev.dimension.flare.ui.component.TabRowIndicator
+import dev.dimension.flare.ui.component.platform.LocalWindowSizeClass
+import dev.dimension.flare.ui.component.platform.WindowSizeClass
 import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.component.status.AdaptiveCard
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
@@ -81,9 +97,13 @@ import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.presenter.HomeTimelineWithTabsPresenter
+import dev.dimension.flare.ui.presenter.home.DeepLinkPresenter
 import dev.dimension.flare.ui.presenter.home.LoggedInPresenter
+import dev.dimension.flare.ui.presenter.home.LoggedInState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.rememberTimelineItemPresenterWithLazyListState
+import dev.dimension.flare.ui.route.Route
+import dev.dimension.flare.ui.route.Router
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
@@ -91,185 +111,277 @@ import moe.tlaster.precompose.molecule.producePresenter
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
 internal fun HomeTimelineScreen(
-    toCompose: () -> Unit,
     toQuickMenu: () -> Unit,
     toLogin: () -> Unit,
     toTabSettings: () -> Unit,
+    uriHandler: UriHandler,
 ) {
     val state by producePresenter(key = "home_timeline") {
         timelinePresenter()
     }
-    val loggedInState = remember { LoggedInPresenter() }.invoke()
     val scope = rememberCoroutineScope()
 
-    val topAppBarScrollBehavior =
-        if (LocalGlobalAppearance.current.bottomBarBehavior == BottomBarBehavior.AlwaysShow) {
-            TopAppBarDefaults.pinnedScrollBehavior()
-        } else {
-            TopAppBarDefaults.enterAlwaysScrollBehavior()
-        }
-    FlareScaffold(
-        topBar = {
-            FlareTopAppBar(
-                title = {
-                    state.pagerState.onSuccess { pagerState ->
-                        state.tabState.onSuccess { tabs ->
-                            if (tabs.any()) {
-                                SecondaryScrollableTabRow(
-                                    containerColor = Color.Transparent,
+    if (LocalGlobalAppearance.current.deckMode && isBigScreen()) {
+        LazyRow(
+            modifier =
+                Modifier
+                    .consumeWindowInsets(
+                        WindowInsets.systemBars
+                            .union(WindowInsets.displayCutout)
+                            .only(WindowInsetsSides.Horizontal),
+                    ),
+            contentPadding =
+                WindowInsets.systemBars
+                    .union(WindowInsets.displayCutout)
+                    .only(WindowInsetsSides.Horizontal)
+                    .asPaddingValues(),
+        ) {
+            state.tabState.onSuccess { tabs ->
+                items(tabs) { tab ->
+                    val tabItemState by producePresenter("tabItemState_${tab.id}") {
+                        val backStack =
+                            remember {
+                                mutableStateListOf<Route>(Route.DeckTimeline(tab.id))
+                            }
+                        val state =
+                            DeepLinkPresenter(
+                                onRoute = {
+                                    Route.from(it)?.let { route ->
+                                        backStack.add(route)
+                                    }
+                                },
+                                onLink = {
+                                    uriHandler.openUri(it)
+                                },
+                            ).invoke()
+                        object : DeepLinkPresenter.State by state {
+                            val backStack = backStack
+                        }
+                    }
+                    CompositionLocalProvider(
+                        LocalUriHandler provides
+                            remember(tabItemState) {
+                                object : UriHandler {
+                                    override fun openUri(uri: String) {
+                                        tabItemState.handle(uri)
+                                    }
+                                }
+                            },
+                        LocalWindowSizeClass provides WindowSizeClass.Compact,
+                    ) {
+                        Row {
+                            Router(
+                                modifier =
+                                    Modifier
+                                        .fillMaxHeight()
+                                        .width(360.dp),
+                                backStack = tabItemState.backStack,
+                                openDrawer = {
+                                    toQuickMenu.invoke()
+                                },
+                                navigate = {
+                                    when (it) {
+                                        is Route.TabSettings -> {
+                                            toTabSettings.invoke()
+                                        }
+
+                                        is Route.ServiceSelect.Selection -> {
+                                            toLogin.invoke()
+                                        }
+
+                                        else -> {
+                                            tabItemState.backStack.add(it)
+                                        }
+                                    }
+                                },
+                                onBack = {
+                                    if (tabItemState.backStack.size > 1) {
+                                        tabItemState.backStack.removeAt(tabItemState.backStack.lastIndex)
+                                    }
+                                },
+                            )
+                            if (tab != tabs.last()) {
+                                VerticalDivider(
                                     modifier =
                                         Modifier
-                                            .fillMaxWidth(),
-                                    selectedTabIndex =
-                                        minOf(
-                                            pagerState.currentPage,
-                                            tabs.lastIndex,
-                                        ),
-                                    edgePadding = 0.dp,
-                                    divider = {},
-                                    indicator = {
-                                        TabRowIndicator(
-                                            selectedIndex =
-                                                minOf(
-                                                    pagerState.currentPage,
-                                                    tabs.lastIndex,
-                                                ),
-                                        )
-                                    },
-                                    minTabWidth = 48.dp,
-                                ) {
-                                    state.tabState.onSuccess { tabs ->
-                                        tabs.forEachIndexed { index, tab ->
-                                            LeadingIconTab(
-                                                modifier = Modifier.clip(CircleShape),
-                                                selectedContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                                                unselectedContentColor = LocalContentColor.current,
-                                                selected = index == pagerState.currentPage,
-                                                onClick = {
-                                                    scope.launch {
-                                                        pagerState.scrollToPage(index)
-                                                    }
-                                                },
-                                                text = {
-                                                    dev.dimension.flare.ui.component.Text(
-                                                        tab.title,
+                                            .fillMaxHeight(),
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    } else {
+        val topAppBarScrollBehavior =
+            if (LocalGlobalAppearance.current.bottomBarBehavior == BottomBarBehavior.AlwaysShow) {
+                TopAppBarDefaults.pinnedScrollBehavior()
+            } else {
+                TopAppBarDefaults.enterAlwaysScrollBehavior()
+            }
+        FlareScaffold(
+            topBar = {
+                FlareTopAppBar(
+                    title = {
+                        state.pagerState.onSuccess { pagerState ->
+                            state.tabState.onSuccess { tabs ->
+                                if (tabs.any()) {
+                                    SecondaryScrollableTabRow(
+                                        containerColor = Color.Transparent,
+                                        modifier =
+                                            Modifier
+                                                .fillMaxWidth(),
+                                        selectedTabIndex =
+                                            minOf(
+                                                pagerState.currentPage,
+                                                tabs.lastIndex,
+                                            ),
+                                        edgePadding = 0.dp,
+                                        divider = {},
+                                        indicator = {
+                                            TabRowIndicator(
+                                                selectedIndex =
+                                                    minOf(
+                                                        pagerState.currentPage,
+                                                        tabs.lastIndex,
+                                                    ),
+                                            )
+                                        },
+                                        minTabWidth = 48.dp,
+                                    ) {
+                                        state.tabState.onSuccess { tabs ->
+                                            tabs.forEachIndexed { index, tab ->
+                                                LeadingIconTab(
+                                                    modifier = Modifier.clip(CircleShape),
+                                                    selectedContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                                                    unselectedContentColor = LocalContentColor.current,
+                                                    selected = index == pagerState.currentPage,
+                                                    onClick = {
+                                                        scope.launch {
+                                                            pagerState.scrollToPage(index)
+                                                        }
+                                                    },
+                                                    text = {
+                                                        dev.dimension.flare.ui.component.Text(
+                                                            tab.title,
 //                                                        modifier =
 //                                                            Modifier
 //                                                                .padding(8.dp),
-                                                    )
-                                                },
-                                                icon = {
-                                                    TabIcon(tab)
-                                                },
+                                                        )
+                                                    },
+                                                    icon = {
+                                                        TabIcon(tab)
+                                                    },
 //                                                colors = FilterChipDefaults.filterChipColors(
 //                                                    containerColor = MaterialTheme.colorScheme.surface,
 //                                                ),
-                                            )
+                                                )
+                                            }
                                         }
                                     }
                                 }
                             }
                         }
-                    }
-                },
-                scrollBehavior = topAppBarScrollBehavior,
-                navigationIcon = {
-                    if (LocalBottomBarShowing.current) {
-                        state.user
-                            .onSuccess {
-                                IconButton(
-                                    onClick = {
-                                        toQuickMenu.invoke()
-                                    },
-                                ) {
-                                    AvatarComponent(
-                                        it.avatar,
-                                        size = 24.dp,
-                                    )
-                                }
-                            }.onError {
-                                IconButton(
-                                    onClick = {
-                                        toQuickMenu.invoke()
-                                    },
-                                ) {
-                                    FAIcon(
-                                        imageVector = FontAwesomeIcons.Solid.Bars,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(24.dp),
-                                    )
-                                }
-                            }.onLoading {
-                                IconButton(
-                                    onClick = {
-                                        toQuickMenu.invoke()
-                                    },
-                                ) {
-                                    FAIcon(
-                                        imageVector = FontAwesomeIcons.Solid.Bars,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(24.dp),
-                                    )
-                                }
-                            }
-                    }
-                },
-                actions = {
-                    IconButton(
-                        onClick = {
-                            toTabSettings.invoke()
-                        },
-                    ) {
-                        FAIcon(
-                            imageVector = FontAwesomeIcons.Solid.Sliders,
-                            contentDescription = stringResource(R.string.edit_tab_title),
-                        )
-                    }
-                    if (loggedInState.isLoggedIn.takeSuccess() == false) {
-                        TextButton(onClick = toLogin) {
-                            Text(text = stringResource(id = R.string.login_button))
-                        }
-                    }
-                },
-            )
-        },
-        modifier = Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection),
-    ) { contentPadding ->
-        state.pagerState.onSuccess { pagerState ->
-            state.tabState.onSuccess { tabState ->
-                LaunchedEffect(pagerState.currentPage >= tabState.size) {
-                    if (pagerState.currentPage >= tabState.size) {
-                        scope.launch {
-                            pagerState.scrollToPage(0)
-                        }
-                    }
-                }
-
-                HorizontalPager(
-                    state = pagerState,
-                    key = { index ->
-                        tabState.getOrNull(index)?.id ?: "timeline_$index"
                     },
-                ) { index ->
-                    val item = tabState.getOrNull(index)
-                    if (item != null) {
-                        val timelineAppearance = LocalTimelineAppearance.current
-                        CompositionLocalProvider(
-                            LocalTimelineAppearance provides
-                                remember(
-                                    item.appearancePatch,
-                                    timelineAppearance,
-                                ) {
-                                    item.resolveTimelineAppearance(timelineAppearance)
-                                },
+                    scrollBehavior = topAppBarScrollBehavior,
+                    navigationIcon = {
+                        if (LocalBottomBarShowing.current) {
+                            state.user
+                                .onSuccess {
+                                    IconButton(
+                                        onClick = {
+                                            toQuickMenu.invoke()
+                                        },
+                                    ) {
+                                        AvatarComponent(
+                                            it.avatar,
+                                            size = 24.dp,
+                                        )
+                                    }
+                                }.onError {
+                                    IconButton(
+                                        onClick = {
+                                            toQuickMenu.invoke()
+                                        },
+                                    ) {
+                                        FAIcon(
+                                            imageVector = FontAwesomeIcons.Solid.Bars,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(24.dp),
+                                        )
+                                    }
+                                }.onLoading {
+                                    IconButton(
+                                        onClick = {
+                                            toQuickMenu.invoke()
+                                        },
+                                    ) {
+                                        FAIcon(
+                                            imageVector = FontAwesomeIcons.Solid.Bars,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(24.dp),
+                                        )
+                                    }
+                                }
+                        }
+                    },
+                    actions = {
+                        IconButton(
+                            onClick = {
+                                toTabSettings.invoke()
+                            },
                         ) {
-                            TimelineItemContent(
-                                item = item,
-                                contentPadding = contentPadding,
-                                modifier = Modifier.fillMaxWidth(),
-                                changeLogState = state.changeLogState,
-                                isCurrentlyVisible = pagerState.currentPage == index,
+                            FAIcon(
+                                imageVector = FontAwesomeIcons.Solid.Sliders,
+                                contentDescription = stringResource(R.string.edit_tab_title),
                             )
+                        }
+                        if (state.isLoggedIn.takeSuccess() == false) {
+                            TextButton(onClick = toLogin) {
+                                Text(text = stringResource(id = R.string.login_button))
+                            }
+                        }
+                    },
+                )
+            },
+            modifier = Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection),
+        ) { contentPadding ->
+            state.pagerState.onSuccess { pagerState ->
+                state.tabState.onSuccess { tabState ->
+                    LaunchedEffect(pagerState.currentPage >= tabState.size) {
+                        if (pagerState.currentPage >= tabState.size) {
+                            scope.launch {
+                                pagerState.scrollToPage(0)
+                            }
+                        }
+                    }
+
+                    HorizontalPager(
+                        state = pagerState,
+                        key = { index ->
+                            tabState.getOrNull(index)?.id ?: "timeline_$index"
+                        },
+                    ) { index ->
+                        val item = tabState.getOrNull(index)
+                        if (item != null) {
+                            val timelineAppearance = LocalTimelineAppearance.current
+                            CompositionLocalProvider(
+                                LocalTimelineAppearance provides
+                                    remember(
+                                        item.appearancePatch,
+                                        timelineAppearance,
+                                    ) {
+                                        item.resolveTimelineAppearance(timelineAppearance)
+                                    },
+                            ) {
+                                TimelineItemContent(
+                                    item = item,
+                                    contentPadding = contentPadding,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    changeLogState = state,
+                                    isCurrentlyVisible = pagerState.currentPage == index,
+                                )
+                            }
                         }
                     }
                 }
@@ -287,11 +399,15 @@ internal fun TimelineItemContent(
     isCurrentlyVisible: Boolean = true,
     lazyStaggeredGridState: LazyStaggeredGridState = rememberLazyStaggeredGridState(),
 ) {
-    val isBigScreen by isBigScreen()
+    val isBigScreen = isBigScreen()
     val layoutDirection = LocalLayoutDirection.current
     val paddingWithStatusBar =
         PaddingValues(
-            top = maxOf(WindowInsets.safeContent.asPaddingValues().calculateTopPadding(), contentPadding.calculateTopPadding()),
+            top =
+                maxOf(
+                    WindowInsets.safeContent.asPaddingValues().calculateTopPadding(),
+                    contentPadding.calculateTopPadding(),
+                ),
             bottom = contentPadding.calculateBottomPadding(),
             start = contentPadding.calculateStartPadding(layoutDirection),
             end = contentPadding.calculateEndPadding(layoutDirection),
@@ -426,6 +542,7 @@ internal fun TimelineItemContent(
 private fun timelinePresenter() =
     run {
         val state = remember { HomeTimelineWithTabsPresenter() }.invoke()
+        val loginState = remember { LoggedInPresenter() }.invoke()
 
         val pagerState =
             state.tabState.map {
@@ -434,8 +551,10 @@ private fun timelinePresenter() =
 
         val changeLogState = changeLogPresenter()
 
-        object : HomeTimelineWithTabsPresenter.State by state {
+        object :
+            HomeTimelineWithTabsPresenter.State by state,
+            LoggedInState by loginState,
+            ChangeLogState by changeLogState {
             val pagerState = pagerState
-            val changeLogState = changeLogState
         }
     }

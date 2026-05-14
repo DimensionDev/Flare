@@ -15,11 +15,9 @@ import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.WindowScope
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavEntryDecorator
 import androidx.navigation3.runtime.entryProvider
@@ -60,6 +58,7 @@ import dev.dimension.flare.ui.screen.dm.DmListScreen
 import dev.dimension.flare.ui.screen.dm.UserDMConversationScreen
 import dev.dimension.flare.ui.screen.feeds.FeedListScreen
 import dev.dimension.flare.ui.screen.home.BlockUserDialog
+import dev.dimension.flare.ui.screen.home.DeckTimelineScreen
 import dev.dimension.flare.ui.screen.home.DeepLinkAccountPicker
 import dev.dimension.flare.ui.screen.home.DiscoverScreen
 import dev.dimension.flare.ui.screen.home.FansScreen
@@ -109,21 +108,24 @@ import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
-internal fun WindowScope.Router(
+internal fun Router(
     backStack: ImmutableList<Route>,
     navigate: (Route) -> Unit,
     onBack: () -> Unit,
+    enableDeepLinkHandler: Boolean = true,
     modifier: Modifier = Modifier,
 ) {
     val listDetailStrategy = rememberListDetailSceneStrategy<Route>()
 
-    val isBigScreen by isBigScreen()
-    OnDeepLink {
-        val route = Route.parse(it)
-        if (route != null) {
-            navigate(route)
+    val isBigScreen = isBigScreen()
+    if (enableDeepLinkHandler) {
+        OnDeepLink {
+            val route = Route.parse(it)
+            if (route != null) {
+                navigate(route)
+            }
+            route != null
         }
-        route != null
     }
     NavDisplay(
         modifier = modifier,
@@ -664,6 +666,15 @@ internal fun WindowScope.Router(
                             navigate(
                                 Route.TabSetting,
                             )
+                        },
+                    )
+                }
+
+                entry<Route.DeckTimeline> { args ->
+                    DeckTimelineScreen(
+                        id = args.id,
+                        toTabSettings = {
+                            navigate(Route.TabSetting)
                         },
                     )
                 }

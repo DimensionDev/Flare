@@ -69,7 +69,7 @@ internal fun VVOStatusScreen(
             accountType = accountType,
         )
     }
-    val bigScreen by isBigScreen()
+    val bigScreen = isBigScreen()
     CompositionLocalProvider(
         LocalTimelineAppearance provides
             LocalTimelineAppearance.current.copy(

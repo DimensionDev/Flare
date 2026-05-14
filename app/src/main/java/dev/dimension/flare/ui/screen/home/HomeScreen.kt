@@ -31,7 +31,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
@@ -62,7 +61,6 @@ import dev.dimension.flare.ui.common.OnNewIntent
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.InAppNotificationComponent
-import dev.dimension.flare.ui.component.LocalGlobalAppearance
 import dev.dimension.flare.ui.component.NavigationSuiteScaffold2
 import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.component.TabIcon
@@ -122,7 +120,6 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                 NavigationSuiteScaffold2(
                     wideNavigationRailState = state.wideNavigationRailState,
                     modifier = Modifier.fillMaxSize(),
-                    bottomBarAutoHideEnabled = state.navigationState.bottomBarAutoHideEnabled,
                     layoutType = layoutType,
                     showFab =
                         state.loggedInState.takeSuccess() == true &&
@@ -464,7 +461,6 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                                             currentRoute,
                                         )
                                     },
-                            navigationState = state.navigationState,
                             openDrawer = {
                                 state.openDrawer()
                             },
@@ -521,10 +517,6 @@ private fun presenter(uriHandler: UriHandler) =
     run {
         val secondaryTabsPresenter = remember { SecondaryTabsPresenter() }.invoke()
         val loggedInState = remember { LoggedInPresenter() }.invoke()
-        val navigationState =
-            remember {
-                NavigationState()
-            }
         val wideNavigationRailState = rememberWideNavigationRailState()
         val tabs =
             remember {
@@ -587,7 +579,6 @@ private fun presenter(uriHandler: UriHandler) =
             val secondaryTabsState = secondaryTabsPresenter.items
             val notificationState = notificationState
             val tabs = tabs.tabs
-            val navigationState = navigationState
             val scrollToTopRegistry = scrollToTopRegistry
             val deeplinkPresenter = deeplinkPresenter
             val topLevelBackStack = topLevelBackStack
@@ -639,31 +630,6 @@ private fun userPresenter(accountType: AccountType) =
     run {
         remember(accountType) { UserPresenter(accountType, null) }.invoke().user
     }
-
-internal class NavigationState {
-    private val bottomBarAutoHideState = mutableStateOf(true)
-    private val bottomBarDividerState = mutableStateOf(true)
-    val bottomBarAutoHideEnabled: Boolean
-        get() = bottomBarAutoHideState.value
-    val bottomBarDividerEnabled: Boolean
-        get() = bottomBarDividerState.value
-
-    fun enableBottomBarAutoHide() {
-        bottomBarAutoHideState.value = true
-    }
-
-    fun disableBottomBarAutoHide() {
-        bottomBarAutoHideState.value = false
-    }
-
-    fun showBottomBarDivider() {
-        bottomBarDividerState.value = true
-    }
-
-    fun hideBottomBarDivider() {
-        bottomBarDividerState.value = false
-    }
-}
 
 private class ScrollToTopRegistry {
     private val callbacks = mutableSetOf<() -> Unit>()

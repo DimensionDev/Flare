@@ -43,7 +43,7 @@ internal fun StatusScreen(
     onBack: () -> Unit,
     accountType: AccountType,
 ) {
-    val isBigScreen by isBigScreen()
+    val isBigScreen = isBigScreen()
     val state by producePresenter(statusKey.toString()) {
         statusPresenter(accountType = accountType, statusKey = statusKey)
     }

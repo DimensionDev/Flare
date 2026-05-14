@@ -10611,6 +10611,62 @@
         }
       }
     },
+    "appearance_deck_mode" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Deck mode"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "デッキモード"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Deck 模式"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Deck 模式"
+          }
+        }
+      }
+    },
+    "appearance_deck_mode_description" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Show the timeline in deck mode when supported"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "対応している場合はタイムラインをデッキモードで表示します"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "在支持的场景下以 Deck 模式显示时间线"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "在支援的情境下以 Deck 模式顯示時間軸"
+          }
+        }
+      }
+    },
     "appearance_show_link_preview" : {
       "localizations" : {
         "af" : {

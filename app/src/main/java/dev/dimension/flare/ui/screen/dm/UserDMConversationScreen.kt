@@ -24,7 +24,6 @@ import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.dm.UserDMConversationPresenter
 import dev.dimension.flare.ui.presenter.invoke
-import dev.dimension.flare.ui.screen.home.NavigationState
 import moe.tlaster.precompose.molecule.producePresenter
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -33,7 +32,6 @@ internal fun UserDMConversationScreen(
     accountType: AccountType,
     userKey: MicroBlogKey,
     onBack: () -> Unit,
-    navigationState: NavigationState,
     toProfile: (MicroBlogKey) -> Unit,
 ) {
     val state by producePresenter(key = "UserDMConversationScreen${userKey}$accountType") {
@@ -48,7 +46,6 @@ internal fun UserDMConversationScreen(
                 accountType = accountType,
                 roomKey = it,
                 onBack = onBack,
-                navigationState = navigationState,
                 toProfile = toProfile,
             )
         }.onLoading {

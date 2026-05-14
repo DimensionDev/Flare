@@ -139,6 +139,8 @@ import dev.dimension.flare.settings_appearance_avatar_shape_round
 import dev.dimension.flare.settings_appearance_avatar_shape_square
 import dev.dimension.flare.settings_appearance_compat_link_previews
 import dev.dimension.flare.settings_appearance_compat_link_previews_description
+import dev.dimension.flare.settings_appearance_deck_mode
+import dev.dimension.flare.settings_appearance_deck_mode_description
 import dev.dimension.flare.settings_appearance_display_group_subtitle
 import dev.dimension.flare.settings_appearance_display_group_title
 import dev.dimension.flare.settings_appearance_expand_media
@@ -743,6 +745,24 @@ internal fun SettingsScreen(
                             checked = LocalGlobalAppearance.current.showBottomBarLabels,
                             {
                                 state.appearanceState.update(AppearanceKeys.ShowBottomBarLabels, it)
+                            },
+                            textBefore = true,
+                        )
+                    },
+                )
+                ExpanderItemSeparator()
+                ExpanderItem(
+                    heading = {
+                        Text(stringResource(Res.string.settings_appearance_deck_mode))
+                    },
+                    caption = {
+                        Text(stringResource(Res.string.settings_appearance_deck_mode_description))
+                    },
+                    trailing = {
+                        Switcher(
+                            checked = LocalGlobalAppearance.current.deckMode,
+                            {
+                                state.appearanceState.update(AppearanceKeys.DeckMode, it)
                             },
                             textBefore = true,
                         )

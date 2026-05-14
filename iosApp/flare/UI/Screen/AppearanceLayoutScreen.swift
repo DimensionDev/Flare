@@ -34,6 +34,14 @@ struct AppearanceLayoutScreen: View {
                     Text("appearance_show_bottom_bar_labels")
                     Text("appearance_show_bottom_bar_labels_description")
                 }
+                Toggle(isOn: Binding(get: {
+                    globalAppearance.deckMode
+                }, set: { newValue in
+                    presenter.state.updateDeckMode(value: newValue)
+                })) {
+                    Text("appearance_deck_mode")
+                    Text("appearance_deck_mode_description")
+                }
             }
             Section {
                 StateView(state: statusPresenter.state.sampleStatus) { status in

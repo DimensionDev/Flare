@@ -68,17 +68,18 @@ private const val DEFAULT_GUEST_MASTODON_HOST = "mastodon.social"
 
 private fun List<TimelineTabItemV2>.withGuestMastodonHomeFallback(isLoggedIn: Boolean): List<TimelineTabItemV2> =
     if (!isLoggedIn && isEmpty()) {
-        listOf(guestMastodonHomeTimelineTab())
+        listOf(guestMastodonHomeTimelineTab)
     } else {
         this
     }
 
-private fun guestMastodonHomeTimelineTab(): TimelineTabItemV2 =
-    SourceTimelineTabItemV2.runtime(
-        id = "guest_home_$DEFAULT_GUEST_MASTODON_HOST",
-        title = UiStrings.Home.asText(),
-        icon = IconType.Material(UiIcon.Home),
-        createPresenter = {
-            HomeTimelinePresenter(AccountType.GuestHost(DEFAULT_GUEST_MASTODON_HOST))
-        },
-    )
+internal val guestMastodonHomeTimelineTab: TimelineTabItemV2
+    get() =
+        SourceTimelineTabItemV2.runtime(
+            id = "guest_home_$DEFAULT_GUEST_MASTODON_HOST",
+            title = UiStrings.Home.asText(),
+            icon = IconType.Material(UiIcon.Home),
+            createPresenter = {
+                HomeTimelinePresenter(AccountType.GuestHost(DEFAULT_GUEST_MASTODON_HOST))
+            },
+        )

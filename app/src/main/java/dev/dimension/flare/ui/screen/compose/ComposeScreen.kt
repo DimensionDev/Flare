@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.screen.compose
 
 import android.content.Context
 import android.net.Uri
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
@@ -196,6 +197,9 @@ internal fun ComposeScreen(
                 focusRequester.requestFocus()
             }
         }
+    BackHandler(state.hasTextContent) {
+        showCloseConfirmDialog = true
+    }
     Column(
         modifier =
             modifier

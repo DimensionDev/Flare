@@ -22,9 +22,6 @@ internal class FavouriteTimelineRemoteMediator(
                 append(accountKey.toString())
             }
 
-    override val supportPrepend: Boolean
-        get() = true
-
     override suspend fun load(
         pageSize: Int,
         request: PagingRequest,
@@ -32,11 +29,8 @@ internal class FavouriteTimelineRemoteMediator(
         val response =
             when (request) {
                 is PagingRequest.Prepend -> {
-                    service.iFavorites(
-                        AdminAdListRequest(
-                            limit = pageSize,
-                            sinceId = request.previousKey,
-                        ),
+                    return PagingResult(
+                        endOfPaginationReached = true,
                     )
                 }
 
@@ -66,7 +60,6 @@ internal class FavouriteTimelineRemoteMediator(
             endOfPaginationReached = response.isEmpty(),
             data = data,
             nextKey = response.lastOrNull()?.noteId,
-            previousKey = response.firstOrNull()?.noteId,
         )
     }
 }

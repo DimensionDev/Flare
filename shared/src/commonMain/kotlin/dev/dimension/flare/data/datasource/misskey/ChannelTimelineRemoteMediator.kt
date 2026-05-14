@@ -16,9 +16,6 @@ internal class ChannelTimelineRemoteMediator(
 ) : CacheableRemoteLoader<UiTimelineV2> {
     override val pagingKey = "channel_${id}_$accountKey"
 
-    override val supportPrepend: Boolean
-        get() = true
-
     override suspend fun load(
         pageSize: Int,
         request: PagingRequest,
@@ -37,15 +34,9 @@ internal class ChannelTimelineRemoteMediator(
                 }
 
                 is PagingRequest.Prepend -> {
-                    service
-                        .channelsTimeline(
-                            channelsTimelineRequest =
-                                ChannelsTimelineRequest(
-                                    channelId = id,
-                                    limit = pageSize,
-                                    sinceId = request.previousKey,
-                                ),
-                        )
+                    return PagingResult(
+                        endOfPaginationReached = true,
+                    )
                 }
 
                 is PagingRequest.Append -> {
@@ -66,7 +57,6 @@ internal class ChannelTimelineRemoteMediator(
             data =
                 response.render(accountKey),
             nextKey = response.lastOrNull()?.id,
-            previousKey = response.firstOrNull()?.id,
         )
     }
 }

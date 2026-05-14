@@ -37,7 +37,13 @@ enum Route: Hashable, Identifiable {
         clearToHome: @escaping () -> Void
     ) -> some View {
         switch self {
-        case .home: HomeTimelineScreen(toServiceSelect: { onNavigate(.serviceSelect) }, toCompose: { onNavigate(.composeNew) }, toTabSetting: { onNavigate(.tabSettings) }, toSecondaryMenu: { onNavigate(.secondaryMenu) })
+        case .home: HomeTimelineScreen(
+            toServiceSelect: { onNavigate(.serviceSelect) },
+            toCompose: { onNavigate(.composeNew) },
+            toTabSetting: { onNavigate(.tabSettings) },
+            toSecondaryMenu: { onNavigate(.secondaryMenu) },
+            onNavigate: onNavigate
+        )
         case .timeline(let item):
             TimelineScreen(tabItem: item)
                 .navigationTitle(item.title.text)

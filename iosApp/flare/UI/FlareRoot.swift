@@ -26,7 +26,7 @@ struct FlareRoot: View {
                         } icon: {
                             Image(homeTabIconName(tab))
                         }
-                        .adaptiveLabelStyle(globalAppearance.showBottomBarLabels)
+                        .adaptiveLabelStyle(globalAppearance.showBottomBarLabels || horizontalSizeClass == .regular)
                     }
                     .badge(homeTabRoute(tab) == .notification ? Int(notificationBadgePresenter.state.count) : 0)
                 }

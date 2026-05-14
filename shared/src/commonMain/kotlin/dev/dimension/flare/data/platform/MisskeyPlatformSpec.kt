@@ -139,6 +139,7 @@ internal data object MisskeyPlatformSpec : PlatformSpec {
     override val timelineSpecs: ImmutableList<TimelineSpec<out TimelineSpec.Data>> =
         persistentListOf(
             CommonTimelineSpecs.home,
+            CommonTimelineSpecs.discover,
             CommonTimelineSpecs.list,
             favouriteTimelineSpec,
             hybridTimelineSpec,

@@ -15,7 +15,6 @@ import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiInstanceMetadata
 import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.asType
-import dev.dimension.flare.ui.presenter.home.DiscoverStatusTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.vvo.VVOFavouriteTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.vvo.VVOLikeTimelinePresenter
 import kotlinx.collections.immutable.ImmutableList
@@ -33,20 +32,6 @@ internal data object VvoPlatformSpec : PlatformSpec {
     override fun agreementUrl(host: String): String? = null
 
     override fun deepLinkPatterns(host: String): ImmutableList<DeepLinkPattern<out DeepLinkMapping.Type>> = persistentListOf()
-
-    internal val featuredTimelineSpec =
-        TimelineSpec(
-            id = "vvo.featured",
-            title = UiStrings.Featured,
-            icon = UiIcon.Featured.asType(),
-            serializer = TimelineSpec.AccountBasedData.serializer(),
-            targetId = { it.accountKey.toString() },
-            presenterFactory = {
-                DiscoverStatusTimelinePresenter(
-                    AccountType.Specific(it.accountKey),
-                )
-            },
-        )
 
     internal val favoriteTimelineSpec =
         TimelineSpec(
@@ -79,7 +64,7 @@ internal data object VvoPlatformSpec : PlatformSpec {
     override val timelineSpecs: ImmutableList<TimelineSpec<out TimelineSpec.Data>> =
         persistentListOf(
             CommonTimelineSpecs.home,
-            featuredTimelineSpec,
+            CommonTimelineSpecs.discover,
             favoriteTimelineSpec,
             likedTimelineSpec,
         )

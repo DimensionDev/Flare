@@ -256,7 +256,7 @@ internal fun TimelineTabItem.toTimelineSlotOrNull(): TimelineSlot? =
 
         is VVo.FeaturedTimelineTabItem -> {
             account.toAccountBasedSlot(
-                spec = VvoPlatformSpec.featuredTimelineSpec,
+                spec = CommonTimelineSpecs.discover,
                 metaData = metaData,
                 fallbackTitle = UiStrings.Featured,
             )

@@ -513,6 +513,10 @@ internal open class MastodonDataSource(
                 data = TimelineSpec.AccountBasedData(accountKey),
                 icon = IconType.FavIcon(accountKey.host),
             ),
+            CommonTimelineSpecs.discover.tabItem(
+                data = TimelineSpec.AccountBasedData(accountKey),
+                icon = IconType.FavIcon(accountKey.host),
+            ),
             MastodonPlatformSpec.localTimelineSpec.tabItem(TimelineSpec.AccountBasedData(accountKey)),
             MastodonPlatformSpec.publicTimelineSpec.tabItem(TimelineSpec.AccountBasedData(accountKey)),
             MastodonPlatformSpec.bookmarkTimelineSpec.tabItem(TimelineSpec.AccountBasedData(accountKey)),

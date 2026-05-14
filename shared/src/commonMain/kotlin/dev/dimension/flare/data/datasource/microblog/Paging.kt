@@ -5,4 +5,6 @@ import androidx.paging.PagingConfig
 internal val pagingConfig: PagingConfig =
     PagingConfig(
         pageSize = 20,
+        prefetchDistance = 2,
+        initialLoadSize = 20,
     )

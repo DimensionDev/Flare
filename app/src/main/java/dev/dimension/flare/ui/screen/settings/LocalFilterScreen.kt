@@ -24,6 +24,7 @@ import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareLargeFlexibleTopAppBar
 import dev.dimension.flare.ui.component.FlareScaffold
+import dev.dimension.flare.ui.component.status.ListEmptyView
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.LocalFilterPresenter
@@ -76,28 +77,39 @@ internal fun LocalFilterScreen(
             verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
         ) {
             state.items.onSuccess { list ->
-                items(list.size) { index ->
-                    val item = list[index]
-                    SegmentedListItem(
-                        onClick = {},
-                        shapes = ListItemDefaults.segmentedShapes2(index, list.size),
-                        content = {
-                            Text(text = item.keyword)
-                        },
-//                        supportingContent = {
-//                            Text(text = item.humanizedExpiredAt ?: stringResource(id = R.string.local_filter_no_expiration))
-//                        },
-                        trailingContent = {
-                            IconButton(onClick = {
-                                edit(item.keyword)
-                            }) {
-                                FAIcon(
-                                    FontAwesomeIcons.Solid.Pen,
-                                    contentDescription = stringResource(id = R.string.local_filter_edit_title),
-                                )
-                            }
-                        },
-                    )
+                if (list.isEmpty()) {
+                    item {
+                        ListEmptyView(
+                            modifier = Modifier.fillParentMaxSize(),
+                        )
+                    }
+                } else {
+                    items(list.size) { index ->
+                        val item = list[index]
+                        SegmentedListItem(
+                            onClick = {},
+                            shapes = ListItemDefaults.segmentedShapes2(index, list.size),
+                            content = {
+                                Text(text = item.keyword)
+                            },
+                            supportingContent =
+                                item.isRegex.takeIf { it }?.let {
+                                    {
+                                        Text(text = stringResource(id = R.string.local_filter_regex))
+                                    }
+                                },
+                            trailingContent = {
+                                IconButton(onClick = {
+                                    edit(item.keyword)
+                                }) {
+                                    FAIcon(
+                                        FontAwesomeIcons.Solid.Pen,
+                                        contentDescription = stringResource(id = R.string.local_filter_edit_title),
+                                    )
+                                }
+                            },
+                        )
+                    }
                 }
             }
         }

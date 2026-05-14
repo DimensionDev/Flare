@@ -88,6 +88,7 @@ class ExportAppDatabasePresenterTest : RobolectricTest() {
                     for_notification = 1,
                     for_search = 0,
                     expired_at = 0,
+                    is_regex = 1,
                 )
             db.keywordFilterDao().insert(keywordFilter)
 

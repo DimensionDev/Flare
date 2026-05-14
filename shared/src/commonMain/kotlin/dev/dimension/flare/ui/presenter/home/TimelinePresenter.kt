@@ -32,6 +32,7 @@ import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.model.tab.TimelineFilterConfig
 import dev.dimension.flare.data.model.tab.TimelinePostContent
 import dev.dimension.flare.data.model.tab.TimelinePostKind
+import dev.dimension.flare.data.repository.KeywordFilterPattern
 import dev.dimension.flare.data.repository.LocalFilterRepository
 import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.data.repository.SettingsRepository
@@ -69,7 +70,7 @@ public abstract class TimelinePresenter :
     private val localFilterRepository: LocalFilterRepository by inject()
     private val inAppNotification: InAppNotification by inject()
 
-    private val filterFlow: Flow<List<String>> by lazy {
+    private val filterFlow: Flow<List<KeywordFilterPattern>> by lazy {
         localFilterRepository.getFlow(forTimeline = true)
     }
 
@@ -207,15 +208,20 @@ public interface TimelineState {
     public suspend fun refresh()
 }
 
-private fun UiTimelineV2.matchesKeywordFilters(filters: List<String>): Boolean =
+internal fun UiTimelineV2.matchesKeywordFilters(filters: List<KeywordFilterPattern>): Boolean =
     if (filters.isEmpty()) {
         true
     } else {
         !filters.any { filter ->
-            searchText
-                .orEmpty()
-                .contains(filter, ignoreCase = true)
+            searchText.orEmpty().matches(filter)
         }
+    }
+
+private fun String.matches(filter: KeywordFilterPattern): Boolean =
+    if (filter.isRegex) {
+        filter.regex?.containsMatchIn(this) == true
+    } else {
+        contains(filter.keyword, ignoreCase = true)
     }
 
 internal fun UiTimelineV2.matchesTimelineFilter(filterConfig: TimelineFilterConfig): Boolean {

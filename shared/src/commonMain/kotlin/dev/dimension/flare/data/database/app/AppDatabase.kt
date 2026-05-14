@@ -27,7 +27,7 @@ import dev.dimension.flare.data.database.app.dao.SearchHistoryDao
         dev.dimension.flare.data.database.app.model.DbSearchHistory::class,
         dev.dimension.flare.data.database.app.model.DbRssSources::class,
     ],
-    version = 9,
+    version = 10,
     autoMigrations = [
         AutoMigration(
             from = 3,
@@ -85,6 +85,14 @@ internal abstract class AppDatabase : RoomDatabase() {
                     )
                     connection.execSQL(
                         "ALTER TABLE DbRssSources DROP COLUMN openInBrowser",
+                    )
+                }
+            }
+        val MIGRATION_9_10 =
+            object : Migration(9, 10) {
+                override suspend fun migrate(connection: SQLiteConnection) {
+                    connection.execSQL(
+                        "ALTER TABLE DbKeywordFilter ADD COLUMN is_regex INTEGER NOT NULL DEFAULT 0",
                     )
                 }
             }

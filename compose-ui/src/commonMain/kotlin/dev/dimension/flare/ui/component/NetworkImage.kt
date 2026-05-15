@@ -1,6 +1,8 @@
 package dev.dimension.flare.ui.component
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ProvidableCompositionLocal
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,6 +24,9 @@ import dev.dimension.flare.ui.theme.PlatformTheme
 import kotlinx.collections.immutable.ImmutableMap
 import kotlin.native.HiddenFromObjC
 
+public val LocalNetworkImageAllowHardware: ProvidableCompositionLocal<Boolean> =
+    compositionLocalOf { true }
+
 @HiddenFromObjC
 @Composable
 public fun NetworkImage(
@@ -38,13 +43,14 @@ public fun NetworkImage(
 ) {
     val platformContext = LocalPlatformContext.current
     val placeholderColor = PlatformTheme.colorScheme.outline
+    val allowHardware = LocalNetworkImageAllowHardware.current
     AsyncImage(
         model =
-            remember(model, platformContext, customHeaders) {
+            remember(model, platformContext, customHeaders, allowHardware) {
                 ImageRequest
                     .Builder(platformContext)
                     .data(model)
-                    .crossfade(true)
+                    .crossfade(allowHardware)
                     .let {
                         if (customHeaders != null) {
                             it.httpHeaders(
@@ -65,7 +71,8 @@ public fun NetworkImage(
                         } else {
                             it
                         }
-                    }.build()
+                    }.applyAllowHardware(allowHardware)
+                    .build()
             },
         contentDescription = contentDescription,
         alignment = alignment,
@@ -96,13 +103,14 @@ public fun SubcomposeNetworkImage(
     customHeaders: ImmutableMap<String, String>? = null,
 ) {
     val platformContext = LocalPlatformContext.current
+    val allowHardware = LocalNetworkImageAllowHardware.current
     SubcomposeAsyncImage(
         model =
-            remember(model, platformContext, customHeaders) {
+            remember(model, platformContext, customHeaders, allowHardware) {
                 ImageRequest
                     .Builder(platformContext)
                     .data(model)
-                    .crossfade(true)
+                    .crossfade(allowHardware)
                     .let {
                         if (customHeaders != null) {
                             it.httpHeaders(
@@ -123,7 +131,8 @@ public fun SubcomposeNetworkImage(
                         } else {
                             it
                         }
-                    }.build()
+                    }.applyAllowHardware(allowHardware)
+                    .build()
             },
         contentDescription = contentDescription,
         alignment = alignment,
@@ -140,8 +149,17 @@ internal fun EmojiImage(
     uri: String,
     modifier: Modifier = Modifier,
 ) {
+    val platformContext = LocalPlatformContext.current
+    val allowHardware = LocalNetworkImageAllowHardware.current
     AsyncImage(
-        model = uri,
+        model =
+            remember(uri, platformContext, allowHardware) {
+                ImageRequest
+                    .Builder(platformContext)
+                    .data(uri)
+                    .applyAllowHardware(allowHardware)
+                    .build()
+            },
         modifier = modifier,
         contentDescription = null,
     )

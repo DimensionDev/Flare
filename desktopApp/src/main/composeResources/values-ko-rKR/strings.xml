@@ -10,7 +10,7 @@
     <string name="home_settings">설정</string>
     <string name="home_tab_home_title">홈</string>
     <string name="home_tab_notifications_title">알림</string>
-    <string name="home_tab_me_title">내 정보</string>
+    <string name="home_tab_me_title">나</string>
     <string name="home_tab_discover_title">발견하기</string>
     <string name="settings_title">설정</string>
     <string name="mastodon_tab_local_title">로컬</string>
@@ -315,8 +315,8 @@
     <string name="misskey_visibility_followers_description">팔로워만 이 게시물을 볼 수 있습니다</string>
     <string name="misskey_visibility_specified_description">언급된 사용자만 이 게시물을 볼 수 있습니다</string>
     <string name="rss_sources_title">구독</string>
-    <string name="add_rss_source">추가</string>
-    <string name="edit_rss_source">RSS 소스 편집</string>
+    <string name="add_rss_source">구독 추가</string>
+    <string name="edit_rss_source">구독 편집</string>
     <string name="delete_rss_source">구독 삭제</string>
     <string name="rss_sources_title_label">제목</string>
     <string name="rss_sources_url_label">URL</string>
@@ -353,7 +353,7 @@
     <string name="send">보내기</string>
     <string name="dm_send_placeholder">메시지 보내기</string>
     <string name="dm_deleted">삭제됨</string>
-    <string name="dm_conversation">다이렉트 메시지 방</string>
+    <string name="dm_conversation">다이렉트 메시지 대화</string>
     <string name="dm_sending">전송 중</string>
     <string name="dm_leave">대화 나가기</string>
     <string name="dm_to_profile">프로필 보기</string>
@@ -398,7 +398,7 @@
     <string name="settings_storage_app_log">앱 로그 열기</string>
     <string name="settings_storage_app_log_description">앱 로그 보기</string>
     <string name="settings_rss_management_title">구독 관리</string>
-    <string name="settings_rss_management_description">구독 관리</string>
+    <string name="settings_rss_management_description">구독을 관리합니다</string>
     <string name="settings_nostr_relays_manage">Nostr 릴레이</string>
     <string name="settings_nostr_relays_add">릴레이 추가</string>
     <string name="settings_nostr_relays_add_dialog_title">릴레이 추가</string>

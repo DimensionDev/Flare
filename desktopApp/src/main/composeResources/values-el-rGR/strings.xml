@@ -323,7 +323,7 @@
     <string name="compose_poll_expiration_1_hour">1 ώρα</string>
     <string name="compose_poll_expiration_6_hours">6 ώρες</string>
     <string name="compose_poll_expiration_12_hours">12 ώρες</string>
-    <string name="compose_poll_expiration_1_ day">1 ημέρα</string>
+    <string name="compose_poll_expiration_1_day">1 ημέρα</string>
     <string name="compose_poll_expiration_3_days">3 ημέρες</string>
     <string name="compose_poll_expiration_7_days">7 ημέρες</string>
     <string name="compose_content_warning_hint">Προειδοποίηση περιεχομένου</string>

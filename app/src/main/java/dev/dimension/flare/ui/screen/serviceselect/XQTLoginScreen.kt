@@ -70,9 +70,14 @@ internal fun XQTLoginScreen(toHome: () -> Unit) {
                     .padding(it)
                     .fillMaxSize(),
             onCreated = {
-                // clea all cookies
+                // clear all cookies, web storage, cache and history so the
+                // login WebView starts from a clean slate even if a previous
+                // account left state behind
                 WebStorage.getInstance().deleteAllData()
                 CookieManager.getInstance().removeAllCookies(null)
+                it.clearCache(true)
+                it.clearHistory()
+                it.clearFormData()
                 with(it.settings) {
                     userAgentString = userAgent.toString()
                     javaScriptEnabled = true

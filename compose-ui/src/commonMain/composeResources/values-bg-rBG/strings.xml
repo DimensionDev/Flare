@@ -4,18 +4,15 @@
     <string name="done">Готово</string>
     <string name="cancel">Отказ</string>
     <string name="ok">ОК</string>
-
     <string name="profile_header_following_count">%1$s Следвани</string>
     <string name="profile_header_fans_count">%1$s Последователи</string>
     <string name="profile_header_toots_count">%1$s Публикации</string>
     <string name="profile_misskey_header_status_count">%1$s Публикации</string>
-
     <string name="profile_header_button_follow">Последване</string>
     <string name="profile_header_button_following">Следване</string>
     <string name="profile_header_button_requested">Заявено</string>
     <string name="profile_header_button_blocked">Блокиран</string>
     <string name="profile_header_button_is_fans">Следва ви</string>
-
     <string name="mastodon_notification_item_followed_you">ви последва</string>
     <string name="mastodon_notification_item_favourited_your_status">хареса публикацията ви</string>
     <string name="mastodon_notification_item_reblogged_your_status">сподели</string>
@@ -28,9 +25,7 @@
     <string name="mastodon_item_show_more">Покажи повече</string>
     <string name="mastodon_item_show_less">Покажи по-малко</string>
     <string name="mastodon_item_pinned">закачи публикация</string>
-
     <string name="post_show_full_text">Покажи целия текст</string>
-
     <string name="bluesky_notification_item_followed_you">ви последва</string>
     <string name="bluesky_notification_item_favourited_your_status">хареса публикацията ви</string>
     <string name="bluesky_notification_item_reblogged_your_status">препубликува публикацията ви</string>
@@ -42,7 +37,6 @@
     <string name="bluesky_notification_item_starterpack_joined">се присъедини чрез Начален пакет</string>
     <string name="bluesky_notification_item_unKnown">Неизвестно</string>
     <string name="bluesky_notification_item_pin">закачи публикация</string>
-
     <string name="misskey_notification_item_mentioned_you">ви спомена</string>
     <string name="misskey_notification_item_replied_to_you">ви отговори</string>
     <string name="misskey_notification_item_reposted_your_status">препубликува публикацията ви</string>
@@ -64,10 +58,8 @@
     <string name="misskey_notification_item_requested_follow">поиска да ви последва</string>
     <string name="misskey_notification_unknwon">Неизвестно известие: %1$s</string>
     <string name="misskey_item_reblogged_status">препубликува</string>
-
     <string name="xqt_item_reblogged_status">препубликува</string>
     <string name="xqt_item_mention_status">ви спомена</string>
-
     <string name="mastodon_visibility_public">Публично</string>
     <string name="mastodon_visibility_unlisted">Неизброено</string>
     <string name="mastodon_visibility_private">Лично</string>
@@ -76,10 +68,8 @@
     <string name="mastodon_visibility_unlisted_description">Всеки може да вижда тази публикация, но тя няма да се появява в публичната хронология</string>
     <string name="mastodon_visibility_private_description">Само последователите могат да виждат тази публикация</string>
     <string name="mastodon_visibility_direct_description">Само споменатите потребители могат да виждат тази публикация</string>
-
     <string name="settings_notifications_title">Известия</string>
     <string name="settings_notifications_subtitle">Персонализирайте как Flare ви известява</string>
-
     <string name="status_loadmore_end">Няма повече публикации</string>
     <string name="status_loadmore_error">Грешка при зареждане на още публикации</string>
     <string name="status_loadmore_error_retry">Повторен опит</string>
@@ -90,31 +80,24 @@
     <string name="login_expired">Сесията за влизане изтече</string>
     <string name="login_expired_message">Докоснете, за да влезете отново</string>
     <string name="login_expired_relogin">Влезте отново</string>
-
     <string name="permission_denied_title">Достъпът е отказан</string>
     <string name="permission_denied_message">Влезте отново, за да получите достъп до тази страница</string>
-
     <string name="misskey_compose_local_only">Само локално</string>
     <string name="misskey_compose_local_only_description">Само потребители от този инстанс могат да виждат тази публикация</string>
-
     <string name="misskey_item_action_renote">Повторна бележка</string>
     <string name="misskey_item_action_quote">Цитат</string>
-
     <string name="bluesky_notification_unknown_message">Неизвестен тип известие %1$s</string>
     <string name="bluesky_notification_unknown_message2">Моля, докладвайте този проблем на разработчика.</string>
-
     <string name="blusky_item_action_repost">Препубликуване</string>
     <string name="blusky_item_action_quote">Цитат</string>
     <string name="blusky_item_action_report">Докладване</string>
     <string name="blusky_item_action_delete">Изтриване</string>
-
     <string name="mastodon_item_unbookmark">Премахни от отметки</string>
     <string name="mastodon_item_bookmark">Отметка</string>
     <string name="mastodon_item_delete">Изтриване</string>
     <string name="mastodon_item_report">Докладване</string>
     <string name="misskey_item_action_delete">Изтриване</string>
     <string name="misskey_item_action_report">Докладване</string>
-
     <string name="bookmark_remove">Премахни отметка</string>
     <string name="bookmark_add">Добави отметка</string>
     <string name="like">Харесване</string>
@@ -132,7 +115,6 @@
     <string name="share">Споделяне</string>
     <string name="fx_share">Споделяне чрез FxEmbed</string>
     <string name="comment">Коментар</string>
-
     <string name="user_report">Докладване</string>
     <string name="user_block">Блокиране</string>
     <string name="user_unblock">Деблокиране</string>
@@ -149,281 +131,194 @@
     <string name="translation_badge_failed">Преводът е неуспешен</string>
     <string name="translation_retry">Повторен опит за превод</string>
     <string name="translation_show_original">Покажи оригинала</string>
-
     <string name="date_format_year_month_day">dd MMM yy</string>
     <string name="date_format_month_day">dd MMM</string>
     <string name="date_format_full">dd MMM yy HH:mm</string>
-
     <string name="vvo_notification_like">Хареса публикацията ви</string>
-
     <string name="user_follow_edit_list">Добави/Премахни от списък</string>
     <string name="list_empty">Няма списъци</string>
     <string name="list_error">Грешка при зареждане на списъците</string>
-
     <string name="misskey_achievement_notes1_title">просто настройвам моя msky</string>
     <string name="misskey_achievement_notes1_description">Публикувайте първата си бележка</string>
     <string name="misskey_achievement_notes1_flavor">Приятно прекарване с Misskey!</string>
-
     <string name="misskey_achievement_notes10_title">Няколко бележки</string>
     <string name="misskey_achievement_notes10_description">Публикувайте 10 бележки</string>
-
     <string name="misskey_achievement_notes100_title">Много бележки</string>
     <string name="misskey_achievement_notes100_description">Публикувайте 100 бележки</string>
-
     <string name="misskey_achievement_notes500_title">Покрит с бележки</string>
     <string name="misskey_achievement_notes500_description">Публикувайте 500 бележки</string>
-
     <string name="misskey_achievement_notes1000_title">Планина от бележки</string>
     <string name="misskey_achievement_notes1000_description">Публикувайте 1 000 бележки</string>
-
     <string name="misskey_achievement_notes5000_title">Преливащи бележки</string>
     <string name="misskey_achievement_notes5000_description">Публикувайте 5 000 бележки</string>
-
     <string name="misskey_achievement_notes10000_title">Супер бележка</string>
     <string name="misskey_achievement_notes10000_description">Публикувайте 10 000 бележки</string>
-
     <string name="misskey_achievement_notes20000_title">Трябват... още... бележки...</string>
     <string name="misskey_achievement_notes20000_description">Публикувайте 20 000 бележки</string>
-
     <string name="misskey_achievement_notes30000_title">Бележки бележки бележки!</string>
     <string name="misskey_achievement_notes30000_description">Публикувайте 30 000 бележки</string>
-
     <string name="misskey_achievement_notes40000_title">Фабрика за бележки</string>
     <string name="misskey_achievement_notes40000_description">Публикувайте 40 000 бележки</string>
-
     <string name="misskey_achievement_notes50000_title">Планета от бележки</string>
     <string name="misskey_achievement_notes50000_description">Публикувайте 50 000 бележки</string>
-
     <string name="misskey_achievement_notes60000_title">Квазар от бележки</string>
     <string name="misskey_achievement_notes60000_description">Публикувайте 60 000 бележки</string>
-
     <string name="misskey_achievement_notes70000_title">Черна дупка от бележки</string>
     <string name="misskey_achievement_notes70000_description">Публикувайте 70 000 бележки</string>
-
     <string name="misskey_achievement_notes80000_title">Галактика от бележки</string>
     <string name="misskey_achievement_notes80000_description">Публикувайте 80 000 бележки</string>
-
     <string name="misskey_achievement_notes90000_title">Вселена от бележки</string>
     <string name="misskey_achievement_notes90000_description">Публикувайте 90 000 бележки</string>
-
     <string name="misskey_achievement_notes100000_title">ВСИЧКИ ВАШИ БЕЛЕЖКИ ПРИНАДЛЕЖАТ НА НАС</string>
     <string name="misskey_achievement_notes100000_description">Публикувайте 100 000 бележки</string>
     <string name="misskey_achievement_notes100000_flavor">Определено имате какво да кажете.</string>
-
     <string name="misskey_achievement_login3_title">Начинаещ I</string>
     <string name="misskey_achievement_login3_description">Влезте общо за 3 дни</string>
     <string name="misskey_achievement_login3_flavor">От днес ме наричайте просто Misskist</string>
-
     <string name="misskey_achievement_login7_title">Начинаещ II</string>
     <string name="misskey_achievement_login7_description">Влезте общо за 7 дни</string>
     <string name="misskey_achievement_login7_flavor">Вече се чувствате сякаш сте му хванали цаката?</string>
-
     <string name="misskey_achievement_login15_title">Начинаещ III</string>
     <string name="misskey_achievement_login15_description">Влезте общо за 15 дни</string>
-
     <string name="misskey_achievement_login30_title">Misskist I</string>
     <string name="misskey_achievement_login30_description">Влезте общо за 30 дни</string>
-
     <string name="misskey_achievement_login60_title">Misskist II</string>
     <string name="misskey_achievement_login60_description">Влезте общо за 60 дни</string>
-
     <string name="misskey_achievement_login100_title">Misskist III</string>
     <string name="misskey_achievement_login100_description">Влезте общо за 100 дни</string>
     <string name="misskey_achievement_login100_flavor">Яростен Misskist</string>
-
     <string name="misskey_achievement_login200_title">Редовен I</string>
     <string name="misskey_achievement_login200_description">Влезте общо за 200 дни</string>
-
     <string name="misskey_achievement_login300_title">Редовен II</string>
     <string name="misskey_achievement_login300_description">Влезте общо за 300 дни</string>
-
     <string name="misskey_achievement_login400_title">Редовен III</string>
     <string name="misskey_achievement_login400_description">Влезте общо за 400 дни</string>
-
     <string name="misskey_achievement_login500_title">Експерт I</string>
     <string name="misskey_achievement_login500_description">Влезте общо за 500 дни</string>
     <string name="misskey_achievement_login500_flavor">Приятели мои, често се казваше, че харесвам бележки</string>
-
     <string name="misskey_achievement_login600_title">Експерт II</string>
     <string name="misskey_achievement_login600_description">Влезте общо за 600 дни</string>
-
     <string name="misskey_achievement_login700_title">Експерт III</string>
     <string name="misskey_achievement_login700_description">Влезте общо за 700 дни</string>
-
     <string name="misskey_achievement_login800_title">Майстор на бележките I</string>
     <string name="misskey_achievement_login800_description">Влезте общо за 800 дни</string>
-
     <string name="misskey_achievement_login900_title">Майстор на бележките II</string>
     <string name="misskey_achievement_login900_description">Влезте общо за 900 дни</string>
-
     <string name="misskey_achievement_login1000_title">Майстор на бележките III</string>
     <string name="misskey_achievement_login1000_description">Влезте общо за 1 000 дни</string>
     <string name="misskey_achievement_login1000_flavor">Благодарим ви, че използвате Misskey!</string>
-
     <string name="misskey_achievement_note_clipped1_title">Трябва... да откъсна...</string>
     <string name="misskey_achievement_note_clipped1_description">Откъснете първата си бележка</string>
-
     <string name="misskey_achievement_note_favorited1_title">Звездоброец</string>
     <string name="misskey_achievement_note_favorited1_description">Добавете в любими първата си бележка</string>
-
     <string name="misskey_achievement_my_note_favorited1_title">Търсене на звезди</string>
     <string name="misskey_achievement_my_note_favorited1_description">Нека някой друг добави в любими една от вашите бележки</string>
-
     <string name="misskey_achievement_profile_filled_title">Добре подготвен</string>
     <string name="misskey_achievement_profile_filled_description">Настройте профила си</string>
-
     <string name="misskey_achievement_marked_as_cat_title">Аз съм котка</string>
     <string name="misskey_achievement_marked_as_cat_description">Отбележете акаунта си като котка</string>
     <string name="misskey_achievement_marked_as_cat_flavor">Ще ти дам име по-късно.</string>
-
     <string name="misskey_achievement_following1_title">Последване на първия потребител</string>
     <string name="misskey_achievement_following1_description">Последвайте потребител</string>
-
     <string name="misskey_achievement_following10_title">В крак... в крак...</string>
     <string name="misskey_achievement_following10_description">Последвайте 10 потребителя</string>
-
     <string name="misskey_achievement_following50_title">Много приятели</string>
     <string name="misskey_achievement_following50_description">Последвайте 50 акаунта</string>
-
     <string name="misskey_achievement_following100_title">100 приятели</string>
     <string name="misskey_achievement_following100_description">Последвайте 100 акаунта</string>
-
     <string name="misskey_achievement_following300_title">Претоварване с приятели</string>
     <string name="misskey_achievement_following300_description">Последвайте 300 акаунта</string>
-
     <string name="misskey_achievement_followers1_title">Първи последовател</string>
     <string name="misskey_achievement_followers1_description">Спечелете 1 последовател</string>
-
     <string name="misskey_achievement_followers10_title">Последвайте ме!</string>
     <string name="misskey_achievement_followers10_description">Спечелете 10 последователя</string>
-
     <string name="misskey_achievement_followers50_title">Идващи на тълпи</string>
     <string name="misskey_achievement_followers50_description">Спечелете 50 последователя</string>
-
     <string name="misskey_achievement_followers100_title">Популярен</string>
     <string name="misskey_achievement_followers100_description">Спечелете 100 последователя</string>
-
     <string name="misskey_achievement_followers300_title">Моля, направете една опашка</string>
     <string name="misskey_achievement_followers300_description">Спечелете 300 последователя</string>
-
     <string name="misskey_achievement_followers500_title">Радио кула</string>
     <string name="misskey_achievement_followers500_description">Спечелете 500 последователя</string>
-
     <string name="misskey_achievement_followers1000_title">Инфлуенсър</string>
     <string name="misskey_achievement_followers1000_description">Спечелете 1 000 последователя</string>
-
     <string name="misskey_achievement_collect_achievements30_title">Колекционер на постижения</string>
     <string name="misskey_achievement_collect_achievements30_description">Спечелете 30 постижения</string>
-
     <string name="misskey_achievement_view_achievements3min_title">Харесва постиженията</string>
     <string name="misskey_achievement_view_achievements3min_description">Разглеждайте списъка си с постижения поне 3 минути</string>
-
     <string name="misskey_achievement_i_love_misskey_title">Обичам Misskey</string>
     <string name="misskey_achievement_i_love_misskey_description">Публикувайте \"I ❤ #Misskey\"</string>
     <string name="misskey_achievement_i_love_misskey_flavor">Екипът по разработка на Misskey оценява вашата подкрепа!</string>
-
     <string name="misskey_achievement_found_treasure_title">Лов на съкровища</string>
     <string name="misskey_achievement_found_treasure_description">Намерихте скритото съкровище</string>
-
     <string name="misskey_achievement_client30min_title">Кратка почивка</string>
     <string name="misskey_achievement_client30min_description">Дръжте Misskey отворен поне 30 минути</string>
-
     <string name="misskey_achievement_client60min_title">Няма \"Miss\" в Misskey</string>
     <string name="misskey_achievement_client60min_description">Дръжте Misskey отворен поне 60 минути</string>
-
     <string name="misskey_achievement_note_deleted_within1min_title">Забрави</string>
     <string name="misskey_achievement_note_deleted_within1min_description">Изтрийте бележка в рамките на минута след публикуването ѝ</string>
-
     <string name="misskey_achievement_posted_at_late_night_title">Нощна птица</string>
     <string name="misskey_achievement_posted_at_late_night_description">Публикувайте бележка късно през нощта</string>
     <string name="misskey_achievement_posted_at_late_night_flavor">Време е за лягане.</string>
-
     <string name="misskey_achievement_posted_at_0min0sec_title">Говорещ часовник</string>
     <string name="misskey_achievement_posted_at_0min0sec_description">Публикувайте бележка в 00:00</string>
     <string name="misskey_achievement_posted_at_0min0sec_flavor">Клик Клик Клик Клан</string>
-
     <string name="misskey_achievement_self_quote_title">Самореференция</string>
     <string name="misskey_achievement_self_quote_description">Цитирайте собствената си бележка</string>
-
     <string name="misskey_achievement_htl20npm_title">Течаща хронология</string>
     <string name="misskey_achievement_htl20npm_description">Нека скоростта на началната ви хронология надвиши 20 бележки в минута</string>
-
     <string name="misskey_achievement_view_instance_chart_title">Аналитик</string>
     <string name="misskey_achievement_view_instance_chart_description">Разгледайте диаграмите на вашия инстанс</string>
-
     <string name="misskey_achievement_output_hello_world_on_scratchpad_title">Здравей, свят!</string>
     <string name="misskey_achievement_output_hello_world_on_scratchpad_description">Изведете \"hello world\" в Scratchpad</string>
-
     <string name="misskey_achievement_open3windows_title">Многопрозоречен режим</string>
     <string name="misskey_achievement_open3windows_description">Имайте поне 3 отворени прозореца едновременно</string>
-
     <string name="misskey_achievement_drive_folder_circular_reference_title">Циклична препратка</string>
     <string name="misskey_achievement_drive_folder_circular_reference_description">Опит за създаване на рекурсивно вложена папка в Drive</string>
-
     <string name="misskey_achievement_react_without_read_title">Наистина ли прочете това?</string>
     <string name="misskey_achievement_react_without_read_description">Реагирайте на бележка с дължина над 100 знака в рамките на 3 секунди след публикуването ѝ</string>
-
     <string name="misskey_achievement_clicked_click_here_title">Кликнете тук</string>
     <string name="misskey_achievement_clicked_click_here_description">Вие кликнахте тук</string>
-
     <string name="misskey_achievement_just_plain_lucky_title">Просто късметлия</string>
     <string name="misskey_achievement_just_plain_lucky_description">Има шанс да бъде получено с вероятност 0,005% на всеки 10 секунди</string>
-
     <string name="misskey_achievement_set_name_to_syuilo_title">Комплекс на божество</string>
     <string name="misskey_achievement_set_name_to_syuilo_description">Задайте името си на \"syuilo\"</string>
-
     <string name="misskey_achievement_passed_since_account_created1_title">Една година юбилей</string>
     <string name="misskey_achievement_passed_since_account_created1_description">Измина една година от създаването на акаунта ви</string>
-
     <string name="misskey_achievement_passed_since_account_created2_title">Две години юбилей</string>
     <string name="misskey_achievement_passed_since_account_created2_description">Изминаха две години от създаването на акаунта ви</string>
-
     <string name="misskey_achievement_passed_since_account_created3_title">Три години юбилей</string>
     <string name="misskey_achievement_passed_since_account_created3_description">Изминаха три години от създаването на акаунта ви</string>
-
     <string name="misskey_achievement_logged_in_on_birthday_title">Честит рожден ден</string>
     <string name="misskey_achievement_logged_in_on_birthday_description">Влезте на рождения си ден</string>
-
     <string name="misskey_achievement_logged_in_on_new_years_day_title">Честита Нова година!</string>
     <string name="misskey_achievement_logged_in_on_new_years_day_description">Влязохте в първия ден от годината</string>
     <string name="misskey_achievement_logged_in_on_new_years_day_flavor">За още една страхотна година в този инстанс</string>
-
     <string name="misskey_achievement_cookie_clicked_title">Игра, в която кликате бисквитки</string>
     <string name="misskey_achievement_cookie_clicked_description">Кликнахте върху бисквитката</string>
     <string name="misskey_achievement_cookie_clicked_flavor">Чакай, на правилния уебсайт ли си?</string>
-
     <string name="misskey_achievement_brain_diver_title">Гмуркач в мозъка</string>
     <string name="misskey_achievement_brain_diver_description">Публикувайте връзката към Brain Diver</string>
     <string name="misskey_achievement_brain_diver_flavor">Misskey-Misskey La-Tu-Ma</string>
-
     <string name="misskey_achievement_smash_test_notification_button_title">Препълване на тестове</string>
     <string name="misskey_achievement_smash_test_notification_button_description">Задействайте тестовото известие многократно за изключително кратко време</string>
-
     <string name="misskey_achievement_tutorial_completed_title">Диплома за начален курс на Misskey</string>
     <string name="misskey_achievement_tutorial_completed_description">Ръководството е завършено</string>
-
     <string name="misskey_achievement_bubble_game_exploding_head_title">🤯</string>
     <string name="misskey_achievement_bubble_game_exploding_head_description">Най-големият обект в играта с мехурчета</string>
-
     <string name="misskey_achievement_bubble_game_double_exploding_head_title">Двойно🤯</string>
     <string name="misskey_achievement_bubble_game_double_exploding_head_description">Два от най-големите обекти в играта с мехурчета едновременно</string>
     <string name="misskey_achievement_bubble_game_double_exploding_head_flavor">Можете да напълните кутия за обяд по този начин 🤯 🤯 малко.</string>
-
     <string name="vote">Гласуване</string>
     <string name="poll_expired">Анкетата е изтекла</string>
     <string name="poll_voted">Гласувано</string>
     <string name="poll_expired_at">Изтекла на %1$s</string>
     <string name="user_send_message">Изпрати директно съобщение</string>
-
     <string name="profile_search_user_using_account">Намери %1$s в %2$s чрез %3$s</string>
     <string name="profile_search_user_using_account_compat">Намери в %1$s</string>
-
     <string name="feeds_discover_feeds_created_by">Създадено от %1$s</string>
-
     <string name="notification_item_accept_follow_request">Приемане</string>
     <string name="notification_item_reject_follow_request">Отхвърляне</string>
-
-
     <string name="dm_list_empty">Няма директни съобщения</string>
     <string name="dm_list_error">Грешка при зареждане на директните съобщения</string>
     <string name="send">Изпрати</string>
@@ -433,7 +328,6 @@
     <string name="dm_sending">Изпраща се</string>
     <string name="dm_leave">Напусни разговора</string>
     <string name="dm_to_profile">Покажи профила</string>
-
     <string name="settings_side_panel_empty">По подразбиране страничният панел следва платформата на текущия акаунт.</string>
     <string name="tab_settings_add">Добави</string>
     <string name="tab_settings_drag">Плъзни</string>
@@ -442,16 +336,13 @@
     <string name="tab_settings_default">По подразбиране</string>
     <string name="tab_settings_list">Списък</string>
     <string name="tab_settings_feed">Потоци</string>
-
     <string name="list_add">Добави списък</string>
     <string name="list_edit">Редактирай списък</string>
     <string name="list_delete">Изтрий списък</string>
-
     <string name="rss_sources_title">Абонаменти</string>
     <string name="add_rss_source">Добави абонамент</string>
     <string name="edit_rss_source">Редактирай абонамент</string>
     <string name="delete_rss_source">Изтрий абонамент</string>
-
     <string name="rss_sources_title_label">Заглавие</string>
     <string name="rss_sources_url_label">URL</string>
     <string name="rss_title">Абонаменти</string>
@@ -459,7 +350,6 @@
     <string name="mastodon_trending_statuses">Трендови статуси</string>
     <string name="mastodon_federated_timeline">Федерирана хронология</string>
     <string name="mastodon_local_timeline">Локална хронология</string>
-
     <string name="service_select_welcome_title">Добре дошли във Flare</string>
     <string name="service_select_welcome_message">Въведете сървър, за да започнете.</string>
     <string name="service_select_welcome_hint">Flare поддържа Mastodon, Misskey, Bluesky, Nostr и X.</string>
@@ -493,7 +383,6 @@
     <string name="service_select_compatibility_warning">Този сървър използва %1$s, Flare ще работи в режим на съвместимост. Някои функции може да не работят правилно.</string>
     <string name="login_agreement">Чрез влизане вие се съгласявате с %1$s.</string>
     <string name="eula_privacy_policy">EULA и Политика за поверителност</string>
-
     <string name="home_tab_home_title">Начало</string>
     <string name="home_tab_notifications_title">Известия</string>
     <string name="home_tab_me_title">Аз</string>
@@ -519,6 +408,10 @@
     <string name="settings_about_source_code">Изходен код</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Присъединете се към нашата Telegram група</string>
+    <string name="settings_about_discord" translatable="false">Discord</string>
+    <string name="settings_about_discord_description">Присъединете се към нашия Discord сървър</string>
+    <string name="settings_about_line" translatable="false">Line</string>
+    <string name="settings_about_line_description">Присъединете се към нашата Line група</string>
     <string name="settings_about_localization">Crowdin</string>
     <string name="settings_about_localization_description">Помогнете ни да преведем Flare</string>
     <string name="settings_privacy_policy">Политика за поверителност</string>

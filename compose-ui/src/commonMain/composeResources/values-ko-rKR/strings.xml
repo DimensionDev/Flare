@@ -4,18 +4,15 @@
     <string name="done">완료</string>
     <string name="cancel">취소</string>
     <string name="ok">확인</string>
-
     <string name="profile_header_following_count">%1$s 팔로잉</string>
     <string name="profile_header_fans_count">%1$s 팔로워</string>
     <string name="profile_header_toots_count">%1$s 게시물</string>
     <string name="profile_misskey_header_status_count">%1$s 게시물</string>
-
     <string name="profile_header_button_follow">팔로우</string>
     <string name="profile_header_button_following">팔로잉</string>
     <string name="profile_header_button_requested">요청됨</string>
     <string name="profile_header_button_blocked">차단됨</string>
     <string name="profile_header_button_is_fans">나를 팔로우함</string>
-
     <string name="mastodon_notification_item_followed_you">님이 나를 팔로우했습니다</string>
     <string name="mastodon_notification_item_favourited_your_status">님이 내 게시물을 즐겨찾기에 추가했습니다</string>
     <string name="mastodon_notification_item_reblogged_your_status">님이 게시물을 공유했습니다</string>
@@ -28,9 +25,7 @@
     <string name="mastodon_item_show_more">더 보기</string>
     <string name="mastodon_item_show_less">숨기기</string>
     <string name="mastodon_item_pinned">님이 게시물을 고정했습니다</string>
-
     <string name="post_show_full_text">전문 보기</string>
-
     <string name="bluesky_notification_item_followed_you">님이 나를 팔로우했습니다</string>
     <string name="bluesky_notification_item_favourited_your_status">님이 내 게시물을 좋아합니다</string>
     <string name="bluesky_notification_item_reblogged_your_status">님이 내 게시물을 리포스트했습니다</string>
@@ -42,7 +37,6 @@
     <string name="bluesky_notification_item_starterpack_joined">님이 스타터 팩을 통해 가입했습니다</string>
     <string name="bluesky_notification_item_unKnown">알 수 없음</string>
     <string name="bluesky_notification_item_pin">님이 게시물을 고정했습니다</string>
-
     <string name="misskey_notification_item_mentioned_you">님이 나를 언급했습니다</string>
     <string name="misskey_notification_item_replied_to_you">님이 답글을 남겼습니다</string>
     <string name="misskey_notification_item_reposted_your_status">님이 내 게시물을 리노트했습니다</string>
@@ -64,10 +58,8 @@
     <string name="misskey_notification_item_requested_follow">님이 팔로우를 요청했습니다</string>
     <string name="misskey_notification_unknwon">알 수 없는 알림: %1$s</string>
     <string name="misskey_item_reblogged_status">리노트함</string>
-
     <string name="xqt_item_reblogged_status">리포스트함</string>
     <string name="xqt_item_mention_status">님이 나를 언급했습니다</string>
-
     <string name="mastodon_visibility_public">공개</string>
     <string name="mastodon_visibility_unlisted">미등재</string>
     <string name="mastodon_visibility_private">팔로워 한정</string>
@@ -76,10 +68,8 @@
     <string name="mastodon_visibility_unlisted_description">누구나 볼 수 있지만 공개 타임라인에는 나타나지 않습니다</string>
     <string name="mastodon_visibility_private_description">팔로워들만 게시물을 볼 수 있습니다</string>
     <string name="mastodon_visibility_direct_description">언급된 사용자들만 게시물을 볼 수 있습니다</string>
-
     <string name="settings_notifications_title">알림</string>
     <string name="settings_notifications_subtitle">Flare 알림 설정 사용자 정의</string>
-
     <string name="status_loadmore_end">더 이상 게시물이 없습니다</string>
     <string name="status_loadmore_error">게시물을 불러오는 중 오류가 발생했습니다</string>
     <string name="status_loadmore_error_retry">재시도</string>
@@ -90,31 +80,24 @@
     <string name="login_expired">로그인 세션이 만료되었습니다</string>
     <string name="login_expired_message">다시 로그인하려면 탭하세요</string>
     <string name="login_expired_relogin">다시 로그인</string>
-
     <string name="permission_denied_title">권한 거부됨</string>
     <string name="permission_denied_message">이 페이지에 액세스하려면 다시 로그인하세요</string>
-
     <string name="misskey_compose_local_only">로컬 전용</string>
     <string name="misskey_compose_local_only_description">이 인스턴스의 사용자들만 게시물을 볼 수 있습니다</string>
-
     <string name="misskey_item_action_renote">리노트</string>
     <string name="misskey_item_action_quote">인용</string>
-
     <string name="bluesky_notification_unknown_message">알 수 없는 알림 유형 %1$s</string>
     <string name="bluesky_notification_unknown_message2">개발자에게 이 문제를 보고해 주세요.</string>
-
     <string name="blusky_item_action_repost">리포스트</string>
     <string name="blusky_item_action_quote">인용</string>
     <string name="blusky_item_action_report">신고</string>
     <string name="blusky_item_action_delete">삭제</string>
-
     <string name="mastodon_item_unbookmark">북마크 해제</string>
     <string name="mastodon_item_bookmark">북마크</string>
     <string name="mastodon_item_delete">삭제</string>
     <string name="mastodon_item_report">신고</string>
     <string name="misskey_item_action_delete">삭제</string>
     <string name="misskey_item_action_report">신고</string>
-
     <string name="bookmark_remove">북마크 제거</string>
     <string name="bookmark_add">북마크 추가</string>
     <string name="like">좋아요</string>
@@ -132,7 +115,6 @@
     <string name="share">공유</string>
     <string name="fx_share">FxEmbed로 공유</string>
     <string name="comment">댓글</string>
-
     <string name="user_report">신고</string>
     <string name="user_block">차단</string>
     <string name="user_unblock">차단 해제</string>
@@ -149,281 +131,194 @@
     <string name="translation_badge_failed">번역 실패</string>
     <string name="translation_retry">번역 재시도</string>
     <string name="translation_show_original">원본 보기</string>
-
     <string name="date_format_year_month_day">yy/MM/dd</string>
     <string name="date_format_month_day">MM/dd</string>
     <string name="date_format_full">yy/MM/dd HH:mm</string>
-
     <string name="vvo_notification_like">님이 내 게시물을 좋아합니다</string>
-
     <string name="user_follow_edit_list">리스트 추가/제거</string>
     <string name="list_empty">리스트가 없습니다</string>
     <string name="list_error">리스트를 불러오지 못했습니다</string>
-
     <string name="misskey_achievement_notes1_title">msky 설정 중</string>
     <string name="misskey_achievement_notes1_description">첫 번째 노트를 게시하세요</string>
     <string name="misskey_achievement_notes1_flavor">Misskey에서 즐거운 시간 보내세요!</string>
-
     <string name="misskey_achievement_notes10_title">노트 10개</string>
     <string name="misskey_achievement_notes10_description">노트 10개를 게시하세요</string>
-
     <string name="misskey_achievement_notes100_title">노트 100개</string>
     <string name="misskey_achievement_notes100_description">노트 100개를 게시하세요</string>
-
     <string name="misskey_achievement_notes500_title">노트로 뒤덮임</string>
     <string name="misskey_achievement_notes500_description">노트 500개를 게시하세요</string>
-
     <string name="misskey_achievement_notes1000_title">노트 산더미</string>
     <string name="misskey_achievement_notes1000_description">노트 1,000개를 게시하세요</string>
-
     <string name="misskey_achievement_notes5000_title">넘쳐나는 노트</string>
     <string name="misskey_achievement_notes5000_description">노트 5,000개를 게시하세요</string>
-
     <string name="misskey_achievement_notes10000_title">슈퍼노트</string>
     <string name="misskey_achievement_notes10000_description">노트 10,000개를 게시하세요</string>
-
     <string name="misskey_achievement_notes20000_title">노트가... 더... 필요해...</string>
     <string name="misskey_achievement_notes20000_description">노트 20,000개를 게시하세요</string>
-
     <string name="misskey_achievement_notes30000_title">노트 노트 노트!</string>
     <string name="misskey_achievement_notes30000_description">노트 30,000개를 게시하세요</string>
-
     <string name="misskey_achievement_notes40000_title">노트 공장</string>
     <string name="misskey_achievement_notes40000_description">노트 40,000개를 게시하세요</string>
-
     <string name="misskey_achievement_notes50000_title">노트 행성</string>
     <string name="misskey_achievement_notes50000_description">노트 50,000개를 게시하세요</string>
-
     <string name="misskey_achievement_notes60000_title">노트 퀘이사</string>
     <string name="misskey_achievement_notes60000_description">노트 60,000개를 게시하세요</string>
-
     <string name="misskey_achievement_notes70000_title">노트 블랙홀</string>
     <string name="misskey_achievement_notes70000_description">노트 70,000개를 게시하세요</string>
-
     <string name="misskey_achievement_notes80000_title">노트 은하</string>
     <string name="misskey_achievement_notes80000_description">노트 80,000개를 게시하세요</string>
-
     <string name="misskey_achievement_notes90000_title">노트 우주</string>
     <string name="misskey_achievement_notes90000_description">노트 90,000개를 게시하세요</string>
-
     <string name="misskey_achievement_notes100000_title">모든 노트는 우리의 것이다</string>
     <string name="misskey_achievement_notes100000_description">노트 100,000개를 게시하세요</string>
     <string name="misskey_achievement_notes100000_flavor">하고 싶은 말이 정말 많으시군요.</string>
-
     <string name="misskey_achievement_login3_title">초보자 I</string>
     <string name="misskey_achievement_login3_description">총 3일간 로그인하세요</string>
     <string name="misskey_achievement_login3_flavor">오늘부터 저를 Misskist라고 불러주세요</string>
-
     <string name="misskey_achievement_login7_title">초보자 II</string>
     <string name="misskey_achievement_login7_description">총 7일간 로그인하세요</string>
     <string name="misskey_achievement_login7_flavor">이제 좀 익숙해지셨나요?</string>
-
     <string name="misskey_achievement_login15_title">초보자 III</string>
     <string name="misskey_achievement_login15_description">총 15일간 로그인하세요</string>
-
     <string name="misskey_achievement_login30_title">Misskist I</string>
     <string name="misskey_achievement_login30_description">총 30일간 로그인하세요</string>
-
     <string name="misskey_achievement_login60_title">Misskist II</string>
     <string name="misskey_achievement_login60_description">총 60일간 로그인하세요</string>
-
     <string name="misskey_achievement_login100_title">Misskist III</string>
     <string name="misskey_achievement_login100_description">총 100일간 로그인하세요</string>
     <string name="misskey_achievement_login100_flavor">격렬한 Misskist</string>
-
     <string name="misskey_achievement_login200_title">단골 I</string>
     <string name="misskey_achievement_login200_description">총 200일간 로그인하세요</string>
-
     <string name="misskey_achievement_login300_title">단골 II</string>
     <string name="misskey_achievement_login300_description">총 300일간 로그인하세요</string>
-
     <string name="misskey_achievement_login400_title">단골 III</string>
     <string name="misskey_achievement_login400_description">총 400일간 로그인하세요</string>
-
     <string name="misskey_achievement_login500_title">전문가 I</string>
     <string name="misskey_achievement_login500_description">총 500일간 로그인하세요</string>
     <string name="misskey_achievement_login500_flavor">여러분, 저는 노트가 좋다는 말을 자주 듣곤 했습니다</string>
-
     <string name="misskey_achievement_login600_title">전문가 II</string>
     <string name="misskey_achievement_login600_description">총 600일간 로그인하세요</string>
-
     <string name="misskey_achievement_login700_title">전문가 III</string>
     <string name="misskey_achievement_login700_description">총 700일간 로그인하세요</string>
-
     <string name="misskey_achievement_login800_title">노트의 달인 I</string>
     <string name="misskey_achievement_login800_description">총 800일간 로그인하세요</string>
-
     <string name="misskey_achievement_login900_title">노트의 달인 II</string>
     <string name="misskey_achievement_login900_description">총 900일간 로그인하세요</string>
-
     <string name="misskey_achievement_login1000_title">노트의 달인 III</string>
     <string name="misskey_achievement_login1000_description">총 1,000일간 로그인하세요</string>
     <string name="misskey_achievement_login1000_flavor">Misskey를 이용해 주셔서 감사합니다!</string>
-
     <string name="misskey_achievement_note_clipped1_title">클립... 해야 해...</string>
     <string name="misskey_achievement_note_clipped1_description">첫 번째 노트를 클립하세요</string>
-
     <string name="misskey_achievement_note_favorited1_title">별을 보는 사람</string>
     <string name="misskey_achievement_note_favorited1_description">첫 번째 노트를 즐겨찾기에 추가하세요</string>
-
     <string name="misskey_achievement_my_note_favorited1_title">별 찾기</string>
     <string name="misskey_achievement_my_note_favorited1_description">다른 사람이 내 노트를 즐겨찾기에 추가하게 하세요</string>
-
     <string name="misskey_achievement_profile_filled_title">준비 완료</string>
     <string name="misskey_achievement_profile_filled_description">프로필을 설정하세요</string>
-
     <string name="misskey_achievement_marked_as_cat_title">나는 고양이로소이다</string>
     <string name="misskey_achievement_marked_as_cat_description">계정을 고양이로 설정하세요</string>
     <string name="misskey_achievement_marked_as_cat_flavor">이름은 나중에 지어줄게요.</string>
-
     <string name="misskey_achievement_following1_title">첫 팔로우</string>
     <string name="misskey_achievement_following1_description">사용자를 팔로우하세요</string>
-
     <string name="misskey_achievement_following10_title">계속해서... 계속해서...</string>
     <string name="misskey_achievement_following10_description">사용자 10명을 팔로우하세요</string>
-
     <string name="misskey_achievement_following50_title">많은 친구들</string>
     <string name="misskey_achievement_following50_description">계정 50개를 팔로우하세요</string>
-
     <string name="misskey_achievement_following100_title">친구 100명</string>
     <string name="misskey_achievement_following100_description">계정 100개를 팔로우하세요</string>
-
     <string name="misskey_achievement_following300_title">친구 과부하</string>
     <string name="misskey_achievement_following300_description">계정 300개를 팔로우하세요</string>
-
     <string name="misskey_achievement_followers1_title">첫 팔로워</string>
     <string name="misskey_achievement_followers1_description">팔로워 1명을 얻으세요</string>
-
     <string name="misskey_achievement_followers10_title">나를 팔로우해!</string>
     <string name="misskey_achievement_followers10_description">팔로워 10명을 얻으세요</string>
-
     <string name="misskey_achievement_followers50_title">구름 인파</string>
     <string name="misskey_achievement_followers50_description">팔로워 50명을 얻으세요</string>
-
     <string name="misskey_achievement_followers100_title">인기인</string>
     <string name="misskey_achievement_followers100_description">팔로워 100명을 얻으세요</string>
-
     <string name="misskey_achievement_followers300_title">한 줄로 서 주세요</string>
     <string name="misskey_achievement_followers300_description">팔로워 300명을 얻으세요</string>
-
     <string name="misskey_achievement_followers500_title">라디오 타워</string>
     <string name="misskey_achievement_followers500_description">팔로워 500명을 얻으세요</string>
-
     <string name="misskey_achievement_followers1000_title">인플루언서</string>
     <string name="misskey_achievement_followers1000_description">팔로워 1,000명을 얻으세요</string>
-
     <string name="misskey_achievement_collect_achievements30_title">업적 수집가</string>
     <string name="misskey_achievement_collect_achievements30_description">업적 30개를 달성하세요</string>
-
     <string name="misskey_achievement_view_achievements3min_title">업적 감상</string>
     <string name="misskey_achievement_view_achievements3min_description">업적 목록을 최소 3분간 살펴보세요</string>
-
     <string name="misskey_achievement_i_love_misskey_title">I Love Misskey</string>
     <string name="misskey_achievement_i_love_misskey_description">\"I ❤ #Misskey\"라고 게시하세요</string>
     <string name="misskey_achievement_i_love_misskey_flavor">Misskey 개발팀은 여러분의 응원에 진심으로 감사드립니다!</string>
-
     <string name="misskey_achievement_found_treasure_title">보물 찾기</string>
     <string name="misskey_achievement_found_treasure_description">숨겨진 보물을 찾았습니다</string>
-
     <string name="misskey_achievement_client30min_title">잠깐의 휴식</string>
     <string name="misskey_achievement_client30min_description">Misskey를 최소 30분 동안 열어 두세요</string>
-
     <string name="misskey_achievement_client60min_title">Misskey에는 실수가 없지</string>
     <string name="misskey_achievement_client60min_description">Misskey를 최소 60분 동안 열어 두세요</string>
-
     <string name="misskey_achievement_note_deleted_within1min_title">신경 쓰지 마세요</string>
     <string name="misskey_achievement_note_deleted_within1min_description">노트를 게시한 후 1분 이내에 삭제하세요</string>
-
     <string name="misskey_achievement_posted_at_late_night_title">야행성</string>
     <string name="misskey_achievement_posted_at_late_night_description">늦은 밤에 노트를 게시하세요</string>
     <string name="misskey_achievement_posted_at_late_night_flavor">이제 잘 시간이에요.</string>
-
     <string name="misskey_achievement_posted_at_0min0sec_title">말하는 시계</string>
     <string name="misskey_achievement_posted_at_0min0sec_description">00:00에 노트를 게시하세요</string>
     <string name="misskey_achievement_posted_at_0min0sec_flavor">똑딱 똑딱 똑딱 댕-</string>
-
     <string name="misskey_achievement_self_quote_title">자기 참조</string>
     <string name="misskey_achievement_self_quote_description">자신의 노트를 인용하세요</string>
-
     <string name="misskey_achievement_htl20npm_title">흐르는 타임라인</string>
     <string name="misskey_achievement_htl20npm_description">홈 타임라인의 속도가 분당 20개(npm)를 초과하게 하세요</string>
-
     <string name="misskey_achievement_view_instance_chart_title">분석가</string>
     <string name="misskey_achievement_view_instance_chart_description">인스턴스의 차트를 확인하세요</string>
-
     <string name="misskey_achievement_output_hello_world_on_scratchpad_title">Hello, world!</string>
     <string name="misskey_achievement_output_hello_world_on_scratchpad_description">Scratchpad에 \"hello world\"를 출력하세요</string>
-
     <string name="misskey_achievement_open3windows_title">멀티 윈도우</string>
     <string name="misskey_achievement_open3windows_description">최소 3개의 창을 동시에 여세요</string>
-
     <string name="misskey_achievement_drive_folder_circular_reference_title">순환 참조</string>
     <string name="misskey_achievement_drive_folder_circular_reference_description">드라이브에서 재귀적으로 중첩된 폴더를 생성하려고 시도하세요</string>
-
     <string name="misskey_achievement_react_without_read_title">정말로 다 읽으셨나요?</string>
     <string name="misskey_achievement_react_without_read_description">100자 이상의 노트가 게시된 지 3초 이내에 반응을 남기세요</string>
-
     <string name="misskey_achievement_clicked_click_here_title">여기를 클릭하세요</string>
     <string name="misskey_achievement_clicked_click_here_description">여기를 클릭했습니다</string>
-
     <string name="misskey_achievement_just_plain_lucky_title">운이 좋네요</string>
     <string name="misskey_achievement_just_plain_lucky_description">10초마다 0.005%의 확률로 획득할 기회가 있습니다</string>
-
     <string name="misskey_achievement_set_name_to_syuilo_title">신 콤플렉스</string>
     <string name="misskey_achievement_set_name_to_syuilo_description">이름을 \"syuilo\"로 설정하세요</string>
-
     <string name="misskey_achievement_passed_since_account_created1_title">1주년</string>
     <string name="misskey_achievement_passed_since_account_created1_description">계정 생성 후 1년이 지났습니다</string>
-
     <string name="misskey_achievement_passed_since_account_created2_title">2주년</string>
     <string name="misskey_achievement_passed_since_account_created2_description">계정 생성 후 2년이 지났습니다</string>
-
     <string name="misskey_achievement_passed_since_account_created3_title">3주년</string>
     <string name="misskey_achievement_passed_since_account_created3_description">계정 생성 후 3년이 지났습니다</string>
-
     <string name="misskey_achievement_logged_in_on_birthday_title">생일 축하합니다</string>
     <string name="misskey_achievement_logged_in_on_birthday_description">생일에 로그인하세요</string>
-
     <string name="misskey_achievement_logged_in_on_new_years_day_title">새해 복 많이 받으세요!</string>
     <string name="misskey_achievement_logged_in_on_new_years_day_description">한 해의 첫날에 로그인했습니다</string>
     <string name="misskey_achievement_logged_in_on_new_years_day_flavor">이 인스턴스에서의 또 다른 멋진 한 해를 위해</string>
-
     <string name="misskey_achievement_cookie_clicked_title">쿠키를 클릭하는 게임</string>
     <string name="misskey_achievement_cookie_clicked_description">쿠키를 클릭했습니다</string>
     <string name="misskey_achievement_cookie_clicked_flavor">잠깐만요, 올바른 웹사이트에 접속하신 거 맞나요?</string>
-
     <string name="misskey_achievement_brain_diver_title">Brain Diver</string>
     <string name="misskey_achievement_brain_diver_description">Brain Diver 링크를 게시하세요</string>
     <string name="misskey_achievement_brain_diver_flavor">Misskey-Misskey La-Tu-Ma</string>
-
     <string name="misskey_achievement_smash_test_notification_button_title">테스트 연타</string>
     <string name="misskey_achievement_smash_test_notification_button_description">매우 짧은 시간 내에 알림 테스트를 반복적으로 실행하세요</string>
-
     <string name="misskey_achievement_tutorial_completed_title">Misskey 초급 과정 수료증</string>
     <string name="misskey_achievement_tutorial_completed_description">튜토리얼 완료</string>
-
     <string name="misskey_achievement_bubble_game_exploding_head_title">🤯</string>
     <string name="misskey_achievement_bubble_game_exploding_head_description">버블 게임에서 가장 큰 오브젝트</string>
-
     <string name="misskey_achievement_bubble_game_double_exploding_head_title">더블 🤯</string>
     <string name="misskey_achievement_bubble_game_double_exploding_head_description">버블 게임에서 동시에 두 개의 가장 큰 오브젝트를 만드세요</string>
     <string name="misskey_achievement_bubble_game_double_exploding_head_flavor">도시락 통을 이렇게 🤯 🤯 채울 수 있겠네요.</string>
-
     <string name="vote">투표</string>
     <string name="poll_expired">설문조사 만료됨</string>
     <string name="poll_voted">투표함</string>
     <string name="poll_expired_at">%1$s에 만료됨</string>
     <string name="user_send_message">다이렉트 메시지 보내기</string>
-
     <string name="profile_search_user_using_account">%3$s을(를) 사용하여 %2$s에서 %1$s 찾기</string>
     <string name="profile_search_user_using_account_compat">%1$s에서 찾기</string>
-
     <string name="feeds_discover_feeds_created_by">%1$s 님이 만듦</string>
-
     <string name="notification_item_accept_follow_request">수락</string>
     <string name="notification_item_reject_follow_request">거절</string>
-
-
     <string name="dm_list_empty">다이렉트 메시지가 없습니다</string>
     <string name="dm_list_error">다이렉트 메시지를 불러오지 못했습니다</string>
     <string name="send">보내기</string>
@@ -433,7 +328,6 @@
     <string name="dm_sending">보내는 중…</string>
     <string name="dm_leave">대화방 나가기</string>
     <string name="dm_to_profile">프로필 보기</string>
-
     <string name="settings_side_panel_empty">기본적으로 사이드 패널은 현재 계정의 플랫폼을 따릅니다.</string>
     <string name="tab_settings_add">추가</string>
     <string name="tab_settings_drag">드래그</string>
@@ -442,16 +336,13 @@
     <string name="tab_settings_default">기본값</string>
     <string name="tab_settings_list">리스트</string>
     <string name="tab_settings_feed">피드</string>
-
     <string name="list_add">리스트 추가</string>
     <string name="list_edit">리스트 편집</string>
     <string name="list_delete">리스트 삭제</string>
-
     <string name="rss_sources_title">구독</string>
     <string name="add_rss_source">구독 추가</string>
     <string name="edit_rss_source">구독 편집</string>
     <string name="delete_rss_source">구독 삭제</string>
-
     <string name="rss_sources_title_label">제목</string>
     <string name="rss_sources_url_label">URL</string>
     <string name="rss_title">구독</string>
@@ -459,7 +350,6 @@
     <string name="mastodon_trending_statuses">인기 게시물</string>
     <string name="mastodon_federated_timeline">연합 타임라인</string>
     <string name="mastodon_local_timeline">로컬 타임라인</string>
-
     <string name="service_select_welcome_title">Flare에 오신 것을 환영합니다</string>
     <string name="service_select_welcome_message">시작하려면 서버를 입력하세요.</string>
     <string name="service_select_welcome_hint">Flare는 Mastodon, Misskey, Bluesky, Nostr, X를 지원합니다.</string>
@@ -493,7 +383,6 @@
     <string name="service_select_compatibility_warning">이 서버는 %1$s을(를) 사용합니다. Flare는 호환 모드로 실행됩니다. 일부 기능이 올바르게 작동하지 않을 수 있습니다.</string>
     <string name="login_agreement">로그인하면 %1$s에 동의하게 됩니다.</string>
     <string name="eula_privacy_policy">최종 사용자 라이선스 계약(EULA) 및 개인정보 처리방침</string>
-
     <string name="home_tab_home_title">홈</string>
     <string name="home_tab_notifications_title">알림</string>
     <string name="home_tab_me_title">나</string>
@@ -519,6 +408,10 @@
     <string name="settings_about_source_code">소스 코드</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">저희 Telegram 그룹에 참여하세요</string>
+    <string name="settings_about_discord" translatable="false">Discord</string>
+    <string name="settings_about_discord_description">저희 Discord 서버에 참여하세요</string>
+    <string name="settings_about_line" translatable="false">Line</string>
+    <string name="settings_about_line_description">저희 Line 그룹에 참여하세요</string>
     <string name="settings_about_localization">Crowdin</string>
     <string name="settings_about_localization_description">Flare 번역을 도와주세요</string>
     <string name="settings_privacy_policy">개인정보 처리방침</string>

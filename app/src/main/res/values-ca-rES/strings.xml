@@ -17,7 +17,7 @@
     <string name="notification_tab_all_title">Tot</string>
     <string name="notification_tab_mentions_title">Mencions</string>
     <string name="notification_tab_comments_title">Comentaris</string>
-    <string name="notification_tab_likes_title">M'agrada</string>
+    <string name="notification_tab_likes_title">M\'agrada</string>
 
     <string name="compose_title">Escriu</string>
     <string name="compose_reply_title">Respon</string>
@@ -41,8 +41,8 @@
     <string name="compose_notification_title">Enviant publicació</string>
     <string name="compose_notification_progress">Enviant publicació</string>
     <string name="compose_notification_success">Publicació enviada</string>
-    <string name="compose_notification_error">No s'ha pogut enviar la publicació</string>
-    <string name="compose_close_confirm_title">Vols desar l'esborrany?</string>
+    <string name="compose_notification_error">No s\'ha pogut enviar la publicació</string>
+    <string name="compose_close_confirm_title">Vols desar l\'esborrany?</string>
     <string name="compose_close_confirm_message">Tens canvis sense desar. Vols desar-los com a esborrany abans de tancar?</string>
     <string name="compose_save_draft">Desa</string>
     <string name="compose_close_discard">Descarta</string>
@@ -58,9 +58,9 @@
     <string name="settings_accounts_title">Comptes</string>
     <string name="settings_accounts_subtitle">Gestiona els comptes iniciats</string>
     <string name="settings_appearance_title">Aparença</string>
-    <string name="settings_appearance_subtitle">Personalitza l'aspecte de Flare</string>
+    <string name="settings_appearance_subtitle">Personalitza l\'aspecte de Flare</string>
     <string name="settings_appearance_theme_group_title">Tema</string>
-    <string name="settings_appearance_theme_group_subtitle">Colors, mida de font i forma de l'avatar</string>
+    <string name="settings_appearance_theme_group_subtitle">Colors, mida de font i forma de l\'avatar</string>
     <string name="settings_appearance_layout_group_title">Disseny</string>
     <string name="settings_appearance_layout_group_subtitle">Disseny de la línia de temps, navegació i accions de publicació</string>
     <string name="settings_appearance_display_group_title">Pantalla</string>
@@ -69,7 +69,7 @@
     <string name="settings_appearance_media_group_subtitle">Visibilitat del contingut multimèdia, reproducció i contingut sensible</string>
     <string name="settings_storage_title">Emmagatzematge</string>
     <string name="settings_storage_subtitle">Gestiona els fitxers a la memòria cau, els registres i les còpies de seguretat</string>
-    <string name="settings_about_title">Sobre l'aplicació</string>
+    <string name="settings_about_title">Sobre l\'aplicació</string>
     <string name="settings_about_subtitle">Més informació sobre Flare</string>
     <string name="settings_side_panel">Personalització del panell lateral</string>
     <string name="settings_side_panel_description">Personalitza el panell lateral</string>
@@ -78,8 +78,8 @@
     <string name="settings_guest_setting_title">Servidor del mode de convidat</string>
     <string name="settings_guest_setting_description">Tria a quin servidor es connectarà el mode de convidat</string>
     <string name="settings_local_history_title">Historial local</string>
-    <string name="settings_local_history_description">Cerca publicacions i perfils a la memòria cau d'aquest dispositiu</string>
-    <string name="settings_app_logging_title">Registres de l'aplicació</string>
+    <string name="settings_local_history_description">Cerca publicacions i perfils a la memòria cau d\'aquest dispositiu</string>
+    <string name="settings_app_logging_title">Registres de l\'aplicació</string>
     <string name="settings_app_logging_save">Desa els registres</string>
     <string name="settings_app_logging_clear">Esborra els registres</string>
     <string name="settings_app_logging_enable_network_logging">Registra les peticions de xarxa</string>
@@ -87,23 +87,23 @@
     <string name="settings_ai_config_description">Configura els proveïdors de IA i els resums</string>
     <string name="settings_ai_config_server">URL del servidor</string>
     <string name="settings_ai_config_server_hint">Introdueix una URL base</string>
-    <string name="settings_ai_config_server_url_requirement">L'URL ha d'acabar amb una barra inclinada i admetre una API v1/chat/completions compatible.</string>
+    <string name="settings_ai_config_server_url_requirement">L\'URL ha d\'acabar amb una barra inclinada i admetre una API v1/chat/completions compatible.</string>
     <string name="settings_ai_config_server_self_host_description">Utilitza el servei oficial o el teu propi servidor compatible</string>
-    <string name="settings_ai_config_type">Tipus d'IA</string>
-    <string name="settings_ai_config_type_description">Tria quin motor d'IA utilitza Flare</string>
+    <string name="settings_ai_config_type">Tipus d\'IA</string>
+    <string name="settings_ai_config_type_description">Tria quin motor d\'IA utilitza Flare</string>
     <string name="settings_ai_config_type_select">Selecciona</string>
     <string name="settings_ai_config_type_on_device">IA al dispositiu</string>
-    <string name="settings_ai_config_type_on_device_description">Executa models d'IA compatibles localment en aquest dispositiu</string>
+    <string name="settings_ai_config_type_on_device_description">Executa models d\'IA compatibles localment en aquest dispositiu</string>
     <string name="settings_ai_config_type_openai">API compatible amb OpenAI</string>
-    <string name="settings_ai_config_type_openai_description">Utilitza un extrem compatible amb OpenAI per a les funcions d'IA</string>
+    <string name="settings_ai_config_type_openai_description">Utilitza un extrem compatible amb OpenAI per a les funcions d\'IA</string>
     <string name="settings_ai_config_value_empty_placeholder">No establert</string>
-    <string name="settings_ai_config_api_key">Clau de l'API</string>
-    <string name="settings_ai_config_api_key_hint">Introdueix la clau de l'API</string>
+    <string name="settings_ai_config_api_key">Clau de l\'API</string>
+    <string name="settings_ai_config_api_key_hint">Introdueix la clau de l\'API</string>
     <string name="settings_ai_config_model">Model</string>
-    <string name="settings_ai_config_model_description">Tria un model d'aquest extrem</string>
+    <string name="settings_ai_config_model_description">Tria un model d\'aquest extrem</string>
     <string name="settings_ai_config_model_select">Selecciona el model</string>
     <string name="settings_ai_config_model_loading">Carregant els models…</string>
-    <string name="settings_ai_config_model_error">No s'han pogut carregar els models</string>
+    <string name="settings_ai_config_model_error">No s\'han pogut carregar els models</string>
     <string name="settings_ai_config_model_no_models">No hi ha cap model</string>
     <string name="settings_ai_config_model_manual_input">Introdueix el nom del model manualment</string>
     <string name="settings_ai_config_reasoning_effort">Esforç de raonament</string>
@@ -127,14 +127,14 @@
     <string name="settings_ai_config_translate_provider_ai">IA</string>
     <string name="settings_ai_config_translate_provider_google_web">Google Translate (Web)</string>
     <string name="settings_ai_config_translate_provider_deepl">DeepL</string>
-    <string name="settings_ai_config_translate_provider_deepl_api_key">Clau d'API de DeepL</string>
+    <string name="settings_ai_config_translate_provider_deepl_api_key">Clau d\'API de DeepL</string>
     <string name="settings_ai_config_translate_provider_deepl_use_pro">Extrem de DeepL Pro</string>
-    <string name="settings_ai_config_translate_provider_deepl_use_pro_description">Utilitza api.deepl.com en lloc de l'extrem gratuït api-free.deepl.com.</string>
+    <string name="settings_ai_config_translate_provider_deepl_use_pro_description">Utilitza api.deepl.com en lloc de l\'extrem gratuït api-free.deepl.com.</string>
     <string name="settings_ai_config_translate_provider_google_cloud">Google Cloud Translate</string>
-    <string name="settings_ai_config_translate_provider_google_cloud_api_key">Clau d'API de Google Cloud</string>
+    <string name="settings_ai_config_translate_provider_google_cloud_api_key">Clau d\'API de Google Cloud</string>
     <string name="settings_ai_config_translate_provider_libretranslate">LibreTranslate</string>
     <string name="settings_ai_config_translate_provider_libretranslate_base_url">URL base de LibreTranslate</string>
-    <string name="settings_ai_config_translate_provider_libretranslate_api_key">Clau d'API de LibreTranslate</string>
+    <string name="settings_ai_config_translate_provider_libretranslate_api_key">Clau d\'API de LibreTranslate</string>
     <string name="settings_translation_title">Traducció</string>
     <string name="settings_translation_description">Tria els serveis de traducció i el comportament de la traducció automàtica</string>
     <string name="settings_translation_auto_excluded_languages">Idiomes a ometre de la traducció automàtica</string>
@@ -144,14 +144,14 @@
     <string name="settings_translation_ai_test_original">Text de mostra</string>
     <string name="settings_translation_ai_test_result">Text traduït</string>
     <string name="settings_language_title">Idioma</string>
-    <string name="settings_language_description">Canvia l'idioma de l'aplicació Flare</string>
+    <string name="settings_language_description">Canvia l\'idioma de l\'aplicació Flare</string>
     <string name="settings_rss_management_title">Gestió de subscripcions</string>
     <string name="settings_rss_management_description">Gestiona les subscripcions</string>
     <string name="settings_nostr_relays_manage">Repetidors Nostr (relays)</string>
     <string name="settings_nostr_relays_add">Afegeix repetidor</string>
     <string name="settings_nostr_relays_add_dialog_title">Afegeix repetidor</string>
-    <string name="settings_nostr_relays_placeholder">Introdueix l'URL del repetidor</string>
-    <string name="settings_nostr_relays_empty">No s'ha afegit cap repetidor</string>
+    <string name="settings_nostr_relays_placeholder">Introdueix l\'URL del repetidor</string>
+    <string name="settings_nostr_relays_empty">No s\'ha afegit cap repetidor</string>
 
     <string name="status_loadmore_error_retry">Torna-ho a provar</string>
     <string name="login_expired">La sessió ha caducat</string>
@@ -161,7 +161,7 @@
     <string name="service_select_welcome_title">Benvingut/da a Flare</string>
     <string name="service_select_welcome_message">Flare és un client de xarxes socials per a Android.\nTria un servei per connectar-te i començar.</string>
 
-    <string name="mastodon_login_verify_message">S'estan verificant les teves credencials…</string>
+    <string name="mastodon_login_verify_message">S\'estan verificant les teves credencials…</string>
 
     <string name="status_title">Publicació</string>
 
@@ -170,16 +170,16 @@
     <string name="misskey_visibility_followers">Seguidors</string>
     <string name="misskey_visibility_specified">Especificat</string>
     <string name="misskey_visibility_public_description">Tothom pot veure i reimpulsar aquesta publicació</string>
-    <string name="misskey_visibility_home_description">Només els usuaris d'aquesta instància poden veure aquesta publicació</string>
+    <string name="misskey_visibility_home_description">Només els usuaris d\'aquesta instància poden veure aquesta publicació</string>
     <string name="misskey_visibility_followers_description">Només els seguidors poden veure aquesta publicació</string>
     <string name="misskey_visibility_specified_description">Només els usuaris mencionats poden veure aquesta publicació</string>
 
-    <string name="bluesky_login_username_hint">Nom d'usuari</string>
+    <string name="bluesky_login_username_hint">Nom d\'usuari</string>
     <string name="bluesky_login_password_hint">Contrasenya</string>
     <string name="bluesky_login_auth_factor_token_hint">Codi 2FA</string>
     <string name="bluesky_login_oauth_button">Inicia la sessió amb OAuth</string>
     <string name="bluesky_login_use_password_button">Utilitza la contrasenya</string>
-    <string name="bluesky_login_oauth_hint">L'OAuth de Bluesky encara pot ser inestable. Si teniu problemes, utilitzeu l'inici de sessió amb contrasenya.</string>
+    <string name="bluesky_login_oauth_hint">L\'OAuth de Bluesky encara pot ser inestable. Si teniu problemes, utilitzeu l\'inici de sessió amb contrasenya.</string>
 
     <string name="report_title">Informa</string>
     <string name="report_description">Què passa amb aquesta publicació?</string>
@@ -219,11 +219,11 @@
     <string name="settings_appearance_generic">Genèric</string>
 
     <string name="settings_appearance_show_actions">Mostra les accions</string>
-    <string name="settings_appearance_show_actions_description">Mostra els botons d'acció a sota de cada publicació</string>
+    <string name="settings_appearance_show_actions_description">Mostra els botons d\'acció a sota de cada publicació</string>
     <string name="settings_appearance_post_action_style">Estil de les accions de la publicació</string>
-    <string name="settings_appearance_post_action_style_description">Tria com es distribueixen els botons d'acció</string>
+    <string name="settings_appearance_post_action_style_description">Tria com es distribueixen els botons d\'acció</string>
     <string name="settings_appearance_post_action_style_hidden">Ocult</string>
-    <string name="settings_appearance_post_action_style_left_aligned">Alineat a l'esquerra</string>
+    <string name="settings_appearance_post_action_style_left_aligned">Alineat a l\'esquerra</string>
     <string name="settings_appearance_post_action_style_right_aligned">Alineat a la dreta</string>
     <string name="settings_appearance_post_action_style_stretch">Estira</string>
     <string name="settings_appearance_show_media">Mostra el contingut multimèdia</string>
@@ -232,14 +232,14 @@
     <string name="settings_appearance_show_numbers_description">Mostra els recomptes a sota de cada publicació</string>
     <string name="settings_appearance_show_cw_img">Mostra contingut sensible</string>
     <string name="settings_appearance_show_cw_img_description">Revela sempre el contingut multimèdia sensible a les publicacions</string>
-    <string name="settings_appearance_expand_media">Manté la relació d'aspecte del contingut multimèdia</string>
-    <string name="settings_appearance_expand_media_description">Mostra el contingut multimèdia amb la seva relació d'aspecte original a les línies de temps</string>
+    <string name="settings_appearance_expand_media">Manté la relació d\'aspecte del contingut multimèdia</string>
+    <string name="settings_appearance_expand_media_description">Mostra el contingut multimèdia amb la seva relació d\'aspecte original a les línies de temps</string>
     <string name="settings_appearance_video_autoplay">Reproducció automàtica de vídeo</string>
     <string name="settings_appearance_video_autoplay_description">Reprodueix automàticament els vídeos a les publicacions</string>
     <string name="settings_appearance_video_autoplay_wifi">Només amb Wi-Fi</string>
     <string name="settings_appearance_video_autoplay_always">Sempre</string>
     <string name="settings_appearance_video_autoplay_never">Mai</string>
-    <string name="settings_appearance_avatar_shape">Forma de l'avatar</string>
+    <string name="settings_appearance_avatar_shape">Forma de l\'avatar</string>
     <string name="settings_appearance_avatar_shape_description">Tria com es mostren els avatars</string>
     <string name="settings_appearance_avatar_shape_round">Rodó</string>
     <string name="settings_appearance_avatar_shape_square">Quadrat</string>
@@ -247,28 +247,28 @@
     <string name="settings_appearance_timeline_display_mode_description">Tria com es mostren les publicacions a les línies de temps</string>
     <string name="settings_appearance_timeline_display_mode_card">Targeta</string>
     <string name="settings_appearance_timeline_display_mode_plain">Simple (només una columna)</string>
-    <string name="settings_appearance_timeline_display_mode_gallery">Galeria (només per a la línia de temps d'inici)</string>
+    <string name="settings_appearance_timeline_display_mode_gallery">Galeria (només per a la línia de temps d\'inici)</string>
     <string name="settings_appearance_theme">Tema</string>
-    <string name="settings_appearance_theme_description">Tria el tema de l'aplicació</string>
+    <string name="settings_appearance_theme_description">Tria el tema de l\'aplicació</string>
     <string name="settings_appearance_theme_light">Clar</string>
     <string name="settings_appearance_theme_dark">Fosc</string>
     <string name="settings_appearance_theme_auto">Automàtic</string>
     <string name="settings_appearance_dynamic_theme">Tema dinàmic</string>
-    <string name="settings_appearance_dynamic_theme_description">Fes coincidir els colors de l'aplicació amb el teu fons de pantalla</string>
-    <string name="settings_appearance_show_link_previews">Mostra visualitzacions prèvies d'enllaços</string>
-    <string name="settings_appearance_show_link_previews_description">Mostra visualitzacions prèvies d'enllaços a les publicacions</string>
-    <string name="settings_appearance_compat_link_previews">Visualitzacions prèvies d'enllaços compactes</string>
-    <string name="settings_appearance_compat_link_previews_description">Utilitza un disseny simplificat per a les visualitzacions prèvies d'enllaços</string>
+    <string name="settings_appearance_dynamic_theme_description">Fes coincidir els colors de l\'aplicació amb el teu fons de pantalla</string>
+    <string name="settings_appearance_show_link_previews">Mostra visualitzacions prèvies d\'enllaços</string>
+    <string name="settings_appearance_show_link_previews_description">Mostra visualitzacions prèvies d\'enllaços a les publicacions</string>
+    <string name="settings_appearance_compat_link_previews">Visualitzacions prèvies d\'enllaços compactes</string>
+    <string name="settings_appearance_compat_link_previews_description">Utilitza un disseny simplificat per a les visualitzacions prèvies d\'enllaços</string>
     <string name="settings_appearance_theme_color">Color del tema</string>
-    <string name="settings_appearance_theme_color_description">Tria el color de ressaltat de l'aplicació</string>
-    <string name="settings_appearance_theme_pure_color">Mode d'alt contrast</string>
+    <string name="settings_appearance_theme_color_description">Tria el color de ressaltat de l\'aplicació</string>
+    <string name="settings_appearance_theme_pure_color">Mode d\'alt contrast</string>
     <string name="settings_appearance_theme_pure_color_description">Augmenta el contrast entre el fons i el text</string>
     <string name="settings_appearance_font_size_diff">Mida de la font</string>
-    <string name="settings_appearance_font_size_diff_description">Ajusta la mida de la font de l'aplicació</string>
+    <string name="settings_appearance_font_size_diff_description">Ajusta la mida de la font de l\'aplicació</string>
     <string name="settings_appearance_font_size_diff_decrease">Disminueix</string>
     <string name="settings_appearance_font_size_diff_increase">Augmenta</string>
     <string name="settings_appearance_bottombar_style">Estil de la barra inferior</string>
-    <string name="settings_appearance_bottombar_style_description">Tria l'aspecte de la barra de navegació inferior</string>
+    <string name="settings_appearance_bottombar_style_description">Tria l\'aspecte de la barra de navegació inferior</string>
     <string name="settings_appearance_bottombar_style_floating">Flotant</string>
     <string name="settings_appearance_bottombar_style_classic">Clàssic</string>
     <string name="settings_appearance_bottombar_behavior">Comportament de la barra inferior</string>
@@ -282,41 +282,41 @@
     <string name="settings_appearance_deck_mode_description">Utilitza un disseny de baralla per a les línies de temps compatibles</string>
     <string name="settings_appearance_in_app_browser">Navegador intern</string>
     <string name="settings_appearance_in_app_browser_description">Obre enllaços externs dins de Flare</string>
-    <string name="settings_appearance_full_width_post">Publicacions d'amplada completa</string>
-    <string name="settings_appearance_full_width_post_description">Permet que les publicacions ocupin tota l'amplada disponible</string>
+    <string name="settings_appearance_full_width_post">Publicacions d\'amplada completa</string>
+    <string name="settings_appearance_full_width_post_description">Permet que les publicacions ocupin tota l\'amplada disponible</string>
     <string name="settings_appearance_absolute_timestamp">Marca de temps absoluta</string>
     <string name="settings_appearance_absolute_timestamp_description">Mostra marques de temps exactes a les publicacions</string>
 
-    <string name="settings_appearance_show_platform_logo">Mostra les icones de la plataforma d'origen</string>
+    <string name="settings_appearance_show_platform_logo">Mostra les icones de la plataforma d\'origen</string>
     <string name="settings_appearance_show_platform_logo_description">Mostra de quina plataforma prové cada publicació</string>
 
-    <string name="settings_storage_clear_image_cache">Esborra la memòria cau d'imatges</string>
-    <string name="settings_storage_clear_image_cache_description">Elimina %1$s MB d'imatges a la memòria cau</string>
+    <string name="settings_storage_clear_image_cache">Esborra la memòria cau d\'imatges</string>
+    <string name="settings_storage_clear_image_cache_description">Elimina %1$s MB d\'imatges a la memòria cau</string>
 
     <string name="settings_storage_clear_database">Esborra la base de dades a la memòria cau</string>
     <string name="settings_storage_clear_database_description">Elimina %1$s usuaris i %2$s publicacions a la memòria cau</string>
-    <string name="settings_storage_app_log">Registres de l'aplicació</string>
-    <string name="settings_storage_app_log_description">Visualitza, desa o esborra els registres de l'aplicació</string>
+    <string name="settings_storage_app_log">Registres de l\'aplicació</string>
+    <string name="settings_storage_app_log_description">Visualitza, desa o esborra els registres de l\'aplicació</string>
 
     <string name="service_select_instance_input_placeholder">URL de la instància</string>
     <string name="service_select_next_button">Següent</string>
-    <string name="service_select_empty_message">No s'han trobat instàncies</string>
+    <string name="service_select_empty_message">No s\'han trobat instàncies</string>
 
     <string name="media_viewer_title">Visor multimèdia</string>
 
     <string name="settings_accounts_remove">Elimina</string>
-    <string name="settings_accounts_remove_confirm">Segur que vols eliminar el compte %1$s d'aquest dispositiu?</string>
+    <string name="settings_accounts_remove_confirm">Segur que vols eliminar el compte %1$s d\'aquest dispositiu?</string>
 
     <string name="media_menu_save">Desa la imatge</string>
     <string name="media_menu_share_image">Comparteix la imatge</string>
-    <string name="media_menu_copy_link">Copia l'enllaç</string>
+    <string name="media_menu_copy_link">Copia l\'enllaç</string>
     <string name="media_menu_media_link">Enllaç multimèdia</string>
     <string name="status_menu_share_via_fxembed">Comparteix mitjançant FxEmbed</string>
     <string name="status_menu_share_via_fixvx">Comparteix mitjançant Fixvx</string>
-    <string name="media_save_success">S'ha desat a Baixades</string>
-    <string name="media_save_fail">No s'ha pogut desar</string>
+    <string name="media_save_success">S\'ha desat a Baixades</string>
+    <string name="media_save_fail">No s\'ha pogut desar</string>
     <string name="media_alt_text">Text alternatiu</string>
-    <string name="media_is_downloading">El contingut multimèdia s'està baixant. Torna-ho a provar d'aquí a un moment.</string>
+    <string name="media_is_downloading">El contingut multimèdia s\'està baixant. Torna-ho a provar d\'aquí a un moment.</string>
 
     <string name="settings_side_panel_empty">Per defecte, el panell lateral segueix la plataforma del compte actual.</string>
     <string name="tab_settings_add">Afegeix</string>
@@ -357,15 +357,15 @@
     <string name="status_detail_repost">Torna a publicar</string>
 
     <string name="account_item_error_title">Error</string>
-    <string name="account_item_error_message">No s'ha pogut carregar el compte</string>
+    <string name="account_item_error_message">No s\'ha pogut carregar el compte</string>
 
     <string name="edit_tab_title">Edita la pestanya</string>
     <string name="edit_tab_name">Nom</string>
     <string name="edit_tab_name_placeholder">Nom de la pestanya</string>
     <string name="edit_tab_icon">Icona</string>
-    <string name="edit_tab_with_avatar">Amb l'avatar</string>
+    <string name="edit_tab_with_avatar">Amb l\'avatar</string>
     <string name="edit_tab_enabled">Mostra en línies de temps mixtes</string>
-    <string name="edit_tab_enabled_description">Inclou aquesta línia de temps quan s'utilitzi dins d'una línia de temps o grup mixt.</string>
+    <string name="edit_tab_enabled_description">Inclou aquesta línia de temps quan s\'utilitzi dins d\'una línia de temps o grup mixt.</string>
 
     <string name="list_add">Afegeix llista</string>
     <string name="list_edit">Edita la llista</string>
@@ -377,13 +377,13 @@
     <string name="list_edit_members">Membres</string>
     <string name="list_edit_edit_members">Edita els membres</string>
     <string name="list_edit_no_members">No hi ha membres</string>
-    <string name="list_edit_members_error">No s'han pogut carregar els membres</string>
+    <string name="list_edit_members_error">No s\'han pogut carregar els membres</string>
     <string name="edit_list_member_title">Edita els membres de la llista</string>
     <string name="edit_list_member_placeholder">Cerca entre qui segueixes</string>
     <string name="edit_list_member_label">Cerca</string>
     <string name="edit_list_member_search">Cerca</string>
-    <string name="edit_list_member_search_empty">No s'ha trobat cap usuari</string>
-    <string name="edit_list_member_search_error">No s'han pogut cercar els usuaris</string>
+    <string name="edit_list_member_search_empty">No s\'ha trobat cap usuari</string>
+    <string name="edit_list_member_search_error">No s\'han pogut cercar els usuaris</string>
     <string name="edit_list_member_add">Afegeix</string>
     <string name="edit_list_member_remove">Elimina</string>
     <string name="list_create_description">Descripció de la llista</string>
@@ -399,7 +399,7 @@
 
     <string name="profile_tab_timeline">Publicacions</string>
     <string name="profile_tab_timeline_with_reply">Publicacions i respostes</string>
-    <string name="profile_tab_likes">M'agrada</string>
+    <string name="profile_tab_likes">M\'agrada</string>
     <string name="profile_tab_media">Contingut multimèdia</string>
 
     <string name="tab_settings_title">Configuració de pestanyes</string>
@@ -407,12 +407,12 @@
 
     <string name="dm_list_title">Missatges directes</string>
     <string name="dm_list_empty">No hi ha cap missatge directe</string>
-    <string name="dm_list_error">No s'han pogut carregar els missatges directes</string>
+    <string name="dm_list_error">No s\'han pogut carregar els missatges directes</string>
     <string name="send">Envia</string>
     <string name="dm_send_placeholder">Envia un missatge</string>
     <string name="dm_deleted">Eliminat</string>
     <string name="dm_conversation">Conversa de missatges directes</string>
-    <string name="dm_sending">S'està enviant</string>
+    <string name="dm_sending">S\'està enviant</string>
     <string name="dm_leave">Abandona la conversa</string>
     <string name="dm_to_profile">Mostra el perfil</string>
 
@@ -430,7 +430,7 @@
     <string name="add_rss_source">Afegeix subscripció</string>
     <string name="edit_rss_source">Edita la subscripció</string>
     <string name="delete_rss_source">Elimina la subscripció</string>
-    <string name="opml_import">Importa des d'OPML</string>
+    <string name="opml_import">Importa des d\'OPML</string>
     <string name="opml_export">Exporta a OPML</string>
     <string name="export_completed">Exportació completada</string>
 
@@ -441,26 +441,26 @@
     <string name="rss_sources_rss_hub_host_label">Servidor RSSHub</string>
     <string name="rss_sources_rss_hub_host_hint">Estableix un servidor RSSHub o tria el servidor públic de RSSHub</string>
     <string name="rss_sources_discovered_rss_sources">Canals descoberts</string>
-    <string name="rss_sources_pinned_in_tabs">Fixa a les pestanyes d'Inici</string>
+    <string name="rss_sources_pinned_in_tabs">Fixa a les pestanyes d\'Inici</string>
     <string name="rss_sources_open_in_browser">Obre al navegador</string>
-    <string name="rss_sources_open_in_app">Obre a l'aplicació</string>
+    <string name="rss_sources_open_in_app">Obre a l\'aplicació</string>
     <string name="rss_sources_full_content">Contingut complet</string>
     <string name="rss_sources_description_only">Només la descripció</string>
     <string name="mastodon_available_timelines">Línies de temps disponibles</string>
     <string name="mastodon_trending_statuses">Estats de tendència</string>
     <string name="mastodon_federated_timeline">Línia de temps federada</string>
     <string name="mastodon_local_timeline">Línia de temps local</string>
-    <string name="subscription_url_hint">Enganxa una URL d'un canal RSS o d'una instància de Mastodon</string>
+    <string name="subscription_url_hint">Enganxa una URL d\'un canal RSS o d\'una instància de Mastodon</string>
     <string name="rss_sources_display_mode">Mode de visualització</string>
 
     <string name="rss_detail_open_in_browser">Obre al navegador</string>
-    <string name="rss_detail_share">Comparteix l'enllaç</string>
+    <string name="rss_detail_share">Comparteix l\'enllaç</string>
     <string name="rss_detail_tldr">Resumeix</string>
     <string name="rss_detail_tldr_title">Resum</string>
-    <string name="rss_detail_tldr_error">No s'ha pogut resumir</string>
+    <string name="rss_detail_tldr_error">No s\'ha pogut resumir</string>
     <string name="rss_detail_tldr_loading">Resumint…</string>
     <string name="rss_detail_translate">Tradueix</string>
-    <string name="rss_detail_translate_error">No s'ha pogut traduir</string>
+    <string name="rss_detail_translate_error">No s\'ha pogut traduir</string>
 
     <string name="emoji_picker_recent">Recents</string>
     <string name="emoji_picker_search">Cerca</string>
@@ -482,32 +482,32 @@
     <string name="antennas_empty">Encara no hi ha antenes</string>
     <string name="home_tab_mixed_timeline_title">Mixt</string>
     <string name="tab_settings_mixed_timeline">Activa la pestanya de línia de temps mixta</string>
-    <string name="tab_settings_mixed_timeline_desc">Combina publicacions de totes les pestanyes en una única pestanya d'Inici.</string>
+    <string name="tab_settings_mixed_timeline_desc">Combina publicacions de totes les pestanyes en una única pestanya d\'Inici.</string>
     <string name="home_tab_social_timeline_title">Social</string>
 
     <string name="deeplink_account_selection_title">Selecciona el compte</string>
     <string name="deeplink_account_selection_message">Selecciona un compte per obrir aquest enllaç</string>
     <string name="deeplink_account_selection_browser">Obre al navegador</string>
 
-    <string name="block_user_title">Bloca l'usuari</string>
+    <string name="block_user_title">Bloca l\'usuari</string>
     <string name="block_user_description">Segur que vols blocar aquest usuari?</string>
-    <string name="unblock_user_title">Desbloca l'usuari</string>
+    <string name="unblock_user_title">Desbloca l\'usuari</string>
     <string name="unblock_user_description">Segur que vols desblocar aquest usuari?</string>
 
-    <string name="mute_user_title">Silencia l'usuari</string>
+    <string name="mute_user_title">Silencia l\'usuari</string>
     <string name="mute_user_description">Segur que vols silenciar aquest usuari?</string>
-    <string name="unmute_user_title">Deixa de silenciar l'usuari</string>
+    <string name="unmute_user_title">Deixa de silenciar l\'usuari</string>
     <string name="unmute_user_description">Segur que vols deixar de silenciar aquest usuari?</string>
 
-    <string name="report_user_title">Informa de l'usuari</string>
+    <string name="report_user_title">Informa de l\'usuari</string>
     <string name="report_user_description">Segur que vols informar sobre aquest usuari?</string>
 
     <string name="settings_storage_export_data">Exporta les dades</string>
     <string name="settings_storage_export_data_description">Exporta totes les dades, inclosos els comptes i les credencials. Mantingues el fitxer segur.</string>
     <string name="settings_storage_import_data">Importa dades</string>
-    <string name="settings_storage_import_data_description">Importa dades des d'un fitxer de còpia de seguretat. Es substituiran els registres existents amb identificadors coincidents.</string>
+    <string name="settings_storage_import_data_description">Importa dades des d\'un fitxer de còpia de seguretat. Es substituiran els registres existents amb identificadors coincidents.</string>
     <string name="save_completed">Exportació completada</string>
-    <string name="save_error">L'exportació ha fallat</string>
+    <string name="save_error">L\'exportació ha fallat</string>
     <string name="import_completed">Importació completada</string>
     <string name="import_error">La importació ha fallat</string>
     <string name="import_confirmation_title">Confirma la importació</string>

@@ -4,18 +4,15 @@
     <string name="done">בוצע</string>
     <string name="cancel">ביטול</string>
     <string name="ok">אישור</string>
-
     <string name="profile_header_following_count">%1$s במעקב</string>
     <string name="profile_header_fans_count">%1$s עוקבים</string>
     <string name="profile_header_toots_count">%1$s פוסטים</string>
     <string name="profile_misskey_header_status_count">%1$s פוסטים</string>
-
     <string name="profile_header_button_follow">מעקב</string>
     <string name="profile_header_button_following">במעקב</string>
     <string name="profile_header_button_requested">נשלחה בקשה</string>
     <string name="profile_header_button_blocked">חסום</string>
     <string name="profile_header_button_is_fans">עוקב אחריך</string>
-
     <string name="mastodon_notification_item_followed_you">עקב אחריך</string>
     <string name="mastodon_notification_item_favourited_your_status">סימן את הפוסט שלך כמועדף</string>
     <string name="mastodon_notification_item_reblogged_your_status">שיתף מחדש</string>
@@ -28,9 +25,7 @@
     <string name="mastodon_item_show_more">הצג עוד</string>
     <string name="mastodon_item_show_less">הצג פחות</string>
     <string name="mastodon_item_pinned">נעץ פוסט</string>
-
     <string name="post_show_full_text">הצג טקסט מלא</string>
-
     <string name="bluesky_notification_item_followed_you">עקב אחריך</string>
     <string name="bluesky_notification_item_favourited_your_status">אהב את הפוסט שלך</string>
     <string name="bluesky_notification_item_reblogged_your_status">פרסם מחדש את הפוסט שלך</string>
@@ -42,7 +37,6 @@
     <string name="bluesky_notification_item_starterpack_joined">הצטרף דרך Starter Pack</string>
     <string name="bluesky_notification_item_unKnown">לא ידוע</string>
     <string name="bluesky_notification_item_pin">נעץ פוסט</string>
-
     <string name="misskey_notification_item_mentioned_you">הזכיר אותך</string>
     <string name="misskey_notification_item_replied_to_you">ענה לך</string>
     <string name="misskey_notification_item_reposted_your_status">פרסם מחדש את הפוסט שלך</string>
@@ -64,10 +58,8 @@
     <string name="misskey_notification_item_requested_follow">ביקש לעקוב אחריך</string>
     <string name="misskey_notification_unknwon">התראה לא ידועה: %1$s</string>
     <string name="misskey_item_reblogged_status">פרסם מחדש</string>
-
     <string name="xqt_item_reblogged_status">פרסם מחדש</string>
     <string name="xqt_item_mention_status">הזכיר אותך</string>
-
     <string name="mastodon_visibility_public">ציבורי</string>
     <string name="mastodon_visibility_unlisted">לא רשום</string>
     <string name="mastodon_visibility_private">פרטי</string>
@@ -76,10 +68,8 @@
     <string name="mastodon_visibility_unlisted_description">כל אחד יכול לראות את הפוסט הזה, אבל הוא לא יופיע בציר הזמן הציבורי</string>
     <string name="mastodon_visibility_private_description">רק עוקבים יכולים לראות את הפוסט הזה</string>
     <string name="mastodon_visibility_direct_description">רק משתמשים שהוזכרו יכולים לראות את הפוסט הזה</string>
-
     <string name="settings_notifications_title">התראות</string>
     <string name="settings_notifications_subtitle">התאם אישית כיצד Flare מתריע בפניך</string>
-
     <string name="status_loadmore_end">אין פוסטים נוספים</string>
     <string name="status_loadmore_error">שגיאה בטעינת פוסטים נוספים</string>
     <string name="status_loadmore_error_retry">נסה שוב</string>
@@ -90,31 +80,24 @@
     <string name="login_expired">פג תוקף חיבור הכניסה</string>
     <string name="login_expired_message">הקש כדי להיכנס שוב</string>
     <string name="login_expired_relogin">התחבר שוב</string>
-
     <string name="permission_denied_title">הגישה נדחתה</string>
     <string name="permission_denied_message">התחבר שוב כדי לגשת לדף זה</string>
-
     <string name="misskey_compose_local_only">מקומי בלבד</string>
     <string name="misskey_compose_local_only_description">רק משתמשים בשרת זה יכולים לראות את הפוסט הזה</string>
-
     <string name="misskey_item_action_renote">Renote</string>
     <string name="misskey_item_action_quote">ציטוט</string>
-
     <string name="bluesky_notification_unknown_message">סוג התראה לא ידוע %1$s</string>
     <string name="bluesky_notification_unknown_message2">אנא דווח על בעיה זו למפתח.</string>
-
     <string name="blusky_item_action_repost">פרסום מחדש</string>
     <string name="blusky_item_action_quote">ציטוט</string>
     <string name="blusky_item_action_report">דיווח</string>
     <string name="blusky_item_action_delete">מחיקה</string>
-
     <string name="mastodon_item_unbookmark">הסר מסימניות</string>
     <string name="mastodon_item_bookmark">הוסף לסימניות</string>
     <string name="mastodon_item_delete">מחיקה</string>
     <string name="mastodon_item_report">דיווח</string>
     <string name="misskey_item_action_delete">מחיקה</string>
     <string name="misskey_item_action_report">דיווח</string>
-
     <string name="bookmark_remove">הסר סימנייה</string>
     <string name="bookmark_add">הוסף סימנייה</string>
     <string name="like">אהבתי</string>
@@ -132,7 +115,6 @@
     <string name="share">שיתוף</string>
     <string name="fx_share">שתף דרך FxEmbed</string>
     <string name="comment">תגובה</string>
-
     <string name="user_report">דיווח</string>
     <string name="user_block">חסימה</string>
     <string name="user_unblock">ביטול חסימה</string>
@@ -149,281 +131,194 @@
     <string name="translation_badge_failed">התרגום נכשל</string>
     <string name="translation_retry">נסה לתרגם שוב</string>
     <string name="translation_show_original">הצג מקור</string>
-
     <string name="date_format_year_month_day">dd MMM yy</string>
     <string name="date_format_month_day">dd MMM</string>
     <string name="date_format_full">dd MMM yy HH:mm</string>
-
     <string name="vvo_notification_like">אהב את הפוסט שלך</string>
-
     <string name="user_follow_edit_list">הוסף/הסר מרשימה</string>
     <string name="list_empty">אין רשימות</string>
     <string name="list_error">טעינת הרשימות נכשלה</string>
-
     <string name="misskey_achievement_notes1_title">רק מגדיר את ה-msky שלי</string>
     <string name="misskey_achievement_notes1_description">פרסם את ההערה הראשונה שלך</string>
     <string name="misskey_achievement_notes1_flavor">תהנה עם Misskey!</string>
-
     <string name="misskey_achievement_notes10_title">כמה הערות</string>
     <string name="misskey_achievement_notes10_description">פרסם 10 הערות</string>
-
     <string name="misskey_achievement_notes100_title">הרבה הערות</string>
     <string name="misskey_achievement_notes100_description">פרסם 100 הערות</string>
-
     <string name="misskey_achievement_notes500_title">מכוסה בהערות</string>
     <string name="misskey_achievement_notes500_description">פרסם 500 הערות</string>
-
     <string name="misskey_achievement_notes1000_title">הר של הערות</string>
     <string name="misskey_achievement_notes1000_description">פרסם 1,000 הערות</string>
-
     <string name="misskey_achievement_notes5000_title">הערות גדושות</string>
     <string name="misskey_achievement_notes5000_description">פרסם 5,000 הערות</string>
-
     <string name="misskey_achievement_notes10000_title">הערת-על</string>
     <string name="misskey_achievement_notes10000_description">פרסם 10,000 הערות</string>
-
     <string name="misskey_achievement_notes20000_title">צריך... עוד... הערות...</string>
     <string name="misskey_achievement_notes20000_description">פרסם 20,000 הערות</string>
-
     <string name="misskey_achievement_notes30000_title">הערות הערות הערות!</string>
     <string name="misskey_achievement_notes30000_description">פרסם 30,000 הערות</string>
-
     <string name="misskey_achievement_notes40000_title">מפעל הערות</string>
     <string name="misskey_achievement_notes40000_description">פרסם 40,000 הערות</string>
-
     <string name="misskey_achievement_notes50000_title">כוכב של הערות</string>
     <string name="misskey_achievement_notes50000_description">פרסם 50,000 הערות</string>
-
     <string name="misskey_achievement_notes60000_title">קוואזר של הערות</string>
     <string name="misskey_achievement_notes60000_description">פרסם 60,000 הערות</string>
-
     <string name="misskey_achievement_notes70000_title">חור שחור של הערות</string>
     <string name="misskey_achievement_notes70000_description">פרסם 70,000 הערות</string>
-
     <string name="misskey_achievement_notes80000_title">גלקסיה של הערות</string>
     <string name="misskey_achievement_notes80000_description">פרסם 80,000 הערות</string>
-
     <string name="misskey_achievement_notes90000_title">יקום של הערות</string>
     <string name="misskey_achievement_notes90000_description">פרסם 90,000 הערות</string>
-
     <string name="misskey_achievement_notes100000_title">כל ההערות שלך שייכות לנו</string>
     <string name="misskey_achievement_notes100000_description">פרסם 100,000 הערות</string>
     <string name="misskey_achievement_notes100000_flavor">בטח יש לך הרבה מה להגיד.</string>
-
     <string name="misskey_achievement_login3_title">מתחיל I</string>
     <string name="misskey_achievement_login3_description">התחבר במשך 3 ימים בסך הכל</string>
     <string name="misskey_achievement_login3_flavor">מהיום, פשוט תקרא לי Misskist</string>
-
     <string name="misskey_achievement_login7_title">מתחיל II</string>
     <string name="misskey_achievement_login7_description">התחבר במשך 7 ימים בסך הכל</string>
     <string name="misskey_achievement_login7_flavor">מרגיש שכבר קלטת את העניין?</string>
-
     <string name="misskey_achievement_login15_title">מתחיל III</string>
     <string name="misskey_achievement_login15_description">התחבר במשך 15 ימים בסך הכל</string>
-
     <string name="misskey_achievement_login30_title">Misskist I</string>
     <string name="misskey_achievement_login30_description">התחבר במשך 30 ימים בסך הכל</string>
-
     <string name="misskey_achievement_login60_title">Misskist II</string>
     <string name="misskey_achievement_login60_description">התחבר במשך 60 ימים בסך הכל</string>
-
     <string name="misskey_achievement_login100_title">Misskist III</string>
     <string name="misskey_achievement_login100_description">התחבר במשך 100 ימים בסך הכל</string>
     <string name="misskey_achievement_login100_flavor">Misskist אלים</string>
-
     <string name="misskey_achievement_login200_title">קבוע I</string>
     <string name="misskey_achievement_login200_description">התחבר במשך 200 ימים בסך הכל</string>
-
     <string name="misskey_achievement_login300_title">קבוע II</string>
     <string name="misskey_achievement_login300_description">התחבר במשך 300 ימים בסך הכל</string>
-
     <string name="misskey_achievement_login400_title">קבוע III</string>
     <string name="misskey_achievement_login400_description">התחבר במשך 400 ימים בסך הכל</string>
-
     <string name="misskey_achievement_login500_title">מומחה I</string>
     <string name="misskey_achievement_login500_description">התחבר במשך 500 ימים בסך הכל</string>
     <string name="misskey_achievement_login500_flavor">חברי, נאמר לעיתים קרובות שאני אוהב הערות</string>
-
     <string name="misskey_achievement_login600_title">מומחה II</string>
     <string name="misskey_achievement_login600_description">התחבר במשך 600 ימים בסך הכל</string>
-
     <string name="misskey_achievement_login700_title">מומחה III</string>
     <string name="misskey_achievement_login700_description">התחבר במשך 700 ימים בסך הכל</string>
-
     <string name="misskey_achievement_login800_title">מאסטר ההערות I</string>
     <string name="misskey_achievement_login800_description">התחבר במשך 800 ימים בסך הכל</string>
-
     <string name="misskey_achievement_login900_title">מאסטר ההערות II</string>
     <string name="misskey_achievement_login900_description">התחבר במשך 900 ימים בסך הכל</string>
-
     <string name="misskey_achievement_login1000_title">מאסטר ההערות III</string>
     <string name="misskey_achievement_login1000_description">התחבר במשך 1,000 ימים בסך הכל</string>
     <string name="misskey_achievement_login1000_flavor">תודה שהשתמשת ב-Misskey!</string>
-
     <string name="misskey_achievement_note_clipped1_title">חייב... לגזור...</string>
     <string name="misskey_achievement_note_clipped1_description">גזור את ההערה הראשונה שלך</string>
-
     <string name="misskey_achievement_note_favorited1_title">חוזק בכוכבים</string>
     <string name="misskey_achievement_note_favorited1_description">סמן את ההערה הראשונה שלך כמועדפת</string>
-
     <string name="misskey_achievement_my_note_favorited1_title">מחפש כוכבים</string>
     <string name="misskey_achievement_my_note_favorited1_description">דאג שמישהו אחר יסמן את אחת ההערות שלך כמועדפת</string>
-
     <string name="misskey_achievement_profile_filled_title">מוכן היטב</string>
     <string name="misskey_achievement_profile_filled_description">הגדר את הפרופיל שלך</string>
-
     <string name="misskey_achievement_marked_as_cat_title">אני חתול</string>
     <string name="misskey_achievement_marked_as_cat_description">סמן את החשבון שלך כחתול</string>
     <string name="misskey_achievement_marked_as_cat_flavor">אני אתן לך שם אחר כך.</string>
-
     <string name="misskey_achievement_following1_title">עוקב אחר המשתמש הראשון שלך</string>
     <string name="misskey_achievement_following1_description">עקוב אחר משתמש</string>
-
     <string name="misskey_achievement_following10_title">להמשיך... להמשיך...</string>
     <string name="misskey_achievement_following10_description">עקוב אחר 10 משתמשים</string>
-
     <string name="misskey_achievement_following50_title">הרבה חברים</string>
     <string name="misskey_achievement_following50_description">עקוב אחר 50 חשבונות</string>
-
     <string name="misskey_achievement_following100_title">100 חברים</string>
     <string name="misskey_achievement_following100_description">עקוב אחר 100 חשבונות</string>
-
     <string name="misskey_achievement_following300_title">עומס חברים</string>
     <string name="misskey_achievement_following300_description">עקוב אחר 300 חשבונות</string>
-
     <string name="misskey_achievement_followers1_title">עוקב ראשון</string>
     <string name="misskey_achievement_followers1_description">קבל עוקב אחד</string>
-
     <string name="misskey_achievement_followers10_title">עקבו אחרי!</string>
     <string name="misskey_achievement_followers10_description">קבל 10 עוקבים</string>
-
     <string name="misskey_achievement_followers50_title">מגיעים בהמונים</string>
     <string name="misskey_achievement_followers50_description">קבל 50 עוקבים</string>
-
     <string name="misskey_achievement_followers100_title">פופולרי</string>
     <string name="misskey_achievement_followers100_description">קבל 100 עוקבים</string>
-
     <string name="misskey_achievement_followers300_title">נא להסתדר בטור אחד</string>
     <string name="misskey_achievement_followers300_description">קבל 300 עוקבים</string>
-
     <string name="misskey_achievement_followers500_title">מגדל רדיו</string>
     <string name="misskey_achievement_followers500_description">קבל 500 עוקבים</string>
-
     <string name="misskey_achievement_followers1000_title">משפיען</string>
     <string name="misskey_achievement_followers1000_description">קבל 1,000 עוקבים</string>
-
     <string name="misskey_achievement_collect_achievements30_title">אספן הישגים</string>
     <string name="misskey_achievement_collect_achievements30_description">זכה ב-30 הישגים</string>
-
     <string name="misskey_achievement_view_achievements3min_title">אוהב הישגים</string>
     <string name="misskey_achievement_view_achievements3min_description">הסתכל ברשימת ההישגים שלך במשך לפחות 3 דקות</string>
-
     <string name="misskey_achievement_i_love_misskey_title">אני אוהב את Misskey</string>
     <string name="misskey_achievement_i_love_misskey_description">פרסם \"I ❤ #Misskey\"</string>
     <string name="misskey_achievement_i_love_misskey_flavor">צוות הפיתוח של Misskey מעריך מאוד את תמיכתך!</string>
-
     <string name="misskey_achievement_found_treasure_title">ציד מטמון</string>
     <string name="misskey_achievement_found_treasure_description">מצאת את האוצר החבוי</string>
-
     <string name="misskey_achievement_client30min_title">הפסקה קצרה</string>
     <string name="misskey_achievement_client30min_description">השאר את Misskey פתוח למשך לפחות 30 דקות</string>
-
     <string name="misskey_achievement_client60min_title">אין \"פספוס\" ב-Misskey</string>
     <string name="misskey_achievement_client60min_description">השאר את Misskey פתוח למשך לפחות 60 דקות</string>
-
     <string name="misskey_achievement_note_deleted_within1min_title">לא משנה</string>
     <string name="misskey_achievement_note_deleted_within1min_description">מחק הערה בתוך דקה מפרסומה</string>
-
     <string name="misskey_achievement_posted_at_late_night_title">חיית לילה</string>
     <string name="misskey_achievement_posted_at_late_night_description">פרסם הערה בשעה מאוחרת בלילה</string>
     <string name="misskey_achievement_posted_at_late_night_flavor">הגיע הזמן ללכת לישון.</string>
-
     <string name="misskey_achievement_posted_at_0min0sec_title">שעון דובר</string>
     <string name="misskey_achievement_posted_at_0min0sec_description">פרסם הערה ב-00:00</string>
     <string name="misskey_achievement_posted_at_0min0sec_flavor">קליק קליק קליק קלאנג</string>
-
     <string name="misskey_achievement_self_quote_title">התייחסות עצמית</string>
     <string name="misskey_achievement_self_quote_description">צטט הערה של עצמך</string>
-
     <string name="misskey_achievement_htl20npm_title">ציר זמן זורם</string>
     <string name="misskey_achievement_htl20npm_description">דאג שמהירות ציר הזמן הראשי שלך תעלה על 20 npm (הערות לדקה)</string>
-
     <string name="misskey_achievement_view_instance_chart_title">אנליסט</string>
     <string name="misskey_achievement_view_instance_chart_description">צפה בגרפים של השרת שלך</string>
-
     <string name="misskey_achievement_output_hello_world_on_scratchpad_title">Hello, world!</string>
     <string name="misskey_achievement_output_hello_world_on_scratchpad_description">הדפס \"hello world\" ב-Scratchpad</string>
-
     <string name="misskey_achievement_open3windows_title">ריבוי חלונות</string>
     <string name="misskey_achievement_open3windows_description">פתח לפחות 3 חלונות בו-זמנית</string>
-
     <string name="misskey_achievement_drive_folder_circular_reference_title">התייחסות מעגלית</string>
     <string name="misskey_achievement_drive_folder_circular_reference_description">נסה ליצור תיקייה מקוננת רקורסיבית ב-Drive</string>
-
     <string name="misskey_achievement_react_without_read_title">באמת קראת את זה?</string>
     <string name="misskey_achievement_react_without_read_description">הגב להערה באורך של מעל 100 תווים בתוך פחות מ-3 שניות מפרסומה</string>
-
     <string name="misskey_achievement_clicked_click_here_title">לחץ כאן</string>
     <string name="misskey_achievement_clicked_click_here_description">לחצת כאן</string>
-
     <string name="misskey_achievement_just_plain_lucky_title">פשוט מזל</string>
     <string name="misskey_achievement_just_plain_lucky_description">יש סיכוי להשיג זאת בהסתברות של 0.005% בכל 10 שניות</string>
-
     <string name="misskey_achievement_set_name_to_syuilo_title">תסביך אלוהים</string>
     <string name="misskey_achievement_set_name_to_syuilo_description">שנה את שמך ל-\"syuilo\"</string>
-
     <string name="misskey_achievement_passed_since_account_created1_title">יום שנה ראשון</string>
     <string name="misskey_achievement_passed_since_account_created1_description">שנה עברה מאז יצירת החשבון שלך</string>
-
     <string name="misskey_achievement_passed_since_account_created2_title">יום שנה שני</string>
     <string name="misskey_achievement_passed_since_account_created2_description">שנתיים עברו מאז יצירת החשבון שלך</string>
-
     <string name="misskey_achievement_passed_since_account_created3_title">יום שנה שלישי</string>
     <string name="misskey_achievement_passed_since_account_created3_description">שלוש שנים עברו מאז יצירת החשבון שלך</string>
-
     <string name="misskey_achievement_logged_in_on_birthday_title">יום הולדת שמח</string>
     <string name="misskey_achievement_logged_in_on_birthday_description">התחבר ביום ההולדת שלך</string>
-
     <string name="misskey_achievement_logged_in_on_new_years_day_title">שנה טובה!</string>
     <string name="misskey_achievement_logged_in_on_new_years_day_description">התחבר ביום הראשון של השנה</string>
     <string name="misskey_achievement_logged_in_on_new_years_day_flavor">לעוד שנה נהדרת בשרת זה</string>
-
     <string name="misskey_achievement_cookie_clicked_title">משחק שבו לוחצים על עוגיות</string>
     <string name="misskey_achievement_cookie_clicked_description">לחצת על העוגייה</string>
     <string name="misskey_achievement_cookie_clicked_flavor">רגע, אתה באתר הנכון?</string>
-
     <string name="misskey_achievement_brain_diver_title">Brain Diver</string>
     <string name="misskey_achievement_brain_diver_description">פרסם את הקישור ל-Brain Diver</string>
     <string name="misskey_achievement_brain_diver_flavor">Misskey-Misskey La-Tu-Ma</string>
-
     <string name="misskey_achievement_smash_test_notification_button_title">בדיקת הצפה</string>
     <string name="misskey_achievement_smash_test_notification_button_description">הפעל את התראת הבדיקה שוב ושוב בזמן קצר מאוד</string>
-
     <string name="misskey_achievement_tutorial_completed_title">תעודת קורס בסיסי של Misskey</string>
     <string name="misskey_achievement_tutorial_completed_description">ההדרכה הושלמה</string>
-
     <string name="misskey_achievement_bubble_game_exploding_head_title">🤯</string>
     <string name="misskey_achievement_bubble_game_exploding_head_description">האובייקט הגדול ביותר במשחק הבועות</string>
-
     <string name="misskey_achievement_bubble_game_double_exploding_head_title">כפול 🤯</string>
     <string name="misskey_achievement_bubble_game_double_exploding_head_description">שני האובייקטים הגדולים ביותר במשחק הבועות בו-זמנית</string>
     <string name="misskey_achievement_bubble_game_double_exploding_head_flavor">אפשר למלא קופסת אוכל ככה 🤯 🤯 קצת.</string>
-
     <string name="vote">הצבעה</string>
     <string name="poll_expired">הסקר הסתיים</string>
     <string name="poll_voted">הצבעת</string>
     <string name="poll_expired_at">הסתיים ב-%1$s</string>
     <string name="user_send_message">שלח הודעה ישירה</string>
-
     <string name="profile_search_user_using_account">מצא את %1$s ב-%2$s באמצעות %3$s</string>
     <string name="profile_search_user_using_account_compat">מצא ב-%1$s</string>
-
     <string name="feeds_discover_feeds_created_by">נוצר על ידי %1$s</string>
-
     <string name="notification_item_accept_follow_request">אישור</string>
     <string name="notification_item_reject_follow_request">דחייה</string>
-
-
     <string name="dm_list_empty">אין הודעות ישירות</string>
     <string name="dm_list_error">טעינת ההודעות הישירות נכשלה</string>
     <string name="send">שליחה</string>
@@ -433,7 +328,6 @@
     <string name="dm_sending">שולח…</string>
     <string name="dm_leave">עזוב את השיחה</string>
     <string name="dm_to_profile">הצג פרופיל</string>
-
     <string name="settings_side_panel_empty">כברירת מחדל, הפאנל הצידי עוקב אחר הפלטפורמה של החשבון הנוכחי.</string>
     <string name="tab_settings_add">הוספה</string>
     <string name="tab_settings_drag">גרירה</string>
@@ -442,16 +336,13 @@
     <string name="tab_settings_default">ברירת מחדל</string>
     <string name="tab_settings_list">רשימה</string>
     <string name="tab_settings_feed">פידים</string>
-
     <string name="list_add">הוסף רשימה</string>
     <string name="list_edit">ערוך רשימה</string>
     <string name="list_delete">מחק רשימה</string>
-
     <string name="rss_sources_title">מינויים</string>
     <string name="add_rss_source">הוסף מינוי</string>
     <string name="edit_rss_source">ערוך מינוי</string>
     <string name="delete_rss_source">מחק מינוי</string>
-
     <string name="rss_sources_title_label">כותרת</string>
     <string name="rss_sources_url_label">URL</string>
     <string name="rss_title">מינויים</string>
@@ -459,7 +350,6 @@
     <string name="mastodon_trending_statuses">סטטוסים מגמתיים</string>
     <string name="mastodon_federated_timeline">ציר זמן פדרטיבי</string>
     <string name="mastodon_local_timeline">ציר זמן מקומי</string>
-
     <string name="service_select_welcome_title">ברוכים הבאים ל-Flare</string>
     <string name="service_select_welcome_message">הזן שרת כדי להתחיל.</string>
     <string name="service_select_welcome_hint">Flare תומך ב-Mastodon, Misskey, Bluesky, Nostr ו-X.</string>
@@ -493,7 +383,6 @@
     <string name="service_select_compatibility_warning">שרת זה משתמש ב-%1$s, Flare יפעל במצב תאימות. ייתכן שחלק מהתכונות לא יעבדו כראוי.</string>
     <string name="login_agreement">על ידי התחברות, אתה מסכים ל-%1$s.</string>
     <string name="eula_privacy_policy">תנאי שימוש ומדיניות פרטיות</string>
-
     <string name="home_tab_home_title">בית</string>
     <string name="home_tab_notifications_title">התראות</string>
     <string name="home_tab_me_title">אני</string>
@@ -519,6 +408,10 @@
     <string name="settings_about_source_code">קוד מקור</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">הצטרף לקבוצת הטלגרם שלנו</string>
+    <string name="settings_about_discord" translatable="false">Discord</string>
+    <string name="settings_about_discord_description">הצטרפו לשרת ה-Discord שלנו</string>
+    <string name="settings_about_line" translatable="false">Line</string>
+    <string name="settings_about_line_description">הצטרפו לקבוצת ה-Line שלנו</string>
     <string name="settings_about_localization">Crowdin</string>
     <string name="settings_about_localization_description">עזור לנו לתרגם את Flare</string>
     <string name="settings_privacy_policy">מדיניות פרטיות</string>

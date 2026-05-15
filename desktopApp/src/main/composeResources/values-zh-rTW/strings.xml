@@ -1,13 +1,12 @@
 <resources>
+    <string name="app_name" translatable="false">Flare</string>
     <string name="ok">確定</string>
     <string name="cancel">取消</string>
     <string name="delete">刪除</string>
     <string name="refresh">重新整理</string>
-
     <string name="home_compose">發布</string>
     <string name="home_login">登入</string>
     <string name="home_settings">設定</string>
-
     <string name="home_tab_home_title">首頁</string>
     <string name="home_tab_notifications_title">通知</string>
     <string name="home_tab_me_title">個人檔案</string>
@@ -24,47 +23,38 @@
     <plurals name="home_timeline_new_toots">
         <item quantity="other">%1$d 條新貼文</item>
     </plurals>
-
     <string name="navigate_back">返回</string>
     <string name="service_select_instance_input_placeholder">執行體 URL</string>
     <string name="service_select_next_button">下一步</string>
     <string name="service_select_empty_message">找不到執行體</string>
-
     <string name="service_select_welcome_title">歡迎使用 Flare</string>
     <string name="service_select_welcome_message">Flare 是一款支援 %1$s 的社群媒體用戶端。\n請選擇一個服務進行連線並開始使用。</string>
     <string name="mastodon_login_verify_message">正在驗證您的憑據…</string>
-
     <string name="profile_tab_timeline">貼文</string>
     <string name="profile_tab_timeline_with_reply">貼文與回覆</string>
     <string name="profile_tab_likes">喜歡</string>
     <string name="profile_tab_media">媒體</string>
-
     <string name="report_title">舉報</string>
     <string name="report_description">這則貼文有什麼問題？</string>
-
     <string name="report_reason_spam_title">垃圾訊息</string>
     <string name="report_reason_violation_title">違法或緊急</string>
     <string name="report_reason_misleading_title">誤導</string>
     <string name="report_reason_sexual_title">不當性內容</string>
     <string name="report_reason_rude_title">反社會行為</string>
     <string name="report_reason_other_title">其他</string>
-
     <string name="report_reason_spam_description">過多的提及或回覆</string>
     <string name="report_reason_violation_description">明顯違反法律或服務條款</string>
     <string name="report_reason_misleading_description">這則貼文具有誤導性</string>
     <string name="report_reason_sexual_description">未標註的裸露或色情內容</string>
     <string name="report_reason_rude_description">騷擾、挑釁或不寬容言論</string>
     <string name="report_reason_other_description">上述選項未涵蓋的問題</string>
-
     <string name="delete_status_title">刪除</string>
     <string name="delete_status_message">確定要刪除這則貼文嗎？</string>
     <string name="compose_close_confirm_title">儲存草稿？</string>
     <string name="compose_close_confirm_message">您有未儲存的變更。要在關閉前儲存為草稿嗎？</string>
     <string name="compose_close_discard">捨棄</string>
-
     <string name="mastodon_report_title">舉報</string>
     <string name="mastodon_report_description">您確定要舉報此內容嗎？</string>
-
     <string name="bookmark_remove">取消書籤</string>
     <string name="bookmark_add">加入書籤</string>
     <string name="like">喜歡</string>
@@ -82,7 +72,6 @@
     <string name="status_detail_repost">轉發</string>
     <string name="emoji_picker_recent">最近使用</string>
     <string name="emoji_picker_search">搜尋</string>
-
     <string name="media_show_thumbnail_list">顯示縮圖列表</string>
     <string name="media_hide_thumbnail_list">隱藏縮圖列表</string>
     <string name="media_save">儲存</string>
@@ -92,7 +81,6 @@
     <string name="status_share_image">分享截圖</string>
     <string name="status_share_via_fxembed">透過 FxEmbed 分享</string>
     <string name="status_share_via_fixvx">透過 Fixvx 分享</string>
-
     <string name="list_add">加入列表</string>
     <string name="list_edit">編輯列表</string>
     <string name="list_delete">刪除列表</string>
@@ -116,25 +104,20 @@
     <string name="edit_list_member_remove">移除</string>
     <string name="list_create_description">列表描述</string>
     <string name="list_create_description_hint">列表描述</string>
-
     <string name="feeds_my_feeds_title">我的訂閱源</string>
     <string name="feeds_discover_feeds_title">探索訂閱源</string>
     <string name="feeds_discover_feeds_created_by">由 %1$s 建立</string>
     <string name="feeds_unsubscribe">取消訂閱</string>
     <string name="feeds_subscribe">訂閱</string>
-
     <string name="social_title">社群</string>
-
     <string name="antenna_title">天線</string>
     <string name="mixed_timeline_title">混合時間軸</string>
-
     <string name="bluesky_login_username">使用者名稱</string>
     <string name="bluesky_login_password">密碼</string>
     <string name="bluesky_login_2fa">2FA 驗證碼</string>
     <string name="bluesky_login_oauth_button">使用 OAuth 登入</string>
     <string name="bluesky_login_use_password_button">使用密碼</string>
     <string name="bluesky_login_oauth_hint">Bluesky OAuth 可能仍不穩定。如果您遇到問題，請改用密碼登入。</string>
-
     <string name="login_expired">登入工作階段已過期</string>
     <string name="login_expired_message">點擊以重新登入</string>
     <string name="login_expired_relogin">重新登入</string>
@@ -143,7 +126,6 @@
     <string name="add_account">加入帳戶</string>
     <string name="remove_account">移除帳戶</string>
     <string name="settings_accounts_remove_confirm">確定要從此裝置移除帳戶 %1$s 嗎？</string>
-
     <string name="settings_accounts_title">帳戶</string>
     <string name="settings_appearance_title">外觀</string>
     <string name="settings_status_appearance_title">貼文外觀</string>
@@ -224,7 +206,6 @@
     <string name="settings_ai_config_translate_provider_libretranslate">LibreTranslate</string>
     <string name="settings_ai_config_translate_provider_libretranslate_base_url">LibreTranslate 基礎 URL</string>
     <string name="settings_ai_config_translate_provider_libretranslate_api_key">LibreTranslate API 密鑰</string>
-
     <string name="settings_translation_title">翻譯</string>
     <string name="settings_translation_description">選擇翻譯服務和自動翻譯行為</string>
     <string name="settings_translation_auto_excluded_languages">自動翻譯跳過的語言</string>
@@ -233,7 +214,6 @@
     <string name="settings_translation_ai_test_action">測試翻譯</string>
     <string name="settings_translation_ai_test_original">範例文字</string>
     <string name="settings_translation_ai_test_result">翻譯結果</string>
-
     <string name="settings_appearance_generic">一般</string>
     <string name="settings_appearance_show_compose_in_home_timeline">在首頁時間軸顯示發布框</string>
     <string name="settings_appearance_show_compose_in_home_timeline_description">在首頁時間軸頂部顯示發布框</string>
@@ -292,23 +272,19 @@
     <string name="settings_appearance_post_action_style_stretch">延伸</string>
     <string name="settings_appearance_absolute_timestamp">絕對時間戳記</string>
     <string name="settings_appearance_absolute_timestamp_description">在貼文上顯示確切的時間</string>
-
     <string name="settings_appearance_show_platform_logo">顯示來源平台圖示</string>
     <string name="settings_appearance_show_platform_logo_description">顯示每則貼文來自哪個平台</string>
-
     <string name="settings_about_source_code">原始碼</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">加入我們的 Telegram 群組</string>
+    <string name="settings_about_discord" translatable="false">Discord</string>
     <string name="settings_about_discord_description">加入我們的 Discord 伺服器</string>
     <string name="settings_about_localization">Crowdin</string>
     <string name="settings_about_localization_description">協助我們翻譯 Flare</string>
     <string name="settings_privacy_policy">隱私權政策</string>
-
     <string name="users">使用者</string>
     <string name="hashtags">標籤</string>
     <string name="statues">貼文</string>
-
-
     <string name="compose_title">發布</string>
     <string name="compose_hint">在想些什麼？</string>
     <string name="compose_poll_option_hint">選項 %1$s</string>
@@ -329,7 +305,6 @@
     <string name="compose_notification_progress">正在發送貼文</string>
     <string name="compose_notification_success">貼文已發送</string>
     <string name="compose_notification_error">發送貼文失敗</string>
-
     <string name="misskey_visibility_public">公開</string>
     <string name="misskey_visibility_home">首頁</string>
     <string name="misskey_visibility_followers">跟隨者</string>
@@ -338,13 +313,10 @@
     <string name="misskey_visibility_home_description">僅此執行體的使用者可以看到此貼文</string>
     <string name="misskey_visibility_followers_description">僅您的跟隨者可以看到此貼文</string>
     <string name="misskey_visibility_specified_description">僅被提及的使用者可以看到此貼文</string>
-
-
     <string name="rss_sources_title">訂閱管理</string>
     <string name="add_rss_source">加入訂閱</string>
     <string name="edit_rss_source">編輯訂閱</string>
     <string name="delete_rss_source">刪除訂閱</string>
-
     <string name="rss_sources_title_label">標題</string>
     <string name="rss_sources_url_label">URL</string>
     <string name="rss_title">訂閱</string>
@@ -367,7 +339,6 @@
     <string name="mastodon_federated_timeline">跨站時間軸</string>
     <string name="mastodon_local_timeline">本站時間軸</string>
     <string name="subscription_url_hint">貼上 RSS 訂閱源 URL 或 Mastodon 執行體 URL</string>
-
     <string name="tab_settings_add">加入</string>
     <string name="tab_settings_drag">拖曳</string>
     <string name="tab_settings_edit">編輯</string>
@@ -375,9 +346,7 @@
     <string name="tab_settings_default">預設</string>
     <string name="tab_settings_list">列表</string>
     <string name="tab_settings_feed">訂閱源</string>
-
     <string name="notification_login_expired">帳戶 %1$s 的登入已過期</string>
-
     <string name="dm_list_empty">暫無私訊</string>
     <string name="dm_list_error">載入私訊失敗</string>
     <string name="send">傳送</string>
@@ -410,7 +379,6 @@
     <string name="tab_settings_filter_text_only">純文字</string>
     <string name="tab_settings_filter_image">圖片</string>
     <string name="tab_settings_filter_video">影片</string>
-
     <string name="edit_tab_title">編輯分頁</string>
     <string name="edit_tab_name">名稱</string>
     <string name="edit_tab_name_placeholder">分頁名稱</string>
@@ -418,16 +386,12 @@
     <string name="edit_tab_with_avatar">使用頭像</string>
     <string name="edit_tab_enabled">在混合時間軸中顯示</string>
     <string name="edit_tab_enabled_description">在混合時間軸或群組中包含此時間軸。</string>
-
     <string name="edit">編輯</string>
-
     <string name="local_history_search_placeholder">搜尋快取的貼文和個人檔案</string>
     <string name="local_history_search_status_title">貼文</string>
     <string name="local_history_search_user_title">使用者</string>
-
     <string name="settings_storage_clear_image_cache">清除圖片快取</string>
     <string name="settings_storage_clear_image_cache_description">移除 %1$s MB 的快取圖片</string>
-
     <string name="settings_storage_clear_database">清除快取資料庫</string>
     <string name="settings_storage_clear_database_description">移除 %1$s 位快取使用者和 %2$s 則快取貼文</string>
     <string name="settings_storage_app_log">應用程式日誌</string>
@@ -444,50 +408,39 @@
     <string name="draft_box_retry">重試</string>
     <string name="draft_box_edit">編輯</string>
     <string name="draft_box_send">發送</string>
-
     <string name="copied_to_clipboard">已複製到剪貼簿</string>
-
     <string name="opml_import">從 OPML 匯入</string>
     <string name="opml_export">匯出至 OPML</string>
     <string name="save_completed">匯出完成</string>
-
     <string name="deeplink_account_selection_title">選擇帳戶</string>
     <string name="deeplink_account_selection_message">選擇帳戶以開啟此連結</string>
     <string name="deeplink_account_selection_browser">在瀏覽器中開啟</string>
-
     <string name="block_user_title">封鎖使用者</string>
     <string name="block_user_description">確定要封鎖此使用者嗎？</string>
     <string name="unblock_user_title">取消封鎖使用者</string>
     <string name="unblock_user_description">確定要取消封鎖此使用者嗎？</string>
-
     <string name="mute_user_title">靜音使用者</string>
     <string name="mute_user_description">確定要靜音此使用者嗎？</string>
     <string name="unmute_user_title">取消靜音使用者</string>
     <string name="unmute_user_description">確定要取消靜音此使用者嗎？</string>
-
     <string name="report_user_title">舉報使用者</string>
     <string name="report_user_description">確定要舉報此使用者嗎？</string>
-
     <string name="settings_storage_export_data">匯出資料</string>
     <string name="settings_storage_export_data_description">匯出所有資料，包含帳戶和憑據。請妥善保管檔案。</string>
     <string name="settings_storage_import_data">匯入資料</string>
     <string name="settings_storage_import_data_description">從備份檔案匯入資料。ID 相符的現有紀錄將被取代。</string>
     <string name="action_export">匯出</string>
     <string name="action_import">匯入</string>
-
     <string name="save_error">匯出失敗</string>
     <string name="import_completed">匯入完成</string>
     <string name="import_error">匯入失敗</string>
     <string name="import_confirmation_title">確認匯入</string>
     <string name="import_confirmation_message">這將從選定檔案匯入資料。ID 相符的現有紀錄將被取代。是否繼續？</string>
-
     <string name="channel_title">頻道</string>
-
     <string name="misskey_channel_tab_following">關注中</string>
     <string name="misskey_channel_tab_favorites">最愛</string>
     <string name="misskey_channel_tab_owned">我的頻道</string>
     <string name="misskey_channel_tab_featured">精選</string>
-
     <string name="media_save_success">已儲存至下載目錄</string>
     <string name="media_save_fail">儲存失敗</string>
 </resources>

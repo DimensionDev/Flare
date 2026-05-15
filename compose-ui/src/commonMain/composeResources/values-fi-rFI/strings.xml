@@ -4,18 +4,15 @@
     <string name="done">Valmis</string>
     <string name="cancel">Peruuta</string>
     <string name="ok">OK</string>
-
     <string name="profile_header_following_count">%1$s Seurataan</string>
     <string name="profile_header_fans_count">%1$s Seuraajaa</string>
     <string name="profile_header_toots_count">%1$s Julkaisua</string>
     <string name="profile_misskey_header_status_count">%1$s Julkaisua</string>
-
     <string name="profile_header_button_follow">Seuraa</string>
     <string name="profile_header_button_following">Seurataan</string>
     <string name="profile_header_button_requested">Pyydetty</string>
     <string name="profile_header_button_blocked">Estetty</string>
     <string name="profile_header_button_is_fans">Seuraa sinua</string>
-
     <string name="mastodon_notification_item_followed_you">seurasi sinua</string>
     <string name="mastodon_notification_item_favourited_your_status">tykkäsi julkaisustasi</string>
     <string name="mastodon_notification_item_reblogged_your_status">jakoi julkaisusi</string>
@@ -28,9 +25,7 @@
     <string name="mastodon_item_show_more">Näytä lisää</string>
     <string name="mastodon_item_show_less">Näytä vähemmän</string>
     <string name="mastodon_item_pinned">kiinnitti julkaisun</string>
-
     <string name="post_show_full_text">Näytä koko teksti</string>
-
     <string name="bluesky_notification_item_followed_you">seurasi sinua</string>
     <string name="bluesky_notification_item_favourited_your_status">tykkäsi julkaisustasi</string>
     <string name="bluesky_notification_item_reblogged_your_status">jakoi julkaisusi</string>
@@ -42,7 +37,6 @@
     <string name="bluesky_notification_item_starterpack_joined">liittyi aloituspakkauksen kautta</string>
     <string name="bluesky_notification_item_unKnown">Tuntematon</string>
     <string name="bluesky_notification_item_pin">kiinnitti julkaisun</string>
-
     <string name="misskey_notification_item_mentioned_you">mainitsi sinut</string>
     <string name="misskey_notification_item_replied_to_you">vastasi sinulle</string>
     <string name="misskey_notification_item_reposted_your_status">jakoi julkaisusi</string>
@@ -64,10 +58,8 @@
     <string name="misskey_notification_item_requested_follow">pyysi saada seurata sinua</string>
     <string name="misskey_notification_unknwon">Tuntematon ilmoitus: %1$s</string>
     <string name="misskey_item_reblogged_status">jakoi</string>
-
     <string name="xqt_item_reblogged_status">jakoi</string>
     <string name="xqt_item_mention_status">mainitsi sinut</string>
-
     <string name="mastodon_visibility_public">Julkinen</string>
     <string name="mastodon_visibility_unlisted">Listaamaton</string>
     <string name="mastodon_visibility_private">Yksityinen</string>
@@ -76,10 +68,8 @@
     <string name="mastodon_visibility_unlisted_description">Kuka tahansa voi nähdä tämän julkaisun, mutta se ei näy julkisella aikajanalla</string>
     <string name="mastodon_visibility_private_description">Vain seuraajasi voivat nähdä tämän julkaisun</string>
     <string name="mastodon_visibility_direct_description">Vain mainitut käyttäjät voivat nähdä tämän julkaisun</string>
-
     <string name="settings_notifications_title">Ilmoitukset</string>
     <string name="settings_notifications_subtitle">Mukauta Flaren ilmoituksia</string>
-
     <string name="status_loadmore_end">Ei enempää julkaisuja</string>
     <string name="status_loadmore_error">Virhe ladattaessa lisää julkaisuja</string>
     <string name="status_loadmore_error_retry">Yritä uudelleen</string>
@@ -90,31 +80,24 @@
     <string name="login_expired">Kirjautumisistunto vanhentunut</string>
     <string name="login_expired_message">Kirjaudu uudelleen napauttamalla</string>
     <string name="login_expired_relogin">Kirjaudu uudelleen</string>
-
     <string name="permission_denied_title">Pääsy evätty</string>
     <string name="permission_denied_message">Kirjaudu uudelleen päästäksesi tälle sivulle</string>
-
     <string name="misskey_compose_local_only">Vain paikallinen</string>
     <string name="misskey_compose_local_only_description">Vain tämän palvelimen käyttäjät voivat nähdä tämän julkaisun</string>
-
     <string name="misskey_item_action_renote">Renote</string>
     <string name="misskey_item_action_quote">Lainaa</string>
-
     <string name="bluesky_notification_unknown_message">Tuntematon ilmoitustyyppi %1$s</string>
     <string name="bluesky_notification_unknown_message2">Ilmoita tästä virheestä kehittäjälle.</string>
-
     <string name="blusky_item_action_repost">Jaa</string>
     <string name="blusky_item_action_quote">Lainaa</string>
     <string name="blusky_item_action_report">Raportoi</string>
     <string name="blusky_item_action_delete">Poista</string>
-
     <string name="mastodon_item_unbookmark">Poista kirjanmerkki</string>
     <string name="mastodon_item_bookmark">Lisää kirjanmerkki</string>
     <string name="mastodon_item_delete">Poista</string>
     <string name="mastodon_item_report">Raportoi</string>
     <string name="misskey_item_action_delete">Poista</string>
     <string name="misskey_item_action_report">Raportoi</string>
-
     <string name="bookmark_remove">Poista kirjanmerkki</string>
     <string name="bookmark_add">Lisää kirjanmerkki</string>
     <string name="like">Tykkää</string>
@@ -132,7 +115,6 @@
     <string name="share">Jaa</string>
     <string name="fx_share">Jaa FxEmbedin kautta</string>
     <string name="comment">Kommentoi</string>
-
     <string name="user_report">Raportoi</string>
     <string name="user_block">Estä</string>
     <string name="user_unblock">Poista esto</string>
@@ -149,281 +131,194 @@
     <string name="translation_badge_failed">Kääntäminen epäonnistui</string>
     <string name="translation_retry">Yritä kääntämistä uudelleen</string>
     <string name="translation_show_original">Näytä alkuperäinen</string>
-
     <string name="date_format_year_month_day">dd. MMM yy</string>
     <string name="date_format_month_day">dd. MMM</string>
     <string name="date_format_full">dd. MMM yy HH:mm</string>
-
     <string name="vvo_notification_like">Tykkäsi julkaisustasi</string>
-
     <string name="user_follow_edit_list">Lisää/poista listalta</string>
     <string name="list_empty">Ei listoja</string>
     <string name="list_error">Listojen lataus epäonnistui</string>
-
     <string name="misskey_achievement_notes1_title">msky-asetusten määrittäminen</string>
     <string name="misskey_achievement_notes1_description">Lähetä ensimmäinen viestisi</string>
     <string name="misskey_achievement_notes1_flavor">Pidä hauskaa Misskeyssä!</string>
-
     <string name="misskey_achievement_notes10_title">Muutama viesti</string>
     <string name="misskey_achievement_notes10_description">Lähetä 10 viestiä</string>
-
     <string name="misskey_achievement_notes100_title">Paljon viestejä</string>
     <string name="misskey_achievement_notes100_description">Lähetä 100 viestiä</string>
-
     <string name="misskey_achievement_notes500_title">Viesteihin hukkumassa</string>
     <string name="misskey_achievement_notes500_description">Lähetä 500 viestiä</string>
-
     <string name="misskey_achievement_notes1000_title">Viestejä vuoreksi asti</string>
     <string name="misskey_achievement_notes1000_description">Lähetä 1 000 viestiä</string>
-
     <string name="misskey_achievement_notes5000_title">Tulviva määrä viestejä</string>
     <string name="misskey_achievement_notes5000_description">Lähetä 5 000 viestiä</string>
-
     <string name="misskey_achievement_notes10000_title">Superviesti</string>
     <string name="misskey_achievement_notes10000_description">Lähetä 10 000 viestiä</string>
-
     <string name="misskey_achievement_notes20000_title">Tarvitsen... lisää... viestejä...</string>
     <string name="misskey_achievement_notes20000_description">Lähetä 20 000 viestiä</string>
-
     <string name="misskey_achievement_notes30000_title">Viestejä, viestejä, viestejä!</string>
     <string name="misskey_achievement_notes30000_description">Lähetä 30 000 viestiä</string>
-
     <string name="misskey_achievement_notes40000_title">Viestitehdas</string>
     <string name="misskey_achievement_notes40000_description">Lähetä 40 000 viestiä</string>
-
     <string name="misskey_achievement_notes50000_title">Viestien planeetta</string>
     <string name="misskey_achievement_notes50000_description">Lähetä 50 000 viestiä</string>
-
     <string name="misskey_achievement_notes60000_title">Viestien kvasaari</string>
     <string name="misskey_achievement_notes60000_description">Lähetä 60 000 viestiä</string>
-
     <string name="misskey_achievement_notes70000_title">Viestien musta aukko</string>
     <string name="misskey_achievement_notes70000_description">Lähetä 70 000 viestiä</string>
-
     <string name="misskey_achievement_notes80000_title">Viestien galaksi</string>
     <string name="misskey_achievement_notes80000_description">Lähetä 80 000 viestiä</string>
-
     <string name="misskey_achievement_notes90000_title">Viestien maailmankaikkeus</string>
     <string name="misskey_achievement_notes90000_description">Lähetä 90 000 viestiä</string>
-
     <string name="misskey_achievement_notes100000_title">KAIKKI VIESTISI OVAT MEIDÄN</string>
     <string name="misskey_achievement_notes100000_description">Lähetä 100 000 viestiä</string>
     <string name="misskey_achievement_notes100000_flavor">Sinulla on todellakin paljon sanottavaa.</string>
-
     <string name="misskey_achievement_login3_title">Aloittelija I</string>
     <string name="misskey_achievement_login3_description">Kirjaudu sisään yhteensä 3 päivänä</string>
     <string name="misskey_achievement_login3_flavor">Tästä päivästä lähtien kutsu minua Misskistiksi</string>
-
     <string name="misskey_achievement_login7_title">Aloittelija II</string>
     <string name="misskey_achievement_login7_description">Kirjaudu sisään yhteensä 7 päivänä</string>
     <string name="misskey_achievement_login7_flavor">Joko tuntuu siltä, että homma on hallussa?</string>
-
     <string name="misskey_achievement_login15_title">Aloittelija III</string>
     <string name="misskey_achievement_login15_description">Kirjaudu sisään yhteensä 15 päivänä</string>
-
     <string name="misskey_achievement_login30_title">Misskisti I</string>
     <string name="misskey_achievement_login30_description">Kirjaudu sisään yhteensä 30 päivänä</string>
-
     <string name="misskey_achievement_login60_title">Misskisti II</string>
     <string name="misskey_achievement_login60_description">Kirjaudu sisään yhteensä 60 päivänä</string>
-
     <string name="misskey_achievement_login100_title">Misskisti III</string>
     <string name="misskey_achievement_login100_description">Kirjaudu sisään yhteensä 100 päivänä</string>
     <string name="misskey_achievement_login100_flavor">Väkivaltainen Misskisti</string>
-
     <string name="misskey_achievement_login200_title">Vakioasiakas I</string>
     <string name="misskey_achievement_login200_description">Kirjaudu sisään yhteensä 200 päivänä</string>
-
     <string name="misskey_achievement_login300_title">Vakioasiakas II</string>
     <string name="misskey_achievement_login300_description">Kirjaudu sisään yhteensä 300 päivänä</string>
-
     <string name="misskey_achievement_login400_title">Vakioasiakas III</string>
     <string name="misskey_achievement_login400_description">Kirjaudu sisään yhteensä 400 päivänä</string>
-
     <string name="misskey_achievement_login500_title">Asiantuntija I</string>
     <string name="misskey_achievement_login500_description">Kirjaudu sisään yhteensä 500 päivänä</string>
     <string name="misskey_achievement_login500_flavor">Ystäväni, on usein sanottu, että pidän viesteistä</string>
-
     <string name="misskey_achievement_login600_title">Asiantuntija II</string>
     <string name="misskey_achievement_login600_description">Kirjaudu sisään yhteensä 600 päivänä</string>
-
     <string name="misskey_achievement_login700_title">Asiantuntija III</string>
     <string name="misskey_achievement_login700_description">Kirjaudu sisään yhteensä 700 päivänä</string>
-
     <string name="misskey_achievement_login800_title">Viestien mestari I</string>
     <string name="misskey_achievement_login800_description">Kirjaudu sisään yhteensä 800 päivänä</string>
-
     <string name="misskey_achievement_login900_title">Viestien mestari II</string>
     <string name="misskey_achievement_login900_description">Kirjaudu sisään yhteensä 900 päivänä</string>
-
     <string name="misskey_achievement_login1000_title">Viestien mestari III</string>
     <string name="misskey_achievement_login1000_description">Kirjaudu sisään yhteensä 1 000 päivänä</string>
     <string name="misskey_achievement_login1000_flavor">Kiitos Misskeyn käyttämisestä!</string>
-
     <string name="misskey_achievement_note_clipped1_title">Pakko... leikata...</string>
     <string name="misskey_achievement_note_clipped1_description">Leikkaa ensimmäinen viestisi</string>
-
     <string name="misskey_achievement_note_favorited1_title">Tähyilijä</string>
     <string name="misskey_achievement_note_favorited1_description">Merkitse suosikiksi ensimmäinen viestisi</string>
-
     <string name="misskey_achievement_my_note_favorited1_title">Tähtiä etsimässä</string>
     <string name="misskey_achievement_my_note_favorited1_description">Joku muu merkitsi viestisi suosikiksi</string>
-
     <string name="misskey_achievement_profile_filled_title">Hyvin valmistautunut</string>
     <string name="misskey_achievement_profile_filled_description">Määritä profiilisi</string>
-
     <string name="misskey_achievement_marked_as_cat_title">Olen kissa</string>
     <string name="misskey_achievement_marked_as_cat_description">Merkitse tilisi kissaksi</string>
     <string name="misskey_achievement_marked_as_cat_flavor">Annan sinulle nimen myöhemmin.</string>
-
     <string name="misskey_achievement_following1_title">Ensimmäisen käyttäjän seuraaminen</string>
     <string name="misskey_achievement_following1_description">Seuraa käyttäjää</string>
-
     <string name="misskey_achievement_following10_title">Pysy perässä... pysy perässä...</string>
     <string name="misskey_achievement_following10_description">Seuraa 10 käyttäjää</string>
-
     <string name="misskey_achievement_following50_title">Paljon ystäviä</string>
     <string name="misskey_achievement_following50_description">Seuraa 50 tiliä</string>
-
     <string name="misskey_achievement_following100_title">100 ystävää</string>
     <string name="misskey_achievement_following100_description">Seuraa 100 tiliä</string>
-
     <string name="misskey_achievement_following300_title">Ystävien ylikuormitus</string>
     <string name="misskey_achievement_following300_description">Seuraa 300 tiliä</string>
-
     <string name="misskey_achievement_followers1_title">Ensimmäinen seuraaja</string>
     <string name="misskey_achievement_followers1_description">Saa 1 seuraaja</string>
-
     <string name="misskey_achievement_followers10_title">Seuraa minua!</string>
     <string name="misskey_achievement_followers10_description">Saa 10 seuraajaa</string>
-
     <string name="misskey_achievement_followers50_title">Saapuvat joukoin</string>
     <string name="misskey_achievement_followers50_description">Saa 50 seuraajaa</string>
-
     <string name="misskey_achievement_followers100_title">Suosittu</string>
     <string name="misskey_achievement_followers100_description">Saa 100 seuraajaa</string>
-
     <string name="misskey_achievement_followers300_title">Yksittäiseen jonoon, kiitos</string>
     <string name="misskey_achievement_followers300_description">Saa 300 seuraajaa</string>
-
     <string name="misskey_achievement_followers500_title">Radiotorni</string>
     <string name="misskey_achievement_followers500_description">Saa 500 seuraajaa</string>
-
     <string name="misskey_achievement_followers1000_title">Vaikuttaja</string>
     <string name="misskey_achievement_followers1000_description">Saa 1 000 seuraajaa</string>
-
     <string name="misskey_achievement_collect_achievements30_title">Saavutusten keräilijä</string>
     <string name="misskey_achievement_collect_achievements30_description">Ansaitse 30 saavutusta</string>
-
     <string name="misskey_achievement_view_achievements3min_title">Pitää saavutuksista</string>
     <string name="misskey_achievement_view_achievements3min_description">Katso saavutuslistaasi vähintään 3 minuutin ajan</string>
-
     <string name="misskey_achievement_i_love_misskey_title">Rakastan Misskeytä</string>
     <string name="misskey_achievement_i_love_misskey_description">Lähetä \"I ❤ #Misskey\"</string>
     <string name="misskey_achievement_i_love_misskey_flavor">Misskeyn kehitystiimi arvostaa tukeasi suuresti!</string>
-
     <string name="misskey_achievement_found_treasure_title">Aarteenetsintä</string>
     <string name="misskey_achievement_found_treasure_description">Olet löytänyt kätketyn aarteen</string>
-
     <string name="misskey_achievement_client30min_title">Lyhyt tauko</string>
     <string name="misskey_achievement_client30min_description">Pidä Misskey auki vähintään 30 minuutin ajan</string>
-
     <string name="misskey_achievement_client60min_title">Ei virheitä Misskeyssä</string>
     <string name="misskey_achievement_client60min_description">Pidä Misskey auki vähintään 60 minuutin ajan</string>
-
     <string name="misskey_achievement_note_deleted_within1min_title">Annettu olla</string>
     <string name="misskey_achievement_note_deleted_within1min_description">Poista viesti minuutin kuluessa sen lähettämisestä</string>
-
     <string name="misskey_achievement_posted_at_late_night_title">Yökyöpeli</string>
     <string name="misskey_achievement_posted_at_late_night_description">Lähetä viesti myöhään yöllä</string>
     <string name="misskey_achievement_posted_at_late_night_flavor">Nyt on aika mennä nukkumaan.</string>
-
     <string name="misskey_achievement_posted_at_0min0sec_title">Puhuva kello</string>
     <string name="misskey_achievement_posted_at_0min0sec_description">Lähetä viesti klo 00:00</string>
     <string name="misskey_achievement_posted_at_0min0sec_flavor">Klik Klik Klik Kling</string>
-
     <string name="misskey_achievement_self_quote_title">Itseensä viittaaminen</string>
     <string name="misskey_achievement_self_quote_description">Lainaa omaa viestiäsi</string>
-
     <string name="misskey_achievement_htl20npm_title">Virtaava aikajana</string>
     <string name="misskey_achievement_htl20npm_description">Koti-aikajanasi nopeus ylittää 20 viestiä minuutissa (npm)</string>
-
     <string name="misskey_achievement_view_instance_chart_title">Analyytikko</string>
     <string name="misskey_achievement_view_instance_chart_description">Katso palvelimesi tilastoja</string>
-
     <string name="misskey_achievement_output_hello_world_on_scratchpad_title">Hei maailma!</string>
     <string name="misskey_achievement_output_hello_world_on_scratchpad_description">Tulosta \"hello world\" Scratchpadissa</string>
-
     <string name="misskey_achievement_open3windows_title">Monta ikkunaa</string>
     <string name="misskey_achievement_open3windows_description">Pidä vähintään 3 ikkunaa auki samanaikaisesti</string>
-
     <string name="misskey_achievement_drive_folder_circular_reference_title">Kehäviittaus</string>
     <string name="misskey_achievement_drive_folder_circular_reference_description">Yritä luoda rekursiivisesti sisäkkäinen kansio Drivessa</string>
-
     <string name="misskey_achievement_react_without_read_title">Luitko sinä todella tuon?</string>
     <string name="misskey_achievement_react_without_read_description">Reagoi yli 100 merkin pituiseen viestiin 3 sekunnin kuluessa sen lähettämisestä</string>
-
     <string name="misskey_achievement_clicked_click_here_title">Klikkaa tästä</string>
     <string name="misskey_achievement_clicked_click_here_description">Olet klikannut tästä</string>
-
     <string name="misskey_achievement_just_plain_lucky_title">Pelkkää tuuria</string>
     <string name="misskey_achievement_just_plain_lucky_description">Mahdollisuus saada tämä 0,005 % todennäköisyydellä joka 10. sekunti</string>
-
     <string name="misskey_achievement_set_name_to_syuilo_title">Jumal-kompleksi</string>
     <string name="misskey_achievement_set_name_to_syuilo_description">Aseta nimeksesi \"syuilo\"</string>
-
     <string name="misskey_achievement_passed_since_account_created1_title">Yksivuotisjuhla</string>
     <string name="misskey_achievement_passed_since_account_created1_description">Yksi vuosi on kulunut tilisi luomisesta</string>
-
     <string name="misskey_achievement_passed_since_account_created2_title">Kaksivuotisjuhla</string>
     <string name="misskey_achievement_passed_since_account_created2_description">Kaksi vuotta on kulunut tilisi luomisesta</string>
-
     <string name="misskey_achievement_passed_since_account_created3_title">Kolmivuotisjuhla</string>
     <string name="misskey_achievement_passed_since_account_created3_description">Kolme vuotta on kulunut tilisi luomisesta</string>
-
     <string name="misskey_achievement_logged_in_on_birthday_title">Hyvää syntymäpäivää</string>
     <string name="misskey_achievement_logged_in_on_birthday_description">Kirjaudu sisään syntymäpäivänäsi</string>
-
     <string name="misskey_achievement_logged_in_on_new_years_day_title">Hyvää uutta vuotta!</string>
     <string name="misskey_achievement_logged_in_on_new_years_day_description">Kirjaudu sisään vuoden ensimmäisenä päivänä</string>
     <string name="misskey_achievement_logged_in_on_new_years_day_flavor">Uudelle upealle vuodelle tällä palvelimella</string>
-
     <string name="misskey_achievement_cookie_clicked_title">Peli, jossa klikkaat keksejä</string>
     <string name="misskey_achievement_cookie_clicked_description">Klikkasit keksiä</string>
     <string name="misskey_achievement_cookie_clicked_flavor">Hetkinen, oletko oikealla sivustolla?</string>
-
     <string name="misskey_achievement_brain_diver_title">Brain Diver</string>
     <string name="misskey_achievement_brain_diver_description">Lähetä linkki Brain Diveriin</string>
     <string name="misskey_achievement_brain_diver_flavor">Misskey-Misskey La-Tu-Ma</string>
-
     <string name="misskey_achievement_smash_test_notification_button_title">Testitulva</string>
     <string name="misskey_achievement_smash_test_notification_button_description">Laukaise testi-ilmoitus toistuvasti erittäin lyhyessä ajassa</string>
-
     <string name="misskey_achievement_tutorial_completed_title">Misskey-alkeiskurssin todistus</string>
     <string name="misskey_achievement_tutorial_completed_description">Opastus suoritettu</string>
-
     <string name="misskey_achievement_bubble_game_exploding_head_title">🤯</string>
     <string name="misskey_achievement_bubble_game_exploding_head_description">Kuplapelin suurin kohde</string>
-
     <string name="misskey_achievement_bubble_game_double_exploding_head_title">Tupla🤯</string>
     <string name="misskey_achievement_bubble_game_double_exploding_head_description">Kaksi kuplapelin suurinta kohdetta samanaikaisesti</string>
     <string name="misskey_achievement_bubble_game_double_exploding_head_flavor">Voit täyttää eväsrasian näin 🤯 🤯 hieman.</string>
-
     <string name="vote">Äänestä</string>
     <string name="poll_expired">Kysely päättynyt</string>
     <string name="poll_voted">Äänestetty</string>
     <string name="poll_expired_at">Päättyi %1$s</string>
     <string name="user_send_message">Lähetä suoraviesti</string>
-
     <string name="profile_search_user_using_account">Etsi %1$s kohteesta %2$s käyttämällä %3$s</string>
     <string name="profile_search_user_using_account_compat">Etsi kohteesta %1$s</string>
-
     <string name="feeds_discover_feeds_created_by">Tekijä: %1$s</string>
-
     <string name="notification_item_accept_follow_request">Hyväksy</string>
     <string name="notification_item_reject_follow_request">Hylkää</string>
-
-
     <string name="dm_list_empty">Ei suoraviestejä</string>
     <string name="dm_list_error">Suoraviestien lataus epäonnistui</string>
     <string name="send">Lähetä</string>
@@ -433,7 +328,6 @@
     <string name="dm_sending">Lähetetään</string>
     <string name="dm_leave">Poistu keskustelusta</string>
     <string name="dm_to_profile">Näytä profiili</string>
-
     <string name="settings_side_panel_empty">Oletuksena sivupaneeli noudattaa nykyisen tilin alustaa.</string>
     <string name="tab_settings_add">Lisää</string>
     <string name="tab_settings_drag">Vedä</string>
@@ -442,16 +336,13 @@
     <string name="tab_settings_default">Oletus</string>
     <string name="tab_settings_list">Lista</string>
     <string name="tab_settings_feed">Syötteet</string>
-
     <string name="list_add">Lisää lista</string>
     <string name="list_edit">Muokkaa listaa</string>
     <string name="list_delete">Poista lista</string>
-
     <string name="rss_sources_title">Tilaukset</string>
     <string name="add_rss_source">Lisää tilaus</string>
     <string name="edit_rss_source">Muokkaa tilausta</string>
     <string name="delete_rss_source">Poista tilaus</string>
-
     <string name="rss_sources_title_label">Otsikko</string>
     <string name="rss_sources_url_label">URL-osoite</string>
     <string name="rss_title">Tilaukset</string>
@@ -459,7 +350,6 @@
     <string name="mastodon_trending_statuses">Nousevat tilapäivitykset</string>
     <string name="mastodon_federated_timeline">Federoitu aikajana</string>
     <string name="mastodon_local_timeline">Paikallinen aikajana</string>
-
     <string name="service_select_welcome_title">Tervetuloa Flareen</string>
     <string name="service_select_welcome_message">Anna palvelin aloittaaksesi.</string>
     <string name="service_select_welcome_hint">Flare tukee Mastodonia, Misskeytä, Blueskyta, Nostria ja X:ää.</string>
@@ -493,7 +383,6 @@
     <string name="service_select_compatibility_warning">Tämä palvelin käyttää versiota %1$s, Flare toimii yhteensopivuustilassa. Jotkut ominaisuudet eivät ehkä toimi oikein.</string>
     <string name="login_agreement">Kirjautumalla hyväksyt %1$s.</string>
     <string name="eula_privacy_policy">EULA:n ja tietosuojakäytännön</string>
-
     <string name="home_tab_home_title">Koti</string>
     <string name="home_tab_notifications_title">Ilmoitukset</string>
     <string name="home_tab_me_title">Minä</string>
@@ -519,6 +408,10 @@
     <string name="settings_about_source_code">Lähdekoodi</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Liity Telegram-ryhmäämme</string>
+    <string name="settings_about_discord" translatable="false">Discord</string>
+    <string name="settings_about_discord_description">Liity Discord-palvelimellemme</string>
+    <string name="settings_about_line" translatable="false">Line</string>
+    <string name="settings_about_line_description">Liity Line-ryhmäämme</string>
     <string name="settings_about_localization">Crowdin</string>
     <string name="settings_about_localization_description">Auta meitä kääntämään Flare</string>
     <string name="settings_privacy_policy">Tietosuojakäytäntö</string>

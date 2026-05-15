@@ -43,7 +43,7 @@
     <string name="compose_notification_success">Pos gestuur</string>
     <string name="compose_notification_error">Kon nie pos stuur nie</string>
     <string name="compose_close_confirm_title">Stoor konsep?</string>
-    <string name="compose_close_confirm_message">Jy het ongestoorde veranderinge. Stoor dit as 'n konsep voordat jy toemaak?</string>
+    <string name="compose_close_confirm_message">Jy het ongestoorde veranderinge. Stoor dit as \'n konsep voordat jy toemaak?</string>
     <string name="compose_save_draft">Stoor</string>
     <string name="compose_close_discard">Gooi weg</string>
     <string name="draft_box_title">Konsepte</string>
@@ -86,8 +86,8 @@
     <string name="settings_ai_config_title">KI</string>
     <string name="settings_ai_config_description">Stel KI-verskaffers en opsomming op</string>
     <string name="settings_ai_config_server">Bediener-URL</string>
-    <string name="settings_ai_config_server_hint">Voer 'n basis-URL in</string>
-    <string name="settings_ai_config_server_url_requirement">Die URL moet eindig met 'n skuinsstreep en 'n versoenbare v1/chat/completions-API ondersteun.</string>
+    <string name="settings_ai_config_server_hint">Voer \'n basis-URL in</string>
+    <string name="settings_ai_config_server_url_requirement">Die URL moet eindig met \'n skuinsstreep en \'n versoenbare v1/chat/completions-API ondersteun.</string>
     <string name="settings_ai_config_server_self_host_description">Gebruik die amptelike diens of jou eie versoenbare bediener</string>
     <string name="settings_ai_config_type">KI-tipe</string>
     <string name="settings_ai_config_type_description">Kies watter KI-agterkant Flare gebruik</string>
@@ -95,17 +95,17 @@
     <string name="settings_ai_config_type_on_device">KI op toestel</string>
     <string name="settings_ai_config_type_on_device_description">Begin ondersteunde KI-modelle plaaslik op hierdie toestel</string>
     <string name="settings_ai_config_type_openai">OpenAI-versoenbare API</string>
-    <string name="settings_ai_config_type_openai_description">Gebruik 'n OpenAI-versoenbare eindpunt vir KI-funksies</string>
+    <string name="settings_ai_config_type_openai_description">Gebruik \'n OpenAI-versoenbare eindpunt vir KI-funksies</string>
     <string name="settings_ai_config_value_empty_placeholder">Nie gestel nie</string>
     <string name="settings_ai_config_api_key">API-sleutel</string>
     <string name="settings_ai_config_api_key_hint">Voer API-sleutel in</string>
     <string name="settings_ai_config_model">Model</string>
-    <string name="settings_ai_config_model_description">Kies 'n model vanaf hierdie eindpunt</string>
+    <string name="settings_ai_config_model_description">Kies \'n model vanaf hierdie eindpunt</string>
     <string name="settings_ai_config_model_select">Kies model</string>
     <string name="settings_ai_config_model_loading">Laai modelle…</string>
     <string name="settings_ai_config_model_error">Kon nie modelle laai nie</string>
     <string name="settings_ai_config_model_no_models">Geen modelle nie</string>
-    <string name="settings_ai_config_model_manual_input">Voer 'n modelnaam handmatig in</string>
+    <string name="settings_ai_config_model_manual_input">Voer \'n modelnaam handmatig in</string>
     <string name="settings_ai_config_reasoning_effort">Redeneringspoging</string>
     <string name="settings_ai_config_reasoning_effort_description">Kies hoeveel ekstra redenering die model gebruik. Verstek volg die verskaffer se instelling.</string>
     <string name="settings_ai_config_reasoning_effort_default">Verstek</string>
@@ -119,7 +119,7 @@
     <string name="settings_ai_config_enable_tldr">Aktiveer KI-opsommings</string>
     <string name="settings_ai_config_tldr_description">Som lang poste op met KI. Beskikbaar vir poste langer as 500 karakters.</string>
     <string name="settings_ai_config_enable_pre_translation">Aktiveer outo-vertaling</string>
-    <string name="settings_ai_config_pre_translation_description">Vertaal nuut gelaaide tydlyn- en profielinhoud in die agtergrond en kas die resultate. Dit kan 'n groot aantal tekens gebruik.</string>
+    <string name="settings_ai_config_pre_translation_description">Vertaal nuut gelaaide tydlyn- en profielinhoud in die agtergrond en kas die resultate. Dit kan \'n groot aantal tekens gebruik.</string>
     <string name="settings_ai_config_translate_prompt">Vertaalaanmaning</string>
     <string name="settings_ai_config_tldr_prompt">Opsomming-aanmaning</string>
     <string name="settings_ai_config_translate_provider">Vertalingverskaffer</string>
@@ -139,7 +139,7 @@
     <string name="settings_translation_description">Kies vertaaldienste en outo-vertaling gedrag</string>
     <string name="settings_translation_auto_excluded_languages">Tale om oor te slaan vir outo-vertaling</string>
     <string name="settings_translation_ai_test_title">KI-vertalingstoets</string>
-    <string name="settings_translation_ai_test_description">Vertaal 'n kort ryk-teks-monster met die huidige KI-vertalinginstellings.</string>
+    <string name="settings_translation_ai_test_description">Vertaal \'n kort ryk-teks-monster met die huidige KI-vertalinginstellings.</string>
     <string name="settings_translation_ai_test_action">Toets vertaling</string>
     <string name="settings_translation_ai_test_original">Monsterteks</string>
     <string name="settings_translation_ai_test_result">Vertaalde teks</string>
@@ -159,7 +159,7 @@
     <string name="login_expired_relogin">Meld weer aan</string>
 
     <string name="service_select_welcome_title">Welkom by Flare</string>
-    <string name="service_select_welcome_message">Flare is 'n sosiale media-kliënt vir Android.\nKies 'n diens om te koppel en te begin.</string>
+    <string name="service_select_welcome_message">Flare is \'n sosiale media-kliënt vir Android.\nKies \'n diens om te koppel en te begin.</string>
 
     <string name="mastodon_login_verify_message">Verifieer tans jou geloofsbriewe…</string>
 
@@ -196,7 +196,7 @@
     <string name="report_reason_misleading_description">Hierdie pos is misleidend</string>
     <string name="report_reason_sexual_description">Naaktheid of pornografie wat nie as sodanig gemerk is nie</string>
     <string name="report_reason_rude_description">Teistering, treitering of onverdraagsaamheid</string>
-    <string name="report_reason_other_description">'n Kwessie wat nie by hierdie opsies ingesluit is nie</string>
+    <string name="report_reason_other_description">\'n Kwessie wat nie by hierdie opsies ingesluit is nie</string>
 
     <string name="delete_status_title">Vee uit</string>
     <string name="delete_status_message">Vee hierdie pos uit?</string>
@@ -235,7 +235,7 @@
     <string name="settings_appearance_expand_media">Behou media-aspekverhouding</string>
     <string name="settings_appearance_expand_media_description">Wys media teen hul oorspronklike aspekverhouding in tydlyne</string>
     <string name="settings_appearance_video_autoplay">Video-outospeel</string>
-    <string name="settings_appearance_video_autoplay_description">Speel video's outomaties in poste</string>
+    <string name="settings_appearance_video_autoplay_description">Speel video\'s outomaties in poste</string>
     <string name="settings_appearance_video_autoplay_wifi">Slegs Wi-Fi</string>
     <string name="settings_appearance_video_autoplay_always">Altyd</string>
     <string name="settings_appearance_video_autoplay_never">Nooit</string>
@@ -258,7 +258,7 @@
     <string name="settings_appearance_show_link_previews">Wys skakelvoorskoue</string>
     <string name="settings_appearance_show_link_previews_description">Wys skakelvoorskoue in poste</string>
     <string name="settings_appearance_compat_link_previews">Kompakte skakelvoorskoue</string>
-    <string name="settings_appearance_compat_link_previews_description">Gebruik 'n vereenvoudigde uitleg vir skakelvoorskoue</string>
+    <string name="settings_appearance_compat_link_previews_description">Gebruik \'n vereenvoudigde uitleg vir skakelvoorskoue</string>
     <string name="settings_appearance_theme_color">Temakleur</string>
     <string name="settings_appearance_theme_color_description">Kies die toepassing se aksentkleur</string>
     <string name="settings_appearance_theme_pure_color">Hoë-kontras-modus</string>
@@ -279,7 +279,7 @@
     <string name="settings_appearance_show_bottom_bar_labels">Wys teks op onderste balk</string>
     <string name="settings_appearance_show_bottom_bar_labels_description">Wys teks-etikette in onderste navigasie en die syreling</string>
     <string name="settings_appearance_deck_mode">Dek-modus</string>
-    <string name="settings_appearance_deck_mode_description">Gebruik 'n dek-uitleg vir ondersteunde tydlyne</string>
+    <string name="settings_appearance_deck_mode_description">Gebruik \'n dek-uitleg vir ondersteunde tydlyne</string>
     <string name="settings_appearance_in_app_browser">In-toepassing blaaier</string>
     <string name="settings_appearance_in_app_browser_description">Maak eksterne skakels binne Flare oop</string>
     <string name="settings_appearance_full_width_post">Volwydte-poste</string>
@@ -316,7 +316,7 @@
     <string name="media_save_success">Gestoor na Aflaaie</string>
     <string name="media_save_fail">Kon nie stoor nie</string>
     <string name="media_alt_text">Alt-teks</string>
-    <string name="media_is_downloading">Media laai nog af. Probeer weer oor 'n oomblik.</string>
+    <string name="media_is_downloading">Media laai nog af. Probeer weer oor \'n oomblik.</string>
 
     <string name="settings_side_panel_empty">By verstek volg die sypaneel die huidige rekening se platform.</string>
     <string name="tab_settings_add">Voeg by</string>
@@ -332,7 +332,7 @@
     <string name="local_filter_edit_title">Wysig filter</string>
     <string name="local_filter_add_title">Voeg filter by</string>
     <string name="local_filter_keyword">Sleutelwoord</string>
-    <string name="local_filter_keyword_hint">Voer 'n sleutelwoord in</string>
+    <string name="local_filter_keyword_hint">Voer \'n sleutelwoord in</string>
     <string name="local_filter_for_timeline">Pas toe op tydlyne</string>
     <string name="local_filter_for_notification">Pas toe op kennisgewings</string>
     <string name="local_filter_for_search">Pas toe op soektog</string>
@@ -365,7 +365,7 @@
     <string name="edit_tab_icon">Ikoon</string>
     <string name="edit_tab_with_avatar">Met avatar</string>
     <string name="edit_tab_enabled">Wys in gemengde tydlyne</string>
-    <string name="edit_tab_enabled_description">Sluit hierdie tydlyn in wanneer dit binne 'n gemengde tydlyn of groep gebruik word.</string>
+    <string name="edit_tab_enabled_description">Sluit hierdie tydlyn in wanneer dit binne \'n gemengde tydlyn of groep gebruik word.</string>
 
     <string name="list_add">Voeg lys by</string>
     <string name="list_edit">Wysig lys</string>
@@ -409,7 +409,7 @@
     <string name="dm_list_empty">Geen direkte boodskappe nie</string>
     <string name="dm_list_error">Kon nie direkte boodskappe laai nie</string>
     <string name="send">Stuur</string>
-    <string name="dm_send_placeholder">Stuur 'n boodskap</string>
+    <string name="dm_send_placeholder">Stuur \'n boodskap</string>
     <string name="dm_deleted">Geskrap</string>
     <string name="dm_conversation">Direkte boodskap gesprek</string>
     <string name="dm_sending">Stuur tans</string>
@@ -439,7 +439,7 @@
     <string name="rss_title">Intekeninge</string>
     <string name="empty_rss_sources">Geen intekeninge nie</string>
     <string name="rss_sources_rss_hub_host_label">RSSHub-gasheer</string>
-    <string name="rss_sources_rss_hub_host_hint">Stel 'n RSSHub-gasheer om RSSHub te gebruik, of kies die publieke RSSHub-bediener</string>
+    <string name="rss_sources_rss_hub_host_hint">Stel \'n RSSHub-gasheer om RSSHub te gebruik, of kies die publieke RSSHub-bediener</string>
     <string name="rss_sources_discovered_rss_sources">Ontdekte voere</string>
     <string name="rss_sources_pinned_in_tabs">Speld vas aan Tuis-blaaie</string>
     <string name="rss_sources_open_in_browser">Maak oop in blaaier</string>
@@ -450,7 +450,7 @@
     <string name="mastodon_trending_statuses">Gewilde statusse</string>
     <string name="mastodon_federated_timeline">Gefedereerde tydlyn</string>
     <string name="mastodon_local_timeline">Plaaslike tydlyn</string>
-    <string name="subscription_url_hint">Plak 'n RSS-voer-URL of 'n Mastodon-instansie-URL</string>
+    <string name="subscription_url_hint">Plak \'n RSS-voer-URL of \'n Mastodon-instansie-URL</string>
     <string name="rss_sources_display_mode">Vertoonmodus</string>
 
     <string name="rss_detail_open_in_browser">Maak oop in blaaier</string>
@@ -482,11 +482,11 @@
     <string name="antennas_empty">Nog geen antennes nie</string>
     <string name="home_tab_mixed_timeline_title">Gemeng</string>
     <string name="tab_settings_mixed_timeline">Aktiveer gemengde tydlyn-blad</string>
-    <string name="tab_settings_mixed_timeline_desc">Kombineer poste van alle blaaie in 'n enkele Tuis-blad.</string>
+    <string name="tab_settings_mixed_timeline_desc">Kombineer poste van alle blaaie in \'n enkele Tuis-blad.</string>
     <string name="home_tab_social_timeline_title">Sosiaal</string>
 
     <string name="deeplink_account_selection_title">Kies rekening</string>
-    <string name="deeplink_account_selection_message">Kies 'n rekening om hierdie skakel oop te maak</string>
+    <string name="deeplink_account_selection_message">Kies \'n rekening om hierdie skakel oop te maak</string>
     <string name="deeplink_account_selection_browser">Maak oop in blaaier</string>
 
     <string name="block_user_title">Blokkeer gebruiker</string>
@@ -505,13 +505,13 @@
     <string name="settings_storage_export_data">Voer data uit</string>
     <string name="settings_storage_export_data_description">Voer alle data uit, insluitend rekeninge en geloofsbriewe. Hou die lêer veilig.</string>
     <string name="settings_storage_import_data">Voer data in</string>
-    <string name="settings_storage_import_data_description">Voer data in vanaf 'n rugsteunlêer. Bestaande rekords met bypassende ID's sal vervang word.</string>
+    <string name="settings_storage_import_data_description">Voer data in vanaf \'n rugsteunlêer. Bestaande rekords met bypassende ID\'s sal vervang word.</string>
     <string name="save_completed">Uitvoer voltooi</string>
     <string name="save_error">Uitvoer het misluk</string>
     <string name="import_completed">Invoer voltooi</string>
     <string name="import_error">Invoer het misluk</string>
     <string name="import_confirmation_title">Bevestig invoer</string>
-    <string name="import_confirmation_message">Dit sal data vanaf die geselekteerde lêer invoer. Bestaande rekords met bypassende ID's sal vervang word. Gaan voort?</string>
+    <string name="import_confirmation_message">Dit sal data vanaf die geselekteerde lêer invoer. Bestaande rekords met bypassende ID\'s sal vervang word. Gaan voort?</string>
 
     <string name="tab_settings_add_group">Voeg groep by</string>
     <string name="tab_settings_add_tab">Voeg blad by</string>
@@ -536,7 +536,7 @@
     <string name="tab_settings_filter_quote">Aanhalings</string>
     <string name="tab_settings_filter_text_only">Slegs teks</string>
     <string name="tab_settings_filter_image">Beelde</string>
-    <string name="tab_settings_filter_video">Video's</string>
+    <string name="tab_settings_filter_video">Video\'s</string>
     <string name="status_share_sheet_theme_title">Tema</string>
     <string name="channel_title">Kanaal</string>
     <string name="channel_item_follow">Volg</string>

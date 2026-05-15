@@ -4,18 +4,15 @@
     <string name="done">Τέλος</string>
     <string name="cancel">Ακύρωση</string>
     <string name="ok">ΟΚ</string>
-
     <string name="profile_header_following_count">%1$s Ακολουθεί</string>
     <string name="profile_header_fans_count">%1$s Ακόλουθοι</string>
     <string name="profile_header_toots_count">%1$s Δημοσιεύσεις</string>
     <string name="profile_misskey_header_status_count">%1$s Δημοσιεύσεις</string>
-
     <string name="profile_header_button_follow">Ακολουθήστε</string>
     <string name="profile_header_button_following">Ακολουθείτε</string>
     <string name="profile_header_button_requested">Εκκρεμεί αίτημα</string>
     <string name="profile_header_button_blocked">Αποκλεισμένος</string>
     <string name="profile_header_button_is_fans">Σας ακολουθεί</string>
-
     <string name="mastodon_notification_item_followed_you">σας ακολούθησε</string>
     <string name="mastodon_notification_item_favourited_your_status">πρόσθεσε στα αγαπημένα τη δημοσίευσή σας</string>
     <string name="mastodon_notification_item_reblogged_your_status">αναδημοσίευσε</string>
@@ -28,9 +25,7 @@
     <string name="mastodon_item_show_more">Εμφάνιση περισσότερων</string>
     <string name="mastodon_item_show_less">Εμφάνιση λιγότερων</string>
     <string name="mastodon_item_pinned">κάρφωσε μια δημοσίευση</string>
-
     <string name="post_show_full_text">Εμφάνιση πλήρους κειμένου</string>
-
     <string name="bluesky_notification_item_followed_you">σας ακολούθησε</string>
     <string name="bluesky_notification_item_favourited_your_status">του/της άρεσε η δημοσίευσή σας</string>
     <string name="bluesky_notification_item_reblogged_your_status">αναδημοσίευσε τη δημοσίευσή σας</string>
@@ -42,7 +37,6 @@
     <string name="bluesky_notification_item_starterpack_joined">εντάχθηκε μέσω ενός Starter Pack</string>
     <string name="bluesky_notification_item_unKnown">Άγνωστο</string>
     <string name="bluesky_notification_item_pin">κάρφωσε μια δημοσίευση</string>
-
     <string name="misskey_notification_item_mentioned_you">σας ανέφερε</string>
     <string name="misskey_notification_item_replied_to_you">σας απάντησε</string>
     <string name="misskey_notification_item_reposted_your_status">αναδημοσίευσε τη δημοσίευσή σας</string>
@@ -64,10 +58,8 @@
     <string name="misskey_notification_item_requested_follow">ζήτησε να σας ακολουθήσει</string>
     <string name="misskey_notification_unknwon">Άγνωστη ειδοποίηση: %1$s</string>
     <string name="misskey_item_reblogged_status">αναδημοσίευσε</string>
-
     <string name="xqt_item_reblogged_status">αναδημοσίευσε</string>
     <string name="xqt_item_mention_status">σας ανέφερε</string>
-
     <string name="mastodon_visibility_public">Δημόσιο</string>
     <string name="mastodon_visibility_unlisted">Μη καταχωρισμένο</string>
     <string name="mastodon_visibility_private">Ιδιωτικό</string>
@@ -76,10 +68,8 @@
     <string name="mastodon_visibility_unlisted_description">Οποιοσδήποτε μπορεί να δει αυτή τη δημοσίευση, αλλά δεν θα εμφανιστεί στη δημόσια ροή</string>
     <string name="mastodon_visibility_private_description">Μόνο οι ακόλουθοι μπορούν να δουν αυτή τη δημοσίευση</string>
     <string name="mastodon_visibility_direct_description">Μόνο οι αναφερόμενοι χρήστες μπορούν να δουν αυτή τη δημοσίευση</string>
-
     <string name="settings_notifications_title">Ειδοποιήσεις</string>
     <string name="settings_notifications_subtitle">Προσαρμόστε τον τρόπο με τον οποίο το Flare σας ειδοποιεί</string>
-
     <string name="status_loadmore_end">Δεν υπάρχουν άλλες δημοσιεύσεις</string>
     <string name="status_loadmore_error">Σφάλμα κατά τη φόρτωση περισσότερων δημοσιεύσεων</string>
     <string name="status_loadmore_error_retry">Προσπάθεια ξανά</string>
@@ -90,31 +80,24 @@
     <string name="login_expired">Η συνεδρία σύνδεσης έληξε</string>
     <string name="login_expired_message">Πατήστε για να συνδεθείτε ξανά</string>
     <string name="login_expired_relogin">Σύνδεση ξανά</string>
-
     <string name="permission_denied_title">Δεν επιτρέπεται η πρόσβαση</string>
     <string name="permission_denied_message">Συνδεθείτε ξανά για να αποκτήσετε πρόσβαση σε αυτή τη σελίδα</string>
-
     <string name="misskey_compose_local_only">Μόνο τοπικά</string>
     <string name="misskey_compose_local_only_description">Μόνο χρήστες σε αυτήν την παρουσία μπορούν να δουν αυτή τη δημοσίευση</string>
-
     <string name="misskey_item_action_renote">Renote</string>
     <string name="misskey_item_action_quote">Παράθεση</string>
-
     <string name="bluesky_notification_unknown_message">Άγνωστος τύπος ειδοποίησης %1$s</string>
     <string name="bluesky_notification_unknown_message2">Παρακαλούμε αναφέρετε αυτό το ζήτημα στον προγραμματιστή.</string>
-
     <string name="blusky_item_action_repost">Αναδημοσίευση</string>
     <string name="blusky_item_action_quote">Παράθεση</string>
     <string name="blusky_item_action_report">Αναφορά</string>
     <string name="blusky_item_action_delete">Διαγραφή</string>
-
     <string name="mastodon_item_unbookmark">Αφαίρεση σελιδοδείκτη</string>
     <string name="mastodon_item_bookmark">Προσθήκη σελιδοδείκτη</string>
     <string name="mastodon_item_delete">Διαγραφή</string>
     <string name="mastodon_item_report">Αναφορά</string>
     <string name="misskey_item_action_delete">Διαγραφή</string>
     <string name="misskey_item_action_report">Αναφορά</string>
-
     <string name="bookmark_remove">Αφαίρεση σελιδοδείκτη</string>
     <string name="bookmark_add">Προσθήκη σελιδοδείκτη</string>
     <string name="like">Μου αρέσει</string>
@@ -132,7 +115,6 @@
     <string name="share">Κοινοποίηση</string>
     <string name="fx_share">Κοινοποίηση μέσω FxEmbed</string>
     <string name="comment">Σχόλιο</string>
-
     <string name="user_report">Αναφορά</string>
     <string name="user_block">Αποκλεισμός</string>
     <string name="user_unblock">Κατάργηση αποκλεισμού</string>
@@ -149,281 +131,194 @@
     <string name="translation_badge_failed">Η μετάφραση απέτυχε</string>
     <string name="translation_retry">Δοκιμάστε ξανά τη μετάφραση</string>
     <string name="translation_show_original">Εμφάνιση πρωτοτύπου</string>
-
     <string name="date_format_year_month_day">dd MMM yy</string>
     <string name="date_format_month_day">dd MMM</string>
     <string name="date_format_full">dd MMM yy HH:mm</string>
-
     <string name="vvo_notification_like">του/της άρεσε η δημοσίευσή σας</string>
-
     <string name="user_follow_edit_list">Προσθήκη/Αφαίρεση από λίστα</string>
     <string name="list_empty">Δεν υπάρχουν λίστες</string>
     <string name="list_error">Αποτυχία φόρτωσης λιστών</string>
-
     <string name="misskey_achievement_notes1_title">απλώς ρυθμίζω το msky μου</string>
     <string name="misskey_achievement_notes1_description">Δημοσιεύστε την πρώτη σας σημείωση</string>
     <string name="misskey_achievement_notes1_flavor">Να περάσετε καλά με το Misskey!</string>
-
     <string name="misskey_achievement_notes10_title">Μερικές σημειώσεις</string>
     <string name="misskey_achievement_notes10_description">Δημοσιεύστε 10 σημειώσεις</string>
-
     <string name="misskey_achievement_notes100_title">Πολλές σημειώσεις</string>
     <string name="misskey_achievement_notes100_description">Δημοσιεύστε 100 σημειώσεις</string>
-
     <string name="misskey_achievement_notes500_title">Καλυμμένος με σημειώσεις</string>
     <string name="misskey_achievement_notes500_description">Δημοσιεύστε 500 σημειώσεις</string>
-
     <string name="misskey_achievement_notes1000_title">Ένα βουνό από σημειώσεις</string>
     <string name="misskey_achievement_notes1000_description">Δημοσιεύστε 1.000 σημειώσεις</string>
-
     <string name="misskey_achievement_notes5000_title">Σημειώσεις που ξεχειλίζουν</string>
     <string name="misskey_achievement_notes5000_description">Δημοσιεύστε 5.000 σημειώσεις</string>
-
     <string name="misskey_achievement_notes10000_title">Supernote</string>
     <string name="misskey_achievement_notes10000_description">Δημοσιεύστε 10.000 σημειώσεις</string>
-
     <string name="misskey_achievement_notes20000_title">Χρειάζομαι... κι άλλες... σημειώσεις...</string>
     <string name="misskey_achievement_notes20000_description">Δημοσιεύστε 20.000 σημειώσεις</string>
-
     <string name="misskey_achievement_notes30000_title">Σημειώσεις σημειώσεις σημειώσεις!</string>
     <string name="misskey_achievement_notes30000_description">Δημοσιεύστε 30.000 σημειώσεις</string>
-
     <string name="misskey_achievement_notes40000_title">Εργοστάσιο σημειώσεων</string>
     <string name="misskey_achievement_notes40000_description">Δημοσιεύστε 40.000 σημειώσεις</string>
-
     <string name="misskey_achievement_notes50000_title">Πλανήτης των σημειώσεων</string>
     <string name="misskey_achievement_notes50000_description">Δημοσιεύστε 50.000 σημειώσεις</string>
-
     <string name="misskey_achievement_notes60000_title">Κβάζαρ σημειώσεων</string>
     <string name="misskey_achievement_notes60000_description">Δημοσιεύστε 60.000 σημειώσεις</string>
-
     <string name="misskey_achievement_notes70000_title">Μαύρη τρύπα σημειώσεων</string>
     <string name="misskey_achievement_notes70000_description">Δημοσιεύστε 70.000 σημειώσεις</string>
-
     <string name="misskey_achievement_notes80000_title">Γαλαξίας σημειώσεων</string>
     <string name="misskey_achievement_notes80000_description">Δημοσιεύστε 80.000 σημειώσεις</string>
-
     <string name="misskey_achievement_notes90000_title">Σύμπαν σημειώσεων</string>
     <string name="misskey_achievement_notes90000_description">Δημοσιεύστε 90.000 σημειώσεις</string>
-
     <string name="misskey_achievement_notes100000_title">ΟΛΕΣ ΟΙ ΣΗΜΕΙΩΣΕΙΣ ΣΑΣ ΜΑΣ ΑΝΗΚΟΥΝ</string>
     <string name="misskey_achievement_notes100000_description">Δημοσιεύστε 100.000 σημειώσεις</string>
     <string name="misskey_achievement_notes100000_flavor">Σίγουρα έχετε πολλά να πείτε.</string>
-
     <string name="misskey_achievement_login3_title">Αρχάριος I</string>
     <string name="misskey_achievement_login3_description">Συνδεθείτε για συνολικά 3 ημέρες</string>
     <string name="misskey_achievement_login3_flavor">Από σήμερα, απλώς να με αποκαλείτε Misskist</string>
-
     <string name="misskey_achievement_login7_title">Αρχάριος II</string>
     <string name="misskey_achievement_login7_description">Συνδεθείτε για συνολικά 7 ημέρες</string>
     <string name="misskey_achievement_login7_flavor">Νιώθετε ότι το έχετε βρει πια;</string>
-
     <string name="misskey_achievement_login15_title">Αρχάριος III</string>
     <string name="misskey_achievement_login15_description">Συνδεθείτε για συνολικά 15 ημέρες</string>
-
     <string name="misskey_achievement_login30_title">Misskist I</string>
     <string name="misskey_achievement_login30_description">Συνδεθείτε για συνολικά 30 ημέρες</string>
-
     <string name="misskey_achievement_login60_title">Misskist II</string>
     <string name="misskey_achievement_login60_description">Συνδεθείτε για συνολικά 60 ημέρες</string>
-
     <string name="misskey_achievement_login100_title">Misskist III</string>
     <string name="misskey_achievement_login100_description">Συνδεθείτε για συνολικά 100 ημέρες</string>
     <string name="misskey_achievement_login100_flavor">Βίαιος Misskist</string>
-
     <string name="misskey_achievement_login200_title">Τακτικός I</string>
     <string name="misskey_achievement_login200_description">Συνδεθείτε για συνολικά 200 ημέρες</string>
-
     <string name="misskey_achievement_login300_title">Τακτικός II</string>
     <string name="misskey_achievement_login300_description">Συνδεθείτε για συνολικά 300 ημέρες</string>
-
     <string name="misskey_achievement_login400_title">Τακτικός III</string>
     <string name="misskey_achievement_login400_description">Συνδεθείτε for συνολικά 400 ημέρες</string>
-
     <string name="misskey_achievement_login500_title">Ειδικός I</string>
     <string name="misskey_achievement_login500_description">Συνδεθείτε για συνολικά 500 ημέρες</string>
     <string name="misskey_achievement_login500_flavor">Φίλοι μου, έχει ειπωθεί συχνά ότι μου αρέσουν οι σημειώσεις</string>
-
     <string name="misskey_achievement_login600_title">Ειδικός II</string>
     <string name="misskey_achievement_login600_description">Συνδεθείτε για συνολικά 600 ημέρες</string>
-
     <string name="misskey_achievement_login700_title">Ειδικός III</string>
     <string name="misskey_achievement_login700_description">Συνδεθείτε για συνολικά 700 ημέρες</string>
-
     <string name="misskey_achievement_login800_title">Master των σημειώσεων I</string>
     <string name="misskey_achievement_login800_description">Συνδεθείτε για συνολικά 800 ημέρες</string>
-
     <string name="misskey_achievement_login900_title">Master των σημειώσεων II</string>
     <string name="misskey_achievement_login900_description">Συνδεθείτε για συνολικά 900 ημέρες</string>
-
     <string name="misskey_achievement_login1000_title">Master των σημειώσεων III</string>
     <string name="misskey_achievement_login1000_description">Συνδεθείτε για συνολικά 1.000 ημέρες</string>
     <string name="misskey_achievement_login1000_flavor">Σας ευχαριστούμε που χρησιμοποιείτε το Misskey!</string>
-
     <string name="misskey_achievement_note_clipped1_title">Πρέπει... να κλιπάρω...</string>
     <string name="misskey_achievement_note_clipped1_description">Κλιπάρετε την πρώτη σας σημείωση</string>
-
     <string name="misskey_achievement_note_favorited1_title">Παρατηρητής των αστεριών</string>
     <string name="misskey_achievement_note_favorited1_description">Προσθέστε στα αγαπημένα την πρώτη σας σημείωση</string>
-
     <string name="misskey_achievement_my_note_favorited1_title">Αναζήτηση αστεριών</string>
     <string name="misskey_achievement_my_note_favorited1_description">Βάλτε κάποιον άλλο να προσθέσει στα αγαπημένα μία από τις σημειώσεις σας</string>
-
     <string name="misskey_achievement_profile_filled_title">Καλά προετοιμασμένος</string>
     <string name="misskey_achievement_profile_filled_description">Ρυθμίστε το προφίλ σας</string>
-
     <string name="misskey_achievement_marked_as_cat_title">Είμαι γάτα</string>
     <string name="misskey_achievement_marked_as_cat_description">Σημειώστε τον λογαριασμό σας ως γάτα</string>
     <string name="misskey_achievement_marked_as_cat_flavor">Θα σου δώσω ένα όνομα αργότερα.</string>
-
     <string name="misskey_achievement_following1_title">Ακολουθείτε τον πρώτο σας χρήστη</string>
     <string name="misskey_achievement_following1_description">Ακολουθήστε έναν χρήστη</string>
-
     <string name="misskey_achievement_following10_title">Συνεχίστε... συνεχίστε...</string>
     <string name="misskey_achievement_following10_description">Ακολουθήστε 10 χρήστες</string>
-
     <string name="misskey_achievement_following50_title">Πολλοί φίλοι</string>
     <string name="misskey_achievement_following50_description">Ακολουθήστε 50 λογαριασμούς</string>
-
     <string name="misskey_achievement_following100_title">100 φίλοι</string>
     <string name="misskey_achievement_following100_description">Ακολουθήστε 100 λογαριασμούς</string>
-
     <string name="misskey_achievement_following300_title">Υπερφόρτωση φίλων</string>
     <string name="misskey_achievement_following300_description">Ακολουθήστε 300 λογαριασμούς</string>
-
     <string name="misskey_achievement_followers1_title">Πρώτος ακόλουθος</string>
     <string name="misskey_achievement_followers1_description">Κερδίστε 1 ακόλουθο</string>
-
     <string name="misskey_achievement_followers10_title">Ακολουθήστε με!</string>
     <string name="misskey_achievement_followers10_description">Κερδίστε 10 ακόλουθους</string>
-
     <string name="misskey_achievement_followers50_title">Έρχονται σε πλήθη</string>
     <string name="misskey_achievement_followers50_description">Κερδίστε 50 ακόλουθους</string>
-
     <string name="misskey_achievement_followers100_title">Δημοφιλής</string>
     <string name="misskey_achievement_followers100_description">Κερδίστε 100 ακόλουθους</string>
-
     <string name="misskey_achievement_followers300_title">Παρακαλώ σχηματίστε μια σειρά</string>
     <string name="misskey_achievement_followers300_description">Κερδίστε 300 ακόλουθους</string>
-
     <string name="misskey_achievement_followers500_title">Πύργος Ραδιοφώνου</string>
     <string name="misskey_achievement_followers500_description">Κερδίστε 500 ακόλουθους</string>
-
     <string name="misskey_achievement_followers1000_title">Influencer</string>
     <string name="misskey_achievement_followers1000_description">Κερδίστε 1.000 ακόλουθους</string>
-
     <string name="misskey_achievement_collect_achievements30_title">Συλλέκτης επιτευγμάτων</string>
     <string name="misskey_achievement_collect_achievements30_description">Κερδίστε 30 επιτεύγματα</string>
-
     <string name="misskey_achievement_view_achievements3min_title">Του αρέσουν τα επιτεύγματα</string>
     <string name="misskey_achievement_view_achievements3min_description">Κοιτάξτε τη λίστα των επιτευγμάτων σας για τουλάχιστον 3 λεπτά</string>
-
     <string name="misskey_achievement_i_love_misskey_title">Λατρεύω το Misskey</string>
     <string name="misskey_achievement_i_love_misskey_description">Δημοσιεύστε \"I ❤ #Misskey\"</string>
     <string name="misskey_achievement_i_love_misskey_flavor">Η ομάδα ανάπτυξης του Misskey εκτιμά πολύ την υποστήριξή σας!</string>
-
     <string name="misskey_achievement_found_treasure_title">Κυνήγι θησαυρού</string>
     <string name="misskey_achievement_found_treasure_description">Βρήκατε τον κρυμμένο θησαυρό</string>
-
     <string name="misskey_achievement_client30min_title">Σύντομο διάλειμμα</string>
     <string name="misskey_achievement_client30min_description">Κρατήστε το Misskey ανοιχτό για τουλάχιστον 30 λεπτά</string>
-
     <string name="misskey_achievement_client60min_title">Κανένα \"Miss\" στο Misskey</string>
     <string name="misskey_achievement_client60min_description">Κρατήστε το Misskey ανοιχτό για τουλάχιστον 60 λεπτά</string>
-
     <string name="misskey_achievement_note_deleted_within1min_title">Δεν πειράζει</string>
     <string name="misskey_achievement_note_deleted_within1min_description">Διαγράψτε μια σημείωση εντός ενός λεπτού από τη δημοσίευσή της</string>
-
     <string name="misskey_achievement_posted_at_late_night_title">Νυχτόβιος</string>
     <string name="misskey_achievement_posted_at_late_night_description">Δημοσιεύστε μια σημείωση αργά τη νύχτα</string>
     <string name="misskey_achievement_posted_at_late_night_flavor">Είναι ώρα για ύπνο.</string>
-
     <string name="misskey_achievement_posted_at_0min0sec_title">Ομιλών Ρολόι</string>
     <string name="misskey_achievement_posted_at_0min0sec_description">Δημοσιεύστε μια σημείωση στις 00:00</string>
     <string name="misskey_achievement_posted_at_0min0sec_flavor">Κλικ Κλικ Κλικ Κλανγκ</string>
-
     <string name="misskey_achievement_self_quote_title">Αυτοαναφορά</string>
     <string name="misskey_achievement_self_quote_description">Παραθέστε τη δική σας σημείωση</string>
-
     <string name="misskey_achievement_htl20npm_title">Ροή χρονολογίου</string>
     <string name="misskey_achievement_htl20npm_description">Κάντε την ταχύτητα της αρχικής σας ροής να ξεπεράσει τις 20 σημειώσεις ανά λεπτό (npm)</string>
-
     <string name="misskey_achievement_view_instance_chart_title">Αναλυτής</string>
     <string name="misskey_achievement_view_instance_chart_description">Δείτε τα γραφήματα της παρουσίας σας</string>
-
     <string name="misskey_achievement_output_hello_world_on_scratchpad_title">Hello, world!</string>
     <string name="misskey_achievement_output_hello_world_on_scratchpad_description">Εμφανίστε το \"hello world\" στο Scratchpad</string>
-
     <string name="misskey_achievement_open3windows_title">Πολλαπλά παράθυρα</string>
     <string name="misskey_achievement_open3windows_description">Έχετε τουλάχιστον 3 παράθυρα ανοιχτά ταυτόχρονα</string>
-
     <string name="misskey_achievement_drive_folder_circular_reference_title">Κυκλική αναφορά</string>
     <string name="misskey_achievement_drive_folder_circular_reference_description">Προσπάθεια δημιουργίας ενός αναδρομικά ένθετου φακέλου στο Drive</string>
-
     <string name="misskey_achievement_react_without_read_title">Το διάβασες πραγματικά αυτό;</string>
     <string name="misskey_achievement_react_without_read_description">Αντιδράστε σε μια σημείωση που υπερβαίνει τους 100 χαρακτήρες εντός 3 δευτερολέπτων από τη δημοσίευσή της</string>
-
     <string name="misskey_achievement_clicked_click_here_title">Κάντε κλικ εδώ</string>
     <string name="misskey_achievement_clicked_click_here_description">Κάνατε κλικ εδώ</string>
-
     <string name="misskey_achievement_just_plain_lucky_title">Απλώς τυχερός</string>
     <string name="misskey_achievement_just_plain_lucky_description">Έχει πιθανότητα να αποκτηθεί με πιθανότητα 0,005% κάθε 10 δευτερόλεπτα</string>
-
     <string name="misskey_achievement_set_name_to_syuilo_title">Σύμπλεγμα του Θεού</string>
     <string name="misskey_achievement_set_name_to_syuilo_description">Ορίστε το όνομά σας σε \"syuilo\"</string>
-
     <string name="misskey_achievement_passed_since_account_created1_title">Πρώτη επέτειος</string>
     <string name="misskey_achievement_passed_since_account_created1_description">Πέρασε ένας χρόνος από τη δημιουργία του λογαριασμού σας</string>
-
     <string name="misskey_achievement_passed_since_account_created2_title">Δεύτερη επέτειος</string>
     <string name="misskey_achievement_passed_since_account_created2_description">Πέρασαν δύο χρόνια από τη δημιουργία του λογαριασμού σας</string>
-
     <string name="misskey_achievement_passed_since_account_created3_title">Τρίτη επέτειος</string>
     <string name="misskey_achievement_passed_since_account_created3_description">Πέρασαν τρία χρόνια από τη δημιουργία του λογαριασμού σας</string>
-
     <string name="misskey_achievement_logged_in_on_birthday_title">Χρόνια πολλά</string>
     <string name="misskey_achievement_logged_in_on_birthday_description">Συνδεθείτε την ημέρα των γενεθλίων σας</string>
-
     <string name="misskey_achievement_logged_in_on_new_years_day_title">Καλή χρονιά!</string>
     <string name="misskey_achievement_logged_in_on_new_years_day_description">Συνδεθήκατε την πρώτη ημέρα του έτους</string>
     <string name="misskey_achievement_logged_in_on_new_years_day_flavor">Σε άλλη μια σπουδαία χρονιά σε αυτήν την παρουσία</string>
-
     <string name="misskey_achievement_cookie_clicked_title">Ένα παιχνίδι στο οποίο κάνετε κλικ σε μπισκότα</string>
     <string name="misskey_achievement_cookie_clicked_description">Κάνατε κλικ στο μπισκότο</string>
     <string name="misskey_achievement_cookie_clicked_flavor">Περίμενε, είσαι στον σωστό ιστότοπο;</string>
-
     <string name="misskey_achievement_brain_diver_title">Brain Diver</string>
     <string name="misskey_achievement_brain_diver_description">Δημοσιεύστε τον σύνδεσμο για το Brain Diver</string>
     <string name="misskey_achievement_brain_diver_flavor">Misskey-Misskey La-Tu-Ma</string>
-
     <string name="misskey_achievement_smash_test_notification_button_title">Υπερχείλιση δοκιμής</string>
     <string name="misskey_achievement_smash_test_notification_button_description">Ενεργοποιήστε τη δοκιμή ειδοποίησης επανειλημμένα μέσα σε εξαιρετικά σύντομο χρονικό διάστημα</string>
-
     <string name="misskey_achievement_tutorial_completed_title">Δίπλωμα βασικού κύκλου μαθημάτων Misskey</string>
     <string name="misskey_achievement_tutorial_completed_description">Το σεμινάριο ολοκληρώθηκε</string>
-
     <string name="misskey_achievement_bubble_game_exploding_head_title">🤯</string>
     <string name="misskey_achievement_bubble_game_exploding_head_description">Το μεγαλύτερο αντικείμενο στο παιχνίδι με τις φυσαλίδες</string>
-
     <string name="misskey_achievement_bubble_game_double_exploding_head_title">Διπλό🤯</string>
     <string name="misskey_achievement_bubble_game_double_exploding_head_description">Δύο από τα μεγαλύτερα αντικείμενα στο παιχνίδι με τις φυσαλίδες ταυτόχρονα</string>
     <string name="misskey_achievement_bubble_game_double_exploding_head_flavor">Μπορείτε να γεμίσετε ένα κουτί μεσημεριανού γεύματος έτσι 🤯 🤯 λίγο.</string>
-
     <string name="vote">Ψηφίστε</string>
     <string name="poll_expired">Η δημοσκόπηση έληξε</string>
     <string name="poll_voted">Ψηφίσατε</string>
     <string name="poll_expired_at">Έληξε στις %1$s</string>
     <string name="user_send_message">Αποστολή άμεσου μηνύματος</string>
-
     <string name="profile_search_user_using_account">Βρείτε τον/την %1$s στο %2$s χρησιμοποιώντας το %3$s</string>
     <string name="profile_search_user_using_account_compat">Εύρεση στο %1$s</string>
-
     <string name="feeds_discover_feeds_created_by">Δημιουργήθηκε από %1$s</string>
-
     <string name="notification_item_accept_follow_request">Αποδοχή</string>
     <string name="notification_item_reject_follow_request">Απόρριψη</string>
-
-
     <string name="dm_list_empty">Δεν υπάρχουν άμεσα μηνύματα</string>
     <string name="dm_list_error">Αποτυχία φόρτωσης άμεσων μηνυμάτων</string>
     <string name="send">Αποστολή</string>
@@ -433,7 +328,6 @@
     <string name="dm_sending">Αποστολή…</string>
     <string name="dm_leave">Αποχώρηση από τη συνομιλία</string>
     <string name="dm_to_profile">Εμφάνιση προφίλ</string>
-
     <string name="settings_side_panel_empty">Από προεπιλογή, το πλευρικό πάνελ ακολουθεί την πλατφόρμα του τρέχοντος λογαριασμού.</string>
     <string name="tab_settings_add">Προσθήκη</string>
     <string name="tab_settings_drag">Σύρσιμο</string>
@@ -442,16 +336,13 @@
     <string name="tab_settings_default">Προεπιλογή</string>
     <string name="tab_settings_list">Λίστα</string>
     <string name="tab_settings_feed">Ροές</string>
-
     <string name="list_add">Προσθήκη λίστας</string>
     <string name="list_edit">Επεξεργασία λίστας</string>
     <string name="list_delete">Διαγραφή λίστας</string>
-
     <string name="rss_sources_title">Συνδρομές</string>
     <string name="add_rss_source">Προσθήκη συνδρομής</string>
     <string name="edit_rss_source">Επεξεργασία συνδρομής</string>
     <string name="delete_rss_source">Διαγραφή συνδρομής</string>
-
     <string name="rss_sources_title_label">Τίτλος</string>
     <string name="rss_sources_url_label">URL</string>
     <string name="rss_title">Συνδρομές</string>
@@ -459,7 +350,6 @@
     <string name="mastodon_trending_statuses">Δημοφιλείς καταστάσεις</string>
     <string name="mastodon_federated_timeline">Ομοσπονδιακό χρονολόγιο</string>
     <string name="mastodon_local_timeline">Τοπικό χρονολόιο</string>
-
     <string name="service_select_welcome_title">Καλώς ήρθατε στο Flare</string>
     <string name="service_select_welcome_message">Εισαγάγετε έναν διακομιστή για να ξεκινήσετε.</string>
     <string name="service_select_welcome_hint">Το Flare υποστηρίζει Mastodon, Misskey, Bluesky, Nostr και X.</string>
@@ -493,7 +383,6 @@
     <string name="service_select_compatibility_warning">Αυτός ο διακομιστής χρησιμοποιεί %1$s, το Flare θα εκτελείται σε κατάσταση συμβατότητας. Ορισμένες λειτουργίες ενδέχεται να μην λειτουργούν σωστά.</string>
     <string name="login_agreement">Με τη σύνδεση, συμφωνείτε με το %1$s.</string>
     <string name="eula_privacy_policy">EULA και Πολιτική Απορρήτου</string>
-
     <string name="home_tab_home_title">Αρχική</string>
     <string name="home_tab_notifications_title">Ειδοποιήσεις</string>
     <string name="home_tab_me_title">Εγώ</string>
@@ -519,6 +408,10 @@
     <string name="settings_about_source_code">Πηγαίος κώδικας</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Γίνετε μέλος στην ομάδα μας στο Telegram</string>
+    <string name="settings_about_discord" translatable="false">Discord</string>
+    <string name="settings_about_discord_description">Γίνετε μέλος στον διακομιστή μας στο Discord</string>
+    <string name="settings_about_line" translatable="false">Line</string>
+    <string name="settings_about_line_description">Γίνετε μέλος στην ομάδα μας στο Line</string>
     <string name="settings_about_localization">Crowdin</string>
     <string name="settings_about_localization_description">Βοηθήστε μας να μεταφράσουμε το Flare</string>
     <string name="settings_privacy_policy">Πολιτική Απορρήτου</string>

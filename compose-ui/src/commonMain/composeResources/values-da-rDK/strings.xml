@@ -4,18 +4,15 @@
     <string name="done">Færdig</string>
     <string name="cancel">Annuller</string>
     <string name="ok">OK</string>
-
     <string name="profile_header_following_count">%1$s Følger</string>
     <string name="profile_header_fans_count">%1$s Følgere</string>
     <string name="profile_header_toots_count">%1$s Indlæg</string>
     <string name="profile_misskey_header_status_count">%1$s Indlæg</string>
-
     <string name="profile_header_button_follow">Følg</string>
     <string name="profile_header_button_following">Følger</string>
     <string name="profile_header_button_requested">Anmodet</string>
     <string name="profile_header_button_blocked">Blokeret</string>
     <string name="profile_header_button_is_fans">Følger dig</string>
-
     <string name="mastodon_notification_item_followed_you">fulgte dig</string>
     <string name="mastodon_notification_item_favourited_your_status">favoriserede dit indlæg</string>
     <string name="mastodon_notification_item_reblogged_your_status">delte igen</string>
@@ -28,9 +25,7 @@
     <string name="mastodon_item_show_more">Vis mere</string>
     <string name="mastodon_item_show_less">Vis mindre</string>
     <string name="mastodon_item_pinned">fastgjorde et indlæg</string>
-
     <string name="post_show_full_text">Vis fuld tekst</string>
-
     <string name="bluesky_notification_item_followed_you">fulgte dig</string>
     <string name="bluesky_notification_item_favourited_your_status">kunne lide dit indlæg</string>
     <string name="bluesky_notification_item_reblogged_your_status">postede dit indlæg igen</string>
@@ -42,7 +37,6 @@
     <string name="bluesky_notification_item_starterpack_joined">blev medlem via en Starter Pack</string>
     <string name="bluesky_notification_item_unKnown">Ukendt</string>
     <string name="bluesky_notification_item_pin">fastgjorde et indlæg</string>
-
     <string name="misskey_notification_item_mentioned_you">nævnte dig</string>
     <string name="misskey_notification_item_replied_to_you">svarede dig</string>
     <string name="misskey_notification_item_reposted_your_status">postede dit indlæg igen</string>
@@ -64,10 +58,8 @@
     <string name="misskey_notification_item_requested_follow">anmodede om at følge dig</string>
     <string name="misskey_notification_unknwon">Ukendt notifikation: %1$s</string>
     <string name="misskey_item_reblogged_status">postede igen</string>
-
     <string name="xqt_item_reblogged_status">postede igen</string>
     <string name="xqt_item_mention_status">nævnte dig</string>
-
     <string name="mastodon_visibility_public">Offentlig</string>
     <string name="mastodon_visibility_unlisted">Ulistet</string>
     <string name="mastodon_visibility_private">Privat</string>
@@ -76,10 +68,8 @@
     <string name="mastodon_visibility_unlisted_description">Alle kan se dette indlæg, men det vil ikke fremgå af den offentlige tidslinje</string>
     <string name="mastodon_visibility_private_description">Kun følgere kan se dette indlæg</string>
     <string name="mastodon_visibility_direct_description">Kun nævnte brugere kan se dette indlæg</string>
-
     <string name="settings_notifications_title">Notifikationer</string>
     <string name="settings_notifications_subtitle">Tilpas, hvordan Flare giver dig besked</string>
-
     <string name="status_loadmore_end">Ikke flere indlæg</string>
     <string name="status_loadmore_error">Fejl ved indlæsning af flere indlæg</string>
     <string name="status_loadmore_error_retry">Prøv igen</string>
@@ -90,31 +80,24 @@
     <string name="login_expired">Login-session udløbet</string>
     <string name="login_expired_message">Tryk for at logge ind igen</string>
     <string name="login_expired_relogin">Log ind igen</string>
-
     <string name="permission_denied_title">Tilladelse nægtet</string>
     <string name="permission_denied_message">Log ind igen for at få adgang til denne side</string>
-
     <string name="misskey_compose_local_only">Kun lokalt</string>
     <string name="misskey_compose_local_only_description">Kun brugere på denne instans kan se dette indlæg</string>
-
     <string name="misskey_item_action_renote">Renote</string>
     <string name="misskey_item_action_quote">Citér</string>
-
     <string name="bluesky_notification_unknown_message">Ukendt notifikationstype %1$s</string>
     <string name="bluesky_notification_unknown_message2">Rapportér venligst dette problem til udvikleren.</string>
-
     <string name="blusky_item_action_repost">Post igen</string>
     <string name="blusky_item_action_quote">Citér</string>
     <string name="blusky_item_action_report">Anmeld</string>
     <string name="blusky_item_action_delete">Slet</string>
-
     <string name="mastodon_item_unbookmark">Fjern bogmærke</string>
     <string name="mastodon_item_bookmark">Bogmærk</string>
     <string name="mastodon_item_delete">Slet</string>
     <string name="mastodon_item_report">Anmeld</string>
     <string name="misskey_item_action_delete">Slet</string>
     <string name="misskey_item_action_report">Anmeld</string>
-
     <string name="bookmark_remove">Fjern bogmærke</string>
     <string name="bookmark_add">Tilføj bogmærke</string>
     <string name="like">Synes godt om</string>
@@ -132,7 +115,6 @@
     <string name="share">Del</string>
     <string name="fx_share">Del via FxEmbed</string>
     <string name="comment">Kommentar</string>
-
     <string name="user_report">Anmeld</string>
     <string name="user_block">Bloker</string>
     <string name="user_unblock">Fjern blokering</string>
@@ -149,281 +131,194 @@
     <string name="translation_badge_failed">Oversættelse mislykkedes</string>
     <string name="translation_retry">Prøv overførsel igen</string>
     <string name="translation_show_original">Vis original</string>
-
     <string name="date_format_year_month_day">dd. MMM yy</string>
     <string name="date_format_month_day">dd. MMM</string>
     <string name="date_format_full">dd. MMM yy HH:mm</string>
-
     <string name="vvo_notification_like">Kunne lide dit indlæg</string>
-
     <string name="user_follow_edit_list">Tilføj/fjern fra liste</string>
     <string name="list_empty">Ingen lister</string>
     <string name="list_error">Kunne ikke indlæse lister</string>
-
     <string name="misskey_achievement_notes1_title">sætter bare min msky op</string>
     <string name="misskey_achievement_notes1_description">Post din første note</string>
     <string name="misskey_achievement_notes1_flavor">Hav det sjovt med Misskey!</string>
-
     <string name="misskey_achievement_notes10_title">Nogle noter</string>
     <string name="misskey_achievement_notes10_description">Post 10 noter</string>
-
     <string name="misskey_achievement_notes100_title">Mange noter</string>
     <string name="misskey_achievement_notes100_description">Post 100 noter</string>
-
     <string name="misskey_achievement_notes500_title">Dækket af noter</string>
     <string name="misskey_achievement_notes500_description">Post 500 noter</string>
-
     <string name="misskey_achievement_notes1000_title">Et bjerg af noter</string>
     <string name="misskey_achievement_notes1000_description">Post 1.000 noter</string>
-
     <string name="misskey_achievement_notes5000_title">Overstrømmende noter</string>
     <string name="misskey_achievement_notes5000_description">Post 5.000 noter</string>
-
     <string name="misskey_achievement_notes10000_title">Supernote</string>
     <string name="misskey_achievement_notes10000_description">Post 10.000 noter</string>
-
     <string name="misskey_achievement_notes20000_title">Brug for... flere... noter...</string>
     <string name="misskey_achievement_notes20000_description">Post 20.000 noter</string>
-
     <string name="misskey_achievement_notes30000_title">Noter noter noter!</string>
     <string name="misskey_achievement_notes30000_description">Post 30.000 noter</string>
-
     <string name="misskey_achievement_notes40000_title">Notefabrik</string>
     <string name="misskey_achievement_notes40000_description">Post 40.000 noter</string>
-
     <string name="misskey_achievement_notes50000_title">Noteplanet</string>
     <string name="misskey_achievement_notes50000_description">Post 50.000 noter</string>
-
     <string name="misskey_achievement_notes60000_title">Note-kvasar</string>
     <string name="misskey_achievement_notes60000_description">Post 60.000 noter</string>
-
     <string name="misskey_achievement_notes70000_title">Sort huls-note</string>
     <string name="misskey_achievement_notes70000_description">Post 70.000 noter</string>
-
     <string name="misskey_achievement_notes80000_title">Note-galakse</string>
     <string name="misskey_achievement_notes80000_description">Post 80.000 noter</string>
-
     <string name="misskey_achievement_notes90000_title">Note-univers</string>
     <string name="misskey_achievement_notes90000_description">Post 90.000 noter</string>
-
     <string name="misskey_achievement_notes100000_title">ALLE DINE NOTER TILHØRER OS</string>
     <string name="misskey_achievement_notes100000_description">Post 100.000 noter</string>
     <string name="misskey_achievement_notes100000_flavor">Du har sandelig meget på hjerte.</string>
-
     <string name="misskey_achievement_login3_title">Begynder I</string>
     <string name="misskey_achievement_login3_description">Log ind i alt 3 dage</string>
     <string name="misskey_achievement_login3_flavor">Fra i dag kan du bare kalde mig Misskist</string>
-
     <string name="misskey_achievement_login7_title">Begynder II</string>
     <string name="misskey_achievement_login7_description">Log ind i alt 7 dage</string>
     <string name="misskey_achievement_login7_flavor">Føler du, at du har fået styr på tingene nu?</string>
-
     <string name="misskey_achievement_login15_title">Begynder III</string>
     <string name="misskey_achievement_login15_description">Log ind i alt 15 dage</string>
-
     <string name="misskey_achievement_login30_title">Misskist I</string>
     <string name="misskey_achievement_login30_description">Log ind i alt 30 dage</string>
-
     <string name="misskey_achievement_login60_title">Misskist II</string>
     <string name="misskey_achievement_login60_description">Log ind i alt 60 dage</string>
-
     <string name="misskey_achievement_login100_title">Misskist III</string>
     <string name="misskey_achievement_login100_description">Log ind i alt 100 dage</string>
     <string name="misskey_achievement_login100_flavor">Voldelig Misskist</string>
-
     <string name="misskey_achievement_login200_title">Fast bruger I</string>
     <string name="misskey_achievement_login200_description">Log ind i alt 200 dage</string>
-
     <string name="misskey_achievement_login300_title">Fast bruger II</string>
     <string name="misskey_achievement_login300_description">Log ind i alt 300 dage</string>
-
     <string name="misskey_achievement_login400_title">Fast bruger III</string>
     <string name="misskey_achievement_login400_description">Log ind i alt 400 dage</string>
-
     <string name="misskey_achievement_login500_title">Ekspert I</string>
     <string name="misskey_achievement_login500_description">Log ind i alt 500 dage</string>
     <string name="misskey_achievement_login500_flavor">Mine venner, det er ofte blevet sagt, at jeg kan lide noter</string>
-
     <string name="misskey_achievement_login600_title">Ekspert II</string>
     <string name="misskey_achievement_login600_description">Log ind i alt 600 dage</string>
-
     <string name="misskey_achievement_login700_title">Ekspert III</string>
     <string name="misskey_achievement_login700_description">Log ind i alt 700 dage</string>
-
     <string name="misskey_achievement_login800_title">Mester af noter I</string>
     <string name="misskey_achievement_login800_description">Log ind i alt 800 dage</string>
-
     <string name="misskey_achievement_login900_title">Mester af noter II</string>
     <string name="misskey_achievement_login900_description">Log ind i alt 900 dage</string>
-
     <string name="misskey_achievement_login1000_title">Mester af noter III</string>
     <string name="misskey_achievement_login1000_description">Log ind i alt 1.000 dage</string>
     <string name="misskey_achievement_login1000_flavor">Tak fordi du bruger Misskey!</string>
-
     <string name="misskey_achievement_note_clipped1_title">Må... klippe...</string>
     <string name="misskey_achievement_note_clipped1_description">Klip din første note</string>
-
     <string name="misskey_achievement_note_favorited1_title">Stjernekigger</string>
     <string name="misskey_achievement_note_favorited1_description">Favorisér din første note</string>
-
     <string name="misskey_achievement_my_note_favorited1_title">Søger efter stjerner</string>
     <string name="misskey_achievement_my_note_favorited1_description">Få en anden til at favorisere en af dine noter</string>
-
     <string name="misskey_achievement_profile_filled_title">Velafbalanceret</string>
     <string name="misskey_achievement_profile_filled_description">Sæt din profil op</string>
-
     <string name="misskey_achievement_marked_as_cat_title">Jeg er en kat</string>
     <string name="misskey_achievement_marked_as_cat_description">Markér din konto som en kat</string>
     <string name="misskey_achievement_marked_as_cat_flavor">Jeg giver dig et navn senere.</string>
-
     <string name="misskey_achievement_following1_title">Følger din første bruger</string>
     <string name="misskey_achievement_following1_description">Følg en bruger</string>
-
     <string name="misskey_achievement_following10_title">Følg med... følg med...</string>
     <string name="misskey_achievement_following10_description">Følg 10 brugere</string>
-
     <string name="misskey_achievement_following50_title">Mange venner</string>
     <string name="misskey_achievement_following50_description">Følg 50 konti</string>
-
     <string name="misskey_achievement_following100_title">100 venner</string>
     <string name="misskey_achievement_following100_description">Følg 100 konti</string>
-
     <string name="misskey_achievement_following300_title">Overflod af venner</string>
     <string name="misskey_achievement_following300_description">Følg 300 konti</string>
-
     <string name="misskey_achievement_followers1_title">Første følger</string>
     <string name="misskey_achievement_followers1_description">Få 1 følger</string>
-
     <string name="misskey_achievement_followers10_title">Følg mig!</string>
     <string name="misskey_achievement_followers10_description">Få 10 følgere</string>
-
     <string name="misskey_achievement_followers50_title">Kommer i flokke</string>
     <string name="misskey_achievement_followers50_description">Få 50 følgere</string>
-
     <string name="misskey_achievement_followers100_title">Populær</string>
     <string name="misskey_achievement_followers100_description">Få 100 følgere</string>
-
     <string name="misskey_achievement_followers300_title">En række, tak</string>
     <string name="misskey_achievement_followers300_description">Få 300 følgere</string>
-
     <string name="misskey_achievement_followers500_title">Radiotårn</string>
     <string name="misskey_achievement_followers500_description">Få 500 følgere</string>
-
     <string name="misskey_achievement_followers1000_title">Influencer</string>
     <string name="misskey_achievement_followers1000_description">Få 1.000 følgere</string>
-
     <string name="misskey_achievement_collect_achievements30_title">Samler på præstationer</string>
     <string name="misskey_achievement_collect_achievements30_description">Optjen 30 præstationer</string>
-
     <string name="misskey_achievement_view_achievements3min_title">Kan lide præstationer</string>
     <string name="misskey_achievement_view_achievements3min_description">Kig på din liste over præstationer i mindst 3 minutter</string>
-
     <string name="misskey_achievement_i_love_misskey_title">Jeg elsker Misskey</string>
     <string name="misskey_achievement_i_love_misskey_description">Post \"I ❤ #Misskey\"</string>
     <string name="misskey_achievement_i_love_misskey_flavor">Misskeys udviklingsteam sætter stor pris på din støtte!</string>
-
     <string name="misskey_achievement_found_treasure_title">Skattejagt</string>
     <string name="misskey_achievement_found_treasure_description">Du har fundet den skjulte skat</string>
-
     <string name="misskey_achievement_client30min_title">Kort pause</string>
     <string name="misskey_achievement_client30min_description">Hold Misskey åben i mindst 30 minutter</string>
-
     <string name="misskey_achievement_client60min_title">Ingen \"Miss\" i Misskey</string>
     <string name="misskey_achievement_client60min_description">Hold Misskey åben i mindst 60 minutter</string>
-
     <string name="misskey_achievement_note_deleted_within1min_title">Lige meget</string>
     <string name="misskey_achievement_note_deleted_within1min_description">Slet en note inden for et minut efter den er postet</string>
-
     <string name="misskey_achievement_posted_at_late_night_title">Natugle</string>
     <string name="misskey_achievement_posted_at_late_night_description">Post en note sent om natten</string>
     <string name="misskey_achievement_posted_at_late_night_flavor">Det er vist på tide at gå i seng.</string>
-
     <string name="misskey_achievement_posted_at_0min0sec_title">Talende ur</string>
     <string name="misskey_achievement_posted_at_0min0sec_description">Post en note kl. 00:00</string>
     <string name="misskey_achievement_posted_at_0min0sec_flavor">Klik Klik Klik Klang</string>
-
     <string name="misskey_achievement_self_quote_title">Selvhenvisning</string>
     <string name="misskey_achievement_self_quote_description">Citér din egen note</string>
-
     <string name="misskey_achievement_htl20npm_title">Flydende tidslinje</string>
     <string name="misskey_achievement_htl20npm_description">Få hastigheden på din hjemme-tidslinje til at overstige 20 npm (noter i minuttet)</string>
-
     <string name="misskey_achievement_view_instance_chart_title">Analytiker</string>
     <string name="misskey_achievement_view_instance_chart_description">Se din instans\' grafer</string>
-
     <string name="misskey_achievement_output_hello_world_on_scratchpad_title">Hello, world!</string>
     <string name="misskey_achievement_output_hello_world_on_scratchpad_description">Udskriv \"hello world\" i Scratchpad</string>
-
     <string name="misskey_achievement_open3windows_title">Multivindue</string>
     <string name="misskey_achievement_open3windows_description">Have mindst 3 vinduer åbne på samme tid</string>
-
     <string name="misskey_achievement_drive_folder_circular_reference_title">Cirkulær reference</string>
     <string name="misskey_achievement_drive_folder_circular_reference_description">Forsøg at oprette en rekursivt indlejret mappe i Drev</string>
-
     <string name="misskey_achievement_react_without_read_title">Læste du virkelig det?</string>
     <string name="misskey_achievement_react_without_read_description">Reagér på en note på over 100 tegn inden for 3 sekunder efter den er postet</string>
-
     <string name="misskey_achievement_clicked_click_here_title">Klik her</string>
     <string name="misskey_achievement_clicked_click_here_description">Du har klikket her</string>
-
     <string name="misskey_achievement_just_plain_lucky_title">Bare heldig</string>
     <string name="misskey_achievement_just_plain_lucky_description">Har en chance for at blive opnået med en sandsynlighed på 0,005 % hvert 10. sekund</string>
-
     <string name="misskey_achievement_set_name_to_syuilo_title">Gudskompleks</string>
     <string name="misskey_achievement_set_name_to_syuilo_description">Sæt dit navn til \"syuilo\"</string>
-
     <string name="misskey_achievement_passed_since_account_created1_title">Etårs jubilæum</string>
     <string name="misskey_achievement_passed_since_account_created1_description">Der er gået et år siden din konto blev oprettet</string>
-
     <string name="misskey_achievement_passed_since_account_created2_title">Toårs jubilæum</string>
     <string name="misskey_achievement_passed_since_account_created2_description">Der er gået to år siden din konto blev oprettet</string>
-
     <string name="misskey_achievement_passed_since_account_created3_title">Treårs jubilæum</string>
     <string name="misskey_achievement_passed_since_account_created3_description">Der er gået tre år siden din konto blev oprettet</string>
-
     <string name="misskey_achievement_logged_in_on_birthday_title">Tillykke med fødselsdagen</string>
     <string name="misskey_achievement_logged_in_on_birthday_description">Log ind på din fødselsdag</string>
-
     <string name="misskey_achievement_logged_in_on_new_years_day_title">Godt nytår!</string>
     <string name="misskey_achievement_logged_in_on_new_years_day_description">Loggede ind på årets første dag</string>
     <string name="misskey_achievement_logged_in_on_new_years_day_flavor">Til endnu et godt år på denne instans</string>
-
     <string name="misskey_achievement_cookie_clicked_title">Et spil, hvor du klikker på cookies</string>
     <string name="misskey_achievement_cookie_clicked_description">Klikkede på cookien</string>
     <string name="misskey_achievement_cookie_clicked_flavor">Vent, er du på den rigtige hjemmeside?</string>
-
     <string name="misskey_achievement_brain_diver_title">Brain Diver</string>
     <string name="misskey_achievement_brain_diver_description">Post linket til Brain Diver</string>
     <string name="misskey_achievement_brain_diver_flavor">Misskey-Misskey La-Tu-Ma</string>
-
     <string name="misskey_achievement_smash_test_notification_button_title">Test-overløb</string>
     <string name="misskey_achievement_smash_test_notification_button_description">Udløs notifikationstesten gentagne gange inden for ekstremt kort tid</string>
-
     <string name="misskey_achievement_tutorial_completed_title">Eksamensbevis fra Misskey-grundkurset</string>
     <string name="misskey_achievement_tutorial_completed_description">Vejledning gennemført</string>
-
     <string name="misskey_achievement_bubble_game_exploding_head_title">🤯</string>
     <string name="misskey_achievement_bubble_game_exploding_head_description">Det største objekt i boblespillet</string>
-
     <string name="misskey_achievement_bubble_game_double_exploding_head_title">Dobbelt🤯</string>
     <string name="misskey_achievement_bubble_game_double_exploding_head_description">To af de største objekter i boblespillet på samme tid</string>
     <string name="misskey_achievement_bubble_game_double_exploding_head_flavor">Man kan fylde en madpakke sådan her 🤯 🤯 en smule.</string>
-
     <string name="vote">Stem</string>
     <string name="poll_expired">Afstemning udløbet</string>
     <string name="poll_voted">Stemte</string>
     <string name="poll_expired_at">Udløb kl. %1$s</string>
     <string name="user_send_message">Send direkte besked</string>
-
     <string name="profile_search_user_using_account">Find %1$s i %2$s ved hjælp af %3$s</string>
     <string name="profile_search_user_using_account_compat">Find i %1$s</string>
-
     <string name="feeds_discover_feeds_created_by">Oprettet af %1$s</string>
-
     <string name="notification_item_accept_follow_request">Acceptér</string>
     <string name="notification_item_reject_follow_request">Afvis</string>
-
-
     <string name="dm_list_empty">Ingen direkte beskeder</string>
     <string name="dm_list_error">Kunne ikke indlæse direkte beskeder</string>
     <string name="send">Send</string>
@@ -433,7 +328,6 @@
     <string name="dm_sending">Sender</string>
     <string name="dm_leave">Forlad samtale</string>
     <string name="dm_to_profile">Vis profil</string>
-
     <string name="settings_side_panel_empty">Som standard følger sidepanelet den aktuelle kontos platform.</string>
     <string name="tab_settings_add">Tilføj</string>
     <string name="tab_settings_drag">Træk</string>
@@ -442,16 +336,13 @@
     <string name="tab_settings_default">Standard</string>
     <string name="tab_settings_list">Liste</string>
     <string name="tab_settings_feed">Feeds</string>
-
     <string name="list_add">Tilføj liste</string>
     <string name="list_edit">Redigér liste</string>
     <string name="list_delete">Slet liste</string>
-
     <string name="rss_sources_title">Abonnementer</string>
     <string name="add_rss_source">Tilføj abonnement</string>
     <string name="edit_rss_source">Redigér abonnement</string>
     <string name="delete_rss_source">Slet abonnement</string>
-
     <string name="rss_sources_title_label">Titel</string>
     <string name="rss_sources_url_label">URL</string>
     <string name="rss_title">Abonnementer</string>
@@ -459,7 +350,6 @@
     <string name="mastodon_trending_statuses">Trending statusser</string>
     <string name="mastodon_federated_timeline">Fødereret tidslinje</string>
     <string name="mastodon_local_timeline">Lokal tidslinje</string>
-
     <string name="service_select_welcome_title">Velkommen til Flare</string>
     <string name="service_select_welcome_message">Indtast en server for at komme i gang.</string>
     <string name="service_select_welcome_hint">Flare understøtter Mastodon, Misskey, Bluesky, Nostr og X.</string>
@@ -493,7 +383,6 @@
     <string name="service_select_compatibility_warning">Denne server bruger %1$s, Flare kører i kompatibilitetstilstand. Nogle funktioner virker muligvis ikke korrekt.</string>
     <string name="login_agreement">Ved at logge ind accepterer du %1$s.</string>
     <string name="eula_privacy_policy">EULA og privatlivspolitik</string>
-
     <string name="home_tab_home_title">Hjem</string>
     <string name="home_tab_notifications_title">Notifikationer</string>
     <string name="home_tab_me_title">Mig</string>
@@ -519,6 +408,10 @@
     <string name="settings_about_source_code">Kildekode</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Bliv medlem af vores Telegram-gruppe</string>
+    <string name="settings_about_discord" translatable="false">Discord</string>
+    <string name="settings_about_discord_description">Bliv medlem af vores Discord-server</string>
+    <string name="settings_about_line" translatable="false">Line</string>
+    <string name="settings_about_line_description">Bliv medlem af vores Line-gruppe</string>
     <string name="settings_about_localization">Crowdin</string>
     <string name="settings_about_localization_description">Hjælp os med at oversætte Flare</string>
     <string name="settings_privacy_policy">Privatlivspolitik</string>

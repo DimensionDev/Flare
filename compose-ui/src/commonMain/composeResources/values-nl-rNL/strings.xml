@@ -3,18 +3,15 @@
     <string name="done">Gereed</string>
     <string name="cancel">Annuleren</string>
     <string name="ok">OK</string>
-
-    <string name="profile_header_following_count">%1 Volgend</string>
-    <string name="profile_header_fans_count">%1 Volgers</string>
-    <string name="profile_header_toots_count">%1 Berichten</string>
-    <string name="profile_misskey_header_status_count">%1 Berichten</string>
-
+    <string name="profile_header_following_count">%1$s Volgend</string>
+    <string name="profile_header_fans_count">%1$s Volgers</string>
+    <string name="profile_header_toots_count">%1$s Berichten</string>
+    <string name="profile_misskey_header_status_count">%1$s Berichten</string>
     <string name="profile_header_button_follow">Volgen</string>
     <string name="profile_header_button_following">Volgend</string>
     <string name="profile_header_button_requested">Verzocht</string>
     <string name="profile_header_button_blocked">Geblokkeerd</string>
     <string name="profile_header_button_is_fans">Volgt jou</string>
-
     <string name="mastodon_notification_item_followed_you">heeft je gevolgd</string>
     <string name="mastodon_notification_item_favourited_your_status">heeft je bericht als favoriet gemarkeerd</string>
     <string name="mastodon_notification_item_reblogged_your_status">heeft geboost</string>
@@ -27,9 +24,7 @@
     <string name="mastodon_item_show_more">Toon meer</string>
     <string name="mastodon_item_show_less">Toon minder</string>
     <string name="mastodon_item_pinned">heeft een bericht vastgezet</string>
-
     <string name="post_show_full_text">Toon volledige tekst</string>
-
     <string name="bluesky_notification_item_followed_you">heeft je gevolgd</string>
     <string name="bluesky_notification_item_favourited_your_status">vond je bericht leuk</string>
     <string name="bluesky_notification_item_reblogged_your_status">heeft je bericht gedeeld</string>
@@ -41,7 +36,6 @@
     <string name="bluesky_notification_item_starterpack_joined">is lid geworden via een Starterspakket</string>
     <string name="bluesky_notification_item_unKnown">Onbekend</string>
     <string name="bluesky_notification_item_pin">heeft een bericht vastgezet</string>
-
     <string name="misskey_notification_item_mentioned_you">noemde je</string>
     <string name="misskey_notification_item_replied_to_you">reageerde op jou</string>
     <string name="misskey_notification_item_reposted_your_status">heeft je bericht gedeeld</string>
@@ -63,10 +57,8 @@
     <string name="misskey_notification_item_requested_follow">verzocht om je te volgen</string>
     <string name="misskey_notification_unknwon">Onbekende notificatie: %1$s</string>
     <string name="misskey_item_reblogged_status">gedeeld</string>
-
     <string name="xqt_item_reblogged_status">gedeeld</string>
     <string name="xqt_item_mention_status">noemde je</string>
-
     <string name="mastodon_visibility_public">Openbaar</string>
     <string name="mastodon_visibility_unlisted">Niet vermeld</string>
     <string name="mastodon_visibility_private">Privé</string>
@@ -75,10 +67,8 @@
     <string name="mastodon_visibility_unlisted_description">Iedereen kan dit bericht zien, maar het verschijnt niet op de openbare tijdlijn</string>
     <string name="mastodon_visibility_private_description">Alleen volgers kunnen dit bericht zien</string>
     <string name="mastodon_visibility_direct_description">Alleen genoemde gebruikers kunnen dit bericht zien</string>
-
     <string name="settings_notifications_title">Notificaties</string>
     <string name="settings_notifications_subtitle">Pas aan hoe Flare je op de hoogte stelt</string>
-
     <string name="status_loadmore_end">Geen berichten meer</string>
     <string name="status_loadmore_error">Fout bij het laden van meer berichten</string>
     <string name="status_loadmore_error_retry">Opnieuw proberen</string>
@@ -89,31 +79,24 @@
     <string name="login_expired">Inlogsessie verlopen</string>
     <string name="login_expired_message">Tik om opnieuw in te loggen</string>
     <string name="login_expired_relogin">Opnieuw inloggen</string>
-
     <string name="permission_denied_title">Toegang geweigerd</string>
     <string name="permission_denied_message">Log opnieuw in om deze pagina te bezoeken</string>
-
     <string name="misskey_compose_local_only">Alleen lokaal</string>
     <string name="misskey_compose_local_only_description">Alleen gebruikers op deze instantie kunnen dit bericht zien</string>
-
     <string name="misskey_item_action_renote">Renote</string>
     <string name="misskey_item_action_quote">Citeren</string>
-
     <string name="bluesky_notification_unknown_message">Onbekend notificatietype %1$s</string>
     <string name="bluesky_notification_unknown_message2">Meld dit probleem aan de ontwikkelaar.</string>
-
     <string name="blusky_item_action_repost">Delen</string>
     <string name="blusky_item_action_quote">Citeren</string>
     <string name="blusky_item_action_report">Rapporteren</string>
     <string name="blusky_item_action_delete">Verwijderen</string>
-
     <string name="mastodon_item_unbookmark">Bladwijzer verwijderen</string>
     <string name="mastodon_item_bookmark">Bladwijzer toevoegen</string>
     <string name="mastodon_item_delete">Verwijderen</string>
     <string name="mastodon_item_report">Rapporteren</string>
     <string name="misskey_item_action_delete">Verwijderen</string>
     <string name="misskey_item_action_report">Rapporteren</string>
-
     <string name="bookmark_remove">Bladwijzer verwijderen</string>
     <string name="bookmark_add">Bladwijzer toevoegen</string>
     <string name="like">Vind ik leuk</string>
@@ -131,7 +114,6 @@
     <string name="share">Delen</string>
     <string name="fx_share">Delen via FxEmbed</string>
     <string name="comment">Reageren</string>
-
     <string name="user_report">Rapporteren</string>
     <string name="user_block">Blokkeren</string>
     <string name="user_unblock">Deblokkeren</string>
@@ -148,280 +130,194 @@
     <string name="translation_badge_failed">Vertaling mislukt</string>
     <string name="translation_retry">Vertaling opnieuw proberen</string>
     <string name="translation_show_original">Toon origineel</string>
-
     <string name="date_format_year_month_day">dd MMM yy</string>
     <string name="date_format_month_day">dd MMM</string>
     <string name="date_format_full">dd MMM yy HH:mm</string>
-
     <string name="vvo_notification_like">Vond je bericht leuk</string>
-
     <string name="user_follow_edit_list">Toevoegen/verwijderen uit lijst</string>
     <string name="list_empty">Geen lijsten</string>
     <string name="list_error">Laden van lijsten mislukt</string>
-
     <string name="misskey_achievement_notes1_title">gewoon mijn msky instellen</string>
     <string name="misskey_achievement_notes1_description">Plaats je eerste notitie</string>
     <string name="misskey_achievement_notes1_flavor">Veel plezier met Misskey!</string>
-
     <string name="misskey_achievement_notes10_title">Enkele notities</string>
     <string name="misskey_achievement_notes10_description">Plaats 10 notities</string>
-
     <string name="misskey_achievement_notes100_title">Veel notities</string>
     <string name="misskey_achievement_notes100_description">Plaats 100 notities</string>
-
     <string name="misskey_achievement_notes500_title">Bedolven onder notities</string>
     <string name="misskey_achievement_notes500_description">Plaats 500 notities</string>
-
     <string name="misskey_achievement_notes1000_title">Een berg notities</string>
     <string name="misskey_achievement_notes1000_description">Plaats 1.000 notities</string>
-
     <string name="misskey_achievement_notes5000_title">Overstromende notities</string>
     <string name="misskey_achievement_notes5000_description">Plaats 5.000 notities</string>
-
     <string name="misskey_achievement_notes10000_title">Supernotitie</string>
     <string name="misskey_achievement_notes10000_description">Plaats 10.000 notities</string>
-
     <string name="misskey_achievement_notes20000_title">Meer... notities... nodig...</string>
     <string name="misskey_achievement_notes20000_description">Plaats 20.000 notities</string>
-
     <string name="misskey_achievement_notes30000_title">Notities notities notities!</string>
     <string name="misskey_achievement_notes30000_description">Plaats 30.000 notities</string>
-
     <string name="misskey_achievement_notes40000_title">Notitiefabriek</string>
     <string name="misskey_achievement_notes40000_description">Plaats 40.000 notities</string>
-
     <string name="misskey_achievement_notes50000_title">Planeet van notities</string>
     <string name="misskey_achievement_notes50000_description">Plaats 50.000 notities</string>
-
     <string name="misskey_achievement_notes60000_title">Notitie-quasar</string>
     <string name="misskey_achievement_notes60000_description">Plaats 60.000 notities</string>
-
     <string name="misskey_achievement_notes70000_title">Notitie-zwart gat</string>
     <string name="misskey_achievement_notes70000_description">Plaats 70.000 notities</string>
-
     <string name="misskey_achievement_notes80000_title">Notitie-stelsel</string>
     <string name="misskey_achievement_notes80000_description">Plaats 80.000 notities</string>
-
     <string name="misskey_achievement_notes90000_title">Notitie-universum</string>
     <string name="misskey_achievement_notes90000_description">Plaats 90.000 notities</string>
-
     <string name="misskey_achievement_notes100000_title">ALL YOUR NOTE ARE BELONG TO US</string>
     <string name="misskey_achievement_notes100000_description">Plaats 100.000 notities</string>
     <string name="misskey_achievement_notes100000_flavor">Je hebt vast veel te vertellen.</string>
-
     <string name="misskey_achievement_login3_title">Beginner I</string>
     <string name="misskey_achievement_login3_description">Log in voor in totaal 3 dagen</string>
     <string name="misskey_achievement_login3_flavor">Vanaf vandaag mag je me Misskist noemen</string>
-
     <string name="misskey_achievement_login7_title">Beginner II</string>
     <string name="misskey_achievement_login7_description">Log in voor in totaal 7 dagen</string>
     <string name="misskey_achievement_login7_flavor">Heb je het gevoel dat je het al onder de knie hebt?</string>
-
     <string name="misskey_achievement_login15_title">Beginner III</string>
     <string name="misskey_achievement_login15_description">Log in voor in totaal 15 dagen</string>
-
     <string name="misskey_achievement_login30_title">Misskist I</string>
     <string name="misskey_achievement_login30_description">Log in voor in totaal 30 dagen</string>
-
     <string name="misskey_achievement_login60_title">Misskist II</string>
     <string name="misskey_achievement_login60_description">Log in voor in totaal 60 dagen</string>
-
     <string name="misskey_achievement_login100_title">Misskist III</string>
     <string name="misskey_achievement_login100_description">Log in voor in totaal 100 dagen</string>
     <string name="misskey_achievement_login100_flavor">Gewelddadige Misskist</string>
-
     <string name="misskey_achievement_login200_title">Stamgast I</string>
     <string name="misskey_achievement_login200_description">Log in voor in totaal 200 dagen</string>
-
     <string name="misskey_achievement_login300_title">Stamgast II</string>
     <string name="misskey_achievement_login300_description">Log in voor in totaal 300 dagen</string>
-
     <string name="misskey_achievement_login400_title">Stamgast III</string>
     <string name="misskey_achievement_login400_description">Log in voor in totaal 400 dagen</string>
-
     <string name="misskey_achievement_login500_title">Expert I</string>
     <string name="misskey_achievement_login500_description">Log in voor in totaal 500 dagen</string>
     <string name="misskey_achievement_login500_flavor">Mijn vrienden, er is vaak gezegd dat ik van notities houd</string>
-
     <string name="misskey_achievement_login600_title">Expert II</string>
     <string name="misskey_achievement_login600_description">Log in voor in totaal 600 dagen</string>
-
     <string name="misskey_achievement_login700_title">Expert III</string>
     <string name="misskey_achievement_login700_description">Log in voor in totaal 700 dagen</string>
-
     <string name="misskey_achievement_login800_title">Meester der Notities I</string>
     <string name="misskey_achievement_login800_description">Log in voor in totaal 800 dagen</string>
-
     <string name="misskey_achievement_login900_title">Meester der Notities II</string>
     <string name="misskey_achievement_login900_description">Log in voor in totaal 900 dagen</string>
-
     <string name="misskey_achievement_login1000_title">Meester der Notities III</string>
     <string name="misskey_achievement_login1000_description">Log in voor in totaal 1.000 dagen</string>
     <string name="misskey_achievement_login1000_flavor">Bedankt voor het gebruiken van Misskey!</string>
-
     <string name="misskey_achievement_note_clipped1_title">Moet... clippen...</string>
     <string name="misskey_achievement_note_clipped1_description">Clip je eerste notitie</string>
-
     <string name="misskey_achievement_note_favorited1_title">Sterrenkijker</string>
     <string name="misskey_achievement_note_favorited1_description">Maak je eerste notitie favoriet</string>
-
     <string name="misskey_achievement_my_note_favorited1_title">Sterren zoeken</string>
     <string name="misskey_achievement_my_note_favorited1_description">Iemand anders je notitie favoriet laten maken</string>
-
     <string name="misskey_achievement_profile_filled_title">Goed voorbereid</string>
     <string name="misskey_achievement_profile_filled_description">Stel je profiel in</string>
-
     <string name="misskey_achievement_marked_as_cat_title">Ik ben een kat</string>
     <string name="misskey_achievement_marked_as_cat_description">Markeer je account als een kat</string>
     <string name="misskey_achievement_marked_as_cat_flavor">Ik geef je later een naam.</string>
-
     <string name="misskey_achievement_following1_title">Je eerste gebruiker volgen</string>
     <string name="misskey_achievement_following1_description">Volg een gebruiker</string>
-
     <string name="misskey_achievement_following10_title">Blijf bij... blijf bij...</string>
     <string name="misskey_achievement_following10_description">Volg 10 gebruikers</string>
-
     <string name="misskey_achievement_following50_title">Veel vrienden</string>
     <string name="misskey_achievement_following50_description">Volg 50 accounts</string>
-
     <string name="misskey_achievement_following100_title">100 vrienden</string>
     <string name="misskey_achievement_following100_description">Volg 100 accounts</string>
-
     <string name="misskey_achievement_following300_title">Overvloed aan vrienden</string>
     <string name="misskey_achievement_following300_description">Volg 300 accounts</string>
-
     <string name="misskey_achievement_followers1_title">Eerste volger</string>
     <string name="misskey_achievement_followers1_description">Krijg 1 volger</string>
-
     <string name="misskey_achievement_followers10_title">Volg mij!</string>
     <string name="misskey_achievement_followers10_description">Krijg 10 volgers</string>
-
     <string name="misskey_achievement_followers50_title">Massaal komen ze</string>
     <string name="misskey_achievement_followers50_description">Krijg 50 volgers</string>
-
     <string name="misskey_achievement_followers100_title">Populair</string>
     <string name="misskey_achievement_followers100_description">Krijg 100 volgers</string>
-
     <string name="misskey_achievement_followers300_title">Sluit achteraan in de rij</string>
     <string name="misskey_achievement_followers300_description">Krijg 300 volgers</string>
-
     <string name="misskey_achievement_followers500_title">Radio-toren</string>
     <string name="misskey_achievement_followers500_description">Krijg 500 volgers</string>
-
     <string name="misskey_achievement_followers1000_title">Influencer</string>
     <string name="misskey_achievement_followers1000_description">Krijg 1.000 volgers</string>
-
     <string name="misskey_achievement_collect_achievements30_title">Prestatieverzamelaar</string>
     <string name="misskey_achievement_collect_achievements30_description">Verdien 30 prestaties</string>
-
     <string name="misskey_achievement_view_achievements3min_title">Houdt van prestaties</string>
     <string name="misskey_achievement_view_achievements3min_description">Bekijk je lijst met prestaties gedurende minstens 3 minuten</string>
-
     <string name="misskey_achievement_i_love_misskey_title">Ik hou van Misskey</string>
     <string name="misskey_achievement_i_love_misskey_description">Plaats \"I ❤ #Misskey\"</string>
     <string name="misskey_achievement_i_love_misskey_flavor">Het ontwikkelingsteam van Misskey waardeert je steun enorm!</string>
-
     <string name="misskey_achievement_found_treasure_title">Schatzoeken</string>
     <string name="misskey_achievement_found_treasure_description">Je hebt de verborgen schat gevonden</string>
-
     <string name="misskey_achievement_client30min_title">Korte pauze</string>
     <string name="misskey_achievement_client30min_description">Houd Misskey minstens 30 minuten open</string>
-
     <string name="misskey_achievement_client60min_title">Geen \"Miss\" in Misskey</string>
     <string name="misskey_achievement_client60min_description">Houd Misskey minstens 60 minuten open</string>
-
     <string name="misskey_achievement_note_deleted_within1min_title">Laat maar zitten</string>
     <string name="misskey_achievement_note_deleted_within1min_description">Verwijder een notitie binnen een minuut na plaatsing</string>
-
     <string name="misskey_achievement_posted_at_late_night_title">Nachtdier</string>
     <string name="misskey_achievement_posted_at_late_night_description">Plaats een notitie laat in de nacht</string>
     <string name="misskey_achievement_posted_at_late_night_flavor">Het is tijd om naar bed te gaan.</string>
-
     <string name="misskey_achievement_posted_at_0min0sec_title">Sprekende klok</string>
     <string name="misskey_achievement_posted_at_0min0sec_description">Plaats een notitie om 00:00</string>
     <string name="misskey_achievement_posted_at_0min0sec_flavor">Klik Klik Klik Kling</string>
-
     <string name="misskey_achievement_self_quote_title">Zelf-referentie</string>
     <string name="misskey_achievement_self_quote_description">Citeer je eigen notitie</string>
-
     <string name="misskey_achievement_htl20npm_title">Stromende tijdlijn</string>
     <string name="misskey_achievement_htl20npm_description">Zorg dat de snelheid van je starttijdlijn hoger is dan 20 npm (notities per minuut)</string>
-
     <string name="misskey_achievement_view_instance_chart_title">Analist</string>
     <string name="misskey_achievement_view_instance_chart_description">Bekijk de grafieken van je instantie</string>
-
     <string name="misskey_achievement_output_hello_world_on_scratchpad_title">Hallo wereld!</string>
     <string name="misskey_achievement_output_hello_world_on_scratchpad_description">Voer \"hello world\" uit in het Scratchpad</string>
-
     <string name="misskey_achievement_open3windows_title">Multi-venster</string>
     <string name="misskey_achievement_open3windows_description">Houd minstens 3 vensters tegelijkertijd open</string>
-
     <string name="misskey_achievement_drive_folder_circular_reference_title">Circulaire referentie</string>
     <string name="misskey_achievement_drive_folder_circular_reference_description">Poging om een recursief geneste map te maken in Drive</string>
-
     <string name="misskey_achievement_react_without_read_title">Heb je dat echt gelezen?</string>
     <string name="misskey_achievement_react_without_read_description">Reageer op een notitie van meer dan 100 tekens binnen 3 seconden na plaatsing</string>
-
     <string name="misskey_achievement_clicked_click_here_title">Klik hier</string>
     <string name="misskey_achievement_clicked_click_here_description">Je hebt hier geklikt</string>
-
     <string name="misskey_achievement_just_plain_lucky_title">Gewoon geluk</string>
     <string name="misskey_achievement_just_plain_lucky_description">Heeft elke 10 seconden een kans van 0,005% om verkregen te worden</string>
-
     <string name="misskey_achievement_set_name_to_syuilo_title">God-complex</string>
     <string name="misskey_achievement_set_name_to_syuilo_description">Stel je naam in op \"syuilo\"</string>
-
     <string name="misskey_achievement_passed_since_account_created1_title">Eenjarig jubileum</string>
     <string name="misskey_achievement_passed_since_account_created1_description">Er is een jaar verstreken sinds je account is aangemaakt</string>
-
     <string name="misskey_achievement_passed_since_account_created2_title">Tweejarig jubileum</string>
     <string name="misskey_achievement_passed_since_account_created2_description">Er zijn twee jaar verstreken sinds je account is aangemaakt</string>
-
     <string name="misskey_achievement_passed_since_account_created3_title">Driejarig jubileum</string>
     <string name="misskey_achievement_passed_since_account_created3_description">Er zijn drie jaar verstreken sinds je account is aangemaakt</string>
-
     <string name="misskey_achievement_logged_in_on_birthday_title">Gefeliciteerd met je verjaardag</string>
     <string name="misskey_achievement_logged_in_on_birthday_description">Log in op je verjaardag</string>
-
     <string name="misskey_achievement_logged_in_on_new_years_day_title">Gelukkig Nieuwjaar!</string>
     <string name="misskey_achievement_logged_in_on_new_years_day_description">Ingelegd op de eerste dag van het jaar</string>
     <string name="misskey_achievement_logged_in_on_new_years_day_flavor">Op naar nog een geweldig jaar op deze instantie</string>
-
     <string name="misskey_achievement_cookie_clicked_title">Een spel waarin je op koekjes klikt</string>
     <string name="misskey_achievement_cookie_clicked_description">Op het koekje geklikt</string>
     <string name="misskey_achievement_cookie_clicked_flavor">Wacht, zit je wel op de juiste website?</string>
-
     <string name="misskey_achievement_brain_diver_title">Brain Diver</string>
     <string name="misskey_achievement_brain_diver_description">Plaats de link naar Brain Diver</string>
     <string name="misskey_achievement_brain_diver_flavor">Misskey-Misskey La-Tu-Ma</string>
-
     <string name="misskey_achievement_smash_test_notification_button_title">Test-overloop</string>
     <string name="misskey_achievement_smash_test_notification_button_description">Trigger de notificatietest herhaaldelijk binnen een extreem korte tijd</string>
-
     <string name="misskey_achievement_tutorial_completed_title">Misskey Basisschool Diploma</string>
     <string name="misskey_achievement_tutorial_completed_description">Handleiding voltooid</string>
-
     <string name="misskey_achievement_bubble_game_exploding_head_title">🤯</string>
     <string name="misskey_achievement_bubble_game_exploding_head_description">Het grootste object in het bubbelspel</string>
-
     <string name="misskey_achievement_bubble_game_double_exploding_head_title">Dubbel 🤯</string>
     <string name="misskey_achievement_bubble_game_double_exploding_head_description">Twee van de grootste objecten in het bubbelspel tegelijkertijd</string>
     <string name="misskey_achievement_bubble_game_double_exploding_head_flavor">Je kunt een lunchtrommel vullen zoals deze 🤯 🤯 een beetje.</string>
-
     <string name="vote">Stemmen</string>
     <string name="poll_expired">Enquête verlopen</string>
     <string name="poll_voted">Gestemd</string>
     <string name="poll_expired_at">Verlopen op %1$s</string>
     <string name="user_send_message">Stuur direct bericht</string>
-
     <string name="profile_search_user_using_account">Vind %1$s in %2$s met %3$s</string>
     <string name="profile_search_user_using_account_compat">Vind in %1$s</string>
-
     <string name="feeds_discover_feeds_created_by">Gemaakt door %1$s</string>
-
     <string name="notification_item_accept_follow_request">Accepteren</string>
     <string name="notification_item_reject_follow_request">Weigeren</string>
-
     <string name="dm_list_empty">Geen directe berichten</string>
     <string name="dm_list_error">Laden van directe berichten mislukt</string>
     <string name="send">Versturen</string>
@@ -431,7 +327,6 @@
     <string name="dm_sending">Versturen</string>
     <string name="dm_leave">Gesprek verlaten</string>
     <string name="dm_to_profile">Toon profiel</string>
-
     <string name="settings_side_panel_empty">Standaard volgt het zijpaneel het platform van het huidige account.</string>
     <string name="tab_settings_add">Toevoegen</string>
     <string name="tab_settings_drag">Slepen</string>
@@ -440,16 +335,13 @@
     <string name="tab_settings_default">Standaard</string>
     <string name="tab_settings_list">Lijst</string>
     <string name="tab_settings_feed">Feeds</string>
-
     <string name="list_add">Lijst toevoegen</string>
     <string name="list_edit">Lijst bewerken</string>
     <string name="list_delete">Lijst verwijderen</string>
-
     <string name="rss_sources_title">Abonnementen</string>
     <string name="add_rss_source">Abonnement toevoegen</string>
     <string name="edit_rss_source">Abonnement bewerken</string>
     <string name="delete_rss_source">Abonnement verwijderen</string>
-
     <string name="rss_sources_title_label">Titel</string>
     <string name="rss_sources_url_label">URL</string>
     <string name="rss_title">Abonnementen</string>
@@ -457,7 +349,6 @@
     <string name="mastodon_trending_statuses">Trending berichten</string>
     <string name="mastodon_federated_timeline">Gefedereerde tijdlijn</string>
     <string name="mastodon_local_timeline">Lokale tijdlijn</string>
-
     <string name="service_select_welcome_title">Welkom bij Flare</string>
     <string name="service_select_welcome_message">Voer een server in om aan de slag te gaan.</string>
     <string name="service_select_welcome_hint">Flare ondersteunt Mastodon, Misskey, Bluesky, Nostr en X.</string>
@@ -491,7 +382,6 @@
     <string name="service_select_compatibility_warning">Deze server gebruikt %1$s, Flare zal in compatibiliteitsmodus draaien. Sommige functies werken mogelijk niet correct.</string>
     <string name="login_agreement">Door in te loggen, ga je akkoord met de %1$s.</string>
     <string name="eula_privacy_policy">EULA en Privacybeleid</string>
-
     <string name="home_tab_home_title">Home</string>
     <string name="home_tab_notifications_title">Notificaties</string>
     <string name="home_tab_me_title">Ik</string>
@@ -517,7 +407,9 @@
     <string name="settings_about_source_code">Broncode</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Sluit je aan bij onze Telegram-groep</string>
+    <string name="settings_about_discord" translatable="false">Discord</string>
     <string name="settings_about_discord_description">Sluit je aan bij onze Discord-server</string>
+    <string name="settings_about_line" translatable="false">Line</string>
     <string name="settings_about_line_description">Sluit je aan bij onze Line-groep</string>
     <string name="settings_about_localization">Crowdin</string>
     <string name="settings_about_localization_description">Help ons Flare te vertalen</string>

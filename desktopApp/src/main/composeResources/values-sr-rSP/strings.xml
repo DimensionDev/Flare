@@ -1,13 +1,12 @@
 <resources>
+    <string name="app_name" translatable="false">Flare</string>
     <string name="ok">U redu</string>
     <string name="cancel">Otkaži</string>
     <string name="delete">Obriši</string>
     <string name="refresh">Osveži</string>
-
     <string name="home_compose">Sastavi</string>
     <string name="home_login">Prijavi se</string>
     <string name="home_settings">Podešavanja</string>
-
     <string name="home_tab_home_title">Početna</string>
     <string name="home_tab_notifications_title">Obaveštenja</string>
     <string name="home_tab_me_title">Ja</string>
@@ -26,47 +25,38 @@
         <item quantity="few">%1$d nove objave</item>
         <item quantity="other">%1$d novih objava</item>
     </plurals>
-
     <string name="navigate_back">Nazad</string>
     <string name="service_select_instance_input_placeholder">URL instance</string>
     <string name="service_select_next_button">Dalje</string>
     <string name="service_select_empty_message">Nijedna instanca nije pronađena</string>
-
     <string name="service_select_welcome_title">Dobrodošli u Flare</string>
     <string name="service_select_welcome_message">Flare je klijent za društvene mreže za %1$s.\nIzaberite servis da biste se povezali i počeli.</string>
     <string name="mastodon_login_verify_message">Provera akreditiva…</string>
-
     <string name="profile_tab_timeline">Objave</string>
     <string name="profile_tab_timeline_with_reply">Objave i odgovori</string>
     <string name="profile_tab_likes">Sviđanja</string>
     <string name="profile_tab_media">Mediji</string>
-
     <string name="report_title">Prijavi</string>
     <string name="report_description">Šta nije u redu sa ovom objavom?</string>
-
     <string name="report_reason_spam_title">Spam</string>
     <string name="report_reason_violation_title">Ilegalno ili hitno</string>
     <string name="report_reason_misleading_title">Obmanjujuće</string>
     <string name="report_reason_sexual_title">Neželjeni seksualni sadržaj</string>
     <string name="report_reason_rude_title">Antisocijalno ponašanje</string>
     <string name="report_reason_other_title">Ostalo</string>
-
     <string name="report_reason_spam_description">Previše pominjanja ili odgovora</string>
     <string name="report_reason_violation_description">Jasno kršenje zakona ili uslova korišćenja</string>
     <string name="report_reason_misleading_description">Ova objava je obmanjujuća</string>
     <string name="report_reason_sexual_description">Nudizam ili pornografija koja nije označena kao takva</string>
     <string name="report_reason_rude_description">Uznemiravanje, trolovanje ili netolerancija</string>
     <string name="report_reason_other_description">Problem koji nije uključen u ove opcije</string>
-
     <string name="delete_status_title">Obriši</string>
     <string name="delete_status_message">Obrisati ovu objavu?</string>
     <string name="compose_close_confirm_title">Sačuvati nacrt?</string>
     <string name="compose_close_confirm_message">Imate nesačuvane promene. Sačuvati ovo kao nacrt pre zatvaranja?</string>
     <string name="compose_close_discard">Odbaci</string>
-
     <string name="mastodon_report_title">Prijavi</string>
     <string name="mastodon_report_description">Da li ste sigurni da želite da prijavite ovo?</string>
-
     <string name="bookmark_remove">Ukloni obeleživač</string>
     <string name="bookmark_add">Dodaj obeleživač</string>
     <string name="like">Sviđa mi se</string>
@@ -84,7 +74,6 @@
     <string name="status_detail_repost">Ponovo objavi</string>
     <string name="emoji_picker_recent">Nedavno</string>
     <string name="emoji_picker_search">Pretraga</string>
-
     <string name="media_show_thumbnail_list">Prikaži listu sličica</string>
     <string name="media_hide_thumbnail_list">Sakrij listu sličica</string>
     <string name="media_save">Sačuvaj</string>
@@ -94,7 +83,6 @@
     <string name="status_share_image">Podeli snimak ekrana</string>
     <string name="status_share_via_fxembed">Podeli preko FxEmbed</string>
     <string name="status_share_via_fixvx">Podeli preko Fixvx</string>
-
     <string name="list_add">Dodaj listu</string>
     <string name="list_edit">Izmeni listu</string>
     <string name="list_delete">Obriši listu</string>
@@ -118,25 +106,20 @@
     <string name="edit_list_member_remove">Ukloni</string>
     <string name="list_create_description">Opis liste</string>
     <string name="list_create_description_hint">Opis liste</string>
-
     <string name="feeds_my_feeds_title">Moji fidovi</string>
     <string name="feeds_discover_feeds_title">Otkrij fidove</string>
     <string name="feeds_discover_feeds_created_by">Autor %1$s</string>
     <string name="feeds_unsubscribe">Otkaži pretplatu</string>
     <string name="feeds_subscribe">Pretplati se</string>
-
     <string name="social_title">Društveno</string>
-
     <string name="antenna_title">Antene</string>
     <string name="mixed_timeline_title">Mešano</string>
-
     <string name="bluesky_login_username">Korisničko ime</string>
     <string name="bluesky_login_password">Lozinka</string>
     <string name="bluesky_login_2fa">2FA token</string>
     <string name="bluesky_login_oauth_button">Prijavi se preko OAuth-a</string>
     <string name="bluesky_login_use_password_button">Koristi lozinku</string>
     <string name="bluesky_login_oauth_hint">Bluesky OAuth može biti nestabilan. Ako imate problema, koristite prijavu lozinkom.</string>
-
     <string name="login_expired">Sesija prijave je istekla</string>
     <string name="login_expired_message">Kliknite da biste se ponovo prijavili</string>
     <string name="login_expired_relogin">Prijavi se ponovo</string>
@@ -145,7 +128,6 @@
     <string name="add_account">Dodaj nalog</string>
     <string name="remove_account">Ukloni nalog</string>
     <string name="settings_accounts_remove_confirm">Da li ste sigurni da želite da uklonite nalog %1$s sa ovog uređaja?</string>
-
     <string name="settings_accounts_title">Nalozi</string>
     <string name="settings_appearance_title">Izgled</string>
     <string name="settings_status_appearance_title">Izgled objave</string>
@@ -226,7 +208,6 @@
     <string name="settings_ai_config_translate_provider_libretranslate">LibreTranslate</string>
     <string name="settings_ai_config_translate_provider_libretranslate_base_url">LibreTranslate bazni URL</string>
     <string name="settings_ai_config_translate_provider_libretranslate_api_key">LibreTranslate API ključ</string>
-
     <string name="settings_translation_title">Prevod</string>
     <string name="settings_translation_description">Izaberite servise za prevod i ponašanje automatskog prevoda</string>
     <string name="settings_translation_auto_excluded_languages">Jezici koji se preskaču kod automatskog prevoda</string>
@@ -235,7 +216,6 @@
     <string name="settings_translation_ai_test_action">Testiraj prevod</string>
     <string name="settings_translation_ai_test_original">Primer teksta</string>
     <string name="settings_translation_ai_test_result">Prevedeni tekst</string>
-
     <string name="settings_appearance_generic">Opšte</string>
     <string name="settings_appearance_show_compose_in_home_timeline">Prikaži polje za sastavljanje na početnoj liniji</string>
     <string name="settings_appearance_show_compose_in_home_timeline_description">Prikaži polje za sastavljanje na vrhu početne vremenske linije</string>
@@ -294,23 +274,19 @@
     <string name="settings_appearance_post_action_style_stretch">Razvučeno</string>
     <string name="settings_appearance_absolute_timestamp">Apsolutna vremenska oznaka</string>
     <string name="settings_appearance_absolute_timestamp_description">Prikaži tačne vremenske oznake na objavama</string>
-
     <string name="settings_appearance_show_platform_logo">Prikaži ikonice izvornih platformi</string>
     <string name="settings_appearance_show_platform_logo_description">Prikaži sa koje platforme svaka objava dolazi</string>
-
     <string name="settings_about_source_code">Izvorni kod</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Pridružite se našoj Telegram grupi</string>
+    <string name="settings_about_discord" translatable="false">Discord</string>
     <string name="settings_about_discord_description">Pridružite se našem Discord serveru</string>
     <string name="settings_about_localization">Crowdin</string>
     <string name="settings_about_localization_description">Pomozite nam da prevedemo Flare</string>
     <string name="settings_privacy_policy">Politika privatnosti</string>
-
     <string name="users">Korisnici</string>
     <string name="hashtags">Heštegovi</string>
     <string name="statues">Objave</string>
-
-
     <string name="compose_title">Sastavi</string>
     <string name="compose_hint">Šta se dešava?</string>
     <string name="compose_poll_option_hint">Opcija %1$s</string>
@@ -331,7 +307,6 @@
     <string name="compose_notification_progress">Slanje objave</string>
     <string name="compose_notification_success">Objava poslata</string>
     <string name="compose_notification_error">Neuspešno slanje objave</string>
-
     <string name="misskey_visibility_public">Javno</string>
     <string name="misskey_visibility_home">Početna</string>
     <string name="misskey_visibility_followers">Pratioci</string>
@@ -340,13 +315,10 @@
     <string name="misskey_visibility_home_description">Samo korisnici na ovoj instanci mogu videti ovu objavu</string>
     <string name="misskey_visibility_followers_description">Samo pratioci mogu videti ovu objavu</string>
     <string name="misskey_visibility_specified_description">Samo pomenuti korisnici mogu videti ovu objavu</string>
-
-
     <string name="rss_sources_title">Pretplate</string>
     <string name="add_rss_source">Dodaj pretplatu</string>
     <string name="edit_rss_source">Izmeni pretplatu</string>
     <string name="delete_rss_source">Obriši pretplatu</string>
-
     <string name="rss_sources_title_label">Naslov</string>
     <string name="rss_sources_url_label">URL</string>
     <string name="rss_title">Pretplate</string>
@@ -369,7 +341,6 @@
     <string name="mastodon_federated_timeline">Federativna vremenska linija</string>
     <string name="mastodon_local_timeline">Lokalna vremenska linija</string>
     <string name="subscription_url_hint">Nalepi URL RSS fida ili URL Mastodon instance</string>
-
     <string name="tab_settings_add">Dodaj</string>
     <string name="tab_settings_drag">Prevuci</string>
     <string name="tab_settings_edit">Izmeni</string>
@@ -377,9 +348,7 @@
     <string name="tab_settings_default">Podrazumevano</string>
     <string name="tab_settings_list">Lista</string>
     <string name="tab_settings_feed">Fidovi</string>
-
     <string name="notification_login_expired">Prijava je istekla za %1$s</string>
-
     <string name="dm_list_empty">Nema direktnih poruka</string>
     <string name="dm_list_error">Neuspešno učitavanje direktnih poruka</string>
     <string name="send">Pošalji</string>
@@ -412,7 +381,6 @@
     <string name="tab_settings_filter_text_only">Samo tekst</string>
     <string name="tab_settings_filter_image">Slike</string>
     <string name="tab_settings_filter_video">Video snimci</string>
-
     <string name="edit_tab_title">Izmeni karticu</string>
     <string name="edit_tab_name">Ime</string>
     <string name="edit_tab_name_placeholder">Ime kartice</string>
@@ -420,16 +388,12 @@
     <string name="edit_tab_with_avatar">Sa avatarom</string>
     <string name="edit_tab_enabled">Prikaži u mešanim vremenskim linijama</string>
     <string name="edit_tab_enabled_description">Uključi ovu vremensku liniju kada se koristi unutar mešane vremenske linije ili grupe.</string>
-
     <string name="edit">Izmeni</string>
-
     <string name="local_history_search_placeholder">Pretraži keširane objave i profile</string>
     <string name="local_history_search_status_title">Objave</string>
     <string name="local_history_search_user_title">Korisnik</string>
-
     <string name="settings_storage_clear_image_cache">Obriši keš slika</string>
     <string name="settings_storage_clear_image_cache_description">Ukloni %1$s MB keširanih slika</string>
-
     <string name="settings_storage_clear_database">Obriši keširanu bazu podataka</string>
     <string name="settings_storage_clear_database_description">Ukloni %1$s keširanih korisnika i %2$s keširanih objava</string>
     <string name="settings_storage_app_log">Dnevnici aplikacije</string>
@@ -446,50 +410,39 @@
     <string name="draft_box_retry">Pokušaj ponovo</string>
     <string name="draft_box_edit">Izmeni</string>
     <string name="draft_box_send">Pošalji</string>
-
     <string name="copied_to_clipboard">Kopirano u privremenu memoriju</string>
-
     <string name="opml_import">Uvezi iz OPML-a</string>
     <string name="opml_export">Izvezi u OPML</string>
     <string name="save_completed">Izvoz završen</string>
-
     <string name="deeplink_account_selection_title">Izaberi nalog</string>
     <string name="deeplink_account_selection_message">Izaberite nalog da biste otvorili ovaj link</string>
     <string name="deeplink_account_selection_browser">Otvori u pretraživaču</string>
-
     <string name="block_user_title">Blokiraj korisnika</string>
     <string name="block_user_description">Da li ste sigurni da želite da blokirate ovog korisnika?</string>
     <string name="unblock_user_title">Deblokiraj korisnika</string>
     <string name="unblock_user_description">Da li ste sigurni da želite da deblokirate ovog korisnika?</string>
-
     <string name="mute_user_title">Ućutkaj korisnika</string>
     <string name="mute_user_description">Da li ste sigurni da želite da ućutkate ovog korisnika?</string>
     <string name="unmute_user_title">Poništi ućutkivanje</string>
     <string name="unmute_user_description">Da li ste sigurni da želite da poništite ućutkivanje ovog korisnika?</string>
-
     <string name="report_user_title">Prijavi korisnika</string>
     <string name="report_user_description">Da li ste sigurni da želite da prijavite ovog korisnika?</string>
-
     <string name="settings_storage_export_data">Izvezi podatke</string>
     <string name="settings_storage_export_data_description">Izvezite sve podatke, uključujući naloge i akreditive. Čuvajte datoteku na sigurnom.</string>
     <string name="settings_storage_import_data">Uvezi podatke</string>
     <string name="settings_storage_import_data_description">Uvezite podatke iz rezervne kopije. Postojeći zapisi sa podudarnim ID-ovima će biti zamenjeni.</string>
     <string name="action_export">Izvezi</string>
     <string name="action_import">Uvezi</string>
-
     <string name="save_error">Izvoz nije uspeo</string>
     <string name="import_completed">Uvoz završen</string>
     <string name="import_error">Uvoz nije uspeo</string>
     <string name="import_confirmation_title">Potvrdi uvoz</string>
     <string name="import_confirmation_message">Ovo će uvesti podatke iz izabrane datoteke. Postojeći zapisi sa podudarnim ID-ovima će biti zamenjeni. Nastaviti?</string>
-
     <string name="channel_title">Kanal</string>
-
     <string name="misskey_channel_tab_following">Prati se</string>
     <string name="misskey_channel_tab_favorites">Omiljeno</string>
     <string name="misskey_channel_tab_owned">U vlasništvu</string>
     <string name="misskey_channel_tab_featured">Istaknuto</string>
-
     <string name="media_save_success">Sačuvano u Preuzimanja</string>
     <string name="media_save_fail">Čuvanje nije uspelo</string>
 </resources>

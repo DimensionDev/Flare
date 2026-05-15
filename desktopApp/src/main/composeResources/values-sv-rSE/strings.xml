@@ -1,13 +1,12 @@
 <resources>
+    <string name="app_name" translatable="false">Flare</string>
     <string name="ok">OK</string>
     <string name="cancel">Avbryt</string>
     <string name="delete">Radera</string>
     <string name="refresh">Uppdatera</string>
-
     <string name="home_compose">Skriv</string>
     <string name="home_login">Logga in</string>
     <string name="home_settings">Inställningar</string>
-
     <string name="home_tab_home_title">Hem</string>
     <string name="home_tab_notifications_title">Aviseringar</string>
     <string name="home_tab_me_title">Mig</string>
@@ -25,47 +24,38 @@
         <item quantity="one">%1$d nytt inlägg</item>
         <item quantity="other">%1$d nya inlägg</item>
     </plurals>
-
     <string name="navigate_back">Bakåt</string>
     <string name="service_select_instance_input_placeholder">Instansens URL</string>
     <string name="service_select_next_button">Nästa</string>
     <string name="service_select_empty_message">Inga instanser hittades</string>
-
     <string name="service_select_welcome_title">Välkommen till Flare</string>
     <string name="service_select_welcome_message">Flare är en sociala medier-klient för %1$s.\nVälj en tjänst för att ansluta och komma igång.</string>
     <string name="mastodon_login_verify_message">Verifierar dina inloggningsuppgifter…</string>
-
     <string name="profile_tab_timeline">Inlägg</string>
     <string name="profile_tab_timeline_with_reply">Inlägg och svar</string>
     <string name="profile_tab_likes">Gilla-markeringar</string>
     <string name="profile_tab_media">Media</string>
-
     <string name="report_title">Rapportera</string>
     <string name="report_description">Vad är fel med det här inlägget?</string>
-
     <string name="report_reason_spam_title">Spam</string>
     <string name="report_reason_violation_title">Olagligt eller brådskande</string>
     <string name="report_reason_misleading_title">Vilseledande</string>
     <string name="report_reason_sexual_title">Oönskat sexuellt innehåll</string>
     <string name="report_reason_rude_title">Antisocialt beteende</string>
     <string name="report_reason_other_title">Annat</string>
-
     <string name="report_reason_spam_description">Överdrivna omnämnanden eller svar</string>
     <string name="report_reason_violation_description">Tydliga brott mot lagen eller användarvillkoren</string>
     <string name="report_reason_misleading_description">Det här inlägget är vilseledande</string>
     <string name="report_reason_sexual_description">Nakenhet eller pornografi som inte är märkt som sådan</string>
     <string name="report_reason_rude_description">Trakasserier, trollande eller intolerans</string>
     <string name="report_reason_other_description">Ett problem som inte ingår i dessa alternativ</string>
-
     <string name="delete_status_title">Radera</string>
     <string name="delete_status_message">Radera det här inlägget?</string>
     <string name="compose_close_confirm_title">Spara utkast?</string>
     <string name="compose_close_confirm_message">Du har osparade ändringar. Vill du spara detta som ett utkast innan du stänger?</string>
     <string name="compose_close_discard">Kasta</string>
-
     <string name="mastodon_report_title">Rapportera</string>
     <string name="mastodon_report_description">Är du säker på att du vill rapportera detta?</string>
-
     <string name="bookmark_remove">Ta bort bokmärke</string>
     <string name="bookmark_add">Lägg till bokmärke</string>
     <string name="like">Gilla</string>
@@ -83,7 +73,6 @@
     <string name="status_detail_repost">Reposta</string>
     <string name="emoji_picker_recent">Senaste</string>
     <string name="emoji_picker_search">Sök</string>
-
     <string name="media_show_thumbnail_list">Visa miniatyrlista</string>
     <string name="media_hide_thumbnail_list">Dölj miniatyrlista</string>
     <string name="media_save">Spara</string>
@@ -93,7 +82,6 @@
     <string name="status_share_image">Dela skärmdump</string>
     <string name="status_share_via_fxembed">Dela via FxEmbed</string>
     <string name="status_share_via_fixvx">Dela via Fixvx</string>
-
     <string name="list_add">Lägg till lista</string>
     <string name="list_edit">Redigera lista</string>
     <string name="list_delete">Radera lista</string>
@@ -117,25 +105,20 @@
     <string name="edit_list_member_remove">Ta bort</string>
     <string name="list_create_description">Listbeskrivning</string>
     <string name="list_create_description_hint">Listbeskrivning</string>
-
     <string name="feeds_my_feeds_title">Mina flöden</string>
     <string name="feeds_discover_feeds_title">Upptäck flöden</string>
     <string name="feeds_discover_feeds_created_by">Skapad av %1$s</string>
     <string name="feeds_unsubscribe">Sluta prenumerera</string>
     <string name="feeds_subscribe">Prenumerera</string>
-
     <string name="social_title">Socialt</string>
-
     <string name="antenna_title">Antenner</string>
     <string name="mixed_timeline_title">Blandat</string>
-
     <string name="bluesky_login_username">Användarnamn</string>
     <string name="bluesky_login_password">Lösenord</string>
     <string name="bluesky_login_2fa">2FA-kod</string>
     <string name="bluesky_login_oauth_button">Logga in med OAuth</string>
     <string name="bluesky_login_use_password_button">Använd lösenord</string>
     <string name="bluesky_login_oauth_hint">Bluesky OAuth kan fortfarande vara instabilt. Om du stöter på problem, använd lösenordsinloggning istället.</string>
-
     <string name="login_expired">Inloggningssessionen har gått ut</string>
     <string name="login_expired_message">Klicka för att logga in igen</string>
     <string name="login_expired_relogin">Logga in igen</string>
@@ -144,7 +127,6 @@
     <string name="add_account">Lägg till konto</string>
     <string name="remove_account">Ta bort konto</string>
     <string name="settings_accounts_remove_confirm">Är du säker på att du vill ta bort kontot %1$s från den här enheten?</string>
-
     <string name="settings_accounts_title">Konton</string>
     <string name="settings_appearance_title">Utseende</string>
     <string name="settings_status_appearance_title">Inläggsutseende</string>
@@ -225,7 +207,6 @@
     <string name="settings_ai_config_translate_provider_libretranslate">LibreTranslate</string>
     <string name="settings_ai_config_translate_provider_libretranslate_base_url">LibreTranslate bas-URL</string>
     <string name="settings_ai_config_translate_provider_libretranslate_api_key">LibreTranslate API-nyckel</string>
-
     <string name="settings_translation_title">Översättning</string>
     <string name="settings_translation_description">Välj översättningstjänster och beteende för automatisk översättning</string>
     <string name="settings_translation_auto_excluded_languages">Språk att hoppa över för automatisk översättning</string>
@@ -234,7 +215,6 @@
     <string name="settings_translation_ai_test_action">Testa översättning</string>
     <string name="settings_translation_ai_test_original">Exempeltext</string>
     <string name="settings_translation_ai_test_result">Översatt text</string>
-
     <string name="settings_appearance_generic">Allmänt</string>
     <string name="settings_appearance_show_compose_in_home_timeline">Visa skrivbox i hem-tidslinjen</string>
     <string name="settings_appearance_show_compose_in_home_timeline_description">Visa skrivboxen högst upp i hem-tidslinjen</string>
@@ -293,23 +273,19 @@
     <string name="settings_appearance_post_action_style_stretch">Sträck ut</string>
     <string name="settings_appearance_absolute_timestamp">Absolut tidsstämpel</string>
     <string name="settings_appearance_absolute_timestamp_description">Visa exakta tidsstämplar på inlägg</string>
-
     <string name="settings_appearance_show_platform_logo">Visa källplattformsikoner</string>
     <string name="settings_appearance_show_platform_logo_description">Visa vilken plattform varje inlägg kom ifrån</string>
-
     <string name="settings_about_source_code">Källkod</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Gå med i vår Telegram-grupp</string>
+    <string name="settings_about_discord" translatable="false">Discord</string>
     <string name="settings_about_discord_description">Gå med i vår Discord-server</string>
     <string name="settings_about_localization">Crowdin</string>
     <string name="settings_about_localization_description">Hjälp oss översätta Flare</string>
     <string name="settings_privacy_policy">Integritetspolicy</string>
-
     <string name="users">Användare</string>
     <string name="hashtags">Hashtaggar</string>
     <string name="statues">Inlägg</string>
-
-
     <string name="compose_title">Skriv</string>
     <string name="compose_hint">Vad händer?</string>
     <string name="compose_poll_option_hint">Alternativ %1$s</string>
@@ -330,7 +306,6 @@
     <string name="compose_notification_progress">Skickar inlägg</string>
     <string name="compose_notification_success">Inlägg skickat</string>
     <string name="compose_notification_error">Misslyckades med att skicka inlägg</string>
-
     <string name="misskey_visibility_public">Offentlig</string>
     <string name="misskey_visibility_home">Hem</string>
     <string name="misskey_visibility_followers">Följare</string>
@@ -339,13 +314,10 @@
     <string name="misskey_visibility_home_description">Endast användare på denna instans kan se detta inlägg</string>
     <string name="misskey_visibility_followers_description">Endast följare kan se detta inlägg</string>
     <string name="misskey_visibility_specified_description">Endast nämnda användare kan se detta inlägg</string>
-
-
     <string name="rss_sources_title">Prenumerationer</string>
     <string name="add_rss_source">Lägg till prenumeration</string>
     <string name="edit_rss_source">Redigera prenumeration</string>
     <string name="delete_rss_source">Ta bort prenumeration</string>
-
     <string name="rss_sources_title_label">Titel</string>
     <string name="rss_sources_url_label">URL</string>
     <string name="rss_title">Prenumerationer</string>
@@ -368,7 +340,6 @@
     <string name="mastodon_federated_timeline">Federerad tidslinje</string>
     <string name="mastodon_local_timeline">Lokal tidslinje</string>
     <string name="subscription_url_hint">Klistra in en RSS-flödes-URL eller en Mastodon-instans-URL</string>
-
     <string name="tab_settings_add">Lägg till</string>
     <string name="tab_settings_drag">Dra</string>
     <string name="tab_settings_edit">Redigera</string>
@@ -376,9 +347,7 @@
     <string name="tab_settings_default">Standard</string>
     <string name="tab_settings_list">Lista</string>
     <string name="tab_settings_feed">Flöden</string>
-
     <string name="notification_login_expired">Inloggning har gått ut för %1$s</string>
-
     <string name="dm_list_empty">Inga direktmeddelanden</string>
     <string name="dm_list_error">Misslyckades med att ladda direktmeddelanden</string>
     <string name="send">Skicka</string>
@@ -411,7 +380,6 @@
     <string name="tab_settings_filter_text_only">Endast text</string>
     <string name="tab_settings_filter_image">Bilder</string>
     <string name="tab_settings_filter_video">Videor</string>
-
     <string name="edit_tab_title">Redigera flik</string>
     <string name="edit_tab_name">Namn</string>
     <string name="edit_tab_name_placeholder">Fliknamn</string>
@@ -419,16 +387,12 @@
     <string name="edit_tab_with_avatar">Med avatar</string>
     <string name="edit_tab_enabled">Visa i blandade tidslinjer</string>
     <string name="edit_tab_enabled_description">Inkludera denna tidslinje när den används inuti en blandad tidslinje eller grupp.</string>
-
     <string name="edit">Redigera</string>
-
     <string name="local_history_search_placeholder">Sök efter cachade inlägg och profiler</string>
     <string name="local_history_search_status_title">Inlägg</string>
     <string name="local_history_search_user_title">Användare</string>
-
     <string name="settings_storage_clear_image_cache">Rensa bildcache</string>
     <string name="settings_storage_clear_image_cache_description">Ta bort %1$s MB cachade bilder</string>
-
     <string name="settings_storage_clear_database">Rensa cachad databas</string>
     <string name="settings_storage_clear_database_description">Ta bort %1$s cachade användare och %2$s cachade inlägg</string>
     <string name="settings_storage_app_log">Apploggar</string>
@@ -445,50 +409,39 @@
     <string name="draft_box_retry">Försök igen</string>
     <string name="draft_box_edit">Redigera</string>
     <string name="draft_box_send">Skicka</string>
-
     <string name="copied_to_clipboard">Kopierat till urklipp</string>
-
     <string name="opml_import">Importera från OPML</string>
     <string name="opml_export">Exportera till OPML</string>
     <string name="save_completed">Export slutförd</string>
-
     <string name="deeplink_account_selection_title">Välj konto</string>
     <string name="deeplink_account_selection_message">Välj ett konto för att öppna länken</string>
     <string name="deeplink_account_selection_browser">Öppna i webbläsare</string>
-
     <string name="block_user_title">Blockera användare</string>
     <string name="block_user_description">Är du säker på att du vill blockera den här användaren?</string>
     <string name="unblock_user_title">Avblockera användare</string>
     <string name="unblock_user_description">Är du säker på att du vill avblockera den här användaren?</string>
-
     <string name="mute_user_title">Tysta användare</string>
     <string name="mute_user_description">Är du säker på att du vill tysta den här användaren?</string>
     <string name="unmute_user_title">Sluta tysta användare</string>
     <string name="unmute_user_description">Är du säker på att du vill sluta tysta den här användaren?</string>
-
     <string name="report_user_title">Rapportera användare</string>
     <string name="report_user_description">Är du säker på att du vill rapportera den här användaren?</string>
-
     <string name="settings_storage_export_data">Exportera data</string>
     <string name="settings_storage_export_data_description">Exportera all data, inklusive konton och inloggningsuppgifter. Håll filen säker.</string>
     <string name="settings_storage_import_data">Importera data</string>
     <string name="settings_storage_import_data_description">Importera data från en säkerhetskopia. Befintliga poster med matchande ID kommer att ersättas.</string>
     <string name="action_export">Exportera</string>
     <string name="action_import">Importera</string>
-
     <string name="save_error">Export misslyckades</string>
     <string name="import_completed">Import slutförd</string>
     <string name="import_error">Import misslyckades</string>
     <string name="import_confirmation_title">Bekräfta import</string>
     <string name="import_confirmation_message">Detta kommer att importera data från den valda filen. Befintliga poster med matchande ID kommer att ersättas. Vill du fortsätta?</string>
-
     <string name="channel_title">Kanal</string>
-
     <string name="misskey_channel_tab_following">Följer</string>
     <string name="misskey_channel_tab_favorites">Favoriter</string>
     <string name="misskey_channel_tab_owned">Ägda</string>
     <string name="misskey_channel_tab_featured">Utvalda</string>
-
     <string name="media_save_success">Sparad till Hämtade filer</string>
     <string name="media_save_fail">Misslyckades med att spara</string>
 </resources>

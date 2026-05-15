@@ -3,18 +3,15 @@
     <string name="done">Gotowe</string>
     <string name="cancel">Anuluj</string>
     <string name="ok">OK</string>
-
     <string name="profile_header_following_count">%1$s Obserwowanych</string>
     <string name="profile_header_fans_count">%1$s Obserwujących</string>
     <string name="profile_header_toots_count">%1$s Wpisów</string>
     <string name="profile_misskey_header_status_count">%1$s Wpisów</string>
-
     <string name="profile_header_button_follow">Obserwuj</string>
     <string name="profile_header_button_following">Obserwujesz</string>
     <string name="profile_header_button_requested">Oczekuje</string>
     <string name="profile_header_button_blocked">Zablokowany</string>
     <string name="profile_header_button_is_fans">Obserwuje Cię</string>
-
     <string name="mastodon_notification_item_followed_you">zaczął Cię obserwować</string>
     <string name="mastodon_notification_item_favourited_your_status">dodał Twój wpis do ulubionych</string>
     <string name="mastodon_notification_item_reblogged_your_status">podał dalej</string>
@@ -27,9 +24,7 @@
     <string name="mastodon_item_show_more">Pokaż więcej</string>
     <string name="mastodon_item_show_less">Pokaż mniej</string>
     <string name="mastodon_item_pinned">przypiął wpis</string>
-
     <string name="post_show_full_text">Pokaż pełny tekst</string>
-
     <string name="bluesky_notification_item_followed_you">zaczął Cię obserwować</string>
     <string name="bluesky_notification_item_favourited_your_status">polubił Twój wpis</string>
     <string name="bluesky_notification_item_reblogged_your_status">podał dalej Twój wpis</string>
@@ -41,7 +36,6 @@
     <string name="bluesky_notification_item_starterpack_joined">dołączył przez Starter Pack</string>
     <string name="bluesky_notification_item_unKnown">Nieznane</string>
     <string name="bluesky_notification_item_pin">przypiął wpis</string>
-
     <string name="misskey_notification_item_mentioned_you">wspomniał o Tobie</string>
     <string name="misskey_notification_item_replied_to_you">odpowiedział Ci</string>
     <string name="misskey_notification_item_reposted_your_status">podał dalej Twój wpis</string>
@@ -63,10 +57,8 @@
     <string name="misskey_notification_item_requested_follow">poprosił o możliwość obserwowania Cię</string>
     <string name="misskey_notification_unknwon">Nieznane powiadomienie: %1$s</string>
     <string name="misskey_item_reblogged_status">podał dalej</string>
-
     <string name="xqt_item_reblogged_status">podał dalej</string>
     <string name="xqt_item_mention_status">wspomniał o Tobie</string>
-
     <string name="mastodon_visibility_public">Publiczne</string>
     <string name="mastodon_visibility_unlisted">Niewidoczne na osi czasu</string>
     <string name="mastodon_visibility_private">Tylko dla obserwujących</string>
@@ -75,10 +67,8 @@
     <string name="mastodon_visibility_unlisted_description">Każdy może zobaczyć ten wpis, ale nie pojawi się on na publicznej osi czasu</string>
     <string name="mastodon_visibility_private_description">Tylko osoby Cię obserwujące mogą zobaczyć ten wpis</string>
     <string name="mastodon_visibility_direct_description">Tylko wspomniane osoby mogą zobaczyć ten wpis</string>
-
     <string name="settings_notifications_title">Powiadomienia</string>
     <string name="settings_notifications_subtitle">Dostosuj sposób, w jaki Flare Cię powiadamia</string>
-
     <string name="status_loadmore_end">Brak kolejnych wpisów</string>
     <string name="status_loadmore_error">Błąd podczas ładowania kolejnych wpisów</string>
     <string name="status_loadmore_error_retry">Spróbuj ponownie</string>
@@ -89,31 +79,24 @@
     <string name="login_expired">Sesja wygasła</string>
     <string name="login_expired_message">Dotknij, aby zalogować się ponownie</string>
     <string name="login_expired_relogin">Zaloguj się ponownie</string>
-
     <string name="permission_denied_title">Odmowa dostępu</string>
     <string name="permission_denied_message">Zaloguj się ponownie, aby uzyskać dostęp do tej strony</string>
-
     <string name="misskey_compose_local_only">Tylko lokalnie</string>
     <string name="misskey_compose_local_only_description">Tylko użytkownicy tej instancji mogą zobaczyć ten wpis</string>
-
     <string name="misskey_item_action_renote">Renote</string>
     <string name="misskey_item_action_quote">Cytat</string>
-
     <string name="bluesky_notification_unknown_message">Nieznany typ powiadomienia %1$s</string>
     <string name="bluesky_notification_unknown_message2">Zgłoś ten błąd deweloperowi.</string>
-
     <string name="blusky_item_action_repost">Podaj dalej</string>
     <string name="blusky_item_action_quote">Cytat</string>
     <string name="blusky_item_action_report">Zgłoś</string>
     <string name="blusky_item_action_delete">Usuń</string>
-
     <string name="mastodon_item_unbookmark">Usuń zakładkę</string>
     <string name="mastodon_item_bookmark">Dodaj zakładkę</string>
     <string name="mastodon_item_delete">Usuń</string>
     <string name="mastodon_item_report">Zgłoś</string>
     <string name="misskey_item_action_delete">Usuń</string>
     <string name="misskey_item_action_report">Zgłoś</string>
-
     <string name="bookmark_remove">Usuń zakładkę</string>
     <string name="bookmark_add">Dodaj zakładkę</string>
     <string name="like">Lubię to!</string>
@@ -131,7 +114,6 @@
     <string name="share">Udostępnij</string>
     <string name="fx_share">Udostępnij przez FxEmbed</string>
     <string name="comment">Skomentuj</string>
-
     <string name="user_report">Zgłoś</string>
     <string name="user_block">Zablokuj</string>
     <string name="user_unblock">Odblokuj</string>
@@ -148,280 +130,194 @@
     <string name="translation_badge_failed">Tłumaczenie nie powiodło się</string>
     <string name="translation_retry">Ponów tłumaczenie</string>
     <string name="translation_show_original">Pokaż oryginał</string>
-
     <string name="date_format_year_month_day">dd MMM yy</string>
     <string name="date_format_month_day">dd MMM</string>
     <string name="date_format_full">dd MMM yy HH:mm</string>
-
     <string name="vvo_notification_like">Polubił Twój wpis</string>
-
     <string name="user_follow_edit_list">Dodaj/usuń z listy</string>
     <string name="list_empty">Brak list</string>
     <string name="list_error">Nie udało się załadować list</string>
-
     <string name="misskey_achievement_notes1_title">właśnie konfiguruję mojego msky</string>
     <string name="misskey_achievement_notes1_description">Opublikuj swoją pierwszą notatkę</string>
     <string name="misskey_achievement_notes1_flavor">Baw się dobrze z Misskey!</string>
-
     <string name="misskey_achievement_notes10_title">Kilka notatek</string>
     <string name="misskey_achievement_notes10_description">Opublikuj 10 notatek</string>
-
     <string name="misskey_achievement_notes100_title">Sporo notatek</string>
     <string name="misskey_achievement_notes100_description">Opublikuj 100 notatek</string>
-
     <string name="misskey_achievement_notes500_title">Zasypany notatkami</string>
     <string name="misskey_achievement_notes500_description">Opublikuj 500 notatek</string>
-
     <string name="misskey_achievement_notes1000_title">Góra notatek</string>
     <string name="misskey_achievement_notes1000_description">Opublikuj 1 000 notatek</string>
-
     <string name="misskey_achievement_notes5000_title">Przelewanie się notatek</string>
     <string name="misskey_achievement_notes5000_description">Opublikuj 5 000 notatek</string>
-
     <string name="misskey_achievement_notes10000_title">Supernotatka</string>
     <string name="misskey_achievement_notes10000_description">Opublikuj 10 000 notatek</string>
-
     <string name="misskey_achievement_notes20000_title">Potrzeba... więcej... notatek...</string>
     <string name="misskey_achievement_notes20000_description">Opublikuj 20 000 notatek</string>
-
     <string name="misskey_achievement_notes30000_title">Notatki notatki notatki!</string>
     <string name="misskey_achievement_notes30000_description">Opublikuj 30 000 notatek</string>
-
     <string name="misskey_achievement_notes40000_title">Fabryka notatek</string>
     <string name="misskey_achievement_notes40000_description">Opublikuj 40 000 notatek</string>
-
     <string name="misskey_achievement_notes50000_title">Planeta notatek</string>
     <string name="misskey_achievement_notes50000_description">Opublikuj 50 000 notatek</string>
-
     <string name="misskey_achievement_notes60000_title">Kwazar notatek</string>
     <string name="misskey_achievement_notes60000_description">Opublikuj 60 000 notatek</string>
-
     <string name="misskey_achievement_notes70000_title">Czarna dziura notatek</string>
     <string name="misskey_achievement_notes70000_description">Opublikuj 70 000 notatek</string>
-
     <string name="misskey_achievement_notes80000_title">Galaktyka notatek</string>
     <string name="misskey_achievement_notes80000_description">Opublikuj 80 000 notatek</string>
-
     <string name="misskey_achievement_notes90000_title">Wszechświat notatek</string>
     <string name="misskey_achievement_notes90000_description">Opublikuj 90 000 notatek</string>
-
     <string name="misskey_achievement_notes100000_title">ALL YOUR NOTE ARE BELONG TO US</string>
     <string name="misskey_achievement_notes100000_description">Opublikuj 100 000 notatek</string>
     <string name="misskey_achievement_notes100000_flavor">Masz naprawdę dużo do powiedzenia.</string>
-
     <string name="misskey_achievement_login3_title">Początkujący I</string>
     <string name="misskey_achievement_login3_description">Loguj się przez łącznie 3 dni</string>
     <string name="misskey_achievement_login3_flavor">Od dzisiaj możesz na mnie mówić Misskista</string>
-
     <string name="misskey_achievement_login7_title">Początkujący II</string>
     <string name="misskey_achievement_login7_description">Loguj się przez łącznie 7 dni</string>
     <string name="misskey_achievement_login7_flavor">Czujesz już, że ogarniasz o co chodzi?</string>
-
     <string name="misskey_achievement_login15_title">Początkujący III</string>
     <string name="misskey_achievement_login15_description">Loguj się przez łącznie 15 dni</string>
-
     <string name="misskey_achievement_login30_title">Misskista I</string>
     <string name="misskey_achievement_login30_description">Loguj się przez łącznie 30 dni</string>
-
     <string name="misskey_achievement_login60_title">Misskista II</string>
     <string name="misskey_achievement_login60_description">Loguj się przez łącznie 60 dni</string>
-
     <string name="misskey_achievement_login100_title">Misskista III</string>
     <string name="misskey_achievement_login100_description">Loguj się przez łącznie 100 dni</string>
     <string name="misskey_achievement_login100_flavor">Brutalna Misskista</string>
-
     <string name="misskey_achievement_login200_title">Stały bywalec I</string>
     <string name="misskey_achievement_login200_description">Loguj się przez łącznie 200 dni</string>
-
     <string name="misskey_achievement_login300_title">Stały bywalec II</string>
     <string name="misskey_achievement_login300_description">Loguj się przez łącznie 300 dni</string>
-
     <string name="misskey_achievement_login400_title">Stały bywalec III</string>
     <string name="misskey_achievement_login400_description">Loguj się przez łącznie 400 dni</string>
-
     <string name="misskey_achievement_login500_title">Ekspert I</string>
     <string name="misskey_achievement_login500_description">Loguj się przez łącznie 500 dni</string>
     <string name="misskey_achievement_login500_flavor">Moi przyjaciele, często mówi się, że lubię notatki</string>
-
     <string name="misskey_achievement_login600_title">Ekspert II</string>
     <string name="misskey_achievement_login600_description">Loguj się przez łącznie 600 dni</string>
-
     <string name="misskey_achievement_login700_title">Ekspert III</string>
     <string name="misskey_achievement_login700_description">Loguj się przez łącznie 700 dni</string>
-
     <string name="misskey_achievement_login800_title">Mistrz Notatek I</string>
     <string name="misskey_achievement_login800_description">Loguj się przez łącznie 800 dni</string>
-
     <string name="misskey_achievement_login900_title">Mistrz Notatek II</string>
     <string name="misskey_achievement_login900_description">Loguj się przez łącznie 900 dni</string>
-
     <string name="misskey_achievement_login1000_title">Mistrz Notatek III</string>
     <string name="misskey_achievement_login1000_description">Loguj się przez łącznie 1 000 dni</string>
     <string name="misskey_achievement_login1000_flavor">Dziękujemy za korzystanie z Misskey!</string>
-
     <string name="misskey_achievement_note_clipped1_title">Trzeba... przypiąć...</string>
     <string name="misskey_achievement_note_clipped1_description">Przypnij swoją pierwszą notatkę</string>
-
     <string name="misskey_achievement_note_favorited1_title">Obserwator gwiazd</string>
     <string name="misskey_achievement_note_favorited1_description">Dodaj swoją pierwszą notatkę do ulubionych</string>
-
     <string name="misskey_achievement_my_note_favorited1_title">Szukanie gwiazd</string>
     <string name="misskey_achievement_my_note_favorited1_description">Spraw, by ktoś inny dodał Twoją notatkę do ulubionych</string>
-
     <string name="misskey_achievement_profile_filled_title">Dobrze przygotowany</string>
     <string name="misskey_achievement_profile_filled_description">Skonfiguruj swój profil</string>
-
     <string name="misskey_achievement_marked_as_cat_title">Jestem kotem</string>
     <string name="misskey_achievement_marked_as_cat_description">Oznacz swoje konto jako kota</string>
     <string name="misskey_achievement_marked_as_cat_flavor">Później nadam Ci imię.</string>
-
     <string name="misskey_achievement_following1_title">Obserwujesz pierwszą osobę</string>
     <string name="misskey_achievement_following1_description">Zacznij kogoś obserwować</string>
-
     <string name="misskey_achievement_following10_title">Bądź na bieżąco...</string>
     <string name="misskey_achievement_following10_description">Zacznij obserwować 10 osób</string>
-
     <string name="misskey_achievement_following50_title">Mnóstwo znajomych</string>
     <string name="misskey_achievement_following50_description">Zacznij obserwować 50 kont</string>
-
     <string name="misskey_achievement_following100_title">100 znajomych</string>
     <string name="misskey_achievement_following100_description">Zacznij obserwować 100 kont</string>
-
     <string name="misskey_achievement_following300_title">Przeładowanie znajomymi</string>
     <string name="misskey_achievement_following300_description">Zacznij obserwować 300 kont</string>
-
     <string name="misskey_achievement_followers1_title">Pierwszy obserwujący</string>
     <string name="misskey_achievement_followers1_description">Zyskaj 1 obserwującego</string>
-
     <string name="misskey_achievement_followers10_title">Obserwuj mnie!</string>
     <string name="misskey_achievement_followers10_description">Zyskaj 10 obserwujących</string>
-
     <string name="misskey_achievement_followers50_title">Tłumy nadchodzą</string>
     <string name="misskey_achievement_followers50_description">Zyskaj 50 obserwujących</string>
-
     <string name="misskey_achievement_followers100_title">Popularność</string>
     <string name="misskey_achievement_followers100_description">Zyskaj 100 obserwujących</string>
-
     <string name="misskey_achievement_followers300_title">Proszę ustawić się w kolejce</string>
     <string name="misskey_achievement_followers300_description">Zyskaj 300 obserwujących</string>
-
     <string name="misskey_achievement_followers500_title">Wieża radiowa</string>
     <string name="misskey_achievement_followers500_description">Zyskaj 500 obserwujących</string>
-
     <string name="misskey_achievement_followers1000_title">Influencer</string>
     <string name="misskey_achievement_followers1000_description">Zyskaj 1 000 obserwujących</string>
-
     <string name="misskey_achievement_collect_achievements30_title">Kolekcjoner osiągnięć</string>
     <string name="misskey_achievement_collect_achievements30_description">Zdobądź 30 osiągnięć</string>
-
     <string name="misskey_achievement_view_achievements3min_title">Lubi osiągnięcia</string>
     <string name="misskey_achievement_view_achievements3min_description">Przeglądaj swoją listę osiągnięć przez co najmniej 3 minuty</string>
-
     <string name="misskey_achievement_i_love_misskey_title">Kocham Misskey</string>
     <string name="misskey_achievement_i_love_misskey_description">Opublikuj \"I ❤ #Misskey\"</string>
     <string name="misskey_achievement_i_love_misskey_flavor">Zespół twórców Misskey bardzo dziękuje za wsparcie!</string>
-
     <string name="misskey_achievement_found_treasure_title">Poszukiwanie skarbu</string>
     <string name="misskey_achievement_found_treasure_description">Znalazłeś ukryty skarb</string>
-
     <string name="misskey_achievement_client30min_title">Krótka przerwa</string>
     <string name="misskey_achievement_client30min_description">Miej Misskey otwarte przez co najmniej 30 minut</string>
-
     <string name="misskey_achievement_client60min_title">Bez \"pudła\" w Misskey</string>
     <string name="misskey_achievement_client60min_description">Miej Misskey otwarte przez co najmniej 60 minut</string>
-
     <string name="misskey_achievement_note_deleted_within1min_title">Nieważne</string>
     <string name="misskey_achievement_note_deleted_within1min_description">Usuń notatkę w ciągu minuty od jej opublikowania</string>
-
     <string name="misskey_achievement_posted_at_late_night_title">Nocny marek</string>
     <string name="misskey_achievement_posted_at_late_night_description">Opublikuj notatkę późno w nocy</string>
     <string name="misskey_achievement_posted_at_late_night_flavor">Pora już iść spać.</string>
-
     <string name="misskey_achievement_posted_at_0min0sec_title">Mówiący zegar</string>
     <string name="misskey_achievement_posted_at_0min0sec_description">Opublikuj notatkę o północy</string>
     <string name="misskey_achievement_posted_at_0min0sec_flavor">Tik Tik Tik Bong</string>
-
     <string name="misskey_achievement_self_quote_title">Samoodniesienie</string>
     <string name="misskey_achievement_self_quote_description">Zacytuj swoją własną notatkę</string>
-
     <string name="misskey_achievement_htl20npm_title">Płynąca oś czasu</string>
     <string name="misskey_achievement_htl20npm_description">Spraw, by prędkość Twojej głównej osi czasu przekroczyła 20 npm (notatek na minutę)</string>
-
     <string name="misskey_achievement_view_instance_chart_title">Analityk</string>
     <string name="misskey_achievement_view_instance_chart_description">Zobacz wykresy swojej instancji</string>
-
     <string name="misskey_achievement_output_hello_world_on_scratchpad_title">Hello, world!</string>
     <string name="misskey_achievement_output_hello_world_on_scratchpad_description">Wypisz \"hello world\" w Brudnopisie</string>
-
     <string name="misskey_achievement_open3windows_title">Wielooknowość</string>
     <string name="misskey_achievement_open3windows_description">Miej co najmniej 3 okna otwarte jednocześnie</string>
-
     <string name="misskey_achievement_drive_folder_circular_reference_title">Odwołanie cykliczne</string>
     <string name="misskey_achievement_drive_folder_circular_reference_description">Próba utworzenia rekurencyjnie zagnieżdżonego folderu w Dysku</string>
-
     <string name="misskey_achievement_react_without_read_title">Czy Ty naprawdę to przeczytałeś?</string>
     <string name="misskey_achievement_react_without_read_description">Zareaguj na notatkę dłuższą niż 100 znaków w ciągu 3 sekund od jej opublikowania</string>
-
     <string name="misskey_achievement_clicked_click_here_title">Kliknij tutaj</string>
     <string name="misskey_achievement_clicked_click_here_description">Kliknąłeś tutaj</string>
-
     <string name="misskey_achievement_just_plain_lucky_title">Zwyczajny fuks</string>
     <string name="misskey_achievement_just_plain_lucky_description">Ma szansę na zdobycie z prawdopodobieństwem 0,005% co 10 sekund</string>
-
     <string name="misskey_achievement_set_name_to_syuilo_title">Kompleks boga</string>
     <string name="misskey_achievement_set_name_to_syuilo_description">Ustaw swoją nazwę na \"syuilo\"</string>
-
     <string name="misskey_achievement_passed_since_account_created1_title">Pierwsza rocznica</string>
     <string name="misskey_achievement_passed_since_account_created1_description">Minął rok od utworzenia Twojego konta</string>
-
     <string name="misskey_achievement_passed_since_account_created2_title">Druga rocznica</string>
     <string name="misskey_achievement_passed_since_account_created2_description">Minęły dwa lata od utworzenia Twojego konta</string>
-
     <string name="misskey_achievement_passed_since_account_created3_title">Trzecia rocznica</string>
     <string name="misskey_achievement_passed_since_account_created3_description">Minęły trzy lata od utworzenia Twojego konta</string>
-
     <string name="misskey_achievement_logged_in_on_birthday_title">Wszystkiego najlepszego</string>
     <string name="misskey_achievement_logged_in_on_birthday_description">Zaloguj się w swoje urodziny</string>
-
     <string name="misskey_achievement_logged_in_on_new_years_day_title">Szczęśliwego Nowego Roku!</string>
     <string name="misskey_achievement_logged_in_on_new_years_day_description">Zalogowano się w pierwszy dzień roku</string>
     <string name="misskey_achievement_logged_in_on_new_years_day_flavor">Za kolejny świetny rok na tej instancji</string>
-
     <string name="misskey_achievement_cookie_clicked_title">Gra, w której klika się ciasteczka</string>
     <string name="misskey_achievement_cookie_clicked_description">Kliknięto ciasteczko</string>
     <string name="misskey_achievement_cookie_clicked_flavor">Czekaj, czy to na pewno ta strona?</string>
-
     <string name="misskey_achievement_brain_diver_title">Brain Diver</string>
     <string name="misskey_achievement_brain_diver_description">Opublikuj link do Brain Diver</string>
     <string name="misskey_achievement_brain_diver_flavor">Misskey-Misskey La-Tu-Ma</string>
-
     <string name="misskey_achievement_smash_test_notification_button_title">Przepełnienie testowe</string>
     <string name="misskey_achievement_smash_test_notification_button_description">Uruchom wielokrotnie test powiadomień w bardzo krótkim czasie</string>
-
     <string name="misskey_achievement_tutorial_completed_title">Dyplom ukończenia kursu podstawowego Misskey</string>
     <string name="misskey_achievement_tutorial_completed_description">Samouczek ukończony</string>
-
     <string name="misskey_achievement_bubble_game_exploding_head_title">🤯</string>
     <string name="misskey_achievement_bubble_game_exploding_head_description">Największy obiekt w grze bąbelkowej</string>
-
     <string name="misskey_achievement_bubble_game_double_exploding_head_title">Podwójne 🤯</string>
     <string name="misskey_achievement_bubble_game_double_exploding_head_description">Dwa największe obiekty w grze bąbelkowej jednocześnie</string>
     <string name="misskey_achievement_bubble_game_double_exploding_head_flavor">Możesz tak trochę wypełnić pudełko śniadaniowe 🤯 🤯.</string>
-
     <string name="vote">Głosuj</string>
     <string name="poll_expired">Ankieta wygasła</string>
     <string name="poll_voted">Zagłosowano</string>
     <string name="poll_expired_at">Wygasła o %1$s</string>
     <string name="user_send_message">Wyślij wiadomość bezpośrednią</string>
-
     <string name="profile_search_user_using_account">Znajdź %1$s w %2$s używając %3$s</string>
     <string name="profile_search_user_using_account_compat">Znajdź w %1$s</string>
-
     <string name="feeds_discover_feeds_created_by">Utworzone przez %1$s</string>
-
     <string name="notification_item_accept_follow_request">Zaakceptuj</string>
     <string name="notification_item_reject_follow_request">Odrzuć</string>
-
     <string name="dm_list_empty">Brak wiadomości bezpośrednich</string>
     <string name="dm_list_error">Nie udało się załadować wiadomości bezpośrednich</string>
     <string name="send">Wyślij</string>
@@ -431,7 +327,6 @@
     <string name="dm_sending">Wysyłanie</string>
     <string name="dm_leave">Opuść rozmowę</string>
     <string name="dm_to_profile">Pokaż profil</string>
-
     <string name="settings_side_panel_empty">Domyślnie panel boczny dopasowuje się do platformy bieżącego konta.</string>
     <string name="tab_settings_add">Dodaj</string>
     <string name="tab_settings_drag">Przeciągnij</string>
@@ -440,16 +335,13 @@
     <string name="tab_settings_default">Domyślne</string>
     <string name="tab_settings_list">Lista</string>
     <string name="tab_settings_feed">Kanały</string>
-
     <string name="list_add">Dodaj listę</string>
     <string name="list_edit">Edytuj listę</string>
     <string name="list_delete">Usuń listę</string>
-
     <string name="rss_sources_title">Subskrypcje</string>
     <string name="add_rss_source">Dodaj subskrypcję</string>
     <string name="edit_rss_source">Edytuj subskrypcję</string>
     <string name="delete_rss_source">Usuń subskrypcję</string>
-
     <string name="rss_sources_title_label">Tytuł</string>
     <string name="rss_sources_url_label">URL</string>
     <string name="rss_title">Subskrypcje</string>
@@ -457,7 +349,6 @@
     <string name="mastodon_trending_statuses">Popularne wpisy</string>
     <string name="mastodon_federated_timeline">Federacyjna oś czasu</string>
     <string name="mastodon_local_timeline">Lokalna oś czasu</string>
-
     <string name="service_select_welcome_title">Witaj we Flare</string>
     <string name="service_select_welcome_message">Wprowadź serwer, aby rozpocząć.</string>
     <string name="service_select_welcome_hint">Flare obsługuje Mastodon, Misskey, Bluesky, Nostr i X.</string>
@@ -491,7 +382,6 @@
     <string name="service_select_compatibility_warning">Ten serwer używa %1$s, Flare będzie działać w trybie kompatybilności. Niektóre funkcje mogą nie działać poprawnie.</string>
     <string name="login_agreement">Logując się, zgadzasz się na %1$s.</string>
     <string name="eula_privacy_policy">EULA i Polityka prywatności</string>
-
     <string name="home_tab_home_title">Główna</string>
     <string name="home_tab_notifications_title">Powiadomienia</string>
     <string name="home_tab_me_title">Ja</string>
@@ -517,7 +407,9 @@
     <string name="settings_about_source_code">Kod źródłowy</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Dołącz do naszej grupy na Telegramie</string>
+    <string name="settings_about_discord" translatable="false">Discord</string>
     <string name="settings_about_discord_description">Dołącz do naszego serwera Discord</string>
+    <string name="settings_about_line" translatable="false">Line</string>
     <string name="settings_about_line_description">Dołącz do naszej grupy Line</string>
     <string name="settings_about_localization">Crowdin</string>
     <string name="settings_about_localization_description">Pomóż nam tłumaczyć Flare</string>

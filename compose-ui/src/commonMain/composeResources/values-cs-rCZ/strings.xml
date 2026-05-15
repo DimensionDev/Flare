@@ -4,18 +4,15 @@
     <string name="done">Hotovo</string>
     <string name="cancel">Zrušit</string>
     <string name="ok">OK</string>
-
     <string name="profile_header_following_count">%1$s Sleduji</string>
     <string name="profile_header_fans_count">%1$s Sledující</string>
     <string name="profile_header_toots_count">%1$s Příspěvky</string>
     <string name="profile_misskey_header_status_count">%1$s Příspěvky</string>
-
     <string name="profile_header_button_follow">Sledovat</string>
     <string name="profile_header_button_following">Sleduji</string>
     <string name="profile_header_button_requested">Požádáno</string>
     <string name="profile_header_button_blocked">Blokován</string>
     <string name="profile_header_button_is_fans">Sleduje vás</string>
-
     <string name="mastodon_notification_item_followed_you">vás začal(a) sledovat</string>
     <string name="mastodon_notification_item_favourited_your_status">přidal(a) váš příspěvek do oblíbených</string>
     <string name="mastodon_notification_item_reblogged_your_status">sdílel(a)</string>
@@ -28,9 +25,7 @@
     <string name="mastodon_item_show_more">Zobrazit více</string>
     <string name="mastodon_item_show_less">Zobrazit méně</string>
     <string name="mastodon_item_pinned">přišpendlil(a) příspěvek</string>
-
     <string name="post_show_full_text">Zobrazit celý text</string>
-
     <string name="bluesky_notification_item_followed_you">vás začal(a) sledovat</string>
     <string name="bluesky_notification_item_favourited_your_status">olajkoval(a) váš příspěvek</string>
     <string name="bluesky_notification_item_reblogged_your_status">přesdílel(a) váš příspěvek</string>
@@ -42,7 +37,6 @@
     <string name="bluesky_notification_item_starterpack_joined">se přidal(a) přes startovací balíček</string>
     <string name="bluesky_notification_item_unKnown">Neznámý</string>
     <string name="bluesky_notification_item_pin">přišpendlil(a) příspěvek</string>
-
     <string name="misskey_notification_item_mentioned_you">vás zmínil(a)</string>
     <string name="misskey_notification_item_replied_to_you">vám odpověděl(a)</string>
     <string name="misskey_notification_item_reposted_your_status">přesdílel(a) váš příspěvek</string>
@@ -64,10 +58,8 @@
     <string name="misskey_notification_item_requested_follow">požádal(a) o sledování</string>
     <string name="misskey_notification_unknwon">Neznámé oznámení: %1$s</string>
     <string name="misskey_item_reblogged_status">přesdílel(a)</string>
-
     <string name="xqt_item_reblogged_status">přesdílel(a)</string>
     <string name="xqt_item_mention_status">vás zmínil(a)</string>
-
     <string name="mastodon_visibility_public">Veřejný</string>
     <string name="mastodon_visibility_unlisted">Neuvedený</string>
     <string name="mastodon_visibility_private">Soukromý</string>
@@ -76,10 +68,8 @@
     <string name="mastodon_visibility_unlisted_description">Kdokoliv může tento příspěvek vidět, ale neobjeví se ve veřejné ose</string>
     <string name="mastodon_visibility_private_description">Pouze sledující mohou vidět tento příspěvek</string>
     <string name="mastodon_visibility_direct_description">Pouze zmínění uživatelé mohou vidět tento příspěvek</string>
-
     <string name="settings_notifications_title">Oznámení</string>
     <string name="settings_notifications_subtitle">Přizpůsobte si, jak vás Flare informuje</string>
-
     <string name="status_loadmore_end">Žádné další příspěvky</string>
     <string name="status_loadmore_error">Chyba při načítání dalších příspěvků</string>
     <string name="status_loadmore_error_retry">Zkusit znovu</string>
@@ -90,31 +80,24 @@
     <string name="login_expired">Platnost přihlášení vypršela</string>
     <string name="login_expired_message">Klepnutím se znovu přihlaste</string>
     <string name="login_expired_relogin">Znovu se přihlásit</string>
-
     <string name="permission_denied_title">Přístup odepřen</string>
     <string name="permission_denied_message">K přístupu na tuto stránku se znovu přihlaste</string>
-
     <string name="misskey_compose_local_only">Pouze místní</string>
     <string name="misskey_compose_local_only_description">Tento příspěvek mohou vidět pouze uživatelé na této instanci</string>
-
     <string name="misskey_item_action_renote">Renote</string>
     <string name="misskey_item_action_quote">Citovat</string>
-
     <string name="bluesky_notification_unknown_message">Neznámý typ oznámení %1$s</string>
     <string name="bluesky_notification_unknown_message2">Nahlaste prosím tento problém vývojáři.</string>
-
     <string name="blusky_item_action_repost">Přesdílet</string>
     <string name="blusky_item_action_quote">Citovat</string>
     <string name="blusky_item_action_report">Nahlásit</string>
     <string name="blusky_item_action_delete">Odstranit</string>
-
     <string name="mastodon_item_unbookmark">Odebrat ze záložek</string>
     <string name="mastodon_item_bookmark">Záložka</string>
     <string name="mastodon_item_delete">Odstranit</string>
     <string name="mastodon_item_report">Nahlásit</string>
     <string name="misskey_item_action_delete">Odstranit</string>
     <string name="misskey_item_action_report">Nahlásit</string>
-
     <string name="bookmark_remove">Odebrat záložku</string>
     <string name="bookmark_add">Přidat do záložek</string>
     <string name="like">To se mi líbí</string>
@@ -132,7 +115,6 @@
     <string name="share">Sdílet</string>
     <string name="fx_share">Sdílet přes FxEmbed</string>
     <string name="comment">Komentovat</string>
-
     <string name="user_report">Nahlásit</string>
     <string name="user_block">Blokovat</string>
     <string name="user_unblock">Odblokovat</string>
@@ -149,281 +131,194 @@
     <string name="translation_badge_failed">Překlad selhal</string>
     <string name="translation_retry">Zkusit překlad znovu</string>
     <string name="translation_show_original">Zobrazit originál</string>
-
     <string name="date_format_year_month_day">dd. MMM yy</string>
     <string name="date_format_month_day">dd. MMM</string>
     <string name="date_format_full">dd. MMM yy HH:mm</string>
-
     <string name="vvo_notification_like">olajkoval(a) váš příspěvek</string>
-
     <string name="user_follow_edit_list">Přidat/Odebrat ze seznamu</string>
     <string name="list_empty">Žádné seznamy</string>
     <string name="list_error">Načítání seznamů selhalo</string>
-
     <string name="misskey_achievement_notes1_title">prostě si nastavuju msky</string>
     <string name="misskey_achievement_notes1_description">Zveřejněte svou první poznámku</string>
     <string name="misskey_achievement_notes1_flavor">Užijte si čas s Misskey!</string>
-
     <string name="misskey_achievement_notes10_title">Pár poznámek</string>
     <string name="misskey_achievement_notes10_description">Zveřejněte 10 poznámek</string>
-
     <string name="misskey_achievement_notes100_title">Hodně poznámek</string>
     <string name="misskey_achievement_notes100_description">Zveřejněte 100 poznámek</string>
-
     <string name="misskey_achievement_notes500_title">Zavalen poznámkami</string>
     <string name="misskey_achievement_notes500_description">Zveřejněte 500 poznámek</string>
-
     <string name="misskey_achievement_notes1000_title">Hora poznámek</string>
     <string name="misskey_achievement_notes1000_description">Zveřejněte 1 000 poznámek</string>
-
     <string name="misskey_achievement_notes5000_title">Přetékající poznámky</string>
     <string name="misskey_achievement_notes5000_description">Zveřejněte 5 000 poznámek</string>
-
     <string name="misskey_achievement_notes10000_title">Superpoznámka</string>
     <string name="misskey_achievement_notes10000_description">Zveřejněte 10 000 poznámek</string>
-
     <string name="misskey_achievement_notes20000_title">Potřebuju... víc... poznámek...</string>
     <string name="misskey_achievement_notes20000_description">Zveřejněte 20 000 poznámek</string>
-
     <string name="misskey_achievement_notes30000_title">Poznámky poznámky poznámky!</string>
     <string name="misskey_achievement_notes30000_description">Zveřejněte 30 000 poznámek</string>
-
     <string name="misskey_achievement_notes40000_title">Továrna na poznámky</string>
     <string name="misskey_achievement_notes40000_description">Zveřejněte 40 000 poznámek</string>
-
     <string name="misskey_achievement_notes50000_title">Planeta poznámek</string>
     <string name="misskey_achievement_notes50000_description">Zveřejněte 50 000 poznámek</string>
-
     <string name="misskey_achievement_notes60000_title">Kvasar poznámek</string>
     <string name="misskey_achievement_notes60000_description">Zveřejněte 60 000 poznámek</string>
-
     <string name="misskey_achievement_notes70000_title">Černá díra poznámek</string>
     <string name="misskey_achievement_notes70000_description">Zveřejněte 70 000 poznámek</string>
-
     <string name="misskey_achievement_notes80000_title">Galaxie poznámek</string>
     <string name="misskey_achievement_notes80000_description">Zveřejněte 80 000 poznámek</string>
-
     <string name="misskey_achievement_notes90000_title">Vesmír poznámek</string>
     <string name="misskey_achievement_notes90000_description">Zveřejněte 90 000 poznámek</string>
-
     <string name="misskey_achievement_notes100000_title">VŠECHNY VAŠE POZNÁMKY PATŘÍ NÁM</string>
     <string name="misskey_achievement_notes100000_description">Zveřejněte 100 000 poznámek</string>
     <string name="misskey_achievement_notes100000_flavor">Určitě toho máte hodně co říct.</string>
-
     <string name="misskey_achievement_login3_title">Začátečník I</string>
     <string name="misskey_achievement_login3_description">Přihlaste se celkem ve 3 dnech</string>
     <string name="misskey_achievement_login3_flavor">Ode dneška mi říkejte prostě Misskist</string>
-
     <string name="misskey_achievement_login7_title">Začátečník II</string>
     <string name="misskey_achievement_login7_description">Přihlaste se celkem v 7 dnech</string>
     <string name="misskey_achievement_login7_flavor">Už cítíte, že tomu přicházíte na kloub?</string>
-
     <string name="misskey_achievement_login15_title">Začátečník III</string>
     <string name="misskey_achievement_login15_description">Přihlaste se celkem v 15 dnech</string>
-
     <string name="misskey_achievement_login30_title">Misskist I</string>
     <string name="misskey_achievement_login30_description">Přihlaste se celkem ve 30 dnech</string>
-
     <string name="misskey_achievement_login60_title">Misskist II</string>
     <string name="misskey_achievement_login60_description">Přihlaste se celkem v 60 dnech</string>
-
     <string name="misskey_achievement_login100_title">Misskist III</string>
     <string name="misskey_achievement_login100_description">Přihlaste se celkem ve 100 dnech</string>
     <string name="misskey_achievement_login100_flavor">Násilný Misskist</string>
-
     <string name="misskey_achievement_login200_title">Pravidelný návštěvník I</string>
     <string name="misskey_achievement_login200_description">Přihlaste se celkem ve 200 dnech</string>
-
     <string name="misskey_achievement_login300_title">Pravidelný návštěvník II</string>
     <string name="misskey_achievement_login300_description">Přihlaste se celkem ve 300 dnech</string>
-
     <string name="misskey_achievement_login400_title">Pravidelný návštěvník III</string>
     <string name="misskey_achievement_login400_description">Přihlaste se celkem ve 400 dnech</string>
-
     <string name="misskey_achievement_login500_title">Expert I</string>
     <string name="misskey_achievement_login500_description">Přihlaste se celkem v 500 dnech</string>
     <string name="misskey_achievement_login500_flavor">Moji přátelé, často se říkalo, že mám rád poznámky</string>
-
     <string name="misskey_achievement_login600_title">Expert II</string>
     <string name="misskey_achievement_login600_description">Přihlaste se celkem v 600 dnech</string>
-
     <string name="misskey_achievement_login700_title">Expert III</string>
     <string name="misskey_achievement_login700_description">Přihlaste se celkem v 700 dnech</string>
-
     <string name="misskey_achievement_login800_title">Mistr poznámek I</string>
     <string name="misskey_achievement_login800_description">Přihlaste se celkem v 800 dnech</string>
-
     <string name="misskey_achievement_login900_title">Mistr poznámek II</string>
     <string name="misskey_achievement_login900_description">Přihlaste se celkem v 900 dnech</string>
-
     <string name="misskey_achievement_login1000_title">Mistr poznámek III</string>
     <string name="misskey_achievement_login1000_description">Přihlaste se celkem v 1 000 dnech</string>
     <string name="misskey_achievement_login1000_flavor">Děkujeme, že používáte Misskey!</string>
-
     <string name="misskey_achievement_note_clipped1_title">Musím... připnout...</string>
     <string name="misskey_achievement_note_clipped1_description">Připněte si svou první poznámku</string>
-
     <string name="misskey_achievement_note_favorited1_title">Pozorovatel hvězd</string>
     <string name="misskey_achievement_note_favorited1_description">Přidejte si svou první poznámku do oblíbených</string>
-
     <string name="misskey_achievement_my_note_favorited1_title">Hledání hvězd</string>
     <string name="misskey_achievement_my_note_favorited1_description">Nechte někoho jiného, aby si přidal vaši poznámku do oblíbených</string>
-
     <string name="misskey_achievement_profile_filled_title">Dobře připraven</string>
     <string name="misskey_achievement_profile_filled_description">Nastavte si svůj profil</string>
-
     <string name="misskey_achievement_marked_as_cat_title">Jsem kočka</string>
     <string name="misskey_achievement_marked_as_cat_description">Označte svůj účet jako kočku</string>
     <string name="misskey_achievement_marked_as_cat_flavor">Později ti dám jméno.</string>
-
     <string name="misskey_achievement_following1_title">Sledování prvního uživatele</string>
     <string name="misskey_achievement_following1_description">Začněte sledovat uživatele</string>
-
     <string name="misskey_achievement_following10_title">Držte krok... držte krok...</string>
     <string name="misskey_achievement_following10_description">Sledujte 10 uživatelů</string>
-
     <string name="misskey_achievement_following50_title">Hodně přátel</string>
     <string name="misskey_achievement_following50_description">Sledujte 50 účtů</string>
-
     <string name="misskey_achievement_following100_title">100 přátel</string>
     <string name="misskey_achievement_following100_description">Sledujte 100 účtů</string>
-
     <string name="misskey_achievement_following300_title">Přátelské přetížení</string>
     <string name="misskey_achievement_following300_description">Sledujte 300 účtů</string>
-
     <string name="misskey_achievement_followers1_title">První sledující</string>
     <string name="misskey_achievement_followers1_description">Získejte 1 sledujícího</string>
-
     <string name="misskey_achievement_followers10_title">Sledujte mě!</string>
     <string name="misskey_achievement_followers10_description">Získejte 10 sledujících</string>
-
     <string name="misskey_achievement_followers50_title">Přicházejí v davech</string>
     <string name="misskey_achievement_followers50_description">Získejte 50 sledujících</string>
-
     <string name="misskey_achievement_followers100_title">Populární</string>
     <string name="misskey_achievement_followers100_description">Získejte 100 sledujících</string>
-
     <string name="misskey_achievement_followers300_title">Tvořte prosím jednu řadu</string>
     <string name="misskey_achievement_followers300_description">Získejte 300 sledujících</string>
-
     <string name="misskey_achievement_followers500_title">Radiová věž</string>
     <string name="misskey_achievement_followers500_description">Získejte 500 sledujících</string>
-
     <string name="misskey_achievement_followers1000_title">Influencer</string>
     <string name="misskey_achievement_followers1000_description">Získejte 1 000 sledujících</string>
-
     <string name="misskey_achievement_collect_achievements30_title">Sběratel úspěchů</string>
     <string name="misskey_achievement_collect_achievements30_description">Získejte 30 úspěchů</string>
-
     <string name="misskey_achievement_view_achievements3min_title">Má rád úspěchy</string>
     <string name="misskey_achievement_view_achievements3min_description">Prohlížejte si svůj seznam úspěchů alespoň 3 minuty</string>
-
     <string name="misskey_achievement_i_love_misskey_title">Miluji Misskey</string>
     <string name="misskey_achievement_i_love_misskey_description">Zveřejněte \"I ❤ #Misskey\"</string>
     <string name="misskey_achievement_i_love_misskey_flavor">Vývojový tým Misskey si velmi váží vaší podpory!</string>
-
     <string name="misskey_achievement_found_treasure_title">Hledání pokladu</string>
     <string name="misskey_achievement_found_treasure_description">Našli jste skrytý poklad</string>
-
     <string name="misskey_achievement_client30min_title">Krátká přestávka</string>
     <string name="misskey_achievement_client30min_description">Mějte Misskey otevřené alespoň 30 minut</string>
-
     <string name="misskey_achievement_client60min_title">Žádné \"Miss\" v Misskey</string>
     <string name="misskey_achievement_client60min_description">Mějte Misskey otevřené alespoň 60 minut</string>
-
     <string name="misskey_achievement_note_deleted_within1min_title">To nevadí</string>
     <string name="misskey_achievement_note_deleted_within1min_description">Smažte poznámku do minuty od jejího zveřejnění</string>
-
     <string name="misskey_achievement_posted_at_late_night_title">Noční tvor</string>
     <string name="misskey_achievement_posted_at_late_night_description">Zveřejněte poznámku pozdě v noci</string>
     <string name="misskey_achievement_posted_at_late_night_flavor">Už je čas jít do postele.</string>
-
     <string name="misskey_achievement_posted_at_0min0sec_title">Mluvící hodiny</string>
     <string name="misskey_achievement_posted_at_0min0sec_description">Zveřejněte poznámku v 00:00</string>
     <string name="misskey_achievement_posted_at_0min0sec_flavor">Tik tik tik cink</string>
-
     <string name="misskey_achievement_self_quote_title">Autoreference</string>
     <string name="misskey_achievement_self_quote_description">Citujte svou vlastní poznámku</string>
-
     <string name="misskey_achievement_htl20npm_title">Proudící časová osa</string>
     <string name="misskey_achievement_htl20npm_description">Rychlost vaší domácí časové osy překročila 20 poznámek za minutu</string>
-
     <string name="misskey_achievement_view_instance_chart_title">Analytik</string>
     <string name="misskey_achievement_view_instance_chart_description">Zobrazte si grafy vaší instance</string>
-
     <string name="misskey_achievement_output_hello_world_on_scratchpad_title">Ahoj světe!</string>
     <string name="misskey_achievement_output_hello_world_on_scratchpad_description">Vypište \"hello world\" v Scratchpadu</string>
-
     <string name="misskey_achievement_open3windows_title">Víceokenní režim</string>
     <string name="misskey_achievement_open3windows_description">Mějte otevřená alespoň 3 okna najednou</string>
-
     <string name="misskey_achievement_drive_folder_circular_reference_title">Kruhová reference</string>
     <string name="misskey_achievement_drive_folder_circular_reference_description">Pokus o vytvoření rekurzivně vnořené složky v Drive</string>
-
     <string name="misskey_achievement_react_without_read_title">Opravdu jsi to četl?</string>
     <string name="misskey_achievement_react_without_read_description">Reagujte na poznámku delší než 100 znaků do 3 sekund od jejího zveřejnění</string>
-
     <string name="misskey_achievement_clicked_click_here_title">Klikněte zde</string>
     <string name="misskey_achievement_clicked_click_here_description">Klikli jste sem</string>
-
     <string name="misskey_achievement_just_plain_lucky_title">Prostě klikař</string>
     <string name="misskey_achievement_just_plain_lucky_description">Má šanci být získán s pravděpodobností 0,005 % každých 10 sekund</string>
-
     <string name="misskey_achievement_set_name_to_syuilo_title">Komplex božství</string>
     <string name="misskey_achievement_set_name_to_syuilo_description">Nastavte si jméno na \"syuilo\"</string>
-
     <string name="misskey_achievement_passed_since_account_created1_title">První výročí</string>
     <string name="misskey_achievement_passed_since_account_created1_description">Uplynul jeden rok od vytvoření vašeho účtu</string>
-
     <string name="misskey_achievement_passed_since_account_created2_title">Druhé výročí</string>
     <string name="misskey_achievement_passed_since_account_created2_description">Uplynuly dva roky od vytvoření vašeho účtu</string>
-
     <string name="misskey_achievement_passed_since_account_created3_title">Třetí výročí</string>
     <string name="misskey_achievement_passed_since_account_created3_description">Uplynuly tři roky od vytvoření vašeho účtu</string>
-
     <string name="misskey_achievement_logged_in_on_birthday_title">Všechno nejlepší k narozeninám</string>
     <string name="misskey_achievement_logged_in_on_birthday_description">Přihlaste se v den svých narozenin</string>
-
     <string name="misskey_achievement_logged_in_on_new_years_day_title">Šťastný nový rok!</string>
     <string name="misskey_achievement_logged_in_on_new_years_day_description">Přihlášen v první den roku</string>
     <string name="misskey_achievement_logged_in_on_new_years_day_flavor">Na další skvělý rok na této instanci</string>
-
     <string name="misskey_achievement_cookie_clicked_title">Hra, ve které klikáte na sušenky</string>
     <string name="misskey_achievement_cookie_clicked_description">Klikli jste na sušenku</string>
     <string name="misskey_achievement_cookie_clicked_flavor">Počkejte, jste na správné webové stránce?</string>
-
     <string name="misskey_achievement_brain_diver_title">Brain Diver</string>
     <string name="misskey_achievement_brain_diver_description">Zveřejněte odkaz na Brain Diver</string>
     <string name="misskey_achievement_brain_diver_flavor">Misskey-Misskey La-Tu-Ma</string>
-
     <string name="misskey_achievement_smash_test_notification_button_title">Testovací přetečení</string>
     <string name="misskey_achievement_smash_test_notification_button_description">Spouštějte test oznámení opakovaně v extrémně krátkém čase</string>
-
     <string name="misskey_achievement_tutorial_completed_title">Diplom ze základního kurzu Misskey</string>
     <string name="misskey_achievement_tutorial_completed_description">Průvodce dokončen</string>
-
     <string name="misskey_achievement_bubble_game_exploding_head_title">🤯</string>
     <string name="misskey_achievement_bubble_game_exploding_head_description">Největší objekt v bublinové hře</string>
-
     <string name="misskey_achievement_bubble_game_double_exploding_head_title">Dvojité🤯</string>
     <string name="misskey_achievement_bubble_game_double_exploding_head_description">Dva největší objekty v bublinové hře současně</string>
     <string name="misskey_achievement_bubble_game_double_exploding_head_flavor">Takhle můžete trochu naplnit krabičku na oběd 🤯 🤯.</string>
-
     <string name="vote">Hlasovat</string>
     <string name="poll_expired">Platnost ankety vypršela</string>
     <string name="poll_voted">Odhlasováno</string>
     <string name="poll_expired_at">Vypršelo v %1$s</string>
     <string name="user_send_message">Poslat přímou zprávu</string>
-
     <string name="profile_search_user_using_account">Najít %1$s v %2$s pomocí %3$s</string>
     <string name="profile_search_user_using_account_compat">Najít v %1$s</string>
-
     <string name="feeds_discover_feeds_created_by">Vytvořil(a) %1$s</string>
-
     <string name="notification_item_accept_follow_request">Přijmout</string>
     <string name="notification_item_reject_follow_request">Odmítnout</string>
-
-
     <string name="dm_list_empty">Žádné přímé zprávy</string>
     <string name="dm_list_error">Načítání přímých zpráv selhalo</string>
     <string name="send">Odeslat</string>
@@ -433,7 +328,6 @@
     <string name="dm_sending">Odesílání</string>
     <string name="dm_leave">Opustit konverzaci</string>
     <string name="dm_to_profile">Zobrazit profil</string>
-
     <string name="settings_side_panel_empty">Ve výchozím nastavení boční panel následuje platformu aktuálního účtu.</string>
     <string name="tab_settings_add">Přidat</string>
     <string name="tab_settings_drag">Přetáhnout</string>
@@ -442,16 +336,13 @@
     <string name="tab_settings_default">Výchozí</string>
     <string name="tab_settings_list">Seznam</string>
     <string name="tab_settings_feed">Zdroje</string>
-
     <string name="list_add">Přidat seznam</string>
     <string name="list_edit">Upravit seznam</string>
     <string name="list_delete">Smazat seznam</string>
-
     <string name="rss_sources_title">Odběry</string>
     <string name="add_rss_source">Přidat odběr</string>
     <string name="edit_rss_source">Upravit odběr</string>
     <string name="delete_rss_source">Smazat odběr</string>
-
     <string name="rss_sources_title_label">Název</string>
     <string name="rss_sources_url_label">URL</string>
     <string name="rss_title">Odběry</string>
@@ -459,7 +350,6 @@
     <string name="mastodon_trending_statuses">Trendující statusy</string>
     <string name="mastodon_federated_timeline">Federovaná osa</string>
     <string name="mastodon_local_timeline">Místní osa</string>
-
     <string name="service_select_welcome_title">Vítejte ve Flare</string>
     <string name="service_select_welcome_message">Zadejte server a začněte.</string>
     <string name="service_select_welcome_hint">Flare podporuje Mastodon, Misskey, Bluesky, Nostr a X.</string>
@@ -493,7 +383,6 @@
     <string name="service_select_compatibility_warning">Tento server používá %1$s, Flare poběží v režimu kompatibility. Některé funkce nemusí fungovat správně.</string>
     <string name="login_agreement">Přihlášením souhlasíte s %1$s.</string>
     <string name="eula_privacy_policy">EULA a Zásady ochrany osobních údajů</string>
-
     <string name="home_tab_home_title">Domů</string>
     <string name="home_tab_notifications_title">Oznámení</string>
     <string name="home_tab_me_title">Já</string>
@@ -519,6 +408,10 @@
     <string name="settings_about_source_code">Zdrojový kód</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Připojte se k naší skupině na Telegramu</string>
+    <string name="settings_about_discord" translatable="false">Discord</string>
+    <string name="settings_about_discord_description">Připojte se k našemu Discord serveru</string>
+    <string name="settings_about_line" translatable="false">Line</string>
+    <string name="settings_about_line_description">Připojte se k naší skupině na Line</string>
     <string name="settings_about_localization">Crowdin</string>
     <string name="settings_about_localization_description">Pomozte nám přeložit Flare</string>
     <string name="settings_privacy_policy">Zásady ochrany osobních údajů</string>

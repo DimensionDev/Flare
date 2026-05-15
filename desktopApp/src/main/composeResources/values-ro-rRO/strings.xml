@@ -1,13 +1,12 @@
 <resources>
+    <string name="app_name" translatable="false">Flare</string>
     <string name="ok">OK</string>
     <string name="cancel">Anulează</string>
     <string name="delete">Șterge</string>
     <string name="refresh">Reîmprospătează</string>
-
     <string name="home_compose">Compune</string>
     <string name="home_login">Autentificare</string>
     <string name="home_settings">Setări</string>
-
     <string name="home_tab_home_title">Acasă</string>
     <string name="home_tab_notifications_title">Notificări</string>
     <string name="home_tab_me_title">Eu</string>
@@ -26,47 +25,38 @@
         <item quantity="few">%1$d postări noi</item>
         <item quantity="other">%1$d de postări noi</item>
     </plurals>
-
     <string name="navigate_back">Înapoi</string>
     <string name="service_select_instance_input_placeholder">URL Instanță</string>
     <string name="service_select_next_button">Înainte</string>
     <string name="service_select_empty_message">Nu s-au găsit instanțe</string>
-
     <string name="service_select_welcome_title">Bun venit la Flare</string>
     <string name="service_select_welcome_message">Flare este un client de social media pentru %1$s.\nAlege un serviciu pentru a te conecta și a începe.</string>
     <string name="mastodon_login_verify_message">Se verifică datele de autentificare…</string>
-
     <string name="profile_tab_timeline">Postări</string>
     <string name="profile_tab_timeline_with_reply">Postări și răspunsuri</string>
     <string name="profile_tab_likes">Aprecieri</string>
     <string name="profile_tab_media">Media</string>
-
     <string name="report_title">Raportează</string>
     <string name="report_description">Ce este în neregulă cu această postare?</string>
-
     <string name="report_reason_spam_title">Spam</string>
     <string name="report_reason_violation_title">Ilegal sau urgent</string>
     <string name="report_reason_misleading_title">Înșelător</string>
     <string name="report_reason_sexual_title">Conținut sexual nedorit</string>
     <string name="report_reason_rude_title">Comportament antisocial</string>
     <string name="report_reason_other_title">Altele</string>
-
     <string name="report_reason_spam_description">Mențiuni sau răspunsuri excesive</string>
     <string name="report_reason_violation_description">Încălcări clare ale legii sau ale termenilor de utilizare</string>
     <string name="report_reason_misleading_description">Această postare este înșelătoare</string>
     <string name="report_reason_sexual_description">Nuditate sau pornografie neetichetată ca atare</string>
     <string name="report_reason_rude_description">Hărțuire, trolling sau intoleranță</string>
     <string name="report_reason_other_description">O problemă care nu este inclusă în aceste opțiuni</string>
-
     <string name="delete_status_title">Șterge</string>
     <string name="delete_status_message">Ștergi această postare?</string>
     <string name="compose_close_confirm_title">Salvezi ciorna?</string>
     <string name="compose_close_confirm_message">Ai modificări nesalvate. Dorești să salvezi ca ciornă înainte de închidere?</string>
     <string name="compose_close_discard">Renunță</string>
-
     <string name="mastodon_report_title">Raportează</string>
     <string name="mastodon_report_description">Sigur dorești să raportezi acest conținut?</string>
-
     <string name="bookmark_remove">Elimină marcajul</string>
     <string name="bookmark_add">Adaugă marcaj</string>
     <string name="like">Apreciază</string>
@@ -84,7 +74,6 @@
     <string name="status_detail_repost">Repostează</string>
     <string name="emoji_picker_recent">Recente</string>
     <string name="emoji_picker_search">Caută</string>
-
     <string name="media_show_thumbnail_list">Arată lista de miniaturi</string>
     <string name="media_hide_thumbnail_list">Ascunde lista de miniaturi</string>
     <string name="media_save">Salvează</string>
@@ -94,7 +83,6 @@
     <string name="status_share_image">Distribuie captura de ecran</string>
     <string name="status_share_via_fxembed">Distribuie prin FxEmbed</string>
     <string name="status_share_via_fixvx">Distribuie prin Fixvx</string>
-
     <string name="list_add">Adaugă listă</string>
     <string name="list_edit">Editează lista</string>
     <string name="list_delete">Șterge lista</string>
@@ -118,25 +106,20 @@
     <string name="edit_list_member_remove">Elimină</string>
     <string name="list_create_description">Descriere listă</string>
     <string name="list_create_description_hint">Descriere listă</string>
-
     <string name="feeds_my_feeds_title">Fluxurile mele</string>
     <string name="feeds_discover_feeds_title">Descoperă fluxuri</string>
     <string name="feeds_discover_feeds_created_by">Creat de %1$s</string>
     <string name="feeds_unsubscribe">Dezabonare</string>
     <string name="feeds_subscribe">Abonare</string>
-
     <string name="social_title">Social</string>
-
     <string name="antenna_title">Antene</string>
     <string name="mixed_timeline_title">Mixt</string>
-
     <string name="bluesky_login_username">Nume utilizator</string>
     <string name="bluesky_login_password">Parolă</string>
     <string name="bluesky_login_2fa">Token 2FA</string>
     <string name="bluesky_login_oauth_button">Autentificare cu OAuth</string>
     <string name="bluesky_login_use_password_button">Folosește parola</string>
     <string name="bluesky_login_oauth_hint">Bluesky OAuth ar putea fi încă instabil. Dacă întâmpini probleme, folosește autentificarea cu parolă.</string>
-
     <string name="login_expired">Sesiunea de autentificare a expirat</string>
     <string name="login_expired_message">Apasă pentru a te autentifica din nou</string>
     <string name="login_expired_relogin">Autentificare din nou</string>
@@ -145,7 +128,6 @@
     <string name="add_account">Adaugă cont</string>
     <string name="remove_account">Elimină cont</string>
     <string name="settings_accounts_remove_confirm">Sigur dorești să elimini contul %1$s de pe acest dispozitiv?</string>
-
     <string name="settings_accounts_title">Conturi</string>
     <string name="settings_appearance_title">Aspect</string>
     <string name="settings_status_appearance_title">Aspect postare</string>
@@ -226,7 +208,6 @@
     <string name="settings_ai_config_translate_provider_libretranslate">LibreTranslate</string>
     <string name="settings_ai_config_translate_provider_libretranslate_base_url">URL de bază LibreTranslate</string>
     <string name="settings_ai_config_translate_provider_libretranslate_api_key">Cheie API LibreTranslate</string>
-
     <string name="settings_translation_title">Traducere</string>
     <string name="settings_translation_description">Alege serviciile de traducere și comportamentul de traducere automată</string>
     <string name="settings_translation_auto_excluded_languages">Limbi de omis pentru traducerea automată</string>
@@ -235,7 +216,6 @@
     <string name="settings_translation_ai_test_action">Testează traducerea</string>
     <string name="settings_translation_ai_test_original">Text mostră</string>
     <string name="settings_translation_ai_test_result">Text tradus</string>
-
     <string name="settings_appearance_generic">Generic</string>
     <string name="settings_appearance_show_compose_in_home_timeline">Arată caseta de compunere în cronologia principală</string>
     <string name="settings_appearance_show_compose_in_home_timeline_description">Arată caseta de compunere în partea de sus a cronologiei Acasă</string>
@@ -294,23 +274,19 @@
     <string name="settings_appearance_post_action_style_stretch">Întinse (stretch)</string>
     <string name="settings_appearance_absolute_timestamp">Marcaj temporal absolut</string>
     <string name="settings_appearance_absolute_timestamp_description">Arată marcajele temporale exacte pe postări</string>
-
     <string name="settings_appearance_show_platform_logo">Arată pictogramele platformei sursă</string>
     <string name="settings_appearance_show_platform_logo_description">Arată de pe ce platformă provine fiecare postare</string>
-
     <string name="settings_about_source_code">Cod sursă</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Alătură-te grupului nostru de Telegram</string>
+    <string name="settings_about_discord" translatable="false">Discord</string>
     <string name="settings_about_discord_description">Alătură-te serverului nostru de Discord</string>
     <string name="settings_about_localization">Crowdin</string>
     <string name="settings_about_localization_description">Ajută-ne să traducem Flare</string>
     <string name="settings_privacy_policy">Politica de confidențialitate</string>
-
     <string name="users">Utilizatori</string>
     <string name="hashtags">Hashtag-uri</string>
     <string name="statues">Postări</string>
-
-
     <string name="compose_title">Compune</string>
     <string name="compose_hint">Ce se întâmplă?</string>
     <string name="compose_poll_option_hint">Opțiunea %1$s</string>
@@ -331,7 +307,6 @@
     <string name="compose_notification_progress">Se trimite postarea</string>
     <string name="compose_notification_success">Postare trimisă</string>
     <string name="compose_notification_error">Eșec la trimiterea postării</string>
-
     <string name="misskey_visibility_public">Public</string>
     <string name="misskey_visibility_home">Acasă</string>
     <string name="misskey_visibility_followers">Urmăritori</string>
@@ -340,13 +315,10 @@
     <string name="misskey_visibility_home_description">Doar utilizatorii de pe această instanță pot vedea această postare</string>
     <string name="misskey_visibility_followers_description">Doar urmăritorii pot vedea această postare</string>
     <string name="misskey_visibility_specified_description">Doar utilizatorii menționați pot vedea această postare</string>
-
-
     <string name="rss_sources_title">Abonamente</string>
     <string name="add_rss_source">Adaugă abonament</string>
     <string name="edit_rss_source">Editează abonamentul</string>
     <string name="delete_rss_source">Șterge abonamentul</string>
-
     <string name="rss_sources_title_label">Titlu</string>
     <string name="rss_sources_url_label">URL</string>
     <string name="rss_title">Abonamente</string>
@@ -369,7 +341,6 @@
     <string name="mastodon_federated_timeline">Cronologie federată</string>
     <string name="mastodon_local_timeline">Cronologie locală</string>
     <string name="subscription_url_hint">Lipește un URL pentru fluxul RSS sau un URL al unei instanțe Mastodon</string>
-
     <string name="tab_settings_add">Adaugă</string>
     <string name="tab_settings_drag">Trage</string>
     <string name="tab_settings_edit">Editează</string>
@@ -377,9 +348,7 @@
     <string name="tab_settings_default">Implicit</string>
     <string name="tab_settings_list">Listă</string>
     <string name="tab_settings_feed">Fluxuri</string>
-
     <string name="notification_login_expired">Autentificare expirată pentru %1$s</string>
-
     <string name="dm_list_empty">Niciun mesaj direct</string>
     <string name="dm_list_error">Eșec la încărcarea mesajelor directe</string>
     <string name="send">Trimite</string>
@@ -412,7 +381,6 @@
     <string name="tab_settings_filter_text_only">Doar text</string>
     <string name="tab_settings_filter_image">Imagini</string>
     <string name="tab_settings_filter_video">Videoclipuri</string>
-
     <string name="edit_tab_title">Editează fila</string>
     <string name="edit_tab_name">Nume</string>
     <string name="edit_tab_name_placeholder">Numele filei</string>
@@ -420,16 +388,12 @@
     <string name="edit_tab_with_avatar">Cu avatar</string>
     <string name="edit_tab_enabled">Arată în cronologiile mixte</string>
     <string name="edit_tab_enabled_description">Include această cronologie atunci când este utilizată într-o cronologie mixtă sau într-un grup.</string>
-
     <string name="edit">Editează</string>
-
     <string name="local_history_search_placeholder">Caută în postări și profiluri din cache</string>
     <string name="local_history_search_status_title">Postări</string>
     <string name="local_history_search_user_title">Utilizator</string>
-
     <string name="settings_storage_clear_image_cache">Șterge cache-ul de imagini</string>
     <string name="settings_storage_clear_image_cache_description">Elimină %1$s MB de imagini stocate în cache</string>
-
     <string name="settings_storage_clear_database">Șterge baza de date din cache</string>
     <string name="settings_storage_clear_database_description">Elimină %1$s utilizatori și %2$s postări stocate în cache</string>
     <string name="settings_storage_app_log">Loguri aplicație</string>
@@ -446,50 +410,39 @@
     <string name="draft_box_retry">Reîncearcă</string>
     <string name="draft_box_edit">Editează</string>
     <string name="draft_box_send">Trimite</string>
-
     <string name="copied_to_clipboard">Copiat în clipboard</string>
-
     <string name="opml_import">Importă din OPML</string>
     <string name="opml_export">Exportă în OPML</string>
     <string name="save_completed">Export complet</string>
-
     <string name="deeplink_account_selection_title">Selectează contul</string>
     <string name="deeplink_account_selection_message">Selectează un cont pentru a deschide acest link</string>
     <string name="deeplink_account_selection_browser">Deschide în browser</string>
-
     <string name="block_user_title">Blochează utilizatorul</string>
     <string name="block_user_description">Sigur dorești să blochezi acest utilizator?</string>
     <string name="unblock_user_title">Deblochează utilizatorul</string>
     <string name="unblock_user_description">Sigur dorești să deblochezi acest utilizator?</string>
-
     <string name="mute_user_title">Pune pe mut utilizatorul</string>
     <string name="mute_user_description">Sigur dorești să pui pe mut acest utilizator?</string>
     <string name="unmute_user_title">Anulează mutul</string>
     <string name="unmute_user_description">Sigur dorești să anulezi mutul pentru acest utilizator?</string>
-
     <string name="report_user_title">Raportează utilizatorul</string>
     <string name="report_user_description">Sigur dorești să raportezi acest utilizator?</string>
-
     <string name="settings_storage_export_data">Exportă datele</string>
     <string name="settings_storage_export_data_description">Exportă toate datele, inclusiv conturile și datele de autentificare. Păstrează fișierul în siguranță.</string>
     <string name="settings_storage_import_data">Importă datele</string>
     <string name="settings_storage_import_data_description">Importă datele dintr-un fișier de backup. Înregistrările existente cu ID-uri identice vor fi înlocuite.</string>
     <string name="action_export">Exportă</string>
     <string name="action_import">Importă</string>
-
     <string name="save_error">Export eșuat</string>
     <string name="import_completed">Import complet</string>
     <string name="import_error">Import eșuat</string>
     <string name="import_confirmation_title">Confirmă importul</string>
     <string name="import_confirmation_message">Aceasta va importa datele din fișierul selectat. Înregistrările existente cu ID-uri identice vor fi înlocuite. Continui?</string>
-
     <string name="channel_title">Canal</string>
-
     <string name="misskey_channel_tab_following">Urmăriți</string>
     <string name="misskey_channel_tab_favorites">Favorite</string>
     <string name="misskey_channel_tab_owned">Proprii</string>
     <string name="misskey_channel_tab_featured">Recomandate</string>
-
     <string name="media_save_success">Salvat în Descărcări</string>
     <string name="media_save_fail">Eșec la salvare</string>
 </resources>

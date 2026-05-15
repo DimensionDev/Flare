@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -14,15 +15,19 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -39,11 +44,13 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.common.items
 import dev.dimension.flare.ui.component.AvatarComponent
+import dev.dimension.flare.ui.component.FlareDropdownMenu
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.SearchBar
 import dev.dimension.flare.ui.component.SearchBarState
 import dev.dimension.flare.ui.component.placeholder
+import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.component.searchBarPresenter
 import dev.dimension.flare.ui.component.searchContent
 import dev.dimension.flare.ui.component.status.AdaptiveCard
@@ -56,6 +63,7 @@ import dev.dimension.flare.ui.presenter.home.DiscoverPresenter
 import dev.dimension.flare.ui.presenter.home.DiscoverState
 import dev.dimension.flare.ui.presenter.home.SearchPresenter
 import dev.dimension.flare.ui.presenter.invoke
+import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 
@@ -64,6 +72,7 @@ import moe.tlaster.precompose.molecule.producePresenter
 internal fun DiscoverScreen(onUserClick: (AccountType, MicroBlogKey) -> Unit) {
     val state by producePresenter("discover") { discoverPresenter() }
     val lazyListState = rememberLazyStaggeredGridState()
+    val isBigScreen = isBigScreen()
     RegisterTabCallback(
         lazyListState = lazyListState,
         onRefresh = {
@@ -75,17 +84,64 @@ internal fun DiscoverScreen(onUserClick: (AccountType, MicroBlogKey) -> Unit) {
     }
     FlareScaffold(
         topBar = {
-            Box(
+            Row(
                 modifier =
                     Modifier
-                        .fillMaxWidth(),
-                contentAlignment = Alignment.Center,
+                        .fillMaxWidth()
+                        .padding(horizontal = screenHorizontalPadding),
+                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 SearchBar(
                     state = state,
                     onSearch = {
                         state.commitSearch(it)
                     },
+                    trailingIcon =
+                        state.selectedAccount?.let { account ->
+                            if (!isBigScreen) {
+                                {
+                                    state.accounts.onSuccess { accounts ->
+                                        var showMenu by remember { mutableStateOf(false) }
+                                        IconButton(
+                                            onClick = {
+                                                if (accounts.size > 1) {
+                                                    showMenu = true
+                                                }
+                                            },
+                                        ) {
+                                            AvatarComponent(
+                                                data = account.avatar,
+                                            )
+                                        }
+                                        FlareDropdownMenu(
+                                            expanded = showMenu,
+                                            onDismissRequest = { showMenu = false },
+                                        ) {
+                                            accounts.forEach { profile ->
+                                                DropdownMenuItem(
+                                                    text = {
+                                                        Text(profile.handle.canonical)
+                                                    },
+                                                    leadingIcon = {
+                                                        AvatarComponent(
+                                                            data = profile.avatar,
+                                                            size = 18.dp,
+                                                        )
+                                                    },
+                                                    onClick = {
+                                                        state.setAccount(profile)
+                                                        showMenu = false
+                                                    },
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            } else {
+                                null
+                            }
+                        },
                 )
             }
         },
@@ -103,31 +159,33 @@ internal fun DiscoverScreen(onUserClick: (AccountType, MicroBlogKey) -> Unit) {
                     contentPadding = contentPadding,
                     forceCardMode = true,
                 ) {
-                    state.accounts.onSuccess { accounts ->
-                        if (accounts.size > 1) {
-                            item(
-                                span = StaggeredGridItemSpan.FullLine,
-                            ) {
-                                LazyRow(
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                    modifier = Modifier.padding(bottom = 8.dp),
+                    if (isBigScreen) {
+                        state.accounts.onSuccess { accounts ->
+                            if (accounts.size > 1) {
+                                item(
+                                    span = StaggeredGridItemSpan.FullLine,
                                 ) {
-                                    items(accounts) { profile ->
-                                        FilterChip(
-                                            selected = state.selectedAccount?.key == profile.key,
-                                            onClick = {
-                                                state.setAccount(profile)
-                                            },
-                                            label = {
-                                                Text(profile.handle.canonical)
-                                            },
-                                            leadingIcon = {
-                                                AvatarComponent(
-                                                    data = profile.avatar,
-                                                    size = 18.dp,
-                                                )
-                                            },
-                                        )
+                                    LazyRow(
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                        modifier = Modifier.padding(bottom = 8.dp),
+                                    ) {
+                                        items(accounts) { profile ->
+                                            FilterChip(
+                                                selected = state.selectedAccount?.key == profile.key,
+                                                onClick = {
+                                                    state.setAccount(profile)
+                                                },
+                                                label = {
+                                                    Text(profile.handle.canonical)
+                                                },
+                                                leadingIcon = {
+                                                    AvatarComponent(
+                                                        data = profile.avatar,
+                                                        size = 18.dp,
+                                                    )
+                                                },
+                                            )
+                                        }
                                     }
                                 }
                             }

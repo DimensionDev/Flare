@@ -103,7 +103,7 @@ private fun List<GetPostThreadV2ThreadItem>.renderThread(accountKey: MicroBlogKe
         }
     }.forEach { (depth, post) ->
         while (stack.lastOrNull()?.first?.let { it >= depth } == true) {
-            stack.removeLast()
+            stack.removeAt(stack.lastIndex)
         }
         val parents =
             when {

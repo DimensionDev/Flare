@@ -1,345 +1,530 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="delete">Изабери</string>
-    <string name="done">Завршено</string>
-    <string name="cancel">Отказати</string>
-    <string name="ok">ОК</string>
-    <string name="profile_header_following_count">%1$s Следећи</string>
-    <string name="profile_header_fans_count">%1$s Фанови</string>
-    <string name="profile_header_button_follow">Следите</string>
-    <string name="profile_header_button_following">Пратим</string>
-    <string name="profile_header_button_requested">Захтевано</string>
-    <string name="profile_header_button_blocked">Блокирано</string>
-    <string name="profile_header_button_is_fans">Слидујете вам</string>
-    <string name="mastodon_notification_item_followed_you">пратио вас је</string>
-    <string name="mastodon_notification_item_favourited_your_status">додали у омиљене</string>
-    <string name="mastodon_notification_item_reblogged_your_status">делили</string>
-    <string name="mastodon_notification_item_poll_ended">Анкета у којој сте учествовали је завршена</string>
-    <string name="mastodon_notification_item_mentioned_you">поменули вас</string>
-    <string name="mastodon_notification_item_requested_follow">захтев за праћење вас</string>
-    <string name="mastodon_notification_item_updated_status">ажурирао је тут</string>
-    <string name="mastodon_item_show_more">Прикажи више</string>
-    <string name="mastodon_item_show_less">Прикажи мање</string>
-    <string name="mastodon_item_pinned">Прикачени туд</string>
-    <string name="bluesky_notification_item_followed_you">пратио вас је</string>
-    <string name="bluesky_notification_item_favourited_your_status">додали у омиљене</string>
-    <string name="bluesky_notification_item_reblogged_your_status">делили</string>
-    <string name="bluesky_notification_item_poll_ended">Анкета у којој сте учествовали је завршена</string>
-    <string name="bluesky_notification_item_mentioned_you">поменули вас</string>
-    <string name="bluesky_item_reblogged_status">попустио тут</string>
-    <string name="bluesky_notification_item_replied_to_you">одговорио вам</string>
-    <string name="bluesky_notification_item_quoted_your_status">цитирао</string>
-    <string name="bluesky_notification_item_starterpack_joined">Starterpack се придружио</string>
-    <string name="bluesky_notification_item_unKnown">Непознато</string>
-    <string name="bluesky_notification_item_pin">Прикачено</string>
-    <string name="misskey_notification_item_mentioned_you">поменули вас</string>
-    <string name="misskey_notification_item_replied_to_you">одговорио вам</string>
-    <string name="misskey_notification_item_reposted_your_status">препостовано</string>
-    <string name="misskey_notification_item_quoted_your_status">цитирао</string>
-    <string name="misskey_notification_item_poll_ended">Анкета у којој сте учествовали је завршена</string>
-    <string name="misskey_notification_item_follow_request_accepted">прихватио ваш захтев за праћење</string>
-    <string name="misskey_notification_item_achievement_earned">Зарадио сте достигнуће: %1$s\n%2$s</string>
-    <string name="misskey_notification_item_app">Апликација</string>
-    <string name="misskey_notification_item_followed_you">пратио вас је</string>
-    <string name="misskey_notification_item_requested_follow">захтевао праћење вас</string>
-    <string name="misskey_notification_unknwon">непозната обавештење %1$s</string>
-    <string name="misskey_item_reblogged_status">попустио тут</string>
-    <string name="xqt_item_reblogged_status">ретвитовао</string>
-    <string name="xqt_item_mention_status">помена вас</string>
-    <string name="mastodon_visibility_public">Јавни</string>
-    <string name="mastodon_visibility_unlisted">Непријављено</string>
-    <string name="mastodon_visibility_private">Приватно</string>
-    <string name="mastodon_visibility_direct">Директно</string>
-    <string name="settings_notifications_title">Обавештења</string>
-    <string name="settings_notifications_subtitle">Прилагодите како Flare вас обавештава</string>
-    <string name="status_loadmore_error_retry">Поновите</string>
-    <string name="status_empty">Ништа за видети овде</string>
-    <string name="status_sensitive_media">Сензитивни медији</string>
-    <string name="show_media">Прикажи медије</string>
-    <string name="login_expired">Сесија пријаве је истекла</string>
-    <string name="login_expired_message">Кликните да се поново пријавите</string>
-    <string name="login_expired_relogin">Поновна пријава</string>
-    <string name="misskey_compose_local_only">Само локално</string>
-    <string name="misskey_item_action_renote">Понови</string>
-    <string name="misskey_item_action_quote">Цитат</string>
-    <string name="bluesky_notification_unknown_message">непозnata обавештење %1$s</string>
-    <string name="bluesky_notification_unknown_message2">Молимо вас да пријавите ово питање програмеру.</string>
-    <string name="blusky_item_action_repost">Поново</string>
-    <string name="blusky_item_action_quote">Цитат</string>
-    <string name="blusky_item_action_report">Пријави</string>
-    <string name="blusky_item_action_delete">Изабери</string>
-    <string name="mastodon_item_unbookmark">Уклоните обележавање</string>
-    <string name="mastodon_item_bookmark">Додајте обележавање</string>
-    <string name="mastodon_item_delete">Изабери</string>
-    <string name="mastodon_item_report">Пријави</string>
-    <string name="misskey_item_action_delete">Изабери</string>
-    <string name="misskey_item_action_report">Пријави</string>
-    <string name="bookmark_remove">Уклоните обележавање</string>
-    <string name="bookmark_add">Додајте обележавање</string>
-    <string name="like">Лајк</string>
-    <string name="unlike">Не свиђа ми се</string>
-    <string name="more">Више</string>
-    <string name="quote">Цитат</string>
-    <string name="reaction_add">Додајте реакцију</string>
-    <string name="reaction_remove">Уклоните реакцију</string>
-    <string name="reply">Одговори</string>
-    <string name="report">Пријави</string>
-    <string name="retweet">Поново</string>
-    <string name="retweet_remove">Уклоните ретвит</string>
-    <string name="share">Делите</string>
-    <string name="comment">Коментар</string>
-    <string name="user_report">Пријави</string>
-    <string name="user_block">блокирати</string>
-    <string name="user_unblock">одблокирати</string>
-    <string name="user_mute"> mute</string>
-    <string name="user_unmute">опозови</string>
-    <string name="user_mute_with_parameter">Мутуј %1$s</string>
-    <string name="user_block_with_parameter">Блокирај %1$s</string>
-    <string name="mastodon_item_content_warning">Упозорење на садржај</string>
-    <string name="reply_to">Одговори на %1$s</string>
-    <string name="date_format_year_month_day">dd MMM yy</string>
-    <string name="date_format_month_day">dd MMM</string>
-    <string name="date_format_full">dd MMM yy HH:mm</string>
-    <string name="vvo_notification_like">Свиђао се ваш статус</string>
-    <string name="user_follow_edit_list">Додај/Уклони из списка</string>
-    <string name="list_empty">Нема спискова</string>
-    <string name="list_error">Непосредан учитани спискова</string>
-    <string name="misskey_achievement_notes1_title">управо подешавам свој msky</string>
-    <string name="misskey_achievement_notes1_description">Објавите своју прву белешку</string>
-    <string name="misskey_achievement_notes1_flavor">Имајте добар провод са Misskey!</string>
-    <string name="misskey_achievement_notes10_title">Неки записи</string>
-    <string name="misskey_achievement_notes10_description">Објавите 10 белешки</string>
-    <string name="misskey_achievement_notes100_title">Положање белешки</string>
-    <string name="misskey_achievement_notes100_description">Објавите 100 белешки</string>
-    <string name="misskey_achievement_notes500_title">Покривене белешке</string>
-    <string name="misskey_achievement_notes500_description">Објавите 500 белешки</string>
-    <string name="misskey_achievement_notes1000_title">Гора белешки</string>
-    <string name="misskey_achievement_notes1000_description">Објавите 1.000 белешки</string>
-    <string name="misskey_achievement_notes5000_title">Додатне белешке</string>
-    <string name="misskey_achievement_notes5000_description">Објавите 5.000 белешки</string>
-    <string name="misskey_achievement_notes10000_title">Супернота</string>
-    <string name="misskey_achievement_notes10000_description">Објавите 10.000 белешки</string>
-    <string name="misskey_achievement_notes20000_title">Треба... више... белешке...</string>
-    <string name="misskey_achievement_notes20000_description">Објавите 20.000 белешки</string>
-    <string name="misskey_achievement_notes30000_title">Белешке белешке белешке!</string>
-    <string name="misskey_achievement_notes30000_description">Објавите 30.000 белешки</string>
-    <string name="misskey_achievement_notes40000_title">Фабрика белешки</string>
-    <string name="misskey_achievement_notes40000_description">Објавите 40.000 белешки</string>
-    <string name="misskey_achievement_notes50000_title">Планета белешки</string>
-    <string name="misskey_achievement_notes50000_description">Објавите 50.000 белешки</string>
-    <string name="misskey_achievement_notes60000_title">Квазар белешки</string>
-    <string name="misskey_achievement_notes60000_description">Објавите 60.000 белешки</string>
-    <string name="misskey_achievement_notes70000_title">Црна рупа белешки</string>
-    <string name="misskey_achievement_notes70000_description">Објавите 70.000 белешки</string>
-    <string name="misskey_achievement_notes80000_title">Галаксија белешки</string>
-    <string name="misskey_achievement_notes80000_description">Објавите 80.000 белешки</string>
-    <string name="misskey_achievement_notes90000_title">Свемир белешки</string>
-    <string name="misskey_achievement_notes90000_description">Објавите 90.000 белешки</string>
-    <string name="misskey_achievement_notes100000_title">СВИ ВАШИ ЗАПИСИ ПРИПАЖУ НАМА</string>
-    <string name="misskey_achievement_notes100000_description">Објавите 100.000 белешки</string>
-    <string name="misskey_achievement_notes100000_flavor">Наравно имате доста да кажете.</string>
-    <string name="misskey_achievement_login3_title">Почетник I</string>
-    <string name="misskey_achievement_login3_description">Пријавите се укупно 3 дана</string>
-    <string name="misskey_achievement_login3_flavor">Почевши од данас, зови ме Misskist</string>
-    <string name="misskey_achievement_login7_title">Почетник II</string>
-    <string name="misskey_achievement_login7_description">Пријавите се укупно 7 дана</string>
-    <string name="misskey_achievement_login7_flavor">Осећате ли се као да сте схватили ствари?</string>
-    <string name="misskey_achievement_login15_title">Почетник III</string>
-    <string name="misskey_achievement_login15_description">Пријавите се укупно 15 дана</string>
+    <string name="app_name" translatable="false">Flare</string>
+    <string name="delete">Obriši</string>
+    <string name="done">Gotovo</string>
+    <string name="cancel">Otkaži</string>
+    <string name="ok">U redu</string>
+
+    <string name="profile_header_following_count">%1$s Prati</string>
+    <string name="profile_header_fans_count">%1$s Pratioci</string>
+    <string name="profile_header_toots_count">%1$s Objave</string>
+    <string name="profile_misskey_header_status_count">%1$s Objave</string>
+
+    <string name="profile_header_button_follow">Prati</string>
+    <string name="profile_header_button_following">Pratite</string>
+    <string name="profile_header_button_requested">Poslat zahtev</string>
+    <string name="profile_header_button_blocked">Blokirano</string>
+    <string name="profile_header_button_is_fans">Prati vas</string>
+
+    <string name="mastodon_notification_item_followed_you">vas prati</string>
+    <string name="mastodon_notification_item_favourited_your_status">je označio vašu objavu kao omiljenu</string>
+    <string name="mastodon_notification_item_reblogged_your_status">je podelio vašu objavu</string>
+    <string name="mastodon_notification_item_poll_ended">Anketa u kojoj ste učestvovali je završena</string>
+    <string name="mastodon_notification_item_mentioned_you">vas je pomenuo</string>
+    <string name="mastodon_notification_item_requested_follow">je poslao zahtev da vas prati</string>
+    <string name="mastodon_notification_item_posted_status">je objavio</string>
+    <string name="mastodon_notification_item_updated_status">je ažurirao objavu</string>
+    <string name="mastodon_item_reblogged_status">je podelio objavu</string>
+    <string name="mastodon_item_show_more">Prikaži više</string>
+    <string name="mastodon_item_show_less">Prikaži manje</string>
+    <string name="mastodon_item_pinned">je zakačio objavu</string>
+
+    <string name="post_show_full_text">Prikaži ceo tekst</string>
+
+    <string name="bluesky_notification_item_followed_you">vas prati</string>
+    <string name="bluesky_notification_item_favourited_your_status">mu se sviđa vaša objava</string>
+    <string name="bluesky_notification_item_reblogged_your_status">je ponovo objavio vašu objavu</string>
+    <string name="bluesky_notification_item_poll_ended">Anketa u kojoj ste učestvovali je završena</string>
+    <string name="bluesky_notification_item_mentioned_you">vas je pomenuo</string>
+    <string name="bluesky_item_reblogged_status">je ponovo objavio</string>
+    <string name="bluesky_notification_item_replied_to_you">vam je odgovorio</string>
+    <string name="bluesky_notification_item_quoted_your_status">je citirao vašu objavu</string>
+    <string name="bluesky_notification_item_starterpack_joined">se pridružio putem Starter Pack-a</string>
+    <string name="bluesky_notification_item_unKnown">Nepoznato</string>
+    <string name="bluesky_notification_item_pin">je zakačio objavu</string>
+
+    <string name="misskey_notification_item_mentioned_you">vas je pomenuo</string>
+    <string name="misskey_notification_item_replied_to_you">vam je odgovorio</string>
+    <string name="misskey_notification_item_reposted_your_status">je ponovo objavio vašu objavu</string>
+    <string name="misskey_notification_item_quoted_your_status">je citirao vašu objavu</string>
+    <string name="misskey_notification_item_reacted_to_your_status">je reagovao na vašu objavu</string>
+    <string name="misskey_notification_item_poll_ended">Anketa u kojoj ste učestvovali je završena</string>
+    <string name="misskey_notification_item_follow_request_accepted">je prihvatio vaš zahtev za praćenje</string>
+    <string name="misskey_notification_item_scheduled_note_posted">zakazana objava je postavljena</string>
+    <string name="misskey_notification_item_scheduled_note_post_failed">postavljanje zakazane objave nije uspelo</string>
+    <string name="misskey_notification_item_role_assigned">vam je dodelio ulogu</string>
+    <string name="misskey_notification_item_chat_room_invitation_received">vas je pozvao u čet sobu</string>
+    <string name="misskey_notification_item_achievement_earned">Osvojili ste dostignuće: %1$s\n%2$s</string>
+    <string name="misskey_notification_item_app">obaveštenje aplikacije</string>
+    <string name="misskey_notification_item_export_completed">izvoz završen</string>
+    <string name="misskey_notification_item_test">test obaveštenje</string>
+    <string name="misskey_notification_item_login">detektovano novo prijavljivanje</string>
+    <string name="misskey_notification_item_create_token">token za pristup kreiran</string>
+    <string name="misskey_notification_item_followed_you">vas prati</string>
+    <string name="misskey_notification_item_requested_follow">je poslao zahtev da vas prati</string>
+    <string name="misskey_notification_unknwon">Nepoznato obaveštenje: %1$s</string>
+    <string name="misskey_item_reblogged_status">je ponovo objavio</string>
+
+    <string name="xqt_item_reblogged_status">je ponovo objavio</string>
+    <string name="xqt_item_mention_status">vas je pomenuo</string>
+
+    <string name="mastodon_visibility_public">Javno</string>
+    <string name="mastodon_visibility_unlisted">Nelistirano</string>
+    <string name="mastodon_visibility_private">Privatno</string>
+    <string name="mastodon_visibility_direct">Direktno</string>
+    <string name="mastodon_visibility_public_description">Svako može videti i podeliti ovu objavu</string>
+    <string name="mastodon_visibility_unlisted_description">Svako može videti ovu objavu, ali se neće pojavljivati na javnoj vremenskoj liniji</string>
+    <string name="mastodon_visibility_private_description">Samo pratioci mogu videti ovu objavu</string>
+    <string name="mastodon_visibility_direct_description">Samo pomenuti korisnici mogu videti ovu objavu</string>
+
+    <string name="settings_notifications_title">Obaveštenja</string>
+    <string name="settings_notifications_subtitle">Prilagodite kako vas Flare obaveštava</string>
+
+    <string name="status_loadmore_end">Nema više objava</string>
+    <string name="status_loadmore_error">Greška pri učitavanju objava</string>
+    <string name="status_loadmore_error_retry">Pokušaj ponovo</string>
+    <string name="status_empty">Ovde nema ničega</string>
+    <string name="status_sensitive_media">Osetljiv sadržaj</string>
+    <string name="show_media">Prikaži medij</string>
+    <string name="hide_media">Sakrij medij</string>
+    <string name="login_expired">Sesija prijavljivanja je istekla</string>
+    <string name="login_expired_message">Dodirnite da biste se ponovo prijavili</string>
+    <string name="login_expired_relogin">Prijavite se ponovo</string>
+
+    <string name="permission_denied_title">Pristup odbijen</string>
+    <string name="permission_denied_message">Prijavite se ponovo da biste pristupili ovoj stranici</string>
+
+    <string name="misskey_compose_local_only">Samo lokalno</string>
+    <string name="misskey_compose_local_only_description">Samo korisnici na ovoj instanci mogu videti ovu objavu</string>
+
+    <string name="misskey_item_action_renote">Ponovna objava</string>
+    <string name="misskey_item_action_quote">Citiraj</string>
+
+    <string name="bluesky_notification_unknown_message">Nepoznat tip obaveštenja %1$s</string>
+    <string name="bluesky_notification_unknown_message2">Molimo prijavite ovaj problem programeru.</string>
+
+    <string name="blusky_item_action_repost">Ponovo objavi</string>
+    <string name="blusky_item_action_quote">Citiraj</string>
+    <string name="blusky_item_action_report">Prijavi</string>
+    <string name="blusky_item_action_delete">Obriši</string>
+
+    <string name="mastodon_item_unbookmark">Ukloni obeleživač</string>
+    <string name="mastodon_item_bookmark">Obeleži</string>
+    <string name="mastodon_item_delete">Obriši</string>
+    <string name="mastodon_item_report">Prijavi</string>
+    <string name="misskey_item_action_delete">Obriši</string>
+    <string name="misskey_item_action_report">Prijavi</string>
+
+    <string name="bookmark_remove">Ukloni obeleživač</string>
+    <string name="bookmark_add">Dodaj obeleživač</string>
+    <string name="like">Sviđa mi se</string>
+    <string name="unlike">Ne sviđa mi se više</string>
+    <string name="favourite">Omiljeno</string>
+    <string name="unfavourite">Ukloni iz omiljenih</string>
+    <string name="more">Više</string>
+    <string name="quote">Citiraj</string>
+    <string name="reaction_add">Dodaj reakciju</string>
+    <string name="reaction_remove">Ukloni reakciju</string>
+    <string name="reply">Odgovori</string>
+    <string name="report">Prijavi</string>
+    <string name="retweet">Ponovo objavi</string>
+    <string name="retweet_remove">Ukloni ponovnu objavu</string>
+    <string name="share">Podeli</string>
+    <string name="fx_share">Podeli putem FxEmbed</string>
+    <string name="comment">Komentariši</string>
+
+    <string name="user_report">Prijavi</string>
+    <string name="user_block">Blokiraj</string>
+    <string name="user_unblock">Deblokiraj</string>
+    <string name="user_mute">Utišaj</string>
+    <string name="user_unmute">Poništi utišavanje</string>
+    <string name="user_mute_with_parameter">Utišaj %1$s</string>
+    <string name="user_block_with_parameter">Blokiraj %1$s</string>
+    <string name="mastodon_item_content_warning">Upozorenje o sadržaju</string>
+    <string name="reply_to">Odgovori korisniku %1$s</string>
+    <string name="status_detail_translate">Prevedi</string>
+    <string name="status_detail_tldr">Sumiraj</string>
+    <string name="translation_badge_translated">Prevedeno</string>
+    <string name="translation_badge_translating">Prevođenje…</string>
+    <string name="translation_badge_failed">Prevođenje nije uspelo</string>
+    <string name="translation_retry">Pokušaj ponovo</string>
+    <string name="translation_show_original">Prikaži original</string>
+
+    <string name="date_format_year_month_day">dd. MMM yy.</string>
+    <string name="date_format_month_day">dd. MMM</string>
+    <string name="date_format_full">dd. MMM yy. HH:mm</string>
+
+    <string name="vvo_notification_like">mu se sviđa vaša objava</string>
+
+    <string name="user_follow_edit_list">Dodaj/Ukloni sa liste</string>
+    <string name="list_empty">Nema listi</string>
+    <string name="list_error">Učitavanje listi nije uspelo</string>
+
+    <string name="misskey_achievement_notes1_title">tek postavljam svoj msky</string>
+    <string name="misskey_achievement_notes1_description">Objavite svoju prvu objavu</string>
+    <string name="misskey_achievement_notes1_flavor">Lepo se provedite na Misskey-u!</string>
+
+    <string name="misskey_achievement_notes10_title">Nekoliko objava</string>
+    <string name="misskey_achievement_notes10_description">Objavite 10 objava</string>
+
+    <string name="misskey_achievement_notes100_title">Dosta objava</string>
+    <string name="misskey_achievement_notes100_description">Objavite 100 objava</string>
+
+    <string name="misskey_achievement_notes500_title">Zatrpani objavama</string>
+    <string name="misskey_achievement_notes500_description">Objavite 500 objava</string>
+
+    <string name="misskey_achievement_notes1000_title">Planina objava</string>
+    <string name="misskey_achievement_notes1000_description">Objavite 1.000 objava</string>
+
+    <string name="misskey_achievement_notes5000_title">Previše objava</string>
+    <string name="misskey_achievement_notes5000_description">Objavite 5.000 objava</string>
+
+    <string name="misskey_achievement_notes10000_title">Superobjava</string>
+    <string name="misskey_achievement_notes10000_description">Objavite 10.000 objava</string>
+
+    <string name="misskey_achievement_notes20000_title">Treba mi... još... objava...</string>
+    <string name="misskey_achievement_notes20000_description">Objavite 20.000 objava</string>
+
+    <string name="misskey_achievement_notes30000_title">Objave, objave, objave!</string>
+    <string name="misskey_achievement_notes30000_description">Objavite 30.000 objava</string>
+
+    <string name="misskey_achievement_notes40000_title">Fabrika objava</string>
+    <string name="misskey_achievement_notes40000_description">Objavite 40.000 objava</string>
+
+    <string name="misskey_achievement_notes50000_title">Planeta objava</string>
+    <string name="misskey_achievement_notes50000_description">Objavite 50.000 objava</string>
+
+    <string name="misskey_achievement_notes60000_title">Kvazar objava</string>
+    <string name="misskey_achievement_notes60000_description">Objavite 60.000 objava</string>
+
+    <string name="misskey_achievement_notes70000_title">Crna rupa objava</string>
+    <string name="misskey_achievement_notes70000_description">Objavite 70.000 objava</string>
+
+    <string name="misskey_achievement_notes80000_title">Galaksija objava</string>
+    <string name="misskey_achievement_notes80000_description">Objavite 80.000 objava</string>
+
+    <string name="misskey_achievement_notes90000_title">Univerzum objava</string>
+    <string name="misskey_achievement_notes90000_description">Objavite 90.000 objava</string>
+
+    <string name="misskey_achievement_notes100000_title">SVE VAŠE OBJAVE PRIPADAJU NAMA</string>
+    <string name="misskey_achievement_notes100000_description">Objavite 100.000 objava</string>
+    <string name="misskey_achievement_notes100000_flavor">Sigurno imate mnogo toga da kažete.</string>
+
+    <string name="misskey_achievement_login3_title">Početnik I</string>
+    <string name="misskey_achievement_login3_description">Prijavite se ukupno 3 dana</string>
+    <string name="misskey_achievement_login3_flavor">Od danas me zovite Misskist</string>
+
+    <string name="misskey_achievement_login7_title">Početnik II</string>
+    <string name="misskey_achievement_login7_description">Prijavite se ukupno 7 dana</string>
+    <string name="misskey_achievement_login7_flavor">Da li ste se već ušemili?</string>
+
+    <string name="misskey_achievement_login15_title">Početnik III</string>
+    <string name="misskey_achievement_login15_description">Prijavite se ukupno 15 dana</string>
+
     <string name="misskey_achievement_login30_title">Misskist I</string>
-    <string name="misskey_achievement_login30_description">Пријавите се укупно 30 дана</string>
+    <string name="misskey_achievement_login30_description">Prijavite se ukupno 30 dana</string>
+
     <string name="misskey_achievement_login60_title">Misskist II</string>
-    <string name="misskey_achievement_login60_description">Пријавите се укупно 60 дана</string>
+    <string name="misskey_achievement_login60_description">Prijavite se ukupno 60 dana</string>
+
     <string name="misskey_achievement_login100_title">Misskist III</string>
-    <string name="misskey_achievement_login100_description">Пријавите се укупно 100 дана</string>
-    <string name="misskey_achievement_login100_flavor">Насилни Misskist</string>
-    <string name="misskey_achievement_login200_title">Редовни I</string>
-    <string name="misskey_achievement_login200_description">Пријавите се укупно 200 дана</string>
-    <string name="misskey_achievement_login300_title">Редовни II</string>
-    <string name="misskey_achievement_login300_description">Пријавите се укупно 300 дана</string>
-    <string name="misskey_achievement_login400_title">Редовни III</string>
-    <string name="misskey_achievement_login400_description">Пријавите се укупно 400 дана</string>
-    <string name="misskey_achievement_login500_title">Стручњак I</string>
-    <string name="misskey_achievement_login500_description">Пријавите се укупно 500 дана</string>
-    <string name="misskey_achievement_login500_flavor">Моји пријатељи, често је речено да волим белешке</string>
-    <string name="misskey_achievement_login600_title">Стручњак II</string>
-    <string name="misskey_achievement_login600_description">Пријавите се укупно 600 дана</string>
-    <string name="misskey_achievement_login700_title">Стручњак III</string>
-    <string name="misskey_achievement_login700_description">Пријавите се укупно 700 дана</string>
-    <string name="misskey_achievement_login800_title">Мастер белешки I</string>
-    <string name="misskey_achievement_login800_description">Пријавите се укупно 800 дана</string>
-    <string name="misskey_achievement_login900_title">Мастер белешки II</string>
-    <string name="misskey_achievement_login900_description">Пријавите се укупно 900 дана</string>
-    <string name="misskey_achievement_login1000_title">Мастер белешки III</string>
-    <string name="misskey_achievement_login1000_description">Пријавите се укупно 1.000 дана</string>
-    <string name="misskey_achievement_login1000_flavor">Хвала што користите Misskey!</string>
-    <string name="misskey_achievement_note_clipped1_title">Мора... сечице...</string>
-    <string name="misskey_achievement_note_clipped1_description">Сечите своју прву белешку</string>
-    <string name="misskey_achievement_note_favorited1_title">Гледање звезда</string>
-    <string name="misskey_achievement_note_favorited1_description">Омиљено ваше прве белешке</string>
-    <string name="misskey_achievement_my_note_favorited1_title">Потрага за звездама</string>
-    <string name="misskey_achievement_my_note_favorited1_description">Дозволите некоме другом да омиљени једну од ваших белешки</string>
-    <string name="misskey_achievement_profile_filled_title">Добро припремљено</string>
-    <string name="misskey_achievement_profile_filled_description">Поставите свој профил</string>
-    <string name="misskey_achievement_marked_as_cat_title">Ја сам мачка</string>
-    <string name="misskey_achievement_marked_as_cat_description">Обележите свој налог као мачку</string>
-    <string name="misskey_achievement_marked_as_cat_flavor">Даћу вам име касније.</string>
-    <string name="misskey_achievement_following1_title">Следећи ваш први корисник</string>
-    <string name="misskey_achievement_following1_description">Прати корисника</string>
-    <string name="misskey_achievement_following10_title">Одржавајте... одржавајте...</string>
-    <string name="misskey_achievement_following10_description">Прати 10 корисника</string>
-    <string name="misskey_achievement_following50_title">Пружење пријатеља</string>
-    <string name="misskey_achievement_following50_description">Прати 50 корисника</string>
-    <string name="misskey_achievement_following100_title">100 пријатеља</string>
-    <string name="misskey_achievement_following100_description">Прати 100 корисника</string>
-    <string name="misskey_achievement_following300_title">Пренапуњавање пријатеља</string>
-    <string name="misskey_achievement_following300_description">Прати 300 корисника</string>
-    <string name="misskey_achievement_followers1_title">Први пратилац</string>
-    <string name="misskey_achievement_followers1_description">Заради 1 пратиоца</string>
-    <string name="misskey_achievement_followers10_title">Прати ме!</string>
-    <string name="misskey_achievement_followers10_description">Заради 10 пратилаца</string>
-    <string name="misskey_achievement_followers50_title">Долазак у гомилама</string>
-    <string name="misskey_achievement_followers50_description">Заради 50 пратилаца</string>
-    <string name="misskey_achievement_followers100_title">Популаран</string>
-    <string name="misskey_achievement_followers100_description">Заради 100 пратилаца</string>
-    <string name="misskey_achievement_followers300_title">Молимо формирајте један ред</string>
-    <string name="misskey_achievement_followers300_description">Заради 300 пратилаца</string>
-    <string name="misskey_achievement_followers500_title">Радио торањ</string>
-    <string name="misskey_achievement_followers500_description">Заради 500 пратилаца</string>
-    <string name="misskey_achievement_followers1000_title">Инфлуенсер</string>
-    <string name="misskey_achievement_followers1000_description">Заради 1.000 пратилаца</string>
-    <string name="misskey_achievement_collect_achievements30_title">Скупљач достигнућа</string>
-    <string name="misskey_achievement_collect_achievements30_description">Заради 30 достигнућа</string>
-    <string name="misskey_achievement_view_achievements3min_title">Лајковање достигнућа</string>
-    <string name="misskey_achievement_view_achievements3min_description">Погледајте вашу листу достигнућа најмање 3 минута</string>
-    <string name="misskey_achievement_i_love_misskey_title">Волим Misskey</string>
-    <string name="misskey_achievement_i_love_misskey_description">Објавите \"Волим #Misskey\"</string>
-    <string name="misskey_achievement_i_love_misskey_flavor">Тим за развој Misskey-а веома цени вашу подршку!</string>
-    <string name="misskey_achievement_found_treasure_title">Трета хвала</string>
-    <string name="misskey_achievement_found_treasure_description">Пронашли сте скривено благо</string>
-    <string name="misskey_achievement_client30min_title">Кратка пауза</string>
-    <string name="misskey_achievement_client30min_description">Држите Misskey отворен најмање 30 минута</string>
-    <string name="misskey_achievement_client60min_title">Нема \"Miss\" у Misskey-у</string>
-    <string name="misskey_achievement_client60min_description">Држите Misskey отворен најмање 60 минута</string>
-    <string name="misskey_achievement_note_deleted_within1min_title">Ништа</string>
-    <string name="misskey_achievement_note_deleted_within1min_description">Обриши белешку у року од једне минуте након објављивања</string>
-    <string name="misskey_achievement_posted_at_late_night_title">Ноћни</string>
-    <string name="misskey_achievement_posted_at_late_night_description">Објавите белешку касно у ноћи</string>
-    <string name="misskey_achievement_posted_at_late_night_flavor">Време је да идем на спавање.</string>
-    <string name="misskey_achievement_posted_at_0min0sec_title">Говорна сат</string>
-    <string name="misskey_achievement_posted_at_0min0sec_description">Објавите белешку у 00:00</string>
-    <string name="misskey_achievement_posted_at_0min0sec_flavor">Клик, клик, клик, креативно!</string>
-    <string name="misskey_achievement_self_quote_title">Сама референца</string>
-    <string name="misskey_achievement_self_quote_description">Цитирајте своју белешку</string>
-    <string name="misskey_achievement_htl20npm_title">Течан временски распоред</string>
-    <string name="misskey_achievement_htl20npm_description">Убрзајте ваш домаћи временски распоред прелазећи 20 npm (белешки у минуту)</string>
-    <string name="misskey_achievement_view_instance_chart_title">Аналитичар</string>
-    <string name="misskey_achievement_view_instance_chart_description">Погледајте графиконе ваше инстанце</string>
-    <string name="misskey_achievement_output_hello_world_on_scratchpad_title">Здраво, свете!</string>
-    <string name="misskey_achievement_output_hello_world_on_scratchpad_description">Излаз \"здраво свете\" у Scratchpad-у</string>
-    <string name="misskey_achievement_open3windows_title">Мулти-Виндоw</string>
-    <string name="misskey_achievement_open3windows_description">Имајте најмање 3 прозора отворена у исто време</string>
-    <string name="misskey_achievement_drive_folder_circular_reference_title">Кружна референца</string>
-    <string name="misskey_achievement_drive_folder_circular_reference_description">Покушајте да направите рекурсивно угнездену фасциклу у Дриву</string>
-    <string name="misskey_achievement_react_without_read_title">Да ли сте заиста прочитали то?</string>
-    <string name="misskey_achievement_react_without_read_description">Реагујте на белешку која има више од 100 знакова у року од 3 секунде од објављивања</string>
-    <string name="misskey_achievement_clicked_click_here_title">Кликните овде</string>
-    <string name="misskey_achievement_clicked_click_here_description">Кликнули сте овде</string>
-    <string name="misskey_achievement_just_plain_lucky_title">Просто срећан</string>
-    <string name="misskey_achievement_just_plain_lucky_description">Има шансу да буде добијен са вероватноћом од 0.005\% сваког 10 секунди</string>
-    <string name="misskey_achievement_set_name_to_syuilo_title">Божански комплекс</string>
-    <string name="misskey_achievement_set_name_to_syuilo_description">Поставите ваше име на \"syuilo\"</string>
-    <string name="misskey_achievement_passed_since_account_created1_title">Прва годишњица</string>
-    <string name="misskey_achievement_passed_since_account_created1_description">Прошла је једна година од када је ваш налог креиран</string>
-    <string name="misskey_achievement_passed_since_account_created2_title">Друга годишњица</string>
-    <string name="misskey_achievement_passed_since_account_created2_description">Прошле су две године од када је ваш налог креиран</string>
-    <string name="misskey_achievement_passed_since_account_created3_title">Трећа годишњица</string>
-    <string name="misskey_achievement_passed_since_account_created3_description">Прошле су три године од када је ваш налог креиран</string>
-    <string name="misskey_achievement_logged_in_on_birthday_title">Срећан рођендан</string>
-    <string name="misskey_achievement_logged_in_on_birthday_description">Пријавите се на његов рођендан</string>
-    <string name="misskey_achievement_logged_in_on_new_years_day_title">Срећна Нова година!</string>
-    <string name="misskey_achievement_logged_in_on_new_years_day_description">Пријављени на први дан године</string>
-    <string name="misskey_achievement_logged_in_on_new_years_day_flavor">На још једну дивну годину на овој инстанци</string>
-    <string name="misskey_achievement_cookie_clicked_title">Игра у којој кликнете на колачиће</string>
-    <string name="misskey_achievement_cookie_clicked_description">Кликнули сте на колачић</string>
-    <string name="misskey_achievement_cookie_clicked_flavor">Чекајте, да ли сте на правом вебсајту?</string>
-    <string name="misskey_achievement_brain_diver_title">Потопљивац мозга</string>
-    <string name="misskey_achievement_brain_diver_description">Објавите везу на Потопљивац мозга</string>
+    <string name="misskey_achievement_login100_description">Prijavite se ukupno 100 dana</string>
+    <string name="misskey_achievement_login100_flavor">Nasilni Misskist</string>
+
+    <string name="misskey_achievement_login200_title">Redovni I</string>
+    <string name="misskey_achievement_login200_description">Prijavite se ukupno 200 dana</string>
+
+    <string name="misskey_achievement_login300_title">Redovni II</string>
+    <string name="misskey_achievement_login300_description">Prijavite se ukupno 300 dana</string>
+
+    <string name="misskey_achievement_login400_title">Redovni III</string>
+    <string name="misskey_achievement_login400_description">Prijavite se ukupno 400 dana</string>
+
+    <string name="misskey_achievement_login500_title">Ekspert I</string>
+    <string name="misskey_achievement_login500_description">Prijavite se ukupno 500 dana</string>
+    <string name="misskey_achievement_login500_flavor">Moji prijatelji, često se govorilo da volim objave</string>
+
+    <string name="misskey_achievement_login600_title">Ekspert II</string>
+    <string name="misskey_achievement_login600_description">Prijavite se ukupno 600 dana</string>
+
+    <string name="misskey_achievement_login700_title">Ekspert III</string>
+    <string name="misskey_achievement_login700_description">Prijavite se ukupno 700 dana</string>
+
+    <string name="misskey_achievement_login800_title">Gospodar objava I</string>
+    <string name="misskey_achievement_login800_description">Prijavite se ukupno 800 dana</string>
+
+    <string name="misskey_achievement_login900_title">Gospodar objava II</string>
+    <string name="misskey_achievement_login900_description">Prijavite se ukupno 900 dana</string>
+
+    <string name="misskey_achievement_login1000_title">Gospodar objava III</string>
+    <string name="misskey_achievement_login1000_description">Prijavite se ukupno 1.000 dana</string>
+    <string name="misskey_achievement_login1000_flavor">Hvala vam što koristite Misskey!</string>
+
+    <string name="misskey_achievement_note_clipped1_title">Moram... iseći...</string>
+    <string name="misskey_achievement_note_clipped1_description">Isecite svoju prvu objavu</string>
+
+    <string name="misskey_achievement_note_favorited1_title">Posmatrač zvezda</string>
+    <string name="misskey_achievement_note_favorited1_description">Označite svoju prvu objavu kao omiljenu</string>
+
+    <string name="misskey_achievement_my_note_favorited1_title">Traženje zvezda</string>
+    <string name="misskey_achievement_my_note_favorited1_description">Neka neko drugi označi vašu objavu kao omiljenu</string>
+
+    <string name="misskey_achievement_profile_filled_title">Dobro pripremljen</string>
+    <string name="misskey_achievement_profile_filled_description">Podesite svoj profil</string>
+
+    <string name="misskey_achievement_marked_as_cat_title">Ja sam mačka</string>
+    <string name="misskey_achievement_marked_as_cat_description">Označite svoj nalog kao mačku</string>
+    <string name="misskey_achievement_marked_as_cat_flavor">Daću ti ime kasnije.</string>
+
+    <string name="misskey_achievement_following1_title">Praćenje prvog korisnika</string>
+    <string name="misskey_achievement_following1_description">Zapratite korisnika</string>
+
+    <string name="misskey_achievement_following10_title">Samo prati... samo prati...</string>
+    <string name="misskey_achievement_following10_description">Zapratite 10 korisnika</string>
+
+    <string name="misskey_achievement_following50_title">Mnogo prijatelja</string>
+    <string name="misskey_achievement_following50_description">Zapratite 50 naloga</string>
+
+    <string name="misskey_achievement_following100_title">100 prijatelja</string>
+    <string name="misskey_achievement_following100_description">Zapratite 100 naloga</string>
+
+    <string name="misskey_achievement_following300_title">Previše prijatelja</string>
+    <string name="misskey_achievement_following300_description">Zapratite 300 naloga</string>
+
+    <string name="misskey_achievement_followers1_title">Prvi pratilac</string>
+    <string name="misskey_achievement_followers1_description">Dobijte 1 pratioca</string>
+
+    <string name="misskey_achievement_followers10_title">Prati me!</string>
+    <string name="misskey_achievement_followers10_description">Dobijte 10 pratilaca</string>
+
+    <string name="misskey_achievement_followers50_title">Dolaze u gomilama</string>
+    <string name="misskey_achievement_followers50_description">Dobijte 50 pratilaca</string>
+
+    <string name="misskey_achievement_followers100_title">Popularan</string>
+    <string name="misskey_achievement_followers100_description">Dobijte 100 pratilaca</string>
+
+    <string name="misskey_achievement_followers300_title">Molimo formirajte jedan red</string>
+    <string name="misskey_achievement_followers300_description">Dobijte 300 pratilaca</string>
+
+    <string name="misskey_achievement_followers500_title">Radio toranj</string>
+    <string name="misskey_achievement_followers500_description">Dobijte 500 pratilaca</string>
+
+    <string name="misskey_achievement_followers1000_title">Influenser</string>
+    <string name="misskey_achievement_followers1000_description">Dobijte 1.000 pratilaca</string>
+
+    <string name="misskey_achievement_collect_achievements30_title">Sakupljač dostignuća</string>
+    <string name="misskey_achievement_collect_achievements30_description">Osvojite 30 dostignuća</string>
+
+    <string name="misskey_achievement_view_achievements3min_title">Voli dostignuća</string>
+    <string name="misskey_achievement_view_achievements3min_description">Gledajte svoju listu dostignuća najmanje 3 minuta</string>
+
+    <string name="misskey_achievement_i_love_misskey_title">Volim Misskey</string>
+    <string name="misskey_achievement_i_love_misskey_description">Objavite \"I ❤ #Misskey\"</string>
+    <string name="misskey_achievement_i_love_misskey_flavor">Razvojni tim Misskey-a veoma ceni vašu podršku!</string>
+
+    <string name="misskey_achievement_found_treasure_title">Potraga za blagom</string>
+    <string name="misskey_achievement_found_treasure_description">Pronašli ste skriveno blago</string>
+
+    <string name="misskey_achievement_client30min_title">Kratka pauza</string>
+    <string name="misskey_achievement_client30min_description">Držite Misskey otvoren najmanje 30 minuta</string>
+
+    <string name="misskey_achievement_client60min_title">Nema promašaja u Misskey-u</string>
+    <string name="misskey_achievement_client60min_description">Držite Misskey otvoren najmanje 60 minuta</string>
+
+    <string name="misskey_achievement_note_deleted_within1min_title">Nema veze</string>
+    <string name="misskey_achievement_note_deleted_within1min_description">Obrišite objavu u roku od jednog minuta od postavljanja</string>
+
+    <string name="misskey_achievement_posted_at_late_night_title">Noćna ptica</string>
+    <string name="misskey_achievement_posted_at_late_night_description">Objavite objavu kasno u noć</string>
+    <string name="misskey_achievement_posted_at_late_night_flavor">Vreme je za spavanje.</string>
+
+    <string name="misskey_achievement_posted_at_0min0sec_title">Sat koji govori</string>
+    <string name="misskey_achievement_posted_at_0min0sec_description">Objavite objavu u 00:00</string>
+    <string name="misskey_achievement_posted_at_0min0sec_flavor">Klik Klik Klik Tras</string>
+
+    <string name="misskey_achievement_self_quote_title">Samo-referenca</string>
+    <string name="misskey_achievement_self_quote_description">Citirajte sopstvenu objavu</string>
+
+    <string name="misskey_achievement_htl20npm_title">Vremenska linija koja teče</string>
+    <string name="misskey_achievement_htl20npm_description">Neka brzina vaše početne vremenske linije premaši 20 opm (objava po minuti)</string>
+
+    <string name="misskey_achievement_view_instance_chart_title">Analitičar</string>
+    <string name="misskey_achievement_view_instance_chart_description">Pogledajte grafikone vaše instance</string>
+
+    <string name="misskey_achievement_output_hello_world_on_scratchpad_title">Zdravo svete!</string>
+    <string name="misskey_achievement_output_hello_world_on_scratchpad_description">Ispiši \"hello world\" u Scratchpad-u</string>
+
+    <string name="misskey_achievement_open3windows_title">Više prozora</string>
+    <string name="misskey_achievement_open3windows_description">Imajte najmanje 3 otvorena prozora istovremeno</string>
+
+    <string name="misskey_achievement_drive_folder_circular_reference_title">Kružna referenca</string>
+    <string name="misskey_achievement_drive_folder_circular_reference_description">Pokušaj kreiranja rekurzivno ugnežđene fascikle na Drive-u</string>
+
+    <string name="misskey_achievement_react_without_read_title">Da li si to stvarno pročitao?</string>
+    <string name="misskey_achievement_react_without_read_description">Reagujte na objavu dužu od 100 karaktera u roku od 3 sekunde od njenog postavljanja</string>
+
+    <string name="misskey_achievement_clicked_click_here_title">Klikni ovde</string>
+    <string name="misskey_achievement_clicked_click_here_description">Kliknuli ste ovde</string>
+
+    <string name="misskey_achievement_just_plain_lucky_title">Čista sreća</string>
+    <string name="misskey_achievement_just_plain_lucky_description">Postoji šansa da se dobije sa verovatnoćom od 0,005% svakih 10 sekundi</string>
+
+    <string name="misskey_achievement_set_name_to_syuilo_title">Kompleks boga</string>
+    <string name="misskey_achievement_set_name_to_syuilo_description">Postavite svoje ime na \"syuilo\"</string>
+
+    <string name="misskey_achievement_passed_since_account_created1_title">Godišnjica (1 godina)</string>
+    <string name="misskey_achievement_passed_since_account_created1_description">Prošla je jedna godina od kreiranja vašeg naloga</string>
+
+    <string name="misskey_achievement_passed_since_account_created2_title">Godišnjica (2 godine)</string>
+    <string name="misskey_achievement_passed_since_account_created2_description">Prošle su dve godine od kreiranja vašeg naloga</string>
+
+    <string name="misskey_achievement_passed_since_account_created3_title">Godišnjica (3 godine)</string>
+    <string name="misskey_achievement_passed_since_account_created3_description">Prošle su tri godine od kreiranja vašeg naloga</string>
+
+    <string name="misskey_achievement_logged_in_on_birthday_title">Srećan rođendan</string>
+    <string name="misskey_achievement_logged_in_on_birthday_description">Prijavite se na svoj rođendan</string>
+
+    <string name="misskey_achievement_logged_in_on_new_years_day_title">Srećna Nova godina!</string>
+    <string name="misskey_achievement_logged_in_on_new_years_day_description">Prijavljeni prvog dana godine</string>
+    <string name="misskey_achievement_logged_in_on_new_years_day_flavor">Za još jednu sjajnu godinu na ovoj instanci</string>
+
+    <string name="misskey_achievement_cookie_clicked_title">Igra u kojoj klikćete na kolačiće</string>
+    <string name="misskey_achievement_cookie_clicked_description">Kliknuli ste na kolačić</string>
+    <string name="misskey_achievement_cookie_clicked_flavor">Čekaj, jesi li na pravom sajtu?</string>
+
+    <string name="misskey_achievement_brain_diver_title">Brain Diver</string>
+    <string name="misskey_achievement_brain_diver_description">Postavite link ka Brain Diver-u</string>
     <string name="misskey_achievement_brain_diver_flavor">Misskey-Misskey La-Tu-Ma</string>
-    <string name="misskey_achievement_smash_test_notification_button_title">Тест преливања</string>
-    <string name="misskey_achievement_smash_test_notification_button_description">Тестирајте обавештење непрестано у изузетно кратком времену</string>
-    <string name="misskey_achievement_tutorial_completed_title">Диплома Миске основне школе</string>
-    <string name="misskey_achievement_tutorial_completed_description">Упутство завршено</string>
+
+    <string name="misskey_achievement_smash_test_notification_button_title">Test prelivanje</string>
+    <string name="misskey_achievement_smash_test_notification_button_description">Pokrenite test obaveštenja više puta u veoma kratkom vremenu</string>
+
+    <string name="misskey_achievement_tutorial_completed_title">Diploma osnovnog Misskey kursa</string>
+    <string name="misskey_achievement_tutorial_completed_description">Vodič završen</string>
+
     <string name="misskey_achievement_bubble_game_exploding_head_title">🤯</string>
-    <string name="misskey_achievement_bubble_game_exploding_head_description">Највећи објекат у игри мехурића</string>
-    <string name="misskey_achievement_bubble_game_double_exploding_head_title">Дупли🤯</string>
-    <string name="misskey_achievement_bubble_game_double_exploding_head_description">Два највећа објекта у игри мехурића у исто време</string>
-    <string name="misskey_achievement_bubble_game_double_exploding_head_flavor">Можете напунити кутију за ручак као ову 🤯 🤯 мало.</string>
-    <string name="vote">Гласати</string>
-    <string name="poll_expired">Анкета је истекла</string>
-    <string name="poll_voted">Гласано</string>
-    <string name="poll_expired_at">Истекао у %1$s</string>
-    <string name="user_send_message">Пошаљите поруку</string>
-    <string name="profile_search_user_using_account">Пронађите %1$s у %2$s користећи %3$s</string>
-    <string name="profile_search_user_using_account_compat">Пронађите у %1$s</string>
-    <string name="feeds_discover_feeds_created_by">Креирао %1$s</string>
-    <string name="notification_item_accept_follow_request">Прихвати</string>
-    <string name="notification_item_reject_follow_request">Одбиј</string>
-    <string name="dm_list_empty">Нема директних порука</string>
-    <string name="dm_list_error">Неуспех учитавања директних порука</string>
-    <string name="send">Пошаљи</string>
-    <string name="dm_send_placeholder">Пошаљите поруку</string>
-    <string name="dm_deleted">Обриши</string>
-    <string name="dm_conversation">Собa за директну поруку</string>
-    <string name="dm_sending">Слање</string>
-    <string name="dm_leave">Напустите разговор</string>
-    <string name="dm_to_profile">Прикажи профил</string>
-    <string name="settings_side_panel_empty">Дефолтно ће приказати бочну таблу у зависности од платформе рачуна.</string>
-    <string name="tab_settings_add">Додај</string>
-    <string name="tab_settings_drag">Повучите</string>
-    <string name="tab_settings_edit">Уреди</string>
-    <string name="tab_settings_remove">Уклони</string>
-    <string name="tab_settings_default">Дефолт</string>
-    <string name="tab_settings_list">Листа</string>
-    <string name="tab_settings_feed">Извори</string>
-    <string name="list_add">Додај листу</string>
-    <string name="list_edit">Уреди листу</string>
-    <string name="list_delete">Обриши листу</string>
-    <string name="add_rss_source">Додај</string>
-    <string name="edit_rss_source">Уреди Rss Извор</string>
-    <string name="rss_sources_title_label">Наслов</string>
-    <string name="rss_sources_url_label">Урл</string>
-    <string name="service_select_welcome_title">Добродошли у Flare</string>
-    <string name="bluesky_login_username_hint">Корисничко име</string>
-    <string name="bluesky_login_password_hint">Лозинка</string>
-    <string name="login_button">Пријава</string>
-    <string name="mastodon_login_verify_message">Молим сачекајте док оверимо ваше податке.</string>
-    <string name="cancel_button">Отказати</string>
-    <string name="service_select_instance_input_placeholder">URL инстанце</string>
-    <string name="service_select_next_button">Следеће</string>
-    <string name="service_select_empty_message">Нема пронађених инстанци</string>
-    <string name="home_tab_home_title">Почетна</string>
-    <string name="home_tab_notifications_title">Обавештења</string>
-    <string name="home_tab_me_title">Ја</string>
-    <string name="home_tab_discover_title">Откријте</string>
-    <string name="settings_title">Подешавања</string>
-    <string name="mastodon_tab_local_title">Локални</string>
-    <string name="mastodon_tab_public_title">Јавни</string>
-    <string name="home_tab_featured_title">Истакнути</string>
-    <string name="home_tab_bookmarks_title">Забелешке</string>
-    <string name="home_tab_favorite_title">Омиљени</string>
-    <string name="home_tab_list_title">Листа</string>
-    <string name="home_tab_feeds_title">Извори</string>
-    <string name="dm_list_title">Директне поруке</string>
-    <string name="antenna_title">Антена</string>
-    <string name="mixed_timeline_title">Мешано</string>
-    <string name="posts_title">Објаве</string>
-    <string name="settings_about_description">Крајње елитни отворени, децентрализовани клијент социјалне мреже покретан вештачком интелигенцијом.</string>
-    <string name="settings_about_source_code">Изворни код</string>
-    <string name="settings_about_telegram">Телеграм</string>
-    <string name="settings_about_telegram_description">Пријате, придружите се нашој Телеграм групи</string>
-    <string name="settings_about_line_description">Пријате, придружите се нашој Лине групи</string>
+    <string name="misskey_achievement_bubble_game_exploding_head_description">Najveći objekat u igri sa mehurićima</string>
+
+    <string name="misskey_achievement_bubble_game_double_exploding_head_title">Dupli🤯</string>
+    <string name="misskey_achievement_bubble_game_double_exploding_head_description">Dva najveća objekta u igri sa mehurićima istovremeno</string>
+    <string name="misskey_achievement_bubble_game_double_exploding_head_flavor">Možete napuniti kutiju za ručak ovako 🤯 🤯 malo.</string>
+
+    <string name="vote">Glasaj</string>
+    <string name="poll_expired">Anketa je istekla</string>
+    <string name="poll_voted">Glasano</string>
+    <string name="poll_expired_at">Isteklo u %1$s</string>
+    <string name="user_send_message">Pošalji direktnu poruku</string>
+
+    <string name="profile_search_user_using_account">Pronađi %1$s na %2$s koristeći %3$s</string>
+    <string name="profile_search_user_using_account_compat">Pronađi na %1$s</string>
+
+    <string name="feeds_discover_feeds_created_by">Kreirao %1$s</string>
+
+    <string name="notification_item_accept_follow_request">Prihvati</string>
+    <string name="notification_item_reject_follow_request">Odbij</string>
+
+
+    <string name="dm_list_empty">Nema direktnih poruka</string>
+    <string name="dm_list_error">Učitavanje direktnih poruka nije uspelo</string>
+    <string name="send">Pošalji</string>
+    <string name="dm_send_placeholder">Pošalji poruku</string>
+    <string name="dm_deleted">Obrisano</string>
+    <string name="dm_conversation">Razgovor putem direktnih poruka</string>
+    <string name="dm_sending">Slanje</string>
+    <string name="dm_leave">Napusti razgovor</string>
+    <string name="dm_to_profile">Prikaži profil</string>
+
+    <string name="settings_side_panel_empty">Podrazumevano, bočni panel prati platformu trenutnog naloga.</string>
+    <string name="tab_settings_add">Dodaj</string>
+    <string name="tab_settings_drag">Prevucite</string>
+    <string name="tab_settings_edit">Izmeni</string>
+    <string name="tab_settings_remove">Ukloni</string>
+    <string name="tab_settings_default">Podrazumevano</string>
+    <string name="tab_settings_list">Lista</string>
+    <string name="tab_settings_feed">Izvori</string>
+
+    <string name="list_add">Dodaj listu</string>
+    <string name="list_edit">Izmeni listu</string>
+    <string name="list_delete">Obriši listu</string>
+
+    <string name="rss_sources_title">Pretplate</string>
+    <string name="add_rss_source">Dodaj pretplatu</string>
+    <string name="edit_rss_source">Izmeni pretplatu</string>
+    <string name="delete_rss_source">Obriši pretplatu</string>
+
+    <string name="rss_sources_title_label">Naslov</string>
+    <string name="rss_sources_url_label">URL</string>
+    <string name="rss_title">Pretplate</string>
+    <string name="empty_rss_sources">Nema pretplata</string>
+    <string name="mastodon_trending_statuses">Popularne objave</string>
+    <string name="mastodon_federated_timeline">Federisana vremenska linija</string>
+    <string name="mastodon_local_timeline">Lokalna vremenska linija</string>
+
+    <string name="service_select_welcome_title">Dobrodošli u Flare</string>
+    <string name="service_select_welcome_message">Unesite server da biste počeli.</string>
+    <string name="service_select_welcome_hint">Flare podržava Mastodon, Misskey, Bluesky, Nostr i X.</string>
+    <string name="service_select_welcome_list_hint">Ili izaberite neki od ovih servera</string>
+    <string name="bluesky_login_username_hint">Korisničko ime</string>
+    <string name="bluesky_login_password_hint">Lozinka</string>
+    <string name="bluesky_login_auth_factor_token_hint">2FA token</string>
+    <string name="bluesky_login_oauth_button">Prijavite se putem OAuth-a</string>
+    <string name="bluesky_login_use_password_button">Koristi lozinku</string>
+    <string name="bluesky_login_oauth_hint">Bluesky OAuth može biti nestabilan. Ako naiđete na probleme, koristite prijavu putem lozinke.</string>
+    <string name="login_button">Prijavi se</string>
+    <string name="mastodon_login_verify_message">Provera akreditiva…</string>
+    <string name="nostr_login_title">Uvezi Nostr nalog</string>
+    <string name="nostr_login_hint">Nalepite npub ili hex javni ključ za pristup samo za čitanje, unesite nsec za lokalno potpisivanje, koristite bunker URI za daljinsko potpisivanje ili povežite Amber i QR signere.</string>
+    <string name="nostr_login_account_hint">npub, nsec, hex ključ, bunker:// ili nostrconnect://</string>
+    <string name="nostr_login_bunker_hint">bunker:// ili nostrconnect:// URI</string>
+    <string name="nostr_login_bunker_button">Poveži bunker</string>
+    <string name="nostr_login_amber_button">Poveži Amber</string>
+    <string name="nostr_login_qr_button">Poveži putem QR-a</string>
+    <string name="nostr_login_qr_hint">Skenirajte pomoću Amber-a, Alby-ja ili drugog Nostr Connect signera.</string>
+    <string name="nostr_login_qr_waiting">Čekanje na odobrenje signera…</string>
+    <string name="nostr_login_qr_link_label">Nostr Connect link</string>
+    <string name="cancel_button">Otkaži</string>
+    <string name="nostr_login_generate_button">Generiši i prijavi se</string>
+    <string name="nostr_login_npub_hint">npub ili hex javni ključ (opciono ako je nsec postavljen)</string>
+    <string name="nostr_login_nsec_hint">nsec ili hex privatni ključ</string>
+    <string name="nostr_login_relays_hint">URL-ovi releja, odvojeni zarezima</string>
+    <string name="service_select_instance_input_placeholder">URL instance</string>
+    <string name="service_select_next_button">Dalje</string>
+    <string name="service_select_empty_message">Instanci nisu pronađene</string>
+    <string name="service_select_compatibility_warning">Ovaj server koristi %1$s, Flare će raditi u režimu kompatibilnosti. Neke funkcije možda neće raditi ispravno.</string>
+    <string name="login_agreement">Prijavljivanjem prihvatate %1$s.</string>
+    <string name="eula_privacy_policy">EULA i Politiku privatnosti</string>
+
+    <string name="home_tab_home_title">Početna</string>
+    <string name="home_tab_notifications_title">Obaveštenja</string>
+    <string name="home_tab_me_title">Ja</string>
+    <string name="home_tab_discover_title">Otkrij</string>
+    <string name="settings_title">Podešavanja</string>
+    <string name="mastodon_tab_local_title">Lokalno</string>
+    <string name="mastodon_tab_public_title">Javno</string>
+    <string name="home_tab_featured_title">Izdvojeno</string>
+    <string name="home_tab_bookmarks_title">Obeleživači</string>
+    <string name="home_tab_favorite_title">Omiljeno</string>
+    <string name="home_tab_list_title">Liste</string>
+    <string name="home_tab_feeds_title">Izvori</string>
+    <string name="dm_list_title">Direktne poruke</string>
+    <string name="social_title">Društveno</string>
+    <string name="antenna_title">Antene</string>
+    <string name="mixed_timeline_title">Mešano</string>
+    <string name="liked_title">Sviđa mi se</string>
+    <string name="all_rss_feeds_title">Sve pretplate</string>
+    <string name="posts_title">Objave</string>
+    <string name="settings_appearance_absolute_timestamp">Apsolutno vreme</string>
+    <string name="settings_appearance_absolute_timestamp_description">Prikaži tačno vreme na objavama</string>
+    <string name="settings_about_description">Klijent otvorenog koda za decentralizovane društvene platforme, pokretan veštačkom inteligencijom.</string>
+    <string name="settings_about_source_code">Izvorni kod</string>
+    <string name="settings_about_telegram">Telegram</string>
+    <string name="settings_about_telegram_description">Pridružite se našoj Telegram grupi</string>
+    <string name="settings_about_discord" translatable="false">Discord</string>
+    <string name="settings_about_discord_description">Pridružite se našem Discord serveru</string>
+    <string name="settings_about_line" translatable="false">Line</string>
+    <string name="settings_about_line_description">Pridružite se našoj Line grupi</string>
     <string name="settings_about_localization">Crowdin</string>
-    <string name="settings_about_localization_description">Помозите нам да преведемо Flare</string>
-    <string name="settings_privacy_policy">Политика приватности</string>
+    <string name="settings_about_localization_description">Pomozite nam u prevođenju Flare-a</string>
+    <string name="settings_privacy_policy">Politika privatnosti</string>
+    <string name="channel_title">Kanal</string>
 </resources>

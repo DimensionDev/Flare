@@ -1,417 +1,526 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name" translatable="false">Flare</string>
     <string name="delete">حذف</string>
     <string name="done">تم</string>
     <string name="cancel">إلغاء</string>
-    <string name="ok">حسناً</string>
-    <string name="profile_header_following_count">%1$s متابعة</string>
-    <string name="profile_header_fans_count">%1$s متابعين</string>
-    <string name="profile_header_toots_count">منشورات %1$s</string>
-    <string name="profile_misskey_header_status_count">منشورات %1$s</string>
-    <string name="profile_header_button_follow">اتبع</string>
-    <string name="profile_header_button_following">تابع</string>
-    <string name="profile_header_button_requested">مطلوب</string>
+    <string name="ok">موافق</string>
+
+    <string name="profile_header_following_count">%1$s يتابع</string>
+    <string name="profile_header_fans_count">%1$s متابعون</string>
+    <string name="profile_header_toots_count">%1$s منشورات</string>
+    <string name="profile_misskey_header_status_count">%1$s منشورات</string>
+
+    <string name="profile_header_button_follow">متابعة</string>
+    <string name="profile_header_button_following">يتابع</string>
+    <string name="profile_header_button_requested">تم الطلب</string>
     <string name="profile_header_button_blocked">محظور</string>
     <string name="profile_header_button_is_fans">يتابعك</string>
+
     <string name="mastodon_notification_item_followed_you">تابعك</string>
-    <string name="mastodon_notification_item_favourited_your_status">المفضلة</string>
-    <string name="mastodon_notification_item_reblogged_your_status">إعادة التدوين</string>
-    <string name="mastodon_notification_item_poll_ended">انتهى استطلاع الرأي الذي كنت تشارك فيه</string>
+    <string name="mastodon_notification_item_favourited_your_status">أعجب بمنشورك</string>
+    <string name="mastodon_notification_item_reblogged_your_status">أعاد النشر</string>
+    <string name="mastodon_notification_item_poll_ended">انتهى استطلاع كنت تشارك فيه</string>
     <string name="mastodon_notification_item_mentioned_you">ذكرك</string>
     <string name="mastodon_notification_item_requested_follow">طلب متابعتك</string>
-    <string name="mastodon_notification_item_posted_status">نشر مشاركة للتو</string>
-    <string name="mastodon_notification_item_updated_status">تم تحديث منشور</string>
-    <string name="mastodon_item_reblogged_status">ترقية منشور</string>
-    <string name="mastodon_item_show_more">إظهار المزيد</string>
-    <string name="mastodon_item_show_less">إظهار أقل</string>
-    <string name="mastodon_item_pinned">المنشور المثبت</string>
-    <string name="post_show_full_text">إظهار النص الكامل</string>
+    <string name="mastodon_notification_item_posted_status">نشر</string>
+    <string name="mastodon_notification_item_updated_status">حدث منشوراً</string>
+    <string name="mastodon_item_reblogged_status">رفع منشوراً</string>
+    <string name="mastodon_item_show_more">عرض المزيد</string>
+    <string name="mastodon_item_show_less">عرض أقل</string>
+    <string name="mastodon_item_pinned">ثبت منشوراً</string>
+
+    <string name="post_show_full_text">عرض النص الكامل</string>
+
     <string name="bluesky_notification_item_followed_you">تابعك</string>
-    <string name="bluesky_notification_item_favourited_your_status">المفضلة</string>
-    <string name="bluesky_notification_item_reblogged_your_status">إعادة التدوين</string>
-    <string name="bluesky_notification_item_poll_ended">انتهى استطلاع الرأي الذي كنت تشارك فيه</string>
+    <string name="bluesky_notification_item_favourited_your_status">أعجب بمنشورك</string>
+    <string name="bluesky_notification_item_reblogged_your_status">أعاد نشر منشورك</string>
+    <string name="bluesky_notification_item_poll_ended">انتهى استطلاع كنت تشارك فيه</string>
     <string name="bluesky_notification_item_mentioned_you">ذكرك</string>
-    <string name="bluesky_item_reblogged_status">إعادة نشر منشور</string>
+    <string name="bluesky_item_reblogged_status">أعاد النشر</string>
     <string name="bluesky_notification_item_replied_to_you">رد عليك</string>
-    <string name="bluesky_notification_item_quoted_your_status">مقتبس</string>
-    <string name="bluesky_notification_item_starterpack_joined">انضم إلى حزمة البداية</string>
+    <string name="bluesky_notification_item_quoted_your_status">اقتبس منشورك</string>
+    <string name="bluesky_notification_item_starterpack_joined">انضم عبر حزمة البداية</string>
     <string name="bluesky_notification_item_unKnown">غير معروف</string>
-    <string name="bluesky_notification_item_pin">مثبتة</string>
+    <string name="bluesky_notification_item_pin">ثبت منشوراً</string>
+
     <string name="misskey_notification_item_mentioned_you">ذكرك</string>
     <string name="misskey_notification_item_replied_to_you">رد عليك</string>
-    <string name="misskey_notification_item_reposted_your_status">أعيد نشرها</string>
-    <string name="misskey_notification_item_quoted_your_status">مقتبس</string>
-    <string name="misskey_notification_item_reacted_to_your_status">رد فعل على مشاركتك</string>
-    <string name="misskey_notification_item_poll_ended">انتهى استطلاع الرأي الذي كنت تشارك فيه</string>
-    <string name="misskey_notification_item_follow_request_accepted">قبلت طلب المتابعة</string>
+    <string name="misskey_notification_item_reposted_your_status">أعاد نشر منشورك</string>
+    <string name="misskey_notification_item_quoted_your_status">اقتبس منشورك</string>
+    <string name="misskey_notification_item_reacted_to_your_status">تفاعل مع منشورك</string>
+    <string name="misskey_notification_item_poll_ended">انتهى استطلاع كنت تشارك فيه</string>
+    <string name="misskey_notification_item_follow_request_accepted">قبل طلب متابعتك</string>
     <string name="misskey_notification_item_scheduled_note_posted">تم نشر الملاحظة المجدولة</string>
-    <string name="misskey_notification_item_scheduled_note_post_failed">فشل في نشر الملاحظة المجدولة</string>
-    <string name="misskey_notification_item_role_assigned">الدور المعين</string>
-    <string name="misskey_notification_item_chat_room_invitation_received">دعوتك إلى غرفة محادثة</string>
-    <string name="misskey_notification_item_achievement_earned">لقد كسبت انجازات: %1$s\n%2$s</string>
-    <string name="misskey_notification_item_app">التطبيق</string>
+    <string name="misskey_notification_item_scheduled_note_post_failed">فشل نشر الملاحظة المجدولة</string>
+    <string name="misskey_notification_item_role_assigned">عين لك دوراً</string>
+    <string name="misskey_notification_item_chat_room_invitation_received">دعاك إلى غرفة دردشة</string>
+    <string name="misskey_notification_item_achievement_earned">لقد حققت إنجازاً: %1$s\n%2$s</string>
+    <string name="misskey_notification_item_app">إشعار التطبيق</string>
     <string name="misskey_notification_item_export_completed">اكتمل التصدير</string>
-    <string name="misskey_notification_item_test">اختبار الإشعار</string>
-    <string name="misskey_notification_item_login">تم اكتشاف تسجيل الدخول</string>
-    <string name="misskey_notification_item_create_token">تم إنشاء رمز الوصول</string>
+    <string name="misskey_notification_item_test">إشعار اختبار</string>
+    <string name="misskey_notification_item_login">تم اكتشاف تسجيل دخول جديد</string>
+    <string name="misskey_notification_item_create_token">تم إنشاء رمز وصول</string>
     <string name="misskey_notification_item_followed_you">تابعك</string>
-    <string name="misskey_notification_item_requested_follow">طلب منك متابعتك</string>
-    <string name="misskey_notification_unknwon">إشعار غير معروف %1$s</string>
-    <string name="misskey_item_reblogged_status">إعادة نشر منشور</string>
-    <string name="xqt_item_reblogged_status">معتدلة</string>
-    <string name="xqt_item_mention_status">يذكر لك</string>
-    <string name="mastodon_visibility_public">عامة</string>
+    <string name="misskey_notification_item_requested_follow">طلب متابعتك</string>
+    <string name="misskey_notification_unknwon">إشعار غير معروف: %1$s</string>
+    <string name="misskey_item_reblogged_status">أعاد النشر</string>
+
+    <string name="xqt_item_reblogged_status">أعاد النشر</string>
+    <string name="xqt_item_mention_status">ذكرك</string>
+
+    <string name="mastodon_visibility_public">عام</string>
     <string name="mastodon_visibility_unlisted">غير مدرج</string>
     <string name="mastodon_visibility_private">خاص</string>
     <string name="mastodon_visibility_direct">مباشر</string>
     <string name="mastodon_visibility_public_description">يمكن لأي شخص رؤية هذا المنشور وتعزيزه</string>
-    <string name="mastodon_visibility_unlisted_description">يمكن لأي شخص رؤية هذه المشاركة، لكنها لن تظهر على الخط الزمني العام</string>
-    <string name="mastodon_visibility_private_description">يمكن فقط للمتابعين رؤية هذا المنشور</string>
-    <string name="mastodon_visibility_direct_description">يمكن للمستخدمين المذكورين فقط رؤية هذا المنشور</string>
+    <string name="mastodon_visibility_unlisted_description">يمكن لأي شخص رؤية هذا المنشور، لكنه لن يظهر في الجدول الزمني العام</string>
+    <string name="mastodon_visibility_private_description">المتابعون فقط يمكنهم رؤية هذا المنشور</string>
+    <string name="mastodon_visibility_direct_description">المستخدمون المذكورون فقط يمكنهم رؤية هذا المنشور</string>
+
     <string name="settings_notifications_title">الإشعارات</string>
-    <string name="settings_notifications_subtitle">تخصيص كيف يخبرك Felle</string>
-    <string name="status_loadmore_end">لا مزيد من المشاركات</string>
-    <string name="status_loadmore_error">خطأ في تحميل المزيد من المشاركات</string>
+    <string name="settings_notifications_subtitle">خصص كيف يخطرك Flare</string>
+
+    <string name="status_loadmore_end">لا توجد منشورات أخرى</string>
+    <string name="status_loadmore_error">خطأ في تحميل المزيد من المنشورات</string>
     <string name="status_loadmore_error_retry">إعادة المحاولة</string>
-    <string name="status_empty">لا شيء لرؤيته هنا</string>
-    <string name="status_sensitive_media">الوسائط الحساسة</string>
-    <string name="show_media">إظهار الوسائط</string>
+    <string name="status_empty">لا يوجد شيء هنا</string>
+    <string name="status_sensitive_media">محتوى حساس</string>
+    <string name="show_media">عرض الوسائط</string>
     <string name="hide_media">إخفاء الوسائط</string>
-    <string name="login_expired">انتهت صلاحية جلسة تسجيل الدخول</string>
+    <string name="login_expired">انتهت جلسة تسجيل الدخول</string>
     <string name="login_expired_message">انقر لتسجيل الدخول مرة أخرى</string>
     <string name="login_expired_relogin">تسجيل الدخول مرة أخرى</string>
+
     <string name="permission_denied_title">تم رفض الإذن</string>
-    <string name="permission_denied_message">تحتاج إلى إعادة تسجيل الدخول للوصول إلى هذه الصفحة</string>
+    <string name="permission_denied_message">سجل الدخول مرة أخرى للوصول إلى هذه الصفحة</string>
+
     <string name="misskey_compose_local_only">محلي فقط</string>
-    <string name="misskey_compose_local_only_description">يمكن فقط للمستخدمين في هذا المظهر رؤية هذه المشاركة</string>
-    <string name="misskey_item_action_renote">Renote</string>
+    <string name="misskey_compose_local_only_description">المستخدمون على هذا الخادم فقط يمكنهم رؤية هذا المنشور</string>
+
+    <string name="misskey_item_action_renote">إعادة ملاحظة</string>
     <string name="misskey_item_action_quote">اقتباس</string>
+
     <string name="bluesky_notification_unknown_message">نوع إشعار غير معروف %1$s</string>
-    <string name="bluesky_notification_unknown_message2">الرجاء إبلاغ المطور بهذه المشكلة.</string>
-    <string name="blusky_item_action_repost">إعادة</string>
+    <string name="bluesky_notification_unknown_message2">يرجى إبلاغ المطور بهذه المشكلة.</string>
+
+    <string name="blusky_item_action_repost">إعادة نشر</string>
     <string name="blusky_item_action_quote">اقتباس</string>
-    <string name="blusky_item_action_report">تقرير</string>
+    <string name="blusky_item_action_report">إبلاغ</string>
     <string name="blusky_item_action_delete">حذف</string>
-    <string name="mastodon_item_unbookmark">إلغاء الإشارة</string>
-    <string name="mastodon_item_bookmark">إشارة</string>
+
+    <string name="mastodon_item_unbookmark">إزالة الإشارة المرجعية</string>
+    <string name="mastodon_item_bookmark">إشارة مرجعية</string>
     <string name="mastodon_item_delete">حذف</string>
-    <string name="mastodon_item_report">تقرير</string>
+    <string name="mastodon_item_report">إبلاغ</string>
     <string name="misskey_item_action_delete">حذف</string>
-    <string name="misskey_item_action_report">تقرير</string>
+    <string name="misskey_item_action_report">إبلاغ</string>
+
     <string name="bookmark_remove">إزالة الإشارة المرجعية</string>
     <string name="bookmark_add">إضافة إشارة مرجعية</string>
     <string name="like">إعجاب</string>
-    <string name="unlike">خلافا</string>
-    <string name="favourite">المفضلة</string>
-    <string name="unfavourite">Unfavourite</string>
+    <string name="unlike">إلغاء الإعجاب</string>
+    <string name="favourite">تفضيل</string>
+    <string name="unfavourite">إلغاء التفضيل</string>
     <string name="more">المزيد</string>
     <string name="quote">اقتباس</string>
-    <string name="reaction_add">إضافة رد فعل</string>
-    <string name="reaction_remove">إزالة رد الفعل</string>
-    <string name="reply">الرد</string>
-    <string name="report">تقرير</string>
-    <string name="retweet">إعادة</string>
+    <string name="reaction_add">إضافة تفاعل</string>
+    <string name="reaction_remove">إزالة تفاعل</string>
+    <string name="reply">رد</string>
+    <string name="report">إبلاغ</string>
+    <string name="retweet">إعادة نشر</string>
     <string name="retweet_remove">إزالة إعادة النشر</string>
     <string name="share">مشاركة</string>
     <string name="fx_share">مشاركة عبر FxEmbed</string>
     <string name="comment">تعليق</string>
-    <string name="user_report">تقرير</string>
-    <string name="user_block">كتلة</string>
+
+    <string name="user_report">إبلاغ</string>
+    <string name="user_block">حظر</string>
     <string name="user_unblock">إلغاء الحظر</string>
     <string name="user_mute">كتم</string>
     <string name="user_unmute">إلغاء الكتم</string>
-    <string name="user_mute_with_parameter">كتم صوت %1$s</string>
+    <string name="user_mute_with_parameter">كتم %1$s</string>
     <string name="user_block_with_parameter">حظر %1$s</string>
-    <string name="mastodon_item_content_warning">تحذير المحتوى</string>
+    <string name="mastodon_item_content_warning">تحذير محتوى</string>
     <string name="reply_to">الرد على %1$s</string>
-    <string name="status_detail_translate">ترجمة المنشور</string>
-    <string name="status_detail_tldr">ملخص المنشور</string>
+    <string name="status_detail_translate">ترجمة</string>
+    <string name="status_detail_tldr">تلخيص</string>
     <string name="translation_badge_translated">مترجم</string>
-    <string name="translation_badge_translating">الترجمة</string>
-    <string name="translation_badge_failed">فشل</string>
+    <string name="translation_badge_translating">جاري الترجمة…</string>
+    <string name="translation_badge_failed">فشلت الترجمة</string>
     <string name="translation_retry">إعادة محاولة الترجمة</string>
-    <string name="translation_show_original">إظهار الأصل</string>
+    <string name="translation_show_original">عرض الأصل</string>
+
     <string name="date_format_year_month_day">dd MMM yy</string>
     <string name="date_format_month_day">dd MMM</string>
     <string name="date_format_full">dd MMM yy HH:mm</string>
-    <string name="vvo_notification_like">أعجبت مشاركتك</string>
+
+    <string name="vvo_notification_like">أعجب بمنشورك</string>
+
     <string name="user_follow_edit_list">إضافة/إزالة من القائمة</string>
     <string name="list_empty">لا توجد قوائم</string>
     <string name="list_error">فشل تحميل القوائم</string>
-    <string name="misskey_achievement_notes1_title">فقط إعداد سماوي</string>
+
+    <string name="misskey_achievement_notes1_title">أقوم بإعداد msky الخاص بي</string>
     <string name="misskey_achievement_notes1_description">انشر ملاحظتك الأولى</string>
-    <string name="misskey_achievement_notes1_flavor">احصل على وقت جيد مع ميسكي</string>
+    <string name="misskey_achievement_notes1_flavor">استمتع بوقتك مع Misskey!</string>
+
     <string name="misskey_achievement_notes10_title">بعض الملاحظات</string>
-    <string name="misskey_achievement_notes10_description">نشر 10 ملاحظات</string>
+    <string name="misskey_achievement_notes10_description">انشر 10 ملاحظات</string>
+
     <string name="misskey_achievement_notes100_title">الكثير من الملاحظات</string>
-    <string name="misskey_achievement_notes100_description">نشر 100 ملاحظة</string>
-    <string name="misskey_achievement_notes500_title">تم تغطيتها في الملاحظات</string>
-    <string name="misskey_achievement_notes500_description">نشر 500 ملاحظة</string>
+    <string name="misskey_achievement_notes100_description">انشر 100 ملاحظة</string>
+
+    <string name="misskey_achievement_notes500_title">مغطى بالملاحظات</string>
+    <string name="misskey_achievement_notes500_description">انشر 500 ملاحظة</string>
+
     <string name="misskey_achievement_notes1000_title">جبل من الملاحظات</string>
-    <string name="misskey_achievement_notes1000_description">نشر 1000 ملاحظة</string>
-    <string name="misskey_achievement_notes5000_title">الملاحظات الزائدة</string>
-    <string name="misskey_achievement_notes5000_description">نشر 5000 ملاحظة</string>
-    <string name="misskey_achievement_notes10000_title">سوبر</string>
-    <string name="misskey_achievement_notes10000_description">نشر 10,000 ملاحظة</string>
-    <string name="misskey_achievement_notes20000_title">بحاجة إلى... المزيد... ملاحظة...</string>
-    <string name="misskey_achievement_notes20000_description">نشر 20,000 ملاحظة</string>
-    <string name="misskey_achievement_notes30000_title">ملاحظات ملاحظات!</string>
-    <string name="misskey_achievement_notes30000_description">نشر 30,000 ملاحظة</string>
-    <string name="misskey_achievement_notes40000_title">مصنع الملاحظات</string>
-    <string name="misskey_achievement_notes40000_description">نشر 40,000 ملاحظة</string>
+    <string name="misskey_achievement_notes1000_description">انشر 1000 ملاحظة</string>
+
+    <string name="misskey_achievement_notes5000_title">ملاحظات فائضة</string>
+    <string name="misskey_achievement_notes5000_description">انشر 5000 ملاحظة</string>
+
+    <string name="misskey_achievement_notes10000_title">ملاحظة خارقة</string>
+    <string name="misskey_achievement_notes10000_description">انشر 10000 ملاحظة</string>
+
+    <string name="misskey_achievement_notes20000_title">أحتاج... المزيد... ملاحظات...</string>
+    <string name="misskey_achievement_notes20000_description">انشر 20000 ملاحظة</string>
+
+    <string name="misskey_achievement_notes30000_title">ملاحظات ملاحظات ملاحظات!</string>
+    <string name="misskey_achievement_notes30000_description">انشر 30000 ملاحظة</string>
+
+    <string name="misskey_achievement_notes40000_title">مصنع ملاحظات</string>
+    <string name="misskey_achievement_notes40000_description">انشر 40000 ملاحظة</string>
+
     <string name="misskey_achievement_notes50000_title">كوكب الملاحظات</string>
-    <string name="misskey_achievement_notes50000_description">نشر 50000 ملاحظة</string>
-    <string name="misskey_achievement_notes60000_title">ملاحظة شبه مسبار</string>
-    <string name="misskey_achievement_notes60000_description">نشر 60,000 ملاحظة</string>
-    <string name="misskey_achievement_notes70000_title">ملاحظة الثقب الأسود</string>
-    <string name="misskey_achievement_notes70000_description">نشر 70,000 ملاحظة</string>
-    <string name="misskey_achievement_notes80000_title">مجرة ملاحظة</string>
-    <string name="misskey_achievement_notes80000_description">نشر 80,000 ملاحظة</string>
-    <string name="misskey_achievement_notes90000_title">ملاحظة الكون</string>
-    <string name="misskey_achievement_notes90000_description">نشر 90,000 ملاحظة</string>
-    <string name="misskey_achievement_notes100000_title">كل ما لديك من ملاحظة بالنسبة لنا</string>
-    <string name="misskey_achievement_notes100000_description">نشر 000 100 ملاحظة</string>
-    <string name="misskey_achievement_notes100000_flavor">أنت متأكد من أن لديك الكثير لقوله.</string>
+    <string name="misskey_achievement_notes50000_description">انشر 50000 ملاحظة</string>
+
+    <string name="misskey_achievement_notes60000_title">كوازار ملاحظات</string>
+    <string name="misskey_achievement_notes60000_description">انشر 60000 ملاحظة</string>
+
+    <string name="misskey_achievement_notes70000_title">ثقب أسود للملاحظات</string>
+    <string name="misskey_achievement_notes70000_description">انشر 70000 ملاحظة</string>
+
+    <string name="misskey_achievement_notes80000_title">مجرة ملاحظات</string>
+    <string name="misskey_achievement_notes80000_description">انشر 80000 ملاحظة</string>
+
+    <string name="misskey_achievement_notes90000_title">كون من الملاحظات</string>
+    <string name="misskey_achievement_notes90000_description">انشر 90000 ملاحظة</string>
+
+    <string name="misskey_achievement_notes100000_title">كل ملاحظاتكم تنتمي لنا</string>
+    <string name="misskey_achievement_notes100000_description">انشر 100000 ملاحظة</string>
+    <string name="misskey_achievement_notes100000_flavor">بالتأكيد لديك الكثير لتقوله.</string>
+
     <string name="misskey_achievement_login3_title">مبتدئ I</string>
-    <string name="misskey_achievement_login3_description">قم بتسجيل الدخول لما مجموعه 3 أيام</string>
-    <string name="misskey_achievement_login3_flavor">ابدأ اليوم، فقط اتصل بي ميسكي</string>
+    <string name="misskey_achievement_login3_description">سجل الدخول لإجمالي 3 أيام</string>
+    <string name="misskey_achievement_login3_flavor">بدءاً من اليوم، نادني فقط بـ Misskist</string>
+
     <string name="misskey_achievement_login7_title">مبتدئ II</string>
-    <string name="misskey_achievement_login7_description">تسجيل الدخول لما مجموعه 7 أيام</string>
-    <string name="misskey_achievement_login7_flavor">هل تشعر أنك حصلت على شبح الأشياء بعد؟</string>
+    <string name="misskey_achievement_login7_description">سجل الدخول لإجمالي 7 أيام</string>
+    <string name="misskey_achievement_login7_flavor">هل تشعر أنك أتقنت الأمور بعد؟</string>
+
     <string name="misskey_achievement_login15_title">مبتدئ III</string>
-    <string name="misskey_achievement_login15_description">قم بتسجيل الدخول لما مجموعه 15 يوما</string>
+    <string name="misskey_achievement_login15_description">سجل الدخول لإجمالي 15 أيام</string>
+
     <string name="misskey_achievement_login30_title">Misskist I</string>
-    <string name="misskey_achievement_login30_description">قم بتسجيل الدخول لما مجموعه 30 يوما</string>
+    <string name="misskey_achievement_login30_description">سجل الدخول لإجمالي 30 يوماً</string>
+
     <string name="misskey_achievement_login60_title">Misskist II</string>
-    <string name="misskey_achievement_login60_description">قم بتسجيل الدخول لما مجموعه 60 يوما</string>
+    <string name="misskey_achievement_login60_description">سجل الدخول لإجمالي 60 يوماً</string>
+
     <string name="misskey_achievement_login100_title">Misskist III</string>
-    <string name="misskey_achievement_login100_description">تسجيل الدخول لما مجموعه 100 يوم</string>
-    <string name="misskey_achievement_login100_flavor">المسيح العنيف</string>
-    <string name="misskey_achievement_login200_title">عادي I</string>
-    <string name="misskey_achievement_login200_description">قم بتسجيل الدخول لما مجموعه 200 يوم</string>
-    <string name="misskey_achievement_login300_title">عادي II</string>
-    <string name="misskey_achievement_login300_description">قم بتسجيل الدخول لما مجموعه 300 يوم</string>
-    <string name="misskey_achievement_login400_title">عادي 3</string>
-    <string name="misskey_achievement_login400_description">قم بتسجيل الدخول لما مجموعه 400 يوم</string>
-    <string name="misskey_achievement_login500_title">الخبير الأول</string>
-    <string name="misskey_achievement_login500_description">تسجيل الدخول لما مجموعه 500 يوم</string>
-    <string name="misskey_achievement_login500_flavor">أصدقائي، كثيرا ما قيل إنني أحب الملاحظات</string>
-    <string name="misskey_achievement_login600_title">الخبير الثاني</string>
-    <string name="misskey_achievement_login600_description">قم بتسجيل الدخول لما مجموعه 600 يوم</string>
-    <string name="misskey_achievement_login700_title">الخبير الثالث</string>
-    <string name="misskey_achievement_login700_description">تسجيل الدخول لما مجموعه 700 يوم</string>
-    <string name="misskey_achievement_login800_title">ماجستير الملاحظات</string>
-    <string name="misskey_achievement_login800_description">تسجيل الدخول لما مجموعه 800 يوم</string>
-    <string name="misskey_achievement_login900_title">ماجستير الملاحظات II</string>
-    <string name="misskey_achievement_login900_description">تسجيل الدخول لما مجموعه 900 يوم</string>
-    <string name="misskey_achievement_login1000_title">ماجستير الملاحظات III</string>
-    <string name="misskey_achievement_login1000_description">قم بتسجيل الدخول لما مجموعه 1000 يوم</string>
-    <string name="misskey_achievement_login1000_flavor">شكرا لك على استخدام Misske!</string>
-    <string name="misskey_achievement_note_clipped1_title">يجب ... نقطة...</string>
-    <string name="misskey_achievement_note_clipped1_description">قلب ملاحظتك الأولى</string>
-    <string name="misskey_achievement_note_favorited1_title">Stargazer</string>
-    <string name="misskey_achievement_note_favorited1_description">تفضيل ملاحظتك الأولى</string>
+    <string name="misskey_achievement_login100_description">سجل الدخول لإجمالي 100 يوم</string>
+    <string name="misskey_achievement_login100_flavor">Misskist عنيف</string>
+
+    <string name="misskey_achievement_login200_title">منتظم I</string>
+    <string name="misskey_achievement_login200_description">سجل الدخول لإجمالي 200 يوم</string>
+
+    <string name="misskey_achievement_login300_title">منتظم II</string>
+    <string name="misskey_achievement_login300_description">سجل الدخول لإجمالي 300 يوم</string>
+
+    <string name="misskey_achievement_login400_title">منتظم III</string>
+    <string name="misskey_achievement_login400_description">سجل الدخول لإجمالي 400 يوم</string>
+
+    <string name="misskey_achievement_login500_title">خبير I</string>
+    <string name="misskey_achievement_login500_description">سجل الدخول لإجمالي 500 يوم</string>
+    <string name="misskey_achievement_login500_flavor">أصدقائي، قيل غالباً أنني أحب الملاحظات</string>
+
+    <string name="misskey_achievement_login600_title">خبير II</string>
+    <string name="misskey_achievement_login600_description">سجل الدخول لإجمالي 600 يوم</string>
+
+    <string name="misskey_achievement_login700_title">خبير III</string>
+    <string name="misskey_achievement_login700_description">سجل الدخول لإجمالي 700 يوم</string>
+
+    <string name="misskey_achievement_login800_title">سيد الملاحظات I</string>
+    <string name="misskey_achievement_login800_description">سجل الدخول لإجمالي 800 يوم</string>
+
+    <string name="misskey_achievement_login900_title">سيد الملاحظات II</string>
+    <string name="misskey_achievement_login900_description">سجل الدخول لإجمالي 900 يوم</string>
+
+    <string name="misskey_achievement_login1000_title">سيد الملاحظات III</string>
+    <string name="misskey_achievement_login1000_description">سجل الدخول لإجمالي 1000 يوم</string>
+    <string name="misskey_achievement_login1000_flavor">شكراً لاستخدامك Misskey!</string>
+
+    <string name="misskey_achievement_note_clipped1_title">يجب... أن أقص...</string>
+    <string name="misskey_achievement_note_clipped1_description">قص ملاحظتك الأولى</string>
+
+    <string name="misskey_achievement_note_favorited1_title">راصد النجوم</string>
+    <string name="misskey_achievement_note_favorited1_description">فضل ملاحظتك الأولى</string>
+
     <string name="misskey_achievement_my_note_favorited1_title">البحث عن النجوم</string>
-    <string name="misskey_achievement_my_note_favorited1_description">لديك شخص آخر مفضل واحدة من ملاحظاتك</string>
-    <string name="misskey_achievement_profile_filled_title">جيد الإعداد</string>
-    <string name="misskey_achievement_profile_filled_description">إعداد ملفك الشخصي</string>
-    <string name="misskey_achievement_marked_as_cat_title">أنا قطرة</string>
-    <string name="misskey_achievement_marked_as_cat_description">وضع علامة على حسابك كقطه</string>
-    <string name="misskey_achievement_marked_as_cat_flavor">سأعطيك إسمًا في وقت لاحق.</string>
-    <string name="misskey_achievement_following1_title">تابع أول مستخدم لك</string>
-    <string name="misskey_achievement_following1_description">اتبع المستخدم</string>
-    <string name="misskey_achievement_following10_title">استمر... واصل...</string>
+    <string name="misskey_achievement_my_note_favorited1_description">اجعل شخصاً آخر يفضل إحدى ملاحظاتك</string>
+
+    <string name="misskey_achievement_profile_filled_title">معد جيداً</string>
+    <string name="misskey_achievement_profile_filled_description">أعدد ملفك الشخصي</string>
+
+    <string name="misskey_achievement_marked_as_cat_title">أنا قطة</string>
+    <string name="misskey_achievement_marked_as_cat_description">ميز حسابك كقطة</string>
+    <string name="misskey_achievement_marked_as_cat_flavor">سأعطيك اسماً لاحقاً.</string>
+
+    <string name="misskey_achievement_following1_title">تتابع أول مستخدم لك</string>
+    <string name="misskey_achievement_following1_description">تابع مستخدماً</string>
+
+    <string name="misskey_achievement_following10_title">واصل... واصل...</string>
     <string name="misskey_achievement_following10_description">تابع 10 مستخدمين</string>
+
     <string name="misskey_achievement_following50_title">الكثير من الأصدقاء</string>
-    <string name="misskey_achievement_following50_description">تتبع 50 حساباً</string>
+    <string name="misskey_achievement_following50_description">تابع 50 حساباً</string>
+
     <string name="misskey_achievement_following100_title">100 صديق</string>
-    <string name="misskey_achievement_following100_description">تابع 100 حساب</string>
-    <string name="misskey_achievement_following300_title">حمولة الأصدقاء الزائدة</string>
-    <string name="misskey_achievement_following300_description">اتبع 300 حساب</string>
+    <string name="misskey_achievement_following100_description">تابع 100 حساباً</string>
+
+    <string name="misskey_achievement_following300_title">صداقة مفرطة</string>
+    <string name="misskey_achievement_following300_description">تابع 300 حساباً</string>
+
     <string name="misskey_achievement_followers1_title">أول متابع</string>
-    <string name="misskey_achievement_followers1_description">اكتسب 1 متابِع</string>
-    <string name="misskey_achievement_followers10_title">تابعني !</string>
-    <string name="misskey_achievement_followers10_description">اكسب 10 متابعين</string>
-    <string name="misskey_achievement_followers50_title">يأتي في الحشود</string>
-    <string name="misskey_achievement_followers50_description">اكسب 50 متابعاً</string>
-    <string name="misskey_achievement_followers100_title">شعبية</string>
-    <string name="misskey_achievement_followers100_description">اكسب 100 متابِع</string>
-    <string name="misskey_achievement_followers300_title">الرجاء إنشاء سطر واحد</string>
-    <string name="misskey_achievement_followers300_description">اكسب 300 تابع</string>
-    <string name="misskey_achievement_followers500_title">برج الراديو</string>
-    <string name="misskey_achievement_followers500_description">اكسب 500 متابع</string>
-    <string name="misskey_achievement_followers1000_title">تأثير</string>
-    <string name="misskey_achievement_followers1000_description">احصل على 1000 تابع</string>
+    <string name="misskey_achievement_followers1_description">احصل على متابع واحد</string>
+
+    <string name="misskey_achievement_followers10_title">تابعني!</string>
+    <string name="misskey_achievement_followers10_description">احصل على 10 متابعين</string>
+
+    <string name="misskey_achievement_followers50_title">قادمون في حشود</string>
+    <string name="misskey_achievement_followers50_description">احصل على 50 متابعاً</string>
+
+    <string name="misskey_achievement_followers100_title">مشهور</string>
+    <string name="misskey_achievement_followers100_description">احصل على 100 متابعاً</string>
+
+    <string name="misskey_achievement_followers300_title">يرجى تشكيل خط واحد</string>
+    <string name="misskey_achievement_followers300_description">احصل على 300 متابعاً</string>
+
+    <string name="misskey_achievement_followers500_title">برج راديو</string>
+    <string name="misskey_achievement_followers500_description">احصل على 500 متابعاً</string>
+
+    <string name="misskey_achievement_followers1000_title">مؤثر</string>
+    <string name="misskey_achievement_followers1000_description">احصل على 1000 متابعاً</string>
+
     <string name="misskey_achievement_collect_achievements30_title">جامع الإنجازات</string>
-    <string name="misskey_achievement_collect_achievements30_description">احصل على 30 إنجازاً</string>
-    <string name="misskey_achievement_view_achievements3min_title">منجزات الإعجاب</string>
-    <string name="misskey_achievement_view_achievements3min_description">انظر إلى قائمة الإنجازات الخاصة بك لمدة 3 دقائق على الأقل</string>
-    <string name="misskey_achievement_i_love_misskey_title">أنا أحب ميسكي</string>
-    <string name="misskey_achievement_i_love_misskey_description">انشر \"أنا ❤️ #Misskey\"</string>
-    <string name="misskey_achievement_i_love_misskey_flavor">فريق تطوير ميسكي يقدر دعمك تقديرا كبيرا!</string>
-    <string name="misskey_achievement_found_treasure_title">صيد الكنز</string>
-    <string name="misskey_achievement_found_treasure_description">لقد عثرت على الكنز المخفي</string>
+    <string name="misskey_achievement_collect_achievements30_description">حقق 30 إنجازاً</string>
+
+    <string name="misskey_achievement_view_achievements3min_title">يحب الإنجازات</string>
+    <string name="misskey_achievement_view_achievements3min_description">انظر إلى قائمة إنجازاتك لمدة 3 دقائق على الأقل</string>
+
+    <string name="misskey_achievement_i_love_misskey_title">أنا أحب Misskey</string>
+    <string name="misskey_achievement_i_love_misskey_description">انشر \"I ❤ #Misskey\"</string>
+    <string name="misskey_achievement_i_love_misskey_flavor">فريق تطوير Misskey يقدر دعمك كثيراً!</string>
+
+    <string name="misskey_achievement_found_treasure_title">البحث عن الكنز</string>
+    <string name="misskey_achievement_found_treasure_description">لقد وجدت الكنز المخفي</string>
+
     <string name="misskey_achievement_client30min_title">استراحة قصيرة</string>
-    <string name="misskey_achievement_client30min_description">إبقاء ميسكي مفتوحة لمدة 30 دقيقة على الأقل</string>
-    <string name="misskey_achievement_client60min_title">لا \"Miss\" في ميسكي</string>
-    <string name="misskey_achievement_client60min_description">إبقاء ميسكي مفتوحة لمدة 60 دقيقة على الأقل</string>
-    <string name="misskey_achievement_note_deleted_within1min_title">العقل</string>
-    <string name="misskey_achievement_note_deleted_within1min_description">حذف ملاحظة في غضون دقيقة من نشرها</string>
-    <string name="misskey_achievement_posted_at_late_night_title">المذنب</string>
-    <string name="misskey_achievement_posted_at_late_night_description">نشر ملاحظة في وقت متأخر من الليل</string>
-    <string name="misskey_achievement_posted_at_late_night_flavor">لقد حان الوقت للذهاب إلى السرير.</string>
-    <string name="misskey_achievement_posted_at_0min0sec_title">الساعة التحدث</string>
-    <string name="misskey_achievement_posted_at_0min0sec_description">انشر ملاحظة في الساعة 00:00</string>
-    <string name="misskey_achievement_posted_at_0min0sec_flavor">Click Click Click Claaang</string>
+    <string name="misskey_achievement_client30min_description">أبقِ Misskey مفتوحاً لمدة 30 دقيقة على الأقل</string>
+
+    <string name="misskey_achievement_client60min_title">لا \"Miss\" في Misskey</string>
+    <string name="misskey_achievement_client60min_description">أبقِ Misskey مفتوحاً لمدة 60 دقيقة على الأقل</string>
+
+    <string name="misskey_achievement_note_deleted_within1min_title">لا يهم</string>
+    <string name="misskey_achievement_note_deleted_within1min_description">احذف ملاحظة في غضون دقيقة من نشرها</string>
+
+    <string name="misskey_achievement_posted_at_late_night_title">ليلي</string>
+    <string name="misskey_achievement_posted_at_late_night_description">انشر ملاحظة في وقت متأخر من الليل</string>
+    <string name="misskey_achievement_posted_at_late_night_flavor">حان وقت الذهاب للفراش.</string>
+
+    <string name="misskey_achievement_posted_at_0min0sec_title">ساعة ناطقة</string>
+    <string name="misskey_achievement_posted_at_0min0sec_description">انشر ملاحظة في تمام الساعة 00:00</string>
+    <string name="misskey_achievement_posted_at_0min0sec_flavor">كليك كليك كليك كلانج</string>
+
     <string name="misskey_achievement_self_quote_title">مرجع ذاتي</string>
-    <string name="misskey_achievement_self_quote_description">اقتبس من ملاحظتك الخاصة</string>
-    <string name="misskey_achievement_htl20npm_title">الخط الزمني للتدفق</string>
-    <string name="misskey_achievement_htl20npm_description">اجعل سرعة الخط الزمني لمنزلك تتجاوز 20 نانومتر (ملاحظات في الدقيقة)</string>
-    <string name="misskey_achievement_view_instance_chart_title">المحلل</string>
-    <string name="misskey_achievement_view_instance_chart_description">عرض مخططات مثيل الخاص بك</string>
-    <string name="misskey_achievement_output_hello_world_on_scratchpad_title">مرحبا، العالم!</string>
-    <string name="misskey_achievement_output_hello_world_on_scratchpad_description">إخراج \"مرحبا بالعالم\" في Scratchpad</string>
-    <string name="misskey_achievement_open3windows_title">نافذة متعددة</string>
-    <string name="misskey_achievement_open3windows_description">لديك على الأقل 3 نوافذ مفتوحة في نفس الوقت</string>
-    <string name="misskey_achievement_drive_folder_circular_reference_title">المرجع الدائري</string>
+    <string name="misskey_achievement_self_quote_description">اقتبس ملاحظتك الخاصة</string>
+
+    <string name="misskey_achievement_htl20npm_title">جدول زمني متدفق</string>
+    <string name="misskey_achievement_htl20npm_description">اجعل سرعة جدولك الزمني المنزلي تتجاوز 20 ملاحظة في الدقيقة</string>
+
+    <string name="misskey_achievement_view_instance_chart_title">محلل</string>
+    <string name="misskey_achievement_view_instance_chart_description">عرض مخططات الخادم الخاص بك</string>
+
+    <string name="misskey_achievement_output_hello_world_on_scratchpad_title">مرحباً بالعالم!</string>
+    <string name="misskey_achievement_output_hello_world_on_scratchpad_description">أخرج \"hello world\" في لوحة المسودة</string>
+
+    <string name="misskey_achievement_open3windows_title">نوافذ متعددة</string>
+    <string name="misskey_achievement_open3windows_description">افتح 3 نوافذ على الأقل في نفس الوقت</string>
+
+    <string name="misskey_achievement_drive_folder_circular_reference_title">مرجع دائري</string>
     <string name="misskey_achievement_drive_folder_circular_reference_description">محاولة إنشاء مجلد متداخل بشكل متكرر في Drive</string>
+
     <string name="misskey_achievement_react_without_read_title">هل قرأت ذلك حقاً؟</string>
-    <string name="misskey_achievement_react_without_read_description">التفاعل على ملاحظة تزيد عن 100 حرف في غضون 3 ثوان من نشرها</string>
+    <string name="misskey_achievement_react_without_read_description">تفاعل مع ملاحظة يزيد طولها عن 100 حرف في غضون 3 ثوانٍ من نشرها</string>
+
     <string name="misskey_achievement_clicked_click_here_title">انقر هنا</string>
-    <string name="misskey_achievement_clicked_click_here_description">لقد قمت بالنقر هنا</string>
-    <string name="misskey_achievement_just_plain_lucky_title">حظا عادي فقط</string>
-    <string name="misskey_achievement_just_plain_lucky_description">لديه فرصة للحصول عليها باحتمال 0.005\% كل 10 ثوان</string>
-    <string name="misskey_achievement_set_name_to_syuilo_title">مجمع الله</string>
-    <string name="misskey_achievement_set_name_to_syuilo_description">عيّن اسمك إلى \"سيويلو\"</string>
+    <string name="misskey_achievement_clicked_click_here_description">لقد نقرت هنا</string>
+
+    <string name="misskey_achievement_just_plain_lucky_title">محظوظ ببساطة</string>
+    <string name="misskey_achievement_just_plain_lucky_description">لديه فرصة للحصول عليه باحتمال 0.005٪ كل 10 ثوانٍ</string>
+
+    <string name="misskey_achievement_set_name_to_syuilo_title">عقدة الإله</string>
+    <string name="misskey_achievement_set_name_to_syuilo_description">عين اسمك ليكون \"syuilo\"</string>
+
     <string name="misskey_achievement_passed_since_account_created1_title">الذكرى السنوية الأولى</string>
-    <string name="misskey_achievement_passed_since_account_created1_description">مضت سنة واحدة منذ إنشاء حسابك</string>
+    <string name="misskey_achievement_passed_since_account_created1_description">مر عام واحد على إنشاء حسابك</string>
+
     <string name="misskey_achievement_passed_since_account_created2_title">الذكرى السنوية الثانية</string>
-    <string name="misskey_achievement_passed_since_account_created2_description">مضت سنتين منذ إنشاء حسابك</string>
+    <string name="misskey_achievement_passed_since_account_created2_description">مر عامان على إنشاء حسابك</string>
+
     <string name="misskey_achievement_passed_since_account_created3_title">الذكرى السنوية الثالثة</string>
-    <string name="misskey_achievement_passed_since_account_created3_description">مضت ثلاث سنوات منذ إنشاء حسابك</string>
+    <string name="misskey_achievement_passed_since_account_created3_description">مرت ثلاث سنوات على إنشاء حسابك</string>
+
     <string name="misskey_achievement_logged_in_on_birthday_title">عيد ميلاد سعيد</string>
-    <string name="misskey_achievement_logged_in_on_birthday_description">تسجيل الدخول في عيد ميلادك</string>
+    <string name="misskey_achievement_logged_in_on_birthday_description">سجل الدخول في يوم ميلادك</string>
+
     <string name="misskey_achievement_logged_in_on_new_years_day_title">سنة جديدة سعيدة!</string>
-    <string name="misskey_achievement_logged_in_on_new_years_day_description">تم تسجيل الدخول في اليوم الأول من السنة</string>
-    <string name="misskey_achievement_logged_in_on_new_years_day_flavor">سنة عظيمة أخرى في هذه الحالة</string>
-    <string name="misskey_achievement_cookie_clicked_title">لعبة تنقر فيها على ملفات تعريف الارتباط</string>
-    <string name="misskey_achievement_cookie_clicked_description">انقر فوق الكوكي</string>
-    <string name="misskey_achievement_cookie_clicked_flavor">انتظر، هل أنت على الموقع الصحيح على الإنترنت؟</string>
-    <string name="misskey_achievement_brain_diver_title">عقل الدماغ</string>
-    <string name="misskey_achievement_brain_diver_description">نشر الرابط إلى محول الدماغ</string>
+    <string name="misskey_achievement_logged_in_on_new_years_day_description">سجل الدخول في اليوم الأول من السنة</string>
+    <string name="misskey_achievement_logged_in_on_new_years_day_flavor">إلى عام رائع آخر على هذا الخادم</string>
+
+    <string name="misskey_achievement_cookie_clicked_title">لعبة تنقر فيها على الكوكيز</string>
+    <string name="misskey_achievement_cookie_clicked_description">نقرت على الكوكي</string>
+    <string name="misskey_achievement_cookie_clicked_flavor">انتظر، هل أنت في الموقع الصحيح؟</string>
+
+    <string name="misskey_achievement_brain_diver_title">غواص الدماغ</string>
+    <string name="misskey_achievement_brain_diver_description">انشر رابط غواص الدماغ</string>
     <string name="misskey_achievement_brain_diver_flavor">Misskey-Misskey La-Tu-Ma</string>
-    <string name="misskey_achievement_smash_test_notification_button_title">اختبار تجاوز</string>
-    <string name="misskey_achievement_smash_test_notification_button_description">تفعيل اختبار الإشعار بشكل متكرر خلال فترة قصيرة جداً</string>
+
+    <string name="misskey_achievement_smash_test_notification_button_title">فيض الاختبار</string>
+    <string name="misskey_achievement_smash_test_notification_button_description">تشغيل اختبار الإشعارات بشكل متكرر في وقت قصير جداً</string>
+
     <string name="misskey_achievement_tutorial_completed_title">دبلوم دورة ميسكي الابتدائية</string>
-    <string name="misskey_achievement_tutorial_completed_description">اكتمل البرنامج التعليمي</string>
+    <string name="misskey_achievement_tutorial_completed_description">تم إكمال البرنامج التعليمي</string>
+
     <string name="misskey_achievement_bubble_game_exploding_head_title">🤯</string>
-    <string name="misskey_achievement_bubble_game_exploding_head_description">أكبر كائن في لعبة الفقاعة</string>
-    <string name="misskey_achievement_bubble_game_double_exploding_head_title">مضاعفة🤯</string>
-    <string name="misskey_achievement_bubble_game_double_exploding_head_description">اثنين من أكبر الكائنات في لعبة الفقاعات في نفس الوقت</string>
-    <string name="misskey_achievement_bubble_game_double_exploding_head_flavor">يمكنك ملء صندوق الغداء مثل هذا 🤯 🤯 قليلاً.</string>
-    <string name="vote">التصويت</string>
-    <string name="poll_expired">انتهت صلاحية الاستطلاع</string>
-    <string name="poll_voted">صوت</string>
-    <string name="poll_expired_at">انتهت صلاحيتها في %1$s</string>
-    <string name="user_send_message">إرسال رسالة</string>
-    <string name="profile_search_user_using_account">البحث عن %1$s في %2$s باستخدام %3$s</string>
-    <string name="profile_search_user_using_account_compat">البحث في %1$s</string>
-    <string name="feeds_discover_feeds_created_by">تم إنشاؤها بواسطة %1$s</string>
+    <string name="misskey_achievement_bubble_game_exploding_head_description">أكبر كائن في لعبة الفقاعات</string>
+
+    <string name="misskey_achievement_bubble_game_double_exploding_head_title">مزدوج🤯</string>
+    <string name="misskey_achievement_bubble_game_double_exploding_head_description">اثنان من أكبر الكائنات في لعبة الفقاعات في نفس الوقت</string>
+    <string name="misskey_achievement_bubble_game_double_exploding_head_flavor">يمكنك ملء صندوق غداء كهذا 🤯 🤯 قليلاً.</string>
+
+    <string name="vote">تصويت</string>
+    <string name="poll_expired">انتهى الاستطلاع</string>
+    <string name="poll_voted">تم التصويت</string>
+    <string name="poll_expired_at">انتهى في %1$s</string>
+    <string name="user_send_message">إرسال رسالة مباشرة</string>
+
+    <string name="profile_search_user_using_account">ابحث عن %1$s في %2$s باستخدام %3$s</string>
+    <string name="profile_search_user_using_account_compat">ابحث في %1$s</string>
+
+    <string name="feeds_discover_feeds_created_by">أنشئ بواسطة %1$s</string>
+
     <string name="notification_item_accept_follow_request">قبول</string>
     <string name="notification_item_reject_follow_request">رفض</string>
+
+
     <string name="dm_list_empty">لا توجد رسائل مباشرة</string>
-    <string name="dm_list_error">فشل في تحميل الرسائل المباشرة</string>
+    <string name="dm_list_error">فشل تحميل الرسائل مباشرة</string>
     <string name="send">إرسال</string>
     <string name="dm_send_placeholder">إرسال رسالة</string>
-    <string name="dm_deleted">محذوف</string>
-    <string name="dm_conversation">غرفة الرسائل المباشرة</string>
-    <string name="dm_sending">إرسال</string>
+    <string name="dm_deleted">تم الحذف</string>
+    <string name="dm_conversation">محادثة رسائل مباشرة</string>
+    <string name="dm_sending">جاري الإرسال</string>
     <string name="dm_leave">مغادرة المحادثة</string>
-    <string name="dm_to_profile">إظهار الملف الشخصي</string>
-    <string name="settings_side_panel_empty">سيتم عرض اللوحة الجانبية بشكل افتراضي اعتمادا على منصة الحساب.</string>
+    <string name="dm_to_profile">عرض الملف الشخصي</string>
+
+    <string name="settings_side_panel_empty">بشكل افتراضي، تتبع اللوحة الجانبية منصة الحساب الحالي.</string>
     <string name="tab_settings_add">إضافة</string>
-    <string name="tab_settings_drag">اسحب</string>
-    <string name="tab_settings_edit">تحرير</string>
+    <string name="tab_settings_drag">سحب</string>
+    <string name="tab_settings_edit">تعديل</string>
     <string name="tab_settings_remove">إزالة</string>
-    <string name="tab_settings_default">الافتراضي</string>
+    <string name="tab_settings_default">افتراضي</string>
     <string name="tab_settings_list">قائمة</string>
-    <string name="tab_settings_feed">التحديثات</string>
+    <string name="tab_settings_feed">خلاصات</string>
+
     <string name="list_add">إضافة قائمة</string>
-    <string name="list_edit">تحرير القائمة</string>
-    <string name="list_delete">حذف القائمة</string>
-    <string name="rss_sources_title">اشتراكات</string>
+    <string name="list_edit">تعديل قائمة</string>
+    <string name="list_delete">حذف قائمة</string>
+
+    <string name="rss_sources_title">الاشتراكات</string>
     <string name="add_rss_source">إضافة اشتراك</string>
-    <string name="edit_rss_source">تعديل الاشتراك</string>
-    <string name="delete_rss_source">حذف الاشتراك</string>
+    <string name="edit_rss_source">تعديل اشتراك</string>
+    <string name="delete_rss_source">حذف اشتراك</string>
+
     <string name="rss_sources_title_label">العنوان</string>
-    <string name="rss_sources_url_label">الرابط</string>
-    <string name="rss_title">اشتراكات</string>
+    <string name="rss_sources_url_label">URL</string>
+    <string name="rss_title">الاشتراكات</string>
     <string name="empty_rss_sources">لا توجد اشتراكات</string>
-    <string name="mastodon_trending_statuses">Trending statuses</string>
-    <string name="mastodon_federated_timeline">الخط الزمني الموحد</string>
-    <string name="mastodon_local_timeline">الخيط المحلي</string>
-    <string name="service_select_welcome_title">مرحبا بكم في Felle</string>
-    <string name="service_select_welcome_message">الرجاء إدخال الخادم للبدء.</string>
-    <string name="service_select_welcome_hint">فلير يدعم ماستودون، وميسكي وبلوسكي ونوستر وكس.</string>
+    <string name="mastodon_trending_statuses">الحالات المتداولة</string>
+    <string name="mastodon_federated_timeline">الجدول الزمني الموحد</string>
+    <string name="mastodon_local_timeline">الجدول الزمني المحلي</string>
+
+    <string name="service_select_welcome_title">مرحباً بك في Flare</string>
+    <string name="service_select_welcome_message">أدخل خادماً للبدء.</string>
+    <string name="service_select_welcome_hint">يدعم Flare منصات Mastodon و Misskey و Bluesky و Nostr و X.</string>
     <string name="service_select_welcome_list_hint">أو اختر من هذه الخوادم</string>
     <string name="bluesky_login_username_hint">اسم المستخدم</string>
     <string name="bluesky_login_password_hint">كلمة المرور</string>
-    <string name="bluesky_login_auth_factor_token_hint">عامل المصادقة رمز</string>
+    <string name="bluesky_login_auth_factor_token_hint">رمز 2FA</string>
     <string name="bluesky_login_oauth_button">تسجيل الدخول باستخدام OAuth</string>
     <string name="bluesky_login_use_password_button">استخدام كلمة المرور</string>
-    <string name="bluesky_login_oauth_hint">قد لا يكون Bluesky OAuth مستقرًا بما فيه الكفاية، يرجى استخدام تسجيل الدخول لكلمة المرور إذا واجهت أي مشاكل.</string>
+    <string name="bluesky_login_oauth_hint">قد لا يزال Bluesky OAuth غير مستقر. إذا واجهت مشكلات، استخدم تسجيل الدخول بكلمة المرور بدلاً من ذلك.</string>
     <string name="login_button">تسجيل الدخول</string>
-    <string name="mastodon_login_verify_message">الرجاء الانتظار بينما نقوم بالتحقق من بيانات الاعتماد الخاصة بك.</string>
+    <string name="mastodon_login_verify_message">جاري التحقق من بيانات الاعتماد الخاصة بك…</string>
     <string name="nostr_login_title">استيراد حساب Nostr</string>
-    <string name="nostr_login_hint">لصق حانة npub أو hex للوصول للقراءة فقط، وتوفير nsec للتوقيع المحلي، استخدام وحدة تخزين URI للتوقيع عن بُعد، أو توصيل موحدات Nostr التي تعتمد على الـ QR.</string>
-    <string name="nostr_login_account_hint">npub, nsec, hex key , bunker://, or nostrconnect://</string>
-    <string name="nostr_login_bunker_hint">bunker:// أو nostrConnect:// URI</string>
-    <string name="nostr_login_bunker_button">توصيل المخزن</string>
-    <string name="nostr_login_amber_button">توصيل الشفرة</string>
-    <string name="nostr_login_qr_button">الاتصال مع QR</string>
-    <string name="nostr_login_qr_hint">المسح باستخدام أمبر أو ألبي أو موفق اتصال نوستر آخر.</string>
-    <string name="nostr_login_qr_waiting">في انتظار موافقة الموقِّع…</string>
-    <string name="nostr_login_qr_link_label">رابط اتصال Nostr</string>
+    <string name="nostr_login_hint">الصق npub أو مفتاح عام hex للوصول للقراءة فقط، أو قدم nsec للتوقيع المحلي، أو استخدم bunker URI للتوقيع عن بعد، أو اتصل بموقعي Amber و Nostr Connect القائم على QR.</string>
+    <string name="nostr_login_account_hint">npub، nsec، مفتاح hex، bunker://، أو nostrconnect://</string>
+    <string name="nostr_login_bunker_hint">رابط bunker:// أو nostrconnect://</string>
+    <string name="nostr_login_bunker_button">اتصال bunker</string>
+    <string name="nostr_login_amber_button">اتصال Amber</string>
+    <string name="nostr_login_qr_button">اتصال بـ QR</string>
+    <string name="nostr_login_qr_hint">امسح باستخدام Amber أو Alby أو أي موقع Nostr Connect آخر.</string>
+    <string name="nostr_login_qr_waiting">في انتظار موافقة الموقع…</string>
+    <string name="nostr_login_qr_link_label">رابط Nostr Connect</string>
     <string name="cancel_button">إلغاء</string>
     <string name="nostr_login_generate_button">توليد وتسجيل الدخول</string>
-    <string name="nostr_login_npub_hint">npub أو hex pubke(اختياري إذا تم تعيين nsec )</string>
-    <string name="nostr_login_nsec_hint">nsec أو hex المفتاح الخاص</string>
-    <string name="nostr_login_relays_hint">ربط عناوين URLs، مفصولة بفواصل</string>
-    <string name="service_select_instance_input_placeholder">رابط مثيل</string>
+    <string name="nostr_login_npub_hint">npub أو مفتاح عام hex (اختياري إذا تم تعيين nsec)</string>
+    <string name="nostr_login_nsec_hint">nsec أو مفتاح خاص hex</string>
+    <string name="nostr_login_relays_hint">عناوين Relay، مفصولة بفاصلة</string>
+    <string name="service_select_instance_input_placeholder">رابط الخادم</string>
     <string name="service_select_next_button">التالي</string>
-    <string name="service_select_empty_message">لا يوجد مثيلات</string>
-    <string name="service_select_compatibility_warning">هذا الخادم يستخدم %1$s، سيتم تشغيل Fflowفي وضع التوافق. قد لا تعمل بعض الميزات بشكل صحيح.</string>
-    <string name="login_agreement">من خلال تسجيل الدخول، أنت توافق على %1$s.</string>
-    <string name="eula_privacy_policy">EULA وسياسة الخصوصية</string>
-    <string name="home_tab_home_title">المنزل</string>
+    <string name="service_select_empty_message">لم يتم العثور على خوادم</string>
+    <string name="service_select_compatibility_warning">يستخدم هذا الخادم %1$s، سيعمل Flare في وضع التوافق. قد لا تعمل بعض الميزات بشكل صحيح.</string>
+    <string name="login_agreement">بتسجيل الدخول، فإنك توافق على %1$s.</string>
+    <string name="eula_privacy_policy">اتفاقية ترخيص المستخدم النهائي وسياسة الخصوصية</string>
+
+    <string name="home_tab_home_title">الرئيسية</string>
     <string name="home_tab_notifications_title">الإشعارات</string>
     <string name="home_tab_me_title">أنا</string>
-    <string name="home_tab_discover_title">اكتشف</string>
+    <string name="home_tab_discover_title">استكشاف</string>
     <string name="settings_title">الإعدادات</string>
     <string name="mastodon_tab_local_title">محلي</string>
-    <string name="mastodon_tab_public_title">عامة</string>
+    <string name="mastodon_tab_public_title">عام</string>
     <string name="home_tab_featured_title">مميز</string>
-    <string name="home_tab_bookmarks_title">المفضلة</string>
-    <string name="home_tab_favorite_title">المفضلة</string>
-    <string name="home_tab_list_title">قائمة</string>
-    <string name="home_tab_feeds_title">التحديثات</string>
+    <string name="home_tab_bookmarks_title">الإشارات المرجعية</string>
+    <string name="home_tab_favorite_title">المفضلات</string>
+    <string name="home_tab_list_title">القوائم</string>
+    <string name="home_tab_feeds_title">الخلاصات</string>
     <string name="dm_list_title">الرسائل المباشرة</string>
-    <string name="social_title">إجتماعي</string>
-    <string name="antenna_title">هوائي</string>
-    <string name="mixed_timeline_title">مختلطة</string>
-    <string name="liked_title">معجب</string>
-    <string name="all_rss_feeds_title">جميع الاشتراكات</string>
-    <string name="posts_title">المشاركات</string>
-    <string name="settings_appearance_absolute_timestamp">الطابع الزمني المطلق</string>
-    <string name="settings_appearance_absolute_timestamp_description">عرض علامات الوقت المطلقة على المشاركات</string>
-    <string name="settings_about_description">الجيل القادم النهائي مفتوح المصدر من AI زبون الشبكة الاجتماعية اللامركزية.</string>
-    <string name="settings_about_source_code">الكود المصدري</string>
+    <string name="social_title">اجتماعي</string>
+    <string name="antenna_title">هوائيات</string>
+    <string name="mixed_timeline_title">مختلط</string>
+    <string name="liked_title">المعجب بها</string>
+    <string name="all_rss_feeds_title">كل الاشتراكات</string>
+    <string name="posts_title">المنشورات</string>
+    <string name="settings_appearance_absolute_timestamp">طابع زمني مطلق</string>
+    <string name="settings_appearance_absolute_timestamp_description">عرض طوابع زمنية دقيقة على المنشورات</string>
+    <string name="settings_about_description">عميل مفتوح المصدر مدعوم بالذكاء الاصطناعي لمنصات التواصل الاجتماعي اللامركزية.</string>
+    <string name="settings_about_source_code">كود المصدر</string>
     <string name="settings_about_telegram">تيليجرام</string>
-    <string name="settings_about_telegram_description">انضم إلى مجموعة تيليجرام</string>
-    <string name="settings_about_discord_description">انضم إلى خادم ديسكورد</string>
-    <string name="settings_about_line_description">انضم إلى مجموعة الخط</string>
-    <string name="settings_about_localization">كرودن</string>
-    <string name="settings_about_localization_description">ساعدنا في ترجمة الشفق</string>
+    <string name="settings_about_telegram_description">انضم إلى مجموعتنا على تيليجرام</string>
+    <string name="settings_about_localization">Crowdin</string>
+    <string name="settings_about_localization_description">ساعدنا في ترجمة Flare</string>
     <string name="settings_privacy_policy">سياسة الخصوصية</string>
     <string name="channel_title">قناة</string>
 </resources>

@@ -1,24 +1,34 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" translatable="false">Flare</string>
+
     <string name="login_button">Пријава</string>
     <string name="navigate_back">Назад</string>
+
     <string name="home_tab_home_title">Почетна</string>
     <string name="home_tab_notifications_title">Обавештења</string>
     <string name="home_tab_me_title">Ја</string>
     <string name="home_tab_discover_title">Откријте</string>
-    <string name="notification_tab_all_title">Сва</string>
-    <string name="notification_tab_mentions_title">Спомињања</string>
+
+    <plurals name="home_timeline_new_toots">
+        <item quantity="one">%1$d нова објава</item>
+        <item quantity="few">%1$d нове објаве</item>
+        <item quantity="other">%1$d нових објава</item>
+    </plurals>
+
+    <string name="notification_tab_all_title">Све</string>
+    <string name="notification_tab_mentions_title">Помињања</string>
     <string name="notification_tab_comments_title">Коментари</string>
-    <string name="notification_tab_likes_title">Лајкови</string>
-    <string name="compose_title">Саставите</string>
+    <string name="notification_tab_likes_title">Свиђања</string>
+
+    <string name="compose_title">Састави</string>
     <string name="compose_reply_title">Одговори</string>
-    <string name="compose_quote_title">Цитат</string>
-    <string name="compose_vvo_comment_title">Коментар</string>
+    <string name="compose_quote_title">Цитирај</string>
+    <string name="compose_vvo_comment_title">Коментариши</string>
     <string name="compose_hint">Шта се дешава?</string>
     <string name="compose_poll_option_hint">Опција %1$s</string>
     <string name="compose_poll_single_choice">Један избор</string>
     <string name="compose_poll_multiple_choice">Више избора</string>
-    <string name="compose_poll_expiration_at">Истиче: %1$s</string>
+    <string name="compose_poll_expiration_at">Истиче у: %1$s</string>
     <string name="compose_poll_expiration_5_minutes">5 минута</string>
     <string name="compose_poll_expiration_30_minutes">30 минута</string>
     <string name="compose_poll_expiration_1_hour">1 сат</string>
@@ -27,236 +37,511 @@
     <string name="compose_poll_expiration_1_day">1 дан</string>
     <string name="compose_poll_expiration_3_days">3 дана</string>
     <string name="compose_poll_expiration_7_days">7 дана</string>
-    <string name="compose_content_warning_hint">Упозорење на садржај</string>
-    <string name="compose_media_sensitive">Означите медије као осетљиве</string>
+    <string name="compose_content_warning_hint">Упозорење о садржају</string>
+    <string name="compose_media_sensitive">Означи медиј као осетљив</string>
+    <string name="compose_notification_title">Слање објаве</string>
+    <string name="compose_notification_progress">Слање објаве</string>
+    <string name="compose_notification_success">Објава је послата</string>
+    <string name="compose_notification_error">Слање објаве није успело</string>
+    <string name="compose_close_confirm_title">Сачувати нацрт?</string>
+    <string name="compose_close_confirm_message">Имате несачуване измене. Да ли желите да их сачувате као нацрт пре затварања?</string>
     <string name="compose_save_draft">Сачувај</string>
-    <string name="draft_box_edit">Уреди</string>
-    <string name="draft_box_retry">Поновите</string>
+    <string name="compose_close_discard">Одбаци</string>
+    <string name="draft_box_title">Нацрти</string>
+    <string name="draft_box_empty">Још нема нацрта</string>
+    <string name="draft_box_edit">Измени</string>
+    <string name="draft_box_retry">Понови</string>
     <string name="draft_box_send">Пошаљи</string>
+    <string name="settings_draft_box_description">Прегледајте, измените и поново пошаљите сачуване нацрте</string>
+
     <string name="settings_title">Подешавања</string>
-    <string name="settings_accounts_title">Управљање рачунима</string>
+
+    <string name="settings_accounts_title">Налози</string>
+    <string name="settings_accounts_subtitle">Управљајте пријављеним налозима</string>
     <string name="settings_appearance_title">Изглед</string>
     <string name="settings_appearance_subtitle">Прилагодите изглед и осећај Flare-а</string>
     <string name="settings_appearance_theme_group_title">Тема</string>
+    <string name="settings_appearance_theme_group_subtitle">Боје, величина фонта и облик аватара</string>
+    <string name="settings_appearance_layout_group_title">Распоред</string>
+    <string name="settings_appearance_layout_group_subtitle">Распоред временске линије, навигација и акције објаве</string>
+    <string name="settings_appearance_display_group_title">Приказ</string>
+    <string name="settings_appearance_display_group_subtitle">Временске ознаке, ознаке извора, линкови и понашање прегледача</string>
     <string name="settings_appearance_media_group_title">Медији</string>
+    <string name="settings_appearance_media_group_subtitle">Видљивост медија, репродукција и осетљив садржај</string>
     <string name="settings_storage_title">Складиште</string>
-    <string name="settings_storage_subtitle">Управљајте складишtem Flare-а</string>
+    <string name="settings_storage_subtitle">Управљајте кешираним датотекама, дневницима и резервним копијама</string>
     <string name="settings_about_title">О апликацији</string>
     <string name="settings_about_subtitle">Сазнајте више о Flare-у</string>
-    <string name="settings_side_panel">Прилагођавање бочне табле</string>
-    <string name="settings_side_panel_description">Прилагодите бочну таблу</string>
-    <string name="settings_local_filter_title">Локални филтер</string>
-    <string name="settings_local_filter_description">Подешавања локалног филтера за временску линију</string>
-    <string name="settings_guest_setting_title">Гостујући мод домаћин</string>
-    <string name="settings_guest_setting_description">Поставите домаћина за гостујући мод</string>
+    <string name="settings_side_panel">Прилагођавање бочне плоче</string>
+    <string name="settings_side_panel_description">Прилагодите бочну плочу</string>
+    <string name="settings_local_filter_title">Локални филтери</string>
+    <string name="settings_local_filter_description">Сакријте одговарајући садржај у временским линијама, обавештењима и претрази</string>
+    <string name="settings_guest_setting_title">Хост за гостујући режим</string>
+    <string name="settings_guest_setting_description">Одаберите сервер на који се гостујући режим повезује</string>
     <string name="settings_local_history_title">Локална историја</string>
-    <string name="settings_local_history_description">Погледајте или претражите вашу историју прегледања</string>
-    <string name="settings_app_logging_title">Логовање апликације</string>
-    <string name="settings_app_logging_save">Сачувај лог</string>
-    <string name="settings_app_logging_clear">Очистите лог</string>
-    <string name="settings_app_logging_enable_network_logging">Омогућите логовање мреже</string>
-    <string name="settings_ai_config_title">AI Конфигурација</string>
+    <string name="settings_local_history_description">Претражујте објаве и профиле кеширане на овом уређају</string>
+    <string name="settings_app_logging_title">Дневници апликације</string>
+    <string name="settings_app_logging_save">Сачувај дневнике</string>
+    <string name="settings_app_logging_clear">Обриши дневнике</string>
+    <string name="settings_app_logging_enable_network_logging">Бележи мрежне захтеве</string>
+    <string name="settings_ai_config_title">ВИ</string>
+    <string name="settings_ai_config_description">Подесите ВИ провајдере и сумирање</string>
     <string name="settings_ai_config_server">URL сервера</string>
-    <string name="settings_ai_config_server_hint">Унесите URL сервера</string>
-    <string name="settings_ai_config_server_self_host_description">Можете користити службени сервер или угостити свој сервер</string>
-    <string name="settings_ai_config_reasoning_effort_default">Дефолт</string>
-    <string name="settings_ai_config_entable_translation">Омогући AI превод</string>
-    <string name="settings_ai_config_translation_description">Замените Google Translate AI превођем, може потрајати дуже</string>
-    <string name="settings_ai_config_enable_tldr">Омогући AI сажимање</string>
-    <string name="settings_ai_config_tldr_description">Омогућите AI сажимање за дуге постове, доступно само у постовима који су дужи од 500 знакова</string>
-    <string name="status_loadmore_error_retry">Поновите</string>
+    <string name="settings_ai_config_server_hint">Унесите основни URL</string>
+    <string name="settings_ai_config_server_url_requirement">URL се мора завршавати косом цртом и подржавати компатибилан v1/chat/completions API.</string>
+    <string name="settings_ai_config_server_self_host_description">Користите званичну услугу или сопствени компатибилан сервер</string>
+    <string name="settings_ai_config_type">Тип ВИ</string>
+    <string name="settings_ai_config_type_description">Одаберите који ВИ позадински систем Flare користи</string>
+    <string name="settings_ai_config_type_select">Одабери</string>
+    <string name="settings_ai_config_type_on_device">ВИ на уређају</string>
+    <string name="settings_ai_config_type_on_device_description">Покрените подржане ВИ моделе локално на овом уређају</string>
+    <string name="settings_ai_config_type_openai">OpenAI-компатибилан API</string>
+    <string name="settings_ai_config_type_openai_description">Користите OpenAI-компатибилну крајњу тачку за ВИ функције</string>
+    <string name="settings_ai_config_value_empty_placeholder">Није постављено</string>
+    <string name="settings_ai_config_api_key">API кључ</string>
+    <string name="settings_ai_config_api_key_hint">Унесите API кључ</string>
+    <string name="settings_ai_config_model">Модел</string>
+    <string name="settings_ai_config_model_description">Одаберите модел са ове крајње тачке</string>
+    <string name="settings_ai_config_model_select">Одабери модел</string>
+    <string name="settings_ai_config_model_loading">Учитавање модела…</string>
+    <string name="settings_ai_config_model_error">Учитавање модела није успело</string>
+    <string name="settings_ai_config_model_no_models">Нема модела</string>
+    <string name="settings_ai_config_model_manual_input">Ручно унесите назив модела</string>
+    <string name="settings_ai_config_reasoning_effort">Напор резоновања</string>
+    <string name="settings_ai_config_reasoning_effort_description">Одаберите колико додатног резоновања модел користи. Подразумевано прати подешавање провајдера.</string>
+    <string name="settings_ai_config_reasoning_effort_default">Подразумевано</string>
+    <string name="settings_ai_config_reasoning_effort_low">Низак</string>
+    <string name="settings_ai_config_reasoning_effort_medium">Средњи</string>
+    <string name="settings_ai_config_reasoning_effort_high">Висок</string>
+    <string name="settings_ai_config_extra_body">Додатно тело (JSON)</string>
+    <string name="settings_ai_config_tap_to_edit">Додирните за измену</string>
+    <string name="settings_ai_config_entable_translation">Омогући ВИ превођење</string>
+    <string name="settings_ai_config_translation_description">Користите ВИ уместо Google преводиоца. Преводи могу трајати дуже.</string>
+    <string name="settings_ai_config_enable_tldr">Омогући ВИ резимее</string>
+    <string name="settings_ai_config_tldr_description">Сумирајте дуге објаве помоћу ВИ. Доступно за објаве дуже од 500 знакова.</string>
+    <string name="settings_ai_config_enable_pre_translation">Омогући аутоматско превођење</string>
+    <string name="settings_ai_config_pre_translation_description">Преводите новоучитани садржај временске линије и профила у позадини и кеширајте резултате. Ово може потрошити велики број токена.</string>
+    <string name="settings_ai_config_translate_prompt">Упит за превођење</string>
+    <string name="settings_ai_config_tldr_prompt">Упит за резиме</string>
+    <string name="settings_ai_config_translate_provider">Провајдер превода</string>
+    <string name="settings_ai_config_translate_provider_description">Одаберите коју услугу користите за превод садржаја</string>
+    <string name="settings_ai_config_translate_provider_ai">ВИ</string>
+    <string name="settings_ai_config_translate_provider_google_web">Google преводилац (веб)</string>
+    <string name="settings_ai_config_translate_provider_deepl">DeepL</string>
+    <string name="settings_ai_config_translate_provider_deepl_api_key">DeepL API кључ</string>
+    <string name="settings_ai_config_translate_provider_deepl_use_pro">DeepL Pro крајња тачка</string>
+    <string name="settings_ai_config_translate_provider_deepl_use_pro_description">Користите api.deepl.com уместо бесплатне api-free.deepl.com крајње тачке.</string>
+    <string name="settings_ai_config_translate_provider_google_cloud">Google Cloud превод</string>
+    <string name="settings_ai_config_translate_provider_google_cloud_api_key">Google Cloud API кључ</string>
+    <string name="settings_ai_config_translate_provider_libretranslate">LibreTranslate</string>
+    <string name="settings_ai_config_translate_provider_libretranslate_base_url">LibreTranslate основни URL</string>
+    <string name="settings_ai_config_translate_provider_libretranslate_api_key">LibreTranslate API кључ</string>
+    <string name="settings_translation_title">Превод</string>
+    <string name="settings_translation_description">Одаберите услуге превођења и понашање аутоматског превода</string>
+    <string name="settings_translation_auto_excluded_languages">Језици које треба прескочити за аутоматски превод</string>
+    <string name="settings_translation_ai_test_title">ВИ тест превода</string>
+    <string name="settings_translation_ai_test_description">Преведите кратак узорак текста са тренутним ВИ подешавањима превода.</string>
+    <string name="settings_translation_ai_test_action">Тестирај превод</string>
+    <string name="settings_translation_ai_test_original">Узорак текста</string>
+    <string name="settings_translation_ai_test_result">Преведени текст</string>
+    <string name="settings_language_title">Језик</string>
+    <string name="settings_language_description">Промените језик апликације Flare</string>
+    <string name="settings_rss_management_title">Управљање претплатама</string>
+    <string name="settings_rss_management_description">Управљајте претплатама</string>
+    <string name="settings_nostr_relays_manage">Nostr релеји</string>
+    <string name="settings_nostr_relays_add">Додај релеј</string>
+    <string name="settings_nostr_relays_add_dialog_title">Додај релеј</string>
+    <string name="settings_nostr_relays_placeholder">Унесите URL релеја</string>
+    <string name="settings_nostr_relays_empty">Није додат ниједан релеј</string>
+
+    <string name="status_loadmore_error_retry">Понови</string>
     <string name="login_expired">Сесија пријаве је истекла</string>
-    <string name="login_expired_message">Кликните да се поново пријавите</string>
-    <string name="login_expired_relogin">Поновна пријава</string>
-    <string name="service_select_welcome_title">Добродошли у Flare</string>
-    <string name="service_select_welcome_message">Flare је клијент друштвених мрежа за Android.\nДа бисте почели, молимо изаберите услугу за повезивање.</string>
-    <string name="mastodon_login_verify_message">Молим сачекајте док оверимо ваше податке.</string>
-    <string name="status_title">Детаљ</string>
-    <string name="misskey_visibility_public">Јавни</string>
+    <string name="login_expired_message">Додирните да се поново пријавите</string>
+    <string name="login_expired_relogin">Пријави се поново</string>
+
+    <string name="service_select_welcome_title">Добро дошли у Flare</string>
+    <string name="service_select_welcome_message">Flare је клијент друштвених медија за Android.\nОдаберите услугу за повезивање да бисте започели.</string>
+
+    <string name="mastodon_login_verify_message">Провера ваших акредитива…</string>
+
+    <string name="status_title">Објава</string>
+
+    <string name="misskey_visibility_public">Јавно</string>
     <string name="misskey_visibility_home">Почетна</string>
     <string name="misskey_visibility_followers">Пратиоци</string>
-    <string name="misskey_visibility_specified">Одређени</string>
+    <string name="misskey_visibility_specified">Наведено</string>
+    <string name="misskey_visibility_public_description">Свако може да види и подстакне ову објаву</string>
+    <string name="misskey_visibility_home_description">Само корисници на овој инстанци могу видети ову објаву</string>
+    <string name="misskey_visibility_followers_description">Само пратиоци могу видети ову објаву</string>
+    <string name="misskey_visibility_specified_description">Само поменути корисници могу видети ову објаву</string>
+
     <string name="bluesky_login_username_hint">Корисничко име</string>
     <string name="bluesky_login_password_hint">Лозинка</string>
+    <string name="bluesky_login_auth_factor_token_hint">2FA токен</string>
+    <string name="bluesky_login_oauth_button">Пријавите се помоћу OAuth-а</string>
+    <string name="bluesky_login_use_password_button">Користи лозинку</string>
+    <string name="bluesky_login_oauth_hint">Bluesky OAuth можда још увек није стабилан. Ако наиђете на проблеме, користите пријаву лозинком.</string>
+
     <string name="report_title">Пријави</string>
-    <string name="report_description">Шта је проблем са овом објавом?</string>
+    <string name="report_description">Шта није у реду са овом објавом?</string>
+
     <string name="report_reason_spam_title">Спам</string>
-    <string name="report_reason_violation_title">Неправилно и хитно</string>
-    <string name="report_reason_misleading_title">Моблицијуће</string>
+    <string name="report_reason_violation_title">Незаконито или хитно</string>
+    <string name="report_reason_misleading_title">Обмањујуће</string>
     <string name="report_reason_sexual_title">Нежељени сексуални садржај</string>
-    <string name="report_reason_rude_title">Анти-социјално понашање</string>
-    <string name="report_reason_other_title">Друго</string>
-    <string name="report_reason_spam_description">Прекомерно спомињање или одговори</string>
-    <string name="report_reason_violation_description">Оклидне повреде закона или услова коришћења</string>
-    <string name="report_reason_misleading_description">Ова објава је обмањујућа</string>
-    <string name="report_reason_sexual_description">Гола или порнографија која није označена као таква</string>
+    <string name="report_reason_rude_title">Антисоцијално понашање</string>
+    <string name="report_reason_other_title">Остало</string>
+
+    <string name="report_reason_spam_description">Прекомерна помињања или одговори</string>
+    <string name="report_reason_violation_description">Јасна кршења закона или услова коришћења</string>
+    <string name="report_reason_misleading_description">Ова објава обмањује</string>
+    <string name="report_reason_sexual_description">Голотиња или порнографија која није тако означена</string>
     <string name="report_reason_rude_description">Узнемиравање, троловање или нетолеранција</string>
     <string name="report_reason_other_description">Проблем који није укључен у ове опције</string>
-    <string name="delete_status_title">Изабери</string>
-    <string name="delete_status_message">Да ли сте сигурни да желите да избришете ово?</string>
+
+    <string name="delete_status_title">Обриши</string>
+    <string name="delete_status_message">Обрисати ову објаву?</string>
+
     <string name="mastodon_report_title">Пријави</string>
-    <string name="mastodon_report_description">Да ли сте сигурни да желите да пријавите ово?</string>
+    <string name="mastodon_report_description">Да ли сте сигурни да желите ово да пријавите?</string>
+
     <string name="more">Више</string>
+
     <string name="discover_search_placeholder">Претрага</string>
-    <string name="discover_users">Препоручите кориснике</string>
-    <string name="discover_hashtags">Популарни хаштагови</string>
+    <string name="discover_users">Предложени корисници</string>
+    <string name="discover_status">Објаве у тренду</string>
+    <string name="discover_hashtags">Хештагови у тренду</string>
+
     <string name="search_users">Корисници</string>
-    <string name="search_status">Статус</string>
-    <string name="quick_menu_add_account">Додај рачун</string>
+    <string name="search_status">Објаве</string>
+
+    <string name="quick_menu_add_account">Додај налог</string>
+
     <string name="settings_appearance_generic">Опште</string>
+
     <string name="settings_appearance_show_actions">Прикажи акције</string>
+    <string name="settings_appearance_show_actions_description">Прикажи дугмад за акције испод сваке објаве</string>
+    <string name="settings_appearance_post_action_style">Стил акције објаве</string>
+    <string name="settings_appearance_post_action_style_description">Одаберите како су дугмад за акције распоређена</string>
+    <string name="settings_appearance_post_action_style_hidden">Скривено</string>
+    <string name="settings_appearance_post_action_style_left_aligned">Лево поравнато</string>
+    <string name="settings_appearance_post_action_style_right_aligned">Десно поравнато</string>
+    <string name="settings_appearance_post_action_style_stretch">Развучено</string>
     <string name="settings_appearance_show_media">Прикажи медије</string>
+    <string name="settings_appearance_show_media_description">Прикажи медијске прилоге у објавама</string>
     <string name="settings_appearance_show_numbers">Прикажи бројеве</string>
+    <string name="settings_appearance_show_numbers_description">Прикажи бројаче испод сваке објаве</string>
     <string name="settings_appearance_show_cw_img">Прикажи осетљив садржај</string>
-    <string name="settings_appearance_show_cw_img_description">Увек прикажите осетљив садржај у статусу</string>
-    <string name="settings_appearance_expand_media">Проширите медије на целу величину</string>
-    <string name="settings_appearance_expand_media_description">Задржите однос екрана медија у временској линији</string>
-    <string name="settings_appearance_video_autoplay">Аутоматско репродуковање видеа</string>
+    <string name="settings_appearance_show_cw_img_description">Увек откриј осетљиве медије у објавама</string>
+    <string name="settings_appearance_expand_media">Задржи однос ширине и висине медија</string>
+    <string name="settings_appearance_expand_media_description">Прикажи медије у оригиналном односу на временским линијама</string>
+    <string name="settings_appearance_video_autoplay">Аутоматска репродукција видео записа</string>
+    <string name="settings_appearance_video_autoplay_description">Аутоматски пуштај видео записе у објавама</string>
     <string name="settings_appearance_video_autoplay_wifi">Само Wi-Fi</string>
     <string name="settings_appearance_video_autoplay_always">Увек</string>
-    <string name="settings_appearance_video_autoplay_never">Никада</string>
+    <string name="settings_appearance_video_autoplay_never">Никад</string>
     <string name="settings_appearance_avatar_shape">Облик аватара</string>
-    <string name="settings_appearance_avatar_shape_description">Промените облик аватара</string>
-    <string name="settings_appearance_avatar_shape_round">Округло</string>
-    <string name="settings_appearance_avatar_shape_square">Квадратно</string>
+    <string name="settings_appearance_avatar_shape_description">Одаберите како се аватари приказују</string>
+    <string name="settings_appearance_avatar_shape_round">Округли</string>
+    <string name="settings_appearance_avatar_shape_square">Квадратни</string>
+    <string name="settings_appearance_timeline_display_mode">Режим приказа временске линије</string>
+    <string name="settings_appearance_timeline_display_mode_description">Одаберите како се објаве приказују на временским линијама</string>
+    <string name="settings_appearance_timeline_display_mode_card">Картица</string>
+    <string name="settings_appearance_timeline_display_mode_plain">Обично (само једна колона)</string>
+    <string name="settings_appearance_timeline_display_mode_gallery">Галерија (само почетна временска линија)</string>
     <string name="settings_appearance_theme">Тема</string>
-    <string name="settings_appearance_theme_description">Промените тему апликације</string>
+    <string name="settings_appearance_theme_description">Одаберите тему апликације</string>
     <string name="settings_appearance_theme_light">Светла</string>
     <string name="settings_appearance_theme_dark">Тамна</string>
     <string name="settings_appearance_theme_auto">Аутоматски</string>
-    <string name="settings_appearance_dynamic_theme">Динамична тема</string>
-    <string name="settings_appearance_dynamic_theme_description">Промените тему апликације на основу позадине вашег уређаја</string>
+    <string name="settings_appearance_dynamic_theme">Динамичка тема</string>
+    <string name="settings_appearance_dynamic_theme_description">Ускладите боје апликације са својом позадином</string>
     <string name="settings_appearance_show_link_previews">Прикажи прегледе линкова</string>
-    <string name="settings_appearance_compat_link_previews">П pojednostavite прегледе линкова</string>
+    <string name="settings_appearance_show_link_previews_description">Прикажи прегледе линкова у објавама</string>
+    <string name="settings_appearance_compat_link_previews">Компактни прегледи линкова</string>
+    <string name="settings_appearance_compat_link_previews_description">Користите поједностављени распоред за прегледе линкова</string>
     <string name="settings_appearance_theme_color">Боја теме</string>
-    <string name="settings_appearance_theme_color_description">Промените боју теме апликације</string>
-    <string name="settings_storage_clear_image_cache">Очистите кеш слике</string>
-    <string name="settings_storage_clear_image_cache_description">%1$s МБ слика биће уклоњено</string>
-    <string name="settings_storage_clear_database">Очистите базу кеша</string>
-    <string name="settings_storage_app_log">Отворите лог апликације</string>
-    <string name="settings_storage_app_log_description">Погледајте лог апликације</string>
+    <string name="settings_appearance_theme_color_description">Одаберите истакнуту боју апликације</string>
+    <string name="settings_appearance_theme_pure_color">Режим високог контраста</string>
+    <string name="settings_appearance_theme_pure_color_description">Повећајте контраст између позадине и текста</string>
+    <string name="settings_appearance_font_size_diff">Величина фонта</string>
+    <string name="settings_appearance_font_size_diff_description">Прилагодите величину фонта апликације</string>
+    <string name="settings_appearance_font_size_diff_decrease">Смањи</string>
+    <string name="settings_appearance_font_size_diff_increase">Повећај</string>
+    <string name="settings_appearance_bottombar_style">Стил доње траке</string>
+    <string name="settings_appearance_bottombar_style_description">Одаберите како изгледа доња навигациона трака</string>
+    <string name="settings_appearance_bottombar_style_floating">Плутајућа</string>
+    <string name="settings_appearance_bottombar_style_classic">Класична</string>
+    <string name="settings_appearance_bottombar_behavior">Понашање доње траке</string>
+    <string name="settings_appearance_bottombar_behavior_description">Одаберите како се доња навигациона трака понаша</string>
+    <string name="settings_appearance_bottombar_behavior_fixed">Фиксно</string>
+    <string name="settings_appearance_bottombar_behavior_hide_on_scroll">Сакриј при скроловању</string>
+    <string name="settings_appearance_bottombar_behavior_minimize_on_scroll">Минимизирај при скроловању</string>
+    <string name="settings_appearance_show_bottom_bar_labels">Прикажи текст доње траке</string>
+    <string name="settings_appearance_show_bottom_bar_labels_description">Прикажи текстуалне ознаке у доњој навигацији и бочној шини</string>
+    <string name="settings_appearance_deck_mode">Deck режим</string>
+    <string name="settings_appearance_deck_mode_description">Користите распоред шпила за подржане временске линије</string>
+    <string name="settings_appearance_in_app_browser">Прегледач у апликацији</string>
+    <string name="settings_appearance_in_app_browser_description">Отворите спољне линкове унутар Flare-а</string>
+    <string name="settings_appearance_full_width_post">Објаве пуне ширине</string>
+    <string name="settings_appearance_full_width_post_description">Дозволите објавама да заузму целу доступну ширину</string>
+    <string name="settings_appearance_absolute_timestamp">Апсолутна временска ознака</string>
+    <string name="settings_appearance_absolute_timestamp_description">Прикажи тачне временске ознаке на објавама</string>
+
+    <string name="settings_appearance_show_platform_logo">Прикажи иконе изворних платформи</string>
+    <string name="settings_appearance_show_platform_logo_description">Прикажи са које платформе је свака објава дошла</string>
+
+    <string name="settings_storage_clear_image_cache">Обриши кеш слика</string>
+    <string name="settings_storage_clear_image_cache_description">Уклоните %1$s MB кешираних слика</string>
+
+    <string name="settings_storage_clear_database">Обриши кеширану базу података</string>
+    <string name="settings_storage_clear_database_description">Уклоните %1$s кешираних корисника и %2$s кешираних објава</string>
+    <string name="settings_storage_app_log">Дневници апликације</string>
+    <string name="settings_storage_app_log_description">Прегледајте, сачувајте или обришите дневнике апликације</string>
+
     <string name="service_select_instance_input_placeholder">URL инстанце</string>
     <string name="service_select_next_button">Следеће</string>
-    <string name="service_select_empty_message">Нема пронађених инстанци</string>
+    <string name="service_select_empty_message">Ниједна инстанца није пронађена</string>
+
     <string name="media_viewer_title">Прегледач медија</string>
+
     <string name="settings_accounts_remove">Уклони</string>
-    <string name="media_save_success">Сачувано у преузимањима</string>
-    <string name="media_save_fail">Неуспех чувања</string>
+    <string name="settings_accounts_remove_confirm">Да ли сте сигурни да желите да уклоните налог %1$s са овог уређаја?</string>
+
+    <string name="media_menu_save">Сачувај слику</string>
+    <string name="media_menu_share_image">Подели слику</string>
+    <string name="media_menu_copy_link">Копирај линк</string>
+    <string name="media_menu_media_link">Линк медија</string>
+    <string name="status_menu_share_via_fxembed">Подели преко FxEmbed-а</string>
+    <string name="status_menu_share_via_fixvx">Подели преко Fixvx-а</string>
+    <string name="media_save_success">Сачувано у Преузимања</string>
+    <string name="media_save_fail">Чување није успело</string>
     <string name="media_alt_text">Алт текст</string>
-    <string name="settings_side_panel_empty">Дефолтно ће приказати бочну таблу у зависности од платформе рачуна.</string>
+    <string name="media_is_downloading">Медиј се још увек преузима. Покушајте поново за тренутак.</string>
+
+    <string name="settings_side_panel_empty">Подразумевано, бочна плоча прати платформу тренутног налога.</string>
     <string name="tab_settings_add">Додај</string>
-    <string name="tab_settings_drag">Повучите</string>
-    <string name="tab_settings_edit">Уреди</string>
+    <string name="tab_settings_drag">Превуци</string>
+    <string name="tab_settings_edit">Измени</string>
     <string name="tab_settings_remove">Уклони</string>
-    <string name="tab_settings_default">Дефолт</string>
+    <string name="tab_settings_default">Подразумевано</string>
     <string name="tab_settings_list">Листа</string>
     <string name="tab_settings_feed">Извори</string>
-    <string name="local_filter_add">Додај Филтер</string>
-    <string name="local_filter_edit_title">Уређивање филтера</string>
-    <string name="local_filter_add_title">Додај Филтер</string>
+
+    <string name="local_filter_add">Додај филтер</string>
+
+    <string name="local_filter_edit_title">Измени филтер</string>
+    <string name="local_filter_add_title">Додај филтер</string>
     <string name="local_filter_keyword">Кључна реч</string>
-    <string name="local_filter_keyword_hint">Кључна реч за филтрирање</string>
-    <string name="local_filter_for_timeline">Филтрирај у временској линији</string>
-    <string name="local_filter_for_notification">Филтрирај у обавештењу</string>
-    <string name="local_filter_for_search">Филтрирај у претрази</string>
+    <string name="local_filter_keyword_hint">Унесите кључну реч</string>
+    <string name="local_filter_for_timeline">Примени на временске линије</string>
+    <string name="local_filter_for_notification">Примени на обавештења</string>
+    <string name="local_filter_for_search">Примени на претрагу</string>
+    <string name="local_filter_regex">Користи регуларне изразе</string>
     <string name="local_filter_delete">Обриши филтер</string>
-    <string name="delete">Изабери</string>
-    <string name="mastodon_tab_local_title">Локални</string>
-    <string name="mastodon_tab_public_title">Јавни</string>
-    <string name="home_tab_featured_title">Истакнути</string>
-    <string name="home_tab_bookmarks_title">Забелешке</string>
-    <string name="home_tab_favorite_title">Омиљени</string>
-    <string name="home_tab_list_title">Листа</string>
+
+    <string name="delete">Обриши</string>
+
+    <string name="mastodon_tab_local_title">Локално</string>
+    <string name="mastodon_tab_public_title">Јавно</string>
+
+    <string name="home_tab_featured_title">Истакнуто</string>
+    <string name="home_tab_bookmarks_title">Обележивачи</string>
+    <string name="home_tab_favorite_title">Омиљено</string>
+    <string name="home_tab_list_title">Листе</string>
     <string name="home_tab_feeds_title">Извори</string>
-    <string name="tab_settings_primary">Прва карта</string>
-    <string name="tab_settings_secondary">Друга карта</string>
-    <string name="status_detail_comment">Коментар</string>
-    <string name="status_detail_repost">Поново</string>
+
+    <string name="tab_settings_primary">Примарна картица</string>
+    <string name="tab_settings_secondary">Секундарна картица</string>
+
+    <string name="status_detail_comment">Коментариши</string>
+    <string name="status_detail_repost">Поново објави</string>
+
     <string name="account_item_error_title">Грешка</string>
-    <string name="account_item_error_message">Неуспех учитавања рачуна</string>
-    <string name="edit_tab_title">Уреди карту</string>
+    <string name="account_item_error_message">Учитавање налога није успело</string>
+
+    <string name="edit_tab_title">Измени картицу</string>
     <string name="edit_tab_name">Име</string>
-    <string name="edit_tab_name_placeholder">Име карте</string>
+    <string name="edit_tab_name_placeholder">Име картице</string>
     <string name="edit_tab_icon">Икона</string>
-    <string name="edit_tab_with_avatar">С аватаром</string>
+    <string name="edit_tab_with_avatar">Са аватаром</string>
+    <string name="edit_tab_enabled">Прикажи у мешовитим временским линијама</string>
+    <string name="edit_tab_enabled_description">Укључи ову временску линију када се користи унутар мешовите временске линије или групе.</string>
+
     <string name="list_add">Додај листу</string>
-    <string name="list_edit">Уреди листу</string>
+    <string name="list_edit">Измени листу</string>
     <string name="list_delete">Обриши листу</string>
-    <string name="list_delete_confirm">Да ли сте сигурни да желите да обришете ову листу %1$s?</string>
-    <string name="list_create">Креирајте листу</string>
+    <string name="list_delete_confirm">Обрисати листу %1$s?</string>
+    <string name="list_create">Креирај листу</string>
     <string name="list_create_name">Име листе</string>
     <string name="list_create_name_hint">Име листе</string>
     <string name="list_edit_members">Чланови</string>
-    <string name="list_edit_edit_members">Уреди чланове</string>
+    <string name="list_edit_edit_members">Измени чланове</string>
     <string name="list_edit_no_members">Нема чланова</string>
-    <string name="list_edit_members_error">Неуспех учитавања чланова</string>
-    <string name="edit_list_member_title">Уреди чланове листе</string>
-    <string name="edit_list_member_placeholder">Претражите ваше пратње</string>
+    <string name="list_edit_members_error">Учитавање чланова није успело</string>
+    <string name="edit_list_member_title">Измени чланове листе</string>
+    <string name="edit_list_member_placeholder">Претражите своје пратиоце</string>
     <string name="edit_list_member_label">Претрага</string>
     <string name="edit_list_member_search">Претрага</string>
-    <string name="edit_list_member_search_empty">Нема корисника</string>
-    <string name="edit_list_member_search_error">Неуспешно претраживање корисника</string>
+    <string name="edit_list_member_search_empty">Корисници нису пронађени</string>
+    <string name="edit_list_member_search_error">Претрага корисника није успела</string>
     <string name="edit_list_member_add">Додај</string>
     <string name="edit_list_member_remove">Уклони</string>
     <string name="list_create_description">Опис листе</string>
     <string name="list_create_description_hint">Опис листе</string>
-    <string name="edit_account_list_title">Уреди листу рачуна</string>
-    <string name="feeds_my_feeds_title">Моје изворе</string>
+
+    <string name="edit_account_list_title">Измени листу налога</string>
+
+    <string name="feeds_my_feeds_title">Моји извори</string>
     <string name="feeds_discover_feeds_title">Откријте изворе</string>
     <string name="feeds_discover_feeds_created_by">Креирао %1$s</string>
-    <string name="feeds_unsubscribe">Отпишите</string>
-    <string name="feeds_subscribe">Пријавите се</string>
+    <string name="feeds_unsubscribe">Откажи претплату</string>
+    <string name="feeds_subscribe">Претплати се</string>
+
     <string name="profile_tab_timeline">Објаве</string>
     <string name="profile_tab_timeline_with_reply">Објаве и одговори</string>
-    <string name="profile_tab_likes">Лајкови</string>
+    <string name="profile_tab_likes">Свиђања</string>
     <string name="profile_tab_media">Медији</string>
-    <string name="tab_settings_title">Подешавања таба</string>
+
+    <string name="tab_settings_title">Подешавања картица</string>
+
+
     <string name="dm_list_title">Директне поруке</string>
     <string name="dm_list_empty">Нема директних порука</string>
-    <string name="dm_list_error">Неуспех учитавања директних порука</string>
+    <string name="dm_list_error">Учитавање директних порука није успело</string>
     <string name="send">Пошаљи</string>
-    <string name="dm_send_placeholder">Пошаљите поруку</string>
-    <string name="dm_deleted">Обриши</string>
-    <string name="dm_conversation">Собa за директну поруку</string>
+    <string name="dm_send_placeholder">Пошаљи поруку</string>
+    <string name="dm_deleted">Обрисано</string>
+    <string name="dm_conversation">Конверзација директним порукама</string>
     <string name="dm_sending">Слање</string>
-    <string name="dm_leave">Напустите разговор</string>
+    <string name="dm_leave">Напусти конверзацију</string>
     <string name="dm_to_profile">Прикажи профил</string>
-    <string name="following_title">Пратим</string>
-    <string name="fans_title">Пратилац</string>
-    <string name="local_history_search_placeholder">Претражите локални кеш</string>
-    <string name="local_history_search_status_title">Статус</string>
+
+
+    <string name="notification_login_expired">Пријава је истекла за %1$s</string>
+
+    <string name="following_title">Прати</string>
+    <string name="fans_title">Пратиоци</string>
+
+    <string name="local_history_search_placeholder">Претражите кеширане објаве и профиле</string>
+    <string name="local_history_search_status_title">Објаве</string>
     <string name="local_history_search_user_title">Корисник</string>
-    <string name="add_rss_source">Додај</string>
-    <string name="edit_rss_source">Уреди Rss Извор</string>
+
+    <string name="rss_sources_title">Претплате</string>
+    <string name="add_rss_source">Додај претплату</string>
+    <string name="edit_rss_source">Измени претплату</string>
+    <string name="delete_rss_source">Обриши претплату</string>
+    <string name="opml_import">Увези из OPML-а</string>
+    <string name="opml_export">Извези у OPML</string>
+    <string name="export_completed">Извоз је завршен</string>
+
     <string name="rss_sources_title_label">Наслов</string>
-    <string name="rss_sources_url_label">Урл</string>
-    <string name="rss_sources_open_in_browser">Отворите у прегледаћу</string>
-    <string name="rss_detail_open_in_browser">Отворите у прегледаћу</string>
-    <string name="rss_detail_tldr">Сажмите</string>
-    <string name="rss_detail_tldr_title">Сажетак</string>
-    <string name="rss_detail_tldr_error">Неуспех сажимања</string>
-    <string name="rss_detail_tldr_loading">Сажимање…</string>
-    <string name="emoji_picker_recent">Недавни</string>
+    <string name="rss_sources_url_label">URL</string>
+    <string name="rss_title">Претплате</string>
+    <string name="empty_rss_sources">Нема претплата</string>
+    <string name="rss_sources_rss_hub_host_label">RSSHub хост</string>
+    <string name="rss_sources_rss_hub_host_hint">Поставите RSSHub хост да бисте користили RSSHub или одаберите јавни RSSHub сервер</string>
+    <string name="rss_sources_discovered_rss_sources">Откривени извори</string>
+    <string name="rss_sources_pinned_in_tabs">Закачи на почетне картице</string>
+    <string name="rss_sources_open_in_browser">Отвори у прегледачу</string>
+    <string name="rss_sources_open_in_app">Отвори у апликацији</string>
+    <string name="rss_sources_full_content">Пун садржај</string>
+    <string name="rss_sources_description_only">Само опис</string>
+    <string name="mastodon_available_timelines">Доступне временске линије</string>
+    <string name="mastodon_trending_statuses">Статуси у тренду</string>
+    <string name="mastodon_federated_timeline">Федеративна временска линија</string>
+    <string name="mastodon_local_timeline">Локална временска линија</string>
+    <string name="subscription_url_hint">Налепите URL RSS извора или URL Mastodon инстанце</string>
+    <string name="rss_sources_display_mode">Режим приказа</string>
+
+    <string name="rss_detail_open_in_browser">Отвори у прегледачу</string>
+    <string name="rss_detail_share">Подели линк</string>
+    <string name="rss_detail_tldr">Сумирај</string>
+    <string name="rss_detail_tldr_title">Резиме</string>
+    <string name="rss_detail_tldr_error">Сумирање није успело</string>
+    <string name="rss_detail_tldr_loading">Сумирање…</string>
+    <string name="rss_detail_translate">Преведи</string>
+    <string name="rss_detail_translate_error">Превођење није успело</string>
+
+    <string name="emoji_picker_recent">Недавно</string>
     <string name="emoji_picker_search">Претрага</string>
-    <string name="podcast_host">Домаћин</string>
+
+    <string name="podcast_host">Хост</string>
     <string name="podcast_title">Подкаст</string>
     <string name="podcast_speaker">Говорник</string>
-    <string name="podcast_listen">Почните слушање</string>
-    <string name="podcast_leave">Напустити</string>
-    <string name="podcast_ended">Подкаст завршен</string>
-    <string name="podcast_living">Подкаст уживо</string>
-    <string name="home_tab_antennas_title">Антена</string>
-    <string name="misskey_channel_tab_following">Пратим</string>
-    <string name="misskey_channel_tab_featured">Истакнути</string>
-    <string name="antennas_empty">Нема антена</string>
-    <string name="home_tab_mixed_timeline_title">Мешано</string>
-    <string name="tab_settings_mixed_timeline">Додајте таб раста</string>
-    <string name="tab_settings_mixed_timeline_desc">Мешана временска линија ће комбиновати све резултате таба у један таб</string>
-    <string name="deeplink_account_selection_browser">Отворите у прегледаћу</string>
-    <string name="tab_settings_filter_all">Сва</string>
+    <string name="podcast_listen">Почни да слушаш</string>
+    <string name="podcast_leave">Напусти</string>
+    <string name="podcast_ended">Подкаст је завршен</string>
+    <string name="podcast_living">Уживо сада</string>
+
+    <string name="home_tab_antennas_title">Антене</string>
+    <string name="home_tab_channels_title">Канали</string>
+    <string name="misskey_channel_tab_following">Прати</string>
+    <string name="misskey_channel_tab_favorites">Омиљено</string>
+    <string name="misskey_channel_tab_owned">Моје</string>
+    <string name="misskey_channel_tab_featured">Истакнуто</string>
+    <string name="antennas_empty">Још нема антена</string>
+    <string name="home_tab_mixed_timeline_title">Мешовито</string>
+    <string name="tab_settings_mixed_timeline">Омогући картицу мешовите временске линије</string>
+    <string name="tab_settings_mixed_timeline_desc">Комбинујте објаве са свих картица у једну почетну картицу.</string>
+    <string name="home_tab_social_timeline_title">Друштвено</string>
+
+    <string name="deeplink_account_selection_title">Одаберите налог</string>
+    <string name="deeplink_account_selection_message">Одаберите налог за отварање овог линка</string>
+    <string name="deeplink_account_selection_browser">Отвори у прегледачу</string>
+
+    <string name="block_user_title">Блокирај корисника</string>
+    <string name="block_user_description">Да ли сте сигурни да желите да блокирате овог корисника?</string>
+    <string name="unblock_user_title">Одблокирај корисника</string>
+    <string name="unblock_user_description">Да ли сте сигурни да желите да одблокирате овог корисника?</string>
+
+    <string name="mute_user_title">Утишај корисника</string>
+    <string name="mute_user_description">Да ли сте сигурни да желите да утишате овог корисника?</string>
+    <string name="unmute_user_title">Поништи утишавање корисника</string>
+    <string name="unmute_user_description">Да ли сте сигурни да желите да поништите утишавање овог корисника?</string>
+
+    <string name="report_user_title">Пријави корисника</string>
+    <string name="report_user_description">Да ли сте сигурни да желите да пријавите овог корисника?</string>
+
+    <string name="settings_storage_export_data">Извези податке</string>
+    <string name="settings_storage_export_data_description">Извезите све податке, укључујући налоге и акредитиве. Чувајте датотеку безбедном.</string>
+    <string name="settings_storage_import_data">Увези податке</string>
+    <string name="settings_storage_import_data_description">Увезите податке из резервне копије. Постојећи записи са подударним ID-овима ће бити замењени.</string>
+    <string name="save_completed">Извоз је завршен</string>
+    <string name="save_error">Извоз није успео</string>
+    <string name="import_completed">Увоз је завршен</string>
+    <string name="import_error">Увоз није успео</string>
+    <string name="import_confirmation_title">Потврдите увоз</string>
+    <string name="import_confirmation_message">Ово ће увести податке из изабране датотеке. Постојећи записи са подударним ID-овима ће бити замењени. Наставити?</string>
+
+    <string name="tab_settings_add_group">Додај групу</string>
+    <string name="tab_settings_add_tab">Додај картицу</string>
+    <string name="tab_settings_edit_group">Измени групу</string>
+    <string name="tab_settings_group_empty">Нема картица у овој групи</string>
+    <string name="tab_settings_group_name_placeholder">Име групе</string>
+    <string name="tab_settings_group_default_name">Нова група</string>
+    <string name="tab_settings_behavior_group_title">Понашање</string>
+    <string name="tab_settings_merge_policy">Политика спајања</string>
+    <string name="tab_settings_merge_policy_desc">Одаберите како се ставке са сваке временске линије комбинују.</string>
+    <string name="tab_settings_merge_policy_time">Хронолошки</string>
+    <string name="tab_settings_merge_policy_time_per_page">Страница по страница</string>
+    <string name="tab_settings_merge_policy_staggered">Испреплетено</string>
+    <string name="tab_settings_filter_title">Филтер временске линије</string>
+    <string name="tab_settings_filter_desc">Одаберите које врсте објава и садржаја остају видљиви.</string>
+    <string name="tab_settings_filter_all">Све</string>
+    <string name="tab_settings_filter_custom">Прилагођено</string>
+    <string name="tab_settings_filter_kind_group">Врсте</string>
+    <string name="tab_settings_filter_content_group">Садржај</string>
     <string name="tab_settings_filter_reply">Одговори</string>
-    <string name="tab_settings_filter_repost">Поново</string>
-    <string name="tab_settings_filter_quote">Цитат</string>
+    <string name="tab_settings_filter_repost">Поновне објаве</string>
+    <string name="tab_settings_filter_quote">Цитирања</string>
+    <string name="tab_settings_filter_text_only">Само текст</string>
+    <string name="tab_settings_filter_image">Слике</string>
+    <string name="tab_settings_filter_video">Видео записи</string>
     <string name="status_share_sheet_theme_title">Тема</string>
-    <string name="channel_item_follow">Следите</string>
+    <string name="channel_title">Канал</string>
+    <string name="channel_item_follow">Прати</string>
+    <string name="channel_item_unfollow">Престани да пратиш</string>
+    <string name="channel_item_favourite">Омиљено</string>
+    <string name="channel_item_unfavourite">Уклони из омиљених</string>
 </resources>

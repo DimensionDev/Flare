@@ -1,362 +1,530 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name" translatable="false">Flare</string>
     <string name="delete">Sil</string>
-    <string name="done">Tamam</string>
+    <string name="done">Bitti</string>
     <string name="cancel">İptal</string>
     <string name="ok">Tamam</string>
-    <string name="profile_header_following_count">%1$s Takip Edilenler</string>
+
+    <string name="profile_header_following_count">%1$s Takip</string>
     <string name="profile_header_fans_count">%1$s Takipçi</string>
+    <string name="profile_header_toots_count">%1$s Gönderi</string>
+    <string name="profile_misskey_header_status_count">%1$s Gönderi</string>
+
     <string name="profile_header_button_follow">Takip Et</string>
-    <string name="profile_header_button_following">Takip Edilenler</string>
+    <string name="profile_header_button_following">Takip Ediliyor</string>
     <string name="profile_header_button_requested">İstek Gönderildi</string>
     <string name="profile_header_button_blocked">Engellendi</string>
-    <string name="profile_header_button_is_fans">Seni Takip Ediyor</string>
+    <string name="profile_header_button_is_fans">Seni takip ediyor</string>
+
     <string name="mastodon_notification_item_followed_you">seni takip etti</string>
-    <string name="mastodon_notification_item_favourited_your_status">favori olarak ekledi</string>
-    <string name="mastodon_notification_item_reblogged_your_status">yeniden paylaştı</string>
-    <string name="mastodon_notification_item_poll_ended">Katıldığın bir anket sona erdi</string>
-    <string name="mastodon_notification_item_mentioned_you">seni bahsetti</string>
-    <string name="mastodon_notification_item_requested_follow">seni takip etme isteği</string>
-    <string name="mastodon_notification_item_updated_status">bir toot güncelledin</string>
-    <string name="mastodon_item_show_more">Daha fazlasını göster</string>
+    <string name="mastodon_notification_item_favourited_your_status">gönderini favorilerine ekledi</string>
+    <string name="mastodon_notification_item_reblogged_your_status">paylaştı</string>
+    <string name="mastodon_notification_item_poll_ended">Katıldığınız bir anket sona erdi</string>
+    <string name="mastodon_notification_item_mentioned_you">senden bahsetti</string>
+    <string name="mastodon_notification_item_requested_follow">seni takip etmek için istek gönderdi</string>
+    <string name="mastodon_notification_item_posted_status">paylaştı</string>
+    <string name="mastodon_notification_item_updated_status">bir gönderiyi güncelledi</string>
+    <string name="mastodon_item_reblogged_status">bir gönderiyi öne çıkardı</string>
+    <string name="mastodon_item_show_more">Daha fazla göster</string>
     <string name="mastodon_item_show_less">Daha az göster</string>
-    <string name="mastodon_item_pinned">Sabitlenmiş toot</string>
+    <string name="mastodon_item_pinned">bir gönderiyi sabitledi</string>
+
+    <string name="post_show_full_text">Tam metni göster</string>
+
     <string name="bluesky_notification_item_followed_you">seni takip etti</string>
-    <string name="bluesky_notification_item_favourited_your_status">favori olarak ekledi</string>
-    <string name="bluesky_notification_item_reblogged_your_status">yeniden paylaştı</string>
-    <string name="bluesky_notification_item_poll_ended">Katıldığın bir anket sona erdi</string>
-    <string name="bluesky_notification_item_mentioned_you">seni bahsetti</string>
-    <string name="bluesky_item_reblogged_status">bir durumu boostladı</string>
+    <string name="bluesky_notification_item_favourited_your_status">gönderini beğendi</string>
+    <string name="bluesky_notification_item_reblogged_your_status">gönderini yeniden paylaştı</string>
+    <string name="bluesky_notification_item_poll_ended">Katıldığınız bir anket sona erdi</string>
+    <string name="bluesky_notification_item_mentioned_you">senden bahsetti</string>
+    <string name="bluesky_item_reblogged_status">yeniden paylaştı</string>
     <string name="bluesky_notification_item_replied_to_you">sana yanıt verdi</string>
-    <string name="bluesky_notification_item_quoted_your_status">alıntı yaptı</string>
-    <string name="bluesky_notification_item_starterpack_joined">Başlangıç paketi Katıldı</string>
+    <string name="bluesky_notification_item_quoted_your_status">gönderini alıntıladı</string>
+    <string name="bluesky_notification_item_starterpack_joined">bir Başlangıç Paketi aracılığıyla katıldı</string>
     <string name="bluesky_notification_item_unKnown">Bilinmiyor</string>
-    <string name="bluesky_notification_item_pin">Sabitlenmiş</string>
-    <string name="misskey_notification_item_mentioned_you">seni bahsetti</string>
+    <string name="bluesky_notification_item_pin">bir gönderiyi sabitledi</string>
+
+    <string name="misskey_notification_item_mentioned_you">senden bahsetti</string>
     <string name="misskey_notification_item_replied_to_you">sana yanıt verdi</string>
-    <string name="misskey_notification_item_reposted_your_status">bir durumu yeniden paylaştı</string>
-    <string name="misskey_notification_item_quoted_your_status">alıntı yaptı</string>
-    <string name="misskey_notification_item_poll_ended">Katıldığın bir anket sona erdi</string>
+    <string name="misskey_notification_item_reposted_your_status">gönderini yeniden paylaştı</string>
+    <string name="misskey_notification_item_quoted_your_status">gönderini alıntıladı</string>
+    <string name="misskey_notification_item_reacted_to_your_status">gönderine tepki verdi</string>
+    <string name="misskey_notification_item_poll_ended">Katıldığınız bir anket sona erdi</string>
     <string name="misskey_notification_item_follow_request_accepted">takip isteğini kabul etti</string>
-    <string name="misskey_notification_item_achievement_earned">Başarı kazandın: %1$s\n%2$s</string>
-    <string name="misskey_notification_item_app">Uygulama</string>
-    <string name="misskey_notification_item_export_completed">Dışa aktarma tamamlandı</string>
+    <string name="misskey_notification_item_scheduled_note_posted">planlanmış not paylaşıldı</string>
+    <string name="misskey_notification_item_scheduled_note_post_failed">planlanmış not paylaşılamadı</string>
+    <string name="misskey_notification_item_role_assigned">sana bir rol atadı</string>
+    <string name="misskey_notification_item_chat_room_invitation_received">seni bir sohbet odasına davet etti</string>
+    <string name="misskey_notification_item_achievement_earned">Bir başarı kazandın: %1$s\n%2$s</string>
+    <string name="misskey_notification_item_app">uygulama bildirimi</string>
+    <string name="misskey_notification_item_export_completed">dışa aktarma tamamlandı</string>
+    <string name="misskey_notification_item_test">test bildirimi</string>
+    <string name="misskey_notification_item_login">yeni giriş tespit edildi</string>
+    <string name="misskey_notification_item_create_token">erişim jetonu oluşturuldu</string>
     <string name="misskey_notification_item_followed_you">seni takip etti</string>
-    <string name="misskey_notification_item_requested_follow">seni takip etme isteği gönderdi</string>
-    <string name="misskey_notification_unknwon">Bilinmeyen bildirim %1$s</string>
-    <string name="misskey_item_reblogged_status">bir durumu boostladı</string>
+    <string name="misskey_notification_item_requested_follow">seni takip etmek için istek gönderdi</string>
+    <string name="misskey_notification_unknwon">Bilinmeyen bildirim: %1$s</string>
+    <string name="misskey_item_reblogged_status">yeniden paylaştı</string>
+
     <string name="xqt_item_reblogged_status">yeniden paylaştı</string>
-    <string name="xqt_item_mention_status">seni bahsetti</string>
-    <string name="mastodon_visibility_public">Herkese açık</string>
-    <string name="mastodon_visibility_unlisted">Listeye alınmamış</string>
+    <string name="xqt_item_mention_status">senden bahsetti</string>
+
+    <string name="mastodon_visibility_public">Genel</string>
+    <string name="mastodon_visibility_unlisted">Liste dışı</string>
     <string name="mastodon_visibility_private">Özel</string>
     <string name="mastodon_visibility_direct">Doğrudan</string>
-    <string name="mastodon_visibility_public_description">Bu gönderiyi herkes görebilir ve beğenebilir</string>
-    <string name="mastodon_visibility_private_description">Sadece takipçiler bu gönderiyi görebilir</string>
-    <string name="mastodon_visibility_direct_description">Yalnızca belirtilen kullanıcılar bu gönderiyi görebilir</string>
+    <string name="mastodon_visibility_public_description">Bu gönderiyi herkes görebilir ve öne çıkarabilir</string>
+    <string name="mastodon_visibility_unlisted_description">Bu gönderiyi herkes görebilir, ancak genel zaman tünelinde görünmez</string>
+    <string name="mastodon_visibility_private_description">Bu gönderiyi yalnızca takipçiler görebilir</string>
+    <string name="mastodon_visibility_direct_description">Bu gönderiyi yalnızca bahsedilen kullanıcılar görebilir</string>
+
     <string name="settings_notifications_title">Bildirimler</string>
-    <string name="settings_notifications_subtitle">Flare\'ın size nasıl bildirim göndereceğini özelleştirin</string>
-    <string name="status_loadmore_error_retry">Yeniden dene</string>
+    <string name="settings_notifications_subtitle">Flare\'in sizi nasıl bilgilendireceğini özelleştirin</string>
+
+    <string name="status_loadmore_end">Daha fazla gönderi yok</string>
+    <string name="status_loadmore_error">Daha fazla gönderi yüklenirken hata oluştu</string>
+    <string name="status_loadmore_error_retry">Tekrar dene</string>
     <string name="status_empty">Burada görülecek bir şey yok</string>
-    <string name="status_sensitive_media">Hassas medya</string>
-    <string name="show_media">Medya göster</string>
-    <string name="login_expired">Giriş oturumu süresi doldu</string>
-    <string name="login_expired_message">Yeniden giriş yapmak için tıklayın</string>
-    <string name="login_expired_relogin">Yeniden giriş yap</string>
-    <string name="misskey_compose_local_only">Yerel yalnızca</string>
-    <string name="misskey_compose_local_only_description">Yalnızca bu örnekteki kullanıcılar bu gönderiyi görebilir</string>
-    <string name="misskey_item_action_renote">Yeniden paylaşıyorum</string>
-    <string name="misskey_item_action_quote">Alıntı</string>
+    <string name="status_sensitive_media">Hassas içerik</string>
+    <string name="show_media">Medyayı göster</string>
+    <string name="hide_media">Medyayı gizle</string>
+    <string name="login_expired">Oturum süresi doldu</string>
+    <string name="login_expired_message">Tekrar giriş yapmak için dokunun</string>
+    <string name="login_expired_relogin">Tekrar giriş yap</string>
+
+    <string name="permission_denied_title">İzin reddedildi</string>
+    <string name="permission_denied_message">Bu sayfaya erişmek için tekrar giriş yapın</string>
+
+    <string name="misskey_compose_local_only">Yalnızca yerel</string>
+    <string name="misskey_compose_local_only_description">Bu gönderiyi yalnızca bu sunucudaki kullanıcılar görebilir</string>
+
+    <string name="misskey_item_action_renote">Yeniden Not</string>
+    <string name="misskey_item_action_quote">Alıntıla</string>
+
     <string name="bluesky_notification_unknown_message">Bilinmeyen bildirim türü %1$s</string>
     <string name="bluesky_notification_unknown_message2">Lütfen bu sorunu geliştiriciye bildirin.</string>
-    <string name="blusky_item_action_repost">Yeniden paylaş</string>
-    <string name="blusky_item_action_quote">Alıntı</string>
-    <string name="blusky_item_action_report">Şikayet et</string>
+
+    <string name="blusky_item_action_repost">Yeniden Paylaş</string>
+    <string name="blusky_item_action_quote">Alıntıla</string>
+    <string name="blusky_item_action_report">Bildir</string>
     <string name="blusky_item_action_delete">Sil</string>
-    <string name="mastodon_item_unbookmark">Yerimi bırak</string>
-    <string name="mastodon_item_bookmark">Yerimi kaydet</string>
+
+    <string name="mastodon_item_unbookmark">Yer işaretini kaldır</string>
+    <string name="mastodon_item_bookmark">Yer işareti ekle</string>
     <string name="mastodon_item_delete">Sil</string>
-    <string name="mastodon_item_report">Şikayet et</string>
+    <string name="mastodon_item_report">Bildir</string>
     <string name="misskey_item_action_delete">Sil</string>
-    <string name="misskey_item_action_report">Şikayet et</string>
-    <string name="bookmark_remove">Yerimi kaldır</string>
-    <string name="bookmark_add">Yerimi ekle</string>
+    <string name="misskey_item_action_report">Bildir</string>
+
+    <string name="bookmark_remove">Yer işaretini kaldır</string>
+    <string name="bookmark_add">Yer işareti ekle</string>
     <string name="like">Beğen</string>
-    <string name="unlike">Beğenme</string>
-    <string name="favourite">Favori</string>
-    <string name="unfavourite">Favorilerden Çıkar</string>
-    <string name="more">Daha fazlası</string>
-    <string name="quote">Alıntı</string>
-    <string name="reaction_add">Tepki Ekle</string>
-    <string name="reaction_remove">Tepki Kaldır</string>
+    <string name="unlike">Beğenmekten vazgeç</string>
+    <string name="favourite">Favorilere ekle</string>
+    <string name="unfavourite">Favorilerden çıkar</string>
+    <string name="more">Daha fazla</string>
+    <string name="quote">Alıntıla</string>
+    <string name="reaction_add">Tepki ekle</string>
+    <string name="reaction_remove">Tepkiyi kaldır</string>
     <string name="reply">Yanıtla</string>
-    <string name="report">Şikayet et</string>
+    <string name="report">Bildir</string>
     <string name="retweet">Yeniden paylaş</string>
-    <string name="retweet_remove">Yeniden gönderimi kaldır</string>
+    <string name="retweet_remove">Paylaşımı geri al</string>
     <string name="share">Paylaş</string>
-    <string name="fx_share">FxEmbed aracılığıyla paylaş</string>
-    <string name="comment">Yorum</string>
-    <string name="user_report">Şikayet et</string>
-    <string name="user_block">engelle</string>
-    <string name="user_unblock">engelle</string>
-    <string name="user_mute">sessize al</string>
-    <string name="user_unmute">ses aç</string>
-    <string name="user_mute_with_parameter">%1$s sustur</string>
-    <string name="user_block_with_parameter">%1$s engelle</string>
+    <string name="fx_share">FxEmbed ile paylaş</string>
+    <string name="comment">Yorum yap</string>
+
+    <string name="user_report">Bildir</string>
+    <string name="user_block">Engelle</string>
+    <string name="user_unblock">Engeli kaldır</string>
+    <string name="user_mute">Sessize al</string>
+    <string name="user_unmute">Sesi aç</string>
+    <string name="user_mute_with_parameter">%1$s kişisini sessize al</string>
+    <string name="user_block_with_parameter">%1$s kişisini engelle</string>
     <string name="mastodon_item_content_warning">İçerik uyarısı</string>
-    <string name="reply_to">%1$s\'ye yanıtla</string>
+    <string name="reply_to">%1$s kişisine yanıt ver</string>
+    <string name="status_detail_translate">Çevir</string>
+    <string name="status_detail_tldr">Özetle</string>
+    <string name="translation_badge_translated">Çevrildi</string>
+    <string name="translation_badge_translating">Çevriliyor…</string>
+    <string name="translation_badge_failed">Çeviri başarısız</string>
+    <string name="translation_retry">Çeviriyi tekrar dene</string>
+    <string name="translation_show_original">Orijinali göster</string>
+
     <string name="date_format_year_month_day">dd MMM yy</string>
     <string name="date_format_month_day">dd MMM</string>
     <string name="date_format_full">dd MMM yy HH:mm</string>
-    <string name="vvo_notification_like">durumunu beğendin</string>
-    <string name="user_follow_edit_list">Listeye Ekle/Kaldır</string>
+
+    <string name="vvo_notification_like">Gönderini beğendi</string>
+
+    <string name="user_follow_edit_list">Listeye ekle/çıkar</string>
     <string name="list_empty">Liste yok</string>
-    <string name="list_error">Listeleri yüklemede hata oluştu</string>
-    <string name="misskey_achievement_notes1_title">şu anda msky\'imi ayarlıyorum</string>
-    <string name="misskey_achievement_notes1_description">ilk notunu paylaş</string>
-    <string name="misskey_achievement_notes1_flavor">Misskey ile iyi zaman geçir!</string>
+    <string name="list_error">Listeler yüklenemedi</string>
+
+    <string name="misskey_achievement_notes1_title">sadece msky\'mi kuruyorum</string>
+    <string name="misskey_achievement_notes1_description">İlk notunu paylaş</string>
+    <string name="misskey_achievement_notes1_flavor">Misskey ile iyi vakit geçirin!</string>
+
     <string name="misskey_achievement_notes10_title">Bazı notlar</string>
     <string name="misskey_achievement_notes10_description">10 not paylaş</string>
-    <string name="misskey_achievement_notes100_title">Birçok not</string>
+
+    <string name="misskey_achievement_notes100_title">Bir sürü not</string>
     <string name="misskey_achievement_notes100_description">100 not paylaş</string>
-    <string name="misskey_achievement_notes500_title">Notlarla kaplı</string>
+
+    <string name="misskey_achievement_notes500_title">Notlara boğulmuş</string>
     <string name="misskey_achievement_notes500_description">500 not paylaş</string>
-    <string name="misskey_achievement_notes1000_title">Bir dağ dolusu not</string>
+
+    <string name="misskey_achievement_notes1000_title">Bir not dağı</string>
     <string name="misskey_achievement_notes1000_description">1.000 not paylaş</string>
+
     <string name="misskey_achievement_notes5000_title">Taşan notlar</string>
     <string name="misskey_achievement_notes5000_description">5.000 not paylaş</string>
+
     <string name="misskey_achievement_notes10000_title">Süper not</string>
     <string name="misskey_achievement_notes10000_description">10.000 not paylaş</string>
-    <string name="misskey_achievement_notes20000_title">Daha fazla not...</string>
+
+    <string name="misskey_achievement_notes20000_title">Daha fazla... not... lazım...</string>
     <string name="misskey_achievement_notes20000_description">20.000 not paylaş</string>
+
     <string name="misskey_achievement_notes30000_title">Notlar notlar notlar!</string>
     <string name="misskey_achievement_notes30000_description">30.000 not paylaş</string>
+
     <string name="misskey_achievement_notes40000_title">Not fabrikası</string>
     <string name="misskey_achievement_notes40000_description">40.000 not paylaş</string>
-    <string name="misskey_achievement_notes50000_title">Notlar gezegeni</string>
+
+    <string name="misskey_achievement_notes50000_title">Not gezegeni</string>
     <string name="misskey_achievement_notes50000_description">50.000 not paylaş</string>
-    <string name="misskey_achievement_notes60000_title">Not kuasar</string>
+
+    <string name="misskey_achievement_notes60000_title">Not kuasarı</string>
     <string name="misskey_achievement_notes60000_description">60.000 not paylaş</string>
+
     <string name="misskey_achievement_notes70000_title">Not kara deliği</string>
     <string name="misskey_achievement_notes70000_description">70.000 not paylaş</string>
+
     <string name="misskey_achievement_notes80000_title">Not galaksisi</string>
     <string name="misskey_achievement_notes80000_description">80.000 not paylaş</string>
+
     <string name="misskey_achievement_notes90000_title">Not evreni</string>
     <string name="misskey_achievement_notes90000_description">90.000 not paylaş</string>
+
     <string name="misskey_achievement_notes100000_title">TÜM NOTLARINIZ BİZE AİT</string>
     <string name="misskey_achievement_notes100000_description">100.000 not paylaş</string>
-    <string name="misskey_achievement_notes100000_flavor">Gerçekten çok şey söylemekte özgürsünüz.</string>
-    <string name="misskey_achievement_login3_title">Başlangıçcı I</string>
-    <string name="misskey_achievement_login3_description">Toplam 3 gün oturum aç</string>
-    <string name="misskey_achievement_login3_flavor">Bugünden itibaren bana Misskist diyebilirsiniz</string>
-    <string name="misskey_achievement_login7_title">Başlangıçcı II</string>
-    <string name="misskey_achievement_login7_description">Toplam 7 gün oturum aç</string>
-    <string name="misskey_achievement_login7_flavor">Olayı kavradığını hissettin mi?</string>
-    <string name="misskey_achievement_login15_title">Başlangıçcı III</string>
-    <string name="misskey_achievement_login15_description">Toplam 15 gün oturum aç</string>
+    <string name="misskey_achievement_notes100000_flavor">Söyleyecek çok şeyin varmış.</string>
+
+    <string name="misskey_achievement_login3_title">Yeni Başlayan I</string>
+    <string name="misskey_achievement_login3_description">Toplam 3 gün giriş yap</string>
+    <string name="misskey_achievement_login3_flavor">Bugünden itibaren bana Misskist deyin</string>
+
+    <string name="misskey_achievement_login7_title">Yeni Başlayan II</string>
+    <string name="misskey_achievement_login7_description">Toplam 7 gün giriş yap</string>
+    <string name="misskey_achievement_login7_flavor">İşleri kavradığını hissediyor musun?</string>
+
+    <string name="misskey_achievement_login15_title">Yeni Başlayan III</string>
+    <string name="misskey_achievement_login15_description">Toplam 15 gün giriş yap</string>
+
     <string name="misskey_achievement_login30_title">Misskist I</string>
-    <string name="misskey_achievement_login30_description">Toplam 30 gün oturum aç</string>
+    <string name="misskey_achievement_login30_description">Toplam 30 gün giriş yap</string>
+
     <string name="misskey_achievement_login60_title">Misskist II</string>
-    <string name="misskey_achievement_login60_description">Toplam 60 gün oturum aç</string>
+    <string name="misskey_achievement_login60_description">Toplam 60 gün giriş yap</string>
+
     <string name="misskey_achievement_login100_title">Misskist III</string>
-    <string name="misskey_achievement_login100_description">Toplam 100 gün oturum aç</string>
-    <string name="misskey_achievement_login100_flavor">Şiddetli Misskist</string>
-    <string name="misskey_achievement_login200_title">Düzenli I</string>
-    <string name="misskey_achievement_login200_description">Toplam 200 gün oturum aç</string>
-    <string name="misskey_achievement_login300_title">Düzenli II</string>
-    <string name="misskey_achievement_login300_description">Toplam 300 gün oturum aç</string>
-    <string name="misskey_achievement_login400_title">Düzenli III</string>
-    <string name="misskey_achievement_login400_description">Toplam 400 gün oturum aç</string>
+    <string name="misskey_achievement_login100_description">Toplam 100 gün giriş yap</string>
+    <string name="misskey_achievement_login100_flavor">Sert Misskist</string>
+
+    <string name="misskey_achievement_login200_title">Müdavim I</string>
+    <string name="misskey_achievement_login200_description">Toplam 200 gün giriş yap</string>
+
+    <string name="misskey_achievement_login300_title">Müdavim II</string>
+    <string name="misskey_achievement_login300_description">Toplam 300 gün giriş yap</string>
+
+    <string name="misskey_achievement_login400_title">Müdavim III</string>
+    <string name="misskey_achievement_login400_description">Toplam 400 gün giriş yap</string>
+
     <string name="misskey_achievement_login500_title">Uzman I</string>
-    <string name="misskey_achievement_login500_description">Toplam 500 gün oturum aç</string>
-    <string name="misskey_achievement_login500_flavor">Arkadaşlarım, sık sık notları sevdiğimi söylediler</string>
+    <string name="misskey_achievement_login500_description">Toplam 500 gün giriş yap</string>
+    <string name="misskey_achievement_login500_flavor">Arkadaşlarım, sık sık notları sevdiğim söylenir</string>
+
     <string name="misskey_achievement_login600_title">Uzman II</string>
-    <string name="misskey_achievement_login600_description">Toplam 600 gün oturum aç</string>
+    <string name="misskey_achievement_login600_description">Toplam 600 gün giriş yap</string>
+
     <string name="misskey_achievement_login700_title">Uzman III</string>
-    <string name="misskey_achievement_login700_description">Toplam 700 gün oturum aç</string>
+    <string name="misskey_achievement_login700_description">Toplam 700 gün giriş yap</string>
+
     <string name="misskey_achievement_login800_title">Notların Ustası I</string>
-    <string name="misskey_achievement_login800_description">Toplam 800 gün oturum aç</string>
+    <string name="misskey_achievement_login800_description">Toplam 800 gün giriş yap</string>
+
     <string name="misskey_achievement_login900_title">Notların Ustası II</string>
-    <string name="misskey_achievement_login900_description">Toplam 900 gün oturum aç</string>
+    <string name="misskey_achievement_login900_description">Toplam 900 gün giriş yap</string>
+
     <string name="misskey_achievement_login1000_title">Notların Ustası III</string>
-    <string name="misskey_achievement_login1000_description">Toplam 1.000 gün oturum aç</string>
-    <string name="misskey_achievement_login1000_flavor">Misskey\'i kullandığınız için teşekkür ederiz!</string>
-    <string name="misskey_achievement_note_clipped1_title">Kesmek zorunda...</string>
-    <string name="misskey_achievement_note_clipped1_description">ilk notunu kes</string>
+    <string name="misskey_achievement_login1000_description">Toplam 1.000 gün giriş yap</string>
+    <string name="misskey_achievement_login1000_flavor">Misskey kullandığınız için teşekkürler!</string>
+
+    <string name="misskey_achievement_note_clipped1_title">Mutlaka... kırpmalıyım...</string>
+    <string name="misskey_achievement_note_clipped1_description">İlk notunu kırp</string>
+
     <string name="misskey_achievement_note_favorited1_title">Yıldız Gözlemcisi</string>
-    <string name="misskey_achievement_note_favorited1_description">ilk notunu favori olarak işaretle</string>
-    <string name="misskey_achievement_my_note_favorited1_title">Yıldız Arayan</string>
-    <string name="misskey_achievement_my_note_favorited1_description">Başka birinin bir notunu favori olarak işaretlemesine izin ver</string>
+    <string name="misskey_achievement_note_favorited1_description">İlk notunu favorilerine ekle</string>
+
+    <string name="misskey_achievement_my_note_favorited1_title">Yıldız Aramak</string>
+    <string name="misskey_achievement_my_note_favorited1_description">Başka birinin notlarından birini favorilerine eklemesini sağla</string>
+
     <string name="misskey_achievement_profile_filled_title">İyi hazırlanmış</string>
-    <string name="misskey_achievement_profile_filled_description">Profilini ayarla</string>
-    <string name="misskey_achievement_marked_as_cat_title">Ben bir Kediyim</string>
+    <string name="misskey_achievement_profile_filled_description">Profilini kur</string>
+
+    <string name="misskey_achievement_marked_as_cat_title">Ben bir kediyim</string>
     <string name="misskey_achievement_marked_as_cat_description">Hesabını kedi olarak işaretle</string>
-    <string name="misskey_achievement_marked_as_cat_flavor">Sana daha sonra bir isim vereceğim.</string>
-    <string name="misskey_achievement_following1_title">ilk kullanıcıyı takip et</string>
+    <string name="misskey_achievement_marked_as_cat_flavor">Sana sonra bir isim vereceğim.</string>
+
+    <string name="misskey_achievement_following1_title">İlk kullanıcını takip ediyorsun</string>
     <string name="misskey_achievement_following1_description">Bir kullanıcıyı takip et</string>
+
     <string name="misskey_achievement_following10_title">Devam et... devam et...</string>
     <string name="misskey_achievement_following10_description">10 kullanıcıyı takip et</string>
-    <string name="misskey_achievement_following50_title">Birçok arkadaş</string>
+
+    <string name="misskey_achievement_following50_title">Bir sürü arkadaş</string>
     <string name="misskey_achievement_following50_description">50 hesabı takip et</string>
+
     <string name="misskey_achievement_following100_title">100 Arkadaş</string>
     <string name="misskey_achievement_following100_description">100 hesabı takip et</string>
-    <string name="misskey_achievement_following300_title">Arkadaş yığılması</string>
+
+    <string name="misskey_achievement_following300_title">Arkadaş aşırı yüklemesi</string>
     <string name="misskey_achievement_following300_description">300 hesabı takip et</string>
+
     <string name="misskey_achievement_followers1_title">İlk takipçi</string>
     <string name="misskey_achievement_followers1_description">1 takipçi kazan</string>
+
     <string name="misskey_achievement_followers10_title">Beni takip et!</string>
     <string name="misskey_achievement_followers10_description">10 takipçi kazan</string>
-    <string name="misskey_achievement_followers50_title">Kalabalık içinde</string>
+
+    <string name="misskey_achievement_followers50_title">Kalabalıklar geliyor</string>
     <string name="misskey_achievement_followers50_description">50 takipçi kazan</string>
+
     <string name="misskey_achievement_followers100_title">Popüler</string>
     <string name="misskey_achievement_followers100_description">100 takipçi kazan</string>
-    <string name="misskey_achievement_followers300_title">Lütfen tek sıra ol</string>
+
+    <string name="misskey_achievement_followers300_title">Lütfen tek sıra olun</string>
     <string name="misskey_achievement_followers300_description">300 takipçi kazan</string>
+
     <string name="misskey_achievement_followers500_title">Radyo Kulesi</string>
     <string name="misskey_achievement_followers500_description">500 takipçi kazan</string>
-    <string name="misskey_achievement_followers1000_title">Etkileyici</string>
+
+    <string name="misskey_achievement_followers1000_title">Fenomen</string>
     <string name="misskey_achievement_followers1000_description">1.000 takipçi kazan</string>
-    <string name="misskey_achievement_collect_achievements30_title">Başarı Toplayıcısı</string>
+
+    <string name="misskey_achievement_collect_achievements30_title">Başarı Koleksiyoncusu</string>
     <string name="misskey_achievement_collect_achievements30_description">30 başarı kazan</string>
-    <string name="misskey_achievement_view_achievements3min_title">Beğenmek Başarıları</string>
-    <string name="misskey_achievement_view_achievements3min_description">Başarılar listene en az 3 dakika bak</string>
+
+    <string name="misskey_achievement_view_achievements3min_title">Başarıları Sever</string>
+    <string name="misskey_achievement_view_achievements3min_description">Başarı listenize en az 3 dakika boyunca bakın</string>
+
     <string name="misskey_achievement_i_love_misskey_title">Misskey\'i Seviyorum</string>
     <string name="misskey_achievement_i_love_misskey_description">\"I ❤ #Misskey\" paylaş</string>
-    <string name="misskey_achievement_i_love_misskey_flavor">Misskey\'in geliştirme ekibi desteğinizi çok takdir ediyor!</string>
+    <string name="misskey_achievement_i_love_misskey_flavor">Misskey geliştirme ekibi desteğiniz için çok minnettar!</string>
+
     <string name="misskey_achievement_found_treasure_title">Hazine Avı</string>
     <string name="misskey_achievement_found_treasure_description">Gizli hazineyi buldun</string>
-    <string name="misskey_achievement_client30min_title">Kısa bir mola</string>
+
+    <string name="misskey_achievement_client30min_title">Kısa mola</string>
     <string name="misskey_achievement_client30min_description">Misskey\'i en az 30 dakika açık tut</string>
-    <string name="misskey_achievement_client60min_title">Misskey\'de \"Miss\" yok</string>
+
+    <string name="misskey_achievement_client60min_title">Misskey\'de \"Hata\" yok</string>
     <string name="misskey_achievement_client60min_description">Misskey\'i en az 60 dakika açık tut</string>
+
     <string name="misskey_achievement_note_deleted_within1min_title">Boşver</string>
-    <string name="misskey_achievement_note_deleted_within1min_description">Bir notu paylaşımından bir dakika içinde sil</string>
-    <string name="misskey_achievement_posted_at_late_night_title">Gececi</string>
-    <string name="misskey_achievement_posted_at_late_night_description">Gece vakti bir not paylaş</string>
-    <string name="misskey_achievement_posted_at_late_night_flavor">Artık uyuma zamanı.</string>
+    <string name="misskey_achievement_note_deleted_within1min_description">Bir notu paylaştıktan sonraki bir dakika içinde sil</string>
+
+    <string name="misskey_achievement_posted_at_late_night_title">Gece Kuşu</string>
+    <string name="misskey_achievement_posted_at_late_night_description">Gece geç saatte bir not paylaş</string>
+    <string name="misskey_achievement_posted_at_late_night_flavor">Yatma vakti geldi.</string>
+
     <string name="misskey_achievement_posted_at_0min0sec_title">Konuşan Saat</string>
-    <string name="misskey_achievement_posted_at_0min0sec_description">00:00\'da not paylaş</string>
-    <string name="misskey_achievement_posted_at_0min0sec_flavor">Tık Tık Tık Klank</string>
-    <string name="misskey_achievement_self_quote_title">Kendine Atıf</string>
+    <string name="misskey_achievement_posted_at_0min0sec_description">Saat tam 00:00\'da bir not paylaş</string>
+    <string name="misskey_achievement_posted_at_0min0sec_flavor">Tık Tık Tık Çaaan</string>
+
+    <string name="misskey_achievement_self_quote_title">Öz-Referans</string>
     <string name="misskey_achievement_self_quote_description">Kendi notunu alıntıla</string>
-    <string name="misskey_achievement_htl20npm_title">Akışkan Zaman Çizelgesi</string>
-    <string name="misskey_achievement_htl20npm_description">Ana zaman çizelgenizin hızını dakikada 20 notun üzerine çıkarın</string>
+
+    <string name="misskey_achievement_htl20npm_title">Akan Zaman Tüneli</string>
+    <string name="misskey_achievement_htl20npm_description">Ana zaman tünelinizin hızı dakikada 20 notu (npm) aşsın</string>
+
     <string name="misskey_achievement_view_instance_chart_title">Analist</string>
-    <string name="misskey_achievement_view_instance_chart_description">Örneğinizin grafiklerine bakın</string>
+    <string name="misskey_achievement_view_instance_chart_description">Sunucunuzun grafiklerini görüntüleyin</string>
+
     <string name="misskey_achievement_output_hello_world_on_scratchpad_title">Merhaba dünya!</string>
-    <string name="misskey_achievement_output_hello_world_on_scratchpad_description">Scratchpad\'te \"merhaba dünya\" yaz</string>
+    <string name="misskey_achievement_output_hello_world_on_scratchpad_description">Scratchpad\'de \"hello world\" çıktısı al</string>
+
     <string name="misskey_achievement_open3windows_title">Çoklu Pencere</string>
-    <string name="misskey_achievement_open3windows_description">Aynı anda en az 3 pencere açık tut</string>
-    <string name="misskey_achievement_drive_folder_circular_reference_title">Dairesel Referans</string>
-    <string name="misskey_achievement_drive_folder_circular_reference_description">Drive\'da kendiliğinden iç içe geçmiş bir klasör oluşturmaya çalışın</string>
-    <string name="misskey_achievement_react_without_read_title">Gerçekten bunu okudun mu?</string>
-    <string name="misskey_achievement_react_without_read_description">Gönderildikten sonraki 3 saniye içinde 100 karakterden uzun bir notta tepki verin</string>
-    <string name="misskey_achievement_clicked_click_here_title">Buraya tıklayın</string>
-    <string name="misskey_achievement_clicked_click_here_description">Buraya tıkladınız</string>
-    <string name="misskey_achievement_just_plain_lucky_title">Tamamen Şanslı</string>
-    <string name="misskey_achievement_just_plain_lucky_description">Her 10 saniyede %0.005\% olasılıkla elde etme şansı vardır</string>
+    <string name="misskey_achievement_open3windows_description">Aynı anda en az 3 pencere açık olsun</string>
+
+    <string name="misskey_achievement_drive_folder_circular_reference_title">Döngüsel Referans</string>
+    <string name="misskey_achievement_drive_folder_circular_reference_description">Sürücü\'de (Drive) özyinelemeli olarak iç içe geçmiş bir klasör oluşturmaya çalışın</string>
+
+    <string name="misskey_achievement_react_without_read_title">Bunu gerçekten okudun mu?</string>
+    <string name="misskey_achievement_react_without_read_description">100 karakterden uzun bir nota paylaşıldıktan sonraki 3 saniye içinde tepki ver</string>
+
+    <string name="misskey_achievement_clicked_click_here_title">Buraya tıkla</string>
+    <string name="misskey_achievement_clicked_click_here_description">Buraya tıkladın</string>
+
+    <string name="misskey_achievement_just_plain_lucky_title">Sadece Şans</string>
+    <string name="misskey_achievement_just_plain_lucky_description">Her 10 saniyede bir %0,005 olasılıkla elde edilme şansı vardır</string>
+
     <string name="misskey_achievement_set_name_to_syuilo_title">Tanrı Kompleksi</string>
-    <string name="misskey_achievement_set_name_to_syuilo_description">Adınızı \"syuilo\" olarak ayarlayın</string>
-    <string name="misskey_achievement_passed_since_account_created1_title">Bir Yıl Dönümü</string>
-    <string name="misskey_achievement_passed_since_account_created1_description">Hesabınızın oluşturulmasından bu yana bir yıl geçti</string>
-    <string name="misskey_achievement_passed_since_account_created2_title">İki Yıl Dönümü</string>
-    <string name="misskey_achievement_passed_since_account_created2_description">Hesabınızın oluşturulmasından bu yana iki yıl geçti</string>
+    <string name="misskey_achievement_set_name_to_syuilo_description">Adını \"syuilo\" olarak ayarla</string>
+
+    <string name="misskey_achievement_passed_since_account_created1_title">Birinci Yıl Dönümü</string>
+    <string name="misskey_achievement_passed_since_account_created1_description">Hesabın oluşturulduğundan beri bir yıl geçti</string>
+
+    <string name="misskey_achievement_passed_since_account_created2_title">İkinci Yıl Dönümü</string>
+    <string name="misskey_achievement_passed_since_account_created2_description">Hesabın oluşturulduğundan beri iki yıl geçti</string>
+
     <string name="misskey_achievement_passed_since_account_created3_title">Üçüncü Yıl Dönümü</string>
-    <string name="misskey_achievement_passed_since_account_created3_description">Hesabınızın oluşturulmasından bu yana üç yıl geçti</string>
-    <string name="misskey_achievement_logged_in_on_birthday_title">Mutlu Doğum Günü</string>
-    <string name="misskey_achievement_logged_in_on_birthday_description">Doğum gününüzde oturum açın</string>
-    <string name="misskey_achievement_logged_in_on_new_years_day_title">Mutlu Yeni Yıl!</string>
-    <string name="misskey_achievement_logged_in_on_new_years_day_description">Yılın ilk gününde oturum açıldı</string>
-    <string name="misskey_achievement_logged_in_on_new_years_day_flavor">Bu örnekte başka bir harika yıla</string>
-    <string name="misskey_achievement_cookie_clicked_title">Kurabiye tıklama oyunu</string>
-    <string name="misskey_achievement_cookie_clicked_description">Kurabiyeye tıkladı</string>
-    <string name="misskey_achievement_cookie_clicked_flavor">Bekle, doğru sitede misin?</string>
-    <string name="misskey_achievement_brain_diver_title">Beyin Dalgası</string>
-    <string name="misskey_achievement_brain_diver_description">Beyin Dalgası\'na bağlantıyı gönderin</string>
+    <string name="misskey_achievement_passed_since_account_created3_description">Hesabın oluşturulduğundan beri üç yıl geçti</string>
+
+    <string name="misskey_achievement_logged_in_on_birthday_title">Mutlu Yıllar</string>
+    <string name="misskey_achievement_logged_in_on_birthday_description">Doğum gününde giriş yap</string>
+
+    <string name="misskey_achievement_logged_in_on_new_years_day_title">Mutlu Yıllar!</string>
+    <string name="misskey_achievement_logged_in_on_new_years_day_description">Yılın ilk gününde giriş yaptın</string>
+    <string name="misskey_achievement_logged_in_on_new_years_day_flavor">Bu sunucuda harika bir yıl daha geçirmek dileğiyle</string>
+
+    <string name="misskey_achievement_cookie_clicked_title">Kurabiyelere tıkladığın bir oyun</string>
+    <string name="misskey_achievement_cookie_clicked_description">Kurabiyeye tıkladın</string>
+    <string name="misskey_achievement_cookie_clicked_flavor">Bekle, doğru web sitesinde misin?</string>
+
+    <string name="misskey_achievement_brain_diver_title">Brain Diver</string>
+    <string name="misskey_achievement_brain_diver_description">Brain Diver bağlantısını paylaş</string>
     <string name="misskey_achievement_brain_diver_flavor">Misskey-Misskey La-Tu-Ma</string>
-    <string name="misskey_achievement_smash_test_notification_button_title">Test taşması</string>
-    <string name="misskey_achievement_smash_test_notification_button_description">Bildirim testini son derece kısa bir süre içinde tekrar tetikleyin</string>
-    <string name="misskey_achievement_tutorial_completed_title">Misskey Temel Kursu Diploması</string>
+
+    <string name="misskey_achievement_smash_test_notification_button_title">Test aşımı</string>
+    <string name="misskey_achievement_smash_test_notification_button_description">Bildirim testini son derece kısa bir süre içinde tekrar tekrar tetikle</string>
+
+    <string name="misskey_achievement_tutorial_completed_title">Misskey Temel Kurs Diploması</string>
     <string name="misskey_achievement_tutorial_completed_description">Eğitim tamamlandı</string>
+
     <string name="misskey_achievement_bubble_game_exploding_head_title">🤯</string>
     <string name="misskey_achievement_bubble_game_exploding_head_description">Balon oyunundaki en büyük nesne</string>
-    <string name="misskey_achievement_bubble_game_double_exploding_head_title">Çift🤯</string>
-    <string name="misskey_achievement_bubble_game_double_exploding_head_description">Balon oyunundaki en büyük iki nesne aynı anda</string>
-    <string name="misskey_achievement_bubble_game_double_exploding_head_flavor">Bir öğle yemeği kutusunu böyle doldurabilirsiniz 🤯 🤯 biraz içine.</string>
-    <string name="vote">Oy ver</string>
-    <string name="poll_expired">Anket süresi doldu</string>
-    <string name="poll_voted">Oy verildi</string>
-    <string name="poll_expired_at">%1$s\'nde süresi doldu</string>
-    <string name="user_send_message">Mesaj gönder</string>
-    <string name="profile_search_user_using_account">%1$s\'ni %2$s içinde %3$s kullanarak bulun</string>
-    <string name="profile_search_user_using_account_compat">%1$s içinde bulun</string>
+
+    <string name="misskey_achievement_bubble_game_double_exploding_head_title">Çift 🤯</string>
+    <string name="misskey_achievement_bubble_game_double_exploding_head_description">Aynı anda balon oyunundaki en büyük nesneden iki tane olması</string>
+    <string name="misskey_achievement_bubble_game_double_exploding_head_flavor">Bunun gibi bir beslenme çantasını biraz 🤯 🤯 doldurabilirsin.</string>
+
+    <string name="vote">Oy Ver</string>
+    <string name="poll_expired">Anket sona erdi</string>
+    <string name="poll_voted">Oylandı</string>
+    <string name="poll_expired_at">%1$s tarihinde sona erdi</string>
+    <string name="user_send_message">Doğrudan mesaj gönder</string>
+
+    <string name="profile_search_user_using_account">%3$s kullanarak %1$s kişisini %2$s içinde bul</string>
+    <string name="profile_search_user_using_account_compat">%1$s içinde bul</string>
+
     <string name="feeds_discover_feeds_created_by">%1$s tarafından oluşturuldu</string>
-    <string name="notification_item_accept_follow_request">Kabul et</string>
+
+    <string name="notification_item_accept_follow_request">Kabul Et</string>
     <string name="notification_item_reject_follow_request">Reddet</string>
-    <string name="dm_list_empty">Hiç doğrudan mesaj yok</string>
-    <string name="dm_list_error">Doğrudan mesajları yüklemekte başarısız olundu</string>
+
+
+    <string name="dm_list_empty">Doğrudan mesaj yok</string>
+    <string name="dm_list_error">Doğrudan mesajlar yüklenemedi</string>
     <string name="send">Gönder</string>
-    <string name="dm_send_placeholder">Bir mesaj gönderin</string>
+    <string name="dm_send_placeholder">Bir mesaj gönder</string>
     <string name="dm_deleted">Silindi</string>
-    <string name="dm_conversation">Doğrudan Mesaj Odası</string>
+    <string name="dm_conversation">Doğrudan mesaj görüşmesi</string>
     <string name="dm_sending">Gönderiliyor</string>
-    <string name="dm_leave">Sohbeti terk et</string>
+    <string name="dm_leave">Görüşmeden ayrıl</string>
     <string name="dm_to_profile">Profili göster</string>
-    <string name="settings_side_panel_empty">Varsayılan olarak yan panel hesap platformuna bağlı olarak görüntülenir.</string>
+
+    <string name="settings_side_panel_empty">Varsayılan olarak, yan panel mevcut hesabın platformunu takip eder.</string>
     <string name="tab_settings_add">Ekle</string>
     <string name="tab_settings_drag">Sürükle</string>
     <string name="tab_settings_edit">Düzenle</string>
     <string name="tab_settings_remove">Kaldır</string>
     <string name="tab_settings_default">Varsayılan</string>
     <string name="tab_settings_list">Liste</string>
-    <string name="tab_settings_feed">Beslemeler</string>
+    <string name="tab_settings_feed">Akışlar</string>
+
     <string name="list_add">Liste ekle</string>
     <string name="list_edit">Listeyi düzenle</string>
     <string name="list_delete">Listeyi sil</string>
-    <string name="add_rss_source">Ekle</string>
-    <string name="edit_rss_source">Rss Kaynağını Düzenle</string>
+
+    <string name="rss_sources_title">Abonelikler</string>
+    <string name="add_rss_source">Abonelik ekle</string>
+    <string name="edit_rss_source">Aboneliği düzenle</string>
+    <string name="delete_rss_source">Aboneliği sil</string>
+
     <string name="rss_sources_title_label">Başlık</string>
-    <string name="rss_sources_url_label">Url</string>
-    <string name="service_select_welcome_title">Flare\'a hoş geldiniz</string>
+    <string name="rss_sources_url_label">URL</string>
+    <string name="rss_title">Abonelikler</string>
+    <string name="empty_rss_sources">Abonelik yok</string>
+    <string name="mastodon_trending_statuses">Trend olan durumlar</string>
+    <string name="mastodon_federated_timeline">Birleşik zaman tüneli</string>
+    <string name="mastodon_local_timeline">Yerel zaman tüneli</string>
+
+    <string name="service_select_welcome_title">Flare\'e Hoş Geldiniz</string>
+    <string name="service_select_welcome_message">Başlamak için bir sunucu girin.</string>
+    <string name="service_select_welcome_hint">Flare; Mastodon, Misskey, Bluesky, Nostr ve X\'i destekler.</string>
+    <string name="service_select_welcome_list_hint">Veya bu sunuculardan birini seçin</string>
     <string name="bluesky_login_username_hint">Kullanıcı adı</string>
     <string name="bluesky_login_password_hint">Şifre</string>
-    <string name="bluesky_login_auth_factor_token_hint">Kimlik Doğrulama Faktörü Tokeni</string>
+    <string name="bluesky_login_auth_factor_token_hint">2FA jetonu</string>
     <string name="bluesky_login_oauth_button">OAuth ile giriş yap</string>
-    <string name="bluesky_login_use_password_button">Şifre Kullan</string>
-    <string name="bluesky_login_oauth_hint">Bluesky OAuth yeterince kararlı olmayabilir, herhangi bir sorunla karşılaşırsanız lütfen şifre ile giriş yapın.</string>
-    <string name="login_button">Giriş</string>
-    <string name="mastodon_login_verify_message">Kimlik bilgilerinizi doğrularken lütfen bekleyin.</string>
+    <string name="bluesky_login_use_password_button">Şifre kullan</string>
+    <string name="bluesky_login_oauth_hint">Bluesky OAuth hala kararsız olabilir. Sorun yaşarsanız bunun yerine şifre ile girişi kullanın.</string>
+    <string name="login_button">Giriş yap</string>
+    <string name="mastodon_login_verify_message">Kimlik bilgileriniz doğrulanıyor…</string>
+    <string name="nostr_login_title">Nostr hesabını içe aktar</string>
+    <string name="nostr_login_hint">Yalnızca okuma erişimi için bir npub veya hex pubkey yapıştırın, yerel imzalama için bir nsec sağlayın, uzaktan imzalama için bir bunker URI kullanın veya Amber ve QR tabanlı Nostr Connect imzalayıcılarını bağlayın.</string>
+    <string name="nostr_login_account_hint">npub, nsec, hex key, bunker:// veya nostrconnect://</string>
+    <string name="nostr_login_bunker_hint">bunker:// veya nostrconnect:// URI</string>
+    <string name="nostr_login_bunker_button">Bunker bağla</string>
+    <string name="nostr_login_amber_button">Amber bağla</string>
+    <string name="nostr_login_qr_button">QR ile bağla</string>
+    <string name="nostr_login_qr_hint">Amber, Alby veya başka bir Nostr Connect imzalayıcı ile tarayın.</string>
+    <string name="nostr_login_qr_waiting">İmzalayıcı onayı bekleniyor…</string>
+    <string name="nostr_login_qr_link_label">Nostr Connect bağlantısı</string>
     <string name="cancel_button">İptal</string>
-    <string name="service_select_instance_input_placeholder">Örnek URL\'si</string>
+    <string name="nostr_login_generate_button">Oluştur ve giriş yap</string>
+    <string name="nostr_login_npub_hint">npub veya hex pubkey (nsec ayarlanmışsa isteğe bağlıdır)</string>
+    <string name="nostr_login_nsec_hint">nsec veya hex özel anahtarı</string>
+    <string name="nostr_login_relays_hint">Virgülle ayrılmış röle (relay) URL\'leri</string>
+    <string name="service_select_instance_input_placeholder">Sunucu (Instance) URL\'si</string>
     <string name="service_select_next_button">İleri</string>
-    <string name="service_select_empty_message">Hiçbir örnek bulunamadı</string>
+    <string name="service_select_empty_message">Sunucu bulunamadı</string>
+    <string name="service_select_compatibility_warning">Bu sunucu %1$s kullanıyor, Flare uyumluluk modunda çalışacak. Bazı özellikler düzgün çalışmayabilir.</string>
+    <string name="login_agreement">Giriş yaparak %1$s kabul etmiş olursunuz.</string>
+    <string name="eula_privacy_policy">EULA ve Gizlilik Politikası</string>
+
     <string name="home_tab_home_title">Ana Sayfa</string>
     <string name="home_tab_notifications_title">Bildirimler</string>
     <string name="home_tab_me_title">Ben</string>
     <string name="home_tab_discover_title">Keşfet</string>
     <string name="settings_title">Ayarlar</string>
     <string name="mastodon_tab_local_title">Yerel</string>
-    <string name="mastodon_tab_public_title">Herkese açık</string>
-    <string name="home_tab_featured_title">Özellikli</string>
+    <string name="mastodon_tab_public_title">Genel</string>
+    <string name="home_tab_featured_title">Öne Çıkanlar</string>
     <string name="home_tab_bookmarks_title">Yer İşaretleri</string>
-    <string name="home_tab_favorite_title">Favori</string>
-    <string name="home_tab_list_title">Liste</string>
-    <string name="home_tab_feeds_title">Beslemeler</string>
+    <string name="home_tab_favorite_title">Favoriler</string>
+    <string name="home_tab_list_title">Listeler</string>
+    <string name="home_tab_feeds_title">Akışlar</string>
     <string name="dm_list_title">Doğrudan Mesajlar</string>
     <string name="social_title">Sosyal</string>
-    <string name="antenna_title">Anten</string>
+    <string name="antenna_title">Antenler</string>
     <string name="mixed_timeline_title">Karışık</string>
+    <string name="liked_title">Beğenilenler</string>
+    <string name="all_rss_feeds_title">Tüm Abonelikler</string>
     <string name="posts_title">Gönderiler</string>
     <string name="settings_appearance_absolute_timestamp">Mutlak zaman damgası</string>
-    <string name="settings_appearance_absolute_timestamp_description">Gönderilere mutlak zaman damgaları ekle</string>
-    <string name="settings_about_description">Son nesil açık kaynaklı yapay zeka destekli merkeziyetsiz sosyal ağ istemcisi.</string>
-    <string name="settings_about_source_code">Kaynak kodu</string>
+    <string name="settings_appearance_absolute_timestamp_description">Gönderilerde tam zaman damgalarını göster</string>
+    <string name="settings_about_description">Merkezi olmayan sosyal platformlar için açık kaynaklı, yapay zeka destekli bir istemci.</string>
+    <string name="settings_about_source_code">Kaynak kod</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Telegram grubumuza katılın</string>
+    <string name="settings_about_discord" translatable="false">Discord</string>
     <string name="settings_about_discord_description">Discord sunucumuza katılın</string>
+    <string name="settings_about_line" translatable="false">Line</string>
     <string name="settings_about_line_description">Line grubumuza katılın</string>
     <string name="settings_about_localization">Crowdin</string>
-    <string name="settings_about_localization_description">Flare\'ı çevirmemize yardım edin</string>
+    <string name="settings_about_localization_description">Flare\'i çevirmemize yardımcı olun</string>
     <string name="settings_privacy_policy">Gizlilik Politikası</string>
     <string name="channel_title">Kanal</string>
 </resources>

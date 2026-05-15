@@ -1,417 +1,526 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="delete">Удалить</string>
     <string name="done">Готово</string>
     <string name="cancel">Отмена</string>
-    <string name="ok">ОК</string>
-    <string name="profile_header_following_count">%1$s подписок</string>
-    <string name="profile_header_fans_count">%1$s подписчиков</string>
-    <string name="profile_header_toots_count">%1$s записей</string>
-    <string name="profile_misskey_header_status_count">%1$s записей</string>
+    <string name="ok">OK</string>
+
+    <string name="profile_header_following_count">%1$s Подписки</string>
+    <string name="profile_header_fans_count">%1$s Подписчики</string>
+    <string name="profile_header_toots_count">%1$s Посты</string>
+    <string name="profile_misskey_header_status_count">%1$s Посты</string>
+
     <string name="profile_header_button_follow">Подписаться</string>
-    <string name="profile_header_button_following">Подписка оформлена</string>
-    <string name="profile_header_button_requested">Подписка запрошена</string>
+    <string name="profile_header_button_following">Вы подписаны</string>
+    <string name="profile_header_button_requested">Запрос отправлен</string>
     <string name="profile_header_button_blocked">Заблокирован</string>
     <string name="profile_header_button_is_fans">Подписан на вас</string>
+
     <string name="mastodon_notification_item_followed_you">подписался на вас</string>
-    <string name="mastodon_notification_item_favourited_your_status">в избранном</string>
-    <string name="mastodon_notification_item_reblogged_your_status">продвинуто</string>
-    <string name="mastodon_notification_item_poll_ended">Опрос, в котором вы участвовали, завершён</string>
+    <string name="mastodon_notification_item_favourited_your_status">добавил ваш пост в избранное</string>
+    <string name="mastodon_notification_item_reblogged_your_status">сделал репост</string>
+    <string name="mastodon_notification_item_poll_ended">Опрос, в котором вы участвовали, завершен</string>
     <string name="mastodon_notification_item_mentioned_you">упомянул вас</string>
-    <string name="mastodon_notification_item_requested_follow">запросил на вас подписку</string>
-    <string name="mastodon_notification_item_posted_status">только что написал сообщение</string>
+    <string name="mastodon_notification_item_requested_follow">отправил запрос на подписку</string>
+    <string name="mastodon_notification_item_posted_status">опубликовал</string>
     <string name="mastodon_notification_item_updated_status">обновил пост</string>
-    <string name="mastodon_item_reblogged_status">ускорил пост</string>
-    <string name="mastodon_item_show_more">Показать еще</string>
-    <string name="mastodon_item_show_less">Меньше</string>
-    <string name="mastodon_item_pinned">Закреплённый пост</string>
-    <string name="post_show_full_text">Показать полностью</string>
+    <string name="mastodon_item_reblogged_status">продвинул пост</string>
+    <string name="mastodon_item_show_more">Показать больше</string>
+    <string name="mastodon_item_show_less">Скрыть</string>
+    <string name="mastodon_item_pinned">закрепил пост</string>
+
+    <string name="post_show_full_text">Показать весь текст</string>
+
     <string name="bluesky_notification_item_followed_you">подписался на вас</string>
-    <string name="bluesky_notification_item_favourited_your_status">в избранном</string>
-    <string name="bluesky_notification_item_reblogged_your_status">продвинуто</string>
-    <string name="bluesky_notification_item_poll_ended">Опрос, в котором вы участвовали, завершён</string>
+    <string name="bluesky_notification_item_favourited_your_status">лайкнул ваш пост</string>
+    <string name="bluesky_notification_item_reblogged_your_status">репостнул ваш пост</string>
+    <string name="bluesky_notification_item_poll_ended">Опрос, в котором вы участвовали, завершен</string>
     <string name="bluesky_notification_item_mentioned_you">упомянул вас</string>
-    <string name="bluesky_item_reblogged_status">опубликовал сообщение</string>
+    <string name="bluesky_item_reblogged_status">сделал репост</string>
     <string name="bluesky_notification_item_replied_to_you">ответил вам</string>
-    <string name="bluesky_notification_item_quoted_your_status">процитировал вашу запись</string>
-    <string name="bluesky_notification_item_starterpack_joined">Присоединился к стартовому набору</string>
-    <string name="bluesky_notification_item_unKnown">Неизвестный</string>
-    <string name="bluesky_notification_item_pin">Закреплено</string>
+    <string name="bluesky_notification_item_quoted_your_status">процитировал ваш пост</string>
+    <string name="bluesky_notification_item_starterpack_joined">присоединился через Starter Pack</string>
+    <string name="bluesky_notification_item_unKnown">Неизвестно</string>
+    <string name="bluesky_notification_item_pin">закрепил пост</string>
+
     <string name="misskey_notification_item_mentioned_you">упомянул вас</string>
     <string name="misskey_notification_item_replied_to_you">ответил вам</string>
-    <string name="misskey_notification_item_reposted_your_status">продвинуто</string>
-    <string name="misskey_notification_item_quoted_your_status">процитировано</string>
-    <string name="misskey_notification_item_reacted_to_your_status">отреагировал на ваше сообщение</string>
-    <string name="misskey_notification_item_poll_ended">Опрос, в котором вы участвовали, завершён</string>
+    <string name="misskey_notification_item_reposted_your_status">репостнул ваш пост</string>
+    <string name="misskey_notification_item_quoted_your_status">процитировал ваш пост</string>
+    <string name="misskey_notification_item_reacted_to_your_status">отреагировал на ваш пост</string>
+    <string name="misskey_notification_item_poll_ended">Опрос, в котором вы участвовали, завершен</string>
     <string name="misskey_notification_item_follow_request_accepted">принял ваш запрос на подписку</string>
-    <string name="misskey_notification_item_scheduled_note_posted">Запланированная заметка опубликована</string>
-    <string name="misskey_notification_item_scheduled_note_post_failed">Запланированная заметка не удалось опубликовать</string>
-    <string name="misskey_notification_item_role_assigned">Роль назначена</string>
-    <string name="misskey_notification_item_chat_room_invitation_received">пригласил вас в комнату чата</string>
+    <string name="misskey_notification_item_scheduled_note_posted">запланированная заметка опубликована</string>
+    <string name="misskey_notification_item_scheduled_note_post_failed">не удалось опубликовать запланированную заметку</string>
+    <string name="misskey_notification_item_role_assigned">назначил вам роль</string>
+    <string name="misskey_notification_item_chat_room_invitation_received">пригласил вас в чат</string>
     <string name="misskey_notification_item_achievement_earned">Вы получили достижение: %1$s\n%2$s</string>
-    <string name="misskey_notification_item_app">Приложение</string>
-    <string name="misskey_notification_item_export_completed">Экспорт завершен</string>
-    <string name="misskey_notification_item_test">Проверить уведомление</string>
-    <string name="misskey_notification_item_login">Обнаружен вход</string>
-    <string name="misskey_notification_item_create_token">Токен доступа создан</string>
+    <string name="misskey_notification_item_app">уведомление приложения</string>
+    <string name="misskey_notification_item_export_completed">экспорт завершен</string>
+    <string name="misskey_notification_item_test">тестовое уведомление</string>
+    <string name="misskey_notification_item_login">обнаружен новый вход в систему</string>
+    <string name="misskey_notification_item_create_token">токен доступа создан</string>
     <string name="misskey_notification_item_followed_you">подписался на вас</string>
-    <string name="misskey_notification_item_requested_follow">попросил подписаться на вас</string>
-    <string name="misskey_notification_unknwon">Неизвестное уведомление %1$s</string>
-    <string name="misskey_item_reblogged_status">опубликовал сообщение</string>
-    <string name="xqt_item_reblogged_status">ретвитнул</string>
-    <string name="xqt_item_mention_status">упоминает вас</string>
+    <string name="misskey_notification_item_requested_follow">отправил запрос на подписку</string>
+    <string name="misskey_notification_unknwon">Неизвестное уведомление: %1$s</string>
+    <string name="misskey_item_reblogged_status">сделал репост</string>
+
+    <string name="xqt_item_reblogged_status">сделал репост</string>
+    <string name="xqt_item_mention_status">упомянул вас</string>
+
     <string name="mastodon_visibility_public">Публичный</string>
-    <string name="mastodon_visibility_unlisted">Вне списков</string>
-    <string name="mastodon_visibility_private">Приватный</string>
-    <string name="mastodon_visibility_direct">Только упомянутые</string>
-    <string name="mastodon_visibility_public_description">Любой может увидеть и усилить этот пост</string>
-    <string name="mastodon_visibility_unlisted_description">Каждый может увидеть этот пост, но он не появится на общедоступной ленте времени</string>
+    <string name="mastodon_visibility_unlisted">Скрытый</string>
+    <string name="mastodon_visibility_private">Только для подписчиков</string>
+    <string name="mastodon_visibility_direct">Личный</string>
+    <string name="mastodon_visibility_public_description">Все могут видеть этот пост и делать репосты</string>
+    <string name="mastodon_visibility_unlisted_description">Все могут видеть этот пост, но он не появится в публичной ленте</string>
     <string name="mastodon_visibility_private_description">Только подписчики могут видеть этот пост</string>
-    <string name="mastodon_visibility_direct_description">Только упомянутые пользователи могут видеть это сообщение</string>
+    <string name="mastodon_visibility_direct_description">Только упомянутые пользователи могут видеть этот пост</string>
+
     <string name="settings_notifications_title">Уведомления</string>
-    <string name="settings_notifications_subtitle">Настройте, как Flare будет уведомлять вас</string>
-    <string name="status_loadmore_end">Больше нет записей</string>
-    <string name="status_loadmore_error">Ошибка загрузки записей</string>
+    <string name="settings_notifications_subtitle">Настройте уведомления Flare</string>
+
+    <string name="status_loadmore_end">Больше постов нет</string>
+    <string name="status_loadmore_error">Ошибка при загрузке постов</string>
     <string name="status_loadmore_error_retry">Повторить</string>
-    <string name="status_empty">Здесь нечего видеть</string>
-    <string name="status_sensitive_media">Деликатный контент</string>
+    <string name="status_empty">Здесь пока ничего нет</string>
+    <string name="status_sensitive_media">Контент деликатного характера</string>
     <string name="show_media">Показать медиа</string>
     <string name="hide_media">Скрыть медиа</string>
-    <string name="login_expired">Сессия входа истекла</string>
+    <string name="login_expired">Сессия истекла</string>
     <string name="login_expired_message">Нажмите, чтобы войти снова</string>
     <string name="login_expired_relogin">Войти снова</string>
+
     <string name="permission_denied_title">Доступ запрещен</string>
-    <string name="permission_denied_message">Вам нужно повторно войти для доступа к этой странице</string>
-    <string name="misskey_compose_local_only">Только локальные</string>
-    <string name="misskey_compose_local_only_description">Только пользователи этого экземпляра могут видеть это сообщение</string>
-    <string name="misskey_item_action_renote">Renote</string>
+    <string name="permission_denied_message">Войдите снова, чтобы получить доступ к этой странице</string>
+
+    <string name="misskey_compose_local_only">Только локально</string>
+    <string name="misskey_compose_local_only_description">Только пользователи этого инстанса увидят этот пост</string>
+
+    <string name="misskey_item_action_renote">Реноут</string>
     <string name="misskey_item_action_quote">Цитата</string>
+
     <string name="bluesky_notification_unknown_message">Неизвестный тип уведомления %1$s</string>
-    <string name="bluesky_notification_unknown_message2">Пожалуйста, сообщите об этом разработчику.</string>
+    <string name="bluesky_notification_unknown_message2">Пожалуйста, сообщите об этой проблеме разработчику.</string>
+
     <string name="blusky_item_action_repost">Репост</string>
-    <string name="blusky_item_action_quote">Цитата</string>
+    <string name="blusky_item_action_quote">Цитировать</string>
     <string name="blusky_item_action_report">Пожаловаться</string>
     <string name="blusky_item_action_delete">Удалить</string>
-    <string name="mastodon_item_unbookmark">Снять закладку</string>
-    <string name="mastodon_item_bookmark">Закладка</string>
+
+    <string name="mastodon_item_unbookmark">Удалить из закладок</string>
+    <string name="mastodon_item_bookmark">В закладки</string>
     <string name="mastodon_item_delete">Удалить</string>
     <string name="mastodon_item_report">Пожаловаться</string>
     <string name="misskey_item_action_delete">Удалить</string>
     <string name="misskey_item_action_report">Пожаловаться</string>
+
     <string name="bookmark_remove">Удалить закладку</string>
-    <string name="bookmark_add">Добавить закладку</string>
-    <string name="like">Нравится</string>
-    <string name="unlike">Не нравится</string>
-    <string name="favourite">Избранное</string>
-    <string name="unfavourite">Unfavourite</string>
-    <string name="more">Ещё</string>
-    <string name="quote">Цитата</string>
+    <string name="bookmark_add">Добавить в закладки</string>
+    <string name="like">Лайк</string>
+    <string name="unlike">Убрать лайк</string>
+    <string name="favourite">В избранное</string>
+    <string name="unfavourite">Из избранного</string>
+    <string name="more">Еще</string>
+    <string name="quote">Цитировать</string>
     <string name="reaction_add">Добавить реакцию</string>
     <string name="reaction_remove">Удалить реакцию</string>
-    <string name="reply">Ответ</string>
+    <string name="reply">Ответить</string>
     <string name="report">Пожаловаться</string>
     <string name="retweet">Репост</string>
     <string name="retweet_remove">Удалить репост</string>
     <string name="share">Поделиться</string>
     <string name="fx_share">Поделиться через FxEmbed</string>
     <string name="comment">Комментарий</string>
+
     <string name="user_report">Пожаловаться</string>
-    <string name="user_block">Блок</string>
+    <string name="user_block">Заблокировать</string>
     <string name="user_unblock">Разблокировать</string>
-    <string name="user_mute">Заглушить</string>
-    <string name="user_unmute">Включить звук</string>
-    <string name="user_mute_with_parameter">Выключить звук %1$s</string>
-    <string name="user_block_with_parameter">Блокировать %1$s</string>
-    <string name="mastodon_item_content_warning">Предупреждение о содержании</string>
-    <string name="reply_to">Ответить %1$s</string>
-    <string name="status_detail_translate">Перевести пост</string>
-    <string name="status_detail_tldr">Пересказ</string>
+    <string name="user_mute">Игнорировать</string>
+    <string name="user_unmute">Перестать игнорировать</string>
+    <string name="user_mute_with_parameter">Игнорировать %1$s</string>
+    <string name="user_block_with_parameter">Заблокировать %1$s</string>
+    <string name="mastodon_item_content_warning">Предупреждение о контенте</string>
+    <string name="reply_to">Ответ пользователю %1$s</string>
+    <string name="status_detail_translate">Перевести</string>
+    <string name="status_detail_tldr">Краткое содержание</string>
     <string name="translation_badge_translated">Переведено</string>
-    <string name="translation_badge_translating">Перевод</string>
-    <string name="translation_badge_failed">Неудачный</string>
+    <string name="translation_badge_translating">Перевод…</string>
+    <string name="translation_badge_failed">Ошибка перевода</string>
     <string name="translation_retry">Повторить перевод</string>
     <string name="translation_show_original">Показать оригинал</string>
+
     <string name="date_format_year_month_day">dd MMM yy</string>
     <string name="date_format_month_day">dd MMM</string>
-    <string name="date_format_full">dd MMM yy H:mm</string>
-    <string name="vvo_notification_like">Понравилось ваше сообщение</string>
-    <string name="user_follow_edit_list">Добавить/Удалить из списка</string>
-    <string name="list_empty">Нет списков</string>
+    <string name="date_format_full">dd MMM yy HH:mm</string>
+
+    <string name="vvo_notification_like">Лайкнул ваш пост</string>
+
+    <string name="user_follow_edit_list">Добавить/удалить из списка</string>
+    <string name="list_empty">Списков нет</string>
     <string name="list_error">Не удалось загрузить списки</string>
-    <string name="misskey_achievement_notes1_title">просто настройка моего msky</string>
-    <string name="misskey_achievement_notes1_description">Опубликовать свою первую заметку</string>
-    <string name="misskey_achievement_notes1_flavor">Приятных дней с Misskey!</string>
-    <string name="misskey_achievement_notes10_title">Некоторые заметки</string>
-    <string name="misskey_achievement_notes10_description">Опубликовать 10 заметок</string>
-    <string name="misskey_achievement_notes100_title">Множество заметок</string>
-    <string name="misskey_achievement_notes100_description">Опубликовать 100 заметок</string>
-    <string name="misskey_achievement_notes500_title">Покрыто в заметках</string>
-    <string name="misskey_achievement_notes500_description">Отправить 500 заметок</string>
+
+    <string name="misskey_achievement_notes1_title">просто настраиваю свой msky</string>
+    <string name="misskey_achievement_notes1_description">Опубликуйте свою первую заметку</string>
+    <string name="misskey_achievement_notes1_flavor">Приятного времяпрепровождения в Misskey!</string>
+
+    <string name="misskey_achievement_notes10_title">Несколько заметок</string>
+    <string name="misskey_achievement_notes10_description">Опубликуйте 10 заметок</string>
+
+    <string name="misskey_achievement_notes100_title">Много заметок</string>
+    <string name="misskey_achievement_notes100_description">Опубликуйте 100 заметок</string>
+
+    <string name="misskey_achievement_notes500_title">Завален заметками</string>
+    <string name="misskey_achievement_notes500_description">Опубликуйте 500 заметок</string>
+
     <string name="misskey_achievement_notes1000_title">Гора заметок</string>
-    <string name="misskey_achievement_notes1000_description">Опубликовать 1000 заметок</string>
-    <string name="misskey_achievement_notes5000_title">Заметки льются рекой</string>
-    <string name="misskey_achievement_notes5000_description">Опубликовать 5000 заметок</string>
+    <string name="misskey_achievement_notes1000_description">Опубликуйте 1 000 заметок</string>
+
+    <string name="misskey_achievement_notes5000_title">Заметки через край</string>
+    <string name="misskey_achievement_notes5000_description">Опубликуйте 5 000 заметок</string>
+
     <string name="misskey_achievement_notes10000_title">Суперзаметка</string>
-    <string name="misskey_achievement_notes10000_description">Опубликовать 10000 заметок</string>
+    <string name="misskey_achievement_notes10000_description">Опубликуйте 10 000 заметок</string>
+
     <string name="misskey_achievement_notes20000_title">Нужно... больше... заметок...</string>
-    <string name="misskey_achievement_notes20000_description">Опубликовать 20 000 заметок</string>
-    <string name="misskey_achievement_notes30000_title">Заметки заметки заметки!</string>
-    <string name="misskey_achievement_notes30000_description">Опубликовать 30 000 заметок</string>
+    <string name="misskey_achievement_notes20000_description">Опубликуйте 20 000 заметок</string>
+
+    <string name="misskey_achievement_notes30000_title">Заметки, заметки, заметки!</string>
+    <string name="misskey_achievement_notes30000_description">Опубликуйте 30 000 заметок</string>
+
     <string name="misskey_achievement_notes40000_title">Фабрика заметок</string>
-    <string name="misskey_achievement_notes40000_description">Опубликовать 40,000 заметок</string>
+    <string name="misskey_achievement_notes40000_description">Опубликуйте 40 000 заметок</string>
+
     <string name="misskey_achievement_notes50000_title">Планета заметок</string>
-    <string name="misskey_achievement_notes50000_description">Опубликовать 50,000 заметок</string>
-    <string name="misskey_achievement_notes60000_title">Замет-квазар</string>
-    <string name="misskey_achievement_notes60000_description">Опубликовать 60,000 заметок</string>
-    <string name="misskey_achievement_notes70000_title">Чёрная дыра из заметок</string>
-    <string name="misskey_achievement_notes70000_description">Опубликовать 70000 заметок</string>
+    <string name="misskey_achievement_notes50000_description">Опубликуйте 50 000 заметок</string>
+
+    <string name="misskey_achievement_notes60000_title">Квазар заметок</string>
+    <string name="misskey_achievement_notes60000_description">Опубликуйте 60 000 заметок</string>
+
+    <string name="misskey_achievement_notes70000_title">Черная дыра заметок</string>
+    <string name="misskey_achievement_notes70000_description">Опубликуйте 70 000 заметок</string>
+
     <string name="misskey_achievement_notes80000_title">Галактика заметок</string>
-    <string name="misskey_achievement_notes80000_description">Опубликовать 80,000 заметок</string>
+    <string name="misskey_achievement_notes80000_description">Опубликуйте 80 000 заметок</string>
+
     <string name="misskey_achievement_notes90000_title">Вселенная заметок</string>
-    <string name="misskey_achievement_notes90000_description">Опубликовать 90,000 заметок</string>
-    <string name="misskey_achievement_notes100000_title">ВСЕ ВАШИ ЗАМЕТКИ ПРИНАДЛЕЖАТ НАМ</string>
-    <string name="misskey_achievement_notes100000_description">Опубликовать 100 000 заметок</string>
-    <string name="misskey_achievement_notes100000_flavor">Вам есть что рассказать.</string>
+    <string name="misskey_achievement_notes90000_description">Опубликуйте 90 000 заметок</string>
+
+    <string name="misskey_achievement_notes100000_title">ALL YOUR NOTE ARE BELONG TO US</string>
+    <string name="misskey_achievement_notes100000_description">Опубликуйте 100 000 заметок</string>
+    <string name="misskey_achievement_notes100000_flavor">Вам определенно есть что сказать.</string>
+
     <string name="misskey_achievement_login3_title">Новичок I</string>
-    <string name="misskey_achievement_login3_description">Войти в общей сложности 3 дня</string>
-    <string name="misskey_achievement_login3_flavor">С сегодняшнего дня зовите меня Мисскист</string>
+    <string name="misskey_achievement_login3_description">Заходите в течение 3 дней в общей сложности</string>
+    <string name="misskey_achievement_login3_flavor">С сегодняшнего дня зовите меня Misskist</string>
+
     <string name="misskey_achievement_login7_title">Новичок II</string>
-    <string name="misskey_achievement_login7_description">Войти в общей сложности 7 дней</string>
-    <string name="misskey_achievement_login7_flavor">Кажется, вы начинаете привыкать?</string>
+    <string name="misskey_achievement_login7_description">Заходите в течение 7 дней в общей сложности</string>
+    <string name="misskey_achievement_login7_flavor">Уже освоились?</string>
+
     <string name="misskey_achievement_login15_title">Новичок III</string>
-    <string name="misskey_achievement_login15_description">Войти в общей сложности 15 дней</string>
+    <string name="misskey_achievement_login15_description">Заходите в течение 15 дней в общей сложности</string>
+
     <string name="misskey_achievement_login30_title">Misskist I</string>
-    <string name="misskey_achievement_login30_description">Войти в общей сложности 30 дней</string>
+    <string name="misskey_achievement_login30_description">Заходите в течение 30 дней в общей сложности</string>
+
     <string name="misskey_achievement_login60_title">Misskist II</string>
-    <string name="misskey_achievement_login60_description">Войти в общей сложности 60 дней</string>
+    <string name="misskey_achievement_login60_description">Заходите в течение 60 дней в общей сложности</string>
+
     <string name="misskey_achievement_login100_title">Misskist III</string>
-    <string name="misskey_achievement_login100_description">Войти в общей сложности 100 дней</string>
-    <string name="misskey_achievement_login100_flavor">Жестокий мисскист</string>
-    <string name="misskey_achievement_login200_title">Завсегдатай Ⅰ</string>
-    <string name="misskey_achievement_login200_description">Войти в общей сложности 200 дней</string>
-    <string name="misskey_achievement_login300_title">Завсегдатай Ⅱ</string>
-    <string name="misskey_achievement_login300_description">Войти в общей сложности 300 дней</string>
-    <string name="misskey_achievement_login400_title">Завсегдатай Ⅲ</string>
-    <string name="misskey_achievement_login400_description">Войти в общей сложности 400 дней</string>
+    <string name="misskey_achievement_login100_description">Заходите в течение 100 дней в общей сложности</string>
+    <string name="misskey_achievement_login100_flavor">Яростный Misskist</string>
+
+    <string name="misskey_achievement_login200_title">Завсегдатай I</string>
+    <string name="misskey_achievement_login200_description">Заходите в течение 200 дней в общей сложности</string>
+
+    <string name="misskey_achievement_login300_title">Завсегдатай II</string>
+    <string name="misskey_achievement_login300_description">Заходите в течение 300 дней в общей сложности</string>
+
+    <string name="misskey_achievement_login400_title">Завсегдатай III</string>
+    <string name="misskey_achievement_login400_description">Заходите в течение 400 дней в общей сложности</string>
+
     <string name="misskey_achievement_login500_title">Эксперт I</string>
-    <string name="misskey_achievement_login500_description">Войти в общей сложности 500 дней</string>
-    <string name="misskey_achievement_login500_flavor">Товарищи, говорят, я люблю заметки</string>
+    <string name="misskey_achievement_login500_description">Заходите в течение 500 дней в общей сложности</string>
+    <string name="misskey_achievement_login500_flavor">Друзья мои, часто говорят, что я люблю заметки</string>
+
     <string name="misskey_achievement_login600_title">Эксперт II</string>
-    <string name="misskey_achievement_login600_description">Войти в общей сложности 600 дней</string>
+    <string name="misskey_achievement_login600_description">Заходите в течение 600 дней в общей сложности</string>
+
     <string name="misskey_achievement_login700_title">Эксперт III</string>
-    <string name="misskey_achievement_login700_description">Войти в общей сложности 700 дней</string>
-    <string name="misskey_achievement_login800_title">Повелитель заметок Ⅰ</string>
-    <string name="misskey_achievement_login800_description">Войти в общей сложности 800 дней</string>
-    <string name="misskey_achievement_login900_title">Повелитель заметок Ⅱ</string>
-    <string name="misskey_achievement_login900_description">Войти в общей сложности 900 дней</string>
-    <string name="misskey_achievement_login1000_title">Повелитель заметок Ⅲ</string>
-    <string name="misskey_achievement_login1000_description">Войти в общей сложности 1000 дней</string>
-    <string name="misskey_achievement_login1000_flavor">Спасибо за использование Misskey!</string>
+    <string name="misskey_achievement_login700_description">Заходите в течение 700 дней в общей сложности</string>
+
+    <string name="misskey_achievement_login800_title">Мастер заметок I</string>
+    <string name="misskey_achievement_login800_description">Заходите в течение 800 дней в общей сложности</string>
+
+    <string name="misskey_achievement_login900_title">Мастер заметок II</string>
+    <string name="misskey_achievement_login900_description">Заходите в течение 900 дней в общей сложности</string>
+
+    <string name="misskey_achievement_login1000_title">Мастер заметок III</string>
+    <string name="misskey_achievement_login1000_description">Заходите в течение 1 000 дней в общей сложности</string>
+    <string name="misskey_achievement_login1000_flavor">Спасибо, что используете Misskey!</string>
+
     <string name="misskey_achievement_note_clipped1_title">Нужно... сохранить...</string>
-    <string name="misskey_achievement_note_clipped1_description">Сохраните вашу первую заметку</string>
-    <string name="misskey_achievement_note_favorited1_title">Звездочёт</string>
-    <string name="misskey_achievement_note_favorited1_description">Добавьте заметку в избранное в первый раз</string>
-    <string name="misskey_achievement_my_note_favorited1_title">В поиске звёзд</string>
-    <string name="misskey_achievement_my_note_favorited1_description">Попадите в избранное другого пользователя</string>
-    <string name="misskey_achievement_profile_filled_title">К бою готов</string>
+    <string name="misskey_achievement_note_clipped1_description">Сохраните свою первую заметку</string>
+
+    <string name="misskey_achievement_note_favorited1_title">Звездочет</string>
+    <string name="misskey_achievement_note_favorited1_description">Добавьте свою первую заметку в избранное</string>
+
+    <string name="misskey_achievement_my_note_favorited1_title">В поисках звезд</string>
+    <string name="misskey_achievement_my_note_favorited1_description">Пусть кто-то другой добавит вашу заметку в избранное</string>
+
+    <string name="misskey_achievement_profile_filled_title">Хорошо подготовлен</string>
     <string name="misskey_achievement_profile_filled_description">Настройте свой профиль</string>
-    <string name="misskey_achievement_marked_as_cat_title">Усы, лапы и хвост</string>
-    <string name="misskey_achievement_marked_as_cat_description">Отметьте свой аккаунт как \"Кот\"</string>
+
+    <string name="misskey_achievement_marked_as_cat_title">Я — кот</string>
+    <string name="misskey_achievement_marked_as_cat_description">Отметьте свой аккаунт как кошачий</string>
     <string name="misskey_achievement_marked_as_cat_flavor">Я дам тебе имя позже.</string>
-    <string name="misskey_achievement_following1_title">Подписаться на вашего первого пользователя</string>
-    <string name="misskey_achievement_following1_description">Подписка на пользователя</string>
-    <string name="misskey_achievement_following10_title">Продолжайте... продолжайте...</string>
-    <string name="misskey_achievement_following10_description">Подписаться на 10 пользователей</string>
+
+    <string name="misskey_achievement_following1_title">Подписка на первого пользователя</string>
+    <string name="misskey_achievement_following1_description">Подпишитесь на пользователя</string>
+
+    <string name="misskey_achievement_following10_title">Не отставай...</string>
+    <string name="misskey_achievement_following10_description">Подпишитесь на 10 пользователей</string>
+
     <string name="misskey_achievement_following50_title">Много друзей</string>
-    <string name="misskey_achievement_following50_description">Подписаться на 50 пользователей</string>
+    <string name="misskey_achievement_following50_description">Подпишитесь на 50 аккаунтов</string>
+
     <string name="misskey_achievement_following100_title">100 друзей</string>
-    <string name="misskey_achievement_following100_description">Подписаться на 100 пользователей</string>
-    <string name="misskey_achievement_following300_title">Перезагрузка друзей</string>
-    <string name="misskey_achievement_following300_description">Подписаться на 300 пользователей</string>
+    <string name="misskey_achievement_following100_description">Подпишитесь на 100 аккаунтов</string>
+
+    <string name="misskey_achievement_following300_title">Перебор друзей</string>
+    <string name="misskey_achievement_following300_description">Подпишитесь на 300 аккаунтов</string>
+
     <string name="misskey_achievement_followers1_title">Первый подписчик</string>
     <string name="misskey_achievement_followers1_description">Получите 1 подписчика</string>
-    <string name="misskey_achievement_followers10_title">Следи за мной!</string>
+
+    <string name="misskey_achievement_followers10_title">Подписывайтесь на меня!</string>
     <string name="misskey_achievement_followers10_description">Получите 10 подписчиков</string>
-    <string name="misskey_achievement_followers50_title">Один за другим</string>
+
+    <string name="misskey_achievement_followers50_title">Толпы народа</string>
     <string name="misskey_achievement_followers50_description">Получите 50 подписчиков</string>
+
     <string name="misskey_achievement_followers100_title">Популярность</string>
     <string name="misskey_achievement_followers100_description">Получите 100 подписчиков</string>
-    <string name="misskey_achievement_followers300_title">Пожалуйста, в порядке очереди</string>
+
+    <string name="misskey_achievement_followers300_title">Пожалуйста, встаньте в очередь</string>
     <string name="misskey_achievement_followers300_description">Получите 300 подписчиков</string>
+
     <string name="misskey_achievement_followers500_title">Радиовышка</string>
     <string name="misskey_achievement_followers500_description">Получите 500 подписчиков</string>
+
     <string name="misskey_achievement_followers1000_title">Инфлюенсер</string>
     <string name="misskey_achievement_followers1000_description">Получите 1 000 подписчиков</string>
+
     <string name="misskey_achievement_collect_achievements30_title">Коллекционер достижений</string>
-    <string name="misskey_achievement_collect_achievements30_description">Получить 30 достижений</string>
+    <string name="misskey_achievement_collect_achievements30_description">Получите 30 достижений</string>
+
     <string name="misskey_achievement_view_achievements3min_title">Любитель достижений</string>
-    <string name="misskey_achievement_view_achievements3min_description">Посмотрите на список достижений не менее 3 минут</string>
-    <string name="misskey_achievement_i_love_misskey_title">Мне нравится Misskey</string>
-    <string name="misskey_achievement_i_love_misskey_description">Напишите \"I ❤️ #Misskey\"</string>
-    <string name="misskey_achievement_i_love_misskey_flavor">Команда разработчиков Misskey высоко ценит вашу поддержку!</string>
+    <string name="misskey_achievement_view_achievements3min_description">Рассматривайте свой список достижений не менее 3 минут</string>
+
+    <string name="misskey_achievement_i_love_misskey_title">Я люблю Misskey</string>
+    <string name="misskey_achievement_i_love_misskey_description">Опубликуйте \"I ❤ #Misskey\"</string>
+    <string name="misskey_achievement_i_love_misskey_flavor">Команда разработчиков Misskey очень ценит вашу поддержку!</string>
+
     <string name="misskey_achievement_found_treasure_title">Охота за сокровищами</string>
-    <string name="misskey_achievement_found_treasure_description">Вы нашли скрытые сокровища</string>
+    <string name="misskey_achievement_found_treasure_description">Вы нашли спрятанное сокровище</string>
+
     <string name="misskey_achievement_client30min_title">Короткий перерыв</string>
-    <string name="misskey_achievement_client30min_description">Оставить Misskey открытым не менее 30 минут</string>
-    <string name="misskey_achievement_client60min_title">Нет \"Miss\" в Misskey</string>
-    <string name="misskey_achievement_client60min_description">Оставить Misskey открытым не менее 60 минут</string>
-    <string name="misskey_achievement_note_deleted_within1min_title">Не обращайте внимание</string>
+    <string name="misskey_achievement_client30min_description">Держите Misskey открытым не менее 30 минут</string>
+
+    <string name="misskey_achievement_client60min_title">Без промахов в Misskey</string>
+    <string name="misskey_achievement_client60min_description">Держите Misskey открытым не менее 60 минут</string>
+
+    <string name="misskey_achievement_note_deleted_within1min_title">Забудьте</string>
     <string name="misskey_achievement_note_deleted_within1min_description">Удалите заметку в течение минуты после публикации</string>
-    <string name="misskey_achievement_posted_at_late_night_title">Ночной</string>
-    <string name="misskey_achievement_posted_at_late_night_description">Опубликовать заметку поздно ночью</string>
+
+    <string name="misskey_achievement_posted_at_late_night_title">Полуночник</string>
+    <string name="misskey_achievement_posted_at_late_night_description">Опубликуйте заметку поздно ночью</string>
     <string name="misskey_achievement_posted_at_late_night_flavor">Пора ложиться спать.</string>
+
     <string name="misskey_achievement_posted_at_0min0sec_title">Говорящие часы</string>
-    <string name="misskey_achievement_posted_at_0min0sec_description">Опубликовать заметку в 00:00</string>
-    <string name="misskey_achievement_posted_at_0min0sec_flavor">Click Click Click Claaang</string>
-    <string name="misskey_achievement_self_quote_title">Самоссылка</string>
-    <string name="misskey_achievement_self_quote_description">Цитировать свою заметку</string>
-    <string name="misskey_achievement_htl20npm_title">Лента времени</string>
-    <string name="misskey_achievement_htl20npm_description">Скорость вашей временной шкалы превышает 20 заметок в минуту</string>
+    <string name="misskey_achievement_posted_at_0min0sec_description">Опубликуйте заметку ровно в 00:00</string>
+    <string name="misskey_achievement_posted_at_0min0sec_flavor">Тик-тик-тик-бом</string>
+
+    <string name="misskey_achievement_self_quote_title">Самоцитирование</string>
+    <string name="misskey_achievement_self_quote_description">Процитируйте свою собственную заметку</string>
+
+    <string name="misskey_achievement_htl20npm_title">Быстрая лента</string>
+    <string name="misskey_achievement_htl20npm_description">Добейтесь скорости вашей домашней ленты более 20 npm (заметок в минуту)</string>
+
     <string name="misskey_achievement_view_instance_chart_title">Аналитик</string>
-    <string name="misskey_achievement_view_instance_chart_description">Просмотр графиков вашего экземпляра</string>
-    <string name="misskey_achievement_output_hello_world_on_scratchpad_title">Привет, мир!</string>
-    <string name="misskey_achievement_output_hello_world_on_scratchpad_description">Напишите \"hello world\" в Scratchpad</string>
-    <string name="misskey_achievement_open3windows_title">Многооконный режим</string>
-    <string name="misskey_achievement_open3windows_description">Откройте одновременно хотя бы 3 окна</string>
-    <string name="misskey_achievement_drive_folder_circular_reference_title">Мы ходим кругами</string>
-    <string name="misskey_achievement_drive_folder_circular_reference_description">Попытайтесь создать рекурсивно вложенную папку в Диске</string>
-    <string name="misskey_achievement_react_without_read_title">Вы действительно это прочитали?</string>
-    <string name="misskey_achievement_react_without_read_description">Отреагируйте на заметку длиннее 100 символов в течение 3 секунд после публикации</string>
-    <string name="misskey_achievement_clicked_click_here_title">Нажмите здесь</string>
-    <string name="misskey_achievement_clicked_click_here_description">Вы нажали здесь</string>
-    <string name="misskey_achievement_just_plain_lucky_title">Везунчик</string>
-    <string name="misskey_achievement_just_plain_lucky_description">Может достаться с вероятностью 0,005% каждые 10 секунд</string>
-    <string name="misskey_achievement_set_name_to_syuilo_title">Комплекс Бога</string>
-    <string name="misskey_achievement_set_name_to_syuilo_description">Установите имя профиля \"syuilo\"</string>
-    <string name="misskey_achievement_passed_since_account_created1_title">Юбилей 1 год</string>
-    <string name="misskey_achievement_passed_since_account_created1_description">Прошел год с тех пор, как ваш аккаунт был создан</string>
-    <string name="misskey_achievement_passed_since_account_created2_title">Юбилей 2 года</string>
+    <string name="misskey_achievement_view_instance_chart_description">Просмотрите графики вашего инстанса</string>
+
+    <string name="misskey_achievement_output_hello_world_on_scratchpad_title">Hello, world!</string>
+    <string name="misskey_achievement_output_hello_world_on_scratchpad_description">Выведите \"hello world\" в Scratchpad</string>
+
+    <string name="misskey_achievement_open3windows_title">Многооконность</string>
+    <string name="misskey_achievement_open3windows_description">Откройте не менее 3 окон одновременно</string>
+
+    <string name="misskey_achievement_drive_folder_circular_reference_title">Циклическая ссылка</string>
+    <string name="misskey_achievement_drive_folder_circular_reference_description">Попытка создать рекурсивно вложенную папку на Диске</string>
+
+    <string name="misskey_achievement_react_without_read_title">Вы правда это читали?</string>
+    <string name="misskey_achievement_react_without_read_description">Отреагируйте на заметку длиной более 100 символов в течение 3 секунд после ее публикации</string>
+
+    <string name="misskey_achievement_clicked_click_here_title">Нажми сюда</string>
+    <string name="misskey_achievement_clicked_click_here_description">Вы нажали сюда</string>
+
+    <string name="misskey_achievement_just_plain_lucky_title">Просто повезло</string>
+    <string name="misskey_achievement_just_plain_lucky_description">Есть шанс получить с вероятностью 0,005% каждые 10 секунд</string>
+
+    <string name="misskey_achievement_set_name_to_syuilo_title">Комплекс бога</string>
+    <string name="misskey_achievement_set_name_to_syuilo_description">Установите имя \"syuilo\"</string>
+
+    <string name="misskey_achievement_passed_since_account_created1_title">Годовщина: 1 год</string>
+    <string name="misskey_achievement_passed_since_account_created1_description">Прошел один год с момента создания вашего аккаунта</string>
+
+    <string name="misskey_achievement_passed_since_account_created2_title">Годовщина: 2 года</string>
     <string name="misskey_achievement_passed_since_account_created2_description">Прошло два года с момента создания вашего аккаунта</string>
-    <string name="misskey_achievement_passed_since_account_created3_title">Юбилей 3 года</string>
-    <string name="misskey_achievement_passed_since_account_created3_description">Прошло три года с тех пор, как ваш аккаунт был создан</string>
-    <string name="misskey_achievement_logged_in_on_birthday_title">С днем рождения</string>
-    <string name="misskey_achievement_logged_in_on_birthday_description">Войти в день рождения</string>
-    <string name="misskey_achievement_logged_in_on_new_years_day_title">С Новым Годом!</string>
-    <string name="misskey_achievement_logged_in_on_new_years_day_description">Вы вошли в первый день года</string>
-    <string name="misskey_achievement_logged_in_on_new_years_day_flavor">Еще один великий год на этом экземпляре</string>
-    <string name="misskey_achievement_cookie_clicked_title">Игра, в которой вы нажимаете на печеньки</string>
-    <string name="misskey_achievement_cookie_clicked_description">Нажал на печеньку</string>
-    <string name="misskey_achievement_cookie_clicked_flavor">Стоп, вы вообще на том сайте-то?</string>
+
+    <string name="misskey_achievement_passed_since_account_created3_title">Годовщина: 3 года</string>
+    <string name="misskey_achievement_passed_since_account_created3_description">Прошло три года с момента создания вашего аккаунта</string>
+
+    <string name="misskey_achievement_logged_in_on_birthday_title">С днем рождения!</string>
+    <string name="misskey_achievement_logged_in_on_birthday_description">Войдите в систему в свой день рождения</string>
+
+    <string name="misskey_achievement_logged_in_on_new_years_day_title">С Новым годом!</string>
+    <string name="misskey_achievement_logged_in_on_new_years_day_description">Вошли в систему в первый день года</string>
+    <string name="misskey_achievement_logged_in_on_new_years_day_flavor">За еще один отличный год на этом инстансе</string>
+
+    <string name="misskey_achievement_cookie_clicked_title">Игра, в которой нужно кликать по печенькам</string>
+    <string name="misskey_achievement_cookie_clicked_description">Кликнули по печеньке</string>
+    <string name="misskey_achievement_cookie_clicked_flavor">Подождите, вы точно на том сайте?</string>
+
     <string name="misskey_achievement_brain_diver_title">Brain Diver</string>
-    <string name="misskey_achievement_brain_diver_description">Опубликовать ссылку на Brain Diver</string>
+    <string name="misskey_achievement_brain_diver_description">Опубликуйте ссылку на Brain Diver</string>
     <string name="misskey_achievement_brain_diver_flavor">Misskey-Misskey La-Tu-Ma</string>
-    <string name="misskey_achievement_smash_test_notification_button_title">Перегрузка тестами</string>
-    <string name="misskey_achievement_smash_test_notification_button_description">Запустите тест уведомлений несколько раз в течение короткого времени</string>
-    <string name="misskey_achievement_tutorial_completed_title">Диплом об окончании начального курса Misskey</string>
+
+    <string name="misskey_achievement_smash_test_notification_button_title">Тестовый перебор</string>
+    <string name="misskey_achievement_smash_test_notification_button_description">Многократно вызывайте тест уведомлений в течение крайне короткого времени</string>
+
+    <string name="misskey_achievement_tutorial_completed_title">Диплом о прохождении начального курса Misskey</string>
     <string name="misskey_achievement_tutorial_completed_description">Обучение завершено</string>
+
     <string name="misskey_achievement_bubble_game_exploding_head_title">🤯</string>
-    <string name="misskey_achievement_bubble_game_exploding_head_description">Самый большой объект в пузырьковой игре</string>
+    <string name="misskey_achievement_bubble_game_exploding_head_description">Самый большой объект в бабл-игре</string>
+
     <string name="misskey_achievement_bubble_game_double_exploding_head_title">Двойной 🤯</string>
-    <string name="misskey_achievement_bubble_game_double_exploding_head_description">Два самых больших объекта в игре \"пузырьки\" одновременно</string>
-    <string name="misskey_achievement_bubble_game_double_exploding_head_flavor">Вы можете так заполнить коробку для обеда 🤯 🤯.</string>
+    <string name="misskey_achievement_bubble_game_double_exploding_head_description">Два самых больших объекта в бабл-игре одновременно</string>
+    <string name="misskey_achievement_bubble_game_double_exploding_head_flavor">Вы можете немного заполнить ланч-бокс вот так 🤯 🤯.</string>
+
     <string name="vote">Голосовать</string>
-    <string name="poll_expired">Опрос просрочен</string>
-    <string name="poll_voted">Проголосовал</string>
-    <string name="poll_expired_at">Истек на %1$s</string>
-    <string name="user_send_message">Отправить сообщение</string>
-    <string name="profile_search_user_using_account">Искать %1$s в %2$s с помощью %3$s</string>
+    <string name="poll_expired">Опрос завершен</string>
+    <string name="poll_voted">Голос учтен</string>
+    <string name="poll_expired_at">Завершен %1$s</string>
+    <string name="user_send_message">Отправить личное сообщение</string>
+
+    <string name="profile_search_user_using_account">Найти %1$s в %2$s через %3$s</string>
     <string name="profile_search_user_using_account_compat">Найти в %1$s</string>
+
     <string name="feeds_discover_feeds_created_by">Создано %1$s</string>
+
     <string name="notification_item_accept_follow_request">Принять</string>
     <string name="notification_item_reject_follow_request">Отклонить</string>
-    <string name="dm_list_empty">Нет личных сообщений</string>
+
+    <string name="dm_list_empty">Личных сообщений нет</string>
     <string name="dm_list_error">Не удалось загрузить личные сообщения</string>
     <string name="send">Отправить</string>
-    <string name="dm_send_placeholder">Отправить сообщение</string>
+    <string name="dm_send_placeholder">Написать сообщение</string>
     <string name="dm_deleted">Удалено</string>
-    <string name="dm_conversation">Диалог</string>
+    <string name="dm_conversation">Переписка</string>
     <string name="dm_sending">Отправка</string>
-    <string name="dm_leave">Покинуть разговор</string>
-    <string name="dm_to_profile">Показать профиль</string>
-    <string name="settings_side_panel_empty">По умолчанию будет отображаться боковая панель в зависимости от платформы аккаунта.</string>
+    <string name="dm_leave">Покинуть беседу</string>
+    <string name="dm_to_profile">В профиль</string>
+
+    <string name="settings_side_panel_empty">По умолчанию боковая панель соответствует платформе текущего аккаунта.</string>
     <string name="tab_settings_add">Добавить</string>
-    <string name="tab_settings_drag">Перетащите</string>
-    <string name="tab_settings_edit">Редактирование</string>
+    <string name="tab_settings_drag">Перетащить</string>
+    <string name="tab_settings_edit">Изменить</string>
     <string name="tab_settings_remove">Удалить</string>
     <string name="tab_settings_default">По умолчанию</string>
     <string name="tab_settings_list">Список</string>
     <string name="tab_settings_feed">Ленты</string>
-    <string name="list_add">Добавить список</string>
+
+    <string name="list_add">Создать список</string>
     <string name="list_edit">Изменить список</string>
     <string name="list_delete">Удалить список</string>
+
     <string name="rss_sources_title">Подписки</string>
     <string name="add_rss_source">Добавить подписку</string>
     <string name="edit_rss_source">Изменить подписку</string>
     <string name="delete_rss_source">Удалить подписку</string>
+
     <string name="rss_sources_title_label">Заголовок</string>
-    <string name="rss_sources_url_label">Ссылка</string>
+    <string name="rss_sources_url_label">URL</string>
     <string name="rss_title">Подписки</string>
-    <string name="empty_rss_sources">Нет подписок</string>
-    <string name="mastodon_trending_statuses">Trending statuses</string>
-    <string name="mastodon_federated_timeline">Федеративная шкала времени</string>
+    <string name="empty_rss_sources">Подписок нет</string>
+    <string name="mastodon_trending_statuses">Популярное</string>
+    <string name="mastodon_federated_timeline">Глобальная лента</string>
     <string name="mastodon_local_timeline">Локальная лента</string>
-    <string name="service_select_welcome_title">Добро пожаловать в Flare</string>
-    <string name="service_select_welcome_message">Пожалуйста, введите сервер, чтобы начать.</string>
-    <string name="service_select_welcome_hint">Сигнал поддерживает Mastodon, Misskey, Bluesky, Nostr и X.</string>
-    <string name="service_select_welcome_list_hint">Или выберите с этих серверов</string>
+
+    <string name="service_select_welcome_title">Добро пожаловать во Flare</string>
+    <string name="service_select_welcome_message">Введите адрес сервера, чтобы начать.</string>
+    <string name="service_select_welcome_hint">Flare поддерживает Mastodon, Misskey, Bluesky, Nostr и X.</string>
+    <string name="service_select_welcome_list_hint">Или выберите из этих серверов</string>
     <string name="bluesky_login_username_hint">Имя пользователя</string>
     <string name="bluesky_login_password_hint">Пароль</string>
-    <string name="bluesky_login_auth_factor_token_hint">Токен фактора аутентификации</string>
-    <string name="bluesky_login_oauth_button">Войти с OAuth</string>
+    <string name="bluesky_login_auth_factor_token_hint">Код 2FA</string>
+    <string name="bluesky_login_oauth_button">Войти через OAuth</string>
     <string name="bluesky_login_use_password_button">Использовать пароль</string>
-    <string name="bluesky_login_oauth_hint">Bluesky OAuth может быть нестабилен, пожалуйста используйте логин с помощью пароля, если вы столкнетесь с какими-либо проблемами.</string>
-    <string name="login_button">Логин</string>
-    <string name="mastodon_login_verify_message">Пожалуйста, подождите, пока мы верифицируем ваши учетные данные.</string>
-    <string name="nostr_login_title">Импорт Nostr аккаунта</string>
-    <string name="nostr_login_hint">Вставить ключ npub или hex для доступа только для чтения, используйте бункерный URI для удаленной подписи, или подключите подписи Amber и QR на базе Nostr Connect.</string>
-    <string name="nostr_login_account_hint">npub, nsec, hex key, bunker://, or nostrconnect://</string>
-    <string name="nostr_login_bunker_hint">бункер:// или nostrconnect:// URI</string>
+    <string name="bluesky_login_oauth_hint">Bluesky OAuth может работать нестабильно. Если возникнут проблемы, используйте вход по паролю.</string>
+    <string name="login_button">Войти</string>
+    <string name="mastodon_login_verify_message">Проверка учетных данных…</string>
+    <string name="nostr_login_title">Импорт аккаунта Nostr</string>
+    <string name="nostr_login_hint">Вставьте npub или hex pubkey для доступа только для чтения, укажите nsec для локального подписания, используйте bunker URI для удаленного подписания или подключите Amber и QR-сканеры Nostr Connect.</string>
+    <string name="nostr_login_account_hint">npub, nsec, hex key, bunker:// или nostrconnect://</string>
+    <string name="nostr_login_bunker_hint">bunker:// или nostrconnect:// URI</string>
     <string name="nostr_login_bunker_button">Подключить бункер</string>
-    <string name="nostr_login_amber_button">Подключить Янтарь</string>
-    <string name="nostr_login_qr_button">Связаться с QR</string>
-    <string name="nostr_login_qr_hint">Сканируйте с Amber, Alby, или другой подписчик Nostr Connect.</string>
-    <string name="nostr_login_qr_waiting">Ожидание одобрения подписчика…</string>
-    <string name="nostr_login_qr_link_label">Nostr Подключение</string>
+    <string name="nostr_login_amber_button">Подключить Amber</string>
+    <string name="nostr_login_qr_button">Подключить через QR</string>
+    <string name="nostr_login_qr_hint">Отсканируйте с помощью Amber, Alby или другого сервиса Nostr Connect.</string>
+    <string name="nostr_login_qr_waiting">Ожидание подтверждения…</string>
+    <string name="nostr_login_qr_link_label">Ссылка Nostr Connect</string>
     <string name="cancel_button">Отмена</string>
-    <string name="nostr_login_generate_button">Сгенерировать и войти</string>
-    <string name="nostr_login_npub_hint">npub или hex pubkey (опционально, если nsec установлен)</string>
-    <string name="nostr_login_nsec_hint">закрытый ключ nsec или hex</string>
-    <string name="nostr_login_relays_hint">Передавать URL, разделенные запятыми</string>
-    <string name="service_select_instance_input_placeholder">URL экземпляра</string>
-    <string name="service_select_next_button">Следующий</string>
-    <string name="service_select_empty_message">Экземпляров не найдено</string>
-    <string name="service_select_compatibility_warning">Этот сервер использует %1$s, Flare будет работать в режиме совместимости. Некоторые функции могут работать некорректно.</string>
-    <string name="login_agreement">Входя в систему, вы соглашаетесь с %1$s.</string>
-    <string name="eula_privacy_policy">EULA и политика конфиденциальности</string>
-    <string name="home_tab_home_title">Домашний</string>
+    <string name="nostr_login_generate_button">Создать и войти</string>
+    <string name="nostr_login_npub_hint">npub или hex pubkey (необязательно, если указан nsec)</string>
+    <string name="nostr_login_nsec_hint">nsec или hex private key</string>
+    <string name="nostr_login_relays_hint">URL реле через запятую</string>
+    <string name="service_select_instance_input_placeholder">URL сервера</string>
+    <string name="service_select_next_button">Далее</string>
+    <string name="service_select_empty_message">Серверы не найдены</string>
+    <string name="service_select_compatibility_warning">Этот сервер использует %1$s, Flare будет работать в режиме совместимости. Некоторые функции могут быть недоступны.</string>
+    <string name="login_agreement">Выполняя вход, вы соглашаетесь с %1$s.</string>
+    <string name="eula_privacy_policy">EULA и Политикой конфиденциальности</string>
+
+    <string name="home_tab_home_title">Главная</string>
     <string name="home_tab_notifications_title">Уведомления</string>
-    <string name="home_tab_me_title">Я</string>
-    <string name="home_tab_discover_title">Поиск</string>
+    <string name="home_tab_me_title">Профиль</string>
+    <string name="home_tab_discover_title">Обзор</string>
     <string name="settings_title">Настройки</string>
-    <string name="mastodon_tab_local_title">Локальный</string>
-    <string name="mastodon_tab_public_title">Публичный</string>
-    <string name="home_tab_featured_title">Избранные</string>
+    <string name="mastodon_tab_local_title">Локальная</string>
+    <string name="mastodon_tab_public_title">Публичная</string>
+    <string name="home_tab_featured_title">Популярное</string>
     <string name="home_tab_bookmarks_title">Закладки</string>
     <string name="home_tab_favorite_title">Избранное</string>
-    <string name="home_tab_list_title">Список</string>
+    <string name="home_tab_list_title">Списки</string>
     <string name="home_tab_feeds_title">Ленты</string>
     <string name="dm_list_title">Личные сообщения</string>
-    <string name="social_title">Соцсети</string>
+    <string name="social_title">Социальное</string>
     <string name="antenna_title">Антенны</string>
-    <string name="mixed_timeline_title">Общая</string>
+    <string name="mixed_timeline_title">Смешанная</string>
     <string name="liked_title">Понравилось</string>
     <string name="all_rss_feeds_title">Все подписки</string>
-    <string name="posts_title">Записи</string>
-    <string name="settings_appearance_absolute_timestamp">Абсолютная метка времени</string>
-    <string name="settings_appearance_absolute_timestamp_description">Показывать абсолютную метку времени на записях</string>
-    <string name="settings_about_description">Конечное поколение с открытым исходным кодом обеспечило децентрализованный клиент социальных сетей.</string>
+    <string name="posts_title">Посты</string>
+    <string name="settings_appearance_absolute_timestamp">Абсолютное время</string>
+    <string name="settings_appearance_absolute_timestamp_description">Показывать точное время публикации</string>
+    <string name="settings_about_description">Клиент для децентрализованных соцсетей с открытым исходным кодом и функциями ИИ.</string>
     <string name="settings_about_source_code">Исходный код</string>
-    <string name="settings_about_telegram">Телеграмма</string>
-    <string name="settings_about_telegram_description">Присоединяйтесь к нашей группе Telegram</string>
-    <string name="settings_about_discord_description">Присоединяйтесь к нашему серверу Discord</string>
-    <string name="settings_about_line_description">Присоединиться к нашей группе Line</string>
+    <string name="settings_about_telegram">Telegram</string>
+    <string name="settings_about_telegram_description">Вступить в нашу группу в Telegram</string>
+    <string name="settings_about_discord_description">Присоединиться к нашему серверу Discord</string>
+    <string name="settings_about_line_description">Вступить в нашу группу в Line</string>
     <string name="settings_about_localization">Crowdin</string>
-    <string name="settings_about_localization_description">Помогите нам перевести сигнал</string>
+    <string name="settings_about_localization_description">Помочь с переводом Flare</string>
     <string name="settings_privacy_policy">Политика конфиденциальности</string>
     <string name="channel_title">Канал</string>
 </resources>

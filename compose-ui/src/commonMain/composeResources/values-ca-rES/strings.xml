@@ -1,345 +1,526 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="delete">Esborrar</string>
+    <string name="app_name" translatable="false">Flare</string>
+    <string name="delete">Suprimeix</string>
     <string name="done">Fet</string>
     <string name="cancel">Cancel·la</string>
     <string name="ok">D\'acord</string>
+
     <string name="profile_header_following_count">%1$s Seguint</string>
     <string name="profile_header_fans_count">%1$s Seguidors</string>
-    <string name="profile_header_button_follow">Seguir</string>
+    <string name="profile_header_toots_count">%1$s Publicacions</string>
+    <string name="profile_misskey_header_status_count">%1$s Publicacions</string>
+
+    <string name="profile_header_button_follow">Segueix</string>
     <string name="profile_header_button_following">Seguint</string>
     <string name="profile_header_button_requested">Sol·licitat</string>
     <string name="profile_header_button_blocked">Bloquejat</string>
     <string name="profile_header_button_is_fans">Et segueix</string>
+
     <string name="mastodon_notification_item_followed_you">t\'ha seguit</string>
-    <string name="mastodon_notification_item_favourited_your_status">favorit</string>
-    <string name="mastodon_notification_item_reblogged_your_status">reblogat</string>
-    <string name="mastodon_notification_item_poll_ended">Una enquesta en la qual participaves ha acabat</string>
-    <string name="mastodon_notification_item_mentioned_you">t\'ha mencionat</string>
-    <string name="mastodon_notification_item_requested_follow">sol·licitud per seguir-te</string>
-    <string name="mastodon_notification_item_updated_status">ha actualitzat un toot</string>
-    <string name="mastodon_item_show_more">Mostrar més</string>
-    <string name="mastodon_item_show_less">Mostrar menys</string>
-    <string name="mastodon_item_pinned">Toot fixat</string>
+    <string name="mastodon_notification_item_favourited_your_status">ha marcat com a preferida la teva publicació</string>
+    <string name="mastodon_notification_item_reblogged_your_status">ha republicat</string>
+    <string name="mastodon_notification_item_poll_ended">Ha finalitzat una enquesta en què participaves</string>
+    <string name="mastodon_notification_item_mentioned_you">t\'ha esmentat</string>
+    <string name="mastodon_notification_item_requested_follow">ha sol·licitat seguir-te</string>
+    <string name="mastodon_notification_item_posted_status">ha publicat</string>
+    <string name="mastodon_notification_item_updated_status">ha actualitzat una publicació</string>
+    <string name="mastodon_item_reblogged_status">ha impulsat una publicació</string>
+    <string name="mastodon_item_show_more">Mostra\'n més</string>
+    <string name="mastodon_item_show_less">Mostra\'n menys</string>
+    <string name="mastodon_item_pinned">ha fixat una publicació</string>
+
+    <string name="post_show_full_text">Mostra el text complet</string>
+
     <string name="bluesky_notification_item_followed_you">t\'ha seguit</string>
-    <string name="bluesky_notification_item_favourited_your_status">favorit</string>
-    <string name="bluesky_notification_item_reblogged_your_status">reblogat</string>
-    <string name="bluesky_notification_item_poll_ended">Una enquesta en la qual participaves ha acabat</string>
-    <string name="bluesky_notification_item_mentioned_you">t\'ha mencionat</string>
-    <string name="bluesky_item_reblogged_status">ha impulsat un toot</string>
+    <string name="bluesky_notification_item_favourited_your_status">li ha agradat la teva publicació</string>
+    <string name="bluesky_notification_item_reblogged_your_status">ha republicat la teva publicació</string>
+    <string name="bluesky_notification_item_poll_ended">Ha finalitzat una enquesta en què participaves</string>
+    <string name="bluesky_notification_item_mentioned_you">t\'ha esmentat</string>
+    <string name="bluesky_item_reblogged_status">ha republicat</string>
     <string name="bluesky_notification_item_replied_to_you">t\'ha respost</string>
-    <string name="bluesky_notification_item_quoted_your_status">citada</string>
-    <string name="bluesky_notification_item_starterpack_joined">Paquet d\'Inici</string>
+    <string name="bluesky_notification_item_quoted_your_status">ha citat la teva publicació</string>
+    <string name="bluesky_notification_item_starterpack_joined">s\'ha unit mitjançant un paquet d\'inici</string>
     <string name="bluesky_notification_item_unKnown">Desconegut</string>
-    <string name="bluesky_notification_item_pin">Fixat</string>
-    <string name="misskey_notification_item_mentioned_you">t\'ha mencionat</string>
+    <string name="bluesky_notification_item_pin">ha fixat una publicació</string>
+
+    <string name="misskey_notification_item_mentioned_you">t\'ha esmentat</string>
     <string name="misskey_notification_item_replied_to_you">t\'ha respost</string>
-    <string name="misskey_notification_item_reposted_your_status">republicat</string>
-    <string name="misskey_notification_item_quoted_your_status">citada</string>
-    <string name="misskey_notification_item_poll_ended">Una enquesta en la qual participaves ha acabat</string>
+    <string name="misskey_notification_item_reposted_your_status">ha republicat la teva publicació</string>
+    <string name="misskey_notification_item_quoted_your_status">ha citat la teva publicació</string>
+    <string name="misskey_notification_item_reacted_to_your_status">ha reaccionat a la teva publicació</string>
+    <string name="misskey_notification_item_poll_ended">Ha finalitzat una enquesta en què participaves</string>
     <string name="misskey_notification_item_follow_request_accepted">ha acceptat la teva sol·licitud de seguiment</string>
-    <string name="misskey_notification_item_achievement_earned">Has guanyat un assoliment: %1$s\n%2$s</string>
-    <string name="misskey_notification_item_app">Aplicació</string>
+    <string name="misskey_notification_item_scheduled_note_posted">s\'ha publicat la nota programada</string>
+    <string name="misskey_notification_item_scheduled_note_post_failed">ha fallat la publicació de la nota programada</string>
+    <string name="misskey_notification_item_role_assigned">t\'ha assignat un rol</string>
+    <string name="misskey_notification_item_chat_room_invitation_received">t\'ha convidat a una sala de xat</string>
+    <string name="misskey_notification_item_achievement_earned">Has guanyat una fita: %1$s\n%2$s</string>
+    <string name="misskey_notification_item_app">notificació de l\'aplicació</string>
+    <string name="misskey_notification_item_export_completed">exportació completada</string>
+    <string name="misskey_notification_item_test">notificació de prova</string>
+    <string name="misskey_notification_item_login">s\'ha detectat un nou inici de sessió</string>
+    <string name="misskey_notification_item_create_token">s\'ha creat un token d\'accés</string>
     <string name="misskey_notification_item_followed_you">t\'ha seguit</string>
-    <string name="misskey_notification_item_requested_follow">sol·licitud per seguir-te</string>
-    <string name="misskey_notification_unknwon">notificació desconeguda %1$s</string>
-    <string name="misskey_item_reblogged_status">ha impulsat un toot</string>
-    <string name="xqt_item_reblogged_status">retuitat</string>
-    <string name="xqt_item_mention_status">et menciona</string>
+    <string name="misskey_notification_item_requested_follow">ha sol·licitat seguir-te</string>
+    <string name="misskey_notification_unknwon">Notificació desconeguda: %1$s</string>
+    <string name="misskey_item_reblogged_status">ha republicat</string>
+
+    <string name="xqt_item_reblogged_status">ha republicat</string>
+    <string name="xqt_item_mention_status">t\'ha esmentat</string>
+
     <string name="mastodon_visibility_public">Públic</string>
     <string name="mastodon_visibility_unlisted">No llistat</string>
     <string name="mastodon_visibility_private">Privat</string>
     <string name="mastodon_visibility_direct">Directe</string>
-    <string name="settings_notifications_title">Notifications</string>
-    <string name="settings_notifications_subtitle">Personalitza com Flare et notifica</string>
-    <string name="status_loadmore_error_retry">Reintenteu</string>
+    <string name="mastodon_visibility_public_description">Qualsevol pot veure i republicar aquesta publicació</string>
+    <string name="mastodon_visibility_unlisted_description">Qualsevol pot veure aquesta publicació, però no apareixerà a la cronologia pública</string>
+    <string name="mastodon_visibility_private_description">Només els seguidors poden veure aquesta publicació</string>
+    <string name="mastodon_visibility_direct_description">Només els usuaris esmentats poden veure aquesta publicació</string>
+
+    <string name="settings_notifications_title">Notificacions</string>
+    <string name="settings_notifications_subtitle">Personalitza com Flare t\'avisa</string>
+
+    <string name="status_loadmore_end">No hi ha més publicacions</string>
+    <string name="status_loadmore_error">Error en carregar més publicacions</string>
+    <string name="status_loadmore_error_retry">Reintenta-ho</string>
     <string name="status_empty">No hi ha res a veure aquí</string>
-    <string name="status_sensitive_media">Mitjans sensibles</string>
-    <string name="show_media">Mostrar mitjans</string>
-    <string name="login_expired">La sessió d\'inici de sessió ha caducat</string>
-    <string name="login_expired_message">Feu clic per iniciar sessió de nou</string>
-    <string name="login_expired_relogin">Inicia sessió de nou</string>
+    <string name="status_sensitive_media">Contingut sensible</string>
+    <string name="show_media">Mostra contingut multimèdia</string>
+    <string name="hide_media">Amaga contingut multimèdia</string>
+    <string name="login_expired">La sessió ha caducat</string>
+    <string name="login_expired_message">Toca per tornar a iniciar la sessió</string>
+    <string name="login_expired_relogin">Torna a iniciar la sessió</string>
+
+    <string name="permission_denied_title">Permís denegat</string>
+    <string name="permission_denied_message">Torna a iniciar la sessió per accedir a aquesta pàgina</string>
+
     <string name="misskey_compose_local_only">Només local</string>
+    <string name="misskey_compose_local_only_description">Només els usuaris d\'aquesta instància poden veure aquesta publicació</string>
+
     <string name="misskey_item_action_renote">Renotar</string>
     <string name="misskey_item_action_quote">Citar</string>
+
     <string name="bluesky_notification_unknown_message">Tipus de notificació desconegut %1$s</string>
     <string name="bluesky_notification_unknown_message2">Si us plau, informa d\'aquest problema al desenvolupador.</string>
-    <string name="blusky_item_action_repost">Republiqui</string>
+
+    <string name="blusky_item_action_repost">Republicar</string>
     <string name="blusky_item_action_quote">Citar</string>
     <string name="blusky_item_action_report">Informar</string>
-    <string name="blusky_item_action_delete">Esborrar</string>
-    <string name="mastodon_item_unbookmark">Desmarcar</string>
-    <string name="mastodon_item_bookmark">Afegir a marcadors</string>
-    <string name="mastodon_item_delete">Esborrar</string>
+    <string name="blusky_item_action_delete">Suprimir</string>
+
+    <string name="mastodon_item_unbookmark">Treure marcador</string>
+    <string name="mastodon_item_bookmark">Marcador</string>
+    <string name="mastodon_item_delete">Suprimir</string>
     <string name="mastodon_item_report">Informar</string>
-    <string name="misskey_item_action_delete">Esborrar</string>
+    <string name="misskey_item_action_delete">Suprimir</string>
     <string name="misskey_item_action_report">Informar</string>
-    <string name="bookmark_remove">Eliminar marcador</string>
+
+    <string name="bookmark_remove">Treure marcador</string>
     <string name="bookmark_add">Afegir marcador</string>
     <string name="like">M\'agrada</string>
     <string name="unlike">Ja no m\'agrada</string>
+    <string name="favourite">Preferit</string>
+    <string name="unfavourite">Treure de preferits</string>
     <string name="more">Més</string>
     <string name="quote">Citar</string>
     <string name="reaction_add">Afegir reacció</string>
-    <string name="reaction_remove">Eliminar reacció</string>
+    <string name="reaction_remove">Treure reacció</string>
     <string name="reply">Respondre</string>
     <string name="report">Informar</string>
-    <string name="retweet">Republiqui</string>
-    <string name="retweet_remove">Eliminar retweet</string>
+    <string name="retweet">Republicar</string>
+    <string name="retweet_remove">Treure repúblicació</string>
     <string name="share">Compartir</string>
-    <string name="comment">Comenta</string>
+    <string name="fx_share">Compartir via FxEmbed</string>
+    <string name="comment">Comentar</string>
+
     <string name="user_report">Informar</string>
-    <string name="user_block">bloquejar</string>
-    <string name="user_unblock">desbloquejar</string>
-    <string name="user_mute">silenciar</string>
-    <string name="user_unmute">desactivar el silenci</string>
+    <string name="user_block">Bloquejar</string>
+    <string name="user_unblock">Desbloquejar</string>
+    <string name="user_mute">Silenciar</string>
+    <string name="user_unmute">Desilenciar</string>
     <string name="user_mute_with_parameter">Silenciar %1$s</string>
     <string name="user_block_with_parameter">Bloquejar %1$s</string>
-    <string name="mastodon_item_content_warning">Avís de contingut</string>
+    <string name="mastodon_item_content_warning">Advertència de contingut</string>
     <string name="reply_to">Respondre a %1$s</string>
-    <string name="date_format_year_month_day">dd MMM aa</string>
+    <string name="status_detail_translate">Traduir</string>
+    <string name="status_detail_tldr">Resumir</string>
+    <string name="translation_badge_translated">Traduït</string>
+    <string name="translation_badge_translating">Traduint…</string>
+    <string name="translation_badge_failed">La traducció ha fallat</string>
+    <string name="translation_retry">Reintentar traducció</string>
+    <string name="translation_show_original">Mostra l\'original</string>
+
+    <string name="date_format_year_month_day">dd MMM yy</string>
     <string name="date_format_month_day">dd MMM</string>
-    <string name="date_format_full">dd MMM aa HH:mm</string>
-    <string name="vvo_notification_like">T\'agrada el teu estat</string>
-    <string name="user_follow_edit_list">Afegir/eliminar de la llista</string>
-    <string name="list_empty">Sense llistes</string>
+    <string name="date_format_full">dd MMM yy HH:mm</string>
+
+    <string name="vvo_notification_like">Li ha agradat la teva publicació</string>
+
+    <string name="user_follow_edit_list">Afegir/Treure de la llista</string>
+    <string name="list_empty">No hi ha llistes</string>
     <string name="list_error">Error en carregar les llistes</string>
-    <string name="misskey_achievement_notes1_title">Només configurant el meu msky</string>
+
+    <string name="misskey_achievement_notes1_title">només configurant el meu msky</string>
     <string name="misskey_achievement_notes1_description">Publica la teva primera nota</string>
     <string name="misskey_achievement_notes1_flavor">Passa-ho bé amb Misskey!</string>
+
     <string name="misskey_achievement_notes10_title">Algunes notes</string>
     <string name="misskey_achievement_notes10_description">Publica 10 notes</string>
+
     <string name="misskey_achievement_notes100_title">Moltes notes</string>
     <string name="misskey_achievement_notes100_description">Publica 100 notes</string>
+
     <string name="misskey_achievement_notes500_title">Cobert de notes</string>
     <string name="misskey_achievement_notes500_description">Publica 500 notes</string>
+
     <string name="misskey_achievement_notes1000_title">Una muntanya de notes</string>
     <string name="misskey_achievement_notes1000_description">Publica 1.000 notes</string>
-    <string name="misskey_achievement_notes5000_title">Notes desbordades</string>
+
+    <string name="misskey_achievement_notes5000_title">Notes desbordants</string>
     <string name="misskey_achievement_notes5000_description">Publica 5.000 notes</string>
-    <string name="misskey_achievement_notes10000_title">Supernova</string>
+
+    <string name="misskey_achievement_notes10000_title">Supernota</string>
     <string name="misskey_achievement_notes10000_description">Publica 10.000 notes</string>
+
     <string name="misskey_achievement_notes20000_title">Necessito... més... notes...</string>
     <string name="misskey_achievement_notes20000_description">Publica 20.000 notes</string>
+
     <string name="misskey_achievement_notes30000_title">Notes notes notes!</string>
     <string name="misskey_achievement_notes30000_description">Publica 30.000 notes</string>
+
     <string name="misskey_achievement_notes40000_title">Fàbrica de notes</string>
     <string name="misskey_achievement_notes40000_description">Publica 40.000 notes</string>
+
     <string name="misskey_achievement_notes50000_title">Planeta de notes</string>
     <string name="misskey_achievement_notes50000_description">Publica 50.000 notes</string>
-    <string name="misskey_achievement_notes60000_title">Quasar de notes</string>
+
+    <string name="misskey_achievement_notes60000_title">Quàsar de notes</string>
     <string name="misskey_achievement_notes60000_description">Publica 60.000 notes</string>
+
     <string name="misskey_achievement_notes70000_title">Forat negre de notes</string>
     <string name="misskey_achievement_notes70000_description">Publica 70.000 notes</string>
+
     <string name="misskey_achievement_notes80000_title">Galàxia de notes</string>
     <string name="misskey_achievement_notes80000_description">Publica 80.000 notes</string>
+
     <string name="misskey_achievement_notes90000_title">Univers de notes</string>
     <string name="misskey_achievement_notes90000_description">Publica 90.000 notes</string>
-    <string name="misskey_achievement_notes100000_title">TOTES LES TEVES NOTES ENS PERTANYEN</string>
+
+    <string name="misskey_achievement_notes100000_title">TOTA LA VOSTRA NOTA ENS PERTANY</string>
     <string name="misskey_achievement_notes100000_description">Publica 100.000 notes</string>
     <string name="misskey_achievement_notes100000_flavor">Segur que tens molt a dir.</string>
+
     <string name="misskey_achievement_login3_title">Principiant I</string>
     <string name="misskey_achievement_login3_description">Inicia sessió durant un total de 3 dies</string>
-    <string name="misskey_achievement_login3_flavor">A partir d\'avui, només anomena\'m Misskist</string>
+    <string name="misskey_achievement_login3_flavor">A partir d\'avui, digue\'m simplement Misskist</string>
+
     <string name="misskey_achievement_login7_title">Principiant II</string>
     <string name="misskey_achievement_login7_description">Inicia sessió durant un total de 7 dies</string>
-    <string name="misskey_achievement_login7_flavor">Tens la sensació que ja et saps la lliçó?</string>
+    <string name="misskey_achievement_login7_flavor">Ja sents que hi tens la mà trencada?</string>
+
     <string name="misskey_achievement_login15_title">Principiant III</string>
     <string name="misskey_achievement_login15_description">Inicia sessió durant un total de 15 dies</string>
+
     <string name="misskey_achievement_login30_title">Misskist I</string>
     <string name="misskey_achievement_login30_description">Inicia sessió durant un total de 30 dies</string>
+
     <string name="misskey_achievement_login60_title">Misskist II</string>
     <string name="misskey_achievement_login60_description">Inicia sessió durant un total de 60 dies</string>
+
     <string name="misskey_achievement_login100_title">Misskist III</string>
     <string name="misskey_achievement_login100_description">Inicia sessió durant un total de 100 dies</string>
-    <string name="misskey_achievement_login100_flavor">Misskist Violent</string>
+    <string name="misskey_achievement_login100_flavor">Misskist violent</string>
+
     <string name="misskey_achievement_login200_title">Regular I</string>
     <string name="misskey_achievement_login200_description">Inicia sessió durant un total de 200 dies</string>
+
     <string name="misskey_achievement_login300_title">Regular II</string>
     <string name="misskey_achievement_login300_description">Inicia sessió durant un total de 300 dies</string>
+
     <string name="misskey_achievement_login400_title">Regular III</string>
     <string name="misskey_achievement_login400_description">Inicia sessió durant un total de 400 dies</string>
+
     <string name="misskey_achievement_login500_title">Expert I</string>
     <string name="misskey_achievement_login500_description">Inicia sessió durant un total de 500 dies</string>
-    <string name="misskey_achievement_login500_flavor">Els meus amics, sovint s\'ha dit que m\'agraden les notes</string>
+    <string name="misskey_achievement_login500_flavor">Amics meus, s\'ha dit sovint que m\'agraden les notes</string>
+
     <string name="misskey_achievement_login600_title">Expert II</string>
     <string name="misskey_achievement_login600_description">Inicia sessió durant un total de 600 dies</string>
+
     <string name="misskey_achievement_login700_title">Expert III</string>
     <string name="misskey_achievement_login700_description">Inicia sessió durant un total de 700 dies</string>
-    <string name="misskey_achievement_login800_title">Mestre de Notes I</string>
+
+    <string name="misskey_achievement_login800_title">Mestre de les Notes I</string>
     <string name="misskey_achievement_login800_description">Inicia sessió durant un total de 800 dies</string>
-    <string name="misskey_achievement_login900_title">Mestre de Notes II</string>
+
+    <string name="misskey_achievement_login900_title">Mestre de les Notes II</string>
     <string name="misskey_achievement_login900_description">Inicia sessió durant un total de 900 dies</string>
-    <string name="misskey_achievement_login1000_title">Mestre de Notes III</string>
+
+    <string name="misskey_achievement_login1000_title">Mestre de les Notes III</string>
     <string name="misskey_achievement_login1000_description">Inicia sessió durant un total de 1.000 dies</string>
-    <string name="misskey_achievement_login1000_flavor">Gràcies per fer servir Misskey!</string>
-    <string name="misskey_achievement_note_clipped1_title">Hauries de... retallar...</string>
+    <string name="misskey_achievement_login1000_flavor">Gràcies per utilitzar Misskey!</string>
+
+    <string name="misskey_achievement_note_clipped1_title">He de... retallar...</string>
     <string name="misskey_achievement_note_clipped1_description">Retalla la teva primera nota</string>
-    <string name="misskey_achievement_note_favorited1_title">Observador d\'estrelles</string>
-    <string name="misskey_achievement_note_favorited1_description">Favorita la teva primera nota</string>
-    <string name="misskey_achievement_my_note_favorited1_title">Cercador d\'estrelles</string>
-    <string name="misskey_achievement_my_note_favorited1_description">Que algú més afavoreixi una de les teves notes</string>
+
+    <string name="misskey_achievement_note_favorited1_title">Astrònom</string>
+    <string name="misskey_achievement_note_favorited1_description">Marca com a preferida la teva primera nota</string>
+
+    <string name="misskey_achievement_my_note_favorited1_title">Buscant estrelles</string>
+    <string name="misskey_achievement_my_note_favorited1_description">Fes que algú altre marqui com a preferida una de les teves notes</string>
+
     <string name="misskey_achievement_profile_filled_title">Ben preparat</string>
     <string name="misskey_achievement_profile_filled_description">Configura el teu perfil</string>
+
     <string name="misskey_achievement_marked_as_cat_title">Sóc un gat</string>
-    <string name="misskey_achievement_marked_as_cat_description">Marca el teu compte com un gat</string>
-    <string name="misskey_achievement_marked_as_cat_flavor">Et donaré un nom més tard.</string>
+    <string name="misskey_achievement_marked_as_cat_description">Marca el teu compte com a gat</string>
+    <string name="misskey_achievement_marked_as_cat_flavor">Ja et posaré un nom més tard.</string>
+
     <string name="misskey_achievement_following1_title">Seguint el teu primer usuari</string>
     <string name="misskey_achievement_following1_description">Segueix un usuari</string>
-    <string name="misskey_achievement_following10_title">Mantén el ritme... mantén el ritme...</string>
+
+    <string name="misskey_achievement_following10_title">Segueix el ritme... segueix el ritme...</string>
     <string name="misskey_achievement_following10_description">Segueix 10 usuaris</string>
+
     <string name="misskey_achievement_following50_title">Molts amics</string>
     <string name="misskey_achievement_following50_description">Segueix 50 comptes</string>
-    <string name="misskey_achievement_following100_title">100 Amics</string>
+
+    <string name="misskey_achievement_following100_title">100 amics</string>
     <string name="misskey_achievement_following100_description">Segueix 100 comptes</string>
+
     <string name="misskey_achievement_following300_title">Sobrecàrrega d\'amics</string>
     <string name="misskey_achievement_following300_description">Segueix 300 comptes</string>
+
     <string name="misskey_achievement_followers1_title">Primer seguidor</string>
     <string name="misskey_achievement_followers1_description">Guanya 1 seguidor</string>
+
     <string name="misskey_achievement_followers10_title">Segueix-me!</string>
     <string name="misskey_achievement_followers10_description">Guanya 10 seguidors</string>
-    <string name="misskey_achievement_followers50_title">Arribant en multitud</string>
+
+    <string name="misskey_achievement_followers50_title">Venint a carretades</string>
     <string name="misskey_achievement_followers50_description">Guanya 50 seguidors</string>
+
     <string name="misskey_achievement_followers100_title">Popular</string>
     <string name="misskey_achievement_followers100_description">Guanya 100 seguidors</string>
-    <string name="misskey_achievement_followers300_title">Si us plau, formi una sola línia</string>
+
+    <string name="misskey_achievement_followers300_title">Si us plau, formeu una fila</string>
     <string name="misskey_achievement_followers300_description">Guanya 300 seguidors</string>
-    <string name="misskey_achievement_followers500_title">Ràdio Torre</string>
+
+    <string name="misskey_achievement_followers500_title">Torre de ràdio</string>
     <string name="misskey_achievement_followers500_description">Guanya 500 seguidors</string>
+
     <string name="misskey_achievement_followers1000_title">Influencer</string>
     <string name="misskey_achievement_followers1000_description">Guanya 1.000 seguidors</string>
-    <string name="misskey_achievement_collect_achievements30_title">Col·leccionista d\'assoliments</string>
-    <string name="misskey_achievement_collect_achievements30_description">Guanya 30 assoliments</string>
-    <string name="misskey_achievement_view_achievements3min_title">Assoliments M\'agrada</string>
-    <string name="misskey_achievement_view_achievements3min_description">Mira la teva llista d\'assoliments durant almenys 3 minuts</string>
-    <string name="misskey_achievement_i_love_misskey_title">Estimo Misskey</string>
-    <string name="misskey_achievement_i_love_misskey_description">Publica \"Estimo #Misskey\"</string>
+
+    <string name="misskey_achievement_collect_achievements30_title">Col·leccionista de fites</string>
+    <string name="misskey_achievement_collect_achievements30_description">Guanya 30 fites</string>
+
+    <string name="misskey_achievement_view_achievements3min_title">Li agraden les fites</string>
+    <string name="misskey_achievement_view_achievements3min_description">Mira la teva llista de fites durant almenys 3 minuts</string>
+
+    <string name="misskey_achievement_i_love_misskey_title">M\'encanta Misskey</string>
+    <string name="misskey_achievement_i_love_misskey_description">Publica \"I ❤ #Misskey\"</string>
     <string name="misskey_achievement_i_love_misskey_flavor">L\'equip de desenvolupament de Misskey agraeix molt el teu suport!</string>
-    <string name="misskey_achievement_found_treasure_title">Recerca del Tresor</string>
+
+    <string name="misskey_achievement_found_treasure_title">Cerca del tresor</string>
     <string name="misskey_achievement_found_treasure_description">Has trobat el tresor amagat</string>
-    <string name="misskey_achievement_client30min_title">Curt descans</string>
-    <string name="misskey_achievement_client30min_description">Mantingues Misskey obert durant almenys 30 minuts</string>
-    <string name="misskey_achievement_client60min_title">No hi ha \"Miss\" a Misskey</string>
-    <string name="misskey_achievement_client60min_description">Mantingues Misskey obert durant almenys 60 minuts</string>
+
+    <string name="misskey_achievement_client30min_title">Breu descans</string>
+    <string name="misskey_achievement_client30min_description">Manté Misskey obert durant almenys 30 minuts</string>
+
+    <string name="misskey_achievement_client60min_title">Sense \"Miss\" a Misskey</string>
+    <string name="misskey_achievement_client60min_description">Manté Misskey obert durant almenys 60 minuts</string>
+
     <string name="misskey_achievement_note_deleted_within1min_title">No importa</string>
-    <string name="misskey_achievement_note_deleted_within1min_description">Elimina una nota dins d\'un minut de la publicació</string>
+    <string name="misskey_achievement_note_deleted_within1min_description">Suprimeix una nota abans d\'un minut de publicar-la</string>
+
     <string name="misskey_achievement_posted_at_late_night_title">Nocturn</string>
-    <string name="misskey_achievement_posted_at_late_night_description">Publica una nota tard a la nit</string>
+    <string name="misskey_achievement_posted_at_late_night_description">Publica una nota a altes hores de la nit</string>
     <string name="misskey_achievement_posted_at_late_night_flavor">Ja és hora d\'anar a dormir.</string>
-    <string name="misskey_achievement_posted_at_0min0sec_title">Rellotge Parlante</string>
+
+    <string name="misskey_achievement_posted_at_0min0sec_title">Rellotge parlant</string>
     <string name="misskey_achievement_posted_at_0min0sec_description">Publica una nota a les 00:00</string>
-    <string name="misskey_achievement_posted_at_0min0sec_flavor">Clic clic clic claaang</string>
-    <string name="misskey_achievement_self_quote_title">Auto-referència</string>
+    <string name="misskey_achievement_posted_at_0min0sec_flavor">Clic Clic Clic Clang</string>
+
+    <string name="misskey_achievement_self_quote_title">Autoreferència</string>
     <string name="misskey_achievement_self_quote_description">Cita la teva pròpia nota</string>
-    <string name="misskey_achievement_htl20npm_title">Línia de Temps Fluida</string>
-    <string name="misskey_achievement_htl20npm_description">Fes que la velocitat de la teva línia de temps a casa superi les 20 npm (notes per minut)</string>
+
+    <string name="misskey_achievement_htl20npm_title">Cronologia fluida</string>
+    <string name="misskey_achievement_htl20npm_description">Fes que la velocitat de la teva cronologia d\'inici superi les 20 notes per minut</string>
+
     <string name="misskey_achievement_view_instance_chart_title">Analista</string>
     <string name="misskey_achievement_view_instance_chart_description">Mira els gràfics de la teva instància</string>
+
     <string name="misskey_achievement_output_hello_world_on_scratchpad_title">Hola, món!</string>
-    <string name="misskey_achievement_output_hello_world_on_scratchpad_description">Sortida \"hola món\" a la finestra de treball</string>
-    <string name="misskey_achievement_open3windows_title">Multi-Finestra</string>
-    <string name="misskey_achievement_open3windows_description">Té almenys 3 finestres obertes al mateix temps</string>
-    <string name="misskey_achievement_drive_folder_circular_reference_title">Referència Circular</string>
-    <string name="misskey_achievement_drive_folder_circular_reference_description">Intenta crear una carpeta anidada de manera recursiva a Drive</string>
+    <string name="misskey_achievement_output_hello_world_on_scratchpad_description">Mostra \"hola món\" al Scratchpad</string>
+
+    <string name="misskey_achievement_open3windows_title">Multifinestra</string>
+    <string name="misskey_achievement_open3windows_description">Tingues almenys 3 finestres obertes alhora</string>
+
+    <string name="misskey_achievement_drive_folder_circular_reference_title">Referència circular</string>
+    <string name="misskey_achievement_drive_folder_circular_reference_description">Intenta crear una carpeta niuada recursivament al Drive</string>
+
     <string name="misskey_achievement_react_without_read_title">Realment ho has llegit?</string>
-    <string name="misskey_achievement_react_without_read_description">Reaccionar a una nota que té més de 100 caràcters en 3 segons després de ser publicada</string>
-    <string name="misskey_achievement_clicked_click_here_title">Fes clic aquí</string>
-    <string name="misskey_achievement_clicked_click_here_description">Has fet clic aquí</string>
-    <string name="misskey_achievement_just_plain_lucky_title">Només pura sort</string>
-    <string name="misskey_achievement_just_plain_lucky_description">Té una oportunitat d\'obtenir-se amb una probabilitat de 0.005\% cada 10 segons</string>
-    <string name="misskey_achievement_set_name_to_syuilo_title">Complex de déu</string>
-    <string name="misskey_achievement_set_name_to_syuilo_description">Estableix el teu nom a \"syuilo\"</string>
-    <string name="misskey_achievement_passed_since_account_created1_title">Aniversari d\'un any</string>
-    <string name="misskey_achievement_passed_since_account_created1_description">Ha passat un any des que es va crear el teu compte</string>
-    <string name="misskey_achievement_passed_since_account_created2_title">Aniversari de dos anys</string>
-    <string name="misskey_achievement_passed_since_account_created2_description">Han passat dos anys des que es va crear el teu compte</string>
-    <string name="misskey_achievement_passed_since_account_created3_title">Aniversari de tres anys</string>
-    <string name="misskey_achievement_passed_since_account_created3_description">Han passat tres anys des que es va crear el teu compte</string>
-    <string name="misskey_achievement_logged_in_on_birthday_title">Feliç aniversari</string>
-    <string name="misskey_achievement_logged_in_on_birthday_description">Inicia sessió el teu aniversari</string>
-    <string name="misskey_achievement_logged_in_on_new_years_day_title">Feliç Any Nou!</string>
-    <string name="misskey_achievement_logged_in_on_new_years_day_description">Inicia sessió el primer dia de l\'any</string>
-    <string name="misskey_achievement_logged_in_on_new_years_day_flavor">Cap a un altre gran any en aquesta instància</string>
-    <string name="misskey_achievement_cookie_clicked_title">Un joc en què fas clic a galetes</string>
-    <string name="misskey_achievement_cookie_clicked_description">Has fet clic a la galeta</string>
-    <string name="misskey_achievement_cookie_clicked_flavor">Espera, estàs al lloc web correcte?</string>
-    <string name="misskey_achievement_brain_diver_title">Mergir cerebral</string>
-    <string name="misskey_achievement_brain_diver_description">Publica l\'enllaç a Mergir cerebral</string>
+    <string name="misskey_achievement_react_without_read_description">Reacciona a una nota de més de 100 caràcters abans de 3 segons de ser publicada</string>
+
+    <string name="misskey_achievement_clicked_click_here_title">Clica aquí</string>
+    <string name="misskey_achievement_clicked_click_here_description">Has clicat aquí</string>
+
+    <string name="misskey_achievement_just_plain_lucky_title">Simplement afortunat</string>
+    <string name="misskey_achievement_just_plain_lucky_description">Té la probabilitat de ser obtingut amb un 0,005% cada 10 segons</string>
+
+    <string name="misskey_achievement_set_name_to_syuilo_title">Complex de Déu</string>
+    <string name="misskey_achievement_set_name_to_syuilo_description">Posa\'t el nom \"syuilo\"</string>
+
+    <string name="misskey_achievement_passed_since_account_created1_title">Primer aniversari</string>
+    <string name="misskey_achievement_passed_since_account_created1_description">Ha passat un any des de la creació del teu compte</string>
+
+    <string name="misskey_achievement_passed_since_account_created2_title">Segon aniversari</string>
+    <string name="misskey_achievement_passed_since_account_created2_description">Han passat dos anys des de la creació del teu compte</string>
+
+    <string name="misskey_achievement_passed_since_account_created3_title">Tercer aniversari</string>
+    <string name="misskey_achievement_passed_since_account_created3_description">Han passat tres anys des de la creació del teu compte</string>
+
+    <string name="misskey_achievement_logged_in_on_birthday_title">Per molts anys</string>
+    <string name="misskey_achievement_logged_in_on_birthday_description">Inicia sessió el dia del teu aniversari</string>
+
+    <string name="misskey_achievement_logged_in_on_new_years_day_title">Bon any nou!</string>
+    <string name="misskey_achievement_logged_in_on_new_years_day_description">Sessió iniciada el primer dia de l\'any</string>
+    <string name="misskey_achievement_logged_in_on_new_years_day_flavor">Per un altre gran any en aquesta instància</string>
+
+    <string name="misskey_achievement_cookie_clicked_title">Un joc en què cliques galetes</string>
+    <string name="misskey_achievement_cookie_clicked_description">Has clicat la galeta</string>
+    <string name="misskey_achievement_cookie_clicked_flavor">Espera, ets al lloc web correcte?</string>
+
+    <string name="misskey_achievement_brain_diver_title">Brain Diver</string>
+    <string name="misskey_achievement_brain_diver_description">Publica l\'enllaç a Brain Diver</string>
     <string name="misskey_achievement_brain_diver_flavor">Misskey-Misskey La-Tu-Ma</string>
-    <string name="misskey_achievement_smash_test_notification_button_title">Prova d\'overflow</string>
-    <string name="misskey_achievement_smash_test_notification_button_description">Activa la prova de notificació repetidament en un temps extremadament curt</string>
+
+    <string name="misskey_achievement_smash_test_notification_button_title">Desbordament de prova</string>
+    <string name="misskey_achievement_smash_test_notification_button_description">Activa la notificació de prova repetidament en un temps extremadament curt</string>
+
     <string name="misskey_achievement_tutorial_completed_title">Diploma del curs elemental de Misskey</string>
     <string name="misskey_achievement_tutorial_completed_description">Tutorial completat</string>
+
     <string name="misskey_achievement_bubble_game_exploding_head_title">🤯</string>
     <string name="misskey_achievement_bubble_game_exploding_head_description">L\'objecte més gran del joc de bombolles</string>
-    <string name="misskey_achievement_bubble_game_double_exploding_head_title">Double🤯</string>
+
+    <string name="misskey_achievement_bubble_game_double_exploding_head_title">Doble🤯</string>
     <string name="misskey_achievement_bubble_game_double_exploding_head_description">Dos dels objectes més grans del joc de bombolles alhora</string>
     <string name="misskey_achievement_bubble_game_double_exploding_head_flavor">Pots omplir una carmanyola així 🤯 🤯 una mica.</string>
+
     <string name="vote">Votar</string>
     <string name="poll_expired">Enquesta caducada</string>
     <string name="poll_voted">Votat</string>
-    <string name="poll_expired_at">Caducada a %1$s</string>
-    <string name="user_send_message">Enviar missatge</string>
-    <string name="profile_search_user_using_account">Troba %1$s en %2$s utilitzant %3$s</string>
-    <string name="profile_search_user_using_account_compat">Troba en %1$s</string>
+    <string name="poll_expired_at">Ha caducat a les %1$s</string>
+    <string name="user_send_message">Enviar missatge directe</string>
+
+    <string name="profile_search_user_using_account">Troba %1$s a %2$s utilitzant %3$s</string>
+    <string name="profile_search_user_using_account_compat">Troba a %1$s</string>
+
     <string name="feeds_discover_feeds_created_by">Creat per %1$s</string>
+
     <string name="notification_item_accept_follow_request">Acceptar</string>
     <string name="notification_item_reject_follow_request">Rebutjar</string>
-    <string name="dm_list_empty">Sense missatges directes</string>
-    <string name="dm_list_error">No s\'ha pogut carregar els missatges directes</string>
+
+
+    <string name="dm_list_empty">No hi ha missatges directes</string>
+    <string name="dm_list_error">Error en carregar els missatges directes</string>
     <string name="send">Enviar</string>
     <string name="dm_send_placeholder">Enviar un missatge</string>
-    <string name="dm_deleted">Eliminat</string>
-    <string name="dm_conversation">Sala de missatges directes</string>
+    <string name="dm_deleted">Suprimit</string>
+    <string name="dm_conversation">Conversa de missatges directes</string>
     <string name="dm_sending">Enviant</string>
-    <string name="dm_leave">Deixar la conversa</string>
-    <string name="dm_to_profile">Mostrar perfil</string>
-    <string name="settings_side_panel_empty">Per defecte es mostrarà el panell lateral depenent de la plataforma del compte.</string>
+    <string name="dm_leave">Sortir de la conversa</string>
+    <string name="dm_to_profile">Mostra el perfil</string>
+
+    <string name="settings_side_panel_empty">Per defecte, el panell lateral segueix la plataforma del compte actual.</string>
     <string name="tab_settings_add">Afegir</string>
-    <string name="tab_settings_drag">Arrossegueu</string>
+    <string name="tab_settings_drag">Arrossegar</string>
     <string name="tab_settings_edit">Editar</string>
-    <string name="tab_settings_remove">Eliminar</string>
+    <string name="tab_settings_remove">Treure</string>
     <string name="tab_settings_default">Per defecte</string>
     <string name="tab_settings_list">Llista</string>
-    <string name="tab_settings_feed">Fluxos</string>
+    <string name="tab_settings_feed">Canals</string>
+
     <string name="list_add">Afegir llista</string>
     <string name="list_edit">Editar llista</string>
-    <string name="list_delete">Esborrar llista</string>
-    <string name="add_rss_source">Afegir</string>
-    <string name="edit_rss_source">Editar font Rss</string>
+    <string name="list_delete">Suprimir llista</string>
+
+    <string name="rss_sources_title">Subscripcions</string>
+    <string name="add_rss_source">Afegir subscripció</string>
+    <string name="edit_rss_source">Editar subscripció</string>
+    <string name="delete_rss_source">Suprimir subscripció</string>
+
     <string name="rss_sources_title_label">Títol</string>
-    <string name="rss_sources_url_label">Url</string>
+    <string name="rss_sources_url_label">URL</string>
+    <string name="rss_title">Subscripcions</string>
+    <string name="empty_rss_sources">No hi ha subscripcions</string>
+    <string name="mastodon_trending_statuses">Estats tendència</string>
+    <string name="mastodon_federated_timeline">Cronologia federada</string>
+    <string name="mastodon_local_timeline">Cronologia local</string>
+
     <string name="service_select_welcome_title">Benvingut a Flare</string>
+    <string name="service_select_welcome_message">Introdueix un servidor per començar.</string>
+    <string name="service_select_welcome_hint">Flare admet Mastodon, Misskey, Bluesky, Nostr i X.</string>
+    <string name="service_select_welcome_list_hint">O tria entre aquests servidors</string>
     <string name="bluesky_login_username_hint">Nom d\'usuari</string>
     <string name="bluesky_login_password_hint">Contrasenya</string>
-    <string name="login_button">Iniciar sessió</string>
-    <string name="mastodon_login_verify_message">Si us plau, espereu mentre verifiquem les vostres credencials.</string>
-    <string name="cancel_button">Cancel·la</string>
+    <string name="bluesky_login_auth_factor_token_hint">Token 2FA</string>
+    <string name="bluesky_login_oauth_button">Inicia la sessió amb OAuth</string>
+    <string name="bluesky_login_use_password_button">Utilitza contrasenya</string>
+    <string name="bluesky_login_oauth_hint">L\'OAuth de Bluesky encara pot ser inestable. Si teniu problemes, utilitzeu l\'inici de sessió amb contrasenya.</string>
+    <string name="login_button">Inicia la sessió</string>
+    <string name="mastodon_login_verify_message">Verificant les teves credencials…</string>
+    <string name="nostr_login_title">Importar compte de Nostr</string>
+    <string name="nostr_login_hint">Enganxa un npub o hex pubkey per a accés de només lectura, proporciona un nsec per a signatura local, utilitza una URI bunker per a signatura remota o connecta Amber i signadors Nostr Connect basats en QR.</string>
+    <string name="nostr_login_account_hint">npub, nsec, hex key, bunker:// o nostrconnect://</string>
+    <string name="nostr_login_bunker_hint">URI bunker:// o nostrconnect://</string>
+    <string name="nostr_login_bunker_button">Connectar bunker</string>
+    <string name="nostr_login_amber_button">Connectar Amber</string>
+    <string name="nostr_login_qr_button">Connectar amb QR</string>
+    <string name="nostr_login_qr_hint">Escaneja amb Amber, Alby o un altre signador de Nostr Connect.</string>
+    <string name="nostr_login_qr_waiting">Esperant l\'aprovació del signador…</string>
+    <string name="nostr_login_qr_link_label">Enllaç de Nostr Connect</string>
+    <string name="cancel_button">Cancel·lar</string>
+    <string name="nostr_login_generate_button">Generar i iniciar la sessió</string>
+    <string name="nostr_login_npub_hint">npub o hex pubkey (opcional si nsec està establert)</string>
+    <string name="nostr_login_nsec_hint">nsec o hex private key</string>
+    <string name="nostr_login_relays_hint">URLs de relay, separades per comes</string>
     <string name="service_select_instance_input_placeholder">URL de la instància</string>
     <string name="service_select_next_button">Següent</string>
     <string name="service_select_empty_message">No s\'han trobat instàncies</string>
+    <string name="service_select_compatibility_warning">Aquest servidor utilitza %1$s, Flare s\'executarà en mode de compatibilitat. Algunes funcions poden no funcionar correctament.</string>
+    <string name="login_agreement">En iniciar la sessió, acceptes el %1$s.</string>
+    <string name="eula_privacy_policy">EULA i Política de Privadesa</string>
+
     <string name="home_tab_home_title">Inici</string>
-    <string name="home_tab_notifications_title">Notifications</string>
+    <string name="home_tab_notifications_title">Notificacions</string>
     <string name="home_tab_me_title">Jo</string>
-    <string name="home_tab_discover_title">Descobreix</string>
+    <string name="home_tab_discover_title">Descobrir</string>
     <string name="settings_title">Configuració</string>
     <string name="mastodon_tab_local_title">Local</string>
     <string name="mastodon_tab_public_title">Públic</string>
-    <string name="home_tab_featured_title">Destacats</string>
-    <string name="home_tab_bookmarks_title">Llibres d\'entrada</string>
-    <string name="home_tab_favorite_title">Favorit</string>
-    <string name="home_tab_list_title">Llista</string>
-    <string name="home_tab_feeds_title">Fluxos</string>
+    <string name="home_tab_featured_title">Destacat</string>
+    <string name="home_tab_bookmarks_title">Marcadors</string>
+    <string name="home_tab_favorite_title">Preferits</string>
+    <string name="home_tab_list_title">Llistes</string>
+    <string name="home_tab_feeds_title">Canals</string>
     <string name="dm_list_title">Missatges directes</string>
-    <string name="antenna_title">Antena</string>
+    <string name="social_title">Social</string>
+    <string name="antenna_title">Antenes</string>
     <string name="mixed_timeline_title">Mixt</string>
+    <string name="liked_title">M\'agrada</string>
+    <string name="all_rss_feeds_title">Totes les subscripcions</string>
     <string name="posts_title">Publicacions</string>
-    <string name="settings_about_description">El client de xarxa social descentralitzat de nova generació obert i impulsat per IA.</string>
+    <string name="settings_appearance_absolute_timestamp">Marca de temps absoluta</string>
+    <string name="settings_appearance_absolute_timestamp_description">Mostra marques de temps exactes a les publicacions</string>
+    <string name="settings_about_description">Un client de codi obert i impulsat per IA per a plataformes socials descentralitzades.</string>
     <string name="settings_about_source_code">Codi font</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Uneix-te al nostre grup de Telegram</string>
-    <string name="settings_about_line_description">Uneix-te al nostre grup de Line</string>
     <string name="settings_about_localization">Crowdin</string>
     <string name="settings_about_localization_description">Ajuda\'ns a traduir Flare</string>
-    <string name="settings_privacy_policy">Política de privadesa</string>
+    <string name="settings_privacy_policy">Política de Privadesa</string>
+    <string name="channel_title">Canal</string>
 </resources>

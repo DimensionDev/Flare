@@ -1,417 +1,530 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name" translatable="false">Flare</string>
     <string name="delete">Radera</string>
     <string name="done">Klar</string>
     <string name="cancel">Avbryt</string>
-    <string name="ok">Ok</string>
+    <string name="ok">OK</string>
+
     <string name="profile_header_following_count">%1$s Följer</string>
     <string name="profile_header_fans_count">%1$s Följare</string>
-    <string name="profile_header_toots_count">%1$s inlägg</string>
-    <string name="profile_misskey_header_status_count">%1$s inlägg</string>
+    <string name="profile_header_toots_count">%1$s Inlägg</string>
+    <string name="profile_misskey_header_status_count">%1$s Inlägg</string>
+
     <string name="profile_header_button_follow">Följ</string>
     <string name="profile_header_button_following">Följer</string>
     <string name="profile_header_button_requested">Begärt</string>
     <string name="profile_header_button_blocked">Blockerad</string>
     <string name="profile_header_button_is_fans">Följer dig</string>
+
     <string name="mastodon_notification_item_followed_you">följde dig</string>
-    <string name="mastodon_notification_item_favourited_your_status">Favoriterad</string>
-    <string name="mastodon_notification_item_reblogged_your_status">återbloggad</string>
-    <string name="mastodon_notification_item_poll_ended">En enkät som du deltog i har avslutats</string>
+    <string name="mastodon_notification_item_favourited_your_status">favoritmarkerade ditt inlägg</string>
+    <string name="mastodon_notification_item_reblogged_your_status">delade vidare</string>
+    <string name="mastodon_notification_item_poll_ended">En omröstning du deltog i har avslutats</string>
     <string name="mastodon_notification_item_mentioned_you">nämnde dig</string>
-    <string name="mastodon_notification_item_requested_follow">begär att följa dig</string>
-    <string name="mastodon_notification_item_posted_status">bara postat ett inlägg</string>
+    <string name="mastodon_notification_item_requested_follow">begärde att få följa dig</string>
+    <string name="mastodon_notification_item_posted_status">postade</string>
     <string name="mastodon_notification_item_updated_status">uppdaterade ett inlägg</string>
-    <string name="mastodon_item_reblogged_status">förstärkte ett inlägg</string>
+    <string name="mastodon_item_reblogged_status">boostade ett inlägg</string>
     <string name="mastodon_item_show_more">Visa mer</string>
     <string name="mastodon_item_show_less">Visa mindre</string>
-    <string name="mastodon_item_pinned">Klistrat inlägg</string>
-    <string name="post_show_full_text">Visa fulltext</string>
+    <string name="mastodon_item_pinned">fäste ett inlägg</string>
+
+    <string name="post_show_full_text">Visa hela texten</string>
+
     <string name="bluesky_notification_item_followed_you">följde dig</string>
-    <string name="bluesky_notification_item_favourited_your_status">Favoriterad</string>
-    <string name="bluesky_notification_item_reblogged_your_status">återbloggad</string>
-    <string name="bluesky_notification_item_poll_ended">En enkät som du deltog i har avslutats</string>
+    <string name="bluesky_notification_item_favourited_your_status">gillade ditt inlägg</string>
+    <string name="bluesky_notification_item_reblogged_your_status">repostade ditt inlägg</string>
+    <string name="bluesky_notification_item_poll_ended">En omröstning du deltog i har avslutats</string>
     <string name="bluesky_notification_item_mentioned_you">nämnde dig</string>
-    <string name="bluesky_item_reblogged_status">repostat ett inlägg</string>
+    <string name="bluesky_item_reblogged_status">repostade</string>
     <string name="bluesky_notification_item_replied_to_you">svarade dig</string>
-    <string name="bluesky_notification_item_quoted_your_status">citerad</string>
-    <string name="bluesky_notification_item_starterpack_joined">Startpaket anslutet</string>
+    <string name="bluesky_notification_item_quoted_your_status">citerade ditt inlägg</string>
+    <string name="bluesky_notification_item_starterpack_joined">gick med via ett startpaket</string>
     <string name="bluesky_notification_item_unKnown">Okänd</string>
-    <string name="bluesky_notification_item_pin">Klistrad</string>
+    <string name="bluesky_notification_item_pin">fäste ett inlägg</string>
+
     <string name="misskey_notification_item_mentioned_you">nämnde dig</string>
     <string name="misskey_notification_item_replied_to_you">svarade dig</string>
-    <string name="misskey_notification_item_reposted_your_status">repostad</string>
-    <string name="misskey_notification_item_quoted_your_status">citerad</string>
+    <string name="misskey_notification_item_reposted_your_status">repostade ditt inlägg</string>
+    <string name="misskey_notification_item_quoted_your_status">citerade ditt inlägg</string>
     <string name="misskey_notification_item_reacted_to_your_status">reagerade på ditt inlägg</string>
-    <string name="misskey_notification_item_poll_ended">En enkät som du deltog i har avslutats</string>
-    <string name="misskey_notification_item_follow_request_accepted">accepterade din följebegäran</string>
-    <string name="misskey_notification_item_scheduled_note_posted">Schemalagd anteckning postad</string>
-    <string name="misskey_notification_item_scheduled_note_post_failed">Schemalagd anteckning misslyckades att posta</string>
-    <string name="misskey_notification_item_role_assigned">Roll tilldelad</string>
+    <string name="misskey_notification_item_poll_ended">En omröstning du deltog i har avslutats</string>
+    <string name="misskey_notification_item_follow_request_accepted">accepterade din följförfrågan</string>
+    <string name="misskey_notification_item_scheduled_note_posted">schemalagd anteckning postad</string>
+    <string name="misskey_notification_item_scheduled_note_post_failed">misslyckades med att posta schemalagd anteckning</string>
+    <string name="misskey_notification_item_role_assigned">tilldelade dig en roll</string>
     <string name="misskey_notification_item_chat_room_invitation_received">bjöd in dig till ett chattrum</string>
-    <string name="misskey_notification_item_achievement_earned">Du har fått en prestation: %1$s\n%2$s</string>
-    <string name="misskey_notification_item_app">App</string>
-    <string name="misskey_notification_item_export_completed">Export slutförd</string>
-    <string name="misskey_notification_item_test">Testa avisering</string>
-    <string name="misskey_notification_item_login">Inloggning upptäckt</string>
-    <string name="misskey_notification_item_create_token">Åtkomsttoken skapad</string>
+    <string name="misskey_notification_item_achievement_earned">Du har fått en utmärkelse: %1$s\n%2$s</string>
+    <string name="misskey_notification_item_app">appnotis</string>
+    <string name="misskey_notification_item_export_completed">export slutförd</string>
+    <string name="misskey_notification_item_test">testnotis</string>
+    <string name="misskey_notification_item_login">ny inloggning upptäckt</string>
+    <string name="misskey_notification_item_create_token">åtkomsttoken skapad</string>
     <string name="misskey_notification_item_followed_you">följde dig</string>
-    <string name="misskey_notification_item_requested_follow">begärde att följa dig</string>
-    <string name="misskey_notification_unknwon">Okänd avisering %1$s</string>
-    <string name="misskey_item_reblogged_status">repostat ett inlägg</string>
-    <string name="xqt_item_reblogged_status">retweeted</string>
-    <string name="xqt_item_mention_status">nämner dig</string>
-    <string name="mastodon_visibility_public">Publik</string>
+    <string name="misskey_notification_item_requested_follow">begärde att få följa dig</string>
+    <string name="misskey_notification_unknwon">Okänd avisering: %1$s</string>
+    <string name="misskey_item_reblogged_status">repostade</string>
+
+    <string name="xqt_item_reblogged_status">repostade</string>
+    <string name="xqt_item_mention_status">nämnde dig</string>
+
+    <string name="mastodon_visibility_public">Offentlig</string>
     <string name="mastodon_visibility_unlisted">Olistad</string>
     <string name="mastodon_visibility_private">Privat</string>
     <string name="mastodon_visibility_direct">Direkt</string>
-    <string name="mastodon_visibility_public_description">Vem som helst kan se och öka detta inlägg</string>
-    <string name="mastodon_visibility_unlisted_description">Vem som helst kan se det här inlägget, men det visas inte på den offentliga tidslinjen</string>
-    <string name="mastodon_visibility_private_description">Endast följare kan se det här inlägget</string>
+    <string name="mastodon_visibility_public_description">Vem som helst kan se och dela detta inlägg</string>
+    <string name="mastodon_visibility_unlisted_description">Vem som helst kan se detta inlägg, men det visas inte på den offentliga tidslinjen</string>
+    <string name="mastodon_visibility_private_description">Endast följare kan se detta inlägg</string>
     <string name="mastodon_visibility_direct_description">Endast nämnda användare kan se detta inlägg</string>
+
     <string name="settings_notifications_title">Aviseringar</string>
-    <string name="settings_notifications_subtitle">Anpassa hur Flare meddelar dig</string>
+    <string name="settings_notifications_subtitle">Anpassa hur Flare aviserar dig</string>
+
     <string name="status_loadmore_end">Inga fler inlägg</string>
     <string name="status_loadmore_error">Fel vid laddning av fler inlägg</string>
     <string name="status_loadmore_error_retry">Försök igen</string>
-    <string name="status_empty">Inget att se här</string>
-    <string name="status_sensitive_media">Känslig media</string>
+    <string name="status_empty">Här var det tomt</string>
+    <string name="status_sensitive_media">Känsligt innehåll</string>
     <string name="show_media">Visa media</string>
     <string name="hide_media">Dölj media</string>
-    <string name="login_expired">Sessionen för inloggning har gått ut</string>
-    <string name="login_expired_message">Klicka för att logga in igen</string>
+    <string name="login_expired">Inloggningssessionen har gått ut</string>
+    <string name="login_expired_message">Tryck för att logga in igen</string>
     <string name="login_expired_relogin">Logga in igen</string>
-    <string name="permission_denied_title">Åtkomst nekad</string>
-    <string name="permission_denied_message">Du måste logga in igen för att komma åt denna sida</string>
+
+    <string name="permission_denied_title">Behörighet nekad</string>
+    <string name="permission_denied_message">Logga in igen för att komma åt denna sida</string>
+
     <string name="misskey_compose_local_only">Endast lokalt</string>
     <string name="misskey_compose_local_only_description">Endast användare på denna instans kan se detta inlägg</string>
+
     <string name="misskey_item_action_renote">Renote</string>
-    <string name="misskey_item_action_quote">Offert</string>
+    <string name="misskey_item_action_quote">Citera</string>
+
     <string name="bluesky_notification_unknown_message">Okänd aviseringstyp %1$s</string>
     <string name="bluesky_notification_unknown_message2">Rapportera detta problem till utvecklaren.</string>
-    <string name="blusky_item_action_repost">Omvänd</string>
-    <string name="blusky_item_action_quote">Offert</string>
+
+    <string name="blusky_item_action_repost">Repost</string>
+    <string name="blusky_item_action_quote">Citera</string>
     <string name="blusky_item_action_report">Rapportera</string>
     <string name="blusky_item_action_delete">Radera</string>
-    <string name="mastodon_item_unbookmark">Avbokmärke</string>
-    <string name="mastodon_item_bookmark">Bokmärke</string>
+
+    <string name="mastodon_item_unbookmark">Ta bort bokmärke</string>
+    <string name="mastodon_item_bookmark">Bokmärk</string>
     <string name="mastodon_item_delete">Radera</string>
     <string name="mastodon_item_report">Rapportera</string>
     <string name="misskey_item_action_delete">Radera</string>
     <string name="misskey_item_action_report">Rapportera</string>
+
     <string name="bookmark_remove">Ta bort bokmärke</string>
     <string name="bookmark_add">Lägg till bokmärke</string>
     <string name="like">Gilla</string>
-    <string name="unlike">Ogilla</string>
-    <string name="favourite">Favorit</string>
-    <string name="unfavourite">Unfavourite</string>
+    <string name="unlike">Sluta gilla</string>
+    <string name="favourite">Favoritmarkera</string>
+    <string name="unfavourite">Ta bort favoritmarkering</string>
     <string name="more">Mer</string>
-    <string name="quote">Offert</string>
+    <string name="quote">Citera</string>
     <string name="reaction_add">Lägg till reaktion</string>
     <string name="reaction_remove">Ta bort reaktion</string>
     <string name="reply">Svara</string>
     <string name="report">Rapportera</string>
-    <string name="retweet">Omvänd</string>
+    <string name="retweet">Repost</string>
     <string name="retweet_remove">Ta bort repost</string>
     <string name="share">Dela</string>
     <string name="fx_share">Dela via FxEmbed</string>
-    <string name="comment">Kommentar</string>
+    <string name="comment">Kommentera</string>
+
     <string name="user_report">Rapportera</string>
     <string name="user_block">Blockera</string>
     <string name="user_unblock">Avblockera</string>
     <string name="user_mute">Tysta</string>
-    <string name="user_unmute">Avtysta</string>
+    <string name="user_unmute">Sluta tysta</string>
     <string name="user_mute_with_parameter">Tysta %1$s</string>
     <string name="user_block_with_parameter">Blockera %1$s</string>
-    <string name="mastodon_item_content_warning">Varning för innehåll</string>
-    <string name="reply_to">Svara %1$s</string>
-    <string name="status_detail_translate">Översätt inlägg</string>
-    <string name="status_detail_tldr">Sammanfattning av inlägg</string>
+    <string name="mastodon_item_content_warning">Innehållsvarning</string>
+    <string name="reply_to">Svara till %1$s</string>
+    <string name="status_detail_translate">Översätt</string>
+    <string name="status_detail_tldr">Sammanfatta</string>
     <string name="translation_badge_translated">Översatt</string>
-    <string name="translation_badge_translating">Översätter</string>
-    <string name="translation_badge_failed">Misslyckades</string>
-    <string name="translation_retry">Försök igen översättning</string>
+    <string name="translation_badge_translating">Översätter…</string>
+    <string name="translation_badge_failed">Översättning misslyckades</string>
+    <string name="translation_retry">Försök igen</string>
     <string name="translation_show_original">Visa original</string>
+
     <string name="date_format_year_month_day">dd MMM yy</string>
     <string name="date_format_month_day">dd MMM</string>
-    <string name="date_format_full">dd MMM åå HH:mm</string>
+    <string name="date_format_full">dd MMM yy HH:mm</string>
+
     <string name="vvo_notification_like">Gillade ditt inlägg</string>
-    <string name="user_follow_edit_list">Lägg till/ta bort från listan</string>
+
+    <string name="user_follow_edit_list">Lägg till/Ta bort från lista</string>
     <string name="list_empty">Inga listor</string>
-    <string name="list_error">Det gick inte att ladda listor</string>
-    <string name="misskey_achievement_notes1_title">bara konfigurera min msky</string>
+    <string name="list_error">Misslyckades med att ladda listor</string>
+
+    <string name="misskey_achievement_notes1_title">just setting up my msky</string>
     <string name="misskey_achievement_notes1_description">Posta din första anteckning</string>
-    <string name="misskey_achievement_notes1_flavor">Ha kul med Misskey!</string>
+    <string name="misskey_achievement_notes1_flavor">Ha det så kul med Misskey!</string>
+
     <string name="misskey_achievement_notes10_title">Några anteckningar</string>
     <string name="misskey_achievement_notes10_description">Posta 10 anteckningar</string>
-    <string name="misskey_achievement_notes100_title">En hel del anteckningar</string>
+
+    <string name="misskey_achievement_notes100_title">Många anteckningar</string>
     <string name="misskey_achievement_notes100_description">Posta 100 anteckningar</string>
-    <string name="misskey_achievement_notes500_title">Täckt i anteckningar</string>
+
+    <string name="misskey_achievement_notes500_title">Täckt av anteckningar</string>
     <string name="misskey_achievement_notes500_description">Posta 500 anteckningar</string>
-    <string name="misskey_achievement_notes1000_title">Ett berg av noter</string>
-    <string name="misskey_achievement_notes1000_description">Posta 1000 anteckningar</string>
-    <string name="misskey_achievement_notes5000_title">Överflödande anteckningar</string>
-    <string name="misskey_achievement_notes5000_description">Posta 5,000 anteckningar</string>
+
+    <string name="misskey_achievement_notes1000_title">Ett berg av anteckningar</string>
+    <string name="misskey_achievement_notes1000_description">Posta 1 000 anteckningar</string>
+
+    <string name="misskey_achievement_notes5000_title">Överflöd av anteckningar</string>
+    <string name="misskey_achievement_notes5000_description">Posta 5 000 anteckningar</string>
+
     <string name="misskey_achievement_notes10000_title">Superanteckning</string>
-    <string name="misskey_achievement_notes10000_description">Posta 10,000 anteckningar</string>
-    <string name="misskey_achievement_notes20000_title">Behöver ... ... anteckningar...</string>
-    <string name="misskey_achievement_notes20000_description">Posta 20.000 anteckningar</string>
-    <string name="misskey_achievement_notes30000_title">Anteckningar anteckningar!</string>
-    <string name="misskey_achievement_notes30000_description">Posta 30.000 anteckningar</string>
-    <string name="misskey_achievement_notes40000_title">Anteckning fabrik</string>
-    <string name="misskey_achievement_notes40000_description">Posta 40,000 anteckningar</string>
-    <string name="misskey_achievement_notes50000_title">Planet av anteckningar</string>
-    <string name="misskey_achievement_notes50000_description">Posta 50,000 anteckningar</string>
-    <string name="misskey_achievement_notes60000_title">Kvasar för anteckning</string>
-    <string name="misskey_achievement_notes60000_description">Posta 60,000 anteckningar</string>
-    <string name="misskey_achievement_notes70000_title">Svart hål för anteckningar</string>
-    <string name="misskey_achievement_notes70000_description">Posta 70,000 anteckningar</string>
-    <string name="misskey_achievement_notes80000_title">Notera galax</string>
-    <string name="misskey_achievement_notes80000_description">Posta 80.000 anteckningar</string>
-    <string name="misskey_achievement_notes90000_title">Notera universum</string>
-    <string name="misskey_achievement_notes90000_description">Posta 90,000 anteckningar</string>
-    <string name="misskey_achievement_notes100000_title">ALLA DITT NOTE ÄR BLOGGA TILL OSS</string>
-    <string name="misskey_achievement_notes100000_description">Posta 100.000 anteckningar</string>
-    <string name="misskey_achievement_notes100000_flavor">Du har säkert mycket att säga.</string>
+    <string name="misskey_achievement_notes10000_description">Posta 10 000 anteckningar</string>
+
+    <string name="misskey_achievement_notes20000_title">Behöver... fler... anteckningar...</string>
+    <string name="misskey_achievement_notes20000_description">Posta 20 000 anteckningar</string>
+
+    <string name="misskey_achievement_notes30000_title">Anteckningar anteckningar anteckningar!</string>
+    <string name="misskey_achievement_notes30000_description">Posta 30 000 anteckningar</string>
+
+    <string name="misskey_achievement_notes40000_title">Anteckningsfabrik</string>
+    <string name="misskey_achievement_notes40000_description">Posta 40 000 anteckningar</string>
+
+    <string name="misskey_achievement_notes50000_title">Anteckningsplanet</string>
+    <string name="misskey_achievement_notes50000_description">Posta 50 000 anteckningar</string>
+
+    <string name="misskey_achievement_notes60000_title">Anteckningskvastar</string>
+    <string name="misskey_achievement_notes60000_description">Posta 60 000 anteckningar</string>
+
+    <string name="misskey_achievement_notes70000_title">Antecknings-svart hål</string>
+    <string name="misskey_achievement_notes70000_description">Posta 70 000 anteckningar</string>
+
+    <string name="misskey_achievement_notes80000_title">Anteckningsgalax</string>
+    <string name="misskey_achievement_notes80000_description">Posta 80 000 anteckningar</string>
+
+    <string name="misskey_achievement_notes90000_title">Anteckningsuniversum</string>
+    <string name="misskey_achievement_notes90000_description">Posta 90 000 anteckningar</string>
+
+    <string name="misskey_achievement_notes100000_title">ALLA DINA ANTECKNINGAR TILLHÖR OSS</string>
+    <string name="misskey_achievement_notes100000_description">Posta 100 000 anteckningar</string>
+    <string name="misskey_achievement_notes100000_flavor">Du har sannerligen mycket att säga.</string>
+
     <string name="misskey_achievement_login3_title">Nybörjare I</string>
-    <string name="misskey_achievement_login3_description">Logga in i totalt 3 dagar</string>
-    <string name="misskey_achievement_login3_flavor">Från och med idag, ring mig Misskist</string>
+    <string name="misskey_achievement_login3_description">Logga in totalt 3 dagar</string>
+    <string name="misskey_achievement_login3_flavor">Från och med idag, kalla mig Misskist</string>
+
     <string name="misskey_achievement_login7_title">Nybörjare II</string>
-    <string name="misskey_achievement_login7_description">Logga in i totalt 7 dagar</string>
-    <string name="misskey_achievement_login7_flavor">Känn dig som om du har fått kläm på saker ännu?</string>
+    <string name="misskey_achievement_login7_description">Logga in totalt 7 dagar</string>
+    <string name="misskey_achievement_login7_flavor">Känns det som att du börjar få kläm på det?</string>
+
     <string name="misskey_achievement_login15_title">Nybörjare III</string>
-    <string name="misskey_achievement_login15_description">Logga in i totalt 15 dagar</string>
+    <string name="misskey_achievement_login15_description">Logga in totalt 15 dagar</string>
+
     <string name="misskey_achievement_login30_title">Misskist I</string>
-    <string name="misskey_achievement_login30_description">Logga in i totalt 30 dagar</string>
+    <string name="misskey_achievement_login30_description">Logga in totalt 30 dagar</string>
+
     <string name="misskey_achievement_login60_title">Misskist II</string>
-    <string name="misskey_achievement_login60_description">Logga in i totalt 60 dagar</string>
+    <string name="misskey_achievement_login60_description">Logga in totalt 60 dagar</string>
+
     <string name="misskey_achievement_login100_title">Misskist III</string>
-    <string name="misskey_achievement_login100_description">Logga in i totalt 100 dagar</string>
-    <string name="misskey_achievement_login100_flavor">Våldsamt Misskist</string>
-    <string name="misskey_achievement_login200_title">Vanlig I</string>
-    <string name="misskey_achievement_login200_description">Logga in i totalt 200 dagar</string>
-    <string name="misskey_achievement_login300_title">Vanlig II</string>
-    <string name="misskey_achievement_login300_description">Logga in i totalt 300 dagar</string>
-    <string name="misskey_achievement_login400_title">Vanlig III</string>
-    <string name="misskey_achievement_login400_description">Logga in i totalt 400 dagar</string>
+    <string name="misskey_achievement_login100_description">Logga in totalt 100 dagar</string>
+    <string name="misskey_achievement_login100_flavor">Våldsam Misskist</string>
+
+    <string name="misskey_achievement_login200_title">Stammis I</string>
+    <string name="misskey_achievement_login200_description">Logga in totalt 200 dagar</string>
+
+    <string name="misskey_achievement_login300_title">Stammis II</string>
+    <string name="misskey_achievement_login300_description">Logga in totalt 300 dagar</string>
+
+    <string name="misskey_achievement_login400_title">Stammis III</string>
+    <string name="misskey_achievement_login400_description">Logga in totalt 400 dagar</string>
+
     <string name="misskey_achievement_login500_title">Expert I</string>
-    <string name="misskey_achievement_login500_description">Logga in i totalt 500 dagar</string>
+    <string name="misskey_achievement_login500_description">Logga in totalt 500 dagar</string>
     <string name="misskey_achievement_login500_flavor">Mina vänner, det har ofta sagts att jag gillar anteckningar</string>
+
     <string name="misskey_achievement_login600_title">Expert II</string>
-    <string name="misskey_achievement_login600_description">Logga in i totalt 600 dagar</string>
+    <string name="misskey_achievement_login600_description">Logga in totalt 600 dagar</string>
+
     <string name="misskey_achievement_login700_title">Expert III</string>
-    <string name="misskey_achievement_login700_description">Logga in i totalt 700 dagar</string>
-    <string name="misskey_achievement_login800_title">Master of Notes I</string>
-    <string name="misskey_achievement_login800_description">Logga in i totalt 800 dagar</string>
-    <string name="misskey_achievement_login900_title">Master of Notes II</string>
-    <string name="misskey_achievement_login900_description">Logga in i totalt 900 dagar</string>
-    <string name="misskey_achievement_login1000_title">Master of Notes III</string>
-    <string name="misskey_achievement_login1000_description">Logga in i totalt 1000 dagar</string>
+    <string name="misskey_achievement_login700_description">Logga in totalt 700 dagar</string>
+
+    <string name="misskey_achievement_login800_title">Mästare på anteckningar I</string>
+    <string name="misskey_achievement_login800_description">Logga in totalt 800 dagar</string>
+
+    <string name="misskey_achievement_login900_title">Mästare på anteckningar II</string>
+    <string name="misskey_achievement_login900_description">Logga in totalt 900 dagar</string>
+
+    <string name="misskey_achievement_login1000_title">Mästare på anteckningar III</string>
+    <string name="misskey_achievement_login1000_description">Logga in totalt 1 000 dagar</string>
     <string name="misskey_achievement_login1000_flavor">Tack för att du använder Misskey!</string>
-    <string name="misskey_achievement_note_clipped1_title">Måste... klipp...</string>
+
+    <string name="misskey_achievement_note_clipped1_title">Måste... klippa...</string>
     <string name="misskey_achievement_note_clipped1_description">Klipp din första anteckning</string>
-    <string name="misskey_achievement_note_favorited1_title">Stargazer</string>
-    <string name="misskey_achievement_note_favorited1_description">Favorit din första anteckning</string>
+
+    <string name="misskey_achievement_note_favorited1_title">Stjärnskådare</string>
+    <string name="misskey_achievement_note_favorited1_description">Favoritmarkera din första anteckning</string>
+
     <string name="misskey_achievement_my_note_favorited1_title">Söker stjärnor</string>
-    <string name="misskey_achievement_my_note_favorited1_description">Ha någon annan favorit en av dina anteckningar</string>
-    <string name="misskey_achievement_profile_filled_title">Välförberedd</string>
-    <string name="misskey_achievement_profile_filled_description">Konfigurera din profil</string>
+    <string name="misskey_achievement_my_note_favorited1_description">Få någon annan att favoritmarkera en av dina anteckningar</string>
+
+    <string name="misskey_achievement_profile_filled_title">Väl förberedd</string>
+    <string name="misskey_achievement_profile_filled_description">Ställ in din profil</string>
+
     <string name="misskey_achievement_marked_as_cat_title">Jag är en katt</string>
     <string name="misskey_achievement_marked_as_cat_description">Markera ditt konto som en katt</string>
-    <string name="misskey_achievement_marked_as_cat_flavor">Jag ska ge dig ett namn senare.</string>
+    <string name="misskey_achievement_marked_as_cat_flavor">Jag ger dig ett namn senare.</string>
+
     <string name="misskey_achievement_following1_title">Följer din första användare</string>
     <string name="misskey_achievement_following1_description">Följ en användare</string>
-    <string name="misskey_achievement_following10_title">Håll upp... häng upp...</string>
+
+    <string name="misskey_achievement_following10_title">Häng med... häng med...</string>
     <string name="misskey_achievement_following10_description">Följ 10 användare</string>
+
     <string name="misskey_achievement_following50_title">Massor av vänner</string>
     <string name="misskey_achievement_following50_description">Följ 50 konton</string>
+
     <string name="misskey_achievement_following100_title">100 vänner</string>
     <string name="misskey_achievement_following100_description">Följ 100 konton</string>
-    <string name="misskey_achievement_following300_title">Vän överbelastning</string>
+
+    <string name="misskey_achievement_following300_title">Vän-överbelastning</string>
     <string name="misskey_achievement_following300_description">Följ 300 konton</string>
+
     <string name="misskey_achievement_followers1_title">Första följaren</string>
     <string name="misskey_achievement_followers1_description">Få 1 följare</string>
+
     <string name="misskey_achievement_followers10_title">Följ mig!</string>
     <string name="misskey_achievement_followers10_description">Få 10 följare</string>
-    <string name="misskey_achievement_followers50_title">Kommer i folkmassor</string>
+
+    <string name="misskey_achievement_followers50_title">Kommer i flockar</string>
     <string name="misskey_achievement_followers50_description">Få 50 följare</string>
+
     <string name="misskey_achievement_followers100_title">Populär</string>
     <string name="misskey_achievement_followers100_description">Få 100 följare</string>
-    <string name="misskey_achievement_followers300_title">Vänligen bilda en enda rad</string>
+
+    <string name="misskey_achievement_followers300_title">Formera en enskild rad tack</string>
     <string name="misskey_achievement_followers300_description">Få 300 följare</string>
+
     <string name="misskey_achievement_followers500_title">Radiotorn</string>
     <string name="misskey_achievement_followers500_description">Få 500 följare</string>
-    <string name="misskey_achievement_followers1000_title">Påtryckare</string>
-    <string name="misskey_achievement_followers1000_description">Få 1000 följare</string>
-    <string name="misskey_achievement_collect_achievements30_title">Prestation Samlare</string>
-    <string name="misskey_achievement_collect_achievements30_description">Tjäna 30 prestationer</string>
-    <string name="misskey_achievement_view_achievements3min_title">Gillar prestationer</string>
-    <string name="misskey_achievement_view_achievements3min_description">Titta på din lista över prestationer i minst 3 minuter</string>
+
+    <string name="misskey_achievement_followers1000_title">Influencer</string>
+    <string name="misskey_achievement_followers1000_description">Få 1 000 följare</string>
+
+    <string name="misskey_achievement_collect_achievements30_title">Utmärkelsesamlare</string>
+    <string name="misskey_achievement_collect_achievements30_description">Tjäna 30 utmärkelser</string>
+
+    <string name="misskey_achievement_view_achievements3min_title">Gillar utmärkelser</string>
+    <string name="misskey_achievement_view_achievements3min_description">Titta på din lista över utmärkelser i minst 3 minuter</string>
+
     <string name="misskey_achievement_i_love_misskey_title">Jag älskar Misskey</string>
-    <string name="misskey_achievement_i_love_misskey_description">Post \"I ❤️ #Misskey\"</string>
-    <string name="misskey_achievement_i_love_misskey_flavor">Misskeys utvecklingsteam uppskattar ditt stöd!</string>
+    <string name="misskey_achievement_i_love_misskey_description">Posta \"I ❤ #Misskey\"</string>
+    <string name="misskey_achievement_i_love_misskey_flavor">Misskeys utvecklingsteam uppskattar verkligen ditt stöd!</string>
+
     <string name="misskey_achievement_found_treasure_title">Skattjakt</string>
     <string name="misskey_achievement_found_treasure_description">Du har hittat den dolda skatten</string>
+
     <string name="misskey_achievement_client30min_title">Kort paus</string>
-    <string name="misskey_achievement_client30min_description">Håll Misskey öppnad i minst 30 minuter</string>
-    <string name="misskey_achievement_client60min_title">Inga \"Miss\" i Misskey</string>
-    <string name="misskey_achievement_client60min_description">Håll Misskey öppnad i minst 60 minuter</string>
-    <string name="misskey_achievement_note_deleted_within1min_title">Aldrigt</string>
-    <string name="misskey_achievement_note_deleted_within1min_description">Ta bort en anteckning inom en minut efter att du skrivit den</string>
-    <string name="misskey_achievement_posted_at_late_night_title">Nattlig</string>
+    <string name="misskey_achievement_client30min_description">Håll Misskey öppet i minst 30 minuter</string>
+
+    <string name="misskey_achievement_client60min_title">Inget \"Miss\" i Misskey</string>
+    <string name="misskey_achievement_client60min_description">Håll Misskey öppet i minst 60 minuter</string>
+
+    <string name="misskey_achievement_note_deleted_within1min_title">Glöm det</string>
+    <string name="misskey_achievement_note_deleted_within1min_description">Radera en anteckning inom en minut efter att den postats</string>
+
+    <string name="misskey_achievement_posted_at_late_night_title">Nattuggla</string>
     <string name="misskey_achievement_posted_at_late_night_description">Posta en anteckning sent på natten</string>
     <string name="misskey_achievement_posted_at_late_night_flavor">Det är dags att gå och lägga sig.</string>
-    <string name="misskey_achievement_posted_at_0min0sec_title">Talar Klocka</string>
-    <string name="misskey_achievement_posted_at_0min0sec_description">Posta en anteckning på 00:00</string>
-    <string name="misskey_achievement_posted_at_0min0sec_flavor">Click Click Click Claaang</string>
+
+    <string name="misskey_achievement_posted_at_0min0sec_title">Talande klocka</string>
+    <string name="misskey_achievement_posted_at_0min0sec_description">Posta en anteckning kl 00:00</string>
+    <string name="misskey_achievement_posted_at_0min0sec_flavor">Klick klick klick klang</string>
+
     <string name="misskey_achievement_self_quote_title">Självreferens</string>
     <string name="misskey_achievement_self_quote_description">Citera din egen anteckning</string>
-    <string name="misskey_achievement_htl20npm_title">Flödande tidslinje</string>
-    <string name="misskey_achievement_htl20npm_description">Ha hastigheten på ditt hem tidslinje överstiger 20 npm (anteckningar per minut)</string>
+
+    <string name="misskey_achievement_htl20npm_title">Flytande tidslinje</string>
+    <string name="misskey_achievement_htl20npm_description">Låt hastigheten på din hemtidslinje överstiga 20 apm (anteckningar per minut)</string>
+
     <string name="misskey_achievement_view_instance_chart_title">Analytiker</string>
-    <string name="misskey_achievement_view_instance_chart_description">Visa din instans sjökort</string>
-    <string name="misskey_achievement_output_hello_world_on_scratchpad_title">Hej, världen!</string>
-    <string name="misskey_achievement_output_hello_world_on_scratchpad_description">Utdata \"hej världen\" i Scratchpad</string>
+    <string name="misskey_achievement_view_instance_chart_description">Visa din instans grafer</string>
+
+    <string name="misskey_achievement_output_hello_world_on_scratchpad_title">Hello, world!</string>
+    <string name="misskey_achievement_output_hello_world_on_scratchpad_description">Skriv ut \"hello world\" i Scratchpad</string>
+
     <string name="misskey_achievement_open3windows_title">Flerfönster</string>
     <string name="misskey_achievement_open3windows_description">Ha minst 3 fönster öppna samtidigt</string>
+
     <string name="misskey_achievement_drive_folder_circular_reference_title">Cirkulär referens</string>
-    <string name="misskey_achievement_drive_folder_circular_reference_description">Försök att skapa en rekursivt nästlad mapp i Drive</string>
-    <string name="misskey_achievement_react_without_read_title">Läste du verkligen det?</string>
+    <string name="misskey_achievement_drive_folder_circular_reference_description">Försök att skapa en rekursivt kapslad mapp i Drive</string>
+
+    <string name="misskey_achievement_react_without_read_title">Läste du verkligen det där?</string>
     <string name="misskey_achievement_react_without_read_description">Reagera på en anteckning som är över 100 tecken lång inom 3 sekunder efter att den postats</string>
+
     <string name="misskey_achievement_clicked_click_here_title">Klicka här</string>
-    <string name="misskey_achievement_clicked_click_here_description">Du har klickat här</string>
+    <string name="misskey_achievement_clicked_click_here_description">Du klickade här</string>
+
     <string name="misskey_achievement_just_plain_lucky_title">Bara ren tur</string>
-    <string name="misskey_achievement_just_plain_lucky_description">Har en chans att erhållas med en sannolikhet på 0,005\ % var 10 sekund</string>
-    <string name="misskey_achievement_set_name_to_syuilo_title">Gud komplex</string>
-    <string name="misskey_achievement_set_name_to_syuilo_description">Ange ditt namn till \"syuilo\"</string>
-    <string name="misskey_achievement_passed_since_account_created1_title">Ett års jubileum</string>
+    <string name="misskey_achievement_just_plain_lucky_description">Har en chans att erhållas med sannolikheten 0,005 % var tionde sekund</string>
+
+    <string name="misskey_achievement_set_name_to_syuilo_title">Gudskomplex</string>
+    <string name="misskey_achievement_set_name_to_syuilo_description">Sätt ditt namn till \"syuilo\"</string>
+
+    <string name="misskey_achievement_passed_since_account_created1_title">Ettårsjubileum</string>
     <string name="misskey_achievement_passed_since_account_created1_description">Ett år har gått sedan ditt konto skapades</string>
+
     <string name="misskey_achievement_passed_since_account_created2_title">Tvåårsjubileum</string>
-    <string name="misskey_achievement_passed_since_account_created2_description">Det har gått två år sedan ditt konto skapades</string>
-    <string name="misskey_achievement_passed_since_account_created3_title">Tredje årsdagen</string>
+    <string name="misskey_achievement_passed_since_account_created2_description">Två år har gått sedan ditt konto skapades</string>
+
+    <string name="misskey_achievement_passed_since_account_created3_title">Treårsjubileum</string>
     <string name="misskey_achievement_passed_since_account_created3_description">Tre år har gått sedan ditt konto skapades</string>
+
     <string name="misskey_achievement_logged_in_on_birthday_title">Grattis på födelsedagen</string>
     <string name="misskey_achievement_logged_in_on_birthday_description">Logga in på din födelsedag</string>
-    <string name="misskey_achievement_logged_in_on_new_years_day_title">Gott Nytt År!</string>
-    <string name="misskey_achievement_logged_in_on_new_years_day_description">Inloggad den första dagen på året</string>
-    <string name="misskey_achievement_logged_in_on_new_years_day_flavor">Till ytterligare ett bra år på denna instans</string>
-    <string name="misskey_achievement_cookie_clicked_title">Ett spel där du klickar på cookies</string>
+
+    <string name="misskey_achievement_logged_in_on_new_years_day_title">Gott nytt år!</string>
+    <string name="misskey_achievement_logged_in_on_new_years_day_description">Inloggad på årets första dag</string>
+    <string name="misskey_achievement_logged_in_on_new_years_day_flavor">Till ännu ett bra år på denna instans</string>
+
+    <string name="misskey_achievement_cookie_clicked_title">Ett spel där du klickar på kakor</string>
     <string name="misskey_achievement_cookie_clicked_description">Klickade på kakan</string>
-    <string name="misskey_achievement_cookie_clicked_flavor">Vänta, är du på rätt hemsida?</string>
-    <string name="misskey_achievement_brain_diver_title">Hjärndykare</string>
+    <string name="misskey_achievement_cookie_clicked_flavor">Vänta, är du på rätt webbplats?</string>
+
+    <string name="misskey_achievement_brain_diver_title">Brain Diver</string>
     <string name="misskey_achievement_brain_diver_description">Posta länken till Brain Diver</string>
     <string name="misskey_achievement_brain_diver_flavor">Misskey-Misskey La-Tu-Ma</string>
-    <string name="misskey_achievement_smash_test_notification_button_title">Testa överflöd</string>
-    <string name="misskey_achievement_smash_test_notification_button_description">Utlösa anmälningstestet upprepade gånger inom en extremt kort tid</string>
-    <string name="misskey_achievement_tutorial_completed_title">Misskey Elementary Course Diplom</string>
-    <string name="misskey_achievement_tutorial_completed_description">Handledning slutförd</string>
+
+    <string name="misskey_achievement_smash_test_notification_button_title">Test-överflöd</string>
+    <string name="misskey_achievement_smash_test_notification_button_description">Utlös aviseringstestet upprepade gånger inom en extremt kort tid</string>
+
+    <string name="misskey_achievement_tutorial_completed_title">Diplom för Misskey-grundkurs</string>
+    <string name="misskey_achievement_tutorial_completed_description">Genomgång slutförd</string>
+
     <string name="misskey_achievement_bubble_game_exploding_head_title">🤯</string>
-    <string name="misskey_achievement_bubble_game_exploding_head_description">Det största föremålet i bubblan spelet</string>
+    <string name="misskey_achievement_bubble_game_exploding_head_description">Det största objektet i bubbelspelet</string>
+
     <string name="misskey_achievement_bubble_game_double_exploding_head_title">Dubbel🤯</string>
-    <string name="misskey_achievement_bubble_game_double_exploding_head_description">Två av de största objekten i bubblan spelet på samma gång</string>
-    <string name="misskey_achievement_bubble_game_double_exploding_head_flavor">Du kan fylla en lunchlåda som denna: exploding_head: 🤯 lite.</string>
+    <string name="misskey_achievement_bubble_game_double_exploding_head_description">Två av de största objekten i bubbelspelet samtidigt</string>
+    <string name="misskey_achievement_bubble_game_double_exploding_head_flavor">Du kan fylla en matlåda såhär 🤯 🤯 lite.</string>
+
     <string name="vote">Rösta</string>
-    <string name="poll_expired">Enkät löpte ut</string>
-    <string name="poll_voted">Röstade</string>
-    <string name="poll_expired_at">Förfallen vid %1$s</string>
-    <string name="user_send_message">Skicka meddelande</string>
-    <string name="profile_search_user_using_account">Hitta %1$s i %2$s med %3$s</string>
-    <string name="profile_search_user_using_account_compat">Sök i %1$s</string>
+    <string name="poll_expired">Omröstningen har avslutats</string>
+    <string name="poll_voted">Röstat</string>
+    <string name="poll_expired_at">Avslutades %1$s</string>
+    <string name="user_send_message">Skicka direktmeddelande</string>
+
+    <string name="profile_search_user_using_account">Hitta %1$s på %2$s med %3$s</string>
+    <string name="profile_search_user_using_account_compat">Hitta på %1$s</string>
+
     <string name="feeds_discover_feeds_created_by">Skapad av %1$s</string>
+
     <string name="notification_item_accept_follow_request">Acceptera</string>
-    <string name="notification_item_reject_follow_request">Avvisa</string>
+    <string name="notification_item_reject_follow_request">Neka</string>
+
+
     <string name="dm_list_empty">Inga direktmeddelanden</string>
-    <string name="dm_list_error">Det gick inte att ladda direktmeddelanden</string>
+    <string name="dm_list_error">Misslyckades med att ladda direktmeddelanden</string>
     <string name="send">Skicka</string>
     <string name="dm_send_placeholder">Skicka ett meddelande</string>
-    <string name="dm_deleted">Borttagen</string>
-    <string name="dm_conversation">Rum för direkt meddelande</string>
+    <string name="dm_deleted">Raderad</string>
+    <string name="dm_conversation">Direktmeddelandekonversation</string>
     <string name="dm_sending">Skickar</string>
-    <string name="dm_leave">Lämna konversationen</string>
+    <string name="dm_leave">Lämna konversation</string>
     <string name="dm_to_profile">Visa profil</string>
-    <string name="settings_side_panel_empty">Standard kommer att visa sidopanel beror på kontoplattformen.</string>
+
+    <string name="settings_side_panel_empty">Som standard följer sidopanelen det aktuella kontots plattform.</string>
     <string name="tab_settings_add">Lägg till</string>
     <string name="tab_settings_drag">Dra</string>
     <string name="tab_settings_edit">Redigera</string>
-    <string name="tab_settings_remove">Radera</string>
+    <string name="tab_settings_remove">Ta bort</string>
     <string name="tab_settings_default">Standard</string>
     <string name="tab_settings_list">Lista</string>
     <string name="tab_settings_feed">Flöden</string>
+
     <string name="list_add">Lägg till lista</string>
     <string name="list_edit">Redigera lista</string>
-    <string name="list_delete">Ta bort lista</string>
+    <string name="list_delete">Radera lista</string>
+
     <string name="rss_sources_title">Prenumerationer</string>
     <string name="add_rss_source">Lägg till prenumeration</string>
     <string name="edit_rss_source">Redigera prenumeration</string>
-    <string name="delete_rss_source">Ta bort prenumeration</string>
+    <string name="delete_rss_source">Radera prenumeration</string>
+
     <string name="rss_sources_title_label">Titel</string>
     <string name="rss_sources_url_label">URL</string>
     <string name="rss_title">Prenumerationer</string>
     <string name="empty_rss_sources">Inga prenumerationer</string>
-    <string name="mastodon_trending_statuses">Trending statuses</string>
-    <string name="mastodon_federated_timeline">Förenad tidslinje</string>
+    <string name="mastodon_trending_statuses">Trendande statusar</string>
+    <string name="mastodon_federated_timeline">Federerad tidslinje</string>
     <string name="mastodon_local_timeline">Lokal tidslinje</string>
+
     <string name="service_select_welcome_title">Välkommen till Flare</string>
-    <string name="service_select_welcome_message">Ange servern för att komma igång.</string>
+    <string name="service_select_welcome_message">Ange en server för att komma igång.</string>
     <string name="service_select_welcome_hint">Flare stöder Mastodon, Misskey, Bluesky, Nostr och X.</string>
-    <string name="service_select_welcome_list_hint">Eller välj från dessa servrar</string>
+    <string name="service_select_welcome_list_hint">Eller välj bland dessa servrar</string>
     <string name="bluesky_login_username_hint">Användarnamn</string>
     <string name="bluesky_login_password_hint">Lösenord</string>
-    <string name="bluesky_login_auth_factor_token_hint">Autentiseringsfaktor token</string>
+    <string name="bluesky_login_auth_factor_token_hint">2FA-kod</string>
     <string name="bluesky_login_oauth_button">Logga in med OAuth</string>
     <string name="bluesky_login_use_password_button">Använd lösenord</string>
-    <string name="bluesky_login_oauth_hint">Bluesky OAuth kanske inte stabilt nog, använd lösenordslogin om du stöter på några problem.</string>
-    <string name="login_button">Inloggning</string>
-    <string name="mastodon_login_verify_message">Vänligen vänta medan vi verifierar dina uppgifter.</string>
-    <string name="nostr_login_title">Importera Nostr konto</string>
-    <string name="nostr_login_hint">Klistra in en npub eller hex pubkey för skrivskyddad åtkomst, ge en nsec för lokal signering, Använd en bunker-URI för fjärrsignering, eller anslut Amber och QR-baserade Nostr Connect-skyltar.</string>
-    <string name="nostr_login_account_hint">npub, nsec, hex-nyckel, bunker://, eller nostrconnect://</string>
+    <string name="bluesky_login_oauth_hint">Bluesky OAuth kan fortfarande vara instabilt. Om du stöter på problem, använd lösenordsinloggning istället.</string>
+    <string name="login_button">Logga in</string>
+    <string name="mastodon_login_verify_message">Verifierar dina uppgifter…</string>
+    <string name="nostr_login_title">Importera Nostr-konto</string>
+    <string name="nostr_login_hint">Klistra in en npub eller hex-pubkey för läsbehörighet, ange en nsec för lokal signering, använd en bunker-URI för fjärrsignering eller anslut Amber och QR-baserade Nostr Connect-signerare.</string>
+    <string name="nostr_login_account_hint">npub, nsec, hex-nyckel, bunker:// eller nostrconnect://</string>
     <string name="nostr_login_bunker_hint">bunker:// eller nostrconnect:// URI</string>
     <string name="nostr_login_bunker_button">Anslut bunker</string>
-    <string name="nostr_login_amber_button">Anslut bärnsten</string>
+    <string name="nostr_login_amber_button">Anslut Amber</string>
     <string name="nostr_login_qr_button">Anslut med QR</string>
-    <string name="nostr_login_qr_hint">Skanna med bärnsten, Alby, eller en annan Nostr Connect-skylt.</string>
-    <string name="nostr_login_qr_waiting">Väntar på godkännande av undertecknare…</string>
-    <string name="nostr_login_qr_link_label">Nostr Connect länk</string>
+    <string name="nostr_login_qr_hint">Skanna med Amber, Alby eller annan Nostr Connect-signerare.</string>
+    <string name="nostr_login_qr_waiting">Väntar på godkännande av signerare…</string>
+    <string name="nostr_login_qr_link_label">Nostr Connect-länk</string>
     <string name="cancel_button">Avbryt</string>
     <string name="nostr_login_generate_button">Generera och logga in</string>
-    <string name="nostr_login_npub_hint">npub eller hex pubkey (valfritt om nsec är satt)</string>
-    <string name="nostr_login_nsec_hint">nsec eller hex privat nyckel</string>
-    <string name="nostr_login_relays_hint">Relä webbadresser, separerade med kommatecken</string>
-    <string name="service_select_instance_input_placeholder">Instans URL</string>
+    <string name="nostr_login_npub_hint">npub eller hex-pubkey (valfritt om nsec är angivet)</string>
+    <string name="nostr_login_nsec_hint">nsec eller hex-privatnyckel</string>
+    <string name="nostr_login_relays_hint">Relä-URL:er, separerade med kommatecken</string>
+    <string name="service_select_instance_input_placeholder">Instans-URL</string>
     <string name="service_select_next_button">Nästa</string>
     <string name="service_select_empty_message">Inga instanser hittades</string>
-    <string name="service_select_compatibility_warning">Denna server använder %1$s, Flare kommer att köras i kompatibilitetsläge. Vissa funktioner kanske inte fungerar som de ska.</string>
+    <string name="service_select_compatibility_warning">Denna server använder %1$s, Flare körs i kompatibilitetsläge. Vissa funktioner kanske inte fungerar som förväntat.</string>
     <string name="login_agreement">Genom att logga in godkänner du %1$s.</string>
-    <string name="eula_privacy_policy">EULA och sekretesspolicy</string>
+    <string name="eula_privacy_policy">EULA och integritetspolicy</string>
+
     <string name="home_tab_home_title">Hem</string>
     <string name="home_tab_notifications_title">Aviseringar</string>
     <string name="home_tab_me_title">Jag</string>
     <string name="home_tab_discover_title">Upptäck</string>
     <string name="settings_title">Inställningar</string>
-    <string name="mastodon_tab_local_title">Lokal</string>
-    <string name="mastodon_tab_public_title">Publik</string>
-    <string name="home_tab_featured_title">Utvalda</string>
+    <string name="mastodon_tab_local_title">Lokalt</string>
+    <string name="mastodon_tab_public_title">Offentligt</string>
+    <string name="home_tab_featured_title">Utvalt</string>
     <string name="home_tab_bookmarks_title">Bokmärken</string>
-    <string name="home_tab_favorite_title">Favorit</string>
-    <string name="home_tab_list_title">Lista</string>
+    <string name="home_tab_favorite_title">Favoriter</string>
+    <string name="home_tab_list_title">Listor</string>
     <string name="home_tab_feeds_title">Flöden</string>
-    <string name="dm_list_title">Direkta meddelanden</string>
+    <string name="dm_list_title">Direktmeddelanden</string>
     <string name="social_title">Socialt</string>
-    <string name="antenna_title">Antenn</string>
-    <string name="mixed_timeline_title">Blandad</string>
-    <string name="liked_title">Gillade</string>
+    <string name="antenna_title">Antenner</string>
+    <string name="mixed_timeline_title">Blandat</string>
+    <string name="liked_title">Gillat</string>
     <string name="all_rss_feeds_title">Alla prenumerationer</string>
     <string name="posts_title">Inlägg</string>
     <string name="settings_appearance_absolute_timestamp">Absolut tidsstämpel</string>
-    <string name="settings_appearance_absolute_timestamp_description">Visa absoluta tidsstämplar på inlägg</string>
-    <string name="settings_about_description">Den ultimata nästa generation öppen källkod AI drivs decentraliserade sociala nätverk klient.</string>
+    <string name="settings_appearance_absolute_timestamp_description">Visa exakta tidsstämplar på inlägg</string>
+    <string name="settings_about_description">En AI-driven klient med öppen källkod för decentraliserade sociala plattformar.</string>
     <string name="settings_about_source_code">Källkod</string>
     <string name="settings_about_telegram">Telegram</string>
-    <string name="settings_about_telegram_description">Gå med i vår Telegramgrupp</string>
+    <string name="settings_about_telegram_description">Gå med i vår Telegram-grupp</string>
+    <string name="settings_about_discord" translatable="false">Discord</string>
     <string name="settings_about_discord_description">Gå med i vår Discord-server</string>
-    <string name="settings_about_line_description">Gå med i vår linjegrupp</string>
+    <string name="settings_about_line" translatable="false">Line</string>
+    <string name="settings_about_line_description">Gå med i vår Line-grupp</string>
     <string name="settings_about_localization">Crowdin</string>
-    <string name="settings_about_localization_description">Hjälp oss att översätta Flare</string>
+    <string name="settings_about_localization_description">Hjälp oss översätta Flare</string>
     <string name="settings_privacy_policy">Integritetspolicy</string>
     <string name="channel_title">Kanal</string>
 </resources>

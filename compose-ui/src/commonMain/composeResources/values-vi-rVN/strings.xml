@@ -1,345 +1,530 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name" translatable="false">Flare</string>
     <string name="delete">Xóa</string>
-    <string name="done">Hoàn tất</string>
+    <string name="done">Xong</string>
     <string name="cancel">Hủy</string>
     <string name="ok">OK</string>
+
     <string name="profile_header_following_count">%1$s Đang theo dõi</string>
     <string name="profile_header_fans_count">%1$s Người theo dõi</string>
+    <string name="profile_header_toots_count">%1$s Bài đăng</string>
+    <string name="profile_misskey_header_status_count">%1$s Bài đăng</string>
+
     <string name="profile_header_button_follow">Theo dõi</string>
     <string name="profile_header_button_following">Đang theo dõi</string>
-    <string name="profile_header_button_requested">Đã yêu cầu</string>
-    <string name="profile_header_button_blocked">Bị chặn</string>
+    <string name="profile_header_button_requested">Đã gửi yêu cầu</string>
+    <string name="profile_header_button_blocked">Đã chặn</string>
     <string name="profile_header_button_is_fans">Theo dõi bạn</string>
+
     <string name="mastodon_notification_item_followed_you">đã theo dõi bạn</string>
-    <string name="mastodon_notification_item_favourited_your_status">đã yêu thích</string>
-    <string name="mastodon_notification_item_reblogged_your_status">đã đăng lại</string>
-    <string name="mastodon_notification_item_poll_ended">Một cuộc thăm dò mà bạn tham gia đã kết thúc</string>
-    <string name="mastodon_notification_item_mentioned_you">đã đề cập đến bạn</string>
-    <string name="mastodon_notification_item_requested_follow">yêu cầu theo dõi bạn</string>
-    <string name="mastodon_notification_item_updated_status">đã cập nhật một toot</string>
-    <string name="mastodon_item_show_more">Hiển thị thêm</string>
-    <string name="mastodon_item_show_less">Hiển thị ít hơn</string>
-    <string name="mastodon_item_pinned">Ghim toot</string>
+    <string name="mastodon_notification_item_favourited_your_status">đã thích bài đăng của bạn</string>
+    <string name="mastodon_notification_item_reblogged_your_status">đã chia sẻ lại</string>
+    <string name="mastodon_notification_item_poll_ended">Một cuộc thăm dò bạn tham gia đã kết thúc</string>
+    <string name="mastodon_notification_item_mentioned_you">đã nhắc đến bạn</string>
+    <string name="mastodon_notification_item_requested_follow">đã yêu cầu theo dõi bạn</string>
+    <string name="mastodon_notification_item_posted_status">đã đăng</string>
+    <string name="mastodon_notification_item_updated_status">đã cập nhật bài đăng</string>
+    <string name="mastodon_item_reblogged_status">đã thúc đẩy bài đăng</string>
+    <string name="mastodon_item_show_more">Xem thêm</string>
+    <string name="mastodon_item_show_less">Thu gọn</string>
+    <string name="mastodon_item_pinned">đã ghim bài đăng</string>
+
+    <string name="post_show_full_text">Xem toàn văn</string>
+
     <string name="bluesky_notification_item_followed_you">đã theo dõi bạn</string>
-    <string name="bluesky_notification_item_favourited_your_status">đã yêu thích</string>
-    <string name="bluesky_notification_item_reblogged_your_status">đã đăng lại</string>
-    <string name="bluesky_notification_item_poll_ended">Một cuộc thăm dò mà bạn tham gia đã kết thúc</string>
-    <string name="bluesky_notification_item_mentioned_you">đã đề cập đến bạn</string>
-    <string name="bluesky_item_reblogged_status">đã tăng cường một toot</string>
+    <string name="bluesky_notification_item_favourited_your_status">đã thích bài đăng của bạn</string>
+    <string name="bluesky_notification_item_reblogged_your_status">đã đăng lại bài đăng của bạn</string>
+    <string name="bluesky_notification_item_poll_ended">Một cuộc thăm dò bạn tham gia đã kết thúc</string>
+    <string name="bluesky_notification_item_mentioned_you">đã nhắc đến bạn</string>
+    <string name="bluesky_item_reblogged_status">đã đăng lại</string>
     <string name="bluesky_notification_item_replied_to_you">đã trả lời bạn</string>
-    <string name="bluesky_notification_item_quoted_your_status">trích dẫn</string>
-    <string name="bluesky_notification_item_starterpack_joined">Starterpack Đã tham gia</string>
+    <string name="bluesky_notification_item_quoted_your_status">đã trích dẫn bài đăng của bạn</string>
+    <string name="bluesky_notification_item_starterpack_joined">đã tham gia qua Gói khởi đầu</string>
     <string name="bluesky_notification_item_unKnown">Không xác định</string>
-    <string name="bluesky_notification_item_pin">Đã ghim</string>
-    <string name="misskey_notification_item_mentioned_you">đã đề cập đến bạn</string>
+    <string name="bluesky_notification_item_pin">đã ghim bài đăng</string>
+
+    <string name="misskey_notification_item_mentioned_you">đã nhắc đến bạn</string>
     <string name="misskey_notification_item_replied_to_you">đã trả lời bạn</string>
-    <string name="misskey_notification_item_reposted_your_status">đã đăng lại</string>
-    <string name="misskey_notification_item_quoted_your_status">trích dẫn</string>
-    <string name="misskey_notification_item_poll_ended">Một cuộc thăm dò mà bạn tham gia đã kết thúc</string>
+    <string name="misskey_notification_item_reposted_your_status">đã đăng lại bài đăng của bạn</string>
+    <string name="misskey_notification_item_quoted_your_status">đã trích dẫn bài đăng của bạn</string>
+    <string name="misskey_notification_item_reacted_to_your_status">đã bày tỏ cảm xúc với bài đăng của bạn</string>
+    <string name="misskey_notification_item_poll_ended">Một cuộc thăm dò bạn tham gia đã kết thúc</string>
     <string name="misskey_notification_item_follow_request_accepted">đã chấp nhận yêu cầu theo dõi của bạn</string>
-    <string name="misskey_notification_item_achievement_earned">Bạn đã đạt được một thành tựu: %1$s\n%2$s</string>
-    <string name="misskey_notification_item_app">Ứng dụng</string>
+    <string name="misskey_notification_item_scheduled_note_posted">bài đăng theo lịch đã được đăng</string>
+    <string name="misskey_notification_item_scheduled_note_post_failed">bài đăng theo lịch không thể đăng</string>
+    <string name="misskey_notification_item_role_assigned">đã gán cho bạn một vai trò</string>
+    <string name="misskey_notification_item_chat_room_invitation_received">đã mời bạn vào phòng chat</string>
+    <string name="misskey_notification_item_achievement_earned">Bạn đã đạt được thành tích: %1$s\n%2$s</string>
+    <string name="misskey_notification_item_app">thông báo ứng dụng</string>
+    <string name="misskey_notification_item_export_completed">xuất dữ liệu hoàn tất</string>
+    <string name="misskey_notification_item_test">thông báo thử nghiệm</string>
+    <string name="misskey_notification_item_login">đã phát hiện đăng nhập mới</string>
+    <string name="misskey_notification_item_create_token">token truy cập đã được tạo</string>
     <string name="misskey_notification_item_followed_you">đã theo dõi bạn</string>
     <string name="misskey_notification_item_requested_follow">đã yêu cầu theo dõi bạn</string>
-    <string name="misskey_notification_unknwon">Thông báo không xác định %1$s</string>
-    <string name="misskey_item_reblogged_status">đã tăng cường một toot</string>
-    <string name="xqt_item_reblogged_status">đã retweet</string>
-    <string name="xqt_item_mention_status">đề cập đến bạn</string>
+    <string name="misskey_notification_unknwon">Thông báo không xác định: %1$s</string>
+    <string name="misskey_item_reblogged_status">đã đăng lại</string>
+
+    <string name="xqt_item_reblogged_status">đã đăng lại</string>
+    <string name="xqt_item_mention_status">đã nhắc đến bạn</string>
+
     <string name="mastodon_visibility_public">Công khai</string>
-    <string name="mastodon_visibility_unlisted">Không được liệt kê</string>
+    <string name="mastodon_visibility_unlisted">Hạn chế</string>
     <string name="mastodon_visibility_private">Riêng tư</string>
     <string name="mastodon_visibility_direct">Trực tiếp</string>
+    <string name="mastodon_visibility_public_description">Mọi người đều có thể xem và chia sẻ bài đăng này</string>
+    <string name="mastodon_visibility_unlisted_description">Mọi người đều có thể xem, nhưng không xuất hiện trên dòng thời gian công khai</string>
+    <string name="mastodon_visibility_private_description">Chỉ người theo dõi mới có thể xem bài đăng này</string>
+    <string name="mastodon_visibility_direct_description">Chỉ những người được nhắc đến mới có thể xem bài đăng này</string>
+
     <string name="settings_notifications_title">Thông báo</string>
     <string name="settings_notifications_subtitle">Tùy chỉnh cách Flare thông báo cho bạn</string>
+
+    <string name="status_loadmore_end">Không còn bài đăng nào</string>
+    <string name="status_loadmore_error">Lỗi khi tải thêm bài đăng</string>
     <string name="status_loadmore_error_retry">Thử lại</string>
-    <string name="status_empty">Không có gì để xem ở đây</string>
-    <string name="status_sensitive_media">Media nhạy cảm</string>
-    <string name="show_media">Hiển thị phương tiện</string>
+    <string name="status_empty">Không có gì ở đây</string>
+    <string name="status_sensitive_media">Nội dung nhạy cảm</string>
+    <string name="show_media">Hiện phương tiện</string>
+    <string name="hide_media">Ẩn phương tiện</string>
     <string name="login_expired">Phiên đăng nhập đã hết hạn</string>
-    <string name="login_expired_message">Nhấp để đăng nhập lại</string>
+    <string name="login_expired_message">Nhấn để đăng nhập lại</string>
     <string name="login_expired_relogin">Đăng nhập lại</string>
-    <string name="misskey_compose_local_only">Chỉ tại địa phương</string>
-    <string name="misskey_item_action_renote">Đăng lại</string>
+
+    <string name="permission_denied_title">Quyền bị từ chối</string>
+    <string name="permission_denied_message">Vui lòng đăng nhập lại để truy cập trang này</string>
+
+    <string name="misskey_compose_local_only">Chỉ cục bộ</string>
+    <string name="misskey_compose_local_only_description">Chỉ người dùng trên máy chủ này mới có thể xem bài đăng này</string>
+
+    <string name="misskey_item_action_renote">Renote</string>
     <string name="misskey_item_action_quote">Trích dẫn</string>
+
     <string name="bluesky_notification_unknown_message">Loại thông báo không xác định %1$s</string>
     <string name="bluesky_notification_unknown_message2">Vui lòng báo cáo vấn đề này cho nhà phát triển.</string>
-    <string name="blusky_item_action_repost">Chia sẻ lại</string>
+
+    <string name="blusky_item_action_repost">Đăng lại</string>
     <string name="blusky_item_action_quote">Trích dẫn</string>
     <string name="blusky_item_action_report">Báo cáo</string>
     <string name="blusky_item_action_delete">Xóa</string>
-    <string name="mastodon_item_unbookmark">Bỏ đánh dấu</string>
-    <string name="mastodon_item_bookmark">Đánh dấu</string>
+
+    <string name="mastodon_item_unbookmark">Bỏ dấu trang</string>
+    <string name="mastodon_item_bookmark">Dấu trang</string>
     <string name="mastodon_item_delete">Xóa</string>
     <string name="mastodon_item_report">Báo cáo</string>
     <string name="misskey_item_action_delete">Xóa</string>
     <string name="misskey_item_action_report">Báo cáo</string>
-    <string name="bookmark_remove">Xóa đánh dấu</string>
-    <string name="bookmark_add">Thêm đánh dấu</string>
+
+    <string name="bookmark_remove">Bỏ dấu trang</string>
+    <string name="bookmark_add">Thêm dấu trang</string>
     <string name="like">Thích</string>
     <string name="unlike">Bỏ thích</string>
+    <string name="favourite">Yêu thích</string>
+    <string name="unfavourite">Bỏ yêu thích</string>
     <string name="more">Thêm</string>
     <string name="quote">Trích dẫn</string>
-    <string name="reaction_add">Thêm phản ứng</string>
-    <string name="reaction_remove">Xóa phản ứng</string>
+    <string name="reaction_add">Thêm cảm xúc</string>
+    <string name="reaction_remove">Bỏ cảm xúc</string>
     <string name="reply">Trả lời</string>
     <string name="report">Báo cáo</string>
-    <string name="retweet">Chia sẻ lại</string>
-    <string name="retweet_remove">Bỏ retweet</string>
+    <string name="retweet">Đăng lại</string>
+    <string name="retweet_remove">Hủy đăng lại</string>
     <string name="share">Chia sẻ</string>
+    <string name="fx_share">Chia sẻ qua FxEmbed</string>
     <string name="comment">Bình luận</string>
+
     <string name="user_report">Báo cáo</string>
-    <string name="user_block">chặn</string>
-    <string name="user_unblock">bỏ chặn</string>
-    <string name="user_mute">im lặng</string>
-    <string name="user_unmute">bỏ im lặng</string>
-    <string name="user_mute_with_parameter">Im lặng %1$s</string>
+    <string name="user_block">Chặn</string>
+    <string name="user_unblock">Bỏ chặn</string>
+    <string name="user_mute">Ẩn</string>
+    <string name="user_unmute">Bỏ ẩn</string>
+    <string name="user_mute_with_parameter">Ẩn %1$s</string>
     <string name="user_block_with_parameter">Chặn %1$s</string>
     <string name="mastodon_item_content_warning">Cảnh báo nội dung</string>
     <string name="reply_to">Trả lời %1$s</string>
+    <string name="status_detail_translate">Dịch</string>
+    <string name="status_detail_tldr">Tóm tắt</string>
+    <string name="translation_badge_translated">Đã dịch</string>
+    <string name="translation_badge_translating">Đang dịch…</string>
+    <string name="translation_badge_failed">Lỗi khi dịch</string>
+    <string name="translation_retry">Thử dịch lại</string>
+    <string name="translation_show_original">Hiện bản gốc</string>
+
     <string name="date_format_year_month_day">dd MMM yy</string>
     <string name="date_format_month_day">dd MMM</string>
     <string name="date_format_full">dd MMM yy HH:mm</string>
-    <string name="vvo_notification_like">Đã thích trạng thái của bạn</string>
+
+    <string name="vvo_notification_like">Đã thích bài đăng của bạn</string>
+
     <string name="user_follow_edit_list">Thêm/Xóa khỏi danh sách</string>
     <string name="list_empty">Không có danh sách</string>
     <string name="list_error">Không thể tải danh sách</string>
-    <string name="misskey_achievement_notes1_title">vừa thiết lập msky</string>
-    <string name="misskey_achievement_notes1_description">Đăng ghi chú đầu tiên của bạn</string>
-    <string name="misskey_achievement_notes1_flavor">Chúc bạn có một khoảng thời gian tốt đẹp với Misskey!</string>
-    <string name="misskey_achievement_notes10_title">Một số ghi chú</string>
-    <string name="misskey_achievement_notes10_description">Đăng 10 ghi chú</string>
-    <string name="misskey_achievement_notes100_title">Nhiều ghi chú</string>
-    <string name="misskey_achievement_notes100_description">Đăng 100 ghi chú</string>
-    <string name="misskey_achievement_notes500_title">Bao gồm trong ghi chú</string>
-    <string name="misskey_achievement_notes500_description">Đăng 500 ghi chú</string>
-    <string name="misskey_achievement_notes1000_title">Một núi ghi chú</string>
-    <string name="misskey_achievement_notes1000_description">Đăng 1,000 ghi chú</string>
-    <string name="misskey_achievement_notes5000_title">Ghi chú tràn ngập</string>
-    <string name="misskey_achievement_notes5000_description">Đăng 5,000 ghi chú</string>
-    <string name="misskey_achievement_notes10000_title">Supernote</string>
-    <string name="misskey_achievement_notes10000_description">Đăng 10,000 ghi chú</string>
-    <string name="misskey_achievement_notes20000_title">Cần... nhiều... ghi chú...</string>
-    <string name="misskey_achievement_notes20000_description">Đăng 20,000 ghi chú</string>
-    <string name="misskey_achievement_notes30000_title">Ghi chú ghi chú ghi chú!</string>
-    <string name="misskey_achievement_notes30000_description">Đăng 30,000 ghi chú</string>
-    <string name="misskey_achievement_notes40000_title">Nhà máy ghi chú</string>
-    <string name="misskey_achievement_notes40000_description">Đăng 40,000 ghi chú</string>
-    <string name="misskey_achievement_notes50000_title">Hành tinh của ghi chú</string>
-    <string name="misskey_achievement_notes50000_description">Đăng 50,000 ghi chú</string>
-    <string name="misskey_achievement_notes60000_title">Quasar ghi chú</string>
-    <string name="misskey_achievement_notes60000_description">Đăng 60,000 ghi chú</string>
-    <string name="misskey_achievement_notes70000_title">Hố đen ghi chú</string>
-    <string name="misskey_achievement_notes70000_description">Đăng 70,000 ghi chú</string>
-    <string name="misskey_achievement_notes80000_title">Ngân hàng ghi chú</string>
-    <string name="misskey_achievement_notes80000_description">Đăng 80,000 ghi chú</string>
-    <string name="misskey_achievement_notes90000_title">Vũ trụ ghi chú</string>
-    <string name="misskey_achievement_notes90000_description">Đăng 90,000 ghi chú</string>
-    <string name="misskey_achievement_notes100000_title">TẤT CẢ CÁC GHI CHÚ CỦA BẠN ĐỀU THUỘC VỀ CHÚNG TÔI</string>
-    <string name="misskey_achievement_notes100000_description">Đăng 100,000 ghi chú</string>
-    <string name="misskey_achievement_notes100000_flavor">Chắc chắn bạn có rất nhiều điều để nói.</string>
-    <string name="misskey_achievement_login3_title">Người mới bắt đầu I</string>
+
+    <string name="misskey_achievement_notes1_title">chỉ đang thiết lập msky của tôi</string>
+    <string name="misskey_achievement_notes1_description">Đăng bài đầu tiên của bạn</string>
+    <string name="misskey_achievement_notes1_flavor">Chúc bạn có thời gian vui vẻ với Misskey!</string>
+
+    <string name="misskey_achievement_notes10_title">Một vài bài đăng</string>
+    <string name="misskey_achievement_notes10_description">Đăng 10 bài</string>
+
+    <string name="misskey_achievement_notes100_title">Rất nhiều bài đăng</string>
+    <string name="misskey_achievement_notes100_description">Đăng 100 bài</string>
+
+    <string name="misskey_achievement_notes500_title">Ngập trong bài đăng</string>
+    <string name="misskey_achievement_notes500_description">Đăng 500 bài</string>
+
+    <string name="misskey_achievement_notes1000_title">Một núi bài đăng</string>
+    <string name="misskey_achievement_notes1000_description">Đăng 1,000 bài</string>
+
+    <string name="misskey_achievement_notes5000_title">Tràn ngập bài đăng</string>
+    <string name="misskey_achievement_notes5000_description">Đăng 5,000 bài</string>
+
+    <string name="misskey_achievement_notes10000_title">Siêu bài đăng</string>
+    <string name="misskey_achievement_notes10000_description">Đăng 10,000 bài</string>
+
+    <string name="misskey_achievement_notes20000_title">Cần... thêm... bài đăng...</string>
+    <string name="misskey_achievement_notes20000_description">Đăng 20,000 bài</string>
+
+    <string name="misskey_achievement_notes30000_title">Toàn là bài đăng!</string>
+    <string name="misskey_achievement_notes30000_description">Đăng 30,000 bài</string>
+
+    <string name="misskey_achievement_notes40000_title">Nhà máy bài đăng</string>
+    <string name="misskey_achievement_notes40000_description">Đăng 40,000 bài</string>
+
+    <string name="misskey_achievement_notes50000_title">Hành tinh bài đăng</string>
+    <string name="misskey_achievement_notes50000_description">Đăng 50,000 bài</string>
+
+    <string name="misskey_achievement_notes60000_title">Chuẩn tinh bài đăng</string>
+    <string name="misskey_achievement_notes60000_description">Đăng 60,000 bài</string>
+
+    <string name="misskey_achievement_notes70000_title">Hố đen bài đăng</string>
+    <string name="misskey_achievement_notes70000_description">Đăng 70,000 bài</string>
+
+    <string name="misskey_achievement_notes80000_title">Thiên hà bài đăng</string>
+    <string name="misskey_achievement_notes80000_description">Đăng 80,000 bài</string>
+
+    <string name="misskey_achievement_notes90000_title">Vũ trụ bài đăng</string>
+    <string name="misskey_achievement_notes90000_description">Đăng 90,000 bài</string>
+
+    <string name="misskey_achievement_notes100000_title">TẤT CẢ BÀI ĐĂNG CỦA BẠN THUỘC VỀ CHÚNG TÔI</string>
+    <string name="misskey_achievement_notes100000_description">Đăng 100,000 bài</string>
+    <string name="misskey_achievement_notes100000_flavor">Bạn chắc chắn có rất nhiều điều để nói.</string>
+
+    <string name="misskey_achievement_login3_title">Người mới I</string>
     <string name="misskey_achievement_login3_description">Đăng nhập tổng cộng 3 ngày</string>
-    <string name="misskey_achievement_login3_flavor">Bắt đầu từ hôm nay, hãy gọi tôi là Misskist</string>
-    <string name="misskey_achievement_login7_title">Người mới bắt đầu II</string>
+    <string name="misskey_achievement_login3_flavor">Từ hôm nay, cứ gọi tôi là Misskist</string>
+
+    <string name="misskey_achievement_login7_title">Người mới II</string>
     <string name="misskey_achievement_login7_description">Đăng nhập tổng cộng 7 ngày</string>
-    <string name="misskey_achievement_login7_flavor">Cảm thấy như bạn đã làm quen với mọi thứ chưa?</string>
-    <string name="misskey_achievement_login15_title">Người mới bắt đầu III</string>
+    <string name="misskey_achievement_login7_flavor">Cảm thấy bắt nhịp được chưa?</string>
+
+    <string name="misskey_achievement_login15_title">Người mới III</string>
     <string name="misskey_achievement_login15_description">Đăng nhập tổng cộng 15 ngày</string>
+
     <string name="misskey_achievement_login30_title">Misskist I</string>
     <string name="misskey_achievement_login30_description">Đăng nhập tổng cộng 30 ngày</string>
+
     <string name="misskey_achievement_login60_title">Misskist II</string>
     <string name="misskey_achievement_login60_description">Đăng nhập tổng cộng 60 ngày</string>
+
     <string name="misskey_achievement_login100_title">Misskist III</string>
     <string name="misskey_achievement_login100_description">Đăng nhập tổng cộng 100 ngày</string>
-    <string name="misskey_achievement_login100_flavor">Misskist bạo lực</string>
-    <string name="misskey_achievement_login200_title">Thường xuyên I</string>
+    <string name="misskey_achievement_login100_flavor">Misskist mãnh liệt</string>
+
+    <string name="misskey_achievement_login200_title">Thành viên thường xuyên I</string>
     <string name="misskey_achievement_login200_description">Đăng nhập tổng cộng 200 ngày</string>
-    <string name="misskey_achievement_login300_title">Thường xuyên II</string>
+
+    <string name="misskey_achievement_login300_title">Thành viên thường xuyên II</string>
     <string name="misskey_achievement_login300_description">Đăng nhập tổng cộng 300 ngày</string>
-    <string name="misskey_achievement_login400_title">Thường xuyên III</string>
+
+    <string name="misskey_achievement_login400_title">Thành viên thường xuyên III</string>
     <string name="misskey_achievement_login400_description">Đăng nhập tổng cộng 400 ngày</string>
+
     <string name="misskey_achievement_login500_title">Chuyên gia I</string>
     <string name="misskey_achievement_login500_description">Đăng nhập tổng cộng 500 ngày</string>
-    <string name="misskey_achievement_login500_flavor">Bạn bè của tôi, thường được nói rằng tôi thích ghi chú</string>
+    <string name="misskey_achievement_login500_flavor">Bạn bè của tôi, người ta thường nói rằng tôi thích bài đăng</string>
+
     <string name="misskey_achievement_login600_title">Chuyên gia II</string>
     <string name="misskey_achievement_login600_description">Đăng nhập tổng cộng 600 ngày</string>
+
     <string name="misskey_achievement_login700_title">Chuyên gia III</string>
     <string name="misskey_achievement_login700_description">Đăng nhập tổng cộng 700 ngày</string>
-    <string name="misskey_achievement_login800_title">Bậc thầy ghi chú I</string>
+
+    <string name="misskey_achievement_login800_title">Bậc thầy bài đăng I</string>
     <string name="misskey_achievement_login800_description">Đăng nhập tổng cộng 800 ngày</string>
-    <string name="misskey_achievement_login900_title">Bậc thầy ghi chú II</string>
+
+    <string name="misskey_achievement_login900_title">Bậc thầy bài đăng II</string>
     <string name="misskey_achievement_login900_description">Đăng nhập tổng cộng 900 ngày</string>
-    <string name="misskey_achievement_login1000_title">Bậc thầy ghi chú III</string>
+
+    <string name="misskey_achievement_login1000_title">Bậc thầy bài đăng III</string>
     <string name="misskey_achievement_login1000_description">Đăng nhập tổng cộng 1,000 ngày</string>
     <string name="misskey_achievement_login1000_flavor">Cảm ơn bạn đã sử dụng Misskey!</string>
-    <string name="misskey_achievement_note_clipped1_title">Phải... cắt...</string>
-    <string name="misskey_achievement_note_clipped1_description">Cắt ghi chú đầu tiên của bạn</string>
-    <string name="misskey_achievement_note_favorited1_title">Người quan sát sao</string>
-    <string name="misskey_achievement_note_favorited1_description">Yêu thích ghi chú đầu tiên của bạn</string>
-    <string name="misskey_achievement_my_note_favorited1_title">Tìm kiếm sao</string>
-    <string name="misskey_achievement_my_note_favorited1_description">Có ai đó yêu thích một trong những ghi chú của bạn</string>
-    <string name="misskey_achievement_profile_filled_title">Được chuẩn bị tốt</string>
+
+    <string name="misskey_achievement_note_clipped1_title">Phải... kẹp lại...</string>
+    <string name="misskey_achievement_note_clipped1_description">Kẹp bài đăng đầu tiên của bạn</string>
+
+    <string name="misskey_achievement_note_favorited1_title">Người ngắm sao</string>
+    <string name="misskey_achievement_note_favorited1_description">Thích bài đăng đầu tiên của bạn</string>
+
+    <string name="misskey_achievement_my_note_favorited1_title">Tìm kiếm những vì sao</string>
+    <string name="misskey_achievement_my_note_favorited1_description">Để người khác thích một bài đăng của bạn</string>
+
+    <string name="misskey_achievement_profile_filled_title">Chuẩn bị kỹ lưỡng</string>
     <string name="misskey_achievement_profile_filled_description">Thiết lập hồ sơ của bạn</string>
-    <string name="misskey_achievement_marked_as_cat_title">Tôi là một con mèo</string>
-    <string name="misskey_achievement_marked_as_cat_description">Đánh dấu tài khoản của bạn là một con mèo</string>
-    <string name="misskey_achievement_marked_as_cat_flavor">Tôi sẽ cho bạn một cái tên sau.</string>
-    <string name="misskey_achievement_following1_title">Theo dõi người dùng đầu tiên của bạn</string>
+
+    <string name="misskey_achievement_marked_as_cat_title">Tôi là một chú mèo</string>
+    <string name="misskey_achievement_marked_as_cat_description">Đánh dấu tài khoản của bạn là mèo</string>
+    <string name="misskey_achievement_marked_as_cat_flavor">Tôi sẽ đặt tên cho bạn sau.</string>
+
+    <string name="misskey_achievement_following1_title">Theo dõi người dùng đầu tiên</string>
     <string name="misskey_achievement_following1_description">Theo dõi một người dùng</string>
-    <string name="misskey_achievement_following10_title">Tiến tới... tiến tới...</string>
+
+    <string name="misskey_achievement_following10_title">Bắt kịp... bắt kịp...</string>
     <string name="misskey_achievement_following10_description">Theo dõi 10 người dùng</string>
-    <string name="misskey_achievement_following50_title">Nhiều bạn bè</string>
+
+    <string name="misskey_achievement_following50_title">Rất nhiều bạn bè</string>
     <string name="misskey_achievement_following50_description">Theo dõi 50 tài khoản</string>
-    <string name="misskey_achievement_following100_title">100 Bạn bè</string>
+
+    <string name="misskey_achievement_following100_title">100 người bạn</string>
     <string name="misskey_achievement_following100_description">Theo dõi 100 tài khoản</string>
-    <string name="misskey_achievement_following300_title">Quá nhiều bạn bè</string>
+
+    <string name="misskey_achievement_following300_title">Quá tải bạn bè</string>
     <string name="misskey_achievement_following300_description">Theo dõi 300 tài khoản</string>
+
     <string name="misskey_achievement_followers1_title">Người theo dõi đầu tiên</string>
     <string name="misskey_achievement_followers1_description">Có 1 người theo dõi</string>
+
     <string name="misskey_achievement_followers10_title">Theo dõi tôi!</string>
     <string name="misskey_achievement_followers10_description">Có 10 người theo dõi</string>
-    <string name="misskey_achievement_followers50_title">Đang đổ xô</string>
+
+    <string name="misskey_achievement_followers50_title">Đến theo đám đông</string>
     <string name="misskey_achievement_followers50_description">Có 50 người theo dõi</string>
+
     <string name="misskey_achievement_followers100_title">Nổi tiếng</string>
     <string name="misskey_achievement_followers100_description">Có 100 người theo dõi</string>
+
     <string name="misskey_achievement_followers300_title">Vui lòng xếp thành một hàng</string>
     <string name="misskey_achievement_followers300_description">Có 300 người theo dõi</string>
-    <string name="misskey_achievement_followers500_title">Tháp phát</string>
+
+    <string name="misskey_achievement_followers500_title">Tháp Radio</string>
     <string name="misskey_achievement_followers500_description">Có 500 người theo dõi</string>
-    <string name="misskey_achievement_followers1000_title">Người có ảnh hưởng</string>
+
+    <string name="misskey_achievement_followers1000_title">Người có sức ảnh hưởng</string>
     <string name="misskey_achievement_followers1000_description">Có 1,000 người theo dõi</string>
-    <string name="misskey_achievement_collect_achievements30_title">Người thu thập thành tựu</string>
-    <string name="misskey_achievement_collect_achievements30_description">Kiếm 30 thành tựu</string>
-    <string name="misskey_achievement_view_achievements3min_title">Thích thành tựu</string>
-    <string name="misskey_achievement_view_achievements3min_description">Nhìn vào danh sách thành tựu của bạn trong ít nhất 3 phút</string>
-    <string name="misskey_achievement_i_love_misskey_title">Tôi Yêu Misskey</string>
-    <string name="misskey_achievement_i_love_misskey_description">Đăng \"Tôi ❤ #Misskey\"</string>
-    <string name="misskey_achievement_i_love_misskey_flavor">Đội phát triển của Misskey rất cảm kích sự hỗ trợ của bạn!</string>
-    <string name="misskey_achievement_found_treasure_title">Cuộc tìm kiếm kho báu</string>
+
+    <string name="misskey_achievement_collect_achievements30_title">Người thu thập thành tích</string>
+    <string name="misskey_achievement_collect_achievements30_description">Đạt được 30 thành tích</string>
+
+    <string name="misskey_achievement_view_achievements3min_title">Người yêu thành tích</string>
+    <string name="misskey_achievement_view_achievements3min_description">Xem danh sách thành tích của bạn trong ít nhất 3 phút</string>
+
+    <string name="misskey_achievement_i_love_misskey_title">Tôi yêu Misskey</string>
+    <string name="misskey_achievement_i_love_misskey_description">Đăng \"I ❤ #Misskey\"</string>
+    <string name="misskey_achievement_i_love_misskey_flavor">Đội ngũ phát triển Misskey rất trân trọng sự ủng hộ của bạn!</string>
+
+    <string name="misskey_achievement_found_treasure_title">Săn kho báu</string>
     <string name="misskey_achievement_found_treasure_description">Bạn đã tìm thấy kho báu ẩn giấu</string>
-    <string name="misskey_achievement_client30min_title">Giải lao ngắn</string>
-    <string name="misskey_achievement_client30min_description">Giữ Misskey mở trong ít nhất 30 phút</string>
-    <string name="misskey_achievement_client60min_title">Không có \"Miss\" trong Misskey</string>
-    <string name="misskey_achievement_client60min_description">Giữ Misskey mở trong ít nhất 60 phút</string>
-    <string name="misskey_achievement_note_deleted_within1min_title">Đừng để ý</string>
-    <string name="misskey_achievement_note_deleted_within1min_description">Xóa một ghi chú trong vòng một phút sau khi đăng nó</string>
-    <string name="misskey_achievement_posted_at_late_night_title">Ghi chú đêm</string>
-    <string name="misskey_achievement_posted_at_late_night_description">Đăng một ghi chú muộn vào ban đêm</string>
-    <string name="misskey_achievement_posted_at_late_night_flavor">Đã đến lúc đi ngủ.</string>
-    <string name="misskey_achievement_posted_at_0min0sec_title">Đồng hồ nói</string>
-    <string name="misskey_achievement_posted_at_0min0sec_description">Đăng một ghi chú vào lúc 00:00</string>
-    <string name="misskey_achievement_posted_at_0min0sec_flavor">Nhấp nhấp nhấp claaang</string>
-    <string name="misskey_achievement_self_quote_title">Tự tham chiếu</string>
-    <string name="misskey_achievement_self_quote_description">Trích dẫn ghi chú của chính bạn</string>
-    <string name="misskey_achievement_htl20npm_title">Dòng thời gian chảy</string>
-    <string name="misskey_achievement_htl20npm_description">Giữ tốc độ dòng thời gian chính của bạn vượt quá 20 npm (ghi chú mỗi phút)</string>
+
+    <string name="misskey_achievement_client30min_title">Nghỉ ngơi ngắn</string>
+    <string name="misskey_achievement_client30min_description">Mở Misskey trong ít nhất 30 phút</string>
+
+    <string name="misskey_achievement_client60min_title">Không \"lỡ\" trong Misskey</string>
+    <string name="misskey_achievement_client60min_description">Mở Misskey trong ít nhất 60 phút</string>
+
+    <string name="misskey_achievement_note_deleted_within1min_title">Đừng bận tâm</string>
+    <string name="misskey_achievement_note_deleted_within1min_description">Xóa một bài đăng trong vòng một phút sau khi đăng</string>
+
+    <string name="misskey_achievement_posted_at_late_night_title">Cú đêm</string>
+    <string name="misskey_achievement_posted_at_late_night_description">Đăng bài vào đêm muộn</string>
+    <string name="misskey_achievement_posted_at_late_night_flavor">Đã đến lúc đi ngủ rồi.</string>
+
+    <string name="misskey_achievement_posted_at_0min0sec_title">Đồng hồ báo giờ</string>
+    <string name="misskey_achievement_posted_at_0min0sec_description">Đăng bài vào đúng 00:00</string>
+    <string name="misskey_achievement_posted_at_0min0sec_flavor">Click Click Click Boong</string>
+
+    <string name="misskey_achievement_self_quote_title">Tự trích dẫn</string>
+    <string name="misskey_achievement_self_quote_description">Trích dẫn bài đăng của chính bạn</string>
+
+    <string name="misskey_achievement_htl20npm_title">Dòng thời gian tuôn trào</string>
+    <string name="misskey_achievement_htl20npm_description">Để tốc độ dòng thời gian chính của bạn vượt quá 20 bài mỗi phút (npm)</string>
+
     <string name="misskey_achievement_view_instance_chart_title">Nhà phân tích</string>
-    <string name="misskey_achievement_view_instance_chart_description">Xem biểu đồ của phiên bản của bạn</string>
-    <string name="misskey_achievement_output_hello_world_on_scratchpad_title">Xin chào, thế giới!</string>
-    <string name="misskey_achievement_output_hello_world_on_scratchpad_description">Xuất \"xin chào thế giới\" trong Scratchpad</string>
-    <string name="misskey_achievement_open3windows_title">Cửa sổ nhiều</string>
-    <string name="misskey_achievement_open3windows_description">Có ít nhất 3 cửa sổ mở cùng lúc</string>
+    <string name="misskey_achievement_view_instance_chart_description">Xem biểu đồ máy chủ của bạn</string>
+
+    <string name="misskey_achievement_output_hello_world_on_scratchpad_title">Hello, world!</string>
+    <string name="misskey_achievement_output_hello_world_on_scratchpad_description">Xuất \"hello world\" trong Scratchpad</string>
+
+    <string name="misskey_achievement_open3windows_title">Đa cửa sổ</string>
+    <string name="misskey_achievement_open3windows_description">Mở ít nhất 3 cửa sổ cùng lúc</string>
+
     <string name="misskey_achievement_drive_folder_circular_reference_title">Tham chiếu vòng</string>
-    <string name="misskey_achievement_drive_folder_circular_reference_description">Cố gắng tạo một thư mục lồng ghép trong Drive</string>
-    <string name="misskey_achievement_react_without_read_title">Bạn thực sự đọc cái đó?</string>
-    <string name="misskey_achievement_react_without_read_description">Phản hồi một ghi chú dài hơn 100 ký tự trong vòng 3 giây kể từ khi nó được đăng</string>
-    <string name="misskey_achievement_clicked_click_here_title">Nhấp vào đây</string>
-    <string name="misskey_achievement_clicked_click_here_description">Bạn đã nhấp vào đây</string>
-    <string name="misskey_achievement_just_plain_lucky_title">Chỉ đơn giản là may mắn</string>
-    <string name="misskey_achievement_just_plain_lucky_description">Có cơ hội nhận được với xác suất 0.005\% mỗi 10 giây</string>
-    <string name="misskey_achievement_set_name_to_syuilo_title">Tâm Thần Thần Thánh</string>
-    <string name="misskey_achievement_set_name_to_syuilo_description">Đặt tên của bạn thành \"syuilo\"</string>
-    <string name="misskey_achievement_passed_since_account_created1_title">Kỷ Niệm Một Năm</string>
-    <string name="misskey_achievement_passed_since_account_created1_description">Đã một năm kể từ khi tài khoản của bạn được tạo</string>
-    <string name="misskey_achievement_passed_since_account_created2_title">Kỷ Niệm Hai Năm</string>
-    <string name="misskey_achievement_passed_since_account_created2_description">Đã hai năm kể từ khi tài khoản của bạn được tạo</string>
-    <string name="misskey_achievement_passed_since_account_created3_title">Kỷ Niệm Ba Năm</string>
-    <string name="misskey_achievement_passed_since_account_created3_description">Đã ba năm kể từ khi tài khoản của bạn được tạo</string>
-    <string name="misskey_achievement_logged_in_on_birthday_title">Chúc Mừng Sinh Nhật</string>
+    <string name="misskey_achievement_drive_folder_circular_reference_description">Cố gắng tạo một thư mục lồng nhau đệ quy trong Drive</string>
+
+    <string name="misskey_achievement_react_without_read_title">Bạn có thực sự đã đọc nó không?</string>
+    <string name="misskey_achievement_react_without_read_description">Bày tỏ cảm xúc với một bài đăng dài hơn 100 ký tự trong vòng 3 giây sau khi nó được đăng</string>
+
+    <string name="misskey_achievement_clicked_click_here_title">Nhấn vào đây</string>
+    <string name="misskey_achievement_clicked_click_here_description">Bạn đã nhấn vào đây</string>
+
+    <string name="misskey_achievement_just_plain_lucky_title">Chỉ là may mắn thuần túy</string>
+    <string name="misskey_achievement_just_plain_lucky_description">Có cơ hội nhận được với xác suất 0.005% mỗi 10 giây</string>
+
+    <string name="misskey_achievement_set_name_to_syuilo_title">Hội chứng Chúa trời</string>
+    <string name="misskey_achievement_set_name_to_syuilo_description">Đặt tên của bạn là \"syuilo\"</string>
+
+    <string name="misskey_achievement_passed_since_account_created1_title">Kỷ niệm một năm</string>
+    <string name="misskey_achievement_passed_since_account_created1_description">Một năm đã trôi qua kể từ khi tài khoản của bạn được tạo</string>
+
+    <string name="misskey_achievement_passed_since_account_created2_title">Kỷ niệm hai năm</string>
+    <string name="misskey_achievement_passed_since_account_created2_description">Hai năm đã trôi qua kể từ khi tài khoản của bạn được tạo</string>
+
+    <string name="misskey_achievement_passed_since_account_created3_title">Kỷ niệm ba năm</string>
+    <string name="misskey_achievement_passed_since_account_created3_description">Ba năm đã trôi qua kể từ khi tài khoản của bạn được tạo</string>
+
+    <string name="misskey_achievement_logged_in_on_birthday_title">Chúc mừng sinh nhật</string>
     <string name="misskey_achievement_logged_in_on_birthday_description">Đăng nhập vào ngày sinh nhật của bạn</string>
-    <string name="misskey_achievement_logged_in_on_new_years_day_title">Chúc Mừng Năm Mới!</string>
-    <string name="misskey_achievement_logged_in_on_new_years_day_description">Đăng nhập vào ngày đầu năm mới</string>
-    <string name="misskey_achievement_logged_in_on_new_years_day_flavor">Tới một năm tuyệt vời khác trên nền tảng này</string>
-    <string name="misskey_achievement_cookie_clicked_title">Một trò chơi mà bạn nhấp vào bánh quy</string>
-    <string name="misskey_achievement_cookie_clicked_description">Đã nhấp vào bánh quy</string>
-    <string name="misskey_achievement_cookie_clicked_flavor">Chờ đã, bạn có đang trên trang web đúng không?</string>
-    <string name="misskey_achievement_brain_diver_title">Người Lặn Não</string>
-    <string name="misskey_achievement_brain_diver_description">Đăng liên kết tới Người Lặn Não</string>
+
+    <string name="misskey_achievement_logged_in_on_new_years_day_title">Chúc mừng năm mới!</string>
+    <string name="misskey_achievement_logged_in_on_new_years_day_description">Đã đăng nhập vào ngày đầu tiên của năm</string>
+    <string name="misskey_achievement_logged_in_on_new_years_day_flavor">Chúc một năm tuyệt vời nữa trên máy chủ này</string>
+
+    <string name="misskey_achievement_cookie_clicked_title">Một trò chơi mà bạn nhấn vào bánh quy</string>
+    <string name="misskey_achievement_cookie_clicked_description">Đã nhấn vào bánh quy</string>
+    <string name="misskey_achievement_cookie_clicked_flavor">Đợi đã, bạn có vào đúng trang web không?</string>
+
+    <string name="misskey_achievement_brain_diver_title">Brain Diver</string>
+    <string name="misskey_achievement_brain_diver_description">Đăng liên kết tới Brain Diver</string>
     <string name="misskey_achievement_brain_diver_flavor">Misskey-Misskey La-Tu-Ma</string>
-    <string name="misskey_achievement_smash_test_notification_button_title">Kiểm tra tràn</string>
-    <string name="misskey_achievement_smash_test_notification_button_description">Kích hoạt bài kiểm tra thông báo liên tục trong một khoảng thời gian rất ngắn</string>
-    <string name="misskey_achievement_tutorial_completed_title">Bằng tốt nghiệp Khóa Học Cơ Bản Misskey</string>
-    <string name="misskey_achievement_tutorial_completed_description">Đã hoàn thành hướng dẫn</string>
+
+    <string name="misskey_achievement_smash_test_notification_button_title">Tràn ngập thử nghiệm</string>
+    <string name="misskey_achievement_smash_test_notification_button_description">Kích hoạt thông báo thử nghiệm liên tục trong một thời gian cực ngắn</string>
+
+    <string name="misskey_achievement_tutorial_completed_title">Bằng tốt nghiệp khóa học cơ bản Misskey</string>
+    <string name="misskey_achievement_tutorial_completed_description">Hoàn thành hướng dẫn</string>
+
     <string name="misskey_achievement_bubble_game_exploding_head_title">🤯</string>
-    <string name="misskey_achievement_bubble_game_exploding_head_description">Đối tượng lớn nhất trong trò chơi bubble</string>
-    <string name="misskey_achievement_bubble_game_double_exploding_head_title">Gấp đôi🤯</string>
-    <string name="misskey_achievement_bubble_game_double_exploding_head_description">Hai đối tượng lớn nhất trong trò chơi bubble cùng một lúc</string>
-    <string name="misskey_achievement_bubble_game_double_exploding_head_flavor">Bạn có thể cho vào hộp cơm như thế này 🤯 🤯 một chút.</string>
-    <string name="vote">Bỏ phiếu</string>
-    <string name="poll_expired">Phiếu đã hết hạn</string>
-    <string name="poll_voted">Đã bỏ phiếu</string>
-    <string name="poll_expired_at">Hết hạn vào %1$s</string>
-    <string name="user_send_message">Gửi tin nhắn</string>
-    <string name="profile_search_user_using_account">Tìm %1$s trong %2$s sử dụng %3$s</string>
+    <string name="misskey_achievement_bubble_game_exploding_head_description">Đối tượng lớn nhất trong trò chơi bong bóng</string>
+
+    <string name="misskey_achievement_bubble_game_double_exploding_head_title">Double🤯</string>
+    <string name="misskey_achievement_bubble_game_double_exploding_head_description">Hai đối tượng lớn nhất trong trò chơi bong bóng cùng một lúc</string>
+    <string name="misskey_achievement_bubble_game_double_exploding_head_flavor">Bạn có thể lấp đầy một hộp cơm trưa như thế này 🤯 🤯 một chút.</string>
+
+    <string name="vote">Bình chọn</string>
+    <string name="poll_expired">Cuộc thăm dò đã hết hạn</string>
+    <string name="poll_voted">Đã bình chọn</string>
+    <string name="poll_expired_at">Hết hạn lúc %1$s</string>
+    <string name="user_send_message">Gửi tin nhắn trực tiếp</string>
+
+    <string name="profile_search_user_using_account">Tìm %1$s trong %2$s bằng %3$s</string>
     <string name="profile_search_user_using_account_compat">Tìm trong %1$s</string>
+
     <string name="feeds_discover_feeds_created_by">Được tạo bởi %1$s</string>
+
     <string name="notification_item_accept_follow_request">Chấp nhận</string>
     <string name="notification_item_reject_follow_request">Từ chối</string>
-    <string name="dm_list_empty">Không có tin nhắn trực tiếp nào</string>
-    <string name="dm_list_error">Tải tin nhắn trực tiếp thất bại</string>
+
+
+    <string name="dm_list_empty">Không có tin nhắn trực tiếp</string>
+    <string name="dm_list_error">Không thể tải tin nhắn trực tiếp</string>
     <string name="send">Gửi</string>
-    <string name="dm_send_placeholder">Gửi một tin nhắn</string>
+    <string name="dm_send_placeholder">Gửi tin nhắn</string>
     <string name="dm_deleted">Đã xóa</string>
-    <string name="dm_conversation">Phòng tin nhắn trực tiếp</string>
+    <string name="dm_conversation">Cuộc hội thoại trực tiếp</string>
     <string name="dm_sending">Đang gửi</string>
-    <string name="dm_leave">Rời cuộc trò chuyện</string>
-    <string name="dm_to_profile">Hiển thị hồ sơ</string>
-    <string name="settings_side_panel_empty">Mặc định sẽ hiển thị bảng bên tùy thuộc vào nền tảng tài khoản.</string>
+    <string name="dm_leave">Rời khỏi cuộc hội thoại</string>
+    <string name="dm_to_profile">Xem hồ sơ</string>
+
+    <string name="settings_side_panel_empty">Theo mặc định, bảng điều khiển bên tuân theo nền tảng của tài khoản hiện tại.</string>
     <string name="tab_settings_add">Thêm</string>
     <string name="tab_settings_drag">Kéo</string>
-    <string name="tab_settings_edit">Chỉnh sửa</string>
+    <string name="tab_settings_edit">Sửa</string>
     <string name="tab_settings_remove">Xóa</string>
     <string name="tab_settings_default">Mặc định</string>
     <string name="tab_settings_list">Danh sách</string>
-    <string name="tab_settings_feed">Nguồn cấp dữ liệu</string>
+    <string name="tab_settings_feed">Nguồn tin</string>
+
     <string name="list_add">Thêm danh sách</string>
-    <string name="list_edit">Chỉnh sửa danh sách</string>
+    <string name="list_edit">Sửa danh sách</string>
     <string name="list_delete">Xóa danh sách</string>
-    <string name="add_rss_source">Thêm</string>
-    <string name="edit_rss_source">Chỉnh sửa Nguồn Rss</string>
+
+    <string name="rss_sources_title">Đăng ký</string>
+    <string name="add_rss_source">Thêm đăng ký</string>
+    <string name="edit_rss_source">Sửa đăng ký</string>
+    <string name="delete_rss_source">Xóa đăng ký</string>
+
     <string name="rss_sources_title_label">Tiêu đề</string>
-    <string name="rss_sources_url_label">Url</string>
-    <string name="service_select_welcome_title">Chào mừng bạn đến với Flare</string>
+    <string name="rss_sources_url_label">URL</string>
+    <string name="rss_title">Đăng ký</string>
+    <string name="empty_rss_sources">Không có đăng ký</string>
+    <string name="mastodon_trending_statuses">Trạng thái thịnh hành</string>
+    <string name="mastodon_federated_timeline">Dòng thời gian liên hợp</string>
+    <string name="mastodon_local_timeline">Dòng thời gian cục bộ</string>
+
+    <string name="service_select_welcome_title">Chào mừng đến với Flare</string>
+    <string name="service_select_welcome_message">Nhập một máy chủ để bắt đầu.</string>
+    <string name="service_select_welcome_hint">Flare hỗ trợ Mastodon, Misskey, Bluesky, Nostr và X.</string>
+    <string name="service_select_welcome_list_hint">Hoặc chọn từ các máy chủ này</string>
     <string name="bluesky_login_username_hint">Tên người dùng</string>
     <string name="bluesky_login_password_hint">Mật khẩu</string>
+    <string name="bluesky_login_auth_factor_token_hint">Mã 2FA</string>
+    <string name="bluesky_login_oauth_button">Đăng nhập bằng OAuth</string>
+    <string name="bluesky_login_use_password_button">Dùng mật khẩu</string>
+    <string name="bluesky_login_oauth_hint">Bluesky OAuth có thể vẫn chưa ổn định. Nếu bạn gặp sự cố, hãy sử dụng đăng nhập bằng mật khẩu để thay thế.</string>
     <string name="login_button">Đăng nhập</string>
-    <string name="mastodon_login_verify_message">Vui lòng chờ trong khi chúng tôi xác minh thông tin đăng nhập của bạn.</string>
+    <string name="mastodon_login_verify_message">Đang xác minh thông tin đăng nhập của bạn…</string>
+    <string name="nostr_login_title">Nhập tài khoản Nostr</string>
+    <string name="nostr_login_hint">Dán npub hoặc hex pubkey để truy cập chỉ đọc, cung cấp nsec để ký cục bộ, sử dụng bunker URI để ký từ xa hoặc kết nối Amber và các trình ký Nostr Connect dựa trên QR.</string>
+    <string name="nostr_login_account_hint">npub, nsec, hex key, bunker:// hoặc nostrconnect://</string>
+    <string name="nostr_login_bunker_hint">bunker:// hoặc nostrconnect:// URI</string>
+    <string name="nostr_login_bunker_button">Kết nối bunker</string>
+    <string name="nostr_login_amber_button">Kết nối Amber</string>
+    <string name="nostr_login_qr_button">Kết nối bằng QR</string>
+    <string name="nostr_login_qr_hint">Quét bằng Amber, Alby hoặc một trình ký Nostr Connect khác.</string>
+    <string name="nostr_login_qr_waiting">Đang chờ trình ký phê duyệt…</string>
+    <string name="nostr_login_qr_link_label">Liên kết Nostr Connect</string>
     <string name="cancel_button">Hủy</string>
-    <string name="service_select_instance_input_placeholder">URL phiên bản</string>
+    <string name="nostr_login_generate_button">Tạo và đăng nhập</string>
+    <string name="nostr_login_npub_hint">npub hoặc hex pubkey (tùy chọn nếu nsec đã được đặt)</string>
+    <string name="nostr_login_nsec_hint">nsec hoặc hex private key</string>
+    <string name="nostr_login_relays_hint">URL Relay, cách nhau bằng dấu phẩy</string>
+    <string name="service_select_instance_input_placeholder">URL máy chủ</string>
     <string name="service_select_next_button">Tiếp theo</string>
-    <string name="service_select_empty_message">Không tìm thấy phiên bản nào</string>
+    <string name="service_select_empty_message">Không tìm thấy máy chủ nào</string>
+    <string name="service_select_compatibility_warning">Máy chủ này sử dụng %1$s, Flare sẽ chạy ở chế độ tương thích. Một số tính năng có thể không hoạt động bình thường.</string>
+    <string name="login_agreement">Bằng cách đăng nhập, bạn đồng ý với %1$s.</string>
+    <string name="eula_privacy_policy">EULA và Chính sách Bảo mật</string>
+
     <string name="home_tab_home_title">Trang chủ</string>
     <string name="home_tab_notifications_title">Thông báo</string>
     <string name="home_tab_me_title">Tôi</string>
     <string name="home_tab_discover_title">Khám phá</string>
     <string name="settings_title">Cài đặt</string>
-    <string name="mastodon_tab_local_title">Địa phương</string>
+    <string name="mastodon_tab_local_title">Cục bộ</string>
     <string name="mastodon_tab_public_title">Công khai</string>
     <string name="home_tab_featured_title">Nổi bật</string>
-    <string name="home_tab_bookmarks_title">Đánh dấu</string>
+    <string name="home_tab_bookmarks_title">Dấu trang</string>
     <string name="home_tab_favorite_title">Yêu thích</string>
     <string name="home_tab_list_title">Danh sách</string>
-    <string name="home_tab_feeds_title">Nguồn cấp dữ liệu</string>
+    <string name="home_tab_feeds_title">Nguồn tin</string>
     <string name="dm_list_title">Tin nhắn trực tiếp</string>
-    <string name="antenna_title">Ăng ten</string>
+    <string name="social_title">Xã hội</string>
+    <string name="antenna_title">Anten</string>
     <string name="mixed_timeline_title">Hỗn hợp</string>
-    <string name="posts_title">Bài viết</string>
-    <string name="settings_about_description">Mạng xã hội phi tập trung dựa trên AI mã nguồn mở thế hệ tiếp theo.</string>
+    <string name="liked_title">Đã thích</string>
+    <string name="all_rss_feeds_title">Tất cả đăng ký</string>
+    <string name="posts_title">Bài đăng</string>
+    <string name="settings_appearance_absolute_timestamp">Dấu thời gian tuyệt đối</string>
+    <string name="settings_appearance_absolute_timestamp_description">Hiển thị thời gian chính xác trên bài đăng</string>
+    <string name="settings_about_description">Một ứng dụng khách mã nguồn mở, hỗ trợ AI cho các nền tảng xã hội phi tập trung.</string>
     <string name="settings_about_source_code">Mã nguồn</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Tham gia nhóm Telegram của chúng tôi</string>
+    <string name="settings_about_discord" translatable="false">Discord</string>
+    <string name="settings_about_discord_description">Tham gia máy chủ Discord của chúng tôi</string>
+    <string name="settings_about_line" translatable="false">Line</string>
     <string name="settings_about_line_description">Tham gia nhóm Line của chúng tôi</string>
     <string name="settings_about_localization">Crowdin</string>
-    <string name="settings_about_localization_description">Hãy giúp chúng tôi dịch Flare</string>
-    <string name="settings_privacy_policy">Chính sách quyền riêng tư</string>
+    <string name="settings_about_localization_description">Giúp chúng tôi dịch Flare</string>
+    <string name="settings_privacy_policy">Chính sách Bảo mật</string>
+    <string name="channel_title">Kênh</string>
 </resources>

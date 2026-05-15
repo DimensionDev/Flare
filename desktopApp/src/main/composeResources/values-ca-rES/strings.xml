@@ -220,6 +220,9 @@
     <string name="dm_to_profile">Mostrar perfil</string>
     <string name="tab_settings_mixed_timeline">Afegir fitxa de línia de temps mixta</string>
     <string name="tab_settings_mixed_timeline_desc">La línia de temps mixta combinarà el resultat de totes les línies de temps en una fitxa</string>
+    <string name="tab_settings_filter_reply">Respondre</string>
+    <string name="tab_settings_filter_repost">Republiqui</string>
+    <string name="tab_settings_filter_quote">Citar</string>
     <string name="edit_tab_title">Editar fitxa</string>
     <string name="edit_tab_name">Nom</string>
     <string name="edit_tab_name_placeholder">Nom de la fitxa</string>

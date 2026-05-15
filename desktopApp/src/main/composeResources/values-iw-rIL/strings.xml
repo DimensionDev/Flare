@@ -220,6 +220,9 @@
     <string name="dm_to_profile">הראה פרופיל</string>
     <string name="tab_settings_mixed_timeline">הוסף טאב טיימליין מעורב</string>
     <string name="tab_settings_mixed_timeline_desc">טיימליין מעורב יערבב את התוצאות של כל הטאבים בטאב אחד</string>
+    <string name="tab_settings_filter_reply">תגובה</string>
+    <string name="tab_settings_filter_repost">שיתוף מחדש</string>
+    <string name="tab_settings_filter_quote">ציטוט</string>
     <string name="edit_tab_title">ערוך טאב</string>
     <string name="edit_tab_name">שם</string>
     <string name="edit_tab_name_placeholder">שם הטאב</string>

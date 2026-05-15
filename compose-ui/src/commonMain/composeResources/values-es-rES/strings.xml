@@ -44,8 +44,16 @@
     <string name="misskey_notification_item_reacted_to_your_status">reaccionó a tu publicación</string>
     <string name="misskey_notification_item_poll_ended">Una encuesta en la que participabas ha terminado</string>
     <string name="misskey_notification_item_follow_request_accepted">aceptó su solicitud de seguimiento</string>
+    <string name="misskey_notification_item_scheduled_note_posted">Nota programada publicada</string>
+    <string name="misskey_notification_item_scheduled_note_post_failed">No se pudo publicar la nota programada</string>
+    <string name="misskey_notification_item_role_assigned">Rol asignado</string>
+    <string name="misskey_notification_item_chat_room_invitation_received">te invitó a una sala de chat</string>
     <string name="misskey_notification_item_achievement_earned">Has conseguido un logro: %1$s\n%2$s</string>
     <string name="misskey_notification_item_app">App</string>
+    <string name="misskey_notification_item_export_completed">Exportación completada</string>
+    <string name="misskey_notification_item_test">Notificación de prueba</string>
+    <string name="misskey_notification_item_login">Inicio de sesión detectado</string>
+    <string name="misskey_notification_item_create_token">Token de acceso creado</string>
     <string name="misskey_notification_item_followed_you">te siguió</string>
     <string name="misskey_notification_item_requested_follow">solicitó seguirte</string>
     <string name="misskey_notification_unknwon">Notificación desconocida %1$s</string>
@@ -94,6 +102,8 @@
     <string name="bookmark_add">Añadir marcador</string>
     <string name="like">Me gusta</string>
     <string name="unlike">A diferencia de</string>
+    <string name="favourite">Favorito</string>
+    <string name="unfavourite">Unfavourite</string>
     <string name="more">Más</string>
     <string name="quote">Cotización</string>
     <string name="reaction_add">Añadir reacción</string>

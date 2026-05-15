@@ -277,6 +277,10 @@
     <string name="tab_settings_mixed_timeline_desc">綜合時間線將所有標籤的時間線結果混合成一個標籤</string>
     <string name="home_tab_social_timeline_title">社會</string>
     <string name="deeplink_account_selection_browser">在瀏覽器中打開</string>
+    <string name="tab_settings_filter_all">所有</string>
+    <string name="tab_settings_filter_reply">回覆</string>
+    <string name="tab_settings_filter_repost">轉發</string>
+    <string name="tab_settings_filter_quote">引用</string>
     <string name="status_share_sheet_theme_title">主題</string>
     <string name="channel_item_follow">追蹤</string>
     <string name="channel_item_favourite">最愛</string>

@@ -253,6 +253,10 @@
     <string name="tab_settings_mixed_timeline">Afegir fitxa de línia de temps mixta</string>
     <string name="tab_settings_mixed_timeline_desc">La línia de temps mixta combinarà el resultat de totes les línies de temps en una fitxa</string>
     <string name="deeplink_account_selection_browser">Obre al navegador</string>
+    <string name="tab_settings_filter_all">Tot</string>
+    <string name="tab_settings_filter_reply">Respondre</string>
+    <string name="tab_settings_filter_repost">Republiqui</string>
+    <string name="tab_settings_filter_quote">Citar</string>
     <string name="status_share_sheet_theme_title">Tema</string>
     <string name="channel_item_follow">Seguir</string>
 </resources>

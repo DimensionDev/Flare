@@ -183,6 +183,9 @@
     <string name="dm_conversation">Стая за лични съобщения</string>
     <string name="dm_to_profile">Показване на профила</string>
     <string name="tab_settings_mixed_timeline">Добавяне на раздел с обединена хронология</string>
+    <string name="tab_settings_filter_reply">Отговор</string>
+    <string name="tab_settings_filter_repost">Препубликуване</string>
+    <string name="tab_settings_filter_quote">Цитиране</string>
     <string name="edit_tab_title">Редактиране на раздела</string>
     <string name="edit_tab_name">Заглавие</string>
     <string name="edit_tab_name_placeholder">Заглавие на раздела</string>

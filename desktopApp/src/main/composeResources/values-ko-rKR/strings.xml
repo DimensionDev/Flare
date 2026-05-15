@@ -225,6 +225,9 @@
     <string name="dm_to_profile">프로필 보기</string>
     <string name="tab_settings_mixed_timeline">혼합된 타임라인 탭 추가</string>
     <string name="tab_settings_mixed_timeline_desc">혼합된 타임라인은 모든 탭의 타임라인 결과를 하나의 탭으로 혼합합니다</string>
+    <string name="tab_settings_filter_reply">답글</string>
+    <string name="tab_settings_filter_repost">다시 게시</string>
+    <string name="tab_settings_filter_quote">인용하기</string>
     <string name="edit_tab_title">탭 편집</string>
     <string name="edit_tab_name">이름</string>
     <string name="edit_tab_name_placeholder">탭 이름</string>

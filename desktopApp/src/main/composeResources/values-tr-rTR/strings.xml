@@ -279,6 +279,9 @@
     <string name="tab_settings_add_tab">Sekme Ekle</string>
     <string name="tab_settings_edit_group">Grup Düzenleme</string>
     <string name="tab_settings_group_empty">Bu grupta sekme yok</string>
+    <string name="tab_settings_filter_reply">Yanıtla</string>
+    <string name="tab_settings_filter_repost">Yeniden paylaş</string>
+    <string name="tab_settings_filter_quote">Alıntı</string>
     <string name="edit_tab_title">Sekmeyi düzenle</string>
     <string name="edit_tab_name">İsim</string>
     <string name="edit_tab_name_placeholder">Sekme adını girin</string>

@@ -44,8 +44,16 @@
     <string name="misskey_notification_item_reacted_to_your_status">ha reagito alla tua Nota</string>
     <string name="misskey_notification_item_poll_ended">Un sondaggio a cui partecipavi è terminato</string>
     <string name="misskey_notification_item_follow_request_accepted">ha accettato la tua richiesta di follow</string>
+    <string name="misskey_notification_item_scheduled_note_posted">Nota pianificata pubblicata</string>
+    <string name="misskey_notification_item_scheduled_note_post_failed">Impossibile pubblicare la nota pianificata</string>
+    <string name="misskey_notification_item_role_assigned">Ruolo assegnato</string>
+    <string name="misskey_notification_item_chat_room_invitation_received">ti ha invitato in una chat room</string>
     <string name="misskey_notification_item_achievement_earned">Obiettivo raggiunto: %1$s\n%2$s</string>
     <string name="misskey_notification_item_app">App</string>
+    <string name="misskey_notification_item_export_completed">Esportazione completata</string>
+    <string name="misskey_notification_item_test">Notifica di prova</string>
+    <string name="misskey_notification_item_login">Login rilevato</string>
+    <string name="misskey_notification_item_create_token">Token di accesso creato</string>
     <string name="misskey_notification_item_followed_you">ti ha seguito</string>
     <string name="misskey_notification_item_requested_follow">ha richiesto di seguirti</string>
     <string name="misskey_notification_unknwon">Notifica sconosciuta %1$s</string>
@@ -94,6 +102,8 @@
     <string name="bookmark_add">Aggiungi segnalibro</string>
     <string name="like">Mi piace</string>
     <string name="unlike">Non mi piace più</string>
+    <string name="favourite">Preferiti</string>
+    <string name="unfavourite">Unfavourite</string>
     <string name="more">Altro</string>
     <string name="quote">Cita</string>
     <string name="reaction_add">Aggiungi reazione</string>

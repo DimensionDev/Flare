@@ -44,8 +44,16 @@
     <string name="misskey_notification_item_reacted_to_your_status">отреагировал на ваше сообщение</string>
     <string name="misskey_notification_item_poll_ended">Опрос, в котором вы участвовали, завершён</string>
     <string name="misskey_notification_item_follow_request_accepted">принял ваш запрос на подписку</string>
+    <string name="misskey_notification_item_scheduled_note_posted">Запланированная заметка опубликована</string>
+    <string name="misskey_notification_item_scheduled_note_post_failed">Запланированная заметка не удалось опубликовать</string>
+    <string name="misskey_notification_item_role_assigned">Роль назначена</string>
+    <string name="misskey_notification_item_chat_room_invitation_received">пригласил вас в комнату чата</string>
     <string name="misskey_notification_item_achievement_earned">Вы получили достижение: %1$s\n%2$s</string>
     <string name="misskey_notification_item_app">Приложение</string>
+    <string name="misskey_notification_item_export_completed">Экспорт завершен</string>
+    <string name="misskey_notification_item_test">Проверить уведомление</string>
+    <string name="misskey_notification_item_login">Обнаружен вход</string>
+    <string name="misskey_notification_item_create_token">Токен доступа создан</string>
     <string name="misskey_notification_item_followed_you">подписался на вас</string>
     <string name="misskey_notification_item_requested_follow">попросил подписаться на вас</string>
     <string name="misskey_notification_unknwon">Неизвестное уведомление %1$s</string>
@@ -94,6 +102,8 @@
     <string name="bookmark_add">Добавить закладку</string>
     <string name="like">Нравится</string>
     <string name="unlike">Не нравится</string>
+    <string name="favourite">Избранное</string>
+    <string name="unfavourite">Unfavourite</string>
     <string name="more">Ещё</string>
     <string name="quote">Цитата</string>
     <string name="reaction_add">Добавить реакцию</string>

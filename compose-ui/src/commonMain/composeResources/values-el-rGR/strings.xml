@@ -42,8 +42,16 @@
     <string name="misskey_notification_item_reacted_to_your_status">αντέδρασε στην ανάρτησή σας</string>
     <string name="misskey_notification_item_poll_ended">Μια δημοσκόπηση στην οποία συμμετείχατε τελείωσε</string>
     <string name="misskey_notification_item_follow_request_accepted">αποδέχθηκε το αίτημα παρακολούθησης</string>
+    <string name="misskey_notification_item_scheduled_note_posted">Η προγραμματισμένη σημείωση δημοσιεύτηκε</string>
+    <string name="misskey_notification_item_scheduled_note_post_failed">Η προγραμματισμένη σημείωση απέτυχε να δημοσιεύσει</string>
+    <string name="misskey_notification_item_role_assigned">Ο ρόλος ανατέθηκε</string>
+    <string name="misskey_notification_item_chat_room_invitation_received">σας προσκάλεσε σε ένα δωμάτιο συνομιλίας</string>
     <string name="misskey_notification_item_achievement_earned">Έχετε κερδίσει ένα επίτευγμα: %1$s\n%2$s</string>
     <string name="misskey_notification_item_app">Εφαρμογή</string>
+    <string name="misskey_notification_item_export_completed">Η εξαγωγή ολοκληρώθηκε</string>
+    <string name="misskey_notification_item_test">Δοκιμή ειδοποίησης</string>
+    <string name="misskey_notification_item_login">Ανιχνεύθηκε σύνδεση</string>
+    <string name="misskey_notification_item_create_token">Δημιουργήθηκε διακριτικό πρόσβασης</string>
     <string name="misskey_notification_item_followed_you">σας ακολούθησε</string>
     <string name="misskey_notification_item_requested_follow">ζήτησε να σε ακολουθήσει</string>
     <string name="misskey_notification_unknwon">Άγνωστη ειδοποίηση %1$s</string>
@@ -92,6 +100,8 @@
     <string name="bookmark_add">Προσθήκη σελιδοδείκτη</string>
     <string name="like">Αρέσει</string>
     <string name="unlike">Σε αντίθεση</string>
+    <string name="favourite">Αγαπημένο</string>
+    <string name="unfavourite">Unfavourite</string>
     <string name="more">Περισσότερα</string>
     <string name="quote">Παράθεση</string>
     <string name="reaction_add">Προσθήκη αντίδρασης</string>

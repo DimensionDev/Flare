@@ -44,8 +44,16 @@
     <string name="misskey_notification_item_reacted_to_your_status">reagoi viestiin</string>
     <string name="misskey_notification_item_poll_ended">Kysely johon osallistuit on päättynyt</string>
     <string name="misskey_notification_item_follow_request_accepted">hyväksyi seurantapyyntösi</string>
+    <string name="misskey_notification_item_scheduled_note_posted">Ajastettu muistiinpano lähetetty</string>
+    <string name="misskey_notification_item_scheduled_note_post_failed">Ajoitettu muistiinpano epäonnistui</string>
+    <string name="misskey_notification_item_role_assigned">Rooli määritetty</string>
+    <string name="misskey_notification_item_chat_room_invitation_received">kutsui sinut chat-huoneeseen</string>
     <string name="misskey_notification_item_achievement_earned">Olet ansainnut saavutuksen: %1$s\n%2$s</string>
     <string name="misskey_notification_item_app">Sovellus</string>
+    <string name="misskey_notification_item_export_completed">Vienti valmis</string>
+    <string name="misskey_notification_item_test">Testaa ilmoitus</string>
+    <string name="misskey_notification_item_login">Kirjautuminen havaittu</string>
+    <string name="misskey_notification_item_create_token">Käyttöoikeus luotu</string>
     <string name="misskey_notification_item_followed_you">seurasi sinua</string>
     <string name="misskey_notification_item_requested_follow">pyysi seuraamaan sinua</string>
     <string name="misskey_notification_unknwon">Tuntematon ilmoitus %1$s</string>
@@ -94,6 +102,8 @@
     <string name="bookmark_add">Lisää kirjanmerkki</string>
     <string name="like">Tykkää</string>
     <string name="unlike">Toisin</string>
+    <string name="favourite">Suosikki</string>
+    <string name="unfavourite">Unfavourite</string>
     <string name="more">Lisää</string>
     <string name="quote">Tarjous</string>
     <string name="reaction_add">Lisää reaktio</string>

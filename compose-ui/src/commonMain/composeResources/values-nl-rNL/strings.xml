@@ -44,8 +44,16 @@
     <string name="misskey_notification_item_reacted_to_your_status">reageerde op je bericht</string>
     <string name="misskey_notification_item_poll_ended">Een poll waaraan u deelnam, is beëindigd</string>
     <string name="misskey_notification_item_follow_request_accepted">heeft je volgverzoek geaccepteerd</string>
+    <string name="misskey_notification_item_scheduled_note_posted">Geplande notitie</string>
+    <string name="misskey_notification_item_scheduled_note_post_failed">Geplande notitie kon niet posten</string>
+    <string name="misskey_notification_item_role_assigned">Rol toegewezen</string>
+    <string name="misskey_notification_item_chat_room_invitation_received">heeft je uitgenodigd voor een chat room</string>
     <string name="misskey_notification_item_achievement_earned">Je hebt een prestatie verdiend: %1$s\n%2$s</string>
     <string name="misskey_notification_item_app">App</string>
+    <string name="misskey_notification_item_export_completed">Exporteren voltooid</string>
+    <string name="misskey_notification_item_test">Test melding</string>
+    <string name="misskey_notification_item_login">Login gedetecteerd</string>
+    <string name="misskey_notification_item_create_token">Toegangstoken is aangemaakt</string>
     <string name="misskey_notification_item_followed_you">volgt jou nu</string>
     <string name="misskey_notification_item_requested_follow">aangevraagd om je te volgen</string>
     <string name="misskey_notification_unknwon">Onbekende melding %1$s</string>
@@ -94,6 +102,8 @@
     <string name="bookmark_add">Bladwijzer toevoegen</string>
     <string name="like">vind-ik-leuk</string>
     <string name="unlike">Anders dan</string>
+    <string name="favourite">Favoriete</string>
+    <string name="unfavourite">Unfavourite</string>
     <string name="more">Meer</string>
     <string name="quote">Offerte</string>
     <string name="reaction_add">Reactie toevoegen</string>

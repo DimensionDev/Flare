@@ -255,6 +255,10 @@
     <string name="tab_settings_mixed_timeline_desc">혼합된 타임라인은 모든 탭의 타임라인 결과를 하나의 탭으로 혼합합니다</string>
     <string name="home_tab_social_timeline_title">소셜</string>
     <string name="deeplink_account_selection_browser">브라우저에서 열기</string>
+    <string name="tab_settings_filter_all">모두</string>
+    <string name="tab_settings_filter_reply">답글</string>
+    <string name="tab_settings_filter_repost">다시 게시</string>
+    <string name="tab_settings_filter_quote">인용하기</string>
     <string name="status_share_sheet_theme_title">테마</string>
     <string name="channel_item_follow">팔로우</string>
 </resources>

@@ -44,8 +44,16 @@
     <string name="misskey_notification_item_reacted_to_your_status">あなたの投稿に反応しました</string>
     <string name="misskey_notification_item_poll_ended">参加していたアンケートが終了しました</string>
     <string name="misskey_notification_item_follow_request_accepted">フォローリクエストを承認しました</string>
+    <string name="misskey_notification_item_scheduled_note_posted">スケジュールされたメモが投稿されました</string>
+    <string name="misskey_notification_item_scheduled_note_post_failed">スケジュールされたメモの投稿に失敗しました</string>
+    <string name="misskey_notification_item_role_assigned">割り当てられた役割</string>
+    <string name="misskey_notification_item_chat_room_invitation_received">あなたをチャットルームに招待しました</string>
     <string name="misskey_notification_item_achievement_earned">実績: %1$s\n%2$s</string>
     <string name="misskey_notification_item_app">アプリ</string>
+    <string name="misskey_notification_item_export_completed">エクスポート完了</string>
+    <string name="misskey_notification_item_test">テスト通知</string>
+    <string name="misskey_notification_item_login">ログインを検出しました</string>
+    <string name="misskey_notification_item_create_token">アクセストークンが作成されました</string>
     <string name="misskey_notification_item_followed_you">があなたをフォローしました</string>
     <string name="misskey_notification_item_requested_follow">がフォローをリクエストしました</string>
     <string name="misskey_notification_unknwon">不明な通知 %1$s</string>
@@ -94,6 +102,8 @@
     <string name="bookmark_add">ブックマークを追加</string>
     <string name="like">いいね！</string>
     <string name="unlike">いいね！を解除</string>
+    <string name="favourite">お気に入り</string>
+    <string name="unfavourite">Unfavourite</string>
     <string name="more">もっと見る</string>
     <string name="quote">引用</string>
     <string name="reaction_add">リアクションを追加</string>

@@ -253,6 +253,10 @@
     <string name="tab_settings_mixed_timeline">Voeg gemengde tydlyn tab by</string>
     <string name="tab_settings_mixed_timeline_desc">Gemengde tydlyn sal al die tab tydlyn resultate in \'n tab meng</string>
     <string name="deeplink_account_selection_browser">Open in blaai</string>
+    <string name="tab_settings_filter_all">Alle</string>
+    <string name="tab_settings_filter_reply">Antwoord</string>
+    <string name="tab_settings_filter_repost">Herpost</string>
+    <string name="tab_settings_filter_quote">Citaat</string>
     <string name="status_share_sheet_theme_title">Tema</string>
     <string name="channel_item_follow">Volg</string>
 </resources>

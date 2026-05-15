@@ -236,6 +236,9 @@
     <string name="dm_to_profile">顯示檔案</string>
     <string name="tab_settings_mixed_timeline">添加綜合時間線標籤</string>
     <string name="tab_settings_mixed_timeline_desc">綜合時間線將所有標籤的時間線結果混合成一個標籤</string>
+    <string name="tab_settings_filter_reply">回覆</string>
+    <string name="tab_settings_filter_repost">轉發</string>
+    <string name="tab_settings_filter_quote">引用</string>
     <string name="edit_tab_title">編輯標籤</string>
     <string name="edit_tab_name">名稱</string>
     <string name="edit_tab_name_placeholder">標籤名稱</string>

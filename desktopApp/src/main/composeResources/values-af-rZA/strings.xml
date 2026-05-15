@@ -220,6 +220,9 @@
     <string name="dm_to_profile">Wys profiel</string>
     <string name="tab_settings_mixed_timeline">Voeg gemengde tydlyn tab by</string>
     <string name="tab_settings_mixed_timeline_desc">Gemengde tydlyn sal al die tab tydlyn resultate in \'n tab meng</string>
+    <string name="tab_settings_filter_reply">Antwoord</string>
+    <string name="tab_settings_filter_repost">Herpost</string>
+    <string name="tab_settings_filter_quote">Citaat</string>
     <string name="edit_tab_title">Bewerk tab</string>
     <string name="edit_tab_name">Naam</string>
     <string name="edit_tab_name_placeholder">Tab naam</string>

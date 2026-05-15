@@ -44,8 +44,16 @@
     <string name="misskey_notification_item_reacted_to_your_status">a reacționat la postarea dvs.</string>
     <string name="misskey_notification_item_poll_ended">Un sondaj la care participați s-a încheiat</string>
     <string name="misskey_notification_item_follow_request_accepted">a acceptat cererea ta de urmărire</string>
+    <string name="misskey_notification_item_scheduled_note_posted">Notă programată postată</string>
+    <string name="misskey_notification_item_scheduled_note_post_failed">Nota programată nu a reușit să posteze</string>
+    <string name="misskey_notification_item_role_assigned">Rol atribuit</string>
+    <string name="misskey_notification_item_chat_room_invitation_received">te-a invitat la o cameră de chat</string>
     <string name="misskey_notification_item_achievement_earned">Ai câștigat o realizare: %1$s\n%2$s</string>
     <string name="misskey_notification_item_app">Aplicație</string>
+    <string name="misskey_notification_item_export_completed">Exportare finalizată</string>
+    <string name="misskey_notification_item_test">Notificare test</string>
+    <string name="misskey_notification_item_login">Autentificare detectată</string>
+    <string name="misskey_notification_item_create_token">Token de acces creat</string>
     <string name="misskey_notification_item_followed_you">te urmărește</string>
     <string name="misskey_notification_item_requested_follow">solicitat să vă urmărească</string>
     <string name="misskey_notification_unknwon">Notificare necunoscută %1$s</string>
@@ -94,6 +102,8 @@
     <string name="bookmark_add">Adaugă marcaj</string>
     <string name="like">Apreciere</string>
     <string name="unlike">Spre deosebire</string>
+    <string name="favourite">Favorit</string>
+    <string name="unfavourite">Unfavourite</string>
     <string name="more">Mai</string>
     <string name="quote">Ofertă</string>
     <string name="reaction_add">Adaugă reacţie</string>

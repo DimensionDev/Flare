@@ -364,6 +364,10 @@
     <string name="tab_settings_group_empty">Bu grupta sekme yok</string>
     <string name="tab_settings_group_name_placeholder">Grup adı</string>
     <string name="tab_settings_group_default_name">Yeni Grup</string>
+    <string name="tab_settings_filter_all">Hepsi</string>
+    <string name="tab_settings_filter_reply">Yanıtla</string>
+    <string name="tab_settings_filter_repost">Yeniden paylaş</string>
+    <string name="tab_settings_filter_quote">Alıntı</string>
     <string name="status_share_sheet_theme_title">Tema</string>
     <string name="channel_title">Kanal</string>
     <string name="channel_item_follow">Takip Et</string>

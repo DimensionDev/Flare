@@ -44,8 +44,16 @@
     <string name="misskey_notification_item_reacted_to_your_status">reagiu à sua publicação</string>
     <string name="misskey_notification_item_poll_ended">Uma enquete em que você participou acabou</string>
     <string name="misskey_notification_item_follow_request_accepted">aceitou sua solicitação para seguir</string>
+    <string name="misskey_notification_item_scheduled_note_posted">Anotação agendada postada</string>
+    <string name="misskey_notification_item_scheduled_note_post_failed">Falha ao publicar nota agendada</string>
+    <string name="misskey_notification_item_role_assigned">Função atribuída</string>
+    <string name="misskey_notification_item_chat_room_invitation_received">convidou você para uma sala de bate-papo</string>
     <string name="misskey_notification_item_achievement_earned">Você ganhou uma conquista: %1$s\n%2$s</string>
     <string name="misskey_notification_item_app">Aplicativo</string>
+    <string name="misskey_notification_item_export_completed">Exportação concluída</string>
+    <string name="misskey_notification_item_test">Notificação de teste</string>
+    <string name="misskey_notification_item_login">Acesso detectado</string>
+    <string name="misskey_notification_item_create_token">Token de acesso criado</string>
     <string name="misskey_notification_item_followed_you">seguiu você</string>
     <string name="misskey_notification_item_requested_follow">solicitado para seguir você</string>
     <string name="misskey_notification_unknwon">Notificação desconhecida %1$s</string>
@@ -94,6 +102,8 @@
     <string name="bookmark_add">Adicionar marcador</string>
     <string name="like">Gostei</string>
     <string name="unlike">Descurtir</string>
+    <string name="favourite">Favorito</string>
+    <string name="unfavourite">Unfavourite</string>
     <string name="more">MAIS</string>
     <string name="quote">Cotação</string>
     <string name="reaction_add">Adicionar reação</string>

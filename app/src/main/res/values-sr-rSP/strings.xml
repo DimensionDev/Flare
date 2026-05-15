@@ -253,6 +253,10 @@
     <string name="tab_settings_mixed_timeline">Додајте таб раста</string>
     <string name="tab_settings_mixed_timeline_desc">Мешана временска линија ће комбиновати све резултате таба у један таб</string>
     <string name="deeplink_account_selection_browser">Отворите у прегледаћу</string>
+    <string name="tab_settings_filter_all">Сва</string>
+    <string name="tab_settings_filter_reply">Одговори</string>
+    <string name="tab_settings_filter_repost">Поново</string>
+    <string name="tab_settings_filter_quote">Цитат</string>
     <string name="status_share_sheet_theme_title">Тема</string>
     <string name="channel_item_follow">Следите</string>
 </resources>

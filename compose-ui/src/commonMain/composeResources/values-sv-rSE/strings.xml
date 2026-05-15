@@ -44,8 +44,16 @@
     <string name="misskey_notification_item_reacted_to_your_status">reagerade på ditt inlägg</string>
     <string name="misskey_notification_item_poll_ended">En enkät som du deltog i har avslutats</string>
     <string name="misskey_notification_item_follow_request_accepted">accepterade din följebegäran</string>
+    <string name="misskey_notification_item_scheduled_note_posted">Schemalagd anteckning postad</string>
+    <string name="misskey_notification_item_scheduled_note_post_failed">Schemalagd anteckning misslyckades att posta</string>
+    <string name="misskey_notification_item_role_assigned">Roll tilldelad</string>
+    <string name="misskey_notification_item_chat_room_invitation_received">bjöd in dig till ett chattrum</string>
     <string name="misskey_notification_item_achievement_earned">Du har fått en prestation: %1$s\n%2$s</string>
     <string name="misskey_notification_item_app">App</string>
+    <string name="misskey_notification_item_export_completed">Export slutförd</string>
+    <string name="misskey_notification_item_test">Testa avisering</string>
+    <string name="misskey_notification_item_login">Inloggning upptäckt</string>
+    <string name="misskey_notification_item_create_token">Åtkomsttoken skapad</string>
     <string name="misskey_notification_item_followed_you">följde dig</string>
     <string name="misskey_notification_item_requested_follow">begärde att följa dig</string>
     <string name="misskey_notification_unknwon">Okänd avisering %1$s</string>
@@ -94,6 +102,8 @@
     <string name="bookmark_add">Lägg till bokmärke</string>
     <string name="like">Gilla</string>
     <string name="unlike">Ogilla</string>
+    <string name="favourite">Favorit</string>
+    <string name="unfavourite">Unfavourite</string>
     <string name="more">Mer</string>
     <string name="quote">Offert</string>
     <string name="reaction_add">Lägg till reaktion</string>

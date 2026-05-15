@@ -225,6 +225,9 @@
     <string name="dm_to_profile">Profil megjelenítése</string>
     <string name="tab_settings_mixed_timeline">Keverve idővonal fül hozzáadása</string>
     <string name="tab_settings_mixed_timeline_desc">A kevert idővonal minden tab idővonalát egy tabba keveri</string>
+    <string name="tab_settings_filter_reply">Válasz</string>
+    <string name="tab_settings_filter_repost">Újraposztolás</string>
+    <string name="tab_settings_filter_quote">Idézet</string>
     <string name="edit_tab_title">Fül szerkesztése</string>
     <string name="edit_tab_name">Név</string>
     <string name="edit_tab_name_placeholder">Fül neve</string>

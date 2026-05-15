@@ -230,6 +230,9 @@
     <string name="dm_to_profile">Hiển thị hồ sơ</string>
     <string name="tab_settings_mixed_timeline">Thêm tab dòng thời gian hỗn hợp</string>
     <string name="tab_settings_mixed_timeline_desc">Dòng thời gian hỗn hợp sẽ kết hợp tất cả kết quả dòng thời gian của các tab thành một tab</string>
+    <string name="tab_settings_filter_reply">Trả lời</string>
+    <string name="tab_settings_filter_repost">Chia sẻ lại</string>
+    <string name="tab_settings_filter_quote">Trích dẫn</string>
     <string name="edit_tab_title">Chỉnh sửa tab</string>
     <string name="edit_tab_name">Tên</string>
     <string name="edit_tab_name_placeholder">Tên tab</string>

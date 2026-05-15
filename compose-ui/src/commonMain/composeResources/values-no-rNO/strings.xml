@@ -44,8 +44,16 @@
     <string name="misskey_notification_item_reacted_to_your_status">reagerte på innlegget ditt</string>
     <string name="misskey_notification_item_poll_ended">En avstemming du deltok i er avsluttet</string>
     <string name="misskey_notification_item_follow_request_accepted">aksepterte din forespørsel</string>
+    <string name="misskey_notification_item_scheduled_note_posted">Planlagt notat</string>
+    <string name="misskey_notification_item_scheduled_note_post_failed">Planlagt notat kunne ikke poste</string>
+    <string name="misskey_notification_item_role_assigned">Rolle tilordnet</string>
+    <string name="misskey_notification_item_chat_room_invitation_received">invitert deg til et praterom</string>
     <string name="misskey_notification_item_achievement_earned">Du har tjent en prestasjon: %1$s\n%2$s</string>
     <string name="misskey_notification_item_app">App</string>
+    <string name="misskey_notification_item_export_completed">Eksport fullført</string>
+    <string name="misskey_notification_item_test">Test varsling</string>
+    <string name="misskey_notification_item_login">Logg inn oppdaget</string>
+    <string name="misskey_notification_item_create_token">Tilgangskode opprettet</string>
     <string name="misskey_notification_item_followed_you">fulgte deg</string>
     <string name="misskey_notification_item_requested_follow">bedt om å følge deg</string>
     <string name="misskey_notification_unknwon">Ukjent varsel %1$s</string>
@@ -94,6 +102,8 @@
     <string name="bookmark_add">Legg til bokmerke</string>
     <string name="like">Lik</string>
     <string name="unlike">Ulikt</string>
+    <string name="favourite">Favoritt</string>
+    <string name="unfavourite">Unfavourite</string>
     <string name="more">Mer</string>
     <string name="quote">Sitat</string>
     <string name="reaction_add">Legg til reaksjon</string>

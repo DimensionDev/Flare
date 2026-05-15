@@ -44,8 +44,16 @@
     <string name="misskey_notification_item_reacted_to_your_status">відреагував на ваш допис</string>
     <string name="misskey_notification_item_poll_ended">Опитування, в якому ви брали участь участь завершено</string>
     <string name="misskey_notification_item_follow_request_accepted">прийняв ваш запит на підписку</string>
+    <string name="misskey_notification_item_scheduled_note_posted">Запланована нотатка опублікована</string>
+    <string name="misskey_notification_item_scheduled_note_post_failed">Не вдалося запланувати нотатку</string>
+    <string name="misskey_notification_item_role_assigned">Роль призначена</string>
+    <string name="misskey_notification_item_chat_room_invitation_received">запросив тебе у чат</string>
     <string name="misskey_notification_item_achievement_earned">Ви заробили досягнення: %1$s\n%2$s</string>
     <string name="misskey_notification_item_app">Застосунок</string>
+    <string name="misskey_notification_item_export_completed">Експорт завершено</string>
+    <string name="misskey_notification_item_test">Спробувати сповіщення</string>
+    <string name="misskey_notification_item_login">Вхід виявлено</string>
+    <string name="misskey_notification_item_create_token">Маркер доступу створено</string>
     <string name="misskey_notification_item_followed_you">підписався на вас</string>
     <string name="misskey_notification_item_requested_follow">запит підписатися на вас</string>
     <string name="misskey_notification_unknwon">Невідоме повідомлення %1$s</string>
@@ -94,6 +102,8 @@
     <string name="bookmark_add">Додати до закладок</string>
     <string name="like">Подобається</string>
     <string name="unlike">На відміну від</string>
+    <string name="favourite">Вибране</string>
+    <string name="unfavourite">Unfavourite</string>
     <string name="more">Більше</string>
     <string name="quote">Цитувати</string>
     <string name="reaction_add">Додати реакцію</string>

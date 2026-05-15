@@ -220,6 +220,9 @@
     <string name="dm_to_profile">Прикажи профил</string>
     <string name="tab_settings_mixed_timeline">Додајте таб раста</string>
     <string name="tab_settings_mixed_timeline_desc">Мешана временска линија ће комбиновати све резултате таба у један таб</string>
+    <string name="tab_settings_filter_reply">Одговори</string>
+    <string name="tab_settings_filter_repost">Поново</string>
+    <string name="tab_settings_filter_quote">Цитат</string>
     <string name="edit_tab_title">Уреди карту</string>
     <string name="edit_tab_name">Име</string>
     <string name="edit_tab_name_placeholder">Име карте</string>

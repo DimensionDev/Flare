@@ -1158,7 +1158,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Manage your accounts"
+            "value" : "Manage signed-in accounts"
           }
         },
         "es" : {
@@ -1294,7 +1294,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Account management"
+            "value" : "Accounts"
           }
         },
         "es" : {
@@ -2923,7 +2923,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Configure AI backend and features"
+            "value" : "Set up AI providers and summarization"
           }
         },
         "es" : {
@@ -3238,7 +3238,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Enable auto translate"
+            "value" : "Enable auto-translate"
           }
         },
         "es" : {
@@ -3380,7 +3380,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Automatically translate and cache newly loaded timeline and profile content in the background. This can consume a large amount of tokens."
+            "value" : "Translate newly loaded timeline and profile content in the background and cache the results. This can use a large number of tokens."
           }
         },
         "es" : {
@@ -3535,7 +3535,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Enter the server URL"
+            "value" : "Enter a base URL"
           }
         },
         "es" : {
@@ -3916,7 +3916,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Enable AI Summarization"
+            "value" : "Enable AI summaries"
           }
         },
         "es" : {
@@ -4106,7 +4106,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "AI Configuration"
+            "value" : "AI"
           }
         },
         "es" : {
@@ -4297,7 +4297,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Enable AI Translation"
+            "value" : "Enable AI translation"
           }
         },
         "es" : {
@@ -4855,7 +4855,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "All Feeds"
+            "value" : "All feeds"
           }
         },
         "es" : {
@@ -5003,7 +5003,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "List"
+            "value" : "Lists"
           }
         },
         "es" : {
@@ -5447,7 +5447,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Antenna"
+            "value" : "Antennas"
           }
         },
         "es" : {
@@ -5637,7 +5637,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Antenna"
+            "value" : "Antennas"
           }
         },
         "es" : {
@@ -5957,7 +5957,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "App logging"
+            "value" : "App logs"
           }
         },
         "es" : {
@@ -6141,7 +6141,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Enable network logging"
+            "value" : "Log network requests"
           }
         },
         "es" : {
@@ -6449,7 +6449,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Display absolute timestamps on posts"
+            "value" : "Show exact timestamps on posts"
           }
         },
         "es" : {
@@ -6983,7 +6983,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Change the shape of the avatar"
+            "value" : "Choose how avatars are displayed"
           }
         },
         "es" : {
@@ -7357,7 +7357,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Link previews in Compat mode"
+            "value" : "Compact link previews"
           }
         },
         "es" : {
@@ -7529,7 +7529,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Show link previews in simplify mode in the post"
+            "value" : "Use a simplified layout for link previews"
           }
         },
         "es" : {
@@ -7856,7 +7856,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Timestamps, platform logos and link previews"
+            "value" : "Timestamps, source badges, links, and browser behavior"
           }
         },
         "es" : {
@@ -8134,7 +8134,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Expand media to full size"
+            "value" : "Preserve media aspect ratio"
           }
         },
         "es" : {
@@ -8318,7 +8318,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Keep the aspectradio of the media in timeline"
+            "value" : "Show media at its original aspect ratio in timelines"
           }
         },
         "es" : {
@@ -8626,7 +8626,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Full width post"
+            "value" : "Full-width posts"
           }
         },
         "es" : {
@@ -8762,7 +8762,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Show the post in full width"
+            "value" : "Let posts span the full available width"
           }
         },
         "es" : {
@@ -9046,7 +9046,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Open links in the in-app browser"
+            "value" : "Open external links inside Flare"
           }
         },
         "es" : {
@@ -9182,7 +9182,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Timeline and post layout"
+            "value" : "Timeline layout, navigation, and post actions"
           }
         },
         "es" : {
@@ -9442,7 +9442,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Images, videos and sensitive content"
+            "value" : "Media visibility, playback, and sensitive content"
           }
         },
         "es" : {
@@ -9898,7 +9898,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Change the style of the post’s action"
+            "value" : "Choose how action buttons are laid out"
           }
         },
         "es" : {
@@ -10726,7 +10726,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Show text labels in the bottom bar and sidebar navigation"
+            "value" : "Show text labels in bottom navigation and the side rail"
           }
         },
         "es" : {
@@ -10998,7 +10998,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Show the timeline in deck mode when supported"
+            "value" : "Use a deck layout for supported timelines"
           }
         },
         "es" : {
@@ -11324,7 +11324,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Show link previews in the post"
+            "value" : "Show link previews in posts"
           }
         },
         "es" : {
@@ -11650,7 +11650,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Show media in the post"
+            "value" : "Show media attachments in posts"
           }
         },
         "es" : {
@@ -11976,7 +11976,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Show numbers on the bottom of the post"
+            "value" : "Show counts below each post"
           }
         },
         "es" : {
@@ -12112,7 +12112,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Show platform logo"
+            "value" : "Show source platform icons"
           }
         },
         "es" : {
@@ -12254,7 +12254,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Show the source platform logo on post"
+            "value" : "Show which platform each post came from"
           }
         },
         "es" : {
@@ -12586,7 +12586,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Always show sensitive content in the post"
+            "value" : "Always reveal sensitive media in posts"
           }
         },
         "es" : {
@@ -13156,7 +13156,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Change the theme of the app"
+            "value" : "Choose the app theme"
           }
         },
         "es" : {
@@ -13328,7 +13328,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Colors, font size and avatar shape"
+            "value" : "Colors, font size, and avatar shape"
           }
         },
         "es" : {
@@ -14282,7 +14282,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Choose how items are displayed in timelines"
+            "value" : "Choose how posts are displayed in timelines"
           }
         },
         "es" : {
@@ -15502,7 +15502,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Automatically play videos in the post"
+            "value" : "Automatically play videos in posts"
           }
         },
         "es" : {
@@ -17383,7 +17383,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pinned"
+            "value" : "pinned a post"
           }
         },
         "es" : {
@@ -17573,7 +17573,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "favourited"
+            "value" : "liked your post"
           }
         },
         "es" : {
@@ -17955,7 +17955,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "quoted"
+            "value" : "quoted your post"
           }
         },
         "es" : {
@@ -18331,7 +18331,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "reposted a post"
+            "value" : "reposted your post"
           }
         },
         "es" : {
@@ -18515,7 +18515,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Starterpack Joined"
+            "value" : "joined via a Starter Pack"
           }
         },
         "es" : {
@@ -18700,7 +18700,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "UnKnown"
+            "value" : "Unknown"
           }
         },
         "es" : {
@@ -19074,7 +19074,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "What's the issue with this post?"
+            "value" : "What's wrong with this post?"
           }
         },
         "es" : {
@@ -21104,7 +21104,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Illegal and Urgent"
+            "value" : "Illegal or urgent"
           }
         },
         "es" : {
@@ -21288,7 +21288,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Glaring violations of law or terms of service"
+            "value" : "Clear violations of the law or terms of service"
           }
         },
         "es" : {
@@ -22936,7 +22936,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cnacel"
+            "value" : "Cancel"
           }
         },
         "es" : {
@@ -27146,7 +27146,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Are you sure you want to delete this?"
+            "value" : "Delete this post?"
           }
         },
         "es" : {
@@ -27454,7 +27454,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Direct Message"
+            "value" : "Direct messages"
           }
         },
         "es" : {
@@ -27590,7 +27590,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Trending"
+            "value" : "Trending posts"
           }
         },
         "es" : {
@@ -28125,7 +28125,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Recommend Users"
+            "value" : "Suggested users"
           }
         },
         "es" : {
@@ -28303,7 +28303,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Write direct message"
+            "value" : "Send a message"
           }
         },
         "es" : {
@@ -28439,7 +28439,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Direct Message"
+            "value" : "Direct messages"
           }
         },
         "es" : {
@@ -31309,7 +31309,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Login session expired for %@"
+            "value" : "Login expired for %@"
           }
         },
         "es" : {
@@ -31433,7 +31433,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Re login"
+            "value" : "Log in again"
           }
         },
         "es" : {
@@ -33120,7 +33120,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Favourite"
+            "value" : "Favorites"
           }
         },
         "es" : {
@@ -33850,7 +33850,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "List"
+            "value" : "Lists"
           }
         },
         "es" : {
@@ -34212,7 +34212,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Notification"
+            "value" : "Notifications"
           }
         },
         "es" : {
@@ -34348,7 +34348,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Import completed"
+            "value" : "Import complete"
           }
         },
         "es" : {
@@ -34484,7 +34484,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "This will import data from the file. Existing records with matching IDs will be replaced. Do you want to continue?"
+            "value" : "This will import data from the selected file. Existing records with matching IDs will be replaced. Continue?"
           }
         },
         "es" : {
@@ -34620,7 +34620,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Confirm Import"
+            "value" : "Confirm import"
           }
         },
         "es" : {
@@ -34756,7 +34756,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Failed to import data"
+            "value" : "Import failed"
           }
         },
         "es" : {
@@ -38918,7 +38918,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Local filter settings for timeline"
+            "value" : "Hide matching content in timelines, notifications, and search"
           }
         },
         "es" : {
@@ -39286,7 +39286,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Edit filter"
+            "value" : "Filter"
           }
         },
         "es" : {
@@ -39606,7 +39606,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Please input a keyword"
+            "value" : "Enter a keyword"
           }
         },
         "es" : {
@@ -39742,7 +39742,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Enable in notification"
+            "value" : "Apply to notifications"
           }
         },
         "es" : {
@@ -40008,7 +40008,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Enable filter in"
+            "value" : "Apply filter to"
           }
         },
         "es" : {
@@ -40138,7 +40138,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Enable in search"
+            "value" : "Apply to search"
           }
         },
         "es" : {
@@ -40268,7 +40268,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Enable in timeline"
+            "value" : "Apply to timelines"
           }
         },
         "es" : {
@@ -40416,7 +40416,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Local filter"
+            "value" : "Local Filters"
           }
         },
         "es" : {
@@ -40607,7 +40607,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "View or search your browsing history"
+            "value" : "Search posts and profiles cached on this device"
           }
         },
         "es" : {
@@ -40773,7 +40773,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Search in cache…"
+            "value" : "Search cached posts and profiles"
           }
         },
         "es" : {
@@ -41105,7 +41105,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Local history"
+            "value" : "Local History"
           }
         },
         "es" : {
@@ -41485,7 +41485,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Login"
+            "value" : "Log in"
           }
         },
         "es" : {
@@ -42633,7 +42633,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pinned post"
+            "value" : "pinned a post"
           }
         },
         "es" : {
@@ -85072,6 +85072,16 @@
         }
       }
     },
+    "notification_compose_progress" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sending post"
+          }
+        }
+      }
+    },
     "notification_compose_error" : {
       "localizations" : {
         "ar" : {
@@ -85249,7 +85259,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Post sended"
+            "value" : "Post sent"
           }
         },
         "es" : {
@@ -87175,7 +87185,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Open in browder"
+            "value" : "Open in browser"
           }
         },
         "es" : {
@@ -95207,7 +95217,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Save completed"
+            "value" : "Export complete"
           }
         },
         "es" : {
@@ -95343,7 +95353,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Failed to save data"
+            "value" : "Export failed"
           }
         },
         "es" : {
@@ -97981,7 +97991,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Export Data"
+            "value" : "Export data"
           }
         },
         "es" : {
@@ -98117,7 +98127,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Export all data including database and settings"
+            "value" : "Export all app data and settings. Keep the file secure."
           }
         },
         "es" : {
@@ -98247,7 +98257,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Import Data"
+            "value" : "Import data"
           }
         },
         "es" : {
@@ -98383,7 +98393,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Import data from file (merges with existing data, replaces duplicates)"
+            "value" : "Import data from a backup file. Existing records with matching IDs will be replaced."
           }
         },
         "es" : {
@@ -102466,7 +102476,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Clear database cache, %1$lld users and %2$lld posts will be deleted"
+            "value" : "Clear cached database, %1$lld cached users and %2$lld cached posts will be removed"
           }
         },
         "es" : {
@@ -102940,7 +102950,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Manage Flare's storage"
+            "value" : "Manage cached files, logs, and backups"
           }
         },
         "es" : {
@@ -103314,7 +103324,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "App logging"
+            "value" : "App logs"
           }
         },
         "es" : {

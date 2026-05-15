@@ -38,7 +38,7 @@ internal class ComposeInAppNotification : InAppNotification {
     }
 
     override fun onSuccess(message: Message) {
-        _source.value = Event(Notification.StringNotification(message.title, success = true))
+        _source.value = Event(Notification.StringNotification(message.successTitle, success = true))
     }
 
     fun message(
@@ -54,7 +54,7 @@ internal class ComposeInAppNotification : InAppNotification {
         _source.value =
             Event(
                 Notification.StringNotification(
-                    message.title,
+                    message.errorTitle,
                     success = false,
                     args =
                         listOfNotNull(
@@ -69,9 +69,16 @@ internal class ComposeInAppNotification : InAppNotification {
     }
 }
 
-private val Message.title
+private val Message.successTitle
     get() =
         when (this) {
-            Message.Compose -> R.string.compose_notification_title
+            Message.Compose -> R.string.compose_notification_success
+            Message.LoginExpired -> R.string.notification_login_expired
+        }
+
+private val Message.errorTitle
+    get() =
+        when (this) {
+            Message.Compose -> R.string.compose_notification_error
             Message.LoginExpired -> R.string.notification_login_expired
         }

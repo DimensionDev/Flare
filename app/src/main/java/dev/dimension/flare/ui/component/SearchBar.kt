@@ -61,6 +61,7 @@ internal fun SearchBar(
     state: SearchBarState,
     onSearch: (String) -> Unit,
     modifier: Modifier = Modifier,
+    trailingIcon: @Composable (() -> Unit)? = null,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     SearchContent(
@@ -81,6 +82,7 @@ internal fun SearchBar(
             state.deleteSearchHistory(it)
         },
         queryTextState = state.queryTextState,
+        trailingIcon = trailingIcon,
     )
 }
 
@@ -97,6 +99,7 @@ private fun SearchContent(
     onExpandedChange: (Boolean) -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
+    trailingIcon: @Composable (() -> Unit)? = null,
 ) {
     androidx.compose.material3.SearchBar(
         inputField = {
@@ -125,6 +128,7 @@ private fun SearchContent(
                         }
                     }
                 },
+                trailingIcon = trailingIcon,
             )
         },
         modifier = modifier,

@@ -8,11 +8,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -20,10 +24,12 @@ import dev.dimension.flare.common.isRefreshing
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.AvatarComponent
+import dev.dimension.flare.ui.component.FlareDropdownMenu
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.SearchBar
 import dev.dimension.flare.ui.component.SearchBarState
+import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.component.searchBarPresenter
 import dev.dimension.flare.ui.component.searchContent
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
@@ -38,8 +44,14 @@ internal fun SearchScreen(
     accountType: AccountType,
     onUserClick: (AccountType, MicroBlogKey) -> Unit,
 ) {
-    val state by producePresenter("search_${accountType}_$initialQuery") { presenter(accountType, initialQuery) }
+    val state by producePresenter("search_${accountType}_$initialQuery") {
+        presenter(
+            accountType,
+            initialQuery,
+        )
+    }
     val lazyListState = rememberLazyStaggeredGridState()
+    val isBigScreen = isBigScreen()
     RegisterTabCallback(
         lazyListState = lazyListState,
         onRefresh = {
@@ -59,6 +71,51 @@ internal fun SearchScreen(
                     onSearch = {
                         state.commitSearch(it)
                     },
+                    trailingIcon =
+                        state.searchState.selectedAccount?.let { account ->
+                            if (!isBigScreen) {
+                                {
+                                    state.searchState.accounts.onSuccess { accounts ->
+                                        var showMenu by remember { mutableStateOf(false) }
+                                        IconButton(
+                                            onClick = {
+                                                if (accounts.size > 1) {
+                                                    showMenu = true
+                                                }
+                                            },
+                                        ) {
+                                            AvatarComponent(
+                                                data = account.avatar,
+                                            )
+                                        }
+                                        FlareDropdownMenu(
+                                            expanded = showMenu,
+                                            onDismissRequest = { showMenu = false },
+                                        ) {
+                                            accounts.forEach { profile ->
+                                                DropdownMenuItem(
+                                                    text = {
+                                                        Text(profile.handle.canonical)
+                                                    },
+                                                    leadingIcon = {
+                                                        AvatarComponent(
+                                                            data = profile.avatar,
+                                                            size = 18.dp,
+                                                        )
+                                                    },
+                                                    onClick = {
+                                                        state.searchState.setAccount(profile)
+                                                        showMenu = false
+                                                    },
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            } else {
+                                null
+                            }
+                        },
                 )
             }
         },
@@ -75,32 +132,34 @@ internal fun SearchScreen(
                     state = lazyListState,
                     contentPadding = contentPadding,
                 ) {
-                    state.searchState.accounts.onSuccess { accounts ->
-                        if (accounts.size > 1) {
-                            item(
-                                span = StaggeredGridItemSpan.FullLine,
-                            ) {
-                                LazyRow(
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                    modifier = Modifier.padding(bottom = 8.dp),
+                    if (isBigScreen) {
+                        state.searchState.accounts.onSuccess { accounts ->
+                            if (accounts.size > 1) {
+                                item(
+                                    span = StaggeredGridItemSpan.FullLine,
                                 ) {
-                                    items(accounts.size) { index ->
-                                        val profile = accounts[index]
-                                        FilterChip(
-                                            selected = state.searchState.selectedAccount?.key == profile.key,
-                                            onClick = {
-                                                state.searchState.setAccount(profile)
-                                            },
-                                            label = {
-                                                Text(profile.handle.canonical)
-                                            },
-                                            leadingIcon = {
-                                                AvatarComponent(
-                                                    data = profile.avatar,
-                                                    size = 18.dp,
-                                                )
-                                            },
-                                        )
+                                    LazyRow(
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                        modifier = Modifier.padding(bottom = 8.dp),
+                                    ) {
+                                        items(accounts.size) { index ->
+                                            val profile = accounts[index]
+                                            FilterChip(
+                                                selected = state.searchState.selectedAccount?.key == profile.key,
+                                                onClick = {
+                                                    state.searchState.setAccount(profile)
+                                                },
+                                                label = {
+                                                    Text(profile.handle.canonical)
+                                                },
+                                                leadingIcon = {
+                                                    AvatarComponent(
+                                                        data = profile.avatar,
+                                                        size = 18.dp,
+                                                    )
+                                                },
+                                            )
+                                        }
                                     }
                                 }
                             }

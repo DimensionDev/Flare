@@ -134,7 +134,7 @@ internal fun SettingsScreen(
                     )
                 },
                 supportingContent = {
-                    Text(text = stringResource(id = R.string.settings_accounts_title))
+                    Text(text = stringResource(id = R.string.settings_accounts_subtitle))
                 },
             )
             Column(

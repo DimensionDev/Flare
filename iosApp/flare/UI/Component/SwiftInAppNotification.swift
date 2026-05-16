@@ -35,7 +35,7 @@ class SwiftInAppNotification: InAppNotification {
     }
 
     func onProgress(message: Message, progress: Int32, total: Int32) {
-
+        
     }
 
     func onSuccess(message: Message) {

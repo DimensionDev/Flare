@@ -21,7 +21,8 @@ import dev.dimension.flare.Res
 import dev.dimension.flare.common.Event
 import dev.dimension.flare.common.InAppNotification
 import dev.dimension.flare.common.Message
-import dev.dimension.flare.compose_notification_title
+import dev.dimension.flare.compose_notification_error
+import dev.dimension.flare.compose_notification_success
 import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.notification_login_expired
 import io.github.composefluent.component.InfoBar
@@ -66,7 +67,7 @@ internal class ComposeInAppNotification : InAppNotification {
     }
 
     override fun onSuccess(message: Message) {
-        _source.value = Event(Notification.StringNotification(message.title, success = true))
+        _source.value = Event(Notification.StringNotification(message.successTitle, success = true))
     }
 
     override fun onError(
@@ -76,7 +77,7 @@ internal class ComposeInAppNotification : InAppNotification {
         _source.value =
             Event(
                 Notification.StringNotification(
-                    message.title,
+                    message.errorTitle,
                     success = false,
                     args =
                         listOfNotNull(
@@ -98,10 +99,17 @@ internal class ComposeInAppNotification : InAppNotification {
     }
 }
 
-private val Message.title
+private val Message.successTitle
     get() =
         when (this) {
-            Message.Compose -> Res.string.compose_notification_title
+            Message.Compose -> Res.string.compose_notification_success
+            Message.LoginExpired -> Res.string.notification_login_expired
+        }
+
+private val Message.errorTitle
+    get() =
+        when (this) {
+            Message.Compose -> Res.string.compose_notification_error
             Message.LoginExpired -> Res.string.notification_login_expired
         }
 

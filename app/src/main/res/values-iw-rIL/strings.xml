@@ -1,24 +1,33 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="login_button">התחברות</string>
-    <string name="navigate_back">חזור אחורה</string>
+    <string name="navigate_back">חזור</string>
+
     <string name="home_tab_home_title">בית</string>
     <string name="home_tab_notifications_title">התראות</string>
     <string name="home_tab_me_title">אני</string>
-    <string name="home_tab_discover_title">גלה</string>
+    <string name="home_tab_discover_title">גילוי</string>
+
+    <plurals name="home_timeline_new_toots">
+        <item quantity="one">פוסט חדש %1$d</item>
+        <item quantity="two">%1$d פוסטים חדשים</item>
+        <item quantity="many">%1$d פוסטים חדשים</item>
+        <item quantity="other">%1$d פוסטים חדשים</item>
+    </plurals>
+
     <string name="notification_tab_all_title">הכל</string>
-    <string name="notification_tab_mentions_title">הזכרת</string>
+    <string name="notification_tab_mentions_title">אזכורים</string>
     <string name="notification_tab_comments_title">תגובות</string>
     <string name="notification_tab_likes_title">לייקים</string>
+
     <string name="compose_title">כתיבה</string>
     <string name="compose_reply_title">תגובה</string>
     <string name="compose_quote_title">ציטוט</string>
     <string name="compose_vvo_comment_title">תגובה</string>
     <string name="compose_hint">מה קורה?</string>
     <string name="compose_poll_option_hint">אפשרות %1$s</string>
-    <string name="compose_poll_single_choice">בחירה בודדת</string>
+    <string name="compose_poll_single_choice">בחירה יחידה</string>
     <string name="compose_poll_multiple_choice">בחירה מרובה</string>
-    <string name="compose_poll_expiration_at">תאריך פקיעה: %1$s</string>
+    <string name="compose_poll_expiration_at">פג תוקף ב: %1$s</string>
     <string name="compose_poll_expiration_5_minutes">5 דקות</string>
     <string name="compose_poll_expiration_30_minutes">30 דקות</string>
     <string name="compose_poll_expiration_1_hour">שעה אחת</string>
@@ -28,122 +37,288 @@
     <string name="compose_poll_expiration_3_days">3 ימים</string>
     <string name="compose_poll_expiration_7_days">7 ימים</string>
     <string name="compose_content_warning_hint">אזהרת תוכן</string>
-    <string name="compose_media_sensitive">סמן מדיה כהרגשה</string>
+    <string name="compose_media_sensitive">סמן מדיה כרגישה</string>
+    <string name="compose_notification_title">שולח פוסט</string>
+    <string name="compose_notification_progress">שולח פוסט</string>
+    <string name="compose_notification_success">הפוסט נשלח</string>
+    <string name="compose_notification_error">שליחת הפוסט נכשלה</string>
+    <string name="compose_close_confirm_title">לשמור טיוטה?</string>
+    <string name="compose_close_confirm_message">יש לך שינויים שלא נשמרו. לשמור כטיוטה לפני הסגירה?</string>
     <string name="compose_save_draft">שמור</string>
+    <string name="compose_close_discard">בטל</string>
+    <string name="draft_box_title">טיוטות</string>
+    <string name="draft_box_empty">אין טיוטות עדיין</string>
     <string name="draft_box_edit">ערוך</string>
-    <string name="draft_box_retry">ניסיון שוב</string>
+    <string name="draft_box_retry">נסה שוב</string>
     <string name="draft_box_send">שלח</string>
+    <string name="settings_draft_box_description">צפה, ערוך ושלח שוב טיוטות שמורות</string>
+
     <string name="settings_title">הגדרות</string>
-    <string name="settings_accounts_title">ניהול חשבון</string>
+
+    <string name="settings_accounts_title">חשבונות</string>
+    <string name="settings_accounts_subtitle">נהל חשבונות מחוברים</string>
     <string name="settings_appearance_title">מראה</string>
-    <string name="settings_appearance_subtitle">התאמה אישית של המראה והתחושה של Flare</string>
-    <string name="settings_appearance_theme_group_title">נושא</string>
+    <string name="settings_appearance_subtitle">התאם אישית את המראה והתחושה של Flare</string>
+    <string name="settings_appearance_theme_group_title">ערכת נושא</string>
+    <string name="settings_appearance_theme_group_subtitle">צבעים, גודל גופן וצורת אוואטאר</string>
+    <string name="settings_appearance_layout_group_title">פריסה</string>
+    <string name="settings_appearance_layout_group_subtitle">פריסת ציר זמן, ניווט ופעולות פוסט</string>
+    <string name="settings_appearance_display_group_title">תצוגה</string>
+    <string name="settings_appearance_display_group_subtitle">חותמות זמן, תגי מקור, קישורים והתנהגות דפדפן</string>
     <string name="settings_appearance_media_group_title">מדיה</string>
+    <string name="settings_appearance_media_group_subtitle">נראות מדיה, השמעה ותוכן רגיש</string>
     <string name="settings_storage_title">אחסון</string>
-    <string name="settings_storage_subtitle">נהל את אחסון Flare</string>
+    <string name="settings_storage_subtitle">נהל קבצים במטמון, לוגים וגיבויים</string>
     <string name="settings_about_title">אודות</string>
     <string name="settings_about_subtitle">למד עוד על Flare</string>
-    <string name="settings_side_panel">התאמה אישית של לוח צד</string>
-    <string name="settings_side_panel_description">התאם אישית את לוח הצד</string>
-    <string name="settings_local_filter_title">מסנן מקומי</string>
-    <string name="settings_local_filter_description">הגדרות מסנן מקומי עבור טיימליין</string>
-    <string name="settings_guest_setting_title">הגדרות מצב אורח</string>
-    <string name="settings_guest_setting_description">שנה את המארח למצב אורח</string>
+    <string name="settings_side_panel">התאמת פאנל צד</string>
+    <string name="settings_side_panel_description">התאם אישית את פאנל הצד</string>
+    <string name="settings_local_filter_title">מסננים מקומיים</string>
+    <string name="settings_local_filter_description">הסתר תוכן תואם בצירי זמן, התראות וחיפוש</string>
+    <string name="settings_guest_setting_title">מארח מצב אורח</string>
+    <string name="settings_guest_setting_description">בחר לאיזה שרת מצב אורח מתחבר</string>
     <string name="settings_local_history_title">היסטוריה מקומית</string>
-    <string name="settings_local_history_description">צפה או חפש את היסטוריית הגלישה שלך</string>
-    <string name="settings_app_logging_title">רישום אפליקציה</string>
-    <string name="settings_app_logging_save">שמור יומן</string>
-    <string name="settings_app_logging_clear">נקה יומן</string>
-    <string name="settings_app_logging_enable_network_logging">הפעל רישום רשת</string>
-    <string name="settings_ai_config_title">הגדרת AI</string>
-    <string name="settings_ai_config_server">כתובת URL של השרת</string>
-    <string name="settings_ai_config_server_hint">הכנס את כתובת ה-URL של השרת</string>
-    <string name="settings_ai_config_server_self_host_description">תוכל להשתמש בשרת הרשמי או לארח את השרת שלך</string>
+    <string name="settings_local_history_description">חפש פוסטים ופרופילים שנשמרו במכשיר זה</string>
+    <string name="settings_app_logging_title">לוגים של האפליקציה</string>
+    <string name="settings_app_logging_save">שמור לוגים</string>
+    <string name="settings_app_logging_clear">נקה לוגים</string>
+    <string name="settings_app_logging_enable_network_logging">תעד בקשות רשת</string>
+    <string name="settings_ai_config_title">AI</string>
+    <string name="settings_ai_config_description">הגדר ספקי AI וסיכום</string>
+    <string name="settings_ai_config_server">כתובת שרת</string>
+    <string name="settings_ai_config_server_hint">הזן כתובת בסיס</string>
+    <string name="settings_ai_config_server_url_requirement">הכתובת חייבת להסתיים בלוכסן (/) ולתמוך ב-v1/chat/completions API תואם.</string>
+    <string name="settings_ai_config_server_self_host_description">השתמש בשירות הרשמי או בשרת תואם משלך</string>
+    <string name="settings_ai_config_type">סוג AI</string>
+    <string name="settings_ai_config_type_description">בחר באיזה AI של Flare להשתמש</string>
+    <string name="settings_ai_config_type_select">בחר</string>
+    <string name="settings_ai_config_type_on_device">AI על המכשיר</string>
+    <string name="settings_ai_config_type_on_device_description">הרץ מודלי AI נתמכים מקומית על המכשיר</string>
+    <string name="settings_ai_config_type_openai">API תואם OpenAI</string>
+    <string name="settings_ai_config_type_openai_description">השתמש בנקודת קצה תואמת OpenAI עבור תכונות AI</string>
+    <string name="settings_ai_config_value_empty_placeholder">לא הוגדר</string>
+    <string name="settings_ai_config_api_key">מפתח API</string>
+    <string name="settings_ai_config_api_key_hint">הזן מפתח API</string>
+    <string name="settings_ai_config_model">מודל</string>
+    <string name="settings_ai_config_model_description">בחר מודל מנקודת קצה זו</string>
+    <string name="settings_ai_config_model_select">בחר מודל</string>
+    <string name="settings_ai_config_model_loading">טוען מודלים…</string>
+    <string name="settings_ai_config_model_error">טעינת מודלים נכשלה</string>
+    <string name="settings_ai_config_model_no_models">אין מודלים</string>
+    <string name="settings_ai_config_model_manual_input">הזן שם מודל באופן ידני</string>
+    <string name="settings_ai_config_reasoning_effort">מאמץ חשיבה</string>
+    <string name="settings_ai_config_reasoning_effort_description">בחר כמה חשיבה נוספת המודל מבצע. ברירת המחדל עוקבת אחר הגדרות הספק.</string>
     <string name="settings_ai_config_reasoning_effort_default">ברירת מחדל</string>
+    <string name="settings_ai_config_reasoning_effort_low">נמוך</string>
+    <string name="settings_ai_config_reasoning_effort_medium">בינוני</string>
+    <string name="settings_ai_config_reasoning_effort_high">גבוה</string>
+    <string name="settings_ai_config_extra_body">גוף נוסף</string>
+    <string name="settings_ai_config_tap_to_edit">לחץ לעריכה</string>
     <string name="settings_ai_config_entable_translation">אפשר תרגום AI</string>
-    <string name="settings_ai_config_translation_description">החלף את Google Translate בתרגום AI, יכול לקחת יותר זמן</string>
-    <string name="settings_ai_config_enable_tldr">אפשר סיכום AI</string>
-    <string name="settings_ai_config_tldr_description">אפשר סיכום AI לפוסטים ארוכים, זמין רק לפוסטים שכבר יש להם יותר מ-500 תווים</string>
-    <string name="status_loadmore_error_retry">ניסיון שוב</string>
-    <string name="login_expired">סשן התחברות פג</string>
-    <string name="login_expired_message">לחץ כדי להתחבר שוב</string>
-    <string name="login_expired_relogin">התחבר שוב</string>
-    <string name="service_select_welcome_title">ברוך הבא ל-Flare</string>
-    <string name="service_select_welcome_message">Flare הוא לקוח לרשתות חברתיות לאנדרואיד.\nכדי להתחיל, בחר שירות להתחבר אליו.</string>
-    <string name="mastodon_login_verify_message">אנא המתן בזמן שאנו מאשרים את האישורים שלך.</string>
-    <string name="status_title">פרטים</string>
+    <string name="settings_ai_config_translation_description">השתמש ב-AI במקום ב-Google Translate. התרגומים עשויים לקחת זמן רב יותר.</string>
+    <string name="settings_ai_config_enable_tldr">אפשר סיכומי AI</string>
+    <string name="settings_ai_config_tldr_description">סכם פוסטים ארוכים עם AI. זמין עבור פוסטים מעל 500 תווים.</string>
+    <string name="settings_ai_config_enable_pre_translation">אפשר תרגום אוטומטי</string>
+    <string name="settings_ai_config_pre_translation_description">תרגם תוכן חדש שנטען בצירי זמן ופרופילים ברקע ושמור את התוצאות. זה עלול לצרוך כמות גדולה של טוקנים.</string>
+    <string name="settings_ai_config_translate_prompt">הנחיית תרגום</string>
+    <string name="settings_ai_config_tldr_prompt">הנחיית סיכום</string>
+    <string name="settings_ai_config_translate_provider">ספק תרגום</string>
+    <string name="settings_ai_config_translate_provider_description">בחר איזה שירות יתרגם את התוכן</string>
+    <string name="settings_ai_config_translate_provider_ai">AI</string>
+    <string name="settings_ai_config_translate_provider_google_web">Google Translate (Web)</string>
+    <string name="settings_ai_config_translate_provider_deepl">DeepL</string>
+    <string name="settings_ai_config_translate_provider_deepl_api_key">מפתח API של DeepL</string>
+    <string name="settings_ai_config_translate_provider_deepl_use_pro">נקודת קצה של DeepL Pro</string>
+    <string name="settings_ai_config_translate_provider_deepl_use_pro_description">השתמש ב-api.deepl.com במקום בנקודת הקצה החינמית api-free.deepl.com.</string>
+    <string name="settings_ai_config_translate_provider_google_cloud">Google Cloud Translate</string>
+    <string name="settings_ai_config_translate_provider_google_cloud_api_key">מפתח API של Google Cloud</string>
+    <string name="settings_ai_config_translate_provider_libretranslate">LibreTranslate</string>
+    <string name="settings_ai_config_translate_provider_libretranslate_base_url">כתובת בסיס של LibreTranslate</string>
+    <string name="settings_ai_config_translate_provider_libretranslate_api_key">מפתח API של LibreTranslate</string>
+    <string name="settings_translation_title">תרגום</string>
+    <string name="settings_translation_description">בחר שירותי תרגום והתנהגות תרגום אוטומטי</string>
+    <string name="settings_translation_auto_excluded_languages">שפות לדילוג בתרגום אוטומטי</string>
+    <string name="settings_translation_ai_test_title">בדיקת תרגום AI</string>
+    <string name="settings_translation_ai_test_description">תרגם דגימת טקסט עשיר קצרה עם הגדרות תרגום AI הנוכחיות.</string>
+    <string name="settings_translation_ai_test_action">בדוק תרגום</string>
+    <string name="settings_translation_ai_test_original">טקסט לדוגמה</string>
+    <string name="settings_translation_ai_test_result">טקסט מתורגם</string>
+    <string name="settings_language_title">שפה</string>
+    <string name="settings_language_description">שנה את שפת האפליקציה של Flare</string>
+    <string name="settings_rss_management_title">ניהול מנויים</string>
+    <string name="settings_rss_management_description">נהל מנויים</string>
+    <string name="settings_nostr_relays_manage">ממסרי Nostr</string>
+    <string name="settings_nostr_relays_add">הוסף ממסר</string>
+    <string name="settings_nostr_relays_add_dialog_title">הוסף ממסר</string>
+    <string name="settings_nostr_relays_placeholder">הזן כתובת ממסר</string>
+    <string name="settings_nostr_relays_empty">לא נוספו ממסרים</string>
+
+    <string name="status_loadmore_error_retry">נסה שוב</string>
+    <string name="login_expired">פג תוקף התחברות</string>
+    <string name="login_expired_message">לחץ להתחברות מחדש</string>
+    <string name="login_expired_relogin">התחבר מחדש</string>
+
+    <string name="service_select_welcome_title">ברוכים הבאים ל-Flare</string>
+    <string name="service_select_welcome_message">Flare הוא לקוח רשת חברתית לאנדרואיד.\nבחר שירות לחיבור כדי להתחיל.</string>
+
+    <string name="mastodon_login_verify_message">מאמת את האישורים שלך…</string>
+
+    <string name="status_title">פוסט</string>
+
     <string name="misskey_visibility_public">ציבורי</string>
     <string name="misskey_visibility_home">בית</string>
     <string name="misskey_visibility_followers">עוקבים</string>
-    <string name="misskey_visibility_specified">נבחרים</string>
+    <string name="misskey_visibility_specified">מסוים</string>
+    <string name="misskey_visibility_public_description">כל אחד יכול לראות ולשתף את הפוסט הזה</string>
+    <string name="misskey_visibility_home_description">רק משתמשים בשרת זה יכולים לראות את הפוסט הזה</string>
+    <string name="misskey_visibility_followers_description">רק עוקבים יכולים לראות את הפוסט הזה</string>
+    <string name="misskey_visibility_specified_description">רק משתמשים שצוינו יכולים לראות את הפוסט הזה</string>
+
     <string name="bluesky_login_username_hint">שם משתמש</string>
     <string name="bluesky_login_password_hint">סיסמה</string>
+    <string name="bluesky_login_auth_factor_token_hint">קוד 2FA</string>
+    <string name="bluesky_login_oauth_button">התחבר עם OAuth</string>
+    <string name="bluesky_login_use_password_button">השתמש בסיסמה</string>
+    <string name="bluesky_login_oauth_hint">Bluesky OAuth עשוי להיות לא יציב. אם אתה נתקל בבעיות, השתמש בהתחברות עם סיסמה.</string>
+
     <string name="report_title">דווח</string>
-    <string name="report_description">מה הבעיה עם פוסט זה?</string>
+    <string name="report_description">מה לא בסדר בפוסט הזה?</string>
+
     <string name="report_reason_spam_title">ספאם</string>
-    <string name="report_reason_violation_title">לא חוקי ודחוף</string>
+    <string name="report_reason_violation_title">לא חוקי או דחוף</string>
     <string name="report_reason_misleading_title">מטעה</string>
     <string name="report_reason_sexual_title">תוכן מיני לא רצוי</string>
     <string name="report_reason_rude_title">התנהגות אנטי-חברתית</string>
     <string name="report_reason_other_title">אחר</string>
-    <string name="report_reason_spam_description">מופעים או תגובות מופרזות</string>
-    <string name="report_reason_violation_description">הפרות בולטות של החוק או תנאי השימוש</string>
+
+    <string name="report_reason_spam_description">כמות מוגזמת של אזכורים או תגובות</string>
+    <string name="report_reason_violation_description">הפרה ברורה של החוק או תנאי השירות</string>
     <string name="report_reason_misleading_description">פוסט זה מטעה</string>
-    <string name="report_reason_sexual_description">ערום או פורנוגרפיה שלא נתוייב כאלה</string>
-    <string name="report_reason_rude_description">הטרדה, טרגטינג או חוסר סובלנות</string>
-    <string name="report_reason_other_description">בעיה שלא כלולה באופציות אלה</string>
+    <string name="report_reason_sexual_description">עירום או פורנוגרפיה שאינם מסומנים ככאלה</string>
+    <string name="report_reason_rude_description">הטרדה, טרולינג או חוסר סובלנות</string>
+    <string name="report_reason_other_description">בעיה שאינה כלולה באפשרויות אלו</string>
+
     <string name="delete_status_title">מחק</string>
-    <string name="delete_status_message">האם אתה בטוח שברצונך למחוק זאת?</string>
+    <string name="delete_status_message">למחוק את הפוסט הזה?</string>
+
     <string name="mastodon_report_title">דווח</string>
-    <string name="mastodon_report_description">האם אתה בטוח שברצונך לדווח על זה?</string>
+    <string name="mastodon_report_description">האם אתה בטוח שברצונך לדווח על כך?</string>
+
     <string name="more">עוד</string>
+
     <string name="discover_search_placeholder">חיפוש</string>
-    <string name="discover_users">המלץ על משתמשים</string>
-    <string name="discover_hashtags">האשטגים חמים</string>
+    <string name="discover_users">משתמשים מוצעים</string>
+    <string name="discover_status">פוסטים פופולריים</string>
+    <string name="discover_hashtags">תגיות פופולריות</string>
+
     <string name="search_users">משתמשים</string>
-    <string name="search_status">סטטוס</string>
+    <string name="search_status">פוסטים</string>
+
     <string name="quick_menu_add_account">הוסף חשבון</string>
+
     <string name="settings_appearance_generic">כללי</string>
-    <string name="settings_appearance_show_actions">הראה פעולות</string>
-    <string name="settings_appearance_show_media">הראה מדיה</string>
-    <string name="settings_appearance_show_numbers">הראה מספרים</string>
-    <string name="settings_appearance_show_cw_img">הראה תוכן רגיש</string>
-    <string name="settings_appearance_show_cw_img_description">מוצג תמיד תוכן רגיש בסטטוס</string>
-    <string name="settings_appearance_expand_media">הרחב מדיה לגודל מלא</string>
-    <string name="settings_appearance_expand_media_description">שמור את יחס המדיה בטיימליין</string>
+
+    <string name="settings_appearance_show_actions">הצג פעולות</string>
+    <string name="settings_appearance_show_actions_description">הצג כפתורי פעולה מתחת לכל פוסט</string>
+    <string name="settings_appearance_post_action_style">סגנון פעולות פוסט</string>
+    <string name="settings_appearance_post_action_style_description">בחר כיצד כפתורי הפעולה יסודרו</string>
+    <string name="settings_appearance_post_action_style_hidden">מוסתר</string>
+    <string name="settings_appearance_post_action_style_left_aligned">מיושר לשמאל</string>
+    <string name="settings_appearance_post_action_style_right_aligned">מיושר לימין</string>
+    <string name="settings_appearance_post_action_style_stretch">פריסה רחבה</string>
+    <string name="settings_appearance_show_media">הצג מדיה</string>
+    <string name="settings_appearance_show_media_description">הצג קבצי מדיה מצורפים בפוסטים</string>
+    <string name="settings_appearance_show_numbers">הצג מספרים</string>
+    <string name="settings_appearance_show_numbers_description">הצג מונים מתחת לכל פוסט</string>
+    <string name="settings_appearance_show_cw_img">הצג תוכן רגיש</string>
+    <string name="settings_appearance_show_cw_img_description">תמיד חשוף מדיה רגישה בפוסטים</string>
+    <string name="settings_appearance_expand_media">שמור על יחס גובה-רוחב של המדיה</string>
+    <string name="settings_appearance_expand_media_description">הצג מדיה ביחס הגובה-רוחב המקורי שלה בצירי זמן</string>
     <string name="settings_appearance_video_autoplay">ניגון אוטומטי של וידאו</string>
-    <string name="settings_appearance_video_autoplay_wifi">רק Wi-Fi</string>
+    <string name="settings_appearance_video_autoplay_description">נגן סרטונים באופן אוטומטי בפוסטים</string>
+    <string name="settings_appearance_video_autoplay_wifi">Wi-Fi בלבד</string>
     <string name="settings_appearance_video_autoplay_always">תמיד</string>
-    <string name="settings_appearance_video_autoplay_never">אף פעם</string>
-    <string name="settings_appearance_avatar_shape">צורת אווטאר</string>
-    <string name="settings_appearance_avatar_shape_description">שנה את צורת האווטאר</string>
+    <string name="settings_appearance_video_autoplay_never">לעולם לא</string>
+    <string name="settings_appearance_avatar_shape">צורת אוואטאר</string>
+    <string name="settings_appearance_avatar_shape_description">בחר כיצד אוואטארים יוצגו</string>
     <string name="settings_appearance_avatar_shape_round">עגול</string>
-    <string name="settings_appearance_avatar_shape_square">ריבועי</string>
-    <string name="settings_appearance_theme">נושא</string>
-    <string name="settings_appearance_theme_description">שנה את נושא האפליקציה</string>
+    <string name="settings_appearance_avatar_shape_square">מרובע</string>
+    <string name="settings_appearance_timeline_display_mode">מצב תצוגת ציר זמן</string>
+    <string name="settings_appearance_timeline_display_mode_description">בחר כיצד פוסטים יוצגו בצירי זמן</string>
+    <string name="settings_appearance_timeline_display_mode_card">כרטיס</string>
+    <string name="settings_appearance_timeline_display_mode_plain">פשוט (טור יחיד בלבד)</string>
+    <string name="settings_appearance_timeline_display_mode_gallery">גלריה (ציר זמן ביתי בלבד)</string>
+    <string name="settings_appearance_theme">ערכת נושא</string>
+    <string name="settings_appearance_theme_description">בחר את ערכת הנושא של האפליקציה</string>
     <string name="settings_appearance_theme_light">בהיר</string>
-    <string name="settings_appearance_theme_dark">חשוך</string>
+    <string name="settings_appearance_theme_dark">כהה</string>
     <string name="settings_appearance_theme_auto">אוטומטי</string>
-    <string name="settings_appearance_dynamic_theme">נושא דינמי</string>
-    <string name="settings_appearance_dynamic_theme_description">שנה את נושא האפליקציה בהתאם לרקע של המכשיר</string>
-    <string name="settings_appearance_show_link_previews">הראה תצוגות מקדימות של קישורים</string>
-    <string name="settings_appearance_compat_link_previews">פשט את תצוגות המקדימות של קישורים</string>
-    <string name="settings_appearance_theme_color">צבע נושא</string>
-    <string name="settings_appearance_theme_color_description">שנה את צבע הנושא של האפליקציה</string>
-    <string name="settings_storage_clear_image_cache">נקה את מטמון התמונות</string>
-    <string name="settings_storage_clear_image_cache_description">%1$s MB של תמונות יוסרו</string>
-    <string name="settings_storage_clear_database">נקה את מסד הנתונים</string>
-    <string name="settings_storage_app_log">פתח יומן אפליקציה</string>
-    <string name="settings_storage_app_log_description">צפה ביומן האפליקציה</string>
-    <string name="service_select_instance_input_placeholder">כתובת URL של מופע</string>
+    <string name="settings_appearance_dynamic_theme">ערכת נושא דינמית</string>
+    <string name="settings_appearance_dynamic_theme_description">התאם את צבעי האפליקציה לטפט שלך</string>
+    <string name="settings_appearance_show_link_previews">הצג תצוגה מקדימה של קישורים</string>
+    <string name="settings_appearance_show_link_previews_description">הצג תצוגה מקדימה של קישורים בפוסטים</string>
+    <string name="settings_appearance_compat_link_previews">תצוגה מקדימה קומפקטית לקישורים</string>
+    <string name="settings_appearance_compat_link_previews_description">השתמש בפריסה פשוטה לתצוגה מקדימה של קישורים</string>
+    <string name="settings_appearance_theme_color">צבע ערכת נושא</string>
+    <string name="settings_appearance_theme_color_description">בחר את צבע הדגש של האפליקציה</string>
+    <string name="settings_appearance_theme_pure_color">מצב ניגודיות גבוהה</string>
+    <string name="settings_appearance_theme_pure_color_description">הגדל את הניגודיות בין הרקע לטקסט</string>
+    <string name="settings_appearance_font_size_diff">גודל גופן</string>
+    <string name="settings_appearance_font_size_diff_description">כוונן את גודל הגופן באפליקציה</string>
+    <string name="settings_appearance_font_size_diff_decrease">הקטן</string>
+    <string name="settings_appearance_font_size_diff_increase">הגדל</string>
+    <string name="settings_appearance_bottombar_style">סגנון פס תחתון</string>
+    <string name="settings_appearance_bottombar_style_description">בחר כיצד נראה פס הניווט התחתון</string>
+    <string name="settings_appearance_bottombar_style_floating">צף</string>
+    <string name="settings_appearance_bottombar_style_classic">קלאסי</string>
+    <string name="settings_appearance_bottombar_behavior">התנהגות פס תחתון</string>
+    <string name="settings_appearance_bottombar_behavior_description">בחר כיצד פס הניווט התחתון מתנהג</string>
+    <string name="settings_appearance_bottombar_behavior_fixed">קבוע</string>
+    <string name="settings_appearance_bottombar_behavior_hide_on_scroll">הסתר בגלילה</string>
+    <string name="settings_appearance_bottombar_behavior_minimize_on_scroll">מזער בגלילה</string>
+    <string name="settings_appearance_show_bottom_bar_labels">הצג טקסט בפס התחתון</string>
+    <string name="settings_appearance_show_bottom_bar_labels_description">הצג תוויות טקסט בניווט התחתון ובפס הצד</string>
+    <string name="settings_appearance_deck_mode">מצב סיפון (Deck)</string>
+    <string name="settings_appearance_deck_mode_description">השתמש בפריסת סיפון עבור צירי זמן נתמכים</string>
+    <string name="settings_appearance_in_app_browser">דפדפן בתוך האפליקציה</string>
+    <string name="settings_appearance_in_app_browser_description">פתח קישורים חיצוניים בתוך Flare</string>
+    <string name="settings_appearance_full_width_post">פוסטים ברוחב מלא</string>
+    <string name="settings_appearance_full_width_post_description">אפשר לפוסטים להתפרס על פני כל הרוחב הזמין</string>
+    <string name="settings_appearance_absolute_timestamp">חותמת זמן מוחלטת</string>
+    <string name="settings_appearance_absolute_timestamp_description">הצג חותמות זמן מדויקות על פוסטים</string>
+
+    <string name="settings_appearance_show_platform_logo">הצג אייקונים של פלטפורמת המקור</string>
+    <string name="settings_appearance_show_platform_logo_description">הצג מאיזו פלטפורמה הגיע כל פוסט</string>
+
+    <string name="settings_storage_clear_image_cache">נקה מטמון תמונות</string>
+    <string name="settings_storage_clear_image_cache_description">הסר %1$s MB של תמונות במטמון</string>
+
+    <string name="settings_storage_clear_database">נקה מטמון מסד נתונים</string>
+    <string name="settings_storage_clear_database_description">הסר %1$s משתמשים ו-%2$s פוסטים מהמטמון</string>
+    <string name="settings_storage_app_log">לוגים של האפליקציה</string>
+    <string name="settings_storage_app_log_description">צפה, שמור או נקה לוגים של האפליקציה</string>
+
+    <string name="service_select_instance_input_placeholder">כתובת שרת (Instance)</string>
     <string name="service_select_next_button">הבא</string>
-    <string name="service_select_empty_message">לא נמצאו מופעים</string>
-    <string name="media_viewer_title">צופה מדיה</string>
+    <string name="service_select_empty_message">לא נמצאו שרתים</string>
+
+    <string name="media_viewer_title">מציג מדיה</string>
+
     <string name="settings_accounts_remove">הסר</string>
-    <string name="media_save_success">נשמר להורדות</string>
-    <string name="media_save_fail">ניסיון לשמור נכשל</string>
-    <string name="media_alt_text">טקסט חלופי</string>
-    <string name="settings_side_panel_empty">ברירת מחדל תציג את לוח הצד בהתאם לפלטפורמת החשבון.</string>
+    <string name="settings_accounts_remove_confirm">האם אתה בטוח שברצונך להסיר את החשבון %1$s ממכשיר זה?</string>
+
+    <string name="media_menu_save">שמור תמונה</string>
+    <string name="media_menu_share_image">שתף תמונה</string>
+    <string name="media_menu_copy_link">העתק קישור</string>
+    <string name="media_menu_media_link">קישור מדיה</string>
+    <string name="status_menu_share_via_fxembed">שתף באמצעות FxEmbed</string>
+    <string name="status_menu_share_via_fixvx">שתף באמצעות Fixvx</string>
+    <string name="media_save_success">נשמר בהורדות</string>
+    <string name="media_save_fail">השמירה נכשלה</string>
+    <string name="media_alt_text">טקסט אלטרנטיבי</string>
+    <string name="media_is_downloading">המדיה עדיין בהורדה. נסה שוב בעוד רגע.</string>
+
+    <string name="settings_side_panel_empty">כברירת מחדל, פאנל הצד עוקב אחר פלטפורמת החשבון הנוכחי.</string>
     <string name="tab_settings_add">הוסף</string>
     <string name="tab_settings_drag">גרור</string>
     <string name="tab_settings_edit">ערוך</string>
@@ -151,112 +326,221 @@
     <string name="tab_settings_default">ברירת מחדל</string>
     <string name="tab_settings_list">רשימה</string>
     <string name="tab_settings_feed">פידים</string>
+
     <string name="local_filter_add">הוסף מסנן</string>
+
     <string name="local_filter_edit_title">ערוך מסנן</string>
     <string name="local_filter_add_title">הוסף מסנן</string>
     <string name="local_filter_keyword">מילת מפתח</string>
-    <string name="local_filter_keyword_hint">מילת מפתח לסינון</string>
-    <string name="local_filter_for_timeline">סנן בטיימליין</string>
-    <string name="local_filter_for_notification">סנן בהתראה</string>
-    <string name="local_filter_for_search">סנן בחיפוש</string>
+    <string name="local_filter_keyword_hint">הזן מילת מפתח</string>
+    <string name="local_filter_for_timeline">חל על צירי זמן</string>
+    <string name="local_filter_for_notification">חל על התראות</string>
+    <string name="local_filter_for_search">חל על חיפוש</string>
+    <string name="local_filter_regex">השתמש בביטויים רגולריים (Regex)</string>
     <string name="local_filter_delete">מחק מסנן</string>
+
     <string name="delete">מחק</string>
+
     <string name="mastodon_tab_local_title">מקומי</string>
     <string name="mastodon_tab_public_title">ציבורי</string>
-    <string name="home_tab_featured_title">מוצגים</string>
-    <string name="home_tab_bookmarks_title">מועדפים</string>
-    <string name="home_tab_favorite_title">מועדף</string>
-    <string name="home_tab_list_title">רשימה</string>
+
+    <string name="home_tab_featured_title">מומלצים</string>
+    <string name="home_tab_bookmarks_title">סימניות</string>
+    <string name="home_tab_favorite_title">מועדפים</string>
+    <string name="home_tab_list_title">רשימות</string>
     <string name="home_tab_feeds_title">פידים</string>
-    <string name="tab_settings_primary">טאב ראשי</string>
-    <string name="tab_settings_secondary">טאב משני</string>
+
+    <string name="tab_settings_primary">לשונית ראשית</string>
+    <string name="tab_settings_secondary">לשונית משנית</string>
+
     <string name="status_detail_comment">תגובה</string>
     <string name="status_detail_repost">שיתוף מחדש</string>
+
     <string name="account_item_error_title">שגיאה</string>
-    <string name="account_item_error_message">ניסיון לטעון חשבון נכשל</string>
-    <string name="edit_tab_title">ערוך טאב</string>
+    <string name="account_item_error_message">טעינת החשבון נכשלה</string>
+
+    <string name="edit_tab_title">ערוך לשונית</string>
     <string name="edit_tab_name">שם</string>
-    <string name="edit_tab_name_placeholder">שם הטאב</string>
-    <string name="edit_tab_icon">איקון</string>
-    <string name="edit_tab_with_avatar">עם אווטאר</string>
+    <string name="edit_tab_name_placeholder">שם הלשונית</string>
+    <string name="edit_tab_icon">אייקון</string>
+    <string name="edit_tab_with_avatar">עם אוואטאר</string>
+    <string name="edit_tab_enabled">הצג בצירי זמן מעורבים</string>
+    <string name="edit_tab_enabled_description">כלול את ציר הזמן הזה כאשר הוא בשימוש בתוך ציר זמן מעורב או קבוצה.</string>
+
     <string name="list_add">הוסף רשימה</string>
     <string name="list_edit">ערוך רשימה</string>
     <string name="list_delete">מחק רשימה</string>
-    <string name="list_delete_confirm">האם אתה בטוח שברצונך למחוק את הרשימה %1$s?</string>
+    <string name="list_delete_confirm">למחוק את הרשימה %1$s?</string>
     <string name="list_create">צור רשימה</string>
     <string name="list_create_name">שם הרשימה</string>
     <string name="list_create_name_hint">שם הרשימה</string>
     <string name="list_edit_members">חברים</string>
     <string name="list_edit_edit_members">ערוך חברים</string>
     <string name="list_edit_no_members">אין חברים</string>
-    <string name="list_edit_members_error">ניסיון לטעון חברים נכשל</string>
+    <string name="list_edit_members_error">טעינת החברים נכשלה</string>
     <string name="edit_list_member_title">ערוך חברי רשימה</string>
-    <string name="edit_list_member_placeholder">חפש את העוקבים שלך</string>
+    <string name="edit_list_member_placeholder">חפש במי שאתה עוקב אחריו</string>
     <string name="edit_list_member_label">חיפוש</string>
     <string name="edit_list_member_search">חיפוש</string>
     <string name="edit_list_member_search_empty">לא נמצאו משתמשים</string>
-    <string name="edit_list_member_search_error">ניסיון לחפש משתמשים נכשל</string>
+    <string name="edit_list_member_search_error">חיפוש המשתמשים נכשל</string>
     <string name="edit_list_member_add">הוסף</string>
     <string name="edit_list_member_remove">הסר</string>
     <string name="list_create_description">תיאור הרשימה</string>
     <string name="list_create_description_hint">תיאור הרשימה</string>
+
     <string name="edit_account_list_title">ערוך רשימת חשבונות</string>
+
     <string name="feeds_my_feeds_title">הפידים שלי</string>
     <string name="feeds_discover_feeds_title">גלה פידים</string>
     <string name="feeds_discover_feeds_created_by">נוצר על ידי %1$s</string>
-    <string name="feeds_unsubscribe">הסרה ממנויים</string>
-    <string name="feeds_subscribe">הירשם</string>
+    <string name="feeds_unsubscribe">בטל מנוי</string>
+    <string name="feeds_subscribe">הירשם כמנוי</string>
+
     <string name="profile_tab_timeline">פוסטים</string>
     <string name="profile_tab_timeline_with_reply">פוסטים ותגובות</string>
     <string name="profile_tab_likes">לייקים</string>
     <string name="profile_tab_media">מדיה</string>
-    <string name="tab_settings_title">הגדרות טאב</string>
+
+    <string name="tab_settings_title">הגדרות לשונית</string>
+
+
     <string name="dm_list_title">הודעות ישירות</string>
     <string name="dm_list_empty">אין הודעות ישירות</string>
-    <string name="dm_list_error">ניסיון לטעון הודעות ישירות נכשל</string>
+    <string name="dm_list_error">טעינת ההודעות הישירות נכשלה</string>
     <string name="send">שלח</string>
     <string name="dm_send_placeholder">שלח הודעה</string>
     <string name="dm_deleted">נמחק</string>
-    <string name="dm_conversation">חדר הודעה ישירה</string>
+    <string name="dm_conversation">שיחת הודעה ישירה</string>
     <string name="dm_sending">שולח</string>
     <string name="dm_leave">עזוב שיחה</string>
-    <string name="dm_to_profile">הראה פרופיל</string>
-    <string name="following_title">עוקב</string>
-    <string name="fans_title">עוקב</string>
-    <string name="local_history_search_placeholder">חפש במטמון המקומי</string>
-    <string name="local_history_search_status_title">סטטוס</string>
+    <string name="dm_to_profile">הצג פרופיל</string>
+
+
+    <string name="notification_login_expired">פג תוקף התחברות עבור %1$s</string>
+
+    <string name="following_title">במעקב</string>
+    <string name="fans_title">עוקבים</string>
+
+    <string name="local_history_search_placeholder">חפש פוסטים ופרופילים במטמון</string>
+    <string name="local_history_search_status_title">פוסטים</string>
     <string name="local_history_search_user_title">משתמש</string>
-    <string name="add_rss_source">הוסף</string>
-    <string name="edit_rss_source">ערוך מקור Rss</string>
+
+    <string name="rss_sources_title">מנויים</string>
+    <string name="add_rss_source">הוסף מנוי</string>
+    <string name="edit_rss_source">ערוך מנוי</string>
+    <string name="delete_rss_source">מחק מנוי</string>
+    <string name="opml_import">ייבא מ-OPML</string>
+    <string name="opml_export">ייצא ל-OPML</string>
+    <string name="export_completed">הייצוא הושלם</string>
+
     <string name="rss_sources_title_label">כותרת</string>
-    <string name="rss_sources_url_label">כתובת URL</string>
+    <string name="rss_sources_url_label">כתובת (URL)</string>
+    <string name="rss_title">מנויים</string>
+    <string name="empty_rss_sources">אין מנויים</string>
+    <string name="rss_sources_rss_hub_host_label">מארח RSSHub</string>
+    <string name="rss_sources_rss_hub_host_hint">הגדר מארח RSSHub כדי להשתמש ב-RSSHub, או בחר בשרת הציבורי של RSSHub</string>
+    <string name="rss_sources_discovered_rss_sources">פידים שהתגלו</string>
+    <string name="rss_sources_pinned_in_tabs">נעץ בלשוניות הבית</string>
     <string name="rss_sources_open_in_browser">פתח בדפדפן</string>
+    <string name="rss_sources_open_in_app">פתח באפליקציה</string>
+    <string name="rss_sources_full_content">תוכן מלא</string>
+    <string name="rss_sources_description_only">תיאור בלבד</string>
+    <string name="mastodon_available_timelines">צירי זמן זמינים</string>
+    <string name="mastodon_trending_statuses">סטטוסים פופולריים</string>
+    <string name="mastodon_federated_timeline">ציר זמן פדרטיבי</string>
+    <string name="mastodon_local_timeline">ציר זמן מקומי</string>
+    <string name="subscription_url_hint">הדבק כתובת של פיד RSS או כתובת שרת Mastodon</string>
+    <string name="rss_sources_display_mode">מצב תצוגה</string>
+
     <string name="rss_detail_open_in_browser">פתח בדפדפן</string>
+    <string name="rss_detail_share">שתף קישור</string>
     <string name="rss_detail_tldr">סכם</string>
     <string name="rss_detail_tldr_title">סיכום</string>
-    <string name="rss_detail_tldr_error">ניסיון לסכם נכשל</string>
+    <string name="rss_detail_tldr_error">הסיכום נכשל</string>
     <string name="rss_detail_tldr_loading">מסכם…</string>
-    <string name="emoji_picker_recent">עדכניים</string>
+    <string name="rss_detail_translate">תרגם</string>
+    <string name="rss_detail_translate_error">התרגום נכשל</string>
+
+    <string name="emoji_picker_recent">אחרונים</string>
     <string name="emoji_picker_search">חיפוש</string>
+
     <string name="podcast_host">מארח</string>
     <string name="podcast_title">פודקאסט</string>
     <string name="podcast_speaker">דובר</string>
-    <string name="podcast_listen">התחל להקשיב</string>
+    <string name="podcast_listen">התחל להאזין</string>
     <string name="podcast_leave">עזוב</string>
     <string name="podcast_ended">הפודקאסט הסתיים</string>
-    <string name="podcast_living">הפודקאסט בשידור חי</string>
-    <string name="home_tab_antennas_title">אנטנה</string>
-    <string name="misskey_channel_tab_following">עוקב</string>
-    <string name="misskey_channel_tab_featured">מוצגים</string>
-    <string name="antennas_empty">אין אנטנות</string>
+    <string name="podcast_living">בשידור חי עכשיו</string>
+
+    <string name="home_tab_antennas_title">אנטנות</string>
+    <string name="home_tab_channels_title">ערוצים</string>
+    <string name="misskey_channel_tab_following">במעקב</string>
+    <string name="misskey_channel_tab_favorites">מועדפים</string>
+    <string name="misskey_channel_tab_owned">בבעלותי</string>
+    <string name="misskey_channel_tab_featured">מומלצים</string>
+    <string name="antennas_empty">אין אנטנות עדיין</string>
     <string name="home_tab_mixed_timeline_title">מעורב</string>
-    <string name="tab_settings_mixed_timeline">הוסף טאב טיימליין מעורב</string>
-    <string name="tab_settings_mixed_timeline_desc">טיימליין מעורב יערבב את התוצאות של כל הטאבים בטאב אחד</string>
+    <string name="tab_settings_mixed_timeline">אפשר לשונית ציר זמן מעורב</string>
+    <string name="tab_settings_mixed_timeline_desc">שלב פוסטים מכל הלשוניות ללשונית בית אחת.</string>
+    <string name="home_tab_social_timeline_title">חברתי</string>
+
+    <string name="deeplink_account_selection_title">בחר חשבון</string>
+    <string name="deeplink_account_selection_message">בחר חשבון לפתיחת קישור זה</string>
     <string name="deeplink_account_selection_browser">פתח בדפדפן</string>
+
+    <string name="block_user_title">חסום משתמש</string>
+    <string name="block_user_description">האם אתה בטוח שברצונך לחסום משתמש זה?</string>
+    <string name="unblock_user_title">בטל חסימת משתמש</string>
+    <string name="unblock_user_description">האם אתה בטוח שברצונך לבטל את החסימה של משתמש זה?</string>
+
+    <string name="mute_user_title">השתק משתמש</string>
+    <string name="mute_user_description">האם אתה בטוח שברצונך להשתיק משתמש זה?</string>
+    <string name="unmute_user_title">בטל השתקת משתמש</string>
+    <string name="unmute_user_description">האם אתה בטוח שברצונך לבטל את ההשתקה של משתמש זה?</string>
+
+    <string name="report_user_title">דווח על משתמש</string>
+    <string name="report_user_description">האם אתה בטוח שברצונך לדווח על משתמש זה?</string>
+
+    <string name="settings_storage_export_data">ייצא נתונים</string>
+    <string name="settings_storage_export_data_description">ייצא את כל הנתונים, כולל חשבונות ואישורים. שמור על הקובץ מאובטח.</string>
+    <string name="settings_storage_import_data">ייבא נתונים</string>
+    <string name="settings_storage_import_data_description">ייבא נתונים מקובץ גיבוי. רשומות קיימות עם מזהים תואמים יוחלפו.</string>
+    <string name="save_completed">הייצוא הושלם</string>
+    <string name="save_error">הייצוא נכשל</string>
+    <string name="import_completed">הייבוא הושלם</string>
+    <string name="import_error">הייבוא נכשל</string>
+    <string name="import_confirmation_title">אשר ייבוא</string>
+    <string name="import_confirmation_message">פעולה זו תייבא נתונים מהקובץ שנבחר. רשומות קיימות עם מזהים תואמים יוחלפו. להמשיך?</string>
+
+    <string name="tab_settings_add_group">הוסף קבוצה</string>
+    <string name="tab_settings_add_tab">הוסף לשונית</string>
+    <string name="tab_settings_edit_group">ערוך קבוצה</string>
+    <string name="tab_settings_group_empty">אין לשוניות בקבוצה זו</string>
+    <string name="tab_settings_group_name_placeholder">שם הקבוצה</string>
+    <string name="tab_settings_group_default_name">קבוצה חדשה</string>
+    <string name="tab_settings_behavior_group_title">התנהגות</string>
+    <string name="tab_settings_merge_policy">מדיניות מיזוג</string>
+    <string name="tab_settings_merge_policy_desc">בחר כיצד פריטים מכל ציר זמן משולבים.</string>
+    <string name="tab_settings_merge_policy_time">כרונולוגי</string>
+    <string name="tab_settings_merge_policy_time_per_page">דף אחר דף</string>
+    <string name="tab_settings_merge_policy_staggered">מדורג</string>
+    <string name="tab_settings_filter_title">מסנן ציר זמן</string>
+    <string name="tab_settings_filter_desc">בחר אילו סוגי פוסטים ותוכן יישארו גלויים.</string>
     <string name="tab_settings_filter_all">הכל</string>
-    <string name="tab_settings_filter_reply">תגובה</string>
-    <string name="tab_settings_filter_repost">שיתוף מחדש</string>
-    <string name="tab_settings_filter_quote">ציטוט</string>
-    <string name="status_share_sheet_theme_title">נושא</string>
-    <string name="channel_item_follow">לעקוב</string>
+    <string name="tab_settings_filter_custom">מותאם אישית</string>
+    <string name="tab_settings_filter_kind_group">סוגים</string>
+    <string name="tab_settings_filter_content_group">תוכן</string>
+    <string name="tab_settings_filter_reply">תגובות</string>
+    <string name="tab_settings_filter_repost">שיתופים מחדש</string>
+    <string name="tab_settings_filter_quote">ציטוטים</string>
+    <string name="tab_settings_filter_text_only">טקסט בלבד</string>
+    <string name="tab_settings_filter_image">תמונות</string>
+    <string name="tab_settings_filter_video">סרטונים</string>
+    <string name="status_share_sheet_theme_title">ערכת נושא</string>
+    <string name="channel_title">ערוץ</string>
+    <string name="channel_item_follow">עקוב</string>
+    <string name="channel_item_unfollow">בטל מעקב</string>
+    <string name="channel_item_favourite">הוסף למועדפים</string>
+    <string name="channel_item_unfavourite">הסר ממועדפים</string>
 </resources>

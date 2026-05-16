@@ -1,3 +1,546 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" translatable="false">Flare</string>
+
+    <string name="login_button">Log in</string>
+    <string name="navigate_back">Go back</string>
+
+    <string name="home_tab_home_title">Home</string>
+    <string name="home_tab_notifications_title">Notifications</string>
+    <string name="home_tab_me_title">Me</string>
+    <string name="home_tab_discover_title">Discover</string>
+
+    <plurals name="home_timeline_new_toots">
+        <item quantity="one">%1$d New Post</item>
+        <item quantity="other">%1$d New Posts</item>
+    </plurals>
+
+    <string name="notification_tab_all_title">All</string>
+    <string name="notification_tab_mentions_title">Mentions</string>
+    <string name="notification_tab_comments_title">Comments</string>
+    <string name="notification_tab_likes_title">Likes</string>
+
+    <string name="compose_title">Compose</string>
+    <string name="compose_reply_title">Reply</string>
+    <string name="compose_quote_title">Quote</string>
+    <string name="compose_vvo_comment_title">Comment</string>
+    <string name="compose_hint">What\'s happening?</string>
+    <string name="compose_poll_option_hint">Option %1$s</string>
+    <string name="compose_poll_single_choice">Single choice</string>
+    <string name="compose_poll_multiple_choice">Multiple choice</string>
+    <string name="compose_poll_expiration_at">Expiration at: %1$s</string>
+    <string name="compose_poll_expiration_5_minutes">5 minutes</string>
+    <string name="compose_poll_expiration_30_minutes">30 minutes</string>
+    <string name="compose_poll_expiration_1_hour">1 hour</string>
+    <string name="compose_poll_expiration_6_hours">6 hours</string>
+    <string name="compose_poll_expiration_12_hours">12 hours</string>
+    <string name="compose_poll_expiration_1_day">1 day</string>
+    <string name="compose_poll_expiration_3_days">3 days</string>
+    <string name="compose_poll_expiration_7_days">7 days</string>
+    <string name="compose_content_warning_hint">Content warning</string>
+    <string name="compose_media_sensitive">Mark media as sensitive</string>
+    <string name="compose_notification_title">Sending post</string>
+    <string name="compose_notification_progress">Sending post</string>
+    <string name="compose_notification_success">Post sent</string>
+    <string name="compose_notification_error">Failed to send post</string>
+    <string name="compose_close_confirm_title">Save draft?</string>
+    <string name="compose_close_confirm_message">You have unsaved changes. Save this as a draft before closing?</string>
+    <string name="compose_save_draft">Save</string>
+    <string name="compose_close_discard">Discard</string>
+    <string name="draft_box_title">Drafts</string>
+    <string name="draft_box_empty">No drafts yet</string>
+    <string name="draft_box_edit">Edit</string>
+    <string name="draft_box_retry">Retry</string>
+    <string name="draft_box_send">Send</string>
+    <string name="settings_draft_box_description">View, edit, and resend saved drafts</string>
+
+    <string name="settings_title">Settings</string>
+
+    <string name="settings_accounts_title">Accounts</string>
+    <string name="settings_accounts_subtitle">Manage signed-in accounts</string>
+    <string name="settings_appearance_title">Appearance</string>
+    <string name="settings_appearance_subtitle">Customize the look and feel of Flare</string>
+    <string name="settings_appearance_theme_group_title">Theme</string>
+    <string name="settings_appearance_theme_group_subtitle">Colors, font size, and avatar shape</string>
+    <string name="settings_appearance_layout_group_title">Layout</string>
+    <string name="settings_appearance_layout_group_subtitle">Timeline layout, navigation, and post actions</string>
+    <string name="settings_appearance_display_group_title">Display</string>
+    <string name="settings_appearance_display_group_subtitle">Timestamps, source badges, links, and browser behavior</string>
+    <string name="settings_appearance_media_group_title">Media</string>
+    <string name="settings_appearance_media_group_subtitle">Media visibility, playback, and sensitive content</string>
+    <string name="settings_storage_title">Storage</string>
+    <string name="settings_storage_subtitle">Manage cached files, logs, and backups</string>
+    <string name="settings_about_title">About</string>
+    <string name="settings_about_subtitle">Learn more about Flare</string>
+    <string name="settings_side_panel">Side Panel customization</string>
+    <string name="settings_side_panel_description">Customize the side panel</string>
+    <string name="settings_local_filter_title">Local Filters</string>
+    <string name="settings_local_filter_description">Hide matching content in timelines, notifications, and search</string>
+    <string name="settings_guest_setting_title">Guest mode host</string>
+    <string name="settings_guest_setting_description">Choose which server guest mode connects to</string>
+    <string name="settings_local_history_title">Local History</string>
+    <string name="settings_local_history_description">Search posts and profiles cached on this device</string>
+    <string name="settings_app_logging_title">App logs</string>
+    <string name="settings_app_logging_save">Save logs</string>
+    <string name="settings_app_logging_clear">Clear logs</string>
+    <string name="settings_app_logging_enable_network_logging">Log network requests</string>
+    <string name="settings_ai_config_title">AI</string>
+    <string name="settings_ai_config_description">Set up AI providers and summarization</string>
+    <string name="settings_ai_config_server">Server URL</string>
+    <string name="settings_ai_config_server_hint">Enter a base URL</string>
+    <string name="settings_ai_config_server_url_requirement">The URL must end with a trailing slash and support a compatible v1/chat/completions API.</string>
+    <string name="settings_ai_config_server_self_host_description">Use the official service or your own compatible server</string>
+    <string name="settings_ai_config_type">AI Type</string>
+    <string name="settings_ai_config_type_description">Choose which AI backend Flare uses</string>
+    <string name="settings_ai_config_type_select">Select</string>
+    <string name="settings_ai_config_type_on_device">On-device AI</string>
+    <string name="settings_ai_config_type_on_device_description">Run supported AI models locally on this device</string>
+    <string name="settings_ai_config_type_openai">OpenAI-compatible API</string>
+    <string name="settings_ai_config_type_openai_description">Use an OpenAI-compatible endpoint for AI features</string>
+    <string name="settings_ai_config_value_empty_placeholder">Not set</string>
+    <string name="settings_ai_config_api_key">API Key</string>
+    <string name="settings_ai_config_api_key_hint">Enter API key</string>
+    <string name="settings_ai_config_model">Model</string>
+    <string name="settings_ai_config_model_description">Choose a model from this endpoint</string>
+    <string name="settings_ai_config_model_select">Select model</string>
+    <string name="settings_ai_config_model_loading">Loading models…</string>
+    <string name="settings_ai_config_model_error">Failed to load models</string>
+    <string name="settings_ai_config_model_no_models">No models</string>
+    <string name="settings_ai_config_model_manual_input">Enter a model name manually</string>
+    <string name="settings_ai_config_reasoning_effort">Reasoning Effort</string>
+    <string name="settings_ai_config_reasoning_effort_description">Choose how much extra reasoning the model uses. Default follows the provider\'s setting.</string>
+    <string name="settings_ai_config_reasoning_effort_default">Default</string>
+    <string name="settings_ai_config_reasoning_effort_low">Low</string>
+    <string name="settings_ai_config_reasoning_effort_medium">Medium</string>
+    <string name="settings_ai_config_reasoning_effort_high">High</string>
+    <string name="settings_ai_config_extra_body">Extra Body</string>
+    <string name="settings_ai_config_tap_to_edit">Tap to edit</string>
+    <string name="settings_ai_config_entable_translation">Enable AI translation</string>
+    <string name="settings_ai_config_translation_description">Use AI instead of Google Translate. Translations may take longer.</string>
+    <string name="settings_ai_config_enable_tldr">Enable AI summaries</string>
+    <string name="settings_ai_config_tldr_description">Summarize long posts with AI. Available for posts longer than 500 characters.</string>
+    <string name="settings_ai_config_enable_pre_translation">Enable auto-translate</string>
+    <string name="settings_ai_config_pre_translation_description">Translate newly loaded timeline and profile content in the background and cache the results. This can use a large number of tokens.</string>
+    <string name="settings_ai_config_translate_prompt">Translation Prompt</string>
+    <string name="settings_ai_config_tldr_prompt">Summary Prompt</string>
+    <string name="settings_ai_config_translate_provider">Translation Provider</string>
+    <string name="settings_ai_config_translate_provider_description">Choose which service translates content</string>
+    <string name="settings_ai_config_translate_provider_ai">AI</string>
+    <string name="settings_ai_config_translate_provider_google_web">Google Translate (Web)</string>
+    <string name="settings_ai_config_translate_provider_deepl">DeepL</string>
+    <string name="settings_ai_config_translate_provider_deepl_api_key">DeepL API Key</string>
+    <string name="settings_ai_config_translate_provider_deepl_use_pro">DeepL Pro endpoint</string>
+    <string name="settings_ai_config_translate_provider_deepl_use_pro_description">Use api.deepl.com instead of the free api-free.deepl.com endpoint.</string>
+    <string name="settings_ai_config_translate_provider_google_cloud">Google Cloud Translate</string>
+    <string name="settings_ai_config_translate_provider_google_cloud_api_key">Google Cloud API Key</string>
+    <string name="settings_ai_config_translate_provider_libretranslate">LibreTranslate</string>
+    <string name="settings_ai_config_translate_provider_libretranslate_base_url">LibreTranslate Base URL</string>
+    <string name="settings_ai_config_translate_provider_libretranslate_api_key">LibreTranslate API Key</string>
+    <string name="settings_translation_title">Translation</string>
+    <string name="settings_translation_description">Choose translation services and auto-translate behavior</string>
+    <string name="settings_translation_auto_excluded_languages">Languages to skip for auto-translate</string>
+    <string name="settings_translation_ai_test_title">AI translation test</string>
+    <string name="settings_translation_ai_test_description">Translate a short rich-text sample with the current AI translation settings.</string>
+    <string name="settings_translation_ai_test_action">Test translation</string>
+    <string name="settings_translation_ai_test_original">Sample text</string>
+    <string name="settings_translation_ai_test_result">Translated text</string>
+    <string name="settings_language_title">Language</string>
+    <string name="settings_language_description">Change Flare\'s app language</string>
+    <string name="settings_rss_management_title">Subscription Management</string>
+    <string name="settings_rss_management_description">Manage subscriptions</string>
+    <string name="settings_nostr_relays_manage">Nostr relays</string>
+    <string name="settings_nostr_relays_add">Add relay</string>
+    <string name="settings_nostr_relays_add_dialog_title">Add relay</string>
+    <string name="settings_nostr_relays_placeholder">Enter relay URL</string>
+    <string name="settings_nostr_relays_empty">No relays added</string>
+
+    <string name="status_loadmore_error_retry">Retry</string>
+    <string name="login_expired">Login session expired</string>
+    <string name="login_expired_message">Tap to log in again</string>
+    <string name="login_expired_relogin">Log in again</string>
+
+    <string name="service_select_welcome_title">Welcome to Flare</string>
+    <string name="service_select_welcome_message">Flare is a social media client for Android.\nChoose a service to connect and get started.</string>
+
+    <string name="mastodon_login_verify_message">Verifying your credentials…</string>
+
+    <string name="status_title">Post</string>
+
+    <string name="misskey_visibility_public">Public</string>
+    <string name="misskey_visibility_home">Home</string>
+    <string name="misskey_visibility_followers">Followers</string>
+    <string name="misskey_visibility_specified">Specified</string>
+    <string name="misskey_visibility_public_description">Anyone can see and boost this post</string>
+    <string name="misskey_visibility_home_description">Only users on this instance can see this post</string>
+    <string name="misskey_visibility_followers_description">Only followers can see this post</string>
+    <string name="misskey_visibility_specified_description">Only mentioned users can see this post</string>
+
+    <string name="bluesky_login_username_hint">Username</string>
+    <string name="bluesky_login_password_hint">Password</string>
+    <string name="bluesky_login_auth_factor_token_hint">2FA token</string>
+    <string name="bluesky_login_oauth_button">Log in with OAuth</string>
+    <string name="bluesky_login_use_password_button">Use password</string>
+    <string name="bluesky_login_oauth_hint">Bluesky OAuth may still be unstable. If you run into issues, use password login instead.</string>
+
+    <string name="report_title">Report</string>
+    <string name="report_description">What\'s wrong with this post?</string>
+
+    <string name="report_reason_spam_title">Spam</string>
+    <string name="report_reason_violation_title">Illegal or urgent</string>
+    <string name="report_reason_misleading_title">Misleading</string>
+    <string name="report_reason_sexual_title">Unwanted Sexual Content</string>
+    <string name="report_reason_rude_title">Anti-Social Behavior</string>
+    <string name="report_reason_other_title">Other</string>
+
+    <string name="report_reason_spam_description">Excessive mentions or replies</string>
+    <string name="report_reason_violation_description">Clear violations of the law or terms of service</string>
+    <string name="report_reason_misleading_description">This post is misleading</string>
+    <string name="report_reason_sexual_description">Nudity or pornography not labeled as such</string>
+    <string name="report_reason_rude_description">Harassment, trolling, or intolerance</string>
+    <string name="report_reason_other_description">An issue not included in these options</string>
+
+    <string name="delete_status_title">Delete</string>
+    <string name="delete_status_message">Delete this post?</string>
+
+    <string name="mastodon_report_title">Report</string>
+    <string name="mastodon_report_description">Are you sure you want to report this?</string>
+
+    <string name="more">More</string>
+
+    <string name="discover_search_placeholder">Search</string>
+    <string name="discover_users">Suggested users</string>
+    <string name="discover_status">Trending Posts</string>
+    <string name="discover_hashtags">Trending Hashtags</string>
+
+    <string name="search_users">Users</string>
+    <string name="search_status">Posts</string>
+
+    <string name="quick_menu_add_account">Add account</string>
+
+    <string name="settings_appearance_generic">Generic</string>
+
+    <string name="settings_appearance_show_actions">Show actions</string>
+    <string name="settings_appearance_show_actions_description">Show action buttons below each post</string>
+    <string name="settings_appearance_post_action_style">Post action style</string>
+    <string name="settings_appearance_post_action_style_description">Choose how action buttons are laid out</string>
+    <string name="settings_appearance_post_action_style_hidden">Hidden</string>
+    <string name="settings_appearance_post_action_style_left_aligned">Left aligned</string>
+    <string name="settings_appearance_post_action_style_right_aligned">Right aligned</string>
+    <string name="settings_appearance_post_action_style_stretch">Stretch</string>
+    <string name="settings_appearance_show_media">Show media</string>
+    <string name="settings_appearance_show_media_description">Show media attachments in posts</string>
+    <string name="settings_appearance_show_numbers">Show numbers</string>
+    <string name="settings_appearance_show_numbers_description">Show counts below each post</string>
+    <string name="settings_appearance_show_cw_img">Show sensitive content</string>
+    <string name="settings_appearance_show_cw_img_description">Always reveal sensitive media in posts</string>
+    <string name="settings_appearance_expand_media">Preserve media aspect ratio</string>
+    <string name="settings_appearance_expand_media_description">Show media at its original aspect ratio in timelines</string>
+    <string name="settings_appearance_video_autoplay">Video autoplay</string>
+    <string name="settings_appearance_video_autoplay_description">Automatically play videos in posts</string>
+    <string name="settings_appearance_video_autoplay_wifi">Wi-Fi only</string>
+    <string name="settings_appearance_video_autoplay_always">Always</string>
+    <string name="settings_appearance_video_autoplay_never">Never</string>
+    <string name="settings_appearance_avatar_shape">Avatar shape</string>
+    <string name="settings_appearance_avatar_shape_description">Choose how avatars are displayed</string>
+    <string name="settings_appearance_avatar_shape_round">Round</string>
+    <string name="settings_appearance_avatar_shape_square">Square</string>
+    <string name="settings_appearance_timeline_display_mode">Timeline display mode</string>
+    <string name="settings_appearance_timeline_display_mode_description">Choose how posts are displayed in timelines</string>
+    <string name="settings_appearance_timeline_display_mode_card">Card</string>
+    <string name="settings_appearance_timeline_display_mode_plain">Plain (single column only)</string>
+    <string name="settings_appearance_timeline_display_mode_gallery">Gallery (home timeline only)</string>
+    <string name="settings_appearance_theme">Theme</string>
+    <string name="settings_appearance_theme_description">Choose the app theme</string>
+    <string name="settings_appearance_theme_light">Light</string>
+    <string name="settings_appearance_theme_dark">Dark</string>
+    <string name="settings_appearance_theme_auto">Auto</string>
+    <string name="settings_appearance_dynamic_theme">Dynamic theme</string>
+    <string name="settings_appearance_dynamic_theme_description">Match the app colors to your wallpaper</string>
+    <string name="settings_appearance_show_link_previews">Show link previews</string>
+    <string name="settings_appearance_show_link_previews_description">Show link previews in posts</string>
+    <string name="settings_appearance_compat_link_previews">Compact link previews</string>
+    <string name="settings_appearance_compat_link_previews_description">Use a simplified layout for link previews</string>
+    <string name="settings_appearance_theme_color">Theme color</string>
+    <string name="settings_appearance_theme_color_description">Choose the app accent color</string>
+    <string name="settings_appearance_theme_pure_color">High contrast mode</string>
+    <string name="settings_appearance_theme_pure_color_description">Increase contrast between background and text</string>
+    <string name="settings_appearance_font_size_diff">Font size</string>
+    <string name="settings_appearance_font_size_diff_description">Adjust the app font size</string>
+    <string name="settings_appearance_font_size_diff_decrease">Decrease</string>
+    <string name="settings_appearance_font_size_diff_increase">Increase</string>
+    <string name="settings_appearance_bottombar_style">Bottom bar style</string>
+    <string name="settings_appearance_bottombar_style_description">Choose how the bottom navigation bar looks</string>
+    <string name="settings_appearance_bottombar_style_floating">Floating</string>
+    <string name="settings_appearance_bottombar_style_classic">Classic</string>
+    <string name="settings_appearance_bottombar_behavior">Bottom bar behavior</string>
+    <string name="settings_appearance_bottombar_behavior_description">Choose how the bottom navigation bar behaves</string>
+    <string name="settings_appearance_bottombar_behavior_fixed">Fixed</string>
+    <string name="settings_appearance_bottombar_behavior_hide_on_scroll">Hide on scroll</string>
+    <string name="settings_appearance_bottombar_behavior_minimize_on_scroll">Minimize on scroll</string>
+    <string name="settings_appearance_show_bottom_bar_labels">Show bottom bar text</string>
+    <string name="settings_appearance_show_bottom_bar_labels_description">Show text labels in bottom navigation and the side rail</string>
+    <string name="settings_appearance_deck_mode">Deck mode</string>
+    <string name="settings_appearance_deck_mode_description">Use a deck layout for supported timelines</string>
+    <string name="settings_appearance_in_app_browser">In-app browser</string>
+    <string name="settings_appearance_in_app_browser_description">Open external links inside Flare</string>
+    <string name="settings_appearance_full_width_post">Full-width posts</string>
+    <string name="settings_appearance_full_width_post_description">Let posts span the full available width</string>
+    <string name="settings_appearance_absolute_timestamp">Absolute timestamp</string>
+    <string name="settings_appearance_absolute_timestamp_description">Show exact timestamps on posts</string>
+
+    <string name="settings_appearance_show_platform_logo">Show source platform icons</string>
+    <string name="settings_appearance_show_platform_logo_description">Show which platform each post came from</string>
+
+    <string name="settings_storage_clear_image_cache">Clear image cache</string>
+    <string name="settings_storage_clear_image_cache_description">Remove %1$s MB of cached images</string>
+
+    <string name="settings_storage_clear_database">Clear cached database</string>
+    <string name="settings_storage_clear_database_description">Remove %1$s cached users and %2$s cached posts</string>
+    <string name="settings_storage_app_log">App logs</string>
+    <string name="settings_storage_app_log_description">View, save, or clear app logs</string>
+
+    <string name="service_select_instance_input_placeholder">Instance URL</string>
+    <string name="service_select_next_button">Next</string>
+    <string name="service_select_empty_message">No instances found</string>
+
+    <string name="media_viewer_title">Media viewer</string>
+
+    <string name="settings_accounts_remove">Remove</string>
+    <string name="settings_accounts_remove_confirm">Are you sure you want to remove account %1$s from this device?</string>
+
+    <string name="media_menu_save">Save image</string>
+    <string name="media_menu_share_image">Share image</string>
+    <string name="media_menu_copy_link">Copy link</string>
+    <string name="media_menu_media_link">Media link</string>
+    <string name="status_menu_share_via_fxembed">Share via FxEmbed</string>
+    <string name="status_menu_share_via_fixvx">Share via Fixvx</string>
+    <string name="media_save_success">Saved to Downloads</string>
+    <string name="media_save_fail">Failed to save</string>
+    <string name="media_alt_text">Alt text</string>
+    <string name="media_is_downloading">Media is still downloading. Try again in a moment.</string>
+
+    <string name="settings_side_panel_empty">By default, the side panel follows the current account\'s platform.</string>
+    <string name="tab_settings_add">Add</string>
+    <string name="tab_settings_drag">Drag</string>
+    <string name="tab_settings_edit">Edit</string>
+    <string name="tab_settings_remove">Remove</string>
+    <string name="tab_settings_default">Default</string>
+    <string name="tab_settings_list">List</string>
+    <string name="tab_settings_feed">Feeds</string>
+
+    <string name="local_filter_add">Add filter</string>
+
+    <string name="local_filter_edit_title">Edit Filter</string>
+    <string name="local_filter_add_title">Add Filter</string>
+    <string name="local_filter_keyword">Keyword</string>
+    <string name="local_filter_keyword_hint">Enter a keyword</string>
+    <string name="local_filter_for_timeline">Apply to timelines</string>
+    <string name="local_filter_for_notification">Apply to notifications</string>
+    <string name="local_filter_for_search">Apply to search</string>
+    <string name="local_filter_regex">Use regular expressions</string>
+    <string name="local_filter_delete">Delete Filter</string>
+
+    <string name="delete">Delete</string>
+
+    <string name="mastodon_tab_local_title">Local</string>
+    <string name="mastodon_tab_public_title">Public</string>
+
+    <string name="home_tab_featured_title">Featured</string>
+    <string name="home_tab_bookmarks_title">Bookmarks</string>
+    <string name="home_tab_favorite_title">Favorites</string>
+    <string name="home_tab_list_title">Lists</string>
+    <string name="home_tab_feeds_title">Feeds</string>
+
+    <string name="tab_settings_primary">Primary tab</string>
+    <string name="tab_settings_secondary">Secondary tab</string>
+
+    <string name="status_detail_comment">Comment</string>
+    <string name="status_detail_repost">Repost</string>
+
+    <string name="account_item_error_title">Error</string>
+    <string name="account_item_error_message">Failed to load account</string>
+
+    <string name="edit_tab_title">Edit tab</string>
+    <string name="edit_tab_name">Name</string>
+    <string name="edit_tab_name_placeholder">Tab name</string>
+    <string name="edit_tab_icon">Icon</string>
+    <string name="edit_tab_with_avatar">With avatar</string>
+    <string name="edit_tab_enabled">Show in mixed timelines</string>
+    <string name="edit_tab_enabled_description">Include this timeline when it is used inside a mixed timeline or group.</string>
+
+    <string name="list_add">Add list</string>
+    <string name="list_edit">Edit list</string>
+    <string name="list_delete">Delete list</string>
+    <string name="list_delete_confirm">Delete the list %1$s?</string>
+    <string name="list_create">Create list</string>
+    <string name="list_create_name">List name</string>
+    <string name="list_create_name_hint">List name</string>
+    <string name="list_edit_members">Members</string>
+    <string name="list_edit_edit_members">Edit members</string>
+    <string name="list_edit_no_members">No members</string>
+    <string name="list_edit_members_error">Failed to load members</string>
+    <string name="edit_list_member_title">Edit list members</string>
+    <string name="edit_list_member_placeholder">Search your following</string>
+    <string name="edit_list_member_label">Search</string>
+    <string name="edit_list_member_search">Search</string>
+    <string name="edit_list_member_search_empty">No users found</string>
+    <string name="edit_list_member_search_error">Failed to search users</string>
+    <string name="edit_list_member_add">Add</string>
+    <string name="edit_list_member_remove">Remove</string>
+    <string name="list_create_description">List description</string>
+    <string name="list_create_description_hint">List description</string>
+
+    <string name="edit_account_list_title">Edit account list</string>
+
+    <string name="feeds_my_feeds_title">My feeds</string>
+    <string name="feeds_discover_feeds_title">Discover feeds</string>
+    <string name="feeds_discover_feeds_created_by">Created by %1$s</string>
+    <string name="feeds_unsubscribe">Unsubscribe</string>
+    <string name="feeds_subscribe">Subscribe</string>
+
+    <string name="profile_tab_timeline">Posts</string>
+    <string name="profile_tab_timeline_with_reply">Posts and replies</string>
+    <string name="profile_tab_likes">Likes</string>
+    <string name="profile_tab_media">Media</string>
+
+    <string name="tab_settings_title">Tab settings</string>
+
+
+    <string name="dm_list_title">Direct Messages</string>
+    <string name="dm_list_empty">No direct messages</string>
+    <string name="dm_list_error">Failed to load direct messages</string>
+    <string name="send">Send</string>
+    <string name="dm_send_placeholder">Send a message</string>
+    <string name="dm_deleted">Deleted</string>
+    <string name="dm_conversation">Direct message conversation</string>
+    <string name="dm_sending">Sending</string>
+    <string name="dm_leave">Leave conversation</string>
+    <string name="dm_to_profile">Show profile</string>
+
+
+    <string name="notification_login_expired">Login expired for %1$s</string>
+
+    <string name="following_title">Following</string>
+    <string name="fans_title">Followers</string>
+
+    <string name="local_history_search_placeholder">Search cached posts and profiles</string>
+    <string name="local_history_search_status_title">Posts</string>
+    <string name="local_history_search_user_title">User</string>
+
+    <string name="rss_sources_title">Subscriptions</string>
+    <string name="add_rss_source">Add Subscription</string>
+    <string name="edit_rss_source">Edit Subscription</string>
+    <string name="delete_rss_source">Delete Subscription</string>
+    <string name="opml_import">Import from OPML</string>
+    <string name="opml_export">Export to OPML</string>
+    <string name="export_completed">Export completed</string>
+
+    <string name="rss_sources_title_label">Title</string>
+    <string name="rss_sources_url_label">URL</string>
+    <string name="rss_title">Subscriptions</string>
+    <string name="empty_rss_sources">No subscriptions</string>
+    <string name="rss_sources_rss_hub_host_label">RSSHub Host</string>
+    <string name="rss_sources_rss_hub_host_hint">Set an RSSHub host to use RSSHub, or choose the public RSSHub server</string>
+    <string name="rss_sources_discovered_rss_sources">Discovered feeds</string>
+    <string name="rss_sources_pinned_in_tabs">Pin to Home tabs</string>
+    <string name="rss_sources_open_in_browser">Open in browser</string>
+    <string name="rss_sources_open_in_app">Open in app</string>
+    <string name="rss_sources_full_content">Full content</string>
+    <string name="rss_sources_description_only">Description only</string>
+    <string name="mastodon_available_timelines">Available timelines</string>
+    <string name="mastodon_trending_statuses">Trending statuses</string>
+    <string name="mastodon_federated_timeline">Federated timeline</string>
+    <string name="mastodon_local_timeline">Local timeline</string>
+    <string name="subscription_url_hint">Paste an RSS feed URL or a Mastodon instance URL</string>
+    <string name="rss_sources_display_mode">Display mode</string>
+
+    <string name="rss_detail_open_in_browser">Open in browser</string>
+    <string name="rss_detail_share">Share link</string>
+    <string name="rss_detail_tldr">Summarize</string>
+    <string name="rss_detail_tldr_title">Summary</string>
+    <string name="rss_detail_tldr_error">Failed to summarize</string>
+    <string name="rss_detail_tldr_loading">Summarizing…</string>
+    <string name="rss_detail_translate">Translate</string>
+    <string name="rss_detail_translate_error">Failed to translate</string>
+
+    <string name="emoji_picker_recent">Recent</string>
+    <string name="emoji_picker_search">Search</string>
+
+    <string name="podcast_host">Host</string>
+    <string name="podcast_title">Podcast</string>
+    <string name="podcast_speaker">Speaker</string>
+    <string name="podcast_listen">Start listening</string>
+    <string name="podcast_leave">Leave</string>
+    <string name="podcast_ended">Podcast ended</string>
+    <string name="podcast_living">Live now</string>
+
+    <string name="home_tab_antennas_title">Antennas</string>
+    <string name="home_tab_channels_title">Channels</string>
+    <string name="misskey_channel_tab_following">Following</string>
+    <string name="misskey_channel_tab_favorites">Favorites</string>
+    <string name="misskey_channel_tab_owned">Owned</string>
+    <string name="misskey_channel_tab_featured">Featured</string>
+    <string name="antennas_empty">No antennas yet</string>
+    <string name="home_tab_mixed_timeline_title">Mixed</string>
+    <string name="tab_settings_mixed_timeline">Enable mixed timeline tab</string>
+    <string name="tab_settings_mixed_timeline_desc">Combine posts from all tabs into a single Home tab.</string>
+    <string name="home_tab_social_timeline_title">Social</string>
+
+    <string name="deeplink_account_selection_title">Select account</string>
+    <string name="deeplink_account_selection_message">Select an account to open this link</string>
+    <string name="deeplink_account_selection_browser">Open in browser</string>
+
+    <string name="block_user_title">Block user</string>
+    <string name="block_user_description">Are you sure you want to block this user?</string>
+    <string name="unblock_user_title">Unblock user</string>
+    <string name="unblock_user_description">Are you sure you want to unblock this user?</string>
+
+    <string name="mute_user_title">Mute user</string>
+    <string name="mute_user_description">Are you sure you want to mute this user?</string>
+    <string name="unmute_user_title">Unmute user</string>
+    <string name="unmute_user_description">Are you sure you want to unmute this user?</string>
+
+    <string name="report_user_title">Report user</string>
+    <string name="report_user_description">Are you sure you want to report this user?</string>
+
+    <string name="settings_storage_export_data">Export data</string>
+    <string name="settings_storage_export_data_description">Export all data, including accounts and credentials. Keep the file secure.</string>
+    <string name="settings_storage_import_data">Import data</string>
+    <string name="settings_storage_import_data_description">Import data from a backup file. Existing records with matching IDs will be replaced.</string>
+    <string name="save_completed">Export complete</string>
+    <string name="save_error">Export failed</string>
+    <string name="import_completed">Import complete</string>
+    <string name="import_error">Import failed</string>
+    <string name="import_confirmation_title">Confirm import</string>
+    <string name="import_confirmation_message">This will import data from the selected file. Existing records with matching IDs will be replaced. Continue?</string>
+
+    <string name="tab_settings_add_group">Add group</string>
+    <string name="tab_settings_add_tab">Add tab</string>
+    <string name="tab_settings_edit_group">Edit group</string>
+    <string name="tab_settings_group_empty">No tabs in this group</string>
+    <string name="tab_settings_group_name_placeholder">Group name</string>
+    <string name="tab_settings_group_default_name">New group</string>
+    <string name="tab_settings_behavior_group_title">Behavior</string>
+    <string name="tab_settings_merge_policy">Merge policy</string>
+    <string name="tab_settings_merge_policy_desc">Choose how items from each timeline are combined.</string>
+    <string name="tab_settings_merge_policy_time">Chronological</string>
+    <string name="tab_settings_merge_policy_time_per_page">Page by page</string>
+    <string name="tab_settings_merge_policy_staggered">Interleaved</string>
+    <string name="tab_settings_filter_title">Timeline filter</string>
+    <string name="tab_settings_filter_desc">Choose which kinds of posts and content stay visible.</string>
+    <string name="tab_settings_filter_all">All</string>
+    <string name="tab_settings_filter_custom">Custom</string>
+    <string name="tab_settings_filter_kind_group">Kinds</string>
+    <string name="tab_settings_filter_content_group">Content</string>
+    <string name="tab_settings_filter_reply">Replies</string>
+    <string name="tab_settings_filter_repost">Reposts</string>
+    <string name="tab_settings_filter_quote">Quotes</string>
+    <string name="tab_settings_filter_text_only">Text-only</string>
+    <string name="tab_settings_filter_image">Images</string>
+    <string name="tab_settings_filter_video">Videos</string>
+    <string name="status_share_sheet_theme_title">Theme</string>
+    <string name="channel_title">Channel</string>
+    <string name="channel_item_follow">Follow</string>
+    <string name="channel_item_unfollow">Unfollow</string>
+    <string name="channel_item_favourite">Favorite</string>
+    <string name="channel_item_unfavourite">Unfavorite</string>
 </resources>

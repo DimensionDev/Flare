@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name" translatable="false">Flare</string>
     <string name="ok">ОК</string>
     <string name="cancel">Отмена</string>
     <string name="delete">Удалить</string>
@@ -280,6 +281,7 @@
     <string name="settings_about_source_code">Исходный код</string>
     <string name="settings_about_telegram">Телеграмма</string>
     <string name="settings_about_telegram_description">Присоединяйтесь к нашей группе Telegram</string>
+    <string name="settings_about_discord" translatable="false">Discord</string>
     <string name="settings_about_discord_description">Присоединяйтесь к нашему серверу Discord</string>
     <string name="settings_about_localization">Crowdin</string>
     <string name="settings_about_localization_description">Помогите нам перевести сигнал</string>
@@ -304,6 +306,9 @@
     <string name="compose_content_warning_hint">Предупреждение о содержании</string>
     <string name="compose_media_sensitive">Скрыть медиа под спойлер</string>
     <string name="compose_notification_title">Успешно отправлено</string>
+    <string name="compose_notification_progress">Отправка поста</string>
+    <string name="compose_notification_success">Пост отправлен</string>
+    <string name="compose_notification_error">Не удалось отправить пост</string>
     <string name="misskey_visibility_public">Публичный</string>
     <string name="misskey_visibility_home">Домашний</string>
     <string name="misskey_visibility_followers">Подписчики</string>

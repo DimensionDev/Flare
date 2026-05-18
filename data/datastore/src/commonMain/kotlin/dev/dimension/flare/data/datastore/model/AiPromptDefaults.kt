@@ -1,7 +1,7 @@
 package dev.dimension.flare.data.datastore.model
 
-internal object AiPromptDefaults {
-    const val TRANSLATE_PROMPT: String =
+public object AiPromptDefaults {
+    public const val TRANSLATE_PROMPT: String =
         "You are a translation engine. Output only the translated template.\n" +
             "The target language is {target_language}.\n" +
             "The input is a plain-text translation template extracted from a social post.\n" +
@@ -31,7 +31,7 @@ internal object AiPromptDefaults {
             "Translate the following template to {target_language}:\n" +
             "{source_text}"
 
-    const val TLDR_PROMPT: String =
+    public const val TLDR_PROMPT: String =
         "Summarize the following text in {target_language}\n" +
             "Respond in raw text, limit the response to 200 characters.\n" +
             "Text: \"{source_text}\""

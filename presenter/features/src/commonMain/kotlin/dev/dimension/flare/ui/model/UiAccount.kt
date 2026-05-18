@@ -3,16 +3,10 @@ package dev.dimension.flare.ui.model
 import androidx.compose.runtime.Immutable
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.data.database.app.model.DbAccount
-import dev.dimension.flare.data.datasource.bluesky.BlueskyDataSource
-import dev.dimension.flare.data.datasource.mastodon.MastodonDataSource
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
-import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
-import dev.dimension.flare.data.datasource.nostr.NostrDataSource
-import dev.dimension.flare.data.datasource.pleroma.PleromaDataSource
-import dev.dimension.flare.data.datasource.vvo.VVODataSource
-import dev.dimension.flare.data.datasource.xqt.XQTDataSource
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.model.SocialPlatformRegistry
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import sh.christian.ozone.oauth.OAuthToken
@@ -223,56 +217,7 @@ public sealed class UiAccount {
 
     internal companion object {
         fun UiAccount.createDataSource(): MicroblogDataSource =
-            when (this) {
-                is Nostr -> {
-                    NostrDataSource(
-                        accountKey = accountKey,
-                    )
-                }
-
-                is Mastodon -> {
-                    when (forkType) {
-                        Mastodon.Credential.ForkType.Mastodon -> {
-                            MastodonDataSource(
-                                accountKey = accountKey,
-                                instance = instance,
-                            )
-                        }
-
-                        Mastodon.Credential.ForkType.Pleroma -> {
-                            PleromaDataSource(
-                                accountKey = accountKey,
-                                instance = instance,
-                            )
-                        }
-                    }
-                }
-
-                is Misskey -> {
-                    MisskeyDataSource(
-                        accountKey = accountKey,
-                        host = host,
-                    )
-                }
-
-                is Bluesky -> {
-                    BlueskyDataSource(
-                        accountKey = accountKey,
-                    )
-                }
-
-                is XQT -> {
-                    XQTDataSource(
-                        accountKey = accountKey,
-                    )
-                }
-
-                is VVo -> {
-                    VVODataSource(
-                        accountKey = accountKey,
-                    )
-                }
-            }
+            SocialPlatformRegistry.default.createDataSource(this)
 
         fun DbAccount.toUi(): UiAccount =
             when (platform_type) {

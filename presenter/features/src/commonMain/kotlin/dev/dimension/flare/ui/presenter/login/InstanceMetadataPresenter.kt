@@ -7,7 +7,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.model.PlatformType
-import dev.dimension.flare.model.spec
+import dev.dimension.flare.model.SocialPlatformRegistry
 import dev.dimension.flare.ui.model.UiInstanceMetadata
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.presenter.PresenterBase
@@ -28,7 +28,7 @@ public class InstanceMetadataPresenter(
             flow {
                 tryRun {
                     emit(UiState.Loading())
-                    platformType.spec.instanceMetadata(host)
+                    SocialPlatformRegistry.default.requireSpec(platformType).instanceMetadata(host)
                 }.fold(
                     onSuccess = {
                         emit(UiState.Success<UiInstanceMetadata>(it))

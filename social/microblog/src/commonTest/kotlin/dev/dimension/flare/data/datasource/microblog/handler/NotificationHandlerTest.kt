@@ -1,7 +1,6 @@
 package dev.dimension.flare.data.datasource.microblog.handler
 
 import androidx.paging.LoadState
-import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.common.CacheState
 import dev.dimension.flare.data.datasource.microblog.loader.NotificationLoader
 import dev.dimension.flare.model.MicroBlogKey
@@ -16,7 +15,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class NotificationHandlerTest : RobolectricTest() {
+class NotificationHandlerTest {
     @Test
     fun refreshLoadsBadgeCountIntoCache() =
         runTest {
@@ -87,7 +86,6 @@ class NotificationHandlerTest : RobolectricTest() {
                     loader = loader,
                 )
 
-            // Warm up cache with a successful refresh.
             val initialValueDeferred =
                 async {
                     handler.notificationBadgeCount.data

@@ -5,11 +5,11 @@ import de.jensklingenberg.ktorfit.converter.FlowConverterFactory
 import de.jensklingenberg.ktorfit.converter.ResponseConverterFactory
 import dev.dimension.flare.common.BuildConfig
 import dev.dimension.flare.common.JSON
+import dev.dimension.flare.data.network.createHttpClientEngine
 import dev.dimension.flare.data.network.mastodon.api.model.MastodonPagingConverterFactory
 import dev.dimension.flare.data.repository.DebugRepository
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
-import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logging
@@ -49,7 +49,7 @@ public fun ktorClient(
         }
     },
 ): HttpClient =
-    HttpClient(httpClientEngine) {
+    HttpClient(createHttpClientEngine()) {
         config.invoke(this)
         install(Logging) {
             logger = FlareLogger
@@ -61,8 +61,6 @@ public fun ktorClient(
                 }
         }
     }
-
-internal expect val httpClientEngine: HttpClientEngine
 
 internal data object FlareLogger : io.ktor.client.plugins.logging.Logger {
     override fun log(message: String) {

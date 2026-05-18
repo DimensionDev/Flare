@@ -9,7 +9,7 @@ import dev.dimension.flare.common.BuildConfig
 import dev.dimension.flare.common.JSON
 import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.network.FlareLogger
-import dev.dimension.flare.data.network.httpClientEngine
+import dev.dimension.flare.data.network.createHttpClientEngine
 import dev.dimension.flare.data.network.ktorClient
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.logging.LogLevel
@@ -113,7 +113,7 @@ internal class OpenAIService {
             OpenAIConfig(
                 host = OpenAIHost(baseUrl = serverUrl),
                 token = apiKey,
-                engine = httpClientEngine,
+                engine = createHttpClientEngine(),
                 timeout =
                     Timeout(
                         request = 1.minutes,

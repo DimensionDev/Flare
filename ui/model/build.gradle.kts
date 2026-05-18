@@ -17,4 +17,14 @@ kotlin {
             FlarePlatform.IOS,
         )
     }
+
+    sourceSets {
+        val commonMain by getting {
+            dependencies {
+                api(dependencies.platform(libs.compose.bom))
+                api(libs.compose.runtime)
+                api(libs.kotlinx.serialization.json)
+            }
+        }
+    }
 }

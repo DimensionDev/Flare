@@ -24,9 +24,9 @@ import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
-import kotlinx.coroutines.flow.flow
 import kotlin.uuid.Uuid
 
 internal class XQTDirectMessageLoader(
@@ -92,11 +92,13 @@ internal class XQTDirectMessageLoader(
         }
 
     override fun roomInfoFlow(source: Flow<DbDirectMessageTimeline?>): Flow<UiDMRoom> =
-        source.combine(credentialFlow) { room, credential ->
-            room?.content
-                ?.copy(unreadCount = room.unreadCount)
-                ?.withXqtMediaAuth(credential, accountKey.host)
-        }.mapNotNull { it }
+        source
+            .combine(credentialFlow) { room, credential ->
+                room
+                    ?.content
+                    ?.copy(unreadCount = room.unreadCount)
+                    ?.withXqtMediaAuth(credential, accountKey.host)
+            }.mapNotNull { it }
 
     override suspend fun fetchRoomInfo(
         database: CacheDatabase,
@@ -268,8 +270,7 @@ internal class XQTDirectMessageLoader(
 private fun UiDMRoom.withXqtMediaAuth(
     credential: UiAccount.XQT.Credential,
     host: String,
-): UiDMRoom =
-    copy(lastMessage = lastMessage?.withXqtMediaAuth(credential, host))
+): UiDMRoom = copy(lastMessage = lastMessage?.withXqtMediaAuth(credential, host))
 
 private fun UiDMItem.withXqtMediaAuth(
     credential: UiAccount.XQT.Credential,

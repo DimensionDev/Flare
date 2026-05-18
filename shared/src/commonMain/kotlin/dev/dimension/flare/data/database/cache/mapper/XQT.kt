@@ -39,8 +39,8 @@ import dev.dimension.flare.ui.model.UiDMItem
 import dev.dimension.flare.ui.model.UiDMRoom
 import dev.dimension.flare.ui.model.UiHandle
 import dev.dimension.flare.ui.model.UiProfile
-import dev.dimension.flare.ui.model.mapper.renderDirectMessage
 import dev.dimension.flare.ui.model.mapper.render
+import dev.dimension.flare.ui.model.mapper.renderDirectMessage
 import dev.dimension.flare.ui.render.toUi
 import dev.dimension.flare.ui.render.toUiPlainText
 import kotlinx.collections.immutable.persistentListOf
@@ -135,9 +135,11 @@ internal object XQT {
                     DbMessageRoom(
                         roomKey = MicroBlogKey(it.conversationId.orEmpty(), accountKey.host),
                         platformType = PlatformType.xQt,
-                        messageKey = messages.filter { message -> message.roomKey.id == it.conversationId }
-                            .maxByOrNull { message -> message.timestamp }
-                            ?.messageKey,
+                        messageKey =
+                            messages
+                                .filter { message -> message.roomKey.id == it.conversationId }
+                                .maxByOrNull { message -> message.timestamp }
+                                ?.messageKey,
                     )
                 }
             database.messageDao().insert(rooms)

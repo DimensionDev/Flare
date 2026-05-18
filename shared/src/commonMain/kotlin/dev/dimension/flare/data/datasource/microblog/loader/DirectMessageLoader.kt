@@ -1,8 +1,9 @@
 package dev.dimension.flare.data.datasource.microblog.loader
 
-import androidx.paging.PagingData
 import androidx.paging.ExperimentalPagingApi
+import androidx.paging.PagingData
 import androidx.paging.RemoteMediator
+import androidx.paging.map
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.model.DbDirectMessageTimeline
@@ -16,7 +17,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
-import androidx.paging.map
 
 @OptIn(ExperimentalPagingApi::class)
 internal interface DirectMessageLoader {

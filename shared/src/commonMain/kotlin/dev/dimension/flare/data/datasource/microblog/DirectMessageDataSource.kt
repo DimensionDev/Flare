@@ -23,14 +23,12 @@ import kotlin.uuid.Uuid
 internal interface DirectMessageDataSource : AuthenticatedMicroblogDataSource {
     val directMessageHandler: DirectMessageHandler
 
-    fun directMessageList(scope: CoroutineScope): Flow<PagingData<UiDMRoom>> =
-        directMessageHandler.list(scope)
+    fun directMessageList(scope: CoroutineScope): Flow<PagingData<UiDMRoom>> = directMessageHandler.list(scope)
 
     fun directMessageConversation(
         roomKey: MicroBlogKey,
         scope: CoroutineScope,
-    ): Flow<PagingData<UiDMItem>> =
-        directMessageHandler.conversation(roomKey, scope)
+    ): Flow<PagingData<UiDMItem>> = directMessageHandler.conversation(roomKey, scope)
 
     fun sendDirectMessage(
         roomKey: MicroBlogKey,
@@ -50,8 +48,7 @@ internal interface DirectMessageDataSource : AuthenticatedMicroblogDataSource {
         directMessageHandler.delete(roomKey, messageKey)
     }
 
-    fun getDirectMessageConversationInfo(roomKey: MicroBlogKey): CacheData<UiDMRoom> =
-        directMessageHandler.roomInfo(roomKey)
+    fun getDirectMessageConversationInfo(roomKey: MicroBlogKey): CacheData<UiDMRoom> = directMessageHandler.roomInfo(roomKey)
 
     suspend fun fetchNewDirectMessageForConversation(roomKey: MicroBlogKey) {
         directMessageHandler.fetchNew(roomKey)
@@ -64,11 +61,9 @@ internal interface DirectMessageDataSource : AuthenticatedMicroblogDataSource {
         directMessageHandler.leave(roomKey)
     }
 
-    fun createDirectMessageRoom(userKey: MicroBlogKey): Flow<UiState<MicroBlogKey>> =
-        directMessageHandler.createRoom(userKey)
+    fun createDirectMessageRoom(userKey: MicroBlogKey): Flow<UiState<MicroBlogKey>> = directMessageHandler.createRoom(userKey)
 
-    suspend fun canSendDirectMessage(userKey: MicroBlogKey): Boolean =
-        directMessageHandler.canSend(userKey)
+    suspend fun canSendDirectMessage(userKey: MicroBlogKey): Boolean = directMessageHandler.canSend(userKey)
 }
 
 internal fun createSendingDirectMessage(
@@ -77,28 +72,27 @@ internal fun createSendingDirectMessage(
     message: String,
     platformType: PlatformType,
     user: UiProfile = fallbackDirectMessageUser(accountKey, platformType),
-) =
-    MicroBlogKey(Uuid.random().toString(), accountKey.host).let { messageKey ->
-        val timestamp = Clock.System.now()
-        DbMessageItem(
-            userKey = accountKey,
-            roomKey = roomKey,
-            timestamp = timestamp.toEpochMilliseconds(),
-            messageKey = messageKey,
-            content =
-                UiDMItem(
-                    key = messageKey,
-                    user = user,
-                    content = UiDMItem.Message.Text(message.toUiPlainText()),
-                    timestamp = timestamp.toUi(),
-                    isFromMe = true,
-                    sendState = UiDMItem.SendState.Sending,
-                    showSender = false,
-                ),
-            isLocal = true,
-            showSender = false,
-        )
-    }
+) = MicroBlogKey(Uuid.random().toString(), accountKey.host).let { messageKey ->
+    val timestamp = Clock.System.now()
+    DbMessageItem(
+        userKey = accountKey,
+        roomKey = roomKey,
+        timestamp = timestamp.toEpochMilliseconds(),
+        messageKey = messageKey,
+        content =
+            UiDMItem(
+                key = messageKey,
+                user = user,
+                content = UiDMItem.Message.Text(message.toUiPlainText()),
+                timestamp = timestamp.toUi(),
+                isFromMe = true,
+                sendState = UiDMItem.SendState.Sending,
+                showSender = false,
+            ),
+        isLocal = true,
+        showSender = false,
+    )
+}
 
 private fun fallbackDirectMessageUser(
     accountKey: MicroBlogKey,

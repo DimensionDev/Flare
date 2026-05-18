@@ -153,7 +153,9 @@ internal class BlueskyDirectMessageLoader(
                             handleMessage(database, accountKey, message.value)
                         }
 
-                        is LogCreateMessageMessageUnion.Unknown -> Unit
+                        is LogCreateMessageMessageUnion.Unknown -> {
+                            Unit
+                        }
                     }
                 }
 
@@ -167,11 +169,15 @@ internal class BlueskyDirectMessageLoader(
                             handleMessage(database, accountKey, message.value)
                         }
 
-                        is LogDeleteMessageMessageUnion.Unknown -> Unit
+                        is LogDeleteMessageMessageUnion.Unknown -> {
+                            Unit
+                        }
                     }
                 }
 
-                else -> Unit
+                else -> {
+                    Unit
+                }
             }
         }
     }

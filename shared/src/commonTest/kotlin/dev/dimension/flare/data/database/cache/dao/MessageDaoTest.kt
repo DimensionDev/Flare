@@ -11,12 +11,12 @@ import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.ui.humanizer.PlatformFormatter
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiDMItem
 import dev.dimension.flare.ui.model.UiDMRoom
 import dev.dimension.flare.ui.model.UiHandle
 import dev.dimension.flare.ui.model.UiProfile
-import dev.dimension.flare.ui.humanizer.PlatformFormatter
 import dev.dimension.flare.ui.render.toUi
 import dev.dimension.flare.ui.render.toUiPlainText
 import kotlinx.collections.immutable.persistentListOf
@@ -114,7 +114,8 @@ class MessageDaoTest : RobolectricTest() {
 
             val savedRoom =
                 assertNotNull(
-                    db.messageDao()
+                    db
+                        .messageDao()
                         .getRoomInfo(roomKey, AccountType.Specific(accountKey))
                         .first(),
                 )
@@ -164,7 +165,11 @@ class MessageDaoTest : RobolectricTest() {
 
             assertEquals(
                 UiDMItem.SendState.Failed,
-                db.messageDao().getMessage(messageKey)?.content?.sendState,
+                db
+                    .messageDao()
+                    .getMessage(messageKey)
+                    ?.content
+                    ?.sendState,
             )
         }
 

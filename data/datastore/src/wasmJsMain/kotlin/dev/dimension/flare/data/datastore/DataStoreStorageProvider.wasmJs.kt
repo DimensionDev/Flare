@@ -1,6 +1,7 @@
 package dev.dimension.flare.data.datastore
 
 import androidx.datastore.core.Storage
+import androidx.datastore.core.okio.OkioSerializer
 import androidx.datastore.core.okio.WebOpfsStorage
 import dev.dimension.flare.common.protobufSerializer
 import dev.dimension.flare.data.datastore.model.AppSettings
@@ -11,20 +12,29 @@ import dev.dimension.flare.data.io.PlatformPathProducer
 public actual class DataStoreStorageProvider actual constructor(
     @Suppress("UNUSED_PARAMETER") platformPathProducer: PlatformPathProducer,
 ) {
-    public actual fun flareConfigStorage(): Storage<FlareConfig> =
+    public actual fun <T> storage(
+        name: String,
+        serializer: OkioSerializer<T>,
+    ): Storage<T> =
         WebOpfsStorage(
+            serializer = serializer,
+            name = name,
+        )
+
+    public actual fun flareConfigStorage(): Storage<FlareConfig> =
+        storage(
             serializer = protobufSerializer(FlareConfig()),
             name = "flare_config.pb",
         )
 
     public actual fun composeConfigStorage(): Storage<ComposeConfigData> =
-        WebOpfsStorage(
+        storage(
             serializer = protobufSerializer(ComposeConfigData()),
             name = "compose_config.pb",
         )
 
     public actual fun appSettingsStorage(): Storage<AppSettings> =
-        WebOpfsStorage(
+        storage(
             serializer = protobufSerializer(AppSettings(version = "")),
             name = "app_settings.pb",
         )

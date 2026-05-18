@@ -2,6 +2,7 @@ package dev.dimension.flare.data.datastore
 
 import androidx.datastore.core.Storage
 import androidx.datastore.core.okio.OkioStorage
+import androidx.datastore.core.okio.OkioSerializer
 import dev.dimension.flare.common.protobufSerializer
 import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.datastore.model.ComposeConfigData
@@ -13,30 +14,33 @@ import okio.SYSTEM
 public actual class DataStoreStorageProvider actual constructor(
     private val platformPathProducer: PlatformPathProducer,
 ) {
-    public actual fun flareConfigStorage(): Storage<FlareConfig> =
+    public actual fun <T> storage(
+        name: String,
+        serializer: OkioSerializer<T>,
+    ): Storage<T> =
         OkioStorage(
             fileSystem = FileSystem.SYSTEM,
-            serializer = protobufSerializer(FlareConfig()),
+            serializer = serializer,
             producePath = {
-                platformPathProducer.dataStoreFile("flare_config.pb")
+                platformPathProducer.dataStoreFile(name)
             },
+        )
+
+    public actual fun flareConfigStorage(): Storage<FlareConfig> =
+        storage(
+            name = "flare_config.pb",
+            serializer = protobufSerializer(FlareConfig()),
         )
 
     public actual fun composeConfigStorage(): Storage<ComposeConfigData> =
-        OkioStorage(
-            fileSystem = FileSystem.SYSTEM,
+        storage(
+            name = "compose_config.pb",
             serializer = protobufSerializer(ComposeConfigData()),
-            producePath = {
-                platformPathProducer.dataStoreFile("compose_config.pb")
-            },
         )
 
     public actual fun appSettingsStorage(): Storage<AppSettings> =
-        OkioStorage(
-            fileSystem = FileSystem.SYSTEM,
+        storage(
+            name = "app_settings.pb",
             serializer = protobufSerializer(AppSettings(version = "")),
-            producePath = {
-                platformPathProducer.dataStoreFile("app_settings.pb")
-            },
         )
 }

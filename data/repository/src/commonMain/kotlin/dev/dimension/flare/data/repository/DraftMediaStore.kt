@@ -7,13 +7,27 @@ import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.io.PlatformPathProducer
 import okio.FileSystem
 import okio.Path.Companion.toPath
-import okio.SYSTEM
 import kotlin.uuid.Uuid
 
-public class DraftMediaStore(
+public class DraftMediaStore private constructor(
     private val platformPathProducer: PlatformPathProducer,
-    private val fileSystem: FileSystem = FileSystem.SYSTEM,
+    private val storage: DraftMediaStorage = defaultDraftMediaStorage(),
 ) {
+    public constructor(
+        platformPathProducer: PlatformPathProducer,
+    ) : this(
+        platformPathProducer = platformPathProducer,
+        storage = defaultDraftMediaStorage(),
+    )
+
+    public constructor(
+        platformPathProducer: PlatformPathProducer,
+        fileSystem: FileSystem,
+    ) : this(
+        platformPathProducer = platformPathProducer,
+        storage = FileSystemDraftMediaStorage(fileSystem),
+    )
+
     public suspend fun persist(
         groupId: String,
         medias: List<ComposeData.Media>,
@@ -26,10 +40,8 @@ public class DraftMediaStore(
                         .orEmpty()
                         .ifBlank { "${Uuid.random()}.bin" }
                 val path = platformPathProducer.draftMediaFile(groupId, "${index}_$fileName")
-                fileSystem.createDirectories(checkNotNull(path.parent))
-                fileSystem.write(path) {
-                    write(media.file.readBytes())
-                }
+                storage.createDirectories(checkNotNull(path.parent))
+                storage.write(path, media.file.readBytes())
                 SaveDraftMedia(
                     cachePath = path.toString(),
                     fileName = media.file.name,
@@ -61,8 +73,8 @@ public class DraftMediaStore(
     public fun delete(medias: List<DraftMedia>) {
         medias.forEach { media ->
             val path = media.cachePath.toPath()
-            if (fileSystem.exists(path)) {
-                fileSystem.delete(path)
+            if (storage.exists(path)) {
+                storage.delete(path)
             }
             cleanupEmptyGroupDirectory(media.groupId)
         }
@@ -76,15 +88,15 @@ public class DraftMediaStore(
             platformPathProducer
                 .draftMediaFile(groupId, "__placeholder__")
                 .parent ?: return
-        if (!fileSystem.exists(groupDirectory)) {
+        if (!storage.exists(groupDirectory)) {
             return
         }
-        fileSystem
+        storage
             .list(groupDirectory)
             .filterNot { keepPaths.contains(it) }
             .forEach { stalePath ->
-                if (fileSystem.exists(stalePath)) {
-                    fileSystem.delete(stalePath)
+                if (storage.exists(stalePath)) {
+                    storage.delete(stalePath)
                 }
             }
         cleanupEmptyGroupDirectory(groupId)
@@ -95,11 +107,11 @@ public class DraftMediaStore(
             platformPathProducer
                 .draftMediaFile(groupId, "__placeholder__")
                 .parent ?: return
-        if (!fileSystem.exists(groupDirectory)) {
+        if (!storage.exists(groupDirectory)) {
             return
         }
-        if (fileSystem.list(groupDirectory).isEmpty()) {
-            fileSystem.delete(groupDirectory)
+        if (storage.list(groupDirectory).isEmpty()) {
+            storage.delete(groupDirectory)
         }
     }
 }

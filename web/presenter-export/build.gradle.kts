@@ -12,4 +12,12 @@ kotlin {
         namespace = "dev.dimension.flare.web.presenter.export"
         platforms(FlarePlatform.WEB)
     }
+
+    sourceSets {
+        val wasmJsMain by getting {
+            dependencies {
+                implementation(libs.kotlinx.serialization.json)
+            }
+        }
+    }
 }

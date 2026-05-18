@@ -11,29 +11,29 @@ import dev.dimension.flare.data.network.vvo.model.Status
 import dev.dimension.flare.data.network.vvo.model.TimelineData
 import dev.dimension.flare.data.network.vvo.model.VVOResponse
 
-internal interface TimelineApi {
+public interface TimelineApi {
     @GET("feed/friends")
-    suspend fun getFriendsTimeline(
+    public suspend fun getFriendsTimeline(
         @Query("max_id") maxId: String? = null,
     ): VVOResponse<TimelineData>
 
     @GET("message/mentionsAt")
-    suspend fun getMentionsAt(
+    public suspend fun getMentionsAt(
         @Query("page") page: Int,
     ): VVOResponse<List<Status>>
 
     @GET("message/cmt")
-    suspend fun getComments(
+    public suspend fun getComments(
         @Query("page") page: Int,
     ): VVOResponse<List<Comment>>
 
     @GET("message/attitude")
-    suspend fun getAttitudes(
+    public suspend fun getAttitudes(
         @Query("page") page: Int,
     ): VVOResponse<List<Attitude>>
 
     @GET("comments/hotflow")
-    suspend fun getHotComments(
+    public suspend fun getHotComments(
         @Query("id") id: String,
         @Query("mid") mid: String,
         @Query("max_id") maxId: Long? = null,
@@ -41,13 +41,13 @@ internal interface TimelineApi {
     ): VVOResponse<HotflowData>
 
     @GET("api/statuses/repostTimeline")
-    suspend fun getRepostTimeline(
+    public suspend fun getRepostTimeline(
         @Query("id") id: String,
         @Query("page") page: Int,
     ): VVOResponse<RepostTimeline>
 
     @GET("comments/hotFlowChild")
-    suspend fun getHotFlowChild(
+    public suspend fun getHotFlowChild(
         @Query("cid") cid: String,
         @Query("max_id") maxId: Long? = null,
         @Query("max_id_type") maxIdType: Int = 0,

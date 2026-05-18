@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal data class ProfileData(
+public data class ProfileData(
     val user: User? = null,
     val statuses: List<Status>? = null,
     val more: String? = null,
@@ -14,7 +14,7 @@ internal data class ProfileData(
 )
 
 @Serializable
-internal data class Button(
+public data class Button(
     val type: String? = null,
     val name: String? = null,
     @SerialName("sub_type")
@@ -23,12 +23,12 @@ internal data class Button(
 )
 
 @Serializable
-internal data class Params(
+public data class Params(
     val uid: String? = null,
 )
 
 @Serializable
-internal data class ContainerInfo(
+public data class ContainerInfo(
     val isVideoCoverStyle: Long? = null,
     val isStarStyle: Long? = null,
     val userInfo: User? = null,
@@ -46,7 +46,7 @@ internal data class ContainerInfo(
 )
 
 @Serializable
-internal data class CardlistInfo(
+public data class CardlistInfo(
     val containerid: String? = null,
     @SerialName("v_p")
     val vP: Long? = null,
@@ -61,7 +61,7 @@ internal data class CardlistInfo(
 )
 
 @Serializable
-internal data class Card(
+public data class Card(
     @SerialName("card_style")
     val cardStyle: Long? = null,
     @SerialName("card_type")
@@ -76,20 +76,20 @@ internal data class Card(
 )
 
 @Serializable
-internal data class CardGroup(
+public data class CardGroup(
     val desc: String? = null,
     val user: User? = null,
     val mblog: Status? = null,
 )
 
 @Serializable
-internal data class TabsInfo(
+public data class TabsInfo(
     val selectedTab: Long? = null,
     val tabs: List<Tab>? = null,
 )
 
 @Serializable
-internal data class Tab(
+public data class Tab(
 //    val id: Long? = null,
     val tabKey: String? = null,
     @SerialName("must_show")
@@ -117,7 +117,7 @@ internal data class Tab(
 )
 
 @Serializable
-internal data class FilterGroup(
+public data class FilterGroup(
     val name: String? = null,
     val containerid: String? = null,
     val title: String? = null,
@@ -125,7 +125,7 @@ internal data class FilterGroup(
 )
 
 @Serializable
-internal data class FilterGroupInfo(
+public data class FilterGroupInfo(
     val title: String? = null,
     val icon: String? = null,
     @SerialName("icon_name")
@@ -135,14 +135,14 @@ internal data class FilterGroupInfo(
 )
 
 @Serializable
-internal data class TabParams(
+public data class TabParams(
     @SerialName("new_select_menu")
     val newSelectMenu: Long? = null,
     val gender: String? = null,
 )
 
 @Serializable
-internal data class RepostTimeline(
+public data class RepostTimeline(
     val data: List<Status>? = null,
     @SerialName("total_number")
     val totalNumber: Long? = null,
@@ -152,7 +152,7 @@ internal data class RepostTimeline(
 )
 
 @Serializable
-internal data class HotflowData(
+public data class HotflowData(
     val data: List<Comment>? = null,
     @SerialName("total_number")
     val totalNumber: Long? = null,
@@ -164,7 +164,7 @@ internal data class HotflowData(
 )
 
 @Serializable
-internal data class HotflowChildData(
+public data class HotflowChildData(
     val ok: Long? = null,
     val data: List<Comment>? = null,
     @SerialName("total_number")

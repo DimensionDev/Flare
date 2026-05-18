@@ -37,7 +37,7 @@ import kotlinx.serialization.json.longOrNull
 import kotlin.time.Instant
 
 @Serializable(with = VVOResponseSerializer::class)
-internal data class VVOResponse<T>(
+public data class VVOResponse<T>(
     val data: T? = null,
     val ok: Long? = null,
     @SerialName("http_code")
@@ -45,7 +45,7 @@ internal data class VVOResponse<T>(
 )
 
 @OptIn(ExperimentalSerializationApi::class)
-internal class VVOResponseSerializer<T>(
+public class VVOResponseSerializer<T>(
     private val dataSer: KSerializer<T>,
 ) : KSerializer<VVOResponse<T>> {
     override val descriptor: SerialDescriptor =
@@ -95,7 +95,7 @@ internal class VVOResponseSerializer<T>(
 }
 
 @Serializable
-internal data class TimelineData(
+public data class TimelineData(
     val statuses: List<Status>? = null,
     val advertises: JsonArray? = null,
     val ad: JsonArray? = null,
@@ -128,7 +128,7 @@ internal data class TimelineData(
 )
 
 @Serializable
-internal data class Status(
+public data class Status(
     val visible: Visible? = null,
     @SerialName("created_at")
     @Serializable(with = VVODateSerializer::class)
@@ -242,12 +242,12 @@ internal data class Status(
 }
 
 @Serializable
-internal data class Title(
+public data class Title(
     val text: String? = null,
 )
 
 @Serializable
-internal data class AttitudeDynamicMembersMessage(
+public data class AttitudeDynamicMembersMessage(
     @SerialName("user_grace_setting")
     val userGraceSetting: UserGraceSetting? = null,
     val bgimg: String? = null,
@@ -267,7 +267,7 @@ internal data class AttitudeDynamicMembersMessage(
 )
 
 @Serializable
-internal data class UserGraceSetting(
+public data class UserGraceSetting(
     @SerialName("zh_CN")
     val zhCN: String? = null,
     @SerialName("zh_TW")
@@ -277,7 +277,7 @@ internal data class UserGraceSetting(
 )
 
 @Serializable
-internal data class CommentManageInfo(
+public data class CommentManageInfo(
     @SerialName("comment_permission_type")
     val commentPermissionType: Long? = null,
     @SerialName("approval_comment_type")
@@ -289,14 +289,14 @@ internal data class CommentManageInfo(
 )
 
 @Serializable
-internal data class HotPage(
+public data class HotPage(
     val fid: String? = null,
     @SerialName("feed_detail_type")
     val feedDetailType: Long? = null,
 )
 
 @Serializable
-internal data class NumberDisplayStrategy(
+public data class NumberDisplayStrategy(
     @SerialName("apply_scenario_flag")
     val applyScenarioFlag: Long? = null,
     @SerialName("display_text_min_number")
@@ -306,7 +306,7 @@ internal data class NumberDisplayStrategy(
 )
 
 @Serializable
-internal data class StatusPageInfo(
+public data class StatusPageInfo(
     val type: String? = null,
     @SerialName("object_type")
     val objectType: Long? = null,
@@ -333,7 +333,7 @@ internal data class StatusPageInfo(
 )
 
 @Serializable
-internal data class Urls(
+public data class Urls(
     @SerialName("mp4_720p_mp4")
     val mp4720PMp4: String? = null,
     @SerialName("mp4_hd_mp4")
@@ -343,7 +343,7 @@ internal data class Urls(
 )
 
 @Serializable
-internal data class MediaInfo(
+public data class MediaInfo(
     @SerialName("stream_url")
     val streamURL: String? = null,
     @SerialName("stream_url_hd")
@@ -352,7 +352,7 @@ internal data class MediaInfo(
 )
 
 @Serializable
-internal data class PagePic(
+public data class PagePic(
     val width: String? = null,
     val pid: String? = null,
     val source: String? = null,
@@ -365,7 +365,7 @@ internal data class PagePic(
 )
 
 @Serializable
-internal data class StatusPic(
+public data class StatusPic(
     val pid: String? = null,
     val url: String? = null,
     val size: String? = null,
@@ -389,7 +389,7 @@ internal data class StatusPic(
 }
 
 @Serializable
-internal data class Large(
+public data class Large(
     val size: String? = null,
     val url: String? = null,
 //    val geo: StatusPicGeo? = null,
@@ -409,7 +409,7 @@ internal data class Large(
 }
 
 @Serializable
-internal data class StatusPicGeo(
+public data class StatusPicGeo(
     val width: JsonPrimitive? = null,
     val height: JsonPrimitive? = null,
     val croped: Boolean? = null,
@@ -422,7 +422,7 @@ internal data class StatusPicGeo(
 }
 
 @Serializable
-internal data class User(
+public data class User(
     val id: Long? = null,
     @SerialName("screen_name")
     val screenName: String? = null,
@@ -473,7 +473,7 @@ internal data class User(
 }
 
 @Serializable
-internal data class Visible(
+public data class Visible(
     // type 0: all,
     // type 10: fans only,
     val type: Long? = null,
@@ -482,13 +482,13 @@ internal data class Visible(
 )
 
 @Serializable
-internal data class Config(
+public data class Config(
     val login: Boolean? = null,
     val st: String? = null,
     val uid: String? = null,
 )
 
-internal object VVODateSerializer : KSerializer<Instant> {
+public object VVODateSerializer : KSerializer<Instant> {
     override val descriptor: SerialDescriptor
         get() = PrimitiveSerialDescriptor("Date", PrimitiveKind.STRING)
 
@@ -531,7 +531,7 @@ internal object VVODateSerializer : KSerializer<Instant> {
 }
 
 @Serializable
-internal data class StatusExtend(
+public data class StatusExtend(
     val ok: Long? = null,
     val longTextContent: String? = null,
     @SerialName("reposts_count")
@@ -543,12 +543,12 @@ internal data class StatusExtend(
 )
 
 @Serializable
-internal data class StatusDetailItem(
+public data class StatusDetailItem(
     val status: Status? = null,
 )
 
 @Serializable
-internal data class Comment(
+public data class Comment(
     @SerialName("disable_reply")
     val disableReply: Long? = null,
     @SerialName("created_at")
@@ -602,7 +602,7 @@ internal data class Comment(
 }
 
 @Serializable
-internal data class Attitude(
+public data class Attitude(
     val id: Long? = null,
     val idStr: String? = null,
     @SerialName("created_at")
@@ -631,7 +631,7 @@ internal data class Attitude(
 )
 
 @Serializable
-internal data class UploadResponse(
+public data class UploadResponse(
     @SerialName("pic_id")
     val picID: String? = null,
     @SerialName("thumbnail_pic")
@@ -643,7 +643,7 @@ internal data class UploadResponse(
 )
 
 @Serializable
-internal data class UnreadData(
+public data class UnreadData(
     val cmt: Long? = null,
     val status: Long? = null,
     val follower: Long? = null,

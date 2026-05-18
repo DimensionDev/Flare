@@ -7,12 +7,12 @@ import dev.dimension.flare.data.network.vvo.model.Config
 import dev.dimension.flare.data.network.vvo.model.UnreadData
 import dev.dimension.flare.data.network.vvo.model.VVOResponse
 
-internal interface ConfigApi {
+public interface ConfigApi {
     @GET("api/config")
-    suspend fun config(): VVOResponse<Config>
+    public suspend fun config(): VVOResponse<Config>
 
     @GET("api/remind/unread")
-    suspend fun remindUnread(
+    public suspend fun remindUnread(
         @Query("t") time: Long,
         @Header("X-Xsrf-Token") st: String,
     ): VVOResponse<UnreadData>

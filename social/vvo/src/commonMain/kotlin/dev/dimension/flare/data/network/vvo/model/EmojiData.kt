@@ -4,18 +4,18 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal data class EmojiData(
+public data class EmojiData(
     val data: Data? = null,
     val ok: Long? = null,
 )
 
 @Serializable
-internal data class Data(
+public data class Data(
     val emoticon: Emoticon? = null,
 )
 
 @Serializable
-internal data class Emoticon(
+public data class Emoticon(
     @SerialName("ZH_CN")
     val zhCN: Map<String, List<Zh>>? = null,
     @SerialName("ZH_TW")
@@ -23,7 +23,7 @@ internal data class Emoticon(
 )
 
 @Serializable
-internal data class Zh(
+public data class Zh(
     val phrase: String? = null,
     val url: String? = null,
 )

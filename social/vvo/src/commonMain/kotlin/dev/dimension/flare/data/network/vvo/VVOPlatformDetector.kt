@@ -8,7 +8,7 @@ import dev.dimension.flare.model.vvoHost
 import dev.dimension.flare.model.vvoHostLong
 import dev.dimension.flare.model.vvoHostShort
 
-internal data object VVOPlatformDetector : PlatformDetector {
+public data object VVOPlatformDetector : PlatformDetector {
     override val priority: Int = 90
 
     override suspend fun detect(host: String): NodeData? {

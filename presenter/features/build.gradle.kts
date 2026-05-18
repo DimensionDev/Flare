@@ -51,6 +51,7 @@ kotlin {
                 api(projects.social.api)
                 api(projects.social.microblog)
                 api(projects.social.rss)
+                api(projects.social.vvo)
                 api(projects.presenter.runtime)
                 implementation(dependencies.platform(libs.compose.bom))
                 implementation(libs.compose.runtime)

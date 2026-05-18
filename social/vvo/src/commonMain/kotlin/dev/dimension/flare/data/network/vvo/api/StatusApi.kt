@@ -13,21 +13,21 @@ import dev.dimension.flare.data.network.vvo.model.StatusExtend
 import dev.dimension.flare.data.network.vvo.model.VVOResponse
 import kotlinx.serialization.json.JsonElement
 
-internal interface StatusApi {
+public interface StatusApi {
     @GET("statuses/extend")
-    suspend fun getStatusExtend(
+    public suspend fun getStatusExtend(
         @Query("id") id: String,
         @Header("X-Xsrf-Token") xsrfToken: String,
     ): VVOResponse<StatusExtend>
 
     @GET("detail/{id}")
-    suspend fun getStatusDetail(
+    public suspend fun getStatusDetail(
         @Path("id") id: String,
     ): String
 
     @POST("api/statuses/update")
     @FormUrlEncoded
-    suspend fun updateStatus(
+    public suspend fun updateStatus(
         @Field("content") content: String,
         @Field("st") st: String,
         @Header("X-Xsrf-Token") xsrfToken: String = st,
@@ -38,7 +38,7 @@ internal interface StatusApi {
 
     @POST("api/statuses/repost")
     @FormUrlEncoded
-    suspend fun repostStatus(
+    public suspend fun repostStatus(
         @Field("id") id: String,
         @Field("content") content: String,
         @Field("st") st: String,
@@ -49,7 +49,7 @@ internal interface StatusApi {
 
     @POST("api/comments/create")
     @FormUrlEncoded
-    suspend fun commentStatus(
+    public suspend fun commentStatus(
         @Field("id") id: String,
         @Field("content") content: String,
         @Field("st") st: String,
@@ -60,7 +60,7 @@ internal interface StatusApi {
 
     @POST("api/comments/reply")
     @FormUrlEncoded
-    suspend fun replyComment(
+    public suspend fun replyComment(
         @Field("id") id: String,
         @Field("cid") cid: String,
         @Field("content") content: String,
@@ -73,7 +73,7 @@ internal interface StatusApi {
 
     @POST("profile/delMyblog")
     @FormUrlEncoded
-    suspend fun deleteStatus(
+    public suspend fun deleteStatus(
         @Field("mid") mid: String,
         @Field("st") st: String,
         @Header("X-Xsrf-Token") xsrfToken: String = st,
@@ -81,7 +81,7 @@ internal interface StatusApi {
 
     @POST("comments/destroy")
     @FormUrlEncoded
-    suspend fun deleteComment(
+    public suspend fun deleteComment(
         @Field("cid") cid: String,
         @Field("st") st: String,
         @Header("X-Xsrf-Token") xsrfToken: String = st,
@@ -89,7 +89,7 @@ internal interface StatusApi {
 
     @POST("api/attitudes/create")
     @FormUrlEncoded
-    suspend fun likeStatus(
+    public suspend fun likeStatus(
         @Field("id") id: String,
         @Field("st") st: String,
         @Field("attitude") attitude: String = "heart",
@@ -98,7 +98,7 @@ internal interface StatusApi {
 
     @POST("api/attitudes/destroy")
     @FormUrlEncoded
-    suspend fun unlikeStatus(
+    public suspend fun unlikeStatus(
         @Field("id") id: String,
         @Field("st") st: String,
         @Field("attitude") attitude: String = "heart",
@@ -107,7 +107,7 @@ internal interface StatusApi {
 
     @POST("api/likes/update")
     @FormUrlEncoded
-    suspend fun likesUpdate(
+    public suspend fun likesUpdate(
         @Field("id") id: String,
         @Field("st") st: String,
         @Field("type") type: String = "comment",
@@ -116,7 +116,7 @@ internal interface StatusApi {
 
     @POST("api/likes/destroy")
     @FormUrlEncoded
-    suspend fun likesDestroy(
+    public suspend fun likesDestroy(
         @Field("id") id: String,
         @Field("st") st: String,
         @Field("type") type: String = "comment",
@@ -125,7 +125,7 @@ internal interface StatusApi {
 
     @POST("api/statuses/createfav")
     @FormUrlEncoded
-    suspend fun favoriteStatus(
+    public suspend fun favoriteStatus(
         @Field("id") id: String,
         @Field("st") st: String,
         @Header("X-Xsrf-Token") xsrfToken: String = st,
@@ -133,7 +133,7 @@ internal interface StatusApi {
 
     @POST("api/statuses/destroyfav")
     @FormUrlEncoded
-    suspend fun unfavoriteStatus(
+    public suspend fun unfavoriteStatus(
         @Field("id") id: String,
         @Field("st") st: String,
         @Header("X-Xsrf-Token") xsrfToken: String = st,

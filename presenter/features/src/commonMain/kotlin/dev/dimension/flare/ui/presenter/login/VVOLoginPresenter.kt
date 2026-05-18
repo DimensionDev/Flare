@@ -61,9 +61,10 @@ public class VVOLoginPresenter(
     ) {
         val service = VVOService(flowOf(chocolate))
         val config = service.config()
-        val uid = config.data?.uid
+        val data = config.data
+        val uid = data?.uid
         requireNotNull(uid) { "uid is null" }
-        val st = config.data.st
+        val st = data.st
         requireNotNull(st) { "st is null" }
         val profile = service.profileInfo(uid, st)
         requireNotNull(profile.data) { "profile is null" }

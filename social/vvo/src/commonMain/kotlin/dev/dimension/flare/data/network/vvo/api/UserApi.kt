@@ -14,34 +14,34 @@ import dev.dimension.flare.data.network.vvo.model.ProfileData
 import dev.dimension.flare.data.network.vvo.model.User
 import dev.dimension.flare.data.network.vvo.model.VVOResponse
 
-internal interface UserApi {
+public interface UserApi {
     @POST("api/friendships/create")
     @FormUrlEncoded
-    suspend fun follow(
+    public suspend fun follow(
         @Field("st") st: String,
         @Field("uid") uid: String,
     ): VVOResponse<User>
 
     @POST("api/friendships/destory")
     @FormUrlEncoded
-    suspend fun unfollow(
+    public suspend fun unfollow(
         @Field("st") st: String,
         @Field("uid") uid: String,
     ): VVOResponse<User>
 
     @GET("profile/info")
-    suspend fun profileInfo(
+    public suspend fun profileInfo(
         @Query("uid") uid: String,
         @Header("X-Xsrf-Token") xsrfToken: String,
     ): VVOResponse<ProfileData>
 
     @HEAD("n/{screenName}")
-    suspend fun checkUserExistence(
+    public suspend fun checkUserExistence(
         @Path("screenName") screenName: String,
     ): Response<Unit>
 
     @GET("api/container/getIndex")
-    suspend fun getContainerIndex(
+    public suspend fun getContainerIndex(
         @Query("type") type: String? = null,
         @Query("value") value: String? = null,
         @Query("containerid") containerId: String? = null,

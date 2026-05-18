@@ -171,12 +171,13 @@ internal class VVOLoader(
 
     private suspend fun ensureLogin(): String {
         val config = service.config()
-        if (config.data?.login != true) {
+        val data = config.data
+        if (data?.login != true) {
             throw LoginExpiredException(
                 accountKey = accountKey,
                 platformType = PlatformType.VVo,
             )
         }
-        return requireNotNull(config.data.st) { "st is null" }
+        return requireNotNull(data.st) { "st is null" }
     }
 }

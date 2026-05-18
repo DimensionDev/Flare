@@ -74,11 +74,12 @@ private fun Status.renderStatusV2(accountKey: MicroBlogKey): UiTimelineV2.Post {
     val media =
         picsList.orEmpty().mapNotNull {
             val url = it.large?.url ?: it.url
+            val videoSrc = it.videoSrc
             if (url.isNullOrEmpty()) {
                 null
-            } else if (it.type == "video" && it.videoSrc != null) {
+            } else if (it.type == "video" && videoSrc != null) {
                 UiMedia.Video(
-                    url = it.videoSrc,
+                    url = videoSrc,
                     thumbnailUrl = it.url ?: url,
                     width = it.large?.geoValue?.widthValue ?: it.geoValue?.widthValue ?: 0f,
                     height = it.large?.geoValue?.heightValue ?: it.geoValue?.heightValue ?: 0f,
@@ -130,12 +131,13 @@ private fun Status.renderStatusV2(accountKey: MicroBlogKey): UiTimelineV2.Post {
                 ?.takeIf {
                     it.type == "bigPic"
                 }?.let {
-                    val url = it.pagePic?.url
+                    val pagePic = it.pagePic
+                    val url = pagePic?.url
                     if (url != null) {
                         UiMedia.Image(
                             url = url,
-                            width = it.pagePic.width?.toFloatOrNull() ?: 0f,
-                            height = it.pagePic.height?.toFloatOrNull() ?: 0f,
+                            width = pagePic.width?.toFloatOrNull() ?: 0f,
+                            height = pagePic.height?.toFloatOrNull() ?: 0f,
                             previewUrl = url,
                             description = null,
                             sensitive = false,
@@ -156,7 +158,8 @@ private fun Status.renderStatusV2(accountKey: MicroBlogKey): UiTimelineV2.Post {
     val isFromMe = user?.key == accountKey
     val displayUser = user
     val statusKey = MicroBlogKey(id = id, host = accountKey.host)
-    val canReblog = visible?.type == null || visible.type == 0L
+    val visibleType = visible?.type
+    val canReblog = visibleType == null || visibleType == 0L
     val url =
         buildString {
             append("https://$vvoHostLong/")
@@ -425,12 +428,12 @@ private fun Comment.renderStatusV2(accountKey: MicroBlogKey): UiTimelineV2.Post 
         createdAt = createdAt?.toUi() ?: Clock.System.now().toUi(),
         clickEvent =
             ClickEvent.Deeplink(
-                if (status != null) {
+                status?.let {
                     DeeplinkRoute.Status.VVOStatus(
-                        statusKey = status.renderStatusV2(accountKey).statusKey,
+                        statusKey = it.renderStatusV2(accountKey).statusKey,
                         accountType = AccountType.Specific(accountKey),
                     )
-                } else {
+                } ?: run {
                     DeeplinkRoute.Status.VVOComment(
                         commentKey = statusKey,
                         accountType = AccountType.Specific(accountKey),

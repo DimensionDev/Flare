@@ -40,14 +40,14 @@ private fun config(
     }
 }
 
-internal class VVOService(
+public class VVOService(
     private val chocolateFlow: Flow<String>,
 ) : TimelineApi by config(chocolateFlow = chocolateFlow).createTimelineApi(),
     UserApi by config(chocolateFlow = chocolateFlow).createUserApi(),
     ConfigApi by config(chocolateFlow = chocolateFlow).createConfigApi(),
     StatusApi by config(chocolateFlow = chocolateFlow).createStatusApi() {
-    companion object {
-        fun checkChocolates(chocolate: String): Boolean =
+    public companion object {
+        public fun checkChocolates(chocolate: String): Boolean =
             chocolate
                 .split(';')
                 .mapNotNull {
@@ -65,7 +65,7 @@ internal class VVOService(
                 }
     }
 
-    suspend fun getUid(screenName: String): String? {
+    public suspend fun getUid(screenName: String): String? {
         val response =
             ktorClient {
                 followRedirects = false
@@ -78,7 +78,7 @@ internal class VVOService(
         }
     }
 
-    suspend fun uploadPic(
+    public suspend fun uploadPic(
         st: String,
         filename: String,
         bytes: ByteArray,
@@ -117,7 +117,7 @@ internal class VVOService(
         ).bodyAsText()
             .decodeJson<UploadResponse>()
 
-    suspend fun emojis(): EmojiData = ktorClient().get("https://flareapp.moe/emoji.json").body()
+    public suspend fun emojis(): EmojiData = ktorClient().get("https://flareapp.moe/emoji.json").body()
 }
 
 private class VVOHeaderConfig {

@@ -8,7 +8,6 @@ import dev.dimension.flare.common.Locale
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.PlatformType
-import dev.dimension.flare.model.defaultSocialPlatformRegistry
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
@@ -72,7 +71,7 @@ internal fun accountServiceFlow(
     when (accountType) {
         AccountType.Guest -> {
             flowOf(
-                defaultSocialPlatformRegistry.guestDataSource(
+                repository.guestDataSource(
                     type = PlatformType.Mastodon,
                     host = "mastodon.social",
                     locale = Locale.language,
@@ -82,7 +81,7 @@ internal fun accountServiceFlow(
 
         is AccountType.GuestHost -> {
             flowOf(
-                defaultSocialPlatformRegistry.guestDataSource(
+                repository.guestDataSource(
                     type = PlatformType.Mastodon,
                     host = accountType.host,
                     locale = Locale.language,

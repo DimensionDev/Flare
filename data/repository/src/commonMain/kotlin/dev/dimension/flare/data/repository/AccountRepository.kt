@@ -11,6 +11,7 @@ import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.SocialPlatformRegistry
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiState
@@ -194,4 +195,15 @@ public class AccountRepository(
                 platformRegistry.createDataSource(account)
             }
         }
+
+    public fun guestDataSource(
+        type: PlatformType,
+        host: String,
+        locale: String,
+    ): MicroblogDataSource =
+        platformRegistry.guestDataSource(
+            type = type,
+            host = host,
+            locale = locale,
+        )
 }

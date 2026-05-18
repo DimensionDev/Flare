@@ -89,6 +89,15 @@ val validateModuleBoundaries by tasks.registering {
                 }
             }
 
+            if (project.path == ":data:database") {
+                dependencyPaths
+                    .filter {
+                        it.startsWith(":social:") ||
+                            it.startsWith(":presenter:") ||
+                            it == ":compose-ui"
+                    }.forEach { violations += "${project.path} must not depend on $it" }
+            }
+
             if (project.path in socialPlatformModules) {
                 dependencyPaths
                     .filter { it in socialPlatformModules }

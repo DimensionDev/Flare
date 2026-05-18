@@ -14,7 +14,7 @@ public sealed interface UiMedia {
 
     @Serializable
     @Immutable
-    public data class Image internal constructor(
+    public data class Image(
         override val url: String,
         val previewUrl: String,
         override val description: String?,
@@ -23,7 +23,7 @@ public sealed interface UiMedia {
         val sensitive: Boolean,
         override val customHeaders: SerializableImmutableMap<String, String>? = null,
     ) : UiMedia {
-        internal constructor(url: String, customHeaders: SerializableImmutableMap<String, String>? = null) : this(
+        public constructor(url: String, customHeaders: SerializableImmutableMap<String, String>? = null) : this(
             url = url,
             previewUrl = url,
             description = null,
@@ -39,7 +39,7 @@ public sealed interface UiMedia {
 
     @Serializable
     @Immutable
-    public data class Video internal constructor(
+    public data class Video(
         override val url: String,
         val thumbnailUrl: String,
         override val description: String?,
@@ -53,7 +53,7 @@ public sealed interface UiMedia {
 
     @Serializable
     @Immutable
-    public data class Gif internal constructor(
+    public data class Gif(
         override val url: String,
         val previewUrl: String,
         override val description: String?,
@@ -67,7 +67,7 @@ public sealed interface UiMedia {
 
     @Serializable
     @Immutable
-    public data class Audio internal constructor(
+    public data class Audio(
         override val url: String,
         override val description: String?,
         val previewUrl: String?,

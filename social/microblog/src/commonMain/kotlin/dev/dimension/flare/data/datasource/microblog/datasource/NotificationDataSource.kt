@@ -2,6 +2,6 @@ package dev.dimension.flare.data.datasource.microblog.datasource
 
 import dev.dimension.flare.data.datasource.microblog.handler.NotificationHandler
 
-internal interface NotificationDataSource {
-    val notificationHandler: NotificationHandler
+public interface NotificationDataSource {
+    public val notificationHandler: NotificationHandler
 }

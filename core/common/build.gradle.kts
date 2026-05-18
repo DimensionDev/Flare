@@ -25,6 +25,7 @@ kotlin {
                 api(libs.kotlinx.immutable)
                 api(libs.kotlinx.serialization.json)
                 api(libs.kotlinx.serialization.protobuf)
+                api(libs.datastore)
                 api(libs.xmlUtil)
             }
         }

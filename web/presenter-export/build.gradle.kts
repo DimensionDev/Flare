@@ -16,7 +16,11 @@ kotlin {
     sourceSets {
         val wasmJsMain by getting {
             dependencies {
+                implementation(projects.data.database)
                 implementation(projects.presenter.runtime)
+                implementation(projects.social.api)
+                implementation(projects.social.mastodon)
+                implementation(projects.social.rss)
                 implementation(libs.kotlinx.serialization.json)
             }
         }

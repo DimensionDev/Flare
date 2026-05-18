@@ -76,12 +76,12 @@ import kotlin.math.roundToLong
 import kotlin.time.Instant
 
 @JvmName("renderMisskeyNotes")
-internal fun List<Note>.render(accountKey: MicroBlogKey): List<UiTimelineV2> = map { it.render(accountKey) }
+public fun List<Note>.render(accountKey: MicroBlogKey): List<UiTimelineV2> = map { it.render(accountKey) }
 
 @JvmName("renderMisskeyNotifications")
-internal fun List<Notification>.render(accountKey: MicroBlogKey): List<UiTimelineV2> = map { it.render(accountKey) }
+public fun List<Notification>.render(accountKey: MicroBlogKey): List<UiTimelineV2> = map { it.render(accountKey) }
 
-internal fun Notification.render(accountKey: MicroBlogKey): UiTimelineV2 {
+public fun Notification.render(accountKey: MicroBlogKey): UiTimelineV2 {
     val user = user?.render(accountKey)
     val notificationType =
         runCatching {
@@ -387,7 +387,7 @@ public enum class MisskeyAchievement(
     }
 }
 
-internal fun Note.render(accountKey: MicroBlogKey): UiTimelineV2 {
+public fun Note.render(accountKey: MicroBlogKey): UiTimelineV2 {
     val wrapperStatus = this.renderStatus(accountKey)
     val actualStatus =
         if (!text.isNullOrEmpty() || !files.isNullOrEmpty() || poll != null || cw != null) {
@@ -744,7 +744,7 @@ private fun Note.renderStatus(accountKey: MicroBlogKey): UiTimelineV2.Post {
     )
 }
 
-internal fun ActionMenu.Companion.misskeyRenote(
+public fun ActionMenu.Companion.misskeyRenote(
     postKey: MicroBlogKey,
     count: Long,
     accountKey: MicroBlogKey?,
@@ -766,7 +766,7 @@ internal fun ActionMenu.Companion.misskeyRenote(
             },
     )
 
-internal fun ActionMenu.Companion.misskeyReact(
+public fun ActionMenu.Companion.misskeyReact(
     postKey: MicroBlogKey,
     hasReacted: Boolean,
     reaction: String?,
@@ -812,7 +812,7 @@ internal fun ActionMenu.Companion.misskeyReact(
             },
     )
 
-internal fun ActionMenu.Companion.misskeyFavourite(
+public fun ActionMenu.Companion.misskeyFavourite(
     postKey: MicroBlogKey,
     favourited: Boolean,
     accountKey: MicroBlogKey?,
@@ -867,7 +867,7 @@ private fun DriveFile.toUi(): UiMedia? {
     }
 }
 
-internal fun UserLite.render(accountKey: MicroBlogKey): UiProfile {
+public fun UserLite.render(accountKey: MicroBlogKey): UiProfile {
     val userHost = host
     val remoteHost =
         if (userHost.isNullOrEmpty()) {
@@ -911,7 +911,7 @@ internal fun UserLite.render(accountKey: MicroBlogKey): UiProfile {
     )
 }
 
-internal fun User.render(accountKey: MicroBlogKey): UiProfile {
+public fun User.render(accountKey: MicroBlogKey): UiProfile {
     val userHost = host
     val remoteHost =
         if (userHost.isNullOrEmpty()) {
@@ -985,7 +985,7 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
     )
 }
 
-internal fun EmojiSimple.toUi(): UiEmoji =
+public fun EmojiSimple.toUi(): UiEmoji =
     UiEmoji(
         shortcode = ":$name:",
         url = url,
@@ -994,7 +994,7 @@ internal fun EmojiSimple.toUi(): UiEmoji =
         insertText = " :$name: ",
     )
 
-internal fun resolveMisskeyEmoji(
+public fun resolveMisskeyEmoji(
     name: String,
     accountHost: String,
     emojis: Map<String, String>,
@@ -1308,13 +1308,13 @@ private class MisskeyRichTextBuilder(
     }
 }
 
-internal fun UserList.render(): UiList.List =
+public fun UserList.render(): UiList.List =
     UiList.List(
         id = id,
         title = name,
     )
 
-internal fun Meta200Response.render(): UiInstanceMetadata {
+public fun Meta200Response.render(): UiInstanceMetadata {
     val configuration =
         UiInstanceMetadata.Configuration(
             registration =
@@ -1364,13 +1364,13 @@ internal fun Meta200Response.render(): UiInstanceMetadata {
     )
 }
 
-internal fun Antenna.render(): UiList.Antenna =
+public fun Antenna.render(): UiList.Antenna =
     UiList.Antenna(
         id = id,
         title = name,
     )
 
-internal fun Channel.render(accountKey: MicroBlogKey): UiList.Channel =
+public fun Channel.render(accountKey: MicroBlogKey): UiList.Channel =
     UiList.Channel(
         id = id,
         title = name,

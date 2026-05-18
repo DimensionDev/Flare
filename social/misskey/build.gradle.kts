@@ -28,9 +28,11 @@ kotlin {
             dependencies {
                 api(projects.core.common)
                 api(projects.core.model)
+                api(projects.ui.model)
                 api(projects.data.network)
                 api(projects.social.api)
                 implementation(projects.data.repository)
+                implementation(libs.mfm.multiplatform)
             }
         }
         val commonTest by getting {

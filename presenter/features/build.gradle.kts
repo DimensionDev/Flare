@@ -41,6 +41,7 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 api(projects.core.model)
+                api(projects.presenter.runtime)
                 implementation(dependencies.platform(libs.compose.bom))
                 implementation(libs.compose.runtime)
                 implementation(libs.bundles.kotlinx)

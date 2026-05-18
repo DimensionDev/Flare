@@ -17,4 +17,22 @@ kotlin {
             FlarePlatform.IOS,
         )
     }
+
+    compilerOptions {
+        freeCompilerArgs.addAll(
+            "-module-name",
+            "flare_presenter_runtime",
+        )
+    }
+
+    sourceSets {
+        val commonMain by getting {
+            dependencies {
+                implementation(dependencies.platform(libs.compose.bom))
+                implementation(libs.compose.runtime)
+                implementation(libs.kotlinx.coroutines.core)
+                implementation(libs.molecule.runtime)
+            }
+        }
+    }
 }

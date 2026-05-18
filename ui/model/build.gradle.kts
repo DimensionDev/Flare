@@ -34,6 +34,7 @@ kotlin {
                 api(libs.compose.runtime)
                 api(libs.paging.common)
                 api(libs.kotlinx.serialization.json)
+                api(libs.bluesky.oauth)
                 implementation(dependencies.platform(libs.koin.bom))
                 implementation(libs.koin.core)
                 implementation(libs.kotlin.codepoints.deluxe)

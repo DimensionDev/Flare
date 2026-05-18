@@ -20,9 +20,9 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.SocialPlatformRegistry
 import dev.dimension.flare.ui.model.UiAccount
-import dev.dimension.flare.ui.model.UiAccount.Companion.createDataSource
-import dev.dimension.flare.ui.model.UiAccount.Companion.toUi
 import dev.dimension.flare.ui.model.UiState
+import dev.dimension.flare.ui.model.createDataSource
+import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.takeSuccess
 import kotlinx.collections.immutable.ImmutableList

@@ -36,31 +36,6 @@ internal data class TabSettingsV2(
 )
 
 @Immutable
-@Serializable
-public data class TimelineFilterConfig(
-    val excludedKinds: List<TimelinePostKind> = emptyList(),
-    val excludedContents: List<TimelinePostContent> = emptyList(),
-)
-
-@Immutable
-@Serializable
-public enum class TimelinePostKind {
-    Original,
-    Reply,
-    Repost,
-    Quote,
-}
-
-@Immutable
-@Serializable
-public enum class TimelinePostContent {
-    Text,
-    Image,
-    Video,
-    Other,
-}
-
-@Immutable
 public sealed interface TimelineTabItemV2 {
     public val id: String
     public val title: UiText

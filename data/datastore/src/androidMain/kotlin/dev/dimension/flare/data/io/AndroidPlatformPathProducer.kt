@@ -5,7 +5,7 @@ import androidx.datastore.dataStoreFile
 import okio.Path
 import okio.Path.Companion.toOkioPath
 
-internal class AndroidPlatformPathProducer(
+public class AndroidPlatformPathProducer(
     private val context: Context,
 ) : PlatformPathProducer {
     override fun dataStoreFile(fileName: String): Path = context.dataStoreFile(fileName).toOkioPath()

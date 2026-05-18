@@ -8,7 +8,7 @@ import platform.Foundation.NSFileManager
 import platform.Foundation.NSURL
 import platform.Foundation.NSUserDomainMask
 
-internal class ApplePlatformPathProducer : PlatformPathProducer {
+public class ApplePlatformPathProducer : PlatformPathProducer {
     override fun dataStoreFile(fileName: String): Path = "${fileDirectory()}/$fileName".toPath()
 
     override fun draftMediaFile(

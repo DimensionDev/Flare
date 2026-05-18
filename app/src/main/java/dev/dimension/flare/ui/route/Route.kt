@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.route
 import androidx.compose.runtime.Immutable
 import androidx.navigation3.runtime.NavKey
 import dev.dimension.flare.data.model.tab.TimelineSourceRef
+import dev.dimension.flare.data.model.tab.xqtDeviceFollowTimelineSource
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import kotlinx.collections.immutable.ImmutableMap
@@ -470,7 +471,7 @@ internal sealed interface Route : NavKey {
                         (deeplinkRoute.accountType as? AccountType.Specific)?.accountKey
                             ?: return null
                     Route.Timeline(
-                        source = TimelineSourceRef.xqtDeviceFollow(accountKey),
+                        source = xqtDeviceFollowTimelineSource(accountKey),
                     )
                 }
 

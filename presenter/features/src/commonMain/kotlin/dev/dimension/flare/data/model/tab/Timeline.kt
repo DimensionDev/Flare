@@ -2,11 +2,9 @@ package dev.dimension.flare.data.model.tab
 
 import androidx.compose.runtime.Immutable
 import dev.dimension.flare.data.model.IconType
-import dev.dimension.flare.data.model.appearance.AppearanceBag
 import dev.dimension.flare.data.model.appearance.AppearancePatch
 import dev.dimension.flare.data.model.appearance.TimelineAppearance
 import dev.dimension.flare.data.model.appearance.toBag
-import dev.dimension.flare.data.model.appearance.toPatch
 import dev.dimension.flare.data.model.appearance.withPatch
 import dev.dimension.flare.data.platform.RssTimelineSpecs
 import dev.dimension.flare.model.MicroBlogKey
@@ -23,17 +21,10 @@ import dev.dimension.flare.ui.presenter.home.TimelinePresenter
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromHexString
 import kotlinx.serialization.encodeToHexString
 import kotlinx.serialization.protobuf.ProtoBuf
-
-@Immutable
-@Serializable
-internal data class TabSettingsV2(
-    val homeSlots: List<TimelineSlot> = emptyList(),
-)
 
 @Immutable
 public sealed interface TimelineTabItemV2 {
@@ -264,129 +255,6 @@ public fun List<TimelineTabItemV2>.withSystemHomeMixedTimelineEnabled(
             add(minOf(targetIndex, size), systemGroup)
         }
 }
-
-internal const val SYSTEM_HOME_MIXED_TIMELINE_ID = "mixed_timeline_system_home"
-
-@Immutable
-@Serializable
-public data class TimelineSlot(
-    val id: String,
-    val content: TimelineSlotContent,
-    val presentation: TimelinePresentation = TimelinePresentation(),
-) {
-    val title: UiText =
-        presentation.titleOverride?.let { UiText.Raw(it) } ?: when (content) {
-            is TimelineSlotContent.Source -> content.source.title
-            is TimelineSlotContent.Group -> UiStrings.MixedTimeline.asText()
-        }
-
-    val icon: IconType =
-        presentation.iconOverride ?: when (content) {
-            is TimelineSlotContent.Source -> content.source.icon
-            is TimelineSlotContent.Group -> UiIcon.Rss.asType()
-        }
-}
-
-@Immutable
-@Serializable
-public data class TimelinePresentation internal constructor(
-    val titleOverride: String? = null,
-    val iconOverride: IconType? = null,
-    private val appearanceOverride: AppearanceBag? = null,
-    val enabled: Boolean = true,
-    val filterConfig: TimelineFilterConfig = TimelineFilterConfig(),
-) {
-    public val appearance: AppearancePatch? by lazy {
-        appearanceOverride?.toPatch()
-    }
-
-    internal fun withOverrides(
-        titleOverride: String?,
-        iconOverride: IconType?,
-        appearancePatch: AppearancePatch?,
-        enabled: Boolean,
-        filterConfig: TimelineFilterConfig,
-    ): TimelinePresentation =
-        TimelinePresentation(
-            titleOverride = titleOverride,
-            iconOverride = iconOverride,
-            appearanceOverride = appearancePatch?.takeUnless { it == AppearancePatch.EMPTY }?.toBag(),
-            enabled = enabled,
-            filterConfig = filterConfig,
-        )
-}
-
-@Immutable
-@Serializable
-public sealed interface TimelineSlotContent {
-    @Immutable
-    @Serializable
-    @SerialName("source")
-    public data class Source(
-        @SerialName("target")
-        public val source: TimelineSourceRef,
-    ) : TimelineSlotContent
-
-    @Immutable
-    @Serializable
-    @SerialName("group")
-    public data class Group(
-        public val children: List<TimelineSlot> = emptyList(),
-        public val source: GroupSource = GroupSource.Manual,
-        public val mergePolicy: TimelineMergePolicy = TimelineMergePolicy.Time,
-    ) : TimelineSlotContent
-}
-
-@Immutable
-@Serializable
-public enum class GroupSource {
-    Manual,
-    SystemHome,
-}
-
-@Immutable
-@Serializable
-public enum class TimelineMergePolicy {
-    Time,
-    TimePerPage,
-    Staggered,
-}
-
-@Immutable
-@Serializable
-public data class TimelineSourceRef(
-    val id: String,
-    val specId: String,
-    val title: UiText,
-    val icon: IconType,
-    val data: String,
-) {
-    public companion object {
-        @OptIn(ExperimentalSerializationApi::class)
-        public fun xqtDeviceFollow(accountKey: MicroBlogKey): TimelineSourceRef =
-            TimelineSourceRef(
-                id = "xqt.device_follow:$accountKey",
-                specId = "xqt.device_follow",
-                title = UiStrings.Posts.asText(),
-                icon = UiIcon.List.asType(),
-                data =
-                    ProtoBuf.encodeToHexString(
-                        TimelineSpec.AccountBasedData.serializer(),
-                        TimelineSpec.AccountBasedData(accountKey),
-                    ),
-            )
-    }
-}
-
-internal fun TimelineSourceRef.toSlot(
-    slotId: String = id,
-    presentation: TimelinePresentation = TimelinePresentation(),
-): TimelineSlot =
-    TimelineSlot(
-        id = slotId,
-        content = TimelineSlotContent.Source(this),
-        presentation = presentation,
-    )
 
 public data class TimelineSpec<T : TimelineSpec.Data>(
     val id: String,

@@ -11,5 +11,5 @@ internal actual fun draftFileItem(
     FileItem(
         name = name,
         type = type,
-        source = FileItem.Source.PathSource(path),
+        path = path,
     )

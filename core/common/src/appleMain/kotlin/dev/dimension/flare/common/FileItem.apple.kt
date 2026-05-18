@@ -4,10 +4,10 @@ import okio.FileSystem
 import okio.Path.Companion.toPath
 
 public actual class FileItem internal constructor(
-    internal actual val name: String?,
+    public actual val name: String?,
     private val loader: suspend () -> ByteArray,
-    internal actual val type: FileType,
-    internal actual val mimeType: String? = null,
+    public actual val type: FileType,
+    public actual val mimeType: String? = null,
 ) {
     public constructor(
         name: String?,
@@ -21,7 +21,7 @@ public actual class FileItem internal constructor(
         mimeType = mimeType,
     )
 
-    internal constructor(
+    public constructor(
         name: String?,
         path: String,
         type: FileType,
@@ -33,5 +33,5 @@ public actual class FileItem internal constructor(
         mimeType = mimeType,
     )
 
-    internal actual suspend fun readBytes(): ByteArray = loader()
+    public actual suspend fun readBytes(): ByteArray = loader()
 }

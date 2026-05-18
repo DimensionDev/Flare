@@ -27,6 +27,7 @@ kotlin {
                 api(libs.kotlinx.serialization.protobuf)
                 api(libs.datastore)
                 api(libs.xmlUtil)
+                implementation(libs.okio)
             }
         }
         val jvmMain by getting {

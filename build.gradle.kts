@@ -132,6 +132,36 @@ val validateModuleBoundaries by tasks.registering {
             }
         }
 
+        val forbiddenRegistryBypassPatterns =
+            listOf(
+                Regex("""\bPlatformType\.(spec|icon|agreementUrl)\b""") to
+                    "use SocialPlatformRegistry metadata instead of PlatformType extensions",
+                Regex("""\b(fun|val)\s+PlatformType\.(spec|icon|agreementUrl)\b""") to
+                    "do not reintroduce PlatformType metadata extensions",
+                Regex("""\bfun\s+UiAccount\.createDataSource\b""") to
+                    "use SocialPlatformRegistry.createDataSource(account) instead of UiAccount.createDataSource()",
+                Regex("""\.\s*createDataSource\s*\(\s*\)""") to
+                    "use SocialPlatformRegistry.createDataSource(account) instead of zero-argument createDataSource()",
+                Regex("""\bPlatformType\.entries\b""") to
+                    "use SocialPlatformRegistry for platform iteration",
+                Regex("""\bPlatformType\.values\s*\(""") to
+                    "use SocialPlatformRegistry for platform iteration",
+            )
+        subprojects.forEach { project ->
+            project.kotlinSourceFiles().forEach { file ->
+                file.useLines { lines ->
+                    lines.forEachIndexed { index, line ->
+                        forbiddenRegistryBypassPatterns.forEach { (pattern, message) ->
+                            if (pattern.containsMatchIn(line)) {
+                                violations +=
+                                    "${file.relativeTo(rootDir).path}:${index + 1} $message: ${line.trim()}"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         val forbiddenCoreImport =
             Regex("""^import\s+dev\.dimension\.flare\.(data|social|ui\.presenter|ui\.component|ui\.screen)\.""")
         subprojects

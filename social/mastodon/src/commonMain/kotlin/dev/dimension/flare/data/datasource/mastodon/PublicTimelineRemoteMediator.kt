@@ -1,30 +1,40 @@
 package dev.dimension.flare.data.datasource.mastodon
 
+import androidx.paging.ExperimentalPagingApi
+import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
-import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
-import dev.dimension.flare.data.network.mastodon.api.AccountResources
+import dev.dimension.flare.data.network.mastodon.MastodonService
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.model.UiProfile
+import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
 
-internal class MastodonFansPagingSource(
-    private val service: AccountResources,
-    private val accountKey: MicroBlogKey?,
-    private val host: String,
-    private val userKey: MicroBlogKey,
-) : RemoteLoader<UiProfile> {
+@OptIn(ExperimentalPagingApi::class)
+public class PublicTimelineRemoteMediator(
+    private val service: MastodonService,
+    private val accountKey: MicroBlogKey,
+    private val local: Boolean,
+) : CacheableRemoteLoader<UiTimelineV2> {
+    override val pagingKey: String =
+        buildString {
+            append("public_timeline")
+            if (local) {
+                append("_local")
+            }
+            append("_$accountKey")
+        }
+
     override suspend fun load(
         pageSize: Int,
         request: PagingRequest,
-    ): PagingResult<UiProfile> {
+    ): PagingResult<UiTimelineV2> {
         val response =
             when (request) {
                 PagingRequest.Refresh -> {
                     service
-                        .followers(
-                            id = userKey.id,
+                        .publicTimeline(
                             limit = pageSize,
+                            local = local,
                         )
                 }
 
@@ -35,18 +45,19 @@ internal class MastodonFansPagingSource(
                 }
 
                 is PagingRequest.Append -> {
-                    service.followers(
-                        id = userKey.id,
+                    service.publicTimeline(
                         limit = pageSize,
                         max_id = request.nextKey,
+                        local = local,
                     )
                 }
             }
 
         return PagingResult(
-            endOfPaginationReached = response.isEmpty() || response.next == null,
-            data = response.map { it.render(accountKey = accountKey, host = host) },
+            endOfPaginationReached = response.isEmpty(),
+            data = response.render(accountKey),
             nextKey = response.next,
+            previousKey = response.prev,
         )
     }
 }

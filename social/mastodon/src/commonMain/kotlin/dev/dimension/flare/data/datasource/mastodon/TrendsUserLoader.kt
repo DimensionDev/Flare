@@ -8,7 +8,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.mapper.render
 
-internal class TrendsUserLoader(
+public class TrendsUserLoader(
     private val service: TrendsResources,
     private val accountKey: MicroBlogKey?,
     private val host: String,

@@ -10,15 +10,11 @@ import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
 
 @OptIn(ExperimentalPagingApi::class)
-internal class ListTimelineRemoteMediator(
-    private val listId: String,
+public class DiscoverStatusRemoteMediator(
     private val service: MastodonService,
     private val accountKey: MicroBlogKey,
 ) : CacheableRemoteLoader<UiTimelineV2> {
-    override val pagingKey = "list_${accountKey}_$listId"
-
-    override val supportPrepend: Boolean
-        get() = true
+    override val pagingKey: String = "discover_status_$accountKey"
 
     override suspend fun load(
         pageSize: Int,
@@ -27,35 +23,19 @@ internal class ListTimelineRemoteMediator(
         val response =
             when (request) {
                 PagingRequest.Refresh -> {
-                    service
-                        .listTimeline(
-                            listId = listId,
-                            limit = pageSize,
-                        )
+                    service.trendsStatuses()
                 }
 
-                is PagingRequest.Prepend -> {
-                    service.listTimeline(
-                        listId = listId,
-                        limit = pageSize,
-                        min_id = request.previousKey,
-                    )
-                }
-
-                is PagingRequest.Append -> {
-                    service.listTimeline(
-                        listId = listId,
-                        limit = pageSize,
-                        max_id = request.nextKey,
+                else -> {
+                    return PagingResult(
+                        endOfPaginationReached = true,
                     )
                 }
             }
 
         return PagingResult(
-            endOfPaginationReached = response.isEmpty(),
+            endOfPaginationReached = true,
             data = response.render(accountKey),
-            nextKey = response.next,
-            previousKey = response.prev,
         )
     }
 }

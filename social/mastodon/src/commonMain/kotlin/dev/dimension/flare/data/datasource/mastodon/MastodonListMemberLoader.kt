@@ -11,7 +11,7 @@ import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.mapper.render
 
-internal class MastodonListMemberLoader(
+public class MastodonListMemberLoader(
     private val service: MastodonService,
     private val accountKey: MicroBlogKey,
 ) : ListMemberLoader {

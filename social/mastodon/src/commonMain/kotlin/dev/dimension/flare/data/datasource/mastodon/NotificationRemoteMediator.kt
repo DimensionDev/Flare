@@ -5,17 +5,19 @@ import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoade
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.network.mastodon.MastodonService
-import dev.dimension.flare.data.network.mastodon.api.model.NotificationTypes
+import dev.dimension.flare.data.network.mastodon.api.model.MarkerUpdate
+import dev.dimension.flare.data.network.mastodon.api.model.UpdateContent
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
 
 @OptIn(ExperimentalPagingApi::class)
-internal class MentionRemoteMediator(
+public class NotificationRemoteMediator(
     private val service: MastodonService,
     private val accountKey: MicroBlogKey,
+    private val onClearMarker: () -> Unit,
 ) : CacheableRemoteLoader<UiTimelineV2> {
-    override val pagingKey: String = "mention_$accountKey"
+    override val pagingKey: String = "notification_$accountKey"
 
     override suspend fun load(
         pageSize: Int,
@@ -27,15 +29,18 @@ internal class MentionRemoteMediator(
                     service
                         .notification(
                             limit = pageSize,
-                            exclude_types = NotificationTypes.entries.filter { it != NotificationTypes.Mention },
-                        )
+                        ).also { notifications ->
+                            notifications.firstOrNull()?.id?.let { id ->
+                                service.updateMarker(MarkerUpdate(notifications = UpdateContent(id)))
+                                onClearMarker.invoke()
+                            }
+                        }
                 }
 
                 is PagingRequest.Prepend -> {
                     service.notification(
                         limit = pageSize,
                         min_id = request.previousKey,
-                        exclude_types = NotificationTypes.entries.filter { it != NotificationTypes.Mention },
                     )
                 }
 
@@ -43,7 +48,6 @@ internal class MentionRemoteMediator(
                     service.notification(
                         limit = pageSize,
                         max_id = request.nextKey,
-                        exclude_types = NotificationTypes.entries.filter { it != NotificationTypes.Mention },
                     )
                 }
             }

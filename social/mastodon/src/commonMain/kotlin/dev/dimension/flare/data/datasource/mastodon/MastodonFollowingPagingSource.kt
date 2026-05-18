@@ -1,46 +1,42 @@
 package dev.dimension.flare.data.datasource.mastodon
 
-import androidx.paging.ExperimentalPagingApi
-import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
-import dev.dimension.flare.data.network.mastodon.MastodonService
+import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
+import dev.dimension.flare.data.network.mastodon.api.AccountResources
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.mapper.render
 
-@OptIn(ExperimentalPagingApi::class)
-internal class FavouriteTimelineRemoteMediator(
-    private val service: MastodonService,
-    private val accountKey: MicroBlogKey,
-) : CacheableRemoteLoader<UiTimelineV2> {
-    override val pagingKey: String = "favourite_$accountKey"
-
-    override val supportPrepend: Boolean
-        get() = true
-
+public class MastodonFollowingPagingSource(
+    private val service: AccountResources,
+    private val accountKey: MicroBlogKey?,
+    private val host: String,
+    private val userKey: MicroBlogKey,
+) : RemoteLoader<UiProfile> {
     override suspend fun load(
         pageSize: Int,
         request: PagingRequest,
-    ): PagingResult<UiTimelineV2> {
+    ): PagingResult<UiProfile> {
         val response =
             when (request) {
                 PagingRequest.Refresh -> {
                     service
-                        .favorites(
+                        .following(
+                            id = userKey.id,
                             limit = pageSize,
                         )
                 }
 
                 is PagingRequest.Prepend -> {
-                    service.favorites(
-                        limit = pageSize,
-                        min_id = request.previousKey,
+                    return PagingResult(
+                        endOfPaginationReached = true,
                     )
                 }
 
                 is PagingRequest.Append -> {
-                    service.favorites(
+                    service.following(
+                        id = userKey.id,
                         limit = pageSize,
                         max_id = request.nextKey,
                     )
@@ -49,9 +45,8 @@ internal class FavouriteTimelineRemoteMediator(
 
         return PagingResult(
             endOfPaginationReached = response.isEmpty() || response.next == null,
-            data = response.render(accountKey),
+            data = response.map { it.render(accountKey = accountKey, host = host) },
             nextKey = response.next,
-            previousKey = response.prev,
         )
     }
 }

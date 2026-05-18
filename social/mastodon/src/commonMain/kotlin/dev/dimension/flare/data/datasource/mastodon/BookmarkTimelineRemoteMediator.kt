@@ -10,19 +10,14 @@ import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
 
 @OptIn(ExperimentalPagingApi::class)
-internal class PublicTimelineRemoteMediator(
+public class BookmarkTimelineRemoteMediator(
     private val service: MastodonService,
     private val accountKey: MicroBlogKey,
-    private val local: Boolean,
 ) : CacheableRemoteLoader<UiTimelineV2> {
-    override val pagingKey: String =
-        buildString {
-            append("public_timeline")
-            if (local) {
-                append("_local")
-            }
-            append("_$accountKey")
-        }
+    override val pagingKey: String = "bookmark_$accountKey"
+
+    override val supportPrepend: Boolean
+        get() = true
 
     override suspend fun load(
         pageSize: Int,
@@ -32,29 +27,28 @@ internal class PublicTimelineRemoteMediator(
             when (request) {
                 PagingRequest.Refresh -> {
                     service
-                        .publicTimeline(
+                        .bookmarks(
                             limit = pageSize,
-                            local = local,
                         )
                 }
 
                 is PagingRequest.Prepend -> {
-                    return PagingResult(
-                        endOfPaginationReached = true,
+                    service.bookmarks(
+                        limit = pageSize,
+                        min_id = request.previousKey,
                     )
                 }
 
                 is PagingRequest.Append -> {
-                    service.publicTimeline(
+                    service.bookmarks(
                         limit = pageSize,
                         max_id = request.nextKey,
-                        local = local,
                     )
                 }
             }
 
         return PagingResult(
-            endOfPaginationReached = response.isEmpty(),
+            endOfPaginationReached = response.isEmpty() || response.next == null,
             data = response.render(accountKey),
             nextKey = response.next,
             previousKey = response.prev,

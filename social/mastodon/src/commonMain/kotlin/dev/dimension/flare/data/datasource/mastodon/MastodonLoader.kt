@@ -20,8 +20,8 @@ import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
 
-internal class MastodonLoader(
-    val accountKey: MicroBlogKey,
+public class MastodonLoader(
+    public val accountKey: MicroBlogKey,
     private val service: MastodonService,
 ) : NotificationLoader,
     UserLoader,

@@ -10,11 +10,12 @@ import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
 
 @OptIn(ExperimentalPagingApi::class)
-internal class HomeTimelineRemoteMediator(
+public class ListTimelineRemoteMediator(
+    private val listId: String,
     private val service: MastodonService,
     private val accountKey: MicroBlogKey,
 ) : CacheableRemoteLoader<UiTimelineV2> {
-    override val pagingKey: String = "home_$accountKey"
+    override val pagingKey: String = "list_${accountKey}_$listId"
 
     override val supportPrepend: Boolean
         get() = true
@@ -27,20 +28,23 @@ internal class HomeTimelineRemoteMediator(
             when (request) {
                 PagingRequest.Refresh -> {
                     service
-                        .homeTimeline(
+                        .listTimeline(
+                            listId = listId,
                             limit = pageSize,
                         )
                 }
 
                 is PagingRequest.Prepend -> {
-                    service.homeTimeline(
+                    service.listTimeline(
+                        listId = listId,
                         limit = pageSize,
                         min_id = request.previousKey,
                     )
                 }
 
                 is PagingRequest.Append -> {
-                    service.homeTimeline(
+                    service.listTimeline(
+                        listId = listId,
                         limit = pageSize,
                         max_id = request.nextKey,
                     )

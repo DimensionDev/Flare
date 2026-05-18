@@ -10,7 +10,7 @@ import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
 
 @OptIn(ExperimentalPagingApi::class)
-internal class UserTimelineRemoteMediator(
+public class UserTimelineRemoteMediator(
     private val service: MastodonService,
     private val accountKey: MicroBlogKey,
     private val userKey: MicroBlogKey,
@@ -18,7 +18,7 @@ internal class UserTimelineRemoteMediator(
     private val withReplies: Boolean = false,
     private val withPinned: Boolean = false,
 ) : CacheableRemoteLoader<UiTimelineV2> {
-    override val pagingKey =
+    override val pagingKey: String =
         buildString {
             append("user_timeline")
             if (onlyMedia) {

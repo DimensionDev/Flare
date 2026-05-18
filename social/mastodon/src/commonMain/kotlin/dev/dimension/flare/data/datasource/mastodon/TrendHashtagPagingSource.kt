@@ -6,7 +6,7 @@ import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.network.mastodon.api.TrendsResources
 import dev.dimension.flare.ui.model.UiHashtag
 
-internal class TrendHashtagPagingSource(
+public class TrendHashtagPagingSource(
     private val service: TrendsResources,
 ) : RemoteLoader<UiHashtag> {
     override suspend fun load(

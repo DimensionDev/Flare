@@ -10,7 +10,7 @@ import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
 
 @OptIn(ExperimentalPagingApi::class)
-internal class SearchStatusPagingSource(
+public class SearchStatusPagingSource(
     private val service: MastodonService,
     private val accountKey: MicroBlogKey,
     private val query: String,

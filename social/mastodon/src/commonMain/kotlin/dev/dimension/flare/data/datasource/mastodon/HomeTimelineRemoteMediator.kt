@@ -10,11 +10,11 @@ import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
 
 @OptIn(ExperimentalPagingApi::class)
-internal class BookmarkTimelineRemoteMediator(
+public class HomeTimelineRemoteMediator(
     private val service: MastodonService,
     private val accountKey: MicroBlogKey,
 ) : CacheableRemoteLoader<UiTimelineV2> {
-    override val pagingKey: String = "bookmark_$accountKey"
+    override val pagingKey: String = "home_$accountKey"
 
     override val supportPrepend: Boolean
         get() = true
@@ -27,20 +27,20 @@ internal class BookmarkTimelineRemoteMediator(
             when (request) {
                 PagingRequest.Refresh -> {
                     service
-                        .bookmarks(
+                        .homeTimeline(
                             limit = pageSize,
                         )
                 }
 
                 is PagingRequest.Prepend -> {
-                    service.bookmarks(
+                    service.homeTimeline(
                         limit = pageSize,
                         min_id = request.previousKey,
                     )
                 }
 
                 is PagingRequest.Append -> {
-                    service.bookmarks(
+                    service.homeTimeline(
                         limit = pageSize,
                         max_id = request.nextKey,
                     )
@@ -48,7 +48,7 @@ internal class BookmarkTimelineRemoteMediator(
             }
 
         return PagingResult(
-            endOfPaginationReached = response.isEmpty() || response.next == null,
+            endOfPaginationReached = response.isEmpty(),
             data = response.render(accountKey),
             nextKey = response.next,
             previousKey = response.prev,

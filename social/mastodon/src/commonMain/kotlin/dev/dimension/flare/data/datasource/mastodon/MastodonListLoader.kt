@@ -13,7 +13,7 @@ import dev.dimension.flare.ui.model.UiList
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
-internal class MastodonListLoader(
+public class MastodonListLoader(
     private val service: MastodonService,
     private val accountKey: MicroBlogKey,
 ) : ListLoader<UiList.List> {

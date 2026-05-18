@@ -10,13 +10,18 @@ import kotlin.js.JsName
 import kotlin.js.JsString
 import kotlin.js.Promise
 import kotlin.js.toJsString
+import kotlinx.serialization.SerializationException
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 
+private val bridgeJson = Json
 private var nextHandleId = 1
 private var nextSubscriptionId = 1
 private var initializedConfigJson: String = "{}"
+private var initializedConfig: JsonElement = JsonObject(emptyMap())
 
 private val presenterHandles = mutableMapOf<String, PresenterHandle>()
 private val supportedPresenterTypeIds =
@@ -38,14 +43,17 @@ private val supportedPresenterTypeIds =
 private data class PresenterHandle(
     val type: String,
     val argsJson: String,
+    val args: JsonElement,
     val subscribers: MutableMap<String, (String) -> Unit> = mutableMapOf(),
     var dispatchCount: Int = 0,
     var lastActionJson: String? = null,
+    var lastAction: JsonElement? = null,
 )
 
 @JsExport
 @JsName("initFlare")
 public fun initFlare(configJson: String): Promise<JsAny?> {
+    initializedConfig = parseBridgeJson(configJson, "configJson")
     initializedConfigJson = configJson
     return Promise.resolve(null)
 }
@@ -59,11 +67,13 @@ public fun createPresenter(
     require(type in supportedPresenterTypeIds) {
         "Unsupported presenter type: $type"
     }
+    val args = parseBridgeJson(argsJson, "argsJson")
     val handleId = "presenter-${nextHandleId++}"
     presenterHandles[handleId] =
         PresenterHandle(
             type = type,
             argsJson = argsJson,
+            args = args,
         )
     return handleId
 }
@@ -95,14 +105,17 @@ public fun dispatch(
     actionJson: String,
 ): Promise<JsString> {
     val handle = requireHandle(handleId)
+    val action = parseBridgeJson(actionJson, "actionJson")
     handle.dispatchCount += 1
     handle.lastActionJson = actionJson
+    handle.lastAction = action
     val resultJson =
         JsonObject(
             mapOf(
                 "handleId" to JsonPrimitive(handleId),
                 "type" to JsonPrimitive(handle.type),
                 "actionJson" to JsonPrimitive(actionJson),
+                "action" to action,
                 "accepted" to JsonPrimitive(true),
                 "dispatchCount" to JsonPrimitive(handle.dispatchCount),
             ),
@@ -122,6 +135,16 @@ private fun requireHandle(handleId: String): PresenterHandle =
         "Unknown presenter handle: $handleId"
     }
 
+private fun parseBridgeJson(
+    json: String,
+    fieldName: String,
+): JsonElement =
+    try {
+        bridgeJson.parseToJsonElement(json)
+    } catch (cause: SerializationException) {
+        throw IllegalArgumentException("$fieldName must be valid JSON.", cause)
+    }
+
 private fun PresenterHandle.notifySubscribers() {
     val stateJson = stateJson()
     subscribers.values.forEach { callback ->
@@ -134,10 +157,13 @@ private fun PresenterHandle.stateJson(): String =
         mapOf(
             "type" to JsonPrimitive(type),
             "argsJson" to JsonPrimitive(argsJson),
+            "args" to args,
             "initializedConfigJson" to JsonPrimitive(initializedConfigJson),
+            "config" to initializedConfig,
             "ready" to JsonPrimitive(true),
             "dispatchCount" to JsonPrimitive(dispatchCount),
             "lastActionJson" to (lastActionJson?.let(::JsonPrimitive) ?: JsonNull),
+            "lastAction" to (lastAction ?: JsonNull),
             "supportedPresenterTypes" to
                 JsonObject(
                     supportedPresenterTypeIds.associateWith { JsonPrimitive(true) },

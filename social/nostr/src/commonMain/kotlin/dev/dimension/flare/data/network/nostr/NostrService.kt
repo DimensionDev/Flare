@@ -79,17 +79,17 @@ public val defaultNostrRelays: List<String> =
         "wss://nostr.bitcoiner.social",
     )
 
-internal class NostrService(
+public class NostrService(
     private val cache: NostrCache,
     private val accountKey: MicroBlogKey,
     credential: UiAccount.Nostr.Credential,
     private val amberSignerBridge: AmberSignerBridge,
     initialRelays: List<String> = emptyList(),
 ) : AutoCloseable {
-    companion object {
+    public companion object {
         private val HEX_KEY_REGEX = Regex("^[0-9a-fA-F]{64}\$")
         private val HEX_DIGITS = "0123456789abcdef".toCharArray()
-        internal const val NOSTR_HOST: String = "nostr"
+        public const val NOSTR_HOST: String = "nostr"
         private const val RELAY_LIST_METADATA_KIND = 10_002
         private const val MIN_EARLY_RETURN_EVENTS = 4
         private const val PUBLISH_SUCCESS_QUORUM = 3
@@ -102,7 +102,7 @@ internal class NostrService(
         private const val MAX_HOME_AUTHORS = 250
         private const val MIN_METADATA_EVENT_LIMIT = 50
 
-        internal suspend fun importAccount(input: String): ImportedAccount {
+        public suspend fun importAccount(input: String): ImportedAccount {
             val value = input.removePrefix("nostr:").trim()
             require(value.isNotEmpty()) { "A public key, private key, or bunker URI is required" }
 
@@ -132,7 +132,7 @@ internal class NostrService(
             error("Unsupported Nostr account input")
         }
 
-        internal fun generateAccount(): ImportedAccount.LocalKey =
+        public fun generateAccount(): ImportedAccount.LocalKey =
             RustKeys.Companion.generate().use { keys ->
                 ImportedAccount.LocalKey(
                     pubkeyHex = keys.publicKey().use { it.toHex() },
@@ -141,16 +141,16 @@ internal class NostrService(
                 )
             }
 
-        internal interface PendingQrLogin : AutoCloseable {
-            val connectUri: String
+        public interface PendingQrLogin : AutoCloseable {
+            public val connectUri: String
 
-            suspend fun awaitAccount(): ImportedAccount.RemoteSigner
+            public suspend fun awaitAccount(): ImportedAccount.RemoteSigner
         }
 
-        internal fun beginQrLogin(relays: List<String> = defaultNostrRelays): PendingQrLogin =
+        public fun beginQrLogin(relays: List<String> = defaultNostrRelays): PendingQrLogin =
             PendingQrLoginSession(normalizeRelayUrls(relays))
 
-        internal suspend fun resolvePublicRelays(
+        public suspend fun resolvePublicRelays(
             pubkeyHex: String,
             bootstrapRelays: List<String> = defaultNostrRelays,
         ): List<String> {
@@ -182,7 +182,7 @@ internal class NostrService(
             }
         }
 
-        internal fun exportAccount(credential: UiAccount.Nostr.Credential): ImportedAccount {
+        public fun exportAccount(credential: UiAccount.Nostr.Credential): ImportedAccount {
             val secretKey = (credential.effectiveSigner as? NostrSignerCredential.LocalKey)?.nsec
             requireNotNull(secretKey) {
                 "Nostr account does not have an exportable private key"
@@ -373,7 +373,7 @@ internal class NostrService(
         signerHandle.close()
     }
 
-    suspend fun ensureConnection() {
+    public suspend fun ensureConnection() {
         relayMutex.withLock {
             syncRelaysLocked(initialRelays)
             if (connected) {
@@ -384,7 +384,7 @@ internal class NostrService(
         }
     }
 
-    suspend fun updateRelays(relays: List<String>) {
+    public suspend fun updateRelays(relays: List<String>) {
         relayMutex.withLock {
             syncRelaysLocked(relays.normalizeRelayUrls())
         }
@@ -414,19 +414,19 @@ internal class NostrService(
         }
     }
 
-    internal sealed interface ImportedAccount {
-        val pubkeyHex: String
-        val npub: String
-        val signerCredential: NostrSignerCredential?
+    public sealed interface ImportedAccount {
+        public val pubkeyHex: String
+        public val npub: String
+        public val signerCredential: NostrSignerCredential?
 
-        data class ReadOnly(
+        public data class ReadOnly(
             override val pubkeyHex: String,
             override val npub: String,
         ) : ImportedAccount {
             override val signerCredential: NostrSignerCredential? = null
         }
 
-        data class LocalKey(
+        public data class LocalKey(
             override val pubkeyHex: String,
             override val npub: String,
             val nsec: String,
@@ -434,7 +434,7 @@ internal class NostrService(
             override val signerCredential: NostrSignerCredential = NostrSignerCredential.LocalKey(nsec)
         }
 
-        data class RemoteSigner(
+        public data class RemoteSigner(
             override val pubkeyHex: String,
             override val npub: String,
             override val signerCredential: NostrSignerCredential,
@@ -544,7 +544,7 @@ internal class NostrService(
 
     private fun List<String>.normalizeRelayUrls(): List<String> = normalizeRelayUrls(this)
 
-    internal suspend fun loadHomeTimeline(
+    public suspend fun loadHomeTimeline(
         pageSize: Int,
         until: Long?,
     ): List<UiTimelineV2> {
@@ -591,7 +591,7 @@ internal class NostrService(
         )
     }
 
-    internal suspend fun loadProfile(targetPubkey: String): UiProfile {
+    public suspend fun loadProfile(targetPubkey: String): UiProfile {
         val metadata =
             loadMetadata(
                 authors = listOf(targetPubkey),
@@ -602,7 +602,7 @@ internal class NostrService(
         )
     }
 
-    internal suspend fun loadUserTimeline(
+    public suspend fun loadUserTimeline(
         targetPubkey: String,
         pageSize: Int,
         until: Long?,
@@ -647,7 +647,7 @@ internal class NostrService(
         )
     }
 
-    internal suspend fun searchStatus(
+    public suspend fun searchStatus(
         query: String,
         pageSize: Int,
         until: Long?,
@@ -710,7 +710,7 @@ internal class NostrService(
         )
     }
 
-    internal suspend fun searchUser(
+    public suspend fun searchUser(
         query: String,
         pageSize: Int,
     ): List<UiProfile> {
@@ -765,7 +765,7 @@ internal class NostrService(
             }.take(pageSize)
     }
 
-    internal suspend fun loadNotifications(
+    public suspend fun loadNotifications(
         pageSize: Int,
         until: Long?,
         type: dev.dimension.flare.data.datasource.microblog.NotificationFilter,
@@ -808,7 +808,7 @@ internal class NostrService(
         )
     }
 
-    internal suspend fun loadStatus(statusKey: MicroBlogKey): UiTimelineV2 {
+    public suspend fun loadStatus(statusKey: MicroBlogKey): UiTimelineV2 {
         val event =
             loadEvent(
                 statusKey = statusKey,
@@ -833,7 +833,7 @@ internal class NostrService(
             ).first()
     }
 
-    internal suspend fun loadStatusContext(
+    public suspend fun loadStatusContext(
         statusKey: MicroBlogKey,
         pageSize: Int,
     ): List<UiTimelineV2.Post> {
@@ -873,7 +873,7 @@ internal class NostrService(
         )
     }
 
-    internal suspend fun relation(targetPubkey: String): dev.dimension.flare.ui.model.UiRelation {
+    public suspend fun relation(targetPubkey: String): dev.dimension.flare.ui.model.UiRelation {
         val follows =
             loadLatestContactList(pubKeyHex)?.verifiedFollowKeySet().orEmpty()
         val blocks = loadLatestBlockList(pubKeyHex)?.tags?.userIdSet().orEmpty()
@@ -885,7 +885,7 @@ internal class NostrService(
         )
     }
 
-    internal suspend fun follow(targetPubkey: String) {
+    public suspend fun follow(targetPubkey: String) {
         val latest = loadLatestContactList(pubKeyHex)
         val follows = (latest?.verifiedFollowKeySet().orEmpty() + targetPubkey).distinct()
         sendEventBuilder(
@@ -896,7 +896,7 @@ internal class NostrService(
         )
     }
 
-    internal suspend fun unfollow(targetPubkey: String) {
+    public suspend fun unfollow(targetPubkey: String) {
         val latest = loadLatestContactList(pubKeyHex)
         val follows = latest?.verifiedFollowKeySet().orEmpty().filterNot { it == targetPubkey }
         sendEventBuilder(
@@ -907,7 +907,7 @@ internal class NostrService(
         )
     }
 
-    internal suspend fun block(targetPubkey: String) {
+    public suspend fun block(targetPubkey: String) {
         val latest = loadLatestBlockList(pubKeyHex)
         val blockList = (latest?.tags?.userIdSet().orEmpty() + targetPubkey).distinct()
         sendEventBuilder(
@@ -919,7 +919,7 @@ internal class NostrService(
         )
     }
 
-    internal suspend fun unblock(targetPubkey: String) {
+    public suspend fun unblock(targetPubkey: String) {
         val latest = loadLatestBlockList(pubKeyHex) ?: return
         val blockList = latest.tags.userIdSet().filterNot { it == targetPubkey }
         sendEventBuilder(
@@ -931,7 +931,7 @@ internal class NostrService(
         )
     }
 
-    internal suspend fun mute(targetPubkey: String) {
+    public suspend fun mute(targetPubkey: String) {
         val latest = loadLatestMuteList(pubKeyHex)
         val mutedUsers = (latest?.tags?.mutedUserIdSet().orEmpty() + targetPubkey).distinct()
         sendEventBuilder(
@@ -947,7 +947,7 @@ internal class NostrService(
         )
     }
 
-    internal suspend fun unmute(targetPubkey: String) {
+    public suspend fun unmute(targetPubkey: String) {
         val latest = loadLatestMuteList(pubKeyHex) ?: return
         val mutedUsers = latest.tags.mutedUserIdSet().filterNot { it == targetPubkey }
         sendEventBuilder(
@@ -963,7 +963,7 @@ internal class NostrService(
         )
     }
 
-    internal suspend fun uploadMedia(
+    public suspend fun uploadMedia(
         serverUrl: String,
         name: String?,
         bytes: ByteArray,
@@ -978,7 +978,7 @@ internal class NostrService(
             altText = altText,
         )
 
-    internal suspend fun composeNote(
+    public suspend fun composeNote(
         content: String,
         media: List<UploadedMedia> = emptyList(),
         contentWarning: String? = null,
@@ -990,7 +990,7 @@ internal class NostrService(
             ),
         )
 
-    internal suspend fun composeReply(
+    public suspend fun composeReply(
         statusKey: MicroBlogKey,
         content: String,
         media: List<UploadedMedia> = emptyList(),
@@ -1008,7 +1008,7 @@ internal class NostrService(
         )
     }
 
-    internal suspend fun composeQuote(
+    public suspend fun composeQuote(
         statusKey: MicroBlogKey,
         content: String,
         media: List<UploadedMedia> = emptyList(),
@@ -1042,7 +1042,7 @@ internal class NostrService(
         )
     }
 
-    internal suspend fun repost(statusKey: MicroBlogKey): String {
+    public suspend fun repost(statusKey: MicroBlogKey): String {
         val target =
             loadEvent(statusKey = statusKey)
                 ?: error("Repost target not found: $statusKey")
@@ -1054,7 +1054,7 @@ internal class NostrService(
         )
     }
 
-    internal suspend fun react(statusKey: MicroBlogKey): String {
+    public suspend fun react(statusKey: MicroBlogKey): String {
         val target =
             loadEvent(statusKey = statusKey)
                 ?: error("Reaction target not found: $statusKey")
@@ -1063,7 +1063,7 @@ internal class NostrService(
         )
     }
 
-    internal suspend fun report(statusKey: MicroBlogKey) {
+    public suspend fun report(statusKey: MicroBlogKey) {
         val target =
             loadEvent(statusKey = statusKey)
                 ?: error("Report target not found: $statusKey")
@@ -1082,7 +1082,7 @@ internal class NostrService(
         )
     }
 
-    internal suspend fun deleteStatus(statusKey: MicroBlogKey) {
+    public suspend fun deleteStatus(statusKey: MicroBlogKey) {
         val target =
             loadEvent(statusKey = statusKey)
                 ?: error("Delete target not found: $statusKey")

@@ -2,25 +2,25 @@ package dev.dimension.flare.data.network.nostr
 
 import dev.dimension.flare.ui.model.NostrSignerCredential
 
-internal data class AmberConnection(
+public data class AmberConnection(
     val credential: NostrSignerCredential.Amber,
     val pubkeyHex: String,
 )
 
-internal interface AmberSignerBridge {
-    fun isAvailable(): Boolean
+public interface AmberSignerBridge {
+    public fun isAvailable(): Boolean
 
-    suspend fun connect(): AmberConnection
+    public suspend fun connect(): AmberConnection
 
-    suspend fun getPublicKey(credential: NostrSignerCredential.Amber): String
+    public suspend fun getPublicKey(credential: NostrSignerCredential.Amber): String
 
-    suspend fun signEvent(
+    public suspend fun signEvent(
         credential: NostrSignerCredential.Amber,
         unsignedEventJson: String,
     ): String
 }
 
-internal class UnsupportedAmberSignerBridge(
+public class UnsupportedAmberSignerBridge(
     private val message: String,
 ) : AmberSignerBridge {
     override fun isAvailable(): Boolean = false

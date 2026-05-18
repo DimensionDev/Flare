@@ -7,16 +7,16 @@ import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlinx.coroutines.flow.firstOrNull
 
-internal interface NostrCache {
-    suspend fun getProfiles(pubKeys: List<String>): Map<String, UiProfile>
+public interface NostrCache {
+    public suspend fun getProfiles(pubKeys: List<String>): Map<String, UiProfile>
 
-    suspend fun getPost(
+    public suspend fun getPost(
         accountKey: MicroBlogKey,
         statusKey: MicroBlogKey,
     ): UiTimelineV2.Post?
 }
 
-internal class DatabaseNostrCache(
+public class DatabaseNostrCache(
     private val database: CacheDatabase,
 ) : NostrCache {
     override suspend fun getProfiles(pubKeys: List<String>): Map<String, UiProfile> {

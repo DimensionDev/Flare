@@ -713,9 +713,9 @@ internal fun Array<Array<String>>.userIdSet(): Set<String> =
 
 internal fun Array<Array<String>>.mutedUserIdSet(): Set<String> = userIdSet()
 
-internal fun bech32PublicKey(hex: String): String = RustPublicKey.Companion.parse(hex).use { it.toBech32() }
+public fun bech32PublicKey(hex: String): String = RustPublicKey.Companion.parse(hex).use { it.toBech32() }
 
-internal fun parsePublicKeyHex(raw: String): String? {
+public fun parsePublicKeyHex(raw: String): String? {
     val value = raw.removePrefix("nostr:").trim()
     return when {
         value.startsWith("npub1", ignoreCase = true) -> {

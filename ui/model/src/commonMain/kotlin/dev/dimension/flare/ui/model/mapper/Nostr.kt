@@ -7,7 +7,7 @@ import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiNumber
 
-internal fun ActionMenu.Companion.nostrRepost(
+public fun ActionMenu.Companion.nostrRepost(
     statusKey: MicroBlogKey,
     repostEventId: String?,
     count: Long,
@@ -37,7 +37,7 @@ internal fun ActionMenu.Companion.nostrRepost(
             },
     )
 
-internal fun ActionMenu.Companion.nostrLike(
+public fun ActionMenu.Companion.nostrLike(
     statusKey: MicroBlogKey,
     reactionEventId: String?,
     count: Long,

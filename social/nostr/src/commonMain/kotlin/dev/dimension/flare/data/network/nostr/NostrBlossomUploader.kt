@@ -121,7 +121,7 @@ internal data class BlobDescriptor(
     val type: String = "",
 )
 
-internal data class UploadedMedia(
+public data class UploadedMedia(
     val url: String,
     val mimeType: String,
     val sha256: String,

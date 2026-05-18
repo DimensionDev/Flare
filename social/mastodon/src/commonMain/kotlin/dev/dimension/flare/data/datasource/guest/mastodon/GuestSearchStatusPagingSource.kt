@@ -7,7 +7,7 @@ import dev.dimension.flare.data.network.mastodon.GuestMastodonService
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
 
-internal class GuestSearchStatusPagingSource(
+public class GuestSearchStatusPagingSource(
     private val service: GuestMastodonService,
     private val host: String,
     private val query: String,

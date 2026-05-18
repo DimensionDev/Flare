@@ -7,7 +7,7 @@ import dev.dimension.flare.data.network.mastodon.api.TrendsResources
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
 
-internal class GuestTimelinePagingSource(
+public class GuestDiscoverStatusPagingSource(
     private val service: TrendsResources,
     private val host: String,
 ) : RemoteLoader<UiTimelineV2> {
@@ -15,26 +15,21 @@ internal class GuestTimelinePagingSource(
         pageSize: Int,
         request: PagingRequest,
     ): PagingResult<UiTimelineV2> {
+        if (request is PagingRequest.Prepend) {
+            return PagingResult(endOfPaginationReached = true)
+        }
         val offset =
             when (request) {
-                PagingRequest.Refresh -> {
-                    0
-                }
-
-                is PagingRequest.Append -> {
-                    request.nextKey.toIntOrNull() ?: 0
-                }
-
-                is PagingRequest.Prepend -> {
-                    return PagingResult(endOfPaginationReached = true)
-                }
+                PagingRequest.Refresh -> 0
+                is PagingRequest.Append -> request.nextKey.toIntOrNull() ?: 0
+                is PagingRequest.Prepend -> 0
             }
 
-        val statuses = service.trendsStatuses(limit = pageSize, offset = offset).distinctBy { it.id }
+        val result = service.trendsStatuses(limit = pageSize, offset = offset)
         return PagingResult(
-            endOfPaginationReached = statuses.size < pageSize,
-            data = statuses.map { it.render(host = host, accountKey = null) },
-            nextKey = (offset + pageSize).toString(),
+            endOfPaginationReached = result.size < pageSize,
+            data = result.map { it.render(host = host, accountKey = null) },
+            nextKey = (offset + result.size).toString(),
         )
     }
 }

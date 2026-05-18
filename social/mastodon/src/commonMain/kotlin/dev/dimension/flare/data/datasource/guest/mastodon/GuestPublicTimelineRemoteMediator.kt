@@ -7,7 +7,7 @@ import dev.dimension.flare.data.network.mastodon.GuestMastodonService
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
 
-internal class GuestPublicTimelineRemoteMediator(
+public class GuestPublicTimelineRemoteMediator(
     private val host: String,
     private val locale: String,
     private val local: Boolean,

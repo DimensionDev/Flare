@@ -7,7 +7,7 @@ import dev.dimension.flare.data.network.mastodon.GuestMastodonService
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
 
-internal class GuestTrendsRemoteMediator(
+public class GuestTrendsRemoteMediator(
     private val host: String,
     private val locale: String,
 ) : CacheableRemoteLoader<UiTimelineV2> {

@@ -7,7 +7,7 @@ import dev.dimension.flare.data.network.mastodon.api.TimelineResources
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
 
-internal class GuestUserTimelinePagingSource(
+public class GuestUserTimelinePagingSource(
     private val service: TimelineResources,
     private val host: String,
     private val userId: String,

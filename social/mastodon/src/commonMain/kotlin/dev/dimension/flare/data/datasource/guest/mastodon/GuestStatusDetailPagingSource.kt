@@ -8,7 +8,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
 
-internal class GuestStatusDetailPagingSource(
+public class GuestStatusDetailPagingSource(
     private val service: GuestMastodonService,
     private val host: String,
     private val statusKey: MicroBlogKey,

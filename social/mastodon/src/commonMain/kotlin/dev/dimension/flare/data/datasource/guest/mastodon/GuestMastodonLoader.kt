@@ -12,7 +12,7 @@ import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
 
-internal class GuestMastodonLoader(
+public class GuestMastodonLoader(
     private val host: String,
     private val service: GuestMastodonService,
 ) : UserLoader,

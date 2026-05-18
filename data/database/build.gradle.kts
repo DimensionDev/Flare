@@ -25,6 +25,7 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 api(projects.core.model)
+                api(libs.kotlinx.coroutines.core)
                 api(libs.room.runtime)
                 api(libs.sqlite.bundled)
                 implementation(libs.kotlinx.serialization.json)

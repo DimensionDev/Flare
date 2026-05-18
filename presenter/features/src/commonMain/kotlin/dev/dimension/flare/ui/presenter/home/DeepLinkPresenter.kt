@@ -13,7 +13,7 @@ import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceFlow
 import dev.dimension.flare.data.translation.PreTranslationService
 import dev.dimension.flare.model.AccountType
-import dev.dimension.flare.model.defaultSocialPlatformRegistry
+import dev.dimension.flare.model.SocialPlatformRegistry
 import dev.dimension.flare.model.requirePlatformSpec
 import dev.dimension.flare.ui.model.DeeplinkEvent
 import dev.dimension.flare.ui.presenter.PresenterBase
@@ -33,6 +33,7 @@ public class DeepLinkPresenter(
     KoinComponent {
     private val accountRepository: AccountRepository by inject()
     private val preTranslationService: PreTranslationService by inject()
+    private val platformRegistry: SocialPlatformRegistry by inject()
 
     @androidx.compose.runtime.Immutable
     public interface State {
@@ -43,7 +44,7 @@ public class DeepLinkPresenter(
         accountRepository.allAccounts.map {
             it
                 .associateWith {
-                    defaultSocialPlatformRegistry
+                    platformRegistry
                         .requirePlatformSpec(it.platformType)
                         .deepLinkPatterns(it.accountKey.host)
                 }.toImmutableMap()

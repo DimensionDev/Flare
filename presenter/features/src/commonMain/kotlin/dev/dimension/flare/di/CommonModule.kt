@@ -71,5 +71,5 @@ internal val commonModule =
         singleOf(::OpenAIService)
         singleOf(::AiCompletionService)
         single<PreTranslationService> { OnlinePreTranslationService(get(), get(), get(), get()) }
-        singleOf(::TimelineResolver)
+        single { TimelineResolver(get()) }
     }

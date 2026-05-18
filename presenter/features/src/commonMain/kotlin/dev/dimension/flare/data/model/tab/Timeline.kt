@@ -8,6 +8,7 @@ import dev.dimension.flare.data.model.appearance.toBag
 import dev.dimension.flare.data.model.appearance.withPatch
 import dev.dimension.flare.data.platform.RssTimelineSpecs
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.SocialPlatformRegistry
 import dev.dimension.flare.model.defaultSocialPlatformRegistry
 import dev.dimension.flare.model.platformSpecs
 import dev.dimension.flare.ui.model.UiIcon
@@ -334,10 +335,12 @@ public data class ShortcutSpec(
     }
 }
 
-public class TimelineResolver internal constructor() {
+public class TimelineResolver internal constructor(
+    private val platformRegistry: SocialPlatformRegistry = defaultSocialPlatformRegistry,
+) {
     private val specs: Map<String, TimelineSpec<out TimelineSpec.Data>> by lazy {
         (
-            defaultSocialPlatformRegistry.platformSpecs
+            platformRegistry.platformSpecs
                 .flatMap { it.timelineSpecs } +
                 RssTimelineSpecs.timelineSpecs
         ).distinctBy { it.id }

@@ -19,6 +19,7 @@ import dev.dimension.flare.data.datasource.microblog.RecommendInstancePagingSour
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
 import dev.dimension.flare.data.network.nodeinfo.NodeData
 import dev.dimension.flare.data.network.nodeinfo.detectPlatformType
+import dev.dimension.flare.model.SocialPlatformRegistry
 import dev.dimension.flare.ui.model.UiInstance
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.isSuccess
@@ -29,8 +30,14 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
-public class NodeInfoPresenter : PresenterBase<NodeInfoState>() {
+public class NodeInfoPresenter :
+    PresenterBase<NodeInfoState>(),
+    KoinComponent {
+    private val platformRegistry: SocialPlatformRegistry by inject()
+
     @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
     @Composable
     override fun body(): NodeInfoState {
@@ -58,12 +65,15 @@ public class NodeInfoPresenter : PresenterBase<NodeInfoState>() {
                 }
             }.collectAsLazyPagingItems()
 
-        val detectedPlatformType by remember(filterFlow) {
+        val detectedPlatformType by remember(
+            filterFlow,
+            platformRegistry,
+        ) {
             filterFlow.flatMapLatest {
                 flow {
                     runCatching {
                         emit(UiState.Loading())
-                        detectPlatformType(it)
+                        platformRegistry.detectPlatformType(it)
                     }.onSuccess {
                         emit(UiState.Success(it))
                     }.onFailure {

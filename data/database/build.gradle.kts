@@ -20,6 +20,14 @@ kotlin {
         )
         ksp(libs.room.compiler)
     }
+
+    sourceSets {
+        val commonMain by getting {
+            dependencies {
+                api(libs.sqlite.bundled)
+            }
+        }
+    }
 }
 
 room3 {

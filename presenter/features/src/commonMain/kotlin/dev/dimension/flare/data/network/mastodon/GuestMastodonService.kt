@@ -11,6 +11,7 @@ import dev.dimension.flare.data.network.mastodon.api.createLookupResources
 import dev.dimension.flare.data.network.mastodon.api.createSearchResources
 import dev.dimension.flare.data.network.mastodon.api.createTimelineResources
 import dev.dimension.flare.data.network.mastodon.api.createTrendsResources
+import dev.dimension.flare.data.network.mastodon.api.model.MastodonPagingConverterFactory
 import io.ktor.client.plugins.HttpResponseValidator
 import io.ktor.client.plugins.ResponseException
 import io.ktor.client.plugins.defaultRequest
@@ -20,7 +21,10 @@ import io.ktor.client.statement.bodyAsText
 private fun config(
     baseUrl: String,
     locale: String,
-) = ktorfit(baseUrl) {
+) = ktorfit(
+    baseUrl = baseUrl,
+    converterFactories = listOf(MastodonPagingConverterFactory()),
+) {
     expectSuccess = true
     HttpResponseValidator {
         handleResponseExceptionWithRequest { exception, _ ->

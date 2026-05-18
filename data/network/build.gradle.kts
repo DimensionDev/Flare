@@ -22,8 +22,16 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
+                api(projects.core.common)
                 api(libs.kotlinx.coroutines.core)
                 api(libs.ktor.client.core)
+                api(libs.ktorfit.lib)
+                implementation(libs.ktorfit.converters.response)
+                implementation(libs.ktorfit.converters.flow)
+                implementation(libs.ktorfit.converters.call)
+                implementation(libs.ktor.client.content.negotiation)
+                implementation(libs.ktor.serialization.kotlinx.json)
+                implementation(libs.ktor.client.logging)
             }
         }
 

@@ -1,7 +1,6 @@
 package dev.dimension.flare.model
 
 import androidx.compose.runtime.Immutable
-import dev.dimension.flare.ui.model.UiIcon
 import kotlinx.serialization.Serializable
 import kotlin.io.encoding.Base64
 
@@ -18,12 +17,6 @@ public enum class PlatformType {
     VVo,
     Nostr,
 }
-
-@Immutable
-public data class PlatformTypeMetadata(
-    val displayName: String,
-    val icon: UiIcon,
-)
 
 public val xqtOldHost: String =
     buildString {

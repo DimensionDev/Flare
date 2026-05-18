@@ -1,5 +1,6 @@
 package dev.dimension.flare.model
 
+import androidx.compose.runtime.Immutable
 import dev.dimension.flare.common.deeplink.DeepLinkMapping
 import dev.dimension.flare.common.deeplink.DeepLinkPattern
 import dev.dimension.flare.data.datasource.bluesky.BlueskyDataSource
@@ -40,6 +41,12 @@ internal interface PlatformSpec {
         locale: String,
     ): MicroblogDataSource
 }
+
+@Immutable
+internal data class PlatformTypeMetadata(
+    val displayName: String,
+    val icon: UiIcon,
+)
 
 internal interface SocialPlatformPlugin {
     val spec: PlatformSpec

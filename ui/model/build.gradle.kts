@@ -32,6 +32,7 @@ kotlin {
                 api(projects.core.model)
                 api(dependencies.platform(libs.compose.bom))
                 api(libs.compose.runtime)
+                api(libs.paging.common)
                 api(libs.kotlinx.serialization.json)
                 implementation(dependencies.platform(libs.koin.bom))
                 implementation(libs.koin.core)

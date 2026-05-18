@@ -1,14 +1,15 @@
 package dev.dimension.flare.common
 
 import androidx.datastore.core.okio.OkioSerializer
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.protobuf.ProtoBuf
 import kotlinx.serialization.serializer
+import kotlin.coroutines.CoroutineContext
 
 public inline fun <reified T> protobufSerializer(defaultValue: T): OkioSerializer<T> = ProtobufSerializer(defaultValue, serializer<T>())
+
+internal expect val protobufSerializerCoroutineContext: CoroutineContext
 
 @OptIn(ExperimentalSerializationApi::class)
 public class ProtobufSerializer<T>(
@@ -16,7 +17,7 @@ public class ProtobufSerializer<T>(
     public val serializer: kotlinx.serialization.KSerializer<T>,
 ) : OkioSerializer<T> {
     override suspend fun readFrom(source: okio.BufferedSource): T =
-        withContext(Dispatchers.IO) {
+        withContext(protobufSerializerCoroutineContext) {
             ProtoBuf.decodeFromByteArray(serializer, source.readByteArray())
         }
 

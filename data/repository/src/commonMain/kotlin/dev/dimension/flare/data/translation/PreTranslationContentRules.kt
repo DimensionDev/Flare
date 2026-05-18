@@ -7,11 +7,11 @@ import dev.dimension.flare.ui.render.RenderRun
 import dev.dimension.flare.ui.render.RenderTextStyle
 import dev.dimension.flare.ui.render.UiRichText
 
-internal object PreTranslationContentRules {
+public object PreTranslationContentRules {
     private val protectedTranslationPattern =
         Regex("""https?://\S+|@[A-Za-z0-9._-]+(?:@[A-Za-z0-9.-]+)?|#[\p{L}\p{N}_]+""")
 
-    fun sourceLanguages(timeline: UiTimelineV2): List<String> =
+    public fun sourceLanguages(timeline: UiTimelineV2): List<String> =
         when (timeline) {
             is UiTimelineV2.Feed -> timeline.sourceLanguages
             is UiTimelineV2.Post -> timeline.sourceLanguages
@@ -20,7 +20,7 @@ internal object PreTranslationContentRules {
             is UiTimelineV2.UserList -> emptyList()
         }
 
-    fun shouldSkipForMatchingSourceLanguage(
+    public fun shouldSkipForMatchingSourceLanguage(
         sourceLanguages: List<String>,
         targetLanguage: String,
     ): Boolean {
@@ -31,7 +31,7 @@ internal object PreTranslationContentRules {
             .any { it == canonicalTargetLanguage }
     }
 
-    fun shouldSkipForExcludedSourceLanguage(
+    public fun shouldSkipForExcludedSourceLanguage(
         sourceLanguages: List<String>,
         excludedLanguages: List<String>,
     ): Boolean {
@@ -45,18 +45,18 @@ internal object PreTranslationContentRules {
             .any { it in canonicalExcludedLanguages }
     }
 
-    fun canonicalExcludedLanguages(languages: List<String>): Set<String> =
+    public fun canonicalExcludedLanguages(languages: List<String>): Set<String> =
         languages
             .asSequence()
             .mapNotNull(::canonicalTranslationLanguage)
             .toSet()
 
-    fun isNonTranslatableOnly(payload: TranslationPayload): Boolean {
+    public fun isNonTranslatableOnly(payload: TranslationPayload): Boolean {
         val fields = listOfNotNull(payload.content, payload.contentWarning, payload.title, payload.description)
         return fields.isNotEmpty() && fields.all(::isNonTranslatableOnly)
     }
 
-    internal fun canonicalTranslationLanguage(language: String): String? {
+    public fun canonicalTranslationLanguage(language: String): String? {
         val normalized = language.trim().lowercase().replace('_', '-')
         if (normalized.isBlank()) {
             return null

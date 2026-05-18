@@ -63,13 +63,14 @@ internal class PostEventHandler(
                 )
             }
             if (event is PostEvent.PollEvent && originalData is UiTimelineV2.Post) {
+                val originalPoll = originalData.poll
                 val updatedData =
                     originalData.copy(
                         poll =
-                            originalData.poll?.copy(
+                            originalPoll?.copy(
                                 ownVotes = event.options,
                                 options =
-                                    originalData.poll.options
+                                    originalPoll.options
                                         .mapIndexed { index, option ->
                                             if (event.options.contains(index)) {
                                                 option.copy(

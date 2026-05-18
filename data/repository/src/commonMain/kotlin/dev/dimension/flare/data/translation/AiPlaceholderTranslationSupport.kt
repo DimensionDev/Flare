@@ -5,17 +5,17 @@ import dev.dimension.flare.ui.render.TranslationDocument
 import dev.dimension.flare.ui.render.TranslationToken
 import dev.dimension.flare.ui.render.TranslationTokenKind
 
-internal object AiPlaceholderTranslationSupport {
+public object AiPlaceholderTranslationSupport {
     private val markerPattern = Regex("""\{\{([TL])(\d+)\}\}""")
     private val blockPattern = Regex("""(?ms)^<<<B(\d+)>>>\n(.*?)\n<<<E\1>>>(?:\n|$)""")
     private val itemPattern = Regex("""(?ms)^<<<I (\S+) ([CS])(?: (.*?))?>>>(?:\n(.*?))?(?=^<<<I |\z)""")
     private val fieldPattern = Regex("""(?ms)^<<<F (content|contentWarning|title|description)>>>\n(.*?)(?=^<<<F |\z)""")
 
-    fun buildPromptTemplate(document: TranslationDocument): String = formatDocumentTemplate(document)
+    public fun buildPromptTemplate(document: TranslationDocument): String = formatDocumentTemplate(document)
 
-    fun buildPromptTemplate(document: PreTranslationBatchDocument): String = formatBatchTemplate(document)
+    public fun buildPromptTemplate(document: PreTranslationBatchDocument): String = formatBatchTemplate(document)
 
-    fun reconstructDocument(
+    public fun reconstructDocument(
         sourceDocument: TranslationDocument,
         translatedTemplate: String,
         targetLanguage: String,
@@ -26,7 +26,7 @@ internal object AiPlaceholderTranslationSupport {
             targetLanguage = targetLanguage,
         )
 
-    fun reconstructBatchDocument(
+    public fun reconstructBatchDocument(
         sourceDocument: PreTranslationBatchDocument,
         translatedTemplate: String,
         targetLanguage: String,

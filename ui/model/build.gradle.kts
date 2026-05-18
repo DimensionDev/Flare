@@ -15,14 +15,23 @@ kotlin {
             FlarePlatform.ANDROID,
             FlarePlatform.JVM,
             FlarePlatform.IOS,
+            FlarePlatform.WEB,
         )
     }
 
-    compilerOptions {
-        freeCompilerArgs.addAll(
-            "-module-name",
-            "flare_ui_model",
-        )
+    targets.configureEach {
+        if (name != "wasmJs") {
+            compilations.configureEach {
+                compileTaskProvider.configure {
+                    compilerOptions {
+                        freeCompilerArgs.addAll(
+                            "-module-name",
+                            "flare_ui_model",
+                        )
+                    }
+                }
+            }
+        }
     }
 
     sourceSets {

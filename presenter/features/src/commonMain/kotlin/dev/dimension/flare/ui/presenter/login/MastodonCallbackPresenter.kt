@@ -8,11 +8,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.network.mastodon.MastodonOAuthService
+import dev.dimension.flare.data.network.mastodon.api.model.CreateApplicationResponse
 import dev.dimension.flare.data.network.nodeinfo.NodeInfoService
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.ApplicationRepository
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.ui.model.MastodonApplicationCredential
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiApplication
 import dev.dimension.flare.ui.model.UiState
@@ -71,8 +73,8 @@ public class MastodonCallbackPresenter(
                 client_name = "Flare",
                 website = "https://github.com/DimensionDev/Flare",
                 redirect_uri = DeeplinkRoute.Companion.Callback.MASTODON,
-            )
-        val accessTokenResponse = service.getAccessToken(code, application.application)
+        )
+        val accessTokenResponse = service.getAccessToken(code, application.application.toCreateApplicationResponse())
         requireNotNull(accessTokenResponse.accessToken) { "Invalid access token" }
         val user = service.verify(accessToken = accessTokenResponse.accessToken)
         val id = user.id
@@ -133,7 +135,7 @@ internal suspend fun mastodonLoginUseCase(
         val application =
             applicationRepository.findByHost(host)?.let {
                 if (it is UiApplication.Mastodon) {
-                    it.application
+                    it.application.toCreateApplicationResponse()
                 } else {
                     null
                 }
@@ -149,3 +151,14 @@ internal suspend fun mastodonLoginUseCase(
         val target = service.getWebOAuthUrl(application)
         launchOAuth(target)
     }
+
+private fun MastodonApplicationCredential.toCreateApplicationResponse(): CreateApplicationResponse =
+    CreateApplicationResponse(
+        id = id,
+        name = name,
+        website = website,
+        redirectURI = redirectURI,
+        clientID = clientID,
+        clientSecret = clientSecret,
+        vapidKey = vapidKey,
+    )

@@ -4,7 +4,7 @@ import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.network.vvo.VVOService
-import dev.dimension.flare.data.repository.LoginExpiredException
+import dev.dimension.flare.model.LoginExpiredException
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiProfile

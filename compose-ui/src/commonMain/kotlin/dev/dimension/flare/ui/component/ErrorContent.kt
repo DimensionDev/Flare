@@ -21,8 +21,8 @@ import dev.dimension.flare.compose.ui.login_expired_message
 import dev.dimension.flare.compose.ui.permission_denied_message
 import dev.dimension.flare.compose.ui.permission_denied_title
 import dev.dimension.flare.compose.ui.status_loadmore_error
-import dev.dimension.flare.data.repository.LoginExpiredException
-import dev.dimension.flare.data.repository.RequireReLoginException
+import dev.dimension.flare.model.LoginExpiredException
+import dev.dimension.flare.model.RequireReLoginException
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import dev.dimension.flare.ui.route.toUri

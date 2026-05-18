@@ -17,6 +17,7 @@ kotlin {
             FlarePlatform.ANDROID,
             FlarePlatform.JVM,
             FlarePlatform.IOS,
+            FlarePlatform.WEB,
         )
         ksp(
             libs.ktorfit.ksp,
@@ -34,7 +35,6 @@ kotlin {
                 api(projects.social.microblog)
                 api(libs.ktorfit.converters.response)
                 implementation(projects.data.database)
-                implementation(projects.data.repository)
                 implementation(libs.cryptography.provider.optimal)
                 implementation(libs.kotlin.codepoints.deluxe)
                 implementation(libs.kotlinx.datetime)

@@ -17,6 +17,7 @@ kotlin {
             FlarePlatform.ANDROID,
             FlarePlatform.JVM,
             FlarePlatform.IOS,
+            FlarePlatform.WEB,
         )
         ksp(
             libs.ktorfit.ksp,
@@ -32,7 +33,6 @@ kotlin {
                 api(projects.data.network)
                 api(projects.social.api)
                 api(libs.ktorfit.converters.response)
-                implementation(projects.data.repository)
                 implementation(libs.kotlinx.datetime)
                 implementation(libs.ksoup)
             }

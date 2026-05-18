@@ -10,7 +10,7 @@ import dev.dimension.flare.data.datasource.microblog.loader.RelationLoader
 import dev.dimension.flare.data.datasource.microblog.loader.UserLoader
 import dev.dimension.flare.data.network.vvo.VVOService
 import dev.dimension.flare.data.network.vvo.model.StatusDetailItem
-import dev.dimension.flare.data.repository.LoginExpiredException
+import dev.dimension.flare.model.LoginExpiredException
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiEmoji

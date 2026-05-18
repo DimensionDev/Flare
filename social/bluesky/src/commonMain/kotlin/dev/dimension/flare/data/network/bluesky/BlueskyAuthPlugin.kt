@@ -1,7 +1,7 @@
 package dev.dimension.flare.data.network.bluesky
 
 import com.atproto.server.RefreshSessionResponse
-import dev.dimension.flare.data.repository.LoginExpiredException
+import dev.dimension.flare.model.LoginExpiredException
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount

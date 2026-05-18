@@ -15,6 +15,7 @@ kotlin {
             FlarePlatform.ANDROID,
             FlarePlatform.JVM,
             FlarePlatform.IOS,
+            FlarePlatform.WEB,
         )
     }
 
@@ -28,7 +29,6 @@ kotlin {
                 api(projects.social.microblog)
                 api(libs.bluesky)
                 api(libs.bluesky.oauth)
-                implementation(projects.data.repository)
                 implementation(libs.cryptography.provider.optimal)
                 implementation(libs.twitter.parser)
             }

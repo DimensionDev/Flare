@@ -23,7 +23,7 @@ import dev.dimension.flare.common.InAppNotification
 import dev.dimension.flare.common.Message
 import dev.dimension.flare.compose_notification_error
 import dev.dimension.flare.compose_notification_success
-import dev.dimension.flare.data.repository.LoginExpiredException
+import dev.dimension.flare.model.LoginExpiredException
 import dev.dimension.flare.notification_login_expired
 import io.github.composefluent.component.InfoBar
 import io.github.composefluent.component.InfoBarSeverity

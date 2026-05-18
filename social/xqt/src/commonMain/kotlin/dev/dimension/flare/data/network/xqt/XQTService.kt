@@ -34,7 +34,7 @@ import dev.dimension.flare.data.network.xqt.api.createV11PostApi
 import dev.dimension.flare.data.network.xqt.api.createV20GetApi
 import dev.dimension.flare.data.network.xqt.api.createVDmPostJsonPostApi
 import dev.dimension.flare.data.network.xqt.elonmusk114514.ElonMusk1145141919810
-import dev.dimension.flare.data.repository.LoginExpiredException
+import dev.dimension.flare.model.LoginExpiredException
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.xqtHost

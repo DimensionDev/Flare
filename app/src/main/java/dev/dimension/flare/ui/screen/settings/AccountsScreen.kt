@@ -56,7 +56,7 @@ import compose.icons.fontawesomeicons.solid.List
 import compose.icons.fontawesomeicons.solid.Plus
 import compose.icons.fontawesomeicons.solid.Trash
 import dev.dimension.flare.R
-import dev.dimension.flare.data.repository.LoginExpiredException
+import dev.dimension.flare.model.LoginExpiredException
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.component.AvatarComponent

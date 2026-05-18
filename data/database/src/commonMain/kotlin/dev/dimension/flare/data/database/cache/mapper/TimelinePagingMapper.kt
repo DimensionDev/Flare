@@ -1,4 +1,4 @@
-package dev.dimension.flare.data.datasource.microblog.paging
+package dev.dimension.flare.data.database.cache.mapper
 
 import dev.dimension.flare.common.SerializableImmutableList
 import dev.dimension.flare.common.SnowflakeIdGenerator
@@ -20,8 +20,8 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlin.uuid.Uuid
 
-internal object TimelinePagingMapper {
-    suspend fun toDb(
+public object TimelinePagingMapper {
+    public suspend fun toDb(
         data: UiTimelineV2,
         pagingKey: String,
         sortId: Long? = null,
@@ -72,7 +72,7 @@ internal object TimelinePagingMapper {
         )
     }
 
-    fun toUi(
+    public fun toUi(
         item: DbPagingTimelineWithStatus,
         pagingKey: String,
         translationDisplayOptions: TranslationDisplayOptions,
@@ -83,7 +83,7 @@ internal object TimelinePagingMapper {
             translationDisplayOptions = translationDisplayOptions,
         )
 
-    fun toUi(
+    public fun toUi(
         item: DbStatusWithReference,
         pagingKey: String,
         translationDisplayOptions: TranslationDisplayOptions,

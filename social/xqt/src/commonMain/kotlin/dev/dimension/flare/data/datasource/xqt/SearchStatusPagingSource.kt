@@ -2,24 +2,28 @@ package dev.dimension.flare.data.datasource.xqt
 
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.database.cache.mapper.cursor
-import dev.dimension.flare.data.database.cache.mapper.users
+import dev.dimension.flare.data.database.cache.mapper.isBottomEnd
+import dev.dimension.flare.data.database.cache.mapper.tweets
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.network.xqt.XQTService
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.model.UiProfile
+import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
+import io.ktor.http.encodeURLQueryComponent
+import kotlinx.serialization.Required
+import kotlinx.serialization.Serializable
 
-internal class FollowingPagingSource(
+public class SearchStatusPagingSource(
     private val service: XQTService,
     private val accountKey: MicroBlogKey,
-    private val userKey: MicroBlogKey,
-) : RemoteLoader<UiProfile> {
+    private val query: String,
+) : RemoteLoader<UiTimelineV2> {
     override suspend fun load(
         pageSize: Int,
         request: PagingRequest,
-    ): PagingResult<UiProfile> {
+    ): PagingResult<UiTimelineV2> {
         val cursor =
             when (request) {
                 PagingRequest.Refresh -> {
@@ -38,36 +42,37 @@ internal class FollowingPagingSource(
             }
         val response =
             service
-                .getFollowing(
+                .getSearchTimeline(
                     variables =
-                        FollowVar(
-                            userID = userKey.id,
+                        SearchRequest(
+                            rawQuery = query,
                             count = pageSize.toLong(),
                             cursor = cursor,
                         ).encodeJson(),
+                    referer = "https://${accountKey.host}/search?q=${query.encodeURLQueryComponent()}",
                 ).body()
-        val users =
-            response
                 ?.data
-                ?.user
-                ?.result
-                ?.timeline
+                ?.searchByRawQuery
+                ?.searchTimeline
                 ?.timeline
                 ?.instructions
-                ?.users()
                 .orEmpty()
-        val nextCursor =
-            response
-                ?.data
-                ?.user
-                ?.result
-                ?.timeline
-                ?.timeline
-                ?.instructions
-                ?.cursor()
+        val tweets = response.tweets()
         return PagingResult(
-            data = users.map { it.render(accountKey = accountKey) },
-            nextKey = nextCursor,
+            endOfPaginationReached = response.isBottomEnd(),
+            data = tweets.mapNotNull { it.render(accountKey) },
+            nextKey = response.cursor(),
         )
     }
 }
+
+@Serializable
+internal data class SearchRequest(
+    val rawQuery: String? = null,
+    val count: Long? = null,
+    val cursor: String? = null,
+    @Required
+    val querySource: String = "typed_query",
+    @Required
+    val product: String = "Top",
+)

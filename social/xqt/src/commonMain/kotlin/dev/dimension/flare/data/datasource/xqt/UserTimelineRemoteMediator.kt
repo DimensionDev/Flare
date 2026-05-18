@@ -11,14 +11,17 @@ import dev.dimension.flare.data.network.xqt.XQTService
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
+import kotlinx.serialization.Required
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 @OptIn(ExperimentalPagingApi::class)
-internal class UserMediaTimelineRemoteMediator(
+public class UserTimelineRemoteMediator(
     private val userKey: MicroBlogKey,
     private val service: XQTService,
     private val accountKey: MicroBlogKey,
 ) : CacheableRemoteLoader<UiTimelineV2> {
-    override val pagingKey: String = "user_media_${userKey}_$accountKey"
+    override val pagingKey: String = "user_timeline_${userKey}_$accountKey"
 
     override suspend fun load(
         pageSize: Int,
@@ -27,7 +30,7 @@ internal class UserMediaTimelineRemoteMediator(
         val response =
             when (request) {
                 PagingRequest.Refresh -> {
-                    service.getUserMedia(
+                    service.getUserTweets(
                         variables =
                             UserTimelineRequest(
                                 userID = userKey.id,
@@ -43,7 +46,7 @@ internal class UserMediaTimelineRemoteMediator(
                 }
 
                 is PagingRequest.Append -> {
-                    service.getUserMedia(
+                    service.getUserTweets(
                         variables =
                             UserTimelineRequest(
                                 userID = userKey.id,
@@ -74,3 +77,21 @@ internal class UserMediaTimelineRemoteMediator(
         )
     }
 }
+
+@Serializable
+internal data class UserTimelineRequest(
+    @SerialName("userId")
+    @Required
+    val userID: String,
+    @Required
+    val count: Long? = null,
+    val cursor: String? = null,
+    @Required
+    val includePromotedContent: Boolean = false,
+    @Required
+    val withQuickPromoteEligibilityTweetFields: Boolean = true,
+    @Required
+    val withVoice: Boolean = true,
+    @Required
+    val withV2Timeline: Boolean = true,
+)

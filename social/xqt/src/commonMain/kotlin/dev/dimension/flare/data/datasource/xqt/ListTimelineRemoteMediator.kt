@@ -11,14 +11,24 @@ import dev.dimension.flare.data.network.xqt.XQTService
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 @OptIn(ExperimentalPagingApi::class)
-internal class UserLikesTimelineRemoteMediator(
-    private val userKey: MicroBlogKey,
+public class ListTimelineRemoteMediator(
+    private val listId: String,
     private val service: XQTService,
     private val accountKey: MicroBlogKey,
 ) : CacheableRemoteLoader<UiTimelineV2> {
-    override val pagingKey: String = "user_likes_${userKey}_$accountKey"
+    override val pagingKey: String = "list_${listId}_$accountKey"
+
+    @Serializable
+    private data class Request(
+        @SerialName("listId")
+        val listID: String? = null,
+        val count: Long? = null,
+        val cursor: String? = null,
+    )
 
     override suspend fun load(
         pageSize: Int,
@@ -27,10 +37,10 @@ internal class UserLikesTimelineRemoteMediator(
         val response =
             when (request) {
                 PagingRequest.Refresh -> {
-                    service.getLikes(
+                    service.getListLatestTweetsTimeline(
                         variables =
-                            UserTimelineRequest(
-                                userID = userKey.id,
+                            Request(
+                                listID = listId,
                                 count = pageSize.toLong(),
                             ).encodeJson(),
                     )
@@ -43,34 +53,22 @@ internal class UserLikesTimelineRemoteMediator(
                 }
 
                 is PagingRequest.Append -> {
-                    service.getLikes(
+                    service.getListLatestTweetsTimeline(
                         variables =
-                            UserTimelineRequest(
-                                userID = userKey.id,
+                            Request(
+                                listID = listId,
                                 count = pageSize.toLong(),
                                 cursor = request.nextKey,
                             ).encodeJson(),
                     )
                 }
-            }.body()
-        val instructions =
-            response
-                ?.data
-                ?.user
-                ?.result
-                ?.timelineV2
-                ?.timeline
-                ?.instructions
-                .orEmpty()
-        val tweet =
-            instructions.tweets(
-                includePin = request is PagingRequest.Refresh,
-            )
+            }.body()?.data?.list?.tweetsTimeline?.timeline?.instructions.orEmpty()
+        val result = response.tweets()
 
         return PagingResult(
-            endOfPaginationReached = tweet.isEmpty(),
-            data = tweet.mapNotNull { it.render(accountKey) },
-            nextKey = instructions.cursor(),
+            endOfPaginationReached = response.isEmpty(),
+            data = result.mapNotNull { it.render(accountKey) },
+            nextKey = response.cursor(),
         )
     }
 }

@@ -10,11 +10,8 @@ import dev.dimension.flare.data.network.xqt.XQTService
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.mapper.render
-import kotlinx.serialization.Required
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
 
-internal class FansPagingSource(
+public class FollowingPagingSource(
     private val service: XQTService,
     private val accountKey: MicroBlogKey,
     private val userKey: MicroBlogKey,
@@ -41,7 +38,7 @@ internal class FansPagingSource(
             }
         val response =
             service
-                .getFollowers(
+                .getFollowing(
                     variables =
                         FollowVar(
                             userID = userKey.id,
@@ -74,13 +71,3 @@ internal class FansPagingSource(
         )
     }
 }
-
-@Serializable
-internal data class FollowVar(
-    @SerialName("userId")
-    val userID: String? = null,
-    val count: Long? = null,
-    val cursor: String? = null,
-    @Required
-    val includePromotedContent: Boolean = false,
-)

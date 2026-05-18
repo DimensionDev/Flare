@@ -20,7 +20,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @OptIn(ExperimentalPagingApi::class)
-internal class StatusDetailRemoteMediator(
+public class StatusDetailRemoteMediator(
     private val statusKey: MicroBlogKey,
     private val service: XQTService,
     private val accountKey: MicroBlogKey,
@@ -147,7 +147,7 @@ internal class StatusDetailRemoteMediator(
 }
 
 @Serializable
-internal data class TweetDetailWithRestIdRequest(
+public data class TweetDetailWithRestIdRequest(
     @SerialName("tweetId")
     val tweetID: String,
     @Required

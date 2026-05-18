@@ -15,7 +15,7 @@ import kotlinx.serialization.Required
 import kotlinx.serialization.Serializable
 
 @OptIn(ExperimentalPagingApi::class)
-internal class HomeTimelineRemoteMediator(
+public class HomeTimelineRemoteMediator(
     private val service: XQTService,
     private val accountKey: MicroBlogKey,
 ) : CacheableRemoteLoader<UiTimelineV2> {
@@ -71,7 +71,7 @@ internal class HomeTimelineRemoteMediator(
 }
 
 @OptIn(ExperimentalPagingApi::class)
-internal class FeaturedTimelineRemoteMediator(
+public class FeaturedTimelineRemoteMediator(
     private val service: XQTService,
     private val accountKey: MicroBlogKey,
 ) : CacheableRemoteLoader<UiTimelineV2> {
@@ -126,7 +126,7 @@ internal class FeaturedTimelineRemoteMediator(
 }
 
 @OptIn(ExperimentalPagingApi::class)
-internal class BookmarkTimelineRemoteMediator(
+public class BookmarkTimelineRemoteMediator(
     private val service: XQTService,
     private val accountKey: MicroBlogKey,
 ) : CacheableRemoteLoader<UiTimelineV2> {

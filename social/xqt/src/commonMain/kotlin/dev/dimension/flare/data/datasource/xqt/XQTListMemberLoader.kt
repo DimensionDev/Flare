@@ -15,7 +15,7 @@ import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.mapper.render
 
-internal class XQTListMemberLoader(
+public class XQTListMemberLoader(
     private val service: XQTService,
     private val accountKey: MicroBlogKey,
 ) : ListMemberLoader {

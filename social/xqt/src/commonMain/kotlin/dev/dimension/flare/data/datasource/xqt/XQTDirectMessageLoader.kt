@@ -21,9 +21,11 @@ import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
-internal class XQTDirectMessageLoader(
+@OptIn(ExperimentalUuidApi::class)
+public class XQTDirectMessageLoader(
     private val service: XQTService,
     private val accountKey: MicroBlogKey,
     private val credentialFlow: Flow<UiAccount.XQT.Credential>,

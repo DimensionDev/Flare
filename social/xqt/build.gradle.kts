@@ -33,6 +33,7 @@ kotlin {
                 api(projects.social.api)
                 api(projects.social.microblog)
                 api(libs.ktorfit.converters.response)
+                implementation(projects.data.database)
                 implementation(projects.data.repository)
                 implementation(libs.cryptography.provider.optimal)
                 implementation(libs.kotlin.codepoints.deluxe)

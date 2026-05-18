@@ -10,7 +10,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.renderNotifications
 
-internal class NotificationPagingSource(
+public class NotificationPagingSource(
     private val locale: String,
     private val service: XQTService,
     private val accountKey: MicroBlogKey,

@@ -17,7 +17,7 @@ import dev.dimension.flare.ui.model.mapper.render
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
-internal class XQTListLoader(
+public class XQTListLoader(
     private val service: XQTService,
     private val accountKey: MicroBlogKey,
 ) : ListLoader<UiList.List> {

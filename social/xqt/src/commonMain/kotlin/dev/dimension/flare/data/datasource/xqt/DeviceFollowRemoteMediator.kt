@@ -1,7 +1,6 @@
 package dev.dimension.flare.data.datasource.xqt
 
 import androidx.paging.ExperimentalPagingApi
-import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.database.cache.mapper.cursor
 import dev.dimension.flare.data.database.cache.mapper.tweets
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
@@ -11,24 +10,13 @@ import dev.dimension.flare.data.network.xqt.XQTService
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
 
 @OptIn(ExperimentalPagingApi::class)
-internal class ListTimelineRemoteMediator(
-    private val listId: String,
+public class DeviceFollowRemoteMediator(
     private val service: XQTService,
     private val accountKey: MicroBlogKey,
 ) : CacheableRemoteLoader<UiTimelineV2> {
-    override val pagingKey: String = "list_${listId}_$accountKey"
-
-    @Serializable
-    data class Request(
-        @SerialName("listId")
-        val listID: String? = null,
-        val count: Long? = null,
-        val cursor: String? = null,
-    )
+    override val pagingKey: String = "device_follow_$accountKey"
 
     override suspend fun load(
         pageSize: Int,
@@ -37,12 +25,8 @@ internal class ListTimelineRemoteMediator(
         val response =
             when (request) {
                 PagingRequest.Refresh -> {
-                    service.getListLatestTweetsTimeline(
-                        variables =
-                            Request(
-                                listID = listId,
-                                count = pageSize.toLong(),
-                            ).encodeJson(),
+                    service.getNotificationsDeviceFollow(
+                        count = pageSize,
                     )
                 }
 
@@ -53,21 +37,17 @@ internal class ListTimelineRemoteMediator(
                 }
 
                 is PagingRequest.Append -> {
-                    service.getListLatestTweetsTimeline(
-                        variables =
-                            Request(
-                                listID = listId,
-                                count = pageSize.toLong(),
-                                cursor = request.nextKey,
-                            ).encodeJson(),
+                    service.getNotificationsDeviceFollow(
+                        count = pageSize,
+                        cursor = request.nextKey,
                     )
                 }
-            }.body()?.data?.list?.tweetsTimeline?.timeline?.instructions.orEmpty()
-        val result = response.tweets()
+            }
+        val tweets = response.tweets()
 
         return PagingResult(
-            endOfPaginationReached = response.isEmpty(),
-            data = result.mapNotNull { it.render(accountKey) },
+            endOfPaginationReached = tweets.isEmpty(),
+            data = tweets.mapNotNull { it.render(accountKey) },
             nextKey = response.cursor(),
         )
     }

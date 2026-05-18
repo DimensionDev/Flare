@@ -13,12 +13,12 @@ import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
 
 @OptIn(ExperimentalPagingApi::class)
-internal class UserRepliesTimelineRemoteMediator(
+public class UserLikesTimelineRemoteMediator(
     private val userKey: MicroBlogKey,
     private val service: XQTService,
     private val accountKey: MicroBlogKey,
 ) : CacheableRemoteLoader<UiTimelineV2> {
-    override val pagingKey: String = "user_replies_${userKey}_$accountKey"
+    override val pagingKey: String = "user_likes_${userKey}_$accountKey"
 
     override suspend fun load(
         pageSize: Int,
@@ -27,7 +27,7 @@ internal class UserRepliesTimelineRemoteMediator(
         val response =
             when (request) {
                 PagingRequest.Refresh -> {
-                    service.getUserTweetsAndReplies(
+                    service.getLikes(
                         variables =
                             UserTimelineRequest(
                                 userID = userKey.id,
@@ -43,7 +43,7 @@ internal class UserRepliesTimelineRemoteMediator(
                 }
 
                 is PagingRequest.Append -> {
-                    service.getUserTweetsAndReplies(
+                    service.getLikes(
                         variables =
                             UserTimelineRequest(
                                 userID = userKey.id,

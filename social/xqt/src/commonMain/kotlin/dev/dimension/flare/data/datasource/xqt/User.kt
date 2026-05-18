@@ -1,7 +1,10 @@
 package dev.dimension.flare.data.datasource.xqt
 
+import de.jensklingenberg.ktorfit.Response
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.network.xqt.XQTService
+import dev.dimension.flare.data.network.xqt.model.GetProfileSpotlightsQuery200Response
+import dev.dimension.flare.data.network.xqt.model.GetUserByRestId200Response
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -25,7 +28,7 @@ internal data class ProfileSpotlightsQueryRequest(
     val screenName: String? = null,
 )
 
-internal suspend fun XQTService.userById(id: String) =
+public suspend fun XQTService.userById(id: String): Response<GetUserByRestId200Response> =
     getUserByRestId(
         variables =
             UserByRestIdRequest(
@@ -34,7 +37,7 @@ internal suspend fun XQTService.userById(id: String) =
             ).encodeJson(),
     )
 
-internal suspend fun XQTService.userByScreenName(screenName: String) =
+public suspend fun XQTService.userByScreenName(screenName: String): Response<GetUserByRestId200Response> =
     getUserByScreenName(
         variables =
             UserByScreenNameRequest(
@@ -43,7 +46,7 @@ internal suspend fun XQTService.userByScreenName(screenName: String) =
             ).encodeJson(),
     )
 
-internal suspend fun XQTService.profileSpotlights(screenName: String) =
+public suspend fun XQTService.profileSpotlights(screenName: String): Response<GetProfileSpotlightsQuery200Response> =
     getProfileSpotlightsQuery(
         variables =
             ProfileSpotlightsQueryRequest(

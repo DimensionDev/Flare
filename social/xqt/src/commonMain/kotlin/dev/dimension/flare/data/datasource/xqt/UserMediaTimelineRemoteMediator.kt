@@ -1,6 +1,7 @@
 package dev.dimension.flare.data.datasource.xqt
 
 import androidx.paging.ExperimentalPagingApi
+import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.database.cache.mapper.cursor
 import dev.dimension.flare.data.database.cache.mapper.tweets
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
@@ -12,11 +13,12 @@ import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
 
 @OptIn(ExperimentalPagingApi::class)
-internal class DeviceFollowRemoteMediator(
+public class UserMediaTimelineRemoteMediator(
+    private val userKey: MicroBlogKey,
     private val service: XQTService,
     private val accountKey: MicroBlogKey,
 ) : CacheableRemoteLoader<UiTimelineV2> {
-    override val pagingKey: String = "device_follow_$accountKey"
+    override val pagingKey: String = "user_media_${userKey}_$accountKey"
 
     override suspend fun load(
         pageSize: Int,
@@ -25,8 +27,12 @@ internal class DeviceFollowRemoteMediator(
         val response =
             when (request) {
                 PagingRequest.Refresh -> {
-                    service.getNotificationsDeviceFollow(
-                        count = pageSize,
+                    service.getUserMedia(
+                        variables =
+                            UserTimelineRequest(
+                                userID = userKey.id,
+                                count = pageSize.toLong(),
+                            ).encodeJson(),
                     )
                 }
 
@@ -37,18 +43,34 @@ internal class DeviceFollowRemoteMediator(
                 }
 
                 is PagingRequest.Append -> {
-                    service.getNotificationsDeviceFollow(
-                        count = pageSize,
-                        cursor = request.nextKey,
+                    service.getUserMedia(
+                        variables =
+                            UserTimelineRequest(
+                                userID = userKey.id,
+                                count = pageSize.toLong(),
+                                cursor = request.nextKey,
+                            ).encodeJson(),
                     )
                 }
-            }
-        val tweets = response.tweets()
+            }.body()
+        val instructions =
+            response
+                ?.data
+                ?.user
+                ?.result
+                ?.timelineV2
+                ?.timeline
+                ?.instructions
+                .orEmpty()
+        val tweet =
+            instructions.tweets(
+                includePin = request is PagingRequest.Refresh,
+            )
 
         return PagingResult(
-            endOfPaginationReached = tweets.isEmpty(),
-            data = tweets.mapNotNull { it.render(accountKey) },
-            nextKey = response.cursor(),
+            endOfPaginationReached = tweet.isEmpty(),
+            data = tweet.mapNotNull { it.render(accountKey) },
+            nextKey = instructions.cursor(),
         )
     }
 }

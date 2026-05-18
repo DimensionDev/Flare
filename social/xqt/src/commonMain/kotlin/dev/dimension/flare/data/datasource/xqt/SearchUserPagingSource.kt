@@ -13,7 +13,7 @@ import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.mapper.render
 import io.ktor.http.encodeURLQueryComponent
 
-internal class SearchUserPagingSource(
+public class SearchUserPagingSource(
     private val service: XQTService,
     private val accountKey: MicroBlogKey,
     private val query: String,

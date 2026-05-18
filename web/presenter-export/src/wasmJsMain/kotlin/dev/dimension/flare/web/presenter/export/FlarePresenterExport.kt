@@ -10,6 +10,7 @@ import kotlin.js.JsName
 import kotlin.js.JsString
 import kotlin.js.Promise
 import kotlin.js.toJsString
+import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 
@@ -23,6 +24,8 @@ private data class PresenterHandle(
     val type: String,
     val argsJson: String,
     val subscribers: MutableMap<String, (String) -> Unit> = mutableMapOf(),
+    var dispatchCount: Int = 0,
+    var lastActionJson: String? = null,
 )
 
 @JsExport
@@ -67,6 +70,8 @@ public fun dispatch(
     actionJson: String,
 ): Promise<JsString> {
     val handle = requireHandle(handleId)
+    handle.dispatchCount += 1
+    handle.lastActionJson = actionJson
     val resultJson =
         JsonObject(
             mapOf(
@@ -74,6 +79,7 @@ public fun dispatch(
                 "type" to JsonPrimitive(handle.type),
                 "actionJson" to JsonPrimitive(actionJson),
                 "accepted" to JsonPrimitive(true),
+                "dispatchCount" to JsonPrimitive(handle.dispatchCount),
             ),
         ).toString()
     handle.notifySubscribers()
@@ -105,5 +111,7 @@ private fun PresenterHandle.stateJson(): String =
             "argsJson" to JsonPrimitive(argsJson),
             "initializedConfigJson" to JsonPrimitive(initializedConfigJson),
             "ready" to JsonPrimitive(true),
+            "dispatchCount" to JsonPrimitive(dispatchCount),
+            "lastActionJson" to (lastActionJson?.let(::JsonPrimitive) ?: JsonNull),
         ),
     ).toString()

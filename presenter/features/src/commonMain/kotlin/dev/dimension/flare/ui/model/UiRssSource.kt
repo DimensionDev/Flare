@@ -1,7 +1,7 @@
 package dev.dimension.flare.ui.model
 
 import androidx.compose.runtime.Immutable
-import dev.dimension.flare.data.database.app.model.RssDisplayMode
+import dev.dimension.flare.model.RssDisplayMode
 import dev.dimension.flare.data.database.app.model.SubscriptionType
 import dev.dimension.flare.model.vvo
 import dev.dimension.flare.model.vvoHost

@@ -2,6 +2,7 @@ package dev.dimension.flare.model
 
 import androidx.compose.runtime.Immutable
 import kotlinx.serialization.Serializable
+import kotlin.io.encoding.Base64
 
 @Serializable
 @Immutable
@@ -37,6 +38,12 @@ public data class MicroBlogKey(
     private fun isSpecialChar(ch: Char): Boolean = ch == '\\' || ch == '@' || ch == ','
 
     public companion object {
+        public fun fromRss(url: String): MicroBlogKey =
+            MicroBlogKey(
+                id = Base64.encode(url.encodeToByteArray()),
+                host = "RSS",
+            )
+
         public fun valueOf(str: String): MicroBlogKey {
             var escaping = false
             var idFinished = false

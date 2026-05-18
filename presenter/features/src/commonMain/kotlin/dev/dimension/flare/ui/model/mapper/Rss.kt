@@ -1,10 +1,9 @@
 package dev.dimension.flare.ui.model.mapper
 
 import com.fleeksoft.ksoup.Ksoup
-import dev.dimension.flare.data.database.app.model.RssDisplayMode
 import dev.dimension.flare.data.network.rss.model.Feed
 import dev.dimension.flare.model.AccountType
-import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.RssDisplayMode
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.render.toUi
@@ -15,7 +14,6 @@ import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.Month
 import kotlinx.datetime.UtcOffset
 import kotlinx.datetime.toInstant
-import kotlin.io.encoding.Base64
 import kotlin.time.Instant
 
 // internal fun StatusContent.Rss.RssContent.render(): UiTimelineV2 =
@@ -170,12 +168,6 @@ internal fun Feed.RDF.Item.render(
         accountType = AccountType.Guest,
     )
 }
-
-internal fun MicroBlogKey.Companion.fromRss(url: String) =
-    MicroBlogKey(
-        id = Base64.encode(url.encodeToByteArray()),
-        host = "RSS",
-    )
 
 internal fun parseRssDateToInstant(input: String): Instant? =
     runCatching {

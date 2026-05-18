@@ -33,7 +33,7 @@ import compose.icons.fontawesomeicons.solid.CircleXmark
 import dev.dimension.flare.Res
 import dev.dimension.flare.add_rss_source
 import dev.dimension.flare.cancel
-import dev.dimension.flare.data.database.app.model.RssDisplayMode
+import dev.dimension.flare.model.RssDisplayMode
 import dev.dimension.flare.data.database.app.model.SubscriptionType
 import dev.dimension.flare.edit_rss_source
 import dev.dimension.flare.mastodon_available_timelines

@@ -2,13 +2,12 @@ package dev.dimension.flare.ui.model
 
 import androidx.compose.runtime.Immutable
 import dev.dimension.flare.common.SerializableImmutableList
-import dev.dimension.flare.data.database.app.model.RssDisplayMode
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.ReferenceType
-import dev.dimension.flare.ui.model.mapper.fromRss
+import dev.dimension.flare.model.RssDisplayMode
 import dev.dimension.flare.ui.render.UiDateTime
 import dev.dimension.flare.ui.render.UiRichText
 import dev.dimension.flare.ui.route.DeeplinkRoute

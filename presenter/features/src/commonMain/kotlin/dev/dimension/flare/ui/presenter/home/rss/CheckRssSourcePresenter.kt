@@ -9,6 +9,7 @@ import dev.dimension.flare.data.network.mastodon.GuestMastodonService
 import dev.dimension.flare.data.network.mastodon.MastodonInstanceService
 import dev.dimension.flare.data.network.mastodon.MastodonPlatformDetector
 import dev.dimension.flare.data.network.rss.RssService
+import dev.dimension.flare.model.RssDisplayMode
 import dev.dimension.flare.ui.model.UiRssSource
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.flattenUiState
@@ -104,7 +105,7 @@ public class CheckRssSourcePresenter(
                                                     title = RssService.fetch(it).title.trim(),
                                                     lastUpdate = Instant.DISTANT_PAST.toUi(),
                                                     favIcon = icon,
-                                                    displayMode = dev.dimension.flare.data.database.app.model.RssDisplayMode.FULL_CONTENT,
+                                                    displayMode = RssDisplayMode.FULL_CONTENT,
                                                 )
                                             }
                                         }.awaitAll()

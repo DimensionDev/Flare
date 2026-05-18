@@ -49,7 +49,7 @@ import compose.icons.fontawesomeicons.solid.CircleCheck
 import compose.icons.fontawesomeicons.solid.CircleChevronDown
 import compose.icons.fontawesomeicons.solid.CircleXmark
 import dev.dimension.flare.R
-import dev.dimension.flare.data.database.app.model.RssDisplayMode
+import dev.dimension.flare.model.RssDisplayMode
 import dev.dimension.flare.data.database.app.model.SubscriptionType
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.NetworkImage

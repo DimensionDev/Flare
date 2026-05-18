@@ -1,6 +1,6 @@
 package dev.dimension.flare.data.database.adapter
 
-import dev.dimension.flare.data.database.app.model.RssDisplayMode
+import dev.dimension.flare.model.RssDisplayMode
 import dev.dimension.flare.data.database.app.model.SubscriptionType
 
 public class SubscriptionTypeConverter {

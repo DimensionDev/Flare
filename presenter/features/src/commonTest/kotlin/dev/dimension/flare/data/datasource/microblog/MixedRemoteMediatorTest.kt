@@ -1626,7 +1626,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                 name = "test",
                 icon = null,
             ),
-        displayMode = dev.dimension.flare.data.database.app.model.RssDisplayMode.FULL_CONTENT,
+        displayMode = dev.dimension.flare.model.RssDisplayMode.FULL_CONTENT,
         accountType = AccountType.Guest,
     )
 

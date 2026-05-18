@@ -3,6 +3,7 @@ package dev.dimension.flare.data.database.app.model
 import androidx.room3.ColumnInfo
 import androidx.room3.Entity
 import androidx.room3.PrimaryKey
+import dev.dimension.flare.model.RssDisplayMode
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -11,13 +12,6 @@ public enum class SubscriptionType {
     MASTODON_TRENDS,
     MASTODON_PUBLIC,
     MASTODON_LOCAL,
-}
-
-@Serializable
-public enum class RssDisplayMode {
-    FULL_CONTENT,
-    OPEN_IN_BROWSER,
-    DESCRIPTION_ONLY,
 }
 
 @Serializable

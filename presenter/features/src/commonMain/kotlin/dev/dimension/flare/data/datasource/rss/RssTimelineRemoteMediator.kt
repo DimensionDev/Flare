@@ -6,6 +6,7 @@ import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.network.rss.RssService
 import dev.dimension.flare.data.network.rss.model.Feed
+import dev.dimension.flare.model.RssDisplayMode
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.model.mapper.title
@@ -38,7 +39,7 @@ internal class RssTimelineRemoteMediator(
                         it.render(
                             sourceName = title,
                             sourceIcon = icon,
-                            displayMode = rssSource?.displayMode ?: dev.dimension.flare.data.database.app.model.RssDisplayMode.FULL_CONTENT,
+                            displayMode = rssSource?.displayMode ?: RssDisplayMode.FULL_CONTENT,
                             sourceLanguage = null,
                         )
                     }
@@ -49,7 +50,7 @@ internal class RssTimelineRemoteMediator(
                         it.render(
                             sourceName = title,
                             sourceIcon = icon,
-                            displayMode = rssSource?.displayMode ?: dev.dimension.flare.data.database.app.model.RssDisplayMode.FULL_CONTENT,
+                            displayMode = rssSource?.displayMode ?: RssDisplayMode.FULL_CONTENT,
                             sourceLanguage = null,
                         )
                     }
@@ -60,7 +61,7 @@ internal class RssTimelineRemoteMediator(
                         it.render(
                             sourceName = title,
                             sourceIcon = icon,
-                            displayMode = rssSource?.displayMode ?: dev.dimension.flare.data.database.app.model.RssDisplayMode.FULL_CONTENT,
+                            displayMode = rssSource?.displayMode ?: RssDisplayMode.FULL_CONTENT,
                             sourceLanguage = response.channel.language,
                         )
                     }

@@ -23,7 +23,6 @@ dependencyResolutionManagement {
 
 rootProject.name = "Flare"
 include(":app")
-include(":shared")
 include(":compose-ui")
 include(":desktopApp")
 include(":core:common")

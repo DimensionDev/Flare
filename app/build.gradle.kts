@@ -123,7 +123,7 @@ dependencies {
     implementation(libs.androidx.window)
     coreLibraryDesugaring(libs.desugar.jdk.libs)
     implementation(libs.compose.webview)
-    implementation(projects.shared)
+    implementation(projects.presenter.features)
     implementation(projects.composeUi)
     implementation(libs.androidx.splash)
     implementation(libs.materialKolor)

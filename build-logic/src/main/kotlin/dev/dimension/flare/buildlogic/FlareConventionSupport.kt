@@ -45,7 +45,7 @@ class FlareRootConventionsPlugin : Plugin<Project> {
                 version.set(ktlintCliVersion)
                 filter {
                     exclude { element -> element.file.path.contains("build", ignoreCase = true) }
-                    if (subproject.path == ":shared") {
+                    if (subproject.path == ":presenter:features") {
                         exclude { element ->
                             element.file.absolutePath.contains("data/network/misskey/api/", ignoreCase = true)
                         }

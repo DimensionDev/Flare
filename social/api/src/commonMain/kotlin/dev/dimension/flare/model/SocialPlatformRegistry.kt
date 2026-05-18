@@ -2,6 +2,7 @@ package dev.dimension.flare.model
 
 import androidx.compose.runtime.Immutable
 import dev.dimension.flare.common.DebugRepository
+import dev.dimension.flare.common.deeplink.DeepLinkMapping
 import dev.dimension.flare.common.deeplink.DeepLinkPattern
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
@@ -18,7 +19,7 @@ public interface SocialPlatformSpec {
 
     public fun agreementUrl(host: String): String?
 
-    public fun deepLinkPatterns(host: String): ImmutableList<DeepLinkPattern<out Any>>
+    public fun deepLinkPatterns(host: String): ImmutableList<DeepLinkPattern<out DeepLinkMapping.Type>>
 
     public suspend fun instanceMetadata(host: String): UiInstanceMetadata
 
@@ -68,6 +69,23 @@ public class SocialPlatformRegistry(
         requireNotNull(specsByType[type]?.spec) {
             "No social platform registered for $type"
         }
+
+    public fun metadata(type: PlatformType): PlatformTypeMetadata = requireSpec(type).metadata
+
+    public fun agreementUrl(
+        type: PlatformType,
+        host: String,
+    ): String? = requireSpec(type).agreementUrl(host)
+
+    public fun deepLinkPatterns(
+        type: PlatformType,
+        host: String,
+    ): ImmutableList<DeepLinkPattern<out DeepLinkMapping.Type>> = requireSpec(type).deepLinkPatterns(host)
+
+    public suspend fun instanceMetadata(
+        type: PlatformType,
+        host: String,
+    ): UiInstanceMetadata = requireSpec(type).instanceMetadata(host)
 
     public fun createDataSource(account: UiAccount): MicroblogDataSource =
         plugins.firstNotNullOfOrNull { it.createDataSource(account) }

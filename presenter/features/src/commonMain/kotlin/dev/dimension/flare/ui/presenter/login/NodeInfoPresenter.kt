@@ -90,12 +90,12 @@ public class NodeInfoPresenter :
             override val detectedPlatformType = detectedPlatformType
             override val canNext = detectedPlatformType.isSuccess
 
-            override fun platformIcon(type: PlatformType): UiIcon = platformRegistry.requireSpec(type).metadata.icon
+            override fun platformIcon(type: PlatformType): UiIcon = platformRegistry.metadata(type).icon
 
             override fun agreementUrl(
                 type: PlatformType,
                 host: String,
-            ): String? = platformRegistry.requireSpec(type).agreementUrl(host)
+            ): String? = platformRegistry.agreementUrl(type, host)
 
             override fun setFilter(value: String) {
                 if (filter != value) {

@@ -14,7 +14,6 @@ import dev.dimension.flare.data.repository.accountServiceFlow
 import dev.dimension.flare.data.translation.PreTranslationService
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.SocialPlatformRegistry
-import dev.dimension.flare.model.requirePlatformSpec
 import dev.dimension.flare.ui.model.DeeplinkEvent
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.route.DeeplinkRoute
@@ -45,8 +44,10 @@ public class DeepLinkPresenter(
             it
                 .associateWith {
                     platformRegistry
-                        .requirePlatformSpec(it.platformType)
-                        .deepLinkPatterns(it.accountKey.host)
+                        .deepLinkPatterns(
+                            type = it.platformType,
+                            host = it.accountKey.host,
+                        )
                 }.toImmutableMap()
         }
     }

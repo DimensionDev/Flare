@@ -37,7 +37,7 @@ public class InstanceMetadataPresenter(
             flow {
                 tryRun {
                     emit(UiState.Loading())
-                    platformRegistry.requireSpec(platformType).instanceMetadata(host)
+                    platformRegistry.instanceMetadata(platformType, host)
                 }.fold(
                     onSuccess = {
                         emit(UiState.Success<UiInstanceMetadata>(it))

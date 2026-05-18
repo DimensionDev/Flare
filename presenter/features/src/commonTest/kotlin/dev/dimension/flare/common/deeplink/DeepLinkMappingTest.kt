@@ -4,7 +4,6 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.defaultSocialPlatformRegistry
-import dev.dimension.flare.model.requirePlatformSpec
 import dev.dimension.flare.model.xqtHost
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.route.DeeplinkRoute
@@ -18,7 +17,7 @@ import kotlin.test.assertTrue
 
 class DeepLinkMappingTest {
     private fun PlatformType.deepLinkPatterns(host: String) =
-        defaultSocialPlatformRegistry.requirePlatformSpec(this).deepLinkPatterns(host)
+        defaultSocialPlatformRegistry.deepLinkPatterns(this, host)
 
     @Test
     fun mastodonPatternsAreGeneratedInOrder() {

@@ -15,6 +15,7 @@ plugins {
 
 dependencies {
     implementation(projects.presenter.features)
+    implementation(projects.data.network)
     implementation(projects.composeUi)
 
     implementation(compose("org.jetbrains.compose.runtime:runtime"))

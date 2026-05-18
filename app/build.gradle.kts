@@ -124,6 +124,7 @@ dependencies {
     coreLibraryDesugaring(libs.desugar.jdk.libs)
     implementation(libs.compose.webview)
     implementation(projects.presenter.features)
+    implementation(projects.data.network)
     implementation(projects.composeUi)
     implementation(libs.androidx.splash)
     implementation(libs.materialKolor)

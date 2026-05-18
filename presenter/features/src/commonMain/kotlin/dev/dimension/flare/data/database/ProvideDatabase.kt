@@ -1,6 +1,5 @@
 package dev.dimension.flare.data.database
 
-import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import kotlinx.coroutines.Dispatchers
@@ -10,7 +9,7 @@ internal fun provideAppDatabase(driverFactory: DriverFactory): AppDatabase =
     driverFactory
         .createBuilder<AppDatabase>("app.db")
         .addMigrations(AppDatabase.MIGRATION_8_9, AppDatabase.MIGRATION_9_10)
-        .setDriver(BundledSQLiteDriver())
+        .setDriver(createDatabaseDriver())
         .setQueryCoroutineContext(Dispatchers.IO)
         .build()
 
@@ -20,6 +19,6 @@ internal fun provideCacheDatabase(driverFactory: DriverFactory): CacheDatabase =
     driverFactory
         .createBuilder<CacheDatabase>(CACHE_DATABASE_NAME, isCache = true)
         .fallbackToDestructiveMigration(dropAllTables = true)
-        .setDriver(BundledSQLiteDriver())
+        .setDriver(createDatabaseDriver())
         .setQueryCoroutineContext(Dispatchers.IO)
         .build()

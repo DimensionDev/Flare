@@ -7,9 +7,9 @@ import dev.dimension.flare.ui.model.UiTimelineV2
 @Immutable
 public sealed interface ProfileTab {
     @Immutable
-    public data class Timeline internal constructor(
-        internal val type: Type,
-        internal val loader: RemoteLoader<UiTimelineV2>,
+    public data class Timeline(
+        val type: Type,
+        val loader: RemoteLoader<UiTimelineV2>,
     ) : ProfileTab {
         @Immutable
         public enum class Type {

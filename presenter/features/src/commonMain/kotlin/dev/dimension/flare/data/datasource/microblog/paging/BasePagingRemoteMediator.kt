@@ -67,6 +67,8 @@ internal abstract class BasePagingRemoteMediator<T : Any, R : Any>(
                 request = request,
             )
         database.connect {
+            val previousKey = result.previousKey
+            val nextKey = result.nextKey
             if (loadType == LoadType.REFRESH) {
                 database.pagingTimelineDao().deletePagingKey(pagingKey)
                 database.pagingTimelineDao().insertPagingKey(
@@ -76,15 +78,15 @@ internal abstract class BasePagingRemoteMediator<T : Any, R : Any>(
                         prevKey = result.previousKey,
                     ),
                 )
-            } else if (loadType == LoadType.PREPEND && result.previousKey != null) {
+            } else if (loadType == LoadType.PREPEND && previousKey != null) {
                 database.pagingTimelineDao().updatePagingKeyPrevKey(
                     pagingKey = pagingKey,
-                    prevKey = result.previousKey,
+                    prevKey = previousKey,
                 )
-            } else if (loadType == LoadType.APPEND && result.nextKey != null) {
+            } else if (loadType == LoadType.APPEND && nextKey != null) {
                 database.pagingTimelineDao().updatePagingKeyNextKey(
                     pagingKey = pagingKey,
-                    nextKey = result.nextKey,
+                    nextKey = nextKey,
                 )
             }
             onSaveCache(request, result.data)

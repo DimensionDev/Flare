@@ -24,6 +24,7 @@ kotlin {
                 api(projects.core.common)
                 api(projects.core.model)
                 api(projects.ui.model)
+                api(libs.paging.common)
             }
         }
     }

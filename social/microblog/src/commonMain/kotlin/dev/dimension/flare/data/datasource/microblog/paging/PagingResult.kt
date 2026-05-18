@@ -1,11 +1,11 @@
 package dev.dimension.flare.data.datasource.microblog.paging
 
-internal data class PagingResult<T : Any>(
+public data class PagingResult<T : Any>(
     val data: List<T> = emptyList(),
     val nextKey: String? = null,
     val previousKey: String? = null,
 ) {
-    constructor(
+    public constructor(
         endOfPaginationReached: Boolean,
         data: List<T> = emptyList(),
         nextKey: String? = null,

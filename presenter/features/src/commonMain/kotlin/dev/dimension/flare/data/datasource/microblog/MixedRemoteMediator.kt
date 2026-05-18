@@ -162,15 +162,17 @@ internal class MixedRemoteMediator(
         subResponse: SubResponse,
     ) {
         val (mediator, result) = subResponse
-        if (request is PagingRequest.Prepend && result.previousKey != null) {
+        val previousKey = result.previousKey
+        val nextKey = result.nextKey
+        if (request is PagingRequest.Prepend && previousKey != null) {
             database.pagingTimelineDao().updatePagingKeyPrevKey(
                 pagingKey = subKey(mediator),
-                prevKey = result.previousKey,
+                prevKey = previousKey,
             )
-        } else if (request is PagingRequest.Append && result.nextKey != null) {
+        } else if (request is PagingRequest.Append && nextKey != null) {
             database.pagingTimelineDao().updatePagingKeyNextKey(
                 pagingKey = subKey(mediator),
-                nextKey = result.nextKey,
+                nextKey = nextKey,
             )
         } else if (request is PagingRequest.Refresh) {
             database.pagingTimelineDao().deletePagingKey(subKey(mediator))

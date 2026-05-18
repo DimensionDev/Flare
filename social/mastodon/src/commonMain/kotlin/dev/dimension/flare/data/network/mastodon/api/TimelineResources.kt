@@ -1,0 +1,104 @@
+package dev.dimension.flare.data.network.mastodon.api
+
+import de.jensklingenberg.ktorfit.http.GET
+import de.jensklingenberg.ktorfit.http.Path
+import de.jensklingenberg.ktorfit.http.Query
+import dev.dimension.flare.data.network.mastodon.api.model.Context
+import dev.dimension.flare.data.network.mastodon.api.model.MastodonPaging
+import dev.dimension.flare.data.network.mastodon.api.model.Notification
+import dev.dimension.flare.data.network.mastodon.api.model.NotificationTypes
+import dev.dimension.flare.data.network.mastodon.api.model.Status
+
+public interface TimelineResources {
+    @GET("api/v1/timelines/home")
+    public suspend fun homeTimeline(
+        @Query("max_id") max_id: String? = null,
+        @Query("since_id") since_id: String? = null,
+        @Query("min_id") min_id: String? = null,
+        @Query("limit") limit: Int? = null,
+        @Query("local") local: Boolean? = null,
+    ): MastodonPaging<Status>
+
+    @GET("api/v1/timelines/public")
+    public suspend fun publicTimeline(
+        @Query("max_id") max_id: String? = null,
+        @Query("since_id") since_id: String? = null,
+        @Query("min_id") min_id: String? = null,
+        @Query("limit") limit: Int? = null,
+        @Query("local") local: Boolean? = null,
+        @Query("remote") remote: Boolean? = null,
+        @Query("only_media") only_media: Boolean? = null,
+    ): MastodonPaging<Status>
+
+    @GET("api/v1/accounts/{id}/statuses")
+    public suspend fun userTimeline(
+        @Path("id") user_id: String,
+        @Query("max_id") max_id: String? = null,
+        @Query("since_id") since_id: String? = null,
+        @Query("min_id") min_id: String? = null,
+        @Query("exclude_replies") exclude_replies: Boolean? = null,
+        @Query("limit") limit: Int? = null,
+        @Query("pinned") pinned: Boolean? = null,
+        @Query("only_media") only_media: Boolean? = null,
+    ): MastodonPaging<Status>
+
+    @GET("api/v1/favourites")
+    public suspend fun favoritesList(
+        @Query("max_id") max_id: String? = null,
+        @Query("since_id") since_id: String? = null,
+        @Query("min_id") min_id: String? = null,
+        @Query("exclude_replies") exclude_replies: Boolean? = null,
+        @Query("limit") limit: Int? = null,
+    ): MastodonPaging<Status>
+
+    @GET("api/v1/notifications")
+    public suspend fun notification(
+        @Query("max_id") max_id: String? = null,
+        @Query("since_id") since_id: String? = null,
+        @Query("min_id") min_id: String? = null,
+        @Query("limit") limit: Int? = null,
+        @Query("exclude_types[]") exclude_types: List<NotificationTypes>? = null,
+        @Query("account_id") account_id: String? = null,
+    ): MastodonPaging<Notification>
+
+    @GET("api/v1/statuses/{id}/context")
+    public suspend fun context(
+        @Path("id") id: String,
+    ): Context
+
+    @GET("api/v1/timelines/tag/{hashtag}")
+    public suspend fun hashtagTimeline(
+        @Path("hashtag") hashtag: String,
+        @Query("max_id") max_id: String? = null,
+        @Query("since_id") since_id: String? = null,
+        @Query("min_id") min_id: String? = null,
+        @Query("limit") limit: Int? = null,
+        @Query("local") local: Boolean? = null,
+        @Query("only_media") only_media: Boolean? = null,
+    ): MastodonPaging<Status>
+
+    @GET("api/v1//timelines/list/{id}")
+    public suspend fun listTimeline(
+        @Path("id") listId: String,
+        @Query("max_id") max_id: String? = null,
+        @Query("since_id") since_id: String? = null,
+        @Query("min_id") min_id: String? = null,
+        @Query("limit") limit: Int? = null,
+    ): MastodonPaging<Status>
+
+    @GET("api/v1/bookmarks")
+    public suspend fun bookmarks(
+        @Query("max_id") max_id: String? = null,
+        @Query("since_id") since_id: String? = null,
+        @Query("min_id") min_id: String? = null,
+        @Query("limit") limit: Int? = null,
+    ): MastodonPaging<Status>
+
+    @GET("api/v1/favourites")
+    public suspend fun favorites(
+        @Query("max_id") max_id: String? = null,
+        @Query("since_id") since_id: String? = null,
+        @Query("min_id") min_id: String? = null,
+        @Query("limit") limit: Int? = null,
+    ): MastodonPaging<Status>
+}

@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.ksp)
     alias(libs.plugins.ktorfit)
 }
 
@@ -17,9 +18,42 @@ kotlin {
             FlarePlatform.JVM,
             FlarePlatform.IOS,
         )
+        ksp(
+            libs.ktorfit.ksp,
+        )
+    }
+
+    sourceSets {
+        val commonMain by getting {
+            dependencies {
+                api(projects.core.common)
+                api(projects.core.model)
+                api(projects.data.network)
+                api(projects.social.api)
+                api(libs.ktorfit.converters.response)
+                implementation(libs.kotlinx.datetime)
+            }
+        }
+        val commonTest by getting {
+            dependencies {
+                implementation(kotlin("test"))
+                implementation(libs.kotlinx.coroutines.test)
+                implementation(libs.ktor.client.mock)
+            }
+        }
     }
 }
 
 ktorfit {
     compilerPluginVersion.set("2.3.3")
+}
+
+afterEvaluate {
+    tasks {
+        configureEach {
+            if (this.name != "kspCommonMainKotlinMetadata" && this.name.startsWith("ksp")) {
+                this.dependsOn("kspCommonMainKotlinMetadata")
+            }
+        }
+    }
 }

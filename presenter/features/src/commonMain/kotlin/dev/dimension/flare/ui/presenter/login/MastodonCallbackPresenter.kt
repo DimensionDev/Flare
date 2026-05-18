@@ -75,8 +75,8 @@ public class MastodonCallbackPresenter(
                 redirect_uri = DeeplinkRoute.Companion.Callback.MASTODON,
         )
         val accessTokenResponse = service.getAccessToken(code, application.application.toCreateApplicationResponse())
-        requireNotNull(accessTokenResponse.accessToken) { "Invalid access token" }
-        val user = service.verify(accessToken = accessTokenResponse.accessToken)
+        val accessToken = requireNotNull(accessTokenResponse.accessToken) { "Invalid access token" }
+        val user = service.verify(accessToken = accessToken)
         val id = user.id
         requireNotNull(id) { "Invalid user id" }
         val nodeInfo = NodeInfoService.fetchNodeInfo(host)
@@ -98,7 +98,7 @@ public class MastodonCallbackPresenter(
             credential =
                 UiAccount.Mastodon.Credential(
                     instance = host,
-                    accessToken = accessTokenResponse.accessToken,
+                    accessToken = accessToken,
                     forkType = forkType,
                     nodeType = nodeInfo,
                 ),

@@ -18,7 +18,7 @@ import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.datasource.microblog.RecommendInstancePagingSource
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
 import dev.dimension.flare.data.network.nodeinfo.NodeData
-import dev.dimension.flare.data.network.nodeinfo.NodeInfoService
+import dev.dimension.flare.data.network.nodeinfo.detectPlatformType
 import dev.dimension.flare.ui.model.UiInstance
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.isSuccess
@@ -63,7 +63,7 @@ public class NodeInfoPresenter : PresenterBase<NodeInfoState>() {
                 flow {
                     runCatching {
                         emit(UiState.Loading())
-                        NodeInfoService.detectPlatformType(it)
+                        detectPlatformType(it)
                     }.onSuccess {
                         emit(UiState.Success(it))
                     }.onFailure {

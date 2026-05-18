@@ -50,6 +50,7 @@ kotlin {
                 implementation(projects.data.network)
                 api(projects.social.api)
                 api(projects.social.bluesky)
+                api(projects.social.mastodon)
                 api(projects.social.microblog)
                 api(projects.social.nostr)
                 api(projects.social.rss)

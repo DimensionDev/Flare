@@ -59,13 +59,14 @@ private val mastodonParser by lazy {
 }
 
 internal fun Notification.render(accountKey: MicroBlogKey): UiTimelineV2 {
-    requireNotNull(account) { "account is null" }
-    val user = account.render(accountKey, host = accountKey.host)
+    val notificationAccount = requireNotNull(account) { "account is null" }
+    val notificationType = type
+    val user = notificationAccount.render(accountKey, host = accountKey.host)
     val messageType =
-        if (type == null) {
+        if (notificationType == null) {
             UiTimelineV2.Message.Type.Unknown(rawType = "")
         } else {
-            when (type) {
+            when (notificationType) {
                 NotificationTypes.Follow -> {
                     UiTimelineV2.Message.Type.Localized.MessageId.Follow
                 }
@@ -112,7 +113,7 @@ internal fun Notification.render(accountKey: MicroBlogKey): UiTimelineV2 {
         UiTimelineV2.Message(
             user = user,
             icon =
-                when (type) {
+                when (notificationType) {
                     NotificationTypes.Follow -> UiIcon.Follow
                     NotificationTypes.Favourite -> UiIcon.Favourite
                     NotificationTypes.Reblog -> UiIcon.Retweet
@@ -136,7 +137,8 @@ internal fun Notification.render(accountKey: MicroBlogKey): UiTimelineV2 {
                 ),
             accountType = accountKey.toAccountType(),
         )
-    if (type in listOf(NotificationTypes.FollowRequest)) {
+    val notificationStatus = status
+    if (notificationType in listOf(NotificationTypes.FollowRequest)) {
         return UiTimelineV2.User(
             value = user,
             message = message,
@@ -180,8 +182,8 @@ internal fun Notification.render(accountKey: MicroBlogKey): UiTimelineV2 {
             statusKey = MicroBlogKey(id ?: "", accountKey.host),
             accountType = accountKey.toAccountType(),
         )
-    } else if (status != null) {
-        return status
+    } else if (notificationStatus != null) {
+        return notificationStatus
             .renderStatus(
                 host = accountKey.host,
                 accountKey = accountKey,
@@ -211,6 +213,7 @@ internal fun Status.render(
 ): UiTimelineV2 {
     requireNotNull(account) { "account is null" }
     val currentStatus = this.renderStatus(host, accountKey)
+    val boostedStatus = reblog
     val topMessage =
         if (pinned == true) {
             UiTimelineV2.Message(
@@ -225,7 +228,7 @@ internal fun Status.render(
                 clickEvent = ClickEvent.Noop,
                 accountType = accountKey.toAccountType(),
             )
-        } else if (reblog != null) {
+        } else if (boostedStatus != null) {
             val userKey = currentStatus.user?.key
             UiTimelineV2.Message(
                 user = currentStatus.user,
@@ -253,11 +256,11 @@ internal fun Status.render(
         } else {
             null
         }
-    return if (reblog != null) {
+    return if (boostedStatus != null) {
         currentStatus.copy(
             message = topMessage,
             internalRepost =
-                reblog.renderStatus(
+                boostedStatus.renderStatus(
                     host = host,
                     accountKey = accountKey,
                 ),
@@ -271,8 +274,8 @@ private fun Status.renderStatus(
     host: String,
     accountKey: MicroBlogKey?,
 ): UiTimelineV2.Post {
-    requireNotNull(account) { "actualStatus.account is null" }
-    val actualUser = account.render(accountKey, host)
+    val statusAccount = requireNotNull(account) { "actualStatus.account is null" }
+    val actualUser = statusAccount.render(accountKey, host)
     val isFromMe = actualUser.key == accountKey
     val canReblog =
         visibility in
@@ -284,19 +287,22 @@ private fun Status.renderStatus(
     val canQuote =
         if (emojiReactions != null) { // assuming that is pleroma
             canReblog
-        } else if (quoteApproval != null && quoteApproval.currentUser != null) {
-            when (quoteApproval.currentUser) {
+        } else {
+            val approval = quoteApproval
+            when (approval?.currentUser) {
                 QuoteApproval.CurrentUser.Automatic -> {
-                    if (!quoteApproval.automatic.isNullOrEmpty()) {
-                        quoteApproval.automatic.contains(QuoteApproval.Approval.Public)
+                    val automatic = approval.automatic.orEmpty()
+                    if (automatic.isNotEmpty()) {
+                        automatic.contains(QuoteApproval.Approval.Public)
                     } else {
                         isFromMe
                     }
                 }
 
                 QuoteApproval.CurrentUser.Manual -> {
-                    if (!quoteApproval.manual.isNullOrEmpty()) {
-                        quoteApproval.manual.contains(QuoteApproval.Approval.Public)
+                    val manual = approval.manual.orEmpty()
+                    if (manual.isNotEmpty()) {
+                        manual.contains(QuoteApproval.Approval.Public)
                     } else {
                         isFromMe
                     }
@@ -309,9 +315,11 @@ private fun Status.renderStatus(
                 QuoteApproval.CurrentUser.Unknown -> {
                     false
                 }
+
+                null -> {
+                    false
+                }
             }
-        } else {
-            false
         }
 //    val canReact = dataSource is StatusEvent.Pleroma
     // TODO: there are too many actions for Pleroma, disable for now
@@ -359,7 +367,7 @@ private fun Status.renderStatus(
             } else if (!uri.isNullOrEmpty()) {
                 append(uri)
             } else {
-                append("https://$host/@${account.acct}/$id")
+                append("https://$host/@${statusAccount.acct}/$id")
             }
         }
     val quoteStatus = quote?.renderStatus(host, accountKey)
@@ -379,19 +387,21 @@ private fun Status.renderStatus(
         quote = listOfNotNull(quoteStatus).toImmutableList(),
         content = parseMastodonContent(this, accountKey, host, sourceLanguages),
         card =
-            card?.url?.let { url ->
+            card?.let { statusCard ->
+                val cardUrl = statusCard.url ?: return@let null
+                val cardImage = statusCard.image
                 UiCard(
-                    url = url,
-                    title = card.title.orEmpty(),
-                    description = card.description?.takeIf { it.isNotEmpty() && it.isNotBlank() },
+                    url = cardUrl,
+                    title = statusCard.title.orEmpty(),
+                    description = statusCard.description?.takeIf { it.isNotEmpty() && it.isNotBlank() },
                     media =
-                        card.image?.let {
+                        cardImage?.let {
                             UiMedia.Image(
-                                url = card.image,
-                                previewUrl = card.image,
-                                description = card.description,
-                                width = card.width?.toFloat() ?: 0f,
-                                height = card.height?.toFloat() ?: 0f,
+                                url = it,
+                                previewUrl = it,
+                                description = statusCard.description,
+                                width = statusCard.width?.toFloat() ?: 0f,
+                                height = statusCard.height?.toFloat() ?: 0f,
                                 sensitive = false,
                             )
                         },
@@ -916,9 +926,10 @@ internal fun Account.render(
     accountKey: MicroBlogKey?,
     host: String,
 ): UiProfile {
+    val accountAcct = acct
     val remoteHost =
-        if (acct != null && acct.contains('@')) {
-            acct.substring(acct.indexOf('@') + 1)
+        if (accountAcct != null && accountAcct.contains('@')) {
+            accountAcct.substring(accountAcct.indexOf('@') + 1)
         } else {
             host
         }

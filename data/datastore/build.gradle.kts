@@ -15,15 +15,12 @@ kotlin {
             FlarePlatform.ANDROID,
             FlarePlatform.JVM,
             FlarePlatform.IOS,
+            FlarePlatform.WEB,
         )
     }
 
     compilerOptions {
         allWarningsAsErrors.set(false)
-        freeCompilerArgs.addAll(
-            "-module-name",
-            "flare_data_datastore",
-        )
     }
 
     sourceSets {
@@ -31,9 +28,15 @@ kotlin {
             dependencies {
                 api(projects.core.common)
                 api(projects.core.model)
-                api(libs.datastore)
+                api(libs.datastore.core)
+                api(libs.datastore.core.okio)
                 api(libs.okio)
                 implementation(libs.kotlinx.serialization.json)
+            }
+        }
+        val androidMain by getting {
+            dependencies {
+                implementation(libs.datastore)
             }
         }
     }

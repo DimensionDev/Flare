@@ -21,6 +21,10 @@ kotlin {
         ksp(libs.room.compiler)
     }
 
+    compilerOptions {
+        allWarningsAsErrors.set(false)
+    }
+
     sourceSets {
         all {
             languageSettings {
@@ -32,8 +36,12 @@ kotlin {
             dependencies {
                 implementation(projects.core.common)
                 api(projects.core.model)
+                api(projects.ui.model)
+                api(projects.social.microblog)
                 api(libs.kotlinx.coroutines.core)
+                api(libs.paging.common)
                 api(libs.room.runtime)
+                api(libs.room.paging)
                 api(libs.sqlite.bundled)
                 implementation(libs.kotlinx.serialization.json)
             }

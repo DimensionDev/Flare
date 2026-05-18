@@ -7,6 +7,6 @@ import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal data class EmojiContent(
-    val data: SerializableImmutableMap<String, SerializableImmutableList<UiEmoji>> = persistentMapOf(),
+public data class EmojiContent(
+    public val data: SerializableImmutableMap<String, SerializableImmutableList<UiEmoji>> = persistentMapOf(),
 )

@@ -9,20 +9,20 @@ import dev.dimension.flare.common.encodeProtobuf
 import dev.dimension.flare.model.DbAccountType
 
 @Entity
-internal data class DbEmoji(
+public data class DbEmoji(
     @PrimaryKey
     @ColumnInfo(name = "host")
-    val host: String,
+    public val host: String,
     @ColumnInfo(name = "content", typeAffinity = ColumnInfo.BLOB)
-    val content: EmojiContent,
+    public val content: EmojiContent,
 )
 
-internal class EmojiContentConverter {
+public class EmojiContentConverter {
     @TypeConverter
-    fun fromEmojiContent(emojiContent: EmojiContent): ByteArray = emojiContent.encodeProtobuf()
+    public fun fromEmojiContent(emojiContent: EmojiContent): ByteArray = emojiContent.encodeProtobuf()
 
     @TypeConverter
-    fun toEmojiContent(data: ByteArray): EmojiContent =
+    public fun toEmojiContent(data: ByteArray): EmojiContent =
         if (data.isEmpty()) {
             EmojiContent()
         } else {
@@ -31,10 +31,10 @@ internal class EmojiContentConverter {
 }
 
 @Entity
-internal data class DbEmojiHistory(
-    val accountType: DbAccountType,
-    val shortCode: String,
-    val lastUse: Long,
+public data class DbEmojiHistory(
+    public val accountType: DbAccountType,
+    public val shortCode: String,
+    public val lastUse: Long,
     @PrimaryKey
-    val _id: String = "$accountType-$shortCode",
+    public val _id: String = "$accountType-$shortCode",
 )

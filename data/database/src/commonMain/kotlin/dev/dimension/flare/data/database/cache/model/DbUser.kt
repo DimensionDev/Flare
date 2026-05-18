@@ -14,14 +14,14 @@ import dev.dimension.flare.ui.model.UiRelation
         Index(value = ["canonicalHandle", "host"], unique = true),
     ],
 )
-internal data class DbUser(
+public data class DbUser(
     @PrimaryKey
-    val userKey: MicroBlogKey,
-    val name: String,
-    val canonicalHandle: String,
-    val host: String,
+    public val userKey: MicroBlogKey,
+    public val name: String,
+    public val canonicalHandle: String,
+    public val host: String,
     @ColumnInfo(typeAffinity = ColumnInfo.BLOB)
-    val content: UiProfile,
+    public val content: UiProfile,
 )
 
 @Entity(
@@ -30,9 +30,9 @@ internal data class DbUser(
         Index(value = ["accountType", "userKey"], unique = true),
     ],
 )
-internal data class DbUserRelation(
-    val accountType: DbAccountType,
-    val userKey: MicroBlogKey,
+public data class DbUserRelation(
+    public val accountType: DbAccountType,
+    public val userKey: MicroBlogKey,
     @ColumnInfo(typeAffinity = ColumnInfo.BLOB)
-    val relation: UiRelation,
+    public val relation: UiRelation,
 )

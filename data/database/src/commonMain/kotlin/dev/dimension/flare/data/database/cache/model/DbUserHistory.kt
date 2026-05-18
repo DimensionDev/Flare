@@ -14,17 +14,17 @@ import dev.dimension.flare.model.MicroBlogKey
         Index(value = ["lastVisit"]),
     ],
 )
-internal data class DbUserHistory(
-    val userKey: MicroBlogKey,
-    val accountType: DbAccountType,
-    val lastVisit: Long,
+public data class DbUserHistory(
+    public val userKey: MicroBlogKey,
+    public val accountType: DbAccountType,
+    public val lastVisit: Long,
     @PrimaryKey
-    val _id: String = "$accountType-$userKey",
+    public val _id: String = "$accountType-$userKey",
 )
 
-internal data class DbUserHistoryWithUser(
+public data class DbUserHistoryWithUser(
     @Embedded
-    val data: DbUserHistory,
+    public val data: DbUserHistory,
     @Relation(parentColumn = "userKey", entityColumn = "userKey")
-    val user: DbUser,
+    public val user: DbUser,
 )

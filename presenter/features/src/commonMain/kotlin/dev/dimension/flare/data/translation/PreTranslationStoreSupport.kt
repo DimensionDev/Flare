@@ -6,6 +6,8 @@ import dev.dimension.flare.data.database.cache.model.TranslationDisplayMode
 import dev.dimension.flare.data.database.cache.model.TranslationEntityType
 import dev.dimension.flare.data.database.cache.model.TranslationPayload
 import dev.dimension.flare.data.database.cache.model.TranslationStatus
+import dev.dimension.flare.data.database.cache.model.TRANSLATION_SKIPPED_EXCLUDED_LANGUAGE_REASON
+import dev.dimension.flare.data.database.cache.model.canRetrySkippedManually
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
@@ -17,7 +19,7 @@ internal object PreTranslationStoreSupport {
     const val FAILED_STALE_IN_FLIGHT_REASON: String = "stale_in_flight"
     const val SKIPPED_AI_SAME_LANGUAGE_REASON: String = "ai_same_language"
     const val SKIPPED_EMPTY_REASON: String = "empty"
-    const val SKIPPED_EXCLUDED_LANGUAGE_REASON: String = "source_language_excluded"
+    const val SKIPPED_EXCLUDED_LANGUAGE_REASON: String = TRANSLATION_SKIPPED_EXCLUDED_LANGUAGE_REASON
     const val SKIPPED_NON_TRANSLATABLE_ONLY_REASON: String = "non_translatable_only"
     const val SKIPPED_SAME_LANGUAGE_REASON: String = "source_language_matches_target"
     const val SKIPPED_UNCHANGED_REASON: String = "unchanged"
@@ -133,9 +135,7 @@ internal object PreTranslationStoreSupport {
         }
     }
 
-    fun canRetrySkippedManually(existing: DbTranslation?): Boolean =
-        existing?.status == TranslationStatus.Skipped &&
-            existing.statusReason == SKIPPED_EXCLUDED_LANGUAGE_REASON
+    fun canRetrySkippedManually(existing: DbTranslation?): Boolean = existing.canRetrySkippedManually()
 
     private fun matchesSkipped(
         existing: DbTranslation?,

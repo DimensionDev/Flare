@@ -6,7 +6,7 @@ import androidx.room3.RoomDatabase
 import androidx.room3.RoomDatabaseConstructor
 import androidx.room3.TypeConverters
 
-internal const val CACHE_DATABASE_VERSION = 39
+public const val CACHE_DATABASE_VERSION: Int = 39
 
 @Database(
     entities = [
@@ -41,26 +41,26 @@ internal const val CACHE_DATABASE_VERSION = 39
     dev.dimension.flare.data.database.cache.model.TranslationConverters::class,
 )
 @ConstructedBy(CacheDatabaseConstructor::class)
-internal abstract class CacheDatabase : RoomDatabase() {
-    abstract fun emojiDao(): dev.dimension.flare.data.database.cache.dao.EmojiDao
+public abstract class CacheDatabase : RoomDatabase() {
+    public abstract fun emojiDao(): dev.dimension.flare.data.database.cache.dao.EmojiDao
 
-    abstract fun statusReferenceDao(): dev.dimension.flare.data.database.cache.dao.StatusReferenceDao
+    public abstract fun statusReferenceDao(): dev.dimension.flare.data.database.cache.dao.StatusReferenceDao
 
-    abstract fun statusDao(): dev.dimension.flare.data.database.cache.dao.StatusDao
+    public abstract fun statusDao(): dev.dimension.flare.data.database.cache.dao.StatusDao
 
-    abstract fun userDao(): dev.dimension.flare.data.database.cache.dao.UserDao
+    public abstract fun userDao(): dev.dimension.flare.data.database.cache.dao.UserDao
 
-    abstract fun pagingTimelineDao(): dev.dimension.flare.data.database.cache.dao.PagingTimelineDao
+    public abstract fun pagingTimelineDao(): dev.dimension.flare.data.database.cache.dao.PagingTimelineDao
 
-    abstract fun messageDao(): dev.dimension.flare.data.database.cache.dao.MessageDao
+    public abstract fun messageDao(): dev.dimension.flare.data.database.cache.dao.MessageDao
 
-    abstract fun listDao(): dev.dimension.flare.data.database.cache.dao.ListDao
+    public abstract fun listDao(): dev.dimension.flare.data.database.cache.dao.ListDao
 
-    abstract fun translationDao(): dev.dimension.flare.data.database.cache.dao.TranslationDao
+    public abstract fun translationDao(): dev.dimension.flare.data.database.cache.dao.TranslationDao
 }
 
 // The Room compiler generates the `actual` implementations.
 @Suppress("NO_ACTUAL_FOR_EXPECT")
-internal expect object CacheDatabaseConstructor : RoomDatabaseConstructor<CacheDatabase> {
+public expect object CacheDatabaseConstructor : RoomDatabaseConstructor<CacheDatabase> {
     override fun initialize(): CacheDatabase
 }

@@ -21,23 +21,23 @@ import dev.dimension.flare.ui.model.UiDMRoom
         ),
     ],
 )
-internal data class DbDirectMessageTimeline(
-    val accountType: DbAccountType,
-    val roomKey: MicroBlogKey,
-    val sortId: Long,
-    val unreadCount: Long,
+public data class DbDirectMessageTimeline(
+    public val accountType: DbAccountType,
+    public val roomKey: MicroBlogKey,
+    public val sortId: Long,
+    public val unreadCount: Long,
     @ColumnInfo(typeAffinity = ColumnInfo.BLOB)
-    val content: UiDMRoom,
+    public val content: UiDMRoom,
     @PrimaryKey
-    val _id: String = "$accountType-$roomKey",
+    public val _id: String = "$accountType-$roomKey",
 )
 
 @Entity
-internal data class DbMessageRoom(
+public data class DbMessageRoom(
     @PrimaryKey
-    val roomKey: MicroBlogKey,
-    val platformType: PlatformType,
-    val messageKey: MicroBlogKey?,
+    public val roomKey: MicroBlogKey,
+    public val platformType: PlatformType,
+    public val messageKey: MicroBlogKey?,
 )
 
 @Entity(
@@ -47,11 +47,11 @@ internal data class DbMessageRoom(
         ),
     ],
 )
-internal data class DbMessageRoomReference(
-    val roomKey: MicroBlogKey,
-    val userKey: MicroBlogKey,
+public data class DbMessageRoomReference(
+    public val roomKey: MicroBlogKey,
+    public val userKey: MicroBlogKey,
     @PrimaryKey
-    val _id: String = "$roomKey-$userKey",
+    public val _id: String = "$roomKey-$userKey",
 )
 
 @Entity(
@@ -61,15 +61,15 @@ internal data class DbMessageRoomReference(
         ),
     ],
 )
-internal data class DbMessageItem(
+public data class DbMessageItem(
     @PrimaryKey
-    val messageKey: MicroBlogKey,
-    val roomKey: MicroBlogKey,
-    val userKey: MicroBlogKey,
-    val timestamp: Long,
+    public val messageKey: MicroBlogKey,
+    public val roomKey: MicroBlogKey,
+    public val userKey: MicroBlogKey,
+    public val timestamp: Long,
     @ColumnInfo(typeAffinity = ColumnInfo.BLOB)
-    val content: UiDMItem,
-    val showSender: Boolean,
-    val isLocal: Boolean = false,
-    val remoteCursor: String? = null,
+    public val content: UiDMItem,
+    public val showSender: Boolean,
+    public val isLocal: Boolean = false,
+    public val remoteCursor: String? = null,
 )

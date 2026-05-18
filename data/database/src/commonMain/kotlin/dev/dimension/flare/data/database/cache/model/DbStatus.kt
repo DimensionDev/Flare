@@ -11,17 +11,17 @@ import dev.dimension.flare.ui.model.UiTimelineV2
 @Entity(
     indices = [Index(value = ["statusKey", "accountType"], unique = true)],
 )
-internal data class DbStatus(
-    val statusKey: MicroBlogKey,
-    val accountType: DbAccountType,
+public data class DbStatus(
+    public val statusKey: MicroBlogKey,
+    public val accountType: DbAccountType,
     @ColumnInfo(typeAffinity = ColumnInfo.BLOB)
-    val content: UiTimelineV2,
-    val text: String?, // For Searching
+    public val content: UiTimelineV2,
+    public val text: String?, // For Searching
     @PrimaryKey
-    val id: String = createId(accountType = accountType, statusKey = statusKey),
+    public val id: String = createId(accountType = accountType, statusKey = statusKey),
 ) {
-    companion object {
-        fun createId(
+    public companion object {
+        public fun createId(
             accountType: DbAccountType,
             statusKey: MicroBlogKey,
         ): String = "${accountType}_$statusKey"

@@ -23,13 +23,13 @@ import dev.dimension.flare.model.ReferenceType
         ),
     ],
 )
-internal data class DbStatusReference(
+public data class DbStatusReference(
     /**
      * Id that being used in the database
      */
     @PrimaryKey
-    val _id: String,
-    val referenceType: ReferenceType,
-    val statusId: String,
-    val referenceStatusId: String,
+    public val _id: String,
+    public val referenceType: ReferenceType,
+    public val statusId: String,
+    public val referenceStatusId: String,
 )

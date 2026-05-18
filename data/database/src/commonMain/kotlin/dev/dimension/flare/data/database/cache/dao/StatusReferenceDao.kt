@@ -8,22 +8,22 @@ import dev.dimension.flare.data.database.cache.model.DbStatusReference
 import dev.dimension.flare.model.ReferenceType
 
 @Dao
-internal interface StatusReferenceDao {
+public interface StatusReferenceDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAll(items: List<DbStatusReference>)
+    public suspend fun insertAll(items: List<DbStatusReference>)
 
     @Query("DELETE FROM status_reference WHERE statusId = :statusId")
-    suspend fun delete(statusId: String)
+    public suspend fun delete(statusId: String)
 
     @Query("DELETE FROM status_reference WHERE statusId in (:statusIds)")
-    suspend fun delete(statusIds: List<String>)
+    public suspend fun delete(statusIds: List<String>)
 
     @Query("DELETE FROM status_reference WHERE statusId in (:statusIds) AND referenceType in (:types)")
-    suspend fun delete(
+    public suspend fun delete(
         statusIds: List<String>,
         types: List<ReferenceType>,
     )
 
     @Query("SELECT * FROM status_reference WHERE statusId = :statusId")
-    suspend fun getByStatusId(statusId: String): List<DbStatusReference>
+    public suspend fun getByStatusId(statusId: String): List<DbStatusReference>
 }

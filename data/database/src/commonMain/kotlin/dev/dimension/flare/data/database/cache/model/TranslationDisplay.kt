@@ -3,7 +3,6 @@ package dev.dimension.flare.data.database.cache.model
 import dev.dimension.flare.common.Locale
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
-import dev.dimension.flare.data.translation.PreTranslationStoreSupport
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.DeeplinkEvent
@@ -14,13 +13,13 @@ import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.render.toUiPlainText
 import kotlinx.collections.immutable.toPersistentList
 
-internal data class TranslationDisplayOptions(
+public data class TranslationDisplayOptions(
     val translationEnabled: Boolean,
     val autoDisplayEnabled: Boolean,
     val providerCacheKey: String,
 )
 
-internal fun UiTimelineV2.applyTranslation(
+public fun UiTimelineV2.applyTranslation(
     options: TranslationDisplayOptions,
     translations: List<DbTranslation>,
 ): UiTimelineV2 {
@@ -75,7 +74,7 @@ internal fun UiTimelineV2.applyTranslation(
                         translation?.status == TranslationStatus.Failed -> TranslationMenuAction.Retry
                         shouldShowTranslated -> TranslationMenuAction.ShowOriginal
                         translation?.status == TranslationStatus.Pending || translation?.status == TranslationStatus.Translating -> null
-                        PreTranslationStoreSupport.canRetrySkippedManually(translation) -> TranslationMenuAction.Translate
+                        translation.canRetrySkippedManually() -> TranslationMenuAction.Translate
                         translation?.status == TranslationStatus.Skipped -> null
                         else -> TranslationMenuAction.Translate
                     }
@@ -102,7 +101,7 @@ internal fun UiTimelineV2.applyTranslation(
     }
 }
 
-internal fun UiProfile.applyTranslation(
+public fun UiProfile.applyTranslation(
     options: TranslationDisplayOptions,
     translation: DbTranslation?,
 ): UiProfile {
@@ -122,7 +121,7 @@ internal fun UiProfile.applyTranslation(
     )
 }
 
-internal fun UiTimelineV2.translationPayload(): TranslationPayload? =
+public fun UiTimelineV2.translationPayload(): TranslationPayload? =
     when (this) {
         is UiTimelineV2.Feed -> {
             TranslationPayload(
@@ -151,12 +150,12 @@ internal fun UiTimelineV2.translationPayload(): TranslationPayload? =
         }
     }
 
-internal fun UiProfile.translationPayload(): TranslationPayload =
+public fun UiProfile.translationPayload(): TranslationPayload =
     TranslationPayload(
         description = description,
     )
 
-internal fun TranslationPayload.sourceHash(providerCacheKey: String): String =
+public fun TranslationPayload.sourceHash(providerCacheKey: String): String =
     buildString {
         append(providerCacheKey)
         append('\u0000')

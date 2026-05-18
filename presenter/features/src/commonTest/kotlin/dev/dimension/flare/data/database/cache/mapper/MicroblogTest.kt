@@ -131,8 +131,8 @@ class MicroblogTest : RobolectricTest() {
                 db.statusDao().get(post.statusKey, AccountType.Specific(accountKey)).first()
             assertNotNull(savedStatus)
             assertEquals(post.statusKey, savedStatus.content.statusKey)
-            requireNotNull(savedStatus.text)
-            kotlin.test.assertTrue(savedStatus.text.contains("status text"))
+            val savedStatusText = requireNotNull(savedStatus.text)
+            kotlin.test.assertTrue(savedStatusText.contains("status text"))
         }
 
     @Test
@@ -223,8 +223,8 @@ class MicroblogTest : RobolectricTest() {
             val savedStatus =
                 db.statusDao().get(statusKey, AccountType.Specific(accountKey)).first()
             assertNotNull(savedStatus)
-            requireNotNull(savedStatus.text)
-            assertTrue(savedStatus.text.contains("new status text"))
+            val savedStatusText = requireNotNull(savedStatus.text)
+            assertTrue(savedStatusText.contains("new status text"))
         }
 
     @Test

@@ -3,7 +3,8 @@ package dev.dimension.flare.common.deeplink
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
-import dev.dimension.flare.model.spec
+import dev.dimension.flare.model.defaultSocialPlatformRegistry
+import dev.dimension.flare.model.requirePlatformSpec
 import dev.dimension.flare.model.xqtHost
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.route.DeeplinkRoute
@@ -16,11 +17,14 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class DeepLinkMappingTest {
+    private fun PlatformType.deepLinkPatterns(host: String) =
+        defaultSocialPlatformRegistry.requirePlatformSpec(this).deepLinkPatterns(host)
+
     @Test
     fun mastodonPatternsAreGeneratedInOrder() {
         val host = "mastodon.social"
 
-        val patterns = PlatformType.Mastodon.spec.deepLinkPatterns(host)
+        val patterns = PlatformType.Mastodon.deepLinkPatterns(host)
 
         assertEquals(2, patterns.size)
 
@@ -49,7 +53,7 @@ class DeepLinkMappingTest {
     fun misskeyPatternsUseNotesRoute() {
         val host = "misskey.example"
 
-        val patterns = PlatformType.Misskey.spec.deepLinkPatterns(host)
+        val patterns = PlatformType.Misskey.deepLinkPatterns(host)
 
         assertEquals(2, patterns.size)
 
@@ -78,7 +82,7 @@ class DeepLinkMappingTest {
     fun blueskyPatternsIncludeProfileAndPost() {
         val host = "bsky.example"
 
-        val patterns = PlatformType.Bluesky.spec.deepLinkPatterns(host)
+        val patterns = PlatformType.Bluesky.deepLinkPatterns(host)
 
         assertEquals(2, patterns.size)
 
@@ -107,7 +111,7 @@ class DeepLinkMappingTest {
     fun xqtPatternsUseStatusRoute() {
         val host = xqtHost
 
-        val patterns = PlatformType.xQt.spec.deepLinkPatterns(host)
+        val patterns = PlatformType.xQt.deepLinkPatterns(host)
 
         assertEquals(12, patterns.size)
 
@@ -150,7 +154,7 @@ class DeepLinkMappingTest {
 
     @Test
     fun vvoHasNoPatterns() {
-        val patterns = PlatformType.VVo.spec.deepLinkPatterns("irrelevant")
+        val patterns = PlatformType.VVo.deepLinkPatterns("irrelevant")
 
         assertTrue(patterns.isEmpty())
     }
@@ -170,9 +174,9 @@ class DeepLinkMappingTest {
         val mapping =
             persistentMapOf(
                 mastodonAccount to
-                    PlatformType.Mastodon.spec.deepLinkPatterns(mastodonAccount.accountKey.host),
+                    PlatformType.Mastodon.deepLinkPatterns(mastodonAccount.accountKey.host),
                 misskeyAccount to
-                    PlatformType.Misskey.spec.deepLinkPatterns(misskeyAccount.accountKey.host),
+                    PlatformType.Misskey.deepLinkPatterns(misskeyAccount.accountKey.host),
             )
 
         val matches = DeepLinkMapping.matches("https://mastodon.social/@alice", mapping)
@@ -197,9 +201,9 @@ class DeepLinkMappingTest {
             ImmutableMap<UiAccount, ImmutableList<DeepLinkPattern<out DeepLinkMapping.Type>>> =
             persistentMapOf(
                 account1 to
-                    PlatformType.Mastodon.spec.deepLinkPatterns(account1.accountKey.host),
+                    PlatformType.Mastodon.deepLinkPatterns(account1.accountKey.host),
                 account2 to
-                    PlatformType.Mastodon.spec.deepLinkPatterns(account2.accountKey.host),
+                    PlatformType.Mastodon.deepLinkPatterns(account2.accountKey.host),
             )
 
         val matches = DeepLinkMapping.matches("https://mastodon.social/@alice", mapping)
@@ -220,7 +224,7 @@ class DeepLinkMappingTest {
             ImmutableMap<UiAccount, ImmutableList<DeepLinkPattern<out DeepLinkMapping.Type>>> =
             persistentMapOf(
                 account to
-                    PlatformType.Mastodon.spec.deepLinkPatterns(account.accountKey.host),
+                    PlatformType.Mastodon.deepLinkPatterns(account.accountKey.host),
             )
 
         // URL containing none of the valid hosts
@@ -255,13 +259,13 @@ class DeepLinkMappingTest {
             ImmutableMap<UiAccount, ImmutableList<DeepLinkPattern<out DeepLinkMapping.Type>>> =
             persistentMapOf(
                 mastodonAccount to
-                    PlatformType.Mastodon.spec.deepLinkPatterns(mastodonAccount.accountKey.host),
+                    PlatformType.Mastodon.deepLinkPatterns(mastodonAccount.accountKey.host),
                 misskeyAccount to
-                    PlatformType.Misskey.spec.deepLinkPatterns(misskeyAccount.accountKey.host),
+                    PlatformType.Misskey.deepLinkPatterns(misskeyAccount.accountKey.host),
                 bskyAccount to
-                    PlatformType.Bluesky.spec.deepLinkPatterns(bskyAccount.accountKey.host),
+                    PlatformType.Bluesky.deepLinkPatterns(bskyAccount.accountKey.host),
                 xAccount to
-                    PlatformType.xQt.spec.deepLinkPatterns(xAccount.accountKey.host),
+                    PlatformType.xQt.deepLinkPatterns(xAccount.accountKey.host),
             )
 
         // https://mastodon.example/@alice

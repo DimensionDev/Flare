@@ -22,7 +22,6 @@ import dev.dimension.flare.data.platform.NostrPlatformSpec
 import dev.dimension.flare.data.platform.VvoPlatformSpec
 import dev.dimension.flare.data.platform.XqtPlatformSpec
 import dev.dimension.flare.ui.model.UiAccount
-import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiInstance
 import kotlinx.collections.immutable.ImmutableList
 
@@ -229,14 +228,6 @@ private data object VvoSocialPlatformPlugin : SocialPlatformPlugin {
             )
         }
 }
-
-public val PlatformType.icon: UiIcon
-    get() = spec.metadata.icon
-
-public fun PlatformType.agreementUrl(host: String): String? = spec.agreementUrl(host)
-
-internal val PlatformType.spec: PlatformSpec
-    get() = defaultSocialPlatformRegistry.requirePlatformSpec(this)
 
 private fun mastodonFallback(domain: String): UiInstance =
     UiInstance(

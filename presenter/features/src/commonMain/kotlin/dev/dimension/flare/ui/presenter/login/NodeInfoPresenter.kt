@@ -19,7 +19,9 @@ import dev.dimension.flare.data.datasource.microblog.RecommendInstancePagingSour
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
 import dev.dimension.flare.data.network.nodeinfo.NodeData
 import dev.dimension.flare.data.network.nodeinfo.detectPlatformType
+import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.SocialPlatformRegistry
+import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiInstance
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.isSuccess
@@ -88,6 +90,13 @@ public class NodeInfoPresenter :
             override val detectedPlatformType = detectedPlatformType
             override val canNext = detectedPlatformType.isSuccess
 
+            override fun platformIcon(type: PlatformType): UiIcon = platformRegistry.requireSpec(type).metadata.icon
+
+            override fun agreementUrl(
+                type: PlatformType,
+                host: String,
+            ): String? = platformRegistry.requireSpec(type).agreementUrl(host)
+
             override fun setFilter(value: String) {
                 if (filter != value) {
                     filter = value
@@ -102,6 +111,13 @@ public interface NodeInfoState {
     public val instances: PagingState<UiInstance>
     public val detectedPlatformType: UiState<NodeData>
     public val canNext: Boolean
+
+    public fun platformIcon(type: PlatformType): UiIcon
+
+    public fun agreementUrl(
+        type: PlatformType,
+        host: String,
+    ): String?
 
     public fun setFilter(value: String)
 }

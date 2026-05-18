@@ -121,7 +121,7 @@ public data class UiRichText(
     }
 }
 
-internal fun uiRichTextOf(
+public fun uiRichTextOf(
     renderRuns: List<RenderContent>,
     raw: String? = null,
     innerText: String? = null,

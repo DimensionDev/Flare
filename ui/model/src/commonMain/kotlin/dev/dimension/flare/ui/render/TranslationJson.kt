@@ -6,32 +6,32 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 @Serializable
-internal data class TranslationDocument(
+public data class TranslationDocument(
     val version: Int? = 1,
     val targetLanguage: String? = null,
     val blocks: List<TranslationBlock>,
 )
 
 @Serializable
-internal data class TranslationBlock(
+public data class TranslationBlock(
     val id: Int,
     val tokens: List<TranslationToken>,
 )
 
 @Serializable
-internal data class TranslationToken(
+public data class TranslationToken(
     val id: Int,
     val kind: TranslationTokenKind,
     val text: String,
 )
 
 @Serializable
-internal enum class TranslationTokenKind {
+public enum class TranslationTokenKind {
     Translatable,
     Locked,
 }
 
-internal class TranslationFormatException(
+public class TranslationFormatException(
     message: String,
 ) : IllegalArgumentException(message)
 
@@ -42,7 +42,7 @@ private val translationJson =
         explicitNulls = false
     }
 
-internal fun UiRichText.toTranslationDocument(targetLanguage: String? = null): TranslationDocument {
+public fun UiRichText.toTranslationDocument(targetLanguage: String? = null): TranslationDocument {
     val projection = toProjectionBlocks()
     return TranslationDocument(
         version = 1,
@@ -72,10 +72,10 @@ internal fun UiRichText.toTranslationDocument(targetLanguage: String? = null): T
     )
 }
 
-internal fun UiRichText.toTranslationJson(targetLanguage: String? = null): String =
+public fun UiRichText.toTranslationJson(targetLanguage: String? = null): String =
     translationJson.encodeToString(toTranslationDocument(targetLanguage))
 
-internal fun UiRichText.applyTranslationJson(json: String): UiRichText =
+public fun UiRichText.applyTranslationJson(json: String): UiRichText =
     applyTranslationDocument(
         runCatching {
             translationJson.decodeFromString(TranslationDocument.serializer(), json)
@@ -84,7 +84,7 @@ internal fun UiRichText.applyTranslationJson(json: String): UiRichText =
         },
     )
 
-internal fun UiRichText.applyTranslationDocument(document: TranslationDocument): UiRichText {
+public fun UiRichText.applyTranslationDocument(document: TranslationDocument): UiRichText {
     val projection = toProjectionBlocks()
     val projectedBlocksByContent = projection.associateBy { it.content }
     val blocksById = document.blocks.associateBy { it.id }

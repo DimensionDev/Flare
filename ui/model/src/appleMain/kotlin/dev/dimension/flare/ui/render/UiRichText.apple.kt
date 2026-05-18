@@ -17,14 +17,14 @@ public interface SwiftPlatformTextRenderer {
     public fun render(renderRuns: ImmutableList<RenderContent>): PlatformText
 }
 
-internal class ApplePlatformTextRenderer(
+public class ApplePlatformTextRenderer(
     private val renderer: SwiftPlatformTextRenderer,
 ) : PlatformTextRendering {
-    override fun render(renderRuns: ImmutableList<RenderContent>): PlatformText = renderer.render(renderRuns)
+    public override fun render(renderRuns: ImmutableList<RenderContent>): PlatformText = renderer.render(renderRuns)
 }
 
-internal interface PlatformTextRendering {
-    fun render(renderRuns: ImmutableList<RenderContent>): PlatformText
+public interface PlatformTextRendering {
+    public fun render(renderRuns: ImmutableList<RenderContent>): PlatformText
 }
 
 private object PlatformTextRendererHolder : KoinComponent {

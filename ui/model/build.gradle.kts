@@ -35,7 +35,9 @@ kotlin {
                 api(libs.kotlinx.serialization.json)
                 implementation(dependencies.platform(libs.koin.bom))
                 implementation(libs.koin.core)
+                implementation(libs.kotlin.codepoints.deluxe)
                 implementation(libs.kotlinx.datetime)
+                implementation(libs.ksoup)
             }
         }
 

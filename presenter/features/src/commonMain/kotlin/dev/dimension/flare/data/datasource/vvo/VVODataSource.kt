@@ -386,26 +386,27 @@ internal class VVODataSource(
                 }
             }
         val mediaId = mediaIds.joinToString(",")
-        if (data.referenceStatus != null && data.referenceStatus.composeStatus is ComposeStatus.VVOComment) {
+        val referenceStatus = data.referenceStatus?.composeStatus
+        if (referenceStatus is ComposeStatus.VVOComment) {
             service.replyComment(
-                cid = data.referenceStatus.composeStatus.statusKey.id,
-                reply = data.referenceStatus.composeStatus.statusKey.id,
-                id = data.referenceStatus.composeStatus.rootId,
-                mid = data.referenceStatus.composeStatus.rootId,
+                cid = referenceStatus.statusKey.id,
+                reply = referenceStatus.statusKey.id,
+                id = referenceStatus.rootId,
+                mid = referenceStatus.rootId,
                 content = data.content,
                 st = st,
                 picId = mediaId,
             )
-        } else if (data.referenceStatus != null && data.referenceStatus.composeStatus is ComposeStatus.Reply) {
+        } else if (referenceStatus is ComposeStatus.Reply) {
             service.commentStatus(
-                id = data.referenceStatus.composeStatus.statusKey.id,
+                id = referenceStatus.statusKey.id,
                 content = data.content,
                 st = st,
                 picId = mediaId,
             )
-        } else if (data.referenceStatus != null && data.referenceStatus.composeStatus is ComposeStatus.Quote) {
+        } else if (referenceStatus is ComposeStatus.Quote) {
             service.repostStatus(
-                id = data.referenceStatus.composeStatus.statusKey.id,
+                id = referenceStatus.statusKey.id,
                 content = data.content,
                 st = st,
                 picId = mediaId,

@@ -8,7 +8,7 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
 
 @Immutable
-public data class ComposeConfig internal constructor(
+public data class ComposeConfig(
     val text: Text? = null,
     val media: Media? = null,
     val poll: Poll? = null,
@@ -18,10 +18,10 @@ public data class ComposeConfig internal constructor(
     val language: Language? = null,
 ) {
     @Immutable
-    public data class Text internal constructor(
+    public data class Text(
         val maxLength: Int,
     ) {
-        internal fun merge(other: Text): Text =
+        public fun merge(other: Text): Text =
             Text(
                 maxLength = minOf(maxLength, other.maxLength),
             )
@@ -29,7 +29,7 @@ public data class ComposeConfig internal constructor(
 
     @Immutable
     // in ISO 639-1 format
-    public data class Language internal constructor(
+    public data class Language(
         val maxCount: Int,
     ) {
         private val popularCodes =
@@ -246,13 +246,13 @@ public data class ComposeConfig internal constructor(
     }
 
     @Immutable
-    public data class Media internal constructor(
+    public data class Media(
         val maxCount: Int,
         val canSensitive: Boolean,
         val altTextMaxLength: Int,
         val allowMediaOnly: Boolean,
     ) {
-        internal fun merge(other: Media): Media =
+        public fun merge(other: Media): Media =
             Media(
                 maxCount = minOf(maxCount, other.maxCount),
                 canSensitive = canSensitive && other.canSensitive,
@@ -262,23 +262,23 @@ public data class ComposeConfig internal constructor(
     }
 
     @Immutable
-    public data class Poll internal constructor(
+    public data class Poll(
         val maxOptions: Int,
     ) {
-        internal fun merge(other: Poll): Poll =
+        public fun merge(other: Poll): Poll =
             Poll(
                 maxOptions = minOf(maxOptions, other.maxOptions),
             )
     }
 
     @Immutable
-    public data class Emoji internal constructor(
-        internal val emoji: CacheData<ImmutableMap<String, ImmutableList<UiEmoji>>>,
+    public data class Emoji(
+        val emoji: CacheData<ImmutableMap<String, ImmutableList<UiEmoji>>>,
         // Emojis picker can be merged only if their mergeTag is the same.
         val mergeTag: String,
         val accountKey: MicroBlogKey,
     ) {
-        internal fun merge(other: Emoji): Emoji? =
+        public fun merge(other: Emoji): Emoji? =
             if (mergeTag == other.mergeTag) {
                 Emoji(
                     emoji = emoji,
@@ -296,7 +296,7 @@ public data class ComposeConfig internal constructor(
     @Immutable
     public data object Visibility
 
-    internal fun merge(other: ComposeConfig): ComposeConfig {
+    public fun merge(other: ComposeConfig): ComposeConfig {
         val text =
             if (text != null && other.text != null) {
                 text.merge(other.text)

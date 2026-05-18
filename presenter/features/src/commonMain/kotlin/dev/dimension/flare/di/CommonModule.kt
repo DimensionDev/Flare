@@ -38,8 +38,8 @@ internal val commonModule =
         single<SocialPlatformRegistry> { defaultSocialPlatformRegistry }
         singleOf(::AccountRepository)
         single(createdAtStart = true) { AccountTabSyncCoordinator(get(), get(), get(), get()) }
-        singleOf(::provideAppDatabase)
-        singleOf(::provideCacheDatabase)
+        single { provideAppDatabase(get()) }
+        single { provideCacheDatabase(get()) }
         single<NostrCache> { DatabaseNostrCache(get()) }
         singleOf(::ApplicationRepository)
         single {

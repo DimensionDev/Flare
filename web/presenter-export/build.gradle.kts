@@ -16,6 +16,7 @@ kotlin {
     sourceSets {
         val wasmJsMain by getting {
             dependencies {
+                implementation(projects.presenter.runtime)
                 implementation(libs.kotlinx.serialization.json)
             }
         }

@@ -6,7 +6,7 @@ import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import kotlinx.collections.immutable.persistentListOf
 
-internal fun userActionsMenu(
+public fun userActionsMenu(
     accountKey: MicroBlogKey?,
     userKey: MicroBlogKey,
     handle: String,

@@ -31,8 +31,8 @@ import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonPrimitive
 
-internal object TranslationProvider {
-    suspend fun translateDocumentJson(
+public object TranslationProvider {
+    public suspend fun translateDocumentJson(
         settings: AppSettings,
         aiCompletionService: AiCompletionService,
         sourceTemplate: String,
@@ -50,7 +50,7 @@ internal object TranslationProvider {
             prompt = prompt,
         )
 
-    suspend fun translateBatchDocumentJson(
+    public suspend fun translateBatchDocumentJson(
         settings: AppSettings,
         aiCompletionService: AiCompletionService,
         sourceJson: String,

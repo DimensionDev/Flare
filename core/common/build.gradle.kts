@@ -28,5 +28,10 @@ kotlin {
                 api(libs.xmlUtil)
             }
         }
+        val jvmMain by getting {
+            dependencies {
+                implementation(libs.commons.lang3)
+            }
+        }
     }
 }

@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 @Entity
-internal data class DbApplication(
+public data class DbApplication(
     @PrimaryKey val host: String,
     val credential_json: String,
     val platform_type: PlatformType,

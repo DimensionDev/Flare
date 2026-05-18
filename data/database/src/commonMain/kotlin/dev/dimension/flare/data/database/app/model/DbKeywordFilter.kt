@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 @Entity
-internal data class DbKeywordFilter(
+public data class DbKeywordFilter(
     @PrimaryKey
     val keyword: String,
     val for_timeline: Long,

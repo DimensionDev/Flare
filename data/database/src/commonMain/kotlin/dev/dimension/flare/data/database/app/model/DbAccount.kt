@@ -9,7 +9,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 @Entity
-internal data class DbAccount(
+public data class DbAccount(
     @PrimaryKey val account_key: MicroBlogKey,
     val credential_json: String,
     val platform_type: PlatformType,

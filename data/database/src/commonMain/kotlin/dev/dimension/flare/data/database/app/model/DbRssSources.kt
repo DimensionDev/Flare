@@ -22,7 +22,7 @@ public enum class RssDisplayMode {
 
 @Serializable
 @Entity
-internal data class DbRssSources(
+public data class DbRssSources(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
     val url: String,

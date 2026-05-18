@@ -3,7 +3,7 @@ package dev.dimension.flare.data.database.app.model
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal data class AppDatabaseExport(
+public data class AppDatabaseExport(
     val accounts: List<DbAccount> = emptyList(),
     val applications: List<DbApplication> = emptyList(),
     val keywordFilters: List<DbKeywordFilter> = emptyList(),

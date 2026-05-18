@@ -18,6 +18,13 @@ kotlin {
         )
     }
 
+    compilerOptions {
+        freeCompilerArgs.addAll(
+            "-module-name",
+            "flare_ui_model",
+        )
+    }
+
     sourceSets {
         val commonMain by getting {
             dependencies {
@@ -26,6 +33,9 @@ kotlin {
                 api(dependencies.platform(libs.compose.bom))
                 api(libs.compose.runtime)
                 api(libs.kotlinx.serialization.json)
+                implementation(dependencies.platform(libs.koin.bom))
+                implementation(libs.koin.core)
+                implementation(libs.kotlinx.datetime)
             }
         }
 

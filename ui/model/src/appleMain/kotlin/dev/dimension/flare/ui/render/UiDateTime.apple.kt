@@ -4,6 +4,6 @@ import kotlinx.datetime.toNSDate
 import platform.Foundation.NSDate
 import kotlin.time.Instant
 
-internal actual fun Instant.toPlatform(): PlatformDateTime = toNSDate()
+public actual fun Instant.toPlatform(): PlatformDateTime = toNSDate()
 
-internal actual typealias PlatformDateTime = NSDate
+public actual typealias PlatformDateTime = NSDate

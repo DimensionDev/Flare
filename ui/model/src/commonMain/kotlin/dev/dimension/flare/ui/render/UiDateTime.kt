@@ -10,11 +10,11 @@ import kotlin.time.Instant
 
 public expect class PlatformDateTime
 
-internal expect fun Instant.toPlatform(): PlatformDateTime
+public expect fun Instant.toPlatform(): PlatformDateTime
 
 @Serializable(with = UiDateTimeSerializer::class)
 @Immutable
-public data class UiDateTime internal constructor(
+public data class UiDateTime public constructor(
     val value: Instant,
 ) {
     val platformValue: PlatformDateTime by lazy {
@@ -33,9 +33,9 @@ public data class UiDateTime internal constructor(
 
 public fun Instant.toUi(): UiDateTime = UiDateTime(this)
 
-internal operator fun UiDateTime.compareTo(other: UiDateTime): Int = value.compareTo(other.value)
+public operator fun UiDateTime.compareTo(other: UiDateTime): Int = value.compareTo(other.value)
 
-internal object UiDateTimeSerializer : kotlinx.serialization.KSerializer<UiDateTime> {
+public object UiDateTimeSerializer : kotlinx.serialization.KSerializer<UiDateTime> {
     override val descriptor: kotlinx.serialization.descriptors.SerialDescriptor
         get() =
             kotlinx.serialization.descriptors.PrimitiveSerialDescriptor(

@@ -7,7 +7,7 @@ import kotlinx.serialization.Transient
 
 @Serializable
 @Immutable
-public data class UiNumber internal constructor(
+public data class UiNumber public constructor(
     public val value: Long,
 ) {
     @Transient

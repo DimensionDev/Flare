@@ -269,7 +269,7 @@ public class EditRssSourcePresenter(
         val canSave =
             when (val state = checkRssSourcePresenterState.state) {
                 is UiState.Success -> {
-                    when (state.data) {
+                    when (val data = state.data) {
                         is RssState.RssFeed -> {
                             true
                         }
@@ -287,11 +287,11 @@ public class EditRssSourcePresenter(
                         }
 
                         is RssState.RssSources -> {
-                            state.data.sources.isNotEmpty()
+                            data.sources.isNotEmpty()
                         }
 
                         is RssState.MastodonInstance -> {
-                            state.data.availableTimelines.isNotEmpty()
+                            data.availableTimelines.isNotEmpty()
                         }
                     }
                 }

@@ -58,7 +58,7 @@ private val mastodonParser by lazy {
     )
 }
 
-internal fun Notification.render(accountKey: MicroBlogKey): UiTimelineV2 {
+public fun Notification.render(accountKey: MicroBlogKey): UiTimelineV2 {
     val notificationAccount = requireNotNull(account) { "account is null" }
     val notificationType = type
     val user = notificationAccount.render(accountKey, host = accountKey.host)
@@ -201,13 +201,13 @@ internal fun Notification.render(accountKey: MicroBlogKey): UiTimelineV2 {
     }
 }
 
-internal fun List<Status>.render(accountKey: MicroBlogKey): List<UiTimelineV2> =
+public fun List<Status>.render(accountKey: MicroBlogKey): List<UiTimelineV2> =
     this
         .map { it.render(host = accountKey.host, accountKey = accountKey) }
         .resolveParents()
         .collapseStandaloneParents()
 
-internal fun Status.render(
+public fun Status.render(
     host: String,
     accountKey: MicroBlogKey?,
 ): UiTimelineV2 {
@@ -771,7 +771,7 @@ private fun List<UiTimelineV2>.collapseStandaloneParents(): List<UiTimelineV2> {
     }
 }
 
-internal fun ActionMenu.Companion.mastodonLike(
+public fun ActionMenu.Companion.mastodonLike(
     favourited: Boolean,
     favouritesCount: Long,
     accountKey: MicroBlogKey?,
@@ -803,7 +803,7 @@ internal fun ActionMenu.Companion.mastodonLike(
             },
     )
 
-internal fun ActionMenu.Companion.mastodonRepost(
+public fun ActionMenu.Companion.mastodonRepost(
     reblogged: Boolean,
     reblogsCount: Long,
     accountKey: MicroBlogKey?,
@@ -835,7 +835,7 @@ internal fun ActionMenu.Companion.mastodonRepost(
             },
     )
 
-internal fun ActionMenu.Companion.mastodonBookmark(
+public fun ActionMenu.Companion.mastodonBookmark(
     bookmarked: Boolean,
     accountKey: MicroBlogKey?,
     statusKey: MicroBlogKey,
@@ -922,7 +922,7 @@ private fun Attachment.toUi(sensitive: Boolean): UiMedia? =
         }
     }
 
-internal fun Account.render(
+public fun Account.render(
     accountKey: MicroBlogKey?,
     host: String,
 ): UiProfile {
@@ -1085,7 +1085,7 @@ private fun updateHtmlTagToken(
     }
 }
 
-internal fun RelationshipResponse.toUi(): UiRelation =
+public fun RelationshipResponse.toUi(): UiRelation =
     UiRelation(
         following = following ?: false,
         isFans = followedBy ?: false,
@@ -1107,7 +1107,7 @@ private fun parseName(status: Account): UiRichText {
     return parseHtml(content).toUi()
 }
 
-internal fun parseMastodonContent(
+public fun parseMastodonContent(
     status: Status,
 //    text: String,
     accountKey: MicroBlogKey?,
@@ -1191,7 +1191,7 @@ private fun replaceMentionAndHashtag(
     }
 }
 
-internal fun InstanceData.render(): UiInstanceMetadata {
+public fun InstanceData.render(): UiInstanceMetadata {
     val configuration =
         UiInstanceMetadata.Configuration(
             registration =
@@ -1250,7 +1250,7 @@ internal fun InstanceData.render(): UiInstanceMetadata {
     )
 }
 
-internal fun MastodonList.render(): UiList.List =
+public fun MastodonList.render(): UiList.List =
     UiList.List(
         id = id.toString(),
         title = title.orEmpty(),

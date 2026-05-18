@@ -17,6 +17,7 @@ kotlin {
             FlarePlatform.ANDROID,
             FlarePlatform.JVM,
             FlarePlatform.IOS,
+            FlarePlatform.WEB,
         )
         ksp(libs.room.compiler)
     }
@@ -41,8 +42,14 @@ kotlin {
                 api(libs.paging.common)
                 api(libs.room.runtime)
                 api(libs.room.paging)
-                api(libs.sqlite.bundled)
+                api(libs.sqlite)
                 implementation(libs.kotlinx.serialization.json)
+            }
+        }
+
+        val nonWebMain by getting {
+            dependencies {
+                api(libs.sqlite.bundled)
             }
         }
     }

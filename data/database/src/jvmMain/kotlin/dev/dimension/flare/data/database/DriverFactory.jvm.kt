@@ -5,8 +5,8 @@ import androidx.room3.RoomDatabase
 import dev.dimension.flare.common.FileSystemUtilsExt
 import java.io.File
 
-internal actual class DriverFactory {
-    actual inline fun <reified T : RoomDatabase> createBuilder(
+public actual class DriverFactory {
+    public actual inline fun <reified T : RoomDatabase> createBuilder(
         name: String,
         isCache: Boolean,
     ): RoomDatabase.Builder<T> {
@@ -22,7 +22,7 @@ internal actual class DriverFactory {
         )
     }
 
-    actual fun deleteDatabase(
+    public actual fun deleteDatabase(
         name: String,
         isCache: Boolean,
     ) {

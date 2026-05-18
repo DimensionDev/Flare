@@ -31,6 +31,11 @@ kotlin {
                 implementation(libs.kotlinx.serialization.json)
             }
         }
+        val jvmMain by getting {
+            dependencies {
+                implementation(projects.core.common)
+            }
+        }
     }
 }
 

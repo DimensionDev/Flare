@@ -126,3 +126,34 @@ public fun TimelineSourceRef.toSlot(
         content = TimelineSlotContent.Source(this),
         presentation = presentation,
     )
+
+public fun List<TimelineSlot>.normalizeSystemHomeMixedTimeline(enabled: Boolean): List<TimelineSlot> {
+    val deduplicatedSlots = distinctBy { it.id }
+    val existingSystemHomeGroup = deduplicatedSlots.firstOrNull { it.isSystemHomeMixedTimeline() }
+    val slotsWithoutSystemHomeGroup = deduplicatedSlots.filterNot { it.isSystemHomeMixedTimeline() }
+    if (!enabled || slotsWithoutSystemHomeGroup.size < 2) {
+        return slotsWithoutSystemHomeGroup
+    }
+
+    val systemHomeGroup =
+        TimelineSlot(
+            id = SYSTEM_HOME_MIXED_TIMELINE_ID,
+            content =
+                TimelineSlotContent.Group(
+                    children = slotsWithoutSystemHomeGroup,
+                    source = GroupSource.SystemHome,
+                    mergePolicy =
+                        (existingSystemHomeGroup?.content as? TimelineSlotContent.Group)?.mergePolicy
+                            ?: TimelineMergePolicy.TimePerPage,
+                ),
+            presentation = existingSystemHomeGroup?.presentation ?: TimelinePresentation(),
+        )
+    val targetIndex = deduplicatedSlots.indexOfFirst { it.isSystemHomeMixedTimeline() }.takeIf { it >= 0 } ?: 0
+    return slotsWithoutSystemHomeGroup
+        .toMutableList()
+        .apply {
+            add(minOf(targetIndex, size), systemHomeGroup)
+        }
+}
+
+private fun TimelineSlot.isSystemHomeMixedTimeline(): Boolean = (content as? TimelineSlotContent.Group)?.source == GroupSource.SystemHome

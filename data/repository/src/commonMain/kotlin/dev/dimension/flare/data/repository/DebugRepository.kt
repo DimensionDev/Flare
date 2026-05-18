@@ -3,22 +3,23 @@ package dev.dimension.flare.data.repository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import kotlin.coroutines.cancellation.CancellationException
 
-internal object DebugRepository {
+public object DebugRepository {
     private const val MAX_MESSAGES = 25
     private const val DEBUG_MAX_MESSAGES = 1000
     private val _messages = MutableStateFlow<List<String>>(emptyList())
     private val _enabled = MutableStateFlow(false)
     private val scope = CoroutineScope(Dispatchers.IO)
 
-    val enabled get() = _enabled.asSharedFlow()
-    val messages get() = _messages.asSharedFlow()
+    public val enabled: SharedFlow<Boolean> get() = _enabled.asSharedFlow()
+    public val messages: SharedFlow<List<String>> get() = _messages.asSharedFlow()
 
-    fun setEnabled(enabled: Boolean) {
+    public fun setEnabled(enabled: Boolean) {
         _enabled.value = enabled
         if (!enabled) {
             _messages.value = _messages.value.takeLast(MAX_MESSAGES)
@@ -28,7 +29,7 @@ internal object DebugRepository {
     private val messageLimit: Int
         get() = if (_enabled.value) DEBUG_MAX_MESSAGES else MAX_MESSAGES
 
-    fun log(message: String) {
+    public fun log(message: String) {
         if (_enabled.value) {
             scope.launch {
                 _messages.value = (_messages.value + message).takeLast(messageLimit)
@@ -36,7 +37,7 @@ internal object DebugRepository {
         }
     }
 
-    fun error(exception: Throwable) {
+    public fun error(exception: Throwable) {
         if (exception is CancellationException) {
             // Ignore cancellation exceptions
             return
@@ -53,13 +54,13 @@ internal object DebugRepository {
         }
     }
 
-    fun clear() {
+    public fun clear() {
         scope.launch {
             _messages.value = emptyList()
         }
     }
 
-    fun printToString(): String = _messages.value.joinToString(separator = "\n")
+    public fun printToString(): String = _messages.value.joinToString(separator = "\n")
 }
 
 /**
@@ -74,7 +75,7 @@ internal object DebugRepository {
  * @param block The function to execute
  * @return A [Result] object containing either the successful result or the failure exception
  */
-internal inline fun <R> tryRun(block: () -> R): Result<R> =
+public inline fun <R> tryRun(block: () -> R): Result<R> =
     try {
         Result.success(block())
     } catch (e: Exception) {

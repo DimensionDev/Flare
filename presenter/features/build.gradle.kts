@@ -46,6 +46,7 @@ kotlin {
                 implementation(projects.core.deeplink)
                 api(projects.data.database)
                 api(projects.data.datastore)
+                api(projects.data.repository)
                 implementation(projects.data.network)
                 api(projects.presenter.runtime)
                 implementation(dependencies.platform(libs.compose.bom))

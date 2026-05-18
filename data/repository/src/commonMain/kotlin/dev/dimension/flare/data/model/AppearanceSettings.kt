@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
  * New code should use the appearance bag / patch based settings model instead.
  */
 @Serializable
-internal data class AppearanceSettings(
+public data class AppearanceSettings(
     val theme: Theme = Theme.SYSTEM,
     val dynamicTheme: Boolean = true,
     val colorSeed: ULong = 0x02EBD2u,
@@ -38,9 +38,9 @@ internal data class AppearanceSettings(
     val showPlatformLogo: Boolean = true,
     val timelineDisplayMode: TimelineDisplayMode = TimelineDisplayMode.Card,
 ) {
-    companion object {
+    public companion object {
         // for iOS
-        val Default: AppearanceSettings = AppearanceSettings()
+        public val Default: AppearanceSettings = AppearanceSettings()
     }
 }
 

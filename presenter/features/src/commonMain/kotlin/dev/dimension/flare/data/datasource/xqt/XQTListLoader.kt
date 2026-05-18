@@ -81,9 +81,10 @@ internal class XQTListLoader(
                     ),
             )
         val data = response.body()?.data?.list
-        if (data?.idStr != null) {
+        val idStr = data?.idStr
+        if (idStr != null) {
             return UiList.List(
-                id = data.idStr,
+                id = idStr,
                 title = metaData.title,
                 description = metaData.description,
                 creator = null,

@@ -772,11 +772,12 @@ internal class XQTDataSource(
             fleet.threads
                 .orEmpty()
                 .mapNotNull {
-                    val title = it.liveContent?.audiospace?.title
-                    val id = it.liveContent?.audiospace?.broadcastID ?: return@mapNotNull null
-                    val ended = it.liveContent.audiospace.endedAt != null
+                    val audioSpace = it.liveContent?.audiospace ?: return@mapNotNull null
+                    val title = audioSpace.title
+                    val id = audioSpace.broadcastID ?: return@mapNotNull null
+                    val ended = audioSpace.endedAt != null
                     val creator =
-                        it.liveContent.audiospace.creatorTwitterUserID?.let {
+                        audioSpace.creatorTwitterUserID?.let {
                             service
                                 .userById(it.toString())
                                 .body()
@@ -785,7 +786,7 @@ internal class XQTDataSource(
                                 ?.render(accountKey = accountKey)
                         } ?: return@mapNotNull null
                     val hosts =
-                        it.liveContent.audiospace.adminTwitterUserIDS
+                        audioSpace.adminTwitterUserIDS
                             .orEmpty()
                             .mapNotNull { host ->
                                 service
@@ -796,7 +797,7 @@ internal class XQTDataSource(
                                     ?.render(accountKey = accountKey)
                             }.toImmutableList()
                     val speakers =
-                        it.liveContent.audiospace.guests
+                        audioSpace.guests
                             .orEmpty()
                             .mapNotNull { speaker ->
                                 service
@@ -807,7 +808,7 @@ internal class XQTDataSource(
                                     ?.render(accountKey = accountKey)
                             }.toImmutableList()
                     val listeners =
-                        it.liveContent.audiospace.listeners
+                        audioSpace.listeners
                             .orEmpty()
                             .mapNotNull { listener ->
                                 service

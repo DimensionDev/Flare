@@ -28,10 +28,12 @@ internal class TrendsUserPagingSource(
                     limit = pageSize,
                     userId = accountKey.id,
                 ).mapNotNull {
-                    if (it.user != null && it.userID != null) {
+                    val user = it.user
+                    val userId = it.userID
+                    if (user != null && userId != null) {
                         User(
-                            legacy = it.user,
-                            restId = it.userID,
+                            legacy = user,
+                            restId = userId,
                         ).render(accountKey = accountKey)
                     } else {
                         null

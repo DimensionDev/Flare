@@ -12,21 +12,21 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
 
-internal object PreTranslationStoreSupport {
-    const val DEFAULT_PRE_TRANSLATION_MAX_ITEMS: Int = 8
-    const val DEFAULT_PRE_TRANSLATION_MAX_INPUT_TOKENS: Int = 6000
-    const val PRE_TRANSLATION_BATCH_MAX_ATTEMPTS: Int = 2
-    const val FAILED_STALE_IN_FLIGHT_REASON: String = "stale_in_flight"
-    const val SKIPPED_AI_SAME_LANGUAGE_REASON: String = "ai_same_language"
-    const val SKIPPED_EMPTY_REASON: String = "empty"
-    const val SKIPPED_EXCLUDED_LANGUAGE_REASON: String = TRANSLATION_SKIPPED_EXCLUDED_LANGUAGE_REASON
-    const val SKIPPED_NON_TRANSLATABLE_ONLY_REASON: String = "non_translatable_only"
-    const val SKIPPED_SAME_LANGUAGE_REASON: String = "source_language_matches_target"
-    const val SKIPPED_UNCHANGED_REASON: String = "unchanged"
-    val PRE_TRANSLATION_BATCH_RETRY_DELAY: Duration = 500.milliseconds
-    val STALE_TRANSLATION_TIMEOUT: Duration = 10.minutes
+public object PreTranslationStoreSupport {
+    public const val DEFAULT_PRE_TRANSLATION_MAX_ITEMS: Int = 8
+    public const val DEFAULT_PRE_TRANSLATION_MAX_INPUT_TOKENS: Int = 6000
+    public const val PRE_TRANSLATION_BATCH_MAX_ATTEMPTS: Int = 2
+    public const val FAILED_STALE_IN_FLIGHT_REASON: String = "stale_in_flight"
+    public const val SKIPPED_AI_SAME_LANGUAGE_REASON: String = "ai_same_language"
+    public const val SKIPPED_EMPTY_REASON: String = "empty"
+    public const val SKIPPED_EXCLUDED_LANGUAGE_REASON: String = TRANSLATION_SKIPPED_EXCLUDED_LANGUAGE_REASON
+    public const val SKIPPED_NON_TRANSLATABLE_ONLY_REASON: String = "non_translatable_only"
+    public const val SKIPPED_SAME_LANGUAGE_REASON: String = "source_language_matches_target"
+    public const val SKIPPED_UNCHANGED_REASON: String = "unchanged"
+    public val PRE_TRANSLATION_BATCH_RETRY_DELAY: Duration = 500.milliseconds
+    public val STALE_TRANSLATION_TIMEOUT: Duration = 10.minutes
 
-    fun toDbTranslation(
+    public fun toDbTranslation(
         candidate: PreparedTranslationCandidate,
         status: TranslationStatus,
         updatedAt: Long,
@@ -46,13 +46,13 @@ internal object PreTranslationStoreSupport {
             updatedAt = updatedAt,
         )
 
-    fun toBatchItem(candidate: PreparedTranslationCandidate): PreTranslationBatchItem =
+    public fun toBatchItem(candidate: PreparedTranslationCandidate): PreTranslationBatchItem =
         PreTranslationBatchItem(
             entityKey = candidate.entityKey,
             payload = candidate.sourceDocument,
         )
 
-    fun chunkCandidatesForBatching(candidates: List<PreparedTranslationCandidate>): List<List<PreparedTranslationCandidate>> {
+    public fun chunkCandidatesForBatching(candidates: List<PreparedTranslationCandidate>): List<List<PreparedTranslationCandidate>> {
         val result = mutableListOf<List<PreparedTranslationCandidate>>()
         val current = mutableListOf<PreparedTranslationCandidate>()
         var currentTokenEstimate = 0
@@ -76,7 +76,7 @@ internal object PreTranslationStoreSupport {
         return result
     }
 
-    suspend fun persistSkippedTranslationIfNeeded(
+    public suspend fun persistSkippedTranslationIfNeeded(
         database: CacheDatabase,
         entityType: TranslationEntityType,
         entityKey: String,
@@ -106,7 +106,7 @@ internal object PreTranslationStoreSupport {
         )
     }
 
-    fun shouldTranslate(
+    public fun shouldTranslate(
         existing: DbTranslation?,
         sourceHash: String,
     ): Boolean {
@@ -135,7 +135,7 @@ internal object PreTranslationStoreSupport {
         }
     }
 
-    fun canRetrySkippedManually(existing: DbTranslation?): Boolean = existing.canRetrySkippedManually()
+    public fun canRetrySkippedManually(existing: DbTranslation?): Boolean = existing.canRetrySkippedManually()
 
     private fun matchesSkipped(
         existing: DbTranslation?,

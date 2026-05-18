@@ -7,8 +7,8 @@ import dev.dimension.flare.ui.render.UiRichText
 import dev.dimension.flare.ui.render.applyTranslationDocument
 import dev.dimension.flare.ui.render.toTranslationDocument
 
-internal object PreTranslationPayloadSupport {
-    fun toBatchPayload(
+public object PreTranslationPayloadSupport {
+    public fun toBatchPayload(
         payload: TranslationPayload,
         targetLanguage: String,
     ): PreTranslationBatchPayload =
@@ -19,7 +19,7 @@ internal object PreTranslationPayloadSupport {
             description = toTranslationDocumentOrNull(payload.description, targetLanguage),
         )
 
-    fun applyBatchPayload(
+    public fun applyBatchPayload(
         sourcePayload: TranslationPayload,
         sourceDocument: PreTranslationBatchPayload,
         translatedDocument: PreTranslationBatchPayload,
@@ -36,10 +36,10 @@ internal object PreTranslationPayloadSupport {
             description = applyTranslatedField(sourcePayload.description, sourceDocument.description, translatedDocument.description),
         )
 
-    fun estimatedTokens(payload: PreTranslationBatchPayload): Int =
+    public fun estimatedTokens(payload: PreTranslationBatchPayload): Int =
         payload.encodeJson(PreTranslationBatchPayload.serializer()).length / 4 + 1
 
-    fun isEmpty(payload: PreTranslationBatchPayload): Boolean =
+    public fun isEmpty(payload: PreTranslationBatchPayload): Boolean =
         payload.content == null &&
             payload.contentWarning == null &&
             payload.title == null &&

@@ -40,6 +40,7 @@ kotlin {
         }
         val commonMain by getting {
             dependencies {
+                api(projects.core.common)
                 api(projects.core.model)
                 implementation(projects.core.deeplink)
                 api(projects.presenter.runtime)

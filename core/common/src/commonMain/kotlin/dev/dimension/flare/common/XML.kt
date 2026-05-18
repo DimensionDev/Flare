@@ -2,7 +2,7 @@ package dev.dimension.flare.common
 
 import nl.adaptivity.xmlutil.serialization.XML
 
-internal val Xml =
+public val Xml: XML =
     XML {
         defaultPolicy {
             autoPolymorphic = true

@@ -83,7 +83,6 @@ kotlin {
                 implementation(libs.xmlUtil)
                 implementation(libs.ktor.client.resources)
                 implementation(libs.cryptography.provider.optimal)
-                implementation(libs.nostr.sdk.kmp)
             }
         }
         val commonTest by getting {

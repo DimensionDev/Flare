@@ -18,6 +18,7 @@ import dev.dimension.flare.data.datasource.microblog.ComposeType
 import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
 import dev.dimension.flare.data.datastore.AppDataStore
+import dev.dimension.flare.data.datastore.model.ComposeVisibility
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.DraftRepository
 import dev.dimension.flare.data.repository.accountServiceFlow
@@ -562,7 +563,7 @@ public class ComposePresenter(
         LaunchedEffect(Unit) {
             appDataStore.composeConfigData.data.firstOrNull()?.let { data ->
                 if (!hasExplicitVisibility) {
-                    visibility = data.visibility
+                    visibility = data.visibility.toUiVisibility()
                 }
             }
         }
@@ -601,6 +602,15 @@ public class ComposePresenter(
         }
     }
 }
+
+private fun ComposeVisibility.toUiVisibility(): UiTimelineV2.Post.Visibility =
+    when (this) {
+        ComposeVisibility.Public -> UiTimelineV2.Post.Visibility.Public
+        ComposeVisibility.Home -> UiTimelineV2.Post.Visibility.Home
+        ComposeVisibility.Followers -> UiTimelineV2.Post.Visibility.Followers
+        ComposeVisibility.Specified -> UiTimelineV2.Post.Visibility.Specified
+        ComposeVisibility.Channel -> UiTimelineV2.Post.Visibility.Channel
+    }
 
 @Immutable
 public interface VisibilityState {

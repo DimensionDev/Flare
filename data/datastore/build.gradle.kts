@@ -18,9 +18,20 @@ kotlin {
         )
     }
 
+    compilerOptions {
+        allWarningsAsErrors.set(false)
+        freeCompilerArgs.addAll(
+            "-module-name",
+            "flare_data_datastore",
+        )
+    }
+
     sourceSets {
         val commonMain by getting {
             dependencies {
+                api(projects.core.common)
+                api(projects.core.model)
+                api(libs.datastore)
                 api(libs.okio)
                 implementation(libs.kotlinx.serialization.json)
             }

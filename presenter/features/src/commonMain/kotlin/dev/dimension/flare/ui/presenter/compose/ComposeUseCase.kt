@@ -5,11 +5,13 @@ import dev.dimension.flare.common.InAppNotification
 import dev.dimension.flare.common.Message
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datastore.AppDataStore
+import dev.dimension.flare.data.datastore.model.ComposeVisibility
 import dev.dimension.flare.data.repository.DebugRepository
 import dev.dimension.flare.data.repository.newDraftGroupId
 import dev.dimension.flare.data.repository.toComposeDraftBundle
 import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.ui.model.UiAccount
+import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -60,7 +62,7 @@ internal class ComposeUseCase(
                 progress.invoke(ComposeProgressState.Progress(0, 1))
                 appDataStore.composeConfigData.updateData {
                     it.copy(
-                        visibility = data.visibility,
+                        visibility = data.visibility.toComposeVisibility(),
                         lastAccounts =
                             if (data.referenceStatus == null) {
                                 accounts.map { account -> account.accountKey }
@@ -106,3 +108,12 @@ internal sealed interface ComposeProgressState {
         val throwable: Throwable,
     ) : ComposeProgressState
 }
+
+private fun UiTimelineV2.Post.Visibility.toComposeVisibility(): ComposeVisibility =
+    when (this) {
+        UiTimelineV2.Post.Visibility.Public -> ComposeVisibility.Public
+        UiTimelineV2.Post.Visibility.Home -> ComposeVisibility.Home
+        UiTimelineV2.Post.Visibility.Followers -> ComposeVisibility.Followers
+        UiTimelineV2.Post.Visibility.Specified -> ComposeVisibility.Specified
+        UiTimelineV2.Post.Visibility.Channel -> ComposeVisibility.Channel
+    }

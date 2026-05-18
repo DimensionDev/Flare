@@ -3,18 +3,21 @@ package dev.dimension.flare.data.repository
 import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.app.model.DbKeywordFilter
 import dev.dimension.flare.ui.model.UiKeywordFilter
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlin.time.Clock
 import kotlin.time.Instant
 
-internal class LocalFilterRepository(
+public class LocalFilterRepository(
     private val database: AppDatabase,
     private val coroutineScope: CoroutineScope,
 ) {
-    fun getAllFlow() =
+    public fun getAllFlow(): Flow<ImmutableList<UiKeywordFilter>> =
         database
             .keywordFilterDao()
             .selectAll()
@@ -25,11 +28,11 @@ internal class LocalFilterRepository(
                     }.toImmutableList()
             }
 
-    fun getFlow(
+    public fun getFlow(
         forTimeline: Boolean = false,
         forNotification: Boolean = false,
         forSearch: Boolean = false,
-    ) = database
+    ): Flow<List<KeywordFilterPattern>> = database
         .keywordFilterDao()
         .selectNotExpiredFor(
             currentTime = Clock.System.now().toEpochMilliseconds(),
@@ -40,14 +43,14 @@ internal class LocalFilterRepository(
             it.map(DbKeywordFilter::toKeywordFilterPattern)
         }
 
-    fun add(
+    public fun add(
         keyword: String,
         forTimeline: Boolean,
         forNotification: Boolean,
         forSearch: Boolean,
         expiredAt: Instant?,
         isRegex: Boolean,
-    ) = coroutineScope.launch {
+    ): Job = coroutineScope.launch {
         database.keywordFilterDao().insert(
             DbKeywordFilter(
                 keyword = keyword,
@@ -60,14 +63,14 @@ internal class LocalFilterRepository(
         )
     }
 
-    fun update(
+    public fun update(
         keyword: String,
         forTimeline: Boolean,
         forNotification: Boolean,
         forSearch: Boolean,
         expiredAt: Instant?,
         isRegex: Boolean,
-    ) = coroutineScope.launch {
+    ): Job = coroutineScope.launch {
         database.keywordFilterDao().update(
             forTimeline = if (forTimeline) 1L else 0L,
             forNotification = if (forNotification) 1L else 0L,
@@ -78,18 +81,18 @@ internal class LocalFilterRepository(
         )
     }
 
-    fun delete(filter: String) =
+    public fun delete(filter: String): Job =
         coroutineScope.launch {
             database.keywordFilterDao().deleteByKeyword(filter)
         }
 
-    fun clear() =
+    public fun clear(): Job =
         coroutineScope.launch {
             database.keywordFilterDao().deleteAll()
         }
 }
 
-internal data class KeywordFilterPattern(
+public data class KeywordFilterPattern(
     val keyword: String,
     val isRegex: Boolean,
     val regex: Regex? = null,

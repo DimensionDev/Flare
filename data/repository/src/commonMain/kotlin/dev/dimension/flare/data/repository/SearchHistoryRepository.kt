@@ -1,21 +1,24 @@
 package dev.dimension.flare.data.repository
 
+import dev.dimension.flare.common.ImmutableListWrapper
 import dev.dimension.flare.common.toImmutableListWrapper
 import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.app.model.DbSearchHistory
 import dev.dimension.flare.ui.model.UiSearchHistory
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlin.time.Clock
 import kotlin.time.Instant
 
-internal class SearchHistoryRepository(
+public class SearchHistoryRepository(
     private val database: AppDatabase,
     private val coroutineScope: CoroutineScope,
 ) {
-    val allSearchHistory =
+    public val allSearchHistory: Flow<ImmutableListWrapper<UiSearchHistory>> =
         database
             .searchHistoryDao()
             .select()
@@ -30,7 +33,7 @@ internal class SearchHistoryRepository(
                     .toImmutableListWrapper()
             }
 
-    fun addSearchHistory(keyword: String) =
+    public fun addSearchHistory(keyword: String): Job =
         coroutineScope.launch {
             database.searchHistoryDao().insert(
                 DbSearchHistory(
@@ -40,12 +43,12 @@ internal class SearchHistoryRepository(
             )
         }
 
-    fun deleteSearchHistory(keyword: String) =
+    public fun deleteSearchHistory(keyword: String): Job =
         coroutineScope.launch {
             database.searchHistoryDao().delete(keyword)
         }
 
-    fun deleteAllSearchHistory() =
+    public fun deleteAllSearchHistory(): Job =
         coroutineScope.launch {
             database.searchHistoryDao().deleteAll()
         }

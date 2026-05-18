@@ -1,9 +1,8 @@
 package dev.dimension.flare.data.datasource.vvo
 
-import androidx.paging.ExperimentalPagingApi
-import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
+import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.network.vvo.VVOService
 import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.model.MicroBlogKey
@@ -11,14 +10,11 @@ import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
 
-@OptIn(ExperimentalPagingApi::class)
-internal class DiscoverStatusRemoteMediator(
+public class CommentPagingSource(
     private val service: VVOService,
     private val accountKey: MicroBlogKey,
-) : CacheableRemoteLoader<UiTimelineV2> {
-    override val pagingKey: String = "discover_status_$accountKey"
-    private val containerId = "102803"
-
+    private val onClearMarker: suspend () -> Unit,
+) : RemoteLoader<UiTimelineV2> {
     override suspend fun load(
         pageSize: Int,
         request: PagingRequest,
@@ -30,11 +26,10 @@ internal class DiscoverStatusRemoteMediator(
                 platformType = PlatformType.VVo,
             )
         }
-
         val page =
             when (request) {
-                is PagingRequest.Append -> {
-                    request.nextKey.toIntOrNull() ?: 0
+                PagingRequest.Refresh -> {
+                    1
                 }
 
                 is PagingRequest.Prepend -> {
@@ -43,28 +38,26 @@ internal class DiscoverStatusRemoteMediator(
                     )
                 }
 
-                PagingRequest.Refresh -> {
-                    0
+                is PagingRequest.Append -> {
+                    request.nextKey.toIntOrNull() ?: 1
                 }
             }
-
+        if (request == PagingRequest.Refresh) {
+            onClearMarker()
+        }
         val response =
-            if (request is PagingRequest.Append) {
-                service.getContainerIndex(containerId = containerId, sinceId = page.toString())
-            } else {
-                service.getContainerIndex(containerId = containerId)
+            service.getComments(
+                page = page,
+            )
+
+        val data =
+            response.data.orEmpty().map {
+                it.render(accountKey)
             }
-
-        val status =
-            response.data
-                ?.cards
-                ?.mapNotNull { it.mblog }
-                .orEmpty()
-
         return PagingResult(
-            endOfPaginationReached = status.isEmpty(),
-            data = status.map { it.render(accountKey) },
-            nextKey = (page + 1).toString(),
+            data = data,
+            endOfPaginationReached = data.isEmpty(),
+            nextKey = (page + 1).takeIf { data.isNotEmpty() }?.toString(),
         )
     }
 }

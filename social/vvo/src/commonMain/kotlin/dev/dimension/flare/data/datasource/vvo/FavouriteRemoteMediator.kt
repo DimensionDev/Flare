@@ -1,6 +1,5 @@
 package dev.dimension.flare.data.datasource.vvo
 
-import androidx.paging.ExperimentalPagingApi
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
@@ -11,12 +10,12 @@ import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
 
-@OptIn(ExperimentalPagingApi::class)
-internal class HomeTimelineRemoteMediator(
+public class FavouriteRemoteMediator(
     private val service: VVOService,
     private val accountKey: MicroBlogKey,
 ) : CacheableRemoteLoader<UiTimelineV2> {
-    override val pagingKey: String = "home_$accountKey"
+    override val pagingKey: String = "favourite_$accountKey"
+    private val containerId = "230259"
 
     override suspend fun load(
         pageSize: Int,
@@ -30,10 +29,10 @@ internal class HomeTimelineRemoteMediator(
             )
         }
 
-        val response =
+        val page =
             when (request) {
                 PagingRequest.Refresh -> {
-                    service.getFriendsTimeline()
+                    null
                 }
 
                 is PagingRequest.Prepend -> {
@@ -43,20 +42,43 @@ internal class HomeTimelineRemoteMediator(
                 }
 
                 is PagingRequest.Append -> {
-                    service.getFriendsTimeline(
-                        maxId = request.nextKey,
+                    request.nextKey.toIntOrNull()
+                }
+            }
+
+        val response =
+            when (request) {
+                PagingRequest.Refresh -> {
+                    service.getContainerIndex(containerId = containerId)
+                }
+
+                is PagingRequest.Prepend -> {
+                    return PagingResult(
+                        endOfPaginationReached = true,
+                    )
+                }
+
+                is PagingRequest.Append -> {
+                    service.getContainerIndex(
+                        containerId = containerId,
+                        page = page,
+                        openApp = 0,
                     )
                 }
             }
 
+        val status =
+            response.data
+                ?.cards
+                ?.mapNotNull { it.mblog }
+                ?.filter { it.user?.id != null }
+                .orEmpty()
+
+        val nextKey = response.data?.cardlistInfo?.page
         return PagingResult(
-            endOfPaginationReached = response.data?.nextCursorStr == null,
-            data =
-                response.data
-                    ?.statuses
-                    .orEmpty()
-                    .map { it.render(accountKey) },
-            nextKey = response.data?.nextCursorStr,
+            endOfPaginationReached = nextKey == null,
+            data = status.map { it.render(accountKey) },
+            nextKey = nextKey?.toString(),
         )
     }
 }

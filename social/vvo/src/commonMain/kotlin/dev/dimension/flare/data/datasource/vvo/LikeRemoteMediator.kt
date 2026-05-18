@@ -10,7 +10,7 @@ import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
 
-internal class LikeRemoteMediator(
+public class LikeRemoteMediator(
     private val service: VVOService,
     private val accountKey: MicroBlogKey,
 ) : CacheableRemoteLoader<UiTimelineV2> {

@@ -12,7 +12,7 @@ import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
 
 @OptIn(ExperimentalPagingApi::class)
-internal class StatusCommentRemoteMediator(
+public class StatusCommentRemoteMediator(
     private val service: VVOService,
     private val statusKey: MicroBlogKey,
     private val accountKey: MicroBlogKey,

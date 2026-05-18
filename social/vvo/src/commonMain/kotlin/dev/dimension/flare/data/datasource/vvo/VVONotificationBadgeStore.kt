@@ -2,7 +2,7 @@ package dev.dimension.flare.data.datasource.vvo
 
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 
-internal class VVONotificationBadgeStore(
+public class VVONotificationBadgeStore(
     private val loader: VVOLoader,
     private val onTotalChanged: (Int) -> Unit,
 ) {
@@ -10,20 +10,20 @@ internal class VVONotificationBadgeStore(
     private var hydrated: Boolean = false
     private val localOverrides = mutableMapOf<NotificationFilter, Int>()
 
-    suspend fun refreshAndGetTotal(): Int {
+    public suspend fun refreshAndGetTotal(): Int {
         serverCounts = loader.notificationBadgeCounts()
         hydrated = true
         localOverrides.clear()
         return currentTotal().also(onTotalChanged)
     }
 
-    suspend fun clear(filter: NotificationFilter) {
+    public suspend fun clear(filter: NotificationFilter) {
         ensureHydrated()
         localOverrides[filter] = 0
         onTotalChanged(currentTotal())
     }
 
-    suspend fun clearAll() {
+    public suspend fun clearAll() {
         ensureHydrated()
         trackedFilters.forEach { localOverrides[it] = 0 }
         onTotalChanged(currentTotal())

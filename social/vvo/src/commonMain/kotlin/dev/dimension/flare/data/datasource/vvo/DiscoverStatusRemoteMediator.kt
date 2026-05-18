@@ -12,12 +12,12 @@ import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
 
 @OptIn(ExperimentalPagingApi::class)
-internal class StatusRepostRemoteMediator(
+public class DiscoverStatusRemoteMediator(
     private val service: VVOService,
-    private val statusKey: MicroBlogKey,
     private val accountKey: MicroBlogKey,
 ) : CacheableRemoteLoader<UiTimelineV2> {
-    override val pagingKey: String = "status_reposts_${statusKey}_$accountKey"
+    override val pagingKey: String = "discover_status_$accountKey"
+    private val containerId = "102803"
 
     override suspend fun load(
         pageSize: Int,
@@ -33,12 +33,8 @@ internal class StatusRepostRemoteMediator(
 
         val page =
             when (request) {
-                PagingRequest.Refresh -> {
-                    1
-                }
-
                 is PagingRequest.Append -> {
-                    request.nextKey.toIntOrNull() ?: 1
+                    request.nextKey.toIntOrNull() ?: 0
                 }
 
                 is PagingRequest.Prepend -> {
@@ -46,18 +42,28 @@ internal class StatusRepostRemoteMediator(
                         endOfPaginationReached = true,
                     )
                 }
+
+                PagingRequest.Refresh -> {
+                    0
+                }
             }
 
         val response =
-            service.getRepostTimeline(
-                id = statusKey.id,
-                page = page,
-            )
+            if (request is PagingRequest.Append) {
+                service.getContainerIndex(containerId = containerId, sinceId = page.toString())
+            } else {
+                service.getContainerIndex(containerId = containerId)
+            }
 
-        val statuses = response.data?.data.orEmpty()
+        val status =
+            response.data
+                ?.cards
+                ?.mapNotNull { it.mblog }
+                .orEmpty()
+
         return PagingResult(
-            endOfPaginationReached = statuses.isEmpty(),
-            data = statuses.map { it.render(accountKey) },
+            endOfPaginationReached = status.isEmpty(),
+            data = status.map { it.render(accountKey) },
             nextKey = (page + 1).toString(),
         )
     }

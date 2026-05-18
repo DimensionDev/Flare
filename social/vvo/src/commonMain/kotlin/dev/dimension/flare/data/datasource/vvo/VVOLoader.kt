@@ -25,8 +25,8 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
 import kotlin.time.Clock
 
-internal class VVOLoader(
-    val accountKey: MicroBlogKey,
+public class VVOLoader(
+    public val accountKey: MicroBlogKey,
     private val service: VVOService,
 ) : NotificationLoader,
     UserLoader,
@@ -37,7 +37,7 @@ internal class VVOLoader(
 
     override suspend fun notificationBadgeCount(): Int = notificationBadgeCounts().values.sum()
 
-    suspend fun notificationBadgeCounts(): Map<NotificationFilter, Int> {
+    public suspend fun notificationBadgeCounts(): Map<NotificationFilter, Int> {
         val st = ensureLogin()
         val response =
             service.remindUnread(

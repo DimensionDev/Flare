@@ -7,18 +7,22 @@ import dev.dimension.flare.data.network.vvo.VVOService
 import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
-import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.mapper.render
 
-internal class LikePagingSource(
+public class SearchUserPagingSource(
     private val service: VVOService,
     private val accountKey: MicroBlogKey,
-    private val onClearMarker: suspend () -> Unit,
-) : RemoteLoader<UiTimelineV2> {
+    private val query: String,
+) : RemoteLoader<UiProfile> {
+    private val containerId by lazy {
+        "100103type=3&q=$query&t="
+    }
+
     override suspend fun load(
         pageSize: Int,
         request: PagingRequest,
-    ): PagingResult<UiTimelineV2> {
+    ): PagingResult<UiProfile> {
         val config = service.config()
         if (config.data?.login != true) {
             throw LoginExpiredException(
@@ -30,7 +34,7 @@ internal class LikePagingSource(
         val page =
             when (request) {
                 PagingRequest.Refresh -> {
-                    1
+                    null
                 }
 
                 is PagingRequest.Prepend -> {
@@ -40,22 +44,28 @@ internal class LikePagingSource(
                 }
 
                 is PagingRequest.Append -> {
-                    request.nextKey.toIntOrNull() ?: 1
+                    request.nextKey.toIntOrNull()
                 }
             }
-        if (request == PagingRequest.Refresh) {
-            onClearMarker()
-        }
 
-        val response = service.getAttitudes(page = page)
-        val data =
+        val response =
+            service.getContainerIndex(
+                containerId = containerId,
+                pageType = "searchall",
+                page = page,
+            )
+        val users =
             response.data
-                .orEmpty()
-                .filter { it.idStr != null }
-                .map { it.render(accountKey) }
+                ?.cards
+                ?.flatMap {
+                    it.cardGroup.orEmpty()
+                }?.mapNotNull {
+                    it.user
+                }.orEmpty()
+
         return PagingResult(
-            data = data,
-            nextKey = if (data.isEmpty()) null else (page + 1).toString(),
+            data = users.map { it.render(accountKey = accountKey) },
+            nextKey = if (users.isEmpty()) null else ((page ?: 0) + 1).toString(),
         )
     }
 }

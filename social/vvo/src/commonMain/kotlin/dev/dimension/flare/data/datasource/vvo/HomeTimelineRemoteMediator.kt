@@ -12,12 +12,11 @@ import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
 
 @OptIn(ExperimentalPagingApi::class)
-internal class CommentChildRemoteMediator(
+public class HomeTimelineRemoteMediator(
     private val service: VVOService,
-    private val commentKey: MicroBlogKey,
     private val accountKey: MicroBlogKey,
 ) : CacheableRemoteLoader<UiTimelineV2> {
-    override val pagingKey: String = "status_comments_child_${commentKey}_$accountKey"
+    override val pagingKey: String = "home_$accountKey"
 
     override suspend fun load(
         pageSize: Int,
@@ -34,9 +33,7 @@ internal class CommentChildRemoteMediator(
         val response =
             when (request) {
                 PagingRequest.Refresh -> {
-                    service.getHotFlowChild(
-                        cid = commentKey.id,
-                    )
+                    service.getFriendsTimeline()
                 }
 
                 is PagingRequest.Prepend -> {
@@ -46,18 +43,20 @@ internal class CommentChildRemoteMediator(
                 }
 
                 is PagingRequest.Append -> {
-                    service.getHotFlowChild(
-                        cid = commentKey.id,
-                        maxId = request.nextKey.toLongOrNull(),
+                    service.getFriendsTimeline(
+                        maxId = request.nextKey,
                     )
                 }
             }
 
-        val maxId = response.maxID?.takeIf { it != 0L }
         return PagingResult(
-            endOfPaginationReached = maxId == null,
-            data = response.data.orEmpty().map { it.render(accountKey) },
-            nextKey = maxId?.toString(),
+            endOfPaginationReached = response.data?.nextCursorStr == null,
+            data =
+                response.data
+                    ?.statuses
+                    .orEmpty()
+                    .map { it.render(accountKey) },
+            nextKey = response.data?.nextCursorStr,
         )
     }
 }

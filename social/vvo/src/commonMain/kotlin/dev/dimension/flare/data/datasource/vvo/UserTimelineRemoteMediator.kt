@@ -13,7 +13,7 @@ import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
 
 @OptIn(ExperimentalPagingApi::class)
-internal class UserTimelineRemoteMediator(
+public class UserTimelineRemoteMediator(
     private val userKey: MicroBlogKey,
     private val service: VVOService,
     private val accountKey: MicroBlogKey,

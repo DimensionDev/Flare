@@ -12,12 +12,12 @@ import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
 
 @OptIn(ExperimentalPagingApi::class)
-internal class MentionRemoteMediator(
+public class StatusRepostRemoteMediator(
     private val service: VVOService,
+    private val statusKey: MicroBlogKey,
     private val accountKey: MicroBlogKey,
-    private val onClearMarker: suspend () -> Unit,
 ) : CacheableRemoteLoader<UiTimelineV2> {
-    override val pagingKey: String = "mention_$accountKey"
+    override val pagingKey: String = "status_reposts_${statusKey}_$accountKey"
 
     override suspend fun load(
         pageSize: Int,
@@ -34,7 +34,11 @@ internal class MentionRemoteMediator(
         val page =
             when (request) {
                 PagingRequest.Refresh -> {
-                    0
+                    1
+                }
+
+                is PagingRequest.Append -> {
+                    request.nextKey.toIntOrNull() ?: 1
                 }
 
                 is PagingRequest.Prepend -> {
@@ -42,24 +46,18 @@ internal class MentionRemoteMediator(
                         endOfPaginationReached = true,
                     )
                 }
-
-                is PagingRequest.Append -> {
-                    request.nextKey.toIntOrNull() ?: 0
-                }
             }
 
         val response =
-            service.getMentionsAt(
+            service.getRepostTimeline(
+                id = statusKey.id,
                 page = page,
             )
-        if (request == PagingRequest.Refresh) {
-            onClearMarker()
-        }
 
-        val data = response.data.orEmpty().map { it.render(accountKey) }
+        val statuses = response.data?.data.orEmpty()
         return PagingResult(
-            endOfPaginationReached = data.isEmpty(),
-            data = data,
+            endOfPaginationReached = statuses.isEmpty(),
+            data = statuses.map { it.render(accountKey) },
             nextKey = (page + 1).toString(),
         )
     }

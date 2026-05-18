@@ -8,7 +8,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.mapper.render
 
-internal class FansPagingSource(
+public class FansPagingSource(
     private val service: VVOService,
     private val accountKey: MicroBlogKey,
     private val userKey: MicroBlogKey,

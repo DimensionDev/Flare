@@ -1,5 +1,6 @@
 package dev.dimension.flare.data.datasource.vvo
 
+import androidx.paging.ExperimentalPagingApi
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
@@ -10,12 +11,13 @@ import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
 
-internal class FavouriteRemoteMediator(
+@OptIn(ExperimentalPagingApi::class)
+public class CommentChildRemoteMediator(
     private val service: VVOService,
+    private val commentKey: MicroBlogKey,
     private val accountKey: MicroBlogKey,
 ) : CacheableRemoteLoader<UiTimelineV2> {
-    override val pagingKey: String = "favourite_$accountKey"
-    private val containerId = "230259"
+    override val pagingKey: String = "status_comments_child_${commentKey}_$accountKey"
 
     override suspend fun load(
         pageSize: Int,
@@ -29,27 +31,12 @@ internal class FavouriteRemoteMediator(
             )
         }
 
-        val page =
-            when (request) {
-                PagingRequest.Refresh -> {
-                    null
-                }
-
-                is PagingRequest.Prepend -> {
-                    return PagingResult(
-                        endOfPaginationReached = true,
-                    )
-                }
-
-                is PagingRequest.Append -> {
-                    request.nextKey.toIntOrNull()
-                }
-            }
-
         val response =
             when (request) {
                 PagingRequest.Refresh -> {
-                    service.getContainerIndex(containerId = containerId)
+                    service.getHotFlowChild(
+                        cid = commentKey.id,
+                    )
                 }
 
                 is PagingRequest.Prepend -> {
@@ -59,26 +46,18 @@ internal class FavouriteRemoteMediator(
                 }
 
                 is PagingRequest.Append -> {
-                    service.getContainerIndex(
-                        containerId = containerId,
-                        page = page,
-                        openApp = 0,
+                    service.getHotFlowChild(
+                        cid = commentKey.id,
+                        maxId = request.nextKey.toLongOrNull(),
                     )
                 }
             }
 
-        val status =
-            response.data
-                ?.cards
-                ?.mapNotNull { it.mblog }
-                ?.filter { it.user?.id != null }
-                .orEmpty()
-
-        val nextKey = response.data?.cardlistInfo?.page
+        val maxId = response.maxID?.takeIf { it != 0L }
         return PagingResult(
-            endOfPaginationReached = nextKey == null,
-            data = status.map { it.render(accountKey) },
-            nextKey = nextKey?.toString(),
+            endOfPaginationReached = maxId == null,
+            data = response.data.orEmpty().map { it.render(accountKey) },
+            nextKey = maxId?.toString(),
         )
     }
 }

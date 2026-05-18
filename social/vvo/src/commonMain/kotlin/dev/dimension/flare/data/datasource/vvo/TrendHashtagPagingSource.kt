@@ -9,7 +9,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiHashtag
 
-internal class TrendHashtagPagingSource(
+public class TrendHashtagPagingSource(
     private val accountKey: MicroBlogKey,
     private val service: VVOService,
 ) : RemoteLoader<UiHashtag> {

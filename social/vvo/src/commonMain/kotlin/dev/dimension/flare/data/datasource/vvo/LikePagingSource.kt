@@ -10,7 +10,7 @@ import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
 
-internal class CommentPagingSource(
+public class LikePagingSource(
     private val service: VVOService,
     private val accountKey: MicroBlogKey,
     private val onClearMarker: suspend () -> Unit,
@@ -26,6 +26,7 @@ internal class CommentPagingSource(
                 platformType = PlatformType.VVo,
             )
         }
+
         val page =
             when (request) {
                 PagingRequest.Refresh -> {
@@ -45,19 +46,16 @@ internal class CommentPagingSource(
         if (request == PagingRequest.Refresh) {
             onClearMarker()
         }
-        val response =
-            service.getComments(
-                page = page,
-            )
 
+        val response = service.getAttitudes(page = page)
         val data =
-            response.data.orEmpty().map {
-                it.render(accountKey)
-            }
+            response.data
+                .orEmpty()
+                .filter { it.idStr != null }
+                .map { it.render(accountKey) }
         return PagingResult(
             data = data,
-            endOfPaginationReached = data.isEmpty(),
-            nextKey = (page + 1).takeIf { data.isNotEmpty() }?.toString(),
+            nextKey = if (data.isEmpty()) null else (page + 1).toString(),
         )
     }
 }

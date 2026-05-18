@@ -9,6 +9,7 @@ import dev.dimension.flare.createTestRootPath
 import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.app.model.DraftMediaType
 import dev.dimension.flare.data.database.app.model.DraftReferenceType
+import dev.dimension.flare.data.database.app.model.DraftVisibility
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.io.PlatformPathProducer
 import dev.dimension.flare.data.repository.ComposeDraftBundle
@@ -126,7 +127,7 @@ class SaveDraftUseCaseTest : RobolectricTest() {
 
             assertNotNull(draft)
             assertEquals("hello draft", draft.content.text)
-            assertEquals(UiTimelineV2.Post.Visibility.Followers, draft.content.visibility)
+            assertEquals(DraftVisibility.Followers, draft.content.visibility)
             assertEquals(listOf("zh", "en"), draft.content.language)
             assertTrue(draft.content.sensitive)
             assertEquals("cw", draft.content.spoilerText)
@@ -305,7 +306,7 @@ class SaveDraftUseCaseTest : RobolectricTest() {
 
             assertNotNull(draft)
             assertEquals("", draft.content.text)
-            assertEquals(UiTimelineV2.Post.Visibility.Public, draft.content.visibility)
+            assertEquals(DraftVisibility.Public, draft.content.visibility)
             assertEquals(listOf("en"), draft.content.language)
             assertEquals(false, draft.content.sensitive)
             assertNull(draft.content.spoilerText)

@@ -60,21 +60,21 @@ import dev.dimension.flare.data.database.app.dao.SearchHistoryDao
     dev.dimension.flare.data.database.adapter.RssDisplayModeConverter::class,
 )
 @ConstructedBy(AppDatabaseConstructor::class)
-internal abstract class AppDatabase : RoomDatabase() {
-    abstract fun accountDao(): AccountDao
+public abstract class AppDatabase : RoomDatabase() {
+    public abstract fun accountDao(): AccountDao
 
-    abstract fun applicationDao(): ApplicationDao
+    public abstract fun applicationDao(): ApplicationDao
 
-    abstract fun draftDao(): DraftDao
+    public abstract fun draftDao(): DraftDao
 
-    abstract fun keywordFilterDao(): KeywordFilterDao
+    public abstract fun keywordFilterDao(): KeywordFilterDao
 
-    abstract fun searchHistoryDao(): SearchHistoryDao
+    public abstract fun searchHistoryDao(): SearchHistoryDao
 
-    abstract fun rssSourceDao(): RssSourceDao
+    public abstract fun rssSourceDao(): RssSourceDao
 
-    companion object {
-        val MIGRATION_8_9 =
+    public companion object {
+        public val MIGRATION_8_9: Migration =
             object : Migration(8, 9) {
                 override suspend fun migrate(connection: SQLiteConnection) {
                     connection.execSQL(
@@ -88,7 +88,7 @@ internal abstract class AppDatabase : RoomDatabase() {
                     )
                 }
             }
-        val MIGRATION_9_10 =
+        public val MIGRATION_9_10: Migration =
             object : Migration(9, 10) {
                 override suspend fun migrate(connection: SQLiteConnection) {
                     connection.execSQL(
@@ -101,6 +101,6 @@ internal abstract class AppDatabase : RoomDatabase() {
 
 // The Room compiler generates the `actual` implementations.
 @Suppress("NO_ACTUAL_FOR_EXPECT")
-internal expect object AppDatabaseConstructor : RoomDatabaseConstructor<AppDatabase> {
+public expect object AppDatabaseConstructor : RoomDatabaseConstructor<AppDatabase> {
     override fun initialize(): AppDatabase
 }

@@ -22,18 +22,20 @@ kotlin {
     }
 
     sourceSets {
+        all {
+            languageSettings {
+                optIn("kotlin.uuid.ExperimentalUuidApi")
+            }
+        }
+
         val commonMain by getting {
             dependencies {
+                implementation(projects.core.common)
                 api(projects.core.model)
                 api(libs.kotlinx.coroutines.core)
                 api(libs.room.runtime)
                 api(libs.sqlite.bundled)
                 implementation(libs.kotlinx.serialization.json)
-            }
-        }
-        val jvmMain by getting {
-            dependencies {
-                implementation(projects.core.common)
             }
         }
     }

@@ -10,15 +10,14 @@ import androidx.room3.TypeConverter
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlin.uuid.Uuid
 
 @Serializable
-internal data class DraftContent(
+public data class DraftContent(
     val text: String,
-    val visibility: UiTimelineV2.Post.Visibility,
+    val visibility: DraftVisibility,
     val language: List<String>,
     val sensitive: Boolean,
     val spoilerText: String? = null,
@@ -27,14 +26,14 @@ internal data class DraftContent(
     val reference: DraftReference? = null,
 ) {
     @Serializable
-    data class DraftPoll(
+    public data class DraftPoll(
         val options: List<String>,
         val expiredAfter: Long,
         val multiple: Boolean,
     )
 
     @Serializable
-    data class DraftReference(
+    public data class DraftReference(
         val type: DraftReferenceType,
         val statusKey: MicroBlogKey,
         val rootId: String? = null,
@@ -42,7 +41,7 @@ internal data class DraftContent(
 }
 
 @Serializable
-internal enum class DraftReferenceType {
+public enum class DraftReferenceType {
     @SerialName("reply")
     REPLY,
 
@@ -54,7 +53,16 @@ internal enum class DraftReferenceType {
 }
 
 @Serializable
-internal enum class DraftTargetStatus {
+public enum class DraftVisibility {
+    Public,
+    Home,
+    Followers,
+    Specified,
+    Channel,
+}
+
+@Serializable
+public enum class DraftTargetStatus {
     @SerialName("draft")
     DRAFT,
 
@@ -66,7 +74,7 @@ internal enum class DraftTargetStatus {
 }
 
 @Serializable
-internal enum class DraftMediaType {
+public enum class DraftMediaType {
     @SerialName("image")
     IMAGE,
 
@@ -83,7 +91,7 @@ internal enum class DraftMediaType {
     ],
 )
 @Serializable
-internal data class DbDraftGroup(
+public data class DbDraftGroup(
     @PrimaryKey
     val group_id: String = Uuid.random().toString(),
     val content: DraftContent,
@@ -108,7 +116,7 @@ internal data class DbDraftGroup(
     ],
 )
 @Serializable
-internal data class DbDraftTarget(
+public data class DbDraftTarget(
     val group_id: String,
     val account_key: MicroBlogKey,
     val status: DraftTargetStatus,
@@ -136,7 +144,7 @@ internal data class DbDraftTarget(
     ],
 )
 @Serializable
-internal data class DbDraftMedia(
+public data class DbDraftMedia(
     val group_id: String,
     val cache_path: String,
     val file_name: String? = null,
@@ -148,7 +156,7 @@ internal data class DbDraftMedia(
     val media_id: String = Uuid.random().toString(),
 )
 
-internal data class DbDraftGroupWithRelations(
+public data class DbDraftGroupWithRelations(
     @Embedded
     val group: DbDraftGroup,
     @Relation(
@@ -165,22 +173,22 @@ internal data class DbDraftGroupWithRelations(
     val medias: List<DbDraftMedia>,
 )
 
-internal class DraftConverters {
+public class DraftConverters {
     @TypeConverter
-    fun fromDraftContent(value: DraftContent): String = value.encodeJson()
+    public fun fromDraftContent(value: DraftContent): String = value.encodeJson()
 
     @TypeConverter
-    fun toDraftContent(value: String): DraftContent = value.decodeJson()
+    public fun toDraftContent(value: String): DraftContent = value.decodeJson()
 
     @TypeConverter
-    fun fromDraftTargetStatus(value: DraftTargetStatus): String = value.name
+    public fun fromDraftTargetStatus(value: DraftTargetStatus): String = value.name
 
     @TypeConverter
-    fun toDraftTargetStatus(value: String): DraftTargetStatus = DraftTargetStatus.valueOf(value)
+    public fun toDraftTargetStatus(value: String): DraftTargetStatus = DraftTargetStatus.valueOf(value)
 
     @TypeConverter
-    fun fromDraftMediaType(value: DraftMediaType): String = value.name
+    public fun fromDraftMediaType(value: DraftMediaType): String = value.name
 
     @TypeConverter
-    fun toDraftMediaType(value: String): DraftMediaType = DraftMediaType.valueOf(value)
+    public fun toDraftMediaType(value: String): DraftMediaType = DraftMediaType.valueOf(value)
 }

@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.presenter.compose
 
 import dev.dimension.flare.data.database.app.model.DraftContent
 import dev.dimension.flare.data.database.app.model.DraftMediaType
+import dev.dimension.flare.data.database.app.model.DraftVisibility
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.DraftRepository
 import dev.dimension.flare.ui.model.UiDraft
@@ -9,6 +10,7 @@ import dev.dimension.flare.ui.model.UiDraftAccount
 import dev.dimension.flare.ui.model.UiDraftMedia
 import dev.dimension.flare.ui.model.UiDraftMediaType
 import dev.dimension.flare.ui.model.UiDraftStatus
+import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.render.toUi
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.firstOrNull
@@ -56,7 +58,7 @@ internal fun DraftContent.toComposeData(
 ): dev.dimension.flare.data.datasource.microblog.ComposeData =
     dev.dimension.flare.data.datasource.microblog.ComposeData(
         content = text,
-        visibility = visibility,
+        visibility = visibility.toUiVisibility(),
         language = language,
         medias = medias,
         sensitive = sensitive,
@@ -77,6 +79,15 @@ internal fun DraftContent.toComposeData(
                 )
             },
     )
+
+private fun DraftVisibility.toUiVisibility(): UiTimelineV2.Post.Visibility =
+    when (this) {
+        DraftVisibility.Public -> UiTimelineV2.Post.Visibility.Public
+        DraftVisibility.Home -> UiTimelineV2.Post.Visibility.Home
+        DraftVisibility.Followers -> UiTimelineV2.Post.Visibility.Followers
+        DraftVisibility.Specified -> UiTimelineV2.Post.Visibility.Specified
+        DraftVisibility.Channel -> UiTimelineV2.Post.Visibility.Channel
+    }
 
 internal fun DraftContent.DraftReference.toComposeStatus(): ComposeStatus =
     when (type) {

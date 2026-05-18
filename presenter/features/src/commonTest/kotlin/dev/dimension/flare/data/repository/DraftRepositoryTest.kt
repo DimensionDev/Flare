@@ -11,12 +11,12 @@ import dev.dimension.flare.data.database.app.model.DraftContent
 import dev.dimension.flare.data.database.app.model.DraftMediaType
 import dev.dimension.flare.data.database.app.model.DraftReferenceType
 import dev.dimension.flare.data.database.app.model.DraftTargetStatus
+import dev.dimension.flare.data.database.app.model.DraftVisibility
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.io.PlatformPathProducer
 import dev.dimension.flare.deleteTestRootPath
 import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
@@ -80,7 +80,7 @@ class DraftRepositoryTest : RobolectricTest() {
                         content =
                             DraftContent(
                                 text = "hello draft",
-                                visibility = UiTimelineV2.Post.Visibility.Public,
+                                visibility = DraftVisibility.Public,
                                 language = listOf("zh", "en"),
                                 sensitive = true,
                                 spoilerText = "cw",
@@ -261,7 +261,7 @@ class DraftRepositoryTest : RobolectricTest() {
     private fun sampleContent(text: String) =
         DraftContent(
             text = text,
-            visibility = UiTimelineV2.Post.Visibility.Public,
+            visibility = DraftVisibility.Public,
             language = listOf("en"),
             sensitive = false,
         )

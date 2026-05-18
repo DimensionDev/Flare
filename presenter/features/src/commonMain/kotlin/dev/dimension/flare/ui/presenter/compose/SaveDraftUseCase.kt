@@ -2,11 +2,13 @@ package dev.dimension.flare.ui.presenter.compose
 
 import dev.dimension.flare.data.database.app.model.DraftContent
 import dev.dimension.flare.data.database.app.model.DraftReferenceType
+import dev.dimension.flare.data.database.app.model.DraftVisibility
 import dev.dimension.flare.data.repository.ComposeDraftBundle
 import dev.dimension.flare.data.repository.DraftMediaStore
 import dev.dimension.flare.data.repository.DraftRepository
 import dev.dimension.flare.data.repository.SaveDraftInput
 import dev.dimension.flare.data.repository.SaveDraftTarget
+import dev.dimension.flare.ui.model.UiTimelineV2
 
 internal class SaveDraftUseCase(
     private val draftRepository: DraftRepository,
@@ -33,7 +35,7 @@ internal class SaveDraftUseCase(
 internal fun dev.dimension.flare.data.datasource.microblog.ComposeData.toDraftContent(): DraftContent =
     DraftContent(
         text = content,
-        visibility = visibility,
+        visibility = visibility.toDraftVisibility(),
         language = language,
         sensitive = sensitive,
         spoilerText = spoilerText,
@@ -60,3 +62,12 @@ internal fun dev.dimension.flare.data.datasource.microblog.ComposeData.toDraftCo
                 )
             },
     )
+
+private fun UiTimelineV2.Post.Visibility.toDraftVisibility(): DraftVisibility =
+    when (this) {
+        UiTimelineV2.Post.Visibility.Public -> DraftVisibility.Public
+        UiTimelineV2.Post.Visibility.Home -> DraftVisibility.Home
+        UiTimelineV2.Post.Visibility.Followers -> DraftVisibility.Followers
+        UiTimelineV2.Post.Visibility.Specified -> DraftVisibility.Specified
+        UiTimelineV2.Post.Visibility.Channel -> DraftVisibility.Channel
+    }

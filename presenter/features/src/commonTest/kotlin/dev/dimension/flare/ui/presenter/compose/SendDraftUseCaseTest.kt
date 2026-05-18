@@ -11,6 +11,7 @@ import dev.dimension.flare.data.database.app.model.DraftContent
 import dev.dimension.flare.data.database.app.model.DraftMediaType
 import dev.dimension.flare.data.database.app.model.DraftReferenceType
 import dev.dimension.flare.data.database.app.model.DraftTargetStatus
+import dev.dimension.flare.data.database.app.model.DraftVisibility
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.io.PlatformPathProducer
 import dev.dimension.flare.data.repository.ComposeDraftBundle
@@ -430,7 +431,7 @@ class SendDraftUseCaseTest : RobolectricTest() {
                     content =
                         DraftContent(
                             text = "restore me",
-                            visibility = UiTimelineV2.Post.Visibility.Followers,
+                            visibility = DraftVisibility.Followers,
                             language = listOf("zh"),
                             sensitive = true,
                             spoilerText = "cw",
@@ -798,7 +799,7 @@ class SendDraftUseCaseTest : RobolectricTest() {
     private fun sampleContent(text: String) =
         DraftContent(
             text = text,
-            visibility = UiTimelineV2.Post.Visibility.Public,
+            visibility = DraftVisibility.Public,
             language = listOf("en"),
             sensitive = false,
             spoilerText = null,

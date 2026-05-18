@@ -1,18 +1,18 @@
 package dev.dimension.flare.common.deeplink
 
-import dev.dimension.flare.data.repository.DebugRepository
 import kotlinx.serialization.KSerializer
 
-internal class DeepLinkMatcher<T>(
-    val request: DeepLinkRequest,
-    val deepLinkPattern: DeepLinkPattern<T>,
+public class DeepLinkMatcher<T>(
+    public val request: DeepLinkRequest,
+    public val deepLinkPattern: DeepLinkPattern<T>,
+    private val errorLogger: (String) -> Unit = {},
 ) {
     /**
      * Match a [DeepLinkRequest] to a [DeepLinkPattern].
      *
      * Returns a [DeepLinkMatchResult] if this matches the pattern, returns null otherwise
      */
-    fun match(): DeepLinkMatchResult<T>? {
+    public fun match(): DeepLinkMatchResult<T>? {
         if (request.pathSegments.size != deepLinkPattern.pathSegments.size) return null
         // exact match (url does not contain any arguments)
         if (request.uri == deepLinkPattern.uriPattern) {
@@ -47,7 +47,7 @@ internal class DeepLinkMatcher<T>(
                         try {
                             candidateSegment.typeParser.invoke(valueToParse)
                         } catch (e: IllegalArgumentException) {
-                            DebugRepository.log(
+                            errorLogger(
                                 "${TAG_LOG_ERROR}: Failed to parse path value:[$requestedSegment]" +
                                     ". ${e.stackTraceToString()}",
                             )
@@ -68,7 +68,7 @@ internal class DeepLinkMatcher<T>(
                 try {
                     queryStringParser.invoke(query.value.first())
                 } catch (e: IllegalArgumentException) {
-                    DebugRepository.log(
+                    errorLogger(
                         "${TAG_LOG_ERROR}: Failed to parse query name:[$name] value:[${query.value}]." +
                             " ${e.stackTraceToString()}",
                     )
@@ -90,9 +90,9 @@ internal class DeepLinkMatcher<T>(
  * been parsed from the raw url string back into its proper KType as declared in [T].
  * Includes arguments for all parts of the uri - path, query, etc.
  * */
-internal data class DeepLinkMatchResult<T>(
-    val serializer: KSerializer<T>,
-    val args: Map<String, Any>,
+public data class DeepLinkMatchResult<T>(
+    public val serializer: KSerializer<T>,
+    public val args: Map<String, Any>,
 )
 
 private const val TAG_LOG_ERROR = "Nav3RecipesDeepLink"

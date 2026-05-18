@@ -1,5 +1,6 @@
 package dev.dimension.flare.common.deeplink
 
+import dev.dimension.flare.data.repository.DebugRepository
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiAccount
@@ -91,7 +92,7 @@ internal object DeepLinkMapping {
         mapping.forEach { (account, patterns) ->
             val matchType =
                 patterns.firstNotNullOfOrNull { pattern ->
-                    DeepLinkMatcher(request, pattern).match()?.let { match ->
+                    DeepLinkMatcher(request, pattern, DebugRepository::log).match()?.let { match ->
                         KeyDecoder(match.args).decodeSerializableValue(match.serializer)
                     }
                 }

@@ -5,13 +5,13 @@ import de.cketti.codepoints.deluxe.codePointSequence
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.database.cache.mapper.XQTTimeline
-import dev.dimension.flare.data.database.cache.model.MessageContent
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.userActionsMenu
 import dev.dimension.flare.data.network.xqt.model.Admin
 import dev.dimension.flare.data.network.xqt.model.AudioSpace
 import dev.dimension.flare.data.network.xqt.model.Entities
 import dev.dimension.flare.data.network.xqt.model.GetProfileSpotlightsQuery200Response
+import dev.dimension.flare.data.network.xqt.model.InboxMessageData
 import dev.dimension.flare.data.network.xqt.model.InstructionUnion
 import dev.dimension.flare.data.network.xqt.model.Media
 import dev.dimension.flare.data.network.xqt.model.NoteTweetResultRichTextTag
@@ -40,7 +40,6 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.ClickEvent
-import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiCard
 import dev.dimension.flare.ui.model.UiDMItem
 import dev.dimension.flare.ui.model.UiHandle
@@ -1042,148 +1041,114 @@ internal fun TwitterList.render(accountKey: MicroBlogKey): UiList.List {
     )
 }
 
-internal fun MessageContent.XQT.render(
-    accountKey: MicroBlogKey,
-    credential: UiAccount.Credential,
-): UiDMItem.Message =
-    when (this) {
-        is MessageContent.XQT.Message -> render(accountKey, credential)
-    }
-
-private fun MessageContent.XQT.Message.render(
-    accountKey: MicroBlogKey,
-    credential: UiAccount.Credential,
-): UiDMItem.Message {
-    if (!data.attachment
+internal fun InboxMessageData.renderDirectMessage(accountKey: MicroBlogKey): UiDMItem.Message {
+    if (!attachment
             ?.photo
             ?.url
             .isNullOrEmpty() &&
-        data.text
+        text
             .orEmpty()
-            .endsWith(data.attachment.photo.url) &&
-        !data.attachment.photo.mediaUrlHttps
-            .isNullOrEmpty() &&
-        credential is UiAccount.XQT.Credential
+            .endsWith(attachment.photo.url) &&
+        !attachment.photo.mediaUrlHttps
+            .isNullOrEmpty()
     ) {
         return UiDMItem.Message.Media(
             UiMedia.Image(
-                url = data.attachment.photo.mediaUrlHttps,
-                previewUrl = data.attachment.photo.mediaUrlHttps,
+                url = attachment.photo.mediaUrlHttps,
+                previewUrl = attachment.photo.mediaUrlHttps,
                 height =
-                    data.attachment.photo.originalInfo
+                    attachment.photo.originalInfo
                         ?.height
                         ?.toFloat() ?: 0f,
                 width =
-                    data.attachment.photo.originalInfo
+                    attachment.photo.originalInfo
                         ?.width
                         ?.toFloat() ?: 0f,
                 sensitive = false,
-                description = data.attachment.photo.extAltText,
-                customHeaders =
-                    persistentMapOf(
-                        "Cookie" to credential.chocolate,
-                        "Referer" to "https://${accountKey.host}/",
-                    ),
+                description = attachment.photo.extAltText,
             ),
         )
-    } else if (!data.attachment
+    } else if (!attachment
             ?.animatedGif
             ?.url
             .isNullOrEmpty() &&
-        data.text
+        text
             .orEmpty()
-            .endsWith(data.attachment.animatedGif.url) &&
-        !data.attachment.animatedGif.mediaUrlHttps
-            .isNullOrEmpty() &&
-        credential is UiAccount.XQT.Credential
+            .endsWith(attachment.animatedGif.url) &&
+        !attachment.animatedGif.mediaUrlHttps
+            .isNullOrEmpty()
     ) {
         return UiDMItem.Message.Media(
             UiMedia.Gif(
-                url = data.attachment.animatedGif.mediaUrlHttps,
-                previewUrl = data.attachment.animatedGif.mediaUrlHttps,
+                url = attachment.animatedGif.mediaUrlHttps,
+                previewUrl = attachment.animatedGif.mediaUrlHttps,
                 height =
-                    data.attachment.animatedGif.originalInfo
+                    attachment.animatedGif.originalInfo
                         ?.height
                         ?.toFloat() ?: 0f,
                 width =
-                    data.attachment.animatedGif.originalInfo
+                    attachment.animatedGif.originalInfo
                         ?.width
                         ?.toFloat() ?: 0f,
-                description = data.attachment.animatedGif.extAltText,
-                customHeaders =
-                    persistentMapOf(
-                        "Cookie" to credential.chocolate,
-                        "Referer" to "https://${accountKey.host}/",
-                    ),
+                description = attachment.animatedGif.extAltText,
             ),
         )
-    } else if (!data.attachment
+    } else if (!attachment
             ?.video
             ?.url
             .isNullOrEmpty() &&
-        data.text
+        text
             .orEmpty()
-            .endsWith(data.attachment.video.url) &&
-        !data.attachment.video.mediaUrlHttps
-            .isNullOrEmpty() &&
-        credential is UiAccount.XQT.Credential
+            .endsWith(attachment.video.url) &&
+        !attachment.video.mediaUrlHttps
+            .isNullOrEmpty()
     ) {
         val url =
-            data.attachment.video.videoInfo
+            attachment.video.videoInfo
                 ?.variants
                 ?.firstOrNull()
                 ?.url
         if (url != null) {
-            if (data.attachment.video.audioOnly == true) {
+            if (attachment.video.audioOnly == true) {
                 return UiDMItem.Message.Media(
                     UiMedia.Audio(
                         url = url,
-                        previewUrl = data.attachment.video.url,
-                        description = data.attachment.video.extAltText,
-                        customHeaders =
-                            persistentMapOf(
-                                "Cookie" to credential.chocolate,
-                                "Referer" to "https://${accountKey.host}/",
-                            ),
+                        previewUrl = attachment.video.url,
+                        description = attachment.video.extAltText,
                     ),
                 )
             } else {
                 return UiDMItem.Message.Media(
                     UiMedia.Video(
                         url = url,
-                        thumbnailUrl = data.attachment.video.mediaUrlHttps,
+                        thumbnailUrl = attachment.video.mediaUrlHttps,
                         height =
-                            data.attachment.video.originalInfo
+                            attachment.video.originalInfo
                                 ?.height
                                 ?.toFloat() ?: 0f,
                         width =
-                            data.attachment.video.originalInfo
+                            attachment.video.originalInfo
                                 ?.width
                                 ?.toFloat() ?: 0f,
-                        description = data.attachment.video.extAltText,
-                        customHeaders =
-                            persistentMapOf(
-                                "Cookie" to credential.chocolate,
-                                "Referer" to "https://${accountKey.host}/",
-                            ),
+                        description = attachment.video.extAltText,
                     ),
                 )
             }
         } else {
             return UiDMItem.Message.Text(
-                twitterParser.parse(this.data.text.orEmpty()).toUiRichText(accountKey),
+                twitterParser.parse(text.orEmpty()).toUiRichText(accountKey),
             )
         }
-    } else if (!data.attachment
+    } else if (!attachment
             ?.tweet
             ?.url
             .isNullOrEmpty() &&
-        data.text
+        text
             .orEmpty()
-            .endsWith(data.attachment.tweet.url) &&
-        data.attachment.tweet.status != null
+            .endsWith(attachment.tweet.url) &&
+        attachment.tweet.status != null
     ) {
-        val tweetLegacy = data.attachment.tweet.status
+        val tweetLegacy = attachment.tweet.status
         val status =
             Tweet(
                 restId = tweetLegacy.idStr,
@@ -1208,7 +1173,7 @@ private fun MessageContent.XQT.Message.render(
         )
     } else {
         return UiDMItem.Message.Text(
-            twitterParser.parse(this.data.text.orEmpty()).toUiRichText(accountKey),
+            twitterParser.parse(text.orEmpty()).toUiRichText(accountKey),
         )
     }
 }

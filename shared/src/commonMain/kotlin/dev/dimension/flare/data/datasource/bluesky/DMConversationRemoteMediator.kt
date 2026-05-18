@@ -10,7 +10,7 @@ import dev.dimension.flare.common.BaseRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.database.cache.mapper.Bluesky
-import dev.dimension.flare.data.database.cache.model.DbMessageItemWithUser
+import dev.dimension.flare.data.database.cache.model.DbMessageItem
 import dev.dimension.flare.data.network.bluesky.BlueskyService
 import dev.dimension.flare.model.MicroBlogKey
 
@@ -21,12 +21,12 @@ internal class DMConversationRemoteMediator(
     private val accountKey: MicroBlogKey,
     private val database: CacheDatabase,
     private val roomKey: MicroBlogKey,
-) : BaseRemoteMediator<Int, DbMessageItemWithUser>() {
+) : BaseRemoteMediator<Int, DbMessageItem>() {
     private var cursor: String? = null
 
     override suspend fun doLoad(
         loadType: LoadType,
-        state: PagingState<Int, DbMessageItemWithUser>,
+        state: PagingState<Int, DbMessageItem>,
     ): MediatorResult {
         val service = getService.invoke()
         val response =

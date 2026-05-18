@@ -7,7 +7,7 @@ import dev.dimension.flare.common.BaseRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.database.cache.mapper.XQT
-import dev.dimension.flare.data.database.cache.model.DbDirectMessageTimelineWithRoom
+import dev.dimension.flare.data.database.cache.model.DbDirectMessageTimeline
 import dev.dimension.flare.data.network.xqt.XQTService
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -17,12 +17,12 @@ internal class DMListRemoteMediator(
     private val service: XQTService,
     private val accountKey: MicroBlogKey,
     private val database: CacheDatabase,
-) : BaseRemoteMediator<Int, DbDirectMessageTimelineWithRoom>() {
+) : BaseRemoteMediator<Int, DbDirectMessageTimeline>() {
     private var cursor: String? = null
 
     override suspend fun doLoad(
         loadType: LoadType,
-        state: PagingState<Int, DbDirectMessageTimelineWithRoom>,
+        state: PagingState<Int, DbDirectMessageTimeline>,
     ): MediatorResult {
         if (loadType == LoadType.REFRESH) {
             cursor = null

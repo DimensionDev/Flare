@@ -1,17 +1,8 @@
 package dev.dimension.flare.ui.model.mapper
 
-import com.fleeksoft.ksoup.nodes.Element
 import dev.dimension.flare.data.database.app.model.DbRssSources
-import dev.dimension.flare.data.database.cache.model.DbDirectMessageTimelineWithRoom
-import dev.dimension.flare.data.database.cache.model.DbMessageItemWithUser
-import dev.dimension.flare.data.database.cache.model.MessageContent
-import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.model.UiAccount
-import dev.dimension.flare.ui.model.UiDMItem
-import dev.dimension.flare.ui.model.UiDMRoom
 import dev.dimension.flare.ui.model.UiRssSource
 import dev.dimension.flare.ui.render.toUi
-import kotlinx.collections.immutable.toImmutableList
 import kotlin.time.Instant
 
 // internal fun DbPagingTimelineWithStatus.render(
@@ -140,66 +131,6 @@ import kotlin.time.Instant
 //        is UserContent.XQT -> content.data.render(accountKey = accountKey)
 //        is UserContent.Test -> error("Test content cannot be rendered")
 //    }
-
-internal fun DbDirectMessageTimelineWithRoom.render(
-    accountKey: MicroBlogKey,
-    credential: UiAccount.Credential,
-) = UiDMRoom(
-    key = room.room.roomKey,
-    lastMessage = room.lastMessage?.render(accountKey, credential),
-    users =
-        room.users
-            .filter { it.reference.userKey != accountKey }
-            .map { it.user.content }
-            .toImmutableList(),
-    unreadCount = timeline.unreadCount,
-)
-
-internal fun DbMessageItemWithUser.render(
-    accountKey: MicroBlogKey,
-    credential: UiAccount.Credential,
-) = UiDMItem(
-    key = message.messageKey,
-    user = user.content,
-    timestamp = Instant.fromEpochMilliseconds(message.timestamp).toUi(),
-    content =
-        when (val content = message.content) {
-            is MessageContent.Bluesky -> {
-                content.render(accountKey = accountKey)
-            }
-
-            is MessageContent.XQT -> {
-                content.render(
-                    accountKey = accountKey,
-                    credential = credential,
-                )
-            }
-
-            is MessageContent.Local -> {
-                UiDMItem.Message.Text(
-                    Element("span")
-                        .apply {
-                            appendText(content.text)
-                        }.toUi(),
-                )
-            }
-        },
-    isFromMe = accountKey == message.userKey,
-    sendState =
-        when (val content = message.content) {
-            is MessageContent.Local -> {
-                when (content.state) {
-                    MessageContent.Local.State.SENDING -> UiDMItem.SendState.Sending
-                    MessageContent.Local.State.FAILED -> UiDMItem.SendState.Failed
-                }
-            }
-
-            else -> {
-                null
-            }
-        },
-    showSender = message.showSender && message.userKey != accountKey,
-)
 
 internal fun DbRssSources.render() =
     UiRssSource(

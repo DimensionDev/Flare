@@ -6,7 +6,6 @@ import dev.dimension.flare.data.database.cache.model.DbMessageItem
 import dev.dimension.flare.data.database.cache.model.DbMessageRoom
 import dev.dimension.flare.data.database.cache.model.DbMessageRoomReference
 import dev.dimension.flare.data.database.cache.model.DbUser
-import dev.dimension.flare.data.database.cache.model.MessageContent
 import dev.dimension.flare.data.network.xqt.model.CursorType
 import dev.dimension.flare.data.network.xqt.model.InboxConversation
 import dev.dimension.flare.data.network.xqt.model.InboxTimelineEntry
@@ -35,7 +34,18 @@ import dev.dimension.flare.data.network.xqt.model.legacy.TopLevel
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.ui.model.ClickEvent
+import dev.dimension.flare.ui.model.UiDMItem
+import dev.dimension.flare.ui.model.UiDMRoom
+import dev.dimension.flare.ui.model.UiHandle
+import dev.dimension.flare.ui.model.UiProfile
+import dev.dimension.flare.ui.model.mapper.renderDirectMessage
 import dev.dimension.flare.ui.model.mapper.render
+import dev.dimension.flare.ui.render.toUi
+import dev.dimension.flare.ui.render.toUiPlainText
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
+import kotlin.time.Instant
 
 internal object XQT {
     suspend fun saveDM(
@@ -48,6 +58,12 @@ internal object XQT {
     ) {
         val trustedConversations =
             conversations?.values.orEmpty().filter { it.trusted == true }
+        val userProfiles =
+            users
+                ?.values
+                .orEmpty()
+                .mapNotNull { it.toUiProfile(accountKey) }
+        val userProfilesById = userProfiles.associateBy { it.key.id }
         val references =
             trustedConversations.flatMap { conversation ->
                 conversation.participants.orEmpty().map {
@@ -71,6 +87,7 @@ internal object XQT {
                         .map {
                             it.toDbMessageItem(
                                 accountKey,
+                                users = userProfilesById,
                                 showSender = conversation.participants.orEmpty().size > 2,
                             )
                         }
@@ -79,23 +96,37 @@ internal object XQT {
                 }
         val timeline =
             trustedConversations.map { conversation ->
+                val roomKey = MicroBlogKey(conversation.conversationId.orEmpty(), accountKey.host)
+                val roomMessages = messages.filter { it.roomKey == roomKey }
+                val unreadCount =
+                    roomMessages
+                        .count { message ->
+                            message.messageKey.id
+                                .toLongOrNull()
+                                ?.let { id ->
+                                    conversation.lastReadEventId
+                                        ?.toLongOrNull()
+                                        ?.let { lastRead -> id > lastRead }
+                                } == true
+                        }.toLong()
+                val lastMessage = roomMessages.maxByOrNull { it.timestamp }
                 DbDirectMessageTimeline(
                     accountType = AccountType.Specific(accountKey),
-                    roomKey = MicroBlogKey(conversation.conversationId.orEmpty(), accountKey.host),
+                    roomKey = roomKey,
                     sortId = conversation.sortTimestamp?.toLongOrNull() ?: 0L,
-                    unreadCount =
-                        messages
-                            .filter {
-                                it.roomKey.id == conversation.conversationId
-                            }.count { message ->
-                                message.messageKey.id
-                                    .toLongOrNull()
-                                    ?.let { id ->
-                                        conversation.lastReadEventId
-                                            ?.toLongOrNull()
-                                            ?.let { lastRead -> id > lastRead }
-                                    } == true
-                            }.toLong(),
+                    unreadCount = unreadCount,
+                    content =
+                        UiDMRoom(
+                            key = roomKey,
+                            users =
+                                conversation.participants
+                                    .orEmpty()
+                                    .mapNotNull { userProfilesById[it.userId] }
+                                    .filter { it.key != accountKey }
+                                    .toImmutableList(),
+                            lastMessage = lastMessage?.content,
+                            unreadCount = unreadCount,
+                        ),
                 )
             }
         if (updateRoom) {
@@ -104,22 +135,15 @@ internal object XQT {
                     DbMessageRoom(
                         roomKey = MicroBlogKey(it.conversationId.orEmpty(), accountKey.host),
                         platformType = PlatformType.xQt,
-                        messageKey =
-                            propertyEntries
-                                ?.firstOrNull { entries -> entries.message?.id == it.lastReadEventId }
-                                ?.let {
-                                    MicroBlogKey(it.message?.id.orEmpty(), accountKey.host)
-                                },
+                        messageKey = messages.filter { message -> message.roomKey.id == it.conversationId }
+                            .maxByOrNull { message -> message.timestamp }
+                            ?.messageKey,
                     )
                 }
             database.messageDao().insert(rooms)
         }
         database.upsertUsers(
-            users
-                ?.values
-                .orEmpty()
-                .toList()
-                .toDbUser(accountKey),
+            userProfiles.map { it.toDbUser(host = accountKey.host) },
         )
         database.messageDao().insertMessages(messages)
         database.messageDao().insertReferences(references)
@@ -127,57 +151,90 @@ internal object XQT {
     }
 }
 
-private fun List<InboxUser>.toDbUser(accountKey: MicroBlogKey): List<DbUser> {
-    return mapNotNull {
-        if (it.name == null || it.screenName == null || it.idStr == null) {
-            return@mapNotNull null
-        }
-        User(
-            legacy =
-                with(it) {
-                    UserLegacy(
-                        name = name.orEmpty(),
-                        screenName = screenName.orEmpty(),
-                        location = location,
-                        description = description,
-                        url = url,
-                        entities = entities,
-                        `protected` = `protected`,
-                        followersCount = followersCount ?: 0,
-                        friendsCount = friendsCount ?: 0,
-                        listedCount = listedCount ?: 0,
-                        createdAt = createdAt.orEmpty(),
-                        favouritesCount = favouritesCount ?: 0,
-                        verified = verified == true,
-                        statusesCount = statusesCount ?: 0,
-                        isTranslator = isTranslator == true,
-                        profileImageUrlHttps = profileImageUrlHttps.orEmpty(),
-                        profileBannerUrl = profileBannerUrl,
-                        translatorType = translatorType.orEmpty(),
-                    )
-                },
-            isBlueVerified = it.isBlueVerified == true,
-            restId = it.idStr,
-        ).render(accountKey).toDbUser(host = accountKey.host)
+private fun InboxUser.toUiProfile(accountKey: MicroBlogKey): UiProfile? {
+    if (name == null || screenName == null || idStr == null) {
+        return null
     }
+    return User(
+        legacy =
+            with(this) {
+                UserLegacy(
+                    name = name.orEmpty(),
+                    screenName = screenName.orEmpty(),
+                    location = location,
+                    description = description,
+                    url = url,
+                    entities = entities,
+                    `protected` = `protected`,
+                    followersCount = followersCount ?: 0,
+                    friendsCount = friendsCount ?: 0,
+                    listedCount = listedCount ?: 0,
+                    createdAt = createdAt.orEmpty(),
+                    favouritesCount = favouritesCount ?: 0,
+                    verified = verified == true,
+                    statusesCount = statusesCount ?: 0,
+                    isTranslator = isTranslator == true,
+                    profileImageUrlHttps = profileImageUrlHttps.orEmpty(),
+                    profileBannerUrl = profileBannerUrl,
+                    translatorType = translatorType.orEmpty(),
+                )
+            },
+        isBlueVerified = isBlueVerified == true,
+        restId = idStr,
+    ).render(accountKey)
 }
 
 private fun InboxTimelineEntry.toDbMessageItem(
     accountKey: MicroBlogKey,
+    users: Map<String, UiProfile>,
     showSender: Boolean,
 ): DbMessageItem? {
     if (message == null) {
         return null
     }
+    val messageData = message.messageData ?: return null
+    val messageKey = MicroBlogKey(message.id ?: return null, accountKey.host)
+    val userKey = MicroBlogKey(messageData.senderId ?: return null, accountKey.host)
+    val timestamp = message.time?.toLongOrNull() ?: 0L
     return DbMessageItem(
-        messageKey = MicroBlogKey(message.id ?: return null, accountKey.host),
+        messageKey = messageKey,
         roomKey = MicroBlogKey(message.conversationId ?: return null, accountKey.host),
-        content = MessageContent.XQT.Message(message.messageData ?: return null),
-        timestamp = message.time?.toLongOrNull() ?: 0L,
-        userKey = MicroBlogKey(message.messageData.senderId ?: return null, accountKey.host),
+        content =
+            UiDMItem(
+                key = messageKey,
+                user = users[userKey.id] ?: fallbackDirectMessageUser(userKey),
+                content = messageData.renderDirectMessage(accountKey),
+                timestamp = Instant.fromEpochMilliseconds(timestamp).toUi(),
+                isFromMe = userKey == accountKey,
+                sendState = null,
+                showSender = showSender && userKey != accountKey,
+            ),
+        timestamp = timestamp,
+        userKey = userKey,
         showSender = showSender,
     )
 }
+
+private fun fallbackDirectMessageUser(userKey: MicroBlogKey): UiProfile =
+    UiProfile(
+        key = userKey,
+        handle = UiHandle(raw = userKey.id, host = userKey.host),
+        avatar = "",
+        nameInternal = userKey.id.toUiPlainText(),
+        platformType = PlatformType.xQt,
+        clickEvent = ClickEvent.Noop,
+        banner = null,
+        description = null,
+        matrices =
+            UiProfile.Matrices(
+                fansCount = 0,
+                followsCount = 0,
+                statusesCount = 0,
+                platformFansCount = null,
+            ),
+        mark = persistentListOf(),
+        bottomContent = null,
+    )
 
 internal data class XQTTimeline(
     val parents: List<XQTTimeline>,

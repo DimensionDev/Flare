@@ -1,6 +1,7 @@
 package dev.dimension.flare.data.database.cache.mapper
 
 import chat.bsky.convo.ConvoView
+import chat.bsky.convo.DeletedMessageView
 import chat.bsky.convo.ConvoViewLastMessageUnion
 import chat.bsky.convo.MessageView
 import dev.dimension.flare.data.database.cache.CacheDatabase
@@ -8,11 +9,20 @@ import dev.dimension.flare.data.database.cache.model.DbDirectMessageTimeline
 import dev.dimension.flare.data.database.cache.model.DbMessageItem
 import dev.dimension.flare.data.database.cache.model.DbMessageRoom
 import dev.dimension.flare.data.database.cache.model.DbMessageRoomReference
-import dev.dimension.flare.data.database.cache.model.MessageContent
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.ui.model.ClickEvent
+import dev.dimension.flare.ui.model.UiDMItem
+import dev.dimension.flare.ui.model.UiDMRoom
+import dev.dimension.flare.ui.model.UiHandle
+import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.mapper.render
+import dev.dimension.flare.ui.render.toUi
+import dev.dimension.flare.ui.render.toUiPlainText
+import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.coroutines.flow.first
 
 internal object Bluesky {
     suspend fun saveDM(
@@ -24,7 +34,11 @@ internal object Bluesky {
         val references = data.flatMap { it.toDbMessageRoomReference(accountKey.host) }
         val messages =
             data.mapNotNull {
-                it.lastMessage?.toDbMessageItem(it.toDbMessageRoom(accountKey.host).roomKey)
+                it.lastMessage?.toDbMessageItem(
+                    roomKey = it.toDbMessageRoom(accountKey.host).roomKey,
+                    users = it.members.associate { member -> member.did.did to member.render(accountKey) },
+                    accountKey = accountKey,
+                )
             }
         val timeline = data.map { it.toDbDirectMessageTimeline(accountKey) }
         val users =
@@ -52,7 +66,12 @@ internal object Bluesky {
 //                platformType = PlatformType.Bluesky,
 //                messageKey = null,
 //            )
-        val messages = data.map { it.toDbMessageItem(roomKey) }
+        val users =
+            database.userDao()
+                .findByKeys(data.map { MicroBlogKey(id = it.sender.did.did, host = accountKey.host) })
+                .first()
+                .associate { it.userKey.id to it.content }
+        val messages = data.map { it.toDbMessageItem(roomKey, users, accountKey) }
         database.messageDao().insertMessages(messages)
 //        database.messageDao().insert(room)
     }
@@ -60,13 +79,31 @@ internal object Bluesky {
 
 private fun ConvoView.toDbDirectMessageTimeline(accountKey: MicroBlogKey): DbDirectMessageTimeline {
     val roomKey = toDbMessageRoom(accountKey.host).roomKey
+    val membersByDid = members.associate { it.did.did to it.render(accountKey) }
+    val lastMessageItem =
+        lastMessage?.toDbMessageItem(
+            roomKey = roomKey,
+            users = membersByDid,
+            accountKey = accountKey,
+        )
     return DbDirectMessageTimeline(
         accountType = AccountType.Specific(accountKey),
         roomKey = roomKey,
         sortId =
-            lastMessage?.toDbMessageItem(roomKey)?.timestamp
+            lastMessageItem?.timestamp
                 ?: 0L,
         unreadCount = unreadCount,
+        content =
+            UiDMRoom(
+                key = roomKey,
+                users =
+                    members
+                        .filter { it.did.did != accountKey.id }
+                        .map { it.render(accountKey) }
+                        .toImmutableList(),
+                lastMessage = lastMessageItem?.content,
+                unreadCount = unreadCount,
+            ),
     )
 }
 
@@ -110,33 +147,88 @@ private fun ConvoView.toDbMessageRoomReference(host: String): List<DbMessageRoom
     }
 }
 
-private fun ConvoViewLastMessageUnion.toDbMessageItem(roomKey: MicroBlogKey) =
+private fun ConvoViewLastMessageUnion.toDbMessageItem(
+    roomKey: MicroBlogKey,
+    users: Map<String, UiProfile>,
+    accountKey: MicroBlogKey,
+) =
     when (this) {
-        is ConvoViewLastMessageUnion.MessageView -> toDbMessageItem(roomKey)
-        is ConvoViewLastMessageUnion.DeletedMessageView -> toDbMessageItem(roomKey)
+        is ConvoViewLastMessageUnion.MessageView -> value.toDbMessageItem(roomKey, users, accountKey)
+        is ConvoViewLastMessageUnion.DeletedMessageView -> value.toDbMessageItem(roomKey, users, accountKey)
         is ConvoViewLastMessageUnion.Unknown -> null
     }
 
-private fun MessageView.toDbMessageItem(roomKey: MicroBlogKey) =
-    DbMessageItem(
-        messageKey = MicroBlogKey(id = id, host = roomKey.host),
+private fun MessageView.toDbMessageItem(
+    roomKey: MicroBlogKey,
+    users: Map<String, UiProfile>,
+    accountKey: MicroBlogKey,
+): DbMessageItem {
+    val messageKey = MicroBlogKey(id = id, host = roomKey.host)
+    val userKey = MicroBlogKey(id = sender.did.did, host = roomKey.host)
+    return DbMessageItem(
+        messageKey = messageKey,
         roomKey = roomKey,
-        userKey = MicroBlogKey(id = sender.did.did, host = roomKey.host),
+        userKey = userKey,
         timestamp = sentAt.toEpochMilliseconds(),
-        content = MessageContent.Bluesky.Message(this),
+        content =
+            UiDMItem(
+                key = messageKey,
+                user = users[sender.did.did] ?: fallbackDirectMessageUser(userKey),
+                timestamp = sentAt.toUi(),
+                content = render(accountKey),
+                isFromMe = userKey == accountKey,
+                sendState = null,
+                showSender = false,
+            ),
         showSender = false,
+        remoteCursor = rev,
     )
+}
 
-private fun ConvoViewLastMessageUnion.MessageView.toDbMessageItem(roomKey: MicroBlogKey) = value.toDbMessageItem(roomKey)
-
-private fun ConvoViewLastMessageUnion.DeletedMessageView.toDbMessageItem(roomKey: MicroBlogKey) =
-    with(value) {
+private fun DeletedMessageView.toDbMessageItem(
+    roomKey: MicroBlogKey,
+    users: Map<String, UiProfile>,
+    accountKey: MicroBlogKey,
+) =
+    run {
+        val messageKey = MicroBlogKey(id = id, host = roomKey.host)
+        val userKey = MicroBlogKey(id = sender.did.did, host = roomKey.host)
         DbMessageItem(
-            messageKey = MicroBlogKey(id = id, host = roomKey.host),
+            messageKey = messageKey,
             roomKey = roomKey,
-            userKey = MicroBlogKey(id = sender.did.did, host = roomKey.host),
+            userKey = userKey,
             timestamp = sentAt.toEpochMilliseconds(),
-            content = MessageContent.Bluesky.Deleted(this),
+            content =
+                UiDMItem(
+                    key = messageKey,
+                    user = users[sender.did.did] ?: fallbackDirectMessageUser(userKey),
+                    timestamp = sentAt.toUi(),
+                    content = render(),
+                    isFromMe = userKey == accountKey,
+                    sendState = null,
+                    showSender = false,
+                ),
             showSender = false,
         )
     }
+
+private fun fallbackDirectMessageUser(userKey: MicroBlogKey): UiProfile =
+    UiProfile(
+        key = userKey,
+        handle = UiHandle(raw = userKey.id, host = userKey.host),
+        avatar = "",
+        nameInternal = userKey.id.toUiPlainText(),
+        platformType = PlatformType.Bluesky,
+        clickEvent = ClickEvent.Noop,
+        banner = null,
+        description = null,
+        matrices =
+            UiProfile.Matrices(
+                fansCount = 0,
+                followsCount = 0,
+                statusesCount = 0,
+                platformFansCount = null,
+            ),
+        mark = persistentListOf(),
+        bottomContent = null,
+    )

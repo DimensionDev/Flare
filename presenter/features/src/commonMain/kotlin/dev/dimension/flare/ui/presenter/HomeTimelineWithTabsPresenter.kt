@@ -5,6 +5,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.tab.SourceTimelineTabItemV2
+import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.SettingsRepository
@@ -31,6 +32,7 @@ public class HomeTimelineWithTabsPresenter :
     KoinComponent {
     private val settingsRepository by inject<SettingsRepository>()
     private val accountRepository by inject<AccountRepository>()
+    private val timelineResolver by inject<TimelineResolver>()
 
     public interface State : UserState {
         public val tabState: UiState<ImmutableList<TimelineTabItemV2>>
@@ -43,7 +45,7 @@ public class HomeTimelineWithTabsPresenter :
     }
 
     private val tabsState by lazy {
-        settingsRepository.homeTimelineTabs.combine(isLoggedInFlow) { tabs, isLoggedIn ->
+        settingsRepository.homeTimelineTabs(timelineResolver).combine(isLoggedInFlow) { tabs, isLoggedIn ->
             tabs
                 .withGuestMastodonHomeFallback(isLoggedIn = isLoggedIn)
                 .toImmutableList()

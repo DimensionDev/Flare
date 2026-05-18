@@ -8,11 +8,13 @@ import dev.dimension.flare.data.model.tab.TabSettingsV2
 import dev.dimension.flare.data.model.tab.TimelineFilterConfig
 import dev.dimension.flare.data.model.tab.TimelinePostKind
 import dev.dimension.flare.data.model.tab.TimelinePresentation
+import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.model.tab.toTimelineSlotOrNull
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.deleteTestRootPath
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.defaultSocialPlatformRegistry
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
@@ -28,6 +30,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class TimelinePresenterBindingTest {
+    private val timelineResolver = TimelineResolver(defaultSocialPlatformRegistry)
     private lateinit var root: Path
     private lateinit var settingsRepository: SettingsRepository
 
@@ -77,6 +80,7 @@ class TimelinePresenterBindingTest {
                 backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
                     observeTimelineFilterConfig(
                         settingsRepository = settingsRepository,
+                        timelineResolver = timelineResolver,
                         timelineTabItemIdFlow = timelineTabItemIdFlow,
                     ).map { it.excludedKinds }
                         .take(2)

@@ -32,6 +32,7 @@ import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.model.tab.TimelineFilterConfig
 import dev.dimension.flare.data.model.tab.TimelinePostContent
 import dev.dimension.flare.data.model.tab.TimelinePostKind
+import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.repository.KeywordFilterPattern
 import dev.dimension.flare.data.repository.LocalFilterRepository
 import dev.dimension.flare.data.repository.LoginExpiredException
@@ -67,6 +68,7 @@ public abstract class TimelinePresenter :
     private val appDataStore: AppDataStore by inject()
     private val preTranslationService: PreTranslationService by inject()
     private val settingsRepository: SettingsRepository by inject()
+    private val timelineResolver: TimelineResolver by inject()
 
     private val localFilterRepository: LocalFilterRepository by inject()
     private val inAppNotification: InAppNotification by inject()
@@ -80,6 +82,7 @@ public abstract class TimelinePresenter :
     private val timelineFilterConfigFlow: Flow<TimelineFilterConfig> by lazy {
         observeTimelineFilterConfig(
             settingsRepository = settingsRepository,
+            timelineResolver = timelineResolver,
             timelineTabItemIdFlow = timelineTabItemIdFlow,
         )
     }
@@ -281,6 +284,7 @@ internal fun UiTimelineV2.Post.traits(): TimelinePostTraits {
 @OptIn(ExperimentalCoroutinesApi::class)
 internal fun observeTimelineFilterConfig(
     settingsRepository: SettingsRepository,
+    timelineResolver: TimelineResolver,
     timelineTabItemIdFlow: Flow<String?>,
 ): Flow<TimelineFilterConfig> =
     timelineTabItemIdFlow
@@ -290,7 +294,7 @@ internal fun observeTimelineFilterConfig(
                 flowOf(TimelineFilterConfig())
             } else {
                 settingsRepository
-                    .homeTimelineTab(id)
+                    .homeTimelineTab(id, timelineResolver)
                     .map { it?.filterConfig ?: TimelineFilterConfig() }
                     .distinctUntilChanged()
             }

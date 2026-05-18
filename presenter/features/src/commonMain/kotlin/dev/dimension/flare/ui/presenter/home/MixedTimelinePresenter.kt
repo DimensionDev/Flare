@@ -7,6 +7,7 @@ import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.notSupported
 import dev.dimension.flare.data.model.tab.GroupTimelineTabItemV2
 import dev.dimension.flare.data.model.tab.TimelineMergePolicy
+import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.data.model.tab.isSystemHomeMixedTimeline
 import dev.dimension.flare.data.repository.SettingsRepository
@@ -42,6 +43,7 @@ public class MixedTimelinePresenter(
 
     private val database: CacheDatabase by inject()
     private val settingsRepository: SettingsRepository by inject()
+    private val timelineResolver: TimelineResolver by inject()
 
     init {
         bindTimelineTabItemId(id)
@@ -49,7 +51,7 @@ public class MixedTimelinePresenter(
 
     private val groupTabFlow: Flow<GroupTimelineTabItemV2?> by lazy {
         settingsRepository
-            .homeTimelineTab(groupId)
+            .homeTimelineTab(groupId, timelineResolver)
             .map { it as? GroupTimelineTabItemV2 }
     }
 
@@ -101,6 +103,7 @@ public class SystemHomeMixedTimelinePresenter(
 
     private val database: CacheDatabase by inject()
     private val settingsRepository: SettingsRepository by inject()
+    private val timelineResolver: TimelineResolver by inject()
 
     init {
         bindTimelineTabItemId(id)
@@ -108,7 +111,7 @@ public class SystemHomeMixedTimelinePresenter(
 
     private val groupTabFlow: Flow<GroupTimelineTabItemV2?> by lazy {
         settingsRepository
-            .homeTimelineTab(groupId)
+            .homeTimelineTab(groupId, timelineResolver)
             .map { it as? GroupTimelineTabItemV2 }
     }
 
@@ -120,7 +123,7 @@ public class SystemHomeMixedTimelinePresenter(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private val subTimelineLoadersFlow: Flow<List<RemoteLoader<UiTimelineV2>>> by lazy {
-        settingsRepository.homeTimelineTabs
+        settingsRepository.homeTimelineTabs(timelineResolver)
             .map { tabs ->
                 tabs
                     .filterNot { it.isSystemHomeMixedTimeline }

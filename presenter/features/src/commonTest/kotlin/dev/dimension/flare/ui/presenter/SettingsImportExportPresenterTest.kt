@@ -25,14 +25,16 @@ import dev.dimension.flare.data.model.tab.TimelineFilterConfig
 import dev.dimension.flare.data.model.tab.TimelineMergePolicy
 import dev.dimension.flare.data.model.tab.TimelinePostKind
 import dev.dimension.flare.data.model.tab.TimelinePresentation
+import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.model.tab.TimelineSlot
 import dev.dimension.flare.data.model.tab.TimelineSlotContent
 import dev.dimension.flare.data.model.tab.toTimelineSlotOrNull
-import dev.dimension.flare.data.repository.homeTimelineTab
 import dev.dimension.flare.data.repository.SettingsRepository
+import dev.dimension.flare.data.repository.homeTimelineTab
 import dev.dimension.flare.deleteTestRootPath
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.defaultSocialPlatformRegistry
 import dev.dimension.flare.ui.model.UiIcon
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.drop
@@ -54,6 +56,7 @@ import kotlin.test.assertTrue
 
 class SettingsImportExportPresenterTest {
     private val json = Json { ignoreUnknownKeys = true }
+    private val timelineResolver = TimelineResolver(defaultSocialPlatformRegistry)
     private lateinit var root: Path
     private lateinit var settingsRepository: SettingsRepository
 
@@ -274,8 +277,8 @@ class SettingsImportExportPresenterTest {
                 TabSettingsV2(homeSlots = listOf(initialGroup))
             }
 
-            val groupItem = settingsRepository.homeTimelineTab(initialGroup.id).first() as? GroupTimelineTabItemV2
-            val childItem = settingsRepository.homeTimelineTab(initialChild.id).first()
+            val groupItem = settingsRepository.homeTimelineTab(initialGroup.id, timelineResolver).first() as? GroupTimelineTabItemV2
+            val childItem = settingsRepository.homeTimelineTab(initialChild.id, timelineResolver).first()
             assertEquals(TimelineMergePolicy.Staggered, groupItem?.mergePolicy)
             assertEquals(listOf(TimelinePostKind.Quote), groupItem?.filterConfig?.excludedKinds)
             assertEquals(listOf(TimelinePostKind.Reply), childItem?.filterConfig?.excludedKinds)
@@ -307,8 +310,11 @@ class SettingsImportExportPresenterTest {
                                 ),
                         ),
                 )
-            val nextGroup = async { settingsRepository.homeTimelineTab(initialGroup.id).drop(1).first() as? GroupTimelineTabItemV2 }
-            val nextChild = async { settingsRepository.homeTimelineTab(initialChild.id).drop(1).first() }
+            val nextGroup =
+                async {
+                    settingsRepository.homeTimelineTab(initialGroup.id, timelineResolver).drop(1).first() as? GroupTimelineTabItemV2
+                }
+            val nextChild = async { settingsRepository.homeTimelineTab(initialChild.id, timelineResolver).drop(1).first() }
 
             settingsRepository.updateTabSettingsV2 {
                 TabSettingsV2(homeSlots = listOf(updatedGroup))

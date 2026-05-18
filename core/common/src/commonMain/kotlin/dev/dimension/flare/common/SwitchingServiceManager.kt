@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
-internal class SwitchingServiceManager<C, S : AutoCloseable>(
+public class SwitchingServiceManager<C, S : AutoCloseable>(
     credentialFlow: Flow<C?>,
     parentScope: CoroutineScope,
     private val createService: suspend (C) -> S,
@@ -67,7 +67,7 @@ internal class SwitchingServiceManager<C, S : AutoCloseable>(
             }
     }
 
-    suspend fun <T> withService(block: suspend (S) -> T): T {
+    public suspend fun <T> withService(block: suspend (S) -> T): T {
         while (true) {
             val snapshot = current.value ?: current.filterNotNull().first()
 

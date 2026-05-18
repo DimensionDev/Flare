@@ -5,12 +5,9 @@ import androidx.room3.Dao
 import androidx.room3.DaoReturnTypeConverters
 import androidx.room3.Insert
 import androidx.room3.Query
-import androidx.room3.Transaction
 import androidx.room3.paging.PagingSourceDaoReturnTypeConverter
 import dev.dimension.flare.data.database.cache.model.DbDirectMessageTimeline
-import dev.dimension.flare.data.database.cache.model.DbDirectMessageTimelineWithRoom
 import dev.dimension.flare.data.database.cache.model.DbMessageItem
-import dev.dimension.flare.data.database.cache.model.DbMessageItemWithUser
 import dev.dimension.flare.data.database.cache.model.DbMessageRoom
 import dev.dimension.flare.data.database.cache.model.DbMessageRoomReference
 import dev.dimension.flare.model.DbAccountType
@@ -20,24 +17,20 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 @DaoReturnTypeConverters(PagingSourceDaoReturnTypeConverter::class)
 internal interface MessageDao {
-    @Transaction
     @Query("SELECT * FROM DbDirectMessageTimeline WHERE accountType = :accountType ORDER BY sortId DESC")
-    fun getRoomPagingSource(accountType: DbAccountType): PagingSource<Int, DbDirectMessageTimelineWithRoom>
+    fun getRoomPagingSource(accountType: DbAccountType): PagingSource<Int, DbDirectMessageTimeline>
 
-    @Transaction
     @Query("SELECT * FROM DbDirectMessageTimeline WHERE accountType = :accountType ORDER BY sortId DESC")
-    fun getRoomTimeline(accountType: DbAccountType): Flow<List<DbDirectMessageTimelineWithRoom>>
+    fun getRoomTimeline(accountType: DbAccountType): Flow<List<DbDirectMessageTimeline>>
 
-    @Transaction
     @Query("SELECT * FROM DbMessageItem WHERE roomKey = :roomKey ORDER BY timestamp DESC")
-    fun getRoomMessagesPagingSource(roomKey: MicroBlogKey): PagingSource<Int, DbMessageItemWithUser>
+    fun getRoomMessagesPagingSource(roomKey: MicroBlogKey): PagingSource<Int, DbMessageItem>
 
-    @Transaction
     @Query("SELECT * FROM DbDirectMessageTimeline WHERE roomKey = :roomKey AND accountType = :accountType")
     fun getRoomInfo(
         roomKey: MicroBlogKey,
         accountType: DbAccountType,
-    ): Flow<DbDirectMessageTimelineWithRoom?>
+    ): Flow<DbDirectMessageTimeline?>
 
     @Insert(onConflict = androidx.room3.OnConflictStrategy.REPLACE)
     suspend fun insert(items: List<DbMessageRoom>)

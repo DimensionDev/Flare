@@ -5,7 +5,9 @@ import dev.dimension.flare.common.SerializableImmutableList
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.render.UiDateTime
 import dev.dimension.flare.ui.render.UiRichText
+import kotlinx.serialization.Serializable
 
+@Serializable
 @Immutable
 public data class UiDMRoom internal constructor(
     val key: MicroBlogKey,
@@ -30,6 +32,7 @@ public data class UiDMRoom internal constructor(
     }
 }
 
+@Serializable
 @Immutable
 public data class UiDMItem internal constructor(
     val key: MicroBlogKey,
@@ -39,23 +42,30 @@ public data class UiDMItem internal constructor(
     val isFromMe: Boolean,
     val sendState: SendState?,
     val showSender: Boolean,
+    val remoteCursor: String? = null,
 ) {
+    @Serializable
     public sealed interface Message {
+        @Serializable
         public data class Text(
             val text: UiRichText,
         ) : Message
 
+        @Serializable
         public data class Media(
             val media: UiMedia,
         ) : Message
 
+        @Serializable
         public data class Status(
             val status: UiTimelineV2.Post,
         ) : Message
 
+        @Serializable
         public data object Deleted : Message
     }
 
+    @Serializable
     public enum class SendState {
         Sending,
         Failed,

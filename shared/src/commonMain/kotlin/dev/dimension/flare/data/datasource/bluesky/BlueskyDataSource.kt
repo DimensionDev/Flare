@@ -17,20 +17,6 @@ import app.bsky.feed.Post
 import app.bsky.feed.PostEmbedUnion
 import app.bsky.feed.PostReplyRef
 import app.bsky.unspecced.GetPopularFeedGeneratorsQueryParams
-import chat.bsky.convo.DeleteMessageForSelfRequest
-import chat.bsky.convo.DeletedMessageView
-import chat.bsky.convo.GetConvoForMembersQueryParams
-import chat.bsky.convo.GetConvoQueryParams
-import chat.bsky.convo.GetLogQueryParams
-import chat.bsky.convo.GetLogResponseLogUnion
-import chat.bsky.convo.LeaveConvoRequest
-import chat.bsky.convo.ListConvosQueryParams
-import chat.bsky.convo.LogCreateMessageMessageUnion
-import chat.bsky.convo.LogDeleteMessageMessageUnion
-import chat.bsky.convo.MessageInput
-import chat.bsky.convo.MessageView
-import chat.bsky.convo.SendMessageRequest
-import chat.bsky.convo.UpdateReadRequest
 import com.atproto.moderation.CreateReportRequest
 import com.atproto.moderation.CreateReportRequestSubjectUnion
 import com.atproto.moderation.Token
@@ -39,14 +25,10 @@ import com.atproto.repo.CreateRecordResponse
 import com.atproto.repo.DeleteRecordRequest
 import com.atproto.repo.StrongRef
 import dev.dimension.flare.common.BasePagingSource
-import dev.dimension.flare.common.CacheData
-import dev.dimension.flare.common.Cacheable
 import dev.dimension.flare.common.FileType
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.cache.CacheDatabase
-import dev.dimension.flare.data.database.cache.mapper.Bluesky
-import dev.dimension.flare.data.database.cache.model.MessageContent
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
@@ -57,7 +39,6 @@ import dev.dimension.flare.data.datasource.microblog.DirectMessageDataSource
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
-import dev.dimension.flare.data.datasource.microblog.createSendingDirectMessage
 import dev.dimension.flare.data.datasource.microblog.datasource.ListDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.NotificationDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.PinnableTimelineTabDataSource
@@ -66,6 +47,7 @@ import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.RelationDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.TimelineTabConfigurationDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
+import dev.dimension.flare.data.datasource.microblog.handler.DirectMessageHandler
 import dev.dimension.flare.data.datasource.microblog.handler.ListHandler
 import dev.dimension.flare.data.datasource.microblog.handler.ListMemberHandler
 import dev.dimension.flare.data.datasource.microblog.handler.NotificationHandler
@@ -93,8 +75,6 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.shared.image.ImageCompressor
 import dev.dimension.flare.ui.model.UiAccount
-import dev.dimension.flare.ui.model.UiDMItem
-import dev.dimension.flare.ui.model.UiDMRoom
 import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiList
@@ -871,371 +851,20 @@ internal class BlueskyDataSource(
         )
     }
 
-    override fun directMessageList(scope: CoroutineScope): Flow<PagingData<UiDMRoom>> =
-        Pager(
-            config = pagingConfig,
-            remoteMediator =
-                DMListRemoteMediator(
-                    getService = this::pdsService,
-                    accountKey = accountKey,
-                    database = database,
-                ),
-            pagingSourceFactory = {
-                database.messageDao().getRoomPagingSource(
-                    accountType = AccountType.Specific(accountKey),
-                )
-            },
-        ).flow
-            .cachedIn(scope)
-            .combine(credentialFlow) { paging, credential ->
-                paging.map {
-                    it.render(accountKey = accountKey, credential = credential)
-                }
-            }.cachedIn(scope)
-
-    override fun directMessageConversation(
-        roomKey: MicroBlogKey,
-        scope: CoroutineScope,
-    ): Flow<PagingData<UiDMItem>> =
-        Pager(
-            config = pagingConfig,
-            remoteMediator =
-                DMConversationRemoteMediator(
-                    getService = this::pdsService,
-                    accountKey = accountKey,
-                    database = database,
-                    roomKey = roomKey,
-                    clearBadge = this::clearDirectMessageBadgeCount,
-                ),
-            pagingSourceFactory = {
-                database.messageDao().getRoomMessagesPagingSource(
-                    roomKey = roomKey,
-                )
-            },
-        ).flow
-            .cachedIn(scope)
-            .combine(credentialFlow) { paging, credential ->
-                paging.map {
-                    it.render(
-                        accountKey = accountKey,
-                        credential = credential,
-                    )
-                }
-            }.cachedIn(scope)
-
-    override fun getDirectMessageConversationInfo(roomKey: MicroBlogKey): CacheData<UiDMRoom> =
-        Cacheable(
-            fetchSource = {
-                val response =
-                    pdsService()
-                        .getConvo(params = GetConvoQueryParams(convoId = roomKey.id))
-                        .requireResponse()
-                Bluesky.saveDM(
-                    accountKey = accountKey,
-                    database = database,
-                    data = listOf(response.convo),
-                )
-            },
-            cacheSource = {
-                database
-                    .messageDao()
-                    .getRoomInfo(
-                        roomKey = roomKey,
-                        accountType = AccountType.Specific(accountKey),
-                    ).distinctUntilChanged()
-                    .combine(
-                        credentialFlow,
-                    ) { room, credential ->
-                        room?.render(
-                            accountKey = accountKey,
-                            credential = credential,
-                        )
-                    }.mapNotNull { it }
-            },
-        )
-
-    override fun sendDirectMessage(
-        roomKey: MicroBlogKey,
-        message: String,
-    ) {
-        coroutineScope.launch {
-            val tempMessage = createSendingDirectMessage(roomKey, message)
-            database.messageDao().insertMessages(listOf(tempMessage))
-            tryRun {
-                pdsService().sendMessage(
-                    request =
-                        SendMessageRequest(
-                            convoId = roomKey.id,
-                            message = MessageInput(message),
-                        ),
-                )
-            }.onSuccess {
-                database.messageDao().deleteMessage(tempMessage.messageKey)
-                Bluesky.saveMessage(
-                    accountKey = accountKey,
-                    database = database,
-                    roomKey = roomKey,
-                    data = listOf(it.requireResponse()),
-                )
-            }.onFailure {
-                database.messageDao().insertMessages(
-                    listOf(
-                        tempMessage.copy(
-                            content =
-                                (tempMessage.content as MessageContent.Local).copy(
-                                    state = MessageContent.Local.State.FAILED,
-                                ),
-                        ),
-                    ),
-                )
-            }
-        }
-    }
-
-    override fun deleteDirectMessage(
-        roomKey: MicroBlogKey,
-        messageKey: MicroBlogKey,
-    ) {
-        coroutineScope.launch {
-            val current = database.messageDao().getMessage(messageKey)
-            if (current != null && current.content is MessageContent.Local) {
-                database.messageDao().deleteMessage(messageKey)
-            } else {
-                tryRun {
-                    pdsService().deleteMessageForSelf(
-                        request =
-                            DeleteMessageForSelfRequest(
-                                convoId = roomKey.id,
-                                messageId = messageKey.id,
-                            ),
-                    )
-                }.onSuccess {
-                    database.messageDao().deleteMessage(messageKey)
-                }
-            }
-        }
-    }
-
-    override fun retrySendDirectMessage(messageKey: MicroBlogKey) {
-        coroutineScope.launch {
-            val current = database.messageDao().getMessage(messageKey)
-            if (current != null && current.content is MessageContent.Local) {
-                database.messageDao().insertMessages(
-                    listOf(
-                        current.copy(
-                            content =
-                                current.content.copy(
-                                    state = MessageContent.Local.State.SENDING,
-                                ),
-                        ),
-                    ),
-                )
-
-                tryRun {
-                    pdsService().sendMessage(
-                        request =
-                            SendMessageRequest(
-                                convoId = current.roomKey.id,
-                                message = MessageInput(current.content.text),
-                            ),
-                    )
-                }.onSuccess {
-                    database.messageDao().deleteMessage(current.messageKey)
-                    Bluesky.saveMessage(
-                        accountKey = accountKey,
-                        database = database,
-                        roomKey = current.roomKey,
-                        data = listOf(it.requireResponse()),
-                    )
-                }.onFailure {
-                    database.messageDao().insertMessages(
-                        listOf(
-                            current.copy(
-                                content =
-                                    current.content.copy(
-                                        state = MessageContent.Local.State.FAILED,
-                                    ),
-                            ),
-                        ),
-                    )
-                }
-            }
-        }
-    }
-
-    override suspend fun fetchNewDirectMessageForConversation(roomKey: MicroBlogKey) {
-        val content = database.messageDao().getLatestMessage(roomKey)?.content
-        val cursor =
-            if (content is MessageContent.Bluesky.Message) {
-                content.data.rev
-            } else {
-                null
-            }
-        val response =
-            pdsService().getLog(
-                params =
-                    GetLogQueryParams(
-                        cursor = cursor,
-                    ),
-            )
-        pdsService().updateRead(
-            request =
-                UpdateReadRequest(
-                    convoId = roomKey.id,
-                ),
-        )
-        response.requireResponse().logs.forEach {
-            when (it) {
-                is GetLogResponseLogUnion.CreateMessage -> {
-                    when (val message = it.value.message) {
-                        is LogCreateMessageMessageUnion.MessageView -> {
-                            handleMessage(roomKey = roomKey, message = message.value)
-                        }
-
-                        is LogCreateMessageMessageUnion.DeletedMessageView -> {
-                            handleMessage(roomKey = roomKey, message = message.value)
-                        }
-
-                        is LogCreateMessageMessageUnion.Unknown -> {
-                            Unit
-                        }
-                    }
-                }
-
-                is GetLogResponseLogUnion.DeleteMessage -> {
-                    when (val message = it.value.message) {
-                        is LogDeleteMessageMessageUnion.MessageView -> {
-                            handleMessage(roomKey = roomKey, message = message.value)
-                        }
-
-                        is LogDeleteMessageMessageUnion.DeletedMessageView -> {
-                            handleMessage(roomKey = roomKey, message = message.value)
-                        }
-
-                        is LogDeleteMessageMessageUnion.Unknown -> {
-                            Unit
-                        }
-                    }
-                }
-
-                else -> {
-                    Unit
-                }
-            }
-        }
-    }
-
-    private suspend fun handleMessage(
-        roomKey: MicroBlogKey,
-        message: MessageView,
-    ) {
-        Bluesky.saveMessage(
+    private val directMessageLoader by lazy {
+        BlueskyDirectMessageLoader(
+            getService = this::pdsService,
             accountKey = accountKey,
-            roomKey = roomKey,
-            database = database,
-            data = listOf(message),
         )
     }
 
-    private suspend fun handleMessage(
-        roomKey: MicroBlogKey,
-        message: DeletedMessageView,
-    ) {
-        database.messageDao().deleteMessage(
-            MicroBlogKey(
-                id = message.id,
-                host = accountKey.host,
-            ),
+    override val directMessageHandler by lazy {
+        DirectMessageHandler(
+            accountKey = accountKey,
+            loader = directMessageLoader,
+            coroutineScope = coroutineScope,
         )
     }
-
-    override val directMessageBadgeCount: CacheData<Int> =
-        Cacheable(
-            fetchSource = {
-                val response =
-                    pdsService()
-                        .listConvos(
-                            params = ListConvosQueryParams(),
-                        ).requireResponse()
-                Bluesky.saveDM(
-                    accountKey = accountKey,
-                    database = database,
-                    data = response.convos,
-                )
-            },
-            cacheSource = {
-                database
-                    .messageDao()
-                    .getRoomTimeline(accountType = AccountType.Specific(accountKey))
-                    .distinctUntilChanged()
-                    .map {
-                        it.sumOf { it.timeline.unreadCount.toInt() }
-                    }
-            },
-        )
-
-    private fun clearDirectMessageBadgeCount(roomKey: MicroBlogKey) {
-        coroutineScope.launch {
-            database
-                .messageDao()
-                .clearUnreadCount(roomKey, accountType = AccountType.Specific(accountKey))
-        }
-    }
-
-    override fun leaveDirectMessage(roomKey: MicroBlogKey) {
-        coroutineScope.launch {
-            tryRun {
-                pdsService().leaveConvo(
-                    request =
-                        LeaveConvoRequest(
-                            convoId = roomKey.id,
-                        ),
-                )
-            }.onSuccess {
-                database.messageDao().deleteRoomTimeline(roomKey, AccountType.Specific(accountKey))
-                database.messageDao().deleteRoom(roomKey)
-                database.messageDao().deleteRoomReference(roomKey)
-                database.messageDao().deleteRoomMessages(roomKey)
-            }
-        }
-    }
-
-    override fun createDirectMessageRoom(userKey: MicroBlogKey): Flow<UiState<MicroBlogKey>> =
-        flow {
-            tryRun {
-                pdsService()
-                    .getConvoForMembers(
-                        params =
-                            GetConvoForMembersQueryParams(
-                                members = persistentListOf(Did(did = userKey.id)),
-                            ),
-                    ).requireResponse()
-            }.onSuccess {
-                Bluesky.saveDM(
-                    accountKey = accountKey,
-                    database = database,
-                    data = listOf(it.convo),
-                )
-            }.fold(
-                onSuccess = {
-                    emit(UiState.Success(MicroBlogKey(id = it.convo.id, host = accountKey.host)))
-                },
-                onFailure = {
-                    emit(UiState.Error(it))
-                },
-            )
-        }
-
-    override suspend fun canSendDirectMessage(userKey: MicroBlogKey): Boolean =
-        tryRun {
-            pdsService()
-                .getConvoForMembers(
-                    params =
-                        GetConvoForMembersQueryParams(
-                            members = persistentListOf(Did(did = userKey.id)),
-                        ),
-                ).requireResponse()
-        }.isSuccess
 
     override fun following(userKey: MicroBlogKey): RemoteLoader<UiProfile> =
         FollowingPagingSource(

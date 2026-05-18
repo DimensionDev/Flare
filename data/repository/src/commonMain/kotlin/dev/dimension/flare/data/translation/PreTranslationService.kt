@@ -38,47 +38,47 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.sync.withPermit
 import kotlin.time.Clock
 
-internal interface PreTranslationService {
-    fun enqueueStatuses(
+public interface PreTranslationService {
+    public fun enqueueStatuses(
         statuses: List<DbStatus>,
         allowLongText: Boolean = false,
     )
 
-    fun enqueueProfile(user: DbUser)
+    public fun enqueueProfile(user: DbUser)
 
-    fun retryStatus(
+    public fun retryStatus(
         accountType: dev.dimension.flare.model.AccountType,
         statusKey: dev.dimension.flare.model.MicroBlogKey,
     )
 
-    fun setStatusDisplayMode(
+    public fun setStatusDisplayMode(
         accountType: dev.dimension.flare.model.AccountType,
         statusKey: dev.dimension.flare.model.MicroBlogKey,
         mode: TranslationDisplayMode,
     )
 }
 
-internal data object NoopPreTranslationService : PreTranslationService {
-    override fun enqueueStatuses(
+public data object NoopPreTranslationService : PreTranslationService {
+    public override fun enqueueStatuses(
         statuses: List<DbStatus>,
         allowLongText: Boolean,
-    ) = Unit
+    ): Unit = Unit
 
-    override fun enqueueProfile(user: DbUser) = Unit
+    public override fun enqueueProfile(user: DbUser): Unit = Unit
 
-    override fun retryStatus(
+    public override fun retryStatus(
         accountType: dev.dimension.flare.model.AccountType,
         statusKey: dev.dimension.flare.model.MicroBlogKey,
-    ) = Unit
+    ): Unit = Unit
 
-    override fun setStatusDisplayMode(
+    public override fun setStatusDisplayMode(
         accountType: dev.dimension.flare.model.AccountType,
         statusKey: dev.dimension.flare.model.MicroBlogKey,
         mode: TranslationDisplayMode,
-    ) = Unit
+    ): Unit = Unit
 }
 
-internal class OnlinePreTranslationService(
+public class OnlinePreTranslationService(
     private val database: CacheDatabase,
     private val appDataStore: AppDataStore,
     private val aiCompletionService: AiCompletionService,
@@ -117,7 +117,7 @@ internal class OnlinePreTranslationService(
         }
     }
 
-    override fun enqueueStatuses(
+    public override fun enqueueStatuses(
         statuses: List<DbStatus>,
         allowLongText: Boolean,
     ) {
@@ -136,7 +136,7 @@ internal class OnlinePreTranslationService(
         }
     }
 
-    override fun enqueueProfile(user: DbUser) {
+    public override fun enqueueProfile(user: DbUser) {
         launchPreparedCandidates(requirePreTranslation = true) { settings ->
             listOfNotNull(
                 prepareProfileCandidate(
@@ -149,7 +149,7 @@ internal class OnlinePreTranslationService(
         }
     }
 
-    override fun retryStatus(
+    public override fun retryStatus(
         accountType: dev.dimension.flare.model.AccountType,
         statusKey: dev.dimension.flare.model.MicroBlogKey,
     ) {
@@ -168,7 +168,7 @@ internal class OnlinePreTranslationService(
         }
     }
 
-    override fun setStatusDisplayMode(
+    public override fun setStatusDisplayMode(
         accountType: dev.dimension.flare.model.AccountType,
         statusKey: dev.dimension.flare.model.MicroBlogKey,
         mode: TranslationDisplayMode,

@@ -17,27 +17,27 @@ import dev.dimension.flare.ui.render.toUiPlainText
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 
-internal object Bluesky {
-    fun rooms(
+public object Bluesky {
+    public fun rooms(
         accountKey: MicroBlogKey,
         data: List<ConvoView>,
     ): List<UiDMRoom> = data.map { it.toUiDMRoom(accountKey) }
 
-    fun messages(
+    public fun messages(
         accountKey: MicroBlogKey,
         roomKey: MicroBlogKey,
         data: List<MessageView>,
         users: Map<String, UiProfile> = emptyMap(),
     ): List<UiDMItem> = data.map { it.toUiDMItem(roomKey, users, accountKey) }
 
-    fun message(
+    public fun message(
         accountKey: MicroBlogKey,
         roomKey: MicroBlogKey,
         data: DeletedMessageView,
         users: Map<String, UiProfile> = emptyMap(),
     ): UiDMItem = data.toUiDMItem(roomKey, users, accountKey)
 
-    fun deletedMessageKey(
+    public fun deletedMessageKey(
         accountKey: MicroBlogKey,
         message: DeletedMessageView,
     ): MicroBlogKey =

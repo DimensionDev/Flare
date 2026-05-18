@@ -29,6 +29,7 @@ kotlin {
                 api(libs.bluesky.oauth)
                 implementation(projects.data.repository)
                 implementation(libs.cryptography.provider.optimal)
+                implementation(libs.twitter.parser)
             }
         }
         val commonTest by getting {

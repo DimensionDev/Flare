@@ -100,7 +100,7 @@ private val parser =
         enableDomainDetection = true,
     )
 
-internal val bskyJson by lazy {
+public val bskyJson: Json by lazy {
     Json {
         ignoreUnknownKeys = true
         classDiscriminator = "${'$'}type"
@@ -109,7 +109,7 @@ internal val bskyJson by lazy {
 
 private fun List<Byte>.stringify(): String = this.toByteArray().decodeToString()
 
-internal fun BookmarkView.render(accountKey: MicroBlogKey): UiTimelineV2? =
+public fun BookmarkView.render(accountKey: MicroBlogKey): UiTimelineV2? =
     when (val content = item) {
         is BookmarkViewItemUnion.BlockedPost -> null
         is BookmarkViewItemUnion.NotFoundPost -> null
@@ -117,7 +117,7 @@ internal fun BookmarkView.render(accountKey: MicroBlogKey): UiTimelineV2? =
         is BookmarkViewItemUnion.Unknown -> null
     }
 
-internal fun parseBlueskyJson(
+public fun parseBlueskyJson(
     json: JsonContent,
     accountKey: MicroBlogKey,
     sourceLanguages: List<String> = emptyList(),
@@ -157,7 +157,7 @@ private fun JsonContent.sourceLanguages(): PersistentList<String> {
         ?: persistentListOf()
 }
 
-internal suspend fun parseBskyFacets(
+public suspend fun parseBskyFacets(
     content: String,
     resolveMentionDid: suspend (handle: String) -> String,
 ): List<Facet> {
@@ -520,9 +520,9 @@ private val ListNotificationsNotificationReason.type: UiTimelineV2.Message.Type
             }
         }
 
-internal fun List<FeedViewPost>.render(accountKey: MicroBlogKey): List<UiTimelineV2> = this.map { it.render(accountKey) }
+public fun List<FeedViewPost>.render(accountKey: MicroBlogKey): List<UiTimelineV2> = this.map { it.render(accountKey) }
 
-internal fun List<ListNotificationsNotification>.render(
+public fun List<ListNotificationsNotification>.render(
     accountKey: MicroBlogKey,
     references: ImmutableMap<AtUri, PostView>,
 ): List<UiTimelineV2> {
@@ -765,7 +765,7 @@ private fun FeedViewPost.render(accountKey: MicroBlogKey): UiTimelineV2 {
     )
 }
 
-internal fun PostView.render(accountKey: MicroBlogKey): UiTimelineV2.Post {
+public fun PostView.render(accountKey: MicroBlogKey): UiTimelineV2.Post {
     val user = author.render(accountKey)
     val isFromMe = user.key == accountKey
     val statusKey =
@@ -971,7 +971,7 @@ internal fun PostView.render(accountKey: MicroBlogKey): UiTimelineV2.Post {
     )
 }
 
-internal fun ActionMenu.Companion.blueskyReblog(
+public fun ActionMenu.Companion.blueskyReblog(
     accountKey: MicroBlogKey,
     postKey: MicroBlogKey,
     count: Long,
@@ -1007,7 +1007,7 @@ internal fun ActionMenu.Companion.blueskyReblog(
             },
     )
 
-internal fun ActionMenu.Companion.blueskyLike(
+public fun ActionMenu.Companion.blueskyLike(
     accountKey: MicroBlogKey,
     postKey: MicroBlogKey,
     count: Long,
@@ -1043,7 +1043,7 @@ internal fun ActionMenu.Companion.blueskyLike(
             },
     )
 
-internal fun ActionMenu.Companion.blueskyBookmark(
+public fun ActionMenu.Companion.blueskyBookmark(
     accountKey: MicroBlogKey,
     postKey: MicroBlogKey,
     uri: String,
@@ -1078,7 +1078,7 @@ internal fun ActionMenu.Companion.blueskyBookmark(
             },
     )
 
-internal fun chat.bsky.actor.ProfileViewBasic.render(accountKey: MicroBlogKey): UiProfile {
+public fun chat.bsky.actor.ProfileViewBasic.render(accountKey: MicroBlogKey): UiProfile {
     val userKey =
         MicroBlogKey(
             id = did.did,
@@ -1115,7 +1115,7 @@ internal fun chat.bsky.actor.ProfileViewBasic.render(accountKey: MicroBlogKey): 
     )
 }
 
-internal fun ProfileViewBasic.render(accountKey: MicroBlogKey): UiProfile {
+public fun ProfileViewBasic.render(accountKey: MicroBlogKey): UiProfile {
     val userKey =
         MicroBlogKey(
             id = did.did,
@@ -1152,7 +1152,7 @@ internal fun ProfileViewBasic.render(accountKey: MicroBlogKey): UiProfile {
     )
 }
 
-internal fun ProfileView.render(accountKey: MicroBlogKey): UiProfile {
+public fun ProfileView.render(accountKey: MicroBlogKey): UiProfile {
     val userKey =
         MicroBlogKey(
             id = did.did,
@@ -1189,7 +1189,7 @@ internal fun ProfileView.render(accountKey: MicroBlogKey): UiProfile {
     )
 }
 
-internal fun ProfileViewDetailed.render(accountKey: MicroBlogKey): UiProfile {
+public fun ProfileViewDetailed.render(accountKey: MicroBlogKey): UiProfile {
     val userKey =
         MicroBlogKey(
             id = did.did,
@@ -1683,7 +1683,7 @@ private fun render(
         }
     }
 
-internal fun GeneratorView.render(accountKey: MicroBlogKey) =
+public fun GeneratorView.render(accountKey: MicroBlogKey): UiList.Feed =
     UiList.Feed(
         id = uri.atUri,
         title = displayName,
@@ -1694,7 +1694,7 @@ internal fun GeneratorView.render(accountKey: MicroBlogKey) =
         liked = viewer?.like?.atUri != null,
     )
 
-internal fun ListView.render(accountKey: MicroBlogKey) =
+public fun ListView.render(accountKey: MicroBlogKey): UiList.List =
     UiList.List(
         id = uri.atUri,
         title = name,
@@ -1703,9 +1703,9 @@ internal fun ListView.render(accountKey: MicroBlogKey) =
         creator = creator.render(accountKey),
     )
 
-internal fun DeletedMessageView.render(): UiDMItem.Message = UiDMItem.Message.Deleted
+public fun DeletedMessageView.render(): UiDMItem.Message = UiDMItem.Message.Deleted
 
-internal fun MessageView.render(accountKey: MicroBlogKey) =
+public fun MessageView.render(accountKey: MicroBlogKey): UiDMItem.Message.Text =
     UiDMItem.Message.Text(
         text = parseBluesky(text, facets.orEmpty(), accountKey),
     )

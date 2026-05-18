@@ -427,23 +427,32 @@ internal fun Note.render(accountKey: MicroBlogKey): UiTimelineV2 {
 }
 
 private fun Note.renderStatus(accountKey: MicroBlogKey): UiTimelineV2.Post {
+    val noteUser = user
+    val noteUserHost = noteUser.host
     val remoteHost =
-        if (user.host.isNullOrEmpty()) {
+        if (noteUserHost.isNullOrEmpty()) {
             accountKey.host
         } else {
-            user.host
+            noteUserHost
         }
     val parent = reply
-    val user = user.render(accountKey)
+    val user = noteUser.render(accountKey)
     val isFromMe = user.key == accountKey
+    val noteChannel = channel
+    val noteText = text
+    val noteContentWarning = cw
+    val noteBodyText = noteText?.takeIf { it.isNotEmpty() }
+    val noteContentWarningText = noteContentWarning?.takeIf { it.isNotEmpty() }
+    val noteFiles = files
+    val notePoll = poll
     val canReblog =
-        (channel == null || channel.allowRenoteToExternal == null || channel.allowRenoteToExternal) &&
+        (noteChannel?.allowRenoteToExternal != false) &&
             (
                 visibility in listOf(Visibility.Public, Visibility.Home) ||
                     (isFromMe && visibility != Visibility.Specified)
             )
     val renderedVisibility =
-        if (channel?.id != null) {
+        if (noteChannel?.id != null) {
             UiTimelineV2.Post.Visibility.Channel
         } else {
             when (visibility) {
@@ -480,13 +489,16 @@ private fun Note.renderStatus(accountKey: MicroBlogKey): UiTimelineV2.Post {
             }.sortedByDescending { it.count.value }
             .toImmutableList()
     val sourceChannel =
-        if (channel?.id != null && channel.name != null) {
+        noteChannel?.let { channel ->
+            val channelId = channel.id
+            val channelName = channel.name
+            if (channelId == null || channelName == null) {
+                return@let null
+            }
             UiTimelineV2.Post.SourceChannel(
-                id = channel.id,
-                name = channel.name,
+                id = channelId,
+                name = channelName,
             )
-        } else {
-            null
         }
     val postUrl =
         buildString {
@@ -507,30 +519,30 @@ private fun Note.renderStatus(accountKey: MicroBlogKey): UiTimelineV2.Post {
                 parent?.renderStatus(accountKey),
             ).toPersistentList(),
         images =
-            files
+            noteFiles
                 ?.mapNotNull { file ->
                     file.toUi()
                 }?.toPersistentList() ?: persistentListOf(),
         contentWarning =
-            if (!cw.isNullOrEmpty() && !text.isNullOrEmpty()) {
-                parseMisskeyText(cw, accountKey, emojis, remoteHost)
+            if (noteContentWarningText != null && noteBodyText != null) {
+                parseMisskeyText(noteContentWarningText, accountKey, emojis, remoteHost)
             } else {
                 null
             },
         user = user,
         quote =
             listOfNotNull(
-                if (text != null || !files.isNullOrEmpty() || cw != null || poll != null) {
+                if (noteText != null || !noteFiles.isNullOrEmpty() || noteContentWarning != null || notePoll != null) {
                     renote?.renderStatus(accountKey)
                 } else {
                     null
                 },
             ).toImmutableList(),
         content =
-            if (!text.isNullOrEmpty()) {
-                parseMisskeyText(text, accountKey, emojis, remoteHost)
-            } else if (!cw.isNullOrEmpty()) {
-                parseMisskeyText(cw, accountKey, emojis, remoteHost)
+            if (noteBodyText != null) {
+                parseMisskeyText(noteBodyText, accountKey, emojis, remoteHost)
+            } else if (noteContentWarningText != null) {
+                parseMisskeyText(noteContentWarningText, accountKey, emojis, remoteHost)
             } else {
                 "".toUiPlainText()
             },
@@ -672,12 +684,13 @@ private fun Note.renderStatus(accountKey: MicroBlogKey): UiTimelineV2.Post {
                 ),
             ).toImmutableList(),
         poll =
-            poll?.let {
+            notePoll?.let { poll ->
+                val choices = poll.choices
                 UiPoll(
                     // misskey poll doesn't have id
                     id = "",
                     options =
-                        poll.choices
+                        choices
                             .map { option ->
                                 UiPoll.Option(
                                     title = option.text,
@@ -686,14 +699,14 @@ private fun Note.renderStatus(accountKey: MicroBlogKey): UiTimelineV2.Post {
                                         option.votes
                                             .toFloat()
                                             .div(
-                                                poll.choices.sumOf { it.votes }.toFloat(),
+                                                choices.sumOf { it.votes }.toFloat(),
                                             ).takeUnless { it.isNaN() } ?: 0f,
                                 )
                             }.toPersistentList(),
                     expiresAt = poll.expiresAt ?: Instant.DISTANT_PAST,
                     multiple = poll.multiple,
                     ownVotes =
-                        poll.choices
+                        choices
                             .mapIndexedNotNull { index, choice ->
                                 index.takeIf { choice.isVoted }
                             }.toPersistentList(),
@@ -855,11 +868,12 @@ private fun DriveFile.toUi(): UiMedia? {
 }
 
 internal fun UserLite.render(accountKey: MicroBlogKey): UiProfile {
+    val userHost = host
     val remoteHost =
-        if (host.isNullOrEmpty()) {
+        if (userHost.isNullOrEmpty()) {
             accountKey.host
         } else {
-            host
+            userHost
         }
     val userKey =
         MicroBlogKey(
@@ -898,11 +912,12 @@ internal fun UserLite.render(accountKey: MicroBlogKey): UiProfile {
 }
 
 internal fun User.render(accountKey: MicroBlogKey): UiProfile {
+    val userHost = host
     val remoteHost =
-        if (host.isNullOrEmpty()) {
+        if (userHost.isNullOrEmpty()) {
             accountKey.host
         } else {
-            host
+            userHost
         }
     val userKey =
         MicroBlogKey(

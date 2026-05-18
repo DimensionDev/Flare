@@ -72,9 +72,9 @@ public class MisskeyCallbackPresenter(
                 host = host,
                 session = session,
             ).check()
-        requireNotNull(response.ok) { "No response" }
-        require(response.ok) { "Response is not ok" }
-        requireNotNull(response.token) { "No token" }
+        val ok = requireNotNull(response.ok) { "No response" }
+        require(ok) { "Response is not ok" }
+        val token = requireNotNull(response.token) { "No token" }
         val id = response.user?.id
         requireNotNull(id) { "No user id" }
         val nodeInfo = NodeInfoService.fetchNodeInfo(host)
@@ -90,7 +90,7 @@ public class MisskeyCallbackPresenter(
             credential =
                 UiAccount.Misskey.Credential(
                     host = host,
-                    accessToken = response.token,
+                    accessToken = token,
                     nodeType = nodeInfo,
                 ),
         )

@@ -37,7 +37,6 @@ kotlin {
                 implementation(projects.core.common)
                 api(projects.core.model)
                 api(projects.ui.model)
-                api(projects.social.microblog)
                 api(libs.kotlinx.coroutines.core)
                 api(libs.paging.common)
                 api(libs.room.runtime)

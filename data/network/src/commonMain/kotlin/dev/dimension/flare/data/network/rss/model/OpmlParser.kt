@@ -9,7 +9,7 @@ private val attributeRegex = Regex("""([:\w-]+)(\s*=\s*)("([^"]*)"|'([^']*)')"""
 // Detects ampersands that are not already part of a valid entity (e.g. &amp; or &#123;).
 private val danglingAmpersandRegex = Regex("&(?!(?:[a-zA-Z]+|#[0-9]+|#x[0-9a-fA-F]+);)")
 
-internal fun decodeOpml(opmlContent: String): Opml {
+public fun decodeOpml(opmlContent: String): Opml {
     val sanitized = sanitizeDanglingAmpersands(opmlContent)
     return Xml.decodeFromString<Opml>(sanitized)
 }

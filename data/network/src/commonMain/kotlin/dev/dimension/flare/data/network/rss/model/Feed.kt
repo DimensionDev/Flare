@@ -7,10 +7,10 @@ import nl.adaptivity.xmlutil.serialization.XmlSerialName
 import nl.adaptivity.xmlutil.serialization.XmlValue
 
 @Serializable
-internal sealed interface Feed {
+public sealed interface Feed {
     @Serializable
     @XmlSerialName("feed")
-    data class Atom(
+    public data class Atom(
         @XmlSerialName("id")
         @XmlElement(true)
         val id: String,
@@ -52,7 +52,7 @@ internal sealed interface Feed {
         val entries: List<Entry> = emptyList(),
     ) : Feed {
         @Serializable
-        data class Entry(
+        public data class Entry(
             @XmlSerialName("id")
             @XmlElement(true)
             val id: String,
@@ -95,7 +95,7 @@ internal sealed interface Feed {
         )
 
         @Serializable
-        data class Media(
+        public data class Media(
             @XmlSerialName("title", prefix = "media")
             @XmlElement(true)
             val title: Text? = null,
@@ -110,7 +110,7 @@ internal sealed interface Feed {
             val description: Text? = null,
         ) {
             @Serializable
-            data class Content(
+            public data class Content(
                 @XmlElement(false)
                 val type: String? = null,
                 @XmlElement(false)
@@ -123,7 +123,7 @@ internal sealed interface Feed {
         }
 
         @Serializable
-        data class Person(
+        public data class Person(
             @XmlSerialName("name")
             @XmlElement(true)
             val name: String,
@@ -136,7 +136,7 @@ internal sealed interface Feed {
         )
 
         @Serializable
-        data class Text(
+        public data class Text(
             @XmlValue
             val value: String,
             @XmlElement(false)
@@ -144,7 +144,7 @@ internal sealed interface Feed {
         )
 
         @Serializable
-        enum class TextType {
+        public enum class TextType {
             @SerialName("text")
             TEXT,
 
@@ -156,7 +156,7 @@ internal sealed interface Feed {
         }
 
         @Serializable
-        data class Content(
+        public data class Content(
             @XmlValue
             val value: String? = null,
             @XmlElement(false)
@@ -166,7 +166,7 @@ internal sealed interface Feed {
         )
 
         @Serializable
-        data class Category(
+        public data class Category(
             @XmlElement(false)
             val term: String,
             @XmlElement(false)
@@ -176,7 +176,7 @@ internal sealed interface Feed {
         )
 
         @Serializable
-        data class Generator(
+        public data class Generator(
             @XmlValue
             val value: String,
             @XmlElement(false)
@@ -186,7 +186,7 @@ internal sealed interface Feed {
         )
 
         @Serializable
-        data class Link(
+        public data class Link(
             @XmlElement(false)
             val href: String, // URI
             @XmlElement(false)
@@ -202,7 +202,7 @@ internal sealed interface Feed {
         )
 
         @Serializable
-        data class Source(
+        public data class Source(
             @XmlSerialName("id")
             @XmlElement(true)
             val id: String? = null,
@@ -244,14 +244,14 @@ internal sealed interface Feed {
 
     @Serializable
     @XmlSerialName("rss")
-    data class Rss20(
+    public data class Rss20(
         val version: String,
         @XmlElement(true)
         val channel: Channel,
     ) : Feed {
         @Serializable
         @XmlSerialName("channel")
-        data class Channel(
+        public data class Channel(
             @XmlElement(true)
             val title: String,
             @XmlElement(true)
@@ -295,7 +295,7 @@ internal sealed interface Feed {
         )
 
         @Serializable
-        data class Cloud(
+        public data class Cloud(
             @XmlElement(true)
             val domain: String,
             @XmlElement(true)
@@ -309,7 +309,7 @@ internal sealed interface Feed {
         )
 
         @Serializable
-        data class Image(
+        public data class Image(
             @XmlElement(true)
             val url: String,
             @XmlElement(true)
@@ -325,7 +325,7 @@ internal sealed interface Feed {
         )
 
         @Serializable
-        data class TextInput(
+        public data class TextInput(
             @XmlElement(true)
             val title: String,
             @XmlElement(true)
@@ -337,7 +337,7 @@ internal sealed interface Feed {
         )
 
         @Serializable
-        data class Item(
+        public data class Item(
             @XmlElement(true)
             val title: String? = null,
             @XmlElement(true)
@@ -364,13 +364,13 @@ internal sealed interface Feed {
         )
 
         @Serializable
-        data class Media(
+        public data class Media(
             @XmlElement(false)
             val url: String,
         )
 
         @Serializable
-        data class Enclosure(
+        public data class Enclosure(
             @XmlElement(true)
             val url: String,
             @XmlElement(true)
@@ -381,7 +381,7 @@ internal sealed interface Feed {
 
         @Serializable
         @XmlSerialName("guid")
-        data class Guid(
+        public data class Guid(
             @XmlElement(false)
             val isPermaLink: Boolean = false,
             @XmlValue
@@ -389,7 +389,7 @@ internal sealed interface Feed {
         )
 
         @Serializable
-        data class Source(
+        public data class Source(
             @XmlElement(true)
             val url: String,
             @XmlElement(true)
@@ -399,7 +399,7 @@ internal sealed interface Feed {
 
     @Serializable
     @XmlSerialName("RDF", namespace = "http://www.w3.org/1999/02/22-rdf-syntax-ns#", prefix = "rdf")
-    data class RDF(
+    public data class RDF(
         @XmlElement(true)
         val channel: Channel,
         @XmlSerialName("item", namespace = "http://purl.org/rss/1.0/", prefix = "")
@@ -407,7 +407,7 @@ internal sealed interface Feed {
     ) : Feed {
         @Serializable
         @XmlSerialName("channel", namespace = "http://purl.org/rss/1.0/", prefix = "")
-        data class Channel(
+        public data class Channel(
             @XmlElement(true)
             val title: String,
             @XmlElement(true)
@@ -420,7 +420,7 @@ internal sealed interface Feed {
         )
 
         @Serializable
-        data class Item(
+        public data class Item(
             @XmlElement(true)
             val title: String,
             @XmlElement(true)

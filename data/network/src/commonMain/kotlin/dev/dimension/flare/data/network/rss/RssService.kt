@@ -4,7 +4,6 @@ import com.fleeksoft.ksoup.Ksoup
 import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.data.network.rss.model.Feed
 import dev.dimension.flare.data.repository.tryRun
-import dev.dimension.flare.ui.model.mapper.link
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.statement.HttpResponse
@@ -13,7 +12,7 @@ import io.ktor.http.Url
 import kotlinx.serialization.decodeFromString
 import nl.adaptivity.xmlutil.serialization.XML
 
-internal object RssService {
+public object RssService {
     private val xml by lazy {
         XML {
             defaultPolicy {
@@ -25,12 +24,12 @@ internal object RssService {
     }
     private val client = ktorClient { }
 
-    suspend fun fetch(url: String): Feed {
+    public suspend fun fetch(url: String): Feed {
         val response = client.get(url).decodedText()
         return parseFeedText(response)
     }
 
-    suspend fun detectLinkSources(url: String): List<String> =
+    public suspend fun detectLinkSources(url: String): List<String> =
         client
             .get(url)
             .decodedText()
@@ -59,7 +58,7 @@ internal object RssService {
             }.takeIf { it.isNotEmpty() }
             ?: throw IllegalArgumentException("No RSS or Atom feeds found at the provided URL: $url")
 
-    suspend fun fetchIcon(url: String): String? {
+    public suspend fun fetchIcon(url: String): String? {
         val webContent =
             tryRun {
                 client.get(url).decodedText()
@@ -78,10 +77,11 @@ internal object RssService {
         if (feedIcon != null) {
             return feedIcon
         }
-        val feedLink = (feed?.link ?: url).replace("http://", "https://", ignoreCase = true)
+        val sourceLink = feed?.link
+        val feedLink = (sourceLink ?: url).replace("http://", "https://", ignoreCase = true)
         val parsedUrl = Url(feedLink)
         val html =
-            if (feed?.link != null && feed.link != url) {
+            if (sourceLink != null && sourceLink != url) {
                 tryRun {
                     client.get(feedLink).decodedText()
                 }.getOrNull() ?: return null
@@ -149,6 +149,14 @@ internal object RssService {
 }
 
 internal fun parseFeedText(text: String): Feed = RssServiceXml.decodeFromString(text)
+
+private val Feed.link: String?
+    get() =
+        when (this) {
+            is Feed.Atom -> links.firstOrNull()?.href
+            is Feed.RDF -> channel.link
+            is Feed.Rss20 -> channel.link
+        }
 
 internal fun decodeResponseBody(
     bytes: ByteArray,

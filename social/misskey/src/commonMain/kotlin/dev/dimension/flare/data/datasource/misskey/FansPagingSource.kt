@@ -9,7 +9,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.mapper.render
 
-internal class FollowingPagingSource(
+public class FansPagingSource(
     private val service: MisskeyService,
     private val accountKey: MicroBlogKey,
     private val userKey: MicroBlogKey,
@@ -36,7 +36,7 @@ internal class FollowingPagingSource(
             }
         val response =
             service
-                .usersFollowing(
+                .usersFollowers(
                     usersFollowersRequest =
                         UsersFollowersRequest(
                             untilId = maxId,
@@ -47,7 +47,7 @@ internal class FollowingPagingSource(
         return PagingResult(
             data =
                 response.mapNotNull {
-                    it.followee?.render(accountKey = accountKey)
+                    it.follower?.render(accountKey = accountKey)
                 },
             nextKey = response.lastOrNull()?.id,
         )

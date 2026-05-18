@@ -5,17 +5,18 @@ import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoade
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.network.misskey.MisskeyService
-import dev.dimension.flare.data.network.misskey.api.model.INotificationsRequest
+import dev.dimension.flare.data.network.misskey.api.model.AntennasNotesRequest
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
 
 @OptIn(ExperimentalPagingApi::class)
-internal class NotificationRemoteMediator(
-    private val accountKey: MicroBlogKey,
+public class AntennasTimelineRemoteMediator(
     private val service: MisskeyService,
+    private val accountKey: MicroBlogKey,
+    private val id: String,
 ) : CacheableRemoteLoader<UiTimelineV2> {
-    override val pagingKey = "notification_$accountKey"
+    override val pagingKey: String = "antennas_${id}_$accountKey"
 
     override suspend fun load(
         pageSize: Int,
@@ -23,27 +24,31 @@ internal class NotificationRemoteMediator(
     ): PagingResult<UiTimelineV2> {
         val response =
             when (request) {
+                PagingRequest.Refresh -> {
+                    service
+                        .antennasNotes(
+                            AntennasNotesRequest(
+                                antennaId = id,
+                                limit = pageSize,
+                            ),
+                        )
+                }
+
                 is PagingRequest.Prepend -> {
                     return PagingResult(
                         endOfPaginationReached = true,
                     )
                 }
 
-                PagingRequest.Refresh -> {
-                    service.iNotifications(
-                        INotificationsRequest(
-                            limit = pageSize,
-                        ),
-                    )
-                }
-
                 is PagingRequest.Append -> {
-                    service.iNotifications(
-                        INotificationsRequest(
-                            limit = pageSize,
-                            untilId = request.nextKey,
-                        ),
-                    )
+                    service
+                        .antennasNotes(
+                            AntennasNotesRequest(
+                                antennaId = id,
+                                limit = pageSize,
+                                untilId = request.nextKey,
+                            ),
+                        )
                 }
             }
 

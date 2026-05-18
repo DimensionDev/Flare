@@ -11,11 +11,11 @@ import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
 
 @OptIn(ExperimentalPagingApi::class)
-internal class MentionTimelineRemoteMediator(
+public class MentionTimelineRemoteMediator(
     private val accountKey: MicroBlogKey,
     private val service: MisskeyService,
 ) : CacheableRemoteLoader<UiTimelineV2> {
-    override val pagingKey = "mention_$accountKey"
+    override val pagingKey: String = "mention_$accountKey"
 
     override suspend fun load(
         pageSize: Int,

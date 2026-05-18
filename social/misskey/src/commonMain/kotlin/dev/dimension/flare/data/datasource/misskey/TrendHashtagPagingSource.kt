@@ -6,7 +6,7 @@ import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.network.misskey.MisskeyService
 import dev.dimension.flare.ui.model.UiHashtag
 
-internal class TrendHashtagPagingSource(
+public class TrendHashtagPagingSource(
     private val service: MisskeyService,
 ) : RemoteLoader<UiHashtag> {
     override suspend fun load(

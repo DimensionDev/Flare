@@ -17,12 +17,12 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 
-internal class MisskeyChannelLoader(
+public class MisskeyChannelLoader(
     private val service: MisskeyService,
     private val accountKey: MicroBlogKey,
     private val source: Source,
 ) : ListLoader<UiList.Channel> {
-    enum class Source {
+    public enum class Source {
         Followed,
         MyFavorites,
         Owned,

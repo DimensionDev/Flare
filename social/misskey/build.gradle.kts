@@ -31,6 +31,7 @@ kotlin {
                 api(projects.ui.model)
                 api(projects.data.network)
                 api(projects.social.api)
+                api(projects.social.microblog)
                 implementation(projects.data.repository)
                 implementation(libs.mfm.multiplatform)
             }

@@ -12,7 +12,7 @@ import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
 
 @OptIn(ExperimentalPagingApi::class)
-internal class UserTimelineRemoteMediator(
+public class UserTimelineRemoteMediator(
     private val accountKey: MicroBlogKey,
     private val service: MisskeyService,
     private val userKey: MicroBlogKey,
@@ -20,7 +20,7 @@ internal class UserTimelineRemoteMediator(
     private val withReplies: Boolean = false,
     private val withPinned: Boolean = false,
 ) : CacheableRemoteLoader<UiTimelineV2> {
-    var pinnedIds = emptyList<String>()
+    private var pinnedIds: List<String> = emptyList()
 
     override val pagingKey: String
         get() =

@@ -11,7 +11,7 @@ import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
 
 @OptIn(ExperimentalPagingApi::class)
-internal class SearchStatusRemoteMediator(
+public class SearchStatusRemoteMediator(
     private val service: MisskeyService,
     private val accountKey: MicroBlogKey,
     private val query: String,

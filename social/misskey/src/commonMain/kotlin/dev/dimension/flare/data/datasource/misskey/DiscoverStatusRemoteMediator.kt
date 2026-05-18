@@ -5,17 +5,17 @@ import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoade
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.network.misskey.MisskeyService
-import dev.dimension.flare.data.network.misskey.api.model.NotesLocalTimelineRequest
+import dev.dimension.flare.data.network.misskey.api.model.NotesFeaturedRequest
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
 
 @OptIn(ExperimentalPagingApi::class)
-internal class LocalTimelineRemoteMediator(
-    private val accountKey: MicroBlogKey,
+public class DiscoverStatusRemoteMediator(
     private val service: MisskeyService,
+    private val accountKey: MicroBlogKey,
 ) : CacheableRemoteLoader<UiTimelineV2> {
-    override val pagingKey = "local_$accountKey"
+    override val pagingKey: String = "discover_status_$accountKey"
 
     override suspend fun load(
         pageSize: Int,
@@ -23,32 +23,28 @@ internal class LocalTimelineRemoteMediator(
     ): PagingResult<UiTimelineV2> {
         val response =
             when (request) {
-                is PagingRequest.Prepend -> {
-                    return PagingResult(
-                        endOfPaginationReached = true,
-                    )
-                }
-
                 PagingRequest.Refresh -> {
-                    service.notesLocalTimeline(
-                        NotesLocalTimelineRequest(
-                            limit = pageSize,
-                        ),
-                    )
+                    service.notesFeatured(NotesFeaturedRequest(limit = pageSize))
                 }
 
                 is PagingRequest.Append -> {
-                    service.notesLocalTimeline(
-                        NotesLocalTimelineRequest(
+                    service.notesFeatured(
+                        NotesFeaturedRequest(
                             limit = pageSize,
                             untilId = request.nextKey,
                         ),
                     )
                 }
+
+                else -> {
+                    return PagingResult(
+                        endOfPaginationReached = true,
+                    )
+                }
             }
 
         return PagingResult(
-            endOfPaginationReached = response.isEmpty(),
+            endOfPaginationReached = true,
             data =
                 response.render(accountKey),
             nextKey = response.lastOrNull()?.id,

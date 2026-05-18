@@ -5,22 +5,17 @@ import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoade
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.network.misskey.MisskeyService
-import dev.dimension.flare.data.network.misskey.api.model.AdminAdListRequest
+import dev.dimension.flare.data.network.misskey.api.model.NotesLocalTimelineRequest
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
 
 @OptIn(ExperimentalPagingApi::class)
-internal class FavouriteTimelineRemoteMediator(
+public class LocalTimelineRemoteMediator(
     private val accountKey: MicroBlogKey,
     private val service: MisskeyService,
 ) : CacheableRemoteLoader<UiTimelineV2> {
-    override val pagingKey: String
-        get() =
-            buildString {
-                append("favourite_")
-                append(accountKey.toString())
-            }
+    override val pagingKey: String = "local_$accountKey"
 
     override suspend fun load(
         pageSize: Int,
@@ -35,16 +30,16 @@ internal class FavouriteTimelineRemoteMediator(
                 }
 
                 PagingRequest.Refresh -> {
-                    service.iFavorites(
-                        AdminAdListRequest(
+                    service.notesLocalTimeline(
+                        NotesLocalTimelineRequest(
                             limit = pageSize,
                         ),
                     )
                 }
 
                 is PagingRequest.Append -> {
-                    service.iFavorites(
-                        AdminAdListRequest(
+                    service.notesLocalTimeline(
+                        NotesLocalTimelineRequest(
                             limit = pageSize,
                             untilId = request.nextKey,
                         ),
@@ -52,14 +47,11 @@ internal class FavouriteTimelineRemoteMediator(
                 }
             }
 
-        val notes = response.map { it.note }
-        val data =
-            notes.render(accountKey)
-
         return PagingResult(
             endOfPaginationReached = response.isEmpty(),
-            data = data,
-            nextKey = response.lastOrNull()?.noteId,
+            data =
+                response.render(accountKey),
+            nextKey = response.lastOrNull()?.id,
         )
     }
 }

@@ -18,7 +18,7 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 
-internal class MisskeyListLoader(
+public class MisskeyListLoader(
     private val service: MisskeyService,
     private val accountKey: MicroBlogKey,
 ) : ListLoader<UiList.List> {

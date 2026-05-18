@@ -1,22 +1,20 @@
 package dev.dimension.flare.data.datasource.misskey
 
-import androidx.paging.ExperimentalPagingApi
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.network.misskey.MisskeyService
-import dev.dimension.flare.data.network.misskey.api.model.NotesUserListTimelineRequest
+import dev.dimension.flare.data.network.misskey.api.model.ChannelsTimelineRequest
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
 
-@OptIn(ExperimentalPagingApi::class)
-internal class ListTimelineRemoteMediator(
-    private val listId: String,
+public class ChannelTimelineRemoteMediator(
     private val service: MisskeyService,
     private val accountKey: MicroBlogKey,
+    private val id: String,
 ) : CacheableRemoteLoader<UiTimelineV2> {
-    override val pagingKey = "list_${accountKey}_$listId"
+    override val pagingKey: String = "channel_${id}_$accountKey"
 
     override suspend fun load(
         pageSize: Int,
@@ -26,13 +24,12 @@ internal class ListTimelineRemoteMediator(
             when (request) {
                 PagingRequest.Refresh -> {
                     service
-                        .notesUserListTimeline(
-                            NotesUserListTimelineRequest(
-                                listId = listId,
-                                limit = pageSize,
-                                withRenotes = true,
-                                allowPartial = true,
-                            ),
+                        .channelsTimeline(
+                            channelsTimelineRequest =
+                                ChannelsTimelineRequest(
+                                    channelId = id,
+                                    limit = pageSize,
+                                ),
                         )
                 }
 
@@ -44,14 +41,13 @@ internal class ListTimelineRemoteMediator(
 
                 is PagingRequest.Append -> {
                     service
-                        .notesUserListTimeline(
-                            NotesUserListTimelineRequest(
-                                listId = listId,
-                                limit = pageSize,
-                                untilId = request.nextKey,
-                                withRenotes = true,
-                                allowPartial = true,
-                            ),
+                        .channelsTimeline(
+                            channelsTimelineRequest =
+                                ChannelsTimelineRequest(
+                                    channelId = id,
+                                    limit = pageSize,
+                                    untilId = request.nextKey,
+                                ),
                         )
                 }
             }

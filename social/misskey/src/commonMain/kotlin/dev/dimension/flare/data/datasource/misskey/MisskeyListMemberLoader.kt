@@ -14,7 +14,7 @@ import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.mapper.render
 import kotlinx.collections.immutable.toImmutableList
 
-internal class MisskeyListMemberLoader(
+public class MisskeyListMemberLoader(
     private val service: MisskeyService,
     private val accountKey: MicroBlogKey,
 ) : ListMemberLoader {

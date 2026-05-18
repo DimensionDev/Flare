@@ -4,24 +4,24 @@ import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.network.misskey.MisskeyService
-import dev.dimension.flare.data.network.misskey.api.model.UsersSearchRequest
+import dev.dimension.flare.data.network.misskey.api.model.UsersFollowersRequest
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.mapper.render
 
-internal class SearchUserPagingSource(
+public class FollowingPagingSource(
     private val service: MisskeyService,
     private val accountKey: MicroBlogKey,
-    private val query: String,
+    private val userKey: MicroBlogKey,
 ) : RemoteLoader<UiProfile> {
     override suspend fun load(
         pageSize: Int,
         request: PagingRequest,
     ): PagingResult<UiProfile> {
-        val offset =
+        val maxId =
             when (request) {
                 PagingRequest.Refresh -> {
-                    0
+                    null
                 }
 
                 is PagingRequest.Prepend -> {
@@ -31,20 +31,25 @@ internal class SearchUserPagingSource(
                 }
 
                 is PagingRequest.Append -> {
-                    request.nextKey.toIntOrNull() ?: 0
+                    request.nextKey
                 }
             }
         val response =
-            service.usersSearch(
-                UsersSearchRequest(
-                    query = query,
-                    limit = pageSize,
-                    offset = offset,
-                ),
-            )
+            service
+                .usersFollowing(
+                    usersFollowersRequest =
+                        UsersFollowersRequest(
+                            untilId = maxId,
+                            limit = pageSize,
+                            userId = userKey.id,
+                        ),
+                ).orEmpty()
         return PagingResult(
-            data = response.map { it.render(accountKey) },
-            nextKey = if (response.isEmpty()) null else (offset + pageSize).toString(),
+            data =
+                response.mapNotNull {
+                    it.followee?.render(accountKey = accountKey)
+                },
+            nextKey = response.lastOrNull()?.id,
         )
     }
 }

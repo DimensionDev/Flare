@@ -4,28 +4,28 @@ import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.network.misskey.MisskeyService
-import dev.dimension.flare.data.repository.tryRun
-import dev.dimension.flare.ui.model.UiList
+import dev.dimension.flare.data.network.misskey.api.model.PinnedUsersRequest
+import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.mapper.render
 
-internal class AntennasListPagingSource(
+public class TrendsUserPagingSource(
     private val service: MisskeyService,
-) : RemoteLoader<UiList.Antenna> {
+    private val accountKey: MicroBlogKey,
+) : RemoteLoader<UiProfile> {
     override suspend fun load(
         pageSize: Int,
         request: PagingRequest,
-    ): PagingResult<UiList.Antenna> {
+    ): PagingResult<UiProfile> {
         if (request is PagingRequest.Prepend || request is PagingRequest.Append) {
             return PagingResult(
                 endOfPaginationReached = true,
             )
         }
         val data =
-            tryRun {
-                service.antennasList().map {
-                    it.render()
-                }
-            }.getOrThrow()
+            service.pinnedUsers(PinnedUsersRequest(limit = pageSize)).map {
+                it.render(accountKey)
+            }
         return PagingResult(
             endOfPaginationReached = true,
             data = data,

@@ -9,11 +9,11 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
 
-internal class HybridTimelineRemoteMediator(
+public class HybridTimelineRemoteMediator(
     private val accountKey: MicroBlogKey,
     private val service: MisskeyService,
 ) : CacheableRemoteLoader<UiTimelineV2> {
-    override val pagingKey = "hybrid_timeline_$accountKey"
+    override val pagingKey: String = "hybrid_timeline_$accountKey"
 
     override suspend fun load(
         pageSize: Int,

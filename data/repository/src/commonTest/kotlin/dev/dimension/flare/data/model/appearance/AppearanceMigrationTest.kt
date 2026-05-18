@@ -63,11 +63,9 @@ class AppearanceMigrationTest {
             migrateAppearanceV1ToV2(pathProducer, store)
 
             assertEquals(
-                imported,
+                imported.toPatch().toBag(),
                 store.data
-                    .first()
-                    .toPatch()
-                    .toAppearanceSettings(),
+                    .first(),
             )
             assertFalse(fs.exists(oldPath))
             fs.deleteRecursively(root)

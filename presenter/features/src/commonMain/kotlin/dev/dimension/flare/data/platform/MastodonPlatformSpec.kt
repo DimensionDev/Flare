@@ -5,48 +5,28 @@ import dev.dimension.flare.common.deeplink.DeepLinkPattern
 import dev.dimension.flare.data.datasource.guest.mastodon.GuestMastodonDataSource
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.model.tab.TimelineSpec
-import dev.dimension.flare.data.network.mastodon.MastodonInstanceService
-import dev.dimension.flare.data.network.mastodon.MastodonPlatformDetector
-import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.PlatformSpec
-import dev.dimension.flare.model.PlatformType
-import dev.dimension.flare.model.PlatformTypeMetadata
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiInstanceMetadata
 import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.asType
-import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.presenter.home.mastodon.MastodonBookmarkTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.mastodon.MastodonFavouriteTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.mastodon.MastodonLocalTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.mastodon.MastodonPublicTimelinePresenter
-import io.ktor.http.Url
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
 internal data object MastodonPlatformSpec : PlatformSpec {
-    override val type = PlatformType.Mastodon
-    override val metadata =
-        PlatformTypeMetadata(
-            displayName = "Mastodon",
-            icon = UiIcon.Mastodon,
-        )
-    override val detector: PlatformDetector = MastodonPlatformDetector
+    override val type = MastodonSocialPlatformSpec.type
+    override val metadata = MastodonSocialPlatformSpec.metadata
+    override val detector = MastodonSocialPlatformSpec.detector
 
-    override fun agreementUrl(host: String): String? = "https://$host/about"
+    override fun agreementUrl(host: String): String? = MastodonSocialPlatformSpec.agreementUrl(host)
 
     override fun deepLinkPatterns(host: String): ImmutableList<DeepLinkPattern<out DeepLinkMapping.Type>> =
-        persistentListOf(
-            DeepLinkPattern(
-                DeepLinkMapping.Type.Profile.serializer(),
-                Url("https://$host/@{handle}"),
-            ),
-            DeepLinkPattern(
-                DeepLinkMapping.Type.Post.serializer(),
-                Url("https://$host/@{handle}/{id}"),
-            ),
-        )
+        MastodonSocialPlatformSpec.deepLinkPatterns(host)
 
     internal val localTimelineSpec =
         TimelineSpec(
@@ -115,7 +95,7 @@ internal data object MastodonPlatformSpec : PlatformSpec {
             favouriteTimelineSpec,
         )
 
-    override suspend fun instanceMetadata(host: String): UiInstanceMetadata = MastodonInstanceService("https://$host/").instance().render()
+    override suspend fun instanceMetadata(host: String): UiInstanceMetadata = MastodonSocialPlatformSpec.instanceMetadata(host)
 
     override fun guestDataSource(
         host: String,

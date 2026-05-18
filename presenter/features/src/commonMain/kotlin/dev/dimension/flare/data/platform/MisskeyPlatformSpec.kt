@@ -7,48 +7,33 @@ import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.tab.SourceTimelineTabItemV2
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
-import dev.dimension.flare.data.network.misskey.MisskeyPlatformDetector
-import dev.dimension.flare.data.network.misskey.MisskeyService
-import dev.dimension.flare.data.network.misskey.api.model.MetaRequest
-import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformSpec
-import dev.dimension.flare.model.PlatformType
-import dev.dimension.flare.model.PlatformTypeMetadata
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiInstanceMetadata
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.model.asType
-import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.presenter.home.misskey.MissKeyLocalTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.misskey.MissKeyPublicTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.misskey.MisskeyFavouriteTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.misskey.MisskeyHybridTimelinePresenter
 import dev.dimension.flare.ui.presenter.list.AntennasTimelinePresenter
 import dev.dimension.flare.ui.presenter.list.ChannelTimelinePresenter
-import io.ktor.http.Url
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
 internal data object MisskeyPlatformSpec : PlatformSpec {
-    override val type = PlatformType.Misskey
-    override val metadata =
-        PlatformTypeMetadata(
-            displayName = "Misskey",
-            icon = UiIcon.Misskey,
-        )
-    override val detector: PlatformDetector = MisskeyPlatformDetector
+    override val type = MisskeySocialPlatformSpec.type
+    override val metadata = MisskeySocialPlatformSpec.metadata
+    override val detector = MisskeySocialPlatformSpec.detector
 
-    override fun agreementUrl(host: String): String? = "https://$host/about"
+    override fun agreementUrl(host: String): String? = MisskeySocialPlatformSpec.agreementUrl(host)
 
     override fun deepLinkPatterns(host: String): ImmutableList<DeepLinkPattern<out DeepLinkMapping.Type>> =
-        persistentListOf(
-            DeepLinkPattern(DeepLinkMapping.Type.Profile.serializer(), Url("https://$host/@{handle}")),
-            DeepLinkPattern(DeepLinkMapping.Type.Post.serializer(), Url("https://$host/notes/{id}")),
-        )
+        MisskeySocialPlatformSpec.deepLinkPatterns(host)
 
     internal val favouriteTimelineSpec =
         TimelineSpec(
@@ -150,7 +135,7 @@ internal data object MisskeyPlatformSpec : PlatformSpec {
         )
 
     override suspend fun instanceMetadata(host: String): UiInstanceMetadata =
-        MisskeyService("https://$host/api/").meta(MetaRequest()).render()
+        MisskeySocialPlatformSpec.instanceMetadata(host)
 
     override fun guestDataSource(
         host: String,

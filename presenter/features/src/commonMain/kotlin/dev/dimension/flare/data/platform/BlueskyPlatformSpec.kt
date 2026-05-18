@@ -7,13 +7,9 @@ import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.tab.SourceTimelineTabItemV2
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
-import dev.dimension.flare.data.network.bluesky.BlueskyPlatformDetector
-import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformSpec
-import dev.dimension.flare.model.PlatformType
-import dev.dimension.flare.model.PlatformTypeMetadata
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiInstanceMetadata
 import dev.dimension.flare.ui.model.UiList
@@ -22,31 +18,18 @@ import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.model.asType
 import dev.dimension.flare.ui.presenter.home.bluesky.BlueskyBookmarkTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.bluesky.BlueskyFeedTimelinePresenter
-import io.ktor.http.Url
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.toImmutableList
 
 internal data object BlueskyPlatformSpec : PlatformSpec {
-    override val type = PlatformType.Bluesky
-    override val metadata =
-        PlatformTypeMetadata(
-            displayName = "Bluesky",
-            icon = UiIcon.Bluesky,
-        )
-    override val detector: PlatformDetector = BlueskyPlatformDetector
+    override val type = BlueskySocialPlatformSpec.type
+    override val metadata = BlueskySocialPlatformSpec.metadata
+    override val detector = BlueskySocialPlatformSpec.detector
 
-    override fun agreementUrl(host: String): String? = "https://bsky.social/about/support/tos"
+    override fun agreementUrl(host: String): String? = BlueskySocialPlatformSpec.agreementUrl(host)
 
     override fun deepLinkPatterns(host: String): ImmutableList<DeepLinkPattern<out DeepLinkMapping.Type>> =
-        buildList {
-            add(DeepLinkPattern(DeepLinkMapping.Type.Profile.serializer(), Url("https://$host/profile/{handle}")))
-            add(DeepLinkPattern(DeepLinkMapping.Type.BlueskyPost.serializer(), Url("https://$host/profile/{handle}/post/{id}")))
-            if (host == "bsky.social") {
-                add(DeepLinkPattern(DeepLinkMapping.Type.Profile.serializer(), Url("https://bsky.app/profile/{handle}")))
-                add(DeepLinkPattern(DeepLinkMapping.Type.BlueskyPost.serializer(), Url("https://bsky.app/profile/{handle}/post/{id}")))
-            }
-        }.toImmutableList()
+        BlueskySocialPlatformSpec.deepLinkPatterns(host)
 
     internal val bookmarkTimelineSpec =
         TimelineSpec(

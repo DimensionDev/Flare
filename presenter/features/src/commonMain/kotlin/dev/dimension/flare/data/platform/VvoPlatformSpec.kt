@@ -4,13 +4,8 @@ import dev.dimension.flare.common.deeplink.DeepLinkMapping
 import dev.dimension.flare.common.deeplink.DeepLinkPattern
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.model.tab.TimelineSpec
-import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
-import dev.dimension.flare.data.network.vvo.VVOPlatformDetector
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.PlatformSpec
-import dev.dimension.flare.model.PlatformType
-import dev.dimension.flare.model.PlatformTypeMetadata
-import dev.dimension.flare.model.vvo
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiInstanceMetadata
 import dev.dimension.flare.ui.model.UiStrings
@@ -21,17 +16,14 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
 internal data object VvoPlatformSpec : PlatformSpec {
-    override val type = PlatformType.VVo
-    override val metadata =
-        PlatformTypeMetadata(
-            displayName = vvo,
-            icon = UiIcon.Weibo,
-        )
-    override val detector: PlatformDetector = VVOPlatformDetector
+    override val type = VvoSocialPlatformSpec.type
+    override val metadata = VvoSocialPlatformSpec.metadata
+    override val detector = VvoSocialPlatformSpec.detector
 
-    override fun agreementUrl(host: String): String? = null
+    override fun agreementUrl(host: String): String? = VvoSocialPlatformSpec.agreementUrl(host)
 
-    override fun deepLinkPatterns(host: String): ImmutableList<DeepLinkPattern<out DeepLinkMapping.Type>> = persistentListOf()
+    override fun deepLinkPatterns(host: String): ImmutableList<DeepLinkPattern<out DeepLinkMapping.Type>> =
+        VvoSocialPlatformSpec.deepLinkPatterns(host)
 
     internal val favoriteTimelineSpec =
         TimelineSpec(

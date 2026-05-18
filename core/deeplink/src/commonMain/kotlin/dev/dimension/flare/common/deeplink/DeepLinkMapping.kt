@@ -1,6 +1,5 @@
 package dev.dimension.flare.common.deeplink
 
-import dev.dimension.flare.data.repository.DebugRepository
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiAccount
@@ -11,12 +10,12 @@ import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.serialization.Serializable
 
-internal object DeepLinkMapping {
-    sealed interface Type {
-        fun deepLink(accountKey: MicroBlogKey): DeeplinkRoute
+public object DeepLinkMapping {
+    public sealed interface Type {
+        public fun deepLink(accountKey: MicroBlogKey): DeeplinkRoute
 
         @Serializable
-        data class Profile(
+        public data class Profile(
             val handle: String,
         ) : Type {
             override fun deepLink(accountKey: MicroBlogKey): DeeplinkRoute {
@@ -38,7 +37,7 @@ internal object DeepLinkMapping {
         }
 
         @Serializable
-        data class Post(
+        public data class Post(
             val handle: String? = null,
             val id: String,
         ) : Type {
@@ -50,7 +49,7 @@ internal object DeepLinkMapping {
         }
 
         @Serializable
-        data class BlueskyPost(
+        public data class BlueskyPost(
             val handle: String,
             val id: String,
         ) : Type {
@@ -66,7 +65,7 @@ internal object DeepLinkMapping {
         }
 
         @Serializable
-        data class PostMedia(
+        public data class PostMedia(
             val handle: String,
             val id: String,
             val index: Int,
@@ -81,7 +80,7 @@ internal object DeepLinkMapping {
         }
     }
 
-    fun matches(
+    public fun matches(
         url: String,
         mapping: ImmutableMap<UiAccount, ImmutableList<DeepLinkPattern<out Type>>>,
     ): ImmutableMap<UiAccount, Type> {
@@ -92,7 +91,7 @@ internal object DeepLinkMapping {
         mapping.forEach { (account, patterns) ->
             val matchType =
                 patterns.firstNotNullOfOrNull { pattern ->
-                    DeepLinkMatcher(request, pattern, DebugRepository::log).match()?.let { match ->
+                    DeepLinkMatcher(request, pattern).match()?.let { match ->
                         KeyDecoder(match.args).decodeSerializableValue(match.serializer)
                     }
                 }

@@ -1,11 +1,13 @@
 package dev.dimension.flare.model
 
 import androidx.compose.runtime.Immutable
+import dev.dimension.flare.common.DebugRepository
 import dev.dimension.flare.common.deeplink.DeepLinkPattern
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiIcon
+import dev.dimension.flare.ui.model.UiInstance
 import dev.dimension.flare.ui.model.UiInstanceMetadata
 import kotlinx.collections.immutable.ImmutableList
 
@@ -36,6 +38,8 @@ public interface SocialPlatformPlugin {
     public val spec: SocialPlatformSpec
 
     public fun createDataSource(account: UiAccount): MicroblogDataSource?
+
+    public suspend fun recommendedInstances(): List<UiInstance> = emptyList()
 }
 
 public class SocialPlatformRegistry(
@@ -49,6 +53,16 @@ public class SocialPlatformRegistry(
 
     public val loginPlatformTypes: List<PlatformType>
         get() = specs.map { it.type }
+
+    public suspend fun recommendedInstances(): List<UiInstance> =
+        plugins.flatMap { plugin ->
+            try {
+                plugin.recommendedInstances()
+            } catch (e: Exception) {
+                DebugRepository.error(e)
+                emptyList()
+            }
+        }.distinctBy { "${it.type}:${it.domain}" }
 
     public fun requireSpec(type: PlatformType): SocialPlatformSpec =
         requireNotNull(specsByType[type]?.spec) {

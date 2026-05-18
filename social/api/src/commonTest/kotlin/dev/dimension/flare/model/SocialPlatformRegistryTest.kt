@@ -11,6 +11,7 @@ import dev.dimension.flare.data.network.nodeinfo.detectPlatformType
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiIcon
+import dev.dimension.flare.ui.model.UiInstance
 import dev.dimension.flare.ui.model.UiInstanceMetadata
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
@@ -56,6 +57,36 @@ class SocialPlatformRegistryTest {
     }
 
     @Test
+    fun recommendedInstancesComeFromRegisteredFirstPlugins() =
+        runTest {
+            val registry =
+                SocialPlatformRegistry(
+                    listOf(
+                        fakePlugin(
+                            type = PlatformType.Mastodon,
+                            recommendedInstances = { listOf(fakeInstance(PlatformType.Mastodon, "mastodon.example")) },
+                        ),
+                        fakePlugin(
+                            type = PlatformType.Mastodon,
+                            recommendedInstances = { listOf(fakeInstance(PlatformType.Mastodon, "duplicate.example")) },
+                        ),
+                        fakePlugin(
+                            type = PlatformType.Bluesky,
+                            recommendedInstances = { listOf(fakeInstance(PlatformType.Bluesky, "bsky.example")) },
+                        ),
+                    ),
+                )
+
+            assertEquals(
+                listOf(
+                    fakeInstance(PlatformType.Mastodon, "mastodon.example"),
+                    fakeInstance(PlatformType.Bluesky, "bsky.example"),
+                ),
+                registry.recommendedInstances(),
+            )
+        }
+
+    @Test
     fun detectsPlatformWithRegisteredDetectorsOnly() =
         runTest {
             val detector =
@@ -94,6 +125,7 @@ class SocialPlatformRegistryTest {
         type: PlatformType,
         displayName: String = type.name,
         detector: PlatformDetector = RecordingDetector(null),
+        recommendedInstances: suspend () -> List<UiInstance> = { emptyList() },
     ): SocialPlatformPlugin =
         object : SocialPlatformPlugin {
             override val spec: SocialPlatformSpec =
@@ -104,7 +136,23 @@ class SocialPlatformRegistryTest {
                 )
 
             override fun createDataSource(account: UiAccount): MicroblogDataSource? = FakeMicroblogDataSource
+
+            override suspend fun recommendedInstances(): List<UiInstance> = recommendedInstances()
         }
+
+    private fun fakeInstance(
+        type: PlatformType,
+        domain: String,
+    ): UiInstance =
+        UiInstance(
+            name = domain,
+            description = domain,
+            iconUrl = null,
+            domain = domain,
+            type = type,
+            bannerUrl = null,
+            usersCount = 0,
+        )
 
     private data class FakeSocialPlatformSpec(
         override val type: PlatformType,

@@ -1,11 +1,6 @@
 package dev.dimension.flare.data.repository
 
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.State
-import androidx.compose.runtime.produceState
-import androidx.compose.runtime.remember
-import dev.dimension.flare.common.Locale
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.database.app.AppDatabase
@@ -16,23 +11,18 @@ import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
-import dev.dimension.flare.model.defaultSocialPlatformRegistry
+import dev.dimension.flare.model.SocialPlatformRegistry
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.createDataSource
 import dev.dimension.flare.ui.model.toUi
-import dev.dimension.flare.ui.model.collectAsUiState
-import dev.dimension.flare.ui.model.takeSuccess
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
@@ -41,13 +31,14 @@ import kotlinx.coroutines.sync.withLock
 import kotlin.time.Clock
 
 @Stable
-internal class AccountRepository internal constructor(
-    private val appDatabase: AppDatabase,
+public class AccountRepository(
+    @PublishedApi internal val appDatabase: AppDatabase,
     private val coroutineScope: CoroutineScope,
-    internal val appDataStore: AppDataStore,
+    private val appDataStore: AppDataStore,
     private val cacheDatabase: CacheDatabase,
+    private val platformRegistry: SocialPlatformRegistry,
 ) {
-    internal val activeAccount: Flow<UiState<UiAccount>> by lazy {
+    public val activeAccount: Flow<UiState<UiAccount>> by lazy {
         appDatabase
             .accountDao()
             .activeAccount()
@@ -63,7 +54,7 @@ internal class AccountRepository internal constructor(
                 }
             }
     }
-    internal val allAccounts: Flow<ImmutableList<UiAccount>> by lazy {
+    public val allAccounts: Flow<ImmutableList<UiAccount>> by lazy {
         appDatabase.accountDao().sortedAccounts().map {
             it.map { it.toUi() }.toImmutableList()
         }
@@ -76,7 +67,7 @@ internal class AccountRepository internal constructor(
     private val addAccountFlow by lazy {
         MutableStateFlow<UiAccount?>(null)
     }
-    internal val onAdded: Flow<UiAccount> by lazy {
+    public val onAdded: Flow<UiAccount> by lazy {
         addAccountFlow
             .mapNotNull { it }
             .distinctUntilChangedBy { it.accountKey }
@@ -84,16 +75,16 @@ internal class AccountRepository internal constructor(
     private val removeAccountFlow by lazy {
         MutableStateFlow<MicroBlogKey?>(null)
     }
-    internal val onRemoved: Flow<MicroBlogKey> by lazy {
+    public val onRemoved: Flow<MicroBlogKey> by lazy {
         removeAccountFlow
             .mapNotNull { it }
             .distinctUntilChangedBy { it }
     }
 
-    internal fun addAccount(
+    public fun addAccount(
         account: UiAccount,
         credential: UiAccount.Credential,
-    ) = coroutineScope.launch {
+    ): Job = coroutineScope.launch {
         val existingAccount = appDatabase.accountDao().getAccount(account.accountKey)
         val dbAccount =
             existingAccount?.copy(
@@ -110,17 +101,17 @@ internal class AccountRepository internal constructor(
         addAccountFlow.value = account
     }
 
-    internal fun updateCredential(
+    public fun updateCredential(
         accountKey: MicroBlogKey,
         credential: UiAccount.Credential,
-    ) = coroutineScope.launch {
+    ): Job = coroutineScope.launch {
         appDatabase.accountDao().setCredential(
             accountKey,
             credential.encodeJson(),
         )
     }
 
-    internal fun updateAccountOrder(accounts: List<MicroBlogKey>) =
+    public fun updateAccountOrder(accounts: List<MicroBlogKey>): Job =
         coroutineScope.launch {
             appDatabase.connect {
                 accounts.forEachIndexed { index, accountKey ->
@@ -132,7 +123,7 @@ internal class AccountRepository internal constructor(
             }
         }
 
-    internal fun setActiveAccount(accountKey: MicroBlogKey) =
+    public fun setActiveAccount(accountKey: MicroBlogKey): Job =
         coroutineScope.launch {
             appDatabase.accountDao().setLastActive(
                 accountKey,
@@ -140,7 +131,7 @@ internal class AccountRepository internal constructor(
             )
         }
 
-    internal fun delete(accountKey: MicroBlogKey) =
+    public fun delete(accountKey: MicroBlogKey): Job =
         coroutineScope.launch {
             appDataStore.composeConfigData.updateData {
                 it.copy(
@@ -172,7 +163,7 @@ internal class AccountRepository internal constructor(
             appDatabase.accountDao().delete(accountKey)
         }
 
-    internal fun getFlow(accountKey: MicroBlogKey): Flow<UiState<UiAccount>> =
+    public fun getFlow(accountKey: MicroBlogKey): Flow<UiState<UiAccount>> =
         appDatabase.accountDao().get(accountKey).map {
             if (it == null) {
                 UiState.Error(NoActiveAccountException)
@@ -181,14 +172,14 @@ internal class AccountRepository internal constructor(
             }
         }
 
-    internal suspend fun find(accountKey: MicroBlogKey): UiAccount? =
+    public suspend fun find(accountKey: MicroBlogKey): UiAccount? =
         appDatabase
             .accountDao()
             .get(accountKey)
             .firstOrNull()
             ?.toUi()
 
-    internal inline fun <reified T : UiAccount.Credential> credentialFlow(accountKey: MicroBlogKey): Flow<T> =
+    public inline fun <reified T : UiAccount.Credential> credentialFlow(accountKey: MicroBlogKey): Flow<T> =
         appDatabase
             .accountDao()
             .get(accountKey)
@@ -197,101 +188,10 @@ internal class AccountRepository internal constructor(
                 it.credential_json.decodeJson<T>()
             }
 
-    internal suspend fun getOrCreateDataSource(account: UiAccount): MicroblogDataSource =
+    public suspend fun getOrCreateDataSource(account: UiAccount): MicroblogDataSource =
         dataSourceCacheMutex.withLock {
             dataSourceCache.getOrPut(account.accountKey) {
-                account.createDataSource()
+                platformRegistry.createDataSource(account)
             }
         }
 }
-
-@Composable
-internal fun accountProvider(
-    accountType: AccountType,
-    repository: AccountRepository,
-): State<UiState<UiAccount>> =
-    produceState<UiState<UiAccount>>(
-        initialValue = UiState.Loading(),
-        key1 = accountType,
-    ) {
-        when (accountType) {
-            AccountType.Guest,
-            is AccountType.GuestHost,
-            -> {
-                flowOf(
-                    UiState.Error(
-                        NoActiveAccountException,
-                    ),
-                )
-            }
-
-            is AccountType.Specific -> {
-                repository.getFlow(accountType.accountKey)
-            }
-        }.collect {
-            value = it
-        }
-    }
-
-@Composable
-internal fun accountServiceProvider(
-    accountType: AccountType,
-    repository: AccountRepository,
-): UiState<MicroblogDataSource> =
-    remember(
-        accountType,
-    ) {
-        accountServiceFlow(
-            accountType = accountType,
-            repository = repository,
-        )
-    }.collectAsUiState().value
-
-@OptIn(ExperimentalCoroutinesApi::class)
-internal fun accountServiceFlow(
-    accountType: AccountType,
-    repository: AccountRepository,
-): Flow<MicroblogDataSource> =
-    when (accountType) {
-        AccountType.Guest -> {
-            flowOf(
-                defaultSocialPlatformRegistry.guestDataSource(
-                    type = PlatformType.Mastodon,
-                    host = "mastodon.social",
-                    locale = Locale.language,
-                ),
-            )
-        }
-
-        is AccountType.GuestHost -> {
-            flowOf(
-                defaultSocialPlatformRegistry.guestDataSource(
-                    type = PlatformType.Mastodon,
-                    host = accountType.host,
-                    locale = Locale.language,
-                ),
-            )
-        }
-
-        is AccountType.Specific -> {
-            repository
-                .getFlow(accountType.accountKey)
-                .mapNotNull { it.takeSuccess() }
-                .distinctUntilChangedBy { it.accountKey }
-                .map { account -> repository.getOrCreateDataSource(account) }
-        }
-    }
-
-internal fun activeAccountFlow(repository: AccountRepository): Flow<UiAccount?> =
-    repository
-        .activeAccount
-        .map { it.takeSuccess() }
-        .distinctUntilChangedBy { it?.accountKey }
-
-internal fun allAccountServicesFlow(repository: AccountRepository): Flow<ImmutableList<MicroblogDataSource>> =
-    repository.allAccounts.map { accounts ->
-        accounts
-            .map {
-                repository.getOrCreateDataSource(it)
-            }.toImmutableList()
-    }

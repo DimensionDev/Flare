@@ -19,6 +19,8 @@ import dev.dimension.flare.data.repository.SearchHistoryRepository
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.data.translation.OnlinePreTranslationService
 import dev.dimension.flare.data.translation.PreTranslationService
+import dev.dimension.flare.model.SocialPlatformRegistry
+import dev.dimension.flare.model.defaultSocialPlatformRegistry
 import dev.dimension.flare.ui.presenter.compose.ComposeUseCase
 import dev.dimension.flare.ui.presenter.compose.RestoreDraftUseCase
 import dev.dimension.flare.ui.presenter.compose.SaveDraftUseCase
@@ -31,6 +33,7 @@ import org.koin.dsl.module
 
 internal val commonModule =
     module {
+        single<SocialPlatformRegistry> { defaultSocialPlatformRegistry }
         singleOf(::AccountRepository)
         single(createdAtStart = true) { AccountTabSyncCoordinator(get(), get(), get(), get()) }
         singleOf(::provideAppDatabase)

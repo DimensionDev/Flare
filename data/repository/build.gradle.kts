@@ -34,6 +34,7 @@ kotlin {
                 api(projects.core.model)
                 api(projects.data.database)
                 api(projects.data.datastore)
+                api(projects.social.api)
                 api(projects.social.microblog)
                 api(projects.ui.model)
                 api(libs.kotlinx.coroutines.core)

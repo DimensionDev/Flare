@@ -19,8 +19,12 @@ kotlin {
                 implementation(projects.data.database)
                 implementation(projects.presenter.runtime)
                 implementation(projects.social.api)
+                implementation(projects.social.bluesky)
                 implementation(projects.social.mastodon)
+                implementation(projects.social.misskey)
                 implementation(projects.social.rss)
+                implementation(projects.social.vvo)
+                implementation(projects.social.xqt)
                 implementation(libs.kotlinx.serialization.json)
             }
         }

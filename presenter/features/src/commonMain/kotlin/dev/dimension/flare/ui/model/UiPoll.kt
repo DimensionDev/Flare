@@ -2,7 +2,7 @@ package dev.dimension.flare.ui.model
 
 import androidx.compose.runtime.Immutable
 import dev.dimension.flare.common.SerializableImmutableList
-import dev.dimension.flare.data.datasource.microblog.PostEvent
+import dev.dimension.flare.ui.model.PostEvent
 import dev.dimension.flare.ui.humanizer.humanizePercentage
 import dev.dimension.flare.ui.render.UiDateTime
 import dev.dimension.flare.ui.render.toUi

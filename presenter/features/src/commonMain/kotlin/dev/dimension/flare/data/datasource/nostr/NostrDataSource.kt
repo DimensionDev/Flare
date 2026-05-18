@@ -9,7 +9,7 @@ import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeType
 import dev.dimension.flare.data.datasource.microblog.DatabaseUpdater
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
-import dev.dimension.flare.data.datasource.microblog.PostEvent
+import dev.dimension.flare.ui.model.PostEvent
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
 import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.RelationDataSource
@@ -405,10 +405,11 @@ internal class NostrDataSource(
         require(event is PostEvent.Nostr)
         when (event) {
             is PostEvent.Nostr.Like -> {
-                if (event.reactionEventId != null) {
+                val reactionEventId = event.reactionEventId
+                if (reactionEventId != null) {
                     serviceManager.withService {
                         it.deleteStatus(
-                            statusKey = MicroBlogKey(event.reactionEventId, NostrService.NOSTR_HOST),
+                            statusKey = MicroBlogKey(reactionEventId, NostrService.NOSTR_HOST),
                         )
                     }
                 } else {
@@ -439,10 +440,11 @@ internal class NostrDataSource(
             }
 
             is PostEvent.Nostr.Repost -> {
-                if (event.repostEventId != null) {
+                val repostEventId = event.repostEventId
+                if (repostEventId != null) {
                     serviceManager.withService {
                         it.deleteStatus(
-                            statusKey = MicroBlogKey(event.repostEventId, NostrService.NOSTR_HOST),
+                            statusKey = MicroBlogKey(repostEventId, NostrService.NOSTR_HOST),
                         )
                     }
                 } else {

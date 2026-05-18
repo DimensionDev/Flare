@@ -3,7 +3,7 @@ package dev.dimension.flare.ui.model.mapper
 import com.fleeksoft.ksoup.nodes.Element
 import com.fleeksoft.ksoup.nodes.Node
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
-import dev.dimension.flare.data.datasource.microblog.PostEvent
+import dev.dimension.flare.ui.model.PostEvent
 import dev.dimension.flare.data.datasource.microblog.userActionsMenu
 import dev.dimension.flare.data.network.mastodon.api.model.Account
 import dev.dimension.flare.data.network.mastodon.api.model.Attachment

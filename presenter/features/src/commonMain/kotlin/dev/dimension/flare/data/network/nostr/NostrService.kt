@@ -1891,7 +1891,7 @@ internal class NostrService(
                                                 color = ActionMenu.Item.Color.Red,
                                                 clickEvent =
                                                     ClickEvent.event(accountKey) {
-                                                        dev.dimension.flare.data.datasource.microblog.PostEvent.Nostr.Report(
+                                                        dev.dimension.flare.ui.model.PostEvent.Nostr.Report(
                                                             postKey = statusKey,
                                                             accountKey = accountKey,
                                                         )

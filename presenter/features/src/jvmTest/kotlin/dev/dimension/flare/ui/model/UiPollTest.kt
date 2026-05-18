@@ -1,6 +1,6 @@
 package dev.dimension.flare.ui.model
 
-import dev.dimension.flare.data.datasource.microblog.PostEvent
+import dev.dimension.flare.ui.model.PostEvent
 import dev.dimension.flare.model.MicroBlogKey
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf

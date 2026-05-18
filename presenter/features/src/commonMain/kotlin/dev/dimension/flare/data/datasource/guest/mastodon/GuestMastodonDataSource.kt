@@ -6,7 +6,7 @@ import dev.dimension.flare.data.datasource.mastodon.SearchUserPagingSource
 import dev.dimension.flare.data.datasource.mastodon.TrendHashtagPagingSource
 import dev.dimension.flare.data.datasource.microblog.DatabaseUpdater
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
-import dev.dimension.flare.data.datasource.microblog.PostEvent
+import dev.dimension.flare.ui.model.PostEvent
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
 import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.RelationDataSource

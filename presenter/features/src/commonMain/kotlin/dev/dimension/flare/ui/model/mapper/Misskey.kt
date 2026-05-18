@@ -1,7 +1,7 @@
 package dev.dimension.flare.ui.model.mapper
 
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
-import dev.dimension.flare.data.datasource.microblog.PostEvent
+import dev.dimension.flare.ui.model.PostEvent
 import dev.dimension.flare.data.datasource.microblog.userActionsMenu
 import dev.dimension.flare.data.network.misskey.api.model.Antenna
 import dev.dimension.flare.data.network.misskey.api.model.Channel

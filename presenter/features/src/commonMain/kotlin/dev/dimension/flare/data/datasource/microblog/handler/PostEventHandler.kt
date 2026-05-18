@@ -5,8 +5,8 @@ import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.database.cache.model.DbStatus
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.DatabaseUpdater
-import dev.dimension.flare.data.datasource.microblog.PostEvent
-import dev.dimension.flare.data.datasource.microblog.UpdatePostActionMenuEvent
+import dev.dimension.flare.data.datasource.microblog.nextActionMenu
+import dev.dimension.flare.ui.model.PostEvent
 import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.DbAccountType
@@ -46,13 +46,14 @@ internal class PostEventHandler(
                         accountType = dbAccountType,
                     ).firstOrNull()
                     ?.content
-            if (event is UpdatePostActionMenuEvent && originalData is UiTimelineV2.Post) {
+            val nextActionMenu = event.nextActionMenu()
+            if (nextActionMenu != null && originalData is UiTimelineV2.Post) {
                 val updatedData =
                     originalData.copy(
                         actions =
                             findAndReplaceActionMenu(
                                 actions = originalData.actions,
-                                newActionMenu = event.nextActionMenu(),
+                                newActionMenu = nextActionMenu,
                             ),
                     )
                 database.statusDao().update(

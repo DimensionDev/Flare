@@ -15,6 +15,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.humanizer.PlatformFormatter
 import dev.dimension.flare.ui.model.ClickEvent
+import dev.dimension.flare.ui.model.PostEvent
 import dev.dimension.flare.ui.model.UiHandle
 import dev.dimension.flare.ui.model.UiNumber
 import dev.dimension.flare.ui.model.UiPoll
@@ -81,16 +82,23 @@ class PostEventHandlerTest : RobolectricTest() {
                 )
             }
 
-            val original = createPost(actions = persistentListOf(createMenuItem(updateKey = "like", count = 1)))
+            val original = createPost(actions = persistentListOf(createMenuItem(updateKey = "mastodon_like_$postKey", count = 1)))
             insertPost(original)
 
             handler = PostEventHandler(accountType = AccountType.Specific(accountKey), handler = fakeRemoteHandler)
-            handler.handleEvent(TestUpdateMenuEvent(postKey = postKey, updateKey = "like", nextCount = 2))
+            handler.handleEvent(
+                PostEvent.Mastodon.Like(
+                    postKey = postKey,
+                    liked = false,
+                    accountKey = accountKey,
+                    count = 1,
+                ),
+            )
             advanceUntilIdle()
 
             val updated = readPost()
             assertNotNull(updated)
-            val updatedLike = updated.actions.filterIsInstance<ActionMenu.Item>().first { it.updateKey == "like" }
+            val updatedLike = updated.actions.filterIsInstance<ActionMenu.Item>().first { it.updateKey == "mastodon_like_$postKey" }
             assertEquals(2, updatedLike.count?.value)
             assertEquals(1, fakeRemoteHandler.callCount)
         }
@@ -108,17 +116,24 @@ class PostEventHandlerTest : RobolectricTest() {
                 )
             }
 
-            val original = createPost(actions = persistentListOf(createMenuItem(updateKey = "like", count = 1)))
+            val original = createPost(actions = persistentListOf(createMenuItem(updateKey = "mastodon_like_$postKey", count = 1)))
             insertPost(original)
 
             fakeRemoteHandler.shouldFail = true
             handler = PostEventHandler(accountType = AccountType.Specific(accountKey), handler = fakeRemoteHandler)
-            handler.handleEvent(TestUpdateMenuEvent(postKey = postKey, updateKey = "like", nextCount = 2))
+            handler.handleEvent(
+                PostEvent.Mastodon.Like(
+                    postKey = postKey,
+                    liked = false,
+                    accountKey = accountKey,
+                    count = 1,
+                ),
+            )
             advanceUntilIdle()
 
             val reverted = readPost()
             assertNotNull(reverted)
-            val like = reverted.actions.filterIsInstance<ActionMenu.Item>().first { it.updateKey == "like" }
+            val like = reverted.actions.filterIsInstance<ActionMenu.Item>().first { it.updateKey == "mastodon_like_$postKey" }
             assertEquals(1, like.count?.value)
             assertEquals(1, fakeRemoteHandler.callCount)
         }
@@ -291,18 +306,5 @@ class PostEventHandlerTest : RobolectricTest() {
                 error("remote failed")
             }
         }
-    }
-
-    private data class TestUpdateMenuEvent(
-        override val postKey: MicroBlogKey,
-        val updateKey: String,
-        val nextCount: Long,
-    ) : UpdatePostActionMenuEvent {
-        override fun nextActionMenu(): ActionMenu.Item =
-            ActionMenu.Item(
-                updateKey = updateKey,
-                text = ActionMenu.Item.Text.Raw("updated"),
-                count = UiNumber(nextCount),
-            )
     }
 }

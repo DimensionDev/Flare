@@ -424,7 +424,7 @@ class SerializationFormatBenchmarkTest {
         multiple = true,
         ownVotes = persistentListOf(1),
         voteEvent =
-            dev.dimension.flare.data.datasource.microblog.PostEvent.Mastodon.Vote(
+            dev.dimension.flare.ui.model.PostEvent.Mastodon.Vote(
                 id = "vote-${statusKey.id}",
                 accountKey = accountKey,
                 postKey = statusKey,

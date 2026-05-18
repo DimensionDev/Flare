@@ -1,4 +1,5 @@
 package dev.dimension.flare.common
+
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlin.time.Clock
@@ -11,7 +12,7 @@ import kotlin.time.Clock
  * * 64‑bit layout: 41 timestamp | 5 datacenter | 5 worker | 12 sequence
  *
  */
-internal data object SnowflakeIdGenerator {
+public data object SnowflakeIdGenerator {
     // ─────────────────────────────── config (edit to suit) ──────────────────
     private const val DATA_CENTER_ID: Int = 1 // 0‒31
     private const val WORKER_ID: Int = 1 // 0‒31
@@ -46,7 +47,7 @@ internal data object SnowflakeIdGenerator {
      *
      * **Suspend**s while waiting to enter the critical section ‒ no CPU busy‑wait.
      */
-    suspend fun nextId(): Long =
+    public suspend fun nextId(): Long =
         mutex.withLock {
             var ts = currentMillis()
 

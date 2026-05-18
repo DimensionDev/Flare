@@ -15,11 +15,11 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 
 // https://github.com/Kotlin/kotlinx.collections.immutable/issues/63
-internal typealias SerializableImmutableList<T> =
+public typealias SerializableImmutableList<T> =
     @Serializable(ImmutableListSerializer::class)
     ImmutableList<T>
 
-internal class ImmutableListSerializer<T>(
+public class ImmutableListSerializer<T>(
     private val dataSerializer: KSerializer<T>,
 ) : KSerializer<ImmutableList<T>> {
     @OptIn(SealedSerializationApi::class)
@@ -32,16 +32,16 @@ internal class ImmutableListSerializer<T>(
     override fun serialize(
         encoder: Encoder,
         value: ImmutableList<T>,
-    ) = ListSerializer(dataSerializer).serialize(encoder, value.toList())
+    ): Unit = ListSerializer(dataSerializer).serialize(encoder, value.toList())
 
     override fun deserialize(decoder: Decoder): ImmutableList<T> = ListSerializer(dataSerializer).deserialize(decoder).toPersistentList()
 }
 
-internal typealias SerializableImmutableMap<K, V> =
+public typealias SerializableImmutableMap<K, V> =
     @Serializable(ImmutableMapSerializer::class)
     ImmutableMap<K, V>
 
-internal class ImmutableMapSerializer<K, V>(
+public class ImmutableMapSerializer<K, V>(
     private val keySerializer: KSerializer<K>,
     private val valueSerializer: KSerializer<V>,
 ) : KSerializer<ImmutableMap<K, V>> {
@@ -55,7 +55,7 @@ internal class ImmutableMapSerializer<K, V>(
     override fun serialize(
         encoder: Encoder,
         value: ImmutableMap<K, V>,
-    ) = MapSerializer(keySerializer, valueSerializer).serialize(encoder, value.toMap())
+    ): Unit = MapSerializer(keySerializer, valueSerializer).serialize(encoder, value.toMap())
 
     override fun deserialize(decoder: Decoder): ImmutableMap<K, V> =
         MapSerializer(keySerializer, valueSerializer).deserialize(decoder).toPersistentMap()

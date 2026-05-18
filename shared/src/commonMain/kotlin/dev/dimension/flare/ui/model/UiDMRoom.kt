@@ -42,6 +42,7 @@ public data class UiDMItem internal constructor(
     val isFromMe: Boolean,
     val sendState: SendState?,
     val showSender: Boolean,
+    val remoteCursor: String? = null,
 ) {
     @Serializable
     public sealed interface Message {

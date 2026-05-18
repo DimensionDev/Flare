@@ -855,7 +855,6 @@ internal class BlueskyDataSource(
         BlueskyDirectMessageLoader(
             getService = this::pdsService,
             accountKey = accountKey,
-            coroutineScope = coroutineScope,
         )
     }
 

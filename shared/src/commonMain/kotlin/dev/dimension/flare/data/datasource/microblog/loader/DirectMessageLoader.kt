@@ -1,69 +1,38 @@
 package dev.dimension.flare.data.datasource.microblog.loader
 
-import androidx.paging.ExperimentalPagingApi
-import androidx.paging.PagingData
-import androidx.paging.RemoteMediator
-import androidx.paging.map
-import dev.dimension.flare.common.CacheData
-import dev.dimension.flare.data.database.cache.CacheDatabase
-import dev.dimension.flare.data.database.cache.model.DbDirectMessageTimeline
-import dev.dimension.flare.data.database.cache.model.DbMessageItem
+import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
+import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiDMItem
 import dev.dimension.flare.ui.model.UiDMRoom
 import dev.dimension.flare.ui.model.UiState
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.flowOf
 
-@OptIn(ExperimentalPagingApi::class)
 internal interface DirectMessageLoader {
     val platformType: PlatformType
 
-    fun listRemoteMediator(
-        database: CacheDatabase,
-        accountKey: MicroBlogKey,
-    ): RemoteMediator<Int, DbDirectMessageTimeline>
+    val runtimeTransformer: Flow<DirectMessageRuntimeTransformer>
+        get() = flowOf(DirectMessageRuntimeTransformer())
 
-    fun conversationRemoteMediator(
-        database: CacheDatabase,
-        accountKey: MicroBlogKey,
+    suspend fun loadRooms(
+        pageSize: Int,
+        request: PagingRequest,
+    ): PagingResult<UiDMRoom>
+
+    suspend fun loadMessages(
         roomKey: MicroBlogKey,
-    ): RemoteMediator<Int, DbMessageItem>
+        pageSize: Int,
+        request: PagingRequest,
+    ): PagingResult<UiDMItem>
 
-    fun listFlow(
-        source: Flow<PagingData<DbDirectMessageTimeline>>,
-        scope: CoroutineScope,
-    ): Flow<PagingData<UiDMRoom>> =
-        source.map { paging ->
-            paging.map { it.content.copy(unreadCount = it.unreadCount) }
-        }
-
-    fun conversationFlow(
-        source: Flow<PagingData<DbMessageItem>>,
-        scope: CoroutineScope,
-    ): Flow<PagingData<UiDMItem>> =
-        source.map { paging ->
-            paging.map { it.content }
-        }
-
-    fun roomInfoFlow(source: Flow<DbDirectMessageTimeline?>): Flow<UiDMRoom> =
-        source.mapNotNull { it?.content?.copy(unreadCount = it.unreadCount) }
-
-    suspend fun fetchRoomInfo(
-        database: CacheDatabase,
-        accountKey: MicroBlogKey,
-        roomKey: MicroBlogKey,
-    )
+    suspend fun fetchRoomInfo(roomKey: MicroBlogKey): UiDMRoom
 
     suspend fun sendMessage(
-        database: CacheDatabase,
-        accountKey: MicroBlogKey,
         roomKey: MicroBlogKey,
         message: String,
-    )
+    ): UiDMItem
 
     suspend fun deleteMessage(
         roomKey: MicroBlogKey,
@@ -71,23 +40,25 @@ internal interface DirectMessageLoader {
     )
 
     suspend fun fetchNewMessages(
-        database: CacheDatabase,
-        accountKey: MicroBlogKey,
         roomKey: MicroBlogKey,
-    )
+        cursor: String?,
+    ): DirectMessageDelta
 
     suspend fun leaveRoom(roomKey: MicroBlogKey)
 
-    fun createRoom(
-        database: CacheDatabase,
-        accountKey: MicroBlogKey,
-        userKey: MicroBlogKey,
-    ): Flow<UiState<MicroBlogKey>>
+    fun createRoom(userKey: MicroBlogKey): Flow<UiState<UiDMRoom>>
 
     suspend fun canSend(userKey: MicroBlogKey): Boolean
 
-    fun badgeCount(
-        database: CacheDatabase,
-        accountKey: MicroBlogKey,
-    ): CacheData<Int>
+    suspend fun loadBadgeCount(): Int
 }
+
+internal data class DirectMessageDelta(
+    val messages: List<UiDMItem> = emptyList(),
+    val deletedMessageKeys: List<MicroBlogKey> = emptyList(),
+)
+
+internal data class DirectMessageRuntimeTransformer(
+    val room: (UiDMRoom) -> UiDMRoom = { it },
+    val item: (UiDMItem) -> UiDMItem = { it },
+)

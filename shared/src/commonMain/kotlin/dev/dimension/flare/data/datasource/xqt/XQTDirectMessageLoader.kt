@@ -1,14 +1,11 @@
 package dev.dimension.flare.data.datasource.xqt
 
-import androidx.paging.PagingData
-import androidx.paging.map
-import dev.dimension.flare.common.CacheData
-import dev.dimension.flare.common.MemCacheable
-import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.XQT
-import dev.dimension.flare.data.database.cache.model.DbDirectMessageTimeline
-import dev.dimension.flare.data.database.cache.model.DbMessageItem
+import dev.dimension.flare.data.datasource.microblog.loader.DirectMessageDelta
 import dev.dimension.flare.data.datasource.microblog.loader.DirectMessageLoader
+import dev.dimension.flare.data.datasource.microblog.loader.DirectMessageRuntimeTransformer
+import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
+import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.network.xqt.XQTService
 import dev.dimension.flare.data.network.xqt.model.AddToConversationRequest
 import dev.dimension.flare.data.network.xqt.model.PostDmNew2Request
@@ -21,12 +18,9 @@ import dev.dimension.flare.ui.model.UiDMRoom
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiState
 import kotlinx.collections.immutable.persistentMapOf
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.mapNotNull
 import kotlin.uuid.Uuid
 
 internal class XQTDirectMessageLoader(
@@ -36,96 +30,114 @@ internal class XQTDirectMessageLoader(
 ) : DirectMessageLoader {
     override val platformType: PlatformType = PlatformType.xQt
 
-    private val dmNotificationMarkerKey: String
-        get() = "dm_notificationBadgeCount_$accountKey"
+    override val runtimeTransformer: Flow<DirectMessageRuntimeTransformer> =
+        credentialFlow.map { credential ->
+            DirectMessageRuntimeTransformer(
+                room = { it.withXqtMediaAuth(credential, accountKey.host) },
+                item = { it.withXqtMediaAuth(credential, accountKey.host) },
+            )
+        }
 
-    private val badgeCount by lazy {
-        MemCacheable(
-            key = dmNotificationMarkerKey,
-            fetchSource = {
-                service.getBadgeCount().dmUnreadCount?.toInt() ?: 0
-            },
+    override suspend fun loadRooms(
+        pageSize: Int,
+        request: PagingRequest,
+    ): PagingResult<UiDMRoom> {
+        if (request == PagingRequest.Refresh) {
+            val response = service.getDMUserUpdates().inboxInitialState
+            return PagingResult(
+                data =
+                    XQT.rooms(
+                        accountKey = accountKey,
+                        propertyEntries = response?.propertyEntries,
+                        users = response?.users,
+                        conversations = response?.conversations,
+                    ),
+                nextKey =
+                    if (response?.inboxTimelines?.trusted?.status == "AT_END") {
+                        null
+                    } else {
+                        response?.inboxTimelines?.trusted?.minEntryId
+                    },
+            )
+        }
+        val maxId =
+            (request as? PagingRequest.Append)?.nextKey
+                ?: return PagingResult(endOfPaginationReached = true)
+        val response =
+            service.getDMInboxTimelineTrusted(
+                maxId = maxId,
+            )
+        return PagingResult(
+            data =
+                XQT.rooms(
+                    accountKey = accountKey,
+                    propertyEntries = response.inboxTimeline?.propertyEntries,
+                    users = response.inboxTimeline?.users,
+                    conversations = response.inboxTimeline?.conversations,
+                ),
+            nextKey =
+                if (response.inboxTimeline?.status == "AT_END") {
+                    null
+                } else {
+                    response.inboxTimeline?.minEntryId
+                },
         )
     }
 
-    override fun listRemoteMediator(
-        database: CacheDatabase,
-        accountKey: MicroBlogKey,
-    ) = DMListRemoteMediator(
-        service = service,
-        accountKey = accountKey,
-        database = database,
-    )
-
-    override fun conversationRemoteMediator(
-        database: CacheDatabase,
-        accountKey: MicroBlogKey,
+    override suspend fun loadMessages(
         roomKey: MicroBlogKey,
-    ) = DMConversationRemoteMediator(
-        service = service,
-        accountKey = accountKey,
-        database = database,
-        roomKey = roomKey,
-        clearBadge = { _, _ -> badgeCount.refresh() },
-    )
-
-    override fun listFlow(
-        source: Flow<PagingData<DbDirectMessageTimeline>>,
-        scope: CoroutineScope,
-    ): Flow<PagingData<UiDMRoom>> =
-        source.combine(credentialFlow) { paging, credential ->
-            paging.map {
-                it.content
-                    .copy(unreadCount = it.unreadCount)
-                    .withXqtMediaAuth(credential, accountKey.host)
-            }
+        pageSize: Int,
+        request: PagingRequest,
+    ): PagingResult<UiDMItem> {
+        val response =
+            service.getDMConversationTimeline(
+                conversationId = roomKey.id,
+                maxId = (request as? PagingRequest.Append)?.nextKey,
+            )
+        if (request == PagingRequest.Refresh) {
+            service.postDMConversationMarkRead(
+                conversationId = roomKey.id,
+                conversationId2 = roomKey.id,
+                lastReadEventId = response.conversationTimeline?.maxEntryId.orEmpty(),
+            )
         }
+        return PagingResult(
+            data =
+                XQT.messages(
+                    accountKey = accountKey,
+                    propertyEntries = response.conversationTimeline?.propertyEntries,
+                    users = response.conversationTimeline?.users,
+                    conversations = response.conversationTimeline?.conversations,
+                ),
+            nextKey =
+                if (response.conversationTimeline?.status == "AT_END") {
+                    null
+                } else {
+                    response.conversationTimeline?.minEntryId
+                },
+        )
+    }
 
-    override fun conversationFlow(
-        source: Flow<PagingData<DbMessageItem>>,
-        scope: CoroutineScope,
-    ): Flow<PagingData<UiDMItem>> =
-        source.combine(credentialFlow) { paging, credential ->
-            paging.map {
-                it.content.withXqtMediaAuth(credential, accountKey.host)
-            }
-        }
-
-    override fun roomInfoFlow(source: Flow<DbDirectMessageTimeline?>): Flow<UiDMRoom> =
-        source
-            .combine(credentialFlow) { room, credential ->
-                room
-                    ?.content
-                    ?.copy(unreadCount = room.unreadCount)
-                    ?.withXqtMediaAuth(credential, accountKey.host)
-            }.mapNotNull { it }
-
-    override suspend fun fetchRoomInfo(
-        database: CacheDatabase,
-        accountKey: MicroBlogKey,
-        roomKey: MicroBlogKey,
-    ) {
+    override suspend fun fetchRoomInfo(roomKey: MicroBlogKey): UiDMRoom {
         val response =
             service.getDMConversationTimeline(
                 conversationId = roomKey.id,
                 context = "FETCH_DM_CONVERSATION",
                 maxId = "0",
             )
-        XQT.saveDM(
-            accountKey = accountKey,
-            database = database,
-            propertyEntries = response.conversationTimeline?.propertyEntries,
-            users = response.conversationTimeline?.users,
-            conversations = response.conversationTimeline?.conversations,
-        )
+        return XQT
+            .rooms(
+                accountKey = accountKey,
+                propertyEntries = response.conversationTimeline?.propertyEntries,
+                users = response.conversationTimeline?.users,
+                conversations = response.conversationTimeline?.conversations,
+            ).single()
     }
 
     override suspend fun sendMessage(
-        database: CacheDatabase,
-        accountKey: MicroBlogKey,
         roomKey: MicroBlogKey,
         message: String,
-    ) {
+    ): UiDMItem {
         val response =
             service.getDMConversationTimeline(
                 conversationId = roomKey.id,
@@ -140,13 +152,13 @@ internal class XQTDirectMessageLoader(
                     text = message,
                 ),
             )
-        XQT.saveDM(
-            accountKey = accountKey,
-            database = database,
-            propertyEntries = sendResponse.propertyEntries,
-            users = sendResponse.users,
-            conversations = response.conversationTimeline?.conversations,
-        )
+        return XQT
+            .messages(
+                accountKey = accountKey,
+                propertyEntries = sendResponse.propertyEntries,
+                users = sendResponse.users,
+                conversations = response.conversationTimeline?.conversations,
+            ).single()
     }
 
     override suspend fun deleteMessage(
@@ -160,22 +172,23 @@ internal class XQTDirectMessageLoader(
     }
 
     override suspend fun fetchNewMessages(
-        database: CacheDatabase,
-        accountKey: MicroBlogKey,
         roomKey: MicroBlogKey,
-    ) {
+        cursor: String?,
+    ): DirectMessageDelta {
         val response = service.getDMConversationTimeline(conversationId = roomKey.id)
         service.postDMConversationMarkRead(
             conversationId = roomKey.id,
             conversationId2 = roomKey.id,
             lastReadEventId = response.conversationTimeline?.maxEntryId.orEmpty(),
         )
-        XQT.saveDM(
-            accountKey = accountKey,
-            database = database,
-            propertyEntries = response.conversationTimeline?.propertyEntries,
-            users = response.conversationTimeline?.users,
-            conversations = response.conversationTimeline?.conversations,
+        return DirectMessageDelta(
+            messages =
+                XQT.messages(
+                    accountKey = accountKey,
+                    propertyEntries = response.conversationTimeline?.propertyEntries,
+                    users = response.conversationTimeline?.users,
+                    conversations = response.conversationTimeline?.conversations,
+                ),
         )
     }
 
@@ -183,11 +196,7 @@ internal class XQTDirectMessageLoader(
         service.postDMConversationDelete(conversationId = roomKey.id)
     }
 
-    override fun createRoom(
-        database: CacheDatabase,
-        accountKey: MicroBlogKey,
-        userKey: MicroBlogKey,
-    ): Flow<UiState<MicroBlogKey>> =
+    override fun createRoom(userKey: MicroBlogKey): Flow<UiState<UiDMRoom>> =
         flow {
             val accountIdLong =
                 accountKey.id.toLongOrNull()
@@ -221,22 +230,17 @@ internal class XQTDirectMessageLoader(
                 } else {
                     response
                 }
-            }.onSuccess { response ->
-                XQT.saveDM(
-                    accountKey = accountKey,
-                    database = database,
-                    propertyEntries = response.conversationTimeline?.propertyEntries,
-                    users = response.conversationTimeline?.users,
-                    conversations = response.conversationTimeline?.conversations,
-                )
             }.fold(
-                onSuccess = {
+                onSuccess = { response ->
                     emit(
                         UiState.Success(
-                            MicroBlogKey(
-                                id = roomId,
-                                host = accountKey.host,
-                            ),
+                            XQT
+                                .rooms(
+                                    accountKey = accountKey,
+                                    propertyEntries = response.conversationTimeline?.propertyEntries,
+                                    users = response.conversationTimeline?.users,
+                                    conversations = response.conversationTimeline?.conversations,
+                                ).single(),
                         ),
                     )
                 },
@@ -261,10 +265,7 @@ internal class XQTDirectMessageLoader(
             }
         }.isSuccess
 
-    override fun badgeCount(
-        database: CacheDatabase,
-        accountKey: MicroBlogKey,
-    ): CacheData<Int> = badgeCount
+    override suspend fun loadBadgeCount(): Int = service.getBadgeCount().dmUnreadCount?.toInt() ?: 0
 }
 
 private fun UiDMRoom.withXqtMediaAuth(

@@ -1,7 +1,7 @@
 package dev.dimension.flare.data.datasource.bluesky
 
 import androidx.paging.ExperimentalPagingApi
-import app.bsky.feed.SearchPostsQueryParams
+import app.bsky.feed.GetFeedQueryParams
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
@@ -9,19 +9,15 @@ import dev.dimension.flare.data.network.bluesky.BlueskyService
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
+import sh.christian.ozone.api.AtUri
 
 @OptIn(ExperimentalPagingApi::class)
-internal class SearchStatusRemoteMediator(
+public class FeedTimelineRemoteMediator(
     private val getService: suspend () -> BlueskyService,
     private val accountKey: MicroBlogKey,
-    private val query: String,
+    private val uri: String,
 ) : CacheableRemoteLoader<UiTimelineV2> {
-    override val pagingKey: String =
-        buildString {
-            append("search_")
-            append(query)
-            append(accountKey.toString())
-        }
+    override val pagingKey: String = "feed_timeline_$uri"
 
     override suspend fun load(
         pageSize: Int,
@@ -30,35 +26,39 @@ internal class SearchStatusRemoteMediator(
         val service = getService()
         val response =
             when (request) {
+                PagingRequest.Refresh -> {
+                    service
+                        .getFeed(
+                            GetFeedQueryParams(
+                                feed = AtUri(atUri = uri),
+                                limit = pageSize.toLong(),
+                            ),
+                        ).maybeResponse()
+                }
+
                 is PagingRequest.Prepend -> {
                     return PagingResult(
                         endOfPaginationReached = true,
                     )
                 }
 
-                PagingRequest.Refresh -> {
-                    service.searchPosts(
-                        SearchPostsQueryParams(
-                            q = query,
-                            limit = pageSize.toLong(),
-                        ),
-                    )
-                }
-
                 is PagingRequest.Append -> {
-                    service.searchPosts(
-                        SearchPostsQueryParams(
-                            q = query,
-                            limit = pageSize.toLong(),
-                            cursor = request.nextKey,
-                        ),
-                    )
+                    service
+                        .getFeed(
+                            GetFeedQueryParams(
+                                feed = AtUri(atUri = uri),
+                                limit = pageSize.toLong(),
+                                cursor = request.nextKey,
+                            ),
+                        ).maybeResponse()
                 }
-            }.requireResponse()
+            } ?: return PagingResult(
+                endOfPaginationReached = true,
+            )
 
         return PagingResult(
             endOfPaginationReached = response.cursor == null,
-            data = response.posts.map { it.render(accountKey) },
+            data = response.feed.render(accountKey),
             nextKey = response.cursor,
         )
     }

@@ -11,7 +11,7 @@ import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
 
 @OptIn(ExperimentalPagingApi::class)
-internal class BookmarkTimelineRemoteMediator(
+public class BookmarkTimelineRemoteMediator(
     private val getService: suspend () -> BlueskyService,
     private val accountKey: MicroBlogKey,
 ) : CacheableRemoteLoader<UiTimelineV2> {

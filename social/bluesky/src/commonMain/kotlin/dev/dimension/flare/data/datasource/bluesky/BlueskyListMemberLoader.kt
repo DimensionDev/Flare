@@ -21,7 +21,7 @@ import sh.christian.ozone.api.Nsid
 import sh.christian.ozone.api.RKey
 import kotlin.time.Clock
 
-internal class BlueskyListMemberLoader(
+public class BlueskyListMemberLoader(
     private val getService: suspend () -> BlueskyService,
     private val accountKey: MicroBlogKey,
 ) : ListMemberLoader {

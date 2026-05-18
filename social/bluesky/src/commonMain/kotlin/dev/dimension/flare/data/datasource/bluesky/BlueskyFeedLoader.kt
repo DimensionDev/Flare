@@ -27,9 +27,10 @@ import sh.christian.ozone.api.Did
 import sh.christian.ozone.api.Nsid
 import sh.christian.ozone.api.RKey
 import kotlin.time.Clock
+import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
-internal class BlueskyFeedLoader(
+public class BlueskyFeedLoader(
     private val getService: suspend () -> BlueskyService,
     private val accountKey: MicroBlogKey,
 ) : ListLoader<UiList.Feed> {
@@ -158,7 +159,8 @@ internal class BlueskyFeedLoader(
         )
     }
 
-    suspend fun subscribe(feedUri: String) {
+    @OptIn(ExperimentalUuidApi::class)
+    public suspend fun subscribe(feedUri: String) {
         val service = getService()
         val currentPreferences = service.getPreferencesForActor().requireResponse()
         val feedInfo =
@@ -204,7 +206,7 @@ internal class BlueskyFeedLoader(
         )
     }
 
-    suspend fun favourite(feedUri: String) {
+    public suspend fun favourite(feedUri: String) {
         val service = getService()
         val feedInfo =
             service
@@ -222,7 +224,7 @@ internal class BlueskyFeedLoader(
         }
     }
 
-    suspend fun unfavourite(feedUri: String) {
+    public suspend fun unfavourite(feedUri: String) {
         val service = getService()
         val feedInfo =
             service

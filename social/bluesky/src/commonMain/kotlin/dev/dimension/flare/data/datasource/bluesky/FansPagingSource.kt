@@ -10,7 +10,7 @@ import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.mapper.render
 import sh.christian.ozone.api.Did
 
-internal class FansPagingSource(
+public class FansPagingSource(
     private val getService: suspend () -> BlueskyService,
     private val accountKey: MicroBlogKey,
     private val userKey: MicroBlogKey,

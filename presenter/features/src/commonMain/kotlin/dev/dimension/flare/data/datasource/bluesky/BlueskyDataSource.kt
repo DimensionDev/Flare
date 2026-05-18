@@ -113,8 +113,6 @@ import sh.christian.ozone.api.Handle
 import sh.christian.ozone.api.Language
 import sh.christian.ozone.api.Nsid
 import sh.christian.ozone.api.RKey
-import sh.christian.ozone.api.model.JsonContent
-import sh.christian.ozone.api.model.JsonContent.Companion.encodeAsJsonContent
 import kotlin.time.Clock
 
 private const val AT_PROTO_PERSONAL_DATA_SERVER = "AtprotoPersonalDataServer"
@@ -924,5 +922,3 @@ internal class BlueskyDataSource(
             accountKey = accountKey,
         )
 }
-
-internal inline fun <reified T : Any> T.bskyJson(): JsonContent = bskyJson.encodeAsJsonContent(this)

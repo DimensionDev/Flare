@@ -31,7 +31,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import sh.christian.ozone.api.Did
 
-internal class BlueskyDirectMessageLoader(
+public class BlueskyDirectMessageLoader(
     private val getService: suspend () -> BlueskyService,
     private val accountKey: MicroBlogKey,
 ) : DirectMessageLoader {

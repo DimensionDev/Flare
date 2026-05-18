@@ -25,6 +25,7 @@ kotlin {
                 api(projects.ui.model)
                 api(projects.data.network)
                 api(projects.social.api)
+                api(projects.social.microblog)
                 api(libs.bluesky)
                 api(libs.bluesky.oauth)
                 implementation(projects.data.repository)

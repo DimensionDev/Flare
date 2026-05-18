@@ -19,7 +19,7 @@ import kotlinx.collections.immutable.toPersistentList
 import sh.christian.ozone.api.AtUri
 
 @OptIn(ExperimentalPagingApi::class)
-internal class StatusDetailRemoteMediator(
+public class StatusDetailRemoteMediator(
     private val statusKey: MicroBlogKey,
     private val getService: suspend () -> BlueskyService,
     private val accountKey: MicroBlogKey,

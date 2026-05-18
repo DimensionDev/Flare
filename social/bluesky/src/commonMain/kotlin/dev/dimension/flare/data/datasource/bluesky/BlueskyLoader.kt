@@ -28,8 +28,8 @@ import sh.christian.ozone.api.Nsid
 import sh.christian.ozone.api.RKey
 import kotlin.time.Clock
 
-internal class BlueskyLoader(
-    val accountKey: MicroBlogKey,
+public class BlueskyLoader(
+    public val accountKey: MicroBlogKey,
     private val getService: suspend () -> BlueskyService,
 ) : NotificationLoader,
     UserLoader,

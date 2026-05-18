@@ -19,7 +19,7 @@ import kotlinx.collections.immutable.toImmutableMap
 import kotlin.time.Clock
 
 @OptIn(ExperimentalPagingApi::class)
-internal class NotificationRemoteMediator(
+public class NotificationRemoteMediator(
     private val getService: suspend () -> BlueskyService,
     private val accountKey: MicroBlogKey,
     private val onClearMarker: () -> Unit,

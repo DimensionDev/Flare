@@ -1,23 +1,26 @@
 package dev.dimension.flare.data.datasource.bluesky
 
-import app.bsky.actor.SearchActorsQueryParams
+import androidx.paging.ExperimentalPagingApi
+import app.bsky.feed.GetTimelineQueryParams
+import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
-import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.network.bluesky.BlueskyService
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.model.UiProfile
+import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
 
-internal class SearchUserPagingSource(
+@OptIn(ExperimentalPagingApi::class)
+public class HomeTimelineRemoteMediator(
     private val getService: suspend () -> BlueskyService,
     private val accountKey: MicroBlogKey,
-    private val query: String,
-) : RemoteLoader<UiProfile> {
+) : CacheableRemoteLoader<UiTimelineV2> {
+    override val pagingKey: String = "home_$accountKey"
+
     override suspend fun load(
         pageSize: Int,
         request: PagingRequest,
-    ): PagingResult<UiProfile> {
+    ): PagingResult<UiTimelineV2> {
         val service = getService()
         val response =
             when (request) {
@@ -29,29 +32,28 @@ internal class SearchUserPagingSource(
 
                 PagingRequest.Refresh -> {
                     service
-                        .searchActors(
-                            SearchActorsQueryParams(
-                                q = query,
+                        .getTimeline(
+                            GetTimelineQueryParams(
                                 limit = pageSize.toLong(),
                             ),
-                        ).requireResponse()
+                        ).maybeResponse()
                 }
 
                 is PagingRequest.Append -> {
                     service
-                        .searchActors(
-                            SearchActorsQueryParams(
-                                q = query,
+                        .getTimeline(
+                            GetTimelineQueryParams(
                                 limit = pageSize.toLong(),
                                 cursor = request.nextKey,
                             ),
-                        ).requireResponse()
+                        ).maybeResponse()
                 }
-            }
-
+            } ?: return PagingResult(
+                endOfPaginationReached = true,
+            )
         return PagingResult(
             endOfPaginationReached = response.cursor == null,
-            data = response.actors.map { it.render(accountKey) },
+            data = response.feed.render(accountKey),
             nextKey = response.cursor,
         )
     }

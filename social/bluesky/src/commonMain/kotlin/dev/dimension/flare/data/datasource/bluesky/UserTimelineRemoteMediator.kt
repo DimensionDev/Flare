@@ -13,14 +13,14 @@ import dev.dimension.flare.ui.model.mapper.render
 import sh.christian.ozone.api.Did
 
 @OptIn(ExperimentalPagingApi::class)
-internal class UserTimelineRemoteMediator(
+public class UserTimelineRemoteMediator(
     private val getService: suspend () -> BlueskyService,
     private val accountKey: MicroBlogKey,
     private val userKey: MicroBlogKey,
     private val onlyMedia: Boolean = false,
     private val withReplies: Boolean = false,
 ) : CacheableRemoteLoader<UiTimelineV2> {
-    override val pagingKey =
+    override val pagingKey: String =
         buildString {
             append("user_timeline")
             if (onlyMedia) {

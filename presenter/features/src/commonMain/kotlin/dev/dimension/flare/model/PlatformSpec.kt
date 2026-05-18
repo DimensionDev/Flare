@@ -1,6 +1,5 @@
 package dev.dimension.flare.model
 
-import androidx.compose.runtime.Immutable
 import dev.dimension.flare.common.deeplink.DeepLinkMapping
 import dev.dimension.flare.common.deeplink.DeepLinkPattern
 import dev.dimension.flare.data.datasource.bluesky.BlueskyDataSource
@@ -12,7 +11,6 @@ import dev.dimension.flare.data.datasource.pleroma.PleromaDataSource
 import dev.dimension.flare.data.datasource.vvo.VVODataSource
 import dev.dimension.flare.data.datasource.xqt.XQTDataSource
 import dev.dimension.flare.data.model.tab.TimelineSpec
-import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
 import dev.dimension.flare.data.platform.BlueskyPlatformSpec
 import dev.dimension.flare.data.platform.MastodonPlatformSpec
 import dev.dimension.flare.data.platform.MisskeyPlatformSpec
@@ -21,84 +19,30 @@ import dev.dimension.flare.data.platform.VvoPlatformSpec
 import dev.dimension.flare.data.platform.XqtPlatformSpec
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiIcon
-import dev.dimension.flare.ui.model.UiInstanceMetadata
 import kotlinx.collections.immutable.ImmutableList
 
-internal interface PlatformSpec {
-    val type: PlatformType
-    val metadata: PlatformTypeMetadata
-    val detector: PlatformDetector
+internal interface PlatformSpec : SocialPlatformSpec {
     val timelineSpecs: ImmutableList<TimelineSpec<out TimelineSpec.Data>>
 
-    fun agreementUrl(host: String): String?
-
-    fun deepLinkPatterns(host: String): ImmutableList<DeepLinkPattern<out DeepLinkMapping.Type>>
-
-    suspend fun instanceMetadata(host: String): UiInstanceMetadata
-
-    fun guestDataSource(
-        host: String,
-        locale: String,
-    ): MicroblogDataSource
+    override fun deepLinkPatterns(host: String): ImmutableList<DeepLinkPattern<out DeepLinkMapping.Type>>
 }
 
-@Immutable
-internal data class PlatformTypeMetadata(
-    val displayName: String,
-    val icon: UiIcon,
-)
+internal val defaultSocialPlatformRegistry: SocialPlatformRegistry =
+    SocialPlatformRegistry(
+        listOf(
+            NostrSocialPlatformPlugin,
+            MastodonSocialPlatformPlugin,
+            MisskeySocialPlatformPlugin,
+            BlueskySocialPlatformPlugin,
+            XqtSocialPlatformPlugin,
+            VvoSocialPlatformPlugin,
+        ),
+    )
 
-internal interface SocialPlatformPlugin {
-    val spec: PlatformSpec
+internal val SocialPlatformRegistry.platformSpecs: List<PlatformSpec>
+    get() = specs.map { it as PlatformSpec }
 
-    fun createDataSource(account: UiAccount): MicroblogDataSource?
-}
-
-internal class SocialPlatformRegistry(
-    plugins: List<SocialPlatformPlugin>,
-) {
-    private val plugins = plugins.distinctBy { it.spec.type }
-    private val specsByType = this.plugins.associateBy { it.spec.type }
-
-    val specs: List<PlatformSpec>
-        get() = plugins.map { it.spec }
-
-    val loginPlatformTypes: List<PlatformType>
-        get() = specs.map { it.type }
-
-    fun requireSpec(type: PlatformType): PlatformSpec =
-        requireNotNull(specsByType[type]?.spec) {
-            "No social platform registered for $type"
-        }
-
-    fun createDataSource(account: UiAccount): MicroblogDataSource =
-        plugins.firstNotNullOfOrNull { it.createDataSource(account) }
-            ?: error("No social platform data source registered for ${account.platformType}")
-
-    fun guestDataSource(
-        type: PlatformType,
-        host: String,
-        locale: String,
-    ): MicroblogDataSource =
-        requireSpec(type).guestDataSource(
-            host = host,
-            locale = locale,
-        )
-
-    companion object {
-        val default: SocialPlatformRegistry =
-            SocialPlatformRegistry(
-                listOf(
-                    NostrSocialPlatformPlugin,
-                    MastodonSocialPlatformPlugin,
-                    MisskeySocialPlatformPlugin,
-                    BlueskySocialPlatformPlugin,
-                    XqtSocialPlatformPlugin,
-                    VvoSocialPlatformPlugin,
-                ),
-            )
-    }
-}
+internal fun SocialPlatformRegistry.requirePlatformSpec(type: PlatformType): PlatformSpec = requireSpec(type) as PlatformSpec
 
 private data object NostrSocialPlatformPlugin : SocialPlatformPlugin {
     override val spec: PlatformSpec = NostrPlatformSpec
@@ -185,4 +129,4 @@ public val PlatformType.icon: UiIcon
 public fun PlatformType.agreementUrl(host: String): String? = spec.agreementUrl(host)
 
 internal val PlatformType.spec: PlatformSpec
-    get() = SocialPlatformRegistry.default.requireSpec(this)
+    get() = defaultSocialPlatformRegistry.requirePlatformSpec(this)

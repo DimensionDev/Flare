@@ -4,10 +4,10 @@ import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.data.database.app.model.DbAccount
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.model.PlatformType
-import dev.dimension.flare.model.SocialPlatformRegistry
+import dev.dimension.flare.model.defaultSocialPlatformRegistry
 
 internal fun UiAccount.createDataSource(): MicroblogDataSource =
-    SocialPlatformRegistry.default.createDataSource(this)
+    defaultSocialPlatformRegistry.createDataSource(this)
 
 internal fun DbAccount.toUi(): UiAccount =
     when (platform_type) {

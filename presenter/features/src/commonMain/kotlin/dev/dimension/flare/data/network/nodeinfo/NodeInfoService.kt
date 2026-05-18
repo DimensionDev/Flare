@@ -7,7 +7,7 @@ import dev.dimension.flare.data.network.nodeinfo.model.Schema11
 import dev.dimension.flare.data.network.nodeinfo.model.Schema20
 import dev.dimension.flare.data.network.nodeinfo.model.Schema21
 import dev.dimension.flare.model.PlatformType
-import dev.dimension.flare.model.SocialPlatformRegistry
+import dev.dimension.flare.model.defaultSocialPlatformRegistry
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.http.URLBuilder
@@ -102,7 +102,7 @@ internal data object NodeInfoService {
 
     suspend fun detectPlatformType(host: String): NodeData {
         val hostCleaned = normalizeHost(host)
-        return SocialPlatformRegistry.default.specs
+        return defaultSocialPlatformRegistry.specs
             .map { it.detector }
             .distinct()
             .sortedByDescending { it.priority }

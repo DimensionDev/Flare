@@ -12,7 +12,7 @@ import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 
-internal suspend fun saveToDatabase(
+public suspend fun saveToDatabase(
     database: CacheDatabase,
     items: List<DbPagingTimelineWithStatus>,
 ) {

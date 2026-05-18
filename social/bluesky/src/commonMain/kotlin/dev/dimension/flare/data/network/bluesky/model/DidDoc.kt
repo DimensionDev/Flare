@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal data class DidDoc(
+public data class DidDoc(
     @SerialName("@context")
     val context: List<String>? = null,
     val id: String? = null,
@@ -14,14 +14,14 @@ internal data class DidDoc(
 )
 
 @Serializable
-internal data class Service(
+public data class Service(
     val id: String? = null,
     val type: String? = null,
     val serviceEndpoint: String? = null,
 )
 
 @Serializable
-internal data class VerificationMethod(
+public data class VerificationMethod(
     val id: String? = null,
     val type: String? = null,
     val controller: String? = null,

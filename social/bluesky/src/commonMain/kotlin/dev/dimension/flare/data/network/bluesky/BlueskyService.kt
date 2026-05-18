@@ -23,7 +23,7 @@ import kotlin.io.encoding.Base64
 
 // compatibility support for darwin (iOS, macOS) since Ktor's SHA-256 implementation is not available there
 // see: https://github.com/ktorio/ktor/blob/477d76409fec6c2d71683817c6060f1b2afdcbb2/ktor-utils/posix/src/io/ktor/util/CryptoNative.kt#L25C57-L25C92
-internal data object OAuthCodeChallengeMethodS256 : OAuthCodeChallengeMethod("S256") {
+public data object OAuthCodeChallengeMethodS256 : OAuthCodeChallengeMethod("S256") {
     override suspend fun provideCodeChallenge(codeVerifier: String): String {
         val hasher =
             CryptographyProvider
@@ -43,7 +43,7 @@ internal data object OAuthCodeChallengeMethodS256 : OAuthCodeChallengeMethod("S2
             .replace('/', '_')
 }
 
-internal data class BlueskyService private constructor(
+public data class BlueskyService private constructor(
     private val baseUrlFlow: Flow<String>,
     private val accountKey: MicroBlogKey? = null,
     private val authTokenFlow: Flow<UiAccount.Bluesky.Credential>? = null,
@@ -71,7 +71,7 @@ internal data class BlueskyService private constructor(
             expectSuccess = false
         },
     ) {
-    constructor(
+    public constructor(
         accountKey: MicroBlogKey,
         credentialFlow: Flow<UiAccount.Bluesky.Credential>,
         onCredentialRefreshed: suspend (UiAccount.Bluesky.Credential) -> Unit,
@@ -82,13 +82,13 @@ internal data class BlueskyService private constructor(
         onCredentialRefreshed = onCredentialRefreshed,
     )
 
-    constructor(
+    public constructor(
         baseUrl: String,
     ) : this(
         baseUrlFlow = flowOf(baseUrl),
     )
 
-    fun newBaseUrlService(baseUrl: String): BlueskyService = copy(baseUrlFlow = flowOf(baseUrl))
+    public fun newBaseUrlService(baseUrl: String): BlueskyService = copy(baseUrlFlow = flowOf(baseUrl))
 }
 
 private class AtprotoProxyPlugin {

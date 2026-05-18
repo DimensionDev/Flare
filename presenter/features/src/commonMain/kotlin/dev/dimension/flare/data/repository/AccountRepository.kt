@@ -1,7 +1,6 @@
 package dev.dimension.flare.data.repository
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.produceState
@@ -205,20 +204,6 @@ internal class AccountRepository internal constructor(
             }
         }
 }
-
-public data object NoActiveAccountException : Exception("No active account.")
-
-@Immutable
-public data class LoginExpiredException(
-    val accountKey: MicroBlogKey,
-    val platformType: PlatformType,
-) : Exception("Login expired.")
-
-@Immutable
-public data class RequireReLoginException(
-    val accountKey: MicroBlogKey,
-    val platformType: PlatformType,
-) : Exception("Login required.")
 
 @Composable
 internal fun accountProvider(

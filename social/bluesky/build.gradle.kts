@@ -17,4 +17,28 @@ kotlin {
             FlarePlatform.IOS,
         )
     }
+
+    sourceSets {
+        val commonMain by getting {
+            dependencies {
+                api(projects.core.model)
+                api(projects.ui.model)
+                api(projects.data.network)
+                api(projects.social.api)
+                api(libs.bluesky)
+                api(libs.bluesky.oauth)
+                implementation(projects.data.repository)
+                implementation(libs.cryptography.provider.optimal)
+            }
+        }
+        val commonTest by getting {
+            dependencies {
+                implementation(kotlin("test"))
+                implementation(libs.kotlinx.coroutines.test)
+                implementation(libs.ktor.client.mock)
+                implementation(libs.ktor.client.content.negotiation)
+                implementation(libs.ktor.serialization.kotlinx.json)
+            }
+        }
+    }
 }

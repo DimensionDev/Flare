@@ -2,7 +2,7 @@ package dev.dimension.flare.data.network.bluesky
 
 import dev.dimension.flare.data.network.nodeinfo.NodeData
 import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
-import dev.dimension.flare.data.repository.tryRun
+import dev.dimension.flare.common.tryRun
 import dev.dimension.flare.model.PlatformType
 
 public data object BlueskyPlatformDetector : PlatformDetector {

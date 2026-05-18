@@ -3,7 +3,7 @@ package dev.dimension.flare.data.network.rss
 import com.fleeksoft.ksoup.Ksoup
 import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.data.network.rss.model.Feed
-import dev.dimension.flare.data.repository.tryRun
+import dev.dimension.flare.common.tryRun
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.statement.HttpResponse

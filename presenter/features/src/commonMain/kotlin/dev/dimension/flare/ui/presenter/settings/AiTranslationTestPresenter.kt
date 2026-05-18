@@ -11,7 +11,7 @@ import dev.dimension.flare.common.Locale
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.network.ai.AiCompletionService
-import dev.dimension.flare.data.repository.tryRun
+import dev.dimension.flare.common.tryRun
 import dev.dimension.flare.data.translation.AiPlaceholderTranslationSupport
 import dev.dimension.flare.data.translation.TranslationPromptFormatter
 import dev.dimension.flare.data.translation.TranslationProvider

@@ -5,7 +5,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import dev.dimension.flare.data.repository.tryRun
+import dev.dimension.flare.common.tryRun
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.defaultSocialPlatformRegistry
 import dev.dimension.flare.ui.model.UiInstanceMetadata

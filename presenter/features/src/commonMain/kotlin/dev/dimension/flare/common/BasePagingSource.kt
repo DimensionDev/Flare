@@ -1,7 +1,7 @@
 package dev.dimension.flare.common
 
 import androidx.paging.PagingSource
-import dev.dimension.flare.data.repository.DebugRepository
+import dev.dimension.flare.common.DebugRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext

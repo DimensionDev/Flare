@@ -3,7 +3,7 @@ package dev.dimension.flare.data.network.rss
 import androidx.compose.runtime.Immutable
 import com.fleeksoft.ksoup.nodes.Element
 import dev.dimension.flare.data.network.ktorClient
-import dev.dimension.flare.data.repository.tryRun
+import dev.dimension.flare.common.tryRun
 import dev.dimension.flare.ui.render.UiDateTime
 import dev.dimension.flare.ui.render.parseHtml
 import dev.dimension.flare.ui.render.toUi

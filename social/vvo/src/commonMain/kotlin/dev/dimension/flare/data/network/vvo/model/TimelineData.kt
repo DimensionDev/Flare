@@ -1,7 +1,7 @@
 package dev.dimension.flare.data.network.vvo.model
 
 import dev.dimension.flare.common.JSON
-import dev.dimension.flare.data.repository.tryRun
+import dev.dimension.flare.common.tryRun
 import kotlinx.datetime.UtcOffset
 import kotlinx.datetime.format.DateTimeComponents.Companion.Format
 import kotlinx.datetime.format.DayOfWeekNames

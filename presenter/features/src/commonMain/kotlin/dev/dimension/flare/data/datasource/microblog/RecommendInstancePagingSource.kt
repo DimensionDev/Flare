@@ -5,7 +5,7 @@ import dev.dimension.flare.common.BasePagingSource
 import dev.dimension.flare.data.network.mastodon.JoinMastodonService
 import dev.dimension.flare.data.network.mastodon.MastodonInstanceService
 import dev.dimension.flare.data.network.misskey.JoinMisskeyService
-import dev.dimension.flare.data.repository.tryRun
+import dev.dimension.flare.common.tryRun
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiInstance
 import kotlinx.coroutines.async

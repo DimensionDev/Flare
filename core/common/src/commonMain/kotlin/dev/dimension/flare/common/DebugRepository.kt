@@ -1,4 +1,4 @@
-package dev.dimension.flare.data.repository
+package dev.dimension.flare.common
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineDispatcher

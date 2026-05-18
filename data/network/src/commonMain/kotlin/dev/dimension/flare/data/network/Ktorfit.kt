@@ -7,7 +7,7 @@ import de.jensklingenberg.ktorfit.converter.FlowConverterFactory
 import de.jensklingenberg.ktorfit.converter.ResponseConverterFactory
 import dev.dimension.flare.common.BuildConfig
 import dev.dimension.flare.common.JSON
-import dev.dimension.flare.data.repository.DebugRepository
+import dev.dimension.flare.common.DebugRepository
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation

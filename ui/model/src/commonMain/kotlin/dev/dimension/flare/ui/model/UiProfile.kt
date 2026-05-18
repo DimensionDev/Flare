@@ -3,7 +3,6 @@ package dev.dimension.flare.ui.model
 import androidx.compose.runtime.Immutable
 import dev.dimension.flare.common.SerializableImmutableList
 import dev.dimension.flare.common.SerializableImmutableMap
-import dev.dimension.flare.data.network.nostr.bech32PublicKey
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.humanizer.Formatter.humanize
@@ -17,7 +16,7 @@ import kotlinx.serialization.Transient
 
 @Serializable
 @Immutable
-public data class UiProfile internal constructor(
+public data class UiProfile public constructor(
     val key: MicroBlogKey,
     val handle: UiHandle,
     val avatar: String,
@@ -26,7 +25,7 @@ public data class UiProfile internal constructor(
     private val clickEvent: ClickEvent,
     public val banner: String?,
     public val description: UiRichText?,
-    internal val sourceLanguages: SerializableImmutableList<String> = persistentListOf(),
+    public val sourceLanguages: SerializableImmutableList<String> = persistentListOf(),
     @Transient
     public val translationDisplayState: TranslationDisplayState = TranslationDisplayState.Hidden,
     public val matrices: Matrices,
@@ -46,7 +45,7 @@ public data class UiProfile internal constructor(
         clickEvent.onClicked
     }
 
-    internal fun mergeWith(existing: UiProfile): UiProfile =
+    public fun mergeWith(existing: UiProfile): UiProfile =
         UiProfile(
             key = key,
             handle =
@@ -80,19 +79,19 @@ public data class UiProfile internal constructor(
         platformType == PlatformType.Nostr &&
             nameInternal.raw == derivedNostrFallbackName()
 
-    private fun derivedNostrFallbackName(): String? = runCatching { bech32PublicKey(key.id).take(16) }.getOrNull()
+    private fun derivedNostrFallbackName(): String? = bech32NostrPublicKey(key.id)?.take(16)
 
     @Serializable
     @Immutable
-    public data class Matrices internal constructor(
+    public data class Matrices public constructor(
         val fansCount: Long,
         val followsCount: Long,
         val statusesCount: Long,
         val platformFansCount: String? = null,
     ) {
-        val fansCountHumanized: String = platformFansCount ?: fansCount.humanize()
-        val followsCountHumanized: String = followsCount.humanize()
-        val statusesCountHumanized: String = statusesCount.humanize()
+        val fansCountHumanized: String by lazy { platformFansCount ?: fansCount.humanize() }
+        val followsCountHumanized: String by lazy { followsCount.humanize() }
+        val statusesCountHumanized: String by lazy { statusesCount.humanize() }
     }
 
     val handleWithoutAt: String by lazy {
@@ -116,12 +115,12 @@ public data class UiProfile internal constructor(
     @Serializable
     public sealed interface BottomContent {
         @Serializable
-        public data class Fields internal constructor(
+        public data class Fields public constructor(
             val fields: SerializableImmutableMap<String, UiRichText>,
         ) : BottomContent
 
         @Serializable
-        public data class Iconify internal constructor(
+        public data class Iconify public constructor(
             val items: SerializableImmutableMap<Icon, UiRichText>,
         ) : BottomContent {
             public enum class Icon {
@@ -200,3 +199,99 @@ private fun UiProfile.BottomContent?.mergeWith(existing: UiProfile.BottomContent
             this
         }
     }
+
+private const val NostrPublicKeyPrefix = "npub"
+private const val Bech32Separator = '1'
+private const val Bech32Charset = "qpzry9x8gf2tvdw0s3jn54khce6mua7l"
+
+private val Bech32ChecksumGenerators =
+    intArrayOf(
+        0x3b6a57b2,
+        0x26508e6d,
+        0x1ea119fa,
+        0x3d4233dd,
+        0x2a1462b3,
+    )
+
+private fun bech32NostrPublicKey(hex: String): String? =
+    runCatching {
+        val data = convertBits(hexToBytes(hex), fromBits = 8, toBits = 5, pad = true)
+        buildString {
+            append(NostrPublicKeyPrefix)
+            append(Bech32Separator)
+            (data + bech32Checksum(NostrPublicKeyPrefix, data)).forEach {
+                append(Bech32Charset[it])
+            }
+        }
+    }.getOrNull()
+
+private fun hexToBytes(hex: String): List<Int> {
+    require(hex.length == 64)
+    require(hex.all { it in '0'..'9' || it in 'a'..'f' || it in 'A'..'F' })
+
+    return hex
+        .chunked(2)
+        .map { it.toInt(16) }
+}
+
+private fun convertBits(
+    data: List<Int>,
+    fromBits: Int,
+    toBits: Int,
+    pad: Boolean,
+): List<Int> {
+    var accumulator = 0
+    var bits = 0
+    val maxValue = (1 shl toBits) - 1
+    val maxAccumulator = (1 shl (fromBits + toBits - 1)) - 1
+    val result = mutableListOf<Int>()
+
+    data.forEach { value ->
+        require(value >= 0 && value shr fromBits == 0)
+        accumulator = ((accumulator shl fromBits) or value) and maxAccumulator
+        bits += fromBits
+        while (bits >= toBits) {
+            bits -= toBits
+            result += (accumulator shr bits) and maxValue
+        }
+    }
+
+    if (pad) {
+        if (bits > 0) {
+            result += (accumulator shl (toBits - bits)) and maxValue
+        }
+    } else {
+        require(bits < fromBits)
+        require(((accumulator shl (toBits - bits)) and maxValue) == 0)
+    }
+
+    return result
+}
+
+private fun bech32Checksum(
+    prefix: String,
+    data: List<Int>,
+): List<Int> {
+    val values = bech32PrefixExpand(prefix) + data + List(6) { 0 }
+    val polymod = bech32Polymod(values) xor 1
+    return List(6) { index ->
+        (polymod shr (5 * (5 - index))) and 31
+    }
+}
+
+private fun bech32PrefixExpand(prefix: String): List<Int> =
+    prefix.map { it.code shr 5 } + 0 + prefix.map { it.code and 31 }
+
+private fun bech32Polymod(values: List<Int>): Int {
+    var checksum = 1
+    values.forEach { value ->
+        val top = checksum shr 25
+        checksum = ((checksum and 0x1ffffff) shl 5) xor value
+        Bech32ChecksumGenerators.forEachIndexed { index, generator ->
+            if (((top shr index) and 1) == 1) {
+                checksum = checksum xor generator
+            }
+        }
+    }
+    return checksum
+}

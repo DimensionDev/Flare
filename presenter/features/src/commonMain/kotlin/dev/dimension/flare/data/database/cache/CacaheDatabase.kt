@@ -5,8 +5,6 @@ import androidx.room3.Database
 import androidx.room3.RoomDatabase
 import androidx.room3.RoomDatabaseConstructor
 import androidx.room3.TypeConverters
-import androidx.room3.immediateTransaction
-import androidx.room3.useWriterConnection
 
 internal const val CACHE_DATABASE_VERSION = 39
 
@@ -66,10 +64,3 @@ internal abstract class CacheDatabase : RoomDatabase() {
 internal expect object CacheDatabaseConstructor : RoomDatabaseConstructor<CacheDatabase> {
     override fun initialize(): CacheDatabase
 }
-
-internal suspend fun <R> RoomDatabase.connect(block: suspend () -> R): R =
-    useWriterConnection {
-        it.immediateTransaction {
-            block.invoke()
-        }
-    }

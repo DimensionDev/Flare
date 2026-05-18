@@ -10,11 +10,11 @@ import okio.Path.Companion.toPath
 import okio.SYSTEM
 import kotlin.uuid.Uuid
 
-internal class DraftMediaStore(
+public class DraftMediaStore(
     private val platformPathProducer: PlatformPathProducer,
     private val fileSystem: FileSystem = FileSystem.SYSTEM,
 ) {
-    suspend fun persist(
+    public suspend fun persist(
         groupId: String,
         medias: List<ComposeData.Media>,
     ): List<SaveDraftMedia> {
@@ -45,7 +45,7 @@ internal class DraftMediaStore(
         return persisted
     }
 
-    suspend fun restore(medias: List<DraftMedia>): List<ComposeData.Media> =
+    public suspend fun restore(medias: List<DraftMedia>): List<ComposeData.Media> =
         medias.map { media ->
             ComposeData.Media(
                 file =
@@ -58,7 +58,7 @@ internal class DraftMediaStore(
             )
         }
 
-    fun delete(medias: List<DraftMedia>) {
+    public fun delete(medias: List<DraftMedia>) {
         medias.forEach { media ->
             val path = media.cachePath.toPath()
             if (fileSystem.exists(path)) {

@@ -18,14 +18,26 @@ kotlin {
         )
     }
 
+    compilerOptions {
+        allWarningsAsErrors.set(false)
+    }
+
     sourceSets {
+        all {
+            languageSettings {
+                optIn("kotlin.uuid.ExperimentalUuidApi")
+            }
+        }
         val commonMain by getting {
             dependencies {
                 api(projects.core.common)
                 api(projects.core.model)
                 api(projects.data.database)
+                api(projects.data.datastore)
+                api(projects.social.microblog)
                 api(projects.ui.model)
                 api(libs.kotlinx.coroutines.core)
+                api(libs.okio)
             }
         }
     }

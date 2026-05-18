@@ -17,29 +17,29 @@ import kotlinx.coroutines.flow.map
 import kotlin.time.Clock
 import kotlin.uuid.Uuid
 
-internal class DraftRepository(
+public class DraftRepository(
     private val database: AppDatabase,
     private val draftMediaStore: DraftMediaStore,
 ) {
-    val visibleDrafts: Flow<List<DraftGroup>> =
+    public val visibleDrafts: Flow<List<DraftGroup>> =
         database
             .draftDao()
             .visibleDraftGroups()
             .map { drafts -> drafts.map { it.toModel() } }
 
-    val sendingDrafts: Flow<List<DraftGroup>> =
+    public val sendingDrafts: Flow<List<DraftGroup>> =
         database
             .draftDao()
             .sendingDraftGroups()
             .map { drafts -> drafts.map { it.toModel() } }
 
-    fun draft(groupId: String): Flow<DraftGroup?> =
+    public fun draft(groupId: String): Flow<DraftGroup?> =
         database
             .draftDao()
             .draftGroup(groupId)
             .map { it?.toModel() }
 
-    suspend fun saveDraft(input: SaveDraftInput): String {
+    public suspend fun saveDraft(input: SaveDraftInput): String {
         val now = Clock.System.now().toEpochMilliseconds()
         val groupId = input.groupId
         val createdAt = input.createdAt ?: database.draftDao().getGroup(groupId)?.created_at ?: now
@@ -90,7 +90,7 @@ internal class DraftRepository(
         return groupId
     }
 
-    suspend fun updateTargetStatus(
+    public suspend fun updateTargetStatus(
         groupId: String,
         accountKey: MicroBlogKey,
         status: DraftTargetStatus,
@@ -112,7 +112,7 @@ internal class DraftRepository(
         }
     }
 
-    suspend fun deleteTarget(
+    public suspend fun deleteTarget(
         groupId: String,
         accountKey: MicroBlogKey,
     ) {
@@ -131,7 +131,7 @@ internal class DraftRepository(
         }
     }
 
-    suspend fun deleteGroup(groupId: String) {
+    public suspend fun deleteGroup(groupId: String) {
         val medias =
             database
                 .draftDao()
@@ -143,7 +143,7 @@ internal class DraftRepository(
         draftMediaStore.delete(medias)
     }
 
-    suspend fun markSendingAsDraftIfExpired(
+    public suspend fun markSendingAsDraftIfExpired(
         expiredBefore: Long,
         errorMessage: String? = null,
     ) {
@@ -164,7 +164,7 @@ internal class DraftRepository(
         }
     }
 
-    suspend fun markSendingAsFailed(errorMessage: String? = null) {
+    public suspend fun markSendingAsFailed(errorMessage: String? = null) {
         val now = Clock.System.now().toEpochMilliseconds()
         database.connect {
             database.draftDao().touchGroupsByTargetStatus(
@@ -186,75 +186,75 @@ internal class DraftRepository(
     ) = "${groupId}_$accountKey"
 }
 
-internal data class SaveDraftInput(
-    val groupId: String,
-    val content: DraftContent,
-    val targets: List<SaveDraftTarget>,
-    val medias: List<SaveDraftMedia>,
-    val createdAt: Long? = null,
+public data class SaveDraftInput(
+    public val groupId: String,
+    public val content: DraftContent,
+    public val targets: List<SaveDraftTarget>,
+    public val medias: List<SaveDraftMedia>,
+    public val createdAt: Long? = null,
 )
 
-internal data class SaveDraftTarget(
-    val accountKey: MicroBlogKey,
-    val status: DraftTargetStatus = DraftTargetStatus.DRAFT,
-    val errorMessage: String? = null,
-    val attemptCount: Int = 0,
-    val lastAttemptAt: Long? = null,
-    val createdAt: Long? = null,
+public data class SaveDraftTarget(
+    public val accountKey: MicroBlogKey,
+    public val status: DraftTargetStatus = DraftTargetStatus.DRAFT,
+    public val errorMessage: String? = null,
+    public val attemptCount: Int = 0,
+    public val lastAttemptAt: Long? = null,
+    public val createdAt: Long? = null,
 )
 
-internal data class SaveDraftMedia(
-    val cachePath: String,
-    val fileName: String? = null,
-    val mediaType: DraftMediaType,
-    val altText: String? = null,
-    val sortOrder: Int? = null,
-    val createdAt: Long? = null,
+public data class SaveDraftMedia(
+    public val cachePath: String,
+    public val fileName: String? = null,
+    public val mediaType: DraftMediaType,
+    public val altText: String? = null,
+    public val sortOrder: Int? = null,
+    public val createdAt: Long? = null,
 )
 
-internal data class DraftGroup(
-    val groupId: String,
-    val content: DraftContent,
-    val createdAt: Long,
-    val updatedAt: Long,
-    val targets: List<DraftTarget>,
-    val medias: List<DraftMedia>,
+public data class DraftGroup(
+    public val groupId: String,
+    public val content: DraftContent,
+    public val createdAt: Long,
+    public val updatedAt: Long,
+    public val targets: List<DraftTarget>,
+    public val medias: List<DraftMedia>,
 )
 
-internal data class DraftTarget(
-    val groupId: String,
-    val accountKey: MicroBlogKey,
-    val status: DraftTargetStatus,
-    val errorMessage: String?,
-    val attemptCount: Int,
-    val lastAttemptAt: Long?,
-    val createdAt: Long,
-    val updatedAt: Long,
+public data class DraftTarget(
+    public val groupId: String,
+    public val accountKey: MicroBlogKey,
+    public val status: DraftTargetStatus,
+    public val errorMessage: String?,
+    public val attemptCount: Int,
+    public val lastAttemptAt: Long?,
+    public val createdAt: Long,
+    public val updatedAt: Long,
 )
 
-internal data class DraftMedia(
-    val mediaId: String,
-    val groupId: String,
-    val cachePath: String,
-    val fileName: String?,
-    val mediaType: DraftMediaType,
-    val altText: String?,
-    val sortOrder: Int,
-    val createdAt: Long,
+public data class DraftMedia(
+    public val mediaId: String,
+    public val groupId: String,
+    public val cachePath: String,
+    public val fileName: String?,
+    public val mediaType: DraftMediaType,
+    public val altText: String?,
+    public val sortOrder: Int,
+    public val createdAt: Long,
 )
 
-internal data class ComposeDraftBundle(
-    val accounts: List<UiAccount>,
-    val template: ComposeData,
-    val groupId: String = newDraftGroupId(),
+public data class ComposeDraftBundle(
+    public val accounts: List<UiAccount>,
+    public val template: ComposeData,
+    public val groupId: String = newDraftGroupId(),
 )
 
-internal fun ComposeData.toComposeDraftBundle(
+public fun ComposeData.toComposeDraftBundle(
     accounts: List<UiAccount>,
     groupId: String = newDraftGroupId(),
 ): ComposeDraftBundle = ComposeDraftBundle(accounts = accounts, template = this, groupId = groupId)
 
-internal fun newDraftGroupId(): String = Uuid.random().toString()
+public fun newDraftGroupId(): String = Uuid.random().toString()
 
 private fun DbDraftGroupWithRelations.toModel(): DraftGroup =
     DraftGroup(

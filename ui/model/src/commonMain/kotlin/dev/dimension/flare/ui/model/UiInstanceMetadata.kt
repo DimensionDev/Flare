@@ -5,7 +5,7 @@ import dev.dimension.flare.common.SerializableImmutableList
 import dev.dimension.flare.common.SerializableImmutableMap
 
 @Immutable
-public data class UiInstanceMetadata internal constructor(
+public data class UiInstanceMetadata(
     val instance: UiInstance,
     val rules: SerializableImmutableMap<String, String>,
     val configuration: Configuration,

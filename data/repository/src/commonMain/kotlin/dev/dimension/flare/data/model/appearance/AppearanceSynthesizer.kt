@@ -34,7 +34,7 @@ internal fun AppearancePatch.toAppearanceSettings(): AppearanceSettings =
         timelineDisplayMode = get(AppearanceKeys.TimelineDisplayMode),
     )
 
-internal fun AppearanceSettings.toPatch(): AppearancePatch =
+public fun AppearanceSettings.toPatch(): AppearancePatch =
     AppearancePatch.EMPTY
         .set(AppearanceKeys.Theme, theme)
         .set(AppearanceKeys.DynamicTheme, dynamicTheme)
@@ -61,7 +61,7 @@ internal fun AppearanceSettings.toPatch(): AppearancePatch =
         .set(AppearanceKeys.TimelineDisplayMode, timelineDisplayMode)
 
 @OptIn(ExperimentalSerializationApi::class)
-internal fun AppearanceBag.toPatch(): AppearancePatch {
+public fun AppearanceBag.toPatch(): AppearancePatch {
     var patch = AppearancePatch.EMPTY
     for ((id, bytes) in entries) {
         val key = AppearanceKeys[id] ?: continue
@@ -76,7 +76,7 @@ internal fun AppearanceBag.toPatch(): AppearancePatch {
 }
 
 @OptIn(ExperimentalSerializationApi::class)
-internal fun AppearancePatch.toBag(): AppearanceBag =
+public fun AppearancePatch.toBag(): AppearanceBag =
     AppearanceBag(
         entries =
             explicitEntries

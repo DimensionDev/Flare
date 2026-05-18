@@ -14,7 +14,7 @@ import okio.FileSystem
 import okio.SYSTEM
 
 @OptIn(ExperimentalSerializationApi::class)
-internal suspend fun migrateAppearanceV1ToV2(
+public suspend fun migrateAppearanceV1ToV2(
     pathProducer: PlatformPathProducer,
     bagStore: DataStore<AppearanceBag>,
 ) {

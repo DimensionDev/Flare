@@ -5,11 +5,12 @@ import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.data.model.tab.findById
 import dev.dimension.flare.data.model.tab.isSystemHomeMixedTimeline
 import dev.dimension.flare.data.model.tab.withSystemHomeMixedTimelineEnabled
+import dev.dimension.flare.model.defaultSocialPlatformRegistry
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.map
 
-private val defaultTimelineResolver by lazy { TimelineResolver() }
+private val defaultTimelineResolver by lazy { TimelineResolver(defaultSocialPlatformRegistry) }
 
 public val SettingsRepository.homeTimelineTabs: Flow<List<TimelineTabItemV2>>
     get() = homeTimelineTabs(defaultTimelineResolver)

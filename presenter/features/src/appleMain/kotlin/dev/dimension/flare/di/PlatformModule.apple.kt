@@ -21,7 +21,7 @@ import org.koin.dsl.module
 
 internal actual val platformModule: Module =
     module {
-        singleOf(::AppDataStore)
+        single { AppDataStore(get<PlatformPathProducer>()) }
         singleOf(::DriverFactory)
         singleOf(::ApplePlatformPathProducer) bind PlatformPathProducer::class
         singleOf(::AppleFormatter) bind PlatformFormatter::class

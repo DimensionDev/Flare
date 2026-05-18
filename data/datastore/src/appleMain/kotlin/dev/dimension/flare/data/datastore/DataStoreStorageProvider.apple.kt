@@ -10,10 +10,10 @@ import dev.dimension.flare.data.io.PlatformPathProducer
 import okio.FileSystem
 import okio.SYSTEM
 
-internal actual class DataStoreStorageProvider actual constructor(
+public actual class DataStoreStorageProvider actual constructor(
     private val platformPathProducer: PlatformPathProducer,
 ) {
-    actual fun flareConfigStorage(): Storage<FlareConfig> =
+    public actual fun flareConfigStorage(): Storage<FlareConfig> =
         OkioStorage(
             fileSystem = FileSystem.SYSTEM,
             serializer = protobufSerializer(FlareConfig()),
@@ -22,7 +22,7 @@ internal actual class DataStoreStorageProvider actual constructor(
             },
         )
 
-    actual fun composeConfigStorage(): Storage<ComposeConfigData> =
+    public actual fun composeConfigStorage(): Storage<ComposeConfigData> =
         OkioStorage(
             fileSystem = FileSystem.SYSTEM,
             serializer = protobufSerializer(ComposeConfigData()),
@@ -31,7 +31,7 @@ internal actual class DataStoreStorageProvider actual constructor(
             },
         )
 
-    actual fun appSettingsStorage(): Storage<AppSettings> =
+    public actual fun appSettingsStorage(): Storage<AppSettings> =
         OkioStorage(
             fileSystem = FileSystem.SYSTEM,
             serializer = protobufSerializer(AppSettings(version = "")),

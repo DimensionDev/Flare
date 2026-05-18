@@ -19,7 +19,7 @@ import org.koin.dsl.module
 
 internal actual val platformModule: Module =
     module {
-        singleOf(::AppDataStore)
+        single { AppDataStore(get<PlatformPathProducer>()) }
         singleOf(::DriverFactory)
         singleOf(::AmberIntentLauncherRegistry)
         single<AmberSignerBridge> { AndroidAmberSignerBridge(androidContext(), get()) }

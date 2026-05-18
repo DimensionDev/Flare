@@ -6,12 +6,12 @@ import dev.dimension.flare.data.datastore.model.ComposeConfigData
 import dev.dimension.flare.data.datastore.model.FlareConfig
 import dev.dimension.flare.data.io.PlatformPathProducer
 
-internal expect class DataStoreStorageProvider(
+public expect class DataStoreStorageProvider(
     platformPathProducer: PlatformPathProducer,
 ) {
-    fun flareConfigStorage(): Storage<FlareConfig>
+    public fun flareConfigStorage(): Storage<FlareConfig>
 
-    fun composeConfigStorage(): Storage<ComposeConfigData>
+    public fun composeConfigStorage(): Storage<ComposeConfigData>
 
-    fun appSettingsStorage(): Storage<AppSettings>
+    public fun appSettingsStorage(): Storage<AppSettings>
 }

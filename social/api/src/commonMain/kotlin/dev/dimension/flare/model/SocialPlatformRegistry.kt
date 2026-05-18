@@ -47,7 +47,7 @@ public class SocialPlatformRegistry(
     plugins: List<SocialPlatformPlugin>,
 ) {
     private val plugins = plugins.distinctBy { it.spec.type }
-    private val specsByType = this.plugins.associateBy { it.spec.type }
+    private val pluginsByType = this.plugins.associateBy { it.spec.type }
 
     public val specs: List<SocialPlatformSpec>
         get() = plugins.map { it.spec }
@@ -66,7 +66,7 @@ public class SocialPlatformRegistry(
         }.distinctBy { "${it.type}:${it.domain}" }
 
     public fun requireSpec(type: PlatformType): SocialPlatformSpec =
-        requireNotNull(specsByType[type]?.spec) {
+        requireNotNull(pluginsByType[type]?.spec) {
             "No social platform registered for $type"
         }
 
@@ -88,8 +88,10 @@ public class SocialPlatformRegistry(
     ): UiInstanceMetadata = requireSpec(type).instanceMetadata(host)
 
     public fun createDataSource(account: UiAccount): MicroblogDataSource =
-        plugins.firstNotNullOfOrNull { it.createDataSource(account) }
-            ?: error("No social platform data source registered for ${account.platformType}")
+        requireNotNull(pluginsByType[account.platformType]) {
+            "No social platform registered for ${account.platformType}"
+        }.createDataSource(account)
+            ?: error("Registered social platform cannot create data source for ${account.platformType}")
 
     public fun guestDataSource(
         type: PlatformType,

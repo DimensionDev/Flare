@@ -58,6 +58,58 @@ class SocialPlatformRegistryTest {
     }
 
     @Test
+    fun createsDataSourceFromMatchingRegisteredPluginOnly() {
+        val registry =
+            SocialPlatformRegistry(
+                listOf(
+                    fakePlugin(
+                        type = PlatformType.Mastodon,
+                        createDataSource = { FakeMicroblogDataSource },
+                    ),
+                ),
+            )
+
+        assertSame(
+            FakeMicroblogDataSource,
+            registry.createDataSource(
+                UiAccount.Mastodon(
+                    accountKey = MicroBlogKey("mastodon-user", "mastodon.example"),
+                    instance = "mastodon.example",
+                ),
+            ),
+        )
+        assertFailsWith<IllegalArgumentException> {
+            registry.createDataSource(
+                UiAccount.Bluesky(
+                    accountKey = MicroBlogKey("did:plc:test", "bsky.social"),
+                ),
+            )
+        }
+    }
+
+    @Test
+    fun registeredPluginMustCreateItsOwnDataSource() {
+        val registry =
+            SocialPlatformRegistry(
+                listOf(
+                    fakePlugin(
+                        type = PlatformType.Mastodon,
+                        createDataSource = { null },
+                    ),
+                ),
+            )
+
+        assertFailsWith<IllegalStateException> {
+            registry.createDataSource(
+                UiAccount.Mastodon(
+                    accountKey = MicroBlogKey("mastodon-user", "mastodon.example"),
+                    instance = "mastodon.example",
+                ),
+            )
+        }
+    }
+
+    @Test
     fun recommendedInstancesComeFromRegisteredFirstPlugins() =
         runTest {
             val registry =
@@ -127,6 +179,7 @@ class SocialPlatformRegistryTest {
         displayName: String = type.name,
         detector: PlatformDetector = RecordingDetector(null),
         recommendedInstances: suspend () -> List<UiInstance> = { emptyList() },
+        createDataSource: (UiAccount) -> MicroblogDataSource? = { FakeMicroblogDataSource },
     ): SocialPlatformPlugin =
         object : SocialPlatformPlugin {
             override val spec: SocialPlatformSpec =
@@ -136,7 +189,7 @@ class SocialPlatformRegistryTest {
                     detector = detector,
                 )
 
-            override fun createDataSource(account: UiAccount): MicroblogDataSource? = FakeMicroblogDataSource
+            override fun createDataSource(account: UiAccount): MicroblogDataSource? = createDataSource(account)
 
             override suspend fun recommendedInstances(): List<UiInstance> = recommendedInstances()
         }

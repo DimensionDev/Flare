@@ -20,15 +20,8 @@ import dev.dimension.flare.data.model.appearance.toGlobalAppearance
 import dev.dimension.flare.data.model.appearance.toPatch
 import dev.dimension.flare.data.model.appearance.toTimelineAppearance
 import dev.dimension.flare.data.model.tab.TabSettingsV2
-import dev.dimension.flare.data.model.tab.TimelineResolver
-import dev.dimension.flare.data.model.tab.TimelineTabItemV2
-import dev.dimension.flare.data.model.tab.findById
-import dev.dimension.flare.data.model.tab.isSystemHomeMixedTimeline
-import dev.dimension.flare.data.model.tab.migrateTabSettingsV1ToV2
-import dev.dimension.flare.data.model.tab.withSystemHomeMixedTimelineEnabled
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
@@ -38,10 +31,10 @@ import okio.FileSystem
 import okio.SYSTEM
 
 @Stable
-public class SettingsRepository internal constructor(
+public class SettingsRepository(
     private val pathProducer: PlatformPathProducer,
     private val appDataStore: AppDataStore,
-    private val timelineResolver: TimelineResolver,
+    private val tabSettingsV2Migrator: TabSettingsV2Migrator = NoOpTabSettingsV2Migrator,
 ) {
     private val appearanceBagStore by lazy {
         createDataStore(
@@ -55,7 +48,7 @@ public class SettingsRepository internal constructor(
     private val tabSettingsMigrationMutex = Mutex()
     private var tabSettingsMigrationCompleted = false
 
-    internal val appearanceBag: Flow<AppearanceBag> by lazy {
+    public val appearanceBag: Flow<AppearanceBag> by lazy {
         flow {
             ensureAppearanceMigrated()
             emitAll(
@@ -117,12 +110,12 @@ public class SettingsRepository internal constructor(
         appearanceBagStore.updateData { patch.toBag() }
     }
 
-    internal suspend fun replaceAppearance(bag: AppearanceBag) {
+    public suspend fun replaceAppearance(bag: AppearanceBag) {
         ensureAppearanceMigrated()
         appearanceBagStore.updateData { bag }
     }
 
-    internal suspend fun replaceAppearance(settings: AppearanceSettings) {
+    public suspend fun replaceAppearance(settings: AppearanceSettings) {
         ensureAppearanceMigrated()
         appearanceBagStore.updateData { settings.toPatch().toBag() }
     }
@@ -149,57 +142,23 @@ public class SettingsRepository internal constructor(
         )
     }
 
-    internal val tabSettingsV2: Flow<TabSettingsV2> by lazy {
+    public val tabSettingsV2: Flow<TabSettingsV2> by lazy {
         flow {
             ensureTabSettingsMigrated()
             emitAll(tabSettingsV2Store.data)
         }
     }
 
-    public val homeTimelineTabs: Flow<List<TimelineTabItemV2>> by lazy {
-        tabSettingsV2
-            .distinctUntilChangedBy { it.homeSlots }
-            .map { settings ->
-                val tabs =
-                    settings.homeSlots
-                        .map { timelineResolver.toTabItem(it) }
-//                        .filter { it.enabled }
-                tabs.withSystemHomeMixedTimelineEnabled(
-                    enabled = tabs.any { it.isSystemHomeMixedTimeline },
-                )
-            }
-    }
-
-    internal fun homeTimelineTab(id: String): Flow<TimelineTabItemV2?> =
-        homeTimelineTabs.map { tabs ->
-            tabs.findById(id)
-        }
-
-    internal suspend fun updateTabSettingsV2(block: TabSettingsV2.() -> TabSettingsV2) {
+    public suspend fun updateTabSettingsV2(block: TabSettingsV2.() -> TabSettingsV2) {
         ensureTabSettingsMigrated()
         tabSettingsV2Store.updateData(block)
-    }
-
-    internal suspend fun replaceHomeTimelineTabs(tabs: List<TimelineTabItemV2>) {
-        updateTabSettingsV2 {
-            val normalizedTabs =
-                tabs.withSystemHomeMixedTimelineEnabled(
-                    enabled = tabs.any { it.isSystemHomeMixedTimeline },
-                )
-            copy(
-                homeSlots =
-                    normalizedTabs
-                        .distinctBy { it.id }
-                        .map { timelineResolver.toSlot(it) },
-            )
-        }
     }
 
     public suspend fun ensureTabSettingsMigrated() {
         if (tabSettingsMigrationCompleted) return
         tabSettingsMigrationMutex.withLock {
             if (tabSettingsMigrationCompleted) return
-            migrateTabSettingsV1ToV2(
+            tabSettingsV2Migrator.migrate(
                 pathProducer = pathProducer,
                 tabSettingsV2Store = tabSettingsV2Store,
             )

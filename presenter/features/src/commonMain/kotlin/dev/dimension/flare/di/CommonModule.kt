@@ -15,8 +15,10 @@ import dev.dimension.flare.data.repository.DraftMediaStore
 import dev.dimension.flare.data.repository.DraftRepository
 import dev.dimension.flare.data.repository.DraftSendingRecoveryCoordinator
 import dev.dimension.flare.data.repository.LocalFilterRepository
+import dev.dimension.flare.data.repository.LegacyTabSettingsV2Migrator
 import dev.dimension.flare.data.repository.SearchHistoryRepository
 import dev.dimension.flare.data.repository.SettingsRepository
+import dev.dimension.flare.data.repository.TabSettingsV2Migrator
 import dev.dimension.flare.data.translation.OnlinePreTranslationService
 import dev.dimension.flare.data.translation.PreTranslationService
 import dev.dimension.flare.model.SocialPlatformRegistry
@@ -63,7 +65,8 @@ internal val commonModule =
         }
         singleOf(::ComposeUseCase)
         singleOf(::SearchHistoryRepository)
-        singleOf(::SettingsRepository)
+        single<TabSettingsV2Migrator> { LegacyTabSettingsV2Migrator }
+        single { SettingsRepository(get(), get(), get()) }
         singleOf(::Readability)
         singleOf(::OpenAIService)
         singleOf(::AiCompletionService)

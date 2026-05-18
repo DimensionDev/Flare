@@ -8,7 +8,6 @@ import dev.dimension.flare.data.model.tab.TabSettingsV2
 import dev.dimension.flare.data.model.tab.TimelineFilterConfig
 import dev.dimension.flare.data.model.tab.TimelinePostKind
 import dev.dimension.flare.data.model.tab.TimelinePresentation
-import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.model.tab.toTimelineSlotOrNull
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.deleteTestRootPath
@@ -48,7 +47,6 @@ class TimelinePresenterBindingTest {
             SettingsRepository(
                 pathProducer = pathProducer,
                 appDataStore = AppDataStore(pathProducer),
-                timelineResolver = TimelineResolver(),
             )
     }
 

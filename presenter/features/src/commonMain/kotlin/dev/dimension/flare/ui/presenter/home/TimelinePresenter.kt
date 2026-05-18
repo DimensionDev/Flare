@@ -36,6 +36,7 @@ import dev.dimension.flare.data.repository.KeywordFilterPattern
 import dev.dimension.flare.data.repository.LocalFilterRepository
 import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.data.repository.SettingsRepository
+import dev.dimension.flare.data.repository.homeTimelineTab
 import dev.dimension.flare.data.translation.PreTranslationService
 import dev.dimension.flare.data.translation.TranslationSettingsSupport
 import dev.dimension.flare.ui.model.UiMedia

@@ -26,8 +26,8 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.put
 import kotlin.time.Duration.Companion.minutes
 
-internal class OpenAIService {
-    suspend fun models(
+public class OpenAIService {
+    public suspend fun models(
         serverUrl: String,
         apiKey: String,
     ): List<String> =
@@ -38,7 +38,7 @@ internal class OpenAIService {
             .map { it.id.id }
             .sorted()
 
-    suspend fun chatCompletion(
+    public suspend fun chatCompletion(
         config: AppSettings.AiConfig.Type.OpenAI,
         prompt: String,
     ): String {
@@ -92,7 +92,7 @@ internal class OpenAIService {
             ?.let { put("reasoning_effort", it) }
     }
 
-    suspend fun chatCompletionOrNull(
+    public suspend fun chatCompletionOrNull(
         config: AppSettings.AiConfig.Type.OpenAI,
         prompt: String,
     ): String? =

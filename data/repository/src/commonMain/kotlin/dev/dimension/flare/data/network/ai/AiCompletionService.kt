@@ -3,11 +3,11 @@ package dev.dimension.flare.data.network.ai
 import dev.dimension.flare.common.OnDeviceAI
 import dev.dimension.flare.data.datastore.model.AppSettings
 
-internal class AiCompletionService(
+public class AiCompletionService(
     private val openAIService: OpenAIService,
     private val onDeviceAI: OnDeviceAI,
 ) {
-    suspend fun translate(
+    public suspend fun translate(
         config: AppSettings.AiConfig,
         source: String,
         targetLanguage: String,
@@ -17,7 +17,7 @@ internal class AiCompletionService(
             onDeviceAI.translate(source, targetLanguage, prompt)
         }
 
-    suspend fun tldr(
+    public suspend fun tldr(
         config: AppSettings.AiConfig,
         source: String,
         targetLanguage: String,

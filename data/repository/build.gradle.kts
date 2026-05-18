@@ -34,11 +34,14 @@ kotlin {
                 api(projects.core.model)
                 api(projects.data.database)
                 api(projects.data.datastore)
+                implementation(projects.data.network)
                 api(projects.social.api)
                 api(projects.social.microblog)
                 api(projects.ui.model)
                 api(libs.kotlinx.coroutines.core)
                 api(libs.okio)
+                implementation(libs.ktor.client.logging)
+                implementation(libs.openai.client)
             }
         }
         val commonTest by getting {

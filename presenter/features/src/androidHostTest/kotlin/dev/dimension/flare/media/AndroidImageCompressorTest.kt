@@ -1,4 +1,4 @@
-package dev.dimension.flare.shared.image
+package dev.dimension.flare.media
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory

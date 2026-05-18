@@ -8,8 +8,8 @@ import dev.dimension.flare.data.io.ApplePlatformPathProducer
 import dev.dimension.flare.data.io.PlatformPathProducer
 import dev.dimension.flare.data.network.nostr.AmberSignerBridge
 import dev.dimension.flare.data.network.nostr.AppleAmberSignerBridge
-import dev.dimension.flare.shared.image.ImageCompressor
-import dev.dimension.flare.shared.image.IosImageCompressor
+import dev.dimension.flare.media.ImageCompressor
+import dev.dimension.flare.media.IosImageCompressor
 import dev.dimension.flare.ui.humanizer.AppleFormatter
 import dev.dimension.flare.ui.humanizer.PlatformFormatter
 import dev.dimension.flare.ui.render.ApplePlatformTextRenderer

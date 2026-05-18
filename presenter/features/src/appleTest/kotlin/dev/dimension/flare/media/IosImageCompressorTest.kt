@@ -1,4 +1,4 @@
-package dev.dimension.flare.shared.image
+package dev.dimension.flare.media
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.memScoped

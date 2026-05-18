@@ -8,8 +8,8 @@ import dev.dimension.flare.data.io.JvmPlatformPathProducer
 import dev.dimension.flare.data.io.PlatformPathProducer
 import dev.dimension.flare.data.network.nostr.AmberSignerBridge
 import dev.dimension.flare.data.network.nostr.JvmAmberSignerBridge
-import dev.dimension.flare.shared.image.ImageCompressor
-import dev.dimension.flare.shared.image.JvmImageCompressor
+import dev.dimension.flare.media.ImageCompressor
+import dev.dimension.flare.media.JvmImageCompressor
 import dev.dimension.flare.ui.humanizer.JVMFormatter
 import dev.dimension.flare.ui.humanizer.PlatformFormatter
 import org.koin.core.module.Module

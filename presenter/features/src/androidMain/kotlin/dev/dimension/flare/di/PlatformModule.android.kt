@@ -7,8 +7,8 @@ import dev.dimension.flare.data.io.PlatformPathProducer
 import dev.dimension.flare.data.network.nostr.AmberIntentLauncherRegistry
 import dev.dimension.flare.data.network.nostr.AmberSignerBridge
 import dev.dimension.flare.data.network.nostr.AndroidAmberSignerBridge
-import dev.dimension.flare.shared.image.AndroidImageCompressor
-import dev.dimension.flare.shared.image.ImageCompressor
+import dev.dimension.flare.media.AndroidImageCompressor
+import dev.dimension.flare.media.ImageCompressor
 import dev.dimension.flare.ui.humanizer.AndroidFormatter
 import dev.dimension.flare.ui.humanizer.PlatformFormatter
 import org.koin.android.ext.koin.androidContext

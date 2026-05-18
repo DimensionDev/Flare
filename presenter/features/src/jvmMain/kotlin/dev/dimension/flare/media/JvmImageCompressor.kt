@@ -1,4 +1,4 @@
-package dev.dimension.flare.shared.image
+package dev.dimension.flare.media
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

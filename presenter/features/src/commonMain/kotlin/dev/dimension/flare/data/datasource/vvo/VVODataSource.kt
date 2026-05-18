@@ -41,7 +41,7 @@ import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
-import dev.dimension.flare.shared.image.ImageCompressor
+import dev.dimension.flare.media.ImageCompressor
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiIcon

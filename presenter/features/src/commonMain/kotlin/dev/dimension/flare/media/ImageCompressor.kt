@@ -1,4 +1,4 @@
-package dev.dimension.flare.shared.image
+package dev.dimension.flare.media
 
 public interface ImageCompressor {
     public suspend fun compress(

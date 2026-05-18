@@ -1,4 +1,4 @@
-package dev.dimension.flare.shared.image
+package dev.dimension.flare.media
 
 import dev.whyoleg.cryptography.CryptographyProviderApi
 import dev.whyoleg.cryptography.providers.base.toByteArray

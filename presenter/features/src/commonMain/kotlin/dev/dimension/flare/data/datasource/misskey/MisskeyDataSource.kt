@@ -56,7 +56,7 @@ import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.shared.image.ImageCompressor
+import dev.dimension.flare.media.ImageCompressor
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiHashtag

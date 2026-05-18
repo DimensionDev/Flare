@@ -94,6 +94,17 @@ val validateModuleBoundaries by tasks.registering {
                     .filter { it in socialPlatformModules }
                     .forEach { violations += "${project.path} must not depend on sibling platform module $it" }
             }
+
+            project.kotlinSourceFiles().forEach { file ->
+                file.useLines { lines ->
+                    lines.forEachIndexed { index, line ->
+                        if (line.matches(Regex("""^\s*package\s+dev\.dimension\.flare\.shared(\.|$).*"""))) {
+                            violations +=
+                                "${file.relativeTo(rootDir).path}:${index + 1} must not use removed shared package: ${line.trim()}"
+                        }
+                    }
+                }
+            }
         }
 
         val forbiddenCoreImport =

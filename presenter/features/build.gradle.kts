@@ -48,6 +48,7 @@ kotlin {
                 api(projects.data.datastore)
                 api(projects.data.repository)
                 implementation(projects.data.network)
+                api(projects.social.api)
                 api(projects.social.microblog)
                 api(projects.presenter.runtime)
                 implementation(dependencies.platform(libs.compose.bom))

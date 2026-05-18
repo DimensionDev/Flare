@@ -110,11 +110,3 @@ internal data object NodeInfoService {
             ?: throw IllegalArgumentException("Unsupported platform: $hostCleaned")
     }
 }
-
-public data class NodeData(
-    val host: String,
-    val platformType: PlatformType,
-    val software: String,
-    // not officially supported, but works fine for basic features
-    val compatibleMode: Boolean,
-)

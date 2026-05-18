@@ -2,6 +2,13 @@
 
 package dev.dimension.flare.web.presenter.export
 
+import dev.dimension.flare.data.platform.BlueskySocialPlatformPlugin
+import dev.dimension.flare.data.platform.MastodonSocialPlatformPlugin
+import dev.dimension.flare.data.platform.MisskeySocialPlatformPlugin
+import dev.dimension.flare.data.platform.VvoSocialPlatformPlugin
+import dev.dimension.flare.data.platform.XqtSocialPlatformPlugin
+import dev.dimension.flare.model.SocialPlatformRegistry
+import dev.dimension.flare.model.SocialPlatformSpec
 import kotlin.js.ExperimentalJsExport
 import kotlin.js.ExperimentalWasmJsInterop
 import kotlin.js.JsAny
@@ -12,6 +19,7 @@ import kotlin.js.Promise
 import kotlin.js.toJsString
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
@@ -22,6 +30,16 @@ private var nextHandleId = 1
 private var nextSubscriptionId = 1
 private var initializedConfigJson: String = "{}"
 private var initializedConfig: JsonElement = JsonObject(emptyMap())
+private val webSocialPlatformRegistry =
+    SocialPlatformRegistry(
+        listOf(
+            MastodonSocialPlatformPlugin,
+            MisskeySocialPlatformPlugin,
+            BlueskySocialPlatformPlugin,
+            XqtSocialPlatformPlugin,
+            VvoSocialPlatformPlugin,
+        ),
+    )
 
 private val presenterHandles = mutableMapOf<String, PresenterHandle>()
 private val supportedPresenterTypeIds =
@@ -84,6 +102,10 @@ public fun supportedPresenterTypes(): String =
     JsonObject(
         supportedPresenterTypeIds.associateWith { JsonPrimitive(true) },
     ).toString()
+
+@JsExport
+@JsName("registeredSocialPlatforms")
+public fun registeredSocialPlatforms(): String = registeredPlatformMetadata().toString()
 
 @JsExport
 @JsName("subscribe")
@@ -168,5 +190,22 @@ private fun PresenterHandle.stateJson(): String =
                 JsonObject(
                     supportedPresenterTypeIds.associateWith { JsonPrimitive(true) },
                 ),
+            "registeredSocialPlatforms" to registeredPlatformMetadata(),
         ),
     ).toString()
+
+private fun registeredPlatformMetadata(): JsonArray =
+    JsonArray(
+        webSocialPlatformRegistry.specs.map { spec ->
+            spec.toMetadataJson()
+        },
+    )
+
+private fun SocialPlatformSpec.toMetadataJson(): JsonObject =
+    JsonObject(
+        mapOf(
+            "type" to JsonPrimitive(type.name),
+            "displayName" to JsonPrimitive(metadata.displayName),
+            "icon" to JsonPrimitive(metadata.icon.name),
+        ),
+    )

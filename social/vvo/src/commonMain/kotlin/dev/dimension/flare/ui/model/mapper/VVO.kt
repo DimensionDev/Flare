@@ -33,11 +33,11 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
 import kotlin.time.Clock
 
-internal fun Status.render(accountKey: MicroBlogKey): UiTimelineV2 = renderStatusV2(accountKey)
+public fun Status.render(accountKey: MicroBlogKey): UiTimelineV2 = renderStatusV2(accountKey)
 
-internal fun Comment.render(accountKey: MicroBlogKey): UiTimelineV2 = renderStatusV2(accountKey)
+public fun Comment.render(accountKey: MicroBlogKey): UiTimelineV2 = renderStatusV2(accountKey)
 
-internal fun Attitude.render(accountKey: MicroBlogKey): UiTimelineV2 {
+public fun Attitude.render(accountKey: MicroBlogKey): UiTimelineV2 {
     val content = status?.renderStatusV2(accountKey)
     val user = user?.render(accountKey)
     return UiTimelineV2.UserList(
@@ -444,7 +444,7 @@ private fun Comment.renderStatusV2(accountKey: MicroBlogKey): UiTimelineV2.Post 
     )
 }
 
-internal fun User.render(accountKey: MicroBlogKey): UiProfile {
+public fun User.render(accountKey: MicroBlogKey): UiProfile {
     val userKey =
         MicroBlogKey(
             id = id.toString(),
@@ -501,7 +501,7 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
     )
 }
 
-internal fun ActionMenu.Companion.vvoLike(
+public fun ActionMenu.Companion.vvoLike(
     statusKey: MicroBlogKey,
     liked: Boolean,
     count: Long,
@@ -528,7 +528,7 @@ internal fun ActionMenu.Companion.vvoLike(
             ),
     )
 
-internal fun ActionMenu.Companion.vvoLikeComment(
+public fun ActionMenu.Companion.vvoLikeComment(
     statusKey: MicroBlogKey,
     liked: Boolean,
     count: Long,
@@ -555,7 +555,7 @@ internal fun ActionMenu.Companion.vvoLikeComment(
             ),
     )
 
-internal fun ActionMenu.Companion.vvoFavorite(
+public fun ActionMenu.Companion.vvoFavorite(
     statusKey: MicroBlogKey,
     favorited: Boolean,
     accountKey: MicroBlogKey,
@@ -579,7 +579,7 @@ internal fun ActionMenu.Companion.vvoFavorite(
             ),
     )
 
-internal fun renderVVOText(
+public fun renderVVOText(
     text: String,
     accountKey: MicroBlogKey,
     sourceLanguages: List<String> = emptyList(),

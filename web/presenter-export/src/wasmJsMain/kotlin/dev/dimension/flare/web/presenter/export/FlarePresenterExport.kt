@@ -19,6 +19,21 @@ private var nextSubscriptionId = 1
 private var initializedConfigJson: String = "{}"
 
 private val presenterHandles = mutableMapOf<String, PresenterHandle>()
+private val supportedPresenterTypeIds =
+    setOf(
+        "service-select",
+        "login",
+        "home-tabs",
+        "timeline",
+        "search",
+        "profile",
+        "status-detail",
+        "compose",
+        "draft",
+        "rss-sources",
+        "rss-detail",
+        "rss-settings",
+    )
 
 private data class PresenterHandle(
     val type: String,
@@ -41,6 +56,9 @@ public fun createPresenter(
     type: String,
     argsJson: String,
 ): String {
+    require(type in supportedPresenterTypeIds) {
+        "Unsupported presenter type: $type"
+    }
     val handleId = "presenter-${nextHandleId++}"
     presenterHandles[handleId] =
         PresenterHandle(
@@ -49,6 +67,13 @@ public fun createPresenter(
         )
     return handleId
 }
+
+@JsExport
+@JsName("supportedPresenterTypes")
+public fun supportedPresenterTypes(): String =
+    JsonObject(
+        supportedPresenterTypeIds.associateWith { JsonPrimitive(true) },
+    ).toString()
 
 @JsExport
 @JsName("subscribe")
@@ -113,5 +138,9 @@ private fun PresenterHandle.stateJson(): String =
             "ready" to JsonPrimitive(true),
             "dispatchCount" to JsonPrimitive(dispatchCount),
             "lastActionJson" to (lastActionJson?.let(::JsonPrimitive) ?: JsonNull),
+            "supportedPresenterTypes" to
+                JsonObject(
+                    supportedPresenterTypeIds.associateWith { JsonPrimitive(true) },
+                ),
         ),
     ).toString()

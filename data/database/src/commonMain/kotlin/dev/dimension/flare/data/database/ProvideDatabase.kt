@@ -5,7 +5,7 @@ import dev.dimension.flare.data.database.cache.CacheDatabase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 
-internal fun provideAppDatabase(driverFactory: DriverFactory): AppDatabase =
+public fun provideAppDatabase(driverFactory: DriverFactory): AppDatabase =
     driverFactory
         .createBuilder<AppDatabase>("app.db")
         .addMigrations(AppDatabase.MIGRATION_8_9, AppDatabase.MIGRATION_9_10)
@@ -13,9 +13,9 @@ internal fun provideAppDatabase(driverFactory: DriverFactory): AppDatabase =
         .setQueryCoroutineContext(Dispatchers.IO)
         .build()
 
-internal const val CACHE_DATABASE_NAME = "cache.db"
+public const val CACHE_DATABASE_NAME: String = "cache.db"
 
-internal fun provideCacheDatabase(driverFactory: DriverFactory): CacheDatabase =
+public fun provideCacheDatabase(driverFactory: DriverFactory): CacheDatabase =
     driverFactory
         .createBuilder<CacheDatabase>(CACHE_DATABASE_NAME, isCache = true)
         .fallbackToDestructiveMigration(dropAllTables = true)

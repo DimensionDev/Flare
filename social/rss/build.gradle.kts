@@ -17,4 +17,19 @@ kotlin {
             FlarePlatform.IOS,
         )
     }
+
+    sourceSets {
+        val commonMain by getting {
+            dependencies {
+                api(projects.core.common)
+                api(projects.core.model)
+                api(projects.data.database)
+                api(projects.data.network)
+                api(projects.social.microblog)
+                api(projects.ui.model)
+                implementation(libs.kotlinx.datetime)
+                implementation(libs.ksoup)
+            }
+        }
+    }
 }

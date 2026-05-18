@@ -23,7 +23,7 @@ import kotlin.time.Instant
 //        is StatusContent.Rss.RssContent.RDF -> this.render()
 //    }
 
-internal val Feed.title: String
+public val Feed.title: String
     get() =
         when (this) {
             is Feed.Atom -> this.title.value
@@ -169,7 +169,7 @@ internal fun Feed.RDF.Item.render(
     )
 }
 
-internal fun parseRssDateToInstant(input: String): Instant? =
+public fun parseRssDateToInstant(input: String): Instant? =
     runCatching {
         Instant.parse(input)
     }.getOrNull() ?: runCatching {

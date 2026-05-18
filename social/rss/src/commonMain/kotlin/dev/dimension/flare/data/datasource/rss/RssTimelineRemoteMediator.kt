@@ -11,7 +11,7 @@ import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.model.mapper.title
 
-internal class RssTimelineRemoteMediator(
+public class RssTimelineRemoteMediator(
     private val url: String,
     private val fetchFeed: suspend (String) -> Feed = RssService::fetch,
     private val fetchIcon: suspend (String) -> String? = RssService::fetchIcon,

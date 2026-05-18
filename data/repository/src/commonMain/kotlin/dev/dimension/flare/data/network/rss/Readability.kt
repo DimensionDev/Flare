@@ -17,10 +17,10 @@ import kotlin.experimental.ExperimentalObjCRefinement
 import kotlin.native.HiddenFromObjC
 import kotlin.time.Instant
 
-internal class Readability {
+public class Readability {
     private val client = ktorClient()
 
-    fun parse(url: String): Flow<Result<DocumentData>> =
+    public fun parse(url: String): Flow<Result<DocumentData>> =
         flow {
             runCatching {
                 val response = client.get(url).bodyAsText()

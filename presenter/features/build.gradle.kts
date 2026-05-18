@@ -84,7 +84,6 @@ kotlin {
                 implementation(libs.ktor.client.resources)
                 implementation(libs.cryptography.provider.optimal)
                 implementation(libs.nostr.sdk.kmp)
-                implementation(libs.readability)
             }
         }
         val commonTest by getting {

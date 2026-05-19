@@ -5,8 +5,6 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.defaultSocialPlatformRegistry
 import dev.dimension.flare.model.xqtHost
-import dev.dimension.flare.ui.model.UiAccount
-import dev.dimension.flare.ui.presenter.home.toDeeplinkRoute
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import io.ktor.http.Url
 import kotlinx.collections.immutable.ImmutableList
@@ -19,6 +17,44 @@ import kotlin.test.assertTrue
 class DeepLinkMappingTest {
     private fun PlatformType.deepLinkPatterns(host: String) =
         defaultSocialPlatformRegistry.deepLinkPatterns(this, host)
+
+    private fun profileRoute(
+        accountKey: MicroBlogKey,
+        userName: String,
+        host: String = accountKey.host,
+    ) = DeeplinkRoute.Profile.UserNameWithHost(
+        accountType = AccountType.Specific(accountKey),
+        userName = userName,
+        host = host,
+    )
+
+    private fun postRoute(
+        accountKey: MicroBlogKey,
+        id: String,
+    ) = DeeplinkRoute.Status.Detail(
+        accountType = AccountType.Specific(accountKey),
+        statusKey = MicroBlogKey(id, accountKey.host),
+    )
+
+    private fun blueskyPostRoute(
+        accountKey: MicroBlogKey,
+        handle: String,
+        id: String,
+    ) = DeeplinkRoute.Status.Detail(
+        accountType = AccountType.Specific(accountKey),
+        statusKey = MicroBlogKey("at://$handle/app.bsky.feed.post/$id", accountKey.host),
+    )
+
+    private fun postMediaRoute(
+        accountKey: MicroBlogKey,
+        id: String,
+        index: Int,
+    ) = DeeplinkRoute.Media.StatusMedia(
+        accountType = AccountType.Specific(accountKey),
+        statusKey = MicroBlogKey(id, accountKey.host),
+        index = index,
+        preview = null,
+    )
 
     @Test
     fun mastodonPatternsAreGeneratedInOrder() {
@@ -161,70 +197,50 @@ class DeepLinkMappingTest {
 
     @Test
     fun matchesReturnsAccountProfile() {
-        val mastodonAccount =
-            UiAccount.Mastodon(
-                accountKey = MicroBlogKey(id = "1", host = "mastodon.social"),
-                instance = "mastodon.social",
-            )
-        val misskeyAccount =
-            UiAccount.Misskey(
-                accountKey = MicroBlogKey(id = "2", host = "misskey.example"),
-                host = "misskey.example",
-            )
+        val mastodonAccountKey = MicroBlogKey(id = "1", host = "mastodon.social")
+        val misskeyAccountKey = MicroBlogKey(id = "2", host = "misskey.example")
         val mapping =
             persistentMapOf(
-                mastodonAccount to
-                    PlatformType.Mastodon.deepLinkPatterns(mastodonAccount.accountKey.host),
-                misskeyAccount to
-                    PlatformType.Misskey.deepLinkPatterns(misskeyAccount.accountKey.host),
+                mastodonAccountKey to
+                    PlatformType.Mastodon.deepLinkPatterns(mastodonAccountKey.host),
+                misskeyAccountKey to
+                    PlatformType.Misskey.deepLinkPatterns(misskeyAccountKey.host),
             )
 
         val matches = DeepLinkMapping.matches("https://mastodon.social/@alice", mapping)
 
         assertEquals(1, matches.size)
-        assertEquals(DeepLinkMapping.Type.Profile("alice"), matches[mastodonAccount])
+        assertEquals(profileRoute(mastodonAccountKey, "alice"), matches[mastodonAccountKey])
     }
 
     @Test
     fun matchesMultipleAccountsWithSameHost() {
-        val account1 =
-            UiAccount.Mastodon(
-                accountKey = MicroBlogKey(id = "1", host = "mastodon.social"),
-                instance = "mastodon.social",
-            )
-        val account2 =
-            UiAccount.Mastodon(
-                accountKey = MicroBlogKey(id = "2", host = "mastodon.social"),
-                instance = "mastodon.social",
-            )
+        val account1 = MicroBlogKey(id = "1", host = "mastodon.social")
+        val account2 = MicroBlogKey(id = "2", host = "mastodon.social")
         val mapping:
-            ImmutableMap<UiAccount, ImmutableList<DeepLinkPattern<out DeepLinkMapping.Type>>> =
+            ImmutableMap<MicroBlogKey, ImmutableList<DeepLinkPattern<out DeepLinkMapping.Type>>> =
             persistentMapOf(
                 account1 to
-                    PlatformType.Mastodon.deepLinkPatterns(account1.accountKey.host),
+                    PlatformType.Mastodon.deepLinkPatterns(account1.host),
                 account2 to
-                    PlatformType.Mastodon.deepLinkPatterns(account2.accountKey.host),
+                    PlatformType.Mastodon.deepLinkPatterns(account2.host),
             )
 
         val matches = DeepLinkMapping.matches("https://mastodon.social/@alice", mapping)
 
         assertEquals(2, matches.size)
-        assertEquals(DeepLinkMapping.Type.Profile("alice"), matches[account1])
-        assertEquals(DeepLinkMapping.Type.Profile("alice"), matches[account2])
+        assertEquals(profileRoute(account1, "alice"), matches[account1])
+        assertEquals(profileRoute(account2, "alice"), matches[account2])
     }
 
     @Test
     fun matchesReturnsEmptyForNonMatchingUrl() {
-        val account =
-            UiAccount.Mastodon(
-                accountKey = MicroBlogKey(id = "1", host = "mastodon.social"),
-                instance = "mastodon.social",
-            )
+        val accountKey = MicroBlogKey(id = "1", host = "mastodon.social")
         val mapping:
-            ImmutableMap<UiAccount, ImmutableList<DeepLinkPattern<out DeepLinkMapping.Type>>> =
+            ImmutableMap<MicroBlogKey, ImmutableList<DeepLinkPattern<out DeepLinkMapping.Type>>> =
             persistentMapOf(
-                account to
-                    PlatformType.Mastodon.deepLinkPatterns(account.accountKey.host),
+                accountKey to
+                    PlatformType.Mastodon.deepLinkPatterns(accountKey.host),
             )
 
         // URL containing none of the valid hosts
@@ -236,66 +252,58 @@ class DeepLinkMappingTest {
 
     @Test
     fun matchesRealWorldLinks() {
-        val mastodonAccount =
-            UiAccount.Mastodon(
-                accountKey = MicroBlogKey(id = "1", host = "mastodon.example"),
-                instance = "mastodon.example",
-            )
-        val misskeyAccount =
-            UiAccount.Misskey(
-                accountKey = MicroBlogKey(id = "2", host = "misskey.example"),
-                host = "misskey.example",
-            )
-        val bskyAccount =
-            UiAccount.Bluesky(
-                accountKey = MicroBlogKey(id = "3", host = "bsky.example"),
-            )
-        val xAccount =
-            UiAccount.XQT(
-                accountKey = MicroBlogKey(id = "4", host = xqtHost),
-            )
+        val mastodonAccountKey = MicroBlogKey(id = "1", host = "mastodon.example")
+        val misskeyAccountKey = MicroBlogKey(id = "2", host = "misskey.example")
+        val bskyAccountKey = MicroBlogKey(id = "3", host = "bsky.example")
+        val xAccountKey = MicroBlogKey(id = "4", host = xqtHost)
 
         val mapping:
-            ImmutableMap<UiAccount, ImmutableList<DeepLinkPattern<out DeepLinkMapping.Type>>> =
+            ImmutableMap<MicroBlogKey, ImmutableList<DeepLinkPattern<out DeepLinkMapping.Type>>> =
             persistentMapOf(
-                mastodonAccount to
-                    PlatformType.Mastodon.deepLinkPatterns(mastodonAccount.accountKey.host),
-                misskeyAccount to
-                    PlatformType.Misskey.deepLinkPatterns(misskeyAccount.accountKey.host),
-                bskyAccount to
-                    PlatformType.Bluesky.deepLinkPatterns(bskyAccount.accountKey.host),
-                xAccount to
-                    PlatformType.xQt.deepLinkPatterns(xAccount.accountKey.host),
+                mastodonAccountKey to
+                    PlatformType.Mastodon.deepLinkPatterns(mastodonAccountKey.host),
+                misskeyAccountKey to
+                    PlatformType.Misskey.deepLinkPatterns(misskeyAccountKey.host),
+                bskyAccountKey to
+                    PlatformType.Bluesky.deepLinkPatterns(bskyAccountKey.host),
+                xAccountKey to
+                    PlatformType.xQt.deepLinkPatterns(xAccountKey.host),
             )
 
         // https://mastodon.example/@alice
         val mastodonProfileMatch =
             DeepLinkMapping.matches("https://mastodon.example/@alice", mapping)
-        assertEquals(DeepLinkMapping.Type.Profile("alice"), mastodonProfileMatch[mastodonAccount])
+        assertEquals(
+            profileRoute(mastodonAccountKey, "alice"),
+            mastodonProfileMatch[mastodonAccountKey],
+        )
 
         // https://mastodon.example/@alice/12345
         val mastodonPostMatch =
             DeepLinkMapping.matches("https://mastodon.example/@alice/12345", mapping)
         assertEquals(
-            DeepLinkMapping.Type.Post("alice", "12345"),
-            mastodonPostMatch[mastodonAccount],
+            postRoute(mastodonAccountKey, "12345"),
+            mastodonPostMatch[mastodonAccountKey],
         )
 
         // https://misskey.example/@bob
         val misskeyProfileMatch = DeepLinkMapping.matches("https://misskey.example/@bob", mapping)
-        assertEquals(DeepLinkMapping.Type.Profile("bob"), misskeyProfileMatch[misskeyAccount])
+        assertEquals(
+            profileRoute(misskeyAccountKey, "bob"),
+            misskeyProfileMatch[misskeyAccountKey],
+        )
 
         // https://misskey.example/notes/12345
         val misskeyPostMatch =
             DeepLinkMapping.matches("https://misskey.example/notes/12345", mapping)
-        assertEquals(DeepLinkMapping.Type.Post(null, "12345"), misskeyPostMatch[misskeyAccount])
+        assertEquals(postRoute(misskeyAccountKey, "12345"), misskeyPostMatch[misskeyAccountKey])
 
         // https://bsky.example/profile/alice.bsky.social
         val bskyProfileMatch =
             DeepLinkMapping.matches("https://bsky.example/profile/alice.bsky.social", mapping)
         assertEquals(
-            DeepLinkMapping.Type.Profile("alice.bsky.social"),
-            bskyProfileMatch[bskyAccount],
+            profileRoute(bskyAccountKey, "alice.bsky.social"),
+            bskyProfileMatch[bskyAccountKey],
         )
 
         // https://bsky.example/profile/alice.bsky.social/post/12345
@@ -305,58 +313,45 @@ class DeepLinkMappingTest {
                 mapping,
             )
         assertEquals(
-            DeepLinkMapping.Type.BlueskyPost("alice.bsky.social", "12345"),
-            bskyPostMatch[bskyAccount],
+            blueskyPostRoute(bskyAccountKey, "alice.bsky.social", "12345"),
+            bskyPostMatch[bskyAccountKey],
         )
 
         // https://x.example/alice
         val xProfileMatch = DeepLinkMapping.matches("https://$xqtHost/alice", mapping)
-        assertEquals(DeepLinkMapping.Type.Profile("alice"), xProfileMatch[xAccount])
+        assertEquals(profileRoute(xAccountKey, "alice"), xProfileMatch[xAccountKey])
 
         // https://x.example/alice/status/12345
         val xPostMatch = DeepLinkMapping.matches("https://$xqtHost/alice/status/12345", mapping)
-        assertEquals(DeepLinkMapping.Type.Post("alice", "12345"), xPostMatch[xAccount])
+        assertEquals(postRoute(xAccountKey, "12345"), xPostMatch[xAccountKey])
 
         // https://x.example/alice/status/12345/photo/1
         val xPostPhotoMatch =
             DeepLinkMapping.matches("https://$xqtHost/alice/status/12345/photo/1", mapping)
-        assertEquals(DeepLinkMapping.Type.PostMedia("alice", "12345", 1), xPostPhotoMatch[xAccount])
+        assertEquals(postMediaRoute(xAccountKey, "12345", 1), xPostPhotoMatch[xAccountKey])
     }
 
     @Test
-    fun typeDeepLinkGeneratesCorrectUrl() {
+    fun matchesGeneratesRoutesForDecodedTypes() {
         val accountKey = MicroBlogKey(id = "1", host = "mastodon.social")
+        val mapping =
+            persistentMapOf(
+                accountKey to PlatformType.Mastodon.deepLinkPatterns(accountKey.host),
+            )
 
-        // Profile with simple handle
-        val simpleProfile = DeepLinkMapping.Type.Profile("alice")
         assertEquals(
-            DeeplinkRoute.Profile.UserNameWithHost(
-                accountType = AccountType.Specific(accountKey),
-                userName = "alice",
-                host = "mastodon.social",
-            ),
-            simpleProfile.toDeeplinkRoute(accountKey),
+            profileRoute(accountKey, "alice"),
+            DeepLinkMapping.matches("https://mastodon.social/@alice", mapping)[accountKey],
         )
 
-        // Profile with full handle
-        val fullProfile = DeepLinkMapping.Type.Profile("bob@misskey.io")
         assertEquals(
-            DeeplinkRoute.Profile.UserNameWithHost(
-                accountType = AccountType.Specific(accountKey),
-                userName = "bob",
-                host = "misskey.io",
-            ),
-            fullProfile.toDeeplinkRoute(accountKey),
+            profileRoute(accountKey, "bob", "misskey.io"),
+            DeepLinkMapping.matches("https://mastodon.social/@bob@misskey.io", mapping)[accountKey],
         )
 
-        // Post
-        val post = DeepLinkMapping.Type.Post(id = "12345")
         assertEquals(
-            DeeplinkRoute.Status.Detail(
-                accountType = AccountType.Specific(accountKey),
-                statusKey = MicroBlogKey("12345", "mastodon.social"),
-            ),
-            post.toDeeplinkRoute(accountKey),
+            postRoute(accountKey, "12345"),
+            DeepLinkMapping.matches("https://mastodon.social/@alice/12345", mapping)[accountKey],
         )
     }
 }

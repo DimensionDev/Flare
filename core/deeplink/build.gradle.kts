@@ -22,9 +22,11 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
+                api(projects.core.model)
                 api(libs.ktor.client.resources)
                 api(libs.kotlinx.immutable)
                 api(libs.kotlinx.serialization.json)
+                api(libs.kotlinx.serialization.protobuf)
             }
         }
         val commonTest by getting {

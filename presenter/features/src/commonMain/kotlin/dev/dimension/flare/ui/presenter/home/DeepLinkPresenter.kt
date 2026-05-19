@@ -42,12 +42,13 @@ public class DeepLinkPresenter(
     private val patternFlow by lazy {
         accountRepository.allAccounts.map {
             it
-                .associateWith {
-                    platformRegistry
-                        .deepLinkPatterns(
-                            type = it.platformType,
-                            host = it.accountKey.host,
-                        )
+                .associate { account ->
+                    account.accountKey to
+                        platformRegistry
+                            .deepLinkPatterns(
+                                type = account.platformType,
+                                host = account.accountKey.host,
+                            )
                 }.toImmutableMap()
         }
     }
@@ -140,12 +141,7 @@ public class DeepLinkPresenter(
                             val route =
                                 DeeplinkRoute.DeepLinkAccountPicker(
                                     originalUrl = url,
-                                    data =
-                                        matches
-                                            .map {
-                                                it.key.accountKey to it.value.toDeeplinkRoute(it.key.accountKey)
-                                            }.toMap()
-                                            .toImmutableMap(),
+                                    data = matches,
                                 )
                             withContext(Dispatchers.Main) {
                                 onRoute.invoke(route)

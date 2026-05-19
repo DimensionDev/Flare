@@ -7,6 +7,8 @@ import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.datastore.model.ComposeConfigData
 import dev.dimension.flare.data.datastore.model.FlareConfig
 import dev.dimension.flare.data.io.PlatformPathProducer
+import dev.dimension.flare.data.model.appearance.AppearanceBag
+import dev.dimension.flare.data.model.tab.TabSettingsV2
 
 public class AppDataStore(
     private val platformPathProducer: PlatformPathProducer,
@@ -29,6 +31,20 @@ public class AppDataStore(
         createDataStore(
             name = "app_settings.pb",
             defaultValue = AppSettings(version = ""),
+        )
+    }
+
+    public val appearanceBagStore: DataStore<AppearanceBag> by lazy {
+        createDataStore(
+            name = "appearance_bag.pb",
+            defaultValue = AppearanceBag(),
+        )
+    }
+
+    public val tabSettingsV2Store: DataStore<TabSettingsV2> by lazy {
+        createDataStore(
+            name = "tab_settings_v2.pb",
+            defaultValue = TabSettingsV2(),
         )
     }
 

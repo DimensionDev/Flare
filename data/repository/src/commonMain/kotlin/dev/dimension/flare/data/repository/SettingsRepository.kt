@@ -1,11 +1,7 @@
 package dev.dimension.flare.data.repository
 
 import androidx.compose.runtime.Stable
-import androidx.datastore.core.DataStore
-import androidx.datastore.core.DataStoreFactory
-import dev.dimension.flare.common.protobufSerializer
 import dev.dimension.flare.data.datastore.AppDataStore
-import dev.dimension.flare.data.datastore.createDataStoreStorage
 import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.io.PlatformPathProducer
 import dev.dimension.flare.data.model.AppearanceSettings
@@ -35,10 +31,7 @@ public class SettingsRepository(
     private val tabSettingsV2Migrator: TabSettingsV2Migrator = NoOpTabSettingsV2Migrator,
 ) {
     private val appearanceBagStore by lazy {
-        createDataStore(
-            name = "appearance_bag.pb",
-            serializer = protobufSerializer(AppearanceBag()),
-        )
+        appDataStore.appearanceBagStore
     }
 
     private val appearanceMigrationMutex = Mutex()
@@ -71,7 +64,7 @@ public class SettingsRepository(
             .map { it.toTimelineAppearance() }
             .distinctUntilChanged()
     }
-    private val appSettingsStore: DataStore<AppSettings> by lazy { appDataStore.appSettingsStore }
+    private val appSettingsStore by lazy { appDataStore.appSettingsStore }
     public val appSettings: Flow<AppSettings> by lazy {
         appSettingsStore.data
     }
@@ -134,10 +127,7 @@ public class SettingsRepository(
 //    }
 
     private val tabSettingsV2Store by lazy {
-        createDataStore(
-            name = "tab_settings_v2.pb",
-            serializer = protobufSerializer(TabSettingsV2()),
-        )
+        appDataStore.tabSettingsV2Store
     }
 
     public val tabSettingsV2: Flow<TabSettingsV2> by lazy {
@@ -167,17 +157,4 @@ public class SettingsRepository(
     public suspend fun updateAppSettings(block: AppSettings.() -> AppSettings) {
         appSettingsStore.updateData(block)
     }
-
-    private inline fun <reified T> createDataStore(
-        name: String,
-        serializer: androidx.datastore.core.okio.OkioSerializer<T>,
-    ): DataStore<T> =
-        DataStoreFactory.create(
-            storage =
-                createDataStoreStorage(
-                    name = name,
-                    serializer = serializer,
-                    platformPathProducer = pathProducer,
-                ),
-        )
 }

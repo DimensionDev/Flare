@@ -28,6 +28,7 @@ kotlin {
             dependencies {
                 api(projects.core.common)
                 api(projects.core.model)
+                api(projects.ui.model)
                 api(libs.datastore.core)
                 api(libs.datastore.core.okio)
                 api(libs.okio)

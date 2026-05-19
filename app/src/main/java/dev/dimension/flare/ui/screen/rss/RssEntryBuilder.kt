@@ -26,7 +26,7 @@ import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiText
-import dev.dimension.flare.ui.presenter.home.rss.RssTimelinePresenter
+import dev.dimension.flare.ui.presenter.home.rss.createRssTimeline
 import dev.dimension.flare.ui.route.Route
 import dev.dimension.flare.ui.screen.home.TimelineScreen
 
@@ -81,7 +81,7 @@ internal fun EntryProviderScope<NavKey>.rssEntryBuilder(
                             IconType.Url(args.favIcon)
                         } ?: IconType.Material(UiIcon.Rss),
                     createPresenter = {
-                        RssTimelinePresenter(args.url)
+                        createRssTimeline(args.url)
                     },
                 )
             },

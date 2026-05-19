@@ -17,7 +17,7 @@ import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.asText
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
-import dev.dimension.flare.ui.presenter.home.HomeTimelinePresenter
+import dev.dimension.flare.ui.presenter.home.AccountTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.UserState
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
@@ -83,6 +83,8 @@ internal val guestMastodonHomeTimelineTab: TimelineTabItemV2
             title = UiStrings.Home.asText(),
             icon = IconType.Material(UiIcon.Home),
             createPresenter = {
-                HomeTimelinePresenter(AccountType.GuestHost(DEFAULT_GUEST_MASTODON_HOST))
+                AccountTimelinePresenter(AccountType.GuestHost(DEFAULT_GUEST_MASTODON_HOST)) { service ->
+                    service.homeTimeline()
+                }
             },
         )

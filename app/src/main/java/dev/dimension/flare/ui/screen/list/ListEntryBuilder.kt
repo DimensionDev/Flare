@@ -10,7 +10,7 @@ import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.tab.SourceTimelineTabItemV2
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiText
-import dev.dimension.flare.ui.presenter.list.ListTimelinePresenter
+import dev.dimension.flare.ui.presenter.list.createListTimeline
 import dev.dimension.flare.ui.route.Route
 import dev.dimension.flare.ui.screen.home.TimelineScreen
 
@@ -63,7 +63,7 @@ internal fun EntryProviderScope<NavKey>.listEntryBuilder(
                     title = UiText.Raw(args.title),
                     icon = IconType.Material(UiIcon.List),
                     createPresenter = {
-                        ListTimelinePresenter(
+                        createListTimeline(
                             accountType = args.accountType,
                             listId = args.listId,
                         )

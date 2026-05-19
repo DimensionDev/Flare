@@ -112,7 +112,9 @@ public class DiscoverPresenter :
 
     private fun statusFlow(scope: CoroutineScope) =
         selectedAccountTypeFlow.flatMapLatest { accountType ->
-            DiscoverStatusTimelinePresenter(accountType).createPager(scope)
+            AccountTimelinePresenter(accountType) { service ->
+                service.discoverStatuses()
+            }.createPager(scope)
         }
 
     @Composable

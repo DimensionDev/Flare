@@ -25,8 +25,8 @@ import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiText
-import dev.dimension.flare.ui.presenter.list.AntennasTimelinePresenter
-import dev.dimension.flare.ui.presenter.list.ChannelTimelinePresenter
+import dev.dimension.flare.ui.presenter.list.createMisskeyAntennaTimeline
+import dev.dimension.flare.ui.presenter.list.createMisskeyChannelTimeline
 import dev.dimension.flare.ui.route.Route
 import dev.dimension.flare.ui.screen.home.TimelineScreen
 
@@ -64,7 +64,7 @@ internal fun EntryProviderScope<NavKey>.misskeyEntryBuilder(
                     title = UiText.Raw(args.title),
                     icon = IconType.Material(UiIcon.Rss),
                     createPresenter = {
-                        AntennasTimelinePresenter(
+                        createMisskeyAntennaTimeline(
                             accountType = args.accountType,
                             id = args.antennaId,
                         )
@@ -104,7 +104,7 @@ internal fun EntryProviderScope<NavKey>.misskeyEntryBuilder(
                     title = UiText.Raw(args.title),
                     icon = IconType.Material(UiIcon.List),
                     createPresenter = {
-                        ChannelTimelinePresenter(
+                        createMisskeyChannelTimeline(
                             accountType = args.accountType,
                             id = args.channelId,
                         )

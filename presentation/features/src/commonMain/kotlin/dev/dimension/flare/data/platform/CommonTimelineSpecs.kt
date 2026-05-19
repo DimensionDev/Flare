@@ -3,7 +3,7 @@ package dev.dimension.flare.data.platform
 import dev.dimension.flare.data.datasource.microblog.datasource.ListDataSource
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.tab.AccountTimelineSpec
-import dev.dimension.flare.data.model.tab.SourceTimelineTabItemV2
+import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.model.MicroBlogKey
@@ -52,14 +52,15 @@ internal object CommonTimelineSpecs {
         )
 }
 
-internal fun UiList.List.toTimelineTabItemV2(accountKey: MicroBlogKey): TimelineTabItemV2 {
+internal fun UiList.List.toTimelineTabItemV2(
+    accountKey: MicroBlogKey,
+    timelineResolver: TimelineResolver,
+): TimelineTabItemV2 {
     val source =
         CommonTimelineSpecs.list.target(
             data = TimelineSpec.AccountResourceData(accountKey, id),
             title = UiText.Raw(title),
             icon = avatar?.let { IconType.Url(it) } ?: UiIcon.List.asType(),
         )
-    return SourceTimelineTabItemV2.fromSource(source) {
-        CommonTimelineSpecs.list.createPresenter(source.data)
-    }
+    return timelineResolver.toTabItem(source)
 }

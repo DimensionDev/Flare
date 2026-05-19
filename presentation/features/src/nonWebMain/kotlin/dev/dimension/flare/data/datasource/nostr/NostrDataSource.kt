@@ -27,6 +27,7 @@ import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.notSupported
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.tab.ShortcutSpec
+import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.model.tab.toSlot
 import dev.dimension.flare.data.network.nostr.AmberSignerBridge
@@ -69,6 +70,7 @@ internal class NostrDataSource(
     private val ioScope: CoroutineScope by inject()
     private val nostrCache: NostrCache by inject()
     private val amberSignerBridge: AmberSignerBridge by inject()
+    private val timelineResolver: TimelineResolver by inject()
     private val credentialFlow by lazy {
         accountRepository.credentialFlow<UiAccount.Nostr.Credential>(accountKey)
     }
@@ -91,7 +93,8 @@ internal class NostrDataSource(
 
     override val builtInTimelineTabs by lazy {
         persistentListOf(
-            CommonTimelineSpecs.home.tabItem(
+            timelineResolver.toTabItem(
+                CommonTimelineSpecs.home,
                 data = TimelineSpec.AccountBasedData(accountKey),
                 icon = IconType.Material(UiIcon.Nostr),
             ),

@@ -6,8 +6,6 @@ import dev.dimension.flare.data.model.appearance.AppearancePatch
 import dev.dimension.flare.data.model.appearance.TimelineAppearance
 import dev.dimension.flare.data.model.appearance.toBag
 import dev.dimension.flare.data.model.appearance.withPatch
-import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
-import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.platform.RssTimelineSpecs
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.SocialPlatformRegistry
@@ -15,23 +13,14 @@ import dev.dimension.flare.model.platformSpecs
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.UiText
-import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.asText
 import dev.dimension.flare.ui.model.asType
 import dev.dimension.flare.ui.presenter.home.AccountTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.MixedTimelinePresenter
-import dev.dimension.flare.ui.presenter.home.StandaloneTimelineContext
 import dev.dimension.flare.ui.presenter.home.StandaloneTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.SystemHomeMixedTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.TimelinePresenter
 import dev.dimension.flare.ui.route.DeeplinkRoute
-import kotlinx.coroutines.flow.Flow
-import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.KSerializer
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.decodeFromHexString
-import kotlinx.serialization.encodeToHexString
-import kotlinx.serialization.protobuf.ProtoBuf
 
 @Immutable
 public sealed interface TimelineTabItemV2 {
@@ -263,97 +252,6 @@ public fun List<TimelineTabItemV2>.withSystemHomeMixedTimelineEnabled(
         }
 }
 
-public interface TimelineSpec<T : TimelineSpec.Data> {
-    public val id: String
-    public val title: UiStrings
-    public val icon: IconType
-    public val serializer: KSerializer<T>
-    public val targetId: (data: T) -> String
-
-    @OptIn(ExperimentalSerializationApi::class)
-    public fun target(
-        data: T,
-        title: UiText = this.title.asText(),
-        icon: IconType = this.icon,
-    ): TimelineSourceRef =
-        TimelineSourceRef(
-            id = "$id:${targetId(data)}",
-            specId = id,
-            title = title,
-            icon = icon,
-            data = ProtoBuf.encodeToHexString(serializer, data),
-        )
-
-    public fun tabItem(
-        data: T,
-        title: UiText = this.title.asText(),
-        icon: IconType = this.icon,
-    ): SourceTimelineTabItemV2 {
-        val source =
-            target(
-                data = data,
-                title = title,
-                icon = icon,
-            )
-        return SourceTimelineTabItemV2.fromSource(source) {
-            createPresenter(source.data)
-        }
-    }
-
-    @OptIn(ExperimentalSerializationApi::class)
-    public fun decode(encodedData: String): T = ProtoBuf.decodeFromHexString(serializer, encodedData)
-
-    public fun createPresenter(encodedData: String): TimelinePresenter
-
-    public interface Data
-
-    public interface AccountData : Data {
-        public val accountKey: MicroBlogKey
-    }
-
-    @Serializable
-    public open class AccountBasedData(
-        public override val accountKey: MicroBlogKey,
-    ) : AccountData
-
-    @Serializable
-    public data class AccountResourceData(
-        public override val accountKey: MicroBlogKey,
-        public val resourceId: String,
-    ) : AccountData
-}
-
-public class AccountTimelineSpec<T : TimelineSpec.AccountData>(
-    override val id: String,
-    override val title: UiStrings,
-    override val icon: IconType,
-    override val serializer: KSerializer<T>,
-    override val targetId: (data: T) -> String,
-    private val loaderFactory: (service: MicroblogDataSource, data: T) -> RemoteLoader<UiTimelineV2>,
-) : TimelineSpec<T> {
-    override fun createPresenter(encodedData: String): TimelinePresenter {
-        val data = decode(encodedData)
-        return AccountTimelinePresenter(
-            accountKey = data.accountKey,
-            loaderFactory = { service -> loaderFactory(service, data) },
-        )
-    }
-}
-
-public class StandaloneTimelineSpec<T : TimelineSpec.Data> internal constructor(
-    override val id: String,
-    override val title: UiStrings,
-    override val icon: IconType,
-    override val serializer: KSerializer<T>,
-    override val targetId: (data: T) -> String,
-    private val loaderFactory: (context: StandaloneTimelineContext, data: T) -> Flow<RemoteLoader<UiTimelineV2>>,
-) : TimelineSpec<T> {
-    override fun createPresenter(encodedData: String): TimelinePresenter {
-        val data = decode(encodedData)
-        return StandaloneTimelinePresenter { context -> loaderFactory(context, data) }
-    }
-}
-
 public data class ShortcutSpec(
     val title: UiStrings,
     val icon: UiIcon,
@@ -413,6 +311,20 @@ public class TimelineResolver internal constructor(
             presenterFactory = { resolvePresenter(source) },
         )
 
+    public fun <T : TimelineSpec.Data> toTabItem(
+        spec: TimelineSpec<T>,
+        data: T,
+        title: UiText = spec.title.asText(),
+        icon: IconType = spec.icon,
+    ): SourceTimelineTabItemV2 =
+        toTabItem(
+            spec.target(
+                data = data,
+                title = title,
+                icon = icon,
+            ),
+        )
+
     internal fun toSlot(item: TimelineTabItemV2): TimelineSlot =
         when (item) {
             is SourceTimelineTabItemV2 -> {
@@ -439,23 +351,34 @@ public class TimelineResolver internal constructor(
             }
         }
 
-    private fun resolvePresenter(source: TimelineSourceRef): TimelinePresenter = resolveSpec(source).createPresenter(source.data)
+    private fun resolvePresenter(source: TimelineSourceRef): TimelinePresenter =
+        when (val spec = resolveSpec(source)) {
+            is AccountTimelineSpec<*> ->
+                AccountTimelinePresenter(
+                    accountKey = spec.accountKey(source.data),
+                    loaderFactory = { service -> spec.createLoader(service, source.data) },
+                )
 
-    @OptIn(ExperimentalSerializationApi::class)
+            is StandaloneTimelineSpec<*> ->
+                StandaloneTimelinePresenter { context ->
+                    spec.createLoader(context, source.data)
+                }
+
+            else -> throw IllegalArgumentException("Unsupported timeline spec type: ${spec::class}")
+        }
+
     public fun resolveAccountKey(item: TimelineTabItemV2): MicroBlogKey? =
         when (item) {
             is SourceTimelineTabItemV2 -> item.source?.let(::resolveAccountKey)
             is GroupTimelineTabItemV2 -> null
         }
 
-    @OptIn(ExperimentalSerializationApi::class)
     internal fun resolveAccountKey(slot: TimelineSlot): MicroBlogKey? =
         when (val content = slot.content) {
             is TimelineSlotContent.Source -> resolveAccountKey(content.source)
             is TimelineSlotContent.Group -> null
         }
 
-    @OptIn(ExperimentalSerializationApi::class)
     private fun resolveAccountKey(source: TimelineSourceRef): MicroBlogKey? {
         val spec = resolveSpec(source)
         val data = spec.decode(source.data)

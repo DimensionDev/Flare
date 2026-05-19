@@ -34,6 +34,7 @@ import dev.dimension.flare.data.datasource.microblog.paging.notSupported
 import dev.dimension.flare.data.datasource.pleroma.PleromaDataSource
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.tab.ShortcutSpec
+import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.model.tab.toSlot
 import dev.dimension.flare.data.network.mastodon.MastodonService
@@ -83,6 +84,7 @@ internal open class MastodonDataSource(
     PostEventHandler.Handler {
     private val accountRepository: AccountRepository by inject()
     private val imageCompressor: ImageCompressor by inject()
+    private val timelineResolver: TimelineResolver by inject()
     private val service by lazy {
         MastodonService(
             baseUrl = "https://$instance/",
@@ -491,7 +493,7 @@ internal open class MastodonDataSource(
                 title = UiStrings.List,
                 data =
                     listHandler.data.map { paging ->
-                        paging.map { it.toTimelineTabItemV2(accountKey) }
+                        paging.map { it.toTimelineTabItemV2(accountKey, timelineResolver) }
                     },
             ),
         )
@@ -509,18 +511,20 @@ internal open class MastodonDataSource(
 
     override val builtInTimelineTabs by lazy {
         persistentListOf(
-            CommonTimelineSpecs.home.tabItem(
+            timelineResolver.toTabItem(
+                CommonTimelineSpecs.home,
                 data = TimelineSpec.AccountBasedData(accountKey),
                 icon = IconType.FavIcon(accountKey.host),
             ),
-            CommonTimelineSpecs.discover.tabItem(
+            timelineResolver.toTabItem(
+                CommonTimelineSpecs.discover,
                 data = TimelineSpec.AccountBasedData(accountKey),
                 icon = IconType.FavIcon(accountKey.host),
             ),
-            MastodonPlatformSpec.localTimelineSpec.tabItem(TimelineSpec.AccountBasedData(accountKey)),
-            MastodonPlatformSpec.publicTimelineSpec.tabItem(TimelineSpec.AccountBasedData(accountKey)),
-            MastodonPlatformSpec.bookmarkTimelineSpec.tabItem(TimelineSpec.AccountBasedData(accountKey)),
-            MastodonPlatformSpec.favouriteTimelineSpec.tabItem(TimelineSpec.AccountBasedData(accountKey)),
+            timelineResolver.toTabItem(MastodonPlatformSpec.localTimelineSpec, TimelineSpec.AccountBasedData(accountKey)),
+            timelineResolver.toTabItem(MastodonPlatformSpec.publicTimelineSpec, TimelineSpec.AccountBasedData(accountKey)),
+            timelineResolver.toTabItem(MastodonPlatformSpec.bookmarkTimelineSpec, TimelineSpec.AccountBasedData(accountKey)),
+            timelineResolver.toTabItem(MastodonPlatformSpec.favouriteTimelineSpec, TimelineSpec.AccountBasedData(accountKey)),
         )
     }
 

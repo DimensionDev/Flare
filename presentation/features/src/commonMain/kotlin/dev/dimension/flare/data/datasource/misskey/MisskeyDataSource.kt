@@ -39,6 +39,7 @@ import dev.dimension.flare.data.datasource.microblog.paging.toPagingSource
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.tab.ShortcutSpec
+import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.model.tab.toSlot
 import dev.dimension.flare.data.network.misskey.api.model.AdminAccountsDeleteRequest
@@ -97,6 +98,7 @@ internal class MisskeyDataSource(
     PostEventHandler.Handler {
     private val accountRepository: AccountRepository by inject()
     private val imageCompressor: ImageCompressor by inject()
+    private val timelineResolver: TimelineResolver by inject()
     private val service by lazy {
         dev.dimension.flare.data.network.misskey.MisskeyService(
             baseUrl = "https://$host/api/",
@@ -691,21 +693,21 @@ internal class MisskeyDataSource(
                 title = UiStrings.List,
                 data =
                     listHandler.data.map { paging ->
-                        paging.map { it.toTimelineTabItemV2(accountKey) }
+                        paging.map { it.toTimelineTabItemV2(accountKey, timelineResolver) }
                     },
             ),
             PinnableTimelineTabSection(
                 title = UiStrings.Antenna,
                 data =
                     antennasList().map { paging ->
-                        paging.map { it.toTimelineTabItemV2(accountKey) }
+                        paging.map { it.toTimelineTabItemV2(accountKey, timelineResolver) }
                     },
             ),
             PinnableTimelineTabSection(
                 title = UiStrings.Channel,
                 data =
                     channelHandler.data.map { paging ->
-                        paging.map { it.toTimelineTabItemV2(accountKey) }
+                        paging.map { it.toTimelineTabItemV2(accountKey, timelineResolver) }
                     },
             ),
         )
@@ -723,18 +725,20 @@ internal class MisskeyDataSource(
 
     override val builtInTimelineTabs by lazy {
         persistentListOf(
-            CommonTimelineSpecs.home.tabItem(
+            timelineResolver.toTabItem(
+                CommonTimelineSpecs.home,
                 data = TimelineSpec.AccountBasedData(accountKey),
                 icon = IconType.FavIcon(accountKey.host),
             ),
-            CommonTimelineSpecs.discover.tabItem(
+            timelineResolver.toTabItem(
+                CommonTimelineSpecs.discover,
                 data = TimelineSpec.AccountBasedData(accountKey),
                 icon = IconType.FavIcon(accountKey.host),
             ),
-            MisskeyPlatformSpec.favouriteTimelineSpec.tabItem(TimelineSpec.AccountBasedData(accountKey)),
-            MisskeyPlatformSpec.hybridTimelineSpec.tabItem(TimelineSpec.AccountBasedData(accountKey)),
-            MisskeyPlatformSpec.localTimelineSpec.tabItem(TimelineSpec.AccountBasedData(accountKey)),
-            MisskeyPlatformSpec.globalTimelineSpec.tabItem(TimelineSpec.AccountBasedData(accountKey)),
+            timelineResolver.toTabItem(MisskeyPlatformSpec.favouriteTimelineSpec, TimelineSpec.AccountBasedData(accountKey)),
+            timelineResolver.toTabItem(MisskeyPlatformSpec.hybridTimelineSpec, TimelineSpec.AccountBasedData(accountKey)),
+            timelineResolver.toTabItem(MisskeyPlatformSpec.localTimelineSpec, TimelineSpec.AccountBasedData(accountKey)),
+            timelineResolver.toTabItem(MisskeyPlatformSpec.globalTimelineSpec, TimelineSpec.AccountBasedData(accountKey)),
         )
     }
 

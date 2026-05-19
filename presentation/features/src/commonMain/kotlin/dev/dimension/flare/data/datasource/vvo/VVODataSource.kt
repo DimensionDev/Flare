@@ -30,6 +30,7 @@ import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.tab.ShortcutSpec
+import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.model.tab.toSlot
 import dev.dimension.flare.data.network.vvo.VVOService
@@ -72,6 +73,7 @@ internal class VVODataSource(
     PostEventHandler.Handler {
     private val accountRepository: AccountRepository by inject()
     private val imageCompressor: ImageCompressor by inject()
+    private val timelineResolver: TimelineResolver by inject()
     private val service by lazy {
         VVOService(
             chocolateFlow =
@@ -106,16 +108,18 @@ internal class VVODataSource(
 
     override val builtInTimelineTabs by lazy {
         persistentListOf(
-            CommonTimelineSpecs.home.tabItem(
+            timelineResolver.toTabItem(
+                CommonTimelineSpecs.home,
                 data = TimelineSpec.AccountBasedData(accountKey),
                 icon = IconType.Material(UiIcon.Weibo),
             ),
-            CommonTimelineSpecs.discover.tabItem(
+            timelineResolver.toTabItem(
+                CommonTimelineSpecs.discover,
                 data = TimelineSpec.AccountBasedData(accountKey),
                 icon = IconType.Material(UiIcon.Weibo),
             ),
-            VvoPlatformSpec.favoriteTimelineSpec.tabItem(TimelineSpec.AccountBasedData(accountKey)),
-            VvoPlatformSpec.likedTimelineSpec.tabItem(TimelineSpec.AccountBasedData(accountKey)),
+            timelineResolver.toTabItem(VvoPlatformSpec.favoriteTimelineSpec, TimelineSpec.AccountBasedData(accountKey)),
+            timelineResolver.toTabItem(VvoPlatformSpec.likedTimelineSpec, TimelineSpec.AccountBasedData(accountKey)),
         )
     }
 

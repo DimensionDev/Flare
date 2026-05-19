@@ -42,6 +42,7 @@ import dev.dimension.flare.data.datasource.microblog.paging.notSupported
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.tab.ShortcutSpec
+import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.model.tab.toSlot
 import dev.dimension.flare.data.network.xqt.XQTService
@@ -126,6 +127,7 @@ internal class XQTDataSource(
     private val coroutineScope: CoroutineScope by inject()
     private val accountRepository: AccountRepository by inject()
     private val imageCompressor: ImageCompressor by inject()
+    private val timelineResolver: TimelineResolver by inject()
     private val credentialFlow by lazy {
         accountRepository
             .credentialFlow<UiAccount.XQT.Credential>(accountKey)
@@ -311,7 +313,7 @@ internal class XQTDataSource(
                 title = UiStrings.List,
                 data =
                     listHandler.data.map { paging ->
-                        paging.map { it.toTimelineTabItemV2(accountKey) }
+                        paging.map { it.toTimelineTabItemV2(accountKey, timelineResolver) }
                     },
             ),
         )
@@ -334,16 +336,18 @@ internal class XQTDataSource(
 
     override val builtInTimelineTabs by lazy {
         persistentListOf(
-            CommonTimelineSpecs.home.tabItem(
+            timelineResolver.toTabItem(
+                CommonTimelineSpecs.home,
                 data = TimelineSpec.AccountBasedData(accountKey),
                 icon = IconType.FavIcon(accountKey.host),
             ),
-            XqtPlatformSpec.featuredTimelineSpec.tabItem(
+            timelineResolver.toTabItem(
+                XqtPlatformSpec.featuredTimelineSpec,
                 data = TimelineSpec.AccountBasedData(accountKey),
                 icon = IconType.FavIcon(accountKey.host),
             ),
-            XqtPlatformSpec.bookmarkTimelineSpec.tabItem(TimelineSpec.AccountBasedData(accountKey)),
-            XqtPlatformSpec.deviceFollowTimelineSpec.tabItem(TimelineSpec.AccountBasedData(accountKey)),
+            timelineResolver.toTabItem(XqtPlatformSpec.bookmarkTimelineSpec, TimelineSpec.AccountBasedData(accountKey)),
+            timelineResolver.toTabItem(XqtPlatformSpec.deviceFollowTimelineSpec, TimelineSpec.AccountBasedData(accountKey)),
         )
     }
 

@@ -6,7 +6,7 @@ import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.tab.AccountTimelineSpec
-import dev.dimension.flare.data.model.tab.SourceTimelineTabItemV2
+import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.model.MicroBlogKey
@@ -130,26 +130,28 @@ internal data object MisskeyPlatformSpec : PlatformSpec {
     ): MicroblogDataSource = throw UnsupportedOperationException("${type.name} guest data source is not supported yet")
 }
 
-internal fun UiList.Antenna.toTimelineTabItemV2(accountKey: MicroBlogKey): TimelineTabItemV2 {
+internal fun UiList.Antenna.toTimelineTabItemV2(
+    accountKey: MicroBlogKey,
+    timelineResolver: TimelineResolver,
+): TimelineTabItemV2 {
     val source =
         MisskeyPlatformSpec.antennaTimelineSpec.target(
             data = TimelineSpec.AccountResourceData(accountKey, id),
             title = UiText.Raw(title),
             icon = UiIcon.Rss.asType(),
         )
-    return SourceTimelineTabItemV2.fromSource(source) {
-        MisskeyPlatformSpec.antennaTimelineSpec.createPresenter(source.data)
-    }
+    return timelineResolver.toTabItem(source)
 }
 
-internal fun UiList.Channel.toTimelineTabItemV2(accountKey: MicroBlogKey): TimelineTabItemV2 {
+internal fun UiList.Channel.toTimelineTabItemV2(
+    accountKey: MicroBlogKey,
+    timelineResolver: TimelineResolver,
+): TimelineTabItemV2 {
     val source =
         MisskeyPlatformSpec.channelTimelineSpec.target(
             data = TimelineSpec.AccountResourceData(accountKey, id),
             title = UiText.Raw(title),
             icon = banner?.let { IconType.Url(it) } ?: UiIcon.Channel.asType(),
         )
-    return SourceTimelineTabItemV2.fromSource(source) {
-        MisskeyPlatformSpec.channelTimelineSpec.createPresenter(source.data)
-    }
+    return timelineResolver.toTabItem(source)
 }

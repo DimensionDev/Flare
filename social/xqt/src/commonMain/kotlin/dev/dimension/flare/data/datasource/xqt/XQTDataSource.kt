@@ -68,7 +68,8 @@ import dev.dimension.flare.data.network.xqt.model.PostUnfavoriteTweetRequest
 import dev.dimension.flare.data.network.xqt.model.TweetUnion
 import dev.dimension.flare.data.platform.XqtTimelineDataSource
 import dev.dimension.flare.data.platform.XqtTimelineSpecs
-import dev.dimension.flare.data.account.AccountRepository
+import dev.dimension.flare.data.account.CredentialProvider
+import dev.dimension.flare.data.account.credentialFlow
 import dev.dimension.flare.common.tryRun
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -125,10 +126,10 @@ internal class XQTDataSource(
     PostEventHandler.Handler {
     private val database: CacheDatabase by inject()
     private val coroutineScope: CoroutineScope by inject()
-    private val accountRepository: AccountRepository by inject()
+    private val credentialProvider: CredentialProvider by inject()
     private val imageCompressor: ImageCompressor by inject()
     private val credentialFlow by lazy {
-        accountRepository
+        credentialProvider
             .credentialFlow<UiAccount.XQT.Credential>(accountKey)
             .distinctUntilChanged()
     }

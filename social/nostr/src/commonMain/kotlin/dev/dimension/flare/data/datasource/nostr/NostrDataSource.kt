@@ -2,7 +2,8 @@ package dev.dimension.flare.data.datasource.nostr
 
 import dev.dimension.flare.common.FileType
 import dev.dimension.flare.common.SwitchingServiceManager
-import dev.dimension.flare.data.account.AccountRepository
+import dev.dimension.flare.data.account.CredentialProvider
+import dev.dimension.flare.data.account.credentialFlow
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
@@ -65,12 +66,12 @@ internal class NostrDataSource(
     PostEventHandler.Handler,
     KoinComponent,
     AutoCloseable {
-    private val accountRepository: AccountRepository by inject()
+    private val credentialProvider: CredentialProvider by inject()
     private val ioScope: CoroutineScope by inject()
     private val nostrCache: NostrCache by inject()
     private val amberSignerBridge: AmberSignerBridge by inject()
     private val credentialFlow by lazy {
-        accountRepository.credentialFlow<UiAccount.Nostr.Credential>(accountKey)
+        credentialProvider.credentialFlow<UiAccount.Nostr.Credential>(accountKey)
     }
     private val loader by lazy {
         NostrLoader(

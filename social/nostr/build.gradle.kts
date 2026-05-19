@@ -27,7 +27,6 @@ kotlin {
                 api(projects.storage.database)
                 api(projects.social.api)
                 api(projects.social.microblog)
-                implementation(projects.capability.account)
                 implementation(projects.network)
                 implementation(libs.bundles.ktor)
                 implementation(libs.cryptography.provider.optimal)

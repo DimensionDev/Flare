@@ -39,7 +39,6 @@ kotlin {
                 api(projects.network)
                 api(projects.social.api)
                 api(projects.social.microblog)
-                implementation(projects.capability.account)
                 implementation(projects.social.nodeinfo)
                 implementation(dependencies.platform(libs.koin.bom))
                 implementation(libs.koin.core)

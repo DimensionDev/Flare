@@ -35,7 +35,7 @@ public class AccountRepository(
     private val appDataStore: AppDataStore,
     private val cacheDatabase: CacheDatabase,
     private val platformRegistry: SocialPlatformRegistry,
-) {
+) : CredentialProvider {
     public val activeAccount: Flow<UiState<UiAccount>> by lazy {
         appDatabase
             .accountDao()
@@ -177,14 +177,11 @@ public class AccountRepository(
             .firstOrNull()
             ?.toUi()
 
-    public inline fun <reified T : UiAccount.Credential> credentialFlow(accountKey: MicroBlogKey): Flow<T> =
+    override fun credentialJsonFlow(accountKey: MicroBlogKey): Flow<String> =
         appDatabase
             .accountDao()
             .get(accountKey)
-            .mapNotNull { it }
-            .map {
-                it.credential_json.decodeJson<T>()
-            }
+            .mapNotNull { it?.credential_json }
 
     public suspend fun getOrCreateDataSource(account: UiAccount): MicroblogDataSource =
         dataSourceCacheMutex.withLock {

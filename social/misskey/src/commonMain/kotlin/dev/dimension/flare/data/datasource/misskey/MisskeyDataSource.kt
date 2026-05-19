@@ -54,7 +54,8 @@ import dev.dimension.flare.data.network.misskey.api.model.NotesReactionsCreateRe
 import dev.dimension.flare.data.platform.MisskeyTimelineDataSource
 import dev.dimension.flare.data.platform.MisskeyTimelineSpecs
 import dev.dimension.flare.data.platform.toTimelineTabDescriptor
-import dev.dimension.flare.data.account.AccountRepository
+import dev.dimension.flare.data.account.CredentialProvider
+import dev.dimension.flare.data.account.credentialFlow
 import dev.dimension.flare.common.tryRun
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -100,14 +101,14 @@ internal class MisskeyDataSource(
     ReactionDataSource,
     RelationDataSource,
     PostEventHandler.Handler {
-    private val accountRepository: AccountRepository by inject()
+    private val credentialProvider: CredentialProvider by inject()
     private val imageCompressor: ImageCompressor by inject()
     private val service by lazy {
         dev.dimension.flare.data.network.misskey.MisskeyService(
             baseUrl = "https://$host/api/",
             accountKey = accountKey,
             accessTokenFlow =
-                accountRepository
+                credentialProvider
                     .credentialFlow<UiAccount.Misskey.Credential>(accountKey)
                     .map { it.accessToken },
         )

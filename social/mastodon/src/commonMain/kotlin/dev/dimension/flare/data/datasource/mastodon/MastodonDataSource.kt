@@ -46,7 +46,8 @@ import dev.dimension.flare.data.network.mastodon.api.model.PostVote
 import dev.dimension.flare.data.network.mastodon.api.model.Visibility
 import dev.dimension.flare.data.platform.MastodonTimelineDataSource
 import dev.dimension.flare.data.platform.MastodonTimelineSpecs
-import dev.dimension.flare.data.account.AccountRepository
+import dev.dimension.flare.data.account.CredentialProvider
+import dev.dimension.flare.data.account.credentialFlow
 import dev.dimension.flare.common.tryRun
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -83,13 +84,13 @@ internal open class MastodonDataSource(
     TimelineTabProvider,
     RelationDataSource,
     PostEventHandler.Handler {
-    private val accountRepository: AccountRepository by inject()
+    private val credentialProvider: CredentialProvider by inject()
     private val imageCompressor: ImageCompressor by inject()
     private val service by lazy {
         MastodonService(
             baseUrl = "https://$instance/",
             accessTokenFlow =
-                accountRepository
+                credentialProvider
                     .credentialFlow<UiAccount.Mastodon.Credential>(accountKey)
                     .map { it.accessToken },
         )

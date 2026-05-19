@@ -39,7 +39,8 @@ import dev.dimension.flare.data.network.vvo.VVOService
 import dev.dimension.flare.data.network.vvo.model.StatusDetailItem
 import dev.dimension.flare.data.platform.VvoTimelineDataSource
 import dev.dimension.flare.data.platform.VvoTimelineSpecs
-import dev.dimension.flare.data.account.AccountRepository
+import dev.dimension.flare.data.account.CredentialProvider
+import dev.dimension.flare.data.account.credentialFlow
 import dev.dimension.flare.model.LoginExpiredException
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -75,12 +76,12 @@ internal class VVODataSource(
     TimelineTabProvider,
     PostDataSource,
     PostEventHandler.Handler {
-    private val accountRepository: AccountRepository by inject()
+    private val credentialProvider: CredentialProvider by inject()
     private val imageCompressor: ImageCompressor by inject()
     private val service by lazy {
         VVOService(
             chocolateFlow =
-                accountRepository
+                credentialProvider
                     .credentialFlow<UiAccount.VVo.Credential>(accountKey)
                     .map { it.chocolate },
         )

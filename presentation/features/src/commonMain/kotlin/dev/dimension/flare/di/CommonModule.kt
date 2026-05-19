@@ -11,6 +11,7 @@ import dev.dimension.flare.data.model.tab.TimelinePersistenceMapper
 import dev.dimension.flare.data.model.tab.TimelinePresenterFactory
 import dev.dimension.flare.data.network.rss.Readability
 import dev.dimension.flare.data.account.AccountRepository
+import dev.dimension.flare.data.account.CredentialProvider
 import dev.dimension.flare.data.repository.AccountTabSyncCoordinator
 import dev.dimension.flare.data.account.ApplicationRepository
 import dev.dimension.flare.data.draft.DraftMediaStore
@@ -39,6 +40,7 @@ internal val commonModule =
             )
         }
         singleOf(::AccountRepository)
+        single<CredentialProvider> { get<AccountRepository>() }
         single(createdAtStart = true) { AccountTabSyncCoordinator(get(), get(), get(), get()) }
         single { provideAppDatabase(get()) }
         single { provideCacheDatabase(get()) }

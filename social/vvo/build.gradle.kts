@@ -34,7 +34,6 @@ kotlin {
                 api(projects.social.api)
                 api(projects.social.microblog)
                 api(libs.ktorfit.converters.response)
-                implementation(projects.capability.account)
                 implementation(dependencies.platform(libs.koin.bom))
                 implementation(libs.koin.core)
                 implementation(libs.kotlinx.datetime)

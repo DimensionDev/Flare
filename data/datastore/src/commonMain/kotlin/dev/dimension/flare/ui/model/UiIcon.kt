@@ -1,11 +1,9 @@
 package dev.dimension.flare.ui.model
 
-import androidx.compose.runtime.Immutable
 import dev.dimension.flare.data.model.IconType
 import kotlinx.serialization.Serializable
 
 @Serializable
-@Immutable
 public enum class UiIcon {
     Home,
     Notification,

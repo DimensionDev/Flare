@@ -1,11 +1,7 @@
 package dev.dimension.flare.data.model.tab
 
-import androidx.compose.runtime.Immutable
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.appearance.AppearanceBag
-import dev.dimension.flare.data.model.appearance.AppearancePatch
-import dev.dimension.flare.data.model.appearance.toBag
-import dev.dimension.flare.data.model.appearance.toPatch
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.UiText
@@ -14,7 +10,6 @@ import dev.dimension.flare.ui.model.asType
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-@Immutable
 @Serializable
 public data class TabSettingsV2(
     public val homeSlots: List<TimelineSlot> = emptyList(),
@@ -22,7 +17,6 @@ public data class TabSettingsV2(
 
 public const val SYSTEM_HOME_MIXED_TIMELINE_ID: String = "mixed_timeline_system_home"
 
-@Immutable
 @Serializable
 public data class TimelineSlot(
     public val id: String,
@@ -42,7 +36,6 @@ public data class TimelineSlot(
         }
 }
 
-@Immutable
 @Serializable
 public data class TimelinePresentation(
     public val titleOverride: String? = null,
@@ -50,31 +43,10 @@ public data class TimelinePresentation(
     public val appearanceOverride: AppearanceBag? = null,
     public val enabled: Boolean = true,
     public val filterConfig: TimelineFilterConfig = TimelineFilterConfig(),
-) {
-    public val appearance: AppearancePatch? by lazy {
-        appearanceOverride?.toPatch()
-    }
+)
 
-    public fun withOverrides(
-        titleOverride: String?,
-        iconOverride: IconType?,
-        appearancePatch: AppearancePatch?,
-        enabled: Boolean,
-        filterConfig: TimelineFilterConfig,
-    ): TimelinePresentation =
-        TimelinePresentation(
-            titleOverride = titleOverride,
-            iconOverride = iconOverride,
-            appearanceOverride = appearancePatch?.takeUnless { it == AppearancePatch.EMPTY }?.toBag(),
-            enabled = enabled,
-            filterConfig = filterConfig,
-        )
-}
-
-@Immutable
 @Serializable
 public sealed interface TimelineSlotContent {
-    @Immutable
     @Serializable
     @SerialName("source")
     public data class Source(
@@ -82,7 +54,6 @@ public sealed interface TimelineSlotContent {
         public val source: TimelineSourceRef,
     ) : TimelineSlotContent
 
-    @Immutable
     @Serializable
     @SerialName("group")
     public data class Group(
@@ -92,14 +63,12 @@ public sealed interface TimelineSlotContent {
     ) : TimelineSlotContent
 }
 
-@Immutable
 @Serializable
 public enum class GroupSource {
     Manual,
     SystemHome,
 }
 
-@Immutable
 @Serializable
 public enum class TimelineMergePolicy {
     Time,
@@ -107,7 +76,6 @@ public enum class TimelineMergePolicy {
     Staggered,
 }
 
-@Immutable
 @Serializable
 public data class TimelineSourceRef(
     public val id: String,

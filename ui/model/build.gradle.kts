@@ -39,6 +39,7 @@ kotlin {
             dependencies {
                 api(projects.core.common)
                 api(projects.core.model)
+                api(projects.data.datastore)
                 api(dependencies.platform(libs.compose.bom))
                 api(libs.compose.runtime)
                 api(libs.paging.common)

@@ -3,6 +3,7 @@ package dev.dimension.flare.data.model.tab
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.appearance.AppearanceBag
 import dev.dimension.flare.ui.model.UiIcon
+import dev.dimension.flare.ui.model.UiText
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.protobuf.ProtoBuf
@@ -21,9 +22,7 @@ class TimelineFilterConfigSerializationTest {
                         TimelineSourceRef(
                             id = "source",
                             specId = "spec",
-                            title =
-                                dev.dimension.flare.ui.model.UiText
-                                    .Raw("Timeline"),
+                            title = UiText.Raw("Timeline"),
                             icon = IconType.Material(UiIcon.Rss),
                             data = "encoded",
                         ),

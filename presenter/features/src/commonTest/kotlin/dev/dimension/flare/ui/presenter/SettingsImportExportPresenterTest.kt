@@ -51,6 +51,7 @@ class SettingsImportExportPresenterTest {
     private val json = Json { ignoreUnknownKeys = true }
     private val timelineResolver = TimelineResolver(defaultSocialPlatformRegistry)
     private lateinit var root: Path
+    private lateinit var appDataStore: AppDataStore
     private lateinit var settingsRepository: SettingsRepository
 
     @BeforeTest
@@ -65,13 +66,12 @@ class SettingsImportExportPresenterTest {
                     fileName: String,
                 ): Path = root.resolve(groupId).resolve(fileName)
             }
-        settingsRepository =
-            SettingsRepository(
-                AppDataStore(pathProducer),
-            )
+        appDataStore = AppDataStore(pathProducer)
+        settingsRepository = SettingsRepository(appDataStore)
         startKoin {
             modules(
                 module {
+                    single { appDataStore }
                     single { settingsRepository }
                 },
             )

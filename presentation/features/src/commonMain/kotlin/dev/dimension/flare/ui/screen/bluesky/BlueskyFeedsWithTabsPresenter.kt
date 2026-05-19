@@ -6,37 +6,28 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import dev.dimension.flare.data.model.IconType
+import dev.dimension.flare.data.model.tab.TimelinePersistenceMapper
 import dev.dimension.flare.data.model.tab.TimelineSlot
-import dev.dimension.flare.data.model.tab.TimelineSpec
-import dev.dimension.flare.data.model.tab.toSlot
-import dev.dimension.flare.data.platform.BlueskyPlatformSpec
+import dev.dimension.flare.data.platform.toTimelineTabDescriptor
 import dev.dimension.flare.model.AccountType
-import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiList
-import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.presenter.PinTabsPresenter
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.presenter.home.bluesky.BlueskyFeedsPresenter
 import dev.dimension.flare.ui.presenter.home.bluesky.BlueskyFeedsState
 import dev.dimension.flare.ui.presenter.invoke
 import kotlinx.coroutines.launch
+import org.koin.core.component.inject
 
 public class BlueskyFeedsWithTabsPresenter(
     private val accountType: AccountType,
 ) : PresenterBase<BlueskyFeedsWithTabsPresenter.State>() {
     private val pinTabsPresenter by lazy {
         object : PinTabsPresenter<UiList>() {
+            private val timelinePersistenceMapper by inject<TimelinePersistenceMapper>()
+
             override fun getTimelineTabItem(item: UiList): TimelineSlot =
-                BlueskyPlatformSpec.feedTimelineSpec
-                    .target(
-                        data = TimelineSpec.AccountResourceData(specificAccountKey(), item.id),
-                        title = UiText.Raw(item.title),
-                        icon =
-                            (item as? UiList.Feed)?.avatar?.let {
-                                IconType.Url(it)
-                            } ?: IconType.Material(UiIcon.Feeds),
-                    ).toSlot()
+                timelinePersistenceMapper.toSlot((item as UiList.Feed).toTimelineTabDescriptor(specificAccountKey()))
         }
     }
 

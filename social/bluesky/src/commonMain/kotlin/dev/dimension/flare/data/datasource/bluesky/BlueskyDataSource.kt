@@ -54,7 +54,6 @@ import dev.dimension.flare.data.datasource.microblog.handler.RelationHandler
 import dev.dimension.flare.data.datasource.microblog.handler.UserHandler
 import dev.dimension.flare.data.datasource.microblog.loader.ListLoader
 import dev.dimension.flare.data.datasource.microblog.loader.ListMemberLoader
-import dev.dimension.flare.data.datasource.microblog.nextActionMenu
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.notSupported
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
@@ -64,12 +63,13 @@ import dev.dimension.flare.data.datasource.microblog.timeline.PinnableTimelineTa
 import dev.dimension.flare.data.datasource.microblog.timeline.TimelineShortcutDescriptor
 import dev.dimension.flare.data.datasource.microblog.timeline.TimelineSpec
 import dev.dimension.flare.data.datasource.microblog.timeline.TimelineTabProvider
+import dev.dimension.flare.data.datasource.microblog.timeline.toTimelineShortcutDescriptor
+import dev.dimension.flare.data.datasource.microblog.timeline.toTimelineTabDescriptor
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.network.bluesky.BlueskyService
 import dev.dimension.flare.data.network.bluesky.model.DidDoc
 import dev.dimension.flare.data.platform.BlueskyTimelineDataSource
 import dev.dimension.flare.data.platform.BlueskyTimelineSpecs
-import dev.dimension.flare.data.platform.toTimelineShortcutDescriptor
 import dev.dimension.flare.data.platform.toTimelineTabDescriptor
 import dev.dimension.flare.data.account.AccountRepository
 import dev.dimension.flare.common.tryRun
@@ -90,7 +90,6 @@ import dev.dimension.flare.ui.model.mapper.bskyJson
 import dev.dimension.flare.ui.model.mapper.parseBskyFacets
 import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
-import dev.dimension.flare.ui.presenter.status.action.BlueskyReportStatusState
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -128,6 +127,8 @@ internal class BlueskyDataSource(
     KoinComponent,
     ListDataSource,
     BlueskyTimelineDataSource,
+    BlueskyFeedDataSource,
+    BlueskyReportDataSource,
     PinnableTimelineProvider,
     TimelineTabProvider,
     RelationDataSource,
@@ -222,7 +223,7 @@ internal class BlueskyDataSource(
         PostEventHandler(
             accountType = AccountType.Specific(accountKey),
             handler = this,
-            optimisticActionMenu = { it.nextActionMenu() },
+            optimisticActionMenu = { it.blueskyNextActionMenu() },
         )
     }
 
@@ -420,9 +421,9 @@ internal class BlueskyDataSource(
             ).requireResponse()
     }
 
-    suspend fun report(
+    override suspend fun report(
         statusKey: MicroBlogKey,
-        reason: BlueskyReportStatusState.ReportReason,
+        reason: BlueskyReportReason,
     ) {
         tryRun {
             val service = pdsService()
@@ -437,12 +438,12 @@ internal class BlueskyDataSource(
                     CreateReportRequest(
                         reasonType =
                             when (reason) {
-                                BlueskyReportStatusState.ReportReason.Spam -> Token.ReasonSpam
-                                BlueskyReportStatusState.ReportReason.Violation -> Token.ReasonViolation
-                                BlueskyReportStatusState.ReportReason.Misleading -> Token.ReasonMisleading
-                                BlueskyReportStatusState.ReportReason.Sexual -> Token.ReasonSexual
-                                BlueskyReportStatusState.ReportReason.Rude -> Token.ReasonRude
-                                BlueskyReportStatusState.ReportReason.Other -> Token.ReasonOther
+                                BlueskyReportReason.Spam -> Token.ReasonSpam
+                                BlueskyReportReason.Violation -> Token.ReasonViolation
+                                BlueskyReportReason.Misleading -> Token.ReasonMisleading
+                                BlueskyReportReason.Sexual -> Token.ReasonSexual
+                                BlueskyReportReason.Rude -> Token.ReasonRude
+                                BlueskyReportReason.Other -> Token.ReasonOther
                             },
                         subject =
                             CreateReportRequestSubjectUnion.RepoStrongRef(
@@ -650,7 +651,7 @@ internal class BlueskyDataSource(
         )
     }
 
-    val feedHandler: ListHandler<UiList.Feed> by lazy {
+    override val feedHandler: ListHandler<UiList.Feed> by lazy {
         ListHandler(
             pagingKey = myFeedsKey,
             accountKey = accountKey,
@@ -658,7 +659,7 @@ internal class BlueskyDataSource(
         )
     }
 
-    fun popularFeeds(
+    override fun popularFeeds(
         query: String?,
         scope: CoroutineScope,
     ): Flow<PagingData<Pair<UiList.Feed, Boolean>>> =
@@ -710,18 +711,18 @@ internal class BlueskyDataSource(
             uri = uri,
         )
 
-    suspend fun subscribeFeed(data: UiList.Feed) {
+    override suspend fun subscribeFeed(data: UiList.Feed) {
         tryRun {
             feedLoader.subscribe(data.id)
             feedHandler.insertToDatabase(data)
         }
     }
 
-    suspend fun unsubscribeFeed(data: UiList.Feed) {
+    override suspend fun unsubscribeFeed(data: UiList.Feed) {
         feedHandler.delete(data.id)
     }
 
-    suspend fun favouriteFeed(data: UiList.Feed) {
+    override suspend fun favouriteFeed(data: UiList.Feed) {
         feedHandler.withDatabase { updataCallback ->
             val newData = data.copy(liked = !data.liked)
             updataCallback(newData)

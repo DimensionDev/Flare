@@ -2,12 +2,12 @@ package dev.dimension.flare.model
 
 import dev.dimension.flare.common.deeplink.DeepLinkMapping
 import dev.dimension.flare.common.deeplink.DeepLinkPattern
-import dev.dimension.flare.data.datasource.bluesky.BlueskyDataSource
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.vvo.VVODataSource
 import dev.dimension.flare.data.datasource.xqt.XQTDataSource
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.platform.BlueskyPlatformSpec
+import dev.dimension.flare.data.platform.BlueskySocialPlatformPlugin
 import dev.dimension.flare.data.platform.MastodonPlatformSpec
 import dev.dimension.flare.data.platform.MastodonSocialPlatformPlugin
 import dev.dimension.flare.data.platform.MisskeyPlatformSpec
@@ -44,35 +44,9 @@ private fun SocialPlatformSpec.toPresentationPlatformSpec(): PlatformSpec =
     when (type) {
         PlatformType.Mastodon -> MastodonPlatformSpec
         PlatformType.Misskey -> MisskeyPlatformSpec
+        PlatformType.Bluesky -> BlueskyPlatformSpec
         else -> this as PlatformSpec
     }
-
-private data object BlueskySocialPlatformPlugin : SocialPlatformPlugin {
-    override val spec: PlatformSpec = BlueskyPlatformSpec
-
-    override suspend fun recommendedInstances(): List<UiInstance> =
-        listOf(
-            UiInstance(
-                name = "Bluesky",
-                description =
-                    "The web. Email. RSS feeds. XMPP chats. " +
-                        "What all these technologies had in common is they allowed people to freely interact " +
-                        "and create content, without a single intermediary.",
-                iconUrl = null,
-                domain = "bsky.social",
-                type = PlatformType.Bluesky,
-                bannerUrl = null,
-                usersCount = 0,
-            ),
-        )
-
-    override fun createDataSource(account: UiAccount): MicroblogDataSource? =
-        (account as? UiAccount.Bluesky)?.let {
-            BlueskyDataSource(
-                accountKey = it.accountKey,
-            )
-        }
-}
 
 private data object XqtSocialPlatformPlugin : SocialPlatformPlugin {
     override val spec: PlatformSpec = XqtPlatformSpec

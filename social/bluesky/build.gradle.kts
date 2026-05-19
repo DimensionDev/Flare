@@ -29,6 +29,9 @@ kotlin {
                 api(projects.social.microblog)
                 api(libs.bluesky)
                 api(libs.bluesky.oauth)
+                implementation(projects.capability.account)
+                implementation(dependencies.platform(libs.koin.bom))
+                implementation(libs.koin.core)
                 implementation(libs.cryptography.provider.optimal)
                 implementation(libs.twitter.parser)
             }

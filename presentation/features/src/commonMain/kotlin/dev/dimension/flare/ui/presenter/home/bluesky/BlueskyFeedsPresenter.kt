@@ -12,7 +12,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.refreshSuspend
 import dev.dimension.flare.common.toPagingState
-import dev.dimension.flare.data.datasource.bluesky.BlueskyDataSource
+import dev.dimension.flare.data.datasource.bluesky.BlueskyFeedDataSource
 import dev.dimension.flare.data.account.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
@@ -38,7 +38,7 @@ public class BlueskyFeedsPresenter(
         val myFeeds =
             serviceState
                 .map { service ->
-                    require(service is BlueskyDataSource)
+                    require(service is BlueskyFeedDataSource)
                     val flow =
                         remember(service) {
                             service.feedHandler.data.cachedIn(scope)
@@ -48,7 +48,7 @@ public class BlueskyFeedsPresenter(
         val popularFeeds =
             serviceState
                 .map { service ->
-                    require(service is BlueskyDataSource)
+                    require(service is BlueskyFeedDataSource)
                     remember(service, query) {
                         service.popularFeeds(query = query, scope = scope)
                     }.collectAsLazyPagingItems()
@@ -70,7 +70,7 @@ public class BlueskyFeedsPresenter(
             override fun subscribe(list: UiList.Feed) {
                 serviceState.onSuccess {
                     scope.launch {
-                        require(it is BlueskyDataSource)
+                        require(it is BlueskyFeedDataSource)
                         it.subscribeFeed(list)
                     }
                 }
@@ -79,7 +79,7 @@ public class BlueskyFeedsPresenter(
             override fun unsubscribe(list: UiList.Feed) {
                 serviceState.onSuccess {
                     scope.launch {
-                        require(it is BlueskyDataSource)
+                        require(it is BlueskyFeedDataSource)
                         it.unsubscribeFeed(list)
                     }
                 }

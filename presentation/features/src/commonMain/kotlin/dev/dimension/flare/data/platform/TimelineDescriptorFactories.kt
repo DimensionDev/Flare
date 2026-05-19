@@ -58,10 +58,3 @@ internal fun UiList.List.toTimelineTabDescriptor(accountKey: MicroBlogKey): Time
         title = UiText.Raw(title),
         icon = avatar?.let { IconType.Url(it) } ?: UiIcon.List.asType(),
     )
-
-internal fun UiList.Feed.toTimelineTabDescriptor(accountKey: MicroBlogKey): TimelineTabDescriptor.Source =
-    BlueskyTimelineSpecs.feed.toTimelineTabDescriptor(
-        data = TimelineSpec.AccountResourceData(accountKey, id),
-        title = UiText.Raw(title),
-        icon = avatar?.let { IconType.Url(it) } ?: UiIcon.Feeds.asType(),
-    )

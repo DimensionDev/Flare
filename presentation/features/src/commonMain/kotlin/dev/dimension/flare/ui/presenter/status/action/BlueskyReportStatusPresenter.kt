@@ -6,7 +6,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import dev.dimension.flare.data.datasource.bluesky.BlueskyDataSource
+import dev.dimension.flare.data.datasource.bluesky.BlueskyReportDataSource
+import dev.dimension.flare.data.datasource.bluesky.BlueskyReportReason
 import dev.dimension.flare.data.account.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
@@ -37,7 +38,7 @@ public class BlueskyReportStatusPresenter(
     override fun body(): BlueskyReportStatusState {
         val service =
             accountServiceProvider(accountType = accountType, repository = accountRepository).map { service ->
-                service as BlueskyDataSource
+                service as BlueskyReportDataSource
             }
         val status =
             remember(statusKey, accountType) {
@@ -60,7 +61,7 @@ public class BlueskyReportStatusPresenter(
                 service.onSuccess {
                     scope.launch {
                         if (status is UiTimelineV2.Post) {
-                            it.report(status.statusKey, value)
+                            it.report(status.statusKey, BlueskyReportReason.valueOf(value.name))
                         }
                     }
                 }

@@ -7,7 +7,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.refreshSuspend
-import dev.dimension.flare.data.datasource.bluesky.BlueskyDataSource
+import dev.dimension.flare.data.datasource.bluesky.BlueskyFeedDataSource
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.account.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceFlow
@@ -45,7 +45,7 @@ public class BlueskyFeedPresenter(
             override val loader: Flow<RemoteLoader<UiTimelineV2>> by lazy {
                 accountServiceFlow(accountType, accountRepository)
                     .map {
-                        require(it is BlueskyDataSource)
+                        require(it is BlueskyFeedDataSource)
                         it.feedTimelineLoader(uri)
                     }
             }
@@ -56,7 +56,7 @@ public class BlueskyFeedPresenter(
     private val infoFlow by lazy {
         accountServiceFlow(accountType, accountRepository)
             .flatMapLatest {
-                require(it is BlueskyDataSource)
+                require(it is BlueskyFeedDataSource)
                 it.feedHandler.listInfo(uri).toUi()
             }.map {
                 it.mapNotNull { it }
@@ -72,7 +72,7 @@ public class BlueskyFeedPresenter(
         val subscribed =
             serviceState
                 .flatMap {
-                    require(it is BlueskyDataSource)
+                    require(it is BlueskyFeedDataSource)
                     remember(it) {
                         it.feedHandler.cacheData
                     }.collectAsUiState().value
@@ -94,7 +94,7 @@ public class BlueskyFeedPresenter(
             override fun subscribe(list: UiList.Feed) {
                 serviceState.onSuccess {
                     scope.launch {
-                        require(it is BlueskyDataSource)
+                        require(it is BlueskyFeedDataSource)
                         it.subscribeFeed(list)
                     }
                 }
@@ -103,7 +103,7 @@ public class BlueskyFeedPresenter(
             override fun unsubscribe(list: UiList.Feed) {
                 serviceState.onSuccess {
                     scope.launch {
-                        require(it is BlueskyDataSource)
+                        require(it is BlueskyFeedDataSource)
                         it.unsubscribeFeed(list)
                     }
                 }
@@ -112,7 +112,7 @@ public class BlueskyFeedPresenter(
             override fun favorite(list: UiList.Feed) {
                 serviceState.onSuccess {
                     scope.launch {
-                        require(it is BlueskyDataSource)
+                        require(it is BlueskyFeedDataSource)
                         it.favouriteFeed(list)
                     }
                 }
@@ -121,7 +121,7 @@ public class BlueskyFeedPresenter(
             override fun unfavorite(list: UiList.Feed) {
                 serviceState.onSuccess {
                     scope.launch {
-                        require(it is BlueskyDataSource)
+                        require(it is BlueskyFeedDataSource)
                         it.favouriteFeed(list)
                     }
                 }

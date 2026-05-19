@@ -3,4 +3,6 @@ package dev.dimension.flare.common
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 
-internal actual val debugRepositoryDispatcher: CoroutineDispatcher = Dispatchers.Default
+public actual object PlatformDispatchers {
+    public actual val IO: CoroutineDispatcher = Dispatchers.Default
+}

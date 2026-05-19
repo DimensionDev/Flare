@@ -16,6 +16,7 @@ kotlin {
     sourceSets {
         val wasmJsMain by getting {
             dependencies {
+                implementation(projects.core.common)
                 implementation(projects.data.database)
                 implementation(projects.presenter.features)
                 implementation(projects.presenter.runtime)

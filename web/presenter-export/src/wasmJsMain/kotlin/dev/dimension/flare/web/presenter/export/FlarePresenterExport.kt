@@ -4,6 +4,7 @@ package dev.dimension.flare.web.presenter.export
 
 import androidx.paging.LoadState
 import dev.dimension.flare.common.PagingState
+import dev.dimension.flare.common.PlatformDispatchers
 import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.model.tab.TimelineSourceRef
 import dev.dimension.flare.data.network.nodeinfo.NodeData
@@ -62,7 +63,6 @@ import kotlin.js.JsString
 import kotlin.js.Promise
 import kotlin.js.toJsString
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
@@ -82,7 +82,7 @@ private val bridgeJson =
         ignoreUnknownKeys = true
         encodeDefaults = true
     }
-private val bridgeScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+private val bridgeScope = CoroutineScope(SupervisorJob() + PlatformDispatchers.IO)
 private var nextHandleId = 1
 private var nextSubscriptionId = 1
 private var initialized = false

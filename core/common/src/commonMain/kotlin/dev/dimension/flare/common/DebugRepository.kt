@@ -1,21 +1,18 @@
 package dev.dimension.flare.common
 
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import kotlin.coroutines.cancellation.CancellationException
 
-internal expect val debugRepositoryDispatcher: CoroutineDispatcher
-
 public object DebugRepository {
     private const val MAX_MESSAGES = 25
     private const val DEBUG_MAX_MESSAGES = 1000
     private val _messages = MutableStateFlow<List<String>>(emptyList())
     private val _enabled = MutableStateFlow(false)
-    private val scope = CoroutineScope(debugRepositoryDispatcher)
+    private val scope = CoroutineScope(PlatformDispatchers.IO)
 
     public val enabled: SharedFlow<Boolean> get() = _enabled.asSharedFlow()
     public val messages: SharedFlow<List<String>> get() = _messages.asSharedFlow()

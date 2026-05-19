@@ -1,6 +1,6 @@
 package dev.dimension.flare.media
 
-import kotlinx.coroutines.Dispatchers
+import dev.dimension.flare.common.PlatformDispatchers
 import kotlinx.coroutines.withContext
 import java.awt.Graphics2D
 import java.awt.Image
@@ -18,7 +18,7 @@ public class JvmImageCompressor : ImageCompressor {
         maxSize: Long,
         maxDimensions: Pair<Int, Int>,
     ): ByteArray =
-        withContext(Dispatchers.IO) {
+        withContext(PlatformDispatchers.IO) {
             val inputStream = ByteArrayInputStream(imageBytes)
             var image = ImageIO.read(inputStream) ?: throw IllegalArgumentException("Failed to decode image")
 

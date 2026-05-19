@@ -5,11 +5,8 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.protobuf.ProtoBuf
 import kotlinx.serialization.serializer
-import kotlin.coroutines.CoroutineContext
 
 public inline fun <reified T> protobufSerializer(defaultValue: T): OkioSerializer<T> = ProtobufSerializer(defaultValue, serializer<T>())
-
-internal expect val protobufSerializerCoroutineContext: CoroutineContext
 
 @OptIn(ExperimentalSerializationApi::class)
 public class ProtobufSerializer<T>(
@@ -17,7 +14,7 @@ public class ProtobufSerializer<T>(
     public val serializer: kotlinx.serialization.KSerializer<T>,
 ) : OkioSerializer<T> {
     override suspend fun readFrom(source: okio.BufferedSource): T =
-        withContext(protobufSerializerCoroutineContext) {
+        withContext(PlatformDispatchers.IO) {
             ProtoBuf.decodeFromByteArray(serializer, source.readByteArray())
         }
 

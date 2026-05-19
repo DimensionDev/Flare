@@ -1,6 +1,6 @@
 package dev.dimension.flare.data.model.tab
 
-import dev.dimension.flare.common.backgroundCoroutineContext
+import dev.dimension.flare.common.PlatformDispatchers
 import dev.dimension.flare.data.io.PlatformPathProducer
 import dev.dimension.flare.data.model.TabSettings
 import kotlinx.coroutines.withContext
@@ -11,13 +11,13 @@ import okio.FileSystem
 import okio.SYSTEM
 
 internal actual suspend fun legacyTabSettingsExists(pathProducer: PlatformPathProducer): Boolean =
-    withContext(backgroundCoroutineContext) {
+    withContext(PlatformDispatchers.IO) {
         FileSystem.SYSTEM.exists(pathProducer.legacyTabSettingsPath())
     }
 
 @OptIn(ExperimentalSerializationApi::class)
 internal actual suspend fun readLegacyTabSettings(pathProducer: PlatformPathProducer): TabSettings? =
-    withContext(backgroundCoroutineContext) {
+    withContext(PlatformDispatchers.IO) {
         runCatching {
             FileSystem.SYSTEM.read(pathProducer.legacyTabSettingsPath()) {
                 ProtoBuf.decodeFromByteArray<TabSettings>(readByteArray())
@@ -26,7 +26,7 @@ internal actual suspend fun readLegacyTabSettings(pathProducer: PlatformPathProd
     }
 
 internal actual suspend fun deleteLegacyTabSettings(pathProducer: PlatformPathProducer): Unit =
-    withContext(backgroundCoroutineContext) {
+    withContext(PlatformDispatchers.IO) {
         runCatching {
             FileSystem.SYSTEM.delete(pathProducer.legacyTabSettingsPath())
         }

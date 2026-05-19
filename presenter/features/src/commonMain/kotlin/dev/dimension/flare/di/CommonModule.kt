@@ -1,5 +1,6 @@
 package dev.dimension.flare.di
 
+import dev.dimension.flare.common.PlatformDispatchers
 import dev.dimension.flare.data.database.provideAppDatabase
 import dev.dimension.flare.data.database.provideCacheDatabase
 import dev.dimension.flare.data.model.tab.TimelineResolver
@@ -25,6 +26,7 @@ import dev.dimension.flare.ui.presenter.compose.ComposeUseCase
 import dev.dimension.flare.ui.presenter.compose.RestoreDraftUseCase
 import dev.dimension.flare.ui.presenter.compose.SaveDraftUseCase
 import dev.dimension.flare.ui.presenter.compose.SendDraftUseCase
+import kotlinx.coroutines.CoroutineScope
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 
@@ -47,7 +49,7 @@ internal val commonModule =
         }
         single(createdAtStart = true) { DraftSendingRecoveryCoordinator(get(), get()) }
         singleOf(::LocalFilterRepository)
-        single { applicationCoroutineScope() }
+        single { CoroutineScope(PlatformDispatchers.IO) }
         singleOf(::SaveDraftUseCase)
         singleOf(::RestoreDraftUseCase)
         single {

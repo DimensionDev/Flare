@@ -1,9 +1,8 @@
 package dev.dimension.flare.data.model.appearance
 
+import dev.dimension.flare.common.PlatformDispatchers
 import dev.dimension.flare.data.io.PlatformPathProducer
 import dev.dimension.flare.data.model.AppearanceSettings
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.decodeFromByteArray
@@ -12,13 +11,13 @@ import okio.FileSystem
 import okio.SYSTEM
 
 internal actual suspend fun legacyAppearanceSettingsExists(pathProducer: PlatformPathProducer): Boolean =
-    withContext(Dispatchers.IO) {
+    withContext(PlatformDispatchers.IO) {
         FileSystem.SYSTEM.exists(pathProducer.legacyAppearanceSettingsPath())
     }
 
 @OptIn(ExperimentalSerializationApi::class)
 internal actual suspend fun readLegacyAppearanceSettings(pathProducer: PlatformPathProducer): AppearanceSettings? =
-    withContext(Dispatchers.IO) {
+    withContext(PlatformDispatchers.IO) {
         runCatching {
             val v1Bytes =
                 FileSystem.SYSTEM.read(pathProducer.legacyAppearanceSettingsPath()) {
@@ -29,7 +28,7 @@ internal actual suspend fun readLegacyAppearanceSettings(pathProducer: PlatformP
     }
 
 internal actual suspend fun deleteLegacyAppearanceSettings(pathProducer: PlatformPathProducer): Unit =
-    withContext(Dispatchers.IO) {
+    withContext(PlatformDispatchers.IO) {
         runCatching {
             FileSystem.SYSTEM.delete(pathProducer.legacyAppearanceSettingsPath())
         }

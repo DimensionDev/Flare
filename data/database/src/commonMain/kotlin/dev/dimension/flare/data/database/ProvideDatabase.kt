@@ -1,11 +1,9 @@
 package dev.dimension.flare.data.database
 
 import androidx.sqlite.SQLiteDriver
+import dev.dimension.flare.common.PlatformDispatchers
 import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.cache.CacheDatabase
-import kotlin.coroutines.CoroutineContext
-
-internal expect val databaseQueryCoroutineContext: CoroutineContext
 
 public fun provideAppDatabase(driverFactory: DriverFactory): AppDatabase =
     provideAppDatabase(
@@ -21,7 +19,7 @@ public fun provideAppDatabase(
         .createBuilder<AppDatabase>("app.db")
         .addMigrations(AppDatabase.MIGRATION_8_9, AppDatabase.MIGRATION_9_10)
         .setDriver(databaseDriver)
-        .setQueryCoroutineContext(databaseQueryCoroutineContext)
+        .setQueryCoroutineContext(PlatformDispatchers.IO)
         .build()
 
 public const val CACHE_DATABASE_NAME: String = "cache.db"
@@ -40,5 +38,5 @@ public fun provideCacheDatabase(
         .createBuilder<CacheDatabase>(CACHE_DATABASE_NAME, isCache = true)
         .fallbackToDestructiveMigration(dropAllTables = true)
         .setDriver(databaseDriver)
-        .setQueryCoroutineContext(databaseQueryCoroutineContext)
+        .setQueryCoroutineContext(PlatformDispatchers.IO)
         .build()

@@ -38,6 +38,7 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 implementation(dependencies.platform(libs.compose.bom))
+                implementation(projects.core.common)
                 implementation(libs.compose.runtime)
                 implementation(libs.kotlinx.coroutines.core)
                 implementation(libs.molecule.runtime)

@@ -6,12 +6,11 @@ import com.sun.jna.Platform
 import com.sun.jna.Pointer
 import com.sun.jna.ptr.IntByReference
 import com.sun.jna.ptr.PointerByReference
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 internal class JvmOnDeviceAI : OnDeviceAI {
     override suspend fun isAvailable(): Boolean =
-        withContext(Dispatchers.IO) {
+        withContext(PlatformDispatchers.IO) {
             FoundationModelsBridge.isAvailable()
         }
 
@@ -20,7 +19,7 @@ internal class JvmOnDeviceAI : OnDeviceAI {
         targetLanguage: String,
         prompt: String,
     ): String? =
-        withContext(Dispatchers.IO) {
+        withContext(PlatformDispatchers.IO) {
             FoundationModelsBridge.generate(prompt)
         }
 
@@ -29,7 +28,7 @@ internal class JvmOnDeviceAI : OnDeviceAI {
         targetLanguage: String,
         prompt: String,
     ): String? =
-        withContext(Dispatchers.IO) {
+        withContext(PlatformDispatchers.IO) {
             FoundationModelsBridge.generate(prompt)
         }
 }

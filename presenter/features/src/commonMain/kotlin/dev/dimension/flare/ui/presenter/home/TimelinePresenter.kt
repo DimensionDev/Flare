@@ -13,7 +13,7 @@ import androidx.paging.map
 import dev.dimension.flare.common.InAppNotification
 import dev.dimension.flare.common.Message
 import dev.dimension.flare.common.PagingState
-import dev.dimension.flare.common.backgroundCoroutineContext
+import dev.dimension.flare.common.PlatformDispatchers
 import dev.dimension.flare.common.cachePagingState
 import dev.dimension.flare.common.emptyFlow
 import dev.dimension.flare.common.onEmpty
@@ -107,7 +107,7 @@ public abstract class TimelinePresenter :
                         ).cachedIn(scope).flatMapLatest { pagingData ->
                             translationSettingsFlow
                                 .map { translationDisplayOptions ->
-                                    withContext(backgroundCoroutineContext) {
+                                    withContext(PlatformDispatchers.IO) {
                                         pagingData.map { item ->
                                             TimelinePagingMapper.toUi(
                                                 item = item,

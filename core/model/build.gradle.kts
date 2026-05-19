@@ -24,7 +24,7 @@ kotlin {
             dependencies {
                 implementation(dependencies.platform(libs.compose.bom))
                 implementation(libs.compose.runtime)
-                implementation(libs.kotlinx.serialization.json)
+                api(libs.kotlinx.serialization.json)
             }
         }
     }

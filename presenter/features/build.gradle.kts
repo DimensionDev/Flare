@@ -52,7 +52,6 @@ kotlin {
                 api(projects.data.draft)
                 api(projects.data.local)
                 api(projects.data.translation)
-                api(projects.data.repository)
                 implementation(projects.data.network)
                 api(projects.social.api)
                 api(projects.social.bluesky)

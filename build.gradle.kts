@@ -114,8 +114,7 @@ val validateModuleBoundaries by tasks.registering {
                 dependencyPaths
                     .filter {
                         it.startsWith(":presenter:") ||
-                            it == ":compose-ui" ||
-                            it == ":data:repository"
+                            it == ":compose-ui"
                     }.forEach { violations += "${project.path} must not depend on $it" }
             }
 

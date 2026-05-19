@@ -8,12 +8,11 @@ import dev.dimension.flare.data.model.tab.TimelineFilterConfig
 import dev.dimension.flare.data.model.tab.TimelinePersistenceMapper
 import dev.dimension.flare.data.model.tab.TimelinePostKind
 import dev.dimension.flare.data.model.tab.TimelinePresentation
-import dev.dimension.flare.data.model.tab.TimelineResolver
-import dev.dimension.flare.data.model.tab.TimelineSpec
-import dev.dimension.flare.data.model.tab.toSlot
+import dev.dimension.flare.data.datasource.microblog.timeline.CommonTimelineSpecs
 import dev.dimension.flare.data.datasource.microblog.timeline.TimelineCatalog
+import dev.dimension.flare.data.datasource.microblog.timeline.TimelineSpec
+import dev.dimension.flare.data.datasource.microblog.timeline.toTimelineTabDescriptor
 import dev.dimension.flare.data.datasource.rss.RssTimelineSpecs
-import dev.dimension.flare.data.platform.CommonTimelineSpecs
 import dev.dimension.flare.deleteTestRootPath
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.defaultSocialPlatformRegistry
@@ -34,14 +33,12 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class TimelinePresenterBindingTest {
-    private val timelineResolver = TimelineResolver(defaultSocialPlatformRegistry)
     private val timelinePersistenceMapper =
         TimelinePersistenceMapper(
             catalog =
                 TimelineCatalog(
                     defaultSocialPlatformRegistry.specs.flatMap { it.timelineSpecs } + RssTimelineSpecs.timelineSpecs,
                 ),
-            timelineResolver = timelineResolver,
         )
     private lateinit var root: Path
     private lateinit var appDataStore: AppDataStore
@@ -102,11 +99,12 @@ class TimelinePresenterBindingTest {
     private fun homeSlot(
         id: String,
         filterConfig: TimelineFilterConfig,
-    ) = CommonTimelineSpecs
-        .home
-        .target(TimelineSpec.AccountBasedData(MicroBlogKey(id = "home", host = "example.com")))
-        .toSlot()
-        .copy(
+    ) = timelinePersistenceMapper
+        .toSlot(
+            CommonTimelineSpecs.home.toTimelineTabDescriptor(
+                TimelineSpec.AccountBasedData(MicroBlogKey(id = "home", host = "example.com")),
+            ),
+        ).copy(
             id = id,
             presentation = TimelinePresentation(filterConfig = filterConfig),
         )

@@ -8,7 +8,6 @@ import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.datasource.microblog.paging.ReportableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.SortIdProvider
-import dev.dimension.flare.data.model.tab.TimelineMergePolicy
 import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -17,7 +16,7 @@ import kotlinx.coroutines.coroutineScope
 public class MixedRemoteMediator(
     private val database: CacheDatabase,
     private val mediators: List<CacheableRemoteLoader<UiTimelineV2>>,
-    private val mergePolicy: TimelineMergePolicy = TimelineMergePolicy.TimePerPage,
+    private val mergePolicy: MicroblogTimelineMergePolicy = MicroblogTimelineMergePolicy.TimePerPage,
 ) : CacheableRemoteLoader<UiTimelineV2>,
     ReportableRemoteLoader,
     SortIdProvider {
@@ -88,7 +87,7 @@ public class MixedRemoteMediator(
         }
 
     override suspend fun sortId(data: UiTimelineV2): Long? =
-        if (mergePolicy == TimelineMergePolicy.Time) {
+        if (mergePolicy == MicroblogTimelineMergePolicy.Time) {
             val createdAt = data.createdAt.value.toEpochMilliseconds()
             val tieBreaker =
                 (itemIdentity(data).hashCode().toLong() - Int.MIN_VALUE.toLong()) % SORT_ID_TIE_BUCKET
@@ -99,8 +98,8 @@ public class MixedRemoteMediator(
 
     private fun merge(response: List<SubResponse>): List<UiTimelineV2> =
         when (mergePolicy) {
-            TimelineMergePolicy.Time,
-            TimelineMergePolicy.TimePerPage,
+            MicroblogTimelineMergePolicy.Time,
+            MicroblogTimelineMergePolicy.TimePerPage,
             -> {
                 response
                     .flatMap { it.result.data }
@@ -109,7 +108,7 @@ public class MixedRemoteMediator(
                     }
             }
 
-            TimelineMergePolicy.Staggered -> {
+            MicroblogTimelineMergePolicy.Staggered -> {
                 response
                     .map { it.result.data }
                     .interleave()

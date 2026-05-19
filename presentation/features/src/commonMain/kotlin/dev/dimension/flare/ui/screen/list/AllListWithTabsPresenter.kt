@@ -2,11 +2,12 @@ package dev.dimension.flare.ui.screen.list
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import dev.dimension.flare.data.datasource.microblog.timeline.CommonTimelineSpecs
+import dev.dimension.flare.data.datasource.microblog.timeline.TimelineSpec
+import dev.dimension.flare.data.datasource.microblog.timeline.toTimelineTabDescriptor
 import dev.dimension.flare.data.model.IconType
+import dev.dimension.flare.data.model.tab.TimelinePersistenceMapper
 import dev.dimension.flare.data.model.tab.TimelineSlot
-import dev.dimension.flare.data.model.tab.TimelineSpec
-import dev.dimension.flare.data.model.tab.toSlot
-import dev.dimension.flare.data.platform.CommonTimelineSpecs
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiList
@@ -16,22 +17,26 @@ import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.list.AllListPresenter
 import dev.dimension.flare.ui.presenter.list.AllListState
+import org.koin.core.component.inject
 
 public class AllListWithTabsPresenter(
     private val accountType: AccountType,
 ) : PresenterBase<AllListWithTabsPresenter.State>() {
     private val pinTabsPresenter by lazy {
         object : PinTabsPresenter<UiList>() {
+            private val timelinePersistenceMapper by inject<TimelinePersistenceMapper>()
+
             override fun getTimelineTabItem(item: UiList): TimelineSlot =
-                CommonTimelineSpecs.list
-                    .target(
+                timelinePersistenceMapper.toSlot(
+                    CommonTimelineSpecs.list.toTimelineTabDescriptor(
                         data = TimelineSpec.AccountResourceData(specificAccountKey(), item.id),
                         title = UiText.Raw(item.title),
                         icon =
                             (item as? UiList.List)?.avatar?.let {
                                 IconType.Url(it)
                             } ?: IconType.Material(UiIcon.List),
-                    ).toSlot()
+                    ),
+                )
         }
     }
 

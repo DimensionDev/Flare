@@ -9,7 +9,6 @@ import dev.dimension.flare.data.datasource.microblog.timeline.toTimelineTabDescr
 import dev.dimension.flare.data.datasource.rss.RssTimelineSpecs
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.defaultSocialPlatformRegistry
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.UiText
@@ -32,7 +31,6 @@ class TimelinePersistenceMapperTest {
     private val mapper =
         TimelinePersistenceMapper(
             catalog = TimelineCatalog(listOf(homeSpec) + RssTimelineSpecs.timelineSpecs),
-            timelineResolver = TimelineResolver(defaultSocialPlatformRegistry),
         )
 
     @Test

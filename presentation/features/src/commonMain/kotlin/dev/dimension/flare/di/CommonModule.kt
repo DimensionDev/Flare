@@ -9,7 +9,6 @@ import dev.dimension.flare.data.datasource.microblog.timeline.TimelineCatalog
 import dev.dimension.flare.data.datasource.rss.RssTimelineSpecs
 import dev.dimension.flare.data.model.tab.TimelinePersistenceMapper
 import dev.dimension.flare.data.model.tab.TimelinePresenterFactory
-import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.network.rss.Readability
 import dev.dimension.flare.data.account.AccountRepository
 import dev.dimension.flare.data.repository.AccountTabSyncCoordinator
@@ -40,7 +39,7 @@ internal val commonModule =
             )
         }
         singleOf(::AccountRepository)
-        single(createdAtStart = true) { AccountTabSyncCoordinator(get(), get(), get(), get(), get()) }
+        single(createdAtStart = true) { AccountTabSyncCoordinator(get(), get(), get(), get()) }
         single { provideAppDatabase(get()) }
         single { provideCacheDatabase(get()) }
         singleOf(::ApplicationRepository)
@@ -71,7 +70,6 @@ internal val commonModule =
         singleOf(::OpenAIService)
         singleOf(::AiCompletionService)
         single<PreTranslationService> { OnlinePreTranslationService(get(), get(), get(), get()) }
-        single { TimelineResolver(get()) }
         single { TimelinePresenterFactory(get()) }
-        single { TimelinePersistenceMapper(get(), get()) }
+        single { TimelinePersistenceMapper(get()) }
     }

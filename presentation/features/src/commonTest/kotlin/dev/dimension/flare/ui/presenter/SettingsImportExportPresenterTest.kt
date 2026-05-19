@@ -15,15 +15,14 @@ import dev.dimension.flare.data.model.tab.TimelineMergePolicy
 import dev.dimension.flare.data.model.tab.TimelinePersistenceMapper
 import dev.dimension.flare.data.model.tab.TimelinePostKind
 import dev.dimension.flare.data.model.tab.TimelinePresentation
-import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.model.tab.TimelineSlot
 import dev.dimension.flare.data.model.tab.TimelineSlotContent
-import dev.dimension.flare.data.model.tab.TimelineSpec
-import dev.dimension.flare.data.model.tab.toSlot
+import dev.dimension.flare.data.datasource.microblog.timeline.CommonTimelineSpecs
 import dev.dimension.flare.data.datasource.microblog.timeline.TimelineCatalog
+import dev.dimension.flare.data.datasource.microblog.timeline.TimelineSpec
+import dev.dimension.flare.data.datasource.microblog.timeline.toTimelineTabDescriptor
 import dev.dimension.flare.data.datasource.rss.RssTimelineSpecs
-import dev.dimension.flare.data.platform.CommonTimelineSpecs
-import dev.dimension.flare.data.platform.MastodonPlatformSpec
+import dev.dimension.flare.data.platform.MastodonTimelineSpecs
 import dev.dimension.flare.data.repository.homeTimelineTab
 import dev.dimension.flare.deleteTestRootPath
 import dev.dimension.flare.model.MicroBlogKey
@@ -53,14 +52,12 @@ import kotlin.test.assertTrue
 
 class SettingsImportExportPresenterTest {
     private val json = Json { ignoreUnknownKeys = true }
-    private val timelineResolver = TimelineResolver(defaultSocialPlatformRegistry)
     private val timelinePersistenceMapper =
         TimelinePersistenceMapper(
             catalog =
                 TimelineCatalog(
                     defaultSocialPlatformRegistry.specs.flatMap { it.timelineSpecs } + RssTimelineSpecs.timelineSpecs,
                 ),
-            timelineResolver = timelineResolver,
         )
     private lateinit var root: Path
     private lateinit var appDataStore: AppDataStore
@@ -253,14 +250,16 @@ class SettingsImportExportPresenterTest {
         }
 
     private fun homeSlot() =
-        CommonTimelineSpecs
-            .home
-            .target(TimelineSpec.AccountBasedData(MicroBlogKey(id = "home", host = "example.com")))
-            .toSlot()
+        timelinePersistenceMapper.toSlot(
+            CommonTimelineSpecs.home.toTimelineTabDescriptor(
+                TimelineSpec.AccountBasedData(MicroBlogKey(id = "home", host = "example.com")),
+            ),
+        )
 
     private fun localSlot() =
-        MastodonPlatformSpec
-            .localTimelineSpec
-            .target(TimelineSpec.AccountBasedData(MicroBlogKey(id = "local", host = "example.com")))
-            .toSlot()
+        timelinePersistenceMapper.toSlot(
+            MastodonTimelineSpecs.local.toTimelineTabDescriptor(
+                TimelineSpec.AccountBasedData(MicroBlogKey(id = "local", host = "example.com")),
+            ),
+        )
 }

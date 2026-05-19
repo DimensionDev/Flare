@@ -4,10 +4,10 @@ import dev.dimension.flare.data.datasource.microblog.timeline.TimelineCatalog
 import dev.dimension.flare.data.datasource.microblog.timeline.TimelineRef
 import dev.dimension.flare.data.datasource.microblog.timeline.TimelineSpec
 import dev.dimension.flare.data.datasource.microblog.timeline.TimelineTabDescriptor
+import dev.dimension.flare.model.MicroBlogKey
 
 internal class TimelinePersistenceMapper(
     private val catalog: TimelineCatalog,
-    private val timelineResolver: TimelineResolver,
 ) {
     fun toTabItem(descriptor: TimelineTabDescriptor.Source): SourceTimelineTabItemV2 =
         SourceTimelineTabItemV2.fromSource(
@@ -50,7 +50,42 @@ internal class TimelinePersistenceMapper(
         )
 
     fun toSlot(item: TimelineTabItemV2): TimelineSlot =
-        timelineResolver.toSlot(item)
+        when (item) {
+            is SourceTimelineTabItemV2 -> {
+                val source =
+                    item.source
+                        ?: throw IllegalArgumentException("Runtime timeline tab cannot be persisted: ${item.id}")
+                source.toSlot(
+                    slotId = item.id,
+                    presentation = item.presentation ?: TimelinePresentation(),
+                )
+            }
+
+            is GroupTimelineTabItemV2 -> {
+                TimelineSlot(
+                    id = item.id,
+                    content =
+                        TimelineSlotContent.Group(
+                            children = item.children.map { toSlot(it) },
+                            source = item.source,
+                            mergePolicy = item.mergePolicy,
+                        ),
+                    presentation = item.presentation,
+                )
+            }
+        }
+
+    fun resolveAccountKey(slot: TimelineSlot): MicroBlogKey? =
+        when (val content = slot.content) {
+            is TimelineSlotContent.Source ->
+                runCatching { decode(content.source) }
+                    .getOrNull()
+                    ?.data
+                    ?.let { it as? TimelineSpec.AccountData }
+                    ?.accountKey
+
+            is TimelineSlotContent.Group -> null
+        }
 
     fun decode(source: TimelineSourceRef): TimelineRef<out TimelineSpec.Data> =
         catalog.decode(

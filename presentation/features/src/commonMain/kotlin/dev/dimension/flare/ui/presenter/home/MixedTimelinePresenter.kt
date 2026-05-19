@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.presenter.home
 
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.datasource.microblog.MicroblogTimelineMergePolicy
 import dev.dimension.flare.data.datasource.microblog.MixedRemoteMediator
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
@@ -91,7 +92,7 @@ public class MixedTimelinePresenter(
                     MixedRemoteMediator(
                         database = database,
                         mediators = loaders.filterIsInstance<CacheableRemoteLoader<UiTimelineV2>>(),
-                        mergePolicy = mergePolicy,
+                        mergePolicy = mergePolicy.toMicroblogPolicy(),
                     )
                 }
             }
@@ -151,7 +152,7 @@ public class SystemHomeMixedTimelinePresenter(
                     MixedRemoteMediator(
                         database = database,
                         mediators = loaders.filterIsInstance<CacheableRemoteLoader<UiTimelineV2>>(),
-                        mergePolicy = mergePolicy,
+                        mergePolicy = mergePolicy.toMicroblogPolicy(),
                     )
                 }
             }
@@ -160,4 +161,11 @@ public class SystemHomeMixedTimelinePresenter(
 private fun Flow<List<TimelineTabItemV2>>.distinctUntilChangedByTabIds(): Flow<List<TimelineTabItemV2>> =
     distinctUntilChanged { old, new ->
         old.map { it.id } == new.map { it.id }
+    }
+
+private fun TimelineMergePolicy.toMicroblogPolicy(): MicroblogTimelineMergePolicy =
+    when (this) {
+        TimelineMergePolicy.Time -> MicroblogTimelineMergePolicy.Time
+        TimelineMergePolicy.TimePerPage -> MicroblogTimelineMergePolicy.TimePerPage
+        TimelineMergePolicy.Staggered -> MicroblogTimelineMergePolicy.Staggered
     }

@@ -2,7 +2,6 @@ package dev.dimension.flare.data.model.tab
 
 import dev.dimension.flare.data.datasource.microblog.timeline.AccountTimelineSpec
 import dev.dimension.flare.data.datasource.microblog.timeline.StandaloneTimelineSpec
-import dev.dimension.flare.data.datasource.microblog.timeline.TimelineLoaderContext as SocialTimelineLoaderContext
 import dev.dimension.flare.data.datasource.microblog.timeline.TimelineRef
 import dev.dimension.flare.data.datasource.microblog.timeline.TimelineSpec
 import dev.dimension.flare.ui.presenter.home.AccountTimelinePresenter
@@ -12,7 +11,7 @@ import dev.dimension.flare.ui.presenter.home.SystemHomeMixedTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.TimelinePresenter
 
 internal class TimelinePresenterFactory(
-    private val timelineResolver: TimelineResolver,
+    private val timelinePersistenceMapper: TimelinePersistenceMapper,
 ) {
     fun create(tab: TimelineTabItemV2): TimelinePresenter =
         when (tab) {
@@ -25,7 +24,7 @@ internal class TimelinePresenterFactory(
     private fun create(tab: SourceTimelineTabItemV2): TimelinePresenter =
         tab.runtimePresenterFactory?.invoke()
             ?: tab.ref?.let(::create)
-            ?: tab.source?.let(timelineResolver::resolvePresenter)
+            ?: tab.source?.let(timelinePersistenceMapper::decode)?.let(::create)
             ?: throw IllegalArgumentException("Runtime timeline tab has no presenter factory: ${tab.id}")
 
     private fun create(tab: GroupTimelineTabItemV2): TimelinePresenter =
@@ -45,11 +44,7 @@ internal class TimelinePresenterFactory(
             is StandaloneTimelineSpec<*> ->
                 StandaloneTimelinePresenter { context ->
                     spec.createLoader(
-                        context =
-                            SocialTimelineLoaderContext(
-                                appDatabase = context.appDatabase,
-                                cacheDatabase = context.cacheDatabase,
-                            ),
+                        context = context,
                         data = ref.data,
                     )
                 }

@@ -27,7 +27,6 @@ import dev.dimension.flare.data.datasource.microblog.paging.TimelineRemoteMediat
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.io.OkioFileStorage
-import dev.dimension.flare.data.model.tab.TimelineMergePolicy
 import dev.dimension.flare.data.ai.AiCompletionService
 import dev.dimension.flare.data.ai.OpenAIService
 import dev.dimension.flare.data.translation.OnlinePreTranslationService
@@ -371,7 +370,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                     }
                 }
 
-            val mediator = MixedRemoteMediator(db, listOf(first, second), TimelineMergePolicy.Staggered)
+            val mediator = MixedRemoteMediator(db, listOf(first, second), MicroblogTimelineMergePolicy.Staggered)
             val result = mediator.load(pageSize = 20, request = PagingRequest.Refresh)
 
             assertEquals(
@@ -413,7 +412,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                     }
                 }
 
-            val mixed = MixedRemoteMediator(db, listOf(loader), TimelineMergePolicy.Time)
+            val mixed = MixedRemoteMediator(db, listOf(loader), MicroblogTimelineMergePolicy.Time)
             val timelineRemoteMediator = TimelineRemoteMediator(loader = mixed, database = db, allowLongText = false)
             val state =
                 PagingState<Int, DbStatusWithReference>(

@@ -1,12 +1,10 @@
 package dev.dimension.flare.data.repository
 
 import dev.dimension.flare.data.account.AccountRepository
-import dev.dimension.flare.data.datasource.microblog.datasource.TimelineTabConfigurationDataSource
 import dev.dimension.flare.data.datasource.microblog.timeline.TimelineTabProvider
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.model.tab.GroupSource
 import dev.dimension.flare.data.model.tab.TimelinePersistenceMapper
-import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.model.tab.TimelineSlot
 import dev.dimension.flare.data.model.tab.TimelineSlotContent
 import dev.dimension.flare.data.model.tab.normalizeSystemHomeMixedTimeline
@@ -20,7 +18,6 @@ internal class AccountTabSyncCoordinator(
     private val accountRepository: AccountRepository,
     private val appDataStore: AppDataStore,
     private val coroutineScope: CoroutineScope,
-    private val timelineResolver: TimelineResolver,
     private val timelinePersistenceMapper: TimelinePersistenceMapper,
 ) {
     init {
@@ -62,9 +59,7 @@ internal class AccountTabSyncCoordinator(
             (service as? TimelineTabProvider)
                 ?.defaultTimelineTabs
                 ?.map(timelinePersistenceMapper::toSlot)
-                ?: (service as? TimelineTabConfigurationDataSource)
-                    ?.defaultTabs
-                    .orEmpty()
+                .orEmpty()
         if (defaultSlots.isEmpty()) {
             return
         }
@@ -112,7 +107,7 @@ internal class AccountTabSyncCoordinator(
     private fun TimelineSlot.cleanupAccountSlots(shouldKeep: (MicroBlogKey?) -> Boolean): TimelineSlot? =
         when (val slotContent = content) {
             is TimelineSlotContent.Source -> {
-                if (shouldKeep(timelineResolver.resolveAccountKey(this))) {
+                if (shouldKeep(timelinePersistenceMapper.resolveAccountKey(this))) {
                     this
                 } else {
                     null

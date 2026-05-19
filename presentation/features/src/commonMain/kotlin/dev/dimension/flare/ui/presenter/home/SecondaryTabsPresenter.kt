@@ -5,14 +5,11 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import dev.dimension.flare.common.combineLatestFlowLists
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
-import dev.dimension.flare.data.datasource.microblog.datasource.TimelineTabConfigurationDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
 import dev.dimension.flare.data.datasource.microblog.timeline.TimelineShortcutDescriptor
 import dev.dimension.flare.data.datasource.microblog.timeline.TimelineTabDescriptor
 import dev.dimension.flare.data.datasource.microblog.timeline.TimelineTabProvider
 import dev.dimension.flare.data.model.tab.TimelinePersistenceMapper
-import dev.dimension.flare.data.model.tab.ShortcutSpec
-import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.data.account.AccountRepository
 import dev.dimension.flare.data.repository.allAccountServicesFlow
@@ -67,7 +64,6 @@ public class SecondaryTabsPresenter :
     }
 
     private val accountRepository: AccountRepository by inject()
-    private val timelineResolver: TimelineResolver by inject()
     private val timelinePersistenceMapper: TimelinePersistenceMapper by inject()
 
     private val itemsFlow by lazy {
@@ -97,30 +93,23 @@ public class SecondaryTabsPresenter :
                                             user = userState,
                                             tabs =
                                                 (
-                                                    listOfNotNull(
-                                                        toTab(
-                                                            ShortcutSpec(
-                                                                title = UiStrings.Me,
-                                                                icon = UiIcon.Profile,
-                                                                target =
-                                                                    ShortcutSpec.Target.Route(
-                                                                        DeeplinkRoute.Profile.User(
-                                                                            accountType = AccountType.Specific(service.accountKey),
-                                                                            userKey = user.key,
-                                                                        ),
+                                                    listOf(
+                                                        Tab(
+                                                            title = UiStrings.Me,
+                                                            icon = UiIcon.Profile,
+                                                            destination =
+                                                                Destination.Route(
+                                                                    DeeplinkRoute.Profile.User(
+                                                                        accountType = AccountType.Specific(service.accountKey),
+                                                                        userKey = user.key,
                                                                     ),
-                                                            ),
+                                                                ),
                                                         ),
                                                     ) +
-                                                        (
-                                                            (service as? TimelineTabProvider)
-                                                                ?.timelineShortcuts
-                                                                ?.mapNotNull(::toTab)
-                                                                ?: (service as? TimelineTabConfigurationDataSource)
-                                                                    ?.shortcuts
-                                                                    ?.mapNotNull(::toTab)
-                                                                    .orEmpty()
-                                                        )
+                                                        (service as? TimelineTabProvider)
+                                                            ?.timelineShortcuts
+                                                            ?.mapNotNull(::toTab)
+                                                            .orEmpty()
                                                 )
                                                     .toImmutableList(),
                                         )
@@ -144,25 +133,6 @@ public class SecondaryTabsPresenter :
             override val items = items
         }
     }
-
-    private fun toTab(shortcut: ShortcutSpec): Tab? =
-        when (val target = shortcut.target) {
-            is ShortcutSpec.Target.Route -> {
-                Tab(
-                    title = shortcut.title,
-                    icon = shortcut.icon,
-                    destination = Destination.Route(target.route),
-                )
-            }
-
-            is ShortcutSpec.Target.Timeline -> {
-                Tab(
-                    title = shortcut.title,
-                    icon = shortcut.icon,
-                    destination = Destination.Timeline(timelineResolver.toTabItem(target.source)),
-                )
-            }
-        }
 
     private fun toTab(shortcut: TimelineShortcutDescriptor): Tab? =
         when (val target = shortcut.target) {

@@ -11,8 +11,8 @@ import dev.dimension.flare.data.model.tab.GroupTimelineTabItemV2
 import dev.dimension.flare.data.model.tab.TabSettingsV2
 import dev.dimension.flare.data.model.tab.TimelineFilterConfig
 import dev.dimension.flare.data.model.tab.TimelineMergePolicy
+import dev.dimension.flare.data.model.tab.TimelinePersistenceMapper
 import dev.dimension.flare.data.model.tab.TimelinePresentation
-import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.model.tab.TimelineSlot
 import dev.dimension.flare.data.model.tab.TimelineSlotContent
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
@@ -31,7 +31,7 @@ public class GroupConfigPresenter :
     KoinComponent {
     private val appDataStore: AppDataStore by inject()
     private val appScope: CoroutineScope by inject()
-    private val timelineResolver: TimelineResolver by inject()
+    private val timelinePersistenceMapper: TimelinePersistenceMapper by inject()
 
     @Composable
     override fun body(): State {
@@ -66,7 +66,7 @@ public class GroupConfigPresenter :
                             mergePolicy = mergePolicy,
                             filterConfig = filterConfig,
                             defaultGroupName = defaultGroupName,
-                            timelineResolver = timelineResolver,
+                            timelinePersistenceMapper = timelinePersistenceMapper,
                         )
                     }
                 }
@@ -102,7 +102,7 @@ internal fun TabSettingsV2.upsertGroupConfig(
     mergePolicy: TimelineMergePolicy = initialItem?.mergePolicy ?: TimelineMergePolicy.TimePerPage,
     filterConfig: TimelineFilterConfig = initialItem?.filterConfig ?: TimelineFilterConfig(),
     defaultGroupName: String,
-    timelineResolver: TimelineResolver,
+    timelinePersistenceMapper: TimelinePersistenceMapper,
 ): TabSettingsV2 {
     val deduplicatedTabs = tabs.distinctBy { it.id }
     if (deduplicatedTabs.isEmpty()) {
@@ -117,7 +117,7 @@ internal fun TabSettingsV2.upsertGroupConfig(
         }
     }
 
-    val childSlots = deduplicatedTabs.map { timelineResolver.toSlot(it) }
+    val childSlots = deduplicatedTabs.map { timelinePersistenceMapper.toSlot(it) }
     val newGroup = buildGroupSlot(name, icon, appearancePatch, enabled, mergePolicy, filterConfig, defaultGroupName, childSlots)
     val currentSlots = homeSlots.toMutableList()
     val targetIndex =

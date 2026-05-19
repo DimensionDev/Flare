@@ -16,6 +16,7 @@ import dev.dimension.flare.data.model.appearance.toGlobalAppearance
 import dev.dimension.flare.data.model.appearance.toPatch
 import dev.dimension.flare.data.model.appearance.toTimelineAppearance
 import dev.dimension.flare.data.model.tab.TabSettingsV2
+import dev.dimension.flare.data.model.tab.migrateTabSettingsV1ToV2
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emitAll
@@ -28,7 +29,6 @@ import kotlinx.coroutines.sync.withLock
 public class SettingsRepository(
     private val pathProducer: PlatformPathProducer,
     private val appDataStore: AppDataStore,
-    private val tabSettingsV2Migrator: TabSettingsV2Migrator = NoOpTabSettingsV2Migrator,
 ) {
     private val appearanceBagStore by lazy {
         appDataStore.appearanceBagStore
@@ -146,7 +146,7 @@ public class SettingsRepository(
         if (tabSettingsMigrationCompleted) return
         tabSettingsMigrationMutex.withLock {
             if (tabSettingsMigrationCompleted) return
-            tabSettingsV2Migrator.migrate(
+            migrateTabSettingsV1ToV2(
                 pathProducer = pathProducer,
                 tabSettingsV2Store = tabSettingsV2Store,
             )

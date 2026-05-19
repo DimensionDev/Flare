@@ -4,10 +4,6 @@ import androidx.datastore.core.DataStoreFactory
 import androidx.datastore.core.okio.OkioStorage
 import dev.dimension.flare.common.protobufSerializer
 import dev.dimension.flare.data.io.PlatformPathProducer
-import dev.dimension.flare.data.model.AppearanceSettings
-import dev.dimension.flare.data.model.PostActionStyle
-import dev.dimension.flare.data.model.Theme
-import dev.dimension.flare.data.model.VideoAutoplay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -41,11 +37,11 @@ class AppearanceMigrationTest {
                 }
             val oldPath = pathProducer.dataStoreFile("appearance_settings.pb")
             val imported =
-                AppearanceSettings(
-                    theme = Theme.DARK,
+                LegacyAppearanceSettings(
+                    theme = LegacyTheme.DARK,
                     showMedia = false,
-                    videoAutoplay = VideoAutoplay.ALWAYS,
-                    postActionStyle = PostActionStyle.Stretch,
+                    videoAutoplay = LegacyVideoAutoplay.ALWAYS,
+                    postActionStyle = LegacyPostActionStyle.Stretch,
                 )
             fs.write(oldPath) {
                 write(ProtoBuf.encodeToByteArray(imported))
@@ -63,7 +59,7 @@ class AppearanceMigrationTest {
             migrateAppearanceV1ToV2(pathProducer, store)
 
             assertEquals(
-                imported.toPatch().toBag(),
+                imported.toBag(),
                 store.data
                     .first(),
             )

@@ -1,11 +1,11 @@
 package dev.dimension.flare.di
 
 import dev.dimension.flare.common.PlatformDispatchers
+import dev.dimension.flare.data.ai.AiCompletionService
+import dev.dimension.flare.data.ai.OpenAIService
 import dev.dimension.flare.data.database.provideAppDatabase
 import dev.dimension.flare.data.database.provideCacheDatabase
 import dev.dimension.flare.data.model.tab.TimelineResolver
-import dev.dimension.flare.data.ai.AiCompletionService
-import dev.dimension.flare.data.ai.OpenAIService
 import dev.dimension.flare.data.network.rss.Readability
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.AccountTabSyncCoordinator
@@ -14,10 +14,8 @@ import dev.dimension.flare.data.repository.DraftMediaStore
 import dev.dimension.flare.data.repository.DraftRepository
 import dev.dimension.flare.data.repository.DraftSendingRecoveryCoordinator
 import dev.dimension.flare.data.repository.LocalFilterRepository
-import dev.dimension.flare.data.repository.LegacyTabSettingsV2Migrator
 import dev.dimension.flare.data.repository.SearchHistoryRepository
 import dev.dimension.flare.data.repository.SettingsRepository
-import dev.dimension.flare.data.repository.TabSettingsV2Migrator
 import dev.dimension.flare.data.translation.OnlinePreTranslationService
 import dev.dimension.flare.data.translation.PreTranslationService
 import dev.dimension.flare.model.SocialPlatformRegistry
@@ -61,8 +59,7 @@ internal val commonModule =
         }
         singleOf(::ComposeUseCase)
         singleOf(::SearchHistoryRepository)
-        single<TabSettingsV2Migrator> { LegacyTabSettingsV2Migrator }
-        single { SettingsRepository(get(), get(), get()) }
+        single { SettingsRepository(get(), get()) }
         singleOf(::Readability)
         singleOf(::OpenAIService)
         singleOf(::AiCompletionService)

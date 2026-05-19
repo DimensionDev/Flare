@@ -3,11 +3,11 @@ package dev.dimension.flare.data.model.tab
 import androidx.datastore.core.DataStoreFactory
 import androidx.datastore.core.okio.OkioStorage
 import dev.dimension.flare.common.protobufSerializer
-import dev.dimension.flare.data.database.app.model.SubscriptionType
 import dev.dimension.flare.data.io.PlatformPathProducer
 import dev.dimension.flare.data.model.AllRssTimelineTabItem
 import dev.dimension.flare.data.model.Bluesky
 import dev.dimension.flare.data.model.IconType
+import dev.dimension.flare.data.model.LegacySubscriptionType
 import dev.dimension.flare.data.model.ListTimelineTabItem
 import dev.dimension.flare.data.model.Mastodon
 import dev.dimension.flare.data.model.MixedTimelineTabItem
@@ -16,7 +16,6 @@ import dev.dimension.flare.data.model.SubscriptionTimelineTabItem
 import dev.dimension.flare.data.model.TabMetaData
 import dev.dimension.flare.data.model.TabSettings
 import dev.dimension.flare.data.model.TitleType
-import dev.dimension.flare.data.platform.RssTimelineSpecs
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiIcon
@@ -167,7 +166,7 @@ class TabSettingsMigrationTest {
                 AllRssTimelineTabItem(),
                 SubscriptionTimelineTabItem(
                     subscriptionUrl = "https://mastodon.example/public",
-                    subscriptionType = SubscriptionType.MASTODON_PUBLIC,
+                    subscriptionType = LegacySubscriptionType.MASTODON_PUBLIC,
                     favIcon = null,
                     metaData =
                         TabMetaData(
@@ -179,9 +178,9 @@ class TabSettingsMigrationTest {
 
         assertEquals(
             listOf(
-                RssTimelineSpecs.rss.id,
-                RssTimelineSpecs.allRss.id,
-                RssTimelineSpecs.subscription.id,
+                "rss.feed",
+                "rss.all",
+                "rss.subscription",
             ),
             slots.map { assertIs<TimelineSlotContent.Source>(it.content).source.specId },
         )

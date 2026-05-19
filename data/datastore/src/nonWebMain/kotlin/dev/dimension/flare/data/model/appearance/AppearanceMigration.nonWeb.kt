@@ -2,7 +2,6 @@ package dev.dimension.flare.data.model.appearance
 
 import dev.dimension.flare.common.PlatformDispatchers
 import dev.dimension.flare.data.io.PlatformPathProducer
-import dev.dimension.flare.data.model.AppearanceSettings
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.decodeFromByteArray
@@ -16,14 +15,14 @@ internal actual suspend fun legacyAppearanceSettingsExists(pathProducer: Platfor
     }
 
 @OptIn(ExperimentalSerializationApi::class)
-internal actual suspend fun readLegacyAppearanceSettings(pathProducer: PlatformPathProducer): AppearanceSettings? =
+internal actual suspend fun readLegacyAppearanceSettings(pathProducer: PlatformPathProducer): LegacyAppearanceSettings? =
     withContext(PlatformDispatchers.IO) {
         runCatching {
             val v1Bytes =
                 FileSystem.SYSTEM.read(pathProducer.legacyAppearanceSettingsPath()) {
                     readByteArray()
                 }
-            ProtoBuf.decodeFromByteArray<AppearanceSettings>(v1Bytes)
+            ProtoBuf.decodeFromByteArray<LegacyAppearanceSettings>(v1Bytes)
         }.getOrNull()
     }
 

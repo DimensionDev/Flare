@@ -10,8 +10,10 @@ import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.LegacyAppearanceSettingsAndTabsExport
 import dev.dimension.flare.data.model.LegacyAppearanceSettingsExport
 import dev.dimension.flare.data.model.LegacySettingsExport
+import dev.dimension.flare.data.model.LegacySubscriptionType
 import dev.dimension.flare.data.model.Mastodon
 import dev.dimension.flare.data.model.SettingsExport
+import dev.dimension.flare.data.model.SubscriptionTimelineTabItem
 import dev.dimension.flare.data.model.TabMetaData
 import dev.dimension.flare.data.model.TabSettings
 import dev.dimension.flare.data.model.Theme
@@ -239,6 +241,27 @@ class SettingsImportExportPresenterTest {
                 ),
                 settings.homeSlots.map { it.id },
             )
+        }
+
+    @Test
+    fun legacySubscriptionTimelineMigrationProducesRuntimeCompatibleData() =
+        runTest {
+            val slot =
+                SubscriptionTimelineTabItem(
+                    subscriptionUrl = "https://mastodon.example/public",
+                    subscriptionType = LegacySubscriptionType.MASTODON_PUBLIC,
+                    metaData =
+                        TabMetaData(
+                            title = TitleType.Text("Public"),
+                            icon = IconType.Material(UiIcon.Rss),
+                        ),
+                ).toTimelineSlotOrNull()
+                    ?: error("Subscription slot should be migratable")
+
+            val tabItem = timelineResolver.toTabItem(slot)
+            tabItem.createPresenter()
+
+            assertEquals(slot.id, tabItem.id)
         }
 
     @Test

@@ -3,16 +3,14 @@ package dev.dimension.flare.data.platform
 import dev.dimension.flare.common.deeplink.DeepLinkMapping
 import dev.dimension.flare.common.deeplink.DeepLinkPattern
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
+import dev.dimension.flare.data.datasource.xqt.XQTDataSource
+import dev.dimension.flare.data.model.tab.AccountTimelineSpec
 import dev.dimension.flare.data.model.tab.TimelineSpec
-import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.PlatformSpec
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiInstanceMetadata
 import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.asType
-import dev.dimension.flare.ui.presenter.home.xqt.XQTBookmarkTimelinePresenter
-import dev.dimension.flare.ui.presenter.home.xqt.XQTDeviceFollowTimelinePresenter
-import dev.dimension.flare.ui.presenter.home.xqt.XQTFeaturedTimelinePresenter
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
@@ -27,44 +25,41 @@ internal data object XqtPlatformSpec : PlatformSpec {
         XqtSocialPlatformSpec.deepLinkPatterns(host)
 
     internal val featuredTimelineSpec =
-        TimelineSpec(
+        AccountTimelineSpec(
             id = "xqt.featured",
             title = UiStrings.Featured,
             icon = UiIcon.Featured.asType(),
             serializer = TimelineSpec.AccountBasedData.serializer(),
             targetId = { it.accountKey.toString() },
-            presenterFactory = {
-                XQTFeaturedTimelinePresenter(
-                    AccountType.Specific(it.accountKey),
-                )
+            loaderFactory = { service, _ ->
+                require(service is XQTDataSource)
+                service.featuredTimelineLoader()
             },
         )
 
     internal val bookmarkTimelineSpec =
-        TimelineSpec(
+        AccountTimelineSpec(
             id = "xqt.bookmark",
             title = UiStrings.Bookmark,
             icon = UiIcon.Bookmark.asType(),
             serializer = TimelineSpec.AccountBasedData.serializer(),
             targetId = { it.accountKey.toString() },
-            presenterFactory = {
-                XQTBookmarkTimelinePresenter(
-                    AccountType.Specific(it.accountKey),
-                )
+            loaderFactory = { service, _ ->
+                require(service is XQTDataSource)
+                service.bookmarkTimelineLoader()
             },
         )
 
     internal val deviceFollowTimelineSpec =
-        TimelineSpec(
+        AccountTimelineSpec(
             id = "xqt.device_follow",
             title = UiStrings.Posts,
             icon = UiIcon.List.asType(),
             serializer = TimelineSpec.AccountBasedData.serializer(),
             targetId = { it.accountKey.toString() },
-            presenterFactory = {
-                XQTDeviceFollowTimelinePresenter(
-                    AccountType.Specific(it.accountKey),
-                )
+            loaderFactory = { service, _ ->
+                require(service is XQTDataSource)
+                service.deviceFollowTimelineLoader()
             },
         )
 

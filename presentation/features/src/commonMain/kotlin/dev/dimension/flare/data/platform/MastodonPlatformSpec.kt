@@ -4,17 +4,14 @@ import dev.dimension.flare.common.deeplink.DeepLinkMapping
 import dev.dimension.flare.common.deeplink.DeepLinkPattern
 import dev.dimension.flare.data.datasource.guest.mastodon.GuestMastodonDataSource
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
+import dev.dimension.flare.data.datasource.mastodon.MastodonDataSource
+import dev.dimension.flare.data.model.tab.AccountTimelineSpec
 import dev.dimension.flare.data.model.tab.TimelineSpec
-import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.PlatformSpec
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiInstanceMetadata
 import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.asType
-import dev.dimension.flare.ui.presenter.home.mastodon.MastodonBookmarkTimelinePresenter
-import dev.dimension.flare.ui.presenter.home.mastodon.MastodonFavouriteTimelinePresenter
-import dev.dimension.flare.ui.presenter.home.mastodon.MastodonLocalTimelinePresenter
-import dev.dimension.flare.ui.presenter.home.mastodon.MastodonPublicTimelinePresenter
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
@@ -29,58 +26,54 @@ internal data object MastodonPlatformSpec : PlatformSpec {
         MastodonSocialPlatformSpec.deepLinkPatterns(host)
 
     internal val localTimelineSpec =
-        TimelineSpec(
+        AccountTimelineSpec(
             id = "mastodon.local",
             title = UiStrings.MastodonLocal,
             icon = UiIcon.Local.asType(),
             serializer = TimelineSpec.AccountBasedData.serializer(),
             targetId = { it.accountKey.toString() },
-            presenterFactory = {
-                MastodonLocalTimelinePresenter(
-                    AccountType.Specific(it.accountKey),
-                )
+            loaderFactory = { service, _ ->
+                require(service is MastodonDataSource)
+                service.publicTimelineLoader(local = true)
             },
         )
 
     internal val publicTimelineSpec =
-        TimelineSpec(
+        AccountTimelineSpec(
             id = "mastodon.public",
             title = UiStrings.MastodonPublic,
             icon = UiIcon.World.asType(),
             serializer = TimelineSpec.AccountBasedData.serializer(),
             targetId = { it.accountKey.toString() },
-            presenterFactory = {
-                MastodonPublicTimelinePresenter(
-                    AccountType.Specific(it.accountKey),
-                )
+            loaderFactory = { service, _ ->
+                require(service is MastodonDataSource)
+                service.publicTimelineLoader(local = false)
             },
         )
 
     internal val bookmarkTimelineSpec =
-        TimelineSpec(
+        AccountTimelineSpec(
             id = "mastodon.bookmark",
             title = UiStrings.Bookmark,
             icon = UiIcon.Bookmark.asType(),
             serializer = TimelineSpec.AccountBasedData.serializer(),
             targetId = { it.accountKey.toString() },
-            presenterFactory = {
-                MastodonBookmarkTimelinePresenter(
-                    AccountType.Specific(it.accountKey),
-                )
+            loaderFactory = { service, _ ->
+                require(service is MastodonDataSource)
+                service.bookmarkTimelineLoader()
             },
         )
 
     internal val favouriteTimelineSpec =
-        TimelineSpec(
+        AccountTimelineSpec(
             id = "mastodon.favourite",
             title = UiStrings.Favourite,
             icon = UiIcon.Favourite.asType(),
             serializer = TimelineSpec.AccountBasedData.serializer(),
             targetId = { it.accountKey.toString() },
-            presenterFactory = {
-                MastodonFavouriteTimelinePresenter(
-                    AccountType.Specific(it.accountKey),
-                )
+            loaderFactory = { service, _ ->
+                require(service is MastodonDataSource)
+                service.favouriteTimelineLoader()
             },
         )
 

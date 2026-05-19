@@ -3,15 +3,14 @@ package dev.dimension.flare.data.platform
 import dev.dimension.flare.common.deeplink.DeepLinkMapping
 import dev.dimension.flare.common.deeplink.DeepLinkPattern
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
+import dev.dimension.flare.data.datasource.vvo.VVODataSource
+import dev.dimension.flare.data.model.tab.AccountTimelineSpec
 import dev.dimension.flare.data.model.tab.TimelineSpec
-import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.PlatformSpec
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiInstanceMetadata
 import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.asType
-import dev.dimension.flare.ui.presenter.home.vvo.VVOFavouriteTimelinePresenter
-import dev.dimension.flare.ui.presenter.home.vvo.VVOLikeTimelinePresenter
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
@@ -26,30 +25,28 @@ internal data object VvoPlatformSpec : PlatformSpec {
         VvoSocialPlatformSpec.deepLinkPatterns(host)
 
     internal val favoriteTimelineSpec =
-        TimelineSpec(
+        AccountTimelineSpec(
             id = "vvo.favorite",
             title = UiStrings.Bookmark,
             icon = UiIcon.Bookmark.asType(),
             serializer = TimelineSpec.AccountBasedData.serializer(),
             targetId = { it.accountKey.toString() },
-            presenterFactory = {
-                VVOFavouriteTimelinePresenter(
-                    AccountType.Specific(it.accountKey),
-                )
+            loaderFactory = { service, _ ->
+                require(service is VVODataSource)
+                service.favouriteTimeline()
             },
         )
 
     internal val likedTimelineSpec =
-        TimelineSpec(
+        AccountTimelineSpec(
             id = "vvo.liked",
             title = UiStrings.Liked,
             icon = UiIcon.Heart.asType(),
             serializer = TimelineSpec.AccountBasedData.serializer(),
             targetId = { it.accountKey.toString() },
-            presenterFactory = {
-                VVOLikeTimelinePresenter(
-                    AccountType.Specific(it.accountKey),
-                )
+            loaderFactory = { service, _ ->
+                require(service is VVODataSource)
+                service.likeRemoteMediator()
             },
         )
 

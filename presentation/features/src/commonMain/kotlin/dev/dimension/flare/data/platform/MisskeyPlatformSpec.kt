@@ -3,11 +3,12 @@ package dev.dimension.flare.data.platform
 import dev.dimension.flare.common.deeplink.DeepLinkMapping
 import dev.dimension.flare.common.deeplink.DeepLinkPattern
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
+import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
 import dev.dimension.flare.data.model.IconType
+import dev.dimension.flare.data.model.tab.AccountTimelineSpec
 import dev.dimension.flare.data.model.tab.SourceTimelineTabItemV2
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
-import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformSpec
 import dev.dimension.flare.ui.model.UiIcon
@@ -16,12 +17,6 @@ import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.model.asType
-import dev.dimension.flare.ui.presenter.home.misskey.MissKeyLocalTimelinePresenter
-import dev.dimension.flare.ui.presenter.home.misskey.MissKeyPublicTimelinePresenter
-import dev.dimension.flare.ui.presenter.home.misskey.MisskeyFavouriteTimelinePresenter
-import dev.dimension.flare.ui.presenter.home.misskey.MisskeyHybridTimelinePresenter
-import dev.dimension.flare.ui.presenter.list.AntennasTimelinePresenter
-import dev.dimension.flare.ui.presenter.list.ChannelTimelinePresenter
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
@@ -36,88 +31,80 @@ internal data object MisskeyPlatformSpec : PlatformSpec {
         MisskeySocialPlatformSpec.deepLinkPatterns(host)
 
     internal val favouriteTimelineSpec =
-        TimelineSpec(
+        AccountTimelineSpec(
             id = "misskey.favourite",
             title = UiStrings.Favourite,
             icon = UiIcon.Favourite.asType(),
             serializer = TimelineSpec.AccountBasedData.serializer(),
             targetId = { it.accountKey.toString() },
-            presenterFactory = {
-                MisskeyFavouriteTimelinePresenter(
-                    AccountType.Specific(it.accountKey),
-                )
+            loaderFactory = { service, _ ->
+                require(service is MisskeyDataSource)
+                service.favouriteTimelineLoader()
             },
         )
 
     internal val hybridTimelineSpec =
-        TimelineSpec(
+        AccountTimelineSpec(
             id = "misskey.hybrid",
             title = UiStrings.Social,
             icon = UiIcon.Featured.asType(),
             serializer = TimelineSpec.AccountBasedData.serializer(),
             targetId = { it.accountKey.toString() },
-            presenterFactory = {
-                MisskeyHybridTimelinePresenter(
-                    AccountType.Specific(it.accountKey),
-                )
+            loaderFactory = { service, _ ->
+                require(service is MisskeyDataSource)
+                service.hybridTimelineLoader()
             },
         )
 
     internal val localTimelineSpec =
-        TimelineSpec(
+        AccountTimelineSpec(
             id = "misskey.local",
             title = UiStrings.MastodonLocal,
             icon = UiIcon.Local.asType(),
             serializer = TimelineSpec.AccountBasedData.serializer(),
             targetId = { it.accountKey.toString() },
-            presenterFactory = {
-                MissKeyLocalTimelinePresenter(
-                    AccountType.Specific(it.accountKey),
-                )
+            loaderFactory = { service, _ ->
+                require(service is MisskeyDataSource)
+                service.localTimelineLoader()
             },
         )
 
     internal val globalTimelineSpec =
-        TimelineSpec(
+        AccountTimelineSpec(
             id = "misskey.global",
             title = UiStrings.MastodonPublic,
             icon = UiIcon.World.asType(),
             serializer = TimelineSpec.AccountBasedData.serializer(),
             targetId = { it.accountKey.toString() },
-            presenterFactory = {
-                MissKeyPublicTimelinePresenter(
-                    AccountType.Specific(it.accountKey),
-                )
+            loaderFactory = { service, _ ->
+                require(service is MisskeyDataSource)
+                service.publicTimelineLoader()
             },
         )
 
     internal val antennaTimelineSpec =
-        TimelineSpec(
+        AccountTimelineSpec(
             id = "misskey.antenna",
             title = UiStrings.Antenna,
             icon = UiIcon.Rss.asType(),
             serializer = TimelineSpec.AccountResourceData.serializer(),
             targetId = { "${it.accountKey}:${it.resourceId}" },
-            presenterFactory = {
-                AntennasTimelinePresenter(
-                    accountType = AccountType.Specific(it.accountKey),
-                    id = it.resourceId,
-                )
+            loaderFactory = { service, data ->
+                require(service is MisskeyDataSource)
+                service.antennasTimelineLoader(data.resourceId)
             },
         )
 
     internal val channelTimelineSpec =
-        TimelineSpec(
+        AccountTimelineSpec(
             id = "misskey.channel",
             title = UiStrings.Channel,
             icon = UiIcon.Channel.asType(),
             serializer = TimelineSpec.AccountResourceData.serializer(),
             targetId = { "${it.accountKey}:${it.resourceId}" },
-            presenterFactory = {
-                ChannelTimelinePresenter(
-                    accountType = AccountType.Specific(it.accountKey),
-                    id = it.resourceId,
-                )
+            loaderFactory = { service, data ->
+                require(service is MisskeyDataSource)
+                service.channelTimelineLoader(data.resourceId)
             },
         )
 

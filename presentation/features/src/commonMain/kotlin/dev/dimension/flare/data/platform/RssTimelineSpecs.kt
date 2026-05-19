@@ -1,15 +1,18 @@
 package dev.dimension.flare.data.platform
 
+import dev.dimension.flare.data.database.app.model.DbRssSources
 import dev.dimension.flare.data.database.app.model.SubscriptionType
+import dev.dimension.flare.data.datasource.microblog.MixedRemoteMediator
+import dev.dimension.flare.data.datasource.rss.RssDataSource
+import dev.dimension.flare.data.model.tab.StandaloneTimelineSpec
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.asType
-import dev.dimension.flare.ui.presenter.home.rss.AllRssTimelinePresenter
-import dev.dimension.flare.ui.presenter.home.rss.RssTimelinePresenter
-import dev.dimension.flare.ui.presenter.home.rss.SubscriptionTimelinePresenter
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.serialization.Serializable
 
 internal data object RssTimelineSpecs {
@@ -28,37 +31,49 @@ internal data object RssTimelineSpecs {
     ) : TimelineSpec.Data
 
     val rss =
-        TimelineSpec(
+        StandaloneTimelineSpec(
             id = "rss.feed",
             title = UiStrings.Rss,
             icon = UiIcon.Rss.asType(),
             serializer = RssData.serializer(),
             targetId = { it.feedUrl },
-            presenterFactory = { RssTimelinePresenter(it.feedUrl) },
+            loaderFactory = { _, data ->
+                flowOf(RssDataSource.fetchLoader(data.feedUrl))
+            },
         )
 
     val allRss =
-        TimelineSpec(
+        StandaloneTimelineSpec(
             id = "rss.all",
             title = UiStrings.AllRssFeeds,
             icon = UiIcon.Rss.asType(),
             serializer = AllRssData.serializer(),
             targetId = { "all" },
-            presenterFactory = { AllRssTimelinePresenter() },
+            loaderFactory = { context, _ ->
+                context.appDatabase
+                    .rssSourceDao()
+                    .getAll()
+                    .map { items ->
+                        MixedRemoteMediator(
+                            database = context.cacheDatabase,
+                            mediators =
+                                items.map {
+                                    RssDataSource.fetchLoader(it)
+                                },
+                        )
+                    }
+            },
         )
 
     val subscription =
-        TimelineSpec(
+        StandaloneTimelineSpec(
             id = "rss.subscription",
             title = UiStrings.Rss,
             icon = UiIcon.Rss.asType(),
             serializer = SubscriptionData.serializer(),
             targetId = { "${it.subscriptionType.name}:${it.subscriptionUrl}" },
-            presenterFactory = {
-                SubscriptionTimelinePresenter(
-                    type = it.subscriptionType,
-                    url = it.subscriptionUrl,
-                )
+            loaderFactory = { _, data ->
+                flowOf(RssDataSource.fetchLoader(data.toDbRssSource()))
             },
         )
 
@@ -69,3 +84,12 @@ internal data object RssTimelineSpecs {
             subscription,
         )
 }
+
+private fun RssTimelineSpecs.SubscriptionData.toDbRssSource(): DbRssSources =
+    DbRssSources(
+        url = subscriptionUrl,
+        title = null,
+        icon = null,
+        lastUpdate = 0,
+        type = subscriptionType,
+    )

@@ -2,12 +2,13 @@ package dev.dimension.flare.data.platform
 
 import dev.dimension.flare.common.deeplink.DeepLinkMapping
 import dev.dimension.flare.common.deeplink.DeepLinkPattern
+import dev.dimension.flare.data.datasource.bluesky.BlueskyDataSource
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.model.IconType
+import dev.dimension.flare.data.model.tab.AccountTimelineSpec
 import dev.dimension.flare.data.model.tab.SourceTimelineTabItemV2
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
-import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformSpec
 import dev.dimension.flare.ui.model.UiIcon
@@ -16,8 +17,6 @@ import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.model.asType
-import dev.dimension.flare.ui.presenter.home.bluesky.BlueskyBookmarkTimelinePresenter
-import dev.dimension.flare.ui.presenter.home.bluesky.BlueskyFeedTimelinePresenter
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
@@ -32,31 +31,28 @@ internal data object BlueskyPlatformSpec : PlatformSpec {
         BlueskySocialPlatformSpec.deepLinkPatterns(host)
 
     internal val bookmarkTimelineSpec =
-        TimelineSpec(
+        AccountTimelineSpec(
             id = "bluesky.bookmark",
             title = UiStrings.Bookmark,
             icon = UiIcon.Bookmark.asType(),
             serializer = TimelineSpec.AccountBasedData.serializer(),
             targetId = { it.accountKey.toString() },
-            presenterFactory = {
-                BlueskyBookmarkTimelinePresenter(
-                    AccountType.Specific(it.accountKey),
-                )
+            loaderFactory = { service, _ ->
+                require(service is BlueskyDataSource)
+                service.bookmarkTimeline()
             },
         )
 
     internal val feedTimelineSpec =
-        TimelineSpec(
+        AccountTimelineSpec(
             id = "bluesky.feed",
             title = UiStrings.Feeds,
             icon = UiIcon.Feeds.asType(),
             serializer = TimelineSpec.AccountResourceData.serializer(),
             targetId = { "${it.accountKey}:${it.resourceId}" },
-            presenterFactory = {
-                BlueskyFeedTimelinePresenter(
-                    accountType = AccountType.Specific(it.accountKey),
-                    uri = it.resourceId,
-                )
+            loaderFactory = { service, data ->
+                require(service is BlueskyDataSource)
+                service.feedTimelineLoader(data.resourceId)
             },
         )
 

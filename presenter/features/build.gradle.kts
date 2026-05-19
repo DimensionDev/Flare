@@ -19,6 +19,7 @@ kotlin {
             FlarePlatform.ANDROID,
             FlarePlatform.JVM,
             FlarePlatform.IOS,
+            FlarePlatform.WEB,
         )
         ksp(
             libs.ktorfit.ksp,
@@ -53,7 +54,6 @@ kotlin {
                 api(projects.social.mastodon)
                 api(projects.social.misskey)
                 api(projects.social.microblog)
-                api(projects.social.nostr)
                 api(projects.social.rss)
                 api(projects.social.vvo)
                 api(projects.social.xqt)
@@ -77,8 +77,6 @@ kotlin {
                 api(libs.bluesky.oauth)
                 implementation(libs.room.runtime)
                 implementation(libs.room.paging)
-                implementation(libs.sqlite.bundled)
-                implementation(libs.datastore)
                 implementation(libs.kotlinx.serialization.protobuf)
                 implementation(libs.xmlUtil)
                 implementation(libs.ktor.client.resources)
@@ -91,6 +89,11 @@ kotlin {
                 implementation(libs.kotlinx.coroutines.test)
                 implementation(libs.paging.testing)
                 implementation(libs.ktor.client.mock)
+            }
+        }
+        val nonWebMain by getting {
+            dependencies {
+                api(projects.social.nostr)
             }
         }
         val androidJvmMain by getting {

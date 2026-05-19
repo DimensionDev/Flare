@@ -2,8 +2,6 @@ package dev.dimension.flare.di
 
 import dev.dimension.flare.data.database.provideAppDatabase
 import dev.dimension.flare.data.database.provideCacheDatabase
-import dev.dimension.flare.data.datasource.nostr.DatabaseNostrCache
-import dev.dimension.flare.data.datasource.nostr.NostrCache
 import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.network.ai.AiCompletionService
 import dev.dimension.flare.data.network.ai.OpenAIService
@@ -27,9 +25,6 @@ import dev.dimension.flare.ui.presenter.compose.ComposeUseCase
 import dev.dimension.flare.ui.presenter.compose.RestoreDraftUseCase
 import dev.dimension.flare.ui.presenter.compose.SaveDraftUseCase
 import dev.dimension.flare.ui.presenter.compose.SendDraftUseCase
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 
@@ -40,7 +35,6 @@ internal val commonModule =
         single(createdAtStart = true) { AccountTabSyncCoordinator(get(), get(), get(), get()) }
         single { provideAppDatabase(get()) }
         single { provideCacheDatabase(get()) }
-        single<NostrCache> { DatabaseNostrCache(get()) }
         singleOf(::ApplicationRepository)
         single {
             DraftMediaStore(get())
@@ -53,7 +47,7 @@ internal val commonModule =
         }
         single(createdAtStart = true) { DraftSendingRecoveryCoordinator(get(), get()) }
         singleOf(::LocalFilterRepository)
-        single { CoroutineScope(Dispatchers.IO) }
+        single { applicationCoroutineScope() }
         singleOf(::SaveDraftUseCase)
         singleOf(::RestoreDraftUseCase)
         single {

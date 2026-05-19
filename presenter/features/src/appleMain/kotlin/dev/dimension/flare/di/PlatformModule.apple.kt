@@ -4,6 +4,8 @@ import dev.dimension.flare.common.AppleOnDeviceAI
 import dev.dimension.flare.common.OnDeviceAI
 import dev.dimension.flare.data.database.DriverFactory
 import dev.dimension.flare.data.datastore.AppDataStore
+import dev.dimension.flare.data.datasource.nostr.DatabaseNostrCache
+import dev.dimension.flare.data.datasource.nostr.NostrCache
 import dev.dimension.flare.data.io.ApplePlatformPathProducer
 import dev.dimension.flare.data.io.PlatformPathProducer
 import dev.dimension.flare.data.network.nostr.AmberSignerBridge
@@ -29,4 +31,5 @@ internal actual val platformModule: Module =
         singleOf(::IosImageCompressor) bind ImageCompressor::class
         singleOf(::AppleOnDeviceAI) bind OnDeviceAI::class
         singleOf(::AppleAmberSignerBridge) bind AmberSignerBridge::class
+        single<NostrCache> { DatabaseNostrCache(get()) }
     }

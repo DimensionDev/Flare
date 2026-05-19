@@ -2,7 +2,6 @@ package dev.dimension.flare.ui.presenter.login
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -173,19 +172,5 @@ public class NostrLoginPresenter(
     }
 }
 
-@Immutable
-public interface NostrLoginState {
-    public val loading: Boolean
-    public val error: Throwable?
-    public val amberAvailable: Boolean
-    public val qrConnectUri: String?
-    public val qrWaitingForApproval: Boolean
-
-    public fun login(input: String)
-
-    public fun connectAmber()
-
-    public fun startQrLogin()
-
-    public fun cancelQrLogin()
-}
+@Composable
+internal actual fun nostrLoginState(toHome: () -> Unit): NostrLoginState = remember(toHome) { NostrLoginPresenter(toHome) }.body()

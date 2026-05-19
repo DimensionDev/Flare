@@ -23,7 +23,7 @@ public class ServiceSelectPresenter(
     @Composable
     override fun body(): ServiceSelectState {
         val nodeInfoState = remember { NodeInfoPresenter() }.body()
-        val nostrLoginState = remember { NostrLoginPresenter(toHome) }.body()
+        val nostrLoginState = nostrLoginState(toHome)
         val blueskyLoginState = remember { BlueskyLoginPresenter(toHome) }.body()
         val blueskyOauthLoginState = remember { BlueskyOAuthLoginPresenter(toHome) }.body()
         val mastodonLoginState = mastodonLoginPresenter(toHome)

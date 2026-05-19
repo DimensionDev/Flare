@@ -29,57 +29,45 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.model.asText
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.withContext
 import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.decodeFromByteArray
-import kotlinx.serialization.protobuf.ProtoBuf
-import okio.FileSystem
-import okio.SYSTEM
 
 @OptIn(ExperimentalSerializationApi::class)
 internal suspend fun migrateTabSettingsV1ToV2(
     pathProducer: PlatformPathProducer,
     tabSettingsV2Store: DataStore<TabSettingsV2>,
 ) {
-    withContext(Dispatchers.IO) {
-        val v1Path = pathProducer.dataStoreFile("tab_settings.pb")
-        val fs = FileSystem.SYSTEM
-        if (!fs.exists(v1Path)) return@withContext
+    if (!legacyTabSettingsExists(pathProducer)) return
+    if (tabSettingsV2Store.data
+            .first()
+            .homeSlots
+            .isNotEmpty()
+    ) {
+        deleteLegacyTabSettings(pathProducer)
+        return
+    }
 
-        if (tabSettingsV2Store.data
-                .first()
-                .homeSlots
-                .isNotEmpty()
-        ) {
-            runCatching { fs.delete(v1Path) }
-            return@withContext
-        }
-
-        val v1 =
-            runCatching {
-                fs.read(v1Path) {
-                    ProtoBuf.decodeFromByteArray<TabSettings>(readByteArray())
-                }
-            }.getOrNull()
-
-        if (v1 != null) {
-            val migratedSlots = v1.toTabSettingsV2().homeSlots
-            if (migratedSlots.isNotEmpty()) {
-                tabSettingsV2Store.updateData { current ->
-                    if (current.homeSlots.isEmpty()) {
-                        current.copy(homeSlots = migratedSlots)
-                    } else {
-                        current
-                    }
+    val v1 = readLegacyTabSettings(pathProducer)
+    if (v1 != null) {
+        val migratedSlots = v1.toTabSettingsV2().homeSlots
+        if (migratedSlots.isNotEmpty()) {
+            tabSettingsV2Store.updateData { current ->
+                if (current.homeSlots.isEmpty()) {
+                    current.copy(homeSlots = migratedSlots)
+                } else {
+                    current
                 }
             }
         }
-        runCatching { fs.delete(v1Path) }
     }
+    deleteLegacyTabSettings(pathProducer)
 }
+
+internal expect suspend fun legacyTabSettingsExists(pathProducer: PlatformPathProducer): Boolean
+
+internal expect suspend fun readLegacyTabSettings(pathProducer: PlatformPathProducer): TabSettings?
+
+internal expect suspend fun deleteLegacyTabSettings(pathProducer: PlatformPathProducer)
 
 internal fun TabSettings.toTabSettingsV2(): TabSettingsV2 =
     TabSettingsV2(

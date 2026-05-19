@@ -7,7 +7,6 @@ import dev.dimension.flare.data.datasource.bluesky.BlueskyDataSource
 import dev.dimension.flare.data.datasource.mastodon.MastodonDataSource
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
-import dev.dimension.flare.data.datasource.nostr.NostrDataSource
 import dev.dimension.flare.data.datasource.pleroma.PleromaDataSource
 import dev.dimension.flare.data.datasource.vvo.VVODataSource
 import dev.dimension.flare.data.datasource.xqt.XQTDataSource
@@ -18,7 +17,6 @@ import dev.dimension.flare.data.network.misskey.JoinMisskeyService
 import dev.dimension.flare.data.platform.BlueskyPlatformSpec
 import dev.dimension.flare.data.platform.MastodonPlatformSpec
 import dev.dimension.flare.data.platform.MisskeyPlatformSpec
-import dev.dimension.flare.data.platform.NostrPlatformSpec
 import dev.dimension.flare.data.platform.VvoPlatformSpec
 import dev.dimension.flare.data.platform.XqtPlatformSpec
 import dev.dimension.flare.ui.model.UiAccount
@@ -31,48 +29,21 @@ internal interface PlatformSpec : SocialPlatformSpec {
     override fun deepLinkPatterns(host: String): ImmutableList<DeepLinkPattern<out DeepLinkMapping.Type>>
 }
 
-internal val defaultSocialPlatformRegistry: SocialPlatformRegistry =
-    SocialPlatformRegistry(
-        listOf(
-            NostrSocialPlatformPlugin,
-            MastodonSocialPlatformPlugin,
-            MisskeySocialPlatformPlugin,
-            BlueskySocialPlatformPlugin,
-            XqtSocialPlatformPlugin,
-            VvoSocialPlatformPlugin,
-        ),
+internal expect val defaultSocialPlatformRegistry: SocialPlatformRegistry
+
+internal val defaultSocialPlatformPlugins: List<SocialPlatformPlugin> =
+    listOf(
+        MastodonSocialPlatformPlugin,
+        MisskeySocialPlatformPlugin,
+        BlueskySocialPlatformPlugin,
+        XqtSocialPlatformPlugin,
+        VvoSocialPlatformPlugin,
     )
 
 internal val SocialPlatformRegistry.platformSpecs: List<PlatformSpec>
     get() = specs.map { it as PlatformSpec }
 
 internal fun SocialPlatformRegistry.requirePlatformSpec(type: PlatformType): PlatformSpec = requireSpec(type) as PlatformSpec
-
-private data object NostrSocialPlatformPlugin : SocialPlatformPlugin {
-    override val spec: PlatformSpec = NostrPlatformSpec
-
-    override suspend fun recommendedInstances(): List<UiInstance> =
-        listOf(
-            UiInstance(
-                name = "Nostr",
-                description =
-                    "A decentralized network based on cryptographic keypairs and that is not peer-to-peer, " +
-                        "it is super simple and scalable and therefore has a chance of working.",
-                iconUrl = null,
-                domain = "nostr",
-                type = PlatformType.Nostr,
-                bannerUrl = null,
-                usersCount = 0,
-            ),
-        )
-
-    override fun createDataSource(account: UiAccount): MicroblogDataSource? =
-        (account as? UiAccount.Nostr)?.let {
-            NostrDataSource(
-                accountKey = it.accountKey,
-            )
-        }
-}
 
 private data object MastodonSocialPlatformPlugin : SocialPlatformPlugin {
     override val spec: PlatformSpec = MastodonPlatformSpec

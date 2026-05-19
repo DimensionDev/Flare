@@ -13,6 +13,7 @@ import androidx.paging.map
 import dev.dimension.flare.common.InAppNotification
 import dev.dimension.flare.common.Message
 import dev.dimension.flare.common.PagingState
+import dev.dimension.flare.common.backgroundCoroutineContext
 import dev.dimension.flare.common.cachePagingState
 import dev.dimension.flare.common.emptyFlow
 import dev.dimension.flare.common.onEmpty
@@ -44,9 +45,7 @@ import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
@@ -108,7 +107,7 @@ public abstract class TimelinePresenter :
                         ).cachedIn(scope).flatMapLatest { pagingData ->
                             translationSettingsFlow
                                 .map { translationDisplayOptions ->
-                                    withContext(Dispatchers.IO) {
+                                    withContext(backgroundCoroutineContext) {
                                         pagingData.map { item ->
                                             TimelinePagingMapper.toUi(
                                                 item = item,

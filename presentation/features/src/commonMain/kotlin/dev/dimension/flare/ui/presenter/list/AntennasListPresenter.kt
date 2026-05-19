@@ -8,7 +8,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.refreshSuspend
 import dev.dimension.flare.common.toPagingState
-import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
+import dev.dimension.flare.data.datasource.misskey.MisskeyAntennaDataSource
 import dev.dimension.flare.data.account.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
@@ -42,7 +42,7 @@ public class AntennasListPresenter(
             service
                 .map {
                     remember {
-                        require(it is MisskeyDataSource)
+                        require(it is MisskeyAntennaDataSource)
                         it.antennasList().cachedIn(scope)
                     }.collectAsLazyPagingItems()
                 }.toPagingState()

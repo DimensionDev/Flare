@@ -2,31 +2,25 @@ package dev.dimension.flare.ui.screen.misskey
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import dev.dimension.flare.data.model.IconType
+import dev.dimension.flare.data.model.tab.TimelinePersistenceMapper
 import dev.dimension.flare.data.model.tab.TimelineSlot
-import dev.dimension.flare.data.model.tab.TimelineSpec
-import dev.dimension.flare.data.model.tab.toSlot
-import dev.dimension.flare.data.platform.MisskeyPlatformSpec
+import dev.dimension.flare.data.platform.toTimelineTabDescriptor
 import dev.dimension.flare.model.AccountType
-import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiList
-import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.presenter.PinTabsPresenter
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.presenter.list.AntennasListPresenter
+import org.koin.core.component.inject
 
 public class MisskeyAntennasListWithTabsPresenter(
     private val accountType: AccountType,
 ) : PresenterBase<MisskeyAntennasListWithTabsPresenter.State>() {
     private val pinTabsPresenter by lazy {
         object : PinTabsPresenter<UiList>() {
+            private val timelinePersistenceMapper by inject<TimelinePersistenceMapper>()
+
             override fun getTimelineTabItem(item: UiList): TimelineSlot =
-                MisskeyPlatformSpec.antennaTimelineSpec
-                    .target(
-                        data = TimelineSpec.AccountResourceData(specificAccountKey(), item.id),
-                        title = UiText.Raw(item.title),
-                        icon = IconType.Material(UiIcon.List),
-                    ).toSlot()
+                timelinePersistenceMapper.toSlot((item as UiList.Antenna).toTimelineTabDescriptor(specificAccountKey()))
         }
     }
 

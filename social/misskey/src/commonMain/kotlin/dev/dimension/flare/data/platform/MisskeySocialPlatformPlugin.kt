@@ -4,6 +4,7 @@ import dev.dimension.flare.common.deeplink.DeepLinkMapping
 import dev.dimension.flare.common.deeplink.DeepLinkPattern
 import dev.dimension.flare.common.tryRun
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
+import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
 import dev.dimension.flare.data.datasource.microblog.timeline.TimelineSpec
 import dev.dimension.flare.data.network.misskey.JoinMisskeyService
 import dev.dimension.flare.data.network.misskey.MisskeyPlatformDetector
@@ -26,7 +27,13 @@ import kotlinx.collections.immutable.persistentListOf
 public data object MisskeySocialPlatformPlugin : SocialPlatformPlugin {
     public override val spec: SocialPlatformSpec = MisskeySocialPlatformSpec
 
-    public override fun createDataSource(account: UiAccount): MicroblogDataSource? = null
+    public override fun createDataSource(account: UiAccount): MicroblogDataSource? =
+        (account as? UiAccount.Misskey)?.let {
+            MisskeyDataSource(
+                accountKey = it.accountKey,
+                host = it.host,
+            )
+        }
 
     public override suspend fun recommendedInstances(): List<UiInstance> =
         tryRun {

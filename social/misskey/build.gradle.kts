@@ -25,6 +25,12 @@ kotlin {
     }
 
     sourceSets {
+        all {
+            languageSettings {
+                optIn("kotlin.uuid.ExperimentalUuidApi")
+            }
+        }
+
         val commonMain by getting {
             dependencies {
                 api(projects.core.common)
@@ -33,7 +39,10 @@ kotlin {
                 api(projects.network)
                 api(projects.social.api)
                 api(projects.social.microblog)
+                implementation(projects.capability.account)
                 implementation(projects.social.nodeinfo)
+                implementation(dependencies.platform(libs.koin.bom))
+                implementation(libs.koin.core)
                 implementation(libs.mfm.multiplatform)
             }
         }

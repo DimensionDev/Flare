@@ -11,18 +11,14 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.refreshSuspend
 import dev.dimension.flare.common.toPagingState
-import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
-import dev.dimension.flare.data.model.IconType
-import dev.dimension.flare.data.model.tab.TimelineResolver
-import dev.dimension.flare.data.model.tab.TimelineSpec
+import dev.dimension.flare.data.datasource.misskey.MisskeyChannelDataSource
+import dev.dimension.flare.data.model.tab.TimelinePersistenceMapper
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
-import dev.dimension.flare.data.platform.MisskeyPlatformSpec
+import dev.dimension.flare.data.platform.toTimelineTabDescriptor
 import dev.dimension.flare.data.account.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
-import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiList
-import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.PresenterBase
@@ -37,7 +33,7 @@ public class MisskeyChannelListPresenter(
 ) : PresenterBase<MisskeyChannelListPresenter.State>(),
     KoinComponent {
     private val accountRepository: AccountRepository by inject()
-    private val timelineResolver: TimelineResolver by inject()
+    private val timelinePersistenceMapper: TimelinePersistenceMapper by inject()
 
     public interface State {
         public val type: Type
@@ -77,7 +73,7 @@ public class MisskeyChannelListPresenter(
         val data =
             serviceState
                 .map { service ->
-                    require(service is MisskeyDataSource)
+                    require(service is MisskeyChannelDataSource)
                     remember(type) {
                         when (type) {
                             State.Type.Following -> service.channelHandler.data.cachedIn(scope)
@@ -96,12 +92,8 @@ public class MisskeyChannelListPresenter(
             }
 
             override fun timelineTabItem(item: UiList.Channel): TimelineTabItemV2 =
-                timelineResolver.toTabItem(
-                    MisskeyPlatformSpec.channelTimelineSpec.target(
-                        data = TimelineSpec.AccountResourceData((accountType as AccountType.Specific).accountKey, item.id),
-                        title = UiText.Raw(item.title),
-                        icon = item.banner?.let { IconType.Url(it) } ?: IconType.Material(UiIcon.Channel),
-                    ),
+                timelinePersistenceMapper.toTabItem(
+                    item.toTimelineTabDescriptor((accountType as AccountType.Specific).accountKey),
                 )
 
             override suspend fun refreshSuspend() {
@@ -117,7 +109,7 @@ public class MisskeyChannelListPresenter(
             override fun follow(list: UiList.Channel) {
                 serviceState.onSuccess {
                     scope.launch {
-                        require(it is MisskeyDataSource)
+                        require(it is MisskeyChannelDataSource)
                         it.followChannel(list)
                     }
                 }
@@ -126,7 +118,7 @@ public class MisskeyChannelListPresenter(
             override fun unfollow(list: UiList.Channel) {
                 serviceState.onSuccess {
                     scope.launch {
-                        require(it is MisskeyDataSource)
+                        require(it is MisskeyChannelDataSource)
                         it.unfollowChannel(list)
                     }
                 }
@@ -135,7 +127,7 @@ public class MisskeyChannelListPresenter(
             override fun favorite(list: UiList.Channel) {
                 serviceState.onSuccess {
                     scope.launch {
-                        require(it is MisskeyDataSource)
+                        require(it is MisskeyChannelDataSource)
                         it.favoriteChannel(list)
                     }
                 }
@@ -144,7 +136,7 @@ public class MisskeyChannelListPresenter(
             override fun unfavorite(list: UiList.Channel) {
                 serviceState.onSuccess {
                     scope.launch {
-                        require(it is MisskeyDataSource)
+                        require(it is MisskeyChannelDataSource)
                         it.unfavoriteChannel(list)
                     }
                 }

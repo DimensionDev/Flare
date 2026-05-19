@@ -3,7 +3,6 @@ package dev.dimension.flare.data.platform
 import dev.dimension.flare.common.deeplink.DeepLinkMapping
 import dev.dimension.flare.common.deeplink.DeepLinkPattern
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
-import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.tab.AccountTimelineSpec
 import dev.dimension.flare.data.model.tab.TimelineResolver
@@ -39,7 +38,7 @@ internal data object MisskeyPlatformSpec : PlatformSpec {
             serializer = TimelineSpec.AccountBasedData.serializer(),
             targetId = { it.accountKey.toString() },
             loaderFactory = { service, _ ->
-                require(service is MisskeyDataSource)
+                require(service is MisskeyTimelineDataSource)
                 service.favouriteTimelineLoader()
             },
         )
@@ -52,7 +51,7 @@ internal data object MisskeyPlatformSpec : PlatformSpec {
             serializer = TimelineSpec.AccountBasedData.serializer(),
             targetId = { it.accountKey.toString() },
             loaderFactory = { service, _ ->
-                require(service is MisskeyDataSource)
+                require(service is MisskeyTimelineDataSource)
                 service.hybridTimelineLoader()
             },
         )
@@ -65,7 +64,7 @@ internal data object MisskeyPlatformSpec : PlatformSpec {
             serializer = TimelineSpec.AccountBasedData.serializer(),
             targetId = { it.accountKey.toString() },
             loaderFactory = { service, _ ->
-                require(service is MisskeyDataSource)
+                require(service is MisskeyTimelineDataSource)
                 service.localTimelineLoader()
             },
         )
@@ -78,7 +77,7 @@ internal data object MisskeyPlatformSpec : PlatformSpec {
             serializer = TimelineSpec.AccountBasedData.serializer(),
             targetId = { it.accountKey.toString() },
             loaderFactory = { service, _ ->
-                require(service is MisskeyDataSource)
+                require(service is MisskeyTimelineDataSource)
                 service.publicTimelineLoader()
             },
         )
@@ -91,7 +90,7 @@ internal data object MisskeyPlatformSpec : PlatformSpec {
             serializer = TimelineSpec.AccountResourceData.serializer(),
             targetId = { "${it.accountKey}:${it.resourceId}" },
             loaderFactory = { service, data ->
-                require(service is MisskeyDataSource)
+                require(service is MisskeyTimelineDataSource)
                 service.antennasTimelineLoader(data.resourceId)
             },
         )
@@ -104,7 +103,7 @@ internal data object MisskeyPlatformSpec : PlatformSpec {
             serializer = TimelineSpec.AccountResourceData.serializer(),
             targetId = { "${it.accountKey}:${it.resourceId}" },
             loaderFactory = { service, data ->
-                require(service is MisskeyDataSource)
+                require(service is MisskeyTimelineDataSource)
                 service.channelTimelineLoader(data.resourceId)
             },
         )
@@ -128,7 +127,7 @@ internal data object MisskeyPlatformSpec : PlatformSpec {
     override fun guestDataSource(
         host: String,
         locale: String,
-    ): MicroblogDataSource = throw UnsupportedOperationException("${type.name} guest data source is not supported yet")
+    ): MicroblogDataSource = MisskeySocialPlatformSpec.guestDataSource(host, locale)
 }
 
 internal fun UiList.Antenna.toTimelineTabItemV2(

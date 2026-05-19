@@ -2,7 +2,7 @@ package dev.dimension.flare.ui.presenter.status.action
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
-import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
+import dev.dimension.flare.data.datasource.misskey.MisskeyReportDataSource
 import dev.dimension.flare.data.account.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceFlow
 import dev.dimension.flare.model.AccountType
@@ -34,7 +34,7 @@ public class MisskeyReportPresenter(
                         accountType = accountType,
                         repository = accountRepository,
                     ).mapNotNull {
-                        it as? MisskeyDataSource
+                        it as? MisskeyReportDataSource
                     }.firstOrNull()
                         ?.report(userKey, statusKey, comment)
                 }

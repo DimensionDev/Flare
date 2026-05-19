@@ -1,19 +1,17 @@
 package dev.dimension.flare.model
 
-import dev.dimension.flare.common.tryRun
 import dev.dimension.flare.common.deeplink.DeepLinkMapping
 import dev.dimension.flare.common.deeplink.DeepLinkPattern
 import dev.dimension.flare.data.datasource.bluesky.BlueskyDataSource
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
-import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
 import dev.dimension.flare.data.datasource.vvo.VVODataSource
 import dev.dimension.flare.data.datasource.xqt.XQTDataSource
 import dev.dimension.flare.data.model.tab.TimelineSpec
-import dev.dimension.flare.data.network.misskey.JoinMisskeyService
 import dev.dimension.flare.data.platform.BlueskyPlatformSpec
 import dev.dimension.flare.data.platform.MastodonPlatformSpec
 import dev.dimension.flare.data.platform.MastodonSocialPlatformPlugin
 import dev.dimension.flare.data.platform.MisskeyPlatformSpec
+import dev.dimension.flare.data.platform.MisskeySocialPlatformPlugin
 import dev.dimension.flare.data.platform.VvoPlatformSpec
 import dev.dimension.flare.data.platform.XqtPlatformSpec
 import dev.dimension.flare.ui.model.UiAccount
@@ -45,39 +43,9 @@ internal fun SocialPlatformRegistry.requirePlatformSpec(type: PlatformType): Pla
 private fun SocialPlatformSpec.toPresentationPlatformSpec(): PlatformSpec =
     when (type) {
         PlatformType.Mastodon -> MastodonPlatformSpec
+        PlatformType.Misskey -> MisskeyPlatformSpec
         else -> this as PlatformSpec
     }
-
-private data object MisskeySocialPlatformPlugin : SocialPlatformPlugin {
-    override val spec: PlatformSpec = MisskeyPlatformSpec
-
-    override suspend fun recommendedInstances(): List<UiInstance> =
-        tryRun {
-            JoinMisskeyService.instances().instancesInfos.map {
-                UiInstance(
-                    name = it.name,
-                    description = it.description,
-                    iconUrl = it.meta?.iconURL,
-                    domain = it.url,
-                    type = PlatformType.Misskey,
-                    bannerUrl = it.meta?.bannerURL,
-                    usersCount =
-                        it.stats?.usersCount ?: it.nodeinfo
-                            ?.usage
-                            ?.users
-                            ?.total ?: 0,
-                )
-            }.sortedByDescending { it.usersCount }
-        }.getOrDefault(emptyList())
-
-    override fun createDataSource(account: UiAccount): MicroblogDataSource? =
-        (account as? UiAccount.Misskey)?.let {
-            MisskeyDataSource(
-                accountKey = it.accountKey,
-                host = it.host,
-            )
-        }
-}
 
 private data object BlueskySocialPlatformPlugin : SocialPlatformPlugin {
     override val spec: PlatformSpec = BlueskyPlatformSpec

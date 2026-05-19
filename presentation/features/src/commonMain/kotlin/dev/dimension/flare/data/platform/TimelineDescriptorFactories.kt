@@ -65,17 +65,3 @@ internal fun UiList.Feed.toTimelineTabDescriptor(accountKey: MicroBlogKey): Time
         title = UiText.Raw(title),
         icon = avatar?.let { IconType.Url(it) } ?: UiIcon.Feeds.asType(),
     )
-
-internal fun UiList.Antenna.toTimelineTabDescriptor(accountKey: MicroBlogKey): TimelineTabDescriptor.Source =
-    MisskeyTimelineSpecs.antenna.toTimelineTabDescriptor(
-        data = TimelineSpec.AccountResourceData(accountKey, id),
-        title = UiText.Raw(title),
-        icon = UiIcon.Rss.asType(),
-    )
-
-internal fun UiList.Channel.toTimelineTabDescriptor(accountKey: MicroBlogKey): TimelineTabDescriptor.Source =
-    MisskeyTimelineSpecs.channel.toTimelineTabDescriptor(
-        data = TimelineSpec.AccountResourceData(accountKey, id),
-        title = UiText.Raw(title),
-        icon = banner?.let { IconType.Url(it) } ?: UiIcon.Channel.asType(),
-    )

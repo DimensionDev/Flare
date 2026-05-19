@@ -5,6 +5,7 @@ import dev.dimension.flare.data.ai.AiCompletionService
 import dev.dimension.flare.data.ai.OpenAIService
 import dev.dimension.flare.data.database.provideAppDatabase
 import dev.dimension.flare.data.database.provideCacheDatabase
+import dev.dimension.flare.data.datastore.SettingsDataStore
 import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.network.rss.Readability
 import dev.dimension.flare.data.repository.AccountRepository
@@ -59,7 +60,8 @@ internal val commonModule =
         }
         singleOf(::ComposeUseCase)
         singleOf(::SearchHistoryRepository)
-        single { SettingsRepository(get(), get()) }
+        single { SettingsDataStore(get(), get()) }
+        single { SettingsRepository(get()) }
         singleOf(::Readability)
         singleOf(::OpenAIService)
         singleOf(::AiCompletionService)

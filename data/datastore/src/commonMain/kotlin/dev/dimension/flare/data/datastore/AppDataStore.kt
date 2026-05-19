@@ -27,21 +27,21 @@ public class AppDataStore(
         )
     }
 
-    public val appSettingsStore: DataStore<AppSettings> by lazy {
+    internal val appSettingsStore: DataStore<AppSettings> by lazy {
         createDataStore(
             name = "app_settings.pb",
             defaultValue = AppSettings(version = ""),
         )
     }
 
-    public val appearanceBagStore: DataStore<AppearanceBag> by lazy {
+    internal val appearanceBagStore: DataStore<AppearanceBag> by lazy {
         createDataStore(
             name = "appearance_bag.pb",
             defaultValue = AppearanceBag(),
         )
     }
 
-    public val tabSettingsV2Store: DataStore<TabSettingsV2> by lazy {
+    internal val tabSettingsV2Store: DataStore<TabSettingsV2> by lazy {
         createDataStore(
             name = "tab_settings_v2.pb",
             defaultValue = TabSettingsV2(),

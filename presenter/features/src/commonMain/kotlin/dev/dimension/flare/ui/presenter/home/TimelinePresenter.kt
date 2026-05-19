@@ -29,7 +29,7 @@ import dev.dimension.flare.data.database.cache.mapper.TimelinePagingMapper
 import dev.dimension.flare.data.datasource.microblog.paging.TimelineRemoteMediator
 import dev.dimension.flare.data.datasource.microblog.paging.toPagingSource
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
-import dev.dimension.flare.data.datastore.AppDataStore
+import dev.dimension.flare.data.datastore.SettingsDataStore
 import dev.dimension.flare.data.model.tab.TimelineFilterConfig
 import dev.dimension.flare.data.model.tab.TimelinePostContent
 import dev.dimension.flare.data.model.tab.TimelinePostKind
@@ -64,7 +64,7 @@ public abstract class TimelinePresenter :
     PresenterBase<TimelineState>(),
     KoinComponent {
     private val database: CacheDatabase by inject()
-    private val appDataStore: AppDataStore by inject()
+    private val settingsDataStore: SettingsDataStore by inject()
     private val preTranslationService: PreTranslationService by inject()
     private val settingsRepository: SettingsRepository by inject()
     private val timelineResolver: TimelineResolver by inject()
@@ -87,7 +87,7 @@ public abstract class TimelinePresenter :
     }
 
     private val translationSettingsFlow: Flow<TranslationDisplayOptions> by lazy {
-        TranslationSettingsSupport.displayOptionsFlow(appDataStore)
+        TranslationSettingsSupport.displayOptionsFlow(settingsDataStore)
     }
 
     internal open fun allowLongTextTranslationDisplay(loader: RemoteLoader<UiTimelineV2>): Boolean = false

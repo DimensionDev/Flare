@@ -15,7 +15,7 @@ import dev.dimension.flare.data.database.cache.model.sourceHash
 import dev.dimension.flare.data.database.cache.model.statusTranslationEntityKey
 import dev.dimension.flare.data.database.cache.model.translationEntityKey
 import dev.dimension.flare.data.database.cache.model.translationPayload
-import dev.dimension.flare.data.datastore.AppDataStore
+import dev.dimension.flare.data.datastore.SettingsDataStore
 import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.ai.AiCompletionService
 import dev.dimension.flare.common.tryRun
@@ -80,7 +80,7 @@ public data object NoopPreTranslationService : PreTranslationService {
 
 public class OnlinePreTranslationService(
     private val database: CacheDatabase,
-    private val appDataStore: AppDataStore,
+    private val settingsDataStore: SettingsDataStore,
     private val aiCompletionService: AiCompletionService,
     private val coroutineScope: CoroutineScope,
     private val batchTranslator: suspend (
@@ -108,7 +108,7 @@ public class OnlinePreTranslationService(
             cleanupStaleInFlightTranslations()
         }
         coroutineScope.launch {
-            appDataStore.appSettingsStore.data
+            settingsDataStore.appSettings
                 .map { it.translationProviderCacheKey() }
                 .distinctUntilChanged()
                 .collect { providerCacheKey ->
@@ -236,7 +236,7 @@ public class OnlinePreTranslationService(
                 return it
             }
         val latestProviderCacheKey =
-            appDataStore.appSettingsStore.data
+            settingsDataStore.appSettings
                 .first()
                 .translationProviderCacheKey()
         if (latestProviderCacheKey != settings.providerCacheKey) {
@@ -291,7 +291,7 @@ public class OnlinePreTranslationService(
     }
 
     private suspend fun activeTranslationSettings(requirePreTranslation: Boolean): ActivePreTranslationSettings? {
-        val appSettings = appDataStore.appSettingsStore.data.first()
+        val appSettings = settingsDataStore.appSettings.first()
         val targetLanguage = currentTargetLanguage()
         val canTranslate =
             if (requirePreTranslation) {

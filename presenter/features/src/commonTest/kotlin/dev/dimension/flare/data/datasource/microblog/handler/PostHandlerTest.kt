@@ -19,6 +19,7 @@ import dev.dimension.flare.data.database.cache.model.TranslationStatus
 import dev.dimension.flare.data.datasource.microblog.loader.PostLoader
 import dev.dimension.flare.data.database.cache.mapper.TimelinePagingMapper
 import dev.dimension.flare.data.datastore.AppDataStore
+import dev.dimension.flare.data.datastore.SettingsDataStore
 import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.io.PlatformPathProducer
 import dev.dimension.flare.data.ai.AiCompletionService
@@ -81,6 +82,7 @@ class PostHandlerTest : RobolectricTest() {
 
     private lateinit var db: CacheDatabase
     private lateinit var appDataStore: AppDataStore
+    private lateinit var settingsDataStore: SettingsDataStore
     private lateinit var fakeLoader: FakePostLoader
     private lateinit var onDeviceAI: FakePostOnDeviceAI
     private var injectedScope: CoroutineScope? = null
@@ -99,6 +101,7 @@ class PostHandlerTest : RobolectricTest() {
                 .build()
 
         appDataStore = AppDataStore(pathProducer)
+        settingsDataStore = SettingsDataStore(pathProducer, appDataStore)
         fakeLoader = FakePostLoader()
         onDeviceAI = FakePostOnDeviceAI()
     }
@@ -120,6 +123,7 @@ class PostHandlerTest : RobolectricTest() {
                 module {
                     single { db }
                     single { appDataStore }
+                    single { settingsDataStore }
                     single<CoroutineScope> { detachedScope }
                     single<OnDeviceAI> { onDeviceAI }
                     single { OpenAIService() }
@@ -399,8 +403,8 @@ class PostHandlerTest : RobolectricTest() {
     fun postRefreshPreTranslatesLongTextWhenOpenedInDetail() =
         runTest {
             startTestKoin(this@runTest)
-            appDataStore.appSettingsStore.updateData {
-                it.copy(
+            settingsDataStore.updateAppSettings {
+                copy(
                     language = "zh-CN",
                     translateConfig = aiPreTranslateConfig(),
                     aiConfig =

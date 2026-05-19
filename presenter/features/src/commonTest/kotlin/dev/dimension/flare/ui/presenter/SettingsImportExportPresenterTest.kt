@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.presenter
 
 import dev.dimension.flare.createTestRootPath
 import dev.dimension.flare.data.datastore.AppDataStore
+import dev.dimension.flare.data.datastore.SettingsDataStore
 import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.io.PlatformPathProducer
 import dev.dimension.flare.data.model.SettingsExport
@@ -67,8 +68,10 @@ class SettingsImportExportPresenterTest {
             }
         settingsRepository =
             SettingsRepository(
-                pathProducer = pathProducer,
-                appDataStore = AppDataStore(pathProducer),
+                SettingsDataStore(
+                    pathProducer = pathProducer,
+                    appDataStore = AppDataStore(pathProducer),
+                ),
             )
         startKoin {
             modules(

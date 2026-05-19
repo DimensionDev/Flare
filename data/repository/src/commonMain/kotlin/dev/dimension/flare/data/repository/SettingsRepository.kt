@@ -1,51 +1,28 @@
 package dev.dimension.flare.data.repository
 
 import androidx.compose.runtime.Stable
-import dev.dimension.flare.data.datastore.AppDataStore
+import dev.dimension.flare.data.datastore.SettingsDataStore
 import dev.dimension.flare.data.datastore.model.AppSettings
-import dev.dimension.flare.data.io.PlatformPathProducer
 import dev.dimension.flare.data.model.appearance.AppearanceBag
 import dev.dimension.flare.data.model.appearance.AppearanceKey
 import dev.dimension.flare.data.model.appearance.AppearancePatch
 import dev.dimension.flare.data.model.appearance.GlobalAppearance
 import dev.dimension.flare.data.model.appearance.TimelineAppearance
-import dev.dimension.flare.data.model.appearance.migrateAppearanceV1ToV2
 import dev.dimension.flare.data.model.appearance.toBag
 import dev.dimension.flare.data.model.appearance.toGlobalAppearance
 import dev.dimension.flare.data.model.appearance.toPatch
 import dev.dimension.flare.data.model.appearance.toTimelineAppearance
 import dev.dimension.flare.data.model.tab.TabSettingsV2
-import dev.dimension.flare.data.model.tab.migrateTabSettingsV1ToV2
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.emitAll
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 
 @Stable
 public class SettingsRepository(
-    private val pathProducer: PlatformPathProducer,
-    private val appDataStore: AppDataStore,
+    private val settingsDataStore: SettingsDataStore,
 ) {
-    private val appearanceBagStore by lazy {
-        appDataStore.appearanceBagStore
-    }
-
-    private val appearanceMigrationMutex = Mutex()
-    private var appearanceMigrationCompleted = false
-    private val tabSettingsMigrationMutex = Mutex()
-    private var tabSettingsMigrationCompleted = false
-
     public val appearanceBag: Flow<AppearanceBag> by lazy {
-        flow {
-            ensureAppearanceMigrated()
-            emitAll(
-                appearanceBagStore.data
-                    .distinctUntilChanged(),
-            )
-        }
+        settingsDataStore.appearanceBag
     }
 
     public val appearancePatch: Flow<AppearancePatch> by lazy {
@@ -63,18 +40,12 @@ public class SettingsRepository(
             .map { it.toTimelineAppearance() }
             .distinctUntilChanged()
     }
-    private val appSettingsStore by lazy { appDataStore.appSettingsStore }
     public val appSettings: Flow<AppSettings> by lazy {
-        appSettingsStore.data
+        settingsDataStore.appSettings
     }
 
     public suspend fun ensureAppearanceMigrated() {
-        if (appearanceMigrationCompleted) return
-        appearanceMigrationMutex.withLock {
-            if (appearanceMigrationCompleted) return
-            migrateAppearanceV1ToV2(pathProducer, appearanceBagStore)
-            appearanceMigrationCompleted = true
-        }
+        settingsDataStore.ensureAppearanceMigrated()
     }
 
     public suspend fun <T : Any> updateAppearance(
@@ -85,9 +56,8 @@ public class SettingsRepository(
     }
 
     public suspend fun updateAppearance(block: AppearancePatch.() -> AppearancePatch) {
-        ensureAppearanceMigrated()
-        appearanceBagStore.updateData { bag ->
-            bag.toPatch().block().toBag()
+        settingsDataStore.updateAppearanceBag {
+            toPatch().block().toBag()
         }
     }
 
@@ -96,44 +66,26 @@ public class SettingsRepository(
     }
 
     public suspend fun replaceAppearance(patch: AppearancePatch) {
-        ensureAppearanceMigrated()
-        appearanceBagStore.updateData { patch.toBag() }
+        settingsDataStore.replaceAppearanceBag(patch.toBag())
     }
 
     public suspend fun replaceAppearance(bag: AppearanceBag) {
-        ensureAppearanceMigrated()
-        appearanceBagStore.updateData { bag }
-    }
-
-    private val tabSettingsV2Store by lazy {
-        appDataStore.tabSettingsV2Store
+        settingsDataStore.replaceAppearanceBag(bag)
     }
 
     public val tabSettingsV2: Flow<TabSettingsV2> by lazy {
-        flow {
-            ensureTabSettingsMigrated()
-            emitAll(tabSettingsV2Store.data)
-        }
+        settingsDataStore.tabSettingsV2
     }
 
     public suspend fun updateTabSettingsV2(block: TabSettingsV2.() -> TabSettingsV2) {
-        ensureTabSettingsMigrated()
-        tabSettingsV2Store.updateData(block)
+        settingsDataStore.updateTabSettingsV2(block)
     }
 
     public suspend fun ensureTabSettingsMigrated() {
-        if (tabSettingsMigrationCompleted) return
-        tabSettingsMigrationMutex.withLock {
-            if (tabSettingsMigrationCompleted) return
-            migrateTabSettingsV1ToV2(
-                pathProducer = pathProducer,
-                tabSettingsV2Store = tabSettingsV2Store,
-            )
-            tabSettingsMigrationCompleted = true
-        }
+        settingsDataStore.ensureTabSettingsMigrated()
     }
 
     public suspend fun updateAppSettings(block: AppSettings.() -> AppSettings) {
-        appSettingsStore.updateData(block)
+        settingsDataStore.updateAppSettings(block)
     }
 }

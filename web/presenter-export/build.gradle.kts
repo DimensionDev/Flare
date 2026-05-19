@@ -17,6 +17,7 @@ kotlin {
         val wasmJsMain by getting {
             dependencies {
                 implementation(projects.data.database)
+                implementation(projects.presenter.features)
                 implementation(projects.presenter.runtime)
                 implementation(projects.social.api)
                 implementation(projects.social.bluesky)
@@ -25,6 +26,9 @@ kotlin {
                 implementation(projects.social.rss)
                 implementation(projects.social.vvo)
                 implementation(projects.social.xqt)
+                implementation(dependencies.platform(libs.koin.bom))
+                implementation(libs.koin.core)
+                implementation(libs.kotlinx.coroutines.core)
                 implementation(libs.kotlinx.serialization.json)
             }
         }

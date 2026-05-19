@@ -28,6 +28,7 @@ import dev.dimension.flare.data.datasource.microblog.handler.RelationHandler
 import dev.dimension.flare.data.datasource.microblog.handler.UserHandler
 import dev.dimension.flare.data.datasource.microblog.loader.ListLoader
 import dev.dimension.flare.data.datasource.microblog.loader.ListMemberLoader
+import dev.dimension.flare.data.datasource.microblog.nextActionMenu
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
@@ -151,6 +152,7 @@ internal class MisskeyDataSource(
         PostEventHandler(
             accountType = AccountType.Specific(accountKey),
             handler = this,
+            optimisticActionMenu = { it.nextActionMenu() },
         )
     }
 

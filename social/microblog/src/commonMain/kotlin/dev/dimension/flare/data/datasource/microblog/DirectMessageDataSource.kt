@@ -20,50 +20,50 @@ import kotlinx.coroutines.flow.Flow
 import kotlin.time.Clock
 import kotlin.uuid.Uuid
 
-internal interface DirectMessageDataSource : AuthenticatedMicroblogDataSource {
-    val directMessageHandler: DirectMessageHandler
+public interface DirectMessageDataSource : AuthenticatedMicroblogDataSource {
+    public val directMessageHandler: DirectMessageHandler
 
-    fun directMessageList(scope: CoroutineScope): Flow<PagingData<UiDMRoom>> = directMessageHandler.list(scope)
+    public fun directMessageList(scope: CoroutineScope): Flow<PagingData<UiDMRoom>> = directMessageHandler.list(scope)
 
-    fun directMessageConversation(
+    public fun directMessageConversation(
         roomKey: MicroBlogKey,
         scope: CoroutineScope,
     ): Flow<PagingData<UiDMItem>> = directMessageHandler.conversation(roomKey, scope)
 
-    fun sendDirectMessage(
+    public fun sendDirectMessage(
         roomKey: MicroBlogKey,
         message: String,
     ) {
         directMessageHandler.send(roomKey, message)
     }
 
-    fun retrySendDirectMessage(messageKey: MicroBlogKey) {
+    public fun retrySendDirectMessage(messageKey: MicroBlogKey) {
         directMessageHandler.retry(messageKey)
     }
 
-    fun deleteDirectMessage(
+    public fun deleteDirectMessage(
         roomKey: MicroBlogKey,
         messageKey: MicroBlogKey,
     ) {
         directMessageHandler.delete(roomKey, messageKey)
     }
 
-    fun getDirectMessageConversationInfo(roomKey: MicroBlogKey): CacheData<UiDMRoom> = directMessageHandler.roomInfo(roomKey)
+    public fun getDirectMessageConversationInfo(roomKey: MicroBlogKey): CacheData<UiDMRoom> = directMessageHandler.roomInfo(roomKey)
 
-    suspend fun fetchNewDirectMessageForConversation(roomKey: MicroBlogKey) {
+    public suspend fun fetchNewDirectMessageForConversation(roomKey: MicroBlogKey) {
         directMessageHandler.fetchNew(roomKey)
     }
 
-    val directMessageBadgeCount: CacheData<Int>
+    public val directMessageBadgeCount: CacheData<Int>
         get() = directMessageHandler.badgeCount
 
-    fun leaveDirectMessage(roomKey: MicroBlogKey) {
+    public fun leaveDirectMessage(roomKey: MicroBlogKey) {
         directMessageHandler.leave(roomKey)
     }
 
-    fun createDirectMessageRoom(userKey: MicroBlogKey): Flow<UiState<MicroBlogKey>> = directMessageHandler.createRoom(userKey)
+    public fun createDirectMessageRoom(userKey: MicroBlogKey): Flow<UiState<MicroBlogKey>> = directMessageHandler.createRoom(userKey)
 
-    suspend fun canSendDirectMessage(userKey: MicroBlogKey): Boolean = directMessageHandler.canSend(userKey)
+    public suspend fun canSendDirectMessage(userKey: MicroBlogKey): Boolean = directMessageHandler.canSend(userKey)
 }
 
 internal fun createSendingDirectMessage(

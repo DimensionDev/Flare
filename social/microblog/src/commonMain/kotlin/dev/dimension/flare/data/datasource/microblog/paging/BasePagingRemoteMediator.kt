@@ -30,10 +30,10 @@ internal fun <T : Any, R : Any> createPagingRemoteMediator(
         }
     }
 
-internal abstract class BasePagingRemoteMediator<T : Any, R : Any>(
+public abstract class BasePagingRemoteMediator<T : Any, R : Any>(
     private val database: CacheDatabase,
 ) : BaseRemoteMediator<Int, T>() {
-    abstract val pagingKey: String
+    public abstract val pagingKey: String
 
     @OptIn(ExperimentalPagingApi::class)
     override suspend fun doLoad(

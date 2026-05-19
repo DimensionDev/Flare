@@ -26,6 +26,7 @@ import dev.dimension.flare.data.datasource.microblog.handler.RelationHandler
 import dev.dimension.flare.data.datasource.microblog.handler.UserHandler
 import dev.dimension.flare.data.datasource.microblog.loader.ListLoader
 import dev.dimension.flare.data.datasource.microblog.loader.ListMemberLoader
+import dev.dimension.flare.data.datasource.microblog.nextActionMenu
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.notSupported
 import dev.dimension.flare.data.datasource.microblog.timeline.CommonTimelineSpecs as SocialCommonTimelineSpecs
@@ -143,6 +144,7 @@ internal open class MastodonDataSource(
         PostEventHandler(
             accountType = AccountType.Specific(accountKey),
             handler = this,
+            optimisticActionMenu = { it.nextActionMenu() },
         )
     }
 

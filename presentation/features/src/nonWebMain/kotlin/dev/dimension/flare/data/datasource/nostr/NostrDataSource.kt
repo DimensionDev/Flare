@@ -19,6 +19,7 @@ import dev.dimension.flare.data.datasource.microblog.handler.PostHandler
 import dev.dimension.flare.data.datasource.microblog.handler.RelationHandler
 import dev.dimension.flare.data.datasource.microblog.handler.UserHandler
 import dev.dimension.flare.data.datasource.microblog.loader.RelationActionType
+import dev.dimension.flare.data.datasource.microblog.nextActionMenu
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
@@ -178,6 +179,7 @@ internal class NostrDataSource(
                 dev.dimension.flare.model.AccountType
                     .Specific(accountKey),
             handler = this,
+            optimisticActionMenu = { it.nextActionMenu() },
         )
     }
 

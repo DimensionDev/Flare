@@ -14,6 +14,7 @@ import dev.dimension.flare.data.translation.PreTranslationService
 import dev.dimension.flare.data.translation.TranslationSettingsSupport
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiHandle
+import dev.dimension.flare.ui.model.UiProfile
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -23,7 +24,7 @@ import kotlinx.coroutines.flow.mapNotNull
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-internal class UserHandler(
+public class UserHandler(
     private val host: String,
     private val loader: UserLoader,
 ) : KoinComponent {
@@ -35,7 +36,7 @@ internal class UserHandler(
         TranslationSettingsSupport.displayOptionsFlow(appDataStore)
     }
 
-    fun userByHandleAndHost(uiHandle: UiHandle) =
+    public fun userByHandleAndHost(uiHandle: UiHandle): Cacheable<UiProfile> =
         Cacheable(
             fetchSource = {
                 val user = loader.userByHandleAndHost(uiHandle)
@@ -57,7 +58,7 @@ internal class UserHandler(
             },
         )
 
-    fun userById(id: String) =
+    public fun userById(id: String): Cacheable<UiProfile> =
         Cacheable(
             fetchSource = {
                 val user = loader.userById(id)

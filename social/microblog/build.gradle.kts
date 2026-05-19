@@ -20,13 +20,22 @@ kotlin {
     }
 
     sourceSets {
+        all {
+            languageSettings {
+                optIn("kotlin.uuid.ExperimentalUuidApi")
+            }
+        }
         val commonMain by getting {
             dependencies {
                 api(projects.core.common)
                 api(projects.core.model)
                 api(projects.presentation.model)
+                api(projects.capability.settings)
+                api(projects.capability.translation)
                 api(projects.storage.database)
                 api(libs.paging.common)
+                implementation(dependencies.platform(libs.koin.bom))
+                implementation(libs.koin.core)
             }
         }
         val commonTest by getting {

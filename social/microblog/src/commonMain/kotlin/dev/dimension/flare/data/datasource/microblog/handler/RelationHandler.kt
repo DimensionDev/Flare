@@ -10,20 +10,21 @@ import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiRelation
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-internal class RelationHandler(
-    val accountType: AccountType,
-    val dataSource: RelationLoader,
+public class RelationHandler(
+    public val accountType: AccountType,
+    public val dataSource: RelationLoader,
 ) : KoinComponent {
     private val database: CacheDatabase by inject()
     private val coroutineScope: CoroutineScope by inject()
 
-    fun relation(userKey: MicroBlogKey) =
+    public fun relation(userKey: MicroBlogKey): Cacheable<UiRelation> =
         Cacheable(
             fetchSource = {
                 val result = dataSource.relation(userKey)
@@ -45,7 +46,7 @@ internal class RelationHandler(
             },
         )
 
-    fun follow(userKey: MicroBlogKey) =
+    public fun follow(userKey: MicroBlogKey): Job =
         coroutineScope.launch {
             tryRun {
                 updateRelation(
@@ -69,7 +70,7 @@ internal class RelationHandler(
             }
         }
 
-    fun unfollow(userKey: MicroBlogKey) =
+    public fun unfollow(userKey: MicroBlogKey): Job =
         coroutineScope.launch {
             tryRun {
                 updateRelation(
@@ -93,7 +94,7 @@ internal class RelationHandler(
             }
         }
 
-    fun block(userKey: MicroBlogKey) =
+    public fun block(userKey: MicroBlogKey): Job =
         coroutineScope.launch {
             tryRun {
                 updateRelation(
@@ -117,7 +118,7 @@ internal class RelationHandler(
             }
         }
 
-    fun unblock(userKey: MicroBlogKey) =
+    public fun unblock(userKey: MicroBlogKey): Job =
         coroutineScope.launch {
             tryRun {
                 updateRelation(
@@ -141,7 +142,7 @@ internal class RelationHandler(
             }
         }
 
-    fun mute(userKey: MicroBlogKey) =
+    public fun mute(userKey: MicroBlogKey): Job =
         coroutineScope.launch {
             tryRun {
                 updateRelation(
@@ -165,7 +166,7 @@ internal class RelationHandler(
             }
         }
 
-    fun unmute(userKey: MicroBlogKey) =
+    public fun unmute(userKey: MicroBlogKey): Job =
         coroutineScope.launch {
             tryRun {
                 updateRelation(
@@ -189,7 +190,7 @@ internal class RelationHandler(
             }
         }
 
-    suspend fun approveFollowRequest(userKey: MicroBlogKey) {
+    public suspend fun approveFollowRequest(userKey: MicroBlogKey) {
         updateRelation(
             userKey = userKey,
             update = { relation ->
@@ -201,7 +202,7 @@ internal class RelationHandler(
         )
     }
 
-    suspend fun rejectFollowRequest(userKey: MicroBlogKey) {
+    public suspend fun rejectFollowRequest(userKey: MicroBlogKey) {
         updateRelation(
             userKey = userKey,
             update = { relation ->

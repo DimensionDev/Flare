@@ -40,7 +40,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 @OptIn(ExperimentalPagingApi::class)
-internal class DirectMessageHandler(
+public class DirectMessageHandler(
     private val accountKey: MicroBlogKey,
     private val loader: DirectMessageLoader,
     private val coroutineScope: CoroutineScope,
@@ -49,7 +49,7 @@ internal class DirectMessageHandler(
     private val accountType = AccountType.Specific(accountKey)
     private val inMemoryBadgeCount = MutableStateFlow<Int?>(null)
 
-    fun list(scope: CoroutineScope): Flow<PagingData<UiDMRoom>> =
+    public fun list(scope: CoroutineScope): Flow<PagingData<UiDMRoom>> =
         Pager(
             config = pagingConfig,
             remoteMediator =
@@ -76,7 +76,7 @@ internal class DirectMessageHandler(
                 paging.map(transformer.room)
             }.cachedIn(scope)
 
-    fun conversation(
+    public fun conversation(
         roomKey: MicroBlogKey,
         scope: CoroutineScope,
     ): Flow<PagingData<UiDMItem>> =
@@ -110,7 +110,7 @@ internal class DirectMessageHandler(
                 paging.map(transformer.item)
             }.cachedIn(scope)
 
-    fun roomInfo(roomKey: MicroBlogKey): CacheData<UiDMRoom> =
+    public fun roomInfo(roomKey: MicroBlogKey): CacheData<UiDMRoom> =
         Cacheable(
             fetchSource = {
                 saveRooms(listOf(loader.fetchRoomInfo(roomKey)))
@@ -130,7 +130,7 @@ internal class DirectMessageHandler(
             },
         )
 
-    fun send(
+    public fun send(
         roomKey: MicroBlogKey,
         message: String,
     ) {
@@ -157,7 +157,7 @@ internal class DirectMessageHandler(
         }
     }
 
-    fun retry(messageKey: MicroBlogKey) {
+    public fun retry(messageKey: MicroBlogKey) {
         coroutineScope.launch {
             val current = database.messageDao().getMessage(messageKey)
             val text = (current?.content?.content as? UiDMItem.Message.Text)?.text?.raw
@@ -190,7 +190,7 @@ internal class DirectMessageHandler(
         }
     }
 
-    fun delete(
+    public fun delete(
         roomKey: MicroBlogKey,
         messageKey: MicroBlogKey,
     ) {
@@ -212,7 +212,7 @@ internal class DirectMessageHandler(
         }
     }
 
-    suspend fun fetchNew(roomKey: MicroBlogKey) {
+    public suspend fun fetchNew(roomKey: MicroBlogKey) {
         val cursor = database.messageDao().getLatestMessage(roomKey)?.remoteCursor
         saveDelta(
             roomKey = roomKey,
@@ -222,7 +222,7 @@ internal class DirectMessageHandler(
         updateRoomTimelineFromMessages(roomKey, unreadCount = 0)
     }
 
-    val badgeCount: CacheData<Int> by lazy {
+    public val badgeCount: CacheData<Int> by lazy {
         Cacheable(
             fetchSource = {
                 inMemoryBadgeCount.value = loader.loadBadgeCount()
@@ -233,7 +233,7 @@ internal class DirectMessageHandler(
         )
     }
 
-    fun leave(roomKey: MicroBlogKey) {
+    public fun leave(roomKey: MicroBlogKey) {
         coroutineScope.launch {
             tryRun {
                 loader.leaveRoom(roomKey)
@@ -246,7 +246,7 @@ internal class DirectMessageHandler(
         }
     }
 
-    fun createRoom(userKey: MicroBlogKey): Flow<UiState<MicroBlogKey>> =
+    public fun createRoom(userKey: MicroBlogKey): Flow<UiState<MicroBlogKey>> =
         loader.createRoom(userKey).map { state ->
             when (state) {
                 is UiState.Success -> {
@@ -264,7 +264,7 @@ internal class DirectMessageHandler(
             }
         }
 
-    suspend fun canSend(userKey: MicroBlogKey): Boolean = loader.canSend(userKey)
+    public suspend fun canSend(userKey: MicroBlogKey): Boolean = loader.canSend(userKey)
 
     private suspend fun saveDelta(
         roomKey: MicroBlogKey,

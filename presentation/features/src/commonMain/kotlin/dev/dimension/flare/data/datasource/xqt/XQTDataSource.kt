@@ -34,6 +34,7 @@ import dev.dimension.flare.data.datasource.microblog.handler.PostEventHandler
 import dev.dimension.flare.data.datasource.microblog.handler.PostHandler
 import dev.dimension.flare.data.datasource.microblog.handler.RelationHandler
 import dev.dimension.flare.data.datasource.microblog.handler.UserHandler
+import dev.dimension.flare.data.datasource.microblog.nextActionMenu
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.notSupported
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
@@ -222,6 +223,7 @@ internal class XQTDataSource(
         PostEventHandler(
             accountType = AccountType.Specific(accountKey),
             handler = this,
+            optimisticActionMenu = { it.nextActionMenu() },
         )
     }
 

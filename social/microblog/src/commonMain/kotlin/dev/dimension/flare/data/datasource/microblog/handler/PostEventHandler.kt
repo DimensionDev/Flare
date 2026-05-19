@@ -5,7 +5,6 @@ import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.database.cache.model.DbStatus
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.DatabaseUpdater
-import dev.dimension.flare.data.datasource.microblog.nextActionMenu
 import dev.dimension.flare.ui.model.PostEvent
 import dev.dimension.flare.common.tryRun
 import dev.dimension.flare.model.AccountType
@@ -20,23 +19,24 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-internal class PostEventHandler(
+public class PostEventHandler(
     private val accountType: AccountType,
     private val handler: Handler,
+    private val optimisticActionMenu: (PostEvent) -> ActionMenu.Item? = { null },
 ) : KoinComponent,
     DatabaseUpdater {
     private val coroutineScope: CoroutineScope by inject()
     private val database: CacheDatabase by inject()
     private val dbAccountType = accountType as DbAccountType
 
-    interface Handler {
-        suspend fun handle(
+    public interface Handler {
+        public suspend fun handle(
             event: PostEvent,
             updater: DatabaseUpdater,
         )
     }
 
-    fun handleEvent(event: PostEvent) {
+    public fun handleEvent(event: PostEvent) {
         coroutineScope.launch {
             val originalData =
                 database
@@ -46,7 +46,7 @@ internal class PostEventHandler(
                         accountType = dbAccountType,
                     ).firstOrNull()
                     ?.content
-            val nextActionMenu = event.nextActionMenu()
+            val nextActionMenu = optimisticActionMenu(event)
             if (nextActionMenu != null && originalData is UiTimelineV2.Post) {
                 val updatedData =
                     originalData.copy(

@@ -85,7 +85,12 @@ class PostEventHandlerTest : RobolectricTest() {
             val original = createPost(actions = persistentListOf(createMenuItem(updateKey = "mastodon_like_$postKey", count = 1)))
             insertPost(original)
 
-            handler = PostEventHandler(accountType = AccountType.Specific(accountKey), handler = fakeRemoteHandler)
+            handler =
+                PostEventHandler(
+                    accountType = AccountType.Specific(accountKey),
+                    handler = fakeRemoteHandler,
+                    optimisticActionMenu = { it.nextActionMenu() },
+                )
             handler.handleEvent(
                 PostEvent.Mastodon.Like(
                     postKey = postKey,
@@ -120,7 +125,12 @@ class PostEventHandlerTest : RobolectricTest() {
             insertPost(original)
 
             fakeRemoteHandler.shouldFail = true
-            handler = PostEventHandler(accountType = AccountType.Specific(accountKey), handler = fakeRemoteHandler)
+            handler =
+                PostEventHandler(
+                    accountType = AccountType.Specific(accountKey),
+                    handler = fakeRemoteHandler,
+                    optimisticActionMenu = { it.nextActionMenu() },
+                )
             handler.handleEvent(
                 PostEvent.Mastodon.Like(
                     postKey = postKey,
@@ -166,7 +176,12 @@ class PostEventHandlerTest : RobolectricTest() {
                 )
             insertPost(createPost(poll = poll))
 
-            handler = PostEventHandler(accountType = AccountType.Specific(accountKey), handler = fakeRemoteHandler)
+            handler =
+                PostEventHandler(
+                    accountType = AccountType.Specific(accountKey),
+                    handler = fakeRemoteHandler,
+                    optimisticActionMenu = { it.nextActionMenu() },
+                )
             handler.handleEvent(
                 PostEvent.Mastodon.Vote(
                     id = "poll-1",
@@ -210,7 +225,12 @@ class PostEventHandlerTest : RobolectricTest() {
                 ),
             )
 
-            handler = PostEventHandler(accountType = AccountType.Specific(accountKey), handler = fakeRemoteHandler)
+            handler =
+                PostEventHandler(
+                    accountType = AccountType.Specific(accountKey),
+                    handler = fakeRemoteHandler,
+                    optimisticActionMenu = { it.nextActionMenu() },
+                )
             handler.deleteFromCache(postKey)
 
             val saved = db.statusDao().get(postKey, AccountType.Specific(accountKey)).first()

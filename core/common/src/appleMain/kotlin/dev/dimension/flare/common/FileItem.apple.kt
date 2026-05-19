@@ -16,11 +16,11 @@ public actual class FileItem internal constructor(
         mimeType: String? = null,
     ) : this(name, { data }, type, mimeType)
 
-    public constructor(
+    public actual constructor(
         name: String?,
         type: FileType,
         loader: suspend () -> ByteArray,
-        mimeType: String? = null,
+        mimeType: String?,
     ) : this(name, loader, type, mimeType)
 
     public constructor(

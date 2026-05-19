@@ -13,11 +13,11 @@ public actual class FileItem(
         mimeType: String? = null,
     ) : this({ data }, name, type, mimeType)
 
-    public constructor(
+    public actual constructor(
         name: String?,
         type: FileType,
         loader: suspend () -> ByteArray,
-        mimeType: String? = null,
+        mimeType: String?,
     ) : this(loader, name, type, mimeType)
 
     public actual suspend fun readBytes(): ByteArray = loader()

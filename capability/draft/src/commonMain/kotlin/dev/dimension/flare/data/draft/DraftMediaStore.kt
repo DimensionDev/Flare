@@ -57,10 +57,10 @@ public class DraftMediaStore(
             val path = media.cachePath.toPath()
             ComposeData.Media(
                 file =
-                    draftFileItem(
-                        name = media.fileName ?: path.name,
-                        type = media.mediaType.toFileType(),
-                        readBytes = {
+                    FileItem(
+                        media.fileName ?: path.name,
+                        media.mediaType.toFileType(),
+                        {
                             fileStorage.read(path)
                         },
                     ),
@@ -113,12 +113,6 @@ public class DraftMediaStore(
         }
     }
 }
-
-internal expect fun draftFileItem(
-    name: String?,
-    type: FileType,
-    readBytes: suspend () -> ByteArray,
-): FileItem
 
 private fun FileType.toDraftMediaType(): DraftMediaType =
     when (this) {

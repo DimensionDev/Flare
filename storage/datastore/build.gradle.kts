@@ -27,22 +27,14 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 api(projects.core.common)
-                api(projects.core.model)
                 api(libs.datastore.core)
                 api(libs.datastore.core.okio)
                 api(libs.okio)
-                implementation(libs.kotlinx.serialization.json)
             }
         }
         val androidMain by getting {
             dependencies {
                 implementation(libs.datastore)
-            }
-        }
-        val commonTest by getting {
-            dependencies {
-                implementation(kotlin("test"))
-                implementation(libs.kotlinx.coroutines.test)
             }
         }
     }

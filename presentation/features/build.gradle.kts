@@ -48,7 +48,7 @@ kotlin {
                 api(projects.capability.ai)
                 api(projects.capability.account)
                 api(projects.storage.database)
-                api(projects.storage.datastore)
+                api(projects.capability.settings)
                 api(projects.capability.draft)
                 api(projects.capability.local)
                 api(projects.capability.translation)

@@ -29,7 +29,7 @@ kotlin {
                 api(projects.core.common)
                 api(projects.core.model)
                 api(projects.storage.database)
-                api(projects.storage.datastore)
+                api(projects.capability.settings)
                 api(projects.social.api)
                 api(projects.presentation.model)
                 api(libs.kotlinx.coroutines.core)

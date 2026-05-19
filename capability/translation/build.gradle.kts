@@ -30,7 +30,7 @@ kotlin {
                 api(projects.core.model)
                 api(projects.capability.ai)
                 api(projects.storage.database)
-                api(projects.storage.datastore)
+                api(projects.capability.settings)
                 implementation(projects.network)
                 api(projects.presentation.model)
             }

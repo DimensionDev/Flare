@@ -4,13 +4,27 @@ import java.io.File
 import java.net.URLConnection
 import java.nio.file.Files
 
-public actual class FileItem(
-    private val file: File,
-    public actual val name: String? = file.name,
-    public actual val type: FileType = resolveType(file.name),
-    public actual val mimeType: String? = resolveMimeType(file),
+public actual class FileItem private constructor(
+    private val loader: suspend () -> ByteArray,
+    public actual val name: String?,
+    public actual val type: FileType,
+    public actual val mimeType: String?,
 ) {
-    public actual suspend fun readBytes(): ByteArray = file.readBytes()
+    public constructor(
+        file: File,
+        name: String? = file.name,
+        type: FileType = resolveType(file.name),
+        mimeType: String? = resolveMimeType(file),
+    ) : this({ file.readBytes() }, name, type, mimeType)
+
+    public constructor(
+        name: String?,
+        type: FileType,
+        loader: suspend () -> ByteArray,
+        mimeType: String? = null,
+    ) : this(loader, name, type, mimeType)
+
+    public actual suspend fun readBytes(): ByteArray = loader()
 
     private companion object {
         fun resolveType(fileName: String): FileType {

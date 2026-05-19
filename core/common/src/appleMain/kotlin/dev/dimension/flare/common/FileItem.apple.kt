@@ -14,24 +14,21 @@ public actual class FileItem internal constructor(
         data: ByteArray,
         type: FileType,
         mimeType: String? = null,
-    ) : this(
-        name = name,
-        loader = { data },
-        type = type,
-        mimeType = mimeType,
-    )
+    ) : this(name, { data }, type, mimeType)
+
+    public constructor(
+        name: String?,
+        type: FileType,
+        loader: suspend () -> ByteArray,
+        mimeType: String? = null,
+    ) : this(name, loader, type, mimeType)
 
     public constructor(
         name: String?,
         path: String,
         type: FileType,
         mimeType: String? = null,
-    ) : this(
-        name = name,
-        loader = { FileSystem.SYSTEM.read(path.toPath()) { readByteArray() } },
-        type = type,
-        mimeType = mimeType,
-    )
+    ) : this(name, { FileSystem.SYSTEM.read(path.toPath()) { readByteArray() } }, type, mimeType)
 
     public actual suspend fun readBytes(): ByteArray = loader()
 }

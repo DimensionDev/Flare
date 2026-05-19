@@ -11,7 +11,7 @@ internal actual fun draftFileItem(
     readBytes: suspend () -> ByteArray,
 ): FileItem =
     FileItem(
-        name = name ?: path.toPath().name,
-        type = type,
-        loader = readBytes,
+        name ?: path.toPath().name,
+        type,
+        readBytes,
     )

@@ -5,6 +5,8 @@ import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.datasource.nostr.DatabaseNostrCache
 import dev.dimension.flare.data.datasource.nostr.NostrCache
 import dev.dimension.flare.data.io.AndroidPlatformPathProducer
+import dev.dimension.flare.data.io.FileStorage
+import dev.dimension.flare.data.io.OkioFileStorage
 import dev.dimension.flare.data.io.PlatformPathProducer
 import dev.dimension.flare.data.network.nostr.AmberIntentLauncherRegistry
 import dev.dimension.flare.data.network.nostr.AmberSignerBridge
@@ -18,6 +20,8 @@ import org.koin.core.module.Module
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.bind
 import org.koin.dsl.module
+import okio.FileSystem
+import okio.SYSTEM
 
 internal actual val platformModule: Module =
     module {
@@ -26,6 +30,7 @@ internal actual val platformModule: Module =
         singleOf(::AmberIntentLauncherRegistry)
         single<AmberSignerBridge> { AndroidAmberSignerBridge(androidContext(), get()) }
         singleOf(::AndroidPlatformPathProducer) bind PlatformPathProducer::class
+        single<FileStorage> { OkioFileStorage(FileSystem.SYSTEM) }
         singleOf(::AndroidFormatter) bind PlatformFormatter::class
         singleOf(::AndroidImageCompressor) bind ImageCompressor::class
         single<NostrCache> { DatabaseNostrCache(get()) }

@@ -7,28 +7,20 @@ import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.io.FileStorage
 import dev.dimension.flare.data.io.OkioFileStorage
 import dev.dimension.flare.data.io.PlatformPathProducer
-import dev.dimension.flare.data.io.defaultFileStorage
 import okio.FileSystem
 import okio.Path.Companion.toPath
 import kotlin.uuid.Uuid
 
-public class DraftMediaStore private constructor(
+public class DraftMediaStore(
     private val platformPathProducer: PlatformPathProducer,
-    private val storage: FileStorage = defaultFileStorage(),
+    private val fileStorage: FileStorage,
 ) {
-    public constructor(
-        platformPathProducer: PlatformPathProducer,
-    ) : this(
-        platformPathProducer = platformPathProducer,
-        storage = defaultFileStorage(),
-    )
-
     public constructor(
         platformPathProducer: PlatformPathProducer,
         fileSystem: FileSystem,
     ) : this(
         platformPathProducer = platformPathProducer,
-        storage = OkioFileStorage(fileSystem),
+        fileStorage = OkioFileStorage(fileSystem),
     )
 
     public suspend fun persist(
@@ -43,8 +35,8 @@ public class DraftMediaStore private constructor(
                         .orEmpty()
                         .ifBlank { "${Uuid.random()}.bin" }
                 val path = platformPathProducer.draftMediaFile(groupId, "${index}_$fileName")
-                storage.createDirectories(checkNotNull(path.parent))
-                storage.write(path, media.file.readBytes())
+                fileStorage.createDirectories(checkNotNull(path.parent))
+                fileStorage.write(path, media.file.readBytes())
                 SaveDraftMedia(
                     cachePath = path.toString(),
                     fileName = media.file.name,
@@ -69,7 +61,7 @@ public class DraftMediaStore private constructor(
                         name = media.fileName,
                         type = media.mediaType.toFileType(),
                         readBytes = {
-                            storage.read(media.cachePath.toPath())
+                            fileStorage.read(media.cachePath.toPath())
                         },
                     ),
                 altText = media.altText,
@@ -79,8 +71,8 @@ public class DraftMediaStore private constructor(
     public fun delete(medias: List<DraftMedia>) {
         medias.forEach { media ->
             val path = media.cachePath.toPath()
-            if (storage.exists(path)) {
-                storage.delete(path)
+            if (fileStorage.exists(path)) {
+                fileStorage.delete(path)
             }
             cleanupEmptyGroupDirectory(media.groupId)
         }
@@ -94,15 +86,15 @@ public class DraftMediaStore private constructor(
             platformPathProducer
                 .draftMediaFile(groupId, "__placeholder__")
                 .parent ?: return
-        if (!storage.exists(groupDirectory)) {
+        if (!fileStorage.exists(groupDirectory)) {
             return
         }
-        storage
+        fileStorage
             .list(groupDirectory)
             .filterNot { keepPaths.contains(it) }
             .forEach { stalePath ->
-                if (storage.exists(stalePath)) {
-                    storage.delete(stalePath)
+                if (fileStorage.exists(stalePath)) {
+                    fileStorage.delete(stalePath)
                 }
             }
         cleanupEmptyGroupDirectory(groupId)
@@ -113,11 +105,11 @@ public class DraftMediaStore private constructor(
             platformPathProducer
                 .draftMediaFile(groupId, "__placeholder__")
                 .parent ?: return
-        if (!storage.exists(groupDirectory)) {
+        if (!fileStorage.exists(groupDirectory)) {
             return
         }
-        if (storage.list(groupDirectory).isEmpty()) {
-            storage.delete(groupDirectory)
+        if (fileStorage.list(groupDirectory).isEmpty()) {
+            fileStorage.delete(groupDirectory)
         }
     }
 }

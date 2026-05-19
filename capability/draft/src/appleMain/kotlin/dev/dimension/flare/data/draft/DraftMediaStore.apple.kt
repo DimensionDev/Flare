@@ -14,7 +14,7 @@ internal actual fun draftFileItem(
     val filePath = path.toPath()
     return FileItem(
         name = name ?: filePath.name,
-        path = path,
         type = type,
+        loader = readBytes,
     )
 }

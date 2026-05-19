@@ -32,6 +32,18 @@ public actual class FileItem {
         mimeType = mimeType,
     )
 
+    public constructor(
+        name: String?,
+        type: FileType,
+        loader: suspend () -> ByteArray,
+        mimeType: String? = null,
+    ) : this(
+        name = name,
+        type = type,
+        source = Source.LoaderSource(loader),
+        mimeType = mimeType,
+    )
+
     private constructor(
         name: String?,
         type: FileType,
@@ -63,6 +75,12 @@ public actual class FileItem {
             private val path: String,
         ) : Source {
             override suspend fun readBytes(): ByteArray = File(path).readBytes()
+        }
+
+        data class LoaderSource(
+            private val loader: suspend () -> ByteArray,
+        ) : Source {
+            override suspend fun readBytes(): ByteArray = loader()
         }
     }
 

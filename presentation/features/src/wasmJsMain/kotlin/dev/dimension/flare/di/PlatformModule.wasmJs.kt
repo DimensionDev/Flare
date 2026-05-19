@@ -7,6 +7,8 @@ import dev.dimension.flare.common.Message
 import dev.dimension.flare.data.ai.OnDeviceAI
 import dev.dimension.flare.data.database.DriverFactory
 import dev.dimension.flare.data.datastore.AppDataStore
+import dev.dimension.flare.data.io.FileStorage
+import dev.dimension.flare.data.io.InMemoryFileStorage
 import dev.dimension.flare.data.io.PlatformPathProducer
 import dev.dimension.flare.data.io.WebPlatformPathProducer
 import dev.dimension.flare.media.ImageCompressor
@@ -22,6 +24,7 @@ internal actual val platformModule: Module =
         single { AppDataStore(get<PlatformPathProducer>()) }
         singleOf(::DriverFactory)
         singleOf(::WebPlatformPathProducer) bind PlatformPathProducer::class
+        single<FileStorage> { InMemoryFileStorage() }
         single<PlatformFormatter> { WebPlatformFormatter }
         single<ImageCompressor> { WebImageCompressor }
         single<OnDeviceAI> { WebOnDeviceAI }

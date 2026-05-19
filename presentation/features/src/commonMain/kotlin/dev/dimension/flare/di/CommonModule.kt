@@ -36,7 +36,10 @@ internal val commonModule =
         single { provideCacheDatabase(get()) }
         singleOf(::ApplicationRepository)
         single {
-            DraftMediaStore(get())
+            DraftMediaStore(
+                platformPathProducer = get(),
+                fileStorage = get(),
+            )
         }
         single {
             DraftRepository(

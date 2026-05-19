@@ -50,6 +50,7 @@ kotlin {
                 api(projects.data.database)
                 api(projects.data.datastore)
                 api(projects.data.draft)
+                api(projects.data.local)
                 api(projects.data.translation)
                 api(projects.data.repository)
                 implementation(projects.data.network)

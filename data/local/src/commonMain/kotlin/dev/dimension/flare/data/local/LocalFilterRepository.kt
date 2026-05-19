@@ -1,4 +1,4 @@
-package dev.dimension.flare.data.repository
+package dev.dimension.flare.data.local
 
 import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.app.model.DbKeywordFilter

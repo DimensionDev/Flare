@@ -13,8 +13,8 @@ import dev.dimension.flare.data.account.ApplicationRepository
 import dev.dimension.flare.data.draft.DraftMediaStore
 import dev.dimension.flare.data.draft.DraftRepository
 import dev.dimension.flare.data.draft.DraftSendingRecoveryCoordinator
-import dev.dimension.flare.data.repository.LocalFilterRepository
-import dev.dimension.flare.data.repository.SearchHistoryRepository
+import dev.dimension.flare.data.local.LocalFilterRepository
+import dev.dimension.flare.data.local.SearchHistoryRepository
 import dev.dimension.flare.data.datastore.SettingsRepository
 import dev.dimension.flare.data.translation.OnlinePreTranslationService
 import dev.dimension.flare.data.translation.PreTranslationService

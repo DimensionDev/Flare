@@ -12,7 +12,7 @@ import dev.dimension.flare.data.model.VideoAutoplay
 import dev.dimension.flare.data.model.appearance.AppearanceKey
 import dev.dimension.flare.data.model.appearance.AppearanceKeys
 import dev.dimension.flare.data.model.appearance.AppearancePatch
-import dev.dimension.flare.data.datastore.SettingsRepository
+import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
 import kotlinx.coroutines.Dispatchers
@@ -24,7 +24,7 @@ import org.koin.core.component.inject
 public class SettingsPresenter :
     PresenterBase<SettingsPresenter.State>(),
     KoinComponent {
-    private val repository: SettingsRepository by inject()
+    private val repository: AppDataStore by inject()
 
     @Composable
     override fun body(): State {

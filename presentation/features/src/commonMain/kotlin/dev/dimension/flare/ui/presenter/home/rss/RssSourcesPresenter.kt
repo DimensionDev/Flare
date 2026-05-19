@@ -11,7 +11,7 @@ import dev.dimension.flare.data.database.app.model.SubscriptionType
 import dev.dimension.flare.data.model.tab.TimelineSlot
 import dev.dimension.flare.data.model.tab.TimelineSlotContent
 import dev.dimension.flare.data.platform.RssTimelineSpecs
-import dev.dimension.flare.data.datastore.SettingsRepository
+import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.ui.model.UiRssSource
 import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.presenter.PresenterBase
@@ -28,7 +28,7 @@ public class RssSourcesPresenter :
     PresenterBase<RssSourcesPresenter.State>(),
     KoinComponent {
     private val appDatabase by inject<AppDatabase>()
-    private val settingsRepository by inject<SettingsRepository>()
+    private val appDataStore by inject<AppDataStore>()
 
     @androidx.compose.runtime.Immutable
     public interface State {
@@ -84,7 +84,7 @@ public class RssSourcesPresenter :
                             .firstOrNull { it.id == id }
                     appDatabase.rssSourceDao().delete(id)
                     source?.let {
-                        settingsRepository.removeHomeTimelineTabForRssSource(it)
+                        appDataStore.removeHomeTimelineTabForRssSource(it)
                     }
                 }
             }
@@ -92,7 +92,7 @@ public class RssSourcesPresenter :
     }
 }
 
-private suspend fun SettingsRepository.removeHomeTimelineTabForRssSource(source: DbRssSources) {
+private suspend fun AppDataStore.removeHomeTimelineTabForRssSource(source: DbRssSources) {
     val sourceId =
         when (source.type) {
             SubscriptionType.RSS -> {

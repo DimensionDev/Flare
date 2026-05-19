@@ -5,7 +5,7 @@ import androidx.compose.runtime.getValue
 import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.model.appearance.GlobalAppearance
 import dev.dimension.flare.data.model.appearance.TimelineAppearance
-import dev.dimension.flare.data.datastore.SettingsRepository
+import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
 import org.koin.core.component.KoinComponent
@@ -14,7 +14,7 @@ import org.koin.core.component.inject
 public class EnvironmentSettingsPresenter :
     PresenterBase<EnvironmentSettingsPresenter.State>(),
     KoinComponent {
-    private val repository: SettingsRepository by inject()
+    private val repository: AppDataStore by inject()
 
     @Composable
     override fun body(): State {

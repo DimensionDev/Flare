@@ -39,7 +39,7 @@ import dev.dimension.flare.Res
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.copied_to_clipboard
 import dev.dimension.flare.data.network.rss.DocumentData
-import dev.dimension.flare.data.datastore.SettingsRepository
+import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.rss_detail_open_in_browser
 import dev.dimension.flare.rss_detail_tldr
 import dev.dimension.flare.rss_detail_tldr_error
@@ -347,17 +347,17 @@ private fun presenter(
     url: String,
     descriptionHtml: String? = null,
     descriptionTitle: String? = null,
-    settingsRepository: SettingsRepository = koinInject(),
+    appDataStore: AppDataStore = koinInject(),
 ) = run {
     val state =
         remember(url, descriptionHtml) {
             RssDetailPresenter(url, descriptionHtml, descriptionTitle)
         }.invoke()
     val enableTldr by remember {
-        settingsRepository.appSettings.map { it.aiConfig.tldr }
+        appDataStore.appSettings.map { it.aiConfig.tldr }
     }.collectAsUiState()
     val preTranslate by remember {
-        settingsRepository.appSettings.map { it.translateConfig.preTranslate }
+        appDataStore.appSettings.map { it.translateConfig.preTranslate }
     }.collectAsUiState()
     var showTldr by remember { mutableStateOf(false) }
     var tldrRefreshKey by remember { mutableIntStateOf(0) }

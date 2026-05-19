@@ -37,7 +37,6 @@ import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.local.KeywordFilterPattern
 import dev.dimension.flare.data.local.LocalFilterRepository
 import dev.dimension.flare.model.LoginExpiredException
-import dev.dimension.flare.data.datastore.SettingsRepository
 import dev.dimension.flare.data.repository.homeTimelineTab
 import dev.dimension.flare.data.translation.PreTranslationService
 import dev.dimension.flare.data.translation.TranslationSettingsSupport
@@ -66,7 +65,6 @@ public abstract class TimelinePresenter :
     private val database: CacheDatabase by inject()
     private val appDataStore: AppDataStore by inject()
     private val preTranslationService: PreTranslationService by inject()
-    private val settingsRepository: SettingsRepository by inject()
     private val timelineResolver: TimelineResolver by inject()
 
     private val localFilterRepository: LocalFilterRepository by inject()
@@ -80,7 +78,7 @@ public abstract class TimelinePresenter :
 
     private val timelineFilterConfigFlow: Flow<TimelineFilterConfig> by lazy {
         observeTimelineFilterConfig(
-            settingsRepository = settingsRepository,
+            appDataStore = appDataStore,
             timelineResolver = timelineResolver,
             timelineTabItemIdFlow = timelineTabItemIdFlow,
         )
@@ -282,7 +280,7 @@ internal fun UiTimelineV2.Post.traits(): TimelinePostTraits {
 
 @OptIn(ExperimentalCoroutinesApi::class)
 internal fun observeTimelineFilterConfig(
-    settingsRepository: SettingsRepository,
+    appDataStore: AppDataStore,
     timelineResolver: TimelineResolver,
     timelineTabItemIdFlow: Flow<String?>,
 ): Flow<TimelineFilterConfig> =
@@ -292,7 +290,7 @@ internal fun observeTimelineFilterConfig(
             if (id == null) {
                 flowOf(TimelineFilterConfig())
             } else {
-                settingsRepository
+                appDataStore
                     .homeTimelineTab(id, timelineResolver)
                     .map { it?.filterConfig ?: TimelineFilterConfig() }
                     .distinctUntilChanged()

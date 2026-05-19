@@ -2,7 +2,7 @@ package dev.dimension.flare.data.repository
 
 import dev.dimension.flare.data.account.AccountRepository
 import dev.dimension.flare.data.datasource.microblog.datasource.TimelineTabConfigurationDataSource
-import dev.dimension.flare.data.datastore.SettingsRepository
+import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.model.tab.GroupSource
 import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.model.tab.TimelineSlot
@@ -16,7 +16,7 @@ import kotlinx.coroutines.launch
 
 internal class AccountTabSyncCoordinator(
     private val accountRepository: AccountRepository,
-    private val settingsRepository: SettingsRepository,
+    private val appDataStore: AppDataStore,
     private val coroutineScope: CoroutineScope,
     private val timelineResolver: TimelineResolver,
 ) {
@@ -41,7 +41,7 @@ internal class AccountTabSyncCoordinator(
             accountRepository.allAccounts
                 .first()
                 .mapTo(linkedSetOf()) { it.accountKey }
-        settingsRepository.updateTabSettingsV2 {
+        appDataStore.updateTabSettingsV2 {
             copy(
                 homeSlots =
                     homeSlots
@@ -61,7 +61,7 @@ internal class AccountTabSyncCoordinator(
         if (defaultSlots.isEmpty()) {
             return
         }
-        settingsRepository.updateTabSettingsV2 {
+        appDataStore.updateTabSettingsV2 {
             val shouldEnableSystemHomeMixedTimeline =
                 homeSlots.anySystemHomeMixedTimeline() ||
                     homeSlots.countNonSystemHomeTabs() < 2
@@ -80,7 +80,7 @@ internal class AccountTabSyncCoordinator(
     }
 
     private suspend fun removeTabsForAccount(accountKey: MicroBlogKey) {
-        settingsRepository.updateTabSettingsV2 {
+        appDataStore.updateTabSettingsV2 {
             copy(
                 homeSlots =
                     homeSlots

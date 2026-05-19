@@ -19,7 +19,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import dev.dimension.flare.data.model.appearance.AppearanceKey
 import dev.dimension.flare.data.model.appearance.AppearancePatch
-import dev.dimension.flare.data.datastore.SettingsRepository
+import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.ui.component.FlareDropdownMenu
 import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.model.UiState
@@ -116,9 +116,9 @@ internal interface AppearanceSettingsUpdater : AppearanceState {
 internal fun appearancePresenter(): AppearanceSettingsUpdater =
     run {
         val scope = rememberCoroutineScope()
-        val settingsRepository = koinInject<SettingsRepository>()
+        val appDataStore = koinInject<AppDataStore>()
         val appearanceState = remember { AppearancePresenter() }.invoke()
-        val appearance by settingsRepository.appearancePatch.collectAsUiState()
+        val appearance by appDataStore.appearancePatch.collectAsUiState()
 
         object : AppearanceSettingsUpdater, AppearanceState by appearanceState {
             override val appearance: UiState<AppearancePatch> = appearance
@@ -128,19 +128,19 @@ internal fun appearancePresenter(): AppearanceSettingsUpdater =
                 value: T,
             ) {
                 scope.launch {
-                    settingsRepository.updateAppearance(key, value)
+                    appDataStore.updateAppearance(key, value)
                 }
             }
 
             override fun clear(key: AppearanceKey<*>) {
                 scope.launch {
-                    settingsRepository.clearAppearance(key)
+                    appDataStore.clearAppearance(key)
                 }
             }
 
             override fun updateFontScale(fontSizeDiff: Float) {
                 scope.launch {
-                    settingsRepository.updateAppearance {
+                    appDataStore.updateAppearance {
                         set(dev.dimension.flare.data.model.appearance.AppearanceKeys.FontSizeDiff, fontSizeDiff)
                             .set(dev.dimension.flare.data.model.appearance.AppearanceKeys.LineHeightDiff, fontSizeDiff * 2)
                     }

@@ -5,7 +5,7 @@ import androidx.compose.runtime.getValue
 import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.model.tab.TimelineSlot
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
-import dev.dimension.flare.data.datastore.SettingsRepository
+import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.map
@@ -24,7 +24,7 @@ public class PinTabs<T> internal constructor(
 public abstract class PinTabsPresenter<T> :
     PresenterBase<PinTabsPresenter.State<T>>(),
     KoinComponent {
-    private val settingsRepository by inject<SettingsRepository>()
+    private val appDataStore by inject<AppDataStore>()
     private val timelineResolver by inject<TimelineResolver>()
     private val appScope: CoroutineScope by inject()
 
@@ -40,7 +40,7 @@ public abstract class PinTabsPresenter<T> :
 
     @Composable
     override fun body(): State<T> {
-        val tabSettings by settingsRepository.tabSettingsV2.collectAsUiState()
+        val tabSettings by appDataStore.tabSettingsV2.collectAsUiState()
         val pins =
             tabSettings.map {
                 PinTabs(it.homeSlots, ::matches)
@@ -51,7 +51,7 @@ public abstract class PinTabsPresenter<T> :
 
             override fun pinTab(item: T) {
                 appScope.launch {
-                    settingsRepository.updateTabSettingsV2 {
+                    appDataStore.updateTabSettingsV2 {
                         if (homeSlots.any { matches(it, item) }) {
                             return@updateTabSettingsV2 this
                         }
@@ -65,7 +65,7 @@ public abstract class PinTabsPresenter<T> :
 
             override fun unpinTab(item: T) {
                 appScope.launch {
-                    settingsRepository.updateTabSettingsV2 {
+                    appDataStore.updateTabSettingsV2 {
                         copy(
                             homeSlots = homeSlots.filterNot { matches(it, item) },
                         )

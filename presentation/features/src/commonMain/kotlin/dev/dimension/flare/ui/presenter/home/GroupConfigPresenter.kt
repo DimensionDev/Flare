@@ -16,7 +16,7 @@ import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.model.tab.TimelineSlot
 import dev.dimension.flare.data.model.tab.TimelineSlotContent
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
-import dev.dimension.flare.data.datastore.SettingsRepository
+import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.collections.immutable.ImmutableList
@@ -29,7 +29,7 @@ import org.koin.core.component.inject
 public class GroupConfigPresenter :
     PresenterBase<GroupConfigPresenter.State>(),
     KoinComponent {
-    private val settingsRepository: SettingsRepository by inject()
+    private val appDataStore: AppDataStore by inject()
     private val appScope: CoroutineScope by inject()
     private val timelineResolver: TimelineResolver by inject()
 
@@ -55,7 +55,7 @@ public class GroupConfigPresenter :
                 defaultGroupName: String,
             ) {
                 appScope.launch {
-                    settingsRepository.updateTabSettingsV2 {
+                    appDataStore.updateTabSettingsV2 {
                         upsertGroupConfig(
                             initialItem = initialItem,
                             name = name,

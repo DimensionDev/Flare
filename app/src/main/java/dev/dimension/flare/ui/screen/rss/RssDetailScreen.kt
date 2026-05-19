@@ -49,7 +49,7 @@ import compose.icons.fontawesomeicons.solid.ShareNodes
 import dev.dimension.flare.R
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.network.rss.DocumentData
-import dev.dimension.flare.data.datastore.SettingsRepository
+import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.DateTimeText
 import dev.dimension.flare.ui.component.FAIcon
@@ -362,7 +362,7 @@ private fun presenter(
     url: String,
     descriptionHtml: String? = null,
     descriptionTitle: String? = null,
-    settingsRepository: SettingsRepository = koinInject(),
+    appDataStore: AppDataStore = koinInject(),
 ) = run {
     val state =
         remember(url, descriptionHtml) {
@@ -377,10 +377,10 @@ private fun presenter(
             )
         }
     val enableTldr by remember {
-        settingsRepository.appSettings.map { it.aiConfig.tldr }
+        appDataStore.appSettings.map { it.aiConfig.tldr }
     }.collectAsUiState()
     val preTranslate by remember {
-        settingsRepository.appSettings.map { it.translateConfig.preTranslate }
+        appDataStore.appSettings.map { it.translateConfig.preTranslate }
     }.collectAsUiState()
     var showTldr by remember { mutableStateOf(false) }
     var tldrRefreshKey by remember { mutableIntStateOf(0) }

@@ -11,7 +11,6 @@ import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.model.tab.toSlot
 import dev.dimension.flare.data.platform.CommonTimelineSpecs
-import dev.dimension.flare.data.datastore.SettingsRepository
 import dev.dimension.flare.deleteTestRootPath
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.defaultSocialPlatformRegistry
@@ -32,7 +31,7 @@ import kotlin.test.assertEquals
 class TimelinePresenterBindingTest {
     private val timelineResolver = TimelineResolver(defaultSocialPlatformRegistry)
     private lateinit var root: Path
-    private lateinit var settingsRepository: SettingsRepository
+    private lateinit var appDataStore: AppDataStore
 
     @BeforeTest
     fun setup() {
@@ -46,10 +45,7 @@ class TimelinePresenterBindingTest {
                     fileName: String,
                 ): Path = root.resolve(groupId).resolve(fileName)
             }
-        settingsRepository =
-            SettingsRepository(
-                AppDataStore(pathProducer),
-            )
+        appDataStore = AppDataStore(pathProducer)
     }
 
     @AfterTest
@@ -69,7 +65,7 @@ class TimelinePresenterBindingTest {
                             excludedKinds = listOf(TimelinePostKind.Reply),
                         ),
                 )
-            settingsRepository.updateTabSettingsV2 {
+            appDataStore.updateTabSettingsV2 {
                 TabSettingsV2(homeSlots = listOf(firstSlot))
             }
 
@@ -78,7 +74,7 @@ class TimelinePresenterBindingTest {
             val job =
                 backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
                     observeTimelineFilterConfig(
-                        settingsRepository = settingsRepository,
+                        appDataStore = appDataStore,
                         timelineResolver = timelineResolver,
                         timelineTabItemIdFlow = timelineTabItemIdFlow,
                     ).map { it.excludedKinds }

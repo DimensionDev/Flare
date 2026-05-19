@@ -15,7 +15,6 @@ import dev.dimension.flare.data.draft.DraftRepository
 import dev.dimension.flare.data.draft.DraftSendingRecoveryCoordinator
 import dev.dimension.flare.data.local.LocalFilterRepository
 import dev.dimension.flare.data.local.SearchHistoryRepository
-import dev.dimension.flare.data.datastore.SettingsRepository
 import dev.dimension.flare.data.translation.OnlinePreTranslationService
 import dev.dimension.flare.data.translation.PreTranslationService
 import dev.dimension.flare.model.SocialPlatformRegistry
@@ -59,7 +58,6 @@ internal val commonModule =
         }
         singleOf(::ComposeUseCase)
         singleOf(::SearchHistoryRepository)
-        single { SettingsRepository(get()) }
         singleOf(::Readability)
         singleOf(::OpenAIService)
         singleOf(::AiCompletionService)

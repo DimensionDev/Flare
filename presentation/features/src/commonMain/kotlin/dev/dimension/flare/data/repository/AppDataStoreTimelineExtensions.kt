@@ -1,6 +1,6 @@
 package dev.dimension.flare.data.repository
 
-import dev.dimension.flare.data.datastore.SettingsRepository
+import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.data.model.tab.findById
@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.map
 
-internal fun SettingsRepository.homeTimelineTabs(timelineResolver: TimelineResolver): Flow<List<TimelineTabItemV2>> =
+internal fun AppDataStore.homeTimelineTabs(timelineResolver: TimelineResolver): Flow<List<TimelineTabItemV2>> =
     tabSettingsV2
         .distinctUntilChangedBy { it.homeSlots }
         .map { settings ->
@@ -22,7 +22,7 @@ internal fun SettingsRepository.homeTimelineTabs(timelineResolver: TimelineResol
             )
         }
 
-internal fun SettingsRepository.homeTimelineTab(
+internal fun AppDataStore.homeTimelineTab(
     id: String,
     timelineResolver: TimelineResolver,
 ): Flow<TimelineTabItemV2?> =
@@ -30,7 +30,7 @@ internal fun SettingsRepository.homeTimelineTab(
         tabs.findById(id)
     }
 
-internal suspend fun SettingsRepository.replaceHomeTimelineTabs(
+internal suspend fun AppDataStore.replaceHomeTimelineTabs(
     tabs: List<TimelineTabItemV2>,
     timelineResolver: TimelineResolver,
 ) {

@@ -5,7 +5,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
-import dev.dimension.flare.data.datastore.SettingsRepository
+import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.repository.homeTimelineTab
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.flattenUiState
@@ -20,7 +20,7 @@ public class HomeTabItemPresenter(
     private val id: String,
 ) : PresenterBase<HomeTabItemPresenter.State>(),
     KoinComponent {
-    private val settingsRepository: SettingsRepository by inject()
+    private val appDataStore: AppDataStore by inject()
     private val timelineResolver: TimelineResolver by inject()
 
     public interface State {
@@ -34,7 +34,7 @@ public class HomeTabItemPresenter(
                 if (id == guestMastodonHomeTimelineTab.id) {
                     flowOf(UiState.Success(guestMastodonHomeTimelineTab))
                 } else {
-                    settingsRepository.homeTimelineTab(id, timelineResolver).map {
+                    appDataStore.homeTimelineTab(id, timelineResolver).map {
                         if (it == null) {
                             UiState.Error<TimelineTabItemV2>(Exception("Tab not found"))
                         } else {

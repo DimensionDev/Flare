@@ -26,7 +26,7 @@ import com.github.skydoves.colorpicker.compose.HsvColorPicker
 import com.github.skydoves.colorpicker.compose.rememberColorPickerController
 import dev.dimension.flare.R
 import dev.dimension.flare.data.model.appearance.AppearanceKeys
-import dev.dimension.flare.data.datastore.SettingsRepository
+import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.ui.component.LocalGlobalAppearance
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import kotlinx.coroutines.CoroutineScope
@@ -100,7 +100,7 @@ internal fun ColorPickerDialog(onBack: () -> Unit) {
 @Composable
 private fun presenter(
     initialColor: ULong,
-    settingsRepository: SettingsRepository = koinInject(),
+    appDataStore: AppDataStore = koinInject(),
     coroutineScope: CoroutineScope = koinInject(),
 ) = run {
     var selectedColor by remember { mutableStateOf(Color(initialColor)) }
@@ -112,7 +112,7 @@ private fun presenter(
 
         fun confirm() {
             coroutineScope.launch {
-                settingsRepository.updateAppearance(AppearanceKeys.ColorSeed, selectedColor.value)
+                appDataStore.updateAppearance(AppearanceKeys.ColorSeed, selectedColor.value)
             }
         }
     }

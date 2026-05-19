@@ -16,7 +16,15 @@ import dev.dimension.flare.data.model.decodeLegacyAppearanceSettingsAndTabsExpor
 import dev.dimension.flare.data.model.decodeLegacyAppearanceSettingsExport
 import dev.dimension.flare.data.model.decodeLegacySettingsExport
 import dev.dimension.flare.data.model.appearance.AppearanceBag
+import dev.dimension.flare.data.model.appearance.AppearanceKey
+import dev.dimension.flare.data.model.appearance.AppearancePatch
+import dev.dimension.flare.data.model.appearance.GlobalAppearance
+import dev.dimension.flare.data.model.appearance.TimelineAppearance
 import dev.dimension.flare.data.model.appearance.migrateAppearanceV1ToV2
+import dev.dimension.flare.data.model.appearance.toBag
+import dev.dimension.flare.data.model.appearance.toGlobalAppearance
+import dev.dimension.flare.data.model.appearance.toPatch
+import dev.dimension.flare.data.model.appearance.toTimelineAppearance
 import dev.dimension.flare.data.model.tab.TabSettingsV2
 import dev.dimension.flare.data.model.tab.migrateTabSettingsV1ToV2
 import kotlinx.coroutines.flow.Flow
@@ -24,6 +32,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.jsonObject
@@ -81,6 +90,24 @@ public class AppDataStore(
         }
     }
 
+    public val appearancePatch: Flow<AppearancePatch> by lazy {
+        appearanceBag
+            .map { it.toPatch() }
+            .distinctUntilChanged()
+    }
+
+    public val globalAppearance: Flow<GlobalAppearance> by lazy {
+        appearancePatch
+            .map { it.toGlobalAppearance() }
+            .distinctUntilChanged()
+    }
+
+    public val timelineAppearance: Flow<TimelineAppearance> by lazy {
+        appearancePatch
+            .map { it.toTimelineAppearance() }
+            .distinctUntilChanged()
+    }
+
     public val appSettings: Flow<AppSettings> by lazy {
         appSettingsStore.data
     }
@@ -108,6 +135,31 @@ public class AppDataStore(
 
     public suspend fun replaceAppearanceBag(bag: AppearanceBag) {
         updateAppearanceBag { bag }
+    }
+
+    public suspend fun <T : Any> updateAppearance(
+        key: AppearanceKey<T>,
+        value: T,
+    ) {
+        updateAppearance { set(key, value) }
+    }
+
+    public suspend fun updateAppearance(block: AppearancePatch.() -> AppearancePatch) {
+        updateAppearanceBag {
+            toPatch().block().toBag()
+        }
+    }
+
+    public suspend fun clearAppearance(key: AppearanceKey<*>) {
+        updateAppearance { clear(key) }
+    }
+
+    public suspend fun replaceAppearance(patch: AppearancePatch) {
+        replaceAppearanceBag(patch.toBag())
+    }
+
+    public suspend fun replaceAppearance(bag: AppearanceBag) {
+        replaceAppearanceBag(bag)
     }
 
     public suspend fun ensureTabSettingsMigrated() {

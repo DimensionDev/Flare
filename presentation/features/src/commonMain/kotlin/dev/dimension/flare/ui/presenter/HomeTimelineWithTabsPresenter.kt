@@ -8,7 +8,7 @@ import dev.dimension.flare.data.model.tab.SourceTimelineTabItemV2
 import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.data.account.AccountRepository
-import dev.dimension.flare.data.datastore.SettingsRepository
+import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.repository.homeTimelineTabs
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiIcon
@@ -30,7 +30,7 @@ import org.koin.core.component.inject
 public class HomeTimelineWithTabsPresenter :
     PresenterBase<HomeTimelineWithTabsPresenter.State>(),
     KoinComponent {
-    private val settingsRepository by inject<SettingsRepository>()
+    private val appDataStore by inject<AppDataStore>()
     private val accountRepository by inject<AccountRepository>()
     private val timelineResolver by inject<TimelineResolver>()
 
@@ -45,7 +45,7 @@ public class HomeTimelineWithTabsPresenter :
     }
 
     private val tabsState by lazy {
-        settingsRepository.homeTimelineTabs(timelineResolver).combine(isLoggedInFlow) { tabs, isLoggedIn ->
+        appDataStore.homeTimelineTabs(timelineResolver).combine(isLoggedInFlow) { tabs, isLoggedIn ->
             tabs
                 .withGuestMastodonHomeFallback(isLoggedIn = isLoggedIn)
                 .toImmutableList()

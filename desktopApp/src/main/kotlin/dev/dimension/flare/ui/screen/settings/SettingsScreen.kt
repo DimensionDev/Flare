@@ -63,7 +63,7 @@ import dev.dimension.flare.data.model.TimelineDisplayMode
 import dev.dimension.flare.data.model.VideoAutoplay
 import dev.dimension.flare.data.model.appearance.AppearanceKey
 import dev.dimension.flare.data.model.appearance.AppearanceKeys
-import dev.dimension.flare.data.datastore.SettingsRepository
+import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.delete
 import dev.dimension.flare.edit
 import dev.dimension.flare.home_login
@@ -2177,7 +2177,7 @@ private fun presenter(
     onImportFilePicker: () -> File?,
 ) = run {
     val scope = rememberCoroutineScope()
-    val settingsRepository = koinInject<SettingsRepository>()
+    val appDataStore = koinInject<AppDataStore>()
     val accountState = accountsPresenter()
     val appearanceState = appearancePresenter()
     val storageState = storagePresenter(onExportFilePicker, onImportFilePicker)
@@ -2197,7 +2197,7 @@ private fun presenter(
 
         fun setLanguage(tag: String) {
             scope.launch {
-                settingsRepository.updateAppSettings {
+                appDataStore.updateAppSettings {
                     copy(language = tag)
                 }
             }
@@ -2340,7 +2340,7 @@ private fun appearancePresenter() =
     run {
         var expanded by remember { mutableStateOf(false) }
         val scope = rememberCoroutineScope()
-        val settingsRepository = koinInject<SettingsRepository>()
+        val appDataStore = koinInject<AppDataStore>()
         object {
             val expanded = expanded
 
@@ -2353,7 +2353,7 @@ private fun appearancePresenter() =
                 value: T,
             ) {
                 scope.launch {
-                    settingsRepository.updateAppearance(key, value)
+                    appDataStore.updateAppearance(key, value)
                 }
             }
         }

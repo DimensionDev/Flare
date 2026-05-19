@@ -21,7 +21,6 @@ import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.model.tab.toSlot
 import dev.dimension.flare.data.platform.CommonTimelineSpecs
 import dev.dimension.flare.data.platform.MastodonPlatformSpec
-import dev.dimension.flare.data.datastore.SettingsRepository
 import dev.dimension.flare.data.repository.homeTimelineTab
 import dev.dimension.flare.deleteTestRootPath
 import dev.dimension.flare.model.MicroBlogKey
@@ -52,7 +51,6 @@ class SettingsImportExportPresenterTest {
     private val timelineResolver = TimelineResolver(defaultSocialPlatformRegistry)
     private lateinit var root: Path
     private lateinit var appDataStore: AppDataStore
-    private lateinit var settingsRepository: SettingsRepository
 
     @BeforeTest
     fun setup() {
@@ -67,12 +65,10 @@ class SettingsImportExportPresenterTest {
                 ): Path = root.resolve(groupId).resolve(fileName)
             }
         appDataStore = AppDataStore(pathProducer)
-        settingsRepository = SettingsRepository(appDataStore)
         startKoin {
             modules(
                 module {
                     single { appDataStore }
-                    single { settingsRepository }
                 },
             )
         }
@@ -88,7 +84,7 @@ class SettingsImportExportPresenterTest {
     fun exportUsesTabSettingsV2FieldOnly() =
         runTest {
             val slot = homeSlot()
-            settingsRepository.updateTabSettingsV2 {
+            appDataStore.updateTabSettingsV2 {
                 TabSettingsV2(homeSlots = listOf(slot))
             }
 
@@ -113,7 +109,7 @@ class SettingsImportExportPresenterTest {
         runTest {
             val oldSlot = localSlot()
             val newSlot = homeSlot()
-            settingsRepository.updateTabSettingsV2 {
+            appDataStore.updateTabSettingsV2 {
                 TabSettingsV2(homeSlots = listOf(oldSlot))
             }
             val exported =
@@ -127,7 +123,7 @@ class SettingsImportExportPresenterTest {
 
             ImportSettingsPresenter(exported).import()
 
-            val settings = settingsRepository.tabSettingsV2.first()
+            val settings = appDataStore.tabSettingsV2.first()
             assertEquals(listOf(newSlot.id), settings.homeSlots.map { it.id })
         }
 
@@ -156,10 +152,10 @@ class SettingsImportExportPresenterTest {
 
             ImportSettingsPresenter(exported).import()
 
-            assertEquals(Theme.DARK, settingsRepository.globalAppearance.first().theme)
-            assertEquals(false, settingsRepository.timelineAppearance.first().showNumbers)
+            assertEquals(Theme.DARK, appDataStore.globalAppearance.first().theme)
+            assertEquals(false, appDataStore.timelineAppearance.first().showNumbers)
             assertTrue(
-                settingsRepository.appearanceBag
+                appDataStore.appearanceBag
                     .first()
                     .entries
                     .isNotEmpty(),
@@ -198,12 +194,12 @@ class SettingsImportExportPresenterTest {
                                 ),
                         ),
                 )
-            settingsRepository.updateTabSettingsV2 {
+            appDataStore.updateTabSettingsV2 {
                 TabSettingsV2(homeSlots = listOf(initialGroup))
             }
 
-            val groupItem = settingsRepository.homeTimelineTab(initialGroup.id, timelineResolver).first() as? GroupTimelineTabItemV2
-            val childItem = settingsRepository.homeTimelineTab(initialChild.id, timelineResolver).first()
+            val groupItem = appDataStore.homeTimelineTab(initialGroup.id, timelineResolver).first() as? GroupTimelineTabItemV2
+            val childItem = appDataStore.homeTimelineTab(initialChild.id, timelineResolver).first()
             assertEquals(TimelineMergePolicy.Staggered, groupItem?.mergePolicy)
             assertEquals(listOf(TimelinePostKind.Quote), groupItem?.filterConfig?.excludedKinds)
             assertEquals(listOf(TimelinePostKind.Reply), childItem?.filterConfig?.excludedKinds)
@@ -237,11 +233,11 @@ class SettingsImportExportPresenterTest {
                 )
             val nextGroup =
                 async {
-                    settingsRepository.homeTimelineTab(initialGroup.id, timelineResolver).drop(1).first() as? GroupTimelineTabItemV2
+                    appDataStore.homeTimelineTab(initialGroup.id, timelineResolver).drop(1).first() as? GroupTimelineTabItemV2
                 }
-            val nextChild = async { settingsRepository.homeTimelineTab(initialChild.id, timelineResolver).drop(1).first() }
+            val nextChild = async { appDataStore.homeTimelineTab(initialChild.id, timelineResolver).drop(1).first() }
 
-            settingsRepository.updateTabSettingsV2 {
+            appDataStore.updateTabSettingsV2 {
                 TabSettingsV2(homeSlots = listOf(updatedGroup))
             }
 

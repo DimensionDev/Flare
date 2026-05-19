@@ -25,6 +25,7 @@ kotlin {
                 api(projects.core.common)
                 api(projects.core.model)
                 api(projects.presentation.model)
+                api(projects.storage.database)
                 api(libs.paging.common)
             }
         }

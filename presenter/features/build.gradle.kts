@@ -55,6 +55,7 @@ kotlin {
                 api(projects.social.mastodon)
                 api(projects.social.misskey)
                 api(projects.social.microblog)
+                implementation(projects.data.nodeinfo)
                 api(projects.social.rss)
                 api(projects.social.vvo)
                 api(projects.social.xqt)

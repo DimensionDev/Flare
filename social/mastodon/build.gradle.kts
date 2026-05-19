@@ -33,6 +33,7 @@ kotlin {
                 api(projects.data.network)
                 api(projects.social.api)
                 api(projects.social.microblog)
+                implementation(projects.data.nodeinfo)
                 api(libs.ktorfit.converters.response)
                 implementation(libs.ksoup)
                 implementation(libs.twitter.parser)

@@ -1,11 +1,11 @@
-package dev.dimension.flare.data.network.nodeinfo
+package dev.dimension.flare.data.nodeinfo
 
 import dev.dimension.flare.data.network.ktorClient
-import dev.dimension.flare.data.network.nodeinfo.model.NodeInfo
-import dev.dimension.flare.data.network.nodeinfo.model.Schema10
-import dev.dimension.flare.data.network.nodeinfo.model.Schema11
-import dev.dimension.flare.data.network.nodeinfo.model.Schema20
-import dev.dimension.flare.data.network.nodeinfo.model.Schema21
+import dev.dimension.flare.data.nodeinfo.model.NodeInfo
+import dev.dimension.flare.data.nodeinfo.model.Schema10
+import dev.dimension.flare.data.nodeinfo.model.Schema11
+import dev.dimension.flare.data.nodeinfo.model.Schema20
+import dev.dimension.flare.data.nodeinfo.model.Schema21
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.http.URLBuilder

@@ -1,4 +1,4 @@
-package dev.dimension.flare.data.network.nodeinfo
+package dev.dimension.flare.data.nodeinfo
 
 import kotlin.test.Test
 import kotlin.test.assertFalse

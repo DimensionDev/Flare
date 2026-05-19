@@ -33,6 +33,7 @@ kotlin {
                 api(projects.data.network)
                 api(projects.social.api)
                 api(projects.social.microblog)
+                implementation(projects.data.nodeinfo)
                 implementation(libs.mfm.multiplatform)
             }
         }

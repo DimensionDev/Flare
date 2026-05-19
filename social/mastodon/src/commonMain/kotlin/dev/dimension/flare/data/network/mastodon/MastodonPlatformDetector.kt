@@ -1,7 +1,7 @@
 package dev.dimension.flare.data.network.mastodon
 
 import dev.dimension.flare.data.network.nodeinfo.NodeData
-import dev.dimension.flare.data.network.nodeinfo.NodeInfoService
+import dev.dimension.flare.data.nodeinfo.NodeInfoService
 import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
 import dev.dimension.flare.common.tryRun
 import dev.dimension.flare.model.PlatformType

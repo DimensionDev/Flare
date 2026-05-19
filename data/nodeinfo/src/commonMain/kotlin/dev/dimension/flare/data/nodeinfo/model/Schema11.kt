@@ -1,4 +1,4 @@
-package dev.dimension.flare.data.network.nodeinfo.model
+package dev.dimension.flare.data.nodeinfo.model
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

@@ -42,8 +42,6 @@ kotlin {
                 api(projects.ui.model)
                 api(libs.kotlinx.coroutines.core)
                 api(libs.okio)
-                api(libs.ksoup)
-                implementation(libs.readability)
             }
         }
         val commonTest by getting {

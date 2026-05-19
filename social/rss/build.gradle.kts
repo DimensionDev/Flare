@@ -19,6 +19,10 @@ kotlin {
         )
     }
 
+    compilerOptions {
+        allWarningsAsErrors.set(false)
+    }
+
     sourceSets {
         val commonMain by getting {
             dependencies {
@@ -30,6 +34,13 @@ kotlin {
                 api(projects.ui.model)
                 implementation(libs.kotlinx.datetime)
                 implementation(libs.ksoup)
+                implementation(libs.readability)
+                implementation(libs.xmlUtil)
+            }
+        }
+        val commonTest by getting {
+            dependencies {
+                implementation(kotlin("test"))
             }
         }
     }

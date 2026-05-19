@@ -2,8 +2,16 @@ package dev.dimension.flare.data.io
 
 import okio.FileSystem
 import okio.Path
+import okio.Path.Companion.toPath
 
 public interface FileStorage {
+    public fun dataStoreFile(fileName: String): Path
+
+    public fun draftMediaFile(
+        groupId: String,
+        fileName: String,
+    ): Path
+
     public fun createDirectories(path: Path)
 
     public fun write(
@@ -20,9 +28,25 @@ public interface FileStorage {
     public fun list(path: Path): List<Path>
 }
 
-public class OkioFileStorage(
-    private val fileSystem: FileSystem,
+public class OkioFileStorage internal constructor(
+    internal val fileSystem: FileSystem,
+    private val platformPathProducer: PlatformPathProducer,
 ) : FileStorage {
+    public constructor(
+        fileSystem: FileSystem,
+        root: Path,
+    ) : this(
+        fileSystem = fileSystem,
+        platformPathProducer = RootPlatformPathProducer(root),
+    )
+
+    override fun dataStoreFile(fileName: String): Path = platformPathProducer.dataStoreFile(fileName)
+
+    override fun draftMediaFile(
+        groupId: String,
+        fileName: String,
+    ): Path = platformPathProducer.draftMediaFile(groupId, fileName)
+
     override fun createDirectories(path: Path) {
         fileSystem.createDirectories(path)
     }
@@ -50,9 +74,22 @@ public class OkioFileStorage(
     override fun list(path: Path): List<Path> = fileSystem.list(path)
 }
 
-public class InMemoryFileStorage : FileStorage {
+public class InMemoryFileStorage(
+    private val root: Path = "/flare".toPath(),
+) : FileStorage {
     private val directories = mutableSetOf<Path>()
     private val files = mutableMapOf<Path, ByteArray>()
+
+    override fun dataStoreFile(fileName: String): Path = root.resolve(fileName)
+
+    override fun draftMediaFile(
+        groupId: String,
+        fileName: String,
+    ): Path =
+        root
+            .resolve("draft_media")
+            .resolve(groupId)
+            .resolve(fileName)
 
     override fun createDirectories(path: Path) {
         generateSequence(path) { it.parent }
@@ -84,4 +121,19 @@ public class InMemoryFileStorage : FileStorage {
             .distinct()
             .toList()
             .sorted()
+}
+
+private class RootPlatformPathProducer(
+    private val root: Path,
+) : PlatformPathProducer {
+    override fun dataStoreFile(fileName: String): Path = root.resolve(fileName)
+
+    override fun draftMediaFile(
+        groupId: String,
+        fileName: String,
+    ): Path =
+        root
+            .resolve("draft_media")
+            .resolve(groupId)
+            .resolve(fileName)
 }

@@ -1,10 +1,14 @@
 package dev.dimension.flare.data.io
 
 import dev.dimension.flare.common.FileSystemUtilsExt
+import okio.FileSystem
 import okio.Path
 import okio.Path.Companion.toOkioPath
 
-public class JvmPlatformPathProducer : PlatformPathProducer {
+public fun createFileStorage(): FileStorage =
+    OkioFileStorage(FileSystem.SYSTEM, JvmPlatformPathProducer())
+
+internal class JvmPlatformPathProducer : PlatformPathProducer {
     override fun dataStoreFile(fileName: String): Path = FileSystemUtilsExt.flareDirectory().toOkioPath().resolve(fileName)
 
     override fun draftMediaFile(

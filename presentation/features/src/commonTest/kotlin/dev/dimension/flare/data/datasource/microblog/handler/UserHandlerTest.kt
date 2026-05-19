@@ -22,8 +22,7 @@ import dev.dimension.flare.data.database.cache.model.translationPayload
 import dev.dimension.flare.data.datasource.microblog.loader.UserLoader
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.datastore.model.AppSettings
-import dev.dimension.flare.data.io.InMemoryFileStorage
-import dev.dimension.flare.data.io.PlatformPathProducer
+import dev.dimension.flare.data.io.OkioFileStorage
 import dev.dimension.flare.data.ai.AiCompletionService
 import dev.dimension.flare.data.ai.OpenAIService
 import dev.dimension.flare.data.translation.OnlinePreTranslationService
@@ -55,7 +54,8 @@ import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
-import okio.Path
+import okio.FileSystem
+import okio.SYSTEM
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
@@ -70,15 +70,6 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalCoroutinesApi::class)
 class UserHandlerTest : RobolectricTest() {
     private val root = createTestRootPath()
-    private val pathProducer =
-        object : PlatformPathProducer {
-            override fun dataStoreFile(fileName: String): Path = root.resolve(fileName)
-
-            override fun draftMediaFile(
-                groupId: String,
-                fileName: String,
-            ): Path = root.resolve("draft_media").resolve(groupId).resolve(fileName)
-        }
 
     private lateinit var db: CacheDatabase
     private lateinit var appDataStore: AppDataStore
@@ -99,7 +90,7 @@ class UserHandlerTest : RobolectricTest() {
                 .setDriver(BundledSQLiteDriver())
                 .setQueryCoroutineContext(Dispatchers.Unconfined)
                 .build()
-        appDataStore = AppDataStore(pathProducer, InMemoryFileStorage())
+        appDataStore = AppDataStore(OkioFileStorage(FileSystem.SYSTEM, root))
 
         loader = FakeUserLoader()
         onDeviceAI = FakeOnDeviceAI()

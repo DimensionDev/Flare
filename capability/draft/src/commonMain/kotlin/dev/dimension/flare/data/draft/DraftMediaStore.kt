@@ -6,24 +6,12 @@ import dev.dimension.flare.common.sanitizeFileName
 import dev.dimension.flare.data.database.app.model.DraftMediaType
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.io.FileStorage
-import dev.dimension.flare.data.io.OkioFileStorage
-import dev.dimension.flare.data.io.PlatformPathProducer
-import okio.FileSystem
 import okio.Path.Companion.toPath
 import kotlin.uuid.Uuid
 
 public class DraftMediaStore(
-    private val platformPathProducer: PlatformPathProducer,
     private val fileStorage: FileStorage,
 ) {
-    public constructor(
-        platformPathProducer: PlatformPathProducer,
-        fileSystem: FileSystem,
-    ) : this(
-        platformPathProducer = platformPathProducer,
-        fileStorage = OkioFileStorage(fileSystem),
-    )
-
     public suspend fun persist(
         groupId: String,
         medias: List<ComposeData.Media>,
@@ -35,7 +23,7 @@ public class DraftMediaStore(
                         ?.sanitizeFileName()
                         .orEmpty()
                         .ifBlank { "${Uuid.random()}.bin" }
-                val path = platformPathProducer.draftMediaFile(groupId, "${index}_$fileName")
+                val path = fileStorage.draftMediaFile(groupId, "${index}_$fileName")
                 fileStorage.createDirectories(checkNotNull(path.parent))
                 fileStorage.write(path, media.file.readBytes())
                 SaveDraftMedia(
@@ -84,7 +72,7 @@ public class DraftMediaStore(
         keepPaths: Set<okio.Path>,
     ) {
         val groupDirectory =
-            platformPathProducer
+            fileStorage
                 .draftMediaFile(groupId, "__placeholder__")
                 .parent ?: return
         if (!fileStorage.exists(groupDirectory)) {
@@ -103,7 +91,7 @@ public class DraftMediaStore(
 
     private fun cleanupEmptyGroupDirectory(groupId: String) {
         val groupDirectory =
-            platformPathProducer
+            fileStorage
                 .draftMediaFile(groupId, "__placeholder__")
                 .parent ?: return
         if (!fileStorage.exists(groupDirectory)) {

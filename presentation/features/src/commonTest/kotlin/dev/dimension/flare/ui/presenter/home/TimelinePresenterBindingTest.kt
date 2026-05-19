@@ -2,8 +2,7 @@ package dev.dimension.flare.ui.presenter.home
 
 import dev.dimension.flare.createTestRootPath
 import dev.dimension.flare.data.datastore.AppDataStore
-import dev.dimension.flare.data.io.InMemoryFileStorage
-import dev.dimension.flare.data.io.PlatformPathProducer
+import dev.dimension.flare.data.io.OkioFileStorage
 import dev.dimension.flare.data.model.tab.TabSettingsV2
 import dev.dimension.flare.data.model.tab.TimelineFilterConfig
 import dev.dimension.flare.data.model.tab.TimelinePostKind
@@ -23,7 +22,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
+import okio.FileSystem
 import okio.Path
+import okio.SYSTEM
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -37,16 +38,7 @@ class TimelinePresenterBindingTest {
     @BeforeTest
     fun setup() {
         root = createTestRootPath()
-        val pathProducer =
-            object : PlatformPathProducer {
-                override fun dataStoreFile(fileName: String): Path = root.resolve(fileName)
-
-                override fun draftMediaFile(
-                    groupId: String,
-                    fileName: String,
-                ): Path = root.resolve(groupId).resolve(fileName)
-            }
-        appDataStore = AppDataStore(pathProducer, InMemoryFileStorage())
+        appDataStore = AppDataStore(OkioFileStorage(FileSystem.SYSTEM, root))
     }
 
     @AfterTest

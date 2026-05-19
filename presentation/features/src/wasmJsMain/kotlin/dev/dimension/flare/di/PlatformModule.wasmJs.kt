@@ -8,23 +8,19 @@ import dev.dimension.flare.data.ai.OnDeviceAI
 import dev.dimension.flare.data.database.DriverFactory
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.io.FileStorage
-import dev.dimension.flare.data.io.InMemoryFileStorage
-import dev.dimension.flare.data.io.PlatformPathProducer
-import dev.dimension.flare.data.io.WebPlatformPathProducer
+import dev.dimension.flare.data.io.createFileStorage
 import dev.dimension.flare.media.ImageCompressor
 import dev.dimension.flare.ui.humanizer.PlatformFormatter
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.singleOf
-import org.koin.dsl.bind
 import org.koin.dsl.module
 import kotlin.time.Instant
 
 internal actual val platformModule: Module =
     module {
-        single { AppDataStore(get<PlatformPathProducer>(), get<FileStorage>()) }
+        single { AppDataStore(get<FileStorage>()) }
         singleOf(::DriverFactory)
-        singleOf(::WebPlatformPathProducer) bind PlatformPathProducer::class
-        single<FileStorage> { InMemoryFileStorage() }
+        single<FileStorage> { createFileStorage() }
         single<PlatformFormatter> { WebPlatformFormatter }
         single<ImageCompressor> { WebImageCompressor }
         single<OnDeviceAI> { WebOnDeviceAI }

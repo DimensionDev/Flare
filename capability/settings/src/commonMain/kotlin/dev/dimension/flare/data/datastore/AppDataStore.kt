@@ -10,7 +10,6 @@ import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.datastore.model.ComposeConfigData
 import dev.dimension.flare.data.datastore.model.FlareConfig
 import dev.dimension.flare.data.io.FileStorage
-import dev.dimension.flare.data.io.PlatformPathProducer
 import dev.dimension.flare.data.model.SettingsExport
 import dev.dimension.flare.data.model.SettingsImportData
 import dev.dimension.flare.data.model.decodeLegacyAppearanceSettingsAndTabsExport
@@ -39,7 +38,6 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.jsonObject
 
 public class AppDataStore(
-    private val platformPathProducer: PlatformPathProducer,
     private val fileStorage: FileStorage,
 ) {
     private val appearanceMigrationMutex = Mutex()
@@ -128,7 +126,7 @@ public class AppDataStore(
             migrateAppearanceV1ToV2(
                 fileStorage = fileStorage,
                 legacyAppearanceSettingsPath =
-                    platformPathProducer.dataStoreFile(LEGACY_APPEARANCE_SETTINGS_FILE_NAME),
+                    fileStorage.dataStoreFile(LEGACY_APPEARANCE_SETTINGS_FILE_NAME),
                 bagStore = appearanceBagStore,
             )
             appearanceMigrationCompleted = true
@@ -175,7 +173,7 @@ public class AppDataStore(
             if (tabSettingsMigrationCompleted) return
             migrateTabSettingsV1ToV2(
                 fileStorage = fileStorage,
-                legacyTabSettingsPath = platformPathProducer.dataStoreFile(LEGACY_TAB_SETTINGS_FILE_NAME),
+                legacyTabSettingsPath = fileStorage.dataStoreFile(LEGACY_TAB_SETTINGS_FILE_NAME),
                 tabSettingsV2Store = tabSettingsV2Store,
             )
             tabSettingsMigrationCompleted = true
@@ -249,7 +247,7 @@ public class AppDataStore(
                 createDataStoreStorage(
                     name = name,
                     serializer = protobufSerializer(defaultValue),
-                    platformPathProducer = platformPathProducer,
+                    fileStorage = fileStorage,
                 ),
         )
 }

@@ -4,7 +4,7 @@ package dev.dimension.flare.di
 
 import dev.dimension.flare.common.InAppNotification
 import dev.dimension.flare.common.Message
-import dev.dimension.flare.common.OnDeviceAI
+import dev.dimension.flare.data.ai.OnDeviceAI
 import dev.dimension.flare.data.database.DriverFactory
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.io.PlatformPathProducer

@@ -10,7 +10,7 @@ import androidx.compose.runtime.setValue
 import dev.dimension.flare.common.Locale
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.data.datastore.AppDataStore
-import dev.dimension.flare.data.network.ai.AiCompletionService
+import dev.dimension.flare.data.ai.AiCompletionService
 import dev.dimension.flare.common.tryRun
 import dev.dimension.flare.data.translation.AiPlaceholderTranslationSupport
 import dev.dimension.flare.data.translation.TranslationPromptFormatter

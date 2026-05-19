@@ -1,4 +1,4 @@
-package dev.dimension.flare.data.network.ai
+package dev.dimension.flare.data.ai
 
 import com.aallam.openai.api.chat.ChatCompletion
 import com.aallam.openai.api.http.Timeout

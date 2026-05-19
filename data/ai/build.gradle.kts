@@ -10,7 +10,7 @@ plugins {
 
 kotlin {
     flare {
-        namespace = "dev.dimension.flare.data.repository"
+        namespace = "dev.dimension.flare.data.ai"
         platforms(
             FlarePlatform.ANDROID,
             FlarePlatform.JVM,
@@ -19,37 +19,19 @@ kotlin {
         )
     }
 
-    compilerOptions {
-        allWarningsAsErrors.set(false)
-    }
-
     sourceSets {
-        all {
-            languageSettings {
-                optIn("kotlin.uuid.ExperimentalUuidApi")
-            }
-        }
         val commonMain by getting {
             dependencies {
-                api(projects.core.common)
-                api(projects.core.model)
-                api(projects.data.database)
+                implementation(projects.core.common)
                 api(projects.data.datastore)
-                api(projects.data.ai)
                 implementation(projects.data.network)
-                api(projects.social.api)
-                api(projects.social.microblog)
-                api(projects.ui.model)
-                api(libs.kotlinx.coroutines.core)
-                api(libs.okio)
-                api(libs.ksoup)
-                implementation(libs.readability)
+                implementation(libs.ktor.client.logging)
+                implementation(libs.openai.client)
             }
         }
         val commonTest by getting {
             dependencies {
                 implementation(kotlin("test"))
-                implementation(libs.kotlinx.coroutines.test)
             }
         }
     }

@@ -4,8 +4,8 @@ import dev.dimension.flare.common.PlatformDispatchers
 import dev.dimension.flare.data.database.provideAppDatabase
 import dev.dimension.flare.data.database.provideCacheDatabase
 import dev.dimension.flare.data.model.tab.TimelineResolver
-import dev.dimension.flare.data.network.ai.AiCompletionService
-import dev.dimension.flare.data.network.ai.OpenAIService
+import dev.dimension.flare.data.ai.AiCompletionService
+import dev.dimension.flare.data.ai.OpenAIService
 import dev.dimension.flare.data.network.rss.Readability
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.AccountTabSyncCoordinator

@@ -6,6 +6,7 @@ import com.sun.jna.Platform
 import com.sun.jna.Pointer
 import com.sun.jna.ptr.IntByReference
 import com.sun.jna.ptr.PointerByReference
+import dev.dimension.flare.data.ai.OnDeviceAI
 import kotlinx.coroutines.withContext
 
 internal class JvmOnDeviceAI : OnDeviceAI {

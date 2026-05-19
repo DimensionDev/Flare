@@ -10,10 +10,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
-import dev.dimension.flare.common.OnDeviceAI
+import dev.dimension.flare.data.ai.OnDeviceAI
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.datastore.model.AppSettings
-import dev.dimension.flare.data.network.ai.OpenAIService
+import dev.dimension.flare.data.ai.OpenAIService
 import dev.dimension.flare.data.translation.PreTranslationContentRules
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.presenter.PresenterBase

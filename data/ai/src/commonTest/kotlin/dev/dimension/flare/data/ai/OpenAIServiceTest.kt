@@ -1,4 +1,4 @@
-package dev.dimension.flare.data.network.ai
+package dev.dimension.flare.data.ai
 
 import dev.dimension.flare.data.datastore.model.AppSettings
 import kotlinx.serialization.json.boolean

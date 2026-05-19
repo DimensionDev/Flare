@@ -7,6 +7,7 @@ import com.google.mlkit.genai.prompt.Generation
 import com.google.mlkit.genai.summarization.Summarization
 import com.google.mlkit.genai.summarization.SummarizationRequest
 import com.google.mlkit.genai.summarization.SummarizerOptions
+import dev.dimension.flare.data.ai.OnDeviceAI
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.suspendCancellableCoroutine
 import java.util.concurrent.Executor

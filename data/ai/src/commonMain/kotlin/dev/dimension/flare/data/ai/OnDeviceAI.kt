@@ -1,4 +1,4 @@
-package dev.dimension.flare.common
+package dev.dimension.flare.data.ai
 
 public interface OnDeviceAI {
     public suspend fun isAvailable(): Boolean

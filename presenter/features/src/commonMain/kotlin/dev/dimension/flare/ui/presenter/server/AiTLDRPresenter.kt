@@ -5,7 +5,7 @@ import androidx.compose.runtime.produceState
 import dev.dimension.flare.common.Locale
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.datastore.model.AiPromptDefaults
-import dev.dimension.flare.data.network.ai.AiCompletionService
+import dev.dimension.flare.data.ai.AiCompletionService
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.flow.first

@@ -1,6 +1,7 @@
 package dev.dimension.flare.common
 
 import android.content.Context
+import dev.dimension.flare.data.ai.OnDeviceAI
 
 internal class FossOnDeviceAI(
     private val context: Context,

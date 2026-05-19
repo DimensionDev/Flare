@@ -8,7 +8,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
-import dev.dimension.flare.data.network.ai.OpenAIService
+import dev.dimension.flare.data.ai.OpenAIService
 import dev.dimension.flare.common.tryRun
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.presenter.PresenterBase

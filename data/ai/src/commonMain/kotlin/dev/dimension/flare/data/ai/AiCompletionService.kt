@@ -1,6 +1,5 @@
-package dev.dimension.flare.data.network.ai
+package dev.dimension.flare.data.ai
 
-import dev.dimension.flare.common.OnDeviceAI
 import dev.dimension.flare.data.datastore.model.AppSettings
 
 public class AiCompletionService(

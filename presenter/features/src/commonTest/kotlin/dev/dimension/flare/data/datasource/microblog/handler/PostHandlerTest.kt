@@ -5,7 +5,7 @@ import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.common.CacheState
 import dev.dimension.flare.common.Locale
-import dev.dimension.flare.common.OnDeviceAI
+import dev.dimension.flare.data.ai.OnDeviceAI
 import dev.dimension.flare.common.TestFormatter
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.createTestRootPath
@@ -21,8 +21,8 @@ import dev.dimension.flare.data.database.cache.mapper.TimelinePagingMapper
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.io.PlatformPathProducer
-import dev.dimension.flare.data.network.ai.AiCompletionService
-import dev.dimension.flare.data.network.ai.OpenAIService
+import dev.dimension.flare.data.ai.AiCompletionService
+import dev.dimension.flare.data.ai.OpenAIService
 import dev.dimension.flare.data.translation.OnlinePreTranslationService
 import dev.dimension.flare.data.translation.PreTranslationService
 import dev.dimension.flare.data.translation.aiPreTranslateConfig

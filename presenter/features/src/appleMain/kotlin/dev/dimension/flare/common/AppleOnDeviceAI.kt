@@ -1,5 +1,7 @@
 package dev.dimension.flare.common
 
+import dev.dimension.flare.data.ai.OnDeviceAI
+
 internal class AppleOnDeviceAI(
     private val delegate: SwiftOnDeviceAI,
 ) : OnDeviceAI {

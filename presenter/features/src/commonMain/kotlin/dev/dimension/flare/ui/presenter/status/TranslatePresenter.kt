@@ -12,7 +12,7 @@ import dev.dimension.flare.data.database.cache.model.TranslationPayload
 import dev.dimension.flare.data.database.cache.model.TranslationStatus
 import dev.dimension.flare.data.database.cache.model.sourceHash
 import dev.dimension.flare.data.datastore.AppDataStore
-import dev.dimension.flare.data.network.ai.AiCompletionService
+import dev.dimension.flare.data.ai.AiCompletionService
 import dev.dimension.flare.common.tryRun
 import dev.dimension.flare.data.translation.AiPlaceholderTranslationSupport
 import dev.dimension.flare.data.translation.TranslationPromptFormatter

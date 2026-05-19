@@ -7,8 +7,8 @@ import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.notSupported
 import dev.dimension.flare.data.model.tab.GroupTimelineTabItemV2
 import dev.dimension.flare.data.model.tab.TimelineMergePolicy
+import dev.dimension.flare.data.model.tab.TimelinePersistenceMapper
 import dev.dimension.flare.data.model.tab.TimelinePresenterFactory
-import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.data.model.tab.isSystemHomeMixedTimeline
 import dev.dimension.flare.data.datastore.AppDataStore
@@ -44,7 +44,7 @@ public class MixedTimelinePresenter(
 
     private val database: CacheDatabase by inject()
     private val appDataStore: AppDataStore by inject()
-    private val timelineResolver: TimelineResolver by inject()
+    private val timelinePersistenceMapper: TimelinePersistenceMapper by inject()
     private val timelinePresenterFactory: TimelinePresenterFactory by inject()
 
     init {
@@ -53,7 +53,7 @@ public class MixedTimelinePresenter(
 
     private val groupTabFlow: Flow<GroupTimelineTabItemV2?> by lazy {
         appDataStore
-            .homeTimelineTab(groupId, timelineResolver)
+            .homeTimelineTab(groupId, timelinePersistenceMapper)
             .map { it as? GroupTimelineTabItemV2 }
     }
 
@@ -105,7 +105,7 @@ public class SystemHomeMixedTimelinePresenter(
 
     private val database: CacheDatabase by inject()
     private val appDataStore: AppDataStore by inject()
-    private val timelineResolver: TimelineResolver by inject()
+    private val timelinePersistenceMapper: TimelinePersistenceMapper by inject()
     private val timelinePresenterFactory: TimelinePresenterFactory by inject()
 
     init {
@@ -114,7 +114,7 @@ public class SystemHomeMixedTimelinePresenter(
 
     private val groupTabFlow: Flow<GroupTimelineTabItemV2?> by lazy {
         appDataStore
-            .homeTimelineTab(groupId, timelineResolver)
+            .homeTimelineTab(groupId, timelinePersistenceMapper)
             .map { it as? GroupTimelineTabItemV2 }
     }
 
@@ -126,7 +126,7 @@ public class SystemHomeMixedTimelinePresenter(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private val subTimelineLoadersFlow: Flow<List<RemoteLoader<UiTimelineV2>>> by lazy {
-        appDataStore.homeTimelineTabs(timelineResolver)
+        appDataStore.homeTimelineTabs(timelinePersistenceMapper)
             .map { tabs ->
                 tabs
                     .filterNot { it.isSystemHomeMixedTimeline }

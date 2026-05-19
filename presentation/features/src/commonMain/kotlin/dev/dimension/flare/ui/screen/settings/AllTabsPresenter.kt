@@ -4,10 +4,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import dev.dimension.flare.data.database.app.model.SubscriptionType
+import dev.dimension.flare.data.datasource.microblog.timeline.toTimelineTabDescriptor
+import dev.dimension.flare.data.datasource.rss.RssTimelineSpecs
 import dev.dimension.flare.data.model.IconType
-import dev.dimension.flare.data.model.tab.TimelineResolver
+import dev.dimension.flare.data.model.tab.TimelinePersistenceMapper
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
-import dev.dimension.flare.data.platform.RssTimelineSpecs
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiIcon
@@ -31,7 +32,7 @@ public class AllTabsPresenter(
 //    private val filterIsTimeline: Boolean = false,
 ) : PresenterBase<AllTabsPresenter.State>(),
     KoinComponent {
-    private val timelineResolver: TimelineResolver by inject()
+    private val timelinePersistenceMapper: TimelinePersistenceMapper by inject()
 
     @Composable
     override fun body(): State {
@@ -59,8 +60,8 @@ public class AllTabsPresenter(
                 (
                     listOfNotNull(
                         if (rssSources.sources.isNotEmpty()) {
-                            timelineResolver.toTabItem(
-                                RssTimelineSpecs.allRss.target(
+                            timelinePersistenceMapper.toTabItem(
+                                RssTimelineSpecs.allRss.toTimelineTabDescriptor(
                                     data = RssTimelineSpecs.AllRssData,
                                 ),
                             )
@@ -68,7 +69,7 @@ public class AllTabsPresenter(
                             null
                         },
                     ) +
-                        rssSources.sources.map { source -> source.toTimelineTabItemV2(timelineResolver) }
+                        rssSources.sources.map { source -> source.toTimelineTabItemV2(timelinePersistenceMapper) }
                 ).toImmutableList()
             }
 
@@ -99,7 +100,7 @@ public class AllTabsPresenter(
     }
 }
 
-private fun UiRssSource.toTimelineTabItemV2(timelineResolver: TimelineResolver): TimelineTabItemV2 {
+private fun UiRssSource.toTimelineTabItemV2(timelinePersistenceMapper: TimelinePersistenceMapper): TimelineTabItemV2 {
     val title = UiText.Raw(title ?: url)
     val icon =
         favIcon?.let { IconType.Url(it) }
@@ -110,13 +111,13 @@ private fun UiRssSource.toTimelineTabItemV2(timelineResolver: TimelineResolver):
             }
     val source =
         if (type == SubscriptionType.RSS) {
-            RssTimelineSpecs.rss.target(
+            RssTimelineSpecs.rss.toTimelineTabDescriptor(
                 data = RssTimelineSpecs.RssData(url),
                 title = title,
                 icon = icon,
             )
         } else {
-            RssTimelineSpecs.subscription.target(
+            RssTimelineSpecs.subscription.toTimelineTabDescriptor(
                 data =
                     RssTimelineSpecs.SubscriptionData(
                         subscriptionUrl = url,
@@ -126,5 +127,5 @@ private fun UiRssSource.toTimelineTabItemV2(timelineResolver: TimelineResolver):
                 icon = icon,
             )
         }
-    return timelineResolver.toTabItem(source)
+    return timelinePersistenceMapper.toTabItem(source)
 }

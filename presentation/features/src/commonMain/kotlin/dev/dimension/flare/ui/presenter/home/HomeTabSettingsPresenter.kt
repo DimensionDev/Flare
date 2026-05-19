@@ -2,7 +2,7 @@ package dev.dimension.flare.ui.presenter.home
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import dev.dimension.flare.data.model.tab.TimelineResolver
+import dev.dimension.flare.data.model.tab.TimelinePersistenceMapper
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.repository.homeTimelineTabs
@@ -22,11 +22,11 @@ public class HomeTabSettingsPresenter :
     PresenterBase<HomeTabSettingsPresenter.State>(),
     KoinComponent {
     private val appDataStore: AppDataStore by inject()
-    private val timelineResolver: TimelineResolver by inject()
+    private val timelinePersistenceMapper: TimelinePersistenceMapper by inject()
     private val appScope: CoroutineScope by inject()
 
     private val homeTimelineTabs by lazy {
-        appDataStore.homeTimelineTabs(timelineResolver)
+        appDataStore.homeTimelineTabs(timelinePersistenceMapper)
             .map { it.toImmutableList() }
     }
 
@@ -39,7 +39,7 @@ public class HomeTabSettingsPresenter :
 
             override fun replaceHomeTimelineTabs(tabs: List<TimelineTabItemV2>) {
                 appScope.launch {
-                    appDataStore.replaceHomeTimelineTabs(tabs, timelineResolver)
+                    appDataStore.replaceHomeTimelineTabs(tabs, timelinePersistenceMapper)
                 }
             }
         }

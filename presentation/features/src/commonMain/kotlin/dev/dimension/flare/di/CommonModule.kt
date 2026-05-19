@@ -6,6 +6,7 @@ import dev.dimension.flare.data.ai.OpenAIService
 import dev.dimension.flare.data.database.provideAppDatabase
 import dev.dimension.flare.data.database.provideCacheDatabase
 import dev.dimension.flare.data.datasource.microblog.timeline.TimelineCatalog
+import dev.dimension.flare.data.datasource.rss.RssTimelineSpecs
 import dev.dimension.flare.data.model.tab.TimelinePersistenceMapper
 import dev.dimension.flare.data.model.tab.TimelinePresenterFactory
 import dev.dimension.flare.data.model.tab.TimelineResolver
@@ -33,7 +34,11 @@ import org.koin.dsl.module
 internal val commonModule =
     module {
         single<SocialPlatformRegistry> { defaultSocialPlatformRegistry }
-        single { TimelineCatalog(get<SocialPlatformRegistry>().specs.flatMap { it.timelineSpecs }) }
+        single {
+            TimelineCatalog(
+                get<SocialPlatformRegistry>().specs.flatMap { it.timelineSpecs } + RssTimelineSpecs.timelineSpecs,
+            )
+        }
         singleOf(::AccountRepository)
         single(createdAtStart = true) { AccountTabSyncCoordinator(get(), get(), get(), get(), get()) }
         single { provideAppDatabase(get()) }

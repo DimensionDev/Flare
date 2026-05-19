@@ -5,6 +5,8 @@ import dev.dimension.flare.data.datasource.microblog.timeline.AccountTimelineSpe
 import dev.dimension.flare.data.datasource.microblog.timeline.TimelineCatalog
 import dev.dimension.flare.data.datasource.microblog.timeline.TimelineDisplay
 import dev.dimension.flare.data.datasource.microblog.timeline.TimelineTabDescriptor
+import dev.dimension.flare.data.datasource.microblog.timeline.toTimelineTabDescriptor
+import dev.dimension.flare.data.datasource.rss.RssTimelineSpecs
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.defaultSocialPlatformRegistry
@@ -29,7 +31,7 @@ class TimelinePersistenceMapperTest {
 
     private val mapper =
         TimelinePersistenceMapper(
-            catalog = TimelineCatalog(listOf(homeSpec)),
+            catalog = TimelineCatalog(listOf(homeSpec) + RssTimelineSpecs.timelineSpecs),
             timelineResolver = TimelineResolver(defaultSocialPlatformRegistry),
         )
 
@@ -81,5 +83,20 @@ class TimelinePersistenceMapperTest {
 
         assertIs<SourceTimelineTabItemV2>(item)
         assertEquals(slot, persistedAgain)
+    }
+
+    @Test
+    fun rssSourceSlotDecodesToTypedRuntimeRef() {
+        val descriptor =
+            RssTimelineSpecs.rss.toTimelineTabDescriptor(
+                data = RssTimelineSpecs.RssData("https://example.com/feed.xml"),
+                title = UiText.Raw("Example"),
+                icon = IconType.Material(UiIcon.Rss),
+            )
+        val slot = mapper.toSlot(descriptor)
+
+        val item = assertIs<SourceTimelineTabItemV2>(mapper.toTabItem(slot))
+
+        assertEquals(descriptor.ref, item.ref)
     }
 }

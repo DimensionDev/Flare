@@ -16,7 +16,29 @@ internal class TimelinePersistenceMapper(
         )
 
     fun toTabItem(slot: TimelineSlot): TimelineTabItemV2 =
-        timelineResolver.toTabItem(slot)
+        when (val content = slot.content) {
+            is TimelineSlotContent.Source -> {
+                SourceTimelineTabItemV2.fromSlot(
+                    slot = slot,
+                    source = content.source,
+                    ref = runCatching { decode(content.source) }.getOrNull(),
+                )
+            }
+
+            is TimelineSlotContent.Group -> {
+                GroupTimelineTabItemV2(
+                    id = slot.id,
+                    children = content.children.map { toTabItem(it) }.filter { it.enabled },
+                    mergePolicy = content.mergePolicy,
+                    source = content.source,
+                    presentation = slot.presentation,
+                    title = slot.title,
+                    icon = slot.icon,
+                    appearancePatch = slot.presentation.appearance,
+                    enabled = slot.presentation.enabled,
+                )
+            }
+        }
 
     fun toSlot(
         descriptor: TimelineTabDescriptor.Source,

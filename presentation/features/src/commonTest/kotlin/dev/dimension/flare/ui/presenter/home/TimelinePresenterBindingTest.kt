@@ -5,11 +5,14 @@ import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.io.OkioFileStorage
 import dev.dimension.flare.data.model.tab.TabSettingsV2
 import dev.dimension.flare.data.model.tab.TimelineFilterConfig
+import dev.dimension.flare.data.model.tab.TimelinePersistenceMapper
 import dev.dimension.flare.data.model.tab.TimelinePostKind
 import dev.dimension.flare.data.model.tab.TimelinePresentation
 import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.model.tab.toSlot
+import dev.dimension.flare.data.datasource.microblog.timeline.TimelineCatalog
+import dev.dimension.flare.data.datasource.rss.RssTimelineSpecs
 import dev.dimension.flare.data.platform.CommonTimelineSpecs
 import dev.dimension.flare.deleteTestRootPath
 import dev.dimension.flare.model.MicroBlogKey
@@ -32,6 +35,14 @@ import kotlin.test.assertEquals
 
 class TimelinePresenterBindingTest {
     private val timelineResolver = TimelineResolver(defaultSocialPlatformRegistry)
+    private val timelinePersistenceMapper =
+        TimelinePersistenceMapper(
+            catalog =
+                TimelineCatalog(
+                    defaultSocialPlatformRegistry.specs.flatMap { it.timelineSpecs } + RssTimelineSpecs.timelineSpecs,
+                ),
+            timelineResolver = timelineResolver,
+        )
     private lateinit var root: Path
     private lateinit var appDataStore: AppDataStore
 
@@ -68,7 +79,7 @@ class TimelinePresenterBindingTest {
                 backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
                     observeTimelineFilterConfig(
                         appDataStore = appDataStore,
-                        timelineResolver = timelineResolver,
+                        timelinePersistenceMapper = timelinePersistenceMapper,
                         timelineTabItemIdFlow = timelineTabItemIdFlow,
                     ).map { it.excludedKinds }
                         .take(2)

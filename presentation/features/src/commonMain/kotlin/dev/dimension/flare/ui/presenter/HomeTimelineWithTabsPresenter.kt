@@ -5,7 +5,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.tab.SourceTimelineTabItemV2
-import dev.dimension.flare.data.model.tab.TimelineResolver
+import dev.dimension.flare.data.model.tab.TimelinePersistenceMapper
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.data.account.AccountRepository
 import dev.dimension.flare.data.datastore.AppDataStore
@@ -32,7 +32,7 @@ public class HomeTimelineWithTabsPresenter :
     KoinComponent {
     private val appDataStore by inject<AppDataStore>()
     private val accountRepository by inject<AccountRepository>()
-    private val timelineResolver by inject<TimelineResolver>()
+    private val timelinePersistenceMapper by inject<TimelinePersistenceMapper>()
 
     public interface State : UserState {
         public val tabState: UiState<ImmutableList<TimelineTabItemV2>>
@@ -45,7 +45,7 @@ public class HomeTimelineWithTabsPresenter :
     }
 
     private val tabsState by lazy {
-        appDataStore.homeTimelineTabs(timelineResolver).combine(isLoggedInFlow) { tabs, isLoggedIn ->
+        appDataStore.homeTimelineTabs(timelinePersistenceMapper).combine(isLoggedInFlow) { tabs, isLoggedIn ->
             tabs
                 .withGuestMastodonHomeFallback(isLoggedIn = isLoggedIn)
                 .toImmutableList()

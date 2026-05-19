@@ -31,9 +31,9 @@ import dev.dimension.flare.data.datasource.microblog.paging.toPagingSource
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.model.tab.TimelineFilterConfig
+import dev.dimension.flare.data.model.tab.TimelinePersistenceMapper
 import dev.dimension.flare.data.model.tab.TimelinePostContent
 import dev.dimension.flare.data.model.tab.TimelinePostKind
-import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.local.KeywordFilterPattern
 import dev.dimension.flare.data.local.LocalFilterRepository
 import dev.dimension.flare.model.LoginExpiredException
@@ -65,7 +65,7 @@ public abstract class TimelinePresenter :
     private val database: CacheDatabase by inject()
     private val appDataStore: AppDataStore by inject()
     private val preTranslationService: PreTranslationService by inject()
-    private val timelineResolver: TimelineResolver by inject()
+    private val timelinePersistenceMapper: TimelinePersistenceMapper by inject()
 
     private val localFilterRepository: LocalFilterRepository by inject()
     private val inAppNotification: InAppNotification by inject()
@@ -79,7 +79,7 @@ public abstract class TimelinePresenter :
     private val timelineFilterConfigFlow: Flow<TimelineFilterConfig> by lazy {
         observeTimelineFilterConfig(
             appDataStore = appDataStore,
-            timelineResolver = timelineResolver,
+            timelinePersistenceMapper = timelinePersistenceMapper,
             timelineTabItemIdFlow = timelineTabItemIdFlow,
         )
     }
@@ -281,7 +281,7 @@ internal fun UiTimelineV2.Post.traits(): TimelinePostTraits {
 @OptIn(ExperimentalCoroutinesApi::class)
 internal fun observeTimelineFilterConfig(
     appDataStore: AppDataStore,
-    timelineResolver: TimelineResolver,
+    timelinePersistenceMapper: TimelinePersistenceMapper,
     timelineTabItemIdFlow: Flow<String?>,
 ): Flow<TimelineFilterConfig> =
     timelineTabItemIdFlow
@@ -291,7 +291,7 @@ internal fun observeTimelineFilterConfig(
                 flowOf(TimelineFilterConfig())
             } else {
                 appDataStore
-                    .homeTimelineTab(id, timelineResolver)
+                    .homeTimelineTab(id, timelinePersistenceMapper)
                     .map { it?.filterConfig ?: TimelineFilterConfig() }
                     .distinctUntilChanged()
             }

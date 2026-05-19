@@ -2,7 +2,7 @@ package dev.dimension.flare.ui.presenter
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import dev.dimension.flare.data.model.tab.TimelineResolver
+import dev.dimension.flare.data.model.tab.TimelinePersistenceMapper
 import dev.dimension.flare.data.model.tab.TimelineSlot
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.data.datastore.AppDataStore
@@ -25,7 +25,7 @@ public abstract class PinTabsPresenter<T> :
     PresenterBase<PinTabsPresenter.State<T>>(),
     KoinComponent {
     private val appDataStore by inject<AppDataStore>()
-    private val timelineResolver by inject<TimelineResolver>()
+    private val timelinePersistenceMapper by inject<TimelinePersistenceMapper>()
     private val appScope: CoroutineScope by inject()
 
     public interface State<T> {
@@ -73,7 +73,7 @@ public abstract class PinTabsPresenter<T> :
                 }
             }
 
-            override fun timelineTabItem(item: T): TimelineTabItemV2 = timelineResolver.toTabItem(getTimelineTabItem(item))
+            override fun timelineTabItem(item: T): TimelineTabItemV2 = timelinePersistenceMapper.toTabItem(getTimelineTabItem(item))
         }
     }
 

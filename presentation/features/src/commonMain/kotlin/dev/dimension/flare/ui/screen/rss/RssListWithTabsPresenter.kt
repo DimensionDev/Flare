@@ -4,10 +4,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import dev.dimension.flare.data.database.app.model.SubscriptionType
+import dev.dimension.flare.data.datasource.microblog.timeline.toTimelineTabDescriptor
+import dev.dimension.flare.data.datasource.rss.RssTimelineSpecs
 import dev.dimension.flare.data.model.IconType
+import dev.dimension.flare.data.model.tab.TimelinePersistenceMapper
 import dev.dimension.flare.data.model.tab.TimelineSlot
-import dev.dimension.flare.data.model.tab.toSlot
-import dev.dimension.flare.data.platform.RssTimelineSpecs
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiRssSource
 import dev.dimension.flare.ui.model.UiText
@@ -15,21 +16,25 @@ import dev.dimension.flare.ui.presenter.PinTabsPresenter
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.presenter.home.rss.RssSourcesPresenter
 import dev.dimension.flare.ui.presenter.invoke
+import org.koin.core.component.inject
 
 public class RssListWithTabsPresenter : PresenterBase<RssListWithTabsPresenter.State>() {
     private val pinTabsPresenter by lazy {
         object : PinTabsPresenter<UiRssSource>() {
+            private val timelinePersistenceMapper by inject<TimelinePersistenceMapper>()
+
             override fun getTimelineTabItem(item: UiRssSource): TimelineSlot =
                 if (item.type == SubscriptionType.RSS) {
-                    RssTimelineSpecs.rss
-                        .target(
+                    timelinePersistenceMapper.toSlot(
+                        RssTimelineSpecs.rss.toTimelineTabDescriptor(
                             data = RssTimelineSpecs.RssData(item.url),
                             title = UiText.Raw(item.title ?: item.url),
                             icon = item.favIcon?.let { IconType.Url(it) } ?: IconType.Material(UiIcon.Rss),
-                        ).toSlot()
+                        ),
+                    )
                 } else {
-                    RssTimelineSpecs.subscription
-                        .target(
+                    timelinePersistenceMapper.toSlot(
+                        RssTimelineSpecs.subscription.toTimelineTabDescriptor(
                             data =
                                 RssTimelineSpecs.SubscriptionData(
                                     subscriptionUrl = item.url,
@@ -43,7 +48,8 @@ public class RssListWithTabsPresenter : PresenterBase<RssListWithTabsPresenter.S
                                     } else {
                                         IconType.FavIcon(item.host)
                                     },
-                        ).toSlot()
+                        ),
+                    )
                 }
         }
     }

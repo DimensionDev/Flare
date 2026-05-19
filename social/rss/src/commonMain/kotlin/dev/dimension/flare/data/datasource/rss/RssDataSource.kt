@@ -11,11 +11,11 @@ import dev.dimension.flare.ui.model.UiTimelineV2
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-internal object RssDataSource :
+public object RssDataSource :
     KoinComponent {
     private val appDatabase: AppDatabase by inject()
 
-    fun fetchLoader(url: String) =
+    public fun fetchLoader(url: String): RssTimelineRemoteMediator =
         RssTimelineRemoteMediator(
             url = url,
             fetchSource = {
@@ -26,7 +26,7 @@ internal object RssDataSource :
             },
         )
 
-    fun fetchLoader(subscription: DbRssSources): CacheableRemoteLoader<UiTimelineV2> =
+    public fun fetchLoader(subscription: DbRssSources): CacheableRemoteLoader<UiTimelineV2> =
         when (subscription.type) {
             SubscriptionType.RSS -> {
                 RssTimelineRemoteMediator(

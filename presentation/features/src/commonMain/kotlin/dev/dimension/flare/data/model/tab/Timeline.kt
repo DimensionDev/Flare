@@ -8,7 +8,6 @@ import dev.dimension.flare.data.model.appearance.AppearancePatch
 import dev.dimension.flare.data.model.appearance.TimelineAppearance
 import dev.dimension.flare.data.model.appearance.toBag
 import dev.dimension.flare.data.model.appearance.withPatch
-import dev.dimension.flare.data.platform.RssTimelineSpecs
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.SocialPlatformRegistry
 import dev.dimension.flare.model.platformSpecs
@@ -262,11 +261,9 @@ public class TimelineResolver internal constructor(
     private val platformRegistry: SocialPlatformRegistry,
 ) {
     private val specs: Map<String, TimelineSpec<out TimelineSpec.Data>> by lazy {
-        (
-            platformRegistry.platformSpecs
-                .flatMap { it.legacyTimelineSpecs } +
-                RssTimelineSpecs.timelineSpecs
-        ).distinctBy { it.id }
+        platformRegistry.platformSpecs
+            .flatMap { it.legacyTimelineSpecs }
+            .distinctBy { it.id }
             .associateBy { it.id }
     }
 

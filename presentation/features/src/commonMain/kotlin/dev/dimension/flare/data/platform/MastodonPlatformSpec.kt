@@ -2,9 +2,7 @@ package dev.dimension.flare.data.platform
 
 import dev.dimension.flare.common.deeplink.DeepLinkMapping
 import dev.dimension.flare.common.deeplink.DeepLinkPattern
-import dev.dimension.flare.data.datasource.guest.mastodon.GuestMastodonDataSource
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
-import dev.dimension.flare.data.datasource.mastodon.MastodonDataSource
 import dev.dimension.flare.data.model.tab.AccountTimelineSpec
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.model.PlatformSpec
@@ -34,7 +32,7 @@ internal data object MastodonPlatformSpec : PlatformSpec {
             serializer = TimelineSpec.AccountBasedData.serializer(),
             targetId = { it.accountKey.toString() },
             loaderFactory = { service, _ ->
-                require(service is MastodonDataSource)
+                require(service is MastodonTimelineDataSource)
                 service.publicTimelineLoader(local = true)
             },
         )
@@ -47,7 +45,7 @@ internal data object MastodonPlatformSpec : PlatformSpec {
             serializer = TimelineSpec.AccountBasedData.serializer(),
             targetId = { it.accountKey.toString() },
             loaderFactory = { service, _ ->
-                require(service is MastodonDataSource)
+                require(service is MastodonTimelineDataSource)
                 service.publicTimelineLoader(local = false)
             },
         )
@@ -60,7 +58,7 @@ internal data object MastodonPlatformSpec : PlatformSpec {
             serializer = TimelineSpec.AccountBasedData.serializer(),
             targetId = { it.accountKey.toString() },
             loaderFactory = { service, _ ->
-                require(service is MastodonDataSource)
+                require(service is MastodonTimelineDataSource)
                 service.bookmarkTimelineLoader()
             },
         )
@@ -73,7 +71,7 @@ internal data object MastodonPlatformSpec : PlatformSpec {
             serializer = TimelineSpec.AccountBasedData.serializer(),
             targetId = { it.accountKey.toString() },
             loaderFactory = { service, _ ->
-                require(service is MastodonDataSource)
+                require(service is MastodonTimelineDataSource)
                 service.favouriteTimelineLoader()
             },
         )
@@ -95,7 +93,7 @@ internal data object MastodonPlatformSpec : PlatformSpec {
         host: String,
         locale: String,
     ): MicroblogDataSource =
-        GuestMastodonDataSource(
+        MastodonSocialPlatformSpec.guestDataSource(
             host = host,
             locale = locale,
         )

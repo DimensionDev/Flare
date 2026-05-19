@@ -4,18 +4,15 @@ import dev.dimension.flare.common.tryRun
 import dev.dimension.flare.common.deeplink.DeepLinkMapping
 import dev.dimension.flare.common.deeplink.DeepLinkPattern
 import dev.dimension.flare.data.datasource.bluesky.BlueskyDataSource
-import dev.dimension.flare.data.datasource.mastodon.MastodonDataSource
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
-import dev.dimension.flare.data.datasource.pleroma.PleromaDataSource
 import dev.dimension.flare.data.datasource.vvo.VVODataSource
 import dev.dimension.flare.data.datasource.xqt.XQTDataSource
 import dev.dimension.flare.data.model.tab.TimelineSpec
-import dev.dimension.flare.data.network.mastodon.JoinMastodonService
-import dev.dimension.flare.data.network.mastodon.MastodonInstanceService
 import dev.dimension.flare.data.network.misskey.JoinMisskeyService
 import dev.dimension.flare.data.platform.BlueskyPlatformSpec
 import dev.dimension.flare.data.platform.MastodonPlatformSpec
+import dev.dimension.flare.data.platform.MastodonSocialPlatformPlugin
 import dev.dimension.flare.data.platform.MisskeyPlatformSpec
 import dev.dimension.flare.data.platform.VvoPlatformSpec
 import dev.dimension.flare.data.platform.XqtPlatformSpec
@@ -41,69 +38,15 @@ internal val defaultSocialPlatformPlugins: List<SocialPlatformPlugin> =
     )
 
 internal val SocialPlatformRegistry.platformSpecs: List<PlatformSpec>
-    get() = specs.map { it as PlatformSpec }
+    get() = specs.map { it.toPresentationPlatformSpec() }
 
-internal fun SocialPlatformRegistry.requirePlatformSpec(type: PlatformType): PlatformSpec = requireSpec(type) as PlatformSpec
+internal fun SocialPlatformRegistry.requirePlatformSpec(type: PlatformType): PlatformSpec = requireSpec(type).toPresentationPlatformSpec()
 
-private data object MastodonSocialPlatformPlugin : SocialPlatformPlugin {
-    override val spec: PlatformSpec = MastodonPlatformSpec
-
-    override suspend fun recommendedInstances(): List<UiInstance> {
-        val instances =
-            tryRun {
-                JoinMastodonService.servers().map {
-                    UiInstance(
-                        name = it.domain,
-                        description = it.description,
-                        iconUrl = null,
-                        domain = it.domain,
-                        type = PlatformType.Mastodon,
-                        bannerUrl = it.proxiedThumbnail,
-                        usersCount = it.totalUsers,
-                    )
-                }
-            }.getOrDefault(emptyList())
-        val pawoo =
-            tryRun {
-                MastodonInstanceService("https://pawoo.net/").instance().let {
-                    UiInstance(
-                        name = it.domain ?: "pawoo.net",
-                        description = it.title,
-                        iconUrl = it.thumbnail?.url,
-                        domain = it.domain ?: "pawoo.net",
-                        type = PlatformType.Mastodon,
-                        bannerUrl = it.thumbnail?.url,
-                        usersCount = it.usage?.users?.activeMonth ?: 0,
-                    )
-                }
-            }.getOrNull()
-        val pinned =
-            listOf(
-                instances.firstOrNull { it.domain == "mstdn.jp" } ?: mastodonFallback("mstdn.jp"),
-                instances.firstOrNull { it.domain == "pawoo.net" } ?: pawoo ?: mastodonFallback("pawoo.net"),
-            )
-        return pinned + instances.sortedByDescending { it.usersCount }.filter { it !in pinned }
+private fun SocialPlatformSpec.toPresentationPlatformSpec(): PlatformSpec =
+    when (type) {
+        PlatformType.Mastodon -> MastodonPlatformSpec
+        else -> this as PlatformSpec
     }
-
-    override fun createDataSource(account: UiAccount): MicroblogDataSource? =
-        (account as? UiAccount.Mastodon)?.let {
-            when (it.forkType) {
-                UiAccount.Mastodon.Credential.ForkType.Mastodon -> {
-                    MastodonDataSource(
-                        accountKey = it.accountKey,
-                        instance = it.instance,
-                    )
-                }
-
-                UiAccount.Mastodon.Credential.ForkType.Pleroma -> {
-                    PleromaDataSource(
-                        accountKey = it.accountKey,
-                        instance = it.instance,
-                    )
-                }
-            }
-        }
-}
 
 private data object MisskeySocialPlatformPlugin : SocialPlatformPlugin {
     override val spec: PlatformSpec = MisskeyPlatformSpec
@@ -199,14 +142,3 @@ private data object VvoSocialPlatformPlugin : SocialPlatformPlugin {
             )
         }
 }
-
-private fun mastodonFallback(domain: String): UiInstance =
-    UiInstance(
-        name = domain,
-        description = domain,
-        iconUrl = null,
-        domain = domain,
-        type = PlatformType.Mastodon,
-        bannerUrl = null,
-        usersCount = 0,
-    )

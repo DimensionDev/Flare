@@ -3,7 +3,10 @@ package dev.dimension.flare.data.platform
 import dev.dimension.flare.common.deeplink.DeepLinkMapping
 import dev.dimension.flare.common.deeplink.DeepLinkPattern
 import dev.dimension.flare.common.tryRun
+import dev.dimension.flare.data.datasource.guest.mastodon.GuestMastodonDataSource
+import dev.dimension.flare.data.datasource.mastodon.MastodonDataSource
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
+import dev.dimension.flare.data.datasource.pleroma.PleromaDataSource
 import dev.dimension.flare.data.datasource.microblog.timeline.TimelineSpec
 import dev.dimension.flare.data.network.mastodon.JoinMastodonService
 import dev.dimension.flare.data.network.mastodon.MastodonInstanceService
@@ -25,7 +28,24 @@ import kotlinx.collections.immutable.persistentListOf
 public data object MastodonSocialPlatformPlugin : SocialPlatformPlugin {
     public override val spec: SocialPlatformSpec = MastodonSocialPlatformSpec
 
-    public override fun createDataSource(account: UiAccount): MicroblogDataSource? = null
+    public override fun createDataSource(account: UiAccount): MicroblogDataSource? =
+        (account as? UiAccount.Mastodon)?.let {
+            when (it.forkType) {
+                UiAccount.Mastodon.Credential.ForkType.Mastodon -> {
+                    MastodonDataSource(
+                        accountKey = it.accountKey,
+                        instance = it.instance,
+                    )
+                }
+
+                UiAccount.Mastodon.Credential.ForkType.Pleroma -> {
+                    PleromaDataSource(
+                        accountKey = it.accountKey,
+                        instance = it.instance,
+                    )
+                }
+            }
+        }
 
     public override suspend fun recommendedInstances(): List<UiInstance> {
         val instances =
@@ -95,7 +115,11 @@ public data object MastodonSocialPlatformSpec : SocialPlatformSpec {
     public override fun guestDataSource(
         host: String,
         locale: String,
-    ): MicroblogDataSource = unsupportedGuestDataSource()
+    ): MicroblogDataSource =
+        GuestMastodonDataSource(
+            host = host,
+            locale = locale,
+        )
 }
 
 private fun mastodonFallback(domain: String): UiInstance =
@@ -108,6 +132,3 @@ private fun mastodonFallback(domain: String): UiInstance =
         bannerUrl = null,
         usersCount = 0,
     )
-
-private fun unsupportedGuestDataSource(): Nothing =
-    throw UnsupportedOperationException("Mastodon guest data source is provided by presenter features.")

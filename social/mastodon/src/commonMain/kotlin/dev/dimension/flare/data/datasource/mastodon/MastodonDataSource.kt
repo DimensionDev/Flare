@@ -26,7 +26,6 @@ import dev.dimension.flare.data.datasource.microblog.handler.RelationHandler
 import dev.dimension.flare.data.datasource.microblog.handler.UserHandler
 import dev.dimension.flare.data.datasource.microblog.loader.ListLoader
 import dev.dimension.flare.data.datasource.microblog.loader.ListMemberLoader
-import dev.dimension.flare.data.datasource.microblog.nextActionMenu
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.notSupported
 import dev.dimension.flare.data.datasource.microblog.timeline.CommonTimelineSpecs as SocialCommonTimelineSpecs
@@ -35,6 +34,8 @@ import dev.dimension.flare.data.datasource.microblog.timeline.PinnableTimelineTa
 import dev.dimension.flare.data.datasource.microblog.timeline.TimelineShortcutDescriptor
 import dev.dimension.flare.data.datasource.microblog.timeline.TimelineSpec
 import dev.dimension.flare.data.datasource.microblog.timeline.TimelineTabProvider
+import dev.dimension.flare.data.datasource.microblog.timeline.toTimelineShortcutDescriptor
+import dev.dimension.flare.data.datasource.microblog.timeline.toTimelineTabDescriptor
 import dev.dimension.flare.data.datasource.pleroma.PleromaDataSource
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.network.mastodon.MastodonService
@@ -45,8 +46,6 @@ import dev.dimension.flare.data.network.mastodon.api.model.PostVote
 import dev.dimension.flare.data.network.mastodon.api.model.Visibility
 import dev.dimension.flare.data.platform.MastodonTimelineDataSource
 import dev.dimension.flare.data.platform.MastodonTimelineSpecs
-import dev.dimension.flare.data.platform.toTimelineShortcutDescriptor
-import dev.dimension.flare.data.platform.toTimelineTabDescriptor
 import dev.dimension.flare.data.account.AccountRepository
 import dev.dimension.flare.common.tryRun
 import dev.dimension.flare.model.AccountType
@@ -79,6 +78,7 @@ internal open class MastodonDataSource(
     KoinComponent,
     ListDataSource,
     MastodonTimelineDataSource,
+    MastodonReportDataSource,
     PinnableTimelineProvider,
     TimelineTabProvider,
     RelationDataSource,
@@ -144,7 +144,7 @@ internal open class MastodonDataSource(
         PostEventHandler(
             accountType = AccountType.Specific(accountKey),
             handler = this,
-            optimisticActionMenu = { it.nextActionMenu() },
+            optimisticActionMenu = { it.mastodonNextActionMenu() },
         )
     }
 
@@ -388,7 +388,7 @@ internal open class MastodonDataSource(
         }
     }
 
-    suspend fun report(
+    override suspend fun report(
         userKey: MicroBlogKey,
         statusKey: MicroBlogKey?,
     ) {

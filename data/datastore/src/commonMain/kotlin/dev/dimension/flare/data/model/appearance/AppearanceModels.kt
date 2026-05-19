@@ -1,6 +1,5 @@
 package dev.dimension.flare.data.model.appearance
 
-import androidx.compose.runtime.Immutable
 import dev.dimension.flare.data.model.AvatarShape
 import dev.dimension.flare.data.model.BottomBarBehavior
 import dev.dimension.flare.data.model.BottomBarStyle
@@ -9,7 +8,6 @@ import dev.dimension.flare.data.model.Theme
 import dev.dimension.flare.data.model.TimelineDisplayMode
 import dev.dimension.flare.data.model.VideoAutoplay
 
-@Immutable
 public data class GlobalAppearance(
     val theme: Theme = AppearanceKeys.Theme.default,
     val dynamicTheme: Boolean = AppearanceKeys.DynamicTheme.default,
@@ -29,7 +27,6 @@ public data class GlobalAppearance(
     }
 }
 
-@Immutable
 public data class TimelineAppearance(
     val avatarShape: AvatarShape = AppearanceKeys.AvatarShape.default,
     val showMedia: Boolean = AppearanceKeys.ShowMedia.default,

@@ -10,7 +10,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.fromHtml
 import dev.dimension.flare.BuildConfig
 import dev.dimension.flare.R
-import dev.dimension.flare.data.repository.SettingsRepository
+import dev.dimension.flare.data.datastore.SettingsRepository
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.map

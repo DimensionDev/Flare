@@ -15,7 +15,7 @@ import dev.dimension.flare.data.draft.DraftRepository
 import dev.dimension.flare.data.draft.DraftSendingRecoveryCoordinator
 import dev.dimension.flare.data.repository.LocalFilterRepository
 import dev.dimension.flare.data.repository.SearchHistoryRepository
-import dev.dimension.flare.data.repository.SettingsRepository
+import dev.dimension.flare.data.datastore.SettingsRepository
 import dev.dimension.flare.data.translation.OnlinePreTranslationService
 import dev.dimension.flare.data.translation.PreTranslationService
 import dev.dimension.flare.model.SocialPlatformRegistry

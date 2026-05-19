@@ -11,7 +11,7 @@ import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.model.tab.toSlot
 import dev.dimension.flare.data.platform.CommonTimelineSpecs
-import dev.dimension.flare.data.repository.SettingsRepository
+import dev.dimension.flare.data.datastore.SettingsRepository
 import dev.dimension.flare.deleteTestRootPath
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.defaultSocialPlatformRegistry

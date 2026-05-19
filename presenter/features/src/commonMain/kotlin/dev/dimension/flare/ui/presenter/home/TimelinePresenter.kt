@@ -37,7 +37,7 @@ import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.repository.KeywordFilterPattern
 import dev.dimension.flare.data.repository.LocalFilterRepository
 import dev.dimension.flare.model.LoginExpiredException
-import dev.dimension.flare.data.repository.SettingsRepository
+import dev.dimension.flare.data.datastore.SettingsRepository
 import dev.dimension.flare.data.repository.homeTimelineTab
 import dev.dimension.flare.data.translation.PreTranslationService
 import dev.dimension.flare.data.translation.TranslationSettingsSupport

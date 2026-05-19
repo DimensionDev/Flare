@@ -5,7 +5,7 @@ import androidx.compose.runtime.getValue
 import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.model.appearance.GlobalAppearance
 import dev.dimension.flare.data.model.appearance.TimelineAppearance
-import dev.dimension.flare.data.repository.SettingsRepository
+import dev.dimension.flare.data.datastore.SettingsRepository
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
 import org.koin.core.component.KoinComponent

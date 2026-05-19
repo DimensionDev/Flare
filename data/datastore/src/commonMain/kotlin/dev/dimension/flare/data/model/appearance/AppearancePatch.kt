@@ -1,8 +1,5 @@
 package dev.dimension.flare.data.model.appearance
 
-import androidx.compose.runtime.Immutable
-
-@Immutable
 public data class AppearancePatch internal constructor(
     private val values: Map<String, Any>,
 ) {

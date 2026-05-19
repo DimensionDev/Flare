@@ -8,7 +8,7 @@ import dev.dimension.flare.data.model.tab.SourceTimelineTabItemV2
 import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.data.repository.AccountRepository
-import dev.dimension.flare.data.repository.SettingsRepository
+import dev.dimension.flare.data.datastore.SettingsRepository
 import dev.dimension.flare.data.repository.homeTimelineTabs
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiIcon

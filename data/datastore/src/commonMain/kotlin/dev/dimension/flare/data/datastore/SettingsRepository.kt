@@ -1,7 +1,5 @@
-package dev.dimension.flare.data.repository
+package dev.dimension.flare.data.datastore
 
-import androidx.compose.runtime.Stable
-import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.model.appearance.AppearanceBag
 import dev.dimension.flare.data.model.appearance.AppearanceKey
@@ -17,7 +15,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 
-@Stable
 public class SettingsRepository(
     private val appDataStore: AppDataStore,
 ) {

@@ -10,7 +10,7 @@ import dev.dimension.flare.data.model.tab.TimelineMergePolicy
 import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.data.model.tab.isSystemHomeMixedTimeline
-import dev.dimension.flare.data.repository.SettingsRepository
+import dev.dimension.flare.data.datastore.SettingsRepository
 import dev.dimension.flare.data.repository.homeTimelineTab
 import dev.dimension.flare.data.repository.homeTimelineTabs
 import dev.dimension.flare.ui.model.UiTimelineV2

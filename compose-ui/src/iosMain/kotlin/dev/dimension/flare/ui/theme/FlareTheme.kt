@@ -10,7 +10,7 @@ import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.model.VideoAutoplay
 import dev.dimension.flare.data.model.appearance.GlobalAppearance
 import dev.dimension.flare.data.model.appearance.TimelineAppearance
-import dev.dimension.flare.data.repository.SettingsRepository
+import dev.dimension.flare.data.datastore.SettingsRepository
 import dev.dimension.flare.ui.component.LocalGlobalAppearance
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import org.koin.compose.koinInject

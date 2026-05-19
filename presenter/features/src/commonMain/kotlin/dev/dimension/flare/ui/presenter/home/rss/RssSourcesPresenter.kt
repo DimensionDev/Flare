@@ -11,7 +11,7 @@ import dev.dimension.flare.data.database.app.model.SubscriptionType
 import dev.dimension.flare.data.model.tab.TimelineSlot
 import dev.dimension.flare.data.model.tab.TimelineSlotContent
 import dev.dimension.flare.data.platform.RssTimelineSpecs
-import dev.dimension.flare.data.repository.SettingsRepository
+import dev.dimension.flare.data.datastore.SettingsRepository
 import dev.dimension.flare.ui.model.UiRssSource
 import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.presenter.PresenterBase

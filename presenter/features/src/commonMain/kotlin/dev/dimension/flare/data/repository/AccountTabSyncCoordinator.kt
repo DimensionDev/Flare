@@ -1,6 +1,7 @@
 package dev.dimension.flare.data.repository
 
 import dev.dimension.flare.data.datasource.microblog.datasource.TimelineTabConfigurationDataSource
+import dev.dimension.flare.data.datastore.SettingsRepository
 import dev.dimension.flare.data.model.tab.GroupSource
 import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.model.tab.TimelineSlot

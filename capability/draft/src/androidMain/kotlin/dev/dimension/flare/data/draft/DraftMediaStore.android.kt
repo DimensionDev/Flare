@@ -7,6 +7,8 @@ internal actual fun draftFileItem(
     path: String,
     name: String?,
     type: FileType,
+    @Suppress("UNUSED_PARAMETER")
+    readBytes: suspend () -> ByteArray,
 ): FileItem =
     FileItem(
         name = name,

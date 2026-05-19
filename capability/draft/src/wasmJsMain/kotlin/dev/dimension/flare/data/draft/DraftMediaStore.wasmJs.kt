@@ -8,11 +8,10 @@ internal actual fun draftFileItem(
     path: String,
     name: String?,
     type: FileType,
+    readBytes: suspend () -> ByteArray,
 ): FileItem =
     FileItem(
         name = name ?: path.toPath().name,
         type = type,
-        loader = {
-            defaultDraftMediaStorage().read(path.toPath())
-        },
+        loader = readBytes,
     )

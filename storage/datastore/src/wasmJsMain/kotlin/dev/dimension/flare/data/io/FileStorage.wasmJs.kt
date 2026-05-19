@@ -1,10 +1,10 @@
-package dev.dimension.flare.data.draft
+package dev.dimension.flare.data.io
 
 import okio.Path
 
-internal actual fun defaultDraftMediaStorage(): DraftMediaStorage = WebDraftMediaStorage
+public actual fun defaultFileStorage(): FileStorage = WebFileStorage
 
-private object WebDraftMediaStorage : DraftMediaStorage {
+private object WebFileStorage : FileStorage {
     private val directories = mutableSetOf<Path>()
     private val files = mutableMapOf<Path, ByteArray>()
 
@@ -21,7 +21,9 @@ private object WebDraftMediaStorage : DraftMediaStorage {
         files[path] = bytes.copyOf()
     }
 
-    override fun read(path: Path): ByteArray = checkNotNull(files[path]) { "Draft media file not found: $path" }.copyOf()
+    override fun read(path: Path): ByteArray =
+        checkNotNull(files[path]) { "File not found: $path" }
+            .copyOf()
 
     override fun exists(path: Path): Boolean = path in files || path in directories
 

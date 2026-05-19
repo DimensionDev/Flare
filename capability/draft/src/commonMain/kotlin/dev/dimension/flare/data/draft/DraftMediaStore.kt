@@ -4,20 +4,23 @@ import dev.dimension.flare.common.FileItem
 import dev.dimension.flare.common.FileType
 import dev.dimension.flare.data.database.app.model.DraftMediaType
 import dev.dimension.flare.data.datasource.microblog.ComposeData
+import dev.dimension.flare.data.io.FileStorage
+import dev.dimension.flare.data.io.OkioFileStorage
 import dev.dimension.flare.data.io.PlatformPathProducer
+import dev.dimension.flare.data.io.defaultFileStorage
 import okio.FileSystem
 import okio.Path.Companion.toPath
 import kotlin.uuid.Uuid
 
 public class DraftMediaStore private constructor(
     private val platformPathProducer: PlatformPathProducer,
-    private val storage: DraftMediaStorage = defaultDraftMediaStorage(),
+    private val storage: FileStorage = defaultFileStorage(),
 ) {
     public constructor(
         platformPathProducer: PlatformPathProducer,
     ) : this(
         platformPathProducer = platformPathProducer,
-        storage = defaultDraftMediaStorage(),
+        storage = defaultFileStorage(),
     )
 
     public constructor(
@@ -25,7 +28,7 @@ public class DraftMediaStore private constructor(
         fileSystem: FileSystem,
     ) : this(
         platformPathProducer = platformPathProducer,
-        storage = FileSystemDraftMediaStorage(fileSystem),
+        storage = OkioFileStorage(fileSystem),
     )
 
     public suspend fun persist(
@@ -65,6 +68,9 @@ public class DraftMediaStore private constructor(
                         path = media.cachePath,
                         name = media.fileName,
                         type = media.mediaType.toFileType(),
+                        readBytes = {
+                            storage.read(media.cachePath.toPath())
+                        },
                     ),
                 altText = media.altText,
             )
@@ -120,6 +126,7 @@ internal expect fun draftFileItem(
     path: String,
     name: String?,
     type: FileType,
+    readBytes: suspend () -> ByteArray,
 ): FileItem
 
 private fun FileType.toDraftMediaType(): DraftMediaType =

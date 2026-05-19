@@ -1,28 +1,28 @@
-package dev.dimension.flare.data.draft
+package dev.dimension.flare.data.io
 
 import okio.FileSystem
 import okio.Path
 
-internal interface DraftMediaStorage {
-    fun createDirectories(path: Path)
+public interface FileStorage {
+    public fun createDirectories(path: Path)
 
-    fun write(
+    public fun write(
         path: Path,
         bytes: ByteArray,
     )
 
-    fun read(path: Path): ByteArray
+    public fun read(path: Path): ByteArray
 
-    fun exists(path: Path): Boolean
+    public fun exists(path: Path): Boolean
 
-    fun delete(path: Path)
+    public fun delete(path: Path)
 
-    fun list(path: Path): List<Path>
+    public fun list(path: Path): List<Path>
 }
 
-internal class FileSystemDraftMediaStorage(
+public class OkioFileStorage(
     private val fileSystem: FileSystem,
-) : DraftMediaStorage {
+) : FileStorage {
     override fun createDirectories(path: Path) {
         fileSystem.createDirectories(path)
     }
@@ -50,4 +50,4 @@ internal class FileSystemDraftMediaStorage(
     override fun list(path: Path): List<Path> = fileSystem.list(path)
 }
 
-internal expect fun defaultDraftMediaStorage(): DraftMediaStorage
+public expect fun defaultFileStorage(): FileStorage

@@ -11,10 +11,3 @@ public data class SettingsExport(
     val appSettings: AppSettings,
     val tabSettingsV2: TabSettingsV2,
 )
-
-@Serializable
-public data class LegacyAppearanceSettingsExport(
-    val appearanceSettings: AppearanceSettings,
-    val appSettings: AppSettings,
-    val tabSettingsV2: TabSettingsV2,
-)

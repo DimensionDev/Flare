@@ -4,24 +4,11 @@ import dev.dimension.flare.createTestRootPath
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.io.PlatformPathProducer
-import dev.dimension.flare.data.model.AppearanceSettings
-import dev.dimension.flare.data.model.HomeTimelineTabItem
-import dev.dimension.flare.data.model.IconType
-import dev.dimension.flare.data.model.LegacyAppearanceSettingsAndTabsExport
-import dev.dimension.flare.data.model.LegacyAppearanceSettingsExport
-import dev.dimension.flare.data.model.LegacySettingsExport
-import dev.dimension.flare.data.model.LegacySubscriptionType
-import dev.dimension.flare.data.model.Mastodon
 import dev.dimension.flare.data.model.SettingsExport
-import dev.dimension.flare.data.model.SubscriptionTimelineTabItem
-import dev.dimension.flare.data.model.TabMetaData
-import dev.dimension.flare.data.model.TabSettings
 import dev.dimension.flare.data.model.Theme
-import dev.dimension.flare.data.model.TitleType
 import dev.dimension.flare.data.model.appearance.AppearanceBag
 import dev.dimension.flare.data.model.tab.GroupSource
 import dev.dimension.flare.data.model.tab.GroupTimelineTabItemV2
-import dev.dimension.flare.data.model.tab.SYSTEM_HOME_MIXED_TIMELINE_ID
 import dev.dimension.flare.data.model.tab.TabSettingsV2
 import dev.dimension.flare.data.model.tab.TimelineFilterConfig
 import dev.dimension.flare.data.model.tab.TimelineMergePolicy
@@ -30,20 +17,24 @@ import dev.dimension.flare.data.model.tab.TimelinePresentation
 import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.model.tab.TimelineSlot
 import dev.dimension.flare.data.model.tab.TimelineSlotContent
-import dev.dimension.flare.data.model.tab.toTimelineSlotOrNull
+import dev.dimension.flare.data.model.tab.TimelineSpec
+import dev.dimension.flare.data.model.tab.toSlot
+import dev.dimension.flare.data.platform.CommonTimelineSpecs
+import dev.dimension.flare.data.platform.MastodonPlatformSpec
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.data.repository.homeTimelineTab
 import dev.dimension.flare.deleteTestRootPath
-import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.defaultSocialPlatformRegistry
-import dev.dimension.flare.ui.model.UiIcon
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.json.jsonObject
 import okio.Path
 import org.koin.core.context.startKoin
@@ -146,17 +137,23 @@ class SettingsImportExportPresenterTest {
         runTest {
             val newSlot = homeSlot()
             val exported =
-                json.encodeToString(
-                    LegacyAppearanceSettingsExport(
-                        appearanceSettings =
-                            AppearanceSettings(
-                                theme = Theme.DARK,
-                                showNumbers = false,
-                            ),
-                        appSettings = AppSettings(version = "legacy-appearance"),
-                        tabSettingsV2 = TabSettingsV2(homeSlots = listOf(newSlot)),
-                    ),
-                )
+                buildJsonObject {
+                    put(
+                        "appearanceSettings",
+                        buildJsonObject {
+                            put("theme", JsonPrimitive("DARK"))
+                            put("showNumbers", JsonPrimitive(false))
+                        },
+                    )
+                    put(
+                        "appSettings",
+                        json.encodeToJsonElement(AppSettings.serializer(), AppSettings(version = "legacy-appearance")),
+                    )
+                    put(
+                        "tabSettingsV2",
+                        json.encodeToJsonElement(TabSettingsV2.serializer(), TabSettingsV2(homeSlots = listOf(newSlot))),
+                    )
+                }.toString()
 
             ImportSettingsPresenter(exported).import()
 
@@ -168,100 +165,6 @@ class SettingsImportExportPresenterTest {
                     .entries
                     .isNotEmpty(),
             )
-        }
-
-    @Test
-    fun importLegacyV1SettingsMigratesTabsToV2WithMixedTimelineDisabled() =
-        runTest {
-            val accountKey = MicroBlogKey(id = "alice", host = "example.com")
-            val exported =
-                json.encodeToString(
-                    LegacyAppearanceSettingsAndTabsExport(
-                        appearanceSettings = AppearanceSettings(),
-                        appSettings = AppSettings(version = "v1"),
-                        tabSettings =
-                            TabSettings(
-                                enableMixedTimeline = false,
-                                mainTabs =
-                                    listOf(
-                                        HomeTimelineTabItem(AccountType.Specific(accountKey)),
-                                        Mastodon.LocalTimelineTabItem(
-                                            account = AccountType.Specific(accountKey),
-                                            metaData = localMetaData(),
-                                        ),
-                                    ),
-                            ),
-                    ),
-                )
-
-            ImportSettingsPresenter(exported).import()
-
-            val settings = settingsRepository.tabSettingsV2.first()
-            assertEquals(
-                listOf(
-                    "common.home:$accountKey",
-                    "mastodon.local:$accountKey",
-                ),
-                settings.homeSlots.map { it.id },
-            )
-        }
-
-    @Test
-    fun importLegacyV1SettingsMigratesTabsToV2WithMixedTimelineEnabled() =
-        runTest {
-            val accountKey = MicroBlogKey(id = "alice", host = "example.com")
-            val exported =
-                json.encodeToString(
-                    LegacySettingsExport(
-                        appearanceBag = AppearanceBag(),
-                        appSettings = AppSettings(version = "v1"),
-                        tabSettings =
-                            TabSettings(
-                                enableMixedTimeline = true,
-                                mainTabs =
-                                    listOf(
-                                        HomeTimelineTabItem(AccountType.Specific(accountKey)),
-                                        Mastodon.LocalTimelineTabItem(
-                                            account = AccountType.Specific(accountKey),
-                                            metaData = localMetaData(),
-                                        ),
-                                    ),
-                            ),
-                    ),
-                )
-
-            ImportSettingsPresenter(exported).import()
-
-            val settings = settingsRepository.tabSettingsV2.first()
-            assertEquals(
-                listOf(
-                    SYSTEM_HOME_MIXED_TIMELINE_ID,
-                    "common.home:$accountKey",
-                    "mastodon.local:$accountKey",
-                ),
-                settings.homeSlots.map { it.id },
-            )
-        }
-
-    @Test
-    fun legacySubscriptionTimelineMigrationProducesRuntimeCompatibleData() =
-        runTest {
-            val slot =
-                SubscriptionTimelineTabItem(
-                    subscriptionUrl = "https://mastodon.example/public",
-                    subscriptionType = LegacySubscriptionType.MASTODON_PUBLIC,
-                    metaData =
-                        TabMetaData(
-                            title = TitleType.Text("Public"),
-                            icon = IconType.Material(UiIcon.Rss),
-                        ),
-                ).toTimelineSlotOrNull()
-                    ?: error("Subscription slot should be migratable")
-
-            val tabItem = timelineResolver.toTabItem(slot)
-            tabItem.createPresenter()
-
-            assertEquals(slot.id, tabItem.id)
         }
 
     @Test
@@ -351,21 +254,14 @@ class SettingsImportExportPresenterTest {
         }
 
     private fun homeSlot() =
-        HomeTimelineTabItem(AccountType.Specific(MicroBlogKey(id = "home", host = "example.com")))
-            .toTimelineSlotOrNull()
-            ?: error("Home slot should be migratable")
+        CommonTimelineSpecs
+            .home
+            .target(TimelineSpec.AccountBasedData(MicroBlogKey(id = "home", host = "example.com")))
+            .toSlot()
 
     private fun localSlot() =
-        Mastodon
-            .LocalTimelineTabItem(
-                account = AccountType.Specific(MicroBlogKey(id = "local", host = "example.com")),
-                metaData = localMetaData(),
-            ).toTimelineSlotOrNull()
-            ?: error("Local slot should be migratable")
-
-    private fun localMetaData() =
-        TabMetaData(
-            title = TitleType.Localized(TitleType.Localized.LocalizedKey.MastodonLocal),
-            icon = IconType.Material(UiIcon.Local),
-        )
+        MastodonPlatformSpec
+            .localTimelineSpec
+            .target(TimelineSpec.AccountBasedData(MicroBlogKey(id = "local", host = "example.com")))
+            .toSlot()
 }

@@ -1,9 +1,6 @@
 package dev.dimension.flare.data.repository
 
 import dev.dimension.flare.data.datasource.microblog.datasource.TimelineTabConfigurationDataSource
-import dev.dimension.flare.data.model.MixedTimelineTabItem
-import dev.dimension.flare.data.model.TabSettings
-import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.data.model.tab.GroupSource
 import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.model.tab.TimelineSlot
@@ -11,7 +8,6 @@ import dev.dimension.flare.data.model.tab.TimelineSlotContent
 import dev.dimension.flare.data.model.tab.normalizeSystemHomeMixedTimeline
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiAccount
-import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -135,37 +131,3 @@ private fun List<TimelineSlot>.anySystemHomeMixedTimeline(): Boolean = any { it.
 private fun List<TimelineSlot>.countNonSystemHomeTabs(): Int = count { !it.isSystemHomeMixedTimeline() }
 
 private fun TimelineSlot.isSystemHomeMixedTimeline(): Boolean = (content as? TimelineSlotContent.Group)?.source == GroupSource.SystemHome
-
-internal fun TabSettings.sanitizeDuplicateTabKeys(): TabSettings {
-    val sanitizedTabs =
-        mainTabs
-            .mapNotNull { it.sanitizeDuplicateTabKeys() }
-            .distinctBy { it.key }
-    return if (sanitizedTabs == mainTabs) {
-        this
-    } else {
-        copy(mainTabs = sanitizedTabs)
-    }
-}
-
-private fun TimelineTabItem.sanitizeDuplicateTabKeys(): TimelineTabItem? =
-    when (this) {
-        is MixedTimelineTabItem -> {
-            val sanitizedSubTabs =
-                subTimelineTabItem
-                    .mapNotNull { it.sanitizeDuplicateTabKeys() }
-                    .distinctBy { it.key }
-                    .toImmutableList()
-            if (sanitizedSubTabs.isEmpty()) {
-                null
-            } else if (sanitizedSubTabs == subTimelineTabItem) {
-                this
-            } else {
-                copy(subTimelineTabItem = sanitizedSubTabs)
-            }
-        }
-
-        else -> {
-            this
-        }
-    }

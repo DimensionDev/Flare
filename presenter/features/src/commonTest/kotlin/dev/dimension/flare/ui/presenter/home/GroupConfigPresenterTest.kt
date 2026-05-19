@@ -1,16 +1,13 @@
 package dev.dimension.flare.ui.presenter.home
 
-import dev.dimension.flare.data.model.HomeTimelineTabItem
 import dev.dimension.flare.data.model.IconType
-import dev.dimension.flare.data.model.ListTimelineTabItem
-import dev.dimension.flare.data.model.TabMetaData
-import dev.dimension.flare.data.model.TitleType
 import dev.dimension.flare.data.model.tab.GroupTimelineTabItemV2
 import dev.dimension.flare.data.model.tab.TabSettingsV2
 import dev.dimension.flare.data.model.tab.TimelineMergePolicy
 import dev.dimension.flare.data.model.tab.TimelineResolver
-import dev.dimension.flare.data.model.tab.toTimelineSlotOrNull
-import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.data.model.tab.TimelineSpec
+import dev.dimension.flare.data.model.tab.toSlot
+import dev.dimension.flare.data.platform.CommonTimelineSpecs
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.defaultSocialPlatformRegistry
 import dev.dimension.flare.ui.model.UiIcon
@@ -23,19 +20,16 @@ class GroupConfigPresenterTest {
     fun upsertGroupConfigReplacesDuplicateKeyInsteadOfAppending() {
         val timelineResolver = TimelineResolver(defaultSocialPlatformRegistry)
         val accountKey = MicroBlogKey("1872639344760254464", "x.com")
-        val accountType = AccountType.Specific(accountKey)
-        val homeTab = timelineResolver.toTabItem(HomeTimelineTabItem(accountType).toTimelineSlotOrNull()!!)
+        val homeTab =
+            timelineResolver.toTabItem(
+                CommonTimelineSpecs.home.target(TimelineSpec.AccountBasedData(accountKey)).toSlot(),
+            )
         val listTab =
             timelineResolver.toTabItem(
-                ListTimelineTabItem(
-                    account = accountType,
-                    listId = "1681353064253640704",
-                    metaData =
-                        TabMetaData(
-                            title = TitleType.Text("list"),
-                            icon = IconType.Material(UiIcon.List),
-                        ),
-                ).toTimelineSlotOrNull()!!,
+                CommonTimelineSpecs
+                    .list
+                    .target(TimelineSpec.AccountResourceData(accountKey, "1681353064253640704"))
+                    .toSlot(),
             )
         val existingGroup =
             TabSettingsV2()

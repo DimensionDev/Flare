@@ -68,12 +68,12 @@ internal expect suspend fun readLegacyTabSettings(pathProducer: PlatformPathProd
 
 internal expect suspend fun deleteLegacyTabSettings(pathProducer: PlatformPathProducer)
 
-public fun TabSettings.toTabSettingsV2(): TabSettingsV2 =
+internal fun TabSettings.toTabSettingsV2(): TabSettingsV2 =
     TabSettingsV2(
         homeSlots = mainTabs.toTimelineSlots().withLegacySystemHomeMixedTimeline(enableMixedTimeline),
     )
 
-public fun List<TimelineTabItem>.toTimelineSlots(): List<TimelineSlot> =
+internal fun List<TimelineTabItem>.toTimelineSlots(): List<TimelineSlot> =
     mapNotNull { it.toTimelineSlotOrNull() }
         .distinctBy { it.id }
 
@@ -94,7 +94,7 @@ private fun List<TimelineSlot>.withLegacySystemHomeMixedTimeline(enabled: Boolea
     return listOf(systemHomeGroup) + this
 }
 
-public fun TimelineTabItem.toTimelineSlotOrNull(): TimelineSlot? =
+internal fun TimelineTabItem.toTimelineSlotOrNull(): TimelineSlot? =
     when (this) {
         is HomeTimelineTabItem -> {
             account.specificAccountKey()?.let { accountKey ->

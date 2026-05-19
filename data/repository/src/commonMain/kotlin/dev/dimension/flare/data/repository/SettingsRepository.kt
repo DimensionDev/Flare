@@ -4,7 +4,6 @@ import androidx.compose.runtime.Stable
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.io.PlatformPathProducer
-import dev.dimension.flare.data.model.AppearanceSettings
 import dev.dimension.flare.data.model.appearance.AppearanceBag
 import dev.dimension.flare.data.model.appearance.AppearanceKey
 import dev.dimension.flare.data.model.appearance.AppearancePatch
@@ -105,26 +104,6 @@ public class SettingsRepository(
         ensureAppearanceMigrated()
         appearanceBagStore.updateData { bag }
     }
-
-    public suspend fun replaceAppearance(settings: AppearanceSettings) {
-        ensureAppearanceMigrated()
-        appearanceBagStore.updateData { settings.toPatch().toBag() }
-    }
-
-//    private val tabSettingsStore by lazy {
-//        createDataStore(
-//            name = "tab_settings.pb",
-//            serializer = protobufSerializer(TabSettings()),
-//        )
-//    }
-
-//    public val tabSettings: Flow<TabSettings> by lazy {
-//        tabSettingsStore.data
-//    }
-//
-//    public suspend fun updateTabSettings(block: TabSettings.() -> TabSettings) {
-//        tabSettingsStore.updateData(block)
-//    }
 
     private val tabSettingsV2Store by lazy {
         appDataStore.tabSettingsV2Store

@@ -3,16 +3,16 @@ package dev.dimension.flare.ui.presenter.home
 import dev.dimension.flare.createTestRootPath
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.io.PlatformPathProducer
-import dev.dimension.flare.data.model.HomeTimelineTabItem
 import dev.dimension.flare.data.model.tab.TabSettingsV2
 import dev.dimension.flare.data.model.tab.TimelineFilterConfig
 import dev.dimension.flare.data.model.tab.TimelinePostKind
 import dev.dimension.flare.data.model.tab.TimelinePresentation
 import dev.dimension.flare.data.model.tab.TimelineResolver
-import dev.dimension.flare.data.model.tab.toTimelineSlotOrNull
+import dev.dimension.flare.data.model.tab.TimelineSpec
+import dev.dimension.flare.data.model.tab.toSlot
+import dev.dimension.flare.data.platform.CommonTimelineSpecs
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.deleteTestRootPath
-import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.defaultSocialPlatformRegistry
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -103,11 +103,12 @@ class TimelinePresenterBindingTest {
     private fun homeSlot(
         id: String,
         filterConfig: TimelineFilterConfig,
-    ) = requireNotNull(
-        HomeTimelineTabItem(AccountType.Specific(MicroBlogKey(id = "home", host = "example.com")))
-            .toTimelineSlotOrNull(),
-    ).copy(
-        id = id,
-        presentation = TimelinePresentation(filterConfig = filterConfig),
-    )
+    ) = CommonTimelineSpecs
+        .home
+        .target(TimelineSpec.AccountBasedData(MicroBlogKey(id = "home", host = "example.com")))
+        .toSlot()
+        .copy(
+            id = id,
+            presentation = TimelinePresentation(filterConfig = filterConfig),
+        )
 }

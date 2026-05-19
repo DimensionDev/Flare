@@ -7,43 +7,43 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.serialization.Serializable
 
 @Serializable
-public data class TabSettings(
+internal data class TabSettings(
     val secondaryItems: List<TabItem>? = null,
     val enableMixedTimeline: Boolean = true,
     val mainTabs: List<TimelineTabItem> = listOf(),
 )
 
 @Serializable
-public sealed class TabItem {
+internal sealed class TabItem {
     // for iOS
-    public val id: String by lazy {
+    internal val id: String by lazy {
         key
     }
-    public abstract val metaData: TabMetaData
-    public abstract val key: String
+    internal abstract val metaData: TabMetaData
+    internal abstract val key: String
 
-    public abstract fun update(metaData: TabMetaData = this.metaData): TabItem
+    internal abstract fun update(metaData: TabMetaData = this.metaData): TabItem
 }
 
-public interface WithAccountTabItem {
-    public val account: AccountType
+internal interface WithAccountTabItem {
+    val account: AccountType
 }
 
 @Serializable
-public sealed class AccountTabItem :
+internal sealed class AccountTabItem :
     TabItem(),
     WithAccountTabItem {
     abstract override val account: AccountType
 }
 
 @Serializable
-public data class TabMetaData(
+internal data class TabMetaData(
     val title: TitleType,
     val icon: IconType,
 )
 
 @Serializable
-public enum class LegacySubscriptionType {
+internal enum class LegacySubscriptionType {
     RSS,
     MASTODON_TRENDS,
     MASTODON_PUBLIC,
@@ -51,18 +51,18 @@ public enum class LegacySubscriptionType {
 }
 
 @Serializable
-public sealed class TitleType {
+internal sealed class TitleType {
     @Serializable
-    public data class Text(
+    internal data class Text(
         val content: String,
     ) : TitleType()
 
     @Serializable
-    public data class Localized(
+    internal data class Localized(
         val key: LocalizedKey,
     ) : TitleType() {
         @Serializable
-        public enum class LocalizedKey {
+        internal enum class LocalizedKey {
             Home,
             Notifications,
             Discover,
@@ -89,7 +89,7 @@ public sealed class TitleType {
 }
 
 @Serializable
-public data object AllNotificationTabItem : TabItem() {
+internal data object AllNotificationTabItem : TabItem() {
     override val metaData: TabMetaData =
         TabMetaData(
             title = TitleType.Localized(TitleType.Localized.LocalizedKey.Notifications),
@@ -102,7 +102,7 @@ public data object AllNotificationTabItem : TabItem() {
 
 // keep this here for compatibility
 @Serializable
-public data class NotificationTabItem(
+internal data class NotificationTabItem(
     override val account: AccountType,
     override val metaData: TabMetaData,
 ) : AccountTabItem() {
@@ -112,15 +112,15 @@ public data class NotificationTabItem(
 }
 
 @Serializable
-public sealed class TimelineTabItem : TabItem() {
-    public companion object {
-        public val default: ImmutableList<TabItem> =
+internal sealed class TimelineTabItem : TabItem() {
+    internal companion object {
+        internal val default: ImmutableList<TabItem> =
             persistentListOf(
                 HomeTabItem,
                 AllNotificationTabItem,
                 DiscoverTabItem,
             )
-        public val guest: ImmutableList<TabItem> =
+        internal val guest: ImmutableList<TabItem> =
             persistentListOf(
                 HomeTabItem,
                 DiscoverTabItem,
@@ -129,7 +129,7 @@ public sealed class TimelineTabItem : TabItem() {
 }
 
 @Serializable
-public data object HomeTabItem : TabItem() {
+internal data object HomeTabItem : TabItem() {
     override val metaData: TabMetaData =
         TabMetaData(
             title = TitleType.Localized(TitleType.Localized.LocalizedKey.Home),
@@ -141,7 +141,7 @@ public data object HomeTabItem : TabItem() {
 }
 
 @Serializable
-public data class HomeTimelineTabItem(
+internal data class HomeTimelineTabItem(
     override val metaData: TabMetaData,
     override val account: AccountType,
 ) : TimelineTabItem(),
@@ -149,7 +149,7 @@ public data class HomeTimelineTabItem(
     override val key: String = "home_$account"
 
     override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
-    public constructor(accountType: AccountType) :
+    internal constructor(accountType: AccountType) :
         this(
             account = accountType,
             metaData =
@@ -158,7 +158,7 @@ public data class HomeTimelineTabItem(
                     icon = IconType.Material(dev.dimension.flare.ui.model.UiIcon.Home),
                 ),
         )
-    public constructor(
+    internal constructor(
         accountKey: MicroBlogKey,
         title: String,
         icon: IconType = IconType.FavIcon(accountKey.host),
@@ -174,7 +174,7 @@ public data class HomeTimelineTabItem(
 }
 
 @Serializable
-public data class MixedTimelineTabItem(
+internal data class MixedTimelineTabItem(
     val subTimelineTabItem: List<TimelineTabItem>,
     override val metaData: TabMetaData =
         TabMetaData(
@@ -196,7 +196,7 @@ public data class MixedTimelineTabItem(
 }
 
 @Serializable
-public data class ListTimelineTabItem(
+internal data class ListTimelineTabItem(
     override val account: AccountType,
     val listId: String,
     override val metaData: TabMetaData,
@@ -208,7 +208,7 @@ public data class ListTimelineTabItem(
 }
 
 @Serializable
-public data class AllListTabItem(
+internal data class AllListTabItem(
     override val account: AccountType,
     override val metaData: TabMetaData,
 ) : AccountTabItem() {
@@ -217,9 +217,9 @@ public data class AllListTabItem(
     override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
 }
 
-public object Mastodon {
+internal object Mastodon {
     @Serializable
-    public data class LocalTimelineTabItem(
+    internal data class LocalTimelineTabItem(
         override val account: AccountType,
         override val metaData: TabMetaData,
     ) : TimelineTabItem(),
@@ -230,7 +230,7 @@ public object Mastodon {
     }
 
     @Serializable
-    public data class PublicTimelineTabItem(
+    internal data class PublicTimelineTabItem(
         override val account: AccountType,
         override val metaData: TabMetaData,
     ) : TimelineTabItem(),
@@ -241,7 +241,7 @@ public object Mastodon {
     }
 
     @Serializable
-    public data class BookmarkTimelineTabItem(
+    internal data class BookmarkTimelineTabItem(
         override val account: AccountType,
         override val metaData: TabMetaData,
     ) : TimelineTabItem(),
@@ -252,7 +252,7 @@ public object Mastodon {
     }
 
     @Serializable
-    public data class FavouriteTimelineTabItem(
+    internal data class FavouriteTimelineTabItem(
         override val account: AccountType,
         override val metaData: TabMetaData,
     ) : TimelineTabItem(),
@@ -263,9 +263,9 @@ public object Mastodon {
     }
 }
 
-public object Misskey {
+internal object Misskey {
     @Serializable
-    public data class LocalTimelineTabItem(
+    internal data class LocalTimelineTabItem(
         override val account: AccountType,
         override val metaData: TabMetaData,
     ) : TimelineTabItem(),
@@ -276,7 +276,7 @@ public object Misskey {
     }
 
     @Serializable
-    public data class GlobalTimelineTabItem(
+    internal data class GlobalTimelineTabItem(
         override val account: AccountType,
         override val metaData: TabMetaData,
     ) : TimelineTabItem(),
@@ -287,7 +287,7 @@ public object Misskey {
     }
 
     @Serializable
-    public data class HybridTimelineTabItem(
+    internal data class HybridTimelineTabItem(
         override val account: AccountType,
         override val metaData: TabMetaData,
     ) : TimelineTabItem(),
@@ -298,7 +298,7 @@ public object Misskey {
     }
 
     @Serializable
-    public data class FavouriteTimelineTabItem(
+    internal data class FavouriteTimelineTabItem(
         override val account: AccountType,
         override val metaData: TabMetaData,
     ) : TimelineTabItem(),
@@ -309,7 +309,7 @@ public object Misskey {
     }
 
     @Serializable
-    public data class AntennasListTabItem(
+    internal data class AntennasListTabItem(
         override val account: AccountType,
         override val metaData: TabMetaData,
     ) : AccountTabItem() {
@@ -319,7 +319,7 @@ public object Misskey {
     }
 
     @Serializable
-    public data class AntennasTimelineTabItem(
+    internal data class AntennasTimelineTabItem(
         val antennasId: String,
         override val account: AccountType,
         override val metaData: TabMetaData,
@@ -331,7 +331,7 @@ public object Misskey {
     }
 
     @Serializable
-    public data class ChannelTimelineTabItem(
+    internal data class ChannelTimelineTabItem(
         val channelId: String,
         override val account: AccountType,
         override val metaData: TabMetaData,
@@ -343,7 +343,7 @@ public object Misskey {
     }
 
     @Serializable
-    public data class ChannelListTabItem(
+    internal data class ChannelListTabItem(
         override val account: AccountType,
         override val metaData: TabMetaData,
     ) : AccountTabItem() {
@@ -353,9 +353,9 @@ public object Misskey {
     }
 }
 
-public object XQT {
+internal object XQT {
     @Serializable
-    public data class FeaturedTimelineTabItem(
+    internal data class FeaturedTimelineTabItem(
         override val account: AccountType,
         override val metaData: TabMetaData,
     ) : TimelineTabItem(),
@@ -366,7 +366,7 @@ public object XQT {
     }
 
     @Serializable
-    public data class BookmarkTimelineTabItem(
+    internal data class BookmarkTimelineTabItem(
         override val account: AccountType,
         override val metaData: TabMetaData,
     ) : TimelineTabItem(),
@@ -377,7 +377,7 @@ public object XQT {
     }
 
     @Serializable
-    public data class DeviceFollowTimelineTabItem(
+    internal data class DeviceFollowTimelineTabItem(
         override val account: AccountType,
         override val metaData: TabMetaData =
             TabMetaData(
@@ -392,9 +392,9 @@ public object XQT {
     }
 }
 
-public object Bluesky {
+internal object Bluesky {
     @Serializable
-    public data class FeedsTabItem(
+    internal data class FeedsTabItem(
         override val account: AccountType,
         override val metaData: TabMetaData,
     ) : AccountTabItem() {
@@ -404,7 +404,7 @@ public object Bluesky {
     }
 
     @Serializable
-    public data class FeedTabItem(
+    internal data class FeedTabItem(
         override val account: AccountType,
         val uri: String,
         override val metaData: TabMetaData,
@@ -416,7 +416,7 @@ public object Bluesky {
     }
 
     @Serializable
-    public data class BookmarkTimelineTabItem(
+    internal data class BookmarkTimelineTabItem(
         override val account: AccountType,
         override val metaData: TabMetaData,
     ) : TimelineTabItem(),
@@ -424,7 +424,7 @@ public object Bluesky {
         override val key: String = "bookmark_$account"
 
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
-        public constructor(accountType: AccountType) :
+        internal constructor(accountType: AccountType) :
             this(
                 account = accountType,
                 metaData =
@@ -436,9 +436,9 @@ public object Bluesky {
     }
 }
 
-public object VVo {
+internal object VVo {
     @Serializable
-    public data class FeaturedTimelineTabItem(
+    internal data class FeaturedTimelineTabItem(
         override val account: AccountType,
         override val metaData: TabMetaData,
     ) : TimelineTabItem(),
@@ -449,7 +449,7 @@ public object VVo {
     }
 
     @Serializable
-    public data class FavoriteTimelineTabItem(
+    internal data class FavoriteTimelineTabItem(
         override val account: AccountType,
         override val metaData: TabMetaData,
     ) : TimelineTabItem(),
@@ -460,7 +460,7 @@ public object VVo {
     }
 
     @Serializable
-    public data class LikedTimelineTabItem(
+    internal data class LikedTimelineTabItem(
         override val account: AccountType,
         override val metaData: TabMetaData,
     ) : TimelineTabItem(),
@@ -472,7 +472,7 @@ public object VVo {
 }
 
 @Serializable
-public data class RssTimelineTabItem(
+internal data class RssTimelineTabItem(
     val feedUrl: String,
     override val metaData: TabMetaData,
     val favIcon: String? = null,
@@ -483,7 +483,7 @@ public data class RssTimelineTabItem(
 }
 
 @Serializable
-public data class AllRssTimelineTabItem(
+internal data class AllRssTimelineTabItem(
     override val metaData: TabMetaData =
         TabMetaData(
             title = TitleType.Localized(TitleType.Localized.LocalizedKey.AllRssFeeds),
@@ -496,7 +496,7 @@ public data class AllRssTimelineTabItem(
 }
 
 @Serializable
-public data class SubscriptionTimelineTabItem(
+internal data class SubscriptionTimelineTabItem(
     val subscriptionUrl: String,
     val subscriptionType: LegacySubscriptionType,
     override val metaData: TabMetaData,
@@ -508,12 +508,12 @@ public data class SubscriptionTimelineTabItem(
 }
 
 @Serializable
-public data class ProfileTabItem(
+internal data class ProfileTabItem(
     override val account: AccountType,
     val userKey: AccountType,
     override val metaData: TabMetaData,
 ) : AccountTabItem() {
-    public constructor(
+    internal constructor(
         accountKey: MicroBlogKey,
         userKey: MicroBlogKey,
     ) : this(
@@ -532,7 +532,7 @@ public data class ProfileTabItem(
 }
 
 @Serializable
-public data object DiscoverTabItem : TabItem() {
+internal data object DiscoverTabItem : TabItem() {
     override val metaData: TabMetaData
         get() =
             TabMetaData(
@@ -545,7 +545,7 @@ public data object DiscoverTabItem : TabItem() {
 }
 
 @Serializable
-public data object SettingsTabItem : TabItem() {
+internal data object SettingsTabItem : TabItem() {
     override val key: String
         get() = "settings"
     override val metaData: TabMetaData
@@ -559,7 +559,7 @@ public data object SettingsTabItem : TabItem() {
 }
 
 @Serializable
-public data class DirectMessageTabItem(
+internal data class DirectMessageTabItem(
     override val account: AccountType,
     override val metaData: TabMetaData,
 ) : AccountTabItem() {
@@ -569,7 +569,7 @@ public data class DirectMessageTabItem(
 }
 
 @Serializable
-public data object RssTabItem : TabItem() {
+internal data object RssTabItem : TabItem() {
     override val key: String = "rss"
     override val metaData: TabMetaData
         get() =

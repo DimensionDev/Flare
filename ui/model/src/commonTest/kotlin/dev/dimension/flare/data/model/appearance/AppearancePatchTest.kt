@@ -1,24 +1,15 @@
 package dev.dimension.flare.data.model.appearance
 
-import dev.dimension.flare.data.model.AppearanceSettings
 import dev.dimension.flare.data.model.AvatarShape
-import dev.dimension.flare.data.model.BottomBarBehavior
-import dev.dimension.flare.data.model.BottomBarStyle
 import dev.dimension.flare.data.model.PostActionStyle
 import dev.dimension.flare.data.model.Theme
 import dev.dimension.flare.data.model.TimelineDisplayMode
 import dev.dimension.flare.data.model.VideoAutoplay
-import kotlinx.serialization.ExperimentalSerializationApi
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 
 class AppearancePatchTest {
-    @Test
-    fun emptyPatchSynthesizesDefaultAppearanceSettings() {
-        assertEquals(AppearanceSettings.Default, AppearancePatch.EMPTY.toAppearanceSettings())
-    }
-
     @Test
     fun getSetAndClearUseDefaults() {
         val patch =
@@ -107,56 +98,6 @@ class AppearancePatchTest {
             ),
             base.withPatch(patch),
         )
-    }
-
-    @OptIn(ExperimentalSerializationApi::class)
-    @Test
-    fun activeAppearanceSettingsFieldsAreCoveredByCatalog() {
-        val deprecatedFields = setOf("showActions")
-        val bagOnlyFields = setOf(AppearanceKeys.ShowBottomBarLabels, AppearanceKeys.DeckMode)
-        val activeFields =
-            AppearanceSettings
-                .serializer()
-                .descriptor
-                .let { descriptor ->
-                    (0 until descriptor.elementsCount)
-                        .map { descriptor.getElementName(it) }
-                        .filterNot { it in deprecatedFields }
-                }
-
-        assertEquals(activeFields.size + bagOnlyFields.size, AppearanceKeys.all.size)
-    }
-
-    @Test
-    fun appearanceSettingsRoundTripPreservesActiveFields() {
-        val settings =
-            AppearanceSettings(
-                theme = Theme.DARK,
-                dynamicTheme = false,
-                colorSeed = 123456u,
-                avatarShape = AvatarShape.SQUARE,
-                pureColorMode = false,
-                showNumbers = false,
-                showLinkPreview = false,
-                showMedia = false,
-                showSensitiveContent = true,
-                videoAutoplay = VideoAutoplay.NEVER,
-                expandMediaSize = false,
-                compatLinkPreview = true,
-                fontSizeDiff = 2f,
-                lineHeightDiff = 4f,
-                showComposeInHomeTimeline = false,
-                bottomBarStyle = BottomBarStyle.Classic,
-                bottomBarBehavior = BottomBarBehavior.AlwaysShow,
-                inAppBrowser = false,
-                fullWidthPost = true,
-                postActionStyle = PostActionStyle.Hidden,
-                absoluteTimestamp = true,
-                showPlatformLogo = false,
-                timelineDisplayMode = TimelineDisplayMode.Gallery,
-            )
-
-        assertEquals(settings, settings.toPatch().toAppearanceSettings())
     }
 
     @Test

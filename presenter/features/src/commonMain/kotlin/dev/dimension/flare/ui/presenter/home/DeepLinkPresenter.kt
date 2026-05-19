@@ -143,7 +143,7 @@ public class DeepLinkPresenter(
                                     data =
                                         matches
                                             .map {
-                                                it.key.accountKey to it.value.deepLink(it.key.accountKey)
+                                                it.key.accountKey to it.value.toDeeplinkRoute(it.key.accountKey)
                                             }.toMap()
                                             .toImmutableMap(),
                                 )

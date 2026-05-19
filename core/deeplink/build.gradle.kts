@@ -22,9 +22,8 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                api(projects.core.model)
-                api(projects.ui.model)
                 api(libs.ktor.client.resources)
+                api(libs.kotlinx.immutable)
                 api(libs.kotlinx.serialization.json)
             }
         }

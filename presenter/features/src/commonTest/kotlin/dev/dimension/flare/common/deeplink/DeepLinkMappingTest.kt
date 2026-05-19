@@ -6,6 +6,7 @@ import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.defaultSocialPlatformRegistry
 import dev.dimension.flare.model.xqtHost
 import dev.dimension.flare.ui.model.UiAccount
+import dev.dimension.flare.ui.presenter.home.toDeeplinkRoute
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import io.ktor.http.Url
 import kotlinx.collections.immutable.ImmutableList
@@ -334,7 +335,7 @@ class DeepLinkMappingTest {
                 userName = "alice",
                 host = "mastodon.social",
             ),
-            simpleProfile.deepLink(accountKey),
+            simpleProfile.toDeeplinkRoute(accountKey),
         )
 
         // Profile with full handle
@@ -345,7 +346,7 @@ class DeepLinkMappingTest {
                 userName = "bob",
                 host = "misskey.io",
             ),
-            fullProfile.deepLink(accountKey),
+            fullProfile.toDeeplinkRoute(accountKey),
         )
 
         // Post
@@ -355,7 +356,7 @@ class DeepLinkMappingTest {
                 accountType = AccountType.Specific(accountKey),
                 statusKey = MicroBlogKey("12345", "mastodon.social"),
             ),
-            post.deepLink(accountKey),
+            post.toDeeplinkRoute(accountKey),
         )
     }
 }

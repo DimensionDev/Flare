@@ -5,8 +5,12 @@ import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.app.model.DbRssSources
 import dev.dimension.flare.data.database.app.model.SubscriptionType
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
+import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
+import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.SocialPlatformRegistry
+import dev.dimension.flare.model.SubscriptionTimelineTypeKey
+import dev.dimension.flare.model.SubscriptionTimelineTypes
 import dev.dimension.flare.ui.model.UiTimelineV2
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -41,37 +45,45 @@ public object RssDataSource :
                 )
             }
 
-            SubscriptionType.MASTODON_TRENDS -> {
-                requireNotNull(
-                    platformRegistry.createSubscriptionLoader(
-                        type = PlatformType.Mastodon,
-                        subscriptionType = "MASTODON_TRENDS",
-                        url = subscription.url,
-                        locale = Locale.language,
-                    )
+            SubscriptionType.MASTODON_TRENDS ->
+                fetchPlatformSubscription(
+                    subscriptionType = SubscriptionTimelineTypes.MastodonTrends,
+                    url = subscription.url,
                 )
-            }
 
-            SubscriptionType.MASTODON_PUBLIC -> {
-                requireNotNull(
-                    platformRegistry.createSubscriptionLoader(
-                        type = PlatformType.Mastodon,
-                        subscriptionType = "MASTODON_PUBLIC",
-                        url = subscription.url,
-                        locale = Locale.language,
-                    )
+            SubscriptionType.MASTODON_PUBLIC ->
+                fetchPlatformSubscription(
+                    subscriptionType = SubscriptionTimelineTypes.MastodonPublic,
+                    url = subscription.url,
                 )
-            }
 
-            SubscriptionType.MASTODON_LOCAL -> {
-                requireNotNull(
-                    platformRegistry.createSubscriptionLoader(
-                        type = PlatformType.Mastodon,
-                        subscriptionType = "MASTODON_LOCAL",
-                        url = subscription.url,
-                        locale = Locale.language,
-                    )
+            SubscriptionType.MASTODON_LOCAL ->
+                fetchPlatformSubscription(
+                    subscriptionType = SubscriptionTimelineTypes.MastodonLocal,
+                    url = subscription.url,
                 )
-            }
         }
+
+    private fun fetchPlatformSubscription(
+        subscriptionType: SubscriptionTimelineTypeKey,
+        url: String,
+    ): CacheableRemoteLoader<UiTimelineV2> =
+        platformRegistry.createSubscriptionLoader(
+            type = PlatformType.Mastodon,
+            subscriptionType = subscriptionType,
+            url = url,
+            locale = Locale.language,
+        ) ?: UnsupportedSubscriptionRemoteLoader(subscriptionType, url)
+}
+
+private class UnsupportedSubscriptionRemoteLoader(
+    subscriptionType: SubscriptionTimelineTypeKey,
+    url: String,
+) : CacheableRemoteLoader<UiTimelineV2> {
+    override val pagingKey: String = "unsupported_subscription:${subscriptionType.value}:$url"
+
+    override suspend fun load(
+        pageSize: Int,
+        request: PagingRequest,
+    ): PagingResult<UiTimelineV2> = PagingResult(endOfPaginationReached = true)
 }

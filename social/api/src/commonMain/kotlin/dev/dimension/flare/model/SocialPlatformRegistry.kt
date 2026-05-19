@@ -13,6 +13,7 @@ import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiInstance
 import dev.dimension.flare.ui.model.UiInstanceMetadata
 import dev.dimension.flare.ui.model.UiTimelineV2
+import kotlin.jvm.JvmInline
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
@@ -35,7 +36,7 @@ public interface SocialPlatformSpec {
     ): MicroblogDataSource
 
     public fun createSubscriptionLoader(
-        subscriptionType: String,
+        subscriptionType: SubscriptionTimelineTypeKey,
         url: String,
         locale: String,
     ): CacheableRemoteLoader<UiTimelineV2>? = null
@@ -46,6 +47,17 @@ public data class PlatformTypeMetadata(
     public val displayName: String,
     public val icon: UiIcon,
 )
+
+@JvmInline
+public value class SubscriptionTimelineTypeKey(
+    public val value: String,
+)
+
+public object SubscriptionTimelineTypes {
+    public val MastodonTrends: SubscriptionTimelineTypeKey = SubscriptionTimelineTypeKey("mastodon.trends")
+    public val MastodonPublic: SubscriptionTimelineTypeKey = SubscriptionTimelineTypeKey("mastodon.public")
+    public val MastodonLocal: SubscriptionTimelineTypeKey = SubscriptionTimelineTypeKey("mastodon.local")
+}
 
 public interface SocialPlatformPlugin {
     public val spec: SocialPlatformSpec
@@ -117,7 +129,7 @@ public class SocialPlatformRegistry(
 
     public fun createSubscriptionLoader(
         type: PlatformType,
-        subscriptionType: String,
+        subscriptionType: SubscriptionTimelineTypeKey,
         url: String,
         locale: String,
     ): CacheableRemoteLoader<UiTimelineV2>? =

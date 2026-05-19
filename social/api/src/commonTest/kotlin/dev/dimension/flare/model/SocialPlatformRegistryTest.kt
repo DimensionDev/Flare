@@ -4,6 +4,9 @@ import dev.dimension.flare.common.deeplink.DeepLinkPattern
 import dev.dimension.flare.common.deeplink.DeepLinkMapping
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
+import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
+import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
+import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.notSupported
 import dev.dimension.flare.data.network.nodeinfo.NodeData
@@ -110,6 +113,37 @@ class SocialPlatformRegistryTest {
     }
 
     @Test
+    fun createsSubscriptionLoaderFromRegisteredSpec() {
+        val subscriptionType = SubscriptionTimelineTypeKey("custom.subscription")
+        val loader = FakeCacheableRemoteLoader("custom-loader")
+        val registry =
+            SocialPlatformRegistry(
+                listOf(
+                    fakePlugin(
+                        type = PlatformType.Mastodon,
+                        createSubscriptionLoader = { requestedType, url, locale ->
+                            if (requestedType == subscriptionType && url == "mastodon.example" && locale == "en") {
+                                loader
+                            } else {
+                                null
+                            }
+                        },
+                    ),
+                ),
+            )
+
+        assertSame(
+            loader,
+            registry.createSubscriptionLoader(
+                type = PlatformType.Mastodon,
+                subscriptionType = subscriptionType,
+                url = "mastodon.example",
+                locale = "en",
+            ),
+        )
+    }
+
+    @Test
     fun recommendedInstancesComeFromRegisteredFirstPlugins() =
         runTest {
             val registry =
@@ -180,6 +214,8 @@ class SocialPlatformRegistryTest {
         detector: PlatformDetector = RecordingDetector(null),
         recommendedInstances: suspend () -> List<UiInstance> = { emptyList() },
         createDataSource: (UiAccount) -> MicroblogDataSource? = { FakeMicroblogDataSource },
+        createSubscriptionLoader: (SubscriptionTimelineTypeKey, String, String) -> CacheableRemoteLoader<UiTimelineV2>? =
+            { _, _, _ -> null },
     ): SocialPlatformPlugin =
         object : SocialPlatformPlugin {
             override val spec: SocialPlatformSpec =
@@ -187,6 +223,7 @@ class SocialPlatformRegistryTest {
                     type = type,
                     displayName = displayName,
                     detector = detector,
+                    subscriptionLoaderFactory = createSubscriptionLoader,
                 )
 
             override fun createDataSource(account: UiAccount): MicroblogDataSource? = createDataSource(account)
@@ -212,6 +249,8 @@ class SocialPlatformRegistryTest {
         override val type: PlatformType,
         private val displayName: String,
         override val detector: PlatformDetector,
+        private val subscriptionLoaderFactory:
+            (SubscriptionTimelineTypeKey, String, String) -> CacheableRemoteLoader<UiTimelineV2>?,
     ) : SocialPlatformSpec {
         override val metadata: PlatformTypeMetadata =
             PlatformTypeMetadata(
@@ -230,6 +269,12 @@ class SocialPlatformRegistryTest {
             host: String,
             locale: String,
         ): MicroblogDataSource = FakeMicroblogDataSource
+
+        override fun createSubscriptionLoader(
+            subscriptionType: SubscriptionTimelineTypeKey,
+            url: String,
+            locale: String,
+        ): CacheableRemoteLoader<UiTimelineV2>? = subscriptionLoaderFactory(subscriptionType, url, locale)
     }
 
     private class RecordingDetector(
@@ -268,5 +313,14 @@ class SocialPlatformRegistryTest {
         override fun fans(userKey: MicroBlogKey): RemoteLoader<UiProfile> = notSupported()
 
         override fun profileTabs(userKey: MicroBlogKey): ImmutableList<ProfileTab> = persistentListOf()
+    }
+
+    private class FakeCacheableRemoteLoader(
+        override val pagingKey: String,
+    ) : CacheableRemoteLoader<UiTimelineV2> {
+        override suspend fun load(
+            pageSize: Int,
+            request: PagingRequest,
+        ): PagingResult<UiTimelineV2> = PagingResult(endOfPaginationReached = true)
     }
 }

@@ -16,6 +16,8 @@ import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.PlatformTypeMetadata
 import dev.dimension.flare.model.SocialPlatformPlugin
 import dev.dimension.flare.model.SocialPlatformSpec
+import dev.dimension.flare.model.SubscriptionTimelineTypeKey
+import dev.dimension.flare.model.SubscriptionTimelineTypes
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiInstance
@@ -126,25 +128,27 @@ public data object MastodonSocialPlatformSpec : SocialPlatformSpec {
         )
 
     public override fun createSubscriptionLoader(
-        subscriptionType: String,
+        subscriptionType: SubscriptionTimelineTypeKey,
         url: String,
         locale: String,
     ): CacheableRemoteLoader<UiTimelineV2>? =
         when (subscriptionType) {
-            "MASTODON_TRENDS" -> {
+            SubscriptionTimelineTypes.MastodonTrends -> {
                 GuestTrendsRemoteMediator(
                     host = url,
                     locale = locale,
                 )
             }
-            "MASTODON_PUBLIC" -> {
+
+            SubscriptionTimelineTypes.MastodonPublic -> {
                 GuestPublicTimelineRemoteMediator(
                     host = url,
                     locale = locale,
                     local = false,
                 )
             }
-            "MASTODON_LOCAL" -> {
+
+            SubscriptionTimelineTypes.MastodonLocal -> {
                 GuestPublicTimelineRemoteMediator(
                     host = url,
                     locale = locale,

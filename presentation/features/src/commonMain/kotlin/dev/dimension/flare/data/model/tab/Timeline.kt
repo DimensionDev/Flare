@@ -274,7 +274,7 @@ public class TimelineResolver internal constructor(
     private val specs: Map<String, TimelineSpec<out TimelineSpec.Data>> by lazy {
         (
             platformRegistry.platformSpecs
-                .flatMap { it.timelineSpecs } +
+                .flatMap { it.legacyTimelineSpecs } +
                 RssTimelineSpecs.timelineSpecs
         ).distinctBy { it.id }
             .associateBy { it.id }

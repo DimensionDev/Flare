@@ -3,6 +3,8 @@ package dev.dimension.flare.data.platform
 import dev.dimension.flare.common.deeplink.DeepLinkMapping
 import dev.dimension.flare.common.deeplink.DeepLinkPattern
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
+import dev.dimension.flare.data.datasource.microblog.timeline.CommonTimelineSpecs
+import dev.dimension.flare.data.datasource.microblog.timeline.TimelineSpec
 import dev.dimension.flare.data.network.bluesky.BlueskyPlatformDetector
 import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
 import dev.dimension.flare.model.PlatformType
@@ -41,6 +43,7 @@ public data object BlueskySocialPlatformPlugin : SocialPlatformPlugin {
 
 public data object BlueskySocialPlatformSpec : SocialPlatformSpec {
     public override val type: PlatformType = PlatformType.Bluesky
+    public override val timelineSpecs: ImmutableList<TimelineSpec<out TimelineSpec.Data>> = CommonTimelineSpecs.timelineSpecs
     public override val metadata: PlatformTypeMetadata =
         PlatformTypeMetadata(
             displayName = "Bluesky",

@@ -27,7 +27,7 @@ internal data object NostrPlatformSpec : PlatformSpec {
 
     override fun deepLinkPatterns(host: String): ImmutableList<DeepLinkPattern<out DeepLinkMapping.Type>> = persistentListOf()
 
-    override val timelineSpecs: ImmutableList<TimelineSpec<out TimelineSpec.Data>> =
+    override val legacyTimelineSpecs: ImmutableList<TimelineSpec<out TimelineSpec.Data>> =
         persistentListOf(
             CommonTimelineSpecs.home,
         )

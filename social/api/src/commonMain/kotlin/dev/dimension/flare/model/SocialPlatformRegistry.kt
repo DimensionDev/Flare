@@ -5,17 +5,21 @@ import dev.dimension.flare.common.DebugRepository
 import dev.dimension.flare.common.deeplink.DeepLinkMapping
 import dev.dimension.flare.common.deeplink.DeepLinkPattern
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
+import dev.dimension.flare.data.datasource.microblog.timeline.TimelineSpec
 import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiInstance
 import dev.dimension.flare.ui.model.UiInstanceMetadata
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 
 public interface SocialPlatformSpec {
     public val type: PlatformType
     public val metadata: PlatformTypeMetadata
     public val detector: PlatformDetector
+    public val timelineSpecs: ImmutableList<TimelineSpec<out TimelineSpec.Data>>
+        get() = persistentListOf()
 
     public fun agreementUrl(host: String): String?
 

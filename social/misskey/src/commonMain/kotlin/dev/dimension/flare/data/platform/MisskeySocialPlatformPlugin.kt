@@ -4,6 +4,8 @@ import dev.dimension.flare.common.deeplink.DeepLinkMapping
 import dev.dimension.flare.common.deeplink.DeepLinkPattern
 import dev.dimension.flare.common.tryRun
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
+import dev.dimension.flare.data.datasource.microblog.timeline.CommonTimelineSpecs
+import dev.dimension.flare.data.datasource.microblog.timeline.TimelineSpec
 import dev.dimension.flare.data.network.misskey.JoinMisskeyService
 import dev.dimension.flare.data.network.misskey.MisskeyPlatformDetector
 import dev.dimension.flare.data.network.misskey.MisskeyService
@@ -45,6 +47,7 @@ public data object MisskeySocialPlatformPlugin : SocialPlatformPlugin {
 
 public data object MisskeySocialPlatformSpec : SocialPlatformSpec {
     public override val type: PlatformType = PlatformType.Misskey
+    public override val timelineSpecs: ImmutableList<TimelineSpec<out TimelineSpec.Data>> = CommonTimelineSpecs.timelineSpecs
     public override val metadata: PlatformTypeMetadata =
         PlatformTypeMetadata(
             displayName = "Misskey",

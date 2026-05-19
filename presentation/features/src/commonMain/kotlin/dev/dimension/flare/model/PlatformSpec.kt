@@ -24,7 +24,7 @@ import dev.dimension.flare.ui.model.UiInstance
 import kotlinx.collections.immutable.ImmutableList
 
 internal interface PlatformSpec : SocialPlatformSpec {
-    val timelineSpecs: ImmutableList<TimelineSpec<out TimelineSpec.Data>>
+    val legacyTimelineSpecs: ImmutableList<TimelineSpec<out TimelineSpec.Data>>
 
     override fun deepLinkPatterns(host: String): ImmutableList<DeepLinkPattern<out DeepLinkMapping.Type>>
 }

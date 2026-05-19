@@ -77,7 +77,7 @@ internal data object MastodonPlatformSpec : PlatformSpec {
             },
         )
 
-    override val timelineSpecs: ImmutableList<TimelineSpec<out TimelineSpec.Data>> =
+    override val legacyTimelineSpecs: ImmutableList<TimelineSpec<out TimelineSpec.Data>> =
         persistentListOf(
             CommonTimelineSpecs.home,
             CommonTimelineSpecs.discover,

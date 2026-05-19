@@ -5,6 +5,8 @@ import dev.dimension.flare.data.ai.AiCompletionService
 import dev.dimension.flare.data.ai.OpenAIService
 import dev.dimension.flare.data.database.provideAppDatabase
 import dev.dimension.flare.data.database.provideCacheDatabase
+import dev.dimension.flare.data.datasource.microblog.timeline.TimelineCatalog
+import dev.dimension.flare.data.model.tab.TimelinePersistenceMapper
 import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.network.rss.Readability
 import dev.dimension.flare.data.account.AccountRepository
@@ -30,6 +32,7 @@ import org.koin.dsl.module
 internal val commonModule =
     module {
         single<SocialPlatformRegistry> { defaultSocialPlatformRegistry }
+        single { TimelineCatalog(get<SocialPlatformRegistry>().specs.flatMap { it.timelineSpecs }) }
         singleOf(::AccountRepository)
         single(createdAtStart = true) { AccountTabSyncCoordinator(get(), get(), get(), get()) }
         single { provideAppDatabase(get()) }
@@ -63,4 +66,5 @@ internal val commonModule =
         singleOf(::AiCompletionService)
         single<PreTranslationService> { OnlinePreTranslationService(get(), get(), get(), get()) }
         single { TimelineResolver(get()) }
+        single { TimelinePersistenceMapper(get(), get()) }
     }

@@ -48,6 +48,7 @@ kotlin {
                 api(projects.data.ai)
                 api(projects.data.database)
                 api(projects.data.datastore)
+                api(projects.data.draft)
                 api(projects.data.translation)
                 api(projects.data.repository)
                 implementation(projects.data.network)

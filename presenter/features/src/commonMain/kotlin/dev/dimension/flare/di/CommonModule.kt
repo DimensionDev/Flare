@@ -10,9 +10,9 @@ import dev.dimension.flare.data.network.rss.Readability
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.AccountTabSyncCoordinator
 import dev.dimension.flare.data.repository.ApplicationRepository
-import dev.dimension.flare.data.repository.DraftMediaStore
-import dev.dimension.flare.data.repository.DraftRepository
-import dev.dimension.flare.data.repository.DraftSendingRecoveryCoordinator
+import dev.dimension.flare.data.draft.DraftMediaStore
+import dev.dimension.flare.data.draft.DraftRepository
+import dev.dimension.flare.data.draft.DraftSendingRecoveryCoordinator
 import dev.dimension.flare.data.repository.LocalFilterRepository
 import dev.dimension.flare.data.repository.SearchHistoryRepository
 import dev.dimension.flare.data.repository.SettingsRepository

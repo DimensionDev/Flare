@@ -1,0 +1,51 @@
+import dev.dimension.flare.buildlogic.FlarePlatform
+import dev.dimension.flare.buildlogic.flare
+
+plugins {
+    id("dev.dimension.flare.multiplatform-library")
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.kotlin.serialization)
+}
+
+kotlin {
+    flare {
+        namespace = "dev.dimension.flare.data.draft"
+        platforms(
+            FlarePlatform.ANDROID,
+            FlarePlatform.JVM,
+            FlarePlatform.IOS,
+            FlarePlatform.WEB,
+        )
+    }
+
+    compilerOptions {
+        allWarningsAsErrors.set(false)
+    }
+
+    sourceSets {
+        all {
+            languageSettings {
+                optIn("kotlin.uuid.ExperimentalUuidApi")
+            }
+        }
+        val commonMain by getting {
+            dependencies {
+                api(projects.core.common)
+                api(projects.core.model)
+                api(projects.data.database)
+                api(projects.data.datastore)
+                api(projects.social.microblog)
+                api(projects.ui.model)
+                api(libs.kotlinx.coroutines.core)
+                api(libs.okio)
+            }
+        }
+        val commonTest by getting {
+            dependencies {
+                implementation(kotlin("test"))
+                implementation(libs.kotlinx.coroutines.test)
+            }
+        }
+    }
+}

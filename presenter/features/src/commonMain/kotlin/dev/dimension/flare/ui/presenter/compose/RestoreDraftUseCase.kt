@@ -4,7 +4,7 @@ import dev.dimension.flare.data.database.app.model.DraftContent
 import dev.dimension.flare.data.database.app.model.DraftMediaType
 import dev.dimension.flare.data.database.app.model.DraftVisibility
 import dev.dimension.flare.data.repository.AccountRepository
-import dev.dimension.flare.data.repository.DraftRepository
+import dev.dimension.flare.data.draft.DraftRepository
 import dev.dimension.flare.ui.model.UiDraft
 import dev.dimension.flare.ui.model.UiDraftAccount
 import dev.dimension.flare.ui.model.UiDraftMedia
@@ -107,7 +107,7 @@ internal fun DraftContent.DraftReference.toComposeStatus(): ComposeStatus =
         }
     }
 
-private fun dev.dimension.flare.data.repository.DraftGroup.toUiDraftStatus(): UiDraftStatus =
+private fun dev.dimension.flare.data.draft.DraftGroup.toUiDraftStatus(): UiDraftStatus =
     when {
         targets.any { it.status == dev.dimension.flare.data.database.app.model.DraftTargetStatus.SENDING } -> UiDraftStatus.SENDING
         targets.any { it.status == dev.dimension.flare.data.database.app.model.DraftTargetStatus.FAILED } -> UiDraftStatus.FAILED

@@ -3,11 +3,11 @@ package dev.dimension.flare.ui.presenter.compose
 import dev.dimension.flare.data.database.app.model.DraftContent
 import dev.dimension.flare.data.database.app.model.DraftReferenceType
 import dev.dimension.flare.data.database.app.model.DraftVisibility
-import dev.dimension.flare.data.repository.ComposeDraftBundle
-import dev.dimension.flare.data.repository.DraftMediaStore
-import dev.dimension.flare.data.repository.DraftRepository
-import dev.dimension.flare.data.repository.SaveDraftInput
-import dev.dimension.flare.data.repository.SaveDraftTarget
+import dev.dimension.flare.data.draft.ComposeDraftBundle
+import dev.dimension.flare.data.draft.DraftMediaStore
+import dev.dimension.flare.data.draft.DraftRepository
+import dev.dimension.flare.data.draft.SaveDraftInput
+import dev.dimension.flare.data.draft.SaveDraftTarget
 import dev.dimension.flare.ui.model.UiTimelineV2
 
 internal class SaveDraftUseCase(

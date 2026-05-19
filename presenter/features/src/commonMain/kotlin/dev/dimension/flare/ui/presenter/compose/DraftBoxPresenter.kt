@@ -7,7 +7,7 @@ import androidx.compose.runtime.remember
 import dev.dimension.flare.common.InAppNotification
 import dev.dimension.flare.common.Message
 import dev.dimension.flare.data.database.app.model.DraftMediaType
-import dev.dimension.flare.data.repository.DraftRepository
+import dev.dimension.flare.data.draft.DraftRepository
 import dev.dimension.flare.ui.model.UiDraft
 import dev.dimension.flare.ui.model.UiDraftAccount
 import dev.dimension.flare.ui.model.UiDraftMedia
@@ -62,7 +62,7 @@ public class DraftBoxPresenter :
                     .associateBy { it.groupId }
                     .values
                     .sortedWith(
-                        compareBy<dev.dimension.flare.data.repository.DraftGroup>({ it.toUiDraftStatus().sortOrder })
+                        compareBy<dev.dimension.flare.data.draft.DraftGroup>({ it.toUiDraftStatus().sortOrder })
                             .thenByDescending { it.updatedAt },
                     ).mapNotNull { draft ->
                         val accounts =
@@ -166,7 +166,7 @@ private val UiDraftStatus.sortOrder: Int
             UiDraftStatus.DRAFT -> 2
         }
 
-private fun dev.dimension.flare.data.repository.DraftGroup.toUiDraftStatus(): UiDraftStatus =
+private fun dev.dimension.flare.data.draft.DraftGroup.toUiDraftStatus(): UiDraftStatus =
     when {
         targets.any { it.status == dev.dimension.flare.data.database.app.model.DraftTargetStatus.SENDING } -> UiDraftStatus.SENDING
         targets.any { it.status == dev.dimension.flare.data.database.app.model.DraftTargetStatus.FAILED } -> UiDraftStatus.FAILED

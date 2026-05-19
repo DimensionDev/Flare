@@ -12,9 +12,9 @@ import dev.dimension.flare.data.database.app.model.DraftReferenceType
 import dev.dimension.flare.data.database.app.model.DraftVisibility
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.io.PlatformPathProducer
-import dev.dimension.flare.data.repository.ComposeDraftBundle
-import dev.dimension.flare.data.repository.DraftMediaStore
-import dev.dimension.flare.data.repository.DraftRepository
+import dev.dimension.flare.data.draft.ComposeDraftBundle
+import dev.dimension.flare.data.draft.DraftMediaStore
+import dev.dimension.flare.data.draft.DraftRepository
 import dev.dimension.flare.deleteTestRootPath
 import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.MicroBlogKey

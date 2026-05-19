@@ -25,7 +25,7 @@ import okio.SYSTEM
 
 internal actual val platformModule: Module =
     module {
-        single { AppDataStore(get<PlatformPathProducer>()) }
+        single { AppDataStore(get<PlatformPathProducer>(), get<FileStorage>()) }
         singleOf(::DriverFactory)
         singleOf(::AmberIntentLauncherRegistry)
         single<AmberSignerBridge> { AndroidAmberSignerBridge(androidContext(), get()) }

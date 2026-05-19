@@ -27,7 +27,7 @@ import okio.SYSTEM
 
 internal actual val platformModule: Module =
     module {
-        single { AppDataStore(get<PlatformPathProducer>()) }
+        single { AppDataStore(get<PlatformPathProducer>(), get<FileStorage>()) }
         singleOf(::DriverFactory)
         singleOf(::ApplePlatformPathProducer) bind PlatformPathProducer::class
         single<FileStorage> { OkioFileStorage(FileSystem.SYSTEM) }

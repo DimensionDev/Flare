@@ -9,6 +9,7 @@ import dev.dimension.flare.common.protobufSerializer
 import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.datastore.model.ComposeConfigData
 import dev.dimension.flare.data.datastore.model.FlareConfig
+import dev.dimension.flare.data.io.FileStorage
 import dev.dimension.flare.data.io.PlatformPathProducer
 import dev.dimension.flare.data.model.SettingsExport
 import dev.dimension.flare.data.model.SettingsImportData
@@ -39,6 +40,7 @@ import kotlinx.serialization.json.jsonObject
 
 public class AppDataStore(
     private val platformPathProducer: PlatformPathProducer,
+    private val fileStorage: FileStorage,
 ) {
     private val appearanceMigrationMutex = Mutex()
     private var appearanceMigrationCompleted = false
@@ -123,7 +125,12 @@ public class AppDataStore(
         if (appearanceMigrationCompleted) return
         appearanceMigrationMutex.withLock {
             if (appearanceMigrationCompleted) return
-            migrateAppearanceV1ToV2(platformPathProducer, appearanceBagStore)
+            migrateAppearanceV1ToV2(
+                fileStorage = fileStorage,
+                legacyAppearanceSettingsPath =
+                    platformPathProducer.dataStoreFile(LEGACY_APPEARANCE_SETTINGS_FILE_NAME),
+                bagStore = appearanceBagStore,
+            )
             appearanceMigrationCompleted = true
         }
     }
@@ -167,7 +174,8 @@ public class AppDataStore(
         tabSettingsMigrationMutex.withLock {
             if (tabSettingsMigrationCompleted) return
             migrateTabSettingsV1ToV2(
-                pathProducer = platformPathProducer,
+                fileStorage = fileStorage,
+                legacyTabSettingsPath = platformPathProducer.dataStoreFile(LEGACY_TAB_SETTINGS_FILE_NAME),
                 tabSettingsV2Store = tabSettingsV2Store,
             )
             tabSettingsMigrationCompleted = true
@@ -245,3 +253,6 @@ public class AppDataStore(
                 ),
         )
 }
+
+private const val LEGACY_APPEARANCE_SETTINGS_FILE_NAME = "appearance_settings.pb"
+private const val LEGACY_TAB_SETTINGS_FILE_NAME = "tab_settings.pb"

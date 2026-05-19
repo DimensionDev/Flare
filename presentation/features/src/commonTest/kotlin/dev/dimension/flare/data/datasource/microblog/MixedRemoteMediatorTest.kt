@@ -26,6 +26,7 @@ import dev.dimension.flare.data.database.cache.mapper.TimelinePagingMapper
 import dev.dimension.flare.data.datasource.microblog.paging.TimelineRemoteMediator
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.datastore.model.AppSettings
+import dev.dimension.flare.data.io.InMemoryFileStorage
 import dev.dimension.flare.data.io.PlatformPathProducer
 import dev.dimension.flare.data.model.tab.TimelineMergePolicy
 import dev.dimension.flare.data.ai.AiCompletionService
@@ -657,7 +658,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
     @Test
     fun refreshSchedulesPreTranslationForRootAndReplyReference() =
         runTest {
-            val appDataStore = AppDataStore(pathProducer)
+            val appDataStore = AppDataStore(pathProducer, InMemoryFileStorage())
             appDataStore.updateAppSettings {
                 copy(
                     language = Locale.language,
@@ -765,7 +766,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
     @Test
     fun homeTimelineSkipsPreTranslationForLongTextPosts() =
         runTest {
-            val appDataStore = AppDataStore(pathProducer)
+            val appDataStore = AppDataStore(pathProducer, InMemoryFileStorage())
             appDataStore.updateAppSettings {
                 copy(
                     language = Locale.language,
@@ -847,7 +848,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
     @Test
     fun homeTimelineSkipsAiTranslationWhenSourceLanguageMatchesTargetLanguage() =
         runTest {
-            val appDataStore = AppDataStore(pathProducer)
+            val appDataStore = AppDataStore(pathProducer, InMemoryFileStorage())
             appDataStore.updateAppSettings {
                 copy(
                     language = Locale.language,
@@ -937,7 +938,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
     fun homeTimelineRequeuesExcludedLanguageSkippedTranslationAfterExclusionRemoved() =
         runBlocking {
             val excludedLanguage = nonTargetLanguageTag()
-            val appDataStore = AppDataStore(pathProducer)
+            val appDataStore = AppDataStore(pathProducer, InMemoryFileStorage())
             appDataStore.updateAppSettings {
                 copy(
                     language = Locale.language,
@@ -1021,7 +1022,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
     @Test
     fun homeTimelineAcceptsAiSkippedTranslationResult() =
         runBlocking {
-            val appDataStore = AppDataStore(pathProducer)
+            val appDataStore = AppDataStore(pathProducer, InMemoryFileStorage())
             appDataStore.updateAppSettings {
                 copy(
                     language = Locale.language,
@@ -1113,7 +1114,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
     @Test
     fun homeTimelineSkipsPreTranslationForNonTranslatableOnlyPosts() =
         runTest {
-            val appDataStore = AppDataStore(pathProducer)
+            val appDataStore = AppDataStore(pathProducer, InMemoryFileStorage())
             appDataStore.updateAppSettings {
                 copy(
                     language = Locale.language,
@@ -1220,7 +1221,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                 ),
             )
 
-            val appDataStore = AppDataStore(pathProducer)
+            val appDataStore = AppDataStore(pathProducer, InMemoryFileStorage())
             appDataStore.updateAppSettings {
                 copy(
                     language = Locale.language,
@@ -1259,7 +1260,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
     @Test
     fun queuedPreTranslationWritesPendingBeforeExecutionStarts() {
         runBlocking {
-            val appDataStore = AppDataStore(pathProducer)
+            val appDataStore = AppDataStore(pathProducer, InMemoryFileStorage())
             appDataStore.updateAppSettings {
                 copy(
                     language = Locale.language,
@@ -1335,7 +1336,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
     @Test
     fun providerSwitchCancelsOldQueueAndLetsNewProviderCompleteImmediately() {
         runBlocking {
-            val appDataStore = AppDataStore(pathProducer)
+            val appDataStore = AppDataStore(pathProducer, InMemoryFileStorage())
             appDataStore.updateAppSettings {
                 copy(
                     language = Locale.language,

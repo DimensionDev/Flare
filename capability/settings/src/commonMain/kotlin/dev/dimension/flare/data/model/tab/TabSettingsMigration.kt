@@ -1,7 +1,7 @@
 package dev.dimension.flare.data.model.tab
 
 import androidx.datastore.core.DataStore
-import dev.dimension.flare.data.io.PlatformPathProducer
+import dev.dimension.flare.data.io.FileStorage
 import dev.dimension.flare.data.model.AllRssTimelineTabItem
 import dev.dimension.flare.data.model.Bluesky
 import dev.dimension.flare.data.model.HomeTimelineTabItem
@@ -18,6 +18,9 @@ import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.data.model.TitleType
 import dev.dimension.flare.data.model.VVo
 import dev.dimension.flare.data.model.XQT
+import dev.dimension.flare.data.model.deleteLegacySettingsFile
+import dev.dimension.flare.data.model.legacySettingsFileExists
+import dev.dimension.flare.data.model.readLegacySettingsFile
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiIcon
@@ -28,25 +31,28 @@ import kotlinx.coroutines.flow.first
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.decodeFromByteArray
 import kotlinx.serialization.encodeToHexString
 import kotlinx.serialization.protobuf.ProtoBuf
+import okio.Path
 
 @OptIn(ExperimentalSerializationApi::class)
 public suspend fun migrateTabSettingsV1ToV2(
-    pathProducer: PlatformPathProducer,
+    fileStorage: FileStorage,
+    legacyTabSettingsPath: Path,
     tabSettingsV2Store: DataStore<TabSettingsV2>,
 ) {
-    if (!legacyTabSettingsExists(pathProducer)) return
+    if (!legacyTabSettingsExists(fileStorage, legacyTabSettingsPath)) return
     if (tabSettingsV2Store.data
             .first()
             .homeSlots
             .isNotEmpty()
     ) {
-        deleteLegacyTabSettings(pathProducer)
+        deleteLegacyTabSettings(fileStorage, legacyTabSettingsPath)
         return
     }
 
-    val v1 = readLegacyTabSettings(pathProducer)
+    val v1 = readLegacyTabSettings(fileStorage, legacyTabSettingsPath)
     if (v1 != null) {
         val migratedSlots = v1.toTabSettingsV2().homeSlots
         if (migratedSlots.isNotEmpty()) {
@@ -59,14 +65,32 @@ public suspend fun migrateTabSettingsV1ToV2(
             }
         }
     }
-    deleteLegacyTabSettings(pathProducer)
+    deleteLegacyTabSettings(fileStorage, legacyTabSettingsPath)
 }
 
-internal expect suspend fun legacyTabSettingsExists(pathProducer: PlatformPathProducer): Boolean
+internal suspend fun legacyTabSettingsExists(
+    fileStorage: FileStorage,
+    path: Path,
+): Boolean = legacySettingsFileExists(fileStorage, path)
 
-internal expect suspend fun readLegacyTabSettings(pathProducer: PlatformPathProducer): TabSettings?
+@OptIn(ExperimentalSerializationApi::class)
+internal suspend fun readLegacyTabSettings(
+    fileStorage: FileStorage,
+    path: Path,
+): TabSettings? =
+    readLegacySettingsFile(fileStorage, path)
+        ?.let { bytes ->
+            runCatching {
+                ProtoBuf.decodeFromByteArray<TabSettings>(bytes)
+            }.getOrNull()
+        }
 
-internal expect suspend fun deleteLegacyTabSettings(pathProducer: PlatformPathProducer)
+internal suspend fun deleteLegacyTabSettings(
+    fileStorage: FileStorage,
+    path: Path,
+) {
+    deleteLegacySettingsFile(fileStorage, path)
+}
 
 internal fun TabSettings.toTabSettingsV2(): TabSettingsV2 =
     TabSettingsV2(

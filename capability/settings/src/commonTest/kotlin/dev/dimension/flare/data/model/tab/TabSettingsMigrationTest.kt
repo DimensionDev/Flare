@@ -3,6 +3,7 @@ package dev.dimension.flare.data.model.tab
 import androidx.datastore.core.DataStoreFactory
 import androidx.datastore.core.okio.OkioStorage
 import dev.dimension.flare.common.protobufSerializer
+import dev.dimension.flare.data.io.OkioFileStorage
 import dev.dimension.flare.data.io.PlatformPathProducer
 import dev.dimension.flare.data.model.AllRssTimelineTabItem
 import dev.dimension.flare.data.model.Bluesky
@@ -264,7 +265,11 @@ class TabSettingsMigrationTest {
                         ),
                 )
 
-            migrateTabSettingsV1ToV2(pathProducer, store)
+            migrateTabSettingsV1ToV2(
+                fileStorage = OkioFileStorage(fs),
+                legacyTabSettingsPath = oldPath,
+                tabSettingsV2Store = store,
+            )
 
             val settings = store.data.first()
             assertEquals(

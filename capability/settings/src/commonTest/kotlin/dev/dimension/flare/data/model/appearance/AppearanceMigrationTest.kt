@@ -3,6 +3,7 @@ package dev.dimension.flare.data.model.appearance
 import androidx.datastore.core.DataStoreFactory
 import androidx.datastore.core.okio.OkioStorage
 import dev.dimension.flare.common.protobufSerializer
+import dev.dimension.flare.data.io.OkioFileStorage
 import dev.dimension.flare.data.io.PlatformPathProducer
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
@@ -56,7 +57,11 @@ class AppearanceMigrationTest {
                         ),
                 )
 
-            migrateAppearanceV1ToV2(pathProducer, store)
+            migrateAppearanceV1ToV2(
+                fileStorage = OkioFileStorage(fs),
+                legacyAppearanceSettingsPath = oldPath,
+                bagStore = store,
+            )
 
             assertEquals(
                 imported.toBag(),

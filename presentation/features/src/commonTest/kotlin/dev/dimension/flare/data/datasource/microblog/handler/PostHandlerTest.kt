@@ -20,6 +20,7 @@ import dev.dimension.flare.data.datasource.microblog.loader.PostLoader
 import dev.dimension.flare.data.database.cache.mapper.TimelinePagingMapper
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.datastore.model.AppSettings
+import dev.dimension.flare.data.io.InMemoryFileStorage
 import dev.dimension.flare.data.io.PlatformPathProducer
 import dev.dimension.flare.data.ai.AiCompletionService
 import dev.dimension.flare.data.ai.OpenAIService
@@ -98,7 +99,7 @@ class PostHandlerTest : RobolectricTest() {
                 .setQueryCoroutineContext(Dispatchers.Unconfined)
                 .build()
 
-        appDataStore = AppDataStore(pathProducer)
+        appDataStore = AppDataStore(pathProducer, InMemoryFileStorage())
         fakeLoader = FakePostLoader()
         onDeviceAI = FakePostOnDeviceAI()
     }

@@ -1,41 +1,65 @@
 package dev.dimension.flare.data.model.appearance
 
 import androidx.datastore.core.DataStore
-import dev.dimension.flare.data.io.PlatformPathProducer
+import dev.dimension.flare.data.io.FileStorage
+import dev.dimension.flare.data.model.deleteLegacySettingsFile
+import dev.dimension.flare.data.model.legacySettingsFileExists
+import dev.dimension.flare.data.model.readLegacySettingsFile
 import kotlinx.coroutines.flow.first
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.decodeFromByteArray
 import kotlinx.serialization.encodeToHexString
 import kotlinx.serialization.protobuf.ProtoBuf
+import okio.Path
 
 public suspend fun migrateAppearanceV1ToV2(
-    pathProducer: PlatformPathProducer,
+    fileStorage: FileStorage,
+    legacyAppearanceSettingsPath: Path,
     bagStore: DataStore<AppearanceBag>,
 ) {
-    if (!legacyAppearanceSettingsExists(pathProducer)) return
+    if (!legacyAppearanceSettingsExists(fileStorage, legacyAppearanceSettingsPath)) return
     if (bagStore.data
             .first()
             .entries
             .isNotEmpty()
     ) {
-        deleteLegacyAppearanceSettings(pathProducer)
+        deleteLegacyAppearanceSettings(fileStorage, legacyAppearanceSettingsPath)
         return
     }
 
-    val v1 = readLegacyAppearanceSettings(pathProducer)
+    val v1 = readLegacyAppearanceSettings(fileStorage, legacyAppearanceSettingsPath)
     if (v1 != null) {
         bagStore.updateData { v1.toBag() }
     }
-    deleteLegacyAppearanceSettings(pathProducer)
+    deleteLegacyAppearanceSettings(fileStorage, legacyAppearanceSettingsPath)
 }
 
-internal expect suspend fun legacyAppearanceSettingsExists(pathProducer: PlatformPathProducer): Boolean
+internal suspend fun legacyAppearanceSettingsExists(
+    fileStorage: FileStorage,
+    path: Path,
+): Boolean = legacySettingsFileExists(fileStorage, path)
 
-internal expect suspend fun readLegacyAppearanceSettings(pathProducer: PlatformPathProducer): LegacyAppearanceSettings?
+@OptIn(ExperimentalSerializationApi::class)
+internal suspend fun readLegacyAppearanceSettings(
+    fileStorage: FileStorage,
+    path: Path,
+): LegacyAppearanceSettings? =
+    readLegacySettingsFile(fileStorage, path)
+        ?.let { bytes ->
+            runCatching {
+                ProtoBuf.decodeFromByteArray<LegacyAppearanceSettings>(bytes)
+            }.getOrNull()
+        }
 
-internal expect suspend fun deleteLegacyAppearanceSettings(pathProducer: PlatformPathProducer)
+internal suspend fun deleteLegacyAppearanceSettings(
+    fileStorage: FileStorage,
+    path: Path,
+) {
+    deleteLegacySettingsFile(fileStorage, path)
+}
 
 @Serializable
 internal data class LegacyAppearanceSettings(

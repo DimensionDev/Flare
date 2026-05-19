@@ -22,6 +22,7 @@ import dev.dimension.flare.data.database.cache.model.translationPayload
 import dev.dimension.flare.data.datasource.microblog.loader.UserLoader
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.datastore.model.AppSettings
+import dev.dimension.flare.data.io.InMemoryFileStorage
 import dev.dimension.flare.data.io.PlatformPathProducer
 import dev.dimension.flare.data.ai.AiCompletionService
 import dev.dimension.flare.data.ai.OpenAIService
@@ -98,7 +99,7 @@ class UserHandlerTest : RobolectricTest() {
                 .setDriver(BundledSQLiteDriver())
                 .setQueryCoroutineContext(Dispatchers.Unconfined)
                 .build()
-        appDataStore = AppDataStore(pathProducer)
+        appDataStore = AppDataStore(pathProducer, InMemoryFileStorage())
 
         loader = FakeUserLoader()
         onDeviceAI = FakeOnDeviceAI()

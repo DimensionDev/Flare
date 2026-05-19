@@ -3,6 +3,7 @@ package dev.dimension.flare.data.datastore
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.datastore.model.AppSettings
+import dev.dimension.flare.data.io.OkioFileStorage
 import dev.dimension.flare.data.io.PlatformPathProducer
 import dev.dimension.flare.data.model.SettingsExport
 import dev.dimension.flare.data.model.appearance.AppearanceBag
@@ -89,9 +90,9 @@ class AppDataStoreTest {
                     groupId: String,
                     fileName: String,
                 ): Path = root.resolve(groupId).resolve(fileName)
-            }
+        }
         try {
-            block(AppDataStore(pathProducer))
+            block(AppDataStore(pathProducer, OkioFileStorage(fs)))
         } finally {
             fs.deleteRecursively(root)
         }

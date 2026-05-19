@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.presenter
 import dev.dimension.flare.createTestRootPath
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.datastore.model.AppSettings
+import dev.dimension.flare.data.io.InMemoryFileStorage
 import dev.dimension.flare.data.io.PlatformPathProducer
 import dev.dimension.flare.data.model.SettingsExport
 import dev.dimension.flare.data.model.Theme
@@ -64,7 +65,7 @@ class SettingsImportExportPresenterTest {
                     fileName: String,
                 ): Path = root.resolve(groupId).resolve(fileName)
             }
-        appDataStore = AppDataStore(pathProducer)
+        appDataStore = AppDataStore(pathProducer, InMemoryFileStorage())
         startKoin {
             modules(
                 module {

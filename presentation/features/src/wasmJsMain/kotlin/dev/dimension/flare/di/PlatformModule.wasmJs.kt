@@ -21,7 +21,7 @@ import kotlin.time.Instant
 
 internal actual val platformModule: Module =
     module {
-        single { AppDataStore(get<PlatformPathProducer>()) }
+        single { AppDataStore(get<PlatformPathProducer>(), get<FileStorage>()) }
         singleOf(::DriverFactory)
         singleOf(::WebPlatformPathProducer) bind PlatformPathProducer::class
         single<FileStorage> { InMemoryFileStorage() }

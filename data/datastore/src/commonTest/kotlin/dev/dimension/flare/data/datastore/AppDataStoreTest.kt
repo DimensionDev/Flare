@@ -16,7 +16,7 @@ import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class SettingsDataStoreTest {
+class AppDataStoreTest {
     @Test
     fun exposesSettingsReadWriteInterface() =
         runTest {
@@ -32,11 +32,7 @@ class SettingsDataStoreTest {
                         fileName: String,
                     ): Path = root.resolve(groupId).resolve(fileName)
                 }
-            val store =
-                SettingsDataStore(
-                    pathProducer = pathProducer,
-                    appDataStore = AppDataStore(pathProducer),
-                )
+            val store = AppDataStore(pathProducer)
 
             store.updateAppSettings {
                 copy(version = "settings-store")

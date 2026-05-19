@@ -2,7 +2,6 @@ package dev.dimension.flare.ui.presenter.home
 
 import dev.dimension.flare.createTestRootPath
 import dev.dimension.flare.data.datastore.AppDataStore
-import dev.dimension.flare.data.datastore.SettingsDataStore
 import dev.dimension.flare.data.io.PlatformPathProducer
 import dev.dimension.flare.data.model.tab.TabSettingsV2
 import dev.dimension.flare.data.model.tab.TimelineFilterConfig
@@ -49,10 +48,7 @@ class TimelinePresenterBindingTest {
             }
         settingsRepository =
             SettingsRepository(
-                SettingsDataStore(
-                    pathProducer = pathProducer,
-                    appDataStore = AppDataStore(pathProducer),
-                ),
+                AppDataStore(pathProducer),
             )
     }
 

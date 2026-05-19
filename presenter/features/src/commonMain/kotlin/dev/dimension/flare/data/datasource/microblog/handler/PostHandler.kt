@@ -7,7 +7,7 @@ import dev.dimension.flare.data.database.cache.mapper.saveToDatabase
 import dev.dimension.flare.data.database.cache.model.DbStatus
 import dev.dimension.flare.data.datasource.microblog.loader.PostLoader
 import dev.dimension.flare.data.database.cache.mapper.TimelinePagingMapper
-import dev.dimension.flare.data.datastore.SettingsDataStore
+import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.common.tryRun
 import dev.dimension.flare.data.translation.PreTranslationService
 import dev.dimension.flare.data.translation.TranslationSettingsSupport
@@ -30,11 +30,11 @@ internal class PostHandler(
 ) : KoinComponent {
     private val database: CacheDatabase by inject()
     private val coroutineScope: CoroutineScope by inject()
-    private val settingsDataStore: SettingsDataStore by inject()
+    private val appDataStore: AppDataStore by inject()
     private val preTranslationService: PreTranslationService by inject()
 
     private val translationDisplayFlow by lazy {
-        TranslationSettingsSupport.displayOptionsFlow(settingsDataStore)
+        TranslationSettingsSupport.displayOptionsFlow(appDataStore)
     }
 
     fun post(postKey: MicroBlogKey): Cacheable<UiTimelineV2> {

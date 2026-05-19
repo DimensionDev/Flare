@@ -1,7 +1,7 @@
 package dev.dimension.flare.data.repository
 
 import androidx.compose.runtime.Stable
-import dev.dimension.flare.data.datastore.SettingsDataStore
+import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.model.appearance.AppearanceBag
 import dev.dimension.flare.data.model.appearance.AppearanceKey
@@ -19,10 +19,10 @@ import kotlinx.coroutines.flow.map
 
 @Stable
 public class SettingsRepository(
-    private val settingsDataStore: SettingsDataStore,
+    private val appDataStore: AppDataStore,
 ) {
     public val appearanceBag: Flow<AppearanceBag> by lazy {
-        settingsDataStore.appearanceBag
+        appDataStore.appearanceBag
     }
 
     public val appearancePatch: Flow<AppearancePatch> by lazy {
@@ -41,11 +41,11 @@ public class SettingsRepository(
             .distinctUntilChanged()
     }
     public val appSettings: Flow<AppSettings> by lazy {
-        settingsDataStore.appSettings
+        appDataStore.appSettings
     }
 
     public suspend fun ensureAppearanceMigrated() {
-        settingsDataStore.ensureAppearanceMigrated()
+        appDataStore.ensureAppearanceMigrated()
     }
 
     public suspend fun <T : Any> updateAppearance(
@@ -56,7 +56,7 @@ public class SettingsRepository(
     }
 
     public suspend fun updateAppearance(block: AppearancePatch.() -> AppearancePatch) {
-        settingsDataStore.updateAppearanceBag {
+        appDataStore.updateAppearanceBag {
             toPatch().block().toBag()
         }
     }
@@ -66,26 +66,26 @@ public class SettingsRepository(
     }
 
     public suspend fun replaceAppearance(patch: AppearancePatch) {
-        settingsDataStore.replaceAppearanceBag(patch.toBag())
+        appDataStore.replaceAppearanceBag(patch.toBag())
     }
 
     public suspend fun replaceAppearance(bag: AppearanceBag) {
-        settingsDataStore.replaceAppearanceBag(bag)
+        appDataStore.replaceAppearanceBag(bag)
     }
 
     public val tabSettingsV2: Flow<TabSettingsV2> by lazy {
-        settingsDataStore.tabSettingsV2
+        appDataStore.tabSettingsV2
     }
 
     public suspend fun updateTabSettingsV2(block: TabSettingsV2.() -> TabSettingsV2) {
-        settingsDataStore.updateTabSettingsV2(block)
+        appDataStore.updateTabSettingsV2(block)
     }
 
     public suspend fun ensureTabSettingsMigrated() {
-        settingsDataStore.ensureTabSettingsMigrated()
+        appDataStore.ensureTabSettingsMigrated()
     }
 
     public suspend fun updateAppSettings(block: AppSettings.() -> AppSettings) {
-        settingsDataStore.updateAppSettings(block)
+        appDataStore.updateAppSettings(block)
     }
 }

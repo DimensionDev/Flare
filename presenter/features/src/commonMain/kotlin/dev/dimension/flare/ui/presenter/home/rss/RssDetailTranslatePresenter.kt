@@ -6,7 +6,7 @@ import androidx.compose.runtime.produceState
 import com.fleeksoft.ksoup.nodes.Node
 import com.fleeksoft.ksoup.nodes.TextNode
 import dev.dimension.flare.common.Locale
-import dev.dimension.flare.data.datastore.SettingsDataStore
+import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.ai.AiCompletionService
 import dev.dimension.flare.data.translation.AiPlaceholderTranslationSupport
@@ -38,7 +38,7 @@ public class RssDetailTranslatePresenter(
     private val targetLanguage: String = Locale.language,
 ) : PresenterBase<RssDetailTranslatePresenter.State>(),
     KoinComponent {
-    private val settingsDataStore: SettingsDataStore by inject()
+    private val appDataStore: AppDataStore by inject()
     private val aiCompletionService: AiCompletionService by inject()
 
     @Immutable
@@ -64,7 +64,7 @@ public class RssDetailTranslatePresenter(
     private suspend fun translate(): Pair<UiState<String>, UiState<String>> {
         val settings =
             runCatching {
-                settingsDataStore.appSettings.first()
+                appDataStore.appSettings.first()
             }.getOrElse {
                 return UiState.Error<String>(it) to UiState.Error<String>(it)
             }

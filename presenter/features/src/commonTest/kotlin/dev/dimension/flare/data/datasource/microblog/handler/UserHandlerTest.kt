@@ -21,7 +21,6 @@ import dev.dimension.flare.data.database.cache.model.translationEntityKey
 import dev.dimension.flare.data.database.cache.model.translationPayload
 import dev.dimension.flare.data.datasource.microblog.loader.UserLoader
 import dev.dimension.flare.data.datastore.AppDataStore
-import dev.dimension.flare.data.datastore.SettingsDataStore
 import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.io.PlatformPathProducer
 import dev.dimension.flare.data.ai.AiCompletionService
@@ -82,7 +81,6 @@ class UserHandlerTest : RobolectricTest() {
 
     private lateinit var db: CacheDatabase
     private lateinit var appDataStore: AppDataStore
-    private lateinit var settingsDataStore: SettingsDataStore
     private lateinit var loader: FakeUserLoader
     private lateinit var handler: UserHandler
     private lateinit var onDeviceAI: FakeOnDeviceAI
@@ -101,7 +99,6 @@ class UserHandlerTest : RobolectricTest() {
                 .setQueryCoroutineContext(Dispatchers.Unconfined)
                 .build()
         appDataStore = AppDataStore(pathProducer)
-        settingsDataStore = SettingsDataStore(pathProducer, appDataStore)
 
         loader = FakeUserLoader()
         onDeviceAI = FakeOnDeviceAI()
@@ -111,7 +108,6 @@ class UserHandlerTest : RobolectricTest() {
                 module {
                     single { db }
                     single { appDataStore }
-                    single { settingsDataStore }
                     single<CoroutineScope> { CoroutineScope(Dispatchers.Unconfined) }
                     single<OnDeviceAI> { onDeviceAI }
                     single { OpenAIService() }
@@ -256,7 +252,7 @@ class UserHandlerTest : RobolectricTest() {
                     content = profile,
                 ),
             )
-            settingsDataStore.updateAppSettings {
+            appDataStore.updateAppSettings {
                 copy(
                     language = "zh-CN",
                     translateConfig = aiPreTranslateConfig(),
@@ -295,7 +291,7 @@ class UserHandlerTest : RobolectricTest() {
                     description = "Original profile bio".toUiPlainText(),
                 )
             loader.nextById = expected
-            settingsDataStore.updateAppSettings {
+            appDataStore.updateAppSettings {
                 copy(
                     language = "zh-CN",
                     translateConfig = aiPreTranslateConfig(),
@@ -333,7 +329,7 @@ class UserHandlerTest : RobolectricTest() {
                     sourceLanguages = persistentListOf(excludedLanguage),
                 )
             loader.nextById = expected
-            settingsDataStore.updateAppSettings {
+            appDataStore.updateAppSettings {
                 copy(
                     language = "zh-CN",
                     translateConfig =
@@ -374,7 +370,7 @@ class UserHandlerTest : RobolectricTest() {
                     description = "Retry profile bio".toUiPlainText(),
                 )
             loader.nextById = expected
-            settingsDataStore.updateAppSettings {
+            appDataStore.updateAppSettings {
                 copy(
                     language = "zh-CN",
                     translateConfig = aiPreTranslateConfig(),
@@ -431,7 +427,7 @@ class UserHandlerTest : RobolectricTest() {
                     description = "Auto retry profile bio".toUiPlainText(),
                 )
             loader.nextById = expected
-            settingsDataStore.updateAppSettings {
+            appDataStore.updateAppSettings {
                 copy(
                     language = "zh-CN",
                     translateConfig = aiPreTranslateConfig(),

@@ -9,7 +9,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import dev.dimension.flare.common.Locale
 import dev.dimension.flare.common.decodeJson
-import dev.dimension.flare.data.datastore.SettingsDataStore
+import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.ai.AiCompletionService
 import dev.dimension.flare.common.tryRun
 import dev.dimension.flare.data.translation.AiPlaceholderTranslationSupport
@@ -35,7 +35,7 @@ import org.koin.core.component.inject
 public class AiTranslationTestPresenter :
     PresenterBase<AiTranslationTestPresenter.State>(),
     KoinComponent {
-    private val settingsDataStore by inject<SettingsDataStore>()
+    private val appDataStore by inject<AppDataStore>()
     private val aiCompletionService by inject<AiCompletionService>()
 
     @Immutable
@@ -69,7 +69,7 @@ public class AiTranslationTestPresenter :
                     translatedText = null
                     val result =
                         tryRun {
-                            val settings = settingsDataStore.appSettings.first()
+                            val settings = appDataStore.appSettings.first()
                             val targetLanguage = Locale.language
                             val sourceJson = sampleText.toTranslationJson(targetLanguage)
                             val promptTemplate =

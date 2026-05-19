@@ -25,7 +25,6 @@ import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.database.cache.mapper.TimelinePagingMapper
 import dev.dimension.flare.data.datasource.microblog.paging.TimelineRemoteMediator
 import dev.dimension.flare.data.datastore.AppDataStore
-import dev.dimension.flare.data.datastore.SettingsDataStore
 import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.io.PlatformPathProducer
 import dev.dimension.flare.data.model.tab.TimelineMergePolicy
@@ -659,7 +658,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
     fun refreshSchedulesPreTranslationForRootAndReplyReference() =
         runTest {
             val appDataStore = AppDataStore(pathProducer)
-            SettingsDataStore(pathProducer, appDataStore).updateAppSettings {
+            appDataStore.updateAppSettings {
                 copy(
                     language = Locale.language,
                     translateConfig = aiPreTranslateConfig(),
@@ -672,7 +671,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
             val preTranslationService: PreTranslationService =
                 OnlinePreTranslationService(
                     database = db,
-                    settingsDataStore = SettingsDataStore(pathProducer, appDataStore),
+                    appDataStore = appDataStore,
                     aiCompletionService = AiCompletionService(OpenAIService(), TestOnDeviceAI()),
                     coroutineScope = CoroutineScope(Dispatchers.Unconfined),
                 )
@@ -767,7 +766,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
     fun homeTimelineSkipsPreTranslationForLongTextPosts() =
         runTest {
             val appDataStore = AppDataStore(pathProducer)
-            SettingsDataStore(pathProducer, appDataStore).updateAppSettings {
+            appDataStore.updateAppSettings {
                 copy(
                     language = Locale.language,
                     translateConfig = aiPreTranslateConfig(),
@@ -780,7 +779,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
             val preTranslationService: PreTranslationService =
                 OnlinePreTranslationService(
                     database = db,
-                    settingsDataStore = SettingsDataStore(pathProducer, appDataStore),
+                    appDataStore = appDataStore,
                     aiCompletionService = AiCompletionService(OpenAIService(), TestOnDeviceAI()),
                     coroutineScope = CoroutineScope(Dispatchers.Unconfined),
                 )
@@ -849,7 +848,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
     fun homeTimelineSkipsAiTranslationWhenSourceLanguageMatchesTargetLanguage() =
         runTest {
             val appDataStore = AppDataStore(pathProducer)
-            SettingsDataStore(pathProducer, appDataStore).updateAppSettings {
+            appDataStore.updateAppSettings {
                 copy(
                     language = Locale.language,
                     translateConfig = aiPreTranslateConfig(),
@@ -862,7 +861,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
             val preTranslationService: PreTranslationService =
                 OnlinePreTranslationService(
                     database = db,
-                    settingsDataStore = SettingsDataStore(pathProducer, appDataStore),
+                    appDataStore = appDataStore,
                     aiCompletionService = AiCompletionService(OpenAIService(), TestOnDeviceAI()),
                     coroutineScope = CoroutineScope(Dispatchers.Unconfined),
                 )
@@ -939,7 +938,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
         runBlocking {
             val excludedLanguage = nonTargetLanguageTag()
             val appDataStore = AppDataStore(pathProducer)
-            SettingsDataStore(pathProducer, appDataStore).updateAppSettings {
+            appDataStore.updateAppSettings {
                 copy(
                     language = Locale.language,
                     translateConfig =
@@ -956,7 +955,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
             val preTranslationService: PreTranslationService =
                 OnlinePreTranslationService(
                     database = db,
-                    settingsDataStore = SettingsDataStore(pathProducer, appDataStore),
+                    appDataStore = appDataStore,
                     aiCompletionService = AiCompletionService(OpenAIService(), TestOnDeviceAI()),
                     coroutineScope = scope,
                 )
@@ -990,7 +989,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                     }
                 assertEquals(PreTranslationStoreSupport.SKIPPED_EXCLUDED_LANGUAGE_REASON, skippedTranslation.statusReason)
 
-                SettingsDataStore(pathProducer, appDataStore).updateAppSettings {
+                appDataStore.updateAppSettings {
                     copy(
                         translateConfig =
                             translateConfig.copy(
@@ -1023,7 +1022,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
     fun homeTimelineAcceptsAiSkippedTranslationResult() =
         runBlocking {
             val appDataStore = AppDataStore(pathProducer)
-            SettingsDataStore(pathProducer, appDataStore).updateAppSettings {
+            appDataStore.updateAppSettings {
                 copy(
                     language = Locale.language,
                     translateConfig = aiPreTranslateConfig(),
@@ -1037,7 +1036,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
             val preTranslationService: PreTranslationService =
                 OnlinePreTranslationService(
                     database = db,
-                    settingsDataStore = SettingsDataStore(pathProducer, appDataStore),
+                    appDataStore = appDataStore,
                     aiCompletionService = AiCompletionService(OpenAIService(), SkippingOnDeviceAI()),
                     coroutineScope = scope,
                 )
@@ -1115,7 +1114,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
     fun homeTimelineSkipsPreTranslationForNonTranslatableOnlyPosts() =
         runTest {
             val appDataStore = AppDataStore(pathProducer)
-            SettingsDataStore(pathProducer, appDataStore).updateAppSettings {
+            appDataStore.updateAppSettings {
                 copy(
                     language = Locale.language,
                     translateConfig = aiPreTranslateConfig(),
@@ -1128,7 +1127,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
             val preTranslationService: PreTranslationService =
                 OnlinePreTranslationService(
                     database = db,
-                    settingsDataStore = SettingsDataStore(pathProducer, appDataStore),
+                    appDataStore = appDataStore,
                     aiCompletionService = AiCompletionService(OpenAIService(), TestOnDeviceAI()),
                     coroutineScope = CoroutineScope(Dispatchers.Unconfined),
                 )
@@ -1222,7 +1221,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
             )
 
             val appDataStore = AppDataStore(pathProducer)
-            SettingsDataStore(pathProducer, appDataStore).updateAppSettings {
+            appDataStore.updateAppSettings {
                 copy(
                     language = Locale.language,
                     translateConfig = aiPreTranslateConfig(),
@@ -1236,7 +1235,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
 
             OnlinePreTranslationService(
                 database = db,
-                settingsDataStore = SettingsDataStore(pathProducer, appDataStore),
+                appDataStore = appDataStore,
                 aiCompletionService = AiCompletionService(OpenAIService(), TestOnDeviceAI()),
                 coroutineScope = scope,
             )
@@ -1261,7 +1260,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
     fun queuedPreTranslationWritesPendingBeforeExecutionStarts() {
         runBlocking {
             val appDataStore = AppDataStore(pathProducer)
-            SettingsDataStore(pathProducer, appDataStore).updateAppSettings {
+            appDataStore.updateAppSettings {
                 copy(
                     language = Locale.language,
                     translateConfig = aiPreTranslateConfig(),
@@ -1277,7 +1276,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
             val preTranslationService: PreTranslationService =
                 OnlinePreTranslationService(
                     database = db,
-                    settingsDataStore = SettingsDataStore(pathProducer, appDataStore),
+                    appDataStore = appDataStore,
                     aiCompletionService = AiCompletionService(OpenAIService(), BlockingOnDeviceAI(started, release)),
                     coroutineScope = scope,
                 )
@@ -1337,7 +1336,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
     fun providerSwitchCancelsOldQueueAndLetsNewProviderCompleteImmediately() {
         runBlocking {
             val appDataStore = AppDataStore(pathProducer)
-            SettingsDataStore(pathProducer, appDataStore).updateAppSettings {
+            appDataStore.updateAppSettings {
                 copy(
                     language = Locale.language,
                     translateConfig = aiPreTranslateConfig(),
@@ -1354,7 +1353,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
             val preTranslationService: PreTranslationService =
                 OnlinePreTranslationService(
                     database = db,
-                    settingsDataStore = SettingsDataStore(pathProducer, appDataStore),
+                    appDataStore = appDataStore,
                     aiCompletionService = AiCompletionService(OpenAIService(), TestOnDeviceAI()),
                     coroutineScope = scope,
                     batchTranslator = { settings, _, _, sourceDocument, targetLanguage, _ ->
@@ -1415,7 +1414,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                     started.await()
                 }
 
-                SettingsDataStore(pathProducer, appDataStore).updateAppSettings {
+                appDataStore.updateAppSettings {
                     copy(
                         translateConfig =
                             translateConfig.copy(

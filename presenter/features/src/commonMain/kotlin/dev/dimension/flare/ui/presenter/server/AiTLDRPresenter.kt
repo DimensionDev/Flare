@@ -3,7 +3,7 @@ package dev.dimension.flare.ui.presenter.server
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.produceState
 import dev.dimension.flare.common.Locale
-import dev.dimension.flare.data.datastore.SettingsDataStore
+import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.datastore.model.AiPromptDefaults
 import dev.dimension.flare.data.ai.AiCompletionService
 import dev.dimension.flare.ui.model.UiState
@@ -17,7 +17,7 @@ public class AiTLDRPresenter(
     private val targetLanguage: String = Locale.language,
 ) : PresenterBase<UiState<String>>(),
     KoinComponent {
-    private val settingsDataStore: SettingsDataStore by inject()
+    private val appDataStore: AppDataStore by inject()
     private val aiCompletionService: AiCompletionService by inject()
 
     @Composable
@@ -26,7 +26,7 @@ public class AiTLDRPresenter(
             value =
                 runCatching {
                     val aiConfig =
-                        settingsDataStore.appSettings
+                        appDataStore.appSettings
                             .first()
                             .aiConfig
                     if (!aiConfig.tldr) {

@@ -11,7 +11,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import dev.dimension.flare.data.ai.OnDeviceAI
-import dev.dimension.flare.data.datastore.SettingsDataStore
+import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.ai.OpenAIService
 import dev.dimension.flare.data.translation.PreTranslationContentRules
@@ -56,7 +56,7 @@ public enum class TranslateProviderOption {
 public class AiConfigPresenter :
     PresenterBase<AiConfigPresenter.State>(),
     KoinComponent {
-    private val settingsDataStore by inject<SettingsDataStore>()
+    private val appDataStore by inject<AppDataStore>()
     private val openAIService by inject<OpenAIService>()
     private val onDeviceAI by inject<OnDeviceAI>()
 
@@ -128,7 +128,7 @@ public class AiConfigPresenter :
     @Composable
     override fun body(): State {
         val scope = rememberCoroutineScope()
-        val appSettings by remember { settingsDataStore.appSettings }
+        val appSettings by remember { appDataStore.appSettings }
             .collectAsState(AppSettings(version = ""))
         var openAIModels by remember {
             mutableStateOf<UiState<ImmutableList<String>>>(UiState.Success(persistentListOf()))
@@ -195,7 +195,7 @@ public class AiConfigPresenter :
         fun update(block: AppSettings.AiConfig.() -> AppSettings.AiConfig) {
             scope.launch {
                 withContext(Dispatchers.Main) {
-                    settingsDataStore.updateAppSettings {
+                    appDataStore.updateAppSettings {
                         copy(
                             aiConfig =
                                 block
@@ -210,7 +210,7 @@ public class AiConfigPresenter :
         fun updateTranslateConfig(block: AppSettings.TranslateConfig.() -> AppSettings.TranslateConfig) {
             scope.launch {
                 withContext(Dispatchers.Main) {
-                    settingsDataStore.updateAppSettings {
+                    appDataStore.updateAppSettings {
                         copy(
                             translateConfig =
                                 block

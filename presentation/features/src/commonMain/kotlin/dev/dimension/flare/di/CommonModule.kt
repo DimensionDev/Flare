@@ -21,6 +21,8 @@ import dev.dimension.flare.data.local.LocalFilterRepository
 import dev.dimension.flare.data.local.SearchHistoryRepository
 import dev.dimension.flare.data.translation.OnlinePreTranslationService
 import dev.dimension.flare.data.translation.PreTranslationService
+import dev.dimension.flare.data.database.cache.model.TranslationSettingsProvider
+import dev.dimension.flare.data.settings.TranslationSettingsProviderImpl
 import dev.dimension.flare.model.SocialPlatformRegistry
 import dev.dimension.flare.model.defaultSocialPlatformRegistry
 import dev.dimension.flare.ui.presenter.compose.ComposeUseCase
@@ -72,6 +74,7 @@ internal val commonModule =
         singleOf(::OpenAIService)
         singleOf(::AiCompletionService)
         single<PreTranslationService> { OnlinePreTranslationService(get(), get(), get(), get()) }
+        single<TranslationSettingsProvider> { TranslationSettingsProviderImpl(get()) }
         single { TimelinePresenterFactory(get()) }
         single { TimelinePersistenceMapper(get()) }
     }

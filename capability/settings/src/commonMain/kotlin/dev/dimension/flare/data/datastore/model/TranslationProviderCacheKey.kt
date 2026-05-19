@@ -1,6 +1,4 @@
-package dev.dimension.flare.data.translation
-
-import dev.dimension.flare.data.datastore.model.AppSettings
+package dev.dimension.flare.data.datastore.model
 
 public fun AppSettings.translationProviderCacheKey(): String = translateConfig.provider.cacheKey()
 

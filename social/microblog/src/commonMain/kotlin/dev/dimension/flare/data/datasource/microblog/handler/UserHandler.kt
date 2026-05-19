@@ -9,9 +9,8 @@ import dev.dimension.flare.data.database.cache.model.TranslationEntityType
 import dev.dimension.flare.data.database.cache.model.applyTranslation
 import dev.dimension.flare.data.database.cache.model.translationEntityKey
 import dev.dimension.flare.data.datasource.microblog.loader.UserLoader
-import dev.dimension.flare.data.datastore.AppDataStore
+import dev.dimension.flare.data.database.cache.model.TranslationSettingsProvider
 import dev.dimension.flare.data.translation.PreTranslationService
-import dev.dimension.flare.data.translation.TranslationSettingsSupport
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiHandle
 import dev.dimension.flare.ui.model.UiProfile
@@ -29,11 +28,11 @@ public class UserHandler(
     private val loader: UserLoader,
 ) : KoinComponent {
     private val database: CacheDatabase by inject()
-    private val appDataStore: AppDataStore by inject()
+    private val translationSettingsProvider: TranslationSettingsProvider by inject()
     private val preTranslationService: PreTranslationService by inject()
 
     private val translationDisplayFlow by lazy {
-        TranslationSettingsSupport.displayOptionsFlow(appDataStore)
+        translationSettingsProvider.displayOptionsFlow
     }
 
     public fun userByHandleAndHost(uiHandle: UiHandle): Cacheable<UiProfile> =

@@ -29,6 +29,7 @@ kotlin {
                 api(projects.core.common)
                 api(projects.core.model)
                 api(projects.storage.datastore)
+                api(projects.storage.database)
                 api(libs.datastore.core)
                 implementation(libs.kotlinx.serialization.json)
             }

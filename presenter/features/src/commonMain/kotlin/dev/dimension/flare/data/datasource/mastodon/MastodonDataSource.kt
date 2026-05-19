@@ -45,7 +45,7 @@ import dev.dimension.flare.data.network.mastodon.api.model.Visibility
 import dev.dimension.flare.data.platform.CommonTimelineSpecs
 import dev.dimension.flare.data.platform.MastodonPlatformSpec
 import dev.dimension.flare.data.platform.toTimelineTabItemV2
-import dev.dimension.flare.data.repository.AccountRepository
+import dev.dimension.flare.data.account.AccountRepository
 import dev.dimension.flare.common.tryRun
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey

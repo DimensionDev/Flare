@@ -5,7 +5,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import dev.dimension.flare.data.datasource.xqt.XQTDataSource
-import dev.dimension.flare.data.repository.AccountRepository
+import dev.dimension.flare.data.account.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiState

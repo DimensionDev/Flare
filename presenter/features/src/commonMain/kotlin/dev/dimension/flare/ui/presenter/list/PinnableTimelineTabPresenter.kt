@@ -13,7 +13,7 @@ import dev.dimension.flare.data.datasource.microblog.datasource.PinnableTimeline
 import dev.dimension.flare.data.datasource.microblog.datasource.PinnableTimelineTabSection
 import dev.dimension.flare.data.datasource.microblog.datasource.TimelineTabConfigurationDataSource
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
-import dev.dimension.flare.data.repository.AccountRepository
+import dev.dimension.flare.data.account.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceFlow
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiState

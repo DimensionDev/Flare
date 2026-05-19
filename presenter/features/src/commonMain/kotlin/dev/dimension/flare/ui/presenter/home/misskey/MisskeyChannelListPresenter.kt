@@ -17,7 +17,7 @@ import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.data.platform.MisskeyPlatformSpec
-import dev.dimension.flare.data.repository.AccountRepository
+import dev.dimension.flare.data.account.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiIcon

@@ -6,7 +6,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import dev.dimension.flare.common.collectAsState
 import dev.dimension.flare.data.datasource.microblog.datasource.NotificationDataSource
-import dev.dimension.flare.data.repository.AccountRepository
+import dev.dimension.flare.data.account.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceFlow
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiState

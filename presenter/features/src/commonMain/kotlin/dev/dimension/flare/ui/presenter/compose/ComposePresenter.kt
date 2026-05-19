@@ -19,7 +19,7 @@ import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.datastore.model.ComposeVisibility
-import dev.dimension.flare.data.repository.AccountRepository
+import dev.dimension.flare.data.account.AccountRepository
 import dev.dimension.flare.data.draft.DraftRepository
 import dev.dimension.flare.data.repository.accountServiceFlow
 import dev.dimension.flare.data.draft.newDraftGroupId

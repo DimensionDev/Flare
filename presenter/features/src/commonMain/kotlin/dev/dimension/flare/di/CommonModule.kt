@@ -7,9 +7,9 @@ import dev.dimension.flare.data.database.provideAppDatabase
 import dev.dimension.flare.data.database.provideCacheDatabase
 import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.network.rss.Readability
-import dev.dimension.flare.data.repository.AccountRepository
+import dev.dimension.flare.data.account.AccountRepository
 import dev.dimension.flare.data.repository.AccountTabSyncCoordinator
-import dev.dimension.flare.data.repository.ApplicationRepository
+import dev.dimension.flare.data.account.ApplicationRepository
 import dev.dimension.flare.data.draft.DraftMediaStore
 import dev.dimension.flare.data.draft.DraftRepository
 import dev.dimension.flare.data.draft.DraftSendingRecoveryCoordinator

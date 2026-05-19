@@ -8,8 +8,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import dev.dimension.flare.data.network.misskey.MisskeyOauthService
 import dev.dimension.flare.data.nodeinfo.NodeInfoService
-import dev.dimension.flare.data.repository.AccountRepository
-import dev.dimension.flare.data.repository.ApplicationRepository
+import dev.dimension.flare.data.account.AccountRepository
+import dev.dimension.flare.data.account.ApplicationRepository
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount

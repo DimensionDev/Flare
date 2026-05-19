@@ -1,10 +1,11 @@
-package dev.dimension.flare.ui.model
+package dev.dimension.flare.data.account
 
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.data.database.app.model.DbAccount
 import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.ui.model.UiAccount
 
-public fun DbAccount.toUi(): UiAccount =
+internal fun DbAccount.toUi(): UiAccount =
     when (platform_type) {
         PlatformType.Nostr -> {
             UiAccount.Nostr(

@@ -8,7 +8,7 @@ import dev.dimension.flare.common.refreshSuspend
 import dev.dimension.flare.data.datasource.microblog.datasource.ListDataSource
 import dev.dimension.flare.data.datasource.microblog.list.ListMetaData
 import dev.dimension.flare.data.datasource.microblog.list.ListMetaDataType
-import dev.dimension.flare.data.repository.AccountRepository
+import dev.dimension.flare.data.account.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiState

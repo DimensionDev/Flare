@@ -3,7 +3,7 @@ package dev.dimension.flare.ui.presenter.compose
 import dev.dimension.flare.data.database.app.model.DraftContent
 import dev.dimension.flare.data.database.app.model.DraftMediaType
 import dev.dimension.flare.data.database.app.model.DraftVisibility
-import dev.dimension.flare.data.repository.AccountRepository
+import dev.dimension.flare.data.account.AccountRepository
 import dev.dimension.flare.data.draft.DraftRepository
 import dev.dimension.flare.ui.model.UiDraft
 import dev.dimension.flare.ui.model.UiDraftAccount

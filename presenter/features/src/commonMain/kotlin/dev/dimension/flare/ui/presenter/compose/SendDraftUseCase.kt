@@ -3,7 +3,7 @@ package dev.dimension.flare.ui.presenter.compose
 import dev.dimension.flare.data.database.app.model.DraftTargetStatus
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeData
-import dev.dimension.flare.data.repository.AccountRepository
+import dev.dimension.flare.data.account.AccountRepository
 import dev.dimension.flare.data.draft.ComposeDraftBundle
 import dev.dimension.flare.data.draft.DraftMediaStore
 import dev.dimension.flare.data.draft.DraftRepository

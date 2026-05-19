@@ -10,7 +10,7 @@ import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
 import dev.dimension.flare.data.model.tab.ShortcutSpec
 import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
-import dev.dimension.flare.data.repository.AccountRepository
+import dev.dimension.flare.data.account.AccountRepository
 import dev.dimension.flare.data.repository.allAccountServicesFlow
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiIcon

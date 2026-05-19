@@ -6,7 +6,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import dev.dimension.flare.common.collectAsState
 import dev.dimension.flare.data.datasource.microblog.datasource.NotificationDataSource
-import dev.dimension.flare.data.repository.AccountRepository
+import dev.dimension.flare.data.account.AccountRepository
 import dev.dimension.flare.data.repository.allAccountServicesFlow
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.delay

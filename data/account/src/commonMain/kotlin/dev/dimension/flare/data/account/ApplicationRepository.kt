@@ -1,4 +1,4 @@
-package dev.dimension.flare.data.repository
+package dev.dimension.flare.data.account
 
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.data.database.app.AppDatabase

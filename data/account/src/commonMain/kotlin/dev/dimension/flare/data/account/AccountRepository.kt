@@ -1,6 +1,5 @@
-package dev.dimension.flare.data.repository
+package dev.dimension.flare.data.account
 
-import androidx.compose.runtime.Stable
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.database.app.AppDatabase
@@ -15,7 +14,6 @@ import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.SocialPlatformRegistry
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.toUi
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
@@ -31,7 +29,6 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlin.time.Clock
 
-@Stable
 public class AccountRepository(
     @PublishedApi internal val appDatabase: AppDatabase,
     private val coroutineScope: CoroutineScope,

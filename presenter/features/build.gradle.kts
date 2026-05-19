@@ -46,6 +46,7 @@ kotlin {
                 api(projects.ui.model)
                 implementation(projects.core.deeplink)
                 api(projects.data.ai)
+                api(projects.data.account)
                 api(projects.data.database)
                 api(projects.data.datastore)
                 api(projects.data.draft)

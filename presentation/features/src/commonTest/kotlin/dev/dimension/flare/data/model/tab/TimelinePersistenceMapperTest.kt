@@ -15,7 +15,9 @@ import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.model.asType
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertIs
+import kotlin.test.assertNull
 
 class TimelinePersistenceMapperTest {
     private val homeSpec =
@@ -96,5 +98,82 @@ class TimelinePersistenceMapperTest {
         val item = assertIs<SourceTimelineTabItemV2>(mapper.toTabItem(slot))
 
         assertEquals(descriptor.ref, item.ref)
+    }
+
+    @Test
+    fun sourceSlotResolvesAccountKeyOnlyForAccountTimelineData() {
+        val accountKey = MicroBlogKey("home", "example.com")
+        val accountSlot =
+            mapper.toSlot(
+                homeSpec.toTimelineTabDescriptor(
+                    dev.dimension.flare.data.datasource.microblog.timeline.TimelineSpec.AccountBasedData(accountKey),
+                ),
+            )
+        val rssSlot =
+            mapper.toSlot(
+                RssTimelineSpecs.rss.toTimelineTabDescriptor(
+                    data = RssTimelineSpecs.RssData("https://example.com/feed.xml"),
+                    title = UiText.Raw("Example"),
+                    icon = IconType.Material(UiIcon.Rss),
+                ),
+            )
+
+        assertEquals(accountKey, mapper.resolveAccountKey(accountSlot))
+        assertNull(mapper.resolveAccountKey(rssSlot))
+    }
+
+    @Test
+    fun runtimeOnlySourceTabCannotBePersisted() {
+        val runtimeTab =
+            SourceTimelineTabItemV2.runtime(
+                id = "runtime:now",
+                title = UiText.Raw("Runtime"),
+                icon = UiIcon.Home.asType(),
+                runtimePresenterFactory = { error("unused") },
+            )
+
+        assertFailsWith<IllegalArgumentException> {
+            mapper.toSlot(runtimeTab)
+        }
+    }
+
+    @Test
+    fun systemHomeMixedTimelinePersistsAsGroupSlot() {
+        val first =
+            mapper.toTabItem(
+                mapper.toSlot(
+                    homeSpec.toTimelineTabDescriptor(
+                        dev.dimension.flare.data.datasource.microblog.timeline.TimelineSpec.AccountBasedData(
+                            MicroBlogKey("first", "example.com"),
+                        ),
+                    ),
+                ),
+            )
+        val second =
+            mapper.toTabItem(
+                mapper.toSlot(
+                    homeSpec.toTimelineTabDescriptor(
+                        dev.dimension.flare.data.datasource.microblog.timeline.TimelineSpec.AccountBasedData(
+                            MicroBlogKey("second", "example.com"),
+                        ),
+                    ),
+                ),
+            )
+
+        val mixed =
+            listOf(first, second)
+                .withSystemHomeMixedTimelineEnabled(
+                    enabled = true,
+                    mergePolicy = TimelineMergePolicy.Staggered,
+                ).first()
+
+        val groupItem = assertIs<GroupTimelineTabItemV2>(mixed)
+        val groupSlot = mapper.toSlot(groupItem)
+        val groupContent = assertIs<TimelineSlotContent.Group>(groupSlot.content)
+
+        assertEquals(SYSTEM_HOME_MIXED_TIMELINE_ID, groupSlot.id)
+        assertEquals(GroupSource.SystemHome, groupContent.source)
+        assertEquals(TimelineMergePolicy.Staggered, groupContent.mergePolicy)
+        assertEquals(listOf(first.id, second.id), groupContent.children.map { it.id })
     }
 }

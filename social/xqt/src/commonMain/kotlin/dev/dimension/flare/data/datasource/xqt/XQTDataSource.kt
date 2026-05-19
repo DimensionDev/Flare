@@ -147,9 +147,13 @@ internal class XQTDataSource(
         )
     }
 
-    private val listLoader = XQTListLoader(service, accountKey)
+    private val listLoader by lazy {
+        XQTListLoader(service, accountKey)
+    }
 
-    private val listMemberLoader = XQTListMemberLoader(service, accountKey)
+    private val listMemberLoader by lazy {
+        XQTListMemberLoader(service, accountKey)
+    }
 
     private val directMessageLoader by lazy {
         XQTDirectMessageLoader(
@@ -300,12 +304,13 @@ internal class XQTDataSource(
         }
     }
 
-    override val listHandler: ListHandler<UiList.List> =
+    override val listHandler: ListHandler<UiList.List> by lazy {
         ListHandler(
             pagingKey = "list_$accountKey",
             accountKey = accountKey,
             loader = listLoader,
         )
+    }
 
     override val pinnableTimelineTabs: List<PinnableTimelineTabSection> by lazy {
         listOf(
@@ -378,12 +383,13 @@ internal class XQTDataSource(
         )
     }
 
-    override val listMemberHandler =
+    override val listMemberHandler by lazy {
         ListMemberHandler(
             pagingKey = "list_member_$accountKey",
             accountKey = accountKey,
             loader = listMemberLoader,
         )
+    }
 
     override fun homeTimeline() =
         HomeTimelineRemoteMediator(

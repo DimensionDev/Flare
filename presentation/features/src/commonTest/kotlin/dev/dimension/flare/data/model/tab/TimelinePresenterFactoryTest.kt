@@ -94,7 +94,7 @@ class TimelinePresenterFactoryTest {
                 id = "runtime:fake",
                 title = UiText.Raw("Runtime"),
                 icon = UiIcon.Home.asType(),
-                runtimePresenterFactory = { presenter },
+                createPresenter = { presenter },
             )
 
         assertSame(presenter, factory.create(item))

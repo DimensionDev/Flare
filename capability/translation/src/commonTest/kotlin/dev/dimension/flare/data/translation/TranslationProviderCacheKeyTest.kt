@@ -1,6 +1,7 @@
 package dev.dimension.flare.data.translation
 
 import dev.dimension.flare.data.datastore.model.AppSettings
+import dev.dimension.flare.data.datastore.model.cacheKey
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

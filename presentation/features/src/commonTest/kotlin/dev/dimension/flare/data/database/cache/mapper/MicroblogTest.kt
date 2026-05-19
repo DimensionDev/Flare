@@ -25,10 +25,10 @@ import dev.dimension.flare.data.database.cache.model.translationPayload
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.database.cache.mapper.TimelinePagingMapper
 import dev.dimension.flare.data.datastore.model.AppSettings
+import dev.dimension.flare.data.datastore.model.cacheKey
 import dev.dimension.flare.data.network.nostr.NostrService
 import dev.dimension.flare.data.network.nostr.bech32PublicKey
 import dev.dimension.flare.data.translation.PreTranslationStoreSupport
-import dev.dimension.flare.data.translation.cacheKey
 import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey

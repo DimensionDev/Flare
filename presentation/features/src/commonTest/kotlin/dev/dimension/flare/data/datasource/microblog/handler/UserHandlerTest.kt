@@ -22,6 +22,7 @@ import dev.dimension.flare.data.database.cache.model.translationPayload
 import dev.dimension.flare.data.datasource.microblog.loader.UserLoader
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.datastore.model.AppSettings
+import dev.dimension.flare.data.datastore.model.cacheKey
 import dev.dimension.flare.data.io.OkioFileStorage
 import dev.dimension.flare.data.ai.AiCompletionService
 import dev.dimension.flare.data.ai.OpenAIService
@@ -32,7 +33,6 @@ import dev.dimension.flare.data.translation.PreTranslationContentRules
 import dev.dimension.flare.data.translation.PreTranslationService
 import dev.dimension.flare.data.translation.PreTranslationStoreSupport
 import dev.dimension.flare.data.translation.aiPreTranslateConfig
-import dev.dimension.flare.data.translation.cacheKey
 import dev.dimension.flare.deleteTestRootPath
 import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.MicroBlogKey

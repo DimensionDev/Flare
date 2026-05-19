@@ -34,7 +34,7 @@ internal class TimelinePersistenceMapper(
             is TimelineSlotContent.Group -> {
                 GroupTimelineTabItemV2(
                     id = slot.id,
-                    children = content.children.map { toTabItem(it) }.filter { it.enabled },
+                    children = content.children.map { toTabItem(it) },
                     mergePolicy = content.mergePolicy,
                     source = content.source,
                     presentation = slot.presentation,

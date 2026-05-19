@@ -129,7 +129,7 @@ class TimelinePersistenceMapperTest {
                 id = "runtime:now",
                 title = UiText.Raw("Runtime"),
                 icon = UiIcon.Home.asType(),
-                runtimePresenterFactory = { error("unused") },
+                createPresenter = { error("unused") },
             )
 
         assertFailsWith<IllegalArgumentException> {
@@ -175,5 +175,55 @@ class TimelinePersistenceMapperTest {
         assertEquals(GroupSource.SystemHome, groupContent.source)
         assertEquals(TimelineMergePolicy.Staggered, groupContent.mergePolicy)
         assertEquals(listOf(first.id, second.id), groupContent.children.map { it.id })
+    }
+
+    @Test
+    fun manualGroupRoundTripPreservesDisabledChildren() {
+        val first =
+            mapper.toTabItem(
+                mapper.toSlot(
+                    homeSpec.toTimelineTabDescriptor(
+                        dev.dimension.flare.data.datasource.microblog.timeline.TimelineSpec.AccountBasedData(
+                            MicroBlogKey("first", "example.com"),
+                        ),
+                    ),
+                ),
+            )
+        val disabledSecond =
+            mapper
+                .toTabItem(
+                    mapper.toSlot(
+                        homeSpec.toTimelineTabDescriptor(
+                            dev.dimension.flare.data.datasource.microblog.timeline.TimelineSpec.AccountBasedData(
+                                MicroBlogKey("second", "example.com"),
+                            ),
+                        ),
+                    ),
+                ).withPresentationOverrides(
+                    title = "Second",
+                    icon = UiIcon.Home.asType(),
+                    enabled = false,
+                )
+
+        val groupSlot =
+            mapper.toSlot(
+                GroupTimelineTabItemV2(
+                    id = "manual",
+                    children = listOf(first, disabledSecond),
+                    mergePolicy = TimelineMergePolicy.Time,
+                    source = GroupSource.Manual,
+                    presentation = TimelinePresentation(),
+                    title = UiText.Raw("Manual"),
+                    icon = UiIcon.Rss.asType(),
+                    appearancePatch = null,
+                    enabled = true,
+                ),
+            )
+
+        val groupItem = assertIs<GroupTimelineTabItemV2>(mapper.toTabItem(groupSlot))
+
+        assertEquals(listOf(first.id, disabledSecond.id), groupItem.children.map { it.id })
+        assertEquals(listOf(true, false), groupItem.children.map { it.enabled })
+        assertEquals(groupSlot, mapper.toSlot(groupItem))
     }
 }

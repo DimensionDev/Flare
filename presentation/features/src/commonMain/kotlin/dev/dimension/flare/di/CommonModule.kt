@@ -34,7 +34,7 @@ internal val commonModule =
         single<SocialPlatformRegistry> { defaultSocialPlatformRegistry }
         single { TimelineCatalog(get<SocialPlatformRegistry>().specs.flatMap { it.timelineSpecs }) }
         singleOf(::AccountRepository)
-        single(createdAtStart = true) { AccountTabSyncCoordinator(get(), get(), get(), get()) }
+        single(createdAtStart = true) { AccountTabSyncCoordinator(get(), get(), get(), get(), get()) }
         single { provideAppDatabase(get()) }
         single { provideCacheDatabase(get()) }
         singleOf(::ApplicationRepository)

@@ -2,8 +2,10 @@ package dev.dimension.flare.data.repository
 
 import dev.dimension.flare.data.account.AccountRepository
 import dev.dimension.flare.data.datasource.microblog.datasource.TimelineTabConfigurationDataSource
+import dev.dimension.flare.data.datasource.microblog.timeline.TimelineTabProvider
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.model.tab.GroupSource
+import dev.dimension.flare.data.model.tab.TimelinePersistenceMapper
 import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.model.tab.TimelineSlot
 import dev.dimension.flare.data.model.tab.TimelineSlotContent
@@ -19,6 +21,7 @@ internal class AccountTabSyncCoordinator(
     private val appDataStore: AppDataStore,
     private val coroutineScope: CoroutineScope,
     private val timelineResolver: TimelineResolver,
+    private val timelinePersistenceMapper: TimelinePersistenceMapper,
 ) {
     init {
         coroutineScope.launch {
@@ -54,10 +57,14 @@ internal class AccountTabSyncCoordinator(
     }
 
     private suspend fun addDefaultTabs(account: UiAccount) {
+        val service = accountRepository.getOrCreateDataSource(account)
         val defaultSlots =
-            (accountRepository.getOrCreateDataSource(account) as? TimelineTabConfigurationDataSource)
-                ?.defaultTabs
-                .orEmpty()
+            (service as? TimelineTabProvider)
+                ?.defaultTimelineTabs
+                ?.map(timelinePersistenceMapper::toSlot)
+                ?: (service as? TimelineTabConfigurationDataSource)
+                    ?.defaultTabs
+                    .orEmpty()
         if (defaultSlots.isEmpty()) {
             return
         }

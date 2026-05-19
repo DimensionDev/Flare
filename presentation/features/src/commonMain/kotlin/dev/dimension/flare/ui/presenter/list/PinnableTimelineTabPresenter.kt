@@ -5,15 +5,19 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.map
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.datasource.microblog.datasource.PinnableTimelineTabDataSource
-import dev.dimension.flare.data.datasource.microblog.datasource.PinnableTimelineTabSection
 import dev.dimension.flare.data.datasource.microblog.datasource.TimelineTabConfigurationDataSource
-import dev.dimension.flare.data.model.tab.TimelineTabItemV2
+import dev.dimension.flare.data.datasource.microblog.timeline.PinnableTimelineProvider
+import dev.dimension.flare.data.datasource.microblog.timeline.TimelineTabProvider
 import dev.dimension.flare.data.account.AccountRepository
+import dev.dimension.flare.data.model.tab.TimelinePersistenceMapper
+import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.data.repository.accountServiceFlow
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiState
@@ -24,6 +28,7 @@ import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -49,10 +54,16 @@ public class PinnableTimelineTabPresenter(
     )
 
     private val accountRepository: AccountRepository by inject()
+    private val timelinePersistenceMapper: TimelinePersistenceMapper by inject()
 
     private data class Sections(
         val builtInTabs: ImmutableList<TimelineTabItemV2>,
-        val pinnableTabs: List<PinnableTimelineTabSection>,
+        val pinnableTabs: List<ResolvedPinnableTimelineTabSection>,
+    )
+
+    private data class ResolvedPinnableTimelineTabSection(
+        val title: UiStrings,
+        val data: Flow<PagingData<TimelineTabItemV2>>,
     )
 
     private val sectionsFlow by lazy {
@@ -62,12 +73,33 @@ public class PinnableTimelineTabPresenter(
         ).map { service ->
             Sections(
                 builtInTabs =
-                    (service as? TimelineTabConfigurationDataSource)
+                    (service as? TimelineTabProvider)
                         ?.builtInTimelineTabs
+                        ?.map(timelinePersistenceMapper::toTabItem)
+                        ?.toImmutableList()
+                        ?: (service as? TimelineTabConfigurationDataSource)
+                            ?.builtInTimelineTabs
                         ?: persistentListOf(),
                 pinnableTabs =
-                    (service as? PinnableTimelineTabDataSource)
+                    (service as? PinnableTimelineProvider)
                         ?.pinnableTimelineTabs
+                        ?.map { section ->
+                            ResolvedPinnableTimelineTabSection(
+                                title = section.title,
+                                data =
+                                    section.data.map { paging ->
+                                        paging.map(timelinePersistenceMapper::toTabItem)
+                                    },
+                            )
+                        }
+                        ?: (service as? PinnableTimelineTabDataSource)
+                            ?.pinnableTimelineTabs
+                            ?.map { section ->
+                                ResolvedPinnableTimelineTabSection(
+                                    title = section.title,
+                                    data = section.data,
+                                )
+                            }
                         .orEmpty(),
             )
         }

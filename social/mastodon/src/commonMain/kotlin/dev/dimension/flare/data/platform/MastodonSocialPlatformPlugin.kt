@@ -21,6 +21,10 @@ import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiInstance
 import dev.dimension.flare.ui.model.UiInstanceMetadata
 import dev.dimension.flare.ui.model.mapper.render
+import dev.dimension.flare.data.datasource.guest.mastodon.GuestPublicTimelineRemoteMediator
+import dev.dimension.flare.data.datasource.guest.mastodon.GuestTrendsRemoteMediator
+import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
+import dev.dimension.flare.ui.model.UiTimelineV2
 import io.ktor.http.Url
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -120,6 +124,35 @@ public data object MastodonSocialPlatformSpec : SocialPlatformSpec {
             host = host,
             locale = locale,
         )
+
+    public override fun createSubscriptionLoader(
+        subscriptionType: String,
+        url: String,
+        locale: String,
+    ): CacheableRemoteLoader<UiTimelineV2>? =
+        when (subscriptionType) {
+            "MASTODON_TRENDS" -> {
+                GuestTrendsRemoteMediator(
+                    host = url,
+                    locale = locale,
+                )
+            }
+            "MASTODON_PUBLIC" -> {
+                GuestPublicTimelineRemoteMediator(
+                    host = url,
+                    locale = locale,
+                    local = false,
+                )
+            }
+            "MASTODON_LOCAL" -> {
+                GuestPublicTimelineRemoteMediator(
+                    host = url,
+                    locale = locale,
+                    local = true,
+                )
+            }
+            else -> null
+        }
 }
 
 private fun mastodonFallback(domain: String): UiInstance =

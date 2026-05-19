@@ -32,7 +32,7 @@ kotlin {
                 api(projects.network)
                 api(projects.social.microblog)
                 api(projects.presentation.model)
-                implementation(projects.social.mastodon)
+                implementation(projects.social.api)
                 implementation(dependencies.platform(libs.koin.bom))
                 implementation(libs.koin.core)
                 implementation(libs.kotlinx.datetime)

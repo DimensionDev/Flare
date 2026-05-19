@@ -5,12 +5,14 @@ import dev.dimension.flare.common.DebugRepository
 import dev.dimension.flare.common.deeplink.DeepLinkMapping
 import dev.dimension.flare.common.deeplink.DeepLinkPattern
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
+import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.timeline.TimelineSpec
 import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiInstance
 import dev.dimension.flare.ui.model.UiInstanceMetadata
+import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
@@ -31,6 +33,12 @@ public interface SocialPlatformSpec {
         host: String,
         locale: String,
     ): MicroblogDataSource
+
+    public fun createSubscriptionLoader(
+        subscriptionType: String,
+        url: String,
+        locale: String,
+    ): CacheableRemoteLoader<UiTimelineV2>? = null
 }
 
 @Immutable
@@ -106,4 +114,12 @@ public class SocialPlatformRegistry(
             host = host,
             locale = locale,
         )
+
+    public fun createSubscriptionLoader(
+        type: PlatformType,
+        subscriptionType: String,
+        url: String,
+        locale: String,
+    ): CacheableRemoteLoader<UiTimelineV2>? =
+        requireSpec(type).createSubscriptionLoader(subscriptionType, url, locale)
 }

@@ -4,9 +4,9 @@ import dev.dimension.flare.common.Locale
 import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.app.model.DbRssSources
 import dev.dimension.flare.data.database.app.model.SubscriptionType
-import dev.dimension.flare.data.datasource.guest.mastodon.GuestPublicTimelineRemoteMediator
-import dev.dimension.flare.data.datasource.guest.mastodon.GuestTrendsRemoteMediator
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
+import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.model.SocialPlatformRegistry
 import dev.dimension.flare.ui.model.UiTimelineV2
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -14,6 +14,7 @@ import org.koin.core.component.inject
 public object RssDataSource :
     KoinComponent {
     private val appDatabase: AppDatabase by inject()
+    private val platformRegistry: SocialPlatformRegistry by inject()
 
     public fun fetchLoader(url: String): RssTimelineRemoteMediator =
         RssTimelineRemoteMediator(
@@ -41,25 +42,35 @@ public object RssDataSource :
             }
 
             SubscriptionType.MASTODON_TRENDS -> {
-                GuestTrendsRemoteMediator(
-                    host = subscription.url,
-                    locale = Locale.language,
+                requireNotNull(
+                    platformRegistry.createSubscriptionLoader(
+                        type = PlatformType.Mastodon,
+                        subscriptionType = "MASTODON_TRENDS",
+                        url = subscription.url,
+                        locale = Locale.language,
+                    )
                 )
             }
 
             SubscriptionType.MASTODON_PUBLIC -> {
-                GuestPublicTimelineRemoteMediator(
-                    host = subscription.url,
-                    locale = Locale.language,
-                    local = false,
+                requireNotNull(
+                    platformRegistry.createSubscriptionLoader(
+                        type = PlatformType.Mastodon,
+                        subscriptionType = "MASTODON_PUBLIC",
+                        url = subscription.url,
+                        locale = Locale.language,
+                    )
                 )
             }
 
             SubscriptionType.MASTODON_LOCAL -> {
-                GuestPublicTimelineRemoteMediator(
-                    host = subscription.url,
-                    locale = Locale.language,
-                    local = true,
+                requireNotNull(
+                    platformRegistry.createSubscriptionLoader(
+                        type = PlatformType.Mastodon,
+                        subscriptionType = "MASTODON_LOCAL",
+                        url = subscription.url,
+                        locale = Locale.language,
+                    )
                 )
             }
         }

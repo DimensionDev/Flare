@@ -150,6 +150,47 @@ val validateModuleBoundaries by tasks.registering {
             }
         }
 
+        val projectDependencyGraph =
+            subprojects.associate { project ->
+                project.path to
+                    project
+                        .projectDependencyPaths()
+                        .filter { it != project.path && rootProject.findProject(it) != null }
+                        .toSet()
+            }
+        val visitState = mutableMapOf<String, Int>()
+        val dependencyStack = mutableListOf<String>()
+        val cycles = linkedSetOf<String>()
+
+        fun visitProject(path: String) {
+            visitState[path] = 1
+            dependencyStack += path
+            projectDependencyGraph[path].orEmpty().forEach { dependency ->
+                when (visitState[dependency]) {
+                    1 -> {
+                        val cycleStart = dependencyStack.indexOf(dependency)
+                        if (cycleStart >= 0) {
+                            cycles += (dependencyStack.drop(cycleStart) + dependency).joinToString(" -> ")
+                        }
+                    }
+
+                    2 -> Unit
+                    else -> visitProject(dependency)
+                }
+            }
+            dependencyStack.removeAt(dependencyStack.lastIndex)
+            visitState[path] = 2
+        }
+
+        projectDependencyGraph.keys.forEach { path ->
+            if (visitState[path] == null) {
+                visitProject(path)
+            }
+        }
+        cycles.forEach { cycle ->
+            violations += "Project dependency cycle: $cycle"
+        }
+
         val forbiddenRegistryBypassPatterns =
             listOf(
                 Regex("""\bPlatformType\.(spec|icon|agreementUrl)\b""") to

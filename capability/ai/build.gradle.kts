@@ -10,7 +10,7 @@ plugins {
 
 kotlin {
     flare {
-        namespace = "dev.dimension.flare.data.account"
+        namespace = "dev.dimension.flare.capability.ai"
         platforms(
             FlarePlatform.ANDROID,
             FlarePlatform.JVM,
@@ -19,20 +19,19 @@ kotlin {
         )
     }
 
-    compilerOptions {
-        allWarningsAsErrors.set(false)
-    }
-
     sourceSets {
         val commonMain by getting {
             dependencies {
-                api(projects.core.common)
-                api(projects.core.model)
-                api(projects.data.database)
-                api(projects.data.datastore)
-                api(projects.social.api)
-                api(projects.ui.model)
-                api(libs.kotlinx.coroutines.core)
+                implementation(projects.core.common)
+                api(projects.storage.datastore)
+                implementation(projects.network)
+                implementation(libs.ktor.client.logging)
+                implementation(libs.openai.client)
+            }
+        }
+        val commonTest by getting {
+            dependencies {
+                implementation(kotlin("test"))
             }
         }
     }

@@ -10,7 +10,7 @@ plugins {
 
 kotlin {
     flare {
-        namespace = "dev.dimension.flare.data.nodeinfo"
+        namespace = "dev.dimension.flare.capability.translation"
         platforms(
             FlarePlatform.ANDROID,
             FlarePlatform.JVM,
@@ -19,16 +19,26 @@ kotlin {
         )
     }
 
+    compilerOptions {
+        allWarningsAsErrors.set(false)
+    }
+
     sourceSets {
         val commonMain by getting {
             dependencies {
-                api(projects.data.network)
-                implementation(libs.kotlinx.serialization.json)
+                api(projects.core.common)
+                api(projects.core.model)
+                api(projects.capability.ai)
+                api(projects.storage.database)
+                api(projects.storage.datastore)
+                implementation(projects.network)
+                api(projects.presentation.model)
             }
         }
         val commonTest by getting {
             dependencies {
                 implementation(kotlin("test"))
+                implementation(libs.kotlinx.coroutines.test)
             }
         }
     }

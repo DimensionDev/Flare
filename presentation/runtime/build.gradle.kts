@@ -10,7 +10,7 @@ plugins {
 
 kotlin {
     flare {
-        namespace = "dev.dimension.flare.presenter.runtime"
+        namespace = "dev.dimension.flare.presentation.runtime"
         platforms(
             FlarePlatform.ANDROID,
             FlarePlatform.JVM,

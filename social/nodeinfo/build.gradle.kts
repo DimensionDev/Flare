@@ -10,7 +10,7 @@ plugins {
 
 kotlin {
     flare {
-        namespace = "dev.dimension.flare.data.ai"
+        namespace = "dev.dimension.flare.social.nodeinfo"
         platforms(
             FlarePlatform.ANDROID,
             FlarePlatform.JVM,
@@ -22,11 +22,8 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation(projects.core.common)
-                api(projects.data.datastore)
-                implementation(projects.data.network)
-                implementation(libs.ktor.client.logging)
-                implementation(libs.openai.client)
+                api(projects.network)
+                implementation(libs.kotlinx.serialization.json)
             }
         }
         val commonTest by getting {

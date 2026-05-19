@@ -11,7 +11,7 @@ plugins {
 
 kotlin {
     flare {
-        namespace = "dev.dimension.flare.data.network"
+        namespace = "dev.dimension.flare.network"
         platforms(
             FlarePlatform.ANDROID,
             FlarePlatform.JVM,

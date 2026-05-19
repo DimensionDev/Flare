@@ -24,7 +24,7 @@ kotlin {
             dependencies {
                 api(projects.core.common)
                 api(projects.core.model)
-                api(projects.ui.model)
+                api(projects.presentation.model)
                 api(libs.paging.common)
             }
         }

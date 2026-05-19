@@ -12,7 +12,7 @@ plugins {
 
 kotlin {
     flare {
-        namespace = "dev.dimension.flare.data.database"
+        namespace = "dev.dimension.flare.storage.database"
         platforms(
             FlarePlatform.ANDROID,
             FlarePlatform.JVM,
@@ -37,7 +37,7 @@ kotlin {
             dependencies {
                 implementation(projects.core.common)
                 api(projects.core.model)
-                api(projects.ui.model)
+                api(projects.presentation.model)
                 api(libs.kotlinx.coroutines.core)
                 api(libs.paging.common)
                 api(libs.room.runtime)

@@ -9,7 +9,7 @@ plugins {
 
 kotlin {
     flare {
-        namespace = "dev.dimension.flare.data.local"
+        namespace = "dev.dimension.flare.capability.local"
         platforms(
             FlarePlatform.ANDROID,
             FlarePlatform.JVM,
@@ -22,8 +22,8 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 api(projects.core.common)
-                api(projects.data.database)
-                api(projects.ui.model)
+                api(projects.storage.database)
+                api(projects.presentation.model)
                 api(libs.kotlinx.coroutines.core)
                 api(libs.kotlinx.immutable)
             }

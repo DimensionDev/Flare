@@ -14,7 +14,7 @@ plugins {
 
 kotlin {
     flare {
-        namespace = "dev.dimension.flare.presenter.features"
+        namespace = "dev.dimension.flare.presentation.features"
         platforms(
             FlarePlatform.ANDROID,
             FlarePlatform.JVM,
@@ -43,26 +43,26 @@ kotlin {
             dependencies {
                 api(projects.core.common)
                 api(projects.core.model)
-                api(projects.ui.model)
+                api(projects.presentation.model)
                 implementation(projects.core.deeplink)
-                api(projects.data.ai)
-                api(projects.data.account)
-                api(projects.data.database)
-                api(projects.data.datastore)
-                api(projects.data.draft)
-                api(projects.data.local)
-                api(projects.data.translation)
-                implementation(projects.data.network)
+                api(projects.capability.ai)
+                api(projects.capability.account)
+                api(projects.storage.database)
+                api(projects.storage.datastore)
+                api(projects.capability.draft)
+                api(projects.capability.local)
+                api(projects.capability.translation)
+                implementation(projects.network)
                 api(projects.social.api)
                 api(projects.social.bluesky)
                 api(projects.social.mastodon)
                 api(projects.social.misskey)
                 api(projects.social.microblog)
-                implementation(projects.data.nodeinfo)
+                implementation(projects.social.nodeinfo)
                 api(projects.social.rss)
                 api(projects.social.vvo)
                 api(projects.social.xqt)
-                api(projects.presenter.runtime)
+                api(projects.presentation.runtime)
                 implementation(dependencies.platform(libs.compose.bom))
                 implementation(libs.compose.runtime)
                 implementation(libs.bundles.kotlinx)

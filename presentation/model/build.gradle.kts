@@ -10,7 +10,7 @@ plugins {
 
 kotlin {
     flare {
-        namespace = "dev.dimension.flare.ui.model"
+        namespace = "dev.dimension.flare.presentation.model"
         platforms(
             FlarePlatform.ANDROID,
             FlarePlatform.JVM,
@@ -40,7 +40,7 @@ kotlin {
                 api(projects.core.common)
                 api(projects.core.deeplink)
                 api(projects.core.model)
-                api(projects.data.datastore)
+                api(projects.storage.datastore)
                 api(dependencies.platform(libs.compose.bom))
                 api(libs.compose.runtime)
                 api(libs.paging.common)

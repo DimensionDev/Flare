@@ -10,7 +10,7 @@ plugins {
 
 kotlin {
     flare {
-        namespace = "dev.dimension.flare.data.draft"
+        namespace = "dev.dimension.flare.capability.account"
         platforms(
             FlarePlatform.ANDROID,
             FlarePlatform.JVM,
@@ -24,27 +24,15 @@ kotlin {
     }
 
     sourceSets {
-        all {
-            languageSettings {
-                optIn("kotlin.uuid.ExperimentalUuidApi")
-            }
-        }
         val commonMain by getting {
             dependencies {
                 api(projects.core.common)
                 api(projects.core.model)
-                api(projects.data.database)
-                api(projects.data.datastore)
-                api(projects.social.microblog)
-                api(projects.ui.model)
+                api(projects.storage.database)
+                api(projects.storage.datastore)
+                api(projects.social.api)
+                api(projects.presentation.model)
                 api(libs.kotlinx.coroutines.core)
-                api(libs.okio)
-            }
-        }
-        val commonTest by getting {
-            dependencies {
-                implementation(kotlin("test"))
-                implementation(libs.kotlinx.coroutines.test)
             }
         }
     }

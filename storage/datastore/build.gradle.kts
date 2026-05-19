@@ -10,7 +10,7 @@ plugins {
 
 kotlin {
     flare {
-        namespace = "dev.dimension.flare.data.translation"
+        namespace = "dev.dimension.flare.storage.datastore"
         platforms(
             FlarePlatform.ANDROID,
             FlarePlatform.JVM,
@@ -28,11 +28,15 @@ kotlin {
             dependencies {
                 api(projects.core.common)
                 api(projects.core.model)
-                api(projects.data.ai)
-                api(projects.data.database)
-                api(projects.data.datastore)
-                implementation(projects.data.network)
-                api(projects.ui.model)
+                api(libs.datastore.core)
+                api(libs.datastore.core.okio)
+                api(libs.okio)
+                implementation(libs.kotlinx.serialization.json)
+            }
+        }
+        val androidMain by getting {
+            dependencies {
+                implementation(libs.datastore)
             }
         }
         val commonTest by getting {

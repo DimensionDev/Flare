@@ -29,11 +29,11 @@ kotlin {
             dependencies {
                 api(projects.core.common)
                 api(projects.core.model)
-                api(projects.ui.model)
-                api(projects.data.network)
+                api(projects.presentation.model)
+                api(projects.network)
                 api(projects.social.api)
                 api(projects.social.microblog)
-                implementation(projects.data.nodeinfo)
+                implementation(projects.social.nodeinfo)
                 implementation(libs.mfm.multiplatform)
             }
         }

@@ -63,7 +63,7 @@ val validateModuleBoundaries by tasks.registering {
         val socialPlatformModules =
             subprojects
                 .map { it.path }
-                .filter { it.startsWith(":social:") && it !in setOf(":social:api", ":social:microblog") }
+                .filter { it.startsWith(":social:") && it !in setOf(":social:api", ":social:microblog", ":social:nodeinfo") }
                 .toSet()
 
         subprojects.forEach { project ->
@@ -76,14 +76,16 @@ val validateModuleBoundaries by tasks.registering {
             if (project.path.startsWith(":core:")) {
                 dependencyPaths
                     .filter {
-                        it.startsWith(":data:") ||
+                        it == ":network" ||
+                            it.startsWith(":storage:") ||
+                            it.startsWith(":capability:") ||
                             it.startsWith(":social:") ||
-                            it.startsWith(":presenter:") ||
+                            (it.startsWith(":presentation:") && it != ":presentation:model") ||
                             it == ":compose-ui"
                     }.forEach { violations += "${project.path} must not depend on $it" }
             }
 
-            if (project.path.startsWith(":presenter:") || project.path.startsWith(":web:")) {
+            if (project.path.startsWith(":presentation:") || project.path.startsWith(":web:")) {
                 if (":compose-ui" in dependencyPaths) {
                     violations += "${project.path} must not depend on :compose-ui"
                 }
@@ -93,19 +95,30 @@ val validateModuleBoundaries by tasks.registering {
                 violations += "${project.path} must not export Nostr on Web"
             }
 
-            if (project.path == ":data:database") {
+            if (project.path == ":storage:database") {
                 dependencyPaths
                     .filter {
                         it.startsWith(":social:") ||
-                            it.startsWith(":presenter:") ||
+                            it.startsWith(":capability:") ||
+                            (it.startsWith(":presentation:") && it != ":presentation:model") ||
                             it == ":compose-ui"
                     }.forEach { violations += "${project.path} must not depend on $it" }
             }
 
-            if (project.path.startsWith(":data:") && project.path != ":data:database") {
+            if (project.path.startsWith(":storage:") && project.path != ":storage:database") {
                 dependencyPaths
                     .filter {
-                        it.startsWith(":presenter:") ||
+                        it.startsWith(":social:") ||
+                            it.startsWith(":capability:") ||
+                            it.startsWith(":presentation:") ||
+                            it == ":compose-ui"
+                    }.forEach { violations += "${project.path} must not depend on $it" }
+            }
+
+            if (project.path.startsWith(":capability:")) {
+                dependencyPaths
+                    .filter {
+                        (it.startsWith(":presentation:") && it != ":presentation:model") ||
                             it == ":compose-ui"
                     }.forEach { violations += "${project.path} must not depend on $it" }
             }
@@ -113,7 +126,8 @@ val validateModuleBoundaries by tasks.registering {
             if (project.path.startsWith(":social:")) {
                 dependencyPaths
                     .filter {
-                        it.startsWith(":presenter:") ||
+                        it.startsWith(":capability:") ||
+                            (it.startsWith(":presentation:") && it != ":presentation:model") ||
                             it == ":compose-ui"
                     }.forEach { violations += "${project.path} must not depend on $it" }
             }

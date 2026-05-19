@@ -28,10 +28,10 @@ kotlin {
             dependencies {
                 api(projects.core.common)
                 api(projects.core.model)
-                api(projects.data.database)
-                api(projects.data.network)
+                api(projects.storage.database)
+                api(projects.network)
                 api(projects.social.microblog)
-                api(projects.ui.model)
+                api(projects.presentation.model)
                 implementation(libs.kotlinx.datetime)
                 implementation(libs.ksoup)
                 implementation(libs.readability)

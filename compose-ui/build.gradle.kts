@@ -33,14 +33,14 @@ kotlin {
         appleTarget.binaries.framework {
             baseName = "KotlinSharedUI"
             isStatic = true
-            export(projects.presenter.features)
+            export(projects.presentation.features)
         }
     }
 
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation(projects.presenter.features)
+                implementation(projects.presentation.features)
                 implementation(compose("org.jetbrains.compose.ui:ui"))
                 implementation(compose("org.jetbrains.compose.runtime:runtime"))
                 implementation(compose("org.jetbrains.compose.foundation:foundation"))
@@ -95,7 +95,7 @@ kotlin {
         }
         val iosMain by getting {
             dependencies {
-                api(projects.presenter.features)
+                api(projects.presentation.features)
                 implementation(libs.cupertino)
                 api(compose("org.jetbrains.compose.ui:ui-util"))
                 implementation(libs.lifecycle.viewmodel.compose)

@@ -23,10 +23,10 @@ kotlin {
             dependencies {
                 api(projects.core.common)
                 api(projects.core.model)
-                api(projects.ui.model)
-                api(projects.data.database)
+                api(projects.presentation.model)
+                api(projects.storage.database)
                 api(projects.social.api)
-                implementation(projects.data.network)
+                implementation(projects.network)
                 implementation(libs.bundles.ktor)
                 implementation(libs.cryptography.provider.optimal)
                 implementation(libs.nostr.sdk.kmp)

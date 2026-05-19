@@ -10,7 +10,7 @@ plugins {
 
 kotlin {
     flare {
-        namespace = "dev.dimension.flare.data.datastore"
+        namespace = "dev.dimension.flare.capability.draft"
         platforms(
             FlarePlatform.ANDROID,
             FlarePlatform.JVM,
@@ -24,19 +24,21 @@ kotlin {
     }
 
     sourceSets {
+        all {
+            languageSettings {
+                optIn("kotlin.uuid.ExperimentalUuidApi")
+            }
+        }
         val commonMain by getting {
             dependencies {
                 api(projects.core.common)
                 api(projects.core.model)
-                api(libs.datastore.core)
-                api(libs.datastore.core.okio)
+                api(projects.storage.database)
+                api(projects.storage.datastore)
+                api(projects.social.microblog)
+                api(projects.presentation.model)
+                api(libs.kotlinx.coroutines.core)
                 api(libs.okio)
-                implementation(libs.kotlinx.serialization.json)
-            }
-        }
-        val androidMain by getting {
-            dependencies {
-                implementation(libs.datastore)
             }
         }
         val commonTest by getting {

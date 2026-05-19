@@ -54,14 +54,14 @@ public class DraftMediaStore(
 
     public suspend fun restore(medias: List<DraftMedia>): List<ComposeData.Media> =
         medias.map { media ->
+            val path = media.cachePath.toPath()
             ComposeData.Media(
                 file =
                     draftFileItem(
-                        path = media.cachePath,
                         name = media.fileName,
                         type = media.mediaType.toFileType(),
                         readBytes = {
-                            fileStorage.read(media.cachePath.toPath())
+                            fileStorage.read(path)
                         },
                     ),
                 altText = media.altText,
@@ -115,7 +115,6 @@ public class DraftMediaStore(
 }
 
 internal expect fun draftFileItem(
-    path: String,
     name: String?,
     type: FileType,
     readBytes: suspend () -> ByteArray,

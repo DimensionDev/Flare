@@ -190,6 +190,32 @@ class DraftMediaStoreTest {
         }
 
     @Test
+    fun restorePreservesMissingFileNameWhenPersistingAgain() =
+        runTest {
+            val store = DraftMediaStore(pathProducer, fileSystem)
+            val firstPersist =
+                store
+                    .persist(
+                        "group-missing-file-name",
+                        listOf(
+                            media(name = null, bytes = byteArrayOf(7), type = FileType.Image, altText = null),
+                        ),
+                    ).single()
+
+            val restored = store.restore(listOf(firstPersist.toDraftMedia("group-missing-file-name", 0))).single()
+            val secondPersist = store.persist("group-missing-file-name", listOf(restored)).single()
+
+            assertNull(restored.file.name)
+            assertNull(secondPersist.fileName)
+            assertContentEquals(
+                byteArrayOf(7),
+                fileSystem.read(secondPersist.cachePath.toPath()) {
+                    readByteArray()
+                },
+            )
+        }
+
+    @Test
     fun persistSanitizesIllegalCharactersInFileName() =
         runTest {
             val store = DraftMediaStore(pathProducer, fileSystem)

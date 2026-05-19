@@ -2,6 +2,7 @@ package dev.dimension.flare.data.draft
 
 import dev.dimension.flare.common.FileItem
 import dev.dimension.flare.common.FileType
+import dev.dimension.flare.common.sanitizeFileName
 import dev.dimension.flare.data.database.app.model.DraftMediaType
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.io.FileStorage
@@ -127,5 +128,3 @@ private fun DraftMediaType.toFileType(): FileType =
         DraftMediaType.VIDEO -> FileType.Video
         DraftMediaType.OTHER -> FileType.Other
     }
-
-private fun String.sanitizeFileName(): String = replace(Regex("[^A-Za-z0-9._-]"), "_")

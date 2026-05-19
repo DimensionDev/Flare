@@ -1,3 +1,5 @@
 package dev.dimension.flare.common
 
-public fun String.sanitizeFileName(): String = replace(Regex("[^A-Za-z0-9._-]"), "_")
+private val invalidFileNameCharsRegex = Regex("[^A-Za-z0-9._-]")
+
+public fun String.sanitizeFileName(): String = replace(invalidFileNameCharsRegex, "_")

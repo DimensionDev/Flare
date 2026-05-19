@@ -8,6 +8,7 @@ import androidx.room3.RoomDatabaseConstructor
 import androidx.room3.TypeConverters
 import androidx.room3.migration.Migration
 import androidx.sqlite.SQLiteConnection
+import androidx.sqlite.execSQL
 import dev.dimension.flare.data.database.app.dao.AccountDao
 import dev.dimension.flare.data.database.app.dao.ApplicationDao
 import dev.dimension.flare.data.database.app.dao.DraftDao
@@ -76,13 +77,13 @@ public abstract class AppDatabase : RoomDatabase() {
         public val MIGRATION_8_9: Migration =
             object : Migration(8, 9) {
                 override suspend fun migrate(connection: SQLiteConnection) {
-                    connection.executeMigrationSql(
+                    connection.execSQL(
                         "ALTER TABLE DbRssSources ADD COLUMN displayMode TEXT NOT NULL DEFAULT 'FULL_CONTENT'",
                     )
-                    connection.executeMigrationSql(
+                    connection.execSQL(
                         "UPDATE DbRssSources SET displayMode = 'OPEN_IN_BROWSER' WHERE openInBrowser = 1",
                     )
-                    connection.executeMigrationSql(
+                    connection.execSQL(
                         "ALTER TABLE DbRssSources DROP COLUMN openInBrowser",
                     )
                 }
@@ -90,7 +91,7 @@ public abstract class AppDatabase : RoomDatabase() {
         public val MIGRATION_9_10: Migration =
             object : Migration(9, 10) {
                 override suspend fun migrate(connection: SQLiteConnection) {
-                    connection.executeMigrationSql(
+                    connection.execSQL(
                         "ALTER TABLE DbKeywordFilter ADD COLUMN is_regex INTEGER NOT NULL DEFAULT 0",
                     )
                 }

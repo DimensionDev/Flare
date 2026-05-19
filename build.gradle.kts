@@ -89,6 +89,10 @@ val validateModuleBoundaries by tasks.registering {
                 }
             }
 
+            if (project.path.startsWith(":web:") && ":social:nostr" in dependencyPaths) {
+                violations += "${project.path} must not export Nostr on Web"
+            }
+
             if (project.path == ":data:database") {
                 dependencyPaths
                     .filter {

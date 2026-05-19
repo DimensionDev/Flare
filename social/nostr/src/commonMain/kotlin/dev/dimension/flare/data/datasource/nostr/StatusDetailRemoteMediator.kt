@@ -1,13 +1,11 @@
 package dev.dimension.flare.data.datasource.nostr
 
-import androidx.paging.ExperimentalPagingApi
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimelineV2
 
-@OptIn(ExperimentalPagingApi::class)
 internal class StatusDetailRemoteMediator(
     private val statusKey: MicroBlogKey,
     private val accountKey: MicroBlogKey,

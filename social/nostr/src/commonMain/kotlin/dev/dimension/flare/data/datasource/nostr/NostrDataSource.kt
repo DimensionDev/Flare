@@ -2,6 +2,7 @@ package dev.dimension.flare.data.datasource.nostr
 
 import dev.dimension.flare.common.FileType
 import dev.dimension.flare.common.SwitchingServiceManager
+import dev.dimension.flare.data.account.AccountRepository
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
@@ -9,7 +10,6 @@ import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeType
 import dev.dimension.flare.data.datasource.microblog.DatabaseUpdater
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
-import dev.dimension.flare.ui.model.PostEvent
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
 import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.RelationDataSource
@@ -19,7 +19,6 @@ import dev.dimension.flare.data.datasource.microblog.handler.PostHandler
 import dev.dimension.flare.data.datasource.microblog.handler.RelationHandler
 import dev.dimension.flare.data.datasource.microblog.handler.UserHandler
 import dev.dimension.flare.data.datasource.microblog.loader.RelationActionType
-import dev.dimension.flare.data.datasource.microblog.nextActionMenu
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
@@ -30,14 +29,14 @@ import dev.dimension.flare.data.datasource.microblog.timeline.CommonTimelineSpec
 import dev.dimension.flare.data.datasource.microblog.timeline.TimelineShortcutDescriptor
 import dev.dimension.flare.data.datasource.microblog.timeline.TimelineSpec
 import dev.dimension.flare.data.datasource.microblog.timeline.TimelineTabProvider
+import dev.dimension.flare.data.datasource.microblog.timeline.toTimelineTabDescriptor
 import dev.dimension.flare.data.network.nostr.AmberSignerBridge
 import dev.dimension.flare.data.network.nostr.NostrService
-import dev.dimension.flare.data.account.AccountRepository
-import dev.dimension.flare.data.platform.toTimelineTabDescriptor
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiIcon
+import dev.dimension.flare.ui.model.PostEvent
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.nostrLike
@@ -179,7 +178,7 @@ internal class NostrDataSource(
                 dev.dimension.flare.model.AccountType
                     .Specific(accountKey),
             handler = this,
-            optimisticActionMenu = { it.nextActionMenu() },
+            optimisticActionMenu = { it.nostrNextActionMenu() },
         )
     }
 

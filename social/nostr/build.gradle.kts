@@ -26,10 +26,14 @@ kotlin {
                 api(projects.presentation.model)
                 api(projects.storage.database)
                 api(projects.social.api)
+                api(projects.social.microblog)
+                implementation(projects.capability.account)
                 implementation(projects.network)
                 implementation(libs.bundles.ktor)
                 implementation(libs.cryptography.provider.optimal)
                 implementation(libs.nostr.sdk.kmp)
+                implementation(dependencies.platform(libs.koin.bom))
+                implementation(libs.koin.core)
             }
         }
         val commonTest by getting {

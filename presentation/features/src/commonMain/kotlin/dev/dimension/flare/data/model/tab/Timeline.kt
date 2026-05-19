@@ -8,9 +8,16 @@ import dev.dimension.flare.data.model.appearance.AppearancePatch
 import dev.dimension.flare.data.model.appearance.TimelineAppearance
 import dev.dimension.flare.data.model.appearance.toBag
 import dev.dimension.flare.data.model.appearance.withPatch
+import dev.dimension.flare.data.platform.BlueskyPlatformSpec
+import dev.dimension.flare.data.platform.CommonTimelineSpecs
+import dev.dimension.flare.data.platform.MastodonPlatformSpec
+import dev.dimension.flare.data.platform.MisskeyPlatformSpec
+import dev.dimension.flare.data.platform.VvoPlatformSpec
+import dev.dimension.flare.data.platform.XqtPlatformSpec
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.SocialPlatformRegistry
-import dev.dimension.flare.model.platformSpecs
+import dev.dimension.flare.model.SocialPlatformSpec
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.UiText
@@ -261,8 +268,8 @@ public class TimelineResolver internal constructor(
     private val platformRegistry: SocialPlatformRegistry,
 ) {
     private val specs: Map<String, TimelineSpec<out TimelineSpec.Data>> by lazy {
-        platformRegistry.platformSpecs
-            .flatMap { it.legacyTimelineSpecs }
+        platformRegistry.specs
+            .flatMap { it.legacyTimelineSpecs() }
             .distinctBy { it.id }
             .associateBy { it.id }
     }
@@ -374,3 +381,13 @@ public class TimelineResolver internal constructor(
         specs[source.specId]
             ?: throw IllegalArgumentException("No timeline spec found for source ID: ${source.specId}")
 }
+
+private fun SocialPlatformSpec.legacyTimelineSpecs(): List<TimelineSpec<out TimelineSpec.Data>> =
+    when (type) {
+        PlatformType.Mastodon -> MastodonPlatformSpec.legacyTimelineSpecs
+        PlatformType.Misskey -> MisskeyPlatformSpec.legacyTimelineSpecs
+        PlatformType.Bluesky -> BlueskyPlatformSpec.legacyTimelineSpecs
+        PlatformType.xQt -> XqtPlatformSpec.legacyTimelineSpecs
+        PlatformType.VVo -> VvoPlatformSpec.legacyTimelineSpecs
+        PlatformType.Nostr -> listOf(CommonTimelineSpecs.home)
+    }

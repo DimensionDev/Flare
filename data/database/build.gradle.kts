@@ -43,6 +43,7 @@ kotlin {
                 api(libs.room.runtime)
                 api(libs.room.paging)
                 api(libs.sqlite)
+                implementation(libs.sqlite.async)
                 implementation(libs.kotlinx.serialization.json)
             }
         }
@@ -50,6 +51,13 @@ kotlin {
         val nonWebMain by getting {
             dependencies {
                 api(libs.sqlite.bundled)
+            }
+        }
+
+        val wasmJsMain by getting {
+            dependencies {
+                implementation(libs.sqlite.web)
+                implementation(npm("@androidx/sqlite-web-worker", file("sqlite-web-worker")))
             }
         }
     }

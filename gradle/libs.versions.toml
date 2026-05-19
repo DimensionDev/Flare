@@ -124,7 +124,9 @@ room-runtime = { group = "androidx.room3", name = "room3-runtime", version.ref =
 room-paging = { group = "androidx.room3", name = "room3-paging", version.ref = "room" }
 room-compiler = { group = "androidx.room3", name = "room3-compiler", version.ref = "room" }
 sqlite = { group = "androidx.sqlite", name = "sqlite", version.ref = "sqlite" }
+sqlite-async = { group = "androidx.sqlite", name = "sqlite-async", version.ref = "sqlite" }
 sqlite-bundled = { group = "androidx.sqlite", name = "sqlite-bundled", version.ref = "sqlite" }
+sqlite-web = { group = "androidx.sqlite", name = "sqlite-web", version.ref = "sqlite" }
 nestedScrollView = { group = "com.github.Tlaster", name = "NestedScrollView", version = "1.0.3" }
 webkit = { group = "androidx.webkit", name = "webkit", version = "1.16.0" }
 androidx-browser = { group = "androidx.browser", name = "browser", version = "1.10.0" }

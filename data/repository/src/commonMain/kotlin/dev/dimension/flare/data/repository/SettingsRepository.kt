@@ -5,7 +5,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.core.DataStoreFactory
 import dev.dimension.flare.common.protobufSerializer
 import dev.dimension.flare.data.datastore.AppDataStore
-import dev.dimension.flare.data.datastore.DataStoreStorageProvider
+import dev.dimension.flare.data.datastore.createDataStoreStorage
 import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.io.PlatformPathProducer
 import dev.dimension.flare.data.model.AppearanceSettings
@@ -34,10 +34,6 @@ public class SettingsRepository(
     private val appDataStore: AppDataStore,
     private val tabSettingsV2Migrator: TabSettingsV2Migrator = NoOpTabSettingsV2Migrator,
 ) {
-    private val storageProvider by lazy {
-        DataStoreStorageProvider(pathProducer)
-    }
-
     private val appearanceBagStore by lazy {
         createDataStore(
             name = "appearance_bag.pb",
@@ -177,6 +173,11 @@ public class SettingsRepository(
         serializer: androidx.datastore.core.okio.OkioSerializer<T>,
     ): DataStore<T> =
         DataStoreFactory.create(
-            storage = storageProvider.storage(name, serializer),
+            storage =
+                createDataStoreStorage(
+                    name = name,
+                    serializer = serializer,
+                    platformPathProducer = pathProducer,
+                ),
         )
 }

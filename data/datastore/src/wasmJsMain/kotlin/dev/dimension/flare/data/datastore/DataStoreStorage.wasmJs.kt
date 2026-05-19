@@ -5,7 +5,7 @@ import androidx.datastore.core.okio.OkioSerializer
 import androidx.datastore.core.okio.WebOpfsStorage
 import dev.dimension.flare.data.io.PlatformPathProducer
 
-internal actual fun <T> createDataStoreStorage(
+public actual fun <T> createDataStoreStorage(
     name: String,
     serializer: OkioSerializer<T>,
     @Suppress("UNUSED_PARAMETER") platformPathProducer: PlatformPathProducer,

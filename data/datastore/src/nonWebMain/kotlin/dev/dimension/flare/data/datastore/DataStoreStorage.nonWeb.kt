@@ -7,7 +7,7 @@ import dev.dimension.flare.data.io.PlatformPathProducer
 import okio.FileSystem
 import okio.SYSTEM
 
-internal actual fun <T> createDataStoreStorage(
+public actual fun <T> createDataStoreStorage(
     name: String,
     serializer: OkioSerializer<T>,
     platformPathProducer: PlatformPathProducer,

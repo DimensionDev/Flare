@@ -9,12 +9,8 @@ import dev.dimension.flare.data.datastore.model.FlareConfig
 import dev.dimension.flare.data.io.PlatformPathProducer
 
 public class AppDataStore(
-    private val storageProvider: DataStoreStorageProvider,
+    private val platformPathProducer: PlatformPathProducer,
 ) {
-    public constructor(
-        platformPathProducer: PlatformPathProducer,
-    ) : this(DataStoreStorageProvider(platformPathProducer))
-
     public val flareDataStore: DataStore<FlareConfig> by lazy {
         createDataStore(
             name = "flare_config.pb",
@@ -42,9 +38,10 @@ public class AppDataStore(
     ): DataStore<T> =
         DataStoreFactory.create(
             storage =
-                storageProvider.storage(
+                createDataStoreStorage(
                     name = name,
                     serializer = protobufSerializer(defaultValue),
+                    platformPathProducer = platformPathProducer,
                 ),
         )
 }

@@ -300,10 +300,10 @@ private fun createLoginPresenter(
 private fun createTimelinePresenter(args: JsonObject): PresenterBase<out Any> {
     args["source"]?.let { sourceElement ->
         val source = bridgeJson.decodeFromJsonElement<TimelineSourceRef>(sourceElement)
-        return GlobalContext.get()
+        val resolver =
+            GlobalContext.get()
             .get<TimelineResolver>()
-            .toTabItem(source)
-            .createPresenter()
+        return resolver.createPresenter(resolver.toTabItem(source))
     }
     args.optionalString("rssUrl")?.let {
         return RssTimelinePresenter(it)

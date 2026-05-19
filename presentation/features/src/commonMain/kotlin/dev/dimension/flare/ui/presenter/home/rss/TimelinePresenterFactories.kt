@@ -12,7 +12,7 @@ public fun createRssTimeline(url: String): TimelinePresenter =
         flowOf(RssDataSource.fetchLoader(url))
     }
 
-internal fun createSubscriptionTimeline(
+public fun createSubscriptionTimeline(
     type: SubscriptionType,
     url: String,
 ): TimelinePresenter =

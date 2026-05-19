@@ -40,7 +40,6 @@ kotlin {
                 api(projects.core.common)
                 api(projects.core.deeplink)
                 api(projects.core.model)
-                api(projects.capability.settings)
                 api(dependencies.platform(libs.compose.bom))
                 api(libs.compose.runtime)
                 api(libs.paging.common)

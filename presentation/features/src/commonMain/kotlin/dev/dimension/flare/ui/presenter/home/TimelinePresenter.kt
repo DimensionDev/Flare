@@ -39,7 +39,7 @@ import dev.dimension.flare.data.local.LocalFilterRepository
 import dev.dimension.flare.model.LoginExpiredException
 import dev.dimension.flare.data.repository.homeTimelineTab
 import dev.dimension.flare.data.translation.PreTranslationService
-import dev.dimension.flare.data.translation.TranslationSettingsSupport
+import dev.dimension.flare.data.settings.TranslationSettingsSupport
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.presenter.PresenterBase

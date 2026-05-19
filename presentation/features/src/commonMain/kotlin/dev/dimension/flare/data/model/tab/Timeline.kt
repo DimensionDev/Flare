@@ -88,13 +88,13 @@ public class SourceTimelineTabItemV2 private constructor(
     }
 
     public companion object {
-        internal fun runtime(
+        public fun runtime(
             id: String,
             title: UiText,
             icon: IconType,
             appearancePatch: AppearancePatch? = null,
             enabled: Boolean = true,
-            runtimePresenterFactory: () -> TimelinePresenter,
+            createPresenter: () -> TimelinePresenter,
         ): SourceTimelineTabItemV2 =
             SourceTimelineTabItemV2(
                 id = id,
@@ -105,7 +105,7 @@ public class SourceTimelineTabItemV2 private constructor(
                 icon = icon,
                 appearancePatch = appearancePatch,
                 enabled = enabled,
-                runtimePresenterFactory = runtimePresenterFactory,
+                runtimePresenterFactory = createPresenter,
             )
 
         internal fun fromSlot(

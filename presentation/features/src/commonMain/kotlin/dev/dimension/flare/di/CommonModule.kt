@@ -9,6 +9,7 @@ import dev.dimension.flare.data.datasource.microblog.timeline.TimelineCatalog
 import dev.dimension.flare.data.datasource.rss.RssTimelineSpecs
 import dev.dimension.flare.data.model.tab.TimelinePersistenceMapper
 import dev.dimension.flare.data.model.tab.TimelinePresenterFactory
+import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.network.rss.Readability
 import dev.dimension.flare.data.account.AccountRepository
 import dev.dimension.flare.data.account.CredentialProvider
@@ -77,4 +78,5 @@ internal val commonModule =
         single<TranslationSettingsProvider> { TranslationSettingsProviderImpl(get()) }
         single { TimelinePresenterFactory(get()) }
         single { TimelinePersistenceMapper(get()) }
+        single { TimelineResolver(get(), get()) }
     }

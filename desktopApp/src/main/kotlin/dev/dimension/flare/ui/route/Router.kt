@@ -38,12 +38,12 @@ import dev.dimension.flare.ui.model.asType
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus.Quote
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus.Reply
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus.VVOComment
-import dev.dimension.flare.ui.presenter.home.bluesky.BlueskyFeedTimelinePresenter
-import dev.dimension.flare.ui.presenter.home.rss.RssTimelinePresenter
-import dev.dimension.flare.ui.presenter.home.rss.SubscriptionTimelinePresenter
-import dev.dimension.flare.ui.presenter.list.AntennasTimelinePresenter
-import dev.dimension.flare.ui.presenter.list.ChannelTimelinePresenter
-import dev.dimension.flare.ui.presenter.list.ListTimelinePresenter
+import dev.dimension.flare.ui.presenter.home.bluesky.createBlueskyFeedTimeline
+import dev.dimension.flare.ui.presenter.home.rss.createRssTimeline
+import dev.dimension.flare.ui.presenter.home.rss.createSubscriptionTimeline
+import dev.dimension.flare.ui.presenter.list.createListTimeline
+import dev.dimension.flare.ui.presenter.list.createMisskeyAntennaTimeline
+import dev.dimension.flare.ui.presenter.list.createMisskeyChannelTimeline
 import dev.dimension.flare.ui.route.FluentDialogSceneStrategy.Companion.dialog
 import dev.dimension.flare.ui.route.Route.EditRssSource
 import dev.dimension.flare.ui.route.Route.Profile
@@ -454,7 +454,7 @@ internal fun Router(
                                         title = UiText.Raw(it.title),
                                         icon = UiIcon.List.asType(),
                                         createPresenter = {
-                                            ListTimelinePresenter(
+                                            createListTimeline(
                                                 accountType = args.accountType,
                                                 listId = it.id,
                                             )
@@ -481,7 +481,7 @@ internal fun Router(
                                         title = UiText.Raw(it.title),
                                         icon = UiIcon.Feeds.asType(),
                                         createPresenter = {
-                                            BlueskyFeedTimelinePresenter(
+                                            createBlueskyFeedTimeline(
                                                 accountType = args.accountType,
                                                 uri = it.id,
                                             )
@@ -907,7 +907,7 @@ internal fun Router(
                                         title = UiText.Raw(it.title),
                                         icon = UiIcon.Rss.asType(),
                                         createPresenter = {
-                                            AntennasTimelinePresenter(
+                                            createMisskeyAntennaTimeline(
                                                 accountType = args.accountType,
                                                 id = it.id,
                                             )
@@ -1053,7 +1053,7 @@ internal fun Router(
                                     title = UiText.Raw(args.title),
                                     icon = UiIcon.Channel.asType(),
                                     createPresenter = {
-                                        ChannelTimelinePresenter(
+                                        createMisskeyChannelTimeline(
                                             accountType = args.accountType,
                                             id = args.channelId,
                                         )
@@ -1073,8 +1073,8 @@ private fun UiRssSource.toTimelineTabItem(): TimelineTabItemV2 =
         icon = favIcon?.let { IconType.Url(it) } ?: UiIcon.Rss.asType(),
         createPresenter = {
             when (type) {
-                SubscriptionType.RSS -> RssTimelinePresenter(url)
-                else -> SubscriptionTimelinePresenter(type, url)
+                SubscriptionType.RSS -> createRssTimeline(url)
+                else -> createSubscriptionTimeline(type, url)
             }
         },
     )

@@ -17,6 +17,7 @@ import dev.dimension.flare.data.database.cache.model.translationEntityKey
 import dev.dimension.flare.data.database.cache.model.translationPayload
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.datastore.model.AppSettings
+import dev.dimension.flare.data.datastore.model.translationProviderCacheKey
 import dev.dimension.flare.data.ai.AiCompletionService
 import dev.dimension.flare.common.tryRun
 import kotlinx.coroutines.CancellationException

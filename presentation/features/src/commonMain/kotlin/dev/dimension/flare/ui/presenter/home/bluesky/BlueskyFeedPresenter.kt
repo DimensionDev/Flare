@@ -41,15 +41,7 @@ public class BlueskyFeedPresenter(
     private val accountRepository: AccountRepository by inject()
 
     private val timelinePresenter by lazy {
-        object : TimelinePresenter() {
-            override val loader: Flow<RemoteLoader<UiTimelineV2>> by lazy {
-                accountServiceFlow(accountType, accountRepository)
-                    .map {
-                        require(it is BlueskyFeedDataSource)
-                        it.feedTimelineLoader(uri)
-                    }
-            }
-        }
+        createBlueskyFeedTimeline(accountType, uri, accountRepository)
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -129,6 +121,33 @@ public class BlueskyFeedPresenter(
         }
     }
 }
+
+public fun createBlueskyFeedTimeline(
+    accountType: AccountType,
+    uri: String,
+): TimelinePresenter =
+    createBlueskyFeedTimeline(
+        accountType = accountType,
+        uri = uri,
+        accountRepository = null,
+    )
+
+private fun createBlueskyFeedTimeline(
+    accountType: AccountType,
+    uri: String,
+    accountRepository: AccountRepository?,
+): TimelinePresenter =
+    object : TimelinePresenter() {
+        private val injectedAccountRepository: AccountRepository by inject()
+
+        override val loader: Flow<RemoteLoader<UiTimelineV2>> by lazy {
+            accountServiceFlow(accountType, accountRepository ?: injectedAccountRepository)
+                .map {
+                    require(it is BlueskyFeedDataSource)
+                    it.feedTimelineLoader(uri)
+                }
+        }
+    }
 
 @Immutable
 public interface BlueskyFeedState {

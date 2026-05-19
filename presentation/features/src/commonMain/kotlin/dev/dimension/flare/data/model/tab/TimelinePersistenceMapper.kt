@@ -15,6 +15,12 @@ internal class TimelinePersistenceMapper(
             ref = descriptor.ref,
         )
 
+    fun toTabItem(source: TimelineSourceRef): SourceTimelineTabItemV2 =
+        SourceTimelineTabItemV2.fromSource(
+            source = source,
+            ref = runCatching { decode(source) }.getOrNull(),
+        )
+
     fun toTabItem(slot: TimelineSlot): TimelineTabItemV2 =
         when (val content = slot.content) {
             is TimelineSlotContent.Source -> {
@@ -78,14 +84,26 @@ internal class TimelinePersistenceMapper(
     fun resolveAccountKey(slot: TimelineSlot): MicroBlogKey? =
         when (val content = slot.content) {
             is TimelineSlotContent.Source ->
-                runCatching { decode(content.source) }
-                    .getOrNull()
-                    ?.data
-                    ?.let { it as? TimelineSpec.AccountData }
-                    ?.accountKey
+                resolveAccountKey(content.source)
 
             is TimelineSlotContent.Group -> null
         }
+
+    fun resolveAccountKey(item: TimelineTabItemV2): MicroBlogKey? =
+        when (item) {
+            is SourceTimelineTabItemV2 ->
+                item.ref?.data?.let { it as? TimelineSpec.AccountData }?.accountKey
+                    ?: item.source?.let(::resolveAccountKey)
+
+            is GroupTimelineTabItemV2 -> null
+        }
+
+    fun resolveAccountKey(source: TimelineSourceRef): MicroBlogKey? =
+        runCatching { decode(source) }
+            .getOrNull()
+            ?.data
+            ?.let { it as? TimelineSpec.AccountData }
+            ?.accountKey
 
     fun decode(source: TimelineSourceRef): TimelineRef<out TimelineSpec.Data> =
         catalog.decode(

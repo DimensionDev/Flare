@@ -4,10 +4,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.isRefreshing
+import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 public class TimelineItemPresenter(
     private val timelineTabItem: TimelineTabItemV2,
@@ -23,8 +25,10 @@ public class TimelineItemPresenter(
         public val isRefreshing: Boolean
     }
 
+    private val timelineResolver: TimelineResolver by inject()
+
     private val timelinePresenter by lazy {
-        timelineTabItem.createPresenter()
+        timelineResolver.createPresenter(timelineTabItem)
     }
 
     @Composable

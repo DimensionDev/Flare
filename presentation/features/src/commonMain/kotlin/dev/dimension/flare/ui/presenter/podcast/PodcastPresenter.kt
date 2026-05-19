@@ -3,8 +3,8 @@ package dev.dimension.flare.ui.presenter.podcast
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
-import dev.dimension.flare.data.datasource.xqt.XQTDataSource
 import dev.dimension.flare.data.account.AccountRepository
+import dev.dimension.flare.data.datasource.xqt.XqtContentDataSource
 import dev.dimension.flare.data.repository.accountServiceFlow
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiPodcast
@@ -32,7 +32,7 @@ public class PodcastPresenter(
             accountType = accountType,
             repository = accountRepository,
         ).map {
-            require(it is XQTDataSource)
+            require(it is XqtContentDataSource)
             it.podcast(id).fold(
                 onSuccess = { UiState.Success(it) },
                 onFailure = { UiState.Error<UiPodcast>(it) },

@@ -3,6 +3,7 @@ package dev.dimension.flare.data.platform
 import dev.dimension.flare.common.deeplink.DeepLinkMapping
 import dev.dimension.flare.common.deeplink.DeepLinkPattern
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
+import dev.dimension.flare.data.datasource.vvo.VVODataSource
 import dev.dimension.flare.data.datasource.microblog.timeline.TimelineSpec
 import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
 import dev.dimension.flare.data.network.vvo.VVOPlatformDetector
@@ -20,7 +21,12 @@ import kotlinx.collections.immutable.persistentListOf
 public data object VvoSocialPlatformPlugin : SocialPlatformPlugin {
     public override val spec: SocialPlatformSpec = VvoSocialPlatformSpec
 
-    public override fun createDataSource(account: UiAccount): MicroblogDataSource? = null
+    public override fun createDataSource(account: UiAccount): MicroblogDataSource? =
+        (account as? UiAccount.VVo)?.let {
+            VVODataSource(
+                accountKey = it.accountKey,
+            )
+        }
 }
 
 public data object VvoSocialPlatformSpec : SocialPlatformSpec {

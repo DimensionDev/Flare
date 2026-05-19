@@ -10,10 +10,10 @@ import androidx.paging.map
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.collectAsState
 import dev.dimension.flare.common.toPagingState
+import dev.dimension.flare.data.account.AccountRepository
 import dev.dimension.flare.data.datasource.microblog.paging.toPagingSource
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
-import dev.dimension.flare.data.datasource.vvo.VVODataSource
-import dev.dimension.flare.data.account.AccountRepository
+import dev.dimension.flare.data.datasource.vvo.VvoStatusDataSource
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -42,7 +42,7 @@ public class VVOStatusDetailPresenter(
             service
                 .flatMap {
                     remember(statusKey, accountType) {
-                        require(it is VVODataSource)
+                        require(it is VvoStatusDataSource)
                         it.status(statusKey)
                     }.collectAsState(UiState.Loading()).value
                 }
@@ -51,7 +51,7 @@ public class VVOStatusDetailPresenter(
 
         val extendedText =
             service.flatMap {
-                require(it is VVODataSource)
+                require(it is VvoStatusDataSource)
                 remember(statusKey, accountType) {
                     it.statusExtendedText(statusKey)
                 }.collectAsState(UiState.Loading()).value
@@ -60,7 +60,7 @@ public class VVOStatusDetailPresenter(
         val actualStatus =
             status.flatMap { item ->
                 service.map { service ->
-                    require(service is VVODataSource)
+                    require(service is VvoStatusDataSource)
                     when (extendedText) {
                         is UiState.Error -> {
                             item
@@ -90,7 +90,7 @@ public class VVOStatusDetailPresenter(
         val repost =
             service
                 .map {
-                    require(it is VVODataSource)
+                    require(it is VvoStatusDataSource)
                     remember(statusKey, accountType) {
                         Pager(config = pagingConfig) {
                             it.statusRepost(statusKey = statusKey).toPagingSource()
@@ -111,7 +111,7 @@ public class VVOStatusDetailPresenter(
         val comment =
             service
                 .map {
-                    require(it is VVODataSource)
+                    require(it is VvoStatusDataSource)
                     remember(statusKey, accountType) {
                         Pager(config = pagingConfig) {
                             it.statusComment(statusKey = statusKey).toPagingSource()

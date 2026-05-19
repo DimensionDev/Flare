@@ -1,7 +1,9 @@
 package dev.dimension.flare.data.datasource.vvo
 
 import androidx.paging.ExperimentalPagingApi
+import androidx.paging.LoadState
 import dev.dimension.flare.common.CacheData
+import dev.dimension.flare.common.CacheState
 import dev.dimension.flare.common.FileItem
 import dev.dimension.flare.common.FileType
 import dev.dimension.flare.common.MemCacheable
@@ -24,20 +26,19 @@ import dev.dimension.flare.data.datasource.microblog.handler.PostEventHandler
 import dev.dimension.flare.data.datasource.microblog.handler.PostHandler
 import dev.dimension.flare.data.datasource.microblog.handler.RelationHandler
 import dev.dimension.flare.data.datasource.microblog.handler.UserHandler
-import dev.dimension.flare.data.datasource.microblog.nextActionMenu
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.datasource.microblog.timeline.CommonTimelineSpecs as SocialCommonTimelineSpecs
 import dev.dimension.flare.data.datasource.microblog.timeline.TimelineSpec
 import dev.dimension.flare.data.datasource.microblog.timeline.TimelineTabProvider
+import dev.dimension.flare.data.datasource.microblog.timeline.toTimelineShortcutDescriptor
+import dev.dimension.flare.data.datasource.microblog.timeline.toTimelineTabDescriptor
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.network.vvo.VVOService
 import dev.dimension.flare.data.network.vvo.model.StatusDetailItem
 import dev.dimension.flare.data.platform.VvoTimelineDataSource
 import dev.dimension.flare.data.platform.VvoTimelineSpecs
-import dev.dimension.flare.data.platform.toTimelineShortcutDescriptor
-import dev.dimension.flare.data.platform.toTimelineTabDescriptor
 import dev.dimension.flare.data.account.AccountRepository
 import dev.dimension.flare.model.LoginExpiredException
 import dev.dimension.flare.model.AccountType
@@ -52,11 +53,11 @@ import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
-import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -70,6 +71,7 @@ internal class VVODataSource(
     UserDataSource,
     RelationDataSource,
     VvoTimelineDataSource,
+    VvoStatusDataSource,
     TimelineTabProvider,
     PostDataSource,
     PostEventHandler.Handler {
@@ -181,7 +183,7 @@ internal class VVODataSource(
         PostEventHandler(
             accountType = AccountType.Specific(accountKey),
             handler = this,
-            optimisticActionMenu = { it.nextActionMenu() },
+            optimisticActionMenu = { it.vvoNextActionMenu() },
         )
     }
 
@@ -466,28 +468,28 @@ internal class VVODataSource(
             accountKey = accountKey,
         )
 
-    fun statusComment(statusKey: MicroBlogKey): RemoteLoader<UiTimelineV2> =
+    override fun statusComment(statusKey: MicroBlogKey): RemoteLoader<UiTimelineV2> =
         StatusCommentRemoteMediator(
             service = service,
             accountKey = accountKey,
             statusKey = statusKey,
         )
 
-    fun statusRepost(statusKey: MicroBlogKey): RemoteLoader<UiTimelineV2> =
+    override fun statusRepost(statusKey: MicroBlogKey): RemoteLoader<UiTimelineV2> =
         StatusRepostRemoteMediator(
             service = service,
             accountKey = accountKey,
             statusKey = statusKey,
         )
 
-    fun commentChild(commentKey: MicroBlogKey): RemoteLoader<UiTimelineV2> =
+    override fun commentChild(commentKey: MicroBlogKey): RemoteLoader<UiTimelineV2> =
         CommentChildRemoteMediator(
             service = service,
             accountKey = accountKey,
             commentKey = commentKey,
         )
 
-    fun comment(statusKey: MicroBlogKey): CacheData<UiTimelineV2> =
+    override fun comment(statusKey: MicroBlogKey): CacheData<UiTimelineV2> =
         MemCacheable("vvo_comment_${accountKey}_$statusKey") {
             service
                 .getHotFlowChild(statusKey.id)
@@ -497,21 +499,21 @@ internal class VVODataSource(
                 ?: throw Exception("status not found")
         }
 
-    fun statusExtendedText(statusKey: MicroBlogKey): Flow<UiState<String>> =
+    override fun statusExtendedText(statusKey: MicroBlogKey): Flow<UiState<String>> =
         MemCacheable(
             "status_extended_text_$statusKey",
         ) {
             val st = ensureLogin()
             val response = service.getStatusExtend(statusKey.id, st)
             response.data?.longTextContent.orEmpty()
-        }.toUi()
+        }.toUiState()
 
-    fun status(statusKey: MicroBlogKey): Flow<UiState<UiTimelineV2>> =
+    override fun status(statusKey: MicroBlogKey): Flow<UiState<UiTimelineV2>> =
         MemCacheable(
             "vvo_status_$statusKey",
         ) {
             loadStatusDetail(statusKey)
-        }.toUi()
+        }.toUiState()
 
     private suspend fun uploadMedia(
         fileItem: FileItem,
@@ -570,3 +572,16 @@ internal class VVODataSource(
         return json.firstOrNull()?.status?.render(accountKey) ?: throw Exception("status not found")
     }
 }
+
+private fun <T : Any> CacheData<T>.toUiState(): Flow<UiState<T>> =
+    combine(data, refreshState) { data, refresh ->
+        if (data is CacheState.Success) {
+            UiState.Success(data.data)
+        } else {
+            when (refresh) {
+                is LoadState.Error -> UiState.Error(refresh.error)
+                LoadState.Loading -> UiState.Loading()
+                is LoadState.NotLoading -> UiState.Error(IllegalStateException("Data is null"))
+            }
+        }
+    }

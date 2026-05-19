@@ -9,10 +9,10 @@ import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.collectAsState
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.common.toPagingState
+import dev.dimension.flare.data.account.AccountRepository
 import dev.dimension.flare.data.datasource.microblog.paging.toPagingSource
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
-import dev.dimension.flare.data.datasource.vvo.VVODataSource
-import dev.dimension.flare.data.account.AccountRepository
+import dev.dimension.flare.data.datasource.vvo.VvoStatusDataSource
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -40,7 +40,7 @@ public class VVOCommentPresenter(
             serviceState
                 .flatMap { service ->
                     remember(commentKey, accountType) {
-                        require(service is VVODataSource)
+                        require(service is VvoStatusDataSource)
                         service.comment(commentKey)
                     }.collectAsState().toUi().map {
                         remember(it) {
@@ -58,7 +58,7 @@ public class VVOCommentPresenter(
             serviceState
                 .map { service ->
                     remember(service) {
-                        require(service is VVODataSource)
+                        require(service is VvoStatusDataSource)
                         Pager(config = pagingConfig) {
                             service.commentChild(commentKey = commentKey).toPagingSource()
                         }.flow

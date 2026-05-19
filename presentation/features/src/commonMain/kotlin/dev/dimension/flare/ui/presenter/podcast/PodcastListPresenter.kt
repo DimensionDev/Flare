@@ -4,8 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
-import dev.dimension.flare.data.datasource.xqt.XQTDataSource
 import dev.dimension.flare.data.account.AccountRepository
+import dev.dimension.flare.data.datasource.xqt.XqtContentDataSource
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiPodcast
@@ -33,7 +33,7 @@ public class PodcastListPresenter(
         val service = accountServiceProvider(accountType, accountRepository)
         val podcasts =
             service.flatMap {
-                require(it is XQTDataSource)
+                require(it is XqtContentDataSource)
                 remember(it) {
                     flow {
                         emit(UiState.Loading())

@@ -2,9 +2,6 @@ package dev.dimension.flare.model
 
 import dev.dimension.flare.common.deeplink.DeepLinkMapping
 import dev.dimension.flare.common.deeplink.DeepLinkPattern
-import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
-import dev.dimension.flare.data.datasource.vvo.VVODataSource
-import dev.dimension.flare.data.datasource.xqt.XQTDataSource
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.platform.BlueskyPlatformSpec
 import dev.dimension.flare.data.platform.BlueskySocialPlatformPlugin
@@ -13,9 +10,9 @@ import dev.dimension.flare.data.platform.MastodonSocialPlatformPlugin
 import dev.dimension.flare.data.platform.MisskeyPlatformSpec
 import dev.dimension.flare.data.platform.MisskeySocialPlatformPlugin
 import dev.dimension.flare.data.platform.VvoPlatformSpec
+import dev.dimension.flare.data.platform.VvoSocialPlatformPlugin
 import dev.dimension.flare.data.platform.XqtPlatformSpec
-import dev.dimension.flare.ui.model.UiAccount
-import dev.dimension.flare.ui.model.UiInstance
+import dev.dimension.flare.data.platform.XqtSocialPlatformPlugin
 import kotlinx.collections.immutable.ImmutableList
 
 internal interface PlatformSpec : SocialPlatformSpec {
@@ -45,42 +42,7 @@ private fun SocialPlatformSpec.toPresentationPlatformSpec(): PlatformSpec =
         PlatformType.Mastodon -> MastodonPlatformSpec
         PlatformType.Misskey -> MisskeyPlatformSpec
         PlatformType.Bluesky -> BlueskyPlatformSpec
+        PlatformType.xQt -> XqtPlatformSpec
+        PlatformType.VVo -> VvoPlatformSpec
         else -> this as PlatformSpec
     }
-
-private data object XqtSocialPlatformPlugin : SocialPlatformPlugin {
-    override val spec: PlatformSpec = XqtPlatformSpec
-
-    override suspend fun recommendedInstances(): List<UiInstance> =
-        listOf(
-            UiInstance(
-                name = "X",
-                description =
-                    "From breaking news and entertainment to sports and politics," +
-                        " get the full story with all the live commentary.",
-                iconUrl = null,
-                domain = "x.com",
-                type = PlatformType.xQt,
-                bannerUrl = null,
-                usersCount = 0,
-            ),
-        )
-
-    override fun createDataSource(account: UiAccount): MicroblogDataSource? =
-        (account as? UiAccount.XQT)?.let {
-            XQTDataSource(
-                accountKey = it.accountKey,
-            )
-        }
-}
-
-private data object VvoSocialPlatformPlugin : SocialPlatformPlugin {
-    override val spec: PlatformSpec = VvoPlatformSpec
-
-    override fun createDataSource(account: UiAccount): MicroblogDataSource? =
-        (account as? UiAccount.VVo)?.let {
-            VVODataSource(
-                accountKey = it.accountKey,
-            )
-        }
-}

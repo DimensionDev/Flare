@@ -3,7 +3,6 @@ package dev.dimension.flare.data.platform
 import dev.dimension.flare.common.deeplink.DeepLinkMapping
 import dev.dimension.flare.common.deeplink.DeepLinkPattern
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
-import dev.dimension.flare.data.datasource.vvo.VVODataSource
 import dev.dimension.flare.data.model.tab.AccountTimelineSpec
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.model.PlatformSpec
@@ -33,7 +32,7 @@ internal data object VvoPlatformSpec : PlatformSpec {
             serializer = TimelineSpec.AccountBasedData.serializer(),
             targetId = { it.accountKey.toString() },
             loaderFactory = { service, _ ->
-                require(service is VVODataSource)
+                require(service is VvoTimelineDataSource)
                 service.favouriteTimeline()
             },
         )
@@ -46,7 +45,7 @@ internal data object VvoPlatformSpec : PlatformSpec {
             serializer = TimelineSpec.AccountBasedData.serializer(),
             targetId = { it.accountKey.toString() },
             loaderFactory = { service, _ ->
-                require(service is VVODataSource)
+                require(service is VvoTimelineDataSource)
                 service.likeRemoteMediator()
             },
         )
@@ -65,5 +64,5 @@ internal data object VvoPlatformSpec : PlatformSpec {
     override fun guestDataSource(
         host: String,
         locale: String,
-    ): MicroblogDataSource = throw UnsupportedOperationException("${type.name} guest data source is not supported yet")
+    ): MicroblogDataSource = VvoSocialPlatformSpec.guestDataSource(host, locale)
 }

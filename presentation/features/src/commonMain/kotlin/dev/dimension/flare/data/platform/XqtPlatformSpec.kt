@@ -3,7 +3,6 @@ package dev.dimension.flare.data.platform
 import dev.dimension.flare.common.deeplink.DeepLinkMapping
 import dev.dimension.flare.common.deeplink.DeepLinkPattern
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
-import dev.dimension.flare.data.datasource.xqt.XQTDataSource
 import dev.dimension.flare.data.model.tab.AccountTimelineSpec
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.model.PlatformSpec
@@ -33,7 +32,7 @@ internal data object XqtPlatformSpec : PlatformSpec {
             serializer = TimelineSpec.AccountBasedData.serializer(),
             targetId = { it.accountKey.toString() },
             loaderFactory = { service, _ ->
-                require(service is XQTDataSource)
+                require(service is XqtTimelineDataSource)
                 service.featuredTimelineLoader()
             },
         )
@@ -46,7 +45,7 @@ internal data object XqtPlatformSpec : PlatformSpec {
             serializer = TimelineSpec.AccountBasedData.serializer(),
             targetId = { it.accountKey.toString() },
             loaderFactory = { service, _ ->
-                require(service is XQTDataSource)
+                require(service is XqtTimelineDataSource)
                 service.bookmarkTimelineLoader()
             },
         )
@@ -59,7 +58,7 @@ internal data object XqtPlatformSpec : PlatformSpec {
             serializer = TimelineSpec.AccountBasedData.serializer(),
             targetId = { it.accountKey.toString() },
             loaderFactory = { service, _ ->
-                require(service is XQTDataSource)
+                require(service is XqtTimelineDataSource)
                 service.deviceFollowTimelineLoader()
             },
         )
@@ -79,5 +78,5 @@ internal data object XqtPlatformSpec : PlatformSpec {
     override fun guestDataSource(
         host: String,
         locale: String,
-    ): MicroblogDataSource = throw UnsupportedOperationException("${type.name} guest data source is not supported yet")
+    ): MicroblogDataSource = XqtSocialPlatformSpec.guestDataSource(host, locale)
 }

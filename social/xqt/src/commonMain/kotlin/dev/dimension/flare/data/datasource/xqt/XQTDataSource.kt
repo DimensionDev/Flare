@@ -34,7 +34,6 @@ import dev.dimension.flare.data.datasource.microblog.handler.PostEventHandler
 import dev.dimension.flare.data.datasource.microblog.handler.PostHandler
 import dev.dimension.flare.data.datasource.microblog.handler.RelationHandler
 import dev.dimension.flare.data.datasource.microblog.handler.UserHandler
-import dev.dimension.flare.data.datasource.microblog.nextActionMenu
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.notSupported
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
@@ -44,6 +43,8 @@ import dev.dimension.flare.data.datasource.microblog.timeline.PinnableTimelineTa
 import dev.dimension.flare.data.datasource.microblog.timeline.TimelineShortcutDescriptor
 import dev.dimension.flare.data.datasource.microblog.timeline.TimelineSpec
 import dev.dimension.flare.data.datasource.microblog.timeline.TimelineTabProvider
+import dev.dimension.flare.data.datasource.microblog.timeline.toTimelineShortcutDescriptor
+import dev.dimension.flare.data.datasource.microblog.timeline.toTimelineTabDescriptor
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.network.xqt.XQTService
 import dev.dimension.flare.data.network.xqt.model.CreateBookmarkRequest
@@ -67,8 +68,6 @@ import dev.dimension.flare.data.network.xqt.model.PostUnfavoriteTweetRequest
 import dev.dimension.flare.data.network.xqt.model.TweetUnion
 import dev.dimension.flare.data.platform.XqtTimelineDataSource
 import dev.dimension.flare.data.platform.XqtTimelineSpecs
-import dev.dimension.flare.data.platform.toTimelineShortcutDescriptor
-import dev.dimension.flare.data.platform.toTimelineTabDescriptor
 import dev.dimension.flare.data.account.AccountRepository
 import dev.dimension.flare.common.tryRun
 import dev.dimension.flare.model.AccountType
@@ -104,7 +103,6 @@ import org.koin.core.component.inject
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.time.Duration.Companion.seconds
-import kotlin.uuid.Uuid
 
 private const val BULK_SIZE: Long = 512 * 1024L // 512 Kib
 private const val MAX_ASYNC_UPLOAD_SIZE = 10
@@ -119,6 +117,7 @@ internal class XQTDataSource(
     KoinComponent,
     ListDataSource,
     XqtTimelineDataSource,
+    XqtContentDataSource,
     PinnableTimelineProvider,
     TimelineTabProvider,
     DirectMessageDataSource,
@@ -168,7 +167,7 @@ internal class XQTDataSource(
         )
     }
 
-    internal suspend fun getTweetResultByRestId(tweetId: String): TweetUnion? =
+    override suspend fun getTweetResultByRestId(tweetId: String): TweetUnion? =
         service
             .getTweetResultByRestId(
                 variables =
@@ -223,7 +222,7 @@ internal class XQTDataSource(
         PostEventHandler(
             accountType = AccountType.Specific(accountKey),
             handler = this,
-            optimisticActionMenu = { it.nextActionMenu() },
+            optimisticActionMenu = { it.xqtNextActionMenu() },
         )
     }
 
@@ -725,7 +724,7 @@ internal class XQTDataSource(
             accountKey,
         )
 
-    suspend fun podcast(id: String): Result<UiPodcast> =
+    override suspend fun podcast(id: String): Result<UiPodcast> =
         tryRun {
             val data =
                 service
@@ -761,7 +760,7 @@ internal class XQTDataSource(
             )
         }
 
-    suspend fun getFleets(): Result<ImmutableList<UiPodcast>> {
+    override suspend fun getFleets(): Result<ImmutableList<UiPodcast>> {
         return tryRun {
             val fleet = service.getFleets()
             fleet.threads

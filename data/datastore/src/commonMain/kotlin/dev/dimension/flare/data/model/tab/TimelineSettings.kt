@@ -6,7 +6,6 @@ import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.model.asText
-import dev.dimension.flare.ui.model.asType
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -32,7 +31,7 @@ public data class TimelineSlot(
     public val icon: IconType =
         presentation.iconOverride ?: when (content) {
             is TimelineSlotContent.Source -> content.source.icon
-            is TimelineSlotContent.Group -> UiIcon.Rss.asType()
+            is TimelineSlotContent.Group -> IconType.Material(UiIcon.Rss)
         }
 }
 

@@ -1,9 +1,9 @@
 package dev.dimension.flare.data.model.tab
 
+import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.asText
-import dev.dimension.flare.ui.model.asType
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -88,7 +88,7 @@ class TimelineSlotNormalizationTest {
             id = id,
             specId = "common.home",
             title = UiStrings.Home.asText(),
-            icon = UiIcon.Home.asType(),
+            icon = IconType.Material(UiIcon.Home),
             data = id,
         ).toSlot()
 }

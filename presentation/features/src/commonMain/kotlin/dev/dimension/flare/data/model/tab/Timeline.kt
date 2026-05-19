@@ -1,6 +1,8 @@
 package dev.dimension.flare.data.model.tab
 
 import androidx.compose.runtime.Immutable
+import dev.dimension.flare.data.datasource.microblog.timeline.TimelineRef
+import dev.dimension.flare.data.datasource.microblog.timeline.TimelineSpec as SocialTimelineSpec
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.appearance.AppearancePatch
 import dev.dimension.flare.data.model.appearance.TimelineAppearance
@@ -16,9 +18,7 @@ import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.model.asText
 import dev.dimension.flare.ui.model.asType
 import dev.dimension.flare.ui.presenter.home.AccountTimelinePresenter
-import dev.dimension.flare.ui.presenter.home.MixedTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.StandaloneTimelinePresenter
-import dev.dimension.flare.ui.presenter.home.SystemHomeMixedTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.TimelinePresenter
 import dev.dimension.flare.ui.route.DeeplinkRoute
 
@@ -33,8 +33,6 @@ public sealed interface TimelineTabItemV2 {
 
     // for iOS and Compose call sites
     public val key: String get() = id
-
-    public fun createPresenter(): TimelinePresenter
 
     public fun withPresentationOverrides(
         title: String,
@@ -51,17 +49,16 @@ public fun TimelineTabItemV2.resolveTimelineAppearance(base: TimelineAppearance)
 public class SourceTimelineTabItemV2 private constructor(
     override val id: String,
     public val source: TimelineSourceRef?,
+    public val ref: TimelineRef<out SocialTimelineSpec.Data>?,
     internal val presentation: TimelinePresentation?,
     override val title: UiText,
     override val icon: IconType,
     override val appearancePatch: AppearancePatch?,
     override val enabled: Boolean,
-    private val presenterFactory: () -> TimelinePresenter,
+    internal val runtimePresenterFactory: (() -> TimelinePresenter)?,
 ) : TimelineTabItemV2 {
     override val filterConfig: TimelineFilterConfig
         get() = presentation?.filterConfig ?: TimelineFilterConfig()
-
-    override fun createPresenter(): TimelinePresenter = presenterFactory().also { it.bindTimelineTabItemId(id) }
 
     override fun withPresentationOverrides(
         title: String,
@@ -87,64 +84,68 @@ public class SourceTimelineTabItemV2 private constructor(
         return SourceTimelineTabItemV2(
             id = id,
             source = source,
+            ref = ref,
             presentation = updatedPresentation,
             title = UiText.Raw(title),
             icon = icon,
             appearancePatch = updatedPresentation.appearance,
             enabled = updatedPresentation.enabled,
-            presenterFactory = presenterFactory,
+            runtimePresenterFactory = runtimePresenterFactory,
         )
     }
 
     public companion object {
-        public fun runtime(
+        internal fun runtime(
             id: String,
             title: UiText,
             icon: IconType,
             appearancePatch: AppearancePatch? = null,
             enabled: Boolean = true,
-            createPresenter: () -> TimelinePresenter,
+            runtimePresenterFactory: () -> TimelinePresenter,
         ): SourceTimelineTabItemV2 =
             SourceTimelineTabItemV2(
                 id = id,
                 source = null,
+                ref = null,
                 presentation = null,
                 title = title,
                 icon = icon,
                 appearancePatch = appearancePatch,
                 enabled = enabled,
-                presenterFactory = createPresenter,
+                runtimePresenterFactory = runtimePresenterFactory,
             )
 
         internal fun fromSlot(
             slot: TimelineSlot,
             source: TimelineSourceRef,
-            presenterFactory: () -> TimelinePresenter,
+            ref: TimelineRef<out SocialTimelineSpec.Data>? = null,
         ): SourceTimelineTabItemV2 =
             SourceTimelineTabItemV2(
                 id = slot.id,
                 source = source,
+                ref = ref,
                 presentation = slot.presentation,
                 title = slot.title,
                 icon = slot.icon,
                 appearancePatch = slot.presentation.appearance,
                 enabled = slot.presentation.enabled,
-                presenterFactory = presenterFactory,
+                runtimePresenterFactory = null,
             )
 
         internal fun fromSource(
             source: TimelineSourceRef,
-            presenterFactory: () -> TimelinePresenter,
+            ref: TimelineRef<out SocialTimelineSpec.Data>? = null,
         ): SourceTimelineTabItemV2 =
             SourceTimelineTabItemV2(
                 id = source.id,
                 source = source,
+                ref = ref,
                 presentation = null,
                 title = source.title,
                 icon = source.icon,
                 appearancePatch = null,
                 enabled = true,
-                presenterFactory = presenterFactory,
+                runtimePresenterFactory = null,
             )
     }
 }
@@ -163,17 +164,6 @@ public class GroupTimelineTabItemV2 internal constructor(
 ) : TimelineTabItemV2 {
     override val filterConfig: TimelineFilterConfig
         get() = presentation.filterConfig
-
-    override fun createPresenter(): TimelinePresenter =
-        when (source) {
-            GroupSource.SystemHome -> {
-                SystemHomeMixedTimelinePresenter(id = id)
-            }
-
-            GroupSource.Manual -> {
-                MixedTimelinePresenter(id = id)
-            }
-        }
 
     override fun withPresentationOverrides(
         title: String,
@@ -286,7 +276,6 @@ public class TimelineResolver internal constructor(
                 SourceTimelineTabItemV2.fromSlot(
                     slot = slot,
                     source = content.source,
-                    presenterFactory = { resolvePresenter(content.source) },
                 )
             }
 
@@ -308,7 +297,6 @@ public class TimelineResolver internal constructor(
     public fun toTabItem(source: TimelineSourceRef): SourceTimelineTabItemV2 =
         SourceTimelineTabItemV2.fromSource(
             source = source,
-            presenterFactory = { resolvePresenter(source) },
         )
 
     public fun <T : TimelineSpec.Data> toTabItem(
@@ -351,7 +339,7 @@ public class TimelineResolver internal constructor(
             }
         }
 
-    private fun resolvePresenter(source: TimelineSourceRef): TimelinePresenter =
+    internal fun resolvePresenter(source: TimelineSourceRef): TimelinePresenter =
         when (val spec = resolveSpec(source)) {
             is AccountTimelineSpec<*> ->
                 AccountTimelinePresenter(

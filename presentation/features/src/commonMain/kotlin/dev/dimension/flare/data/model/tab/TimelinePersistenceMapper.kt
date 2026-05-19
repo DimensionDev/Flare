@@ -10,7 +10,10 @@ internal class TimelinePersistenceMapper(
     private val timelineResolver: TimelineResolver,
 ) {
     fun toTabItem(descriptor: TimelineTabDescriptor.Source): SourceTimelineTabItemV2 =
-        timelineResolver.toTabItem(toSourceRef(descriptor))
+        SourceTimelineTabItemV2.fromSource(
+            source = toSourceRef(descriptor),
+            ref = descriptor.ref,
+        )
 
     fun toTabItem(slot: TimelineSlot): TimelineTabItemV2 =
         timelineResolver.toTabItem(slot)

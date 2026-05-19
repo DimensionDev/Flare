@@ -7,6 +7,7 @@ import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.notSupported
 import dev.dimension.flare.data.model.tab.GroupTimelineTabItemV2
 import dev.dimension.flare.data.model.tab.TimelineMergePolicy
+import dev.dimension.flare.data.model.tab.TimelinePresenterFactory
 import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.data.model.tab.isSystemHomeMixedTimeline
@@ -44,6 +45,7 @@ public class MixedTimelinePresenter(
     private val database: CacheDatabase by inject()
     private val appDataStore: AppDataStore by inject()
     private val timelineResolver: TimelineResolver by inject()
+    private val timelinePresenterFactory: TimelinePresenterFactory by inject()
 
     init {
         bindTimelineTabItemId(id)
@@ -71,7 +73,7 @@ public class MixedTimelinePresenter(
             }.distinctUntilChanged { old, new ->
                 old.orEmpty().map { it.id } == new.orEmpty().map { it.id }
             }.flatMapLatest { tabs ->
-                val presenters = tabs?.map { it.createPresenter() } ?: fallbackSubTimelinePresenter
+                val presenters = tabs?.map(timelinePresenterFactory::create) ?: fallbackSubTimelinePresenter
                 if (presenters.isEmpty()) {
                     flowOf(emptyList())
                 } else {
@@ -104,6 +106,7 @@ public class SystemHomeMixedTimelinePresenter(
     private val database: CacheDatabase by inject()
     private val appDataStore: AppDataStore by inject()
     private val timelineResolver: TimelineResolver by inject()
+    private val timelinePresenterFactory: TimelinePresenterFactory by inject()
 
     init {
         bindTimelineTabItemId(id)
@@ -130,7 +133,7 @@ public class SystemHomeMixedTimelinePresenter(
                     .filter { it.enabled }
             }.distinctUntilChangedByTabIds()
             .flatMapLatest { tabs ->
-                val presenters = tabs.map { it.createPresenter() }
+                val presenters = tabs.map(timelinePresenterFactory::create)
                 if (presenters.isEmpty()) {
                     flowOf(emptyList())
                 } else {

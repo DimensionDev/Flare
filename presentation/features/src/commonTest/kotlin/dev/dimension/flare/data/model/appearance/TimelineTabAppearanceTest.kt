@@ -20,7 +20,7 @@ class TimelineTabAppearanceTest {
                     AppearancePatch.EMPTY
                         .set(AppearanceKeys.ShowNumbers, false)
                         .set(AppearanceKeys.AbsoluteTimestamp, true),
-                createPresenter = { error("unused in test") },
+                runtimePresenterFactory = { error("unused in test") },
             )
         val base =
             TimelineAppearance(

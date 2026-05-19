@@ -82,7 +82,7 @@ internal val guestMastodonHomeTimelineTab: TimelineTabItemV2
             id = "guest_home_$DEFAULT_GUEST_MASTODON_HOST",
             title = UiStrings.Home.asText(),
             icon = IconType.Material(UiIcon.Home),
-            createPresenter = {
+            runtimePresenterFactory = {
                 AccountTimelinePresenter(AccountType.GuestHost(DEFAULT_GUEST_MASTODON_HOST)) { service ->
                     service.homeTimeline()
                 }

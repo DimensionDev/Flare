@@ -9,13 +9,13 @@ import dev.dimension.flare.data.model.tab.TabSettingsV2
 import dev.dimension.flare.data.model.tab.toTabSettingsV2
 import kotlinx.serialization.Serializable
 
-public data class SettingsImportData(
+internal data class SettingsImportData(
     val appearanceBag: AppearanceBag,
     val appSettings: AppSettings,
     val tabSettingsV2: TabSettingsV2,
 )
 
-public fun decodeLegacyAppearanceSettingsExport(jsonContent: String): SettingsImportData {
+internal fun decodeLegacyAppearanceSettingsExport(jsonContent: String): SettingsImportData {
     val export = jsonContent.decodeJson(LegacyAppearanceSettingsExport.serializer())
     return SettingsImportData(
         appearanceBag = export.appearanceSettings.toBag(),
@@ -24,7 +24,7 @@ public fun decodeLegacyAppearanceSettingsExport(jsonContent: String): SettingsIm
     )
 }
 
-public fun decodeLegacySettingsExport(jsonContent: String): SettingsImportData {
+internal fun decodeLegacySettingsExport(jsonContent: String): SettingsImportData {
     val export = jsonContent.decodeJson(LegacySettingsExport.serializer())
     return SettingsImportData(
         appearanceBag = export.appearanceBag,
@@ -33,7 +33,7 @@ public fun decodeLegacySettingsExport(jsonContent: String): SettingsImportData {
     )
 }
 
-public fun decodeLegacyAppearanceSettingsAndTabsExport(jsonContent: String): SettingsImportData {
+internal fun decodeLegacyAppearanceSettingsAndTabsExport(jsonContent: String): SettingsImportData {
     val export = jsonContent.decodeJson(LegacyAppearanceSettingsAndTabsExport.serializer())
     return SettingsImportData(
         appearanceBag = export.appearanceSettings.toBag(),

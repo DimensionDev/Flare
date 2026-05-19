@@ -190,7 +190,7 @@ class DraftMediaStoreTest {
         }
 
     @Test
-    fun restorePreservesMissingFileNameWhenPersistingAgain() =
+    fun restoreFallsBackToCacheFileNameWhenOriginalFileNameIsMissing() =
         runTest {
             val store = DraftMediaStore(pathProducer, fileSystem)
             val firstPersist =
@@ -204,9 +204,10 @@ class DraftMediaStoreTest {
 
             val restored = store.restore(listOf(firstPersist.toDraftMedia("group-missing-file-name", 0))).single()
             val secondPersist = store.persist("group-missing-file-name", listOf(restored)).single()
+            val fallbackFileName = firstPersist.cachePath.toPath().name
 
-            assertNull(restored.file.name)
-            assertNull(secondPersist.fileName)
+            assertEquals(fallbackFileName, restored.file.name)
+            assertEquals(fallbackFileName, secondPersist.fileName)
             assertContentEquals(
                 byteArrayOf(7),
                 fileSystem.read(secondPersist.cachePath.toPath()) {

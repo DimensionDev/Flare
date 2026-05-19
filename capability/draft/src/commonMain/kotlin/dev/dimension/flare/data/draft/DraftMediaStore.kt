@@ -58,7 +58,7 @@ public class DraftMediaStore(
             ComposeData.Media(
                 file =
                     draftFileItem(
-                        name = media.fileName,
+                        name = media.fileName ?: path.name,
                         type = media.mediaType.toFileType(),
                         readBytes = {
                             fileStorage.read(path)

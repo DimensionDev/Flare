@@ -3,6 +3,7 @@ package dev.dimension.flare.data.platform
 import dev.dimension.flare.common.deeplink.DeepLinkMapping
 import dev.dimension.flare.common.deeplink.DeepLinkPattern
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
+import dev.dimension.flare.data.datasource.microblog.timeline.CommonTimelineSpecs as SocialCommonTimelineSpecs
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
 import dev.dimension.flare.data.network.nostr.NostrPlatformDetector
@@ -16,6 +17,7 @@ import kotlinx.collections.immutable.persistentListOf
 
 internal data object NostrPlatformSpec : PlatformSpec {
     override val type = PlatformType.Nostr
+    override val timelineSpecs = SocialCommonTimelineSpecs.timelineSpecs
     override val metadata =
         PlatformTypeMetadata(
             displayName = "Nostr",

@@ -166,7 +166,13 @@ public class SecondaryTabsPresenter :
 
     private fun toTab(shortcut: TimelineShortcutDescriptor): Tab? =
         when (val target = shortcut.target) {
-            is TimelineShortcutDescriptor.Target.Route -> null
+            is TimelineShortcutDescriptor.Target.Route -> {
+                Tab(
+                    title = shortcut.title,
+                    icon = shortcut.icon,
+                    destination = Destination.Route(target.toDeeplinkRoute() ?: return null),
+                )
+            }
 
             is TimelineShortcutDescriptor.Target.Timeline -> {
                 Tab(
@@ -183,5 +189,15 @@ public class SecondaryTabsPresenter :
                         ),
                 )
             }
+        }
+
+    private fun TimelineShortcutDescriptor.Target.Route.toDeeplinkRoute(): DeeplinkRoute? =
+        when (id) {
+            TimelineShortcutDescriptor.RouteIds.AllLists -> accountKey?.let(DeeplinkRoute::AllLists)
+            TimelineShortcutDescriptor.RouteIds.AllDirectMessages -> accountKey?.let(DeeplinkRoute::AllDirectMessages)
+            TimelineShortcutDescriptor.RouteIds.BlueskyAllFeeds -> accountKey?.let(DeeplinkRoute.Bluesky::AllFeeds)
+            TimelineShortcutDescriptor.RouteIds.MisskeyAllAntennas -> accountKey?.let(DeeplinkRoute.Misskey::AllAntennas)
+            TimelineShortcutDescriptor.RouteIds.MisskeyAllChannels -> accountKey?.let(DeeplinkRoute.Misskey::AllChannels)
+            else -> null
         }
 }

@@ -4,7 +4,6 @@ import dev.dimension.flare.common.deeplink.DeepLinkMapping
 import dev.dimension.flare.common.deeplink.DeepLinkPattern
 import dev.dimension.flare.common.tryRun
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
-import dev.dimension.flare.data.datasource.microblog.timeline.CommonTimelineSpecs
 import dev.dimension.flare.data.datasource.microblog.timeline.TimelineSpec
 import dev.dimension.flare.data.network.mastodon.JoinMastodonService
 import dev.dimension.flare.data.network.mastodon.MastodonInstanceService
@@ -68,7 +67,7 @@ public data object MastodonSocialPlatformPlugin : SocialPlatformPlugin {
 
 public data object MastodonSocialPlatformSpec : SocialPlatformSpec {
     public override val type: PlatformType = PlatformType.Mastodon
-    public override val timelineSpecs: ImmutableList<TimelineSpec<out TimelineSpec.Data>> = CommonTimelineSpecs.timelineSpecs
+    public override val timelineSpecs: ImmutableList<TimelineSpec<out TimelineSpec.Data>> = MastodonTimelineSpecs.timelineSpecs
     public override val metadata: PlatformTypeMetadata =
         PlatformTypeMetadata(
             displayName = "Mastodon",

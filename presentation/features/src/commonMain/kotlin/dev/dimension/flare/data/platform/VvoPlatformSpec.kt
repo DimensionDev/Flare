@@ -16,6 +16,7 @@ import kotlinx.collections.immutable.persistentListOf
 
 internal data object VvoPlatformSpec : PlatformSpec {
     override val type = VvoSocialPlatformSpec.type
+    override val timelineSpecs = VvoSocialPlatformSpec.timelineSpecs
     override val metadata = VvoSocialPlatformSpec.metadata
     override val detector = VvoSocialPlatformSpec.detector
 

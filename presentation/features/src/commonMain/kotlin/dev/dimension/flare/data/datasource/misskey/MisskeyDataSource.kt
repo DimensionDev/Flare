@@ -16,11 +16,8 @@ import dev.dimension.flare.ui.model.PostEvent
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
 import dev.dimension.flare.data.datasource.microblog.ReactionDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.ListDataSource
-import dev.dimension.flare.data.datasource.microblog.datasource.PinnableTimelineTabDataSource
-import dev.dimension.flare.data.datasource.microblog.datasource.PinnableTimelineTabSection
 import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.RelationDataSource
-import dev.dimension.flare.data.datasource.microblog.datasource.TimelineTabConfigurationDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
 import dev.dimension.flare.data.datasource.microblog.handler.EmojiHandler
 import dev.dimension.flare.data.datasource.microblog.handler.ListHandler
@@ -37,11 +34,13 @@ import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.notSupported
 import dev.dimension.flare.data.datasource.microblog.paging.toPagingSource
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
+import dev.dimension.flare.data.datasource.microblog.timeline.CommonTimelineSpecs as SocialCommonTimelineSpecs
+import dev.dimension.flare.data.datasource.microblog.timeline.PinnableTimelineProvider
+import dev.dimension.flare.data.datasource.microblog.timeline.PinnableTimelineTabSection
+import dev.dimension.flare.data.datasource.microblog.timeline.TimelineShortcutDescriptor
+import dev.dimension.flare.data.datasource.microblog.timeline.TimelineSpec
+import dev.dimension.flare.data.datasource.microblog.timeline.TimelineTabProvider
 import dev.dimension.flare.data.model.IconType
-import dev.dimension.flare.data.model.tab.ShortcutSpec
-import dev.dimension.flare.data.model.tab.TimelineResolver
-import dev.dimension.flare.data.model.tab.TimelineSpec
-import dev.dimension.flare.data.model.tab.toSlot
 import dev.dimension.flare.data.network.misskey.api.model.AdminAccountsDeleteRequest
 import dev.dimension.flare.data.network.misskey.api.model.ChannelsFeaturedRequest
 import dev.dimension.flare.data.network.misskey.api.model.ChannelsFollowRequest
@@ -50,9 +49,10 @@ import dev.dimension.flare.data.network.misskey.api.model.NotesCreateRequest
 import dev.dimension.flare.data.network.misskey.api.model.NotesCreateRequestPoll
 import dev.dimension.flare.data.network.misskey.api.model.NotesPollsVoteRequest
 import dev.dimension.flare.data.network.misskey.api.model.NotesReactionsCreateRequest
-import dev.dimension.flare.data.platform.CommonTimelineSpecs
-import dev.dimension.flare.data.platform.MisskeyPlatformSpec
-import dev.dimension.flare.data.platform.toTimelineTabItemV2
+import dev.dimension.flare.data.platform.MisskeyTimelineDataSource
+import dev.dimension.flare.data.platform.MisskeyTimelineSpecs
+import dev.dimension.flare.data.platform.toTimelineShortcutDescriptor
+import dev.dimension.flare.data.platform.toTimelineTabDescriptor
 import dev.dimension.flare.data.account.AccountRepository
 import dev.dimension.flare.common.tryRun
 import dev.dimension.flare.model.AccountType
@@ -69,7 +69,6 @@ import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
-import dev.dimension.flare.ui.route.DeeplinkRoute
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -91,14 +90,14 @@ internal class MisskeyDataSource(
     PostDataSource,
     KoinComponent,
     ListDataSource,
-    PinnableTimelineTabDataSource,
-    TimelineTabConfigurationDataSource,
+    MisskeyTimelineDataSource,
+    PinnableTimelineProvider,
+    TimelineTabProvider,
     ReactionDataSource,
     RelationDataSource,
     PostEventHandler.Handler {
     private val accountRepository: AccountRepository by inject()
     private val imageCompressor: ImageCompressor by inject()
-    private val timelineResolver: TimelineResolver by inject()
     private val service by lazy {
         dev.dimension.flare.data.network.misskey.MisskeyService(
             baseUrl = "https://$host/api/",
@@ -313,19 +312,19 @@ internal class MisskeyDataSource(
             service,
         )
 
-    fun localTimelineLoader() =
+    override fun localTimelineLoader() =
         LocalTimelineRemoteMediator(
             accountKey,
             service,
         )
 
-    fun hybridTimelineLoader() =
+    override fun hybridTimelineLoader() =
         HybridTimelineRemoteMediator(
             accountKey,
             service,
         )
 
-    fun publicTimelineLoader() =
+    override fun publicTimelineLoader() =
         PublicTimelineRemoteMediator(
             accountKey,
             service,
@@ -649,7 +648,7 @@ internal class MisskeyDataSource(
             ProfileTab.Media,
         ).toPersistentList()
 
-    fun favouriteTimelineLoader() =
+    override fun favouriteTimelineLoader() =
         FavouriteTimelineRemoteMediator(
             service = service,
             accountKey = accountKey,
@@ -693,111 +692,92 @@ internal class MisskeyDataSource(
                 title = UiStrings.List,
                 data =
                     listHandler.data.map { paging ->
-                        paging.map { it.toTimelineTabItemV2(accountKey, timelineResolver) }
+                        paging.map { it.toTimelineTabDescriptor(accountKey) }
                     },
             ),
             PinnableTimelineTabSection(
                 title = UiStrings.Antenna,
                 data =
                     antennasList().map { paging ->
-                        paging.map { it.toTimelineTabItemV2(accountKey, timelineResolver) }
+                        paging.map { it.toTimelineTabDescriptor(accountKey) }
                     },
             ),
             PinnableTimelineTabSection(
                 title = UiStrings.Channel,
                 data =
                     channelHandler.data.map { paging ->
-                        paging.map { it.toTimelineTabItemV2(accountKey, timelineResolver) }
+                        paging.map { it.toTimelineTabDescriptor(accountKey) }
                     },
             ),
         )
     }
 
-    override val defaultTabs by lazy {
+    override val defaultTimelineTabs by lazy {
         persistentListOf(
-            CommonTimelineSpecs.home
-                .target(
+            SocialCommonTimelineSpecs.home
+                .toTimelineTabDescriptor(
                     data = TimelineSpec.AccountBasedData(accountKey),
                     icon = IconType.FavIcon(accountKey.host),
-                ).toSlot(),
+                ),
         )
     }
 
     override val builtInTimelineTabs by lazy {
         persistentListOf(
-            timelineResolver.toTabItem(
-                CommonTimelineSpecs.home,
+            SocialCommonTimelineSpecs.home.toTimelineTabDescriptor(
                 data = TimelineSpec.AccountBasedData(accountKey),
                 icon = IconType.FavIcon(accountKey.host),
             ),
-            timelineResolver.toTabItem(
-                CommonTimelineSpecs.discover,
+            SocialCommonTimelineSpecs.discover.toTimelineTabDescriptor(
                 data = TimelineSpec.AccountBasedData(accountKey),
                 icon = IconType.FavIcon(accountKey.host),
             ),
-            timelineResolver.toTabItem(MisskeyPlatformSpec.favouriteTimelineSpec, TimelineSpec.AccountBasedData(accountKey)),
-            timelineResolver.toTabItem(MisskeyPlatformSpec.hybridTimelineSpec, TimelineSpec.AccountBasedData(accountKey)),
-            timelineResolver.toTabItem(MisskeyPlatformSpec.localTimelineSpec, TimelineSpec.AccountBasedData(accountKey)),
-            timelineResolver.toTabItem(MisskeyPlatformSpec.globalTimelineSpec, TimelineSpec.AccountBasedData(accountKey)),
+            MisskeyTimelineSpecs.favourite.toTimelineTabDescriptor(TimelineSpec.AccountBasedData(accountKey)),
+            MisskeyTimelineSpecs.hybrid.toTimelineTabDescriptor(TimelineSpec.AccountBasedData(accountKey)),
+            MisskeyTimelineSpecs.local.toTimelineTabDescriptor(TimelineSpec.AccountBasedData(accountKey)),
+            MisskeyTimelineSpecs.global.toTimelineTabDescriptor(TimelineSpec.AccountBasedData(accountKey)),
         )
     }
 
-    override val shortcuts by lazy {
+    override val timelineShortcuts by lazy {
         persistentListOf(
-            ShortcutSpec(
-                title = UiStrings.Favourite,
-                icon = UiIcon.Favourite,
-                target =
-                    ShortcutSpec.Target.Timeline(
-                        MisskeyPlatformSpec.favouriteTimelineSpec.target(TimelineSpec.AccountBasedData(accountKey)),
-                    ),
-            ),
-            ShortcutSpec(
+            MisskeyTimelineSpecs.favourite
+                .toTimelineTabDescriptor(TimelineSpec.AccountBasedData(accountKey))
+                .toTimelineShortcutDescriptor(UiStrings.Favourite, UiIcon.Favourite),
+            TimelineShortcutDescriptor(
                 title = UiStrings.List,
                 icon = UiIcon.List,
                 target =
-                    ShortcutSpec.Target.Route(
-                        DeeplinkRoute.AllLists(accountKey),
+                    TimelineShortcutDescriptor.Target.Route(
+                        id = TimelineShortcutDescriptor.RouteIds.AllLists,
+                        accountKey = accountKey,
                     ),
             ),
-            ShortcutSpec(
-                title = UiStrings.Social,
-                icon = UiIcon.Featured,
-                target =
-                    ShortcutSpec.Target.Timeline(
-                        MisskeyPlatformSpec.hybridTimelineSpec.target(TimelineSpec.AccountBasedData(accountKey)),
-                    ),
-            ),
-            ShortcutSpec(
-                title = UiStrings.MastodonLocal,
-                icon = UiIcon.Local,
-                target =
-                    ShortcutSpec.Target.Timeline(
-                        MisskeyPlatformSpec.localTimelineSpec.target(TimelineSpec.AccountBasedData(accountKey)),
-                    ),
-            ),
-            ShortcutSpec(
-                title = UiStrings.MastodonPublic,
-                icon = UiIcon.World,
-                target =
-                    ShortcutSpec.Target.Timeline(
-                        MisskeyPlatformSpec.globalTimelineSpec.target(TimelineSpec.AccountBasedData(accountKey)),
-                    ),
-            ),
-            ShortcutSpec(
+            MisskeyTimelineSpecs.hybrid
+                .toTimelineTabDescriptor(TimelineSpec.AccountBasedData(accountKey))
+                .toTimelineShortcutDescriptor(UiStrings.Social, UiIcon.Featured),
+            MisskeyTimelineSpecs.local
+                .toTimelineTabDescriptor(TimelineSpec.AccountBasedData(accountKey))
+                .toTimelineShortcutDescriptor(UiStrings.MastodonLocal, UiIcon.Local),
+            MisskeyTimelineSpecs.global
+                .toTimelineTabDescriptor(TimelineSpec.AccountBasedData(accountKey))
+                .toTimelineShortcutDescriptor(UiStrings.MastodonPublic, UiIcon.World),
+            TimelineShortcutDescriptor(
                 title = UiStrings.Antenna,
                 icon = UiIcon.Rss,
                 target =
-                    ShortcutSpec.Target.Route(
-                        DeeplinkRoute.Misskey.AllAntennas(accountKey),
+                    TimelineShortcutDescriptor.Target.Route(
+                        id = TimelineShortcutDescriptor.RouteIds.MisskeyAllAntennas,
+                        accountKey = accountKey,
                     ),
             ),
-            ShortcutSpec(
+            TimelineShortcutDescriptor(
                 title = UiStrings.Channel,
                 icon = UiIcon.Channel,
                 target =
-                    ShortcutSpec.Target.Route(
-                        DeeplinkRoute.Misskey.AllChannels(accountKey),
+                    TimelineShortcutDescriptor.Target.Route(
+                        id = TimelineShortcutDescriptor.RouteIds.MisskeyAllChannels,
+                        accountKey = accountKey,
                     ),
             ),
         )
@@ -895,14 +875,14 @@ internal class MisskeyDataSource(
             ).toPagingSource()
         }.flow
 
-    fun antennasTimelineLoader(id: String) =
+    override fun antennasTimelineLoader(id: String) =
         AntennasTimelineRemoteMediator(
             service = service,
             accountKey = accountKey,
             id = id,
         )
 
-    fun channelTimelineLoader(id: String) =
+    override fun channelTimelineLoader(id: String) =
         ChannelTimelineRemoteMediator(
             service = service,
             accountKey = accountKey,

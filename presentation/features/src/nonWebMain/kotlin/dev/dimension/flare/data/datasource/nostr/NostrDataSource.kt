@@ -13,7 +13,6 @@ import dev.dimension.flare.ui.model.PostEvent
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
 import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.RelationDataSource
-import dev.dimension.flare.data.datasource.microblog.datasource.TimelineTabConfigurationDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
 import dev.dimension.flare.data.datasource.microblog.handler.PostEventHandler
 import dev.dimension.flare.data.datasource.microblog.handler.PostHandler
@@ -26,14 +25,14 @@ import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.notSupported
 import dev.dimension.flare.data.model.IconType
-import dev.dimension.flare.data.model.tab.ShortcutSpec
-import dev.dimension.flare.data.model.tab.TimelineResolver
-import dev.dimension.flare.data.model.tab.TimelineSpec
-import dev.dimension.flare.data.model.tab.toSlot
+import dev.dimension.flare.data.datasource.microblog.timeline.CommonTimelineSpecs as SocialCommonTimelineSpecs
+import dev.dimension.flare.data.datasource.microblog.timeline.TimelineShortcutDescriptor
+import dev.dimension.flare.data.datasource.microblog.timeline.TimelineSpec
+import dev.dimension.flare.data.datasource.microblog.timeline.TimelineTabProvider
 import dev.dimension.flare.data.network.nostr.AmberSignerBridge
 import dev.dimension.flare.data.network.nostr.NostrService
-import dev.dimension.flare.data.platform.CommonTimelineSpecs
 import dev.dimension.flare.data.account.AccountRepository
+import dev.dimension.flare.data.platform.toTimelineTabDescriptor
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiHashtag
@@ -61,7 +60,7 @@ internal class NostrDataSource(
 ) : AuthenticatedMicroblogDataSource,
     UserDataSource,
     RelationDataSource,
-    TimelineTabConfigurationDataSource,
+    TimelineTabProvider,
     PostDataSource,
     PostEventHandler.Handler,
     KoinComponent,
@@ -70,7 +69,6 @@ internal class NostrDataSource(
     private val ioScope: CoroutineScope by inject()
     private val nostrCache: NostrCache by inject()
     private val amberSignerBridge: AmberSignerBridge by inject()
-    private val timelineResolver: TimelineResolver by inject()
     private val credentialFlow by lazy {
         accountRepository.credentialFlow<UiAccount.Nostr.Credential>(accountKey)
     }
@@ -81,28 +79,27 @@ internal class NostrDataSource(
         )
     }
 
-    override val defaultTabs by lazy {
+    override val defaultTimelineTabs by lazy {
         persistentListOf(
-            CommonTimelineSpecs.home
-                .target(
+            SocialCommonTimelineSpecs.home
+                .toTimelineTabDescriptor(
                     data = TimelineSpec.AccountBasedData(accountKey),
                     icon = IconType.Material(UiIcon.Nostr),
-                ).toSlot(),
+                ),
         )
     }
 
     override val builtInTimelineTabs by lazy {
         persistentListOf(
-            timelineResolver.toTabItem(
-                CommonTimelineSpecs.home,
+            SocialCommonTimelineSpecs.home.toTimelineTabDescriptor(
                 data = TimelineSpec.AccountBasedData(accountKey),
                 icon = IconType.Material(UiIcon.Nostr),
             ),
         )
     }
 
-    override val shortcuts by lazy {
-        persistentListOf<ShortcutSpec>()
+    override val timelineShortcuts by lazy {
+        persistentListOf<TimelineShortcutDescriptor>()
     }
 
     private val serviceManager by lazy {

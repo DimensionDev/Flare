@@ -23,11 +23,8 @@ import dev.dimension.flare.ui.model.PostEvent
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
 import dev.dimension.flare.data.datasource.microblog.datasource.ListDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.NotificationDataSource
-import dev.dimension.flare.data.datasource.microblog.datasource.PinnableTimelineTabDataSource
-import dev.dimension.flare.data.datasource.microblog.datasource.PinnableTimelineTabSection
 import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.RelationDataSource
-import dev.dimension.flare.data.datasource.microblog.datasource.TimelineTabConfigurationDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
 import dev.dimension.flare.data.datasource.microblog.handler.DirectMessageHandler
 import dev.dimension.flare.data.datasource.microblog.handler.ListHandler
@@ -40,11 +37,13 @@ import dev.dimension.flare.data.datasource.microblog.handler.UserHandler
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.notSupported
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
+import dev.dimension.flare.data.datasource.microblog.timeline.CommonTimelineSpecs as SocialCommonTimelineSpecs
+import dev.dimension.flare.data.datasource.microblog.timeline.PinnableTimelineProvider
+import dev.dimension.flare.data.datasource.microblog.timeline.PinnableTimelineTabSection
+import dev.dimension.flare.data.datasource.microblog.timeline.TimelineShortcutDescriptor
+import dev.dimension.flare.data.datasource.microblog.timeline.TimelineSpec
+import dev.dimension.flare.data.datasource.microblog.timeline.TimelineTabProvider
 import dev.dimension.flare.data.model.IconType
-import dev.dimension.flare.data.model.tab.ShortcutSpec
-import dev.dimension.flare.data.model.tab.TimelineResolver
-import dev.dimension.flare.data.model.tab.TimelineSpec
-import dev.dimension.flare.data.model.tab.toSlot
 import dev.dimension.flare.data.network.xqt.XQTService
 import dev.dimension.flare.data.network.xqt.model.CreateBookmarkRequest
 import dev.dimension.flare.data.network.xqt.model.CreateBookmarkRequestVariables
@@ -65,9 +64,10 @@ import dev.dimension.flare.data.network.xqt.model.PostFavoriteTweetRequest
 import dev.dimension.flare.data.network.xqt.model.PostMediaMetadataCreateRequest
 import dev.dimension.flare.data.network.xqt.model.PostUnfavoriteTweetRequest
 import dev.dimension.flare.data.network.xqt.model.TweetUnion
-import dev.dimension.flare.data.platform.CommonTimelineSpecs
-import dev.dimension.flare.data.platform.XqtPlatformSpec
-import dev.dimension.flare.data.platform.toTimelineTabItemV2
+import dev.dimension.flare.data.platform.XqtTimelineDataSource
+import dev.dimension.flare.data.platform.XqtTimelineSpecs
+import dev.dimension.flare.data.platform.toTimelineShortcutDescriptor
+import dev.dimension.flare.data.platform.toTimelineTabDescriptor
 import dev.dimension.flare.data.account.AccountRepository
 import dev.dimension.flare.common.tryRun
 import dev.dimension.flare.model.AccountType
@@ -82,7 +82,6 @@ import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
-import dev.dimension.flare.ui.route.DeeplinkRoute
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -118,8 +117,9 @@ internal class XQTDataSource(
     PostDataSource,
     KoinComponent,
     ListDataSource,
-    PinnableTimelineTabDataSource,
-    TimelineTabConfigurationDataSource,
+    XqtTimelineDataSource,
+    PinnableTimelineProvider,
+    TimelineTabProvider,
     DirectMessageDataSource,
     RelationDataSource,
     PostEventHandler.Handler {
@@ -127,7 +127,6 @@ internal class XQTDataSource(
     private val coroutineScope: CoroutineScope by inject()
     private val accountRepository: AccountRepository by inject()
     private val imageCompressor: ImageCompressor by inject()
-    private val timelineResolver: TimelineResolver by inject()
     private val credentialFlow by lazy {
         accountRepository
             .credentialFlow<UiAccount.XQT.Credential>(accountKey)
@@ -313,76 +312,66 @@ internal class XQTDataSource(
                 title = UiStrings.List,
                 data =
                     listHandler.data.map { paging ->
-                        paging.map { it.toTimelineTabItemV2(accountKey, timelineResolver) }
+                        paging.map { it.toTimelineTabDescriptor(accountKey) }
                     },
             ),
         )
     }
 
-    override val defaultTabs by lazy {
+    override val defaultTimelineTabs by lazy {
         persistentListOf(
-            CommonTimelineSpecs.home
-                .target(
+            SocialCommonTimelineSpecs.home
+                .toTimelineTabDescriptor(
                     data = TimelineSpec.AccountBasedData(accountKey),
                     icon = IconType.FavIcon(accountKey.host),
-                ).toSlot(),
-            XqtPlatformSpec.featuredTimelineSpec
-                .target(
+                ),
+            XqtTimelineSpecs.featured
+                .toTimelineTabDescriptor(
                     data = TimelineSpec.AccountBasedData(accountKey),
                     icon = IconType.FavIcon(accountKey.host),
-                ).toSlot(),
+                ),
         )
     }
 
     override val builtInTimelineTabs by lazy {
         persistentListOf(
-            timelineResolver.toTabItem(
-                CommonTimelineSpecs.home,
+            SocialCommonTimelineSpecs.home.toTimelineTabDescriptor(
                 data = TimelineSpec.AccountBasedData(accountKey),
                 icon = IconType.FavIcon(accountKey.host),
             ),
-            timelineResolver.toTabItem(
-                XqtPlatformSpec.featuredTimelineSpec,
+            XqtTimelineSpecs.featured.toTimelineTabDescriptor(
                 data = TimelineSpec.AccountBasedData(accountKey),
                 icon = IconType.FavIcon(accountKey.host),
             ),
-            timelineResolver.toTabItem(XqtPlatformSpec.bookmarkTimelineSpec, TimelineSpec.AccountBasedData(accountKey)),
-            timelineResolver.toTabItem(XqtPlatformSpec.deviceFollowTimelineSpec, TimelineSpec.AccountBasedData(accountKey)),
+            XqtTimelineSpecs.bookmark.toTimelineTabDescriptor(TimelineSpec.AccountBasedData(accountKey)),
+            XqtTimelineSpecs.deviceFollow.toTimelineTabDescriptor(TimelineSpec.AccountBasedData(accountKey)),
         )
     }
 
-    override val shortcuts by lazy {
+    override val timelineShortcuts by lazy {
         persistentListOf(
-            ShortcutSpec(
-                title = UiStrings.Featured,
-                icon = UiIcon.Featured,
-                target =
-                    ShortcutSpec.Target.Timeline(
-                        XqtPlatformSpec.featuredTimelineSpec.target(TimelineSpec.AccountBasedData(accountKey)),
-                    ),
-            ),
-            ShortcutSpec(
-                title = UiStrings.Bookmark,
-                icon = UiIcon.Bookmark,
-                target =
-                    ShortcutSpec.Target.Timeline(
-                        XqtPlatformSpec.bookmarkTimelineSpec.target(TimelineSpec.AccountBasedData(accountKey)),
-                    ),
-            ),
-            ShortcutSpec(
+            XqtTimelineSpecs.featured
+                .toTimelineTabDescriptor(TimelineSpec.AccountBasedData(accountKey))
+                .toTimelineShortcutDescriptor(UiStrings.Featured, UiIcon.Featured),
+            XqtTimelineSpecs.bookmark
+                .toTimelineTabDescriptor(TimelineSpec.AccountBasedData(accountKey))
+                .toTimelineShortcutDescriptor(UiStrings.Bookmark, UiIcon.Bookmark),
+            TimelineShortcutDescriptor(
                 title = UiStrings.List,
                 icon = UiIcon.List,
                 target =
-                    ShortcutSpec.Target.Route(
-                        DeeplinkRoute.AllLists(accountKey),
+                    TimelineShortcutDescriptor.Target.Route(
+                        id = TimelineShortcutDescriptor.RouteIds.AllLists,
+                        accountKey = accountKey,
                     ),
             ),
-            ShortcutSpec(
+            TimelineShortcutDescriptor(
                 title = UiStrings.DirectMessage,
                 icon = UiIcon.Messages,
                 target =
-                    ShortcutSpec.Target.Route(
-                        DeeplinkRoute.AllDirectMessages(accountKey),
+                    TimelineShortcutDescriptor.Target.Route(
+                        id = TimelineShortcutDescriptor.RouteIds.AllDirectMessages,
+                        accountKey = accountKey,
                     ),
             ),
         )
@@ -401,19 +390,19 @@ internal class XQTDataSource(
             accountKey,
         )
 
-    fun featuredTimelineLoader() =
+    override fun featuredTimelineLoader() =
         FeaturedTimelineRemoteMediator(
             service,
             accountKey,
         )
 
-    fun bookmarkTimelineLoader() =
+    override fun bookmarkTimelineLoader() =
         BookmarkTimelineRemoteMediator(
             service,
             accountKey,
         )
 
-    fun deviceFollowTimelineLoader() =
+    override fun deviceFollowTimelineLoader() =
         DeviceFollowRemoteMediator(
             service,
             accountKey,

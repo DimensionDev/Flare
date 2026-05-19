@@ -16,6 +16,7 @@ import kotlinx.collections.immutable.persistentListOf
 
 internal data object XqtPlatformSpec : PlatformSpec {
     override val type = XqtSocialPlatformSpec.type
+    override val timelineSpecs = XqtSocialPlatformSpec.timelineSpecs
     override val metadata = XqtSocialPlatformSpec.metadata
     override val detector = XqtSocialPlatformSpec.detector
 

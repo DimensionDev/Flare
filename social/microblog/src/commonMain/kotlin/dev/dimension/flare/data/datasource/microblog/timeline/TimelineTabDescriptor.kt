@@ -47,6 +47,14 @@ public data class TimelineShortcutDescriptor(
     public val icon: UiIcon,
     public val target: Target,
 ) {
+    public object RouteIds {
+        public const val AllLists: String = "all_lists"
+        public const val AllDirectMessages: String = "all_direct_messages"
+        public const val BlueskyAllFeeds: String = "bluesky_all_feeds"
+        public const val MisskeyAllAntennas: String = "misskey_all_antennas"
+        public const val MisskeyAllChannels: String = "misskey_all_channels"
+    }
+
     public sealed interface Target {
         public data class Timeline(
             public val ref: TimelineRef<out TimelineSpec.Data>,

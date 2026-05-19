@@ -22,6 +22,7 @@ import kotlinx.collections.immutable.persistentListOf
 
 internal data object BlueskyPlatformSpec : PlatformSpec {
     override val type = BlueskySocialPlatformSpec.type
+    override val timelineSpecs = BlueskySocialPlatformSpec.timelineSpecs
     override val metadata = BlueskySocialPlatformSpec.metadata
     override val detector = BlueskySocialPlatformSpec.detector
 

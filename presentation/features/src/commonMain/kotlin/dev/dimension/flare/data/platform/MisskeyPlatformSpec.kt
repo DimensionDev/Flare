@@ -22,6 +22,7 @@ import kotlinx.collections.immutable.persistentListOf
 
 internal data object MisskeyPlatformSpec : PlatformSpec {
     override val type = MisskeySocialPlatformSpec.type
+    override val timelineSpecs = MisskeySocialPlatformSpec.timelineSpecs
     override val metadata = MisskeySocialPlatformSpec.metadata
     override val detector = MisskeySocialPlatformSpec.detector
 

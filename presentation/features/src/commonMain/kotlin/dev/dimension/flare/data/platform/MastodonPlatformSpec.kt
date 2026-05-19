@@ -17,6 +17,7 @@ import kotlinx.collections.immutable.persistentListOf
 
 internal data object MastodonPlatformSpec : PlatformSpec {
     override val type = MastodonSocialPlatformSpec.type
+    override val timelineSpecs = MastodonSocialPlatformSpec.timelineSpecs
     override val metadata = MastodonSocialPlatformSpec.metadata
     override val detector = MastodonSocialPlatformSpec.detector
 

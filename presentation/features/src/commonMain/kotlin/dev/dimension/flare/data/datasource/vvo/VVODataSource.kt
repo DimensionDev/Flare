@@ -17,7 +17,6 @@ import dev.dimension.flare.data.datasource.microblog.ProfileTab
 import dev.dimension.flare.data.datasource.microblog.datasource.NotificationDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.RelationDataSource
-import dev.dimension.flare.data.datasource.microblog.datasource.TimelineTabConfigurationDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
 import dev.dimension.flare.data.datasource.microblog.handler.EmojiHandler
 import dev.dimension.flare.data.datasource.microblog.handler.NotificationHandler
@@ -28,15 +27,16 @@ import dev.dimension.flare.data.datasource.microblog.handler.UserHandler
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
+import dev.dimension.flare.data.datasource.microblog.timeline.CommonTimelineSpecs as SocialCommonTimelineSpecs
+import dev.dimension.flare.data.datasource.microblog.timeline.TimelineSpec
+import dev.dimension.flare.data.datasource.microblog.timeline.TimelineTabProvider
 import dev.dimension.flare.data.model.IconType
-import dev.dimension.flare.data.model.tab.ShortcutSpec
-import dev.dimension.flare.data.model.tab.TimelineResolver
-import dev.dimension.flare.data.model.tab.TimelineSpec
-import dev.dimension.flare.data.model.tab.toSlot
 import dev.dimension.flare.data.network.vvo.VVOService
 import dev.dimension.flare.data.network.vvo.model.StatusDetailItem
-import dev.dimension.flare.data.platform.CommonTimelineSpecs
-import dev.dimension.flare.data.platform.VvoPlatformSpec
+import dev.dimension.flare.data.platform.VvoTimelineDataSource
+import dev.dimension.flare.data.platform.VvoTimelineSpecs
+import dev.dimension.flare.data.platform.toTimelineShortcutDescriptor
+import dev.dimension.flare.data.platform.toTimelineTabDescriptor
 import dev.dimension.flare.data.account.AccountRepository
 import dev.dimension.flare.model.LoginExpiredException
 import dev.dimension.flare.model.AccountType
@@ -68,12 +68,12 @@ internal class VVODataSource(
     NotificationDataSource,
     UserDataSource,
     RelationDataSource,
-    TimelineTabConfigurationDataSource,
+    VvoTimelineDataSource,
+    TimelineTabProvider,
     PostDataSource,
     PostEventHandler.Handler {
     private val accountRepository: AccountRepository by inject()
     private val imageCompressor: ImageCompressor by inject()
-    private val timelineResolver: TimelineResolver by inject()
     private val service by lazy {
         VVOService(
             chocolateFlow =
@@ -96,59 +96,42 @@ internal class VVODataSource(
         }
     }
 
-    override val defaultTabs by lazy {
+    override val defaultTimelineTabs by lazy {
         persistentListOf(
-            CommonTimelineSpecs.home
-                .target(
+            SocialCommonTimelineSpecs.home
+                .toTimelineTabDescriptor(
                     data = TimelineSpec.AccountBasedData(accountKey),
                     icon = IconType.Material(UiIcon.Weibo),
-                ).toSlot(),
+                ),
         )
     }
 
     override val builtInTimelineTabs by lazy {
         persistentListOf(
-            timelineResolver.toTabItem(
-                CommonTimelineSpecs.home,
+            SocialCommonTimelineSpecs.home.toTimelineTabDescriptor(
                 data = TimelineSpec.AccountBasedData(accountKey),
                 icon = IconType.Material(UiIcon.Weibo),
             ),
-            timelineResolver.toTabItem(
-                CommonTimelineSpecs.discover,
+            SocialCommonTimelineSpecs.discover.toTimelineTabDescriptor(
                 data = TimelineSpec.AccountBasedData(accountKey),
                 icon = IconType.Material(UiIcon.Weibo),
             ),
-            timelineResolver.toTabItem(VvoPlatformSpec.favoriteTimelineSpec, TimelineSpec.AccountBasedData(accountKey)),
-            timelineResolver.toTabItem(VvoPlatformSpec.likedTimelineSpec, TimelineSpec.AccountBasedData(accountKey)),
+            VvoTimelineSpecs.favorite.toTimelineTabDescriptor(TimelineSpec.AccountBasedData(accountKey)),
+            VvoTimelineSpecs.liked.toTimelineTabDescriptor(TimelineSpec.AccountBasedData(accountKey)),
         )
     }
 
-    override val shortcuts by lazy {
+    override val timelineShortcuts by lazy {
         persistentListOf(
-            ShortcutSpec(
-                title = UiStrings.Featured,
-                icon = UiIcon.Featured,
-                target =
-                    ShortcutSpec.Target.Timeline(
-                        CommonTimelineSpecs.discover.target(TimelineSpec.AccountBasedData(accountKey)),
-                    ),
-            ),
-            ShortcutSpec(
-                title = UiStrings.Bookmark,
-                icon = UiIcon.Bookmark,
-                target =
-                    ShortcutSpec.Target.Timeline(
-                        VvoPlatformSpec.favoriteTimelineSpec.target(TimelineSpec.AccountBasedData(accountKey)),
-                    ),
-            ),
-            ShortcutSpec(
-                title = UiStrings.Liked,
-                icon = UiIcon.Heart,
-                target =
-                    ShortcutSpec.Target.Timeline(
-                        VvoPlatformSpec.likedTimelineSpec.target(TimelineSpec.AccountBasedData(accountKey)),
-                    ),
-            ),
+            SocialCommonTimelineSpecs.discover
+                .toTimelineTabDescriptor(TimelineSpec.AccountBasedData(accountKey))
+                .toTimelineShortcutDescriptor(UiStrings.Featured, UiIcon.Featured),
+            VvoTimelineSpecs.favorite
+                .toTimelineTabDescriptor(TimelineSpec.AccountBasedData(accountKey))
+                .toTimelineShortcutDescriptor(UiStrings.Bookmark, UiIcon.Bookmark),
+            VvoTimelineSpecs.liked
+                .toTimelineTabDescriptor(TimelineSpec.AccountBasedData(accountKey))
+                .toTimelineShortcutDescriptor(UiStrings.Liked, UiIcon.Heart),
         )
     }
 
@@ -469,13 +452,13 @@ internal class VVODataSource(
         }
     }
 
-    fun favouriteTimeline() =
+    override fun favouriteTimeline() =
         FavouriteRemoteMediator(
             service = service,
             accountKey = accountKey,
         )
 
-    fun likeRemoteMediator() =
+    override fun likeRemoteMediator() =
         LikeRemoteMediator(
             service = service,
             accountKey = accountKey,

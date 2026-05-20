@@ -21,11 +21,7 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                api(projects.core.common)
-                api(projects.foundation.database)
-                api(projects.modules.local.model)
-                api(libs.kotlinx.coroutines.core)
-                api(libs.kotlinx.immutable)
+                api(projects.modules.local.data)
             }
         }
     }

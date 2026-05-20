@@ -5,7 +5,6 @@ plugins {
     id("dev.dimension.flare.multiplatform-library")
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.multiplatform)
-    alias(libs.plugins.kotlin.serialization)
 }
 
 kotlin {
@@ -19,26 +18,10 @@ kotlin {
         )
     }
 
-    compilerOptions {
-        allWarningsAsErrors.set(false)
-    }
-
     sourceSets {
         val commonMain by getting {
             dependencies {
-                api(projects.core.common)
-                api(projects.core.model)
-                api(projects.capability.ai)
-                api(projects.foundation.database)
-                api(projects.capability.settings)
-                implementation(projects.foundation.network)
-                api(projects.presentation.model)
-            }
-        }
-        val commonTest by getting {
-            dependencies {
-                implementation(kotlin("test"))
-                implementation(libs.kotlinx.coroutines.test)
+                api(projects.modules.translation.data)
             }
         }
     }

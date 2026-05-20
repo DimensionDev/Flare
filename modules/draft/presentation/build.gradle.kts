@@ -55,6 +55,7 @@ kotlin {
                 api(projects.core.common)
                 api(projects.core.model)
                 api(projects.modules.account.api)
+                api(projects.modules.draft.data)
                 api(projects.social.microblog)
                 api(dependencies.platform(libs.compose.bom))
                 api(libs.compose.runtime)

@@ -59,8 +59,12 @@ internal fun VVOLoginScreen(toHome: () -> Unit) {
                     .padding(it)
                     .fillMaxSize(),
             onCreated = {
-                // clea all cookies
+                // clea all cookies + WebView-side caches/history/form data so a
+                // previous Weibo login session cannot leak into this one
                 CookieManager.getInstance().removeAllCookies(null)
+                it.clearCache(true)
+                it.clearHistory()
+                it.clearFormData()
                 with(it.settings) {
                     javaScriptEnabled = true
 //                    domStorageEnabled = true

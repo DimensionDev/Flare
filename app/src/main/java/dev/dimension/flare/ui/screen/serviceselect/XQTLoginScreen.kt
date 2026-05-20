@@ -70,9 +70,15 @@ internal fun XQTLoginScreen(toHome: () -> Unit) {
                     .padding(it)
                     .fillMaxSize(),
             onCreated = {
-                // clea all cookies
+                // clea all cookies + WebView-side caches/history/form data so a
+                // previous X (Twitter) session cannot survive a re-login attempt.
+                // The cacheMode below is LOAD_CACHE_ELSE_NETWORK, which makes
+                // skipping this step especially sticky.
                 WebStorage.getInstance().deleteAllData()
                 CookieManager.getInstance().removeAllCookies(null)
+                it.clearCache(true)
+                it.clearHistory()
+                it.clearFormData()
                 with(it.settings) {
                     userAgentString = userAgent.toString()
                     javaScriptEnabled = true

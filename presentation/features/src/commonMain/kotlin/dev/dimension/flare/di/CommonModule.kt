@@ -9,11 +9,15 @@ import dev.dimension.flare.data.ai.OpenAIService
 import dev.dimension.flare.data.database.cache.model.TranslationSettingsProvider
 import dev.dimension.flare.data.database.provideAppDatabase
 import dev.dimension.flare.data.database.provideCacheDatabase
+import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.timeline.TimelineCatalog
 import dev.dimension.flare.data.datasource.rss.RssTimelineSpecs
 import dev.dimension.flare.data.draft.DraftMediaStore
 import dev.dimension.flare.data.draft.DraftRepository
 import dev.dimension.flare.data.draft.DraftSendingRecoveryCoordinator
+import dev.dimension.flare.data.draft.RestoreDraftUseCase
+import dev.dimension.flare.data.draft.SaveDraftUseCase
+import dev.dimension.flare.data.draft.SendDraftUseCase
 import dev.dimension.flare.data.local.LocalFilterRepository
 import dev.dimension.flare.data.local.SearchHistoryRepository
 import dev.dimension.flare.data.model.tab.TimelinePersistenceMapper
@@ -27,9 +31,6 @@ import dev.dimension.flare.data.translation.PreTranslationService
 import dev.dimension.flare.model.SocialPlatformRegistry
 import dev.dimension.flare.model.defaultSocialPlatformRegistry
 import dev.dimension.flare.ui.presenter.compose.ComposeUseCase
-import dev.dimension.flare.ui.presenter.compose.RestoreDraftUseCase
-import dev.dimension.flare.ui.presenter.compose.SaveDraftUseCase
-import dev.dimension.flare.ui.presenter.compose.SendDraftUseCase
 import kotlinx.coroutines.CoroutineScope
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
@@ -61,12 +62,23 @@ internal val commonModule =
         singleOf(::LocalFilterRepository)
         single { CoroutineScope(PlatformDispatchers.IO) }
         singleOf(::SaveDraftUseCase)
-        singleOf(::RestoreDraftUseCase)
         single {
+            val accountRepository = get<AccountRepository>()
+            RestoreDraftUseCase(
+                draftRepository = get(),
+                findAccount = accountRepository::find,
+            )
+        }
+        single {
+            val accountRepository = get<AccountRepository>()
             SendDraftUseCase(
                 draftRepository = get(),
-                accountRepository = get(),
                 draftMediaStore = get(),
+                findAccount = accountRepository::find,
+                composeDraft = { account, data, progress ->
+                    (accountRepository.getOrCreateDataSource(account) as? AuthenticatedMicroblogDataSource)
+                        ?.compose(data = data, progress = progress)
+                },
             )
         }
         singleOf(::ComposeUseCase)

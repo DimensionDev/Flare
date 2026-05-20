@@ -1,10 +1,13 @@
-package dev.dimension.flare.ui.presenter.compose
+package dev.dimension.flare.data.draft
 
-import dev.dimension.flare.data.account.AccountRepository
 import dev.dimension.flare.data.database.app.model.DraftContent
 import dev.dimension.flare.data.database.app.model.DraftMediaType
+import dev.dimension.flare.data.database.app.model.DraftReferenceType
+import dev.dimension.flare.data.database.app.model.DraftTargetStatus
 import dev.dimension.flare.data.database.app.model.DraftVisibility
-import dev.dimension.flare.data.draft.DraftRepository
+import dev.dimension.flare.data.datasource.microblog.ComposeData
+import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiDraft
 import dev.dimension.flare.ui.model.UiDraftAccount
 import dev.dimension.flare.ui.model.UiDraftMedia
@@ -12,19 +15,20 @@ import dev.dimension.flare.ui.model.UiDraftMediaType
 import dev.dimension.flare.ui.model.UiDraftStatus
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.render.toUi
+import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.firstOrNull
 import kotlin.time.Instant
 
-public class RestoreDraftUseCase internal constructor(
+public class RestoreDraftUseCase(
     private val draftRepository: DraftRepository,
-    private val accountRepository: AccountRepository,
+    private val findAccount: suspend (MicroBlogKey) -> UiAccount?,
 ) {
     public suspend operator fun invoke(groupId: String): UiDraft? {
         val draft = draftRepository.draft(groupId).firstOrNull() ?: return null
         val accounts =
             draft.targets.mapNotNull { target ->
-                accountRepository.find(target.accountKey)?.let {
+                findAccount(target.accountKey)?.let {
                     UiDraftAccount(account = it)
                 }
             }
@@ -53,10 +57,10 @@ public class RestoreDraftUseCase internal constructor(
     }
 }
 
-internal fun DraftContent.toComposeData(
-    medias: List<dev.dimension.flare.data.datasource.microblog.ComposeData.Media>,
-): dev.dimension.flare.data.datasource.microblog.ComposeData =
-    dev.dimension.flare.data.datasource.microblog.ComposeData(
+public fun DraftContent.toComposeData(
+    medias: List<ComposeData.Media>,
+): ComposeData =
+    ComposeData(
         content = text,
         visibility = visibility.toUiVisibility(),
         language = language,
@@ -65,7 +69,7 @@ internal fun DraftContent.toComposeData(
         spoilerText = spoilerText,
         poll =
             poll?.let {
-                dev.dimension.flare.data.datasource.microblog.ComposeData.Poll(
+                ComposeData.Poll(
                     options = it.options,
                     expiredAfter = it.expiredAfter,
                     multiple = it.multiple,
@@ -74,7 +78,7 @@ internal fun DraftContent.toComposeData(
         localOnly = localOnly,
         referenceStatus =
             reference?.let { reference ->
-                dev.dimension.flare.data.datasource.microblog.ComposeData.ReferenceStatus(
+                ComposeData.ReferenceStatus(
                     composeStatus = reference.toComposeStatus(),
                 )
             },
@@ -89,17 +93,17 @@ private fun DraftVisibility.toUiVisibility(): UiTimelineV2.Post.Visibility =
         DraftVisibility.Channel -> UiTimelineV2.Post.Visibility.Channel
     }
 
-internal fun DraftContent.DraftReference.toComposeStatus(): ComposeStatus =
+private fun DraftContent.DraftReference.toComposeStatus(): ComposeStatus =
     when (type) {
-        dev.dimension.flare.data.database.app.model.DraftReferenceType.QUOTE -> {
+        DraftReferenceType.QUOTE -> {
             ComposeStatus.Quote(statusKey)
         }
 
-        dev.dimension.flare.data.database.app.model.DraftReferenceType.REPLY -> {
+        DraftReferenceType.REPLY -> {
             ComposeStatus.Reply(statusKey)
         }
 
-        dev.dimension.flare.data.database.app.model.DraftReferenceType.VVO_COMMENT -> {
+        DraftReferenceType.VVO_COMMENT -> {
             ComposeStatus.VVOComment(
                 statusKey = statusKey,
                 rootId = requireNotNull(rootId),
@@ -107,9 +111,9 @@ internal fun DraftContent.DraftReference.toComposeStatus(): ComposeStatus =
         }
     }
 
-private fun dev.dimension.flare.data.draft.DraftGroup.toUiDraftStatus(): UiDraftStatus =
+public fun DraftGroup.toUiDraftStatus(): UiDraftStatus =
     when {
-        targets.any { it.status == dev.dimension.flare.data.database.app.model.DraftTargetStatus.SENDING } -> UiDraftStatus.SENDING
-        targets.any { it.status == dev.dimension.flare.data.database.app.model.DraftTargetStatus.FAILED } -> UiDraftStatus.FAILED
+        targets.any { it.status == DraftTargetStatus.SENDING } -> UiDraftStatus.SENDING
+        targets.any { it.status == DraftTargetStatus.FAILED } -> UiDraftStatus.FAILED
         else -> UiDraftStatus.DRAFT
     }

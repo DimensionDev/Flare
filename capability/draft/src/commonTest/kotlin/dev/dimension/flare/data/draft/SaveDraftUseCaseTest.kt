@@ -1,31 +1,24 @@
-package dev.dimension.flare.ui.presenter.compose
+package dev.dimension.flare.data.draft
 
 import androidx.room3.Room
-import dev.dimension.flare.RobolectricTest
+import dev.dimension.flare.common.FileItem
 import dev.dimension.flare.common.FileType
-import dev.dimension.flare.createTestFileItem
-import dev.dimension.flare.createTestRootPath
 import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.app.model.DraftMediaType
 import dev.dimension.flare.data.database.app.model.DraftReferenceType
 import dev.dimension.flare.data.database.app.model.DraftVisibility
-import dev.dimension.flare.data.datasource.microblog.ComposeData
-import dev.dimension.flare.data.draft.ComposeDraftBundle
-import dev.dimension.flare.data.draft.DraftMediaStore
-import dev.dimension.flare.data.draft.DraftRepository
-import dev.dimension.flare.data.io.OkioFileStorage
-import dev.dimension.flare.deleteTestRootPath
 import dev.dimension.flare.data.database.memoryDatabaseBuilder
+import dev.dimension.flare.data.datasource.microblog.ComposeData
+import dev.dimension.flare.data.io.FakeFileStorage
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
-import okio.FileSystem
 import okio.Path.Companion.toPath
-import okio.SYSTEM
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -38,10 +31,9 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlin.uuid.Uuid
 
-class SaveDraftUseCaseTest : RobolectricTest() {
-    private val root = createTestRootPath()
-    private val fileSystem = FileSystem.SYSTEM
-    private val fileStorage = OkioFileStorage(fileSystem, root)
+class SaveDraftUseCaseTest {
+    private val root = "/save-draft-use-case-test".toPath()
+    private lateinit var fileStorage: FakeFileStorage
 
     private lateinit var db: AppDatabase
     private lateinit var repository: DraftRepository
@@ -50,6 +42,7 @@ class SaveDraftUseCaseTest : RobolectricTest() {
 
     @BeforeTest
     fun setup() {
+        fileStorage = FakeFileStorage(root)
         db =
             Room
                 .memoryDatabaseBuilder<AppDatabase>()
@@ -63,7 +56,6 @@ class SaveDraftUseCaseTest : RobolectricTest() {
     @AfterTest
     fun tearDown() {
         db.close()
-        deleteTestRootPath(root)
     }
 
     @Test
@@ -137,10 +129,10 @@ class SaveDraftUseCaseTest : RobolectricTest() {
             assertEquals(listOf("cover", "clip"), draft.medias.map { it.altText })
 
             draft.medias.forEach { media ->
-                assertTrue(fileSystem.exists(media.cachePath.toPath()))
+                assertTrue(fileStorage.exists(media.cachePath.toPath()))
             }
-            assertContentEquals(firstBytes, fileSystem.read(draft.medias[0].cachePath.toPath()) { readByteArray() })
-            assertContentEquals(secondBytes, fileSystem.read(draft.medias[1].cachePath.toPath()) { readByteArray() })
+            assertContentEquals(firstBytes, fileStorage.read(draft.medias[0].cachePath.toPath()))
+            assertContentEquals(secondBytes, fileStorage.read(draft.medias[1].cachePath.toPath()))
         }
 
     @Test
@@ -380,10 +372,10 @@ class SaveDraftUseCaseTest : RobolectricTest() {
             assertEquals("second", updatedDraft.content.text)
             assertEquals(1, updatedDraft.medias.size)
             assertEquals(initialPath, updatedDraft.medias.single().cachePath)
-            assertTrue(fileSystem.exists(initialPath.toPath()))
+            assertTrue(fileStorage.exists(initialPath.toPath()))
             assertEquals(
                 1,
-                fileSystem.list(root.resolve("draft_media").resolve(initialGroupId)).size,
+                fileStorage.list(root.resolve("draft_media").resolve(initialGroupId)).size,
             )
             assertNotEquals("", updatedDraft.medias.single().cachePath)
         }
@@ -427,8 +419,8 @@ class SaveDraftUseCaseTest : RobolectricTest() {
             val updatedDraft = assertNotNull(repository.draft(groupId).first())
 
             assertEquals(1, updatedDraft.medias.size)
-            assertFalse(fileSystem.exists(removedPath.toPath()))
-            assertEquals(1, fileSystem.list(root.resolve("draft_media").resolve(groupId)).size)
+            assertFalse(fileStorage.exists(removedPath.toPath()))
+            assertEquals(1, fileStorage.list(root.resolve("draft_media").resolve(groupId)).size)
         }
 
     @Test
@@ -531,7 +523,18 @@ class SaveDraftUseCaseTest : RobolectricTest() {
         altText: String?,
     ): ComposeData.Media =
         ComposeData.Media(
-            file = createTestFileItem(root = root, name = name, bytes = bytes, type = type),
+            file = fileItem(name = name, bytes = bytes, type = type),
             altText = altText,
+        )
+
+    private fun fileItem(
+        name: String?,
+        bytes: ByteArray,
+        type: FileType,
+    ): FileItem =
+        FileItem(
+            name,
+            type,
+            { bytes },
         )
 }

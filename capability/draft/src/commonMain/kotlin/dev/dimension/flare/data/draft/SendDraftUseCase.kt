@@ -1,43 +1,22 @@
-package dev.dimension.flare.ui.presenter.compose
+package dev.dimension.flare.data.draft
 
-import dev.dimension.flare.data.account.AccountRepository
 import dev.dimension.flare.data.database.app.model.DraftTargetStatus
-import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeData
-import dev.dimension.flare.data.draft.ComposeDraftBundle
-import dev.dimension.flare.data.draft.DraftMediaStore
-import dev.dimension.flare.data.draft.DraftRepository
-import dev.dimension.flare.data.draft.SaveDraftInput
-import dev.dimension.flare.data.draft.SaveDraftTarget
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiAccount
 import kotlinx.coroutines.flow.firstOrNull
 import kotlin.time.Clock
 
-internal class SendDraftUseCase(
+public class SendDraftUseCase(
     private val draftRepository: DraftRepository,
     private val draftMediaStore: DraftMediaStore,
     private val findAccount: suspend (MicroBlogKey) -> UiAccount?,
     private val composeDraft: suspend (UiAccount, ComposeData, () -> Unit) -> Unit,
 ) {
-    constructor(
-        draftRepository: DraftRepository,
-        accountRepository: AccountRepository,
-        draftMediaStore: DraftMediaStore,
-    ) : this(
-        draftRepository = draftRepository,
-        draftMediaStore = draftMediaStore,
-        findAccount = { accountRepository.find(it) },
-        composeDraft = { account, data, progress ->
-            (accountRepository.getOrCreateDataSource(account) as? AuthenticatedMicroblogDataSource)
-                ?.compose(data = data, progress = progress)
-        },
-    )
-
-    suspend operator fun invoke(
+    public suspend operator fun invoke(
         bundle: ComposeDraftBundle,
         progress: suspend (ComposeProgressState) -> Unit,
-    ) {
+    ): Unit {
         val persistedMedia = draftMediaStore.persist(bundle.groupId, bundle.template.medias)
         val savedGroupId =
             draftRepository.saveDraft(
@@ -64,10 +43,10 @@ internal class SendDraftUseCase(
         )
     }
 
-    suspend operator fun invoke(
+    public suspend operator fun invoke(
         groupId: String,
         progress: suspend (ComposeProgressState) -> Unit,
-    ) {
+    ): Unit {
         val draft = draftRepository.draft(groupId).firstOrNull() ?: return
         val medias = draftMediaStore.restore(draft.medias)
         val datas =
@@ -178,8 +157,21 @@ private data class ComposeTargetData(
     val data: ComposeData,
 )
 
-internal class ComposeDraftFailedException(
-    val failures: List<Throwable>,
+public sealed interface ComposeProgressState {
+    public data object Success : ComposeProgressState
+
+    public data class Progress(
+        public val current: Int,
+        public val max: Int,
+    ) : ComposeProgressState
+
+    public data class Error(
+        public val throwable: Throwable,
+    ) : ComposeProgressState
+}
+
+public class ComposeDraftFailedException(
+    public val failures: List<Throwable>,
 ) : Exception(
         failures.firstOrNull()?.message ?: "Compose failed.",
     )

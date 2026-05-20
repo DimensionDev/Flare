@@ -49,7 +49,7 @@ kotlin {
                 implementation(projects.capability.account)
                 implementation(projects.storage.database)
                 api(projects.capability.settings)
-                implementation(projects.capability.draft)
+                api(projects.capability.draft)
                 implementation(projects.capability.local)
                 implementation(projects.capability.translation)
                 implementation(projects.network)

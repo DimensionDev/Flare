@@ -7,7 +7,11 @@ import androidx.compose.runtime.remember
 import dev.dimension.flare.common.InAppNotification
 import dev.dimension.flare.common.Message
 import dev.dimension.flare.data.database.app.model.DraftMediaType
+import dev.dimension.flare.data.draft.ComposeProgressState
 import dev.dimension.flare.data.draft.DraftRepository
+import dev.dimension.flare.data.draft.SendDraftUseCase
+import dev.dimension.flare.data.draft.toComposeData
+import dev.dimension.flare.data.draft.toUiDraftStatus
 import dev.dimension.flare.ui.model.UiDraft
 import dev.dimension.flare.ui.model.UiDraftAccount
 import dev.dimension.flare.ui.model.UiDraftMedia
@@ -165,10 +169,3 @@ private val UiDraftStatus.sortOrder: Int
             UiDraftStatus.FAILED -> 1
             UiDraftStatus.DRAFT -> 2
         }
-
-private fun dev.dimension.flare.data.draft.DraftGroup.toUiDraftStatus(): UiDraftStatus =
-    when {
-        targets.any { it.status == dev.dimension.flare.data.database.app.model.DraftTargetStatus.SENDING } -> UiDraftStatus.SENDING
-        targets.any { it.status == dev.dimension.flare.data.database.app.model.DraftTargetStatus.FAILED } -> UiDraftStatus.FAILED
-        else -> UiDraftStatus.DRAFT
-    }

@@ -1,20 +1,17 @@
-package dev.dimension.flare.ui.presenter.compose
+package dev.dimension.flare.data.draft
 
 import dev.dimension.flare.data.database.app.model.DraftContent
 import dev.dimension.flare.data.database.app.model.DraftReferenceType
 import dev.dimension.flare.data.database.app.model.DraftVisibility
-import dev.dimension.flare.data.draft.ComposeDraftBundle
-import dev.dimension.flare.data.draft.DraftMediaStore
-import dev.dimension.flare.data.draft.DraftRepository
-import dev.dimension.flare.data.draft.SaveDraftInput
-import dev.dimension.flare.data.draft.SaveDraftTarget
+import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 
-internal class SaveDraftUseCase(
+public class SaveDraftUseCase(
     private val draftRepository: DraftRepository,
     private val draftMediaStore: DraftMediaStore,
 ) {
-    suspend operator fun invoke(bundle: ComposeDraftBundle): String {
+    public suspend operator fun invoke(bundle: ComposeDraftBundle): String {
         val persistedMedia = draftMediaStore.persist(groupId = bundle.groupId, medias = bundle.template.medias)
         return draftRepository.saveDraft(
             SaveDraftInput(
@@ -32,7 +29,7 @@ internal class SaveDraftUseCase(
     }
 }
 
-internal fun dev.dimension.flare.data.datasource.microblog.ComposeData.toDraftContent(): DraftContent =
+public fun ComposeData.toDraftContent(): DraftContent =
     DraftContent(
         text = content,
         visibility = visibility.toDraftVisibility(),

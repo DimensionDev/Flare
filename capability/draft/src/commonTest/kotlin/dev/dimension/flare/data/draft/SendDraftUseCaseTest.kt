@@ -1,36 +1,27 @@
-package dev.dimension.flare.ui.presenter.compose
+package dev.dimension.flare.data.draft
 
 import androidx.room3.Room
-import dev.dimension.flare.RobolectricTest
+import dev.dimension.flare.common.FileItem
 import dev.dimension.flare.common.FileType
-import dev.dimension.flare.createTestFileItem
-import dev.dimension.flare.createTestRootPath
 import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.app.model.DraftContent
 import dev.dimension.flare.data.database.app.model.DraftMediaType
 import dev.dimension.flare.data.database.app.model.DraftReferenceType
 import dev.dimension.flare.data.database.app.model.DraftTargetStatus
 import dev.dimension.flare.data.database.app.model.DraftVisibility
-import dev.dimension.flare.data.datasource.microblog.ComposeData
-import dev.dimension.flare.data.draft.ComposeDraftBundle
-import dev.dimension.flare.data.draft.DraftMediaStore
-import dev.dimension.flare.data.draft.DraftRepository
-import dev.dimension.flare.data.draft.SaveDraftInput
-import dev.dimension.flare.data.draft.SaveDraftMedia
-import dev.dimension.flare.data.draft.SaveDraftTarget
-import dev.dimension.flare.data.io.OkioFileStorage
-import dev.dimension.flare.deleteTestRootPath
 import dev.dimension.flare.data.database.memoryDatabaseBuilder
+import dev.dimension.flare.data.datasource.microblog.ComposeData
+import dev.dimension.flare.data.io.FakeFileStorage
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import okio.FileSystem
-import okio.SYSTEM
+import okio.Path.Companion.toPath
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -43,10 +34,9 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class SendDraftUseCaseTest : RobolectricTest() {
-    private val root = createTestRootPath()
-    private val fileSystem = FileSystem.SYSTEM
-    private val fileStorage = OkioFileStorage(fileSystem, root)
+class SendDraftUseCaseTest {
+    private val root = "/send-draft-use-case-test".toPath()
+    private lateinit var fileStorage: FakeFileStorage
 
     private lateinit var db: AppDatabase
     private lateinit var repository: DraftRepository
@@ -54,6 +44,7 @@ class SendDraftUseCaseTest : RobolectricTest() {
 
     @BeforeTest
     fun setup() {
+        fileStorage = FakeFileStorage(root)
         db =
             Room
                 .memoryDatabaseBuilder<AppDatabase>()
@@ -66,7 +57,6 @@ class SendDraftUseCaseTest : RobolectricTest() {
     @AfterTest
     fun tearDown() {
         db.close()
-        deleteTestRootPath(root)
     }
 
     @Test
@@ -680,13 +670,13 @@ class SendDraftUseCaseTest : RobolectricTest() {
     @Test
     fun sendBundlePersistFailurePropagatesException() =
         runTest {
-            val blockedParent = root.resolve("blocked-send")
-            fileSystem.write(blockedParent) {
-                writeUtf8("not a directory")
-            }
             val blockedStore =
                 DraftMediaStore(
-                    OkioFileStorage(fileSystem, blockedParent),
+                    FakeFileStorage(
+                        onCreateDirectories = { path ->
+                            error("Cannot create directory: $path")
+                        },
+                    ),
                 )
             val account = mastodonAccount("alice", "mastodon.social")
             val useCase =
@@ -804,8 +794,19 @@ class SendDraftUseCaseTest : RobolectricTest() {
         altText: String?,
     ): ComposeData.Media =
         ComposeData.Media(
-            file = createTestFileItem(root = root, name = name, bytes = bytes, type = type),
+            file = fileItem(name = name, bytes = bytes, type = type),
             altText = altText,
+        )
+
+    private fun fileItem(
+        name: String?,
+        bytes: ByteArray,
+        type: FileType,
+    ): FileItem =
+        FileItem(
+            name,
+            type,
+            { bytes },
         )
 
     private data class SentCompose(

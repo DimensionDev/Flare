@@ -66,5 +66,10 @@ kotlin {
                 implementation(libs.ksoup)
             }
         }
+        val commonTest by getting {
+            dependencies {
+                implementation(kotlin("test"))
+            }
+        }
     }
 }

@@ -46,13 +46,3 @@ kotlin {
 ktorfit {
     compilerPluginVersion.set("2.3.3")
 }
-
-afterEvaluate {
-    tasks {
-        configureEach {
-            if (this.name != "kspCommonMainKotlinMetadata" && this.name.startsWith("ksp")) {
-                this.dependsOn("kspCommonMainKotlinMetadata")
-            }
-        }
-    }
-}

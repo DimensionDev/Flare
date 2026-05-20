@@ -19,15 +19,30 @@ kotlin {
         )
     }
 
+    tasks
+        .withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask<*>>()
+        .configureEach {
+            if (name == "compileCommonMainKotlinMetadata") {
+                compilerOptions {
+                    freeCompilerArgs.addAll(
+                        "-module-name",
+                        "flare_ui_model_commonMain",
+                    )
+                }
+            }
+        }
+
     targets.configureEach {
         if (name != "wasmJs") {
             compilations.configureEach {
-                compileTaskProvider.configure {
-                    compilerOptions {
-                        freeCompilerArgs.addAll(
-                            "-module-name",
-                            "flare_ui_model",
-                        )
+                if (name == "main") {
+                    compileTaskProvider.configure {
+                        compilerOptions {
+                            freeCompilerArgs.addAll(
+                                "-module-name",
+                                "flare_ui_model",
+                            )
+                        }
                     }
                 }
             }

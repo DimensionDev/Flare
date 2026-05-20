@@ -41,6 +41,8 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 implementation(projects.presentation.features)
+                implementation(projects.presentation.runtime)
+                implementation(projects.social.misskey)
                 implementation(compose("org.jetbrains.compose.ui:ui"))
                 implementation(compose("org.jetbrains.compose.runtime:runtime"))
                 implementation(compose("org.jetbrains.compose.foundation:foundation"))

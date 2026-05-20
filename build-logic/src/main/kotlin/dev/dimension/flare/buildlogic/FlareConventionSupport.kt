@@ -7,6 +7,7 @@ import org.gradle.api.JavaVersion
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.VersionCatalogsExtension
+import org.gradle.api.tasks.testing.AbstractTestTask
 import org.gradle.jvm.toolchain.JavaLanguageVersion
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.getByName
@@ -45,19 +46,33 @@ class FlareRootConventionsPlugin : Plugin<Project> {
                 version.set(ktlintCliVersion)
                 filter {
                     exclude { element -> element.file.path.contains("build", ignoreCase = true) }
-                    if (subproject.path == ":presentation:features") {
-                        exclude { element ->
-                            element.file.absolutePath.contains("data/network/misskey/api/", ignoreCase = true)
-                        }
-                        exclude { element ->
-                            element.file.absolutePath.contains("data/network/xqt/", ignoreCase = true)
-                        }
-                    }
+                    exclude { element -> element.file.absolutePath.contains("data/network/misskey/api/", ignoreCase = true) }
+                    exclude { element -> element.file.absolutePath.contains("data/network/xqt/", ignoreCase = true) }
                 }
             }
+            subproject.configureKspKtlintOrdering()
+            subproject.tasks
+                .matching { it.name == "wasmJsBrowserTest" }
+                .withType(AbstractTestTask::class.java)
+                .configureEach {
+                    failOnNoDiscoveredTests.set(false)
+                    onlyIf("Chrome is available for WASM browser tests") {
+                        chromeBrowserIsAvailable(subproject)
+                    }
+                }
         }
     }
 }
+
+private fun chromeBrowserIsAvailable(project: Project): Boolean =
+    project.providers.environmentVariable("CHROME_BIN").orNull?.isNotBlank() == true ||
+        listOf(
+            "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+            "/usr/bin/google-chrome",
+            "/usr/bin/google-chrome-stable",
+            "/usr/bin/chromium",
+            "/usr/bin/chromium-browser",
+        ).any { project.file(it).exists() }
 
 class FlareAndroidApplicationSpec internal constructor(
     private val project: Project,
@@ -249,6 +264,24 @@ class FlareModuleSpec internal constructor(
                 kspDependencies.forEach { dependencyNotation ->
                     kotlin.project.dependencies.add(configurationName, dependencyNotation)
                 }
+            }
+        }
+    }
+}
+
+private fun Project.configureKspKtlintOrdering() {
+    pluginManager.withPlugin("com.google.devtools.ksp") {
+        val commonMetadataKsp = tasks.matching { it.name == "kspCommonMainKotlinMetadata" }
+        tasks
+            .matching {
+                it.name == "runKtlintCheckOverCommonMainSourceSet" ||
+                    it.name == "runKtlintFormatOverCommonMainSourceSet"
+            }.configureEach {
+                dependsOn(commonMetadataKsp)
+            }
+        tasks.configureEach {
+            if (name != "kspCommonMainKotlinMetadata" && name.startsWith("ksp")) {
+                dependsOn(commonMetadataKsp)
             }
         }
     }

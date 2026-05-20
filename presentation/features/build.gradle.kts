@@ -45,23 +45,23 @@ kotlin {
                 api(projects.core.model)
                 api(projects.presentation.model)
                 implementation(projects.core.deeplink)
-                api(projects.capability.ai)
-                api(projects.capability.account)
-                api(projects.storage.database)
+                implementation(projects.capability.ai)
+                implementation(projects.capability.account)
+                implementation(projects.storage.database)
                 api(projects.capability.settings)
-                api(projects.capability.draft)
-                api(projects.capability.local)
-                api(projects.capability.translation)
+                implementation(projects.capability.draft)
+                implementation(projects.capability.local)
+                implementation(projects.capability.translation)
                 implementation(projects.network)
                 api(projects.social.api)
-                api(projects.social.bluesky)
-                api(projects.social.mastodon)
-                api(projects.social.misskey)
+                implementation(projects.social.bluesky)
+                implementation(projects.social.mastodon)
+                implementation(projects.social.misskey)
                 api(projects.social.microblog)
                 implementation(projects.social.nodeinfo)
-                api(projects.social.rss)
-                api(projects.social.vvo)
-                api(projects.social.xqt)
+                implementation(projects.social.rss)
+                implementation(projects.social.vvo)
+                implementation(projects.social.xqt)
                 api(projects.presentation.runtime)
                 implementation(dependencies.platform(libs.compose.bom))
                 implementation(libs.compose.runtime)
@@ -98,7 +98,7 @@ kotlin {
         }
         val nonWebMain by getting {
             dependencies {
-                api(projects.social.nostr)
+                implementation(projects.social.nostr)
             }
         }
         val androidJvmMain by getting {
@@ -142,19 +142,4 @@ room3 {
 
 ktorfit {
     compilerPluginVersion.set("2.3.3")
-}
-
-afterEvaluate {
-//    val kspCommonMainKotlinMetadata by tasks
-    val runKtlintFormatOverCommonMainSourceSet by tasks
-    val runKtlintCheckOverCommonMainSourceSet by tasks
-    runKtlintFormatOverCommonMainSourceSet.dependsOn("kspCommonMainKotlinMetadata")
-    runKtlintCheckOverCommonMainSourceSet.dependsOn("kspCommonMainKotlinMetadata")
-    tasks {
-        configureEach {
-            if (this.name != "kspCommonMainKotlinMetadata" && this.name.startsWith("ksp")) {
-                this.dependsOn("kspCommonMainKotlinMetadata")
-            }
-        }
-    }
 }

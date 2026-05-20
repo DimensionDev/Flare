@@ -248,3 +248,7 @@ val validateModuleBoundaries by tasks.registering {
         }
     }
 }
+
+tasks.matching { it.name == "check" }.configureEach {
+    dependsOn(validateModuleBoundaries)
+}

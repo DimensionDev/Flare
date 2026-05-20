@@ -126,6 +126,7 @@ dependencies {
     implementation(projects.presentation.features)
     implementation(projects.capability.ai)
     implementation(projects.network)
+    implementation(projects.social.rss)
     implementation(projects.composeUi)
     implementation(libs.androidx.splash)
     implementation(libs.materialKolor)

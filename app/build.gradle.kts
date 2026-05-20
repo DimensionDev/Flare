@@ -124,6 +124,7 @@ dependencies {
     coreLibraryDesugaring(libs.desugar.jdk.libs)
     implementation(libs.compose.webview)
     implementation(projects.presentation.features)
+    implementation(projects.modules.draft.presentation)
     implementation(projects.capability.ai)
     implementation(projects.foundation.network)
     implementation(projects.social.rss)

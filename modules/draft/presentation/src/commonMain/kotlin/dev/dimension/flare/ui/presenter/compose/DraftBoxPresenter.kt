@@ -6,6 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import dev.dimension.flare.common.InAppNotification
 import dev.dimension.flare.common.Message
+import dev.dimension.flare.data.account.AccountProfileProvider
 import dev.dimension.flare.data.database.app.model.DraftMediaType
 import dev.dimension.flare.data.draft.ComposeProgressState
 import dev.dimension.flare.data.draft.DraftRepository
@@ -17,9 +18,7 @@ import dev.dimension.flare.ui.model.UiDraftAccount
 import dev.dimension.flare.ui.model.UiDraftMedia
 import dev.dimension.flare.ui.model.UiDraftMediaType
 import dev.dimension.flare.ui.model.UiDraftStatus
-import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.presenter.PresenterBase
-import dev.dimension.flare.ui.presenter.settings.AccountsPresenter
 import dev.dimension.flare.ui.render.toUi
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
@@ -35,33 +34,21 @@ public class DraftBoxPresenter :
     private val draftRepository: DraftRepository by inject()
     private val sendDraftUseCase: SendDraftUseCase by inject()
     private val inAppNotification: InAppNotification by inject()
+    private val accountProfileProvider: AccountProfileProvider by inject()
     private val coroutineScope: CoroutineScope by inject()
 
     @Composable
     override fun body(): DraftBoxState {
         val visibleDrafts by draftRepository.visibleDrafts.collectAsState(emptyList())
         val sendingDrafts by draftRepository.sendingDrafts.collectAsState(emptyList())
-        val accountsState = remember { AccountsPresenter() }.body()
-        val avatarMap =
-            remember(
-                accountsState.accounts,
-            ) {
-                accountsState.accounts
-                    .takeSuccess()
-                    ?.toImmutableList()
-                    ?.associate { (account, profileState) ->
-                        account.accountKey to profileState.takeSuccess()?.avatar
-                    }.orEmpty()
-            }
+        val accountProfiles by accountProfileProvider.accounts.collectAsState(emptyList())
 
         val items =
-            remember(visibleDrafts, sendingDrafts, avatarMap, accountsState.accounts) {
+            remember(visibleDrafts, sendingDrafts, accountProfiles) {
                 val accountMap =
-                    accountsState.accounts
-                        .takeSuccess()
-                        ?.toImmutableList()
-                        ?.associate { it.account.accountKey to it.account }
-                        .orEmpty()
+                    accountProfiles.associate { it.account.accountKey to it.account }
+                val avatarMap =
+                    accountProfiles.associate { it.account.accountKey to it.avatar }
                 (visibleDrafts + sendingDrafts)
                     .associateBy { it.groupId }
                     .values

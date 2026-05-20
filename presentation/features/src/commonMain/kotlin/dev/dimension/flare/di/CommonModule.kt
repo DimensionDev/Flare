@@ -1,6 +1,8 @@
 package dev.dimension.flare.di
 
 import dev.dimension.flare.common.PlatformDispatchers
+import dev.dimension.flare.data.account.AccountProfileProvider
+import dev.dimension.flare.data.account.AccountProfileProviderImpl
 import dev.dimension.flare.data.account.AccountRepository
 import dev.dimension.flare.data.account.ApplicationRepository
 import dev.dimension.flare.data.account.CredentialProvider
@@ -44,6 +46,7 @@ internal val commonModule =
             )
         }
         singleOf(::AccountRepository)
+        single<AccountProfileProvider> { AccountProfileProviderImpl(get()) }
         single<CredentialProvider> { get<AccountRepository>() }
         single(createdAtStart = true) { AccountTabSyncCoordinator(get(), get(), get(), get()) }
         single { provideAppDatabase(get()) }

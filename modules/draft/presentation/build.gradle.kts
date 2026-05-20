@@ -57,9 +57,13 @@ kotlin {
                 api(projects.modules.account.api)
                 api(projects.modules.draft.data)
                 api(projects.social.microblog)
+                api(projects.ui.model)
+                api(projects.ui.presenterRuntime)
                 api(dependencies.platform(libs.compose.bom))
                 api(libs.compose.runtime)
                 api(libs.kotlinx.immutable)
+                implementation(dependencies.platform(libs.koin.bom))
+                implementation(libs.koin.core)
             }
         }
     }

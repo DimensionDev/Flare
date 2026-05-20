@@ -47,7 +47,8 @@ public data object NostrSocialPlatformPlugin : SocialPlatformPlugin {
 
 public data object NostrSocialPlatformSpec : SocialPlatformSpec {
     public override val type: PlatformType = PlatformType.Nostr
-    public override val timelineSpecs: ImmutableList<TimelineSpec<out TimelineSpec.Data>> = CommonTimelineSpecs.timelineSpecs
+    public override val timelineSpecs: ImmutableList<TimelineSpec<out TimelineSpec.Data>> =
+        persistentListOf(CommonTimelineSpecs.home)
     public override val metadata: PlatformTypeMetadata =
         PlatformTypeMetadata(
             displayName = "Nostr",
@@ -65,6 +66,5 @@ public data object NostrSocialPlatformSpec : SocialPlatformSpec {
     public override fun guestDataSource(
         host: String,
         locale: String,
-    ): MicroblogDataSource =
-        throw UnsupportedOperationException("${type.name} guest data source is not supported yet")
+    ): MicroblogDataSource = throw UnsupportedOperationException("${type.name} guest data source is not supported yet")
 }

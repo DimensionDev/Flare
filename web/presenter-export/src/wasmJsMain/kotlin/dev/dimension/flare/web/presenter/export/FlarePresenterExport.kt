@@ -34,10 +34,10 @@ import dev.dimension.flare.ui.presenter.compose.DraftBoxState
 import dev.dimension.flare.ui.presenter.home.SearchPresenter
 import dev.dimension.flare.ui.presenter.home.SearchState
 import dev.dimension.flare.ui.presenter.home.TimelineState
-import dev.dimension.flare.ui.presenter.home.rss.AllRssTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.rss.RssDetailPresenter
 import dev.dimension.flare.ui.presenter.home.rss.RssSourcesPresenter
-import dev.dimension.flare.ui.presenter.home.rss.RssTimelinePresenter
+import dev.dimension.flare.ui.presenter.home.rss.createAllRssTimeline
+import dev.dimension.flare.ui.presenter.home.rss.createRssTimeline
 import dev.dimension.flare.ui.presenter.login.BlueskyLoginState
 import dev.dimension.flare.ui.presenter.login.BlueskyOAuthLoginPresenter
 import dev.dimension.flare.ui.presenter.login.MastodonLoginState
@@ -54,14 +54,6 @@ import dev.dimension.flare.ui.presenter.profile.ProfileState
 import dev.dimension.flare.ui.presenter.status.StatusPresenter
 import dev.dimension.flare.ui.presenter.status.StatusState
 import dev.dimension.flare.ui.render.UiDateTime
-import kotlin.js.ExperimentalJsExport
-import kotlin.js.ExperimentalWasmJsInterop
-import kotlin.js.JsAny
-import kotlin.js.JsExport
-import kotlin.js.JsName
-import kotlin.js.JsString
-import kotlin.js.Promise
-import kotlin.js.toJsString
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
@@ -76,6 +68,14 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.decodeFromJsonElement
 import org.koin.core.context.GlobalContext
 import org.koin.core.context.startKoin
+import kotlin.js.ExperimentalJsExport
+import kotlin.js.ExperimentalWasmJsInterop
+import kotlin.js.JsAny
+import kotlin.js.JsExport
+import kotlin.js.JsName
+import kotlin.js.JsString
+import kotlin.js.Promise
+import kotlin.js.toJsString
 
 private val bridgeJson =
     Json {
@@ -250,39 +250,69 @@ private fun createPresenterInstance(
     args: JsonObject,
 ): PresenterBase<out Any> =
     when (type) {
-        "service-select" -> ServiceSelectPresenter(toHome = { handleId.navigateHome() })
-        "login" -> createLoginPresenter(handleId, args)
-        "home-tabs" -> HomeTabsPresenter()
-        "timeline" -> createTimelinePresenter(args)
-        "search" ->
+        "service-select" -> {
+            ServiceSelectPresenter(toHome = { handleId.navigateHome() })
+        }
+
+        "login" -> {
+            createLoginPresenter(handleId, args)
+        }
+
+        "home-tabs" -> {
+            HomeTabsPresenter()
+        }
+
+        "timeline" -> {
+            createTimelinePresenter(args)
+        }
+
+        "search" -> {
             SearchPresenter(
                 accountType = args.accountType(),
                 initialQuery = args.optionalString("query").orEmpty(),
             )
-        "profile" ->
+        }
+
+        "profile" -> {
             ProfilePresenter(
                 accountType = args.accountType(),
                 userKey = args["userKey"]?.toMicroBlogKeyOrNull(),
             )
-        "status-detail" ->
+        }
+
+        "status-detail" -> {
             StatusPresenter(
                 accountType = args.accountType(),
                 statusKey = args.requiredMicroBlogKey("statusKey"),
             )
-        "compose" ->
+        }
+
+        "compose" -> {
             ComposePresenter(
                 accountType = args["accountType"]?.toAccountTypeOrNull(),
                 draftGroupId = args.optionalString("draftGroupId"),
             )
-        "draft" -> DraftBoxPresenter()
-        "rss-sources", "rss-settings" -> RssSourcesPresenter()
-        "rss-detail" ->
+        }
+
+        "draft" -> {
+            DraftBoxPresenter()
+        }
+
+        "rss-sources", "rss-settings" -> {
+            RssSourcesPresenter()
+        }
+
+        "rss-detail" -> {
             RssDetailPresenter(
                 url = args.requiredString("url"),
                 descriptionHtml = args.optionalString("descriptionHtml"),
                 descriptionTitle = args.optionalString("descriptionTitle"),
             )
-        else -> error("Unsupported presenter type: $type")
+        }
+
+        else -> {
+            error("Unsupported presenter type: $type")
+        }
     }
 
 private fun createLoginPresenter(
@@ -301,18 +331,19 @@ private fun createTimelinePresenter(args: JsonObject): PresenterBase<out Any> {
     args["source"]?.let { sourceElement ->
         val source = bridgeJson.decodeFromJsonElement<TimelineSourceRef>(sourceElement)
         val resolver =
-            GlobalContext.get()
-            .get<TimelineResolver>()
+            GlobalContext
+                .get()
+                .get<TimelineResolver>()
         return resolver.createPresenter(resolver.toTabItem(source))
     }
     args.optionalString("rssUrl")?.let {
-        return RssTimelinePresenter(it)
+        return createRssTimeline(it)
     }
     args.optionalString("feedUrl")?.let {
-        return RssTimelinePresenter(it)
+        return createRssTimeline(it)
     }
     return when (args.optionalString("kind")?.lowercase()) {
-        null, "", "all-rss" -> AllRssTimelinePresenter()
+        null, "", "all-rss" -> createAllRssTimeline()
         "nostr" -> throw IllegalArgumentException("Nostr timeline is not exported for Web.")
         else -> throw IllegalArgumentException("Unsupported timeline args: $args")
     }
@@ -405,33 +436,58 @@ private fun PresenterHandle.dispatchServiceSelect(
             state.setFilter(action.requiredString("value"))
             true
         }
+
         "mastodon.login" -> {
             state.mastodonLoginState.login(action.requiredString("host")) { url ->
                 pushLaunchUrl("mastodon", url)
             }
             true
         }
+
         "mastodon.resume" -> {
             state.mastodonLoginState.resume(action.requiredString("url"))
             true
         }
+
         "misskey.login" -> {
             state.misskeyLoginState.login(action.requiredString("host")) { url ->
                 pushLaunchUrl("misskey", url)
             }
             true
         }
+
         "misskey.resume" -> {
             state.misskeyLoginState.resume(action.requiredString("url"))
             true
         }
-        "bluesky.login" -> dispatchBlueskyLogin(state.blueskyLoginState, "login", action)
-        "bluesky.clear" -> dispatchBlueskyLogin(state.blueskyLoginState, "clear", action)
-        "bluesky-oauth.login" -> dispatchBlueskyOAuthLogin(state.blueskyOauthLoginState, "login", action)
-        "bluesky-oauth.resume" -> dispatchBlueskyOAuthLogin(state.blueskyOauthLoginState, "resume", action)
-        "bluesky-oauth.clear" -> dispatchBlueskyOAuthLogin(state.blueskyOauthLoginState, "clear", action)
-        "nostr.login", "nostr.connectAmber", "nostr.startQrLogin", "nostr.cancelQrLogin" -> false
-        else -> false
+
+        "bluesky.login" -> {
+            dispatchBlueskyLogin(state.blueskyLoginState, "login", action)
+        }
+
+        "bluesky.clear" -> {
+            dispatchBlueskyLogin(state.blueskyLoginState, "clear", action)
+        }
+
+        "bluesky-oauth.login" -> {
+            dispatchBlueskyOAuthLogin(state.blueskyOauthLoginState, "login", action)
+        }
+
+        "bluesky-oauth.resume" -> {
+            dispatchBlueskyOAuthLogin(state.blueskyOauthLoginState, "resume", action)
+        }
+
+        "bluesky-oauth.clear" -> {
+            dispatchBlueskyOAuthLogin(state.blueskyOauthLoginState, "clear", action)
+        }
+
+        "nostr.login", "nostr.connectAmber", "nostr.startQrLogin", "nostr.cancelQrLogin" -> {
+            false
+        }
+
+        else -> {
+            false
+        }
     }
 
 private fun PresenterHandle.dispatchBlueskyLogin(
@@ -449,11 +505,15 @@ private fun PresenterHandle.dispatchBlueskyLogin(
             )
             true
         }
+
         "clear" -> {
             state.clear()
             true
         }
-        else -> false
+
+        else -> {
+            false
+        }
     }
 
 private fun PresenterHandle.dispatchBlueskyOAuthLogin(
@@ -471,15 +531,20 @@ private fun PresenterHandle.dispatchBlueskyOAuthLogin(
             }
             true
         }
+
         "resume" -> {
             state.resume(action.requiredString("url"))
             true
         }
+
         "clear" -> {
             state.clear()
             true
         }
-        else -> false
+
+        else -> {
+            false
+        }
     }
 
 private fun PresenterHandle.dispatchMastodonLogin(
@@ -494,11 +559,15 @@ private fun PresenterHandle.dispatchMastodonLogin(
             }
             true
         }
+
         "resume" -> {
             state.resume(action.requiredString("url"))
             true
         }
-        else -> false
+
+        else -> {
+            false
+        }
     }
 
 private fun PresenterHandle.dispatchMisskeyLogin(
@@ -513,11 +582,15 @@ private fun PresenterHandle.dispatchMisskeyLogin(
             }
             true
         }
+
         "resume" -> {
             state.resume(action.requiredString("url"))
             true
         }
-        else -> false
+
+        else -> {
+            false
+        }
     }
 
 private fun PresenterHandle.dispatchXqtLogin(
@@ -530,6 +603,7 @@ private fun PresenterHandle.dispatchXqtLogin(
             state.login(action.requiredString("chocolate"))
             true
         }
+
         "checkChocolate" -> {
             val result = state.checkChocolate(action.requiredString("chocolate"))
             lastDispatchResult =
@@ -540,7 +614,10 @@ private fun PresenterHandle.dispatchXqtLogin(
                 )
             true
         }
-        else -> false
+
+        else -> {
+            false
+        }
     }
 
 private fun PresenterHandle.dispatchVvoLogin(
@@ -553,6 +630,7 @@ private fun PresenterHandle.dispatchVvoLogin(
             state.login(action.requiredString("chocolate"))
             true
         }
+
         "checkChocolate" -> {
             val result = state.checkChocolate(action.requiredString("chocolate"))
             lastDispatchResult =
@@ -563,7 +641,10 @@ private fun PresenterHandle.dispatchVvoLogin(
                 )
             true
         }
-        else -> false
+
+        else -> {
+            false
+        }
     }
 
 private fun dispatchRssSources(
@@ -580,11 +661,15 @@ private fun dispatchRssSources(
             )
             true
         }
+
         "delete" -> {
             state.delete(action.requiredInt("id"))
             true
         }
-        else -> false
+
+        else -> {
+            false
+        }
     }
 
 private fun dispatchTimeline(
@@ -596,7 +681,10 @@ private fun dispatchTimeline(
             bridgeScope.launch { state.refresh() }
             true
         }
-        else -> false
+
+        else -> {
+            false
+        }
     }
 
 private fun dispatchSearch(
@@ -609,11 +697,15 @@ private fun dispatchSearch(
             state.search(action.requiredString("query"))
             true
         }
+
         "refresh" -> {
             bridgeScope.launch { state.refreshSuspend() }
             true
         }
-        else -> false
+
+        else -> {
+            false
+        }
     }
 
 private fun dispatchProfile(
@@ -627,19 +719,25 @@ private fun dispatchProfile(
             state.follow(userKey)
             true
         }
+
         "unfollow" -> {
             state.unfollow(userKey)
             true
         }
+
         "unblock" -> {
             state.unblock(userKey)
             true
         }
+
         "report" -> {
             state.report(userKey)
             true
         }
-        else -> false
+
+        else -> {
+            false
+        }
     }
 }
 
@@ -653,23 +751,30 @@ private fun dispatchCompose(
             state.setText(action.requiredString("value"))
             true
         }
+
         "setMediaSize" -> {
             state.setMediaSize(action.requiredInt("value"))
             true
         }
+
         "selectAccount" -> {
             state.selectAccount(action.requiredMicroBlogKey("accountKey"))
             true
         }
+
         "loadDraft" -> {
             state.loadDraft(action.requiredString("groupId"))
             true
         }
+
         "consumeLoadedDraft" -> {
             state.consumeLoadedDraft()
             true
         }
-        else -> false
+
+        else -> {
+            false
+        }
     }
 
 private fun dispatchDraftBox(
@@ -682,15 +787,20 @@ private fun dispatchDraftBox(
             state.retry(action.requiredString("groupId"))
             true
         }
+
         "send" -> {
             state.send(action.requiredString("groupId"))
             true
         }
+
         "delete" -> {
             state.delete(action.requiredString("groupId"))
             true
         }
-        else -> false
+
+        else -> {
+            false
+        }
     }
 
 private fun PresenterHandle.pushLaunchUrl(
@@ -751,31 +861,86 @@ private fun PresenterHandle.stateJson(): String =
 
 private fun PresenterHandle.statePayloadJson(): JsonObject =
     when (val state = currentState) {
-        null -> JsonObject(mapOf("kind" to JsonPrimitive("initializing")))
-        is HomeTabsPresenter.State -> homeTabsStateJson(state)
-        is ServiceSelectState -> serviceSelectStateJson(state)
-        is BlueskyLoginState -> blueskyLoginStateJson(state)
-        is BlueskyOAuthLoginPresenter.State -> blueskyOAuthLoginStateJson(state)
-        is MastodonLoginState -> mastodonLoginStateJson(state)
-        is MisskeyLoginState -> misskeyLoginStateJson(state)
-        is NostrLoginState -> nostrLoginStateJson(state)
-        is XQTLoginState -> xqtLoginStateJson(state)
-        is VVOLoginState -> vvoLoginStateJson(state)
-        is RssSourcesPresenter.State -> rssSourcesStateJson(state)
-        is RssDetailPresenter.State -> rssDetailStateJson(state)
-        is TimelineState -> timelineStateJson(state)
-        is SearchState -> searchStateJson(state)
-        is ProfileState -> profileStateJson(state)
-        is StatusState -> statusStateJson(state)
-        is ComposeState -> composeStateJson(state)
-        is DraftBoxState -> draftBoxStateJson(state)
-        else ->
+        null -> {
+            JsonObject(mapOf("kind" to JsonPrimitive("initializing")))
+        }
+
+        is HomeTabsPresenter.State -> {
+            homeTabsStateJson(state)
+        }
+
+        is ServiceSelectState -> {
+            serviceSelectStateJson(state)
+        }
+
+        is BlueskyLoginState -> {
+            blueskyLoginStateJson(state)
+        }
+
+        is BlueskyOAuthLoginPresenter.State -> {
+            blueskyOAuthLoginStateJson(state)
+        }
+
+        is MastodonLoginState -> {
+            mastodonLoginStateJson(state)
+        }
+
+        is MisskeyLoginState -> {
+            misskeyLoginStateJson(state)
+        }
+
+        is NostrLoginState -> {
+            nostrLoginStateJson(state)
+        }
+
+        is XQTLoginState -> {
+            xqtLoginStateJson(state)
+        }
+
+        is VVOLoginState -> {
+            vvoLoginStateJson(state)
+        }
+
+        is RssSourcesPresenter.State -> {
+            rssSourcesStateJson(state)
+        }
+
+        is RssDetailPresenter.State -> {
+            rssDetailStateJson(state)
+        }
+
+        is TimelineState -> {
+            timelineStateJson(state)
+        }
+
+        is SearchState -> {
+            searchStateJson(state)
+        }
+
+        is ProfileState -> {
+            profileStateJson(state)
+        }
+
+        is StatusState -> {
+            statusStateJson(state)
+        }
+
+        is ComposeState -> {
+            composeStateJson(state)
+        }
+
+        is DraftBoxState -> {
+            draftBoxStateJson(state)
+        }
+
+        else -> {
             JsonObject(
                 mapOf(
                     "kind" to JsonPrimitive("opaque"),
                     "description" to JsonPrimitive(state.toString()),
                 ),
             )
+        }
     }
 
 private fun homeTabsStateJson(state: HomeTabsPresenter.State): JsonObject =
@@ -988,35 +1153,51 @@ private fun <T : Any> uiStateJson(
     valueJson: (T) -> JsonElement,
 ): JsonObject =
     when (state) {
-        is UiState.Loading -> JsonObject(mapOf("status" to JsonPrimitive("loading")))
-        is UiState.Error ->
+        is UiState.Loading -> {
+            JsonObject(mapOf("status" to JsonPrimitive("loading")))
+        }
+
+        is UiState.Error -> {
             JsonObject(
                 mapOf(
                     "status" to JsonPrimitive("error"),
                     "error" to throwableJson(state.throwable),
                 ),
             )
-        is UiState.Success ->
+        }
+
+        is UiState.Success -> {
             JsonObject(
                 mapOf(
                     "status" to JsonPrimitive("success"),
                     "data" to valueJson(state.data),
                 ),
             )
+        }
     }
 
 private fun unitUiStateJson(state: UiState<Nothing>?): JsonObject =
     when (state) {
-        null -> JsonObject(mapOf("status" to JsonPrimitive("idle")))
-        is UiState.Loading -> JsonObject(mapOf("status" to JsonPrimitive("loading")))
-        is UiState.Error ->
+        null -> {
+            JsonObject(mapOf("status" to JsonPrimitive("idle")))
+        }
+
+        is UiState.Loading -> {
+            JsonObject(mapOf("status" to JsonPrimitive("loading")))
+        }
+
+        is UiState.Error -> {
             JsonObject(
                 mapOf(
                     "status" to JsonPrimitive("error"),
                     "error" to throwableJson(state.throwable),
                 ),
             )
-        is UiState.Success -> JsonObject(mapOf("status" to JsonPrimitive("success")))
+        }
+
+        is UiState.Success -> {
+            JsonObject(mapOf("status" to JsonPrimitive("success")))
+        }
     }
 
 private fun <T : Any> pagingStateJson(
@@ -1024,16 +1205,24 @@ private fun <T : Any> pagingStateJson(
     itemJson: (T) -> JsonElement,
 ): JsonObject =
     when (state) {
-        is PagingState.Loading -> JsonObject(mapOf("status" to JsonPrimitive("loading")))
-        is PagingState.Error ->
+        is PagingState.Loading -> {
+            JsonObject(mapOf("status" to JsonPrimitive("loading")))
+        }
+
+        is PagingState.Error -> {
             JsonObject(
                 mapOf(
                     "status" to JsonPrimitive("error"),
                     "error" to throwableJson(state.error),
                 ),
             )
-        is PagingState.Empty -> JsonObject(mapOf("status" to JsonPrimitive("empty")))
-        is PagingState.Success ->
+        }
+
+        is PagingState.Empty -> {
+            JsonObject(mapOf("status" to JsonPrimitive("empty")))
+        }
+
+        is PagingState.Success -> {
             JsonObject(
                 mapOf(
                     "status" to JsonPrimitive("success"),
@@ -1048,25 +1237,32 @@ private fun <T : Any> pagingStateJson(
                         ),
                 ),
             )
+        }
     }
 
 private fun loadStateJson(state: LoadState): JsonObject =
     when (state) {
-        is LoadState.Loading -> JsonObject(mapOf("status" to JsonPrimitive("loading")))
-        is LoadState.NotLoading ->
+        is LoadState.Loading -> {
+            JsonObject(mapOf("status" to JsonPrimitive("loading")))
+        }
+
+        is LoadState.NotLoading -> {
             JsonObject(
                 mapOf(
                     "status" to JsonPrimitive("not-loading"),
                     "endOfPaginationReached" to JsonPrimitive(state.endOfPaginationReached),
                 ),
             )
-        is LoadState.Error ->
+        }
+
+        is LoadState.Error -> {
             JsonObject(
                 mapOf(
                     "status" to JsonPrimitive("error"),
                     "error" to throwableJson(state.error),
                 ),
             )
+        }
     }
 
 private fun nodeDataJson(data: NodeData): JsonObject =
@@ -1120,7 +1316,7 @@ private fun timelineItemJson(item: UiTimelineV2): JsonObject {
         )
     val detail =
         when (item) {
-            is UiTimelineV2.Feed ->
+            is UiTimelineV2.Feed -> {
                 mapOf(
                     "title" to (item.title?.let(::JsonPrimitive) ?: JsonNull),
                     "description" to (item.description?.let(::JsonPrimitive) ?: JsonNull),
@@ -1128,7 +1324,9 @@ private fun timelineItemJson(item: UiTimelineV2): JsonObject {
                     "sourceName" to JsonPrimitive(item.source.name),
                     "sourceIcon" to (item.source.icon?.let(::JsonPrimitive) ?: JsonNull),
                 )
-            is UiTimelineV2.Post ->
+            }
+
+            is UiTimelineV2.Post -> {
                 mapOf(
                     "platformType" to JsonPrimitive(item.platformType.name),
                     "content" to JsonPrimitive(item.content.raw),
@@ -1138,19 +1336,26 @@ private fun timelineItemJson(item: UiTimelineV2): JsonObject {
                     "mediaCount" to JsonPrimitive(item.images.size),
                     "quoteCount" to JsonPrimitive(item.quote.size),
                 )
-            is UiTimelineV2.User ->
+            }
+
+            is UiTimelineV2.User -> {
                 mapOf(
                     "user" to profileJson(item.value),
                 )
-            is UiTimelineV2.UserList ->
+            }
+
+            is UiTimelineV2.UserList -> {
                 mapOf(
                     "users" to JsonArray(item.users.map(::profileJson)),
                 )
-            is UiTimelineV2.Message ->
+            }
+
+            is UiTimelineV2.Message -> {
                 mapOf(
                     "messageType" to JsonPrimitive(item.type.toString()),
                     "user" to (item.user?.let(::profileJson) ?: JsonNull),
                 )
+            }
         }
     return JsonObject(common + detail)
 }
@@ -1218,21 +1423,27 @@ private fun microBlogKeyJson(key: MicroBlogKey): JsonObject =
 
 private fun accountTypeJson(accountType: AccountType): JsonObject =
     when (accountType) {
-        AccountType.Guest -> JsonObject(mapOf("type" to JsonPrimitive("guest")))
-        is AccountType.GuestHost ->
+        AccountType.Guest -> {
+            JsonObject(mapOf("type" to JsonPrimitive("guest")))
+        }
+
+        is AccountType.GuestHost -> {
             JsonObject(
                 mapOf(
                     "type" to JsonPrimitive("guest-host"),
                     "host" to JsonPrimitive(accountType.host),
                 ),
             )
-        is AccountType.Specific ->
+        }
+
+        is AccountType.Specific -> {
             JsonObject(
                 mapOf(
                     "type" to JsonPrimitive("specific"),
                     "accountKey" to microBlogKeyJson(accountType.accountKey),
                 ),
             )
+        }
     }
 
 private fun dateTimeJson(value: UiDateTime): JsonObject =
@@ -1299,19 +1510,25 @@ private fun JsonObject.accountType(): AccountType = this["accountType"]?.toAccou
 
 private fun JsonElement.toAccountTypeOrNull(): AccountType? =
     when (this) {
-        is JsonObject ->
+        is JsonObject -> {
             when (optionalString("type")?.lowercase()) {
                 "guest" -> AccountType.Guest
                 "guest-host", "guesthost" -> optionalString("host")?.let(AccountType::GuestHost)
                 "specific" -> this["accountKey"]?.toMicroBlogKeyOrNull()?.let(AccountType::Specific)
                 else -> this["accountKey"]?.toMicroBlogKeyOrNull()?.let(AccountType::Specific)
             }
-        is JsonPrimitive ->
+        }
+
+        is JsonPrimitive -> {
             when (content.lowercase()) {
                 "guest", "" -> AccountType.Guest
                 else -> MicroBlogKey.valueOf(content).let(AccountType::Specific)
             }
-        else -> null
+        }
+
+        else -> {
+            null
+        }
     }
 
 private fun JsonElement.toMicroBlogKeyOrNull(): MicroBlogKey? =
@@ -1321,6 +1538,12 @@ private fun JsonElement.toMicroBlogKeyOrNull(): MicroBlogKey? =
             val host = optionalString("host").orEmpty()
             MicroBlogKey(id = id, host = host)
         }
-        is JsonPrimitive -> runCatching { MicroBlogKey.valueOf(content) }.getOrNull()
-        else -> null
+
+        is JsonPrimitive -> {
+            runCatching { MicroBlogKey.valueOf(content) }.getOrNull()
+        }
+
+        else -> {
+            null
+        }
     }

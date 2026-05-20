@@ -2,6 +2,7 @@ package dev.dimension.flare.model
 
 import kotlin.test.Test
 import kotlin.test.assertContains
+import kotlin.test.assertEquals
 
 class DefaultSocialPlatformRegistryJvmTest {
     @Test
@@ -13,6 +14,6 @@ class DefaultSocialPlatformRegistryJvmTest {
     fun nonWebRegistryIncludesNostrTimelineSpecs() {
         val specIds = defaultSocialPlatformRegistry.requireSpec(PlatformType.Nostr).timelineSpecs.map { it.id }
 
-        assertContains(specIds, "common.home")
+        assertEquals(listOf("common.home"), specIds)
     }
 }

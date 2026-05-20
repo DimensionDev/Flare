@@ -1,6 +1,5 @@
 package dev.dimension.flare.ui.render
 
-import androidx.compose.runtime.Immutable
 import dev.dimension.flare.ui.humanizer.Formatter.absolute
 import dev.dimension.flare.ui.humanizer.Formatter.full
 import dev.dimension.flare.ui.humanizer.Formatter.relative
@@ -13,7 +12,6 @@ public expect class PlatformDateTime
 public expect fun Instant.toPlatform(): PlatformDateTime
 
 @Serializable(with = UiDateTimeSerializer::class)
-@Immutable
 public data class UiDateTime public constructor(
     val value: Instant,
 ) {

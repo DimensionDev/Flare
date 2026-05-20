@@ -27,7 +27,14 @@ kotlin {
                 api(libs.kotlinx.serialization.json)
                 api(libs.kotlinx.serialization.protobuf)
                 api(libs.xmlUtil)
+                implementation(dependencies.platform(libs.koin.bom))
+                implementation(libs.koin.core)
                 implementation(libs.okio)
+            }
+        }
+        val appleMain by getting {
+            dependencies {
+                implementation(libs.kotlinx.datetime)
             }
         }
         val jvmMain by getting {

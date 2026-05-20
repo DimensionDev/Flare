@@ -4,8 +4,8 @@ import dev.dimension.flare.common.deeplink.DeepLinkMapping
 import dev.dimension.flare.common.deeplink.DeepLinkPattern
 import dev.dimension.flare.common.tryRun
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
-import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
 import dev.dimension.flare.data.datasource.microblog.timeline.TimelineSpec
+import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
 import dev.dimension.flare.data.network.misskey.JoinMisskeyService
 import dev.dimension.flare.data.network.misskey.MisskeyPlatformDetector
 import dev.dimension.flare.data.network.misskey.MisskeyService
@@ -37,17 +37,24 @@ public data object MisskeySocialPlatformPlugin : SocialPlatformPlugin {
 
     public override suspend fun recommendedInstances(): List<UiInstance> =
         tryRun {
-            JoinMisskeyService.instances().instancesInfos.map {
-                UiInstance(
-                    name = it.name,
-                    description = it.description,
-                    iconUrl = it.meta?.iconURL,
-                    domain = it.url,
-                    type = PlatformType.Misskey,
-                    bannerUrl = it.meta?.bannerURL,
-                    usersCount = it.stats?.usersCount ?: it.nodeinfo?.usage?.users?.total ?: 0,
-                )
-            }.sortedByDescending { it.usersCount }
+            JoinMisskeyService
+                .instances()
+                .instancesInfos
+                .map {
+                    UiInstance(
+                        name = it.name,
+                        description = it.description,
+                        iconUrl = it.meta?.iconURL,
+                        domain = it.url,
+                        type = PlatformType.Misskey,
+                        bannerUrl = it.meta?.bannerURL,
+                        usersCount =
+                            it.stats?.usersCount ?: it.nodeinfo
+                                ?.usage
+                                ?.users
+                                ?.total ?: 0,
+                    )
+                }.sortedByDescending { it.usersCount }
         }.getOrDefault(emptyList())
 }
 
@@ -78,5 +85,4 @@ public data object MisskeySocialPlatformSpec : SocialPlatformSpec {
     ): MicroblogDataSource = unsupportedGuestDataSource()
 }
 
-private fun unsupportedGuestDataSource(): Nothing =
-    throw UnsupportedOperationException("Misskey guest data source is not supported yet.")
+private fun unsupportedGuestDataSource(): Nothing = throw UnsupportedOperationException("Misskey guest data source is not supported yet.")

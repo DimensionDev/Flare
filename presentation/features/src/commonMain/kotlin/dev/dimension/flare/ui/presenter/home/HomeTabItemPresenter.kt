@@ -3,9 +3,9 @@ package dev.dimension.flare.ui.presenter.home
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.model.tab.TimelinePersistenceMapper
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
-import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.repository.homeTimelineTab
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.flattenUiState

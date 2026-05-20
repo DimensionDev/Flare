@@ -38,8 +38,8 @@ import dev.dimension.flare.LocalWindowPadding
 import dev.dimension.flare.Res
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.copied_to_clipboard
-import dev.dimension.flare.data.network.rss.DocumentData
 import dev.dimension.flare.data.datastore.AppDataStore
+import dev.dimension.flare.data.network.rss.DocumentData
 import dev.dimension.flare.rss_detail_open_in_browser
 import dev.dimension.flare.rss_detail_tldr
 import dev.dimension.flare.rss_detail_tldr_error

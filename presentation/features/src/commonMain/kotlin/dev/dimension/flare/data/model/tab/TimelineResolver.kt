@@ -7,12 +7,9 @@ public class TimelineResolver internal constructor(
     private val timelinePersistenceMapper: TimelinePersistenceMapper,
     private val timelinePresenterFactory: TimelinePresenterFactory,
 ) {
-    public fun toTabItem(source: TimelineSourceRef): SourceTimelineTabItemV2 =
-        timelinePersistenceMapper.toTabItem(source)
+    public fun toTabItem(source: TimelineSourceRef): SourceTimelineTabItemV2 = timelinePersistenceMapper.toTabItem(source)
 
-    public fun createPresenter(item: TimelineTabItemV2): TimelinePresenter =
-        timelinePresenterFactory.create(item)
+    public fun createPresenter(item: TimelineTabItemV2): TimelinePresenter = timelinePresenterFactory.create(item)
 
-    public fun resolveAccountKey(item: TimelineTabItemV2): MicroBlogKey? =
-        timelinePersistenceMapper.resolveAccountKey(item)
+    public fun resolveAccountKey(item: TimelineTabItemV2): MicroBlogKey? = timelinePersistenceMapper.resolveAccountKey(item)
 }

@@ -27,6 +27,9 @@ import com.atproto.repo.StrongRef
 import dev.dimension.flare.common.BasePagingSource
 import dev.dimension.flare.common.FileType
 import dev.dimension.flare.common.encodeJson
+import dev.dimension.flare.common.tryRun
+import dev.dimension.flare.data.account.CredentialProvider
+import dev.dimension.flare.data.account.credentialFlow
 import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
@@ -37,7 +40,6 @@ import dev.dimension.flare.data.datasource.microblog.ComposeType
 import dev.dimension.flare.data.datasource.microblog.DatabaseUpdater
 import dev.dimension.flare.data.datasource.microblog.DirectMessageDataSource
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
-import dev.dimension.flare.ui.model.PostEvent
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
 import dev.dimension.flare.data.datasource.microblog.datasource.ListDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.NotificationDataSource
@@ -57,7 +59,6 @@ import dev.dimension.flare.data.datasource.microblog.loader.ListMemberLoader
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.notSupported
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
-import dev.dimension.flare.data.datasource.microblog.timeline.CommonTimelineSpecs as SocialCommonTimelineSpecs
 import dev.dimension.flare.data.datasource.microblog.timeline.PinnableTimelineProvider
 import dev.dimension.flare.data.datasource.microblog.timeline.PinnableTimelineTabSection
 import dev.dimension.flare.data.datasource.microblog.timeline.TimelineShortcutDescriptor
@@ -71,12 +72,10 @@ import dev.dimension.flare.data.network.bluesky.model.DidDoc
 import dev.dimension.flare.data.platform.BlueskyTimelineDataSource
 import dev.dimension.flare.data.platform.BlueskyTimelineSpecs
 import dev.dimension.flare.data.platform.toTimelineTabDescriptor
-import dev.dimension.flare.data.account.CredentialProvider
-import dev.dimension.flare.data.account.credentialFlow
-import dev.dimension.flare.common.tryRun
+import dev.dimension.flare.media.ImageCompressor
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.media.ImageCompressor
+import dev.dimension.flare.ui.model.PostEvent
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiIcon
@@ -115,6 +114,7 @@ import sh.christian.ozone.api.Language
 import sh.christian.ozone.api.Nsid
 import sh.christian.ozone.api.RKey
 import kotlin.time.Clock
+import dev.dimension.flare.data.datasource.microblog.timeline.CommonTimelineSpecs as SocialCommonTimelineSpecs
 
 private const val AT_PROTO_PERSONAL_DATA_SERVER = "AtprotoPersonalDataServer"
 
@@ -816,7 +816,7 @@ internal class BlueskyDataSource(
                 icon = UiIcon.List,
                 target =
                     TimelineShortcutDescriptor.Target.Route(
-                        id = TimelineShortcutDescriptor.RouteIds.AllLists,
+                        id = TimelineShortcutDescriptor.RouteIds.ALL_LISTS,
                         accountKey = accountKey,
                     ),
             ),
@@ -825,7 +825,7 @@ internal class BlueskyDataSource(
                 icon = UiIcon.Feeds,
                 target =
                     TimelineShortcutDescriptor.Target.Route(
-                        id = TimelineShortcutDescriptor.RouteIds.BlueskyAllFeeds,
+                        id = TimelineShortcutDescriptor.RouteIds.BLUESKY_ALL_FEEDS,
                         accountKey = accountKey,
                     ),
             ),
@@ -837,7 +837,7 @@ internal class BlueskyDataSource(
                 icon = UiIcon.Messages,
                 target =
                     TimelineShortcutDescriptor.Target.Route(
-                        id = TimelineShortcutDescriptor.RouteIds.AllDirectMessages,
+                        id = TimelineShortcutDescriptor.RouteIds.ALL_DIRECT_MESSAGES,
                         accountKey = accountKey,
                     ),
             ),

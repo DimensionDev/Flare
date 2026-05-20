@@ -12,9 +12,6 @@ import dev.dimension.flare.data.datastore.model.FlareConfig
 import dev.dimension.flare.data.io.FileStorage
 import dev.dimension.flare.data.model.SettingsExport
 import dev.dimension.flare.data.model.SettingsImportData
-import dev.dimension.flare.data.model.decodeLegacyAppearanceSettingsAndTabsExport
-import dev.dimension.flare.data.model.decodeLegacyAppearanceSettingsExport
-import dev.dimension.flare.data.model.decodeLegacySettingsExport
 import dev.dimension.flare.data.model.appearance.AppearanceBag
 import dev.dimension.flare.data.model.appearance.AppearanceKey
 import dev.dimension.flare.data.model.appearance.AppearancePatch
@@ -25,6 +22,9 @@ import dev.dimension.flare.data.model.appearance.toBag
 import dev.dimension.flare.data.model.appearance.toGlobalAppearance
 import dev.dimension.flare.data.model.appearance.toPatch
 import dev.dimension.flare.data.model.appearance.toTimelineAppearance
+import dev.dimension.flare.data.model.decodeLegacyAppearanceSettingsAndTabsExport
+import dev.dimension.flare.data.model.decodeLegacyAppearanceSettingsExport
+import dev.dimension.flare.data.model.decodeLegacySettingsExport
 import dev.dimension.flare.data.model.tab.TabSettingsV2
 import dev.dimension.flare.data.model.tab.migrateTabSettingsV1ToV2
 import kotlinx.coroutines.flow.Flow

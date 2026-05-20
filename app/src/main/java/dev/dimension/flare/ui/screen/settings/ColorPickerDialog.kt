@@ -25,8 +25,8 @@ import com.github.skydoves.colorpicker.compose.ColorEnvelope
 import com.github.skydoves.colorpicker.compose.HsvColorPicker
 import com.github.skydoves.colorpicker.compose.rememberColorPickerController
 import dev.dimension.flare.R
-import dev.dimension.flare.data.model.appearance.AppearanceKeys
 import dev.dimension.flare.data.datastore.AppDataStore
+import dev.dimension.flare.data.model.appearance.AppearanceKeys
 import dev.dimension.flare.ui.component.LocalGlobalAppearance
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import kotlinx.coroutines.CoroutineScope

@@ -10,6 +10,9 @@ import dev.dimension.flare.common.Cacheable
 import dev.dimension.flare.common.FileType
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.common.encodeJson
+import dev.dimension.flare.common.tryRun
+import dev.dimension.flare.data.account.CredentialProvider
+import dev.dimension.flare.data.account.credentialFlow
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.XQT
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
@@ -19,7 +22,6 @@ import dev.dimension.flare.data.datasource.microblog.ComposeType
 import dev.dimension.flare.data.datasource.microblog.DatabaseUpdater
 import dev.dimension.flare.data.datasource.microblog.DirectMessageDataSource
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
-import dev.dimension.flare.ui.model.PostEvent
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
 import dev.dimension.flare.data.datasource.microblog.datasource.ListDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.NotificationDataSource
@@ -37,7 +39,6 @@ import dev.dimension.flare.data.datasource.microblog.handler.UserHandler
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.notSupported
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
-import dev.dimension.flare.data.datasource.microblog.timeline.CommonTimelineSpecs as SocialCommonTimelineSpecs
 import dev.dimension.flare.data.datasource.microblog.timeline.PinnableTimelineProvider
 import dev.dimension.flare.data.datasource.microblog.timeline.PinnableTimelineTabSection
 import dev.dimension.flare.data.datasource.microblog.timeline.TimelineShortcutDescriptor
@@ -68,12 +69,10 @@ import dev.dimension.flare.data.network.xqt.model.PostUnfavoriteTweetRequest
 import dev.dimension.flare.data.network.xqt.model.TweetUnion
 import dev.dimension.flare.data.platform.XqtTimelineDataSource
 import dev.dimension.flare.data.platform.XqtTimelineSpecs
-import dev.dimension.flare.data.account.CredentialProvider
-import dev.dimension.flare.data.account.credentialFlow
-import dev.dimension.flare.common.tryRun
+import dev.dimension.flare.media.ImageCompressor
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.media.ImageCompressor
+import dev.dimension.flare.ui.model.PostEvent
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiList
@@ -104,6 +103,7 @@ import org.koin.core.component.inject
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.time.Duration.Companion.seconds
+import dev.dimension.flare.data.datasource.microblog.timeline.CommonTimelineSpecs as SocialCommonTimelineSpecs
 
 private const val BULK_SIZE: Long = 512 * 1024L // 512 Kib
 private const val MAX_ASYNC_UPLOAD_SIZE = 10
@@ -368,7 +368,7 @@ internal class XQTDataSource(
                 icon = UiIcon.List,
                 target =
                     TimelineShortcutDescriptor.Target.Route(
-                        id = TimelineShortcutDescriptor.RouteIds.AllLists,
+                        id = TimelineShortcutDescriptor.RouteIds.ALL_LISTS,
                         accountKey = accountKey,
                     ),
             ),
@@ -377,7 +377,7 @@ internal class XQTDataSource(
                 icon = UiIcon.Messages,
                 target =
                     TimelineShortcutDescriptor.Target.Route(
-                        id = TimelineShortcutDescriptor.RouteIds.AllDirectMessages,
+                        id = TimelineShortcutDescriptor.RouteIds.ALL_DIRECT_MESSAGES,
                         accountKey = accountKey,
                     ),
             ),

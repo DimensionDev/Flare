@@ -200,9 +200,9 @@ private fun UiProfile.BottomContent?.mergeWith(existing: UiProfile.BottomContent
         }
     }
 
-private const val NostrPublicKeyPrefix = "npub"
-private const val Bech32Separator = '1'
-private const val Bech32Charset = "qpzry9x8gf2tvdw0s3jn54khce6mua7l"
+private const val NOSTR_PUBLIC_KEY_PREFIX = "npub"
+private const val BECH32_SEPARATOR = '1'
+private const val BECH32_CHARSET = "qpzry9x8gf2tvdw0s3jn54khce6mua7l"
 
 private val Bech32ChecksumGenerators =
     intArrayOf(
@@ -217,10 +217,10 @@ private fun bech32NostrPublicKey(hex: String): String? =
     runCatching {
         val data = convertBits(hexToBytes(hex), fromBits = 8, toBits = 5, pad = true)
         buildString {
-            append(NostrPublicKeyPrefix)
-            append(Bech32Separator)
-            (data + bech32Checksum(NostrPublicKeyPrefix, data)).forEach {
-                append(Bech32Charset[it])
+            append(NOSTR_PUBLIC_KEY_PREFIX)
+            append(BECH32_SEPARATOR)
+            (data + bech32Checksum(NOSTR_PUBLIC_KEY_PREFIX, data)).forEach {
+                append(BECH32_CHARSET[it])
             }
         }
     }.getOrNull()
@@ -279,8 +279,7 @@ private fun bech32Checksum(
     }
 }
 
-private fun bech32PrefixExpand(prefix: String): List<Int> =
-    prefix.map { it.code shr 5 } + 0 + prefix.map { it.code and 31 }
+private fun bech32PrefixExpand(prefix: String): List<Int> = prefix.map { it.code shr 5 } + 0 + prefix.map { it.code and 31 }
 
 private fun bech32Polymod(values: List<Int>): Int {
     var checksum = 1

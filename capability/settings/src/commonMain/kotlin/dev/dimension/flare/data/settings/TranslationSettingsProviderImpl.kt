@@ -7,7 +7,7 @@ import dev.dimension.flare.data.settings.TranslationSettingsSupport
 import kotlinx.coroutines.flow.Flow
 
 public class TranslationSettingsProviderImpl(
-    private val appDataStore: AppDataStore
+    private val appDataStore: AppDataStore,
 ) : TranslationSettingsProvider {
     override val displayOptionsFlow: Flow<TranslationDisplayOptions>
         get() = TranslationSettingsSupport.displayOptionsFlow(appDataStore)

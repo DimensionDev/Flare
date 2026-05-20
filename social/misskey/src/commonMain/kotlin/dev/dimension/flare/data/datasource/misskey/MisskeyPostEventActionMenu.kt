@@ -8,7 +8,7 @@ import dev.dimension.flare.ui.model.mapper.misskeyRenote
 
 internal fun PostEvent.misskeyNextActionMenu(): ActionMenu.Item? =
     when (this) {
-        is PostEvent.Misskey.React ->
+        is PostEvent.Misskey.React -> {
             ActionMenu.misskeyReact(
                 postKey = postKey,
                 hasReacted = !hasReacted,
@@ -16,20 +16,25 @@ internal fun PostEvent.misskeyNextActionMenu(): ActionMenu.Item? =
                 count = (count + if (!hasReacted) 1 else -1).coerceAtLeast(0),
                 accountKey = accountKey,
             )
+        }
 
-        is PostEvent.Misskey.Renote ->
+        is PostEvent.Misskey.Renote -> {
             ActionMenu.misskeyRenote(
                 postKey = postKey,
                 count = count + 1,
                 accountKey = accountKey,
             )
+        }
 
-        is PostEvent.Misskey.Favourite ->
+        is PostEvent.Misskey.Favourite -> {
             ActionMenu.misskeyFavourite(
                 postKey = postKey,
                 favourited = !favourited,
                 accountKey = accountKey,
             )
+        }
 
-        else -> null
+        else -> {
+            null
+        }
     }

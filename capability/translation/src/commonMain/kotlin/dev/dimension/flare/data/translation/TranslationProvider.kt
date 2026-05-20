@@ -2,8 +2,8 @@ package dev.dimension.flare.data.translation
 
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.common.encodeJson
-import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.ai.AiCompletionService
+import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.ui.render.TranslationDocument
 import dev.dimension.flare.ui.render.TranslationTokenKind

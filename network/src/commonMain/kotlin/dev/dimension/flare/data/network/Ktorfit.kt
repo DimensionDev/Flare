@@ -6,8 +6,8 @@ import de.jensklingenberg.ktorfit.converter.Converter
 import de.jensklingenberg.ktorfit.converter.FlowConverterFactory
 import de.jensklingenberg.ktorfit.converter.ResponseConverterFactory
 import dev.dimension.flare.common.BuildConfig
-import dev.dimension.flare.common.JSON
 import dev.dimension.flare.common.DebugRepository
+import dev.dimension.flare.common.JSON
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -24,23 +24,24 @@ public fun ktorfit(
     json: Json = JSON,
     converterFactories: List<Converter.Factory> = emptyList(),
     config: HttpClientConfig<*>.() -> Unit = {},
-): Ktorfit = de.jensklingenberg.ktorfit.ktorfit {
-    baseUrl(baseUrl)
-    httpClient(
-        ktorClient {
-            install(ContentNegotiation) {
-                json(json)
-            }
-            config.invoke(this)
-        },
-    )
-    converterFactories(
-        FlowConverterFactory(),
-        CallConverterFactory(),
-        ResponseConverterFactory(),
-        *converterFactories.toTypedArray(),
-    )
-}
+): Ktorfit =
+    de.jensklingenberg.ktorfit.ktorfit {
+        baseUrl(baseUrl)
+        httpClient(
+            ktorClient {
+                install(ContentNegotiation) {
+                    json(json)
+                }
+                config.invoke(this)
+            },
+        )
+        converterFactories(
+            FlowConverterFactory(),
+            CallConverterFactory(),
+            ResponseConverterFactory(),
+            *converterFactories.toTypedArray(),
+        )
+    }
 
 @OptIn(ExperimentalObjCRefinement::class)
 @HiddenFromObjC

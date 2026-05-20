@@ -6,11 +6,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import com.slapps.cupertino.theme.CupertinoTheme
+import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.model.VideoAutoplay
 import dev.dimension.flare.data.model.appearance.GlobalAppearance
 import dev.dimension.flare.data.model.appearance.TimelineAppearance
-import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.ui.component.LocalGlobalAppearance
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import org.koin.compose.koinInject

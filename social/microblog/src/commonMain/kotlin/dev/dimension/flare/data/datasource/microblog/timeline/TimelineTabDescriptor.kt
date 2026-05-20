@@ -48,11 +48,11 @@ public data class TimelineShortcutDescriptor(
     public val target: Target,
 ) {
     public object RouteIds {
-        public const val AllLists: String = "all_lists"
-        public const val AllDirectMessages: String = "all_direct_messages"
-        public const val BlueskyAllFeeds: String = "bluesky_all_feeds"
-        public const val MisskeyAllAntennas: String = "misskey_all_antennas"
-        public const val MisskeyAllChannels: String = "misskey_all_channels"
+        public const val ALL_LISTS: String = "all_lists"
+        public const val ALL_DIRECT_MESSAGES: String = "all_direct_messages"
+        public const val BLUESKY_ALL_FEEDS: String = "bluesky_all_feeds"
+        public const val MISSKEY_ALL_ANTENNAS: String = "misskey_all_antennas"
+        public const val MISSKEY_ALL_CHANNELS: String = "misskey_all_channels"
     }
 
     public sealed interface Target {

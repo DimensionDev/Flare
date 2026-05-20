@@ -83,19 +83,28 @@ internal class TimelinePersistenceMapper(
 
     fun resolveAccountKey(slot: TimelineSlot): MicroBlogKey? =
         when (val content = slot.content) {
-            is TimelineSlotContent.Source ->
+            is TimelineSlotContent.Source -> {
                 resolveAccountKey(content.source)
+            }
 
-            is TimelineSlotContent.Group -> null
+            is TimelineSlotContent.Group -> {
+                null
+            }
         }
 
     fun resolveAccountKey(item: TimelineTabItemV2): MicroBlogKey? =
         when (item) {
-            is SourceTimelineTabItemV2 ->
-                item.ref?.data?.let { it as? TimelineSpec.AccountData }?.accountKey
+            is SourceTimelineTabItemV2 -> {
+                item.ref
+                    ?.data
+                    ?.let { it as? TimelineSpec.AccountData }
+                    ?.accountKey
                     ?: item.source?.let(::resolveAccountKey)
+            }
 
-            is GroupTimelineTabItemV2 -> null
+            is GroupTimelineTabItemV2 -> {
+                null
+            }
         }
 
     fun resolveAccountKey(source: TimelineSourceRef): MicroBlogKey? =

@@ -2,7 +2,6 @@ package dev.dimension.flare.data.model.tab
 
 import androidx.compose.runtime.Immutable
 import dev.dimension.flare.data.datasource.microblog.timeline.TimelineRef
-import dev.dimension.flare.data.datasource.microblog.timeline.TimelineSpec as SocialTimelineSpec
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.appearance.AppearancePatch
 import dev.dimension.flare.data.model.appearance.TimelineAppearance
@@ -14,6 +13,7 @@ import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.model.asText
 import dev.dimension.flare.ui.model.asType
 import dev.dimension.flare.ui.presenter.home.TimelinePresenter
+import dev.dimension.flare.data.datasource.microblog.timeline.TimelineSpec as SocialTimelineSpec
 
 @Immutable
 public sealed interface TimelineTabItemV2 {

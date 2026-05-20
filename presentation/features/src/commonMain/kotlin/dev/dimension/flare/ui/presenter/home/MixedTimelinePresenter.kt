@@ -6,13 +6,13 @@ import dev.dimension.flare.data.datasource.microblog.MixedRemoteMediator
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.notSupported
+import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.model.tab.GroupTimelineTabItemV2
 import dev.dimension.flare.data.model.tab.TimelineMergePolicy
 import dev.dimension.flare.data.model.tab.TimelinePersistenceMapper
 import dev.dimension.flare.data.model.tab.TimelinePresenterFactory
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.data.model.tab.isSystemHomeMixedTimeline
-import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.repository.homeTimelineTab
 import dev.dimension.flare.data.repository.homeTimelineTabs
 import dev.dimension.flare.ui.model.UiTimelineV2
@@ -127,7 +127,8 @@ public class SystemHomeMixedTimelinePresenter(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private val subTimelineLoadersFlow: Flow<List<RemoteLoader<UiTimelineV2>>> by lazy {
-        appDataStore.homeTimelineTabs(timelinePersistenceMapper)
+        appDataStore
+            .homeTimelineTabs(timelinePersistenceMapper)
             .map { tabs ->
                 tabs
                     .filterNot { it.isSystemHomeMixedTimeline }

@@ -6,9 +6,9 @@ import androidx.compose.runtime.produceState
 import com.fleeksoft.ksoup.nodes.Node
 import com.fleeksoft.ksoup.nodes.TextNode
 import dev.dimension.flare.common.Locale
+import dev.dimension.flare.data.ai.AiCompletionService
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.datastore.model.AppSettings
-import dev.dimension.flare.data.ai.AiCompletionService
 import dev.dimension.flare.data.translation.AiPlaceholderTranslationSupport
 import dev.dimension.flare.data.translation.TranslationPromptFormatter
 import dev.dimension.flare.data.translation.TranslationProvider

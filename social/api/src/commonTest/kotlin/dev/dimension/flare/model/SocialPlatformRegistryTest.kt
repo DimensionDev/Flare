@@ -1,7 +1,7 @@
 package dev.dimension.flare.model
 
-import dev.dimension.flare.common.deeplink.DeepLinkPattern
 import dev.dimension.flare.common.deeplink.DeepLinkMapping
+import dev.dimension.flare.common.deeplink.DeepLinkPattern
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
@@ -249,8 +249,7 @@ class SocialPlatformRegistryTest {
         override val type: PlatformType,
         private val displayName: String,
         override val detector: PlatformDetector,
-        private val subscriptionLoaderFactory:
-            (SubscriptionTimelineTypeKey, String, String) -> CacheableRemoteLoader<UiTimelineV2>?,
+        private val subscriptionLoaderFactory: (SubscriptionTimelineTypeKey, String, String) -> CacheableRemoteLoader<UiTimelineV2>?,
     ) : SocialPlatformSpec {
         override val metadata: PlatformTypeMetadata =
             PlatformTypeMetadata(
@@ -260,8 +259,7 @@ class SocialPlatformRegistryTest {
 
         override fun agreementUrl(host: String): String? = null
 
-        override fun deepLinkPatterns(host: String): ImmutableList<DeepLinkPattern<out DeepLinkMapping.Type>> =
-            persistentListOf()
+        override fun deepLinkPatterns(host: String): ImmutableList<DeepLinkPattern<out DeepLinkMapping.Type>> = persistentListOf()
 
         override suspend fun instanceMetadata(host: String): UiInstanceMetadata = error("unused")
 

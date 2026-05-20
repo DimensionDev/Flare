@@ -1,9 +1,9 @@
 package dev.dimension.flare.di
 
 import dev.dimension.flare.data.database.DriverFactory
-import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.datasource.nostr.DatabaseNostrCache
 import dev.dimension.flare.data.datasource.nostr.NostrCache
+import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.io.FileStorage
 import dev.dimension.flare.data.io.createFileStorage
 import dev.dimension.flare.data.network.nostr.AmberIntentLauncherRegistry

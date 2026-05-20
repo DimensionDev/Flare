@@ -3,7 +3,6 @@ package dev.dimension.flare.ui.model.mapper
 import com.fleeksoft.ksoup.nodes.Element
 import com.fleeksoft.ksoup.nodes.Node
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
-import dev.dimension.flare.ui.model.PostEvent
 import dev.dimension.flare.data.network.vvo.model.Attitude
 import dev.dimension.flare.data.network.vvo.model.Comment
 import dev.dimension.flare.data.network.vvo.model.Status
@@ -15,6 +14,7 @@ import dev.dimension.flare.model.vvoHost
 import dev.dimension.flare.model.vvoHostLong
 import dev.dimension.flare.model.vvoHostShort
 import dev.dimension.flare.ui.model.ClickEvent
+import dev.dimension.flare.ui.model.PostEvent
 import dev.dimension.flare.ui.model.UiHandle
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiMedia

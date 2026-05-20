@@ -13,9 +13,9 @@ import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiInstance
 import dev.dimension.flare.ui.model.UiInstanceMetadata
 import dev.dimension.flare.ui.model.UiTimelineV2
-import kotlin.jvm.JvmInline
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
+import kotlin.jvm.JvmInline
 
 public interface SocialPlatformSpec {
     public val type: PlatformType
@@ -80,14 +80,15 @@ public class SocialPlatformRegistry(
         get() = specs.map { it.type }
 
     public suspend fun recommendedInstances(): List<UiInstance> =
-        plugins.flatMap { plugin ->
-            try {
-                plugin.recommendedInstances()
-            } catch (e: Exception) {
-                DebugRepository.error(e)
-                emptyList()
-            }
-        }.distinctBy { "${it.type}:${it.domain}" }
+        plugins
+            .flatMap { plugin ->
+                try {
+                    plugin.recommendedInstances()
+                } catch (e: Exception) {
+                    DebugRepository.error(e)
+                    emptyList()
+                }
+            }.distinctBy { "${it.type}:${it.domain}" }
 
     public fun requireSpec(type: PlatformType): SocialPlatformSpec =
         requireNotNull(pluginsByType[type]?.spec) {
@@ -132,6 +133,5 @@ public class SocialPlatformRegistry(
         subscriptionType: SubscriptionTimelineTypeKey,
         url: String,
         locale: String,
-    ): CacheableRemoteLoader<UiTimelineV2>? =
-        requireSpec(type).createSubscriptionLoader(subscriptionType, url, locale)
+    ): CacheableRemoteLoader<UiTimelineV2>? = requireSpec(type).createSubscriptionLoader(subscriptionType, url, locale)
 }

@@ -4,11 +4,11 @@ import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.asType
+import kotlinx.serialization.Serializable
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertSame
-import kotlinx.serialization.Serializable
 
 class TimelineCatalogTest {
     @Test

@@ -56,6 +56,7 @@ import dev.dimension.flare.action_import
 import dev.dimension.flare.add_account
 import dev.dimension.flare.app_name
 import dev.dimension.flare.cancel
+import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.model.AvatarShape
 import dev.dimension.flare.data.model.PostActionStyle
 import dev.dimension.flare.data.model.Theme
@@ -63,7 +64,6 @@ import dev.dimension.flare.data.model.TimelineDisplayMode
 import dev.dimension.flare.data.model.VideoAutoplay
 import dev.dimension.flare.data.model.appearance.AppearanceKey
 import dev.dimension.flare.data.model.appearance.AppearanceKeys
-import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.delete
 import dev.dimension.flare.edit
 import dev.dimension.flare.home_login

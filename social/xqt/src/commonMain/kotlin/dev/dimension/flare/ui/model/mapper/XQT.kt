@@ -1188,36 +1188,37 @@ public fun UserResults.render(accountKey: MicroBlogKey): UiProfile? =
 public fun AudioSpace.render(
     accountKey: MicroBlogKey,
     url: String?,
-): UiPodcast = UiPodcast(
-    id = metadata?.restID ?: throw Exception("No ID"),
-    title = metadata.title.orEmpty(),
-    playbackUrl = url,
-    creator =
-        metadata.creatorResults
-            ?.render(accountKey) ?: throw Exception("No creator"),
-    hosts =
-        participants
-            ?.admins
-            ?.map {
-                it.render(accountKey)
-            }.orEmpty()
-            .toImmutableList(),
-    speakers =
-        participants
-            ?.speakers
-            ?.map {
-                it.render(accountKey)
-            }.orEmpty()
-            .toImmutableList(),
-    listeners =
-        participants
-            ?.listeners
-            ?.map {
-                it.render(accountKey)
-            }.orEmpty()
-            .toImmutableList(),
-    ended = metadata.state == "Ended" || metadata.endedAt != null,
-)
+): UiPodcast =
+    UiPodcast(
+        id = metadata?.restID ?: throw Exception("No ID"),
+        title = metadata.title.orEmpty(),
+        playbackUrl = url,
+        creator =
+            metadata.creatorResults
+                ?.render(accountKey) ?: throw Exception("No creator"),
+        hosts =
+            participants
+                ?.admins
+                ?.map {
+                    it.render(accountKey)
+                }.orEmpty()
+                .toImmutableList(),
+        speakers =
+            participants
+                ?.speakers
+                ?.map {
+                    it.render(accountKey)
+                }.orEmpty()
+                .toImmutableList(),
+        listeners =
+            participants
+                ?.listeners
+                ?.map {
+                    it.render(accountKey)
+                }.orEmpty()
+                .toImmutableList(),
+        ended = metadata.state == "Ended" || metadata.endedAt != null,
+    )
 
 private fun Admin.render(accountKey: MicroBlogKey): UiProfile {
     val key =

@@ -82,32 +82,34 @@ public class AccountRepository(
     public fun addAccount(
         account: UiAccount,
         credential: UiAccount.Credential,
-    ): Job = coroutineScope.launch {
-        val existingAccount = appDatabase.accountDao().getAccount(account.accountKey)
-        val dbAccount =
-            existingAccount?.copy(
-                credential_json = credential.encodeJson(),
-                last_active = Clock.System.now().toEpochMilliseconds(),
-            ) ?: DbAccount(
-                account_key = account.accountKey,
-                platform_type = account.platformType,
-                credential_json = credential.encodeJson(),
-                last_active = Clock.System.now().toEpochMilliseconds(),
-                sort_id = appDatabase.accountDao().getMaxSortId()?.plus(1) ?: 0L,
-            )
-        appDatabase.accountDao().insert(dbAccount)
-        addAccountFlow.value = account
-    }
+    ): Job =
+        coroutineScope.launch {
+            val existingAccount = appDatabase.accountDao().getAccount(account.accountKey)
+            val dbAccount =
+                existingAccount?.copy(
+                    credential_json = credential.encodeJson(),
+                    last_active = Clock.System.now().toEpochMilliseconds(),
+                ) ?: DbAccount(
+                    account_key = account.accountKey,
+                    platform_type = account.platformType,
+                    credential_json = credential.encodeJson(),
+                    last_active = Clock.System.now().toEpochMilliseconds(),
+                    sort_id = appDatabase.accountDao().getMaxSortId()?.plus(1) ?: 0L,
+                )
+            appDatabase.accountDao().insert(dbAccount)
+            addAccountFlow.value = account
+        }
 
     public fun updateCredential(
         accountKey: MicroBlogKey,
         credential: UiAccount.Credential,
-    ): Job = coroutineScope.launch {
-        appDatabase.accountDao().setCredential(
-            accountKey,
-            credential.encodeJson(),
-        )
-    }
+    ): Job =
+        coroutineScope.launch {
+            appDatabase.accountDao().setCredential(
+                accountKey,
+                credential.encodeJson(),
+            )
+        }
 
     public fun updateAccountOrder(accounts: List<MicroBlogKey>): Job =
         coroutineScope.launch {

@@ -6,10 +6,10 @@ import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.toDbUser
 import dev.dimension.flare.data.database.cache.mapper.upsertUser
 import dev.dimension.flare.data.database.cache.model.TranslationEntityType
+import dev.dimension.flare.data.database.cache.model.TranslationSettingsProvider
 import dev.dimension.flare.data.database.cache.model.applyTranslation
 import dev.dimension.flare.data.database.cache.model.translationEntityKey
 import dev.dimension.flare.data.datasource.microblog.loader.UserLoader
-import dev.dimension.flare.data.database.cache.model.TranslationSettingsProvider
 import dev.dimension.flare.data.translation.PreTranslationService
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiHandle

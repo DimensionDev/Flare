@@ -44,14 +44,15 @@ public class MastodonOAuthService(
     public suspend fun getAccessToken(
         code: String,
         response: CreateApplicationResponse,
-    ): RequestTokenResponse = requestToken(
-        client_id = response.clientID,
-        client_secret = response.clientSecret,
-        redirect_uri = response.redirectURI,
-        scope = scopes.joinToString(" ") { it.value },
-        code = code,
-        grant_type = "authorization_code",
-    )
+    ): RequestTokenResponse =
+        requestToken(
+            client_id = response.clientID,
+            client_secret = response.clientSecret,
+            redirect_uri = response.redirectURI,
+            scope = scopes.joinToString(" ") { it.value },
+            code = code,
+            grant_type = "authorization_code",
+        )
 
     public suspend fun verify(accessToken: String): Account = verifyCredentials(accessToken = "Bearer $accessToken")
 }

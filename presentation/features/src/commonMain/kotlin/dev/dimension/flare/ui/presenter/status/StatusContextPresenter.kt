@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import dev.dimension.flare.data.account.AccountRepository
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
@@ -11,7 +12,6 @@ import dev.dimension.flare.data.database.cache.model.DbStatus
 import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
-import dev.dimension.flare.data.account.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceFlow
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.DbAccountType

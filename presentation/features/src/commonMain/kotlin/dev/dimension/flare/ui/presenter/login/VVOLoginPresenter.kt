@@ -7,8 +7,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import dev.dimension.flare.data.network.vvo.VVOService
 import dev.dimension.flare.data.account.AccountRepository
+import dev.dimension.flare.data.network.vvo.VVOService
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.vvoHost
 import dev.dimension.flare.ui.model.UiAccount

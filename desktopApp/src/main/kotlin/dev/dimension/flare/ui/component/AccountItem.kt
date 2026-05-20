@@ -11,9 +11,9 @@ import compose.icons.fontawesomeicons.solid.FaceSadTear
 import dev.dimension.flare.Res
 import dev.dimension.flare.account_item_error_message
 import dev.dimension.flare.account_item_error_title
-import dev.dimension.flare.model.LoginExpiredException
 import dev.dimension.flare.login_expired
 import dev.dimension.flare.login_expired_relogin
+import dev.dimension.flare.model.LoginExpiredException
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiState

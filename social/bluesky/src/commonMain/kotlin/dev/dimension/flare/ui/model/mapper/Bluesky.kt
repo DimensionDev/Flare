@@ -31,13 +31,13 @@ import chat.bsky.convo.DeletedMessageView
 import chat.bsky.convo.MessageView
 import dev.dimension.flare.common.SerializableImmutableList
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
-import dev.dimension.flare.ui.model.PostEvent
 import dev.dimension.flare.data.datasource.microblog.userActionsMenu
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.toAccountType
 import dev.dimension.flare.ui.model.ClickEvent
+import dev.dimension.flare.ui.model.PostEvent
 import dev.dimension.flare.ui.model.UiCard
 import dev.dimension.flare.ui.model.UiDMItem
 import dev.dimension.flare.ui.model.UiHandle

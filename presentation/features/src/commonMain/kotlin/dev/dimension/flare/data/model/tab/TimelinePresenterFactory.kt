@@ -35,20 +35,24 @@ internal class TimelinePresenterFactory(
 
     private fun create(ref: TimelineRef<out TimelineSpec.Data>): TimelinePresenter =
         when (val spec = ref.spec) {
-            is AccountTimelineSpec<*> ->
+            is AccountTimelineSpec<*> -> {
                 AccountTimelinePresenter(
                     accountKey = spec.accountKey(ref.data),
                     loaderFactory = { service -> spec.createLoader(service, ref.data) },
                 )
+            }
 
-            is StandaloneTimelineSpec<*> ->
+            is StandaloneTimelineSpec<*> -> {
                 StandaloneTimelinePresenter { context ->
                     spec.createLoader(
                         context = context,
                         data = ref.data,
                     )
                 }
+            }
 
-            else -> throw IllegalArgumentException("Unsupported timeline spec type: ${spec::class}")
+            else -> {
+                throw IllegalArgumentException("Unsupported timeline spec type: ${spec::class}")
+            }
         }
 }

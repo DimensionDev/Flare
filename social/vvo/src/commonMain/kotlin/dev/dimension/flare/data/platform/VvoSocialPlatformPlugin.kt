@@ -3,8 +3,8 @@ package dev.dimension.flare.data.platform
 import dev.dimension.flare.common.deeplink.DeepLinkMapping
 import dev.dimension.flare.common.deeplink.DeepLinkPattern
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
-import dev.dimension.flare.data.datasource.vvo.VVODataSource
 import dev.dimension.flare.data.datasource.microblog.timeline.TimelineSpec
+import dev.dimension.flare.data.datasource.vvo.VVODataSource
 import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
 import dev.dimension.flare.data.network.vvo.VVOPlatformDetector
 import dev.dimension.flare.model.PlatformType
@@ -49,6 +49,5 @@ public data object VvoSocialPlatformSpec : SocialPlatformSpec {
     public override fun guestDataSource(
         host: String,
         locale: String,
-    ): MicroblogDataSource =
-        throw UnsupportedOperationException("${type.name} guest data source is not supported yet")
+    ): MicroblogDataSource = throw UnsupportedOperationException("${type.name} guest data source is not supported yet")
 }

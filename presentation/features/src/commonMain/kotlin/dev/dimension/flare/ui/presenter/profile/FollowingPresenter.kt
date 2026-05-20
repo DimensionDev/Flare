@@ -8,11 +8,11 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.common.toPagingState
+import dev.dimension.flare.data.account.AccountRepository
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.toPagingSource
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
-import dev.dimension.flare.data.account.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey

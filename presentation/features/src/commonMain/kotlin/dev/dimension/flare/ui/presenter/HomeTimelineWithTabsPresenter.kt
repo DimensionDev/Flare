@@ -3,12 +3,12 @@ package dev.dimension.flare.ui.presenter
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import dev.dimension.flare.data.account.AccountRepository
+import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.tab.SourceTimelineTabItemV2
 import dev.dimension.flare.data.model.tab.TimelinePersistenceMapper
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
-import dev.dimension.flare.data.account.AccountRepository
-import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.repository.homeTimelineTabs
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiIcon
@@ -16,8 +16,8 @@ import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.asText
 import dev.dimension.flare.ui.model.collectAsUiState
-import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
 import dev.dimension.flare.ui.presenter.home.AccountTimelinePresenter
+import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
 import dev.dimension.flare.ui.presenter.home.UserState
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList

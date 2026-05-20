@@ -1,7 +1,7 @@
 package dev.dimension.flare.data.datasource.xqt
 
-import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.data.network.xqt.model.TweetUnion
+import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiPodcast
 import kotlinx.collections.immutable.ImmutableList
 

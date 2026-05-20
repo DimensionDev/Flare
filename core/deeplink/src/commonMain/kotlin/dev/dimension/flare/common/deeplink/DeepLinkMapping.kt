@@ -63,7 +63,7 @@ public object DeepLinkMapping {
 
 private fun DeepLinkMapping.Type.toDeeplinkRoute(accountKey: MicroBlogKey): DeeplinkRoute =
     when (this) {
-        is DeepLinkMapping.Type.BlueskyPost ->
+        is DeepLinkMapping.Type.BlueskyPost -> {
             DeeplinkRoute.Status.Detail(
                 accountType = AccountType.Specific(accountKey),
                 statusKey =
@@ -72,20 +72,23 @@ private fun DeepLinkMapping.Type.toDeeplinkRoute(accountKey: MicroBlogKey): Deep
                         accountKey.host,
                     ),
             )
+        }
 
-        is DeepLinkMapping.Type.Post ->
+        is DeepLinkMapping.Type.Post -> {
             DeeplinkRoute.Status.Detail(
                 accountType = AccountType.Specific(accountKey),
                 statusKey = MicroBlogKey(id, accountKey.host),
             )
+        }
 
-        is DeepLinkMapping.Type.PostMedia ->
+        is DeepLinkMapping.Type.PostMedia -> {
             DeeplinkRoute.Media.StatusMedia(
                 accountType = AccountType.Specific(accountKey),
                 statusKey = MicroBlogKey(id, accountKey.host),
                 index = index,
                 preview = null,
             )
+        }
 
         is DeepLinkMapping.Type.Profile -> {
             val (userName, host) =

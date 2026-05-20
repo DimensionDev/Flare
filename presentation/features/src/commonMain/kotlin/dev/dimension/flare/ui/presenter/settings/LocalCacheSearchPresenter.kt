@@ -11,9 +11,9 @@ import androidx.paging.filter
 import androidx.paging.map
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.toPagingState
+import dev.dimension.flare.data.account.AccountRepository
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
-import dev.dimension.flare.data.account.AccountRepository
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiState

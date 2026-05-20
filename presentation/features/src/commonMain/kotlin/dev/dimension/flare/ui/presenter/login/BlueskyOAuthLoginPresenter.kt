@@ -6,9 +6,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import dev.dimension.flare.data.account.AccountRepository
 import dev.dimension.flare.data.network.bluesky.OAuthCodeChallengeMethodS256
 import dev.dimension.flare.data.network.ktorClient
-import dev.dimension.flare.data.account.AccountRepository
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.presenter.PresenterBase

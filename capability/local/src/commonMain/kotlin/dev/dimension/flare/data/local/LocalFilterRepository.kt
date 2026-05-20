@@ -32,16 +32,17 @@ public class LocalFilterRepository(
         forTimeline: Boolean = false,
         forNotification: Boolean = false,
         forSearch: Boolean = false,
-    ): Flow<List<KeywordFilterPattern>> = database
-        .keywordFilterDao()
-        .selectNotExpiredFor(
-            currentTime = Clock.System.now().toEpochMilliseconds(),
-            forTimeline = if (forTimeline) 1L else 0L,
-            forNotification = if (forNotification) 1L else 0L,
-            forSearch = if (forSearch) 1L else 0L,
-        ).map {
-            it.map(DbKeywordFilter::toKeywordFilterPattern)
-        }
+    ): Flow<List<KeywordFilterPattern>> =
+        database
+            .keywordFilterDao()
+            .selectNotExpiredFor(
+                currentTime = Clock.System.now().toEpochMilliseconds(),
+                forTimeline = if (forTimeline) 1L else 0L,
+                forNotification = if (forNotification) 1L else 0L,
+                forSearch = if (forSearch) 1L else 0L,
+            ).map {
+                it.map(DbKeywordFilter::toKeywordFilterPattern)
+            }
 
     public fun add(
         keyword: String,
@@ -50,18 +51,19 @@ public class LocalFilterRepository(
         forSearch: Boolean,
         expiredAt: Instant?,
         isRegex: Boolean,
-    ): Job = coroutineScope.launch {
-        database.keywordFilterDao().insert(
-            DbKeywordFilter(
-                keyword = keyword,
-                for_timeline = if (forTimeline) 1L else 0L,
-                for_notification = if (forNotification) 1L else 0L,
-                for_search = if (forSearch) 1L else 0L,
-                expired_at = expiredAt?.toEpochMilliseconds() ?: 0L,
-                is_regex = if (isRegex) 1L else 0L,
-            ),
-        )
-    }
+    ): Job =
+        coroutineScope.launch {
+            database.keywordFilterDao().insert(
+                DbKeywordFilter(
+                    keyword = keyword,
+                    for_timeline = if (forTimeline) 1L else 0L,
+                    for_notification = if (forNotification) 1L else 0L,
+                    for_search = if (forSearch) 1L else 0L,
+                    expired_at = expiredAt?.toEpochMilliseconds() ?: 0L,
+                    is_regex = if (isRegex) 1L else 0L,
+                ),
+            )
+        }
 
     public fun update(
         keyword: String,
@@ -70,16 +72,17 @@ public class LocalFilterRepository(
         forSearch: Boolean,
         expiredAt: Instant?,
         isRegex: Boolean,
-    ): Job = coroutineScope.launch {
-        database.keywordFilterDao().update(
-            forTimeline = if (forTimeline) 1L else 0L,
-            forNotification = if (forNotification) 1L else 0L,
-            forSearch = if (forSearch) 1L else 0L,
-            expiredAt = expiredAt?.toEpochMilliseconds() ?: 0L,
-            isRegex = if (isRegex) 1L else 0L,
-            keyword = keyword,
-        )
-    }
+    ): Job =
+        coroutineScope.launch {
+            database.keywordFilterDao().update(
+                forTimeline = if (forTimeline) 1L else 0L,
+                forNotification = if (forNotification) 1L else 0L,
+                forSearch = if (forSearch) 1L else 0L,
+                expiredAt = expiredAt?.toEpochMilliseconds() ?: 0L,
+                isRegex = if (isRegex) 1L else 0L,
+                keyword = keyword,
+            )
+        }
 
     public fun delete(filter: String): Job =
         coroutineScope.launch {

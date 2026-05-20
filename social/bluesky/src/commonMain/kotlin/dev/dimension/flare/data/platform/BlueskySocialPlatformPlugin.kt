@@ -2,8 +2,8 @@ package dev.dimension.flare.data.platform
 
 import dev.dimension.flare.common.deeplink.DeepLinkMapping
 import dev.dimension.flare.common.deeplink.DeepLinkPattern
-import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.bluesky.BlueskyDataSource
+import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.timeline.TimelineSpec
 import dev.dimension.flare.data.network.bluesky.BlueskyPlatformDetector
 import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
@@ -74,6 +74,5 @@ public data object BlueskySocialPlatformSpec : SocialPlatformSpec {
     public override fun guestDataSource(
         host: String,
         locale: String,
-    ): MicroblogDataSource =
-        throw UnsupportedOperationException("${type.name} guest data source is not supported yet")
+    ): MicroblogDataSource = throw UnsupportedOperationException("${type.name} guest data source is not supported yet")
 }

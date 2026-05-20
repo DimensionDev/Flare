@@ -6,8 +6,7 @@ import okio.FileSystem
 import okio.Path
 import okio.Path.Companion.toOkioPath
 
-public fun createFileStorage(context: Context): FileStorage =
-    OkioFileStorage(FileSystem.SYSTEM, AndroidPlatformPathProducer(context))
+public fun createFileStorage(context: Context): FileStorage = OkioFileStorage(FileSystem.SYSTEM, AndroidPlatformPathProducer(context))
 
 internal class AndroidPlatformPathProducer(
     private val context: Context,

@@ -11,9 +11,9 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.map
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.toPagingState
+import dev.dimension.flare.data.account.AccountRepository
 import dev.dimension.flare.data.datasource.microblog.timeline.PinnableTimelineProvider
 import dev.dimension.flare.data.datasource.microblog.timeline.TimelineTabProvider
-import dev.dimension.flare.data.account.AccountRepository
 import dev.dimension.flare.data.model.tab.TimelinePersistenceMapper
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.data.repository.accountServiceFlow
@@ -87,8 +87,7 @@ public class PinnableTimelineTabPresenter(
                                         paging.map(timelinePersistenceMapper::toTabItem)
                                     },
                             )
-                        }
-                        .orEmpty(),
+                        }.orEmpty(),
             )
         }
     }

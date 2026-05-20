@@ -3,13 +3,15 @@ package dev.dimension.flare.data.datasource.mastodon
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.map
 import dev.dimension.flare.common.FileType
+import dev.dimension.flare.common.tryRun
+import dev.dimension.flare.data.account.CredentialProvider
+import dev.dimension.flare.data.account.credentialFlow
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeType
 import dev.dimension.flare.data.datasource.microblog.DatabaseUpdater
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
-import dev.dimension.flare.ui.model.PostEvent
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
 import dev.dimension.flare.data.datasource.microblog.datasource.ListDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.NotificationDataSource
@@ -28,7 +30,6 @@ import dev.dimension.flare.data.datasource.microblog.loader.ListLoader
 import dev.dimension.flare.data.datasource.microblog.loader.ListMemberLoader
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.notSupported
-import dev.dimension.flare.data.datasource.microblog.timeline.CommonTimelineSpecs as SocialCommonTimelineSpecs
 import dev.dimension.flare.data.datasource.microblog.timeline.PinnableTimelineProvider
 import dev.dimension.flare.data.datasource.microblog.timeline.PinnableTimelineTabSection
 import dev.dimension.flare.data.datasource.microblog.timeline.TimelineShortcutDescriptor
@@ -46,12 +47,10 @@ import dev.dimension.flare.data.network.mastodon.api.model.PostVote
 import dev.dimension.flare.data.network.mastodon.api.model.Visibility
 import dev.dimension.flare.data.platform.MastodonTimelineDataSource
 import dev.dimension.flare.data.platform.MastodonTimelineSpecs
-import dev.dimension.flare.data.account.CredentialProvider
-import dev.dimension.flare.data.account.credentialFlow
-import dev.dimension.flare.common.tryRun
+import dev.dimension.flare.media.ImageCompressor
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.media.ImageCompressor
+import dev.dimension.flare.ui.model.PostEvent
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiIcon
@@ -67,6 +66,7 @@ import kotlinx.coroutines.flow.map
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import kotlin.uuid.Uuid
+import dev.dimension.flare.data.datasource.microblog.timeline.CommonTimelineSpecs as SocialCommonTimelineSpecs
 
 @OptIn(ExperimentalPagingApi::class)
 internal open class MastodonDataSource(
@@ -547,7 +547,7 @@ internal open class MastodonDataSource(
                 icon = UiIcon.List,
                 target =
                     TimelineShortcutDescriptor.Target.Route(
-                        id = TimelineShortcutDescriptor.RouteIds.AllLists,
+                        id = TimelineShortcutDescriptor.RouteIds.ALL_LISTS,
                         accountKey = accountKey,
                     ),
             ),

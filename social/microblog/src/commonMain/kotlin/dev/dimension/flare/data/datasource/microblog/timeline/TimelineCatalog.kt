@@ -16,14 +16,12 @@ public class TimelineCatalog(
             "No timeline spec registered for $id"
         }
 
-    public fun encode(ref: TimelineRef<out TimelineSpec.Data>): EncodedTimelineRef =
-        encodeTyped(ref)
+    public fun encode(ref: TimelineRef<out TimelineSpec.Data>): EncodedTimelineRef = encodeTyped(ref)
 
     public fun decode(
         specId: String,
         encodedData: String,
-    ): TimelineRef<out TimelineSpec.Data> =
-        decodeTyped(requireSpec(specId), encodedData)
+    ): TimelineRef<out TimelineSpec.Data> = decodeTyped(requireSpec(specId), encodedData)
 
     private fun <T : TimelineSpec.Data> encodeTyped(ref: TimelineRef<T>): EncodedTimelineRef =
         EncodedTimelineRef(

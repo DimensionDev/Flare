@@ -8,7 +8,7 @@ import dev.dimension.flare.ui.model.mapper.blueskyReblog
 
 internal fun PostEvent.blueskyNextActionMenu(): ActionMenu.Item? =
     when (this) {
-        is PostEvent.Bluesky.Reblog ->
+        is PostEvent.Bluesky.Reblog -> {
             ActionMenu.blueskyReblog(
                 accountKey = accountKey,
                 postKey = postKey,
@@ -17,8 +17,9 @@ internal fun PostEvent.blueskyNextActionMenu(): ActionMenu.Item? =
                 count = count + if (repostUri == null) 1 else -1,
                 repostUri = if (repostUri == null) "" else null,
             )
+        }
 
-        is PostEvent.Bluesky.Like ->
+        is PostEvent.Bluesky.Like -> {
             ActionMenu.blueskyLike(
                 accountKey = accountKey,
                 postKey = postKey,
@@ -27,8 +28,9 @@ internal fun PostEvent.blueskyNextActionMenu(): ActionMenu.Item? =
                 count = count + if (likedUri == null) 1 else -1,
                 likedUri = if (likedUri == null) "" else null,
             )
+        }
 
-        is PostEvent.Bluesky.Bookmark ->
+        is PostEvent.Bluesky.Bookmark -> {
             ActionMenu.blueskyBookmark(
                 accountKey = accountKey,
                 postKey = postKey,
@@ -37,6 +39,9 @@ internal fun PostEvent.blueskyNextActionMenu(): ActionMenu.Item? =
                 bookmarked = !bookmarked,
                 count = count + if (!bookmarked) 1 else -1,
             )
+        }
 
-        else -> null
+        else -> {
+            null
+        }
     }

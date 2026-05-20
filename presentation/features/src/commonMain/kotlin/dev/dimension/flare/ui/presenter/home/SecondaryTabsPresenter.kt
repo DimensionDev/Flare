@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import dev.dimension.flare.common.combineLatestFlowLists
+import dev.dimension.flare.data.account.AccountRepository
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
 import dev.dimension.flare.data.datasource.microblog.timeline.TimelineShortcutDescriptor
@@ -11,7 +12,6 @@ import dev.dimension.flare.data.datasource.microblog.timeline.TimelineTabDescrip
 import dev.dimension.flare.data.datasource.microblog.timeline.TimelineTabProvider
 import dev.dimension.flare.data.model.tab.TimelinePersistenceMapper
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
-import dev.dimension.flare.data.account.AccountRepository
 import dev.dimension.flare.data.repository.allAccountServicesFlow
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiIcon
@@ -110,8 +110,7 @@ public class SecondaryTabsPresenter :
                                                             ?.timelineShortcuts
                                                             ?.mapNotNull(::toTab)
                                                             .orEmpty()
-                                                )
-                                                    .toImmutableList(),
+                                                ).toImmutableList(),
                                         )
                                     }
                                 }
@@ -163,11 +162,11 @@ public class SecondaryTabsPresenter :
 
     private fun TimelineShortcutDescriptor.Target.Route.toDeeplinkRoute(): DeeplinkRoute? =
         when (id) {
-            TimelineShortcutDescriptor.RouteIds.AllLists -> accountKey?.let(DeeplinkRoute::AllLists)
-            TimelineShortcutDescriptor.RouteIds.AllDirectMessages -> accountKey?.let(DeeplinkRoute::AllDirectMessages)
-            TimelineShortcutDescriptor.RouteIds.BlueskyAllFeeds -> accountKey?.let(DeeplinkRoute.Bluesky::AllFeeds)
-            TimelineShortcutDescriptor.RouteIds.MisskeyAllAntennas -> accountKey?.let(DeeplinkRoute.Misskey::AllAntennas)
-            TimelineShortcutDescriptor.RouteIds.MisskeyAllChannels -> accountKey?.let(DeeplinkRoute.Misskey::AllChannels)
+            TimelineShortcutDescriptor.RouteIds.ALL_LISTS -> accountKey?.let(DeeplinkRoute::AllLists)
+            TimelineShortcutDescriptor.RouteIds.ALL_DIRECT_MESSAGES -> accountKey?.let(DeeplinkRoute::AllDirectMessages)
+            TimelineShortcutDescriptor.RouteIds.BLUESKY_ALL_FEEDS -> accountKey?.let(DeeplinkRoute.Bluesky::AllFeeds)
+            TimelineShortcutDescriptor.RouteIds.MISSKEY_ALL_ANTENNAS -> accountKey?.let(DeeplinkRoute.Misskey::AllAntennas)
+            TimelineShortcutDescriptor.RouteIds.MISSKEY_ALL_CHANNELS -> accountKey?.let(DeeplinkRoute.Misskey::AllChannels)
             else -> null
         }
 }

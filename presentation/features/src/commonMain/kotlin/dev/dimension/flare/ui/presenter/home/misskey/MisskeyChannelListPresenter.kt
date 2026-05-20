@@ -11,11 +11,11 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.refreshSuspend
 import dev.dimension.flare.common.toPagingState
+import dev.dimension.flare.data.account.AccountRepository
 import dev.dimension.flare.data.datasource.misskey.MisskeyChannelDataSource
 import dev.dimension.flare.data.model.tab.TimelinePersistenceMapper
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.data.platform.toTimelineTabDescriptor
-import dev.dimension.flare.data.account.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiList

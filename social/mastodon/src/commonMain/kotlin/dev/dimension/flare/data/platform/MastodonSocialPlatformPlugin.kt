@@ -4,10 +4,13 @@ import dev.dimension.flare.common.deeplink.DeepLinkMapping
 import dev.dimension.flare.common.deeplink.DeepLinkPattern
 import dev.dimension.flare.common.tryRun
 import dev.dimension.flare.data.datasource.guest.mastodon.GuestMastodonDataSource
+import dev.dimension.flare.data.datasource.guest.mastodon.GuestPublicTimelineRemoteMediator
+import dev.dimension.flare.data.datasource.guest.mastodon.GuestTrendsRemoteMediator
 import dev.dimension.flare.data.datasource.mastodon.MastodonDataSource
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
-import dev.dimension.flare.data.datasource.pleroma.PleromaDataSource
+import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.timeline.TimelineSpec
+import dev.dimension.flare.data.datasource.pleroma.PleromaDataSource
 import dev.dimension.flare.data.network.mastodon.JoinMastodonService
 import dev.dimension.flare.data.network.mastodon.MastodonInstanceService
 import dev.dimension.flare.data.network.mastodon.MastodonPlatformDetector
@@ -22,11 +25,8 @@ import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiInstance
 import dev.dimension.flare.ui.model.UiInstanceMetadata
-import dev.dimension.flare.ui.model.mapper.render
-import dev.dimension.flare.data.datasource.guest.mastodon.GuestPublicTimelineRemoteMediator
-import dev.dimension.flare.data.datasource.guest.mastodon.GuestTrendsRemoteMediator
-import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.mapper.render
 import io.ktor.http.Url
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -155,7 +155,10 @@ public data object MastodonSocialPlatformSpec : SocialPlatformSpec {
                     local = true,
                 )
             }
-            else -> null
+
+            else -> {
+                null
+            }
         }
 }
 

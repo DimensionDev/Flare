@@ -25,19 +25,18 @@ import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.notSupported
-import dev.dimension.flare.data.model.IconType
-import dev.dimension.flare.data.datasource.microblog.timeline.CommonTimelineSpecs as SocialCommonTimelineSpecs
 import dev.dimension.flare.data.datasource.microblog.timeline.TimelineShortcutDescriptor
 import dev.dimension.flare.data.datasource.microblog.timeline.TimelineSpec
 import dev.dimension.flare.data.datasource.microblog.timeline.TimelineTabProvider
 import dev.dimension.flare.data.datasource.microblog.timeline.toTimelineTabDescriptor
+import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.network.nostr.AmberSignerBridge
 import dev.dimension.flare.data.network.nostr.NostrService
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.model.PostEvent
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiIcon
-import dev.dimension.flare.ui.model.PostEvent
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.nostrLike
@@ -53,6 +52,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import dev.dimension.flare.data.datasource.microblog.timeline.CommonTimelineSpecs as SocialCommonTimelineSpecs
 
 internal typealias NostrServiceManager = SwitchingServiceManager<UiAccount.Nostr.Credential, NostrService>
 

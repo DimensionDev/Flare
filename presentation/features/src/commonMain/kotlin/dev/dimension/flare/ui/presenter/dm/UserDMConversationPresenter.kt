@@ -3,8 +3,8 @@ package dev.dimension.flare.ui.presenter.dm
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
-import dev.dimension.flare.data.datasource.microblog.DirectMessageDataSource
 import dev.dimension.flare.data.account.AccountRepository
+import dev.dimension.flare.data.datasource.microblog.DirectMessageDataSource
 import dev.dimension.flare.data.repository.accountServiceFlow
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey

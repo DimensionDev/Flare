@@ -1,8 +1,8 @@
 package dev.dimension.flare.common
 
 import com.fleeksoft.ksoup.nodes.Element
-import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.database.cache.mapper.TimelinePagingMapper
+import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType

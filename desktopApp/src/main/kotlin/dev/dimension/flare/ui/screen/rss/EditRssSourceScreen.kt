@@ -33,13 +33,13 @@ import compose.icons.fontawesomeicons.solid.CircleXmark
 import dev.dimension.flare.Res
 import dev.dimension.flare.add_rss_source
 import dev.dimension.flare.cancel
-import dev.dimension.flare.model.RssDisplayMode
 import dev.dimension.flare.data.database.app.model.SubscriptionType
 import dev.dimension.flare.edit_rss_source
 import dev.dimension.flare.mastodon_available_timelines
 import dev.dimension.flare.mastodon_federated_timeline
 import dev.dimension.flare.mastodon_local_timeline
 import dev.dimension.flare.mastodon_trending_statuses
+import dev.dimension.flare.model.RssDisplayMode
 import dev.dimension.flare.ok
 import dev.dimension.flare.opml_import
 import dev.dimension.flare.rss_sources_description_only

@@ -3,6 +3,8 @@ package dev.dimension.flare.data.translation
 import dev.dimension.flare.common.Locale
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.common.encodeJson
+import dev.dimension.flare.common.tryRun
+import dev.dimension.flare.data.ai.AiCompletionService
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.model.DbStatus
 import dev.dimension.flare.data.database.cache.model.DbTranslation
@@ -18,8 +20,6 @@ import dev.dimension.flare.data.database.cache.model.translationPayload
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.datastore.model.translationProviderCacheKey
-import dev.dimension.flare.data.ai.AiCompletionService
-import dev.dimension.flare.common.tryRun
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -38,8 +38,6 @@ import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.sync.withPermit
 import kotlin.time.Clock
-
-
 
 public class OnlinePreTranslationService(
     private val database: CacheDatabase,

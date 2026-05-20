@@ -9,8 +9,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import com.atproto.server.CreateSessionRequest
 import com.atproto.server.CreateSessionResponse
-import dev.dimension.flare.data.network.bluesky.BlueskyService
 import dev.dimension.flare.data.account.AccountRepository
+import dev.dimension.flare.data.network.bluesky.BlueskyService
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.presenter.PresenterBase

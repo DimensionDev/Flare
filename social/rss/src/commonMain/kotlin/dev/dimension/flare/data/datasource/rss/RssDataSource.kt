@@ -45,23 +45,26 @@ public object RssDataSource :
                 )
             }
 
-            SubscriptionType.MASTODON_TRENDS ->
+            SubscriptionType.MASTODON_TRENDS -> {
                 fetchPlatformSubscription(
                     subscriptionType = SubscriptionTimelineTypes.MastodonTrends,
                     url = subscription.url,
                 )
+            }
 
-            SubscriptionType.MASTODON_PUBLIC ->
+            SubscriptionType.MASTODON_PUBLIC -> {
                 fetchPlatformSubscription(
                     subscriptionType = SubscriptionTimelineTypes.MastodonPublic,
                     url = subscription.url,
                 )
+            }
 
-            SubscriptionType.MASTODON_LOCAL ->
+            SubscriptionType.MASTODON_LOCAL -> {
                 fetchPlatformSubscription(
                     subscriptionType = SubscriptionTimelineTypes.MastodonLocal,
                     url = subscription.url,
                 )
+            }
         }
 
     private fun fetchPlatformSubscription(

@@ -9,8 +9,7 @@ import platform.Foundation.NSFileManager
 import platform.Foundation.NSURL
 import platform.Foundation.NSUserDomainMask
 
-public fun createFileStorage(): FileStorage =
-    OkioFileStorage(FileSystem.SYSTEM, ApplePlatformPathProducer())
+public fun createFileStorage(): FileStorage = OkioFileStorage(FileSystem.SYSTEM, ApplePlatformPathProducer())
 
 internal class ApplePlatformPathProducer : PlatformPathProducer {
     override fun dataStoreFile(fileName: String): Path = "${fileDirectory()}/$fileName".toPath()

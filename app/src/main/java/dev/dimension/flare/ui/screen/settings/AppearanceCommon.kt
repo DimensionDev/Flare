@@ -17,9 +17,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.model.appearance.AppearanceKey
 import dev.dimension.flare.data.model.appearance.AppearancePatch
-import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.ui.component.FlareDropdownMenu
 import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.model.UiState

@@ -9,10 +9,10 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.flatMap
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.toPagingState
-import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
-import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.account.AccountRepository
 import dev.dimension.flare.data.account.NoActiveAccountException
+import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
+import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.repository.accountServiceFlow
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey

@@ -3,7 +3,6 @@ package dev.dimension.flare.ui.model.mapper
 import com.fleeksoft.ksoup.nodes.Element
 import com.fleeksoft.ksoup.nodes.Node
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
-import dev.dimension.flare.ui.model.PostEvent
 import dev.dimension.flare.data.datasource.microblog.userActionsMenu
 import dev.dimension.flare.data.network.mastodon.api.model.Account
 import dev.dimension.flare.data.network.mastodon.api.model.Attachment
@@ -23,6 +22,7 @@ import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.model.toAccountType
 import dev.dimension.flare.ui.model.ClickEvent
+import dev.dimension.flare.ui.model.PostEvent
 import dev.dimension.flare.ui.model.UiCard
 import dev.dimension.flare.ui.model.UiHandle
 import dev.dimension.flare.ui.model.UiIcon

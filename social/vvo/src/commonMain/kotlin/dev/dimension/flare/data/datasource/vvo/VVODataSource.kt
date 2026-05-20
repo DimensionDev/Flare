@@ -8,13 +8,14 @@ import dev.dimension.flare.common.FileItem
 import dev.dimension.flare.common.FileType
 import dev.dimension.flare.common.MemCacheable
 import dev.dimension.flare.common.decodeJson
+import dev.dimension.flare.data.account.CredentialProvider
+import dev.dimension.flare.data.account.credentialFlow
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeType
 import dev.dimension.flare.data.datasource.microblog.DatabaseUpdater
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
-import dev.dimension.flare.ui.model.PostEvent
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
 import dev.dimension.flare.data.datasource.microblog.datasource.NotificationDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
@@ -29,7 +30,6 @@ import dev.dimension.flare.data.datasource.microblog.handler.UserHandler
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
-import dev.dimension.flare.data.datasource.microblog.timeline.CommonTimelineSpecs as SocialCommonTimelineSpecs
 import dev.dimension.flare.data.datasource.microblog.timeline.TimelineSpec
 import dev.dimension.flare.data.datasource.microblog.timeline.TimelineTabProvider
 import dev.dimension.flare.data.datasource.microblog.timeline.toTimelineShortcutDescriptor
@@ -39,13 +39,12 @@ import dev.dimension.flare.data.network.vvo.VVOService
 import dev.dimension.flare.data.network.vvo.model.StatusDetailItem
 import dev.dimension.flare.data.platform.VvoTimelineDataSource
 import dev.dimension.flare.data.platform.VvoTimelineSpecs
-import dev.dimension.flare.data.account.CredentialProvider
-import dev.dimension.flare.data.account.credentialFlow
-import dev.dimension.flare.model.LoginExpiredException
+import dev.dimension.flare.media.ImageCompressor
 import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.model.LoginExpiredException
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
-import dev.dimension.flare.media.ImageCompressor
+import dev.dimension.flare.ui.model.PostEvent
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiIcon
@@ -62,6 +61,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import dev.dimension.flare.data.datasource.microblog.timeline.CommonTimelineSpecs as SocialCommonTimelineSpecs
 
 @OptIn(ExperimentalPagingApi::class)
 internal class VVODataSource(

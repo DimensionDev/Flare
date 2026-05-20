@@ -2,8 +2,8 @@ package dev.dimension.flare.ui.presenter.profile
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
-import dev.dimension.flare.data.datasource.microblog.datasource.RelationDataSource
 import dev.dimension.flare.data.account.AccountRepository
+import dev.dimension.flare.data.datasource.microblog.datasource.RelationDataSource
 import dev.dimension.flare.data.repository.accountServiceFlow
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey

@@ -1,9 +1,9 @@
 package dev.dimension.flare.ui.presenter.home
 
+import dev.dimension.flare.data.account.AccountRepository
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
-import dev.dimension.flare.data.account.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceFlow
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiTimelineV2

@@ -17,4 +17,43 @@ kotlin {
             FlarePlatform.WEB,
         )
     }
+
+    tasks
+        .withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask<*>>()
+        .configureEach {
+            if (name == "compileCommonMainKotlinMetadata") {
+                compilerOptions {
+                    freeCompilerArgs.addAll(
+                        "-module-name",
+                        "flare_local_model_commonMain",
+                    )
+                }
+            }
+        }
+
+    targets.configureEach {
+        if (name != "wasmJs" && name != "metadata") {
+            compilations.configureEach {
+                if (name == "main") {
+                    compileTaskProvider.configure {
+                        compilerOptions {
+                            freeCompilerArgs.addAll(
+                                "-module-name",
+                                "flare_local_model",
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    sourceSets {
+        val commonMain by getting {
+            dependencies {
+                api(dependencies.platform(libs.compose.bom))
+                api(libs.compose.runtime)
+            }
+        }
+    }
 }

@@ -35,8 +35,8 @@ kotlin {
                 api(projects.core.model)
                 api(projects.foundation.database)
                 api(projects.foundation.filesystem)
+                api(projects.modules.draft.presentation)
                 api(projects.social.microblog)
-                api(projects.presentation.model)
                 api(libs.kotlinx.coroutines.core)
                 api(libs.okio)
             }

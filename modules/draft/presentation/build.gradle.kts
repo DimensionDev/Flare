@@ -18,4 +18,48 @@ kotlin {
             FlarePlatform.WEB,
         )
     }
+
+    tasks
+        .withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask<*>>()
+        .configureEach {
+            if (name == "compileCommonMainKotlinMetadata") {
+                compilerOptions {
+                    freeCompilerArgs.addAll(
+                        "-module-name",
+                        "flare_draft_presentation_commonMain",
+                    )
+                }
+            }
+        }
+
+    targets.configureEach {
+        if (name != "wasmJs" && name != "metadata") {
+            compilations.configureEach {
+                if (name == "main") {
+                    compileTaskProvider.configure {
+                        compilerOptions {
+                            freeCompilerArgs.addAll(
+                                "-module-name",
+                                "flare_draft_presentation",
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    sourceSets {
+        val commonMain by getting {
+            dependencies {
+                api(projects.core.common)
+                api(projects.core.model)
+                api(projects.modules.account.api)
+                api(projects.social.microblog)
+                api(dependencies.platform(libs.compose.bom))
+                api(libs.compose.runtime)
+                api(libs.kotlinx.immutable)
+            }
+        }
+    }
 }

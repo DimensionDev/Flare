@@ -52,6 +52,8 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
+                api(projects.modules.draft.presentation)
+                api(projects.modules.local.model)
                 api(projects.modules.account.api)
                 api(projects.social.model)
                 api(projects.ui.model)

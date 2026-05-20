@@ -23,7 +23,7 @@ kotlin {
             dependencies {
                 api(projects.core.common)
                 api(projects.foundation.database)
-                api(projects.presentation.model)
+                api(projects.modules.local.model)
                 api(libs.kotlinx.coroutines.core)
                 api(libs.kotlinx.immutable)
             }

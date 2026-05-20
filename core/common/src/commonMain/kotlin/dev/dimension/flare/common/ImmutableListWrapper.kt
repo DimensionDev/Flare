@@ -1,9 +1,7 @@
 package dev.dimension.flare.common
 
-import androidx.compose.runtime.Immutable
 import kotlinx.collections.immutable.ImmutableList
 
-@Immutable
 public data class ImmutableListWrapper<T : Any>(
     private val data: ImmutableList<T>,
 ) {

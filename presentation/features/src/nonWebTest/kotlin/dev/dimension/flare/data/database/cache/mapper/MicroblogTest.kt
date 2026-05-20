@@ -9,6 +9,7 @@ import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.common.Locale
 import dev.dimension.flare.common.TestFormatter
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.mapper.TimelinePagingMapper
 import dev.dimension.flare.data.database.cache.model.DbStatus
 import dev.dimension.flare.data.database.cache.model.DbStatusReference
 import dev.dimension.flare.data.database.cache.model.DbStatusReferenceWithStatus
@@ -23,7 +24,6 @@ import dev.dimension.flare.data.database.cache.model.sourceHash
 import dev.dimension.flare.data.database.cache.model.translationEntityKey
 import dev.dimension.flare.data.database.cache.model.translationPayload
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
-import dev.dimension.flare.data.database.cache.mapper.TimelinePagingMapper
 import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.datastore.model.cacheKey
 import dev.dimension.flare.data.network.nostr.NostrService

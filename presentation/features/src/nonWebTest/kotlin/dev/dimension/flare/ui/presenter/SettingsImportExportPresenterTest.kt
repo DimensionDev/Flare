@@ -1,6 +1,11 @@
 package dev.dimension.flare.ui.presenter
 
 import dev.dimension.flare.createTestRootPath
+import dev.dimension.flare.data.datasource.microblog.timeline.CommonTimelineSpecs
+import dev.dimension.flare.data.datasource.microblog.timeline.TimelineCatalog
+import dev.dimension.flare.data.datasource.microblog.timeline.TimelineSpec
+import dev.dimension.flare.data.datasource.microblog.timeline.toTimelineTabDescriptor
+import dev.dimension.flare.data.datasource.rss.RssTimelineSpecs
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.io.OkioFileStorage
@@ -17,11 +22,6 @@ import dev.dimension.flare.data.model.tab.TimelinePostKind
 import dev.dimension.flare.data.model.tab.TimelinePresentation
 import dev.dimension.flare.data.model.tab.TimelineSlot
 import dev.dimension.flare.data.model.tab.TimelineSlotContent
-import dev.dimension.flare.data.datasource.microblog.timeline.CommonTimelineSpecs
-import dev.dimension.flare.data.datasource.microblog.timeline.TimelineCatalog
-import dev.dimension.flare.data.datasource.microblog.timeline.TimelineSpec
-import dev.dimension.flare.data.datasource.microblog.timeline.toTimelineTabDescriptor
-import dev.dimension.flare.data.datasource.rss.RssTimelineSpecs
 import dev.dimension.flare.data.platform.MastodonTimelineSpecs
 import dev.dimension.flare.data.repository.homeTimelineTab
 import dev.dimension.flare.deleteTestRootPath

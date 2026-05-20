@@ -25,7 +25,9 @@ class TimelinePersistenceMapperTest {
             id = "common.home",
             title = UiStrings.Home,
             icon = UiIcon.Home.asType(),
-            serializer = dev.dimension.flare.data.datasource.microblog.timeline.TimelineSpec.AccountBasedData.serializer(),
+            serializer =
+                dev.dimension.flare.data.datasource.microblog.timeline.TimelineSpec.AccountBasedData
+                    .serializer(),
             stableKeyFactory = { it.accountKey.toString() },
             loaderFactory = { _, _ -> notSupported() },
         )
@@ -42,7 +44,8 @@ class TimelinePersistenceMapperTest {
             TimelineTabDescriptor.Source(
                 ref =
                     homeSpec.ref(
-                        dev.dimension.flare.data.datasource.microblog.timeline.TimelineSpec.AccountBasedData(accountKey),
+                        dev.dimension.flare.data.datasource.microblog.timeline.TimelineSpec
+                            .AccountBasedData(accountKey),
                     ),
                 display =
                     TimelineDisplay(
@@ -68,7 +71,8 @@ class TimelinePersistenceMapperTest {
             TimelineTabDescriptor.Source(
                 ref =
                     homeSpec.ref(
-                        dev.dimension.flare.data.datasource.microblog.timeline.TimelineSpec.AccountBasedData(accountKey),
+                        dev.dimension.flare.data.datasource.microblog.timeline.TimelineSpec
+                            .AccountBasedData(accountKey),
                     ),
                 display =
                     TimelineDisplay(
@@ -106,7 +110,8 @@ class TimelinePersistenceMapperTest {
         val accountSlot =
             mapper.toSlot(
                 homeSpec.toTimelineTabDescriptor(
-                    dev.dimension.flare.data.datasource.microblog.timeline.TimelineSpec.AccountBasedData(accountKey),
+                    dev.dimension.flare.data.datasource.microblog.timeline.TimelineSpec
+                        .AccountBasedData(accountKey),
                 ),
             )
         val rssSlot =

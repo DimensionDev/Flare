@@ -33,7 +33,13 @@ class AppDataStoreTest {
 
                 assertEquals(AppSettings(version = "settings-store"), store.appSettings.first())
                 assertEquals(mapOf("app.theme" to "dark"), store.appearanceBag.first().entries)
-                assertEquals(listOf("manual-group"), store.tabSettingsV2.first().homeSlots.map { it.id })
+                assertEquals(
+                    listOf("manual-group"),
+                    store.tabSettingsV2
+                        .first()
+                        .homeSlots
+                        .map { it.id },
+                )
             }
         }
 
@@ -52,7 +58,13 @@ class AppDataStoreTest {
 
                 assertEquals(mapOf("app.theme" to "light"), store.appearanceBag.first().entries)
                 assertEquals(AppSettings(version = "imported"), store.appSettings.first())
-                assertEquals(listOf("manual-group"), store.tabSettingsV2.first().homeSlots.map { it.id })
+                assertEquals(
+                    listOf("manual-group"),
+                    store.tabSettingsV2
+                        .first()
+                        .homeSlots
+                        .map { it.id },
+                )
             }
         }
 

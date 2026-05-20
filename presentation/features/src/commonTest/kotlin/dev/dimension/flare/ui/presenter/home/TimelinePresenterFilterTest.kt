@@ -1,10 +1,10 @@
 package dev.dimension.flare.ui.presenter.home
 
 import dev.dimension.flare.common.TestFormatter
+import dev.dimension.flare.data.local.KeywordFilterPattern
 import dev.dimension.flare.data.model.tab.TimelineFilterConfig
 import dev.dimension.flare.data.model.tab.TimelinePostContent
 import dev.dimension.flare.data.model.tab.TimelinePostKind
-import dev.dimension.flare.data.local.KeywordFilterPattern
 import dev.dimension.flare.ui.humanizer.PlatformFormatter
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.createSampleStatus

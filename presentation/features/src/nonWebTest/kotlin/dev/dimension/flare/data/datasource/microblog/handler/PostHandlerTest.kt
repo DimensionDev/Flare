@@ -5,24 +5,26 @@ import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.common.CacheState
 import dev.dimension.flare.common.Locale
-import dev.dimension.flare.data.ai.OnDeviceAI
 import dev.dimension.flare.common.TestFormatter
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.createTestRootPath
+import dev.dimension.flare.data.ai.AiCompletionService
+import dev.dimension.flare.data.ai.OnDeviceAI
+import dev.dimension.flare.data.ai.OpenAIService
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.mapper.TimelinePagingMapper
 import dev.dimension.flare.data.database.cache.mapper.saveToDatabase
 import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
 import dev.dimension.flare.data.database.cache.model.DbStatus
 import dev.dimension.flare.data.database.cache.model.DbStatusReference
 import dev.dimension.flare.data.database.cache.model.TranslationEntityType
+import dev.dimension.flare.data.database.cache.model.TranslationSettingsProvider
 import dev.dimension.flare.data.database.cache.model.TranslationStatus
 import dev.dimension.flare.data.datasource.microblog.loader.PostLoader
-import dev.dimension.flare.data.database.cache.mapper.TimelinePagingMapper
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.io.OkioFileStorage
-import dev.dimension.flare.data.ai.AiCompletionService
-import dev.dimension.flare.data.ai.OpenAIService
+import dev.dimension.flare.data.settings.TranslationSettingsProviderImpl
 import dev.dimension.flare.data.translation.OnlinePreTranslationService
 import dev.dimension.flare.data.translation.PreTranslationService
 import dev.dimension.flare.data.translation.aiPreTranslateConfig
@@ -112,6 +114,7 @@ class PostHandlerTest : RobolectricTest() {
                 module {
                     single { db }
                     single { appDataStore }
+                    single<TranslationSettingsProvider> { TranslationSettingsProviderImpl(get()) }
                     single<CoroutineScope> { detachedScope }
                     single<OnDeviceAI> { onDeviceAI }
                     single { OpenAIService() }

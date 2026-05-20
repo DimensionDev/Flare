@@ -15,8 +15,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class DeepLinkMappingTest {
-    private fun PlatformType.deepLinkPatterns(host: String) =
-        defaultSocialPlatformRegistry.deepLinkPatterns(this, host)
+    private fun PlatformType.deepLinkPatterns(host: String) = defaultSocialPlatformRegistry.deepLinkPatterns(this, host)
 
     private fun profileRoute(
         accountKey: MicroBlogKey,

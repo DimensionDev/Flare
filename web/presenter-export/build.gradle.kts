@@ -19,7 +19,7 @@ kotlin {
                 implementation(projects.core.common)
                 implementation(projects.foundation.database)
                 implementation(projects.presentation.features)
-                implementation(projects.presentation.runtime)
+                implementation(projects.ui.presenterRuntime)
                 implementation(projects.social.api)
                 implementation(projects.social.bluesky)
                 implementation(projects.social.mastodon)

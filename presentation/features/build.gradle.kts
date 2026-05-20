@@ -66,7 +66,7 @@ kotlin {
                 implementation(projects.social.rss)
                 implementation(projects.social.vvo)
                 implementation(projects.social.xqt)
-                api(projects.presentation.runtime)
+                api(projects.ui.presenterRuntime)
                 implementation(dependencies.platform(libs.compose.bom))
                 implementation(libs.compose.runtime)
                 implementation(libs.bundles.kotlinx)

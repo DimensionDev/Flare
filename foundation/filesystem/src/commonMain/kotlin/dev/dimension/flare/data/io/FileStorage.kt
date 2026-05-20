@@ -29,7 +29,7 @@ public interface FileStorage {
 }
 
 public class OkioFileStorage internal constructor(
-    internal val fileSystem: FileSystem,
+    public val fileSystem: FileSystem,
     private val platformPathProducer: PlatformPathProducer,
 ) : FileStorage {
     public constructor(

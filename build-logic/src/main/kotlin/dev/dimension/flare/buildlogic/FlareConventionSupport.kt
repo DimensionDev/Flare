@@ -240,7 +240,14 @@ class FlareModuleSpec internal constructor(
         }
         if (FlarePlatform.WEB in selectedPlatforms && !kotlin.hasTarget("wasmJs")) {
             kotlin.wasmJs {
-                browser()
+                browser {
+                    testTask {
+                        useKarma {
+                            useChromeHeadless()
+                            useConfigDirectory(project.rootProject.file("karma.config.d"))
+                        }
+                    }
+                }
             }
         }
 

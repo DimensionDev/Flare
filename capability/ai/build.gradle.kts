@@ -24,7 +24,7 @@ kotlin {
             dependencies {
                 implementation(projects.core.common)
                 api(projects.capability.settings)
-                implementation(projects.network)
+                implementation(projects.foundation.network)
                 implementation(libs.ktor.client.logging)
                 implementation(libs.openai.client)
             }

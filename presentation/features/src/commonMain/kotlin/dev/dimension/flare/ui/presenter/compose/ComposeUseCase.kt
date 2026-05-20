@@ -8,9 +8,9 @@ import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.datastore.model.ComposeVisibility
 import dev.dimension.flare.data.draft.ComposeProgressState
-import dev.dimension.flare.data.draft.newDraftGroupId
 import dev.dimension.flare.data.draft.SaveDraftUseCase
 import dev.dimension.flare.data.draft.SendDraftUseCase
+import dev.dimension.flare.data.draft.newDraftGroupId
 import dev.dimension.flare.data.draft.toComposeDraftBundle
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiTimelineV2

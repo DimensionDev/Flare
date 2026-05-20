@@ -7,8 +7,8 @@ import dev.dimension.flare.common.CacheState
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.model.DbEmoji
 import dev.dimension.flare.data.database.cache.model.EmojiContent
-import dev.dimension.flare.data.datasource.microblog.loader.EmojiLoader
 import dev.dimension.flare.data.database.memoryDatabaseBuilder
+import dev.dimension.flare.data.datasource.microblog.loader.EmojiLoader
 import dev.dimension.flare.ui.model.UiEmoji
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap

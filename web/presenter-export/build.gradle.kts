@@ -17,7 +17,7 @@ kotlin {
         val wasmJsMain by getting {
             dependencies {
                 implementation(projects.core.common)
-                implementation(projects.storage.database)
+                implementation(projects.foundation.database)
                 implementation(projects.presentation.features)
                 implementation(projects.presentation.runtime)
                 implementation(projects.social.api)

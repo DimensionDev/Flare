@@ -14,8 +14,8 @@ import dev.dimension.flare.ui.model.UiDraftMedia
 import dev.dimension.flare.ui.model.UiDraftMediaType
 import dev.dimension.flare.ui.model.UiDraftStatus
 import dev.dimension.flare.ui.model.UiTimelineV2
-import dev.dimension.flare.ui.render.toUi
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
+import dev.dimension.flare.ui.render.toUi
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.firstOrNull
 import kotlin.time.Instant
@@ -57,9 +57,7 @@ public class RestoreDraftUseCase(
     }
 }
 
-public fun DraftContent.toComposeData(
-    medias: List<ComposeData.Media>,
-): ComposeData =
+public fun DraftContent.toComposeData(medias: List<ComposeData.Media>): ComposeData =
     ComposeData(
         content = text,
         visibility = visibility.toUiVisibility(),

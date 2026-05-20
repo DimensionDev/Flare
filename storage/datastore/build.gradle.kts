@@ -5,7 +5,6 @@ plugins {
     id("dev.dimension.flare.multiplatform-library")
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.multiplatform)
-    alias(libs.plugins.kotlin.serialization)
 }
 
 kotlin {
@@ -19,22 +18,11 @@ kotlin {
         )
     }
 
-    compilerOptions {
-        allWarningsAsErrors.set(false)
-    }
-
     sourceSets {
         val commonMain by getting {
             dependencies {
-                api(projects.core.common)
-                api(libs.datastore.core)
-                api(libs.datastore.core.okio)
-                api(libs.okio)
-            }
-        }
-        val androidMain by getting {
-            dependencies {
-                implementation(libs.datastore)
+                api(projects.foundation.datastore)
+                api(projects.foundation.filesystem)
             }
         }
     }

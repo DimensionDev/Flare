@@ -17,4 +17,18 @@ kotlin {
             FlarePlatform.WEB,
         )
     }
+
+    sourceSets {
+        val commonMain by getting {
+            dependencies {
+                implementation(projects.core.common)
+                api(libs.okio)
+            }
+        }
+        val androidMain by getting {
+            dependencies {
+                implementation(libs.datastore)
+            }
+        }
+    }
 }

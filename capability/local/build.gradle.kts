@@ -22,7 +22,7 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 api(projects.core.common)
-                api(projects.storage.database)
+                api(projects.foundation.database)
                 api(projects.presentation.model)
                 api(libs.kotlinx.coroutines.core)
                 api(libs.kotlinx.immutable)

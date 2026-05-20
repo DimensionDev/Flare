@@ -125,7 +125,7 @@ dependencies {
     implementation(libs.compose.webview)
     implementation(projects.presentation.features)
     implementation(projects.capability.ai)
-    implementation(projects.network)
+    implementation(projects.foundation.network)
     implementation(projects.social.rss)
     implementation(projects.composeUi)
     implementation(libs.androidx.splash)

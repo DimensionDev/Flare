@@ -33,6 +33,10 @@ kotlin {
         }
     }
 
+    compilerOptions {
+        allWarningsAsErrors.set(false)
+    }
+
     sourceSets {
         all {
             languageSettings {
@@ -47,12 +51,12 @@ kotlin {
                 implementation(projects.core.deeplink)
                 implementation(projects.capability.ai)
                 implementation(projects.capability.account)
-                implementation(projects.storage.database)
+                implementation(projects.foundation.database)
                 api(projects.capability.settings)
                 api(projects.capability.draft)
                 implementation(projects.capability.local)
                 implementation(projects.capability.translation)
-                implementation(projects.network)
+                implementation(projects.foundation.network)
                 api(projects.social.api)
                 implementation(projects.social.bluesky)
                 implementation(projects.social.mastodon)

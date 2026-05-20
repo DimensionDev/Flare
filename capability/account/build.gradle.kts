@@ -28,7 +28,7 @@ kotlin {
             dependencies {
                 api(projects.core.common)
                 api(projects.core.model)
-                api(projects.storage.database)
+                api(projects.foundation.database)
                 api(projects.capability.settings)
                 api(projects.social.api)
                 api(projects.presentation.model)

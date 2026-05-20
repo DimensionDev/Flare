@@ -22,7 +22,7 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                api(projects.network)
+                api(projects.foundation.network)
                 implementation(libs.kotlinx.serialization.json)
             }
         }

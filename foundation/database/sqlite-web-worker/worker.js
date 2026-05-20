@@ -24,10 +24,17 @@ const statements = new Map();
 let nextDatabaseId = 0;
 let nextStatementId = 0;
 
+function createDatabase(fileName) {
+  if (typeof sqlite3.oo1.OpfsDb === 'function') {
+    return new sqlite3.oo1.OpfsDb(fileName);
+  }
+  return new sqlite3.oo1.DB(fileName || ':memory:', 'c');
+}
+
 function openRequest(id, requestData) {
   try {
     const newDatabaseId = nextDatabaseId++;
-    const newDatabase = new sqlite3.oo1.OpfsDb(requestData.fileName);
+    const newDatabase = createDatabase(requestData.fileName);
     databases.set(newDatabaseId, newDatabase);
     postMessage({ id, data: { databaseId: newDatabaseId } });
   } catch (error) {

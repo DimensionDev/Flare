@@ -7,10 +7,10 @@ import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.database.cache.mapper.toDbUser
 import dev.dimension.flare.data.database.cache.mapper.upsertUsers
 import dev.dimension.flare.data.database.cache.model.DbListMember
+import dev.dimension.flare.data.database.memoryDatabaseBuilder
 import dev.dimension.flare.data.datasource.microblog.loader.ListMemberLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
-import dev.dimension.flare.data.database.memoryDatabaseBuilder
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.humanizer.PlatformFormatter

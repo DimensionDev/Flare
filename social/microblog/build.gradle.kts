@@ -30,7 +30,7 @@ kotlin {
                 api(projects.core.common)
                 api(projects.core.model)
                 api(projects.presentation.model)
-                api(projects.storage.database)
+                api(projects.foundation.database)
                 api(libs.paging.common)
                 implementation(dependencies.platform(libs.koin.bom))
                 implementation(libs.koin.core)

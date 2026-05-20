@@ -16,7 +16,7 @@ public class SendDraftUseCase(
     public suspend operator fun invoke(
         bundle: ComposeDraftBundle,
         progress: suspend (ComposeProgressState) -> Unit,
-    ): Unit {
+    ) {
         val persistedMedia = draftMediaStore.persist(bundle.groupId, bundle.template.medias)
         val savedGroupId =
             draftRepository.saveDraft(
@@ -46,7 +46,7 @@ public class SendDraftUseCase(
     public suspend operator fun invoke(
         groupId: String,
         progress: suspend (ComposeProgressState) -> Unit,
-    ): Unit {
+    ) {
         val draft = draftRepository.draft(groupId).firstOrNull() ?: return
         val medias = draftMediaStore.restore(draft.medias)
         val datas =

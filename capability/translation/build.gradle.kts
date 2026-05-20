@@ -29,9 +29,9 @@ kotlin {
                 api(projects.core.common)
                 api(projects.core.model)
                 api(projects.capability.ai)
-                api(projects.storage.database)
+                api(projects.foundation.database)
                 api(projects.capability.settings)
-                implementation(projects.network)
+                implementation(projects.foundation.network)
                 api(projects.presentation.model)
             }
         }

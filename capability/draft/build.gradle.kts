@@ -33,8 +33,8 @@ kotlin {
             dependencies {
                 api(projects.core.common)
                 api(projects.core.model)
-                api(projects.storage.database)
-                api(projects.storage.datastore)
+                api(projects.foundation.database)
+                api(projects.foundation.filesystem)
                 api(projects.social.microblog)
                 api(projects.presentation.model)
                 api(libs.kotlinx.coroutines.core)

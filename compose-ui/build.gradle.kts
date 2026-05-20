@@ -27,6 +27,11 @@ kotlin {
     android {
         experimentalProperties["android.experimental.kmp.enableAndroidResources"] = true
     }
+
+    compilerOptions {
+        allWarningsAsErrors.set(false)
+    }
+
     listOf("iosArm64", "iosSimulatorArm64")
         .map { targetName -> targets.getByName(targetName) as KotlinNativeTarget }
         .forEach { appleTarget ->

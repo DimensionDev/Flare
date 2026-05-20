@@ -15,7 +15,7 @@ plugins {
 
 dependencies {
     implementation(projects.presentation.features)
-    implementation(projects.network)
+    implementation(projects.foundation.network)
     implementation(projects.social.rss)
     implementation(projects.composeUi)
 

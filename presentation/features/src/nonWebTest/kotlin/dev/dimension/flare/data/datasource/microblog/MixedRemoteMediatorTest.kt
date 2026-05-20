@@ -21,6 +21,7 @@ import dev.dimension.flare.data.database.cache.model.DbStatusWithReference
 import dev.dimension.flare.data.database.cache.model.TranslationDisplayOptions
 import dev.dimension.flare.data.database.cache.model.TranslationEntityType
 import dev.dimension.flare.data.database.cache.model.TranslationStatus
+import dev.dimension.flare.data.database.memoryDatabaseBuilder
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
@@ -34,7 +35,6 @@ import dev.dimension.flare.data.translation.PreTranslationService
 import dev.dimension.flare.data.translation.PreTranslationStoreSupport
 import dev.dimension.flare.data.translation.aiPreTranslateConfig
 import dev.dimension.flare.deleteTestRootPath
-import dev.dimension.flare.data.database.memoryDatabaseBuilder
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType

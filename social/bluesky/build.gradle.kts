@@ -24,7 +24,7 @@ kotlin {
             dependencies {
                 api(projects.core.model)
                 api(projects.presentation.model)
-                api(projects.network)
+                api(projects.foundation.network)
                 api(projects.social.api)
                 api(projects.social.microblog)
                 api(libs.bluesky)

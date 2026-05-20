@@ -6,9 +6,9 @@ import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.common.CacheState
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.model.DbUserRelation
+import dev.dimension.flare.data.database.memoryDatabaseBuilder
 import dev.dimension.flare.data.datasource.microblog.loader.RelationActionType
 import dev.dimension.flare.data.datasource.microblog.loader.RelationLoader
-import dev.dimension.flare.data.database.memoryDatabaseBuilder
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiRelation

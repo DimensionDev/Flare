@@ -62,6 +62,8 @@ kotlin {
                 api(projects.foundation.datastore)
                 api(libs.datastore.core)
                 implementation(libs.kotlinx.serialization.json)
+                api(dependencies.platform(libs.koin.bom))
+                api(libs.koin.core)
             }
         }
         val commonTest by getting {

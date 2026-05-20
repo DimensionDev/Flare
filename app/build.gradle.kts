@@ -125,7 +125,7 @@ dependencies {
     implementation(libs.compose.webview)
     implementation(projects.presentation.features)
     implementation(projects.modules.draft.presentation)
-    implementation(projects.capability.ai)
+    implementation(projects.modules.ai.data)
     implementation(projects.foundation.network)
     implementation(projects.social.rss)
     implementation(projects.composeUi)

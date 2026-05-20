@@ -69,6 +69,8 @@ kotlin {
                 api(projects.social.microblog)
                 api(libs.kotlinx.coroutines.core)
                 api(libs.okio)
+                api(dependencies.platform(libs.koin.bom))
+                api(libs.koin.core)
             }
         }
         val commonTest by getting {

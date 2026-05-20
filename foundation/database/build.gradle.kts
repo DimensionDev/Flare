@@ -45,6 +45,8 @@ kotlin {
                 api(libs.sqlite)
                 implementation(libs.sqlite.async)
                 implementation(libs.kotlinx.serialization.json)
+                api(dependencies.platform(libs.koin.bom))
+                api(libs.koin.core)
             }
         }
 

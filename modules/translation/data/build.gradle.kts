@@ -64,6 +64,8 @@ kotlin {
                 api(projects.social.model)
                 api(projects.ui.richtext)
                 implementation(projects.foundation.network)
+                api(dependencies.platform(libs.koin.bom))
+                api(libs.koin.core)
             }
         }
         val commonTest by getting {

@@ -64,6 +64,9 @@ kotlin {
                 api(projects.social.api)
                 api(projects.ui.model)
                 api(libs.kotlinx.coroutines.core)
+                implementation(projects.social.microblog)
+                api(dependencies.platform(libs.koin.bom))
+                api(libs.koin.core)
             }
         }
     }

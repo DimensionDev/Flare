@@ -57,6 +57,8 @@ kotlin {
                 implementation(projects.foundation.network)
                 implementation(libs.ktor.client.logging)
                 implementation(libs.openai.client)
+                api(dependencies.platform(libs.koin.bom))
+                api(libs.koin.core)
             }
         }
         val commonTest by getting {

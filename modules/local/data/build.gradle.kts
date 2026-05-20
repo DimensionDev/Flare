@@ -56,6 +56,8 @@ kotlin {
                 api(projects.modules.local.model)
                 api(libs.kotlinx.coroutines.core)
                 api(libs.kotlinx.immutable)
+                api(dependencies.platform(libs.koin.bom))
+                api(libs.koin.core)
             }
         }
     }

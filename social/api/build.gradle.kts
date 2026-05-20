@@ -25,7 +25,8 @@ kotlin {
                 api(projects.core.common)
                 api(projects.core.deeplink)
                 api(projects.core.model)
-                api(projects.presentation.model)
+                api(projects.modules.account.api)
+                api(projects.social.model)
                 api(projects.social.microblog)
                 api(libs.kotlinx.immutable)
             }

@@ -33,7 +33,7 @@ kotlin {
         }
 
     targets.configureEach {
-        if (name != "wasmJs") {
+        if (name != "wasmJs" && name != "metadata") {
             compilations.configureEach {
                 if (name == "main") {
                     compileTaskProvider.configure {
@@ -54,6 +54,7 @@ kotlin {
             dependencies {
                 api(projects.core.common)
                 api(projects.core.deeplink)
+                api(projects.core.model)
                 api(dependencies.platform(libs.compose.bom))
                 api(libs.compose.runtime)
                 api(libs.kotlinx.coroutines.core)

@@ -23,7 +23,8 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 api(projects.core.model)
-                api(projects.presentation.model)
+                api(projects.modules.account.api)
+                api(projects.social.model)
                 api(projects.foundation.network)
                 api(projects.social.api)
                 api(projects.social.microblog)

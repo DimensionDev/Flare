@@ -20,7 +20,7 @@ kotlin {
     }
 
     targets.configureEach {
-        if (name != "wasmJs") {
+        if (name != "wasmJs" && name != "metadata") {
             compilations.configureEach {
                 compileTaskProvider.configure {
                     compilerOptions {

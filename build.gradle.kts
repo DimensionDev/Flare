@@ -63,7 +63,10 @@ val validateModuleBoundaries by tasks.registering {
         val socialPlatformModules =
             subprojects
                 .map { it.path }
-                .filter { it.startsWith(":social:") && it !in setOf(":social:api", ":social:microblog", ":social:nodeinfo") }
+                .filter {
+                    it.startsWith(":social:") &&
+                        it !in setOf(":social:api", ":social:microblog", ":social:model", ":social:nodeinfo")
+                }
                 .toSet()
 
         subprojects.forEach { project ->

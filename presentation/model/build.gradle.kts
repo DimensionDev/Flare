@@ -33,7 +33,7 @@ kotlin {
         }
 
     targets.configureEach {
-        if (name != "wasmJs") {
+        if (name != "wasmJs" && name != "metadata") {
             compilations.configureEach {
                 if (name == "main") {
                     compileTaskProvider.configure {
@@ -52,6 +52,8 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
+                api(projects.modules.account.api)
+                api(projects.social.model)
                 api(projects.ui.model)
                 api(projects.ui.richtext)
                 api(projects.core.common)

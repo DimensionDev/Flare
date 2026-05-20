@@ -33,7 +33,7 @@ kotlin {
         }
 
     targets.configureEach {
-        if (name != "wasmJs") {
+        if (name != "wasmJs" && name != "metadata") {
             compilations.configureEach {
                 if (name == "main") {
                     compileTaskProvider.configure {

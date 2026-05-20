@@ -5,6 +5,7 @@ plugins {
     id("dev.dimension.flare.multiplatform-library")
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 kotlin {
@@ -16,5 +17,54 @@ kotlin {
             FlarePlatform.IOS,
             FlarePlatform.WEB,
         )
+    }
+
+    tasks
+        .withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask<*>>()
+        .configureEach {
+            if (name == "compileCommonMainKotlinMetadata") {
+                compilerOptions {
+                    freeCompilerArgs.addAll(
+                        "-module-name",
+                        "flare_social_model_commonMain",
+                    )
+                }
+            }
+        }
+
+    targets.configureEach {
+        if (name != "wasmJs" && name != "metadata") {
+            compilations.configureEach {
+                if (name == "main") {
+                    compileTaskProvider.configure {
+                        compilerOptions {
+                            freeCompilerArgs.addAll(
+                                "-module-name",
+                                "flare_social_model",
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    sourceSets {
+        val commonMain by getting {
+            dependencies {
+                api(projects.core.common)
+                api(projects.core.deeplink)
+                api(projects.core.model)
+                api(projects.ui.model)
+                api(projects.ui.richtext)
+                api(dependencies.platform(libs.compose.bom))
+                api(libs.compose.runtime)
+                api(libs.kotlinx.immutable)
+                api(libs.kotlinx.serialization.json)
+                implementation(dependencies.platform(libs.koin.bom))
+                implementation(libs.koin.core)
+                implementation(libs.ksoup)
+            }
+        }
     }
 }

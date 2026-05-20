@@ -29,7 +29,8 @@ kotlin {
             dependencies {
                 api(projects.core.common)
                 api(projects.core.model)
-                api(projects.presentation.model)
+                api(projects.modules.account.api)
+                api(projects.social.model)
                 api(projects.foundation.database)
                 api(libs.paging.common)
                 implementation(dependencies.platform(libs.koin.bom))

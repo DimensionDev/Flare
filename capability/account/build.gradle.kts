@@ -31,7 +31,8 @@ kotlin {
                 api(projects.foundation.database)
                 api(projects.capability.settings)
                 api(projects.social.api)
-                api(projects.presentation.model)
+                api(projects.modules.account.api)
+                api(projects.ui.model)
                 api(libs.kotlinx.coroutines.core)
             }
         }

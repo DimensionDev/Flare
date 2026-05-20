@@ -1,26 +1,22 @@
 package dev.dimension.flare.data.draft
 
 import androidx.room3.Room
+import dev.dimension.flare.common.FileItem
 import dev.dimension.flare.common.FileType
-import dev.dimension.flare.createTestFileItem
-import dev.dimension.flare.createTestRootPath
-import dev.dimension.flare.data.database.memoryDatabaseBuilder
 import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.app.model.DraftContent
 import dev.dimension.flare.data.database.app.model.DraftMediaType
 import dev.dimension.flare.data.database.app.model.DraftReferenceType
 import dev.dimension.flare.data.database.app.model.DraftTargetStatus
 import dev.dimension.flare.data.database.app.model.DraftVisibility
+import dev.dimension.flare.data.database.memoryDatabaseBuilder
 import dev.dimension.flare.data.datasource.microblog.ComposeData
-import dev.dimension.flare.data.io.OkioFileStorage
-import dev.dimension.flare.deleteTestRootPath
+import dev.dimension.flare.data.io.FakeFileStorage
 import dev.dimension.flare.model.MicroBlogKey
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
-import okio.FileSystem
 import okio.Path.Companion.toPath
-import okio.SYSTEM
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -30,16 +26,14 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
 class DraftRepositoryTest {
-    private val root = createTestRootPath()
-    private val fileSystem = FileSystem.SYSTEM
-    private val fileStorage = OkioFileStorage(fileSystem, root)
-
+    private lateinit var fileStorage: FakeFileStorage
     private lateinit var db: AppDatabase
     private lateinit var repository: DraftRepository
     private lateinit var mediaStore: DraftMediaStore
 
     @BeforeTest
     fun setup() {
+        fileStorage = FakeFileStorage()
         db =
             Room
                 .memoryDatabaseBuilder<AppDatabase>()
@@ -52,7 +46,6 @@ class DraftRepositoryTest {
     @AfterTest
     fun tearDown() {
         db.close()
-        deleteTestRootPath(root)
     }
 
     @Test
@@ -185,7 +178,7 @@ class DraftRepositoryTest {
                     medias =
                         listOf(
                             ComposeData.Media(
-                                file = createTestFileItem(root = root, name = "a.png", bytes = byteArrayOf(1, 2, 3), type = FileType.Image),
+                                file = fileItem(name = "a.png", bytes = byteArrayOf(1, 2, 3), type = FileType.Image),
                                 altText = "cover",
                             ),
                         ),
@@ -203,7 +196,7 @@ class DraftRepositoryTest {
             repository.deleteGroup("group-media-delete")
 
             assertNull(repository.draft("group-media-delete").first())
-            assertFalse(fileSystem.exists(persistedMedia.single().cachePath.toPath()))
+            assertFalse(fileStorage.exists(persistedMedia.single().cachePath.toPath()))
         }
 
     @Test
@@ -252,5 +245,16 @@ class DraftRepositoryTest {
             visibility = DraftVisibility.Public,
             language = listOf("en"),
             sensitive = false,
+        )
+
+    private fun fileItem(
+        name: String?,
+        bytes: ByteArray,
+        type: FileType,
+    ): FileItem =
+        FileItem(
+            name,
+            type,
+            { bytes },
         )
 }

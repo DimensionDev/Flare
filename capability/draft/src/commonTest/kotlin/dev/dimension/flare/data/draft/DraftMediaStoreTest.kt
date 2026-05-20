@@ -1,17 +1,14 @@
 package dev.dimension.flare.data.draft
 
+import dev.dimension.flare.common.FileItem
 import dev.dimension.flare.common.FileType
-import dev.dimension.flare.createTestFileItem
-import dev.dimension.flare.createTestRootPath
 import dev.dimension.flare.data.database.app.model.DraftMediaType
 import dev.dimension.flare.data.datasource.microblog.ComposeData
-import dev.dimension.flare.data.io.OkioFileStorage
-import dev.dimension.flare.deleteTestRootPath
+import dev.dimension.flare.data.io.FakeFileStorage
 import kotlinx.coroutines.test.runTest
-import okio.FileSystem
+import okio.Path
 import okio.Path.Companion.toPath
-import okio.SYSTEM
-import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
@@ -21,13 +18,12 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class DraftMediaStoreTest {
-    private val root = createTestRootPath()
-    private val fileSystem = FileSystem.SYSTEM
-    private val fileStorage = OkioFileStorage(fileSystem, root)
+    private val root = "/draft-media-store-test".toPath()
+    private lateinit var fileStorage: FakeFileStorage
 
-    @AfterTest
-    fun tearDown() {
-        deleteTestRootPath(root)
+    @BeforeTest
+    fun setup() {
+        fileStorage = FakeFileStorage(root)
     }
 
     @Test
@@ -44,7 +40,7 @@ class DraftMediaStoreTest {
 
             assertEquals(2, persisted.size)
             persisted.forEach {
-                assertTrue(fileSystem.exists(it.cachePath.toPath()))
+                assertTrue(fileStorage.exists(it.cachePath.toPath()))
             }
 
             val restored = store.restore(persisted.mapIndexed { index, media -> media.toDraftMedia("group-1", index) })
@@ -57,9 +53,9 @@ class DraftMediaStoreTest {
             store.delete(persisted.mapIndexed { index, media -> media.toDraftMedia("group-1", index) })
 
             persisted.forEach {
-                assertFalse(fileSystem.exists(it.cachePath.toPath()))
+                assertFalse(fileStorage.exists(it.cachePath.toPath()))
             }
-            assertFalse(fileSystem.exists(root.resolve("draft_media").resolve("group-1")))
+            assertFalse(fileStorage.exists(root.resolve("draft_media").resolve("group-1")))
         }
 
     @Test
@@ -81,12 +77,12 @@ class DraftMediaStoreTest {
             assertEquals(firstPersist.map { it.cachePath }, secondPersist.map { it.cachePath })
             assertEquals(
                 2,
-                fileSystem
+                fileStorage
                     .list(root.resolve("draft_media").resolve("group-2"))
                     .size,
             )
             secondPersist.forEach {
-                assertTrue(fileSystem.exists(it.cachePath.toPath()))
+                assertTrue(fileStorage.exists(it.cachePath.toPath()))
             }
         }
 
@@ -105,7 +101,7 @@ class DraftMediaStoreTest {
             val updatedMedia =
                 listOf(
                     restored.single().copy(
-                        file = createTestFileItem(root = root, name = "a.png", bytes = byteArrayOf(9, 8, 7), type = FileType.Image),
+                        file = fileItem(name = "a.png", bytes = byteArrayOf(9, 8, 7), type = FileType.Image),
                     ),
                 )
 
@@ -114,7 +110,7 @@ class DraftMediaStoreTest {
             assertEquals(firstPersist.single().cachePath, secondPersist.single().cachePath)
             assertContentEquals(
                 byteArrayOf(9, 8, 7),
-                fileSystem.read(secondPersist.single().cachePath.toPath()) { readByteArray() },
+                fileStorage.read(secondPersist.single().cachePath.toPath()),
             )
         }
 
@@ -145,11 +141,11 @@ class DraftMediaStoreTest {
 
             assertTrue(firstPersist[0].cachePath in newPaths)
             assertTrue(secondPersist.any { it.fileName == "c.png" })
-            assertFalse(fileSystem.exists(removedPath.toPath()))
+            assertFalse(fileStorage.exists(removedPath.toPath()))
             assertEquals(2, newPaths.size)
             assertTrue(newPaths.any { it !in originalPaths })
             secondPersist.forEach {
-                assertTrue(fileSystem.exists(it.cachePath.toPath()))
+                assertTrue(fileStorage.exists(it.cachePath.toPath()))
             }
         }
 
@@ -170,7 +166,7 @@ class DraftMediaStoreTest {
             assertNull(persisted[0].fileName)
             assertEquals("", persisted[1].fileName)
             persisted.forEach {
-                assertTrue(fileSystem.exists(it.cachePath.toPath()))
+                assertTrue(fileStorage.exists(it.cachePath.toPath()))
                 assertTrue(
                     it.cachePath
                         .toPath()
@@ -201,9 +197,7 @@ class DraftMediaStoreTest {
             assertEquals(fallbackFileName, secondPersist.fileName)
             assertContentEquals(
                 byteArrayOf(7),
-                fileSystem.read(secondPersist.cachePath.toPath()) {
-                    readByteArray()
-                },
+                fileStorage.read(secondPersist.cachePath.toPath()),
             )
         }
 
@@ -220,7 +214,7 @@ class DraftMediaStoreTest {
                 )
 
             assertEquals(1, persisted.size)
-            assertTrue(fileSystem.exists(persisted.single().cachePath.toPath()))
+            assertTrue(fileStorage.exists(persisted.single().cachePath.toPath()))
             assertEquals(
                 "0_a__b__c___.png",
                 persisted
@@ -252,7 +246,7 @@ class DraftMediaStoreTest {
                     .toPath()
                     .name,
             )
-            assertTrue(fileSystem.exists(persisted.single().cachePath.toPath()))
+            assertTrue(fileStorage.exists(persisted.single().cachePath.toPath()))
         }
 
     @Test
@@ -272,10 +266,10 @@ class DraftMediaStoreTest {
 
             assertTrue(secondPersist.isEmpty())
             firstPersist.forEach {
-                assertFalse(fileSystem.exists(it.cachePath.toPath()))
+                assertFalse(fileStorage.exists(it.cachePath.toPath()))
             }
             val groupDir = root.resolve("draft_media").resolve("group-6")
-            assertTrue(!fileSystem.exists(groupDir) || fileSystem.list(groupDir).isEmpty())
+            assertTrue(!fileStorage.exists(groupDir) || fileStorage.list(groupDir).isEmpty())
         }
 
     @Test
@@ -286,12 +280,7 @@ class DraftMediaStoreTest {
                 DraftMedia(
                     mediaId = "missing",
                     groupId = "group-7",
-                    cachePath =
-                        root
-                            .resolve("draft_media")
-                            .resolve("group-7")
-                            .resolve("missing.png")
-                            .toString(),
+                    cachePath = fileStorage.draftMediaFile("group-7", "missing.png").toString(),
                     fileName = "missing.png",
                     mediaType = DraftMediaType.IMAGE,
                     altText = null,
@@ -311,8 +300,8 @@ class DraftMediaStoreTest {
             store.delete(listOf(missing, persisted))
             store.delete(listOf(missing, persisted))
 
-            assertFalse(fileSystem.exists(persisted.cachePath.toPath()))
-            assertFalse(fileSystem.exists(missing.cachePath.toPath()))
+            assertFalse(fileStorage.exists(persisted.cachePath.toPath()))
+            assertFalse(fileStorage.exists(missing.cachePath.toPath()))
         }
 
     @Test
@@ -323,12 +312,7 @@ class DraftMediaStoreTest {
                 DraftMedia(
                     mediaId = "missing-restore",
                     groupId = "group-restore-fail",
-                    cachePath =
-                        root
-                            .resolve("draft_media")
-                            .resolve("group-restore-fail")
-                            .resolve("missing.png")
-                            .toString(),
+                    cachePath = fileStorage.draftMediaFile("group-restore-fail", "missing.png").toString(),
                     fileName = "missing.png",
                     mediaType = DraftMediaType.IMAGE,
                     altText = null,
@@ -348,13 +332,13 @@ class DraftMediaStoreTest {
     @Test
     fun persistFailsWhenDraftDirectoryCannotBeCreated() =
         runTest {
-            val blockedParent = root.resolve("blocked")
-            fileSystem.write(blockedParent) {
-                writeUtf8("not a directory")
-            }
             val blockedStore =
                 DraftMediaStore(
-                    OkioFileStorage(fileSystem, blockedParent),
+                    FakeFileStorage(
+                        onCreateDirectories = { path: Path ->
+                            error("Cannot create directory: $path")
+                        },
+                    ),
                 )
 
             assertFailsWith<Throwable> {
@@ -374,8 +358,19 @@ class DraftMediaStoreTest {
         altText: String?,
     ): ComposeData.Media =
         ComposeData.Media(
-            file = createTestFileItem(root = root, name = name, bytes = bytes, type = type),
+            file = fileItem(name = name, bytes = bytes, type = type),
             altText = altText,
+        )
+
+    private fun fileItem(
+        name: String?,
+        bytes: ByteArray,
+        type: FileType,
+    ): FileItem =
+        FileItem(
+            name,
+            type,
+            { bytes },
         )
 
     private fun SaveDraftMedia.toDraftMedia(

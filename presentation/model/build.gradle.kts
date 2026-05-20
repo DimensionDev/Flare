@@ -52,6 +52,8 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
+                api(projects.ui.model)
+                api(projects.ui.richtext)
                 api(projects.core.common)
                 api(projects.core.deeplink)
                 api(projects.core.model)

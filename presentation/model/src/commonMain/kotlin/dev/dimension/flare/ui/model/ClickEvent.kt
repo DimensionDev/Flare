@@ -5,10 +5,6 @@ import dev.dimension.flare.ui.route.DeeplinkRoute
 import dev.dimension.flare.ui.route.toUri
 import kotlinx.serialization.Serializable
 
-public data class ClickContext(
-    public val launcher: UriLauncher,
-)
-
 @Serializable
 public sealed interface ClickEvent {
     @Serializable

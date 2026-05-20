@@ -1,7 +1,6 @@
 package dev.dimension.flare.data.database.cache.dao
 
 import androidx.room3.Room
-import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.model.DbTranslation
@@ -10,7 +9,7 @@ import dev.dimension.flare.data.database.cache.model.TranslationEntityType
 import dev.dimension.flare.data.database.cache.model.TranslationPayload
 import dev.dimension.flare.data.database.cache.model.TranslationStatus
 import dev.dimension.flare.data.database.cache.model.profileTranslationEntityKey
-import dev.dimension.flare.memoryDatabaseBuilder
+import dev.dimension.flare.data.database.memoryDatabaseBuilder
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.render.toUiPlainText
 import kotlinx.coroutines.Dispatchers
@@ -31,7 +30,6 @@ class TranslationDaoTest : RobolectricTest() {
         db =
             Room
                 .memoryDatabaseBuilder<CacheDatabase>()
-                .setDriver(BundledSQLiteDriver())
                 .setQueryCoroutineContext(Dispatchers.Unconfined)
                 .build()
     }

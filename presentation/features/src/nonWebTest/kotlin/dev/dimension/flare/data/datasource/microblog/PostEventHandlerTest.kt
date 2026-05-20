@@ -1,7 +1,6 @@
 package dev.dimension.flare.data.datasource.microblog
 
 import androidx.room3.Room
-import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.common.SerializableImmutableList
 import dev.dimension.flare.common.TestFormatter
@@ -9,7 +8,7 @@ import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
 import dev.dimension.flare.data.database.cache.model.DbStatus
 import dev.dimension.flare.data.datasource.microblog.handler.PostEventHandler
-import dev.dimension.flare.memoryDatabaseBuilder
+import dev.dimension.flare.data.database.memoryDatabaseBuilder
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
@@ -56,7 +55,6 @@ class PostEventHandlerTest : RobolectricTest() {
         db =
             Room
                 .memoryDatabaseBuilder<CacheDatabase>()
-                .setDriver(BundledSQLiteDriver())
                 .setQueryCoroutineContext(Dispatchers.Unconfined)
                 .build()
 

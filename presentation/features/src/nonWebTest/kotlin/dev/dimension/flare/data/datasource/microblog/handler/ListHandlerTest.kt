@@ -2,7 +2,6 @@ package dev.dimension.flare.data.datasource.microblog.handler
 
 import androidx.paging.testing.asSnapshot
 import androidx.room3.Room
-import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.datasource.microblog.list.ListMetaData
@@ -10,7 +9,7 @@ import dev.dimension.flare.data.datasource.microblog.list.ListMetaDataType
 import dev.dimension.flare.data.datasource.microblog.loader.ListLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
-import dev.dimension.flare.memoryDatabaseBuilder
+import dev.dimension.flare.data.database.memoryDatabaseBuilder
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiList
@@ -46,7 +45,6 @@ class ListHandlerTest : RobolectricTest() {
         db =
             Room
                 .memoryDatabaseBuilder<CacheDatabase>()
-                .setDriver(BundledSQLiteDriver())
                 .setQueryCoroutineContext(Dispatchers.Unconfined)
                 .build()
 

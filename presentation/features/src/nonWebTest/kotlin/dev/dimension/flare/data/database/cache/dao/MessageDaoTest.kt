@@ -1,13 +1,12 @@
 package dev.dimension.flare.data.database.cache.dao
 
 import androidx.room3.Room
-import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.common.TestFormatter
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.model.DbDirectMessageTimeline
 import dev.dimension.flare.data.database.cache.model.DbMessageItem
-import dev.dimension.flare.memoryDatabaseBuilder
+import dev.dimension.flare.data.database.memoryDatabaseBuilder
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
@@ -43,7 +42,6 @@ class MessageDaoTest : RobolectricTest() {
         db =
             Room
                 .memoryDatabaseBuilder<CacheDatabase>()
-                .setDriver(BundledSQLiteDriver())
                 .setQueryCoroutineContext(Dispatchers.Unconfined)
                 .build()
         startKoin {

@@ -2,14 +2,13 @@ package dev.dimension.flare.data.datasource.microblog.handler
 
 import androidx.paging.LoadState
 import androidx.room3.Room
-import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.common.CacheState
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.model.DbEmoji
 import dev.dimension.flare.data.database.cache.model.EmojiContent
 import dev.dimension.flare.data.datasource.microblog.loader.EmojiLoader
-import dev.dimension.flare.memoryDatabaseBuilder
+import dev.dimension.flare.data.database.memoryDatabaseBuilder
 import dev.dimension.flare.ui.model.UiEmoji
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
@@ -43,7 +42,6 @@ class EmojiHandlerTest : RobolectricTest() {
         db =
             Room
                 .memoryDatabaseBuilder<CacheDatabase>()
-                .setDriver(BundledSQLiteDriver())
                 .setQueryCoroutineContext(Dispatchers.Unconfined)
                 .build()
 

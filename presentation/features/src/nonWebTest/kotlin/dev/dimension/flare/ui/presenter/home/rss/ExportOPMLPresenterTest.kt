@@ -1,13 +1,12 @@
 package dev.dimension.flare.ui.presenter.home.rss
 
 import androidx.room3.Room
-import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import app.cash.molecule.RecompositionMode
 import app.cash.molecule.moleculeFlow
 import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.app.model.DbRssSources
-import dev.dimension.flare.memoryDatabaseBuilder
+import dev.dimension.flare.data.database.memoryDatabaseBuilder
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.isSuccess
 import dev.dimension.flare.ui.model.takeSuccess
@@ -35,7 +34,6 @@ class ExportOPMLPresenterTest : RobolectricTest() {
         val db =
             Room
                 .memoryDatabaseBuilder<AppDatabase>()
-                .setDriver(BundledSQLiteDriver())
                 .setQueryCoroutineContext(Dispatchers.Unconfined)
                 .build()
         this.db = db

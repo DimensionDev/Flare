@@ -2,7 +2,6 @@ package dev.dimension.flare.data.datasource.microblog.handler
 
 import androidx.paging.LoadState
 import androidx.room3.Room
-import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.common.CacheState
 import dev.dimension.flare.common.Locale
@@ -36,7 +35,7 @@ import dev.dimension.flare.data.translation.PreTranslationService
 import dev.dimension.flare.data.translation.PreTranslationStoreSupport
 import dev.dimension.flare.data.translation.aiPreTranslateConfig
 import dev.dimension.flare.deleteTestRootPath
-import dev.dimension.flare.memoryDatabaseBuilder
+import dev.dimension.flare.data.database.memoryDatabaseBuilder
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.humanizer.PlatformFormatter
@@ -89,7 +88,6 @@ class UserHandlerTest : RobolectricTest() {
         db =
             Room
                 .memoryDatabaseBuilder<CacheDatabase>()
-                .setDriver(BundledSQLiteDriver())
                 .setQueryCoroutineContext(Dispatchers.Unconfined)
                 .build()
         appDataStore = AppDataStore(OkioFileStorage(FileSystem.SYSTEM, root))

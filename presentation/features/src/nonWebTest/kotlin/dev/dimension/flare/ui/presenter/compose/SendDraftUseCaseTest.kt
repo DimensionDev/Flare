@@ -1,7 +1,6 @@
 package dev.dimension.flare.ui.presenter.compose
 
 import androidx.room3.Room
-import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.common.FileType
 import dev.dimension.flare.createTestFileItem
@@ -21,7 +20,7 @@ import dev.dimension.flare.data.draft.SaveDraftMedia
 import dev.dimension.flare.data.draft.SaveDraftTarget
 import dev.dimension.flare.data.io.OkioFileStorage
 import dev.dimension.flare.deleteTestRootPath
-import dev.dimension.flare.memoryDatabaseBuilder
+import dev.dimension.flare.data.database.memoryDatabaseBuilder
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiTimelineV2
@@ -58,7 +57,6 @@ class SendDraftUseCaseTest : RobolectricTest() {
         db =
             Room
                 .memoryDatabaseBuilder<AppDatabase>()
-                .setDriver(BundledSQLiteDriver())
                 .setQueryCoroutineContext(Dispatchers.Unconfined)
                 .build()
         mediaStore = DraftMediaStore(fileStorage)

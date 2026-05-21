@@ -1,7 +1,6 @@
 package dev.dimension.flare.common
 
 import androidx.paging.LoadState
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
@@ -10,8 +9,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.withContext
-
-internal expect val cacheDataDispatcher: CoroutineDispatcher
 
 public class Cacheable<T>(
     fetchSource: suspend () -> Unit,
@@ -74,7 +71,7 @@ public sealed class CacheData<T>(
                 emit(LoadState.Loading)
                 emit(
                     try {
-                        withContext(cacheDataDispatcher) {
+                        withContext(PlatformDispatchers.IO) {
                             fetchSource.invoke()
                         }
                         LoadState.NotLoading(true)

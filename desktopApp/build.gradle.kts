@@ -20,6 +20,7 @@ dependencies {
     implementation(projects.foundation.network)
     implementation(projects.foundation.filesystem)
     implementation(projects.social.rss)
+    implementation(projects.social.rss.model)
     implementation(projects.composeUi)
 
     implementation(compose("org.jetbrains.compose.runtime:runtime"))

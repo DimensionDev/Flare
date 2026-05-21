@@ -33,6 +33,7 @@ kotlin {
                 api(projects.social.microblog)
                 api(projects.modules.account.api)
                 api(projects.social.model)
+                api(projects.social.rss.model)
                 implementation(projects.social.api)
                 implementation(dependencies.platform(libs.koin.bom))
                 implementation(libs.koin.core)

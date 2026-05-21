@@ -38,6 +38,7 @@ kotlin {
                 implementation(projects.core.common)
                 api(projects.core.model)
                 api(projects.social.model)
+                api(projects.social.rss.model)
                 api(libs.kotlinx.coroutines.core)
                 api(libs.paging.common)
                 api(libs.room.runtime)

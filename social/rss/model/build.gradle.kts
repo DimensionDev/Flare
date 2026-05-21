@@ -10,7 +10,7 @@ plugins {
 
 kotlin {
     flare {
-        namespace = "dev.dimension.flare.social.model"
+        namespace = "dev.dimension.flare.social.rss.model"
         platforms(
             FlarePlatform.ANDROID,
             FlarePlatform.JVM,
@@ -26,7 +26,7 @@ kotlin {
                 compilerOptions {
                     freeCompilerArgs.addAll(
                         "-module-name",
-                        "flare_social_model_commonMain",
+                        "flare_social_rss_model_commonMain",
                     )
                 }
             }
@@ -40,7 +40,7 @@ kotlin {
                         compilerOptions {
                             freeCompilerArgs.addAll(
                                 "-module-name",
-                                "flare_social_model",
+                                "flare_social_rss_model",
                             )
                         }
                     }
@@ -52,24 +52,7 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                api(projects.core.common)
-                api(projects.core.deeplink)
-                api(projects.core.model)
-                api(projects.social.rss.model)
-                implementation(projects.core.humanizer)
-                implementation(projects.foundation.filesystem)
-                api(projects.ui.model)
-                api(projects.ui.richtext)
-                api(dependencies.platform(libs.compose.bom))
-                api(libs.compose.runtime)
-                api(libs.kotlinx.immutable)
                 api(libs.kotlinx.serialization.json)
-                implementation(libs.ksoup)
-            }
-        }
-        val commonTest by getting {
-            dependencies {
-                implementation(kotlin("test"))
             }
         }
     }

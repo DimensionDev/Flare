@@ -70,6 +70,7 @@ kotlin {
                 api(projects.social.microblog)
                 implementation(projects.social.nodeinfo)
                 implementation(projects.social.rss)
+                api(projects.social.rss.model)
                 implementation(projects.social.vvo)
                 implementation(projects.social.xqt)
                 api(projects.ui.presenterRuntime)

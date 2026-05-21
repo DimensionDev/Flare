@@ -11,7 +11,7 @@ import java.util.Locale
 import kotlin.time.Clock
 import kotlin.time.Instant
 
-internal class AndroidFormatter(
+public class AndroidFormatter public constructor(
     private val context: Context,
 ) : PlatformFormatter {
     override fun formatNumber(number: Long): String {

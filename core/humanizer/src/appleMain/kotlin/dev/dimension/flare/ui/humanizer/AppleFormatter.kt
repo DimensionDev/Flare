@@ -19,7 +19,7 @@ public interface SwiftFormatter {
     public fun formatNumber(number: Long): String
 }
 
-internal class AppleFormatter(
+public class AppleFormatter public constructor(
     private val formatter: SwiftFormatter,
 ) : PlatformFormatter {
     override fun formatNumber(number: Long): String = formatter.formatNumber(number)

@@ -22,7 +22,7 @@ public fun updateTimeFormatterLocale(locale: Locale) {
     prettyTime.setLocale(locale)
 }
 
-internal class JVMFormatter : PlatformFormatter {
+public class JVMFormatter : PlatformFormatter {
     override fun formatNumber(number: Long): String {
         val fmt =
             NumberFormat.getCompactNumberInstance(

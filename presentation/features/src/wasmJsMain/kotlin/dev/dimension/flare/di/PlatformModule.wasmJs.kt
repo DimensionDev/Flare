@@ -11,31 +11,21 @@ import dev.dimension.flare.data.io.FileStorage
 import dev.dimension.flare.data.io.createFileStorage
 import dev.dimension.flare.media.ImageCompressor
 import dev.dimension.flare.ui.humanizer.PlatformFormatter
+import dev.dimension.flare.ui.humanizer.WebFormatter
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
-import kotlin.time.Instant
 
 internal actual val platformModule: Module =
     module {
         single { AppDataStore(get<FileStorage>()) }
         singleOf(::DriverFactory)
         single<FileStorage> { createFileStorage() }
-        single<PlatformFormatter> { WebPlatformFormatter }
+        single<PlatformFormatter> { WebFormatter }
         single<ImageCompressor> { WebImageCompressor }
         single<OnDeviceAI> { WebOnDeviceAI }
         single<InAppNotification> { NoopInAppNotification }
     }
-
-private data object WebPlatformFormatter : PlatformFormatter {
-    override fun formatNumber(number: Long): String = number.toString()
-
-    override fun formatRelativeInstant(instant: Instant): String = instant.toString()
-
-    override fun formatFullInstant(instant: Instant): String = instant.toString()
-
-    override fun formatAbsoluteInstant(instant: Instant): String = instant.toString()
-}
 
 private data object WebImageCompressor : ImageCompressor {
     override suspend fun compress(

@@ -25,5 +25,21 @@ kotlin {
                 api(libs.koin.core)
             }
         }
+        val androidMain by getting {
+            dependencies {
+                implementation(libs.kotlinx.datetime)
+            }
+        }
+        val jvmMain by getting {
+            dependencies {
+                implementation(libs.kotlinx.datetime)
+                implementation(libs.prettytime)
+            }
+        }
+        val appleMain by getting {
+            dependencies {
+                implementation(libs.kotlinx.datetime)
+            }
+        }
     }
 }

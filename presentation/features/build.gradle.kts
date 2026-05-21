@@ -135,7 +135,6 @@ kotlin {
         val jvmMain by getting {
             dependencies {
                 implementation(libs.commons.lang3)
-                implementation(libs.prettytime)
                 implementation(libs.jna)
             }
         }

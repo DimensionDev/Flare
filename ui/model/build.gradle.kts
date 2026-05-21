@@ -60,8 +60,6 @@ kotlin {
                 api(libs.compose.runtime)
                 api(libs.kotlinx.coroutines.core)
                 api(libs.kotlinx.serialization.json)
-                implementation(dependencies.platform(libs.koin.bom))
-                implementation(libs.koin.core)
             }
         }
     }

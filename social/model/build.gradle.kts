@@ -62,8 +62,6 @@ kotlin {
                 api(libs.compose.runtime)
                 api(libs.kotlinx.immutable)
                 api(libs.kotlinx.serialization.json)
-                implementation(dependencies.platform(libs.koin.bom))
-                implementation(libs.koin.core)
                 implementation(libs.ksoup)
             }
         }

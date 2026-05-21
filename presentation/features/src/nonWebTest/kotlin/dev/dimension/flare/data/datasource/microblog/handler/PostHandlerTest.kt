@@ -16,8 +16,8 @@ import dev.dimension.flare.data.database.cache.mapper.saveToDatabase
 import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
 import dev.dimension.flare.data.database.cache.model.DbStatus
 import dev.dimension.flare.data.database.cache.model.DbStatusReference
-import dev.dimension.flare.data.database.cache.model.TranslationEntityType
-import dev.dimension.flare.data.database.cache.model.TranslationStatus
+import dev.dimension.flare.data.translation.TranslationEntityType
+import dev.dimension.flare.data.translation.TranslationStatus
 import dev.dimension.flare.data.database.memoryDatabaseBuilder
 import dev.dimension.flare.data.datasource.microblog.loader.PostLoader
 import dev.dimension.flare.data.datastore.AppDataStore

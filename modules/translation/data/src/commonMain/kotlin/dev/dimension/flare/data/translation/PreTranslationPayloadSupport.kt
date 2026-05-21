@@ -1,7 +1,6 @@
 package dev.dimension.flare.data.translation
 
 import dev.dimension.flare.common.encodeJson
-import dev.dimension.flare.data.database.cache.model.TranslationPayload
 import dev.dimension.flare.ui.render.TranslationDocument
 import dev.dimension.flare.ui.render.UiRichText
 import dev.dimension.flare.ui.render.applyTranslationDocument

@@ -18,8 +18,8 @@ import dev.dimension.flare.data.ai.OpenAIService
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.TimelinePagingMapper
 import dev.dimension.flare.data.database.cache.model.DbStatusWithReference
-import dev.dimension.flare.data.database.cache.model.TranslationEntityType
-import dev.dimension.flare.data.database.cache.model.TranslationStatus
+import dev.dimension.flare.data.translation.TranslationEntityType
+import dev.dimension.flare.data.translation.TranslationStatus
 import dev.dimension.flare.data.database.memoryDatabaseBuilder
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest

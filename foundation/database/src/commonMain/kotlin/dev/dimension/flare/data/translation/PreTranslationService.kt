@@ -2,7 +2,7 @@ package dev.dimension.flare.data.translation
 
 import dev.dimension.flare.data.database.cache.model.DbStatus
 import dev.dimension.flare.data.database.cache.model.DbUser
-import dev.dimension.flare.data.database.cache.model.TranslationDisplayMode
+import dev.dimension.flare.data.translation.TranslationDisplayMode
 
 public interface PreTranslationService {
     public fun enqueueStatuses(

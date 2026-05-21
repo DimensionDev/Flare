@@ -1,6 +1,5 @@
 package dev.dimension.flare.data.translation
 
-import dev.dimension.flare.data.database.cache.model.TranslationPayload
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.render.RenderContent
 import dev.dimension.flare.ui.render.RenderRun

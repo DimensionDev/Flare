@@ -8,7 +8,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import dev.dimension.flare.common.deeplink.DeepLinkMapping
 import dev.dimension.flare.data.account.AccountRepository
-import dev.dimension.flare.data.database.cache.model.TranslationDisplayMode
+import dev.dimension.flare.data.translation.TranslationDisplayMode
 import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
 import dev.dimension.flare.data.repository.accountServiceFlow
 import dev.dimension.flare.data.translation.PreTranslationService

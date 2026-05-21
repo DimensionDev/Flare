@@ -1,14 +1,14 @@
 package dev.dimension.flare.data.database.cache.mapper
 
 import dev.dimension.flare.common.Locale
-import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.database.cache.model.DbTranslation
-import dev.dimension.flare.data.database.cache.model.TranslationDisplayMode
-import dev.dimension.flare.data.database.cache.model.TranslationPayload
-import dev.dimension.flare.data.database.cache.model.TranslationStatus
 import dev.dimension.flare.data.database.cache.model.canRetrySkippedManually
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
+import dev.dimension.flare.data.translation.TranslationDisplayMode
 import dev.dimension.flare.data.translation.TranslationDisplayOptions
+import dev.dimension.flare.data.translation.TranslationPayload
+import dev.dimension.flare.data.translation.TranslationStatus
+import dev.dimension.flare.data.translation.sourceHash
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.DeeplinkEvent
@@ -155,13 +155,6 @@ public fun UiProfile.translationPayload(): TranslationPayload =
         description = description,
     )
 
-public fun TranslationPayload.sourceHash(providerCacheKey: String): String =
-    buildString {
-        append(providerCacheKey)
-        append('\u0000')
-        append(encodeJson(TranslationPayload.serializer()))
-    }.stableTranslationHash()
-
 private fun DbTranslation?.toDisplayState(): TranslationDisplayState =
     when (this?.status) {
         TranslationStatus.Pending,
@@ -260,13 +253,4 @@ private enum class TranslationMenuAction {
     Retry,
     Translate,
     ShowOriginal,
-}
-
-private fun String.stableTranslationHash(): String {
-    var hash = -0x340d631b8c4674c3L
-    encodeToByteArray().forEach { byte ->
-        hash = hash xor (byte.toLong() and 0xffL)
-        hash *= 0x100000001b3L
-    }
-    return hash.toULong().toString(16)
 }

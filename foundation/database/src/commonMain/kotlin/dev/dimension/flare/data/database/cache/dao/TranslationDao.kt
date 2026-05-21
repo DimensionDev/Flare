@@ -5,10 +5,10 @@ import androidx.room3.Insert
 import androidx.room3.OnConflictStrategy
 import androidx.room3.Query
 import dev.dimension.flare.data.database.cache.model.DbTranslation
-import dev.dimension.flare.data.database.cache.model.TranslationDisplayMode
-import dev.dimension.flare.data.database.cache.model.TranslationEntityType
-import dev.dimension.flare.data.database.cache.model.TranslationPayload
-import dev.dimension.flare.data.database.cache.model.TranslationStatus
+import dev.dimension.flare.data.translation.TranslationDisplayMode
+import dev.dimension.flare.data.translation.TranslationEntityType
+import dev.dimension.flare.data.translation.TranslationPayload
+import dev.dimension.flare.data.translation.TranslationStatus
 import kotlinx.coroutines.flow.Flow
 
 @Dao

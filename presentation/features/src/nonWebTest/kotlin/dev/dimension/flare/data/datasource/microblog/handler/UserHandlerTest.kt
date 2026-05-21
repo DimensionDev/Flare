@@ -14,11 +14,11 @@ import dev.dimension.flare.data.ai.OpenAIService
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.model.DbTranslation
 import dev.dimension.flare.data.database.cache.model.DbUser
-import dev.dimension.flare.data.database.cache.model.TranslationEntityType
-import dev.dimension.flare.data.database.cache.model.TranslationPayload
-import dev.dimension.flare.data.database.cache.model.TranslationStatus
+import dev.dimension.flare.data.translation.TranslationEntityType
+import dev.dimension.flare.data.translation.TranslationPayload
+import dev.dimension.flare.data.translation.TranslationStatus
 import dev.dimension.flare.data.database.cache.model.translationEntityKey
-import dev.dimension.flare.data.database.cache.mapper.sourceHash
+import dev.dimension.flare.data.translation.sourceHash
 import dev.dimension.flare.data.database.cache.mapper.translationPayload
 import dev.dimension.flare.data.database.memoryDatabaseBuilder
 import dev.dimension.flare.data.datasource.microblog.loader.UserLoader

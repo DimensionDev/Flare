@@ -14,12 +14,12 @@ import dev.dimension.flare.data.database.cache.model.DbStatusReference
 import dev.dimension.flare.data.database.cache.model.DbStatusReferenceWithStatus
 import dev.dimension.flare.data.database.cache.model.DbStatusWithReference
 import dev.dimension.flare.data.database.cache.model.DbTranslation
-import dev.dimension.flare.data.database.cache.model.TranslationDisplayMode
-import dev.dimension.flare.data.database.cache.model.TranslationEntityType
-import dev.dimension.flare.data.database.cache.model.TranslationPayload
-import dev.dimension.flare.data.database.cache.model.TranslationStatus
+import dev.dimension.flare.data.translation.TranslationDisplayMode
+import dev.dimension.flare.data.translation.TranslationEntityType
+import dev.dimension.flare.data.translation.TranslationPayload
+import dev.dimension.flare.data.translation.TranslationStatus
 import dev.dimension.flare.data.database.cache.model.translationEntityKey
-import dev.dimension.flare.data.database.cache.mapper.sourceHash
+import dev.dimension.flare.data.translation.sourceHash
 import dev.dimension.flare.data.database.cache.mapper.translationPayload
 import dev.dimension.flare.data.database.memoryDatabaseBuilder
 import dev.dimension.flare.data.datasource.microblog.ActionMenu

@@ -7,11 +7,14 @@ import androidx.room3.PrimaryKey
 import androidx.room3.TypeConverter
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.common.encodeJson
+import dev.dimension.flare.data.translation.TRANSLATION_SKIPPED_EXCLUDED_LANGUAGE_REASON
+import dev.dimension.flare.data.translation.TranslationDisplayMode
+import dev.dimension.flare.data.translation.TranslationEntityType
+import dev.dimension.flare.data.translation.TranslationPayload
+import dev.dimension.flare.data.translation.TranslationStatus
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiProfile
-import dev.dimension.flare.ui.render.UiRichText
-import kotlinx.serialization.Serializable
 
 @Entity(
     indices = [
@@ -37,41 +40,9 @@ public data class DbTranslation(
     public val id: String = "${entityType.name}:$entityKey:$targetLanguage",
 )
 
-@Serializable
-public enum class TranslationEntityType {
-    Status,
-    Profile,
-}
-
-@Serializable
-public enum class TranslationStatus {
-    Pending,
-    Translating,
-    Completed,
-    Failed,
-    Skipped,
-}
-
-@Serializable
-public enum class TranslationDisplayMode {
-    Auto,
-    Original,
-    Translated,
-}
-
-public const val TRANSLATION_SKIPPED_EXCLUDED_LANGUAGE_REASON: String = "source_language_excluded"
-
 public fun DbTranslation?.canRetrySkippedManually(): Boolean =
     this?.status == TranslationStatus.Skipped &&
         statusReason == TRANSLATION_SKIPPED_EXCLUDED_LANGUAGE_REASON
-
-@Serializable
-public data class TranslationPayload(
-    public val content: UiRichText? = null,
-    public val contentWarning: UiRichText? = null,
-    public val title: UiRichText? = null,
-    public val description: UiRichText? = null,
-)
 
 public class TranslationConverters {
     @TypeConverter

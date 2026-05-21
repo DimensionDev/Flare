@@ -2,13 +2,10 @@ package dev.dimension.flare.data.io
 
 import android.content.Context
 import androidx.datastore.dataStoreFile
-import okio.FileSystem
 import okio.Path
 import okio.Path.Companion.toOkioPath
 
-public fun createFileStorage(context: Context): FileStorage = OkioFileStorage(FileSystem.SYSTEM, AndroidPlatformPathProducer(context))
-
-internal class AndroidPlatformPathProducer(
+public class AndroidPlatformPathProducer(
     private val context: Context,
 ) : PlatformPathProducer {
     override fun dataStoreFile(fileName: String): Path = context.dataStoreFile(fileName).toOkioPath()

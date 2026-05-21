@@ -8,7 +8,7 @@ import dev.dimension.flare.data.ai.OnDeviceAI
 import dev.dimension.flare.data.database.DriverFactory
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.io.FileStorage
-import dev.dimension.flare.data.io.createFileStorage
+import dev.dimension.flare.data.io.InMemoryFileStorage
 import dev.dimension.flare.media.ImageCompressor
 import dev.dimension.flare.ui.humanizer.PlatformFormatter
 import dev.dimension.flare.ui.humanizer.WebFormatter
@@ -20,7 +20,7 @@ internal actual val platformModule: Module =
     module {
         single { AppDataStore(get<FileStorage>()) }
         singleOf(::DriverFactory)
-        single<FileStorage> { createFileStorage() }
+        single<FileStorage> { InMemoryFileStorage() }
         single<PlatformFormatter> { WebFormatter }
         single<ImageCompressor> { WebImageCompressor }
         single<OnDeviceAI> { WebOnDeviceAI }

@@ -1,7 +1,6 @@
 package dev.dimension.flare.data.io
 
 import kotlinx.cinterop.ExperimentalForeignApi
-import okio.FileSystem
 import okio.Path
 import okio.Path.Companion.toPath
 import platform.Foundation.NSDocumentDirectory
@@ -9,9 +8,7 @@ import platform.Foundation.NSFileManager
 import platform.Foundation.NSURL
 import platform.Foundation.NSUserDomainMask
 
-public fun createFileStorage(): FileStorage = OkioFileStorage(FileSystem.SYSTEM, ApplePlatformPathProducer())
-
-internal class ApplePlatformPathProducer : PlatformPathProducer {
+public class ApplePlatformPathProducer : PlatformPathProducer {
     override fun dataStoreFile(fileName: String): Path = "${fileDirectory()}/$fileName".toPath()
 
     override fun draftMediaFile(

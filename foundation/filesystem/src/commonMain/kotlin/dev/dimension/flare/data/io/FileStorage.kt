@@ -28,7 +28,7 @@ public interface FileStorage {
     public fun list(path: Path): List<Path>
 }
 
-public class OkioFileStorage internal constructor(
+public class OkioFileStorage(
     public val fileSystem: FileSystem,
     private val platformPathProducer: PlatformPathProducer,
 ) : FileStorage {

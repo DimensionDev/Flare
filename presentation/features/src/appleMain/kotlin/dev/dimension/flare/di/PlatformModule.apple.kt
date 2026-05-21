@@ -6,8 +6,9 @@ import dev.dimension.flare.data.database.DriverFactory
 import dev.dimension.flare.data.datasource.nostr.DatabaseNostrCache
 import dev.dimension.flare.data.datasource.nostr.NostrCache
 import dev.dimension.flare.data.datastore.AppDataStore
+import dev.dimension.flare.data.io.ApplePlatformPathProducer
 import dev.dimension.flare.data.io.FileStorage
-import dev.dimension.flare.data.io.createFileStorage
+import dev.dimension.flare.data.io.OkioFileStorage
 import dev.dimension.flare.data.network.nostr.AmberSignerBridge
 import dev.dimension.flare.data.network.nostr.AppleAmberSignerBridge
 import dev.dimension.flare.media.ImageCompressor
@@ -16,6 +17,7 @@ import dev.dimension.flare.ui.humanizer.AppleFormatter
 import dev.dimension.flare.ui.humanizer.PlatformFormatter
 import dev.dimension.flare.ui.render.ApplePlatformTextRenderer
 import dev.dimension.flare.ui.render.PlatformTextRendering
+import okio.FileSystem
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.bind
@@ -25,7 +27,7 @@ internal actual val platformModule: Module =
     module {
         single { AppDataStore(get<FileStorage>()) }
         singleOf(::DriverFactory)
-        single<FileStorage> { createFileStorage() }
+        single<FileStorage> { OkioFileStorage(FileSystem.SYSTEM, ApplePlatformPathProducer()) }
         singleOf(::AppleFormatter) bind PlatformFormatter::class
         singleOf(::ApplePlatformTextRenderer) bind PlatformTextRendering::class
         singleOf(::IosImageCompressor) bind ImageCompressor::class

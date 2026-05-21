@@ -7,13 +7,15 @@ import dev.dimension.flare.data.datasource.nostr.DatabaseNostrCache
 import dev.dimension.flare.data.datasource.nostr.NostrCache
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.io.FileStorage
-import dev.dimension.flare.data.io.createFileStorage
+import dev.dimension.flare.data.io.JvmPlatformPathProducer
+import dev.dimension.flare.data.io.OkioFileStorage
 import dev.dimension.flare.data.network.nostr.AmberSignerBridge
 import dev.dimension.flare.data.network.nostr.JvmAmberSignerBridge
 import dev.dimension.flare.media.ImageCompressor
 import dev.dimension.flare.media.JvmImageCompressor
 import dev.dimension.flare.ui.humanizer.JVMFormatter
 import dev.dimension.flare.ui.humanizer.PlatformFormatter
+import okio.FileSystem
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.bind
@@ -23,7 +25,7 @@ internal actual val platformModule: Module =
     module {
         single { AppDataStore(get<FileStorage>()) }
         singleOf(::DriverFactory)
-        single<FileStorage> { createFileStorage() }
+        single<FileStorage> { OkioFileStorage(FileSystem.SYSTEM, JvmPlatformPathProducer()) }
         singleOf(::JVMFormatter) bind PlatformFormatter::class
         singleOf(::JvmImageCompressor) bind ImageCompressor::class
         singleOf(::JvmOnDeviceAI) bind OnDeviceAI::class

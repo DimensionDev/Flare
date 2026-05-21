@@ -1,7 +1,12 @@
-package dev.dimension.flare.data.database.cache.model
+package dev.dimension.flare.data.database.cache.mapper
 
 import dev.dimension.flare.common.Locale
 import dev.dimension.flare.common.encodeJson
+import dev.dimension.flare.data.database.cache.model.DbTranslation
+import dev.dimension.flare.data.database.cache.model.TranslationDisplayMode
+import dev.dimension.flare.data.database.cache.model.TranslationPayload
+import dev.dimension.flare.data.database.cache.model.TranslationStatus
+import dev.dimension.flare.data.database.cache.model.canRetrySkippedManually
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.translation.TranslationDisplayOptions
 import dev.dimension.flare.model.AccountType

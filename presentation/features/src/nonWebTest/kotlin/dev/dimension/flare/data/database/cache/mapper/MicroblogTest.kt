@@ -18,9 +18,9 @@ import dev.dimension.flare.data.database.cache.model.TranslationDisplayMode
 import dev.dimension.flare.data.database.cache.model.TranslationEntityType
 import dev.dimension.flare.data.database.cache.model.TranslationPayload
 import dev.dimension.flare.data.database.cache.model.TranslationStatus
-import dev.dimension.flare.data.database.cache.model.sourceHash
 import dev.dimension.flare.data.database.cache.model.translationEntityKey
-import dev.dimension.flare.data.database.cache.model.translationPayload
+import dev.dimension.flare.data.database.cache.mapper.sourceHash
+import dev.dimension.flare.data.database.cache.mapper.translationPayload
 import dev.dimension.flare.data.database.memoryDatabaseBuilder
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datastore.model.AppSettings

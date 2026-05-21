@@ -6,6 +6,7 @@ struct GroupConfigScreen: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.timelineAppearance) private var baseTimelineAppearance
     let item: GroupTimelineTabItemV2?
+    let onConfirm: (GroupTimelineTabItemV2?) -> Void
     @State private var name: String
     @State private var icon: IconType
     @State private var enabled: Bool
@@ -18,8 +19,12 @@ struct GroupConfigScreen: View {
     @State private var editItem: TimelineTabItemV2? = nil
     @StateObject private var presenter: KotlinPresenter<GroupConfigPresenterState>
 
-    init(item: GroupTimelineTabItemV2? = nil) {
+    init(
+        item: GroupTimelineTabItemV2? = nil,
+        onConfirm: @escaping (GroupTimelineTabItemV2?) -> Void
+    ) {
         self.item = item
+        self.onConfirm = onConfirm
         _name = State(initialValue: item?.title.text ?? "")
         _icon = State(initialValue: item?.icon ?? IconType.Material(icon: .rss))
         _enabled = State(initialValue: item?.enabled ?? true)
@@ -167,16 +172,19 @@ struct GroupConfigScreen: View {
             }
             ToolbarItem(placement: .confirmationAction) {
                 Button {
-                    presenter.state.commit(
-                        initialItem: item,
-                        name: name,
-                        icon: icon,
-                        appearancePatch: appearancePatch,
-                        enabled: enabled,
-                        tabs: tabs,
-                        mergePolicy: mergePolicy,
-                        filterConfig: filterConfig,
-                        defaultGroupName: NSLocalizedString("tab_settings_group_default_name", comment: "")
+                    let defaultGroupName = NSLocalizedString("tab_settings_group_default_name", comment: "")
+                    onConfirm(
+                        presenter.state.buildGroupItem(
+                            initialItem: item,
+                            name: name,
+                            icon: icon,
+                            appearancePatch: appearancePatch,
+                            enabled: enabled,
+                            tabs: tabs,
+                            mergePolicy: mergePolicy,
+                            filterConfig: filterConfig,
+                            defaultGroupName: defaultGroupName
+                        )
                     )
                     dismiss()
                 } label: {

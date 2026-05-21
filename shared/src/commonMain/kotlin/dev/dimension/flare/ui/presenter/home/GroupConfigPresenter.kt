@@ -43,6 +43,38 @@ public class GroupConfigPresenter :
         return object : State {
             override val availableIcons: ImmutableList<IconType> = availableIcons
 
+            override fun buildGroupItem(
+                initialItem: GroupTimelineTabItemV2?,
+                name: String,
+                icon: IconType,
+                appearancePatch: AppearancePatch?,
+                enabled: Boolean,
+                tabs: List<TimelineTabItemV2>,
+                mergePolicy: TimelineMergePolicy,
+                filterConfig: TimelineFilterConfig,
+                defaultGroupName: String,
+            ): GroupTimelineTabItemV2? {
+                val childSlots =
+                    tabs
+                        .distinctBy { it.id }
+                        .map { timelineResolver.toSlot(it) }
+                if (childSlots.isEmpty()) {
+                    return null
+                }
+                return timelineResolver.toTabItem(
+                    buildGroupSlot(
+                        name = name,
+                        icon = icon,
+                        appearancePatch = appearancePatch,
+                        enabled = enabled,
+                        mergePolicy = mergePolicy,
+                        filterConfig = filterConfig,
+                        defaultGroupName = defaultGroupName,
+                        childSlots = childSlots,
+                    ),
+                ) as GroupTimelineTabItemV2
+            }
+
             override fun commit(
                 initialItem: GroupTimelineTabItemV2?,
                 name: String,
@@ -77,6 +109,18 @@ public class GroupConfigPresenter :
     @Immutable
     public interface State {
         public val availableIcons: ImmutableList<IconType>
+
+        public fun buildGroupItem(
+            initialItem: GroupTimelineTabItemV2?,
+            name: String,
+            icon: IconType,
+            appearancePatch: AppearancePatch?,
+            enabled: Boolean,
+            tabs: List<TimelineTabItemV2>,
+            mergePolicy: TimelineMergePolicy = initialItem?.mergePolicy ?: TimelineMergePolicy.TimePerPage,
+            filterConfig: TimelineFilterConfig = initialItem?.filterConfig ?: TimelineFilterConfig(),
+            defaultGroupName: String,
+        ): GroupTimelineTabItemV2?
 
         public fun commit(
             initialItem: GroupTimelineTabItemV2?,

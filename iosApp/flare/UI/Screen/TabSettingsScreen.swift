@@ -165,13 +165,17 @@ struct TabSettingsScreen: View {
         })) {
             NavigationStack {
                 if let item = editGroup {
-                    GroupConfigScreen(item: item)
+                    GroupConfigScreen(item: item) { updated in
+                        upsertGroup(initialItem: item, updatedItem: updated)
+                    }
                 }
             }
         }
         .sheet(isPresented: $showCreateGroup) {
             NavigationStack {
-                GroupConfigScreen(item: nil)
+                GroupConfigScreen(item: nil) { updated in
+                    upsertGroup(initialItem: nil, updatedItem: updated)
+                }
             }
         }
         .sheet(isPresented: Binding(get: {
@@ -224,6 +228,23 @@ struct TabSettingsScreen: View {
             .compactMap { $0 as? GroupTimelineTabItemV2 }
             .first(where: { isSystemHomeMixedTimeline($0) })?
             .mergePolicy ?? .timePerPage
+    }
+
+    private func upsertGroup(
+        initialItem: GroupTimelineTabItemV2?,
+        updatedItem: GroupTimelineTabItemV2?
+    ) {
+        let targetIndex = initialItem
+            .flatMap { item in tabItems.firstIndex(where: { $0.id == item.id }) }
+            ?? tabItems.count
+
+        tabItems.removeAll { item in
+            item.id == initialItem?.id || item.id == updatedItem?.id
+        }
+
+        if let updatedItem {
+            tabItems.insert(updatedItem, at: min(targetIndex, tabItems.count))
+        }
     }
 }
 

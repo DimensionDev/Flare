@@ -22,9 +22,17 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
+                implementation(projects.core.common)
                 implementation(dependencies.platform(libs.compose.bom))
+                implementation(dependencies.platform(libs.koin.bom))
                 implementation(libs.compose.runtime)
+                implementation(libs.koin.core)
                 api(libs.kotlinx.serialization.json)
+            }
+        }
+        val appleMain by getting {
+            dependencies {
+                implementation(libs.kotlinx.datetime)
             }
         }
     }

@@ -33,11 +33,6 @@ kotlin {
                 implementation(libs.okio)
             }
         }
-        val appleMain by getting {
-            dependencies {
-                implementation(libs.kotlinx.datetime)
-            }
-        }
         val jvmMain by getting {
             dependencies {
                 implementation(libs.commons.lang3)

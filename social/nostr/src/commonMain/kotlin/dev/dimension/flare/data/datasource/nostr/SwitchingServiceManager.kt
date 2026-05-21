@@ -1,4 +1,4 @@
-package dev.dimension.flare.common
+package dev.dimension.flare.data.datasource.nostr
 
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
-public class SwitchingServiceManager<C, S : AutoCloseable>(
+internal class SwitchingServiceManager<C, S : AutoCloseable>(
     credentialFlow: Flow<C?>,
     parentScope: CoroutineScope,
     private val createService: suspend (C) -> S,
@@ -67,7 +67,7 @@ public class SwitchingServiceManager<C, S : AutoCloseable>(
             }
     }
 
-    public suspend fun <T> withService(block: suspend (S) -> T): T {
+    internal suspend fun <T> withService(block: suspend (S) -> T): T {
         while (true) {
             val snapshot = current.value ?: current.filterNotNull().first()
 

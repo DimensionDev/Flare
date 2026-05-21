@@ -49,7 +49,7 @@ public class DeepLinkPattern<T>(
      * order matters here - path segments need to match in value and order when matching
      * requested deeplink to supported deeplink
      */
-    public val pathSegments: List<PathSegment> =
+    internal val pathSegments: List<PathSegment> =
         buildList {
             uriPattern.rawSegments.forEach { segment ->
                 // first, check if it is a path arg
@@ -79,7 +79,7 @@ public class DeepLinkPattern<T>(
      *
      * This will be used later on to parse a provided query value into the correct KType
      */
-    public val queryValueParsers: Map<String, TypeParser> =
+    internal val queryValueParsers: Map<String, TypeParser> =
         buildMap {
             uriPattern.parameters.forEach { paramName, _ ->
                 val elementIndex = serializer.descriptor.getElementIndex(paramName)
@@ -91,19 +91,19 @@ public class DeepLinkPattern<T>(
     /**
      * Metadata about a supported path segment
      */
-    public class PathSegment(
-        public val stringValue: String,
-        public val isParamArg: Boolean,
-        public val typeParser: TypeParser,
-        public val prefix: String = "",
-        public val suffix: String = "",
+    internal class PathSegment(
+        internal val stringValue: String,
+        internal val isParamArg: Boolean,
+        internal val typeParser: TypeParser,
+        internal val prefix: String = "",
+        internal val suffix: String = "",
     )
 }
 
 /**
  * Parses a String into a Serializable Primitive
  */
-public typealias TypeParser = (String) -> Any
+internal typealias TypeParser = (String) -> Any
 
 private fun getTypeParser(kind: SerialKind): TypeParser =
     when (kind) {

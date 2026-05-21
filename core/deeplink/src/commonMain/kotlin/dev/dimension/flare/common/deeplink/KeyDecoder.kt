@@ -14,7 +14,7 @@ import kotlinx.serialization.modules.SerializersModule
  * **IMPORTANT** This decoder assumes that all argument types are Primitives.
  */
 @OptIn(ExperimentalSerializationApi::class)
-public class KeyDecoder(
+internal class KeyDecoder(
     private val arguments: Map<String, Any>,
 ) : AbstractDecoder() {
     override val serializersModule: SerializersModule = EmptySerializersModule()

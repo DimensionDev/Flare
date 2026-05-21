@@ -66,22 +66,10 @@ class DeepLinkMappingTest {
         val profile = patterns[0]
         assertEquals(DeepLinkMapping.Type.Profile.serializer(), profile.serializer)
         assertEquals(Url("https://$host/@{handle}"), profile.uriPattern)
-        assertEquals(
-            listOf("handle" to true),
-            profile.pathSegments
-                .filter { it.stringValue.isNotEmpty() }
-                .map { it.stringValue to it.isParamArg },
-        )
 
         val post = patterns[1]
         assertEquals(DeepLinkMapping.Type.Post.serializer(), post.serializer)
         assertEquals(Url("https://$host/@{handle}/{id}"), post.uriPattern)
-        assertEquals(
-            listOf("handle" to true, "id" to true),
-            post.pathSegments
-                .filter { it.stringValue.isNotEmpty() }
-                .map { it.stringValue to it.isParamArg },
-        )
     }
 
     @Test
@@ -95,22 +83,10 @@ class DeepLinkMappingTest {
         val profile = patterns[0]
         assertEquals(DeepLinkMapping.Type.Profile.serializer(), profile.serializer)
         assertEquals(Url("https://$host/@{handle}"), profile.uriPattern)
-        assertEquals(
-            listOf("handle" to true),
-            profile.pathSegments
-                .filter { it.stringValue.isNotEmpty() }
-                .map { it.stringValue to it.isParamArg },
-        )
 
         val post = patterns[1]
         assertEquals(DeepLinkMapping.Type.Post.serializer(), post.serializer)
         assertEquals(Url("https://$host/notes/{id}"), post.uriPattern)
-        assertEquals(
-            listOf("notes" to false, "id" to true),
-            post.pathSegments
-                .filter { it.stringValue.isNotEmpty() }
-                .map { it.stringValue to it.isParamArg },
-        )
     }
 
     @Test
@@ -124,22 +100,10 @@ class DeepLinkMappingTest {
         val profile = patterns[0]
         assertEquals(DeepLinkMapping.Type.Profile.serializer(), profile.serializer)
         assertEquals(Url("https://$host/profile/{handle}"), profile.uriPattern)
-        assertEquals(
-            listOf("profile" to false, "handle" to true),
-            profile.pathSegments
-                .filter { it.stringValue.isNotEmpty() }
-                .map { it.stringValue to it.isParamArg },
-        )
 
         val post = patterns[1]
         assertEquals(DeepLinkMapping.Type.BlueskyPost.serializer(), post.serializer)
         assertEquals(Url("https://$host/profile/{handle}/post/{id}"), post.uriPattern)
-        assertEquals(
-            listOf("profile" to false, "handle" to true, "post" to false, "id" to true),
-            post.pathSegments
-                .filter { it.stringValue.isNotEmpty() }
-                .map { it.stringValue to it.isParamArg },
-        )
     }
 
     @Test
@@ -153,38 +117,14 @@ class DeepLinkMappingTest {
         val profile = patterns[0]
         assertEquals(DeepLinkMapping.Type.Profile.serializer(), profile.serializer)
         assertEquals(Url("https://$host/{handle}"), profile.uriPattern)
-        assertEquals(
-            listOf("handle" to true),
-            profile.pathSegments
-                .filter { it.stringValue.isNotEmpty() }
-                .map { it.stringValue to it.isParamArg },
-        )
 
         val post = patterns[4]
         assertEquals(DeepLinkMapping.Type.Post.serializer(), post.serializer)
         assertEquals(Url("https://$host/{handle}/status/{id}"), post.uriPattern)
-        assertEquals(
-            listOf("handle" to true, "status" to false, "id" to true),
-            post.pathSegments
-                .filter { it.stringValue.isNotEmpty() }
-                .map { it.stringValue to it.isParamArg },
-        )
 
         val media = patterns[8]
         assertEquals(DeepLinkMapping.Type.PostMedia.serializer(), media.serializer)
         assertEquals(Url("https://$host/{handle}/status/{id}/photo/{index}"), media.uriPattern)
-        assertEquals(
-            listOf(
-                "handle" to true,
-                "status" to false,
-                "id" to true,
-                "photo" to false,
-                "index" to true,
-            ),
-            media.pathSegments
-                .filter { it.stringValue.isNotEmpty() }
-                .map { it.stringValue to it.isParamArg },
-        )
     }
 
     @Test

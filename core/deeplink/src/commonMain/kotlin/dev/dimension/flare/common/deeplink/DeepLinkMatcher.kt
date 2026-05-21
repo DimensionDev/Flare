@@ -2,9 +2,9 @@ package dev.dimension.flare.common.deeplink
 
 import kotlinx.serialization.KSerializer
 
-public class DeepLinkMatcher<T>(
-    public val request: DeepLinkRequest,
-    public val deepLinkPattern: DeepLinkPattern<T>,
+internal class DeepLinkMatcher<T>(
+    private val request: DeepLinkRequest,
+    private val deepLinkPattern: DeepLinkPattern<T>,
     private val errorLogger: (String) -> Unit = {},
 ) {
     /**
@@ -12,7 +12,7 @@ public class DeepLinkMatcher<T>(
      *
      * Returns a [DeepLinkMatchResult] if this matches the pattern, returns null otherwise
      */
-    public fun match(): DeepLinkMatchResult<T>? {
+    internal fun match(): DeepLinkMatchResult<T>? {
         if (request.pathSegments.size != deepLinkPattern.pathSegments.size) return null
         // exact match (url does not contain any arguments)
         if (request.uri == deepLinkPattern.uriPattern) {
@@ -90,9 +90,9 @@ public class DeepLinkMatcher<T>(
  * been parsed from the raw url string back into its proper KType as declared in [T].
  * Includes arguments for all parts of the uri - path, query, etc.
  * */
-public data class DeepLinkMatchResult<T>(
-    public val serializer: KSerializer<T>,
-    public val args: Map<String, Any>,
+internal data class DeepLinkMatchResult<T>(
+    internal val serializer: KSerializer<T>,
+    internal val args: Map<String, Any>,
 )
 
 private const val TAG_LOG_ERROR = "Nav3RecipesDeepLink"

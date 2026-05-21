@@ -10,7 +10,7 @@ plugins {
 
 kotlin {
     flare {
-        namespace = "dev.dimension.flare.modules.account.data"
+        namespace = "dev.dimension.flare.modules.account.model"
         platforms(
             FlarePlatform.ANDROID,
             FlarePlatform.JVM,
@@ -26,7 +26,7 @@ kotlin {
                 compilerOptions {
                     freeCompilerArgs.addAll(
                         "-module-name",
-                        "flare_account_data_commonMain",
+                        "flare_account_model_commonMain",
                     )
                 }
             }
@@ -40,7 +40,7 @@ kotlin {
                         compilerOptions {
                             freeCompilerArgs.addAll(
                                 "-module-name",
-                                "flare_account_data",
+                                "flare_account_model",
                             )
                         }
                     }
@@ -49,25 +49,13 @@ kotlin {
         }
     }
 
-    compilerOptions {
-        allWarningsAsErrors.set(false)
-    }
-
     sourceSets {
         val commonMain by getting {
             dependencies {
-                api(projects.core.common)
                 api(projects.core.model)
-                api(projects.foundation.database)
-                api(projects.modules.account.api)
-                api(projects.modules.account.model)
-                api(projects.modules.settings.data)
-                api(projects.social.api)
-                api(projects.ui.model)
-                api(libs.kotlinx.coroutines.core)
-                implementation(projects.social.microblog)
-                api(dependencies.platform(libs.koin.bom))
-                api(libs.koin.core)
+                api(dependencies.platform(libs.compose.bom))
+                api(libs.compose.runtime)
+                api(libs.kotlinx.serialization.json)
             }
         }
     }

@@ -54,6 +54,7 @@ kotlin {
             dependencies {
                 api(projects.core.common)
                 api(projects.core.model)
+                api(projects.modules.account.model)
                 api(dependencies.platform(libs.compose.bom))
                 api(libs.compose.runtime)
                 api(libs.kotlinx.coroutines.core)

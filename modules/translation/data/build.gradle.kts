@@ -60,6 +60,7 @@ kotlin {
                 api(projects.core.model)
                 api(projects.foundation.database)
                 api(projects.modules.ai.data)
+                implementation(projects.modules.account.model)
                 api(projects.modules.settings.data)
                 api(projects.social.model)
                 api(projects.ui.richtext)

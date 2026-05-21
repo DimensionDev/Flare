@@ -55,6 +55,7 @@ kotlin {
                 api(projects.core.common)
                 api(projects.core.deeplink)
                 api(projects.core.model)
+                api(projects.modules.account.model)
                 api(projects.social.rss.model)
                 implementation(projects.core.humanizer)
                 implementation(projects.foundation.filesystem)

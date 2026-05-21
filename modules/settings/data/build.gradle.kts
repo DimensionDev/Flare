@@ -60,6 +60,7 @@ kotlin {
                 api(projects.core.model)
                 api(projects.foundation.database)
                 api(projects.foundation.datastore)
+                implementation(projects.modules.account.model)
                 api(libs.datastore.core)
                 implementation(libs.kotlinx.serialization.json)
                 api(dependencies.platform(libs.koin.bom))

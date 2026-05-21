@@ -37,6 +37,7 @@ kotlin {
             dependencies {
                 implementation(projects.core.common)
                 api(projects.core.model)
+                api(projects.modules.account.model)
                 api(projects.social.model)
                 api(projects.social.rss.model)
                 api(libs.kotlinx.coroutines.core)

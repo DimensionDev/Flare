@@ -1,5 +1,7 @@
 package dev.dimension.flare.model
 
+public data object NoActiveAccountException : Exception("No active account.")
+
 public data class LoginExpiredException(
     val accountKey: MicroBlogKey,
     val platformType: PlatformType,

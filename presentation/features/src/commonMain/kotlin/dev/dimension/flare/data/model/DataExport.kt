@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonElement
 
 @Serializable
-public data class DataExport(
+internal data class DataExport(
     val appDatabase: JsonElement,
     val settings: JsonElement,
 )

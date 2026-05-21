@@ -25,7 +25,7 @@ import com.atproto.repo.CreateRecordResponse
 import com.atproto.repo.DeleteRecordRequest
 import com.atproto.repo.StrongRef
 import dev.dimension.flare.common.BasePagingSource
-import dev.dimension.flare.common.FileType
+import dev.dimension.flare.data.io.FileType
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.common.tryRun
 import dev.dimension.flare.data.account.CredentialProvider

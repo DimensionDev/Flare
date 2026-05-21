@@ -37,7 +37,7 @@ import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Rss
 import dev.dimension.flare.R
-import dev.dimension.flare.common.FileItem
+import dev.dimension.flare.data.io.FileItem
 import dev.dimension.flare.data.datasource.microblog.list.ListMetaData
 import dev.dimension.flare.data.datasource.microblog.list.ListMetaDataType
 import dev.dimension.flare.model.AccountType

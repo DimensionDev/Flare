@@ -56,6 +56,12 @@ kotlin {
             }
         }
 
+        val jvmMain by getting {
+            dependencies {
+                implementation(projects.foundation.filesystem)
+            }
+        }
+
         val wasmJsMain by getting {
             dependencies {
                 implementation(libs.sqlite.web)

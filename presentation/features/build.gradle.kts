@@ -102,6 +102,7 @@ kotlin {
         val commonTest by getting {
             dependencies {
                 implementation(kotlin("test"))
+                implementation(projects.foundation.filesystem)
                 implementation(libs.kotlinx.coroutines.test)
                 implementation(libs.paging.testing)
                 implementation(libs.ktor.client.mock)

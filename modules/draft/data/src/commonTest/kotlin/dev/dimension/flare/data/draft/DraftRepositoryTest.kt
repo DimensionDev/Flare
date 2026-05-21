@@ -1,8 +1,8 @@
 package dev.dimension.flare.data.draft
 
 import androidx.room3.Room
-import dev.dimension.flare.common.FileItem
-import dev.dimension.flare.common.FileType
+import dev.dimension.flare.data.io.FileItem
+import dev.dimension.flare.data.io.FileType
 import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.app.model.DraftContent
 import dev.dimension.flare.data.database.app.model.DraftMediaType

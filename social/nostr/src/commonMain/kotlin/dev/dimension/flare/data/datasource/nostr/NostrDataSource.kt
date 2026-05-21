@@ -1,6 +1,6 @@
 package dev.dimension.flare.data.datasource.nostr
 
-import dev.dimension.flare.common.FileType
+import dev.dimension.flare.data.io.FileType
 import dev.dimension.flare.common.SwitchingServiceManager
 import dev.dimension.flare.data.account.CredentialProvider
 import dev.dimension.flare.data.account.credentialFlow

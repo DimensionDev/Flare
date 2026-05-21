@@ -2,7 +2,7 @@ package dev.dimension.flare.ui.model
 
 import androidx.compose.runtime.Immutable
 import dev.dimension.flare.common.SerializableImmutableMap
-import dev.dimension.flare.common.sanitizeFileName
+import dev.dimension.flare.data.io.sanitizeFileName
 import kotlinx.serialization.Serializable
 
 @Serializable

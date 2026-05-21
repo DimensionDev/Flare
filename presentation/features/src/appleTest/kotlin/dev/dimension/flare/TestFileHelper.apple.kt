@@ -1,7 +1,7 @@
 package dev.dimension.flare
 
-import dev.dimension.flare.common.FileItem
-import dev.dimension.flare.common.FileType
+import dev.dimension.flare.data.io.FileItem
+import dev.dimension.flare.data.io.FileType
 import okio.FileSystem
 import okio.Path
 import okio.Path.Companion.toPath

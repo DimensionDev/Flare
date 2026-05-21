@@ -1,6 +1,6 @@
 package dev.dimension.flare.data.network.mastodon
 
-import dev.dimension.flare.common.MimeTypes
+import dev.dimension.flare.data.io.MimeTypes
 import dev.dimension.flare.data.network.ktorfit
 import dev.dimension.flare.data.network.mastodon.api.AccountResources
 import dev.dimension.flare.data.network.mastodon.api.FriendshipResources

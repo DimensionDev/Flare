@@ -26,6 +26,7 @@ kotlin {
                 api(projects.modules.account.api)
                 api(projects.social.model)
                 api(projects.foundation.database)
+                api(projects.foundation.filesystem)
                 api(projects.social.api)
                 api(projects.social.microblog)
                 implementation(projects.foundation.network)

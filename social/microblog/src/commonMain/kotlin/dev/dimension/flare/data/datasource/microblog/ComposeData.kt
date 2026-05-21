@@ -1,6 +1,6 @@
 package dev.dimension.flare.data.datasource.microblog
 
-import dev.dimension.flare.common.FileItem
+import dev.dimension.flare.data.io.FileItem
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 

@@ -32,6 +32,7 @@ kotlin {
                 api(projects.modules.account.api)
                 api(projects.social.model)
                 api(projects.foundation.database)
+                api(projects.foundation.filesystem)
                 api(libs.paging.common)
                 implementation(dependencies.platform(libs.koin.bom))
                 implementation(libs.koin.core)

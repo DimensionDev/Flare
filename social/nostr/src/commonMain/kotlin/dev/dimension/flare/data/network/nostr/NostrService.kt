@@ -1,6 +1,6 @@
 package dev.dimension.flare.data.network.nostr
 
-import dev.dimension.flare.common.FileType
+import dev.dimension.flare.data.io.FileType
 import dev.dimension.flare.common.JSON
 import dev.dimension.flare.common.jsonObjectOrNull
 import dev.dimension.flare.data.datasource.microblog.ActionMenu

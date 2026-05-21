@@ -48,7 +48,7 @@ import compose.icons.fontawesomeicons.solid.Rss
 import compose.icons.fontawesomeicons.solid.Trash
 import compose.icons.fontawesomeicons.solid.UserPen
 import dev.dimension.flare.R
-import dev.dimension.flare.common.FileItem
+import dev.dimension.flare.data.io.FileItem
 import dev.dimension.flare.common.onEmpty
 import dev.dimension.flare.common.onError
 import dev.dimension.flare.common.onLoading

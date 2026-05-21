@@ -7,7 +7,7 @@ import androidx.paging.cachedIn
 import androidx.paging.map
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.common.Cacheable
-import dev.dimension.flare.common.FileType
+import dev.dimension.flare.data.io.FileType
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.common.tryRun

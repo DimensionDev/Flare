@@ -2,7 +2,7 @@ package dev.dimension.flare.data.database
 
 import androidx.room3.Room
 import androidx.room3.RoomDatabase
-import dev.dimension.flare.common.FileSystemUtilsExt
+import dev.dimension.flare.data.io.FileSystemUtilsExt
 import java.io.File
 
 public actual class DriverFactory {

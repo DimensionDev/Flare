@@ -2,7 +2,7 @@ package dev.dimension.flare.data.datasource.mastodon
 
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.map
-import dev.dimension.flare.common.FileType
+import dev.dimension.flare.data.io.FileType
 import dev.dimension.flare.common.tryRun
 import dev.dimension.flare.data.account.CredentialProvider
 import dev.dimension.flare.data.account.credentialFlow

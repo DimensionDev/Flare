@@ -18,6 +18,7 @@ dependencies {
     implementation(projects.core.humanizer)
     implementation(projects.modules.draft.presentation)
     implementation(projects.foundation.network)
+    implementation(projects.foundation.filesystem)
     implementation(projects.social.rss)
     implementation(projects.composeUi)
 

@@ -56,6 +56,7 @@ kotlin {
                 api(projects.core.deeplink)
                 api(projects.core.model)
                 implementation(projects.core.humanizer)
+                implementation(projects.foundation.filesystem)
                 api(projects.ui.model)
                 api(projects.ui.richtext)
                 api(dependencies.platform(libs.compose.bom))

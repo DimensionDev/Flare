@@ -78,7 +78,7 @@ import compose.icons.fontawesomeicons.solid.Download
 import compose.icons.fontawesomeicons.solid.Image
 import compose.icons.fontawesomeicons.solid.Link
 import dev.dimension.flare.R
-import dev.dimension.flare.common.sanitizeFileName
+import dev.dimension.flare.data.io.sanitizeFileName
 import dev.dimension.flare.data.model.VideoAutoplay
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey

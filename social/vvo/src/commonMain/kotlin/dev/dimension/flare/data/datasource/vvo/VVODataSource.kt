@@ -4,8 +4,8 @@ import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadState
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.common.CacheState
-import dev.dimension.flare.common.FileItem
-import dev.dimension.flare.common.FileType
+import dev.dimension.flare.data.io.FileItem
+import dev.dimension.flare.data.io.FileType
 import dev.dimension.flare.common.MemCacheable
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.data.account.CredentialProvider

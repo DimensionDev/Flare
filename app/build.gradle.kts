@@ -128,6 +128,7 @@ dependencies {
     implementation(projects.modules.draft.presentation)
     implementation(projects.modules.ai.data)
     implementation(projects.foundation.network)
+    implementation(projects.foundation.filesystem)
     implementation(projects.social.rss)
     implementation(projects.composeUi)
     implementation(libs.androidx.splash)

@@ -59,7 +59,7 @@ import compose.icons.fontawesomeicons.solid.TriangleExclamation
 import compose.icons.fontawesomeicons.solid.Xmark
 import dev.dimension.flare.Res
 import dev.dimension.flare.cancel
-import dev.dimension.flare.common.FileItem
+import dev.dimension.flare.data.io.FileItem
 import dev.dimension.flare.common.ImageClipboardManager
 import dev.dimension.flare.common.ImageDragAndDropTarget
 import dev.dimension.flare.compose_close_confirm_message

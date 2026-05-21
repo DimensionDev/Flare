@@ -1,8 +1,8 @@
 package dev.dimension.flare.data.draft
 
-import dev.dimension.flare.common.FileItem
-import dev.dimension.flare.common.FileType
-import dev.dimension.flare.common.sanitizeFileName
+import dev.dimension.flare.data.io.FileItem
+import dev.dimension.flare.data.io.FileType
+import dev.dimension.flare.data.io.sanitizeFileName
 import dev.dimension.flare.data.database.app.model.DraftMediaType
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.io.FileStorage

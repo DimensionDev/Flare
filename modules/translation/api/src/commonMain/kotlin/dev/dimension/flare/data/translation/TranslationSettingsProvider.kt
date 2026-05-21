@@ -1,6 +1,5 @@
-package dev.dimension.flare.data.database.cache.model
+package dev.dimension.flare.data.translation
 
-import dev.dimension.flare.data.translation.TranslationDisplayOptions
 import kotlinx.coroutines.flow.Flow
 
 public interface TranslationSettingsProvider {

@@ -16,7 +16,6 @@ import dev.dimension.flare.data.database.cache.model.DbTranslation
 import dev.dimension.flare.data.database.cache.model.DbUser
 import dev.dimension.flare.data.database.cache.model.TranslationEntityType
 import dev.dimension.flare.data.database.cache.model.TranslationPayload
-import dev.dimension.flare.data.database.cache.model.TranslationSettingsProvider
 import dev.dimension.flare.data.database.cache.model.TranslationStatus
 import dev.dimension.flare.data.database.cache.model.sourceHash
 import dev.dimension.flare.data.database.cache.model.translationEntityKey
@@ -34,6 +33,7 @@ import dev.dimension.flare.data.translation.PreTranslationBatchPayload
 import dev.dimension.flare.data.translation.PreTranslationContentRules
 import dev.dimension.flare.data.translation.PreTranslationService
 import dev.dimension.flare.data.translation.PreTranslationStoreSupport
+import dev.dimension.flare.data.translation.TranslationSettingsProvider
 import dev.dimension.flare.data.translation.aiPreTranslateConfig
 import dev.dimension.flare.deleteTestRootPath
 import dev.dimension.flare.model.MicroBlogKey

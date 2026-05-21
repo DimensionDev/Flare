@@ -1,9 +1,9 @@
 package dev.dimension.flare.data.draft
 
-import dev.dimension.flare.data.database.app.model.DraftMediaType
-import dev.dimension.flare.data.database.app.model.DraftTargetStatus
-import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.model.UiAccount
+import dev.dimension.flare.data.account.AccountLookup
+import dev.dimension.flare.model.draft.DraftGroup
+import dev.dimension.flare.model.draft.DraftMediaType
+import dev.dimension.flare.model.draft.DraftTargetStatus
 import dev.dimension.flare.ui.model.UiDraft
 import dev.dimension.flare.ui.model.UiDraftAccount
 import dev.dimension.flare.ui.model.UiDraftMedia
@@ -16,13 +16,13 @@ import kotlin.time.Instant
 
 public class RestoreDraftUseCase(
     private val draftRepository: DraftRepository,
-    private val findAccount: suspend (MicroBlogKey) -> UiAccount?,
+    private val accountLookup: AccountLookup,
 ) {
     public suspend operator fun invoke(groupId: String): UiDraft? {
         val draft = draftRepository.draft(groupId).firstOrNull() ?: return null
         val accounts =
             draft.targets.mapNotNull { target ->
-                findAccount(target.accountKey)?.let {
+                accountLookup.find(target.accountKey)?.let {
                     UiDraftAccount(account = it)
                 }
             }

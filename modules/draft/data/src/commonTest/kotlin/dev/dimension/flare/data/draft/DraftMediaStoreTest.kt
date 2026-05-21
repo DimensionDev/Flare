@@ -2,9 +2,11 @@ package dev.dimension.flare.data.draft
 
 import dev.dimension.flare.data.io.FileItem
 import dev.dimension.flare.data.io.FileType
-import dev.dimension.flare.data.database.app.model.DraftMediaType
+import dev.dimension.flare.data.database.app.model.DraftMediaType as DbDraftMediaType
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.io.FakeFileStorage
+import dev.dimension.flare.model.draft.DraftMedia
+import dev.dimension.flare.model.draft.DraftMediaType
 import kotlinx.coroutines.test.runTest
 import okio.Path
 import okio.Path.Companion.toPath
@@ -381,9 +383,16 @@ class DraftMediaStoreTest {
         groupId = groupId,
         cachePath = cachePath,
         fileName = fileName,
-        mediaType = mediaType,
+        mediaType = mediaType.toModel(),
         altText = altText,
         sortOrder = sortOrder ?: index,
         createdAt = createdAt ?: 0L,
     )
+
+    private fun DbDraftMediaType.toModel(): DraftMediaType =
+        when (this) {
+            DbDraftMediaType.IMAGE -> DraftMediaType.IMAGE
+            DbDraftMediaType.VIDEO -> DraftMediaType.VIDEO
+            DbDraftMediaType.OTHER -> DraftMediaType.OTHER
+        }
 }

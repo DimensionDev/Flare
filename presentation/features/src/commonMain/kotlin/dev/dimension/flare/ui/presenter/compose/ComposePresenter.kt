@@ -22,11 +22,11 @@ import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.datastore.model.ComposeVisibility
 import dev.dimension.flare.data.draft.DraftRepository
 import dev.dimension.flare.data.draft.RestoreDraftUseCase
-import dev.dimension.flare.data.draft.newDraftGroupId
 import dev.dimension.flare.data.repository.accountServiceFlow
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.model.draft.newDraftGroupId
 import dev.dimension.flare.ui.model.EmojiData
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiDraft

@@ -13,6 +13,7 @@ import dev.dimension.flare.data.database.memoryDatabaseBuilder
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.io.FakeFileStorage
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.draft.DraftTargetStatus as ModelDraftTargetStatus
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
@@ -228,7 +229,7 @@ class DraftRepositoryTest {
             val draft = repository.draft(groupId).first()
 
             assertNotNull(draft)
-            assertEquals(DraftTargetStatus.FAILED, draft.targets.single().status)
+            assertEquals(ModelDraftTargetStatus.FAILED, draft.targets.single().status)
             assertEquals("interrupted", draft.targets.single().errorMessage)
             assertEquals(
                 groupId,

@@ -3,6 +3,7 @@ package dev.dimension.flare.di
 import dev.dimension.flare.data.draft.DraftMediaStore
 import dev.dimension.flare.data.draft.DraftRepository
 import dev.dimension.flare.data.draft.DraftSendingRecoveryCoordinator
+import dev.dimension.flare.data.draft.RestoreDraftUseCase
 import dev.dimension.flare.data.draft.SaveDraftUseCase
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.singleOf
@@ -21,4 +22,5 @@ public val draftDataModule: Module =
         }
         single(createdAtStart = true) { DraftSendingRecoveryCoordinator(get(), get()) }
         singleOf(::SaveDraftUseCase)
+        singleOf(::RestoreDraftUseCase)
     }

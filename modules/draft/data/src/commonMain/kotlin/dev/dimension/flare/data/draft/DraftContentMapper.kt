@@ -1,9 +1,10 @@
 package dev.dimension.flare.data.draft
 
-import dev.dimension.flare.data.database.app.model.DraftContent
-import dev.dimension.flare.data.database.app.model.DraftReferenceType
-import dev.dimension.flare.data.database.app.model.DraftVisibility
 import dev.dimension.flare.data.datasource.microblog.ComposeData
+import dev.dimension.flare.model.draft.DraftContent
+import dev.dimension.flare.model.draft.DraftReference
+import dev.dimension.flare.model.draft.DraftReferenceType
+import dev.dimension.flare.model.draft.DraftVisibility
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 
@@ -41,7 +42,7 @@ private fun DraftVisibility.toUiVisibility(): UiTimelineV2.Post.Visibility =
         DraftVisibility.Channel -> UiTimelineV2.Post.Visibility.Channel
     }
 
-private fun DraftContent.DraftReference.toComposeStatus(): ComposeStatus =
+private fun DraftReference.toComposeStatus(): ComposeStatus =
     when (type) {
         DraftReferenceType.QUOTE -> {
             ComposeStatus.Quote(statusKey)

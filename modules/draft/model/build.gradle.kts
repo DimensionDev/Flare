@@ -10,7 +10,7 @@ plugins {
 
 kotlin {
     flare {
-        namespace = "dev.dimension.flare.modules.draft.data"
+        namespace = "dev.dimension.flare.modules.draft.model"
         platforms(
             FlarePlatform.ANDROID,
             FlarePlatform.JVM,
@@ -26,7 +26,7 @@ kotlin {
                 compilerOptions {
                     freeCompilerArgs.addAll(
                         "-module-name",
-                        "flare_draft_data_commonMain",
+                        "flare_draft_model_commonMain",
                     )
                 }
             }
@@ -40,17 +40,13 @@ kotlin {
                         compilerOptions {
                             freeCompilerArgs.addAll(
                                 "-module-name",
-                                "flare_draft_data",
+                                "flare_draft_model",
                             )
                         }
                     }
                 }
             }
         }
-    }
-
-    compilerOptions {
-        allWarningsAsErrors.set(false)
     }
 
     sourceSets {
@@ -61,23 +57,13 @@ kotlin {
         }
         val commonMain by getting {
             dependencies {
-                api(projects.core.common)
                 api(projects.core.model)
-                api(projects.foundation.database)
-                api(projects.foundation.filesystem)
                 api(projects.modules.account.api)
-                api(projects.modules.draft.model)
                 api(projects.social.microblog)
-                api(libs.kotlinx.coroutines.core)
-                api(libs.okio)
-                api(dependencies.platform(libs.koin.bom))
-                api(libs.koin.core)
-            }
-        }
-        val commonTest by getting {
-            dependencies {
-                implementation(kotlin("test"))
-                implementation(libs.kotlinx.coroutines.test)
+                api(projects.ui.model)
+                api(dependencies.platform(libs.compose.bom))
+                api(libs.compose.runtime)
+                api(libs.kotlinx.immutable)
             }
         }
     }

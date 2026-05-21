@@ -4,6 +4,7 @@ import dev.dimension.flare.data.database.app.model.DraftContent
 import dev.dimension.flare.data.database.app.model.DraftReferenceType
 import dev.dimension.flare.data.database.app.model.DraftVisibility
 import dev.dimension.flare.data.datasource.microblog.ComposeData
+import dev.dimension.flare.model.draft.ComposeDraftBundle
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 

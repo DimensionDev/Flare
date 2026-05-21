@@ -10,8 +10,8 @@ import dev.dimension.flare.data.datastore.model.ComposeVisibility
 import dev.dimension.flare.data.draft.ComposeProgressState
 import dev.dimension.flare.data.draft.SaveDraftUseCase
 import dev.dimension.flare.data.draft.SendDraftUseCase
-import dev.dimension.flare.data.draft.newDraftGroupId
-import dev.dimension.flare.data.draft.toComposeDraftBundle
+import dev.dimension.flare.model.draft.newDraftGroupId
+import dev.dimension.flare.model.draft.toComposeDraftBundle
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlinx.coroutines.CoroutineScope

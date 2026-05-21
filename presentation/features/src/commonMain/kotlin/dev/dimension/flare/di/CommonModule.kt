@@ -5,7 +5,6 @@ import dev.dimension.flare.data.account.AccountRepository
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.timeline.TimelineCatalog
 import dev.dimension.flare.data.datasource.rss.RssTimelineSpecs
-import dev.dimension.flare.data.draft.RestoreDraftUseCase
 import dev.dimension.flare.data.draft.SendDraftUseCase
 import dev.dimension.flare.data.model.tab.TimelinePersistenceMapper
 import dev.dimension.flare.data.model.tab.TimelinePresenterFactory
@@ -29,13 +28,6 @@ internal val commonModule =
         }
         single(createdAtStart = true) { AccountTabSyncCoordinator(get(), get(), get(), get()) }
         single { CoroutineScope(PlatformDispatchers.IO) }
-        single {
-            val accountRepository = get<AccountRepository>()
-            RestoreDraftUseCase(
-                draftRepository = get(),
-                findAccount = accountRepository::find,
-            )
-        }
         single {
             val accountRepository = get<AccountRepository>()
             SendDraftUseCase(

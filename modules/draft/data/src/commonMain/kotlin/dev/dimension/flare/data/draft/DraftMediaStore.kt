@@ -3,9 +3,11 @@ package dev.dimension.flare.data.draft
 import dev.dimension.flare.data.io.FileItem
 import dev.dimension.flare.data.io.FileType
 import dev.dimension.flare.data.io.sanitizeFileName
-import dev.dimension.flare.data.database.app.model.DraftMediaType
+import dev.dimension.flare.data.database.app.model.DraftMediaType as DbDraftMediaType
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.io.FileStorage
+import dev.dimension.flare.model.draft.DraftMedia
+import dev.dimension.flare.model.draft.DraftMediaType
 import okio.Path.Companion.toPath
 import kotlin.uuid.Uuid
 
@@ -29,7 +31,7 @@ public class DraftMediaStore(
                 SaveDraftMedia(
                     cachePath = path.toString(),
                     fileName = media.file.name,
-                    mediaType = media.file.type.toDraftMediaType(),
+                    mediaType = media.file.type.toDbDraftMediaType(),
                     altText = media.altText,
                     sortOrder = index,
                 )
@@ -103,11 +105,11 @@ public class DraftMediaStore(
     }
 }
 
-private fun FileType.toDraftMediaType(): DraftMediaType =
+private fun FileType.toDbDraftMediaType(): DbDraftMediaType =
     when (this) {
-        FileType.Image -> DraftMediaType.IMAGE
-        FileType.Video -> DraftMediaType.VIDEO
-        FileType.Other -> DraftMediaType.OTHER
+        FileType.Image -> DbDraftMediaType.IMAGE
+        FileType.Video -> DbDraftMediaType.VIDEO
+        FileType.Other -> DbDraftMediaType.OTHER
     }
 
 private fun DraftMediaType.toFileType(): FileType =

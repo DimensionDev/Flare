@@ -56,6 +56,7 @@ kotlin {
                 api(projects.core.model)
                 api(projects.modules.account.api)
                 api(projects.modules.draft.data)
+                api(projects.modules.draft.model)
                 api(projects.social.microblog)
                 api(projects.ui.model)
                 api(projects.ui.presenterRuntime)

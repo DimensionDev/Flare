@@ -36,7 +36,8 @@ public class AccountRepository(
     private val appDataStore: AppDataStore,
     private val cacheDatabase: CacheDatabase,
     private val platformRegistry: SocialPlatformRegistry,
-) : CredentialProvider {
+) : CredentialProvider,
+    AccountLookup {
     public val activeAccount: Flow<UiState<UiAccount>> by lazy {
         appDatabase
             .accountDao()
@@ -173,7 +174,7 @@ public class AccountRepository(
             }
         }
 
-    public suspend fun find(accountKey: MicroBlogKey): UiAccount? =
+    override suspend fun find(accountKey: MicroBlogKey): UiAccount? =
         appDatabase
             .accountDao()
             .get(accountKey)

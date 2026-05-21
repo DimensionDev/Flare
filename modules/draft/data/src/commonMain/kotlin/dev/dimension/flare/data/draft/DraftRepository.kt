@@ -5,17 +5,26 @@ import dev.dimension.flare.data.database.app.model.DbDraftGroup
 import dev.dimension.flare.data.database.app.model.DbDraftGroupWithRelations
 import dev.dimension.flare.data.database.app.model.DbDraftMedia
 import dev.dimension.flare.data.database.app.model.DbDraftTarget
-import dev.dimension.flare.data.database.app.model.DraftContent
-import dev.dimension.flare.data.database.app.model.DraftMediaType
-import dev.dimension.flare.data.database.app.model.DraftTargetStatus
+import dev.dimension.flare.data.database.app.model.DraftContent as DbDraftContent
+import dev.dimension.flare.data.database.app.model.DraftMediaType as DbDraftMediaType
+import dev.dimension.flare.data.database.app.model.DraftReferenceType as DbDraftReferenceType
+import dev.dimension.flare.data.database.app.model.DraftTargetStatus as DbDraftTargetStatus
+import dev.dimension.flare.data.database.app.model.DraftVisibility as DbDraftVisibility
 import dev.dimension.flare.data.database.cache.connect
-import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.model.UiAccount
+import dev.dimension.flare.model.draft.DraftContent
+import dev.dimension.flare.model.draft.DraftGroup
+import dev.dimension.flare.model.draft.DraftMedia
+import dev.dimension.flare.model.draft.DraftMediaType
+import dev.dimension.flare.model.draft.DraftPoll
+import dev.dimension.flare.model.draft.DraftReference
+import dev.dimension.flare.model.draft.DraftReferenceType
+import dev.dimension.flare.model.draft.DraftTarget
+import dev.dimension.flare.model.draft.DraftTargetStatus
+import dev.dimension.flare.model.draft.DraftVisibility
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlin.time.Clock
-import kotlin.uuid.Uuid
 
 public class DraftRepository(
     private val database: AppDatabase,
@@ -93,7 +102,7 @@ public class DraftRepository(
     public suspend fun updateTargetStatus(
         groupId: String,
         accountKey: MicroBlogKey,
-        status: DraftTargetStatus,
+        status: DbDraftTargetStatus,
         errorMessage: String? = null,
         attemptCount: Int = 0,
         lastAttemptAt: Long? = null,
@@ -150,14 +159,14 @@ public class DraftRepository(
         val now = Clock.System.now().toEpochMilliseconds()
         database.connect {
             database.draftDao().resetSendingTargets(
-                fromStatus = DraftTargetStatus.SENDING,
-                toStatus = DraftTargetStatus.DRAFT,
+                fromStatus = DbDraftTargetStatus.SENDING,
+                toStatus = DbDraftTargetStatus.DRAFT,
                 expiredBefore = expiredBefore,
                 errorMessage = errorMessage,
                 updatedAt = now,
             )
             database.draftDao().touchExpiredSendingGroups(
-                fromStatus = DraftTargetStatus.SENDING,
+                fromStatus = DbDraftTargetStatus.SENDING,
                 expiredBefore = expiredBefore,
                 updatedAt = now,
             )
@@ -168,12 +177,12 @@ public class DraftRepository(
         val now = Clock.System.now().toEpochMilliseconds()
         database.connect {
             database.draftDao().touchGroupsByTargetStatus(
-                status = DraftTargetStatus.SENDING,
+                status = DbDraftTargetStatus.SENDING,
                 updatedAt = now,
             )
             database.draftDao().updateTargetsByStatus(
-                fromStatus = DraftTargetStatus.SENDING,
-                toStatus = DraftTargetStatus.FAILED,
+                fromStatus = DbDraftTargetStatus.SENDING,
+                toStatus = DbDraftTargetStatus.FAILED,
                 errorMessage = errorMessage,
                 updatedAt = now,
             )
@@ -188,7 +197,7 @@ public class DraftRepository(
 
 public data class SaveDraftInput(
     public val groupId: String,
-    public val content: DraftContent,
+    public val content: DbDraftContent,
     public val targets: List<SaveDraftTarget>,
     public val medias: List<SaveDraftMedia>,
     public val createdAt: Long? = null,
@@ -196,7 +205,7 @@ public data class SaveDraftInput(
 
 public data class SaveDraftTarget(
     public val accountKey: MicroBlogKey,
-    public val status: DraftTargetStatus = DraftTargetStatus.DRAFT,
+    public val status: DbDraftTargetStatus = DbDraftTargetStatus.DRAFT,
     public val errorMessage: String? = null,
     public val attemptCount: Int = 0,
     public val lastAttemptAt: Long? = null,
@@ -206,60 +215,16 @@ public data class SaveDraftTarget(
 public data class SaveDraftMedia(
     public val cachePath: String,
     public val fileName: String? = null,
-    public val mediaType: DraftMediaType,
+    public val mediaType: DbDraftMediaType,
     public val altText: String? = null,
     public val sortOrder: Int? = null,
     public val createdAt: Long? = null,
 )
 
-public data class DraftGroup(
-    public val groupId: String,
-    public val content: DraftContent,
-    public val createdAt: Long,
-    public val updatedAt: Long,
-    public val targets: List<DraftTarget>,
-    public val medias: List<DraftMedia>,
-)
-
-public data class DraftTarget(
-    public val groupId: String,
-    public val accountKey: MicroBlogKey,
-    public val status: DraftTargetStatus,
-    public val errorMessage: String?,
-    public val attemptCount: Int,
-    public val lastAttemptAt: Long?,
-    public val createdAt: Long,
-    public val updatedAt: Long,
-)
-
-public data class DraftMedia(
-    public val mediaId: String,
-    public val groupId: String,
-    public val cachePath: String,
-    public val fileName: String?,
-    public val mediaType: DraftMediaType,
-    public val altText: String?,
-    public val sortOrder: Int,
-    public val createdAt: Long,
-)
-
-public data class ComposeDraftBundle(
-    public val accounts: List<UiAccount>,
-    public val template: ComposeData,
-    public val groupId: String = newDraftGroupId(),
-)
-
-public fun ComposeData.toComposeDraftBundle(
-    accounts: List<UiAccount>,
-    groupId: String = newDraftGroupId(),
-): ComposeDraftBundle = ComposeDraftBundle(accounts = accounts, template = this, groupId = groupId)
-
-public fun newDraftGroupId(): String = Uuid.random().toString()
-
 private fun DbDraftGroupWithRelations.toModel(): DraftGroup =
     DraftGroup(
         groupId = group.group_id,
-        content = group.content,
+        content = group.content.toModel(),
         createdAt = group.created_at,
         updatedAt = group.updated_at,
         targets =
@@ -269,7 +234,7 @@ private fun DbDraftGroupWithRelations.toModel(): DraftGroup =
                     DraftTarget(
                         groupId = it.group_id,
                         accountKey = it.account_key,
-                        status = it.status,
+                        status = it.status.toModel(),
                         errorMessage = it.error_message,
                         attemptCount = it.attempt_count,
                         lastAttemptAt = it.last_attempt_at,
@@ -286,10 +251,66 @@ private fun DbDraftGroupWithRelations.toModel(): DraftGroup =
                         groupId = it.group_id,
                         cachePath = it.cache_path,
                         fileName = it.file_name,
-                        mediaType = it.media_type,
+                        mediaType = it.media_type.toModel(),
                         altText = it.alt_text,
                         sortOrder = it.sort_order,
                         createdAt = it.created_at,
                     )
                 },
     )
+
+private fun DbDraftContent.toModel(): DraftContent =
+    DraftContent(
+        text = text,
+        visibility = visibility.toModel(),
+        language = language,
+        sensitive = sensitive,
+        spoilerText = spoilerText,
+        localOnly = localOnly,
+        poll =
+            poll?.let {
+                DraftPoll(
+                    options = it.options,
+                    expiredAfter = it.expiredAfter,
+                    multiple = it.multiple,
+                )
+            },
+        reference =
+            reference?.let {
+                DraftReference(
+                    type = it.type.toModel(),
+                    statusKey = it.statusKey,
+                    rootId = it.rootId,
+                )
+            },
+    )
+
+private fun DbDraftVisibility.toModel(): DraftVisibility =
+    when (this) {
+        DbDraftVisibility.Public -> DraftVisibility.Public
+        DbDraftVisibility.Home -> DraftVisibility.Home
+        DbDraftVisibility.Followers -> DraftVisibility.Followers
+        DbDraftVisibility.Specified -> DraftVisibility.Specified
+        DbDraftVisibility.Channel -> DraftVisibility.Channel
+    }
+
+private fun DbDraftReferenceType.toModel(): DraftReferenceType =
+    when (this) {
+        DbDraftReferenceType.REPLY -> DraftReferenceType.REPLY
+        DbDraftReferenceType.QUOTE -> DraftReferenceType.QUOTE
+        DbDraftReferenceType.VVO_COMMENT -> DraftReferenceType.VVO_COMMENT
+    }
+
+private fun DbDraftTargetStatus.toModel(): DraftTargetStatus =
+    when (this) {
+        DbDraftTargetStatus.DRAFT -> DraftTargetStatus.DRAFT
+        DbDraftTargetStatus.SENDING -> DraftTargetStatus.SENDING
+        DbDraftTargetStatus.FAILED -> DraftTargetStatus.FAILED
+    }
+
+private fun DbDraftMediaType.toModel(): DraftMediaType =
+    when (this) {
+        DbDraftMediaType.IMAGE -> DraftMediaType.IMAGE
+        DbDraftMediaType.VIDEO -> DraftMediaType.VIDEO
+        DbDraftMediaType.OTHER -> DraftMediaType.OTHER
+    }

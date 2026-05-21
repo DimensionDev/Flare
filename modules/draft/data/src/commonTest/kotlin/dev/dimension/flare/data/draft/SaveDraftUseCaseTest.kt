@@ -4,13 +4,14 @@ import androidx.room3.Room
 import dev.dimension.flare.data.io.FileItem
 import dev.dimension.flare.data.io.FileType
 import dev.dimension.flare.data.database.app.AppDatabase
-import dev.dimension.flare.data.database.app.model.DraftMediaType
-import dev.dimension.flare.data.database.app.model.DraftReferenceType
-import dev.dimension.flare.data.database.app.model.DraftVisibility
 import dev.dimension.flare.data.database.memoryDatabaseBuilder
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.io.FakeFileStorage
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.draft.ComposeDraftBundle
+import dev.dimension.flare.model.draft.DraftMediaType
+import dev.dimension.flare.model.draft.DraftReferenceType
+import dev.dimension.flare.model.draft.DraftVisibility
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus

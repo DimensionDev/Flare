@@ -13,6 +13,8 @@ import dev.dimension.flare.data.database.memoryDatabaseBuilder
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.io.FakeFileStorage
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.draft.ComposeDraftBundle
+import dev.dimension.flare.model.draft.DraftTargetStatus as ModelDraftTargetStatus
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
@@ -147,7 +149,7 @@ class SendDraftUseCaseTest {
             val draft = assertNotNull(repository.draft("send-partial-failure").first())
             assertEquals(1, draft.targets.size)
             assertEquals(accountB.accountKey, draft.targets.single().accountKey)
-            assertEquals(DraftTargetStatus.FAILED, draft.targets.single().status)
+            assertEquals(ModelDraftTargetStatus.FAILED, draft.targets.single().status)
             assertEquals("account-b failed", draft.targets.single().errorMessage)
             assertEquals(listOf(accountA.accountKey, accountB.accountKey), sent.map { it.account.accountKey })
             val error = assertIs<ComposeProgressState.Error>(progresses.last())
@@ -178,7 +180,7 @@ class SendDraftUseCaseTest {
 
             val draft = assertNotNull(repository.draft("send-all-failed").first())
             assertEquals(2, draft.targets.size)
-            assertTrue(draft.targets.all { it.status == DraftTargetStatus.FAILED })
+            assertTrue(draft.targets.all { it.status == ModelDraftTargetStatus.FAILED })
             assertEquals(setOf("all failed"), draft.targets.mapNotNull { it.errorMessage }.toSet())
         }
 
@@ -204,7 +206,7 @@ class SendDraftUseCaseTest {
             val draft = assertNotNull(repository.draft("send-failure").first())
             val target = draft.targets.single()
 
-            assertEquals(DraftTargetStatus.FAILED, target.status)
+            assertEquals(ModelDraftTargetStatus.FAILED, target.status)
             assertEquals("boom", target.errorMessage)
             assertEquals(ComposeProgressState.Progress(0, 1), progresses.first())
             val error = assertIs<ComposeProgressState.Error>(progresses.last())
@@ -343,7 +345,7 @@ class SendDraftUseCaseTest {
             advanceUntilIdle()
 
             val draft = assertNotNull(repository.draft("resend-missing-account").first())
-            assertEquals(DraftTargetStatus.FAILED, draft.targets.single().status)
+            assertEquals(ModelDraftTargetStatus.FAILED, draft.targets.single().status)
             assertEquals(
                 listOf(
                     ComposeProgressState.Progress(0, 0),
@@ -381,7 +383,7 @@ class SendDraftUseCaseTest {
                 progresses,
             )
             assertEquals(
-                DraftTargetStatus.SENDING,
+                ModelDraftTargetStatus.SENDING,
                 repository
                     .draft("resend-all-sending")
                     .first()
@@ -501,7 +503,7 @@ class SendDraftUseCaseTest {
             val remainingDraft = assertNotNull(repository.draft("resend-group").first())
             assertEquals(1, remainingDraft.targets.size)
             assertEquals(sendingAccount.accountKey, remainingDraft.targets.single().accountKey)
-            assertEquals(DraftTargetStatus.SENDING, remainingDraft.targets.single().status)
+            assertEquals(ModelDraftTargetStatus.SENDING, remainingDraft.targets.single().status)
         }
 
     @Test
@@ -658,7 +660,7 @@ class SendDraftUseCaseTest {
             advanceUntilIdle()
 
             val draft = assertNotNull(repository.draft("resend-restore-fail").first())
-            assertEquals(DraftTargetStatus.FAILED, draft.targets.single().status)
+            assertEquals(ModelDraftTargetStatus.FAILED, draft.targets.single().status)
             assertTrue(
                 draft.targets
                     .single()

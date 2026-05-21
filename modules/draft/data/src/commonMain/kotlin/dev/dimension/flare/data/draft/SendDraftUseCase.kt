@@ -1,8 +1,10 @@
 package dev.dimension.flare.data.draft
 
-import dev.dimension.flare.data.database.app.model.DraftTargetStatus
+import dev.dimension.flare.data.database.app.model.DraftTargetStatus as DbDraftTargetStatus
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.draft.ComposeDraftBundle
+import dev.dimension.flare.model.draft.DraftTargetStatus
 import dev.dimension.flare.ui.model.UiAccount
 import kotlinx.coroutines.flow.firstOrNull
 import kotlin.time.Clock
@@ -28,7 +30,7 @@ public class SendDraftUseCase(
                             bundle.accounts.map {
                                 SaveDraftTarget(
                                     accountKey = it.accountKey,
-                                    status = DraftTargetStatus.SENDING,
+                                    status = DbDraftTargetStatus.SENDING,
                                     attemptCount = 1,
                                     lastAttemptAt = Clock.System.now().toEpochMilliseconds(),
                                 )
@@ -79,7 +81,7 @@ public class SendDraftUseCase(
             draftRepository.updateTargetStatus(
                 groupId = groupId,
                 accountKey = target.account.accountKey,
-                status = DraftTargetStatus.SENDING,
+                status = DbDraftTargetStatus.SENDING,
                 attemptCount = 1,
                 lastAttemptAt = Clock.System.now().toEpochMilliseconds(),
             )
@@ -103,7 +105,7 @@ public class SendDraftUseCase(
                 draftRepository.updateTargetStatus(
                     groupId = groupId,
                     accountKey = target.account.accountKey,
-                    status = DraftTargetStatus.FAILED,
+                    status = DbDraftTargetStatus.FAILED,
                     errorMessage = throwable.message,
                     attemptCount = 1,
                     lastAttemptAt = Clock.System.now().toEpochMilliseconds(),

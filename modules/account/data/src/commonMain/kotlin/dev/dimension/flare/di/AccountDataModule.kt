@@ -1,5 +1,6 @@
 package dev.dimension.flare.di
 
+import dev.dimension.flare.data.account.AccountLookup
 import dev.dimension.flare.data.account.AccountProfileProvider
 import dev.dimension.flare.data.account.AccountProfileProviderImpl
 import dev.dimension.flare.data.account.AccountRepository
@@ -13,6 +14,7 @@ public val accountDataModule: Module =
     module {
         singleOf(::AccountRepository)
         single<AccountProfileProvider> { AccountProfileProviderImpl(get()) }
+        single<AccountLookup> { get<AccountRepository>() }
         single<CredentialProvider> { get<AccountRepository>() }
         singleOf(::ApplicationRepository)
     }

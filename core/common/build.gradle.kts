@@ -28,12 +28,6 @@ kotlin {
                 api(libs.kotlinx.serialization.protobuf)
                 api(libs.paging.common)
                 api(libs.xmlUtil)
-                implementation(libs.okio)
-            }
-        }
-        val jvmMain by getting {
-            dependencies {
-                implementation(libs.commons.lang3)
             }
         }
     }

@@ -1,6 +1,5 @@
 package dev.dimension.flare.data.io
 
-import dev.dimension.flare.common.FileSystemUtilsExt
 import okio.FileSystem
 import okio.Path
 import okio.Path.Companion.toOkioPath

@@ -21,13 +21,17 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation(projects.core.common)
                 api(libs.okio)
             }
         }
         val androidMain by getting {
             dependencies {
                 implementation(libs.datastore)
+            }
+        }
+        val jvmMain by getting {
+            dependencies {
+                implementation(libs.commons.lang3)
             }
         }
     }

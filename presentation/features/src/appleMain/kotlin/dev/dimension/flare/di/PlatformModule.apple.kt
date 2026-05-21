@@ -1,7 +1,5 @@
 package dev.dimension.flare.di
 
-import dev.dimension.flare.common.AppleOnDeviceAI
-import dev.dimension.flare.data.ai.OnDeviceAI
 import dev.dimension.flare.data.database.DriverFactory
 import dev.dimension.flare.data.datasource.nostr.DatabaseNostrCache
 import dev.dimension.flare.data.datasource.nostr.NostrCache
@@ -31,7 +29,6 @@ internal actual val platformModule: Module =
         singleOf(::AppleFormatter) bind PlatformFormatter::class
         singleOf(::ApplePlatformTextRenderer) bind PlatformTextRendering::class
         singleOf(::IosImageCompressor) bind ImageCompressor::class
-        singleOf(::AppleOnDeviceAI) bind OnDeviceAI::class
         singleOf(::AppleAmberSignerBridge) bind AmberSignerBridge::class
         single<NostrCache> { DatabaseNostrCache(get()) }
     }

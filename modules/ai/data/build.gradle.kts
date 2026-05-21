@@ -1,6 +1,8 @@
 import dev.dimension.flare.buildlogic.FlarePlatform
 import dev.dimension.flare.buildlogic.flare
 
+val hasGoogleServices = rootProject.file("app/google-services.json").exists()
+
 plugins {
     id("dev.dimension.flare.multiplatform-library")
     alias(libs.plugins.android.library)
@@ -59,6 +61,27 @@ kotlin {
                 implementation(libs.openai.client)
                 api(dependencies.platform(libs.koin.bom))
                 api(libs.koin.core)
+            }
+        }
+        val androidMain by getting {
+            if (hasGoogleServices) {
+                kotlin.srcDir("src/play/kotlin")
+            } else {
+                kotlin.srcDir("src/foss/kotlin")
+            }
+            dependencies {
+                // START Non-FOSS component
+                if (hasGoogleServices) {
+                    implementation(libs.kotlinx.coroutines.play.services)
+                    implementation("com.google.mlkit:genai-prompt:1.0.0-beta2")
+                    implementation("com.google.mlkit:genai-summarization:1.0.0-beta1")
+                }
+                // END Non-FOSS component
+            }
+        }
+        val jvmMain by getting {
+            dependencies {
+                implementation(libs.jna)
             }
         }
         val commonTest by getting {

@@ -4,7 +4,6 @@ package dev.dimension.flare.di
 
 import dev.dimension.flare.common.InAppNotification
 import dev.dimension.flare.common.Message
-import dev.dimension.flare.data.ai.OnDeviceAI
 import dev.dimension.flare.data.database.DriverFactory
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.io.FileStorage
@@ -23,7 +22,6 @@ internal actual val platformModule: Module =
         single<FileStorage> { InMemoryFileStorage() }
         single<PlatformFormatter> { WebFormatter }
         single<ImageCompressor> { WebImageCompressor }
-        single<OnDeviceAI> { WebOnDeviceAI }
         single<InAppNotification> { NoopInAppNotification }
     }
 
@@ -33,22 +31,6 @@ private data object WebImageCompressor : ImageCompressor {
         maxSize: Long,
         maxDimensions: Pair<Int, Int>,
     ): ByteArray = imageBytes
-}
-
-private data object WebOnDeviceAI : OnDeviceAI {
-    override suspend fun isAvailable(): Boolean = false
-
-    override suspend fun translate(
-        source: String,
-        targetLanguage: String,
-        prompt: String,
-    ): String? = null
-
-    override suspend fun tldr(
-        source: String,
-        targetLanguage: String,
-        prompt: String,
-    ): String? = null
 }
 
 private data object NoopInAppNotification : InAppNotification {

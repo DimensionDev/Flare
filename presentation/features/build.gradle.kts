@@ -137,7 +137,6 @@ kotlin {
         val jvmMain by getting {
             dependencies {
                 implementation(libs.commons.lang3)
-                implementation(libs.jna)
             }
         }
         val appleMain by getting {

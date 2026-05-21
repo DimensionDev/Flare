@@ -38,6 +38,7 @@ kotlin {
         appleTarget.binaries.framework {
             baseName = "KotlinSharedUI"
             isStatic = true
+            export(projects.modules.ai.data)
             export(projects.presentation.features)
         }
     }
@@ -103,6 +104,7 @@ kotlin {
         }
         val iosMain by getting {
             dependencies {
+                api(projects.modules.ai.data)
                 api(projects.presentation.features)
                 implementation(libs.cupertino)
                 api(compose("org.jetbrains.compose.ui:ui-util"))

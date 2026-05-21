@@ -10,4 +10,7 @@ public val aiDataModule: Module =
     module {
         singleOf(::OpenAIService)
         singleOf(::AiCompletionService)
+        registerPlatformAi()
     }
+
+internal expect fun Module.registerPlatformAi()

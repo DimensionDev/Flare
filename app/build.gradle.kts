@@ -85,14 +85,6 @@ android {
         }
     }
 
-    // START Non-FOSS component
-    if (project.file("google-services.json").exists()) {
-        sourceSets.getByName("main").kotlin.directories.add("src/play/java")
-    }
-    // END Non-FOSS component
-    if (!project.file("google-services.json").exists()){
-        sourceSets.getByName("main").kotlin.directories.add("src/foss/java")
-    }
 }
 
 dependencies {
@@ -149,9 +141,6 @@ dependencies {
         implementation(platform(libs.firebase.bom))
         implementation(libs.firebase.crashlytics.ktx)
         implementation(libs.firebase.analytics.ktx)
-        implementation(libs.kotlinx.coroutines.play.services)
-        implementation("com.google.mlkit:genai-prompt:1.0.0-beta2")
-        implementation("com.google.mlkit:genai-summarization:1.0.0-beta1")
     }
     // END Non-FOSS component
 

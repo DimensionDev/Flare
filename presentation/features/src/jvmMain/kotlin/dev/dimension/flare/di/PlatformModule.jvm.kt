@@ -1,7 +1,5 @@
 package dev.dimension.flare.di
 
-import dev.dimension.flare.common.JvmOnDeviceAI
-import dev.dimension.flare.data.ai.OnDeviceAI
 import dev.dimension.flare.data.database.DriverFactory
 import dev.dimension.flare.data.datasource.nostr.DatabaseNostrCache
 import dev.dimension.flare.data.datasource.nostr.NostrCache
@@ -28,7 +26,6 @@ internal actual val platformModule: Module =
         single<FileStorage> { OkioFileStorage(FileSystem.SYSTEM, JvmPlatformPathProducer()) }
         singleOf(::JVMFormatter) bind PlatformFormatter::class
         singleOf(::JvmImageCompressor) bind ImageCompressor::class
-        singleOf(::JvmOnDeviceAI) bind OnDeviceAI::class
         singleOf(::JvmAmberSignerBridge) bind AmberSignerBridge::class
         single<NostrCache> { DatabaseNostrCache(get()) }
     }

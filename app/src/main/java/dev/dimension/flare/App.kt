@@ -16,7 +16,6 @@ import dev.dimension.flare.common.AnimatedPngDecoder
 import dev.dimension.flare.common.AnimatedWebPDecoder
 import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.di.KoinHelper
-import dev.dimension.flare.di.aiModule
 import dev.dimension.flare.di.androidModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
@@ -28,7 +27,7 @@ class App :
         super.onCreate()
         startKoin {
             androidContext(this@App)
-            modules(KoinHelper.modules() + androidModule + aiModule)
+            modules(KoinHelper.modules() + androidModule)
         }
     }
 

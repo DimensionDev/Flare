@@ -3,7 +3,8 @@ package dev.dimension.flare.common
 import android.content.Context
 import dev.dimension.flare.data.ai.OnDeviceAI
 
-internal class FossOnDeviceAI(
+internal class AndroidOnDeviceAI(
+    @Suppress("UNUSED_PARAMETER")
     private val context: Context,
 ) : OnDeviceAI {
     override suspend fun isAvailable(): Boolean = false

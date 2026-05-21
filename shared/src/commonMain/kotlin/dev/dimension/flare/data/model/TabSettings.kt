@@ -6,31 +6,6 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiRssSource
-import dev.dimension.flare.ui.presenter.home.DiscoverStatusTimelinePresenter
-import dev.dimension.flare.ui.presenter.home.HomeTimelinePresenter
-import dev.dimension.flare.ui.presenter.home.MixedTimelinePresenter
-import dev.dimension.flare.ui.presenter.home.TimelinePresenter
-import dev.dimension.flare.ui.presenter.home.bluesky.BlueskyBookmarkTimelinePresenter
-import dev.dimension.flare.ui.presenter.home.bluesky.BlueskyFeedTimelinePresenter
-import dev.dimension.flare.ui.presenter.home.mastodon.MastodonBookmarkTimelinePresenter
-import dev.dimension.flare.ui.presenter.home.mastodon.MastodonFavouriteTimelinePresenter
-import dev.dimension.flare.ui.presenter.home.mastodon.MastodonLocalTimelinePresenter
-import dev.dimension.flare.ui.presenter.home.mastodon.MastodonPublicTimelinePresenter
-import dev.dimension.flare.ui.presenter.home.misskey.MissKeyLocalTimelinePresenter
-import dev.dimension.flare.ui.presenter.home.misskey.MissKeyPublicTimelinePresenter
-import dev.dimension.flare.ui.presenter.home.misskey.MisskeyFavouriteTimelinePresenter
-import dev.dimension.flare.ui.presenter.home.misskey.MisskeyHybridTimelinePresenter
-import dev.dimension.flare.ui.presenter.home.rss.AllRssTimelinePresenter
-import dev.dimension.flare.ui.presenter.home.rss.RssTimelinePresenter
-import dev.dimension.flare.ui.presenter.home.rss.SubscriptionTimelinePresenter
-import dev.dimension.flare.ui.presenter.home.vvo.VVOFavouriteTimelinePresenter
-import dev.dimension.flare.ui.presenter.home.vvo.VVOLikeTimelinePresenter
-import dev.dimension.flare.ui.presenter.home.xqt.XQTBookmarkTimelinePresenter
-import dev.dimension.flare.ui.presenter.home.xqt.XQTDeviceFollowTimelinePresenter
-import dev.dimension.flare.ui.presenter.home.xqt.XQTFeaturedTimelinePresenter
-import dev.dimension.flare.ui.presenter.list.AntennasTimelinePresenter
-import dev.dimension.flare.ui.presenter.list.ChannelTimelinePresenter
-import dev.dimension.flare.ui.presenter.list.ListTimelinePresenter
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.serialization.Serializable
@@ -142,8 +117,6 @@ internal data class NotificationTabItem(
 @Immutable
 @Serializable
 internal sealed class TimelineTabItem : TabItem() {
-    internal abstract fun createPresenter(): TimelinePresenter
-
     internal companion object {
         internal val default: ImmutableList<TabItem> =
             persistentListOf(
@@ -182,8 +155,6 @@ internal data class HomeTimelineTabItem(
     WithAccountTabItem {
     override val key: String = "home_$account"
 
-    override fun createPresenter(): TimelinePresenter = HomeTimelinePresenter(account)
-
     override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
 
     internal constructor(accountType: AccountType) :
@@ -221,8 +192,6 @@ internal data class MixedTimelineTabItem(
             icon = IconType.Material(dev.dimension.flare.ui.model.UiIcon.Rss),
         ),
 ) : TimelineTabItem() {
-    override fun createPresenter(): TimelinePresenter = MixedTimelinePresenter(subTimelineTabItem.map { it.createPresenter() })
-
     override val key: String
         get() =
             buildString {
@@ -260,8 +229,6 @@ internal data class ListTimelineTabItem(
 
     override val key: String = "list_${account}_$listId"
 
-    override fun createPresenter(): TimelinePresenter = ListTimelinePresenter(account, listId)
-
     override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
 }
 
@@ -286,8 +253,6 @@ internal object Mastodon {
         WithAccountTabItem {
         override val key: String = "local_$account"
 
-        override fun createPresenter(): TimelinePresenter = MastodonLocalTimelinePresenter(account)
-
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }
 
@@ -299,8 +264,6 @@ internal object Mastodon {
     ) : TimelineTabItem(),
         WithAccountTabItem {
         override val key: String = "internal_$account"
-
-        override fun createPresenter(): TimelinePresenter = MastodonPublicTimelinePresenter(account)
 
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }
@@ -314,8 +277,6 @@ internal object Mastodon {
         WithAccountTabItem {
         override val key: String = "bookmark_$account"
 
-        override fun createPresenter(): TimelinePresenter = MastodonBookmarkTimelinePresenter(account)
-
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }
 
@@ -327,8 +288,6 @@ internal object Mastodon {
     ) : TimelineTabItem(),
         WithAccountTabItem {
         override val key: String = "favourite_$account"
-
-        override fun createPresenter(): TimelinePresenter = MastodonFavouriteTimelinePresenter(account)
 
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }
@@ -344,8 +303,6 @@ internal object Misskey {
         WithAccountTabItem {
         override val key: String = "local_$account"
 
-        override fun createPresenter(): TimelinePresenter = MissKeyLocalTimelinePresenter(account)
-
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }
 
@@ -357,8 +314,6 @@ internal object Misskey {
     ) : TimelineTabItem(),
         WithAccountTabItem {
         override val key: String = "global_$account"
-
-        override fun createPresenter(): TimelinePresenter = MissKeyPublicTimelinePresenter(account)
 
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }
@@ -372,8 +327,6 @@ internal object Misskey {
         WithAccountTabItem {
         override val key: String = "hybrid_$account"
 
-        override fun createPresenter(): TimelinePresenter = MisskeyHybridTimelinePresenter(account)
-
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }
 
@@ -385,8 +338,6 @@ internal object Misskey {
     ) : TimelineTabItem(),
         WithAccountTabItem {
         override val key: String = "favourite_$account"
-
-        override fun createPresenter(): TimelinePresenter = MisskeyFavouriteTimelinePresenter(account)
 
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }
@@ -426,8 +377,6 @@ internal object Misskey {
 
         override val key: String = "antennas_${account}_$antennasId"
 
-        override fun createPresenter(): TimelinePresenter = AntennasTimelinePresenter(account, antennasId)
-
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }
 
@@ -455,8 +404,6 @@ internal object Misskey {
 
         override val key: String = "channel_${account}_$channelId"
 
-        override fun createPresenter(): TimelinePresenter = ChannelTimelinePresenter(account, channelId)
-
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }
 
@@ -482,8 +429,6 @@ internal object XQT {
         WithAccountTabItem {
         override val key: String = "featured_$account"
 
-        override fun createPresenter(): TimelinePresenter = XQTFeaturedTimelinePresenter(account)
-
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }
 
@@ -495,8 +440,6 @@ internal object XQT {
     ) : TimelineTabItem(),
         WithAccountTabItem {
         override val key: String = "bookmark_$account"
-
-        override fun createPresenter(): TimelinePresenter = XQTBookmarkTimelinePresenter(account)
 
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }
@@ -513,8 +456,6 @@ internal object XQT {
     ) : TimelineTabItem(),
         WithAccountTabItem {
         override val key: String = "device_follow_$account"
-
-        override fun createPresenter(): TimelinePresenter = XQTDeviceFollowTimelinePresenter(account)
 
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }
@@ -554,8 +495,6 @@ internal object Bluesky {
                 ),
         )
 
-        override fun createPresenter(): TimelinePresenter = BlueskyFeedTimelinePresenter(account, uri)
-
         override val key: String = "feed_${account}_$uri"
 
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
@@ -569,8 +508,6 @@ internal object Bluesky {
     ) : TimelineTabItem(),
         WithAccountTabItem {
         override val key: String = "bookmark_$account"
-
-        override fun createPresenter(): TimelinePresenter = BlueskyBookmarkTimelinePresenter(account)
 
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
 
@@ -596,8 +533,6 @@ internal object VVo {
         WithAccountTabItem {
         override val key: String = "featured_$account"
 
-        override fun createPresenter(): TimelinePresenter = DiscoverStatusTimelinePresenter(account)
-
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }
 
@@ -609,8 +544,6 @@ internal object VVo {
     ) : TimelineTabItem(),
         WithAccountTabItem {
         override val key: String = "favorite_$account"
-
-        override fun createPresenter(): TimelinePresenter = VVOFavouriteTimelinePresenter(account)
 
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }
@@ -624,8 +557,6 @@ internal object VVo {
         WithAccountTabItem {
         override val key: String = "liked_$account"
 
-        override fun createPresenter(): TimelinePresenter = VVOLikeTimelinePresenter(account)
-
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }
 }
@@ -638,8 +569,6 @@ internal data class RssTimelineTabItem(
     val favIcon: String? = null,
 ) : TimelineTabItem() {
     override val key: String = "rss_$feedUrl"
-
-    override fun createPresenter(): TimelinePresenter = RssTimelinePresenter(feedUrl)
 
     override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
 
@@ -669,8 +598,6 @@ internal data class AllRssTimelineTabItem(
     override val key: String = "all_rss"
 
     override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
-
-    override fun createPresenter(): TimelinePresenter = AllRssTimelinePresenter()
 }
 
 @Immutable
@@ -682,8 +609,6 @@ internal data class SubscriptionTimelineTabItem(
     val favIcon: String? = null,
 ) : TimelineTabItem() {
     override val key: String = "subscription_${subscriptionType.name}_$subscriptionUrl"
-
-    override fun createPresenter(): TimelinePresenter = SubscriptionTimelinePresenter(subscriptionType, subscriptionUrl)
 
     override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
 

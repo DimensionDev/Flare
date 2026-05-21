@@ -207,6 +207,7 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
     private var scrollingState = IsScrollingState()
     private var lastAppliedSignature: SnapshotSignature?
     private var lastRenderHashMap: [String: Int32] = [:]
+    private var lastLoadedTimelineItemIDs: Set<String> = []
     private let autoplayPlayerView = VideoPlayerView()
     private var autoplaySelectionTask: Task<Void, Never>?
     private var autoplayCountdownTask: Task<Void, Never>?
@@ -224,6 +225,8 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
     // Maps item identifier → index for timeline cells
     private var itemIndexMap: [String: Int] = [:]
     private var stableTimelineItemIDs: Set<String> = []
+    private var lastKnownTimelineItemIDByIndex: [Int: String] = [:]
+    private var lastKnownTimelineRenderHashByItemID: [String: Int32] = [:]
 
     private struct SnapshotSignature: Equatable, Sendable {
         let accessoryIDs: [String]
@@ -239,6 +242,7 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
         let indexMap: [String: Int]
         let renderHashMap: [String: Int32]
         let stableTimelineItemIDs: Set<String>
+        let loadedTimelineItemIDs: Set<String>
         let isRefreshing: Bool
     }
 
@@ -400,6 +404,13 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
         "\(itemID):\(renderHash):\(heightCacheWidthKey(for: width))"
     }
 
+    private func cachedStabilizedHeight(for itemID: String, width: CGFloat) -> CGFloat? {
+        guard let renderHash = lastKnownTimelineRenderHashByItemID[itemID] else {
+            return nil
+        }
+        return heightCache[timelineHeightCacheKey(itemID: itemID, renderHash: renderHash, width: width)]
+    }
+
     private func measuredCompressedCardHeight(_ card: UIView, width: CGFloat) -> CGFloat {
         card.bounds = CGRect(x: 0, y: 0, width: width, height: UIView.layoutFittingCompressedSize.height)
         card.setNeedsLayout()
@@ -441,6 +452,15 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
                     }
                 }
             }
+        }
+    }
+
+    private func pruneStabilizedPagingCache(keepingItemIDs: Set<String>, itemCount: Int) {
+        lastKnownTimelineItemIDByIndex = lastKnownTimelineItemIDByIndex.filter { index, itemID in
+            index >= 0 && index < itemCount && keepingItemIDs.contains(itemID)
+        }
+        lastKnownTimelineRenderHashByItemID = lastKnownTimelineRenderHashByItemID.filter { itemID, _ in
+            keepingItemIDs.contains(itemID)
         }
     }
 
@@ -631,7 +651,12 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
         } else {
             cell.cachedPreferredHeight = nil
             cell.onPreferredHeightChanged = nil
-            cell.setHostedView(nil)
+            cell.configurePlaceholder(
+                index: index,
+                totalCount: totalCount,
+                appearance: appearance,
+                isMultipleColumn: columnCount > 1
+            )
         }
     }
 
@@ -915,6 +940,7 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
         var newIndexMap: [String: Int] = [:]
         var newRenderHashMap: [String: Int32] = [:]
         var newStableTimelineItemIDs = Set<String>()
+        var newLoadedTimelineItemIDs = Set<String>()
         let accessoryIDs = accessoryItems.map { "\(Self.accessoryPrefix)\($0.id)" }
         var itemIDs: [String] = []
         var footerIDs: [String] = []
@@ -933,25 +959,55 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
 
         case .success(let success):
             let itemCount = Int(success.itemCount)
+            var loadedIDsByIndex: [Int: String] = [:]
+            var loadedRenderHashByItemID: [String: Int32] = [:]
+            var loadedTimelineItemIDs = Set<String>()
+
+            for i in 0..<itemCount {
+                guard let peeked = success.peek(index: Int32(i)),
+                      let itemKey = peeked.itemKey,
+                      !itemKey.isEmpty else {
+                    continue
+                }
+                let id = "\(Self.timelinePrefix)\(itemKey)"
+                loadedIDsByIndex[i] = id
+                loadedRenderHashByItemID[id] = peeked.renderHash
+                loadedTimelineItemIDs.insert(id)
+            }
+
             var items: [String] = []
+            var usedItemIDs = Set<String>()
             items.reserveCapacity(itemCount)
             for i in 0..<itemCount {
-                let peeked = success.peek(index: Int32(i))
-                let itemKey = peeked?.itemKey
                 let id: String
-                if let itemKey, !itemKey.isEmpty {
-                    id = "\(Self.timelinePrefix)\(itemKey)"
+                if let loadedID = loadedIDsByIndex[i] {
+                    id = loadedID
                     newStableTimelineItemIDs.insert(id)
+                    newRenderHashMap[id] = loadedRenderHashByItemID[id]
+                } else if let cachedID = lastKnownTimelineItemIDByIndex[i],
+                          !loadedTimelineItemIDs.contains(cachedID),
+                          !usedItemIDs.contains(cachedID) {
+                    id = cachedID
+                    newStableTimelineItemIDs.insert(id)
+                    if let renderHash = lastKnownTimelineRenderHashByItemID[id] {
+                        newRenderHashMap[id] = renderHash
+                    }
                 } else {
                     id = "\(Self.timelinePrefix)idx_\(i)"
                 }
                 items.append(id)
                 newIndexMap[id] = i
-                if let peeked {
-                    newRenderHashMap[id] = peeked.renderHash
-                }
+                usedItemIDs.insert(id)
             }
             itemIDs = items
+            newLoadedTimelineItemIDs = loadedTimelineItemIDs
+            for (index, id) in loadedIDsByIndex {
+                lastKnownTimelineItemIDByIndex[index] = id
+            }
+            for (id, renderHash) in loadedRenderHashByItemID {
+                lastKnownTimelineRenderHashByItemID[id] = renderHash
+            }
+            pruneStabilizedPagingCache(keepingItemIDs: Set(itemIDs), itemCount: itemCount)
 
             // Footer
             let footer = footerItemIDs(for: success)
@@ -967,6 +1023,7 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
             indexMap: newIndexMap,
             renderHashMap: newRenderHashMap,
             stableTimelineItemIDs: newStableTimelineItemIDs,
+            loadedTimelineItemIDs: newLoadedTimelineItemIDs,
             isRefreshing: pagingIsRefreshing(data)
         )
     }
@@ -1006,8 +1063,13 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
         if previousSignature?.accessoryIDs == newSignature.accessoryIDs,
            previousSignature?.itemIDs == newSignature.itemIDs,
            previousSignature?.footerIDs == newSignature.footerIDs {
-            let changedIDs = plan.itemIDs.filter { lastRenderHashMap[$0] != plan.renderHashMap[$0] }
+            let changedIDs = changedItemIDs(
+                in: plan.itemIDs,
+                newRenderHashMap: plan.renderHashMap,
+                newLoadedItemIDs: plan.loadedTimelineItemIDs
+            )
             lastRenderHashMap = plan.renderHashMap
+            lastLoadedTimelineItemIDs = plan.loadedTimelineItemIDs
             reconfigureItems(changedIDs)
             validateCurrentAutoplayVisibility()
             scheduleAutoplaySelection()
@@ -1016,19 +1078,28 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
 
         if previousSignature?.accessoryIDs == newSignature.accessoryIDs,
            previousSignature?.itemIDs == newSignature.itemIDs {
-            let changedIDs = plan.itemIDs.filter { lastRenderHashMap[$0] != plan.renderHashMap[$0] }
+            let changedIDs = changedItemIDs(
+                in: plan.itemIDs,
+                newRenderHashMap: plan.renderHashMap,
+                newLoadedItemIDs: plan.loadedTimelineItemIDs
+            )
             applyFooterSnapshot(footerIDs: plan.footerIDs, reconfigureIDs: changedIDs, isRefreshing: plan.isRefreshing)
             lastAppliedSignature = newSignature
             lastRenderHashMap = plan.renderHashMap
+            lastLoadedTimelineItemIDs = plan.loadedTimelineItemIDs
             validateCurrentAutoplayVisibility()
             scheduleAutoplaySelection()
             return
         }
 
-        // Reconfigure only existing timeline items whose render payload changed.
+        // Reconfigure only existing timeline items whose render payload or loaded state changed.
         let existing = Set(dataSource.snapshot().itemIdentifiers)
         let toReconfigure = plan.itemIDs.filter {
-            existing.contains($0) && lastRenderHashMap[$0] != plan.renderHashMap[$0]
+            existing.contains($0) && itemNeedsReconfigure(
+                $0,
+                newRenderHashMap: plan.renderHashMap,
+                newLoadedItemIDs: plan.loadedTimelineItemIDs
+            )
         }
         if !toReconfigure.isEmpty {
             snapshot.reconfigureItems(toReconfigure)
@@ -1066,6 +1137,30 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
         }
         lastAppliedSignature = newSignature
         lastRenderHashMap = plan.renderHashMap
+        lastLoadedTimelineItemIDs = plan.loadedTimelineItemIDs
+    }
+
+    private func changedItemIDs(
+        in itemIDs: [String],
+        newRenderHashMap: [String: Int32],
+        newLoadedItemIDs: Set<String>
+    ) -> [String] {
+        itemIDs.filter {
+            itemNeedsReconfigure(
+                $0,
+                newRenderHashMap: newRenderHashMap,
+                newLoadedItemIDs: newLoadedItemIDs
+            )
+        }
+    }
+
+    private func itemNeedsReconfigure(
+        _ itemID: String,
+        newRenderHashMap: [String: Int32],
+        newLoadedItemIDs: Set<String>
+    ) -> Bool {
+        lastRenderHashMap[itemID] != newRenderHashMap[itemID] ||
+            lastLoadedTimelineItemIDs.contains(itemID) != newLoadedItemIDs.contains(itemID)
     }
 
     private func restorePendingScrollAnchorIfNeeded() {
@@ -1478,6 +1573,11 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
             return CGSize(width: width, height: height)
         }
 
+        if itemID.hasPrefix(Self.timelinePrefix),
+           let cachedHeight = cachedStabilizedHeight(for: itemID, width: width) {
+            return CGSize(width: width, height: cachedHeight)
+        }
+
         return CGSize(width: width, height: 200)
     }
 
@@ -1568,6 +1668,8 @@ private final class TimelineUIKitCollectionViewCell: UICollectionViewCell {
     private var hostedBottomConstraint: NSLayoutConstraint?
     private var timelineViewStorage: TimelineUIView?
     private var timelineCardStorage: AdaptiveTimelineCardUIView?
+    private var placeholderViewStorage: TimelinePlaceholderUIView?
+    private var placeholderCardStorage: AdaptiveTimelineCardUIView?
 
     // Rebuild-skip signature. When the incoming data + appearance + detail-key are
     // identical to the previous configure we short-circuit the expensive
@@ -1604,7 +1706,10 @@ private final class TimelineUIKitCollectionViewCell: UICollectionViewCell {
     }
 
     func autoplayCandidates(prefix: String) -> [TimelineVideoAutoplayCandidate] {
-        timelineViewStorage?.autoplayCandidates(prefix: prefix) ?? []
+        guard hostedView === timelineCardStorage else {
+            return []
+        }
+        return timelineViewStorage?.autoplayCandidates(prefix: prefix) ?? []
     }
 
     func performDeferredPoolCleanup() {
@@ -1681,6 +1786,19 @@ private final class TimelineUIKitCollectionViewCell: UICollectionViewCell {
             timelineView.onOpenURL = openURL
         }
         setHostedView(timelineCard, usesWaterfallLayout: isMultipleColumn)
+    }
+
+    func configurePlaceholder(
+        index: Int,
+        totalCount: Int,
+        appearance: TimelineUIKitAppearance,
+        isMultipleColumn: Bool
+    ) {
+        let placeholderCard = resolvedPlaceholderCard()
+        placeholderCard.isPlainTimelineDisplayMode = appearance.isPlainTimelineDisplayMode
+        placeholderCard.isMultipleColumn = isMultipleColumn
+        placeholderCard.configure(index: index, totalCount: totalCount)
+        setHostedView(placeholderCard, usesWaterfallLayout: isMultipleColumn)
     }
 
     override func layoutSubviews() {
@@ -1816,6 +1934,25 @@ private final class TimelineUIKitCollectionViewCell: UICollectionViewCell {
         let card = AdaptiveTimelineCardUIView()
         card.setContent(UIView.padding(resolvedTimelineView(), insets: UIEdgeInsets(top: 12, left: 16, bottom: 12, right: 16)))
         timelineCardStorage = card
+        return card
+    }
+
+    private func resolvedPlaceholderView() -> TimelinePlaceholderUIView {
+        if let placeholderViewStorage {
+            return placeholderViewStorage
+        }
+        let view = TimelinePlaceholderUIView()
+        placeholderViewStorage = view
+        return view
+    }
+
+    private func resolvedPlaceholderCard() -> AdaptiveTimelineCardUIView {
+        if let placeholderCardStorage {
+            return placeholderCardStorage
+        }
+        let card = AdaptiveTimelineCardUIView()
+        card.setContent(UIView.padding(resolvedPlaceholderView(), insets: UIEdgeInsets(top: 12, left: 16, bottom: 12, right: 16)))
+        placeholderCardStorage = card
         return card
     }
 }

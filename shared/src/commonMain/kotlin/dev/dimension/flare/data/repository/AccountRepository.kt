@@ -17,8 +17,8 @@ import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.PlatformRegistry
 import dev.dimension.flare.model.PlatformType
-import dev.dimension.flare.model.spec
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiAccount.Companion.createDataSource
 import dev.dimension.flare.ui.model.UiAccount.Companion.toUi
@@ -47,6 +47,7 @@ internal class AccountRepository internal constructor(
     private val coroutineScope: CoroutineScope,
     internal val appDataStore: AppDataStore,
     private val cacheDatabase: CacheDatabase,
+    internal val platformRegistry: PlatformRegistry,
 ) {
     internal val activeAccount: Flow<UiState<UiAccount>> by lazy {
         appDatabase
@@ -55,7 +56,7 @@ internal class AccountRepository internal constructor(
             .distinctUntilChangedBy {
                 it?.account_key
             }.map {
-                it?.toUi()
+                it?.toUi(platformRegistry)
             }.map {
                 if (it == null) {
                     UiState.Error(NoActiveAccountException)
@@ -66,7 +67,7 @@ internal class AccountRepository internal constructor(
     }
     internal val allAccounts: Flow<ImmutableList<UiAccount>> by lazy {
         appDatabase.accountDao().sortedAccounts().map {
-            it.map { it.toUi() }.toImmutableList()
+            it.map { it.toUi(platformRegistry) }.toImmutableList()
         }
     }
     private val dataSourceCacheMutex = Mutex()
@@ -178,7 +179,7 @@ internal class AccountRepository internal constructor(
             if (it == null) {
                 UiState.Error(NoActiveAccountException)
             } else {
-                UiState.Success(it.toUi())
+                UiState.Success(it.toUi(platformRegistry))
             }
         }
 
@@ -187,7 +188,7 @@ internal class AccountRepository internal constructor(
             .accountDao()
             .get(accountKey)
             .firstOrNull()
-            ?.toUi()
+            ?.toUi(platformRegistry)
 
     internal inline fun <reified T : UiAccount.Credential> credentialFlow(accountKey: MicroBlogKey): Flow<T> =
         appDatabase
@@ -201,7 +202,7 @@ internal class AccountRepository internal constructor(
     internal suspend fun getOrCreateDataSource(account: UiAccount): MicroblogDataSource =
         dataSourceCacheMutex.withLock {
             dataSourceCache.getOrPut(account.accountKey) {
-                account.createDataSource()
+                account.createDataSource(platformRegistry)
             }
         }
 }
@@ -270,7 +271,7 @@ internal fun accountServiceFlow(
     when (accountType) {
         AccountType.Guest -> {
             flowOf(
-                PlatformType.Mastodon.spec.guestDataSource(
+                repository.platformRegistry.require(PlatformType.Mastodon).guestDataSource(
                     host = "mastodon.social",
                     locale = Locale.language,
                 ),
@@ -279,7 +280,7 @@ internal fun accountServiceFlow(
 
         is AccountType.GuestHost -> {
             flowOf(
-                PlatformType.Mastodon.spec.guestDataSource(
+                repository.platformRegistry.require(PlatformType.Mastodon).guestDataSource(
                     host = accountType.host,
                     locale = Locale.language,
                 ),

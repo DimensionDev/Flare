@@ -6,8 +6,8 @@ import dev.dimension.flare.data.network.nodeinfo.model.Schema10
 import dev.dimension.flare.data.network.nodeinfo.model.Schema11
 import dev.dimension.flare.data.network.nodeinfo.model.Schema20
 import dev.dimension.flare.data.network.nodeinfo.model.Schema21
+import dev.dimension.flare.model.PlatformRegistry
 import dev.dimension.flare.model.PlatformType
-import dev.dimension.flare.model.spec
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.http.URLBuilder
@@ -100,10 +100,13 @@ internal data object NodeInfoService {
             }.first()
     }
 
-    suspend fun detectPlatformType(host: String): NodeData {
+    suspend fun detectPlatformType(
+        host: String,
+        platformRegistry: PlatformRegistry,
+    ): NodeData {
         val hostCleaned = normalizeHost(host)
-        return PlatformType.entries
-            .map { it.spec.detector }
+        return platformRegistry.all
+            .map { it.detector }
             .distinct()
             .sortedByDescending { it.priority }
             .firstNotNullOfOrNull { detector -> detector.detect(hostCleaned) }

@@ -3,8 +3,8 @@ package dev.dimension.flare.data.datasource.microblog.paging
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 
-internal interface RemoteLoader<T : Any> {
-    suspend fun load(
+public interface RemoteLoader<T : Any> {
+    public suspend fun load(
         pageSize: Int,
         request: PagingRequest,
     ): PagingResult<T>

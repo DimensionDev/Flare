@@ -12,7 +12,14 @@ import dev.dimension.flare.common.InAppNotification
 import dev.dimension.flare.common.Message
 import dev.dimension.flare.common.SwiftOnDeviceAI
 import dev.dimension.flare.data.network.ktorClient
+import dev.dimension.flare.data.platform.BlueskyPlatformSpec
+import dev.dimension.flare.data.platform.MastodonPlatformSpec
+import dev.dimension.flare.data.platform.MisskeyPlatformSpec
+import dev.dimension.flare.data.platform.NostrPlatformSpec
+import dev.dimension.flare.data.platform.VvoPlatformSpec
+import dev.dimension.flare.data.platform.XqtPlatformSpec
 import dev.dimension.flare.di.KoinHelper
+import dev.dimension.flare.model.PlatformRegistry
 import dev.dimension.flare.ui.humanizer.SwiftFormatter
 import dev.dimension.flare.ui.render.SwiftPlatformTextRenderer
 import kotlinx.coroutines.CoroutineScope
@@ -36,7 +43,7 @@ public object ComposeUIHelper {
         swiftOnDeviceAI: SwiftOnDeviceAI,
     ) {
         startKoin {
-            modules(KoinHelper.modules())
+            modules(KoinHelper.modules(supportedPlatformRegistry()))
             modules(
                 module {
                     single {
@@ -72,6 +79,18 @@ public object ComposeUIHelper {
         }
     }
 }
+
+private fun supportedPlatformRegistry(): PlatformRegistry =
+    PlatformRegistry(
+        listOf(
+            NostrPlatformSpec,
+            MastodonPlatformSpec,
+            MisskeyPlatformSpec,
+            BlueskyPlatformSpec,
+            XqtPlatformSpec,
+            VvoPlatformSpec,
+        ),
+    )
 
 private class ProxyInAppNotification(
     private val delegate: InAppNotification,

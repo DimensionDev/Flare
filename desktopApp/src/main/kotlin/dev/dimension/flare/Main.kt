@@ -24,8 +24,15 @@ import coil3.network.ktor3.KtorNetworkFetcherFactory
 import coil3.request.crossfade
 import dev.dimension.flare.common.DeeplinkHandler
 import dev.dimension.flare.data.network.ktorClient
+import dev.dimension.flare.data.platform.BlueskyPlatformSpec
+import dev.dimension.flare.data.platform.MastodonPlatformSpec
+import dev.dimension.flare.data.platform.MisskeyPlatformSpec
+import dev.dimension.flare.data.platform.NostrPlatformSpec
+import dev.dimension.flare.data.platform.VvoPlatformSpec
+import dev.dimension.flare.data.platform.XqtPlatformSpec
 import dev.dimension.flare.di.KoinHelper
 import dev.dimension.flare.di.desktopModule
+import dev.dimension.flare.model.PlatformRegistry
 import dev.dimension.flare.ui.component.PlatformTitleBar
 import dev.dimension.flare.ui.component.PlatformWindow
 import dev.dimension.flare.ui.theme.FlareTheme
@@ -85,7 +92,7 @@ fun main(args: Array<String>) {
     }
     startKoin {
         modules(
-            desktopModule + KoinHelper.modules(),
+            desktopModule + KoinHelper.modules(supportedPlatformRegistry()),
         )
     }
     application {
@@ -157,6 +164,18 @@ fun main(args: Array<String>) {
         }
     }
 }
+
+private fun supportedPlatformRegistry(): PlatformRegistry =
+    PlatformRegistry(
+        listOf(
+            NostrPlatformSpec,
+            MastodonPlatformSpec,
+            MisskeyPlatformSpec,
+            BlueskyPlatformSpec,
+            XqtPlatformSpec,
+            VvoPlatformSpec,
+        ),
+    )
 
 internal class NavigationBackButtonState {
     var canGoBack by mutableStateOf(false)

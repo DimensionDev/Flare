@@ -1,3 +1,5 @@
 package dev.dimension.flare.di
 
-internal fun appModule() = listOf(commonModule, platformModule)
+import dev.dimension.flare.model.PlatformRegistry
+
+internal fun appModule(platformRegistry: PlatformRegistry) = listOf(commonModule(platformRegistry), platformModule)

@@ -7,29 +7,29 @@ import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlinx.collections.immutable.ImmutableList
 
-internal interface MicroblogDataSource {
-    fun homeTimeline(): RemoteLoader<UiTimelineV2>
+public interface MicroblogDataSource {
+    public fun homeTimeline(): RemoteLoader<UiTimelineV2>
 
-    fun userTimeline(
+    public fun userTimeline(
         userKey: MicroBlogKey,
         mediaOnly: Boolean = false,
     ): RemoteLoader<UiTimelineV2>
 
-    fun context(statusKey: MicroBlogKey): RemoteLoader<UiTimelineV2>
+    public fun context(statusKey: MicroBlogKey): RemoteLoader<UiTimelineV2>
 
-    fun searchStatus(query: String): RemoteLoader<UiTimelineV2>
+    public fun searchStatus(query: String): RemoteLoader<UiTimelineV2>
 
-    fun searchUser(query: String): RemoteLoader<UiProfile>
+    public fun searchUser(query: String): RemoteLoader<UiProfile>
 
-    fun discoverUsers(): RemoteLoader<UiProfile>
+    public fun discoverUsers(): RemoteLoader<UiProfile>
 
-    fun discoverStatuses(): RemoteLoader<UiTimelineV2>
+    public fun discoverStatuses(): RemoteLoader<UiTimelineV2>
 
-    fun discoverHashtags(): RemoteLoader<UiHashtag>
+    public fun discoverHashtags(): RemoteLoader<UiHashtag>
 
-    fun following(userKey: MicroBlogKey): RemoteLoader<UiProfile>
+    public fun following(userKey: MicroBlogKey): RemoteLoader<UiProfile>
 
-    fun fans(userKey: MicroBlogKey): RemoteLoader<UiProfile>
+    public fun fans(userKey: MicroBlogKey): RemoteLoader<UiProfile>
 
-    fun profileTabs(userKey: MicroBlogKey): ImmutableList<ProfileTab>
+    public fun profileTabs(userKey: MicroBlogKey): ImmutableList<ProfileTab>
 }

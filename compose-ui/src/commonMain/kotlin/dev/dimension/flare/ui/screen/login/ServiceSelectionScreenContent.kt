@@ -76,8 +76,6 @@ import dev.dimension.flare.compose.ui.service_select_welcome_list_hint
 import dev.dimension.flare.compose.ui.service_select_welcome_message
 import dev.dimension.flare.compose.ui.service_select_welcome_title
 import dev.dimension.flare.model.PlatformType
-import dev.dimension.flare.model.agreementUrl
-import dev.dimension.flare.model.icon
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.placeholder
@@ -92,6 +90,7 @@ import dev.dimension.flare.ui.component.platform.PlatformTextField
 import dev.dimension.flare.ui.component.status.AdaptiveCard
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.toImageVector
+import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiInstance
 import dev.dimension.flare.ui.model.isSuccess
 import dev.dimension.flare.ui.model.onError
@@ -186,7 +185,7 @@ public fun ServiceSelectionScreenContent(
                         state.detectedPlatformType
                             .onSuccess {
                                 FAIcon(
-                                    imageVector = it.platformType.icon.toImageVector(),
+                                    imageVector = state.platformIcon(it.platformType).toImageVector(),
                                     contentDescription = null,
                                     modifier = Modifier.size(24.dp),
                                 )
@@ -547,6 +546,7 @@ public fun ServiceSelectionScreenContent(
                             LoginAgreement(
                                 platformType = nodeData.platformType,
                                 host = nodeData.host,
+                                agreementUrl = state::agreementUrl,
                                 openUri = openUri,
                             )
                         }
@@ -583,6 +583,7 @@ public fun ServiceSelectionScreenContent(
                         val instance = get(it)
                         ServiceSelectItem(
                             instance = instance,
+                            platformIcon = state::platformIcon,
                             index = it,
                             totalCount = itemCount,
                             onClick = {
@@ -598,6 +599,7 @@ public fun ServiceSelectionScreenContent(
                             index = it,
                             totalCount = 10,
                             instance = null,
+                            platformIcon = state::platformIcon,
                             onClick = {},
                         )
                     }
@@ -784,6 +786,7 @@ private fun NostrLoginContent(state: SelectionPresenter.State) {
 @Composable
 private fun ServiceSelectItem(
     instance: UiInstance?,
+    platformIcon: (PlatformType) -> UiIcon,
     onClick: () -> Unit,
     index: Int,
     totalCount: Int,
@@ -826,7 +829,7 @@ private fun ServiceSelectItem(
                     )
                 } else if (instance != null) {
                     FAIcon(
-                        imageVector = instance.type.icon.toImageVector(),
+                        imageVector = platformIcon(instance.type).toImageVector(),
                         contentDescription = null,
                         modifier = Modifier.size(24.dp),
                     )
@@ -859,10 +862,11 @@ private fun ServiceSelectItem(
 private fun LoginAgreement(
     platformType: PlatformType,
     host: String,
+    agreementUrl: (PlatformType, String) -> String?,
     openUri: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val url = platformType.agreementUrl(host) ?: return
+    val url = agreementUrl(platformType, host) ?: return
     val linkText = stringResource(Res.string.eula_privacy_policy)
     val fullText = stringResource(Res.string.login_agreement, linkText)
     val color = PlatformTheme.colorScheme.primary

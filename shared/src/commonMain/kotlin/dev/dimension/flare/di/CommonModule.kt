@@ -19,6 +19,7 @@ import dev.dimension.flare.data.repository.SearchHistoryRepository
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.data.translation.OnlinePreTranslationService
 import dev.dimension.flare.data.translation.PreTranslationService
+import dev.dimension.flare.model.PlatformRegistry
 import dev.dimension.flare.ui.presenter.compose.ComposeUseCase
 import dev.dimension.flare.ui.presenter.compose.RestoreDraftUseCase
 import dev.dimension.flare.ui.presenter.compose.SaveDraftUseCase
@@ -29,8 +30,9 @@ import kotlinx.coroutines.IO
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 
-internal val commonModule =
+internal fun commonModule(platformRegistry: PlatformRegistry) =
     module {
+        single { platformRegistry }
         singleOf(::AccountRepository)
         single(createdAtStart = true) { AccountTabSyncCoordinator(get(), get(), get(), get()) }
         singleOf(::provideAppDatabase)
@@ -65,5 +67,5 @@ internal val commonModule =
         singleOf(::OpenAIService)
         singleOf(::AiCompletionService)
         single<PreTranslationService> { OnlinePreTranslationService(get(), get(), get(), get()) }
-        singleOf(::TimelineResolver)
+        single { TimelineResolver(get()) }
     }

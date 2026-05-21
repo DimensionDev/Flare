@@ -1,17 +1,10 @@
 package dev.dimension.flare.ui.model
 
 import androidx.compose.runtime.Immutable
-import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.data.database.app.model.DbAccount
-import dev.dimension.flare.data.datasource.bluesky.BlueskyDataSource
-import dev.dimension.flare.data.datasource.mastodon.MastodonDataSource
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
-import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
-import dev.dimension.flare.data.datasource.nostr.NostrDataSource
-import dev.dimension.flare.data.datasource.pleroma.PleromaDataSource
-import dev.dimension.flare.data.datasource.vvo.VVODataSource
-import dev.dimension.flare.data.datasource.xqt.XQTDataSource
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.PlatformRegistry
 import dev.dimension.flare.model.PlatformType
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -222,103 +215,14 @@ public sealed class UiAccount {
     }
 
     internal companion object {
-        fun UiAccount.createDataSource(): MicroblogDataSource =
-            when (this) {
-                is Nostr -> {
-                    NostrDataSource(
-                        accountKey = accountKey,
-                    )
-                }
+        fun UiAccount.createDataSource(platformRegistry: PlatformRegistry): MicroblogDataSource =
+            platformRegistry.require(platformType).createDataSource(this)
 
-                is Mastodon -> {
-                    when (forkType) {
-                        Mastodon.Credential.ForkType.Mastodon -> {
-                            MastodonDataSource(
-                                accountKey = accountKey,
-                                instance = instance,
-                            )
-                        }
-
-                        Mastodon.Credential.ForkType.Pleroma -> {
-                            PleromaDataSource(
-                                accountKey = accountKey,
-                                instance = instance,
-                            )
-                        }
-                    }
-                }
-
-                is Misskey -> {
-                    MisskeyDataSource(
-                        accountKey = accountKey,
-                        host = host,
-                    )
-                }
-
-                is Bluesky -> {
-                    BlueskyDataSource(
-                        accountKey = accountKey,
-                    )
-                }
-
-                is XQT -> {
-                    XQTDataSource(
-                        accountKey = accountKey,
-                    )
-                }
-
-                is VVo -> {
-                    VVODataSource(
-                        accountKey = accountKey,
-                    )
-                }
-            }
-
-        fun DbAccount.toUi(): UiAccount =
-            when (platform_type) {
-                PlatformType.Nostr -> {
-                    Nostr(
-                        accountKey = account_key,
-                    )
-                }
-
-                PlatformType.Mastodon -> {
-                    val credential = credential_json.decodeJson<Mastodon.Credential>()
-                    Mastodon(
-                        accountKey = account_key,
-                        forkType = credential.forkType,
-                        instance = credential.instance,
-                        nodeType = credential.nodeType,
-                    )
-                }
-
-                PlatformType.Misskey -> {
-                    val credential = credential_json.decodeJson<Misskey.Credential>()
-                    Misskey(
-                        accountKey = account_key,
-                        host = credential.host,
-                        nodeType = credential.nodeType,
-                    )
-                }
-
-                PlatformType.Bluesky -> {
-                    Bluesky(
-                        accountKey = account_key,
-                    )
-                }
-
-                PlatformType.xQt -> {
-                    XQT(
-                        accountKey = account_key,
-                    )
-                }
-
-                PlatformType.VVo -> {
-                    VVo(
-                        accountKey = account_key,
-                    )
-                }
-            }
+        fun DbAccount.toUi(platformRegistry: PlatformRegistry): UiAccount =
+            platformRegistry.require(platform_type).restoreAccount(
+                accountKey = account_key,
+                credentialJson = credential_json,
+            )
     }
 }
 

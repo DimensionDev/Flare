@@ -33,6 +33,7 @@ import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.deleteTestRootPath
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.testPlatformRegistry
 import dev.dimension.flare.ui.model.UiIcon
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.drop
@@ -73,7 +74,7 @@ class SettingsImportExportPresenterTest {
             SettingsRepository(
                 pathProducer = pathProducer,
                 appDataStore = AppDataStore(pathProducer),
-                timelineResolver = TimelineResolver(),
+                timelineResolver = TimelineResolver(testPlatformRegistry()),
             )
         startKoin {
             modules(

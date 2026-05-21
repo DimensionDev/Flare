@@ -1,8 +1,8 @@
 package dev.dimension.flare.data.network.nodeinfo
 
-internal interface PlatformDetector {
-    val priority: Int
+public interface PlatformDetector {
+    public val priority: Int
         get() = 0
 
-    suspend fun detect(host: String): NodeData?
+    public suspend fun detect(host: String): NodeData?
 }

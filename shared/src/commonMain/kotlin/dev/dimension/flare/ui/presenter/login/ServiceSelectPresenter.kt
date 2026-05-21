@@ -8,6 +8,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import dev.dimension.flare.data.repository.ApplicationRepository
+import dev.dimension.flare.model.PlatformRegistry
+import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.launch
@@ -19,6 +22,7 @@ public class ServiceSelectPresenter(
 ) : PresenterBase<ServiceSelectState>(),
     KoinComponent {
     private val applicationRepository: ApplicationRepository by inject()
+    private val platformRegistry: PlatformRegistry by inject()
 
     @Composable
     override fun body(): ServiceSelectState {
@@ -43,6 +47,14 @@ public class ServiceSelectPresenter(
             override val mastodonLoginState = mastodonLoginState
             override val misskeyLoginState = misskeyLoginState
             override val loading = loading
+
+            override fun platformIcon(platformType: PlatformType): UiIcon =
+                platformRegistry.require(platformType).metadata.icon
+
+            override fun agreementUrl(
+                platformType: PlatformType,
+                host: String,
+            ): String? = platformRegistry.require(platformType).agreementUrl(host)
         }
     }
 
@@ -153,6 +165,13 @@ public interface ServiceSelectState : NodeInfoState {
     public val mastodonLoginState: MastodonLoginState
     public val misskeyLoginState: MisskeyLoginState
     public val loading: Boolean
+
+    public fun platformIcon(platformType: PlatformType): UiIcon
+
+    public fun agreementUrl(
+        platformType: PlatformType,
+        host: String,
+    ): String?
 }
 
 @Immutable

@@ -1,17 +1,19 @@
 package dev.dimension.flare.data.platform
 
-import dev.dimension.flare.common.deeplink.DeepLinkMapping
-import dev.dimension.flare.common.deeplink.DeepLinkPattern
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
+import dev.dimension.flare.data.datasource.xqt.XQTDataSource
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
 import dev.dimension.flare.data.network.xqt.XQTPlatformDetector
 import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.PlatformDeepLink
 import dev.dimension.flare.model.PlatformSpec
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.PlatformTypeMetadata
 import dev.dimension.flare.model.xqtHost
 import dev.dimension.flare.model.xqtOldHost
+import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiInstanceMetadata
 import dev.dimension.flare.ui.model.UiStrings
@@ -19,14 +21,15 @@ import dev.dimension.flare.ui.model.asType
 import dev.dimension.flare.ui.presenter.home.xqt.XQTBookmarkTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.xqt.XQTDeviceFollowTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.xqt.XQTFeaturedTimelinePresenter
-import io.ktor.http.Url
+import dev.dimension.flare.ui.route.DeeplinkRoute
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.serialization.Serializable
 
-internal data object XqtPlatformSpec : PlatformSpec {
-    override val type = PlatformType.xQt
-    override val metadata =
+public data object XqtPlatformSpec : PlatformSpec {
+    public override val type: PlatformType = PlatformType.xQt
+    public override val metadata: PlatformTypeMetadata =
         PlatformTypeMetadata(
             displayName = "X",
             icon = UiIcon.X,
@@ -35,7 +38,7 @@ internal data object XqtPlatformSpec : PlatformSpec {
 
     override fun agreementUrl(host: String): String = "https://help.x.com/en/rules-and-policies/x-rules"
 
-    override fun deepLinkPatterns(host: String): ImmutableList<DeepLinkPattern<out DeepLinkMapping.Type>> {
+    override fun deepLinks(accountKey: MicroBlogKey): ImmutableList<PlatformDeepLink<*>> {
         val profile =
             listOf(
                 "https://$xqtHost/{handle}",
@@ -58,9 +61,9 @@ internal data object XqtPlatformSpec : PlatformSpec {
                 "https://www.$xqtOldHost/{handle}/status/{id}/photo/{index}",
             )
         return (
-            profile.map { DeepLinkPattern(DeepLinkMapping.Type.Profile.serializer(), Url(it)) } +
-                post.map { DeepLinkPattern(DeepLinkMapping.Type.Post.serializer(), Url(it)) } +
-                media.map { DeepLinkPattern(DeepLinkMapping.Type.PostMedia.serializer(), Url(it)) }
+            profile.map { profileDeepLink(accountKey, it) } +
+                post.map { postDeepLink(accountKey, it) } +
+                media.map { postMediaDeepLink(accountKey, it) }
         ).toImmutableList()
     }
 
@@ -118,8 +121,107 @@ internal data object XqtPlatformSpec : PlatformSpec {
     override suspend fun instanceMetadata(host: String): UiInstanceMetadata =
         throw UnsupportedOperationException("${type.name} is not supported yet")
 
+    override fun restoreAccount(
+        accountKey: MicroBlogKey,
+        credentialJson: String,
+    ): UiAccount =
+        UiAccount.XQT(
+            accountKey = accountKey,
+        )
+
+    override fun createDataSource(account: UiAccount): MicroblogDataSource {
+        require(account is UiAccount.XQT) {
+            "Expected X account for ${type.name}, got ${account.platformType.name}"
+        }
+        return XQTDataSource(
+            accountKey = account.accountKey,
+        )
+    }
+
     override fun guestDataSource(
         host: String,
         locale: String,
     ): MicroblogDataSource = throw UnsupportedOperationException("${type.name} guest data source is not supported yet")
+
+    private fun profileDeepLink(
+        accountKey: MicroBlogKey,
+        uriPattern: String,
+    ): PlatformDeepLink<XqtProfileDeepLink> =
+        PlatformDeepLink(
+            uriPattern = uriPattern,
+            serializer = XqtProfileDeepLink.serializer(),
+            callback = { data ->
+                profileRoute(
+                    accountKey = accountKey,
+                    handle = data.handle,
+                )
+            },
+        )
+
+    private fun postDeepLink(
+        accountKey: MicroBlogKey,
+        uriPattern: String,
+    ): PlatformDeepLink<XqtPostDeepLink> =
+        PlatformDeepLink(
+            uriPattern = uriPattern,
+            serializer = XqtPostDeepLink.serializer(),
+            callback = { data ->
+                DeeplinkRoute.Status.Detail(
+                    accountType = AccountType.Specific(accountKey),
+                    statusKey = MicroBlogKey(data.id, accountKey.host),
+                )
+            },
+        )
+
+    private fun postMediaDeepLink(
+        accountKey: MicroBlogKey,
+        uriPattern: String,
+    ): PlatformDeepLink<XqtPostMediaDeepLink> =
+        PlatformDeepLink(
+            uriPattern = uriPattern,
+            serializer = XqtPostMediaDeepLink.serializer(),
+            callback = { data ->
+                DeeplinkRoute.Media.StatusMedia(
+                    accountType = AccountType.Specific(accountKey),
+                    statusKey = MicroBlogKey(data.id, accountKey.host),
+                    index = data.index,
+                    preview = null,
+                )
+            },
+        )
+}
+
+@Serializable
+private data class XqtProfileDeepLink(
+    val handle: String,
+)
+
+@Serializable
+private data class XqtPostDeepLink(
+    val handle: String,
+    val id: String,
+)
+
+@Serializable
+private data class XqtPostMediaDeepLink(
+    val handle: String,
+    val id: String,
+    val index: Int,
+)
+
+private fun profileRoute(
+    accountKey: MicroBlogKey,
+    handle: String,
+): DeeplinkRoute {
+    val target =
+        if (handle.contains('@')) {
+            MicroBlogKey.valueOf(handle)
+        } else {
+            MicroBlogKey(handle, accountKey.host)
+        }
+    return DeeplinkRoute.Profile.UserNameWithHost(
+        accountType = AccountType.Specific(accountKey),
+        userName = target.id,
+        host = target.host,
+    )
 }

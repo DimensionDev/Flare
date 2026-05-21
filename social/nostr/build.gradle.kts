@@ -39,6 +39,7 @@ kotlin {
         val commonTest by getting {
             dependencies {
                 implementation(kotlin("test"))
+                implementation(projects.core.humanizer)
                 implementation(libs.kotlinx.coroutines.test)
                 implementation(dependencies.platform(libs.koin.bom))
                 implementation(libs.koin.core)

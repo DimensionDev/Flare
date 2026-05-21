@@ -46,6 +46,7 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 api(projects.core.common)
+                api(projects.core.humanizer)
                 api(projects.core.model)
                 api(projects.core.deeplink)
                 api(projects.modules.account.api)

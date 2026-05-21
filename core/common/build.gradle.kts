@@ -28,8 +28,6 @@ kotlin {
                 api(libs.kotlinx.serialization.protobuf)
                 api(libs.paging.common)
                 api(libs.xmlUtil)
-                implementation(dependencies.platform(libs.koin.bom))
-                implementation(libs.koin.core)
                 implementation(libs.okio)
             }
         }

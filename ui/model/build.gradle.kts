@@ -55,6 +55,7 @@ kotlin {
                 api(projects.core.common)
                 api(projects.core.deeplink)
                 api(projects.core.model)
+                implementation(projects.core.humanizer)
                 api(dependencies.platform(libs.compose.bom))
                 api(libs.compose.runtime)
                 api(libs.kotlinx.coroutines.core)

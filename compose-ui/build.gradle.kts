@@ -46,6 +46,7 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 implementation(projects.presentation.features)
+                implementation(projects.core.humanizer)
                 implementation(projects.ui.presenterRuntime)
                 implementation(projects.social.misskey)
                 implementation(compose("org.jetbrains.compose.ui:ui"))

@@ -5,12 +5,11 @@ plugins {
     id("dev.dimension.flare.multiplatform-library")
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.multiplatform)
-    alias(libs.plugins.kotlin.serialization)
 }
 
 kotlin {
     flare {
-        namespace = "dev.dimension.flare.core.model"
+        namespace = "dev.dimension.flare.core.humanizer"
         platforms(
             FlarePlatform.ANDROID,
             FlarePlatform.JVM,
@@ -22,15 +21,8 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation(projects.core.humanizer)
-                implementation(dependencies.platform(libs.compose.bom))
-                implementation(libs.compose.runtime)
-                api(libs.kotlinx.serialization.json)
-            }
-        }
-        val appleMain by getting {
-            dependencies {
-                implementation(libs.kotlinx.datetime)
+                api(dependencies.platform(libs.koin.bom))
+                api(libs.koin.core)
             }
         }
     }

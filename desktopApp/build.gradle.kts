@@ -15,6 +15,7 @@ plugins {
 
 dependencies {
     implementation(projects.presentation.features)
+    implementation(projects.core.humanizer)
     implementation(projects.modules.draft.presentation)
     implementation(projects.foundation.network)
     implementation(projects.social.rss)

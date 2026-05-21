@@ -9,8 +9,8 @@ import dev.dimension.flare.data.database.cache.model.DbStatusReference
 import dev.dimension.flare.data.database.cache.model.DbStatusReferenceWithStatus
 import dev.dimension.flare.data.database.cache.model.DbStatusWithReference
 import dev.dimension.flare.data.database.cache.model.DbStatusWithUser
-import dev.dimension.flare.data.database.cache.model.TranslationDisplayOptions
 import dev.dimension.flare.data.database.cache.model.applyTranslation
+import dev.dimension.flare.data.translation.TranslationDisplayOptions
 import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.ReferenceType

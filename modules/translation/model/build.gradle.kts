@@ -5,12 +5,11 @@ plugins {
     id("dev.dimension.flare.multiplatform-library")
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.multiplatform)
-    alias(libs.plugins.kotlin.serialization)
 }
 
 kotlin {
     flare {
-        namespace = "dev.dimension.flare.modules.settings.data"
+        namespace = "dev.dimension.flare.modules.translation.model"
         platforms(
             FlarePlatform.ANDROID,
             FlarePlatform.JVM,
@@ -26,7 +25,7 @@ kotlin {
                 compilerOptions {
                     freeCompilerArgs.addAll(
                         "-module-name",
-                        "flare_settings_data_commonMain",
+                        "flare_translation_model_commonMain",
                     )
                 }
             }
@@ -40,38 +39,11 @@ kotlin {
                         compilerOptions {
                             freeCompilerArgs.addAll(
                                 "-module-name",
-                                "flare_settings_data",
+                                "flare_translation_model",
                             )
                         }
                     }
                 }
-            }
-        }
-    }
-
-    compilerOptions {
-        allWarningsAsErrors.set(false)
-    }
-
-    sourceSets {
-        val commonMain by getting {
-            dependencies {
-                api(projects.core.common)
-                api(projects.core.model)
-                api(projects.foundation.database)
-                api(projects.foundation.datastore)
-                implementation(projects.modules.account.model)
-                api(projects.modules.translation.model)
-                api(libs.datastore.core)
-                implementation(libs.kotlinx.serialization.json)
-                api(dependencies.platform(libs.koin.bom))
-                api(libs.koin.core)
-            }
-        }
-        val commonTest by getting {
-            dependencies {
-                implementation(kotlin("test"))
-                implementation(libs.kotlinx.coroutines.test)
             }
         }
     }

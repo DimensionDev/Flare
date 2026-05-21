@@ -22,7 +22,6 @@ import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.TimelinePagingMapper
 import dev.dimension.flare.data.database.cache.model.DbStatusWithReference
-import dev.dimension.flare.data.database.cache.model.TranslationDisplayOptions
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.NotSupportRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
@@ -38,6 +37,7 @@ import dev.dimension.flare.data.model.tab.TimelinePostContent
 import dev.dimension.flare.data.model.tab.TimelinePostKind
 import dev.dimension.flare.data.repository.homeTimelineTab
 import dev.dimension.flare.data.settings.TranslationSettingsSupport
+import dev.dimension.flare.data.translation.TranslationDisplayOptions
 import dev.dimension.flare.data.translation.PreTranslationService
 import dev.dimension.flare.model.LoginExpiredException
 import dev.dimension.flare.ui.model.UiMedia

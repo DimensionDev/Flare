@@ -1,9 +1,9 @@
 package dev.dimension.flare.data.settings
 
-import dev.dimension.flare.data.database.cache.model.TranslationDisplayOptions
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.datastore.model.translationProviderCacheKey
+import dev.dimension.flare.data.translation.TranslationDisplayOptions
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map

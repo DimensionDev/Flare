@@ -18,7 +18,6 @@ import dev.dimension.flare.data.ai.OpenAIService
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.TimelinePagingMapper
 import dev.dimension.flare.data.database.cache.model.DbStatusWithReference
-import dev.dimension.flare.data.database.cache.model.TranslationDisplayOptions
 import dev.dimension.flare.data.database.cache.model.TranslationEntityType
 import dev.dimension.flare.data.database.cache.model.TranslationStatus
 import dev.dimension.flare.data.database.memoryDatabaseBuilder
@@ -29,6 +28,7 @@ import dev.dimension.flare.data.datasource.microblog.paging.TimelineRemoteMediat
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.io.OkioFileStorage
+import dev.dimension.flare.data.translation.TranslationDisplayOptions
 import dev.dimension.flare.data.translation.OnlinePreTranslationService
 import dev.dimension.flare.data.translation.PreTranslationContentRules
 import dev.dimension.flare.data.translation.PreTranslationService

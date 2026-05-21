@@ -3,6 +3,7 @@ package dev.dimension.flare.data.database.cache.model
 import dev.dimension.flare.common.Locale
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
+import dev.dimension.flare.data.translation.TranslationDisplayOptions
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.DeeplinkEvent
@@ -12,12 +13,6 @@ import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.render.toUiPlainText
 import kotlinx.collections.immutable.toPersistentList
-
-public data class TranslationDisplayOptions(
-    val translationEnabled: Boolean,
-    val autoDisplayEnabled: Boolean,
-    val providerCacheKey: String,
-)
 
 public fun UiTimelineV2.applyTranslation(
     options: TranslationDisplayOptions,

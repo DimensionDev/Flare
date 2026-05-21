@@ -142,6 +142,66 @@ class TimelinePresenterFilterTest {
     }
 
     @Test
+    fun matchesKeywordFiltersChecksInternalRepostContent() {
+        val base = createSampleStatus(createSampleUser())
+        val original =
+            base.copy(
+                statusKey = base.statusKey.copy(id = "original"),
+                content = "Visible original #blocked".toUiPlainText(),
+            )
+        val repostWrapper =
+            base.copy(
+                statusKey = original.statusKey.copy(id = "repost"),
+                content = "".toUiPlainText(),
+                internalRepost = original,
+            )
+
+        assertFalse(
+            repostWrapper.matchesKeywordFilters(
+                listOf(
+                    KeywordFilterPattern(
+                        keyword = "#blocked",
+                        isRegex = false,
+                    ),
+                ),
+            ),
+        )
+    }
+
+    @Test
+    fun matchesKeywordFiltersDoesNotSearchNestedInternalRepostContent() {
+        val base = createSampleStatus(createSampleUser())
+        val nestedOriginal =
+            base.copy(
+                statusKey = base.statusKey.copy(id = "nested-original"),
+                content = "Nested original #deepblocked".toUiPlainText(),
+            )
+        val directRepost =
+            base.copy(
+                statusKey = base.statusKey.copy(id = "direct-repost"),
+                content = "".toUiPlainText(),
+                internalRepost = nestedOriginal,
+            )
+        val repostWrapper =
+            base.copy(
+                statusKey = base.statusKey.copy(id = "repost-wrapper"),
+                content = "".toUiPlainText(),
+                internalRepost = directRepost,
+            )
+
+        assertTrue(
+            repostWrapper.matchesKeywordFilters(
+                listOf(
+                    KeywordFilterPattern(
+                        keyword = "#deepblocked",
+                        isRegex = false,
+                    ),
+                ),
+            ),
+        )
+    }
+
+    @Test
     fun matchesKeywordFiltersIgnoresInvalidRegexRules() {
         val status =
             createSampleStatus(createSampleUser()).copy(

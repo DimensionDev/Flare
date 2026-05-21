@@ -53,7 +53,7 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 api(projects.core.common)
-                api(projects.core.deeplink)
+                api(projects.foundation.deeplink)
                 api(projects.core.model)
                 implementation(projects.core.humanizer)
                 api(dependencies.platform(libs.compose.bom))

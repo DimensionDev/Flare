@@ -48,7 +48,7 @@ kotlin {
                 api(projects.core.common)
                 api(projects.core.humanizer)
                 api(projects.core.model)
-                api(projects.core.deeplink)
+                api(projects.foundation.deeplink)
                 api(projects.modules.account.api)
                 api(projects.modules.draft.presentation)
                 api(projects.modules.local.model)

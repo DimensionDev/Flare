@@ -10,7 +10,7 @@ plugins {
 
 kotlin {
     flare {
-        namespace = "dev.dimension.flare.core.deeplink"
+        namespace = "dev.dimension.flare.foundation.deeplink"
         platforms(
             FlarePlatform.ANDROID,
             FlarePlatform.JVM,

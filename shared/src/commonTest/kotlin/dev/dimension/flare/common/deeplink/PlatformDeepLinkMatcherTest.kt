@@ -81,14 +81,14 @@ class PlatformDeepLinkMatcherTest {
     @Test
     fun matchesReturnsAccountProfileRoute() {
         val mastodonAccount =
-            UiAccount.Mastodon(
+            UiAccount(
                 accountKey = MicroBlogKey(id = "1", host = "mastodon.social"),
-                instance = "mastodon.social",
+                platformType = PlatformType.Mastodon,
             )
         val misskeyAccount =
-            UiAccount.Misskey(
+            UiAccount(
                 accountKey = MicroBlogKey(id = "2", host = "misskey.example"),
-                host = "misskey.example",
+                platformType = PlatformType.Misskey,
             )
         val mapping = deepLinkMapping(mastodonAccount, misskeyAccount)
 
@@ -108,14 +108,14 @@ class PlatformDeepLinkMatcherTest {
     @Test
     fun matchesMultipleAccountsWithSameHost() {
         val account1 =
-            UiAccount.Mastodon(
+            UiAccount(
                 accountKey = MicroBlogKey(id = "1", host = "mastodon.social"),
-                instance = "mastodon.social",
+                platformType = PlatformType.Mastodon,
             )
         val account2 =
-            UiAccount.Mastodon(
+            UiAccount(
                 accountKey = MicroBlogKey(id = "2", host = "mastodon.social"),
-                instance = "mastodon.social",
+                platformType = PlatformType.Mastodon,
             )
         val mapping = deepLinkMapping(account1, account2)
 
@@ -143,9 +143,9 @@ class PlatformDeepLinkMatcherTest {
     @Test
     fun matchesReturnsEmptyForNonMatchingUrl() {
         val account =
-            UiAccount.Mastodon(
+            UiAccount(
                 accountKey = MicroBlogKey(id = "1", host = "mastodon.social"),
-                instance = "mastodon.social",
+                platformType = PlatformType.Mastodon,
             )
         val mapping = deepLinkMapping(account)
 
@@ -156,22 +156,24 @@ class PlatformDeepLinkMatcherTest {
     @Test
     fun matchesRealWorldLinks() {
         val mastodonAccount =
-            UiAccount.Mastodon(
+            UiAccount(
                 accountKey = MicroBlogKey(id = "1", host = "mastodon.example"),
-                instance = "mastodon.example",
+                platformType = PlatformType.Mastodon,
             )
         val misskeyAccount =
-            UiAccount.Misskey(
+            UiAccount(
                 accountKey = MicroBlogKey(id = "2", host = "misskey.example"),
-                host = "misskey.example",
+                platformType = PlatformType.Misskey,
             )
         val bskyAccount =
-            UiAccount.Bluesky(
+            UiAccount(
                 accountKey = MicroBlogKey(id = "3", host = "bsky.example"),
+                platformType = PlatformType.Bluesky,
             )
         val xAccount =
-            UiAccount.XQT(
+            UiAccount(
                 accountKey = MicroBlogKey(id = "4", host = xqtHost),
+                platformType = PlatformType.xQt,
             )
 
         val mapping = deepLinkMapping(mastodonAccount, misskeyAccount, bskyAccount, xAccount)
@@ -265,9 +267,9 @@ class PlatformDeepLinkMatcherTest {
     @Test
     fun profileWithFullHandleUsesHandleHost() {
         val account =
-            UiAccount.Mastodon(
+            UiAccount(
                 accountKey = MicroBlogKey(id = "1", host = "mastodon.social"),
-                instance = "mastodon.social",
+                platformType = PlatformType.Mastodon,
             )
         val mapping = deepLinkMapping(account)
 
@@ -287,8 +289,7 @@ class PlatformDeepLinkMatcherTest {
 private fun PlatformType.deepLinks(accountKey: MicroBlogKey): ImmutableList<PlatformDeepLink<*>> =
     platformRegistry.require(this).deepLinks(accountKey)
 
-private fun UiAccount.deepLinks(): ImmutableList<PlatformDeepLink<*>> =
-    platformRegistry.require(platformType).deepLinks(accountKey)
+private fun UiAccount.deepLinks(): ImmutableList<PlatformDeepLink<*>> = platformRegistry.require(platformType).deepLinks(accountKey)
 
 private fun deepLinkMapping(vararg accounts: UiAccount): Map<UiAccount, List<PlatformDeepLink<*>>> =
     persistentMapOf<UiAccount, List<PlatformDeepLink<*>>>()

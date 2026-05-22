@@ -1,7 +1,7 @@
 package dev.dimension.flare.data.network.bluesky
 
+import dev.dimension.flare.data.platform.BlueskyCredential
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.model.UiAccount
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.MockRequestHandleScope
@@ -32,7 +32,7 @@ class BlueskyAuthPluginTest {
     fun expiredRequestRefreshesSuccessfully() =
         runTest {
             val credentialFlow =
-                MutableStateFlow<UiAccount.Bluesky.Credential>(
+                MutableStateFlow<BlueskyCredential>(
                     credential(
                         accessToken = "access-old",
                         refreshToken = "refresh-old",
@@ -98,7 +98,7 @@ class BlueskyAuthPluginTest {
     fun concurrentExpiredRequestsReuseRefreshedCredential() =
         runTest {
             val credentialFlow =
-                MutableStateFlow<UiAccount.Bluesky.Credential>(
+                MutableStateFlow<BlueskyCredential>(
                     credential(
                         accessToken = "access-old",
                         refreshToken = "refresh-old",
@@ -204,7 +204,7 @@ class BlueskyAuthPluginTest {
     fun credentialFlowChangeUsesNewCredential() =
         runTest {
             val credentialFlow =
-                MutableStateFlow<UiAccount.Bluesky.Credential>(
+                MutableStateFlow<BlueskyCredential>(
                     credential(
                         accessToken = "access-old",
                         refreshToken = "refresh-old",
@@ -256,15 +256,15 @@ class BlueskyAuthPluginTest {
     private fun credential(
         accessToken: String,
         refreshToken: String,
-    ) = UiAccount.Bluesky.Credential.BlueskyCredential(
+    ) = BlueskyCredential.Password(
         baseUrl = "https://bsky.social",
         accessToken = accessToken,
         refreshToken = refreshToken,
     )
 
     private fun createClient(
-        credentialFlow: MutableStateFlow<UiAccount.Bluesky.Credential>,
-        onTokensChanged: suspend (UiAccount.Bluesky.Credential) -> Unit,
+        credentialFlow: MutableStateFlow<BlueskyCredential>,
+        onTokensChanged: suspend (BlueskyCredential) -> Unit,
         handler: suspend MockRequestHandleScope.(path: String, authorization: String?) -> HttpResponseData,
     ): HttpClient =
         HttpClient(

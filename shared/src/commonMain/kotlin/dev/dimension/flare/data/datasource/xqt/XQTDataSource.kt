@@ -65,14 +65,13 @@ import dev.dimension.flare.data.network.xqt.model.PostMediaMetadataCreateRequest
 import dev.dimension.flare.data.network.xqt.model.PostUnfavoriteTweetRequest
 import dev.dimension.flare.data.network.xqt.model.TweetUnion
 import dev.dimension.flare.data.platform.CommonTimelineSpecs
+import dev.dimension.flare.data.platform.XQTCredential
 import dev.dimension.flare.data.platform.XqtPlatformSpec
 import dev.dimension.flare.data.platform.toTimelineTabItemV2
-import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.shared.image.ImageCompressor
-import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiPodcast
@@ -111,6 +110,7 @@ private const val MAX_ASYNC_UPLOAD_SIZE = 10
 @OptIn(ExperimentalPagingApi::class)
 internal class XQTDataSource(
     override val accountKey: MicroBlogKey,
+    sourceCredentialFlow: Flow<XQTCredential>,
 ) : AuthenticatedMicroblogDataSource,
     NotificationDataSource,
     UserDataSource,
@@ -124,12 +124,9 @@ internal class XQTDataSource(
     PostEventHandler.Handler {
     private val database: CacheDatabase by inject()
     private val coroutineScope: CoroutineScope by inject()
-    private val accountRepository: AccountRepository by inject()
     private val imageCompressor: ImageCompressor by inject()
     private val credentialFlow by lazy {
-        accountRepository
-            .credentialFlow<UiAccount.XQT.Credential>(accountKey)
-            .distinctUntilChanged()
+        sourceCredentialFlow.distinctUntilChanged()
     }
     private val service by lazy {
         XQTService(

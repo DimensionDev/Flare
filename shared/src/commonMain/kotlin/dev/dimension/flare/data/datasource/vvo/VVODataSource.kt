@@ -35,14 +35,13 @@ import dev.dimension.flare.data.model.tab.toSlot
 import dev.dimension.flare.data.network.vvo.VVOService
 import dev.dimension.flare.data.network.vvo.model.StatusDetailItem
 import dev.dimension.flare.data.platform.CommonTimelineSpecs
+import dev.dimension.flare.data.platform.VVoCredential
 import dev.dimension.flare.data.platform.VvoPlatformSpec
-import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.shared.image.ImageCompressor
-import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiProfile
@@ -62,6 +61,7 @@ import org.koin.core.component.inject
 @OptIn(ExperimentalPagingApi::class)
 internal class VVODataSource(
     override val accountKey: MicroBlogKey,
+    credentialFlow: Flow<VVoCredential>,
 ) : AuthenticatedMicroblogDataSource,
     KoinComponent,
     NotificationDataSource,
@@ -70,14 +70,10 @@ internal class VVODataSource(
     TimelineTabConfigurationDataSource,
     PostDataSource,
     PostEventHandler.Handler {
-    private val accountRepository: AccountRepository by inject()
     private val imageCompressor: ImageCompressor by inject()
     private val service by lazy {
         VVOService(
-            chocolateFlow =
-                accountRepository
-                    .credentialFlow<UiAccount.VVo.Credential>(accountKey)
-                    .map { it.chocolate },
+            chocolateFlow = credentialFlow.map { it.chocolate },
         )
     }
 

@@ -9,10 +9,10 @@ import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.network.xqt.XQTService
 import dev.dimension.flare.data.network.xqt.model.AddToConversationRequest
 import dev.dimension.flare.data.network.xqt.model.PostDmNew2Request
+import dev.dimension.flare.data.platform.XQTCredential
 import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
-import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiDMItem
 import dev.dimension.flare.ui.model.UiDMRoom
 import dev.dimension.flare.ui.model.UiMedia
@@ -26,7 +26,7 @@ import kotlin.uuid.Uuid
 internal class XQTDirectMessageLoader(
     private val service: XQTService,
     private val accountKey: MicroBlogKey,
-    private val credentialFlow: Flow<UiAccount.XQT.Credential>,
+    private val credentialFlow: Flow<XQTCredential>,
 ) : DirectMessageLoader {
     override val platformType: PlatformType = PlatformType.xQt
 
@@ -269,12 +269,12 @@ internal class XQTDirectMessageLoader(
 }
 
 private fun UiDMRoom.withXqtMediaAuth(
-    credential: UiAccount.XQT.Credential,
+    credential: XQTCredential,
     host: String,
 ): UiDMRoom = copy(lastMessage = lastMessage?.withXqtMediaAuth(credential, host))
 
 private fun UiDMItem.withXqtMediaAuth(
-    credential: UiAccount.XQT.Credential,
+    credential: XQTCredential,
     host: String,
 ): UiDMItem =
     copy(
@@ -286,7 +286,7 @@ private fun UiDMItem.withXqtMediaAuth(
     )
 
 private fun UiMedia.withXqtMediaAuth(
-    credential: UiAccount.XQT.Credential,
+    credential: XQTCredential,
     host: String,
 ): UiMedia {
     val headers =

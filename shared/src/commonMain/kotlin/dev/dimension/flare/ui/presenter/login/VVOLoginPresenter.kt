@@ -8,8 +8,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import dev.dimension.flare.data.network.vvo.VVOService
+import dev.dimension.flare.data.platform.VVoCredential
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.vvoHost
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.presenter.PresenterBase
@@ -68,15 +70,16 @@ public class VVOLoginPresenter(
         val profile = service.profileInfo(uid, st)
         requireNotNull(profile.data) { "profile is null" }
         accountRepository.addAccount(
-            UiAccount.VVo(
+            UiAccount(
                 accountKey =
                     MicroBlogKey(
                         id = uid,
                         host = vvoHost,
                     ),
+                platformType = PlatformType.VVo,
             ),
             credential =
-                UiAccount.VVo.Credential(
+                VVoCredential(
                     chocolate = chocolate,
                 ),
         )

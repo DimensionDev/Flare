@@ -48,8 +48,7 @@ public class ServiceSelectPresenter(
             override val misskeyLoginState = misskeyLoginState
             override val loading = loading
 
-            override fun platformIcon(platformType: PlatformType): UiIcon =
-                platformRegistry.require(platformType).metadata.icon
+            override fun platformIcon(platformType: PlatformType): UiIcon = platformRegistry.require(platformType).metadata.icon
 
             override fun agreementUrl(
                 platformType: PlatformType,

@@ -4,9 +4,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import dev.dimension.flare.data.platform.NostrCredential
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.map
@@ -35,7 +35,7 @@ public class NostrRelaysPresenter(
     @Composable
     override fun body(): State {
         val credential by remember {
-            accountRepository.credentialFlow<UiAccount.Nostr.Credential>(accountKey)
+            accountRepository.credentialFlow<NostrCredential>(accountKey)
         }.collectAsUiState()
 
         return object : State {

@@ -1,6 +1,6 @@
 package dev.dimension.flare.data.network.nostr
 
-import dev.dimension.flare.ui.model.NostrSignerCredential
+import dev.dimension.flare.data.platform.NostrSignerCredential
 
 internal data class AmberConnection(
     val credential: NostrSignerCredential.Amber,

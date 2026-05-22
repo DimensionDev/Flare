@@ -1,6 +1,5 @@
 package dev.dimension.flare.data.platform
 
-import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
 import dev.dimension.flare.data.model.IconType
@@ -14,11 +13,11 @@ import dev.dimension.flare.data.network.misskey.api.model.MetaRequest
 import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.PlatformDataSourceContext
 import dev.dimension.flare.model.PlatformDeepLink
 import dev.dimension.flare.model.PlatformSpec
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.PlatformTypeMetadata
-import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiInstanceMetadata
 import dev.dimension.flare.ui.model.UiList
@@ -169,25 +168,12 @@ public data object MisskeyPlatformSpec : PlatformSpec {
     override suspend fun instanceMetadata(host: String): UiInstanceMetadata =
         MisskeyService("https://$host/api/").meta(MetaRequest()).render()
 
-    override fun restoreAccount(
-        accountKey: MicroBlogKey,
-        credentialJson: String,
-    ): UiAccount {
-        val credential = credentialJson.decodeJson<UiAccount.Misskey.Credential>()
-        return UiAccount.Misskey(
-            accountKey = accountKey,
-            host = credential.host,
-            nodeType = credential.nodeType,
-        )
-    }
-
-    override fun createDataSource(account: UiAccount): MicroblogDataSource {
-        require(account is UiAccount.Misskey) {
-            "Expected Misskey account for ${type.name}, got ${account.platformType.name}"
-        }
+    override fun createDataSource(context: PlatformDataSourceContext): MicroblogDataSource {
+        val credential = context.credential(MisskeyCredential.serializer())
         return MisskeyDataSource(
-            accountKey = account.accountKey,
-            host = account.host,
+            accountKey = context.accountKey,
+            host = credential.host,
+            credentialFlow = context.credentialFlow(MisskeyCredential.serializer()),
         )
     }
 

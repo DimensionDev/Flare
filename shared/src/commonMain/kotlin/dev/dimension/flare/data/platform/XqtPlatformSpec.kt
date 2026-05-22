@@ -8,13 +8,13 @@ import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
 import dev.dimension.flare.data.network.xqt.XQTPlatformDetector
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.PlatformDataSourceContext
 import dev.dimension.flare.model.PlatformDeepLink
 import dev.dimension.flare.model.PlatformSpec
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.PlatformTypeMetadata
 import dev.dimension.flare.model.xqtHost
 import dev.dimension.flare.model.xqtOldHost
-import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiInstanceMetadata
 import dev.dimension.flare.ui.model.UiStrings
@@ -122,22 +122,11 @@ public data object XqtPlatformSpec : PlatformSpec {
     override suspend fun instanceMetadata(host: String): UiInstanceMetadata =
         throw UnsupportedOperationException("${type.name} is not supported yet")
 
-    override fun restoreAccount(
-        accountKey: MicroBlogKey,
-        credentialJson: String,
-    ): UiAccount =
-        UiAccount.XQT(
-            accountKey = accountKey,
+    override fun createDataSource(context: PlatformDataSourceContext): MicroblogDataSource =
+        XQTDataSource(
+            accountKey = context.accountKey,
+            sourceCredentialFlow = context.credentialFlow(XQTCredential.serializer()),
         )
-
-    override fun createDataSource(account: UiAccount): MicroblogDataSource {
-        require(account is UiAccount.XQT) {
-            "Expected X account for ${type.name}, got ${account.platformType.name}"
-        }
-        return XQTDataSource(
-            accountKey = account.accountKey,
-        )
-    }
 
     override fun guestDataSource(
         host: String,

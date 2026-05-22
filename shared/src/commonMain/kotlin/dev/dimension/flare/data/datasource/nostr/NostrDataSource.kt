@@ -32,31 +32,32 @@ import dev.dimension.flare.data.model.tab.toSlot
 import dev.dimension.flare.data.network.nostr.AmberSignerBridge
 import dev.dimension.flare.data.network.nostr.NostrService
 import dev.dimension.flare.data.platform.CommonTimelineSpecs
-import dev.dimension.flare.data.repository.AccountRepository
+import dev.dimension.flare.data.platform.NostrCredential
+import dev.dimension.flare.data.platform.normalized
+import dev.dimension.flare.data.platform.signerStableId
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.nostrLike
 import dev.dimension.flare.ui.model.mapper.nostrRepost
-import dev.dimension.flare.ui.model.normalized
-import dev.dimension.flare.ui.model.signerStableId
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-internal typealias NostrServiceManager = SwitchingServiceManager<UiAccount.Nostr.Credential, NostrService>
+internal typealias NostrServiceManager = SwitchingServiceManager<NostrCredential, NostrService>
 
 internal class NostrDataSource(
     override val accountKey: MicroBlogKey,
+    private val credentialFlow: Flow<NostrCredential>,
 ) : AuthenticatedMicroblogDataSource,
     UserDataSource,
     RelationDataSource,
@@ -65,13 +66,9 @@ internal class NostrDataSource(
     PostEventHandler.Handler,
     KoinComponent,
     AutoCloseable {
-    private val accountRepository: AccountRepository by inject()
     private val ioScope: CoroutineScope by inject()
     private val nostrCache: NostrCache by inject()
     private val amberSignerBridge: AmberSignerBridge by inject()
-    private val credentialFlow by lazy {
-        accountRepository.credentialFlow<UiAccount.Nostr.Credential>(accountKey)
-    }
     private val loader by lazy {
         NostrLoader(
             accountKey = accountKey,

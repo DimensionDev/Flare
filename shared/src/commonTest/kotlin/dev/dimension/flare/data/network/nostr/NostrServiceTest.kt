@@ -2,11 +2,11 @@ package dev.dimension.flare.data.network.nostr
 
 import dev.dimension.flare.common.TestFormatter
 import dev.dimension.flare.data.datasource.nostr.NostrCache
+import dev.dimension.flare.data.platform.NostrCredential
+import dev.dimension.flare.data.platform.NostrSignerCredential
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.ui.humanizer.PlatformFormatter
-import dev.dimension.flare.ui.model.NostrSignerCredential
-import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
@@ -48,7 +48,7 @@ class NostrServiceTest {
             val generated = NostrService.generateAccount()
             val exported =
                 NostrService.exportAccount(
-                    UiAccount.Nostr.Credential(
+                    NostrCredential(
                         pubkeyHex = generated.pubkeyHex,
                         signer = NostrSignerCredential.LocalKey(generated.nsec),
                     ),
@@ -110,7 +110,7 @@ class NostrServiceTest {
                         },
                     accountKey = MicroBlogKey(ROOT_EVENT_PUBKEY, NostrService.NOSTR_HOST),
                     credential =
-                        UiAccount.Nostr.Credential(
+                        NostrCredential(
                             pubkeyHex = ROOT_EVENT_PUBKEY,
                         ),
                     amberSignerBridge = UnsupportedAmberSignerBridge("Amber signer is unavailable in tests."),
@@ -281,7 +281,7 @@ class NostrServiceTest {
                     },
                 accountKey = MicroBlogKey("nostr-test", NostrService.NOSTR_HOST),
                 credential =
-                    UiAccount.Nostr.Credential(
+                    NostrCredential(
                         pubkeyHex = generated.pubkeyHex,
                         signer = NostrSignerCredential.LocalKey(generated.nsec),
                     ),

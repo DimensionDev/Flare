@@ -10,8 +10,10 @@ import androidx.compose.runtime.setValue
 import com.atproto.server.CreateSessionRequest
 import com.atproto.server.CreateSessionResponse
 import dev.dimension.flare.data.network.bluesky.BlueskyService
+import dev.dimension.flare.data.platform.BlueskyCredential
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.presenter.PresenterBase
 import io.ktor.http.Url
@@ -123,19 +125,22 @@ public class BlueskyLoginPresenter(
             }
 
         accountRepository.addAccount(
-            UiAccount.Bluesky(
-                accountKey =
-                    MicroBlogKey(
-                        id = response.did.did,
-                        host = Url(baseUrl).host,
-                    ),
-            ),
+            account =
+                UiAccount(
+                    accountKey =
+                        MicroBlogKey(
+                            id = response.did.did,
+                            host = Url(baseUrl).host,
+                        ),
+                    platformType = PlatformType.Bluesky,
+                ),
             credential =
-                UiAccount.Bluesky.Credential.BlueskyCredential(
+                BlueskyCredential.Password(
                     baseUrl = baseUrl,
                     accessToken = response.accessJwt,
                     refreshToken = response.refreshJwt,
                 ),
+            serializer = BlueskyCredential.serializer(),
         )
     }
 }

@@ -10,8 +10,10 @@ import androidx.compose.runtime.setValue
 import dev.dimension.flare.data.datasource.xqt.userById
 import dev.dimension.flare.data.network.xqt.XQTService
 import dev.dimension.flare.data.network.xqt.model.User
+import dev.dimension.flare.data.platform.XQTCredential
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.xqtHost
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.presenter.PresenterBase
@@ -73,15 +75,16 @@ public class XQTLoginPresenter(
         requireNotNull(account)
         require(account is User)
         accountRepository.addAccount(
-            UiAccount.XQT(
+            UiAccount(
                 accountKey =
                     MicroBlogKey(
                         id = account.restId,
                         host = xqtHost,
                     ),
+                platformType = PlatformType.xQt,
             ),
             credential =
-                UiAccount.XQT.Credential(
+                XQTCredential(
                     chocolate = chocolate,
                 ),
         )

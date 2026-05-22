@@ -3,10 +3,10 @@ package dev.dimension.flare.model
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
-import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiInstanceMetadata
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.coroutines.flow.Flow
 import kotlinx.serialization.KSerializer
 
 public interface PlatformSpec {
@@ -21,17 +21,25 @@ public interface PlatformSpec {
 
     public suspend fun instanceMetadata(host: String): UiInstanceMetadata
 
-    public fun restoreAccount(
-        accountKey: MicroBlogKey,
-        credentialJson: String,
-    ): UiAccount
-
-    public fun createDataSource(account: UiAccount): MicroblogDataSource
+    public fun createDataSource(context: PlatformDataSourceContext): MicroblogDataSource
 
     public fun guestDataSource(
         host: String,
         locale: String,
     ): MicroblogDataSource
+}
+
+public interface PlatformDataSourceContext {
+    public val accountKey: MicroBlogKey
+
+    public fun <T : Any> credential(serializer: KSerializer<T>): T
+
+    public fun <T : Any> credentialFlow(serializer: KSerializer<T>): Flow<T>
+
+    public suspend fun <T : Any> updateCredential(
+        serializer: KSerializer<T>,
+        credential: T,
+    )
 }
 
 public data class PlatformDeepLink<T>(
@@ -58,8 +66,7 @@ public class PlatformRegistry(
 
     public fun get(type: PlatformType): PlatformSpec? = byType[type]
 
-    public fun require(type: PlatformType): PlatformSpec =
-        get(type) ?: throw UnsupportedPlatformException(type)
+    public fun require(type: PlatformType): PlatformSpec = get(type) ?: throw UnsupportedPlatformException(type)
 }
 
 public class UnsupportedPlatformException(

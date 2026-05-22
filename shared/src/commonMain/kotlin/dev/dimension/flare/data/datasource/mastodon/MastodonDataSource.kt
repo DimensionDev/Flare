@@ -43,14 +43,13 @@ import dev.dimension.flare.data.network.mastodon.api.model.PostStatus
 import dev.dimension.flare.data.network.mastodon.api.model.PostVote
 import dev.dimension.flare.data.network.mastodon.api.model.Visibility
 import dev.dimension.flare.data.platform.CommonTimelineSpecs
+import dev.dimension.flare.data.platform.MastodonCredential
 import dev.dimension.flare.data.platform.MastodonPlatformSpec
 import dev.dimension.flare.data.platform.toTimelineTabItemV2
-import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.shared.image.ImageCompressor
-import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiList
@@ -62,6 +61,7 @@ import dev.dimension.flare.ui.route.DeeplinkRoute
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -71,6 +71,7 @@ import kotlin.uuid.Uuid
 internal open class MastodonDataSource(
     override val accountKey: MicroBlogKey,
     val instance: String,
+    private val credentialFlow: Flow<MastodonCredential>,
 ) : AuthenticatedMicroblogDataSource,
     NotificationDataSource,
     UserDataSource,
@@ -81,15 +82,11 @@ internal open class MastodonDataSource(
     TimelineTabConfigurationDataSource,
     RelationDataSource,
     PostEventHandler.Handler {
-    private val accountRepository: AccountRepository by inject()
     private val imageCompressor: ImageCompressor by inject()
     private val service by lazy {
         MastodonService(
             baseUrl = "https://$instance/",
-            accessTokenFlow =
-                accountRepository
-                    .credentialFlow<UiAccount.Mastodon.Credential>(accountKey)
-                    .map { it.accessToken },
+            accessTokenFlow = credentialFlow.map { it.accessToken },
         )
     }
 

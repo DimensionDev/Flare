@@ -1,10 +1,10 @@
 package dev.dimension.flare.data.network.bluesky
 
 import com.atproto.server.RefreshSessionResponse
+import dev.dimension.flare.data.platform.BlueskyCredential
 import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
-import dev.dimension.flare.ui.model.UiAccount
 import io.ktor.client.HttpClient
 import io.ktor.client.call.HttpClientCall
 import io.ktor.client.call.body
@@ -42,8 +42,8 @@ internal class BlueskyAuthPlugin(
     private val oauthApi: OAuthApi,
     private val accountKey: MicroBlogKey?,
     private val baseUrlFlow: Flow<String>? = null,
-    private val authTokenFlow: Flow<UiAccount.Bluesky.Credential>?,
-    private val onAuthTokensChanged: suspend (UiAccount.Bluesky.Credential) -> Unit,
+    private val authTokenFlow: Flow<BlueskyCredential>?,
+    private val onAuthTokensChanged: suspend (BlueskyCredential) -> Unit,
 ) {
     private val refreshMutex = Mutex()
 
@@ -52,8 +52,8 @@ internal class BlueskyAuthPlugin(
         var oauthApi: OAuthApi = OAuthApi(),
         var accountKey: MicroBlogKey? = null,
         var baseUrlFlow: Flow<String>? = null,
-        var authTokenFlow: Flow<UiAccount.Bluesky.Credential>? = null,
-        var onAuthTokensChanged: suspend (UiAccount.Bluesky.Credential) -> Unit = {},
+        var authTokenFlow: Flow<BlueskyCredential>? = null,
+        var onAuthTokensChanged: suspend (BlueskyCredential) -> Unit = {},
     )
 
     companion object : HttpClientPlugin<Config, BlueskyAuthPlugin> {
@@ -108,7 +108,7 @@ internal class BlueskyAuthPlugin(
                     if (error == "ExpiredToken" || error == "invalid_token" || error == "use_dpop_nonce") {
                         shouldRetry = !isRefresh
                     }
-                    var currentCredential: UiAccount.Bluesky.Credential = credential
+                    var currentCredential: BlueskyCredential = credential
                     var retryCount = 0
                     while (shouldRetry) {
                         retryCount++
@@ -188,18 +188,18 @@ internal class BlueskyAuthPlugin(
         }
 
         private suspend fun HttpRequestBuilder.auth(
-            credential: UiAccount.Bluesky.Credential,
+            credential: BlueskyCredential,
             oAuthApi: OAuthApi,
         ) {
             when (val tokens = credential) {
-                is UiAccount.Bluesky.Credential.BlueskyCredential -> {
+                is BlueskyCredential.Password -> {
                     header(
                         HttpHeaders.Authorization,
                         "Bearer ${tokens.accessToken}",
                     )
                 }
 
-                is UiAccount.Bluesky.Credential.OAuthCredential -> {
+                is BlueskyCredential.OAuthCredential -> {
                     applyDpop(
                         credential,
                         oAuthApi,
@@ -209,18 +209,18 @@ internal class BlueskyAuthPlugin(
         }
 
         private suspend fun HttpRequestBuilder.refresh(
-            credential: UiAccount.Bluesky.Credential,
+            credential: BlueskyCredential,
             oAuthApi: OAuthApi,
         ) {
             when (val tokens = credential) {
-                is UiAccount.Bluesky.Credential.BlueskyCredential -> {
+                is BlueskyCredential.Password -> {
                     header(
                         HttpHeaders.Authorization,
                         "Bearer ${tokens.refreshToken}",
                     )
                 }
 
-                is UiAccount.Bluesky.Credential.OAuthCredential -> {
+                is BlueskyCredential.OAuthCredential -> {
                     applyDpop(
                         tokens,
                         oAuthApi,
@@ -230,9 +230,9 @@ internal class BlueskyAuthPlugin(
         }
 
         private suspend fun onResponse(
-            credential: UiAccount.Bluesky.Credential,
+            credential: BlueskyCredential,
             response: HttpResponse,
-            onAuthTokensChanged: suspend (UiAccount.Bluesky.Credential) -> Unit,
+            onAuthTokensChanged: suspend (BlueskyCredential) -> Unit,
         ) {
             refreshDpopNonce(credential, response)?.let { newTokens ->
                 onAuthTokensChanged(newTokens)
@@ -240,12 +240,12 @@ internal class BlueskyAuthPlugin(
         }
 
         private suspend fun refreshExpiredToken(
-            credential: UiAccount.Bluesky.Credential,
+            credential: BlueskyCredential,
             oAuthApi: OAuthApi,
             scope: HttpClient,
-        ): UiAccount.Bluesky.Credential? =
+        ): BlueskyCredential? =
             when (val tokens = credential) {
-                is UiAccount.Bluesky.Credential.BlueskyCredential -> {
+                is BlueskyCredential.Password -> {
                     val refreshResponse =
                         scope.post("/xrpc/com.atproto.server.refreshSession") {
                             refresh(tokens, oAuthApi)
@@ -254,7 +254,7 @@ internal class BlueskyAuthPlugin(
                         .toAtpResponse<RefreshSessionResponse>()
                         .maybeResponse()
                         ?.let { refreshed ->
-                            UiAccount.Bluesky.Credential.BlueskyCredential(
+                            BlueskyCredential.Password(
                                 accessToken = refreshed.accessJwt,
                                 refreshToken = refreshed.refreshJwt,
                                 baseUrl = tokens.baseUrl,
@@ -262,7 +262,7 @@ internal class BlueskyAuthPlugin(
                         }
                 }
 
-                is UiAccount.Bluesky.Credential.OAuthCredential -> {
+                is BlueskyCredential.OAuthCredential -> {
                     oAuthApi
                         .refreshToken(
                             clientId = tokens.oAuthToken.clientId,
@@ -270,7 +270,7 @@ internal class BlueskyAuthPlugin(
                             refreshToken = tokens.oAuthToken.refreshToken,
                             keyPair = tokens.oAuthToken.keyPair,
                         ).let { refreshed ->
-                            UiAccount.Bluesky.Credential.OAuthCredential(
+                            BlueskyCredential.OAuthCredential(
                                 baseUrl = tokens.baseUrl,
                                 oAuthToken = refreshed,
                             )
@@ -279,15 +279,15 @@ internal class BlueskyAuthPlugin(
             }
 
         private fun refreshDpopNonce(
-            credential: UiAccount.Bluesky.Credential,
+            credential: BlueskyCredential,
             callResponse: HttpResponse,
-        ): UiAccount.Bluesky.Credential? =
+        ): BlueskyCredential? =
             when (val tokens = credential) {
-                is UiAccount.Bluesky.Credential.BlueskyCredential -> {
+                is BlueskyCredential.Password -> {
                     null
                 }
 
-                is UiAccount.Bluesky.Credential.OAuthCredential -> {
+                is BlueskyCredential.OAuthCredential -> {
                     callResponse.headers["DPoP-Nonce"]?.let {
                         tokens.copy(
                             oAuthToken =
@@ -300,7 +300,7 @@ internal class BlueskyAuthPlugin(
             }
 
         private suspend fun HttpRequestBuilder.applyDpop(
-            tokens: UiAccount.Bluesky.Credential.OAuthCredential,
+            tokens: BlueskyCredential.OAuthCredential,
             oAuthApi: OAuthApi,
         ) {
             url.protocol = tokens.oAuthToken.pds.protocol
@@ -320,17 +320,17 @@ internal class BlueskyAuthPlugin(
         }
     }
 
-    private suspend fun currentCredential(): UiAccount.Bluesky.Credential? = authTokenFlow?.firstOrNull()
+    private suspend fun currentCredential(): BlueskyCredential? = authTokenFlow?.firstOrNull()
 
-    private suspend fun cacheCredential(credential: UiAccount.Bluesky.Credential) {
+    private suspend fun cacheCredential(credential: BlueskyCredential) {
         onAuthTokensChanged(credential)
     }
 
     private suspend fun refreshExpiredTokenLocked(
-        credential: UiAccount.Bluesky.Credential,
+        credential: BlueskyCredential,
         oAuthApi: OAuthApi,
         scope: HttpClient,
-    ): UiAccount.Bluesky.Credential? =
+    ): BlueskyCredential? =
         refreshMutex.withLock {
             val latestCredential = currentCredential()
             if (latestCredential != null && latestCredential != credential) {

@@ -1,8 +1,8 @@
 package dev.dimension.flare.data.network.bluesky
 
 import dev.dimension.flare.data.network.ktorClient
+import dev.dimension.flare.data.platform.BlueskyCredential
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.model.UiAccount
 import dev.whyoleg.cryptography.CryptographyProvider
 import dev.whyoleg.cryptography.algorithms.SHA256
 import io.ktor.client.HttpClient
@@ -46,8 +46,8 @@ internal data object OAuthCodeChallengeMethodS256 : OAuthCodeChallengeMethod("S2
 internal data class BlueskyService private constructor(
     private val baseUrlFlow: Flow<String>,
     private val accountKey: MicroBlogKey? = null,
-    private val authTokenFlow: Flow<UiAccount.Bluesky.Credential>? = null,
-    private val onCredentialRefreshed: suspend (UiAccount.Bluesky.Credential) -> Unit = {},
+    private val authTokenFlow: Flow<BlueskyCredential>? = null,
+    private val onCredentialRefreshed: suspend (BlueskyCredential) -> Unit = {},
 ) : BlueskyApi by XrpcBlueskyApi(
         ktorClient {
             install(AtprotoProxyPlugin)
@@ -73,8 +73,8 @@ internal data class BlueskyService private constructor(
     ) {
     constructor(
         accountKey: MicroBlogKey,
-        credentialFlow: Flow<UiAccount.Bluesky.Credential>,
-        onCredentialRefreshed: suspend (UiAccount.Bluesky.Credential) -> Unit,
+        credentialFlow: Flow<BlueskyCredential>,
+        onCredentialRefreshed: suspend (BlueskyCredential) -> Unit,
     ) : this(
         baseUrlFlow = credentialFlow.map { it.baseUrl },
         accountKey = accountKey,

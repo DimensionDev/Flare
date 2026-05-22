@@ -50,15 +50,14 @@ import dev.dimension.flare.data.network.misskey.api.model.NotesCreateRequestPoll
 import dev.dimension.flare.data.network.misskey.api.model.NotesPollsVoteRequest
 import dev.dimension.flare.data.network.misskey.api.model.NotesReactionsCreateRequest
 import dev.dimension.flare.data.platform.CommonTimelineSpecs
+import dev.dimension.flare.data.platform.MisskeyCredential
 import dev.dimension.flare.data.platform.MisskeyPlatformSpec
 import dev.dimension.flare.data.platform.toTimelineTabItemV2
-import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.shared.image.ImageCompressor
 import dev.dimension.flare.ui.model.ClickEvent
-import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiList
@@ -85,6 +84,7 @@ import org.koin.core.component.inject
 internal class MisskeyDataSource(
     override val accountKey: MicroBlogKey,
     private val host: String,
+    private val credentialFlow: Flow<MisskeyCredential>,
 ) : AuthenticatedMicroblogDataSource,
     UserDataSource,
     PostDataSource,
@@ -95,16 +95,12 @@ internal class MisskeyDataSource(
     ReactionDataSource,
     RelationDataSource,
     PostEventHandler.Handler {
-    private val accountRepository: AccountRepository by inject()
     private val imageCompressor: ImageCompressor by inject()
     private val service by lazy {
         dev.dimension.flare.data.network.misskey.MisskeyService(
             baseUrl = "https://$host/api/",
             accountKey = accountKey,
-            accessTokenFlow =
-                accountRepository
-                    .credentialFlow<UiAccount.Misskey.Credential>(accountKey)
-                    .map { it.accessToken },
+            accessTokenFlow = credentialFlow.map { it.accessToken },
         )
     }
 

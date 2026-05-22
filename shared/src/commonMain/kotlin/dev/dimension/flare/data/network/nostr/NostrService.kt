@@ -6,24 +6,24 @@ import dev.dimension.flare.common.jsonObjectOrNull
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.userActionsMenu
 import dev.dimension.flare.data.datasource.nostr.NostrCache
+import dev.dimension.flare.data.platform.NostrCredential
+import dev.dimension.flare.data.platform.NostrSignerCredential
+import dev.dimension.flare.data.platform.effectivePubkeyHex
+import dev.dimension.flare.data.platform.effectiveSigner
+import dev.dimension.flare.data.platform.normalized
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.ui.model.ClickEvent
-import dev.dimension.flare.ui.model.NostrSignerCredential
-import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiHandle
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiNumber
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
-import dev.dimension.flare.ui.model.effectivePubkeyHex
-import dev.dimension.flare.ui.model.effectiveSigner
 import dev.dimension.flare.ui.model.mapper.nostrLike
 import dev.dimension.flare.ui.model.mapper.nostrRepost
-import dev.dimension.flare.ui.model.normalized
 import dev.dimension.flare.ui.render.RenderContent
 import dev.dimension.flare.ui.render.RenderRun
 import dev.dimension.flare.ui.render.RenderTextStyle
@@ -82,7 +82,7 @@ public val defaultNostrRelays: List<String> =
 internal class NostrService(
     private val cache: NostrCache,
     private val accountKey: MicroBlogKey,
-    credential: UiAccount.Nostr.Credential,
+    credential: NostrCredential,
     private val amberSignerBridge: AmberSignerBridge,
     initialRelays: List<String> = emptyList(),
 ) : AutoCloseable {
@@ -182,7 +182,7 @@ internal class NostrService(
             }
         }
 
-        internal fun exportAccount(credential: UiAccount.Nostr.Credential): ImportedAccount {
+        internal fun exportAccount(credential: NostrCredential): ImportedAccount {
             val secretKey = (credential.effectiveSigner as? NostrSignerCredential.LocalKey)?.nsec
             requireNotNull(secretKey) {
                 "Nostr account does not have an exportable private key"

@@ -9,6 +9,7 @@ import androidx.compose.runtime.setValue
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.network.mastodon.MastodonOAuthService
 import dev.dimension.flare.data.network.nodeinfo.NodeInfoService
+import dev.dimension.flare.data.platform.MastodonCredential
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.ApplicationRepository
 import dev.dimension.flare.model.MicroBlogKey
@@ -80,21 +81,21 @@ public class MastodonCallbackPresenter(
         val nodeInfo = NodeInfoService.fetchNodeInfo(host)
         val forkType =
             if (nodeInfo in NodeInfoService.pleromaNodeInfoName) {
-                UiAccount.Mastodon.Credential.ForkType.Pleroma
+                MastodonCredential.ForkType.Pleroma
             } else {
-                UiAccount.Mastodon.Credential.ForkType.Mastodon
+                MastodonCredential.ForkType.Mastodon
             }
         accountRepository.addAccount(
-            UiAccount.Mastodon(
+            UiAccount(
                 accountKey =
                     MicroBlogKey(
                         id = id,
                         host = host,
                     ),
-                instance = host,
+                platformType = PlatformType.Mastodon,
             ),
             credential =
-                UiAccount.Mastodon.Credential(
+                MastodonCredential(
                     instance = host,
                     accessToken = accessTokenResponse.accessToken,
                     forkType = forkType,

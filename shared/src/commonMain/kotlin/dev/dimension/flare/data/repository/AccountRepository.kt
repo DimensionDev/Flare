@@ -17,11 +17,10 @@ import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.PlatformDataSourceContext
 import dev.dimension.flare.model.PlatformRegistry
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
-import dev.dimension.flare.ui.model.UiAccount.Companion.createDataSource
-import dev.dimension.flare.ui.model.UiAccount.Companion.toUi
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.takeSuccess
@@ -39,6 +38,8 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.serializer
 import kotlin.time.Clock
 
 @Stable
@@ -56,7 +57,7 @@ internal class AccountRepository internal constructor(
             .distinctUntilChangedBy {
                 it?.account_key
             }.map {
-                it?.toUi(platformRegistry)
+                it?.toUi()
             }.map {
                 if (it == null) {
                     UiState.Error(NoActiveAccountException)
@@ -67,7 +68,7 @@ internal class AccountRepository internal constructor(
     }
     internal val allAccounts: Flow<ImmutableList<UiAccount>> by lazy {
         appDatabase.accountDao().sortedAccounts().map {
-            it.map { it.toUi(platformRegistry) }.toImmutableList()
+            it.map { it.toUi() }.toImmutableList()
         }
     }
     private val dataSourceCacheMutex = Mutex()
@@ -92,19 +93,30 @@ internal class AccountRepository internal constructor(
             .distinctUntilChangedBy { it }
     }
 
-    internal fun addAccount(
+    internal inline fun <reified T : Any> addAccount(
         account: UiAccount,
-        credential: UiAccount.Credential,
+        credential: T,
+    ) = addAccount(
+        account = account,
+        credential = credential,
+        serializer = serializer(),
+    )
+
+    internal fun <T : Any> addAccount(
+        account: UiAccount,
+        credential: T,
+        serializer: KSerializer<T>,
     ) = coroutineScope.launch {
         val existingAccount = appDatabase.accountDao().getAccount(account.accountKey)
+        val credentialJson = credential.encodeJson(serializer)
         val dbAccount =
             existingAccount?.copy(
-                credential_json = credential.encodeJson(),
+                credential_json = credentialJson,
                 last_active = Clock.System.now().toEpochMilliseconds(),
             ) ?: DbAccount(
                 account_key = account.accountKey,
                 platform_type = account.platformType,
-                credential_json = credential.encodeJson(),
+                credential_json = credentialJson,
                 last_active = Clock.System.now().toEpochMilliseconds(),
                 sort_id = appDatabase.accountDao().getMaxSortId()?.plus(1) ?: 0L,
             )
@@ -112,13 +124,23 @@ internal class AccountRepository internal constructor(
         addAccountFlow.value = account
     }
 
-    internal fun updateCredential(
+    internal inline fun <reified T : Any> updateCredential(
         accountKey: MicroBlogKey,
-        credential: UiAccount.Credential,
+        credential: T,
+    ) = updateCredential(
+        accountKey = accountKey,
+        credential = credential,
+        serializer = serializer(),
+    )
+
+    internal fun <T : Any> updateCredential(
+        accountKey: MicroBlogKey,
+        credential: T,
+        serializer: KSerializer<T>,
     ) = coroutineScope.launch {
         appDatabase.accountDao().setCredential(
             accountKey,
-            credential.encodeJson(),
+            credential.encodeJson(serializer),
         )
     }
 
@@ -179,7 +201,7 @@ internal class AccountRepository internal constructor(
             if (it == null) {
                 UiState.Error(NoActiveAccountException)
             } else {
-                UiState.Success(it.toUi(platformRegistry))
+                UiState.Success(it.toUi())
             }
         }
 
@@ -188,24 +210,91 @@ internal class AccountRepository internal constructor(
             .accountDao()
             .get(accountKey)
             .firstOrNull()
-            ?.toUi(platformRegistry)
+            ?.toUi()
 
-    internal inline fun <reified T : UiAccount.Credential> credentialFlow(accountKey: MicroBlogKey): Flow<T> =
+    internal inline fun <reified T : Any> credentialFlow(accountKey: MicroBlogKey): Flow<T> =
+        credentialFlow(
+            accountKey = accountKey,
+            serializer = serializer(),
+        )
+
+    internal fun <T : Any> credentialFlow(
+        accountKey: MicroBlogKey,
+        serializer: KSerializer<T>,
+    ): Flow<T> =
         appDatabase
             .accountDao()
             .get(accountKey)
             .mapNotNull { it }
             .map {
-                it.credential_json.decodeJson<T>()
+                it.credential_json.decodeJson(serializer)
             }
 
-    internal suspend fun getOrCreateDataSource(account: UiAccount): MicroblogDataSource =
-        dataSourceCacheMutex.withLock {
-            dataSourceCache.getOrPut(account.accountKey) {
-                account.createDataSource(platformRegistry)
+    internal suspend fun getOrCreateDataSource(account: UiAccount): MicroblogDataSource {
+        val existingDataSource =
+            dataSourceCacheMutex.withLock {
+                dataSourceCache[account.accountKey]
             }
+        if (existingDataSource != null) {
+            return existingDataSource
         }
+
+        val dbAccount =
+            appDatabase.accountDao().getAccount(account.accountKey)
+                ?: throw NoSuchElementException("Account not found: ${account.accountKey}")
+        val dataSource =
+            platformRegistry
+                .require(account.platformType)
+                .createDataSource(
+                    RepositoryPlatformDataSourceContext(
+                        accountKey = account.accountKey,
+                        credentialJson = dbAccount.credential_json,
+                    ),
+                )
+
+        val cached =
+            dataSourceCacheMutex.withLock {
+                dataSourceCache[account.accountKey]?.let {
+                    it
+                } ?: dataSource.also {
+                    dataSourceCache[account.accountKey] = it
+                }
+            }
+        if (cached !== dataSource && dataSource is AutoCloseable) {
+            dataSource.close()
+        }
+        return cached
+    }
+
+    private inner class RepositoryPlatformDataSourceContext(
+        override val accountKey: MicroBlogKey,
+        private val credentialJson: String,
+    ) : PlatformDataSourceContext {
+        override fun <T : Any> credential(serializer: KSerializer<T>): T = credentialJson.decodeJson(serializer)
+
+        override fun <T : Any> credentialFlow(serializer: KSerializer<T>): Flow<T> =
+            this@AccountRepository.credentialFlow(
+                accountKey = accountKey,
+                serializer = serializer,
+            )
+
+        override suspend fun <T : Any> updateCredential(
+            serializer: KSerializer<T>,
+            credential: T,
+        ) {
+            appDatabase.accountDao().setCredential(
+                accountKey,
+                credential.encodeJson(serializer),
+            )
+        }
+    }
 }
+
+private fun DbAccount.toUi(): UiAccount =
+    UiAccount(
+        accountKey = account_key,
+        platformType = platform_type,
+    )
 
 public data object NoActiveAccountException : Exception("No active account.")
 

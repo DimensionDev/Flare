@@ -11,11 +11,11 @@ import dev.dimension.flare.data.network.bluesky.BlueskyPlatformDetector
 import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.PlatformDataSourceContext
 import dev.dimension.flare.model.PlatformDeepLink
 import dev.dimension.flare.model.PlatformSpec
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.PlatformTypeMetadata
-import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiInstanceMetadata
 import dev.dimension.flare.ui.model.UiList
@@ -91,22 +91,17 @@ public data object BlueskyPlatformSpec : PlatformSpec {
     override suspend fun instanceMetadata(host: String): UiInstanceMetadata =
         throw UnsupportedOperationException("${type.name} is not supported yet")
 
-    override fun restoreAccount(
-        accountKey: MicroBlogKey,
-        credentialJson: String,
-    ): UiAccount =
-        UiAccount.Bluesky(
-            accountKey = accountKey,
+    override fun createDataSource(context: PlatformDataSourceContext): MicroblogDataSource =
+        BlueskyDataSource(
+            accountKey = context.accountKey,
+            credentialFlow = context.credentialFlow(BlueskyCredential.serializer()),
+            updateCredential = { credential ->
+                context.updateCredential(
+                    serializer = BlueskyCredential.serializer(),
+                    credential = credential,
+                )
+            },
         )
-
-    override fun createDataSource(account: UiAccount): MicroblogDataSource {
-        require(account is UiAccount.Bluesky) {
-            "Expected Bluesky account for ${type.name}, got ${account.platformType.name}"
-        }
-        return BlueskyDataSource(
-            accountKey = account.accountKey,
-        )
-    }
 
     override fun guestDataSource(
         host: String,

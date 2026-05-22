@@ -1,6 +1,5 @@
 package dev.dimension.flare.data.platform
 
-import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.data.datasource.guest.mastodon.GuestMastodonDataSource
 import dev.dimension.flare.data.datasource.mastodon.MastodonDataSource
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
@@ -12,11 +11,11 @@ import dev.dimension.flare.data.network.mastodon.MastodonPlatformDetector
 import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.PlatformDataSourceContext
 import dev.dimension.flare.model.PlatformDeepLink
 import dev.dimension.flare.model.PlatformSpec
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.PlatformTypeMetadata
-import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiInstanceMetadata
 import dev.dimension.flare.ui.model.UiStrings
@@ -130,35 +129,23 @@ public data object MastodonPlatformSpec : PlatformSpec {
 
     override suspend fun instanceMetadata(host: String): UiInstanceMetadata = MastodonInstanceService("https://$host/").instance().render()
 
-    override fun restoreAccount(
-        accountKey: MicroBlogKey,
-        credentialJson: String,
-    ): UiAccount {
-        val credential = credentialJson.decodeJson<UiAccount.Mastodon.Credential>()
-        return UiAccount.Mastodon(
-            accountKey = accountKey,
-            forkType = credential.forkType,
-            instance = credential.instance,
-            nodeType = credential.nodeType,
-        )
-    }
-
-    override fun createDataSource(account: UiAccount): MicroblogDataSource {
-        require(account is UiAccount.Mastodon) {
-            "Expected Mastodon account for ${type.name}, got ${account.platformType.name}"
-        }
-        return when (account.forkType) {
-            UiAccount.Mastodon.Credential.ForkType.Mastodon -> {
+    override fun createDataSource(context: PlatformDataSourceContext): MicroblogDataSource {
+        val credential = context.credential(MastodonCredential.serializer())
+        val credentialFlow = context.credentialFlow(MastodonCredential.serializer())
+        return when (credential.forkType) {
+            MastodonCredential.ForkType.Mastodon -> {
                 MastodonDataSource(
-                    accountKey = account.accountKey,
-                    instance = account.instance,
+                    accountKey = context.accountKey,
+                    instance = credential.instance,
+                    credentialFlow = credentialFlow,
                 )
             }
 
-            UiAccount.Mastodon.Credential.ForkType.Pleroma -> {
+            MastodonCredential.ForkType.Pleroma -> {
                 PleromaDataSource(
-                    accountKey = account.accountKey,
-                    instance = account.instance,
+                    accountKey = context.accountKey,
+                    instance = credential.instance,
+                    credentialFlow = credentialFlow,
                 )
             }
         }

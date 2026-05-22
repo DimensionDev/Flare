@@ -26,8 +26,6 @@ import com.atproto.repo.DeleteRecordRequest
 import com.atproto.repo.StrongRef
 import dev.dimension.flare.common.BasePagingSource
 import dev.dimension.flare.common.FileType
-import dev.dimension.flare.common.encodeJson
-import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
@@ -66,15 +64,14 @@ import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.model.tab.toSlot
 import dev.dimension.flare.data.network.bluesky.BlueskyService
 import dev.dimension.flare.data.network.bluesky.model.DidDoc
+import dev.dimension.flare.data.platform.BlueskyCredential
 import dev.dimension.flare.data.platform.BlueskyPlatformSpec
 import dev.dimension.flare.data.platform.CommonTimelineSpecs
 import dev.dimension.flare.data.platform.toTimelineTabItemV2
-import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.shared.image.ImageCompressor
-import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiList
@@ -122,6 +119,8 @@ private const val AT_PROTO_PERSONAL_DATA_SERVER = "AtprotoPersonalDataServer"
 @OptIn(ExperimentalPagingApi::class)
 internal class BlueskyDataSource(
     override val accountKey: MicroBlogKey,
+    private val credentialFlow: Flow<BlueskyCredential>,
+    private val updateCredential: suspend (BlueskyCredential) -> Unit,
 ) : AuthenticatedMicroblogDataSource,
     NotificationDataSource,
     UserDataSource,
@@ -134,13 +133,8 @@ internal class BlueskyDataSource(
     DirectMessageDataSource,
     PostEventHandler.Handler {
     private val database: CacheDatabase by inject()
-    private val appDatabase: AppDatabase by inject()
     private val coroutineScope: CoroutineScope by inject()
-    private val accountRepository: AccountRepository by inject()
     private val imageCompressor: ImageCompressor by inject()
-    private val credentialFlow by lazy {
-        accountRepository.credentialFlow<UiAccount.Bluesky.Credential>(accountKey)
-    }
     private var cachedPdsService: BlueskyService? = null
 
     private val mutex = Mutex(locked = false)
@@ -152,12 +146,7 @@ internal class BlueskyDataSource(
                     BlueskyService(
                         accountKey = accountKey,
                         credentialFlow = credentialFlow,
-                        onCredentialRefreshed = { credential ->
-                            appDatabase.accountDao().setCredential(
-                                accountKey,
-                                credential.encodeJson(),
-                            )
-                        },
+                        onCredentialRefreshed = updateCredential,
                     )
                 val didDoc: DidDoc? =
                     service

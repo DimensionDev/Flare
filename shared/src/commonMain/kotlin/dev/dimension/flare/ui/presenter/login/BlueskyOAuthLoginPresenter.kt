@@ -8,8 +8,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import dev.dimension.flare.data.network.bluesky.OAuthCodeChallengeMethodS256
 import dev.dimension.flare.data.network.ktorClient
+import dev.dimension.flare.data.platform.BlueskyCredential
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.presenter.PresenterBase
 import io.ktor.client.plugins.DefaultRequest
@@ -169,19 +171,22 @@ public class BlueskyOAuthLoginPresenter(
             "Failed to obtain access token from $iss"
         }
         val credential =
-            UiAccount.Bluesky.Credential.OAuthCredential(
+            BlueskyCredential.OAuthCredential(
                 baseUrl = iss,
                 oAuthToken = token,
             )
         accountRepository.addAccount(
-            UiAccount.Bluesky(
-                accountKey =
-                    MicroBlogKey(
-                        id = token.subject.did,
-                        host = host,
-                    ),
-            ),
+            account =
+                UiAccount(
+                    accountKey =
+                        MicroBlogKey(
+                            id = token.subject.did,
+                            host = host,
+                        ),
+                    platformType = PlatformType.Bluesky,
+                ),
             credential = credential,
+            serializer = BlueskyCredential.serializer(),
         )
     }
 }

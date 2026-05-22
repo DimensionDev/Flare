@@ -19,6 +19,7 @@ import dev.dimension.flare.data.model.TitleType
 import dev.dimension.flare.data.platform.RssTimelineSpecs
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.testPlatformRegistry
 import dev.dimension.flare.ui.model.UiIcon
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
@@ -56,8 +57,8 @@ class TabSettingsMigrationTest {
 
         assertNotNull(slot)
         val source = assertIs<TimelineSlotContent.Source>(slot.content).source
-        assertEquals("mastodon.local", source.specId)
-        assertEquals("mastodon.local:$accountKey", slot.id)
+        assertEquals(TimelineSpecIds.MASTODON_LOCAL, source.specId)
+        assertEquals("${TimelineSpecIds.MASTODON_LOCAL}:$accountKey", slot.id)
         assertEquals(IconType.FavIcon("example.com"), slot.icon)
         assertEquals("Local custom", assertIs<dev.dimension.flare.ui.model.UiText.Raw>(slot.title).string)
     }
@@ -77,8 +78,8 @@ class TabSettingsMigrationTest {
 
         assertNotNull(slot)
         val source = assertIs<TimelineSlotContent.Source>(slot.content).source
-        assertEquals("common.list", source.specId)
-        assertEquals("common.list:$accountKey:list-1", slot.id)
+        assertEquals(TimelineSpecIds.COMMON_LIST, source.specId)
+        assertEquals("${TimelineSpecIds.COMMON_LIST}:$accountKey:list-1", slot.id)
     }
 
     @Test
@@ -146,7 +147,10 @@ class TabSettingsMigrationTest {
         assertEquals(GroupSource.SystemHome, group.source)
         assertEquals(TimelineMergePolicy.TimePerPage, group.mergePolicy)
         assertEquals(
-            listOf("mastodon.local:$accountKey", "rss.feed:https://example.com/rss.xml"),
+            listOf(
+                "${TimelineSpecIds.MASTODON_LOCAL}:$accountKey",
+                "${TimelineSpecIds.RSS_FEED}:https://example.com/rss.xml",
+            ),
             group.children.map { it.id },
         )
     }
@@ -207,8 +211,19 @@ class TabSettingsMigrationTest {
         val slots = listOf(duplicate, duplicate.copy(), unsupported).toTimelineSlots()
 
         assertEquals(1, slots.size)
-        assertEquals("mastodon.favourite:$accountKey", slots.single().id)
+        assertEquals("${TimelineSpecIds.MASTODON_FAVOURITE}:$accountKey", slots.single().id)
         assertNull(unsupported.toTimelineSlotOrNull())
+    }
+
+    @Test
+    fun legacyMigrationIdsResolveAgainstRegisteredTimelineSpecs() {
+        val runtimeIds =
+            (
+                testPlatformRegistry().all.flatMap { it.timelineSpecs } +
+                    RssTimelineSpecs.timelineSpecs
+            ).map { it.id }.toSet()
+
+        assertEquals(emptySet(), TimelineSpecIds.legacyMigrationIds - runtimeIds)
     }
 
     @OptIn(ExperimentalSerializationApi::class)
@@ -271,8 +286,8 @@ class TabSettingsMigrationTest {
             assertEquals(
                 listOf(
                     SYSTEM_HOME_MIXED_TIMELINE_ID,
-                    "mastodon.local:$accountKey",
-                    "rss.feed:https://example.com/rss.xml",
+                    "${TimelineSpecIds.MASTODON_LOCAL}:$accountKey",
+                    "${TimelineSpecIds.RSS_FEED}:https://example.com/rss.xml",
                 ),
                 settings.homeSlots.map { it.id },
             )

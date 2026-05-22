@@ -3,6 +3,7 @@ package dev.dimension.flare.data.platform
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.tab.SourceTimelineTabItemV2
 import dev.dimension.flare.data.model.tab.TimelineSpec
+import dev.dimension.flare.data.model.tab.TimelineSpecIds
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -18,7 +19,7 @@ import dev.dimension.flare.ui.presenter.list.ListTimelinePresenter
 internal object CommonTimelineSpecs {
     val home =
         TimelineSpec(
-            id = "common.home",
+            id = TimelineSpecIds.COMMON_HOME,
             title = UiStrings.Home,
             icon = UiIcon.Home.asType(),
             serializer = TimelineSpec.AccountBasedData.serializer(),
@@ -32,7 +33,7 @@ internal object CommonTimelineSpecs {
 
     val discover =
         TimelineSpec(
-            id = "common.discover",
+            id = TimelineSpecIds.COMMON_DISCOVER,
             title = UiStrings.Discover,
             icon = UiIcon.Search.asType(),
             serializer = TimelineSpec.AccountBasedData.serializer(),
@@ -46,7 +47,7 @@ internal object CommonTimelineSpecs {
 
     val list =
         TimelineSpec(
-            id = "common.list",
+            id = TimelineSpecIds.COMMON_LIST,
             title = UiStrings.List,
             icon = UiIcon.List.asType(),
             serializer = TimelineSpec.AccountResourceData.serializer(),

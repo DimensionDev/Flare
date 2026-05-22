@@ -8,6 +8,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.app.model.DbRssSources
 import dev.dimension.flare.data.database.app.model.SubscriptionType
+import dev.dimension.flare.data.model.tab.RssTimelineData
+import dev.dimension.flare.data.model.tab.SubscriptionTimelineData
 import dev.dimension.flare.data.model.tab.TimelineSlot
 import dev.dimension.flare.data.model.tab.TimelineSlotContent
 import dev.dimension.flare.data.platform.RssTimelineSpecs
@@ -97,14 +99,14 @@ private suspend fun SettingsRepository.removeHomeTimelineTabForRssSource(source:
         when (source.type) {
             SubscriptionType.RSS -> {
                 RssTimelineSpecs.rss
-                    .target(RssTimelineSpecs.RssData(source.url))
+                    .target(RssTimelineData(source.url))
                     .id
             }
 
             else -> {
                 RssTimelineSpecs.subscription
                     .target(
-                        RssTimelineSpecs.SubscriptionData(
+                        SubscriptionTimelineData(
                             subscriptionUrl = source.url,
                             subscriptionType = source.type,
                         ),

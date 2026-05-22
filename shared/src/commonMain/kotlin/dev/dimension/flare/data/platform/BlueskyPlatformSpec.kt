@@ -5,6 +5,7 @@ import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.tab.SourceTimelineTabItemV2
 import dev.dimension.flare.data.model.tab.TimelineSpec
+import dev.dimension.flare.data.model.tab.TimelineSpecIds
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.data.network.bluesky.BlueskyPlatformDetector
 import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
@@ -52,7 +53,7 @@ public data object BlueskyPlatformSpec : PlatformSpec {
 
     internal val bookmarkTimelineSpec =
         TimelineSpec(
-            id = "bluesky.bookmark",
+            id = TimelineSpecIds.BLUESKY_BOOKMARK,
             title = UiStrings.Bookmark,
             icon = UiIcon.Bookmark.asType(),
             serializer = TimelineSpec.AccountBasedData.serializer(),
@@ -66,7 +67,7 @@ public data object BlueskyPlatformSpec : PlatformSpec {
 
     internal val feedTimelineSpec =
         TimelineSpec(
-            id = "bluesky.feed",
+            id = TimelineSpecIds.BLUESKY_FEED,
             title = UiStrings.Feeds,
             icon = UiIcon.Feeds.asType(),
             serializer = TimelineSpec.AccountResourceData.serializer(),

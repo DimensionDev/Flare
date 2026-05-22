@@ -6,6 +6,7 @@ import dev.dimension.flare.data.datasource.mastodon.MastodonDataSource
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.pleroma.PleromaDataSource
 import dev.dimension.flare.data.model.tab.TimelineSpec
+import dev.dimension.flare.data.model.tab.TimelineSpecIds
 import dev.dimension.flare.data.network.mastodon.MastodonInstanceService
 import dev.dimension.flare.data.network.mastodon.MastodonPlatformDetector
 import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
@@ -62,7 +63,7 @@ public data object MastodonPlatformSpec : PlatformSpec {
 
     internal val localTimelineSpec =
         TimelineSpec(
-            id = "mastodon.local",
+            id = TimelineSpecIds.MASTODON_LOCAL,
             title = UiStrings.MastodonLocal,
             icon = UiIcon.Local.asType(),
             serializer = TimelineSpec.AccountBasedData.serializer(),
@@ -76,7 +77,7 @@ public data object MastodonPlatformSpec : PlatformSpec {
 
     internal val publicTimelineSpec =
         TimelineSpec(
-            id = "mastodon.public",
+            id = TimelineSpecIds.MASTODON_PUBLIC,
             title = UiStrings.MastodonPublic,
             icon = UiIcon.World.asType(),
             serializer = TimelineSpec.AccountBasedData.serializer(),
@@ -90,7 +91,7 @@ public data object MastodonPlatformSpec : PlatformSpec {
 
     internal val bookmarkTimelineSpec =
         TimelineSpec(
-            id = "mastodon.bookmark",
+            id = TimelineSpecIds.MASTODON_BOOKMARK,
             title = UiStrings.Bookmark,
             icon = UiIcon.Bookmark.asType(),
             serializer = TimelineSpec.AccountBasedData.serializer(),
@@ -104,7 +105,7 @@ public data object MastodonPlatformSpec : PlatformSpec {
 
     internal val favouriteTimelineSpec =
         TimelineSpec(
-            id = "mastodon.favourite",
+            id = TimelineSpecIds.MASTODON_FAVOURITE,
             title = UiStrings.Favourite,
             icon = UiIcon.Favourite.asType(),
             serializer = TimelineSpec.AccountBasedData.serializer(),

@@ -6,6 +6,7 @@ import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.tab.SourceTimelineTabItemV2
 import dev.dimension.flare.data.model.tab.TimelineSpec
+import dev.dimension.flare.data.model.tab.TimelineSpecIds
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.data.network.misskey.MisskeyPlatformDetector
 import dev.dimension.flare.data.network.misskey.MisskeyService
@@ -68,7 +69,7 @@ public data object MisskeyPlatformSpec : PlatformSpec {
 
     internal val favouriteTimelineSpec =
         TimelineSpec(
-            id = "misskey.favourite",
+            id = TimelineSpecIds.MISSKEY_FAVOURITE,
             title = UiStrings.Favourite,
             icon = UiIcon.Favourite.asType(),
             serializer = TimelineSpec.AccountBasedData.serializer(),
@@ -82,7 +83,7 @@ public data object MisskeyPlatformSpec : PlatformSpec {
 
     internal val hybridTimelineSpec =
         TimelineSpec(
-            id = "misskey.hybrid",
+            id = TimelineSpecIds.MISSKEY_HYBRID,
             title = UiStrings.Social,
             icon = UiIcon.Featured.asType(),
             serializer = TimelineSpec.AccountBasedData.serializer(),
@@ -96,7 +97,7 @@ public data object MisskeyPlatformSpec : PlatformSpec {
 
     internal val localTimelineSpec =
         TimelineSpec(
-            id = "misskey.local",
+            id = TimelineSpecIds.MISSKEY_LOCAL,
             title = UiStrings.MastodonLocal,
             icon = UiIcon.Local.asType(),
             serializer = TimelineSpec.AccountBasedData.serializer(),
@@ -110,7 +111,7 @@ public data object MisskeyPlatformSpec : PlatformSpec {
 
     internal val globalTimelineSpec =
         TimelineSpec(
-            id = "misskey.global",
+            id = TimelineSpecIds.MISSKEY_GLOBAL,
             title = UiStrings.MastodonPublic,
             icon = UiIcon.World.asType(),
             serializer = TimelineSpec.AccountBasedData.serializer(),
@@ -124,7 +125,7 @@ public data object MisskeyPlatformSpec : PlatformSpec {
 
     internal val antennaTimelineSpec =
         TimelineSpec(
-            id = "misskey.antenna",
+            id = TimelineSpecIds.MISSKEY_ANTENNA,
             title = UiStrings.Antenna,
             icon = UiIcon.Rss.asType(),
             serializer = TimelineSpec.AccountResourceData.serializer(),
@@ -139,7 +140,7 @@ public data object MisskeyPlatformSpec : PlatformSpec {
 
     internal val channelTimelineSpec =
         TimelineSpec(
-            id = "misskey.channel",
+            id = TimelineSpecIds.MISSKEY_CHANNEL,
             title = UiStrings.Channel,
             icon = UiIcon.Channel.asType(),
             serializer = TimelineSpec.AccountResourceData.serializer(),

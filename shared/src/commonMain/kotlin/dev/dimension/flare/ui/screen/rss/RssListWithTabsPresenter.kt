@@ -5,6 +5,8 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import dev.dimension.flare.data.database.app.model.SubscriptionType
 import dev.dimension.flare.data.model.IconType
+import dev.dimension.flare.data.model.tab.RssTimelineData
+import dev.dimension.flare.data.model.tab.SubscriptionTimelineData
 import dev.dimension.flare.data.model.tab.TimelineSlot
 import dev.dimension.flare.data.model.tab.toSlot
 import dev.dimension.flare.data.platform.RssTimelineSpecs
@@ -23,7 +25,7 @@ public class RssListWithTabsPresenter : PresenterBase<RssListWithTabsPresenter.S
                 if (item.type == SubscriptionType.RSS) {
                     RssTimelineSpecs.rss
                         .target(
-                            data = RssTimelineSpecs.RssData(item.url),
+                            data = RssTimelineData(item.url),
                             title = UiText.Raw(item.title ?: item.url),
                             icon = item.favIcon?.let { IconType.Url(it) } ?: IconType.Material(UiIcon.Rss),
                         ).toSlot()
@@ -31,7 +33,7 @@ public class RssListWithTabsPresenter : PresenterBase<RssListWithTabsPresenter.S
                     RssTimelineSpecs.subscription
                         .target(
                             data =
-                                RssTimelineSpecs.SubscriptionData(
+                                SubscriptionTimelineData(
                                     subscriptionUrl = item.url,
                                     subscriptionType = item.type,
                                 ),

@@ -3,6 +3,7 @@ package dev.dimension.flare.data.platform
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.xqt.XQTDataSource
 import dev.dimension.flare.data.model.tab.TimelineSpec
+import dev.dimension.flare.data.model.tab.TimelineSpecIds
 import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
 import dev.dimension.flare.data.network.xqt.XQTPlatformDetector
 import dev.dimension.flare.model.AccountType
@@ -69,7 +70,7 @@ public data object XqtPlatformSpec : PlatformSpec {
 
     internal val featuredTimelineSpec =
         TimelineSpec(
-            id = "xqt.featured",
+            id = TimelineSpecIds.XQT_FEATURED,
             title = UiStrings.Featured,
             icon = UiIcon.Featured.asType(),
             serializer = TimelineSpec.AccountBasedData.serializer(),
@@ -83,7 +84,7 @@ public data object XqtPlatformSpec : PlatformSpec {
 
     internal val bookmarkTimelineSpec =
         TimelineSpec(
-            id = "xqt.bookmark",
+            id = TimelineSpecIds.XQT_BOOKMARK,
             title = UiStrings.Bookmark,
             icon = UiIcon.Bookmark.asType(),
             serializer = TimelineSpec.AccountBasedData.serializer(),
@@ -97,7 +98,7 @@ public data object XqtPlatformSpec : PlatformSpec {
 
     internal val deviceFollowTimelineSpec =
         TimelineSpec(
-            id = "xqt.device_follow",
+            id = TimelineSpecIds.XQT_DEVICE_FOLLOW,
             title = UiStrings.Posts,
             icon = UiIcon.List.asType(),
             serializer = TimelineSpec.AccountBasedData.serializer(),

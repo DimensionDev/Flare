@@ -389,8 +389,8 @@ public data class TimelineSourceRef(
         @OptIn(ExperimentalSerializationApi::class)
         public fun xqtDeviceFollow(accountKey: MicroBlogKey): TimelineSourceRef =
             TimelineSourceRef(
-                id = "xqt.device_follow:$accountKey",
-                specId = "xqt.device_follow",
+                id = "${TimelineSpecIds.XQT_DEVICE_FOLLOW}:$accountKey",
+                specId = TimelineSpecIds.XQT_DEVICE_FOLLOW,
                 title = UiStrings.Posts.asText(),
                 icon = UiIcon.List.asType(),
                 data =

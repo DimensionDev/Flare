@@ -5,6 +5,9 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import dev.dimension.flare.data.database.app.model.SubscriptionType
 import dev.dimension.flare.data.model.IconType
+import dev.dimension.flare.data.model.tab.AllRssTimelineData
+import dev.dimension.flare.data.model.tab.RssTimelineData
+import dev.dimension.flare.data.model.tab.SubscriptionTimelineData
 import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.data.platform.RssTimelineSpecs
@@ -61,7 +64,7 @@ public class AllTabsPresenter(
                         if (rssSources.sources.isNotEmpty()) {
                             timelineResolver.toTabItem(
                                 RssTimelineSpecs.allRss.target(
-                                    data = RssTimelineSpecs.AllRssData,
+                                    data = AllRssTimelineData,
                                 ),
                             )
                         } else {
@@ -111,14 +114,14 @@ private fun UiRssSource.toTimelineTabItemV2(timelineResolver: TimelineResolver):
     val source =
         if (type == SubscriptionType.RSS) {
             RssTimelineSpecs.rss.target(
-                data = RssTimelineSpecs.RssData(url),
+                data = RssTimelineData(url),
                 title = title,
                 icon = icon,
             )
         } else {
             RssTimelineSpecs.subscription.target(
                 data =
-                    RssTimelineSpecs.SubscriptionData(
+                    SubscriptionTimelineData(
                         subscriptionUrl = url,
                         subscriptionType = type,
                     ),

@@ -3,6 +3,7 @@ package dev.dimension.flare.data.platform
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.vvo.VVODataSource
 import dev.dimension.flare.data.model.tab.TimelineSpec
+import dev.dimension.flare.data.model.tab.TimelineSpecIds
 import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
 import dev.dimension.flare.data.network.vvo.VVOPlatformDetector
 import dev.dimension.flare.model.AccountType
@@ -37,7 +38,7 @@ public data object VvoPlatformSpec : PlatformSpec {
 
     internal val favoriteTimelineSpec =
         TimelineSpec(
-            id = "vvo.favorite",
+            id = TimelineSpecIds.VVO_FAVORITE,
             title = UiStrings.Bookmark,
             icon = UiIcon.Bookmark.asType(),
             serializer = TimelineSpec.AccountBasedData.serializer(),
@@ -51,7 +52,7 @@ public data object VvoPlatformSpec : PlatformSpec {
 
     internal val likedTimelineSpec =
         TimelineSpec(
-            id = "vvo.liked",
+            id = TimelineSpecIds.VVO_LIKED,
             title = UiStrings.Liked,
             icon = UiIcon.Heart.asType(),
             serializer = TimelineSpec.AccountBasedData.serializer(),

@@ -1,2 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <string name="changelog_current">
+        <![CDATA[
+            <span>%1$s verzió:</span>
+            <ul>
+                <li>Új Deck Mode a többoszlopos idővonalnézethez.</li>
+                <li>Részletesebb idővonallap-testreszabás ikonokkal, szűrőkkel, csoportokkal és laponkénti megjelenéssel.</li>
+                <li>Regex-támogatás a helyi kulcsszószűrőkhöz.</li>
+                <li>Teljesítményjavítások és hibajavítások.</li>
+            </ul>
+        ]]>
+    </string>
+</resources>

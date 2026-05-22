@@ -2,12 +2,15 @@
 <resources>
     <string name="changelog_title">欢迎回来！</string>
     <string name="changelog_message">自您上次登录以来，我们已经做了一些更改。以下是详细信息：</string>
-    <string name="changelog_current"><![CDATA[            <span> %1$s版本：</span>
+    <string name="changelog_current">
+        <![CDATA[
+            <span>版本 %1$s：</span>
             <ul>
-                <li>添加了新的时间线显示模式， 包括图库布局。</li>
-                <li>改进RSS阅读， 分享、翻译和摘要。</li>
-                <li>更容易自定义的重整外观设置。</li>
-                <li>Bug 修复和性能改进。</li>
+                <li>新增 Deck Mode，带来多列时间线体验。</li>
+                <li>新增更丰富的时间线标签自定义，包括图标、过滤器、分组和单标签外观。</li>
+                <li>本地关键词过滤新增正则表达式支持。</li>
+                <li>性能改进和问题修复。</li>
             </ul>
-        ]]></string>
+        ]]>
+    </string>
 </resources>

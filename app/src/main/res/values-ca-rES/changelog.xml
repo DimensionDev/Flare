@@ -1,2 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <string name="changelog_current">
+        <![CDATA[
+            <span>Versió %1$s:</span>
+            <ul>
+                <li>S’ha afegit el Deck Mode per a una experiència de línia de temps amb diverses columnes.</li>
+                <li>S’ha afegit una personalització més completa de les pestanyes de la línia de temps, incloent-hi icones, filtres, grups i aparença per pestanya.</li>
+                <li>S’ha afegit compatibilitat amb regex per als filtres locals de paraules clau.</li>
+                <li>Millores de rendiment i correccions d’errors.</li>
+            </ul>
+        ]]>
+    </string>
+</resources>

@@ -187,7 +187,7 @@
     <string name="settings_ai_config_type">Tekoälyn tyyppi</string>
     <string name="settings_ai_config_type_description">Valitse, mitä tekoälyalustaa Flare käyttää</string>
     <string name="settings_ai_config_type_on_device">Laitteen oma tekoäly</string>
-    <string name="settings_ai_config_type_openai">OpenAI-yhteensopiva API</string>
+    <string name="settings_ai_config_type_openai">AI-yhteensopiva API</string>
     <string name="settings_ai_config_api_key">API-avain</string>
     <string name="settings_ai_config_api_key_hint">Anna API-avain</string>
     <string name="settings_ai_config_model">Malli</string>

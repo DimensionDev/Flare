@@ -187,7 +187,7 @@
     <string name="settings_ai_config_type">Tipus d\'IA</string>
     <string name="settings_ai_config_type_description">Tria quin motor d\'IA utilitza Flare</string>
     <string name="settings_ai_config_type_on_device">IA al dispositiu</string>
-    <string name="settings_ai_config_type_openai">API compatible amb OpenAI</string>
+    <string name="settings_ai_config_type_openai">API compatible amb IA</string>
     <string name="settings_ai_config_api_key">Clau API</string>
     <string name="settings_ai_config_api_key_hint">Introdueix la clau API</string>
     <string name="settings_ai_config_model">Model</string>

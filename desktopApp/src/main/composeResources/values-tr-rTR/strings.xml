@@ -168,7 +168,7 @@
     <string name="settings_ai_config_type">AI Türü</string>
     <string name="settings_ai_config_type_description">Flare\'in hangi AI altyapısını kullanacağını seçin</string>
     <string name="settings_ai_config_type_on_device">Cihaz üzerindeki AI</string>
-    <string name="settings_ai_config_type_openai">OpenAI uyumlu API</string>
+    <string name="settings_ai_config_type_openai">YZ uyumlu API</string>
     <string name="settings_ai_config_api_key">API Anahtarı</string>
     <string name="settings_ai_config_api_key_hint">API anahtarını girin</string>
     <string name="settings_ai_config_model">Model</string>

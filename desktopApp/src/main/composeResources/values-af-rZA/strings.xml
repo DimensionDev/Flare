@@ -187,7 +187,7 @@
     <string name="settings_ai_config_type">KI-tipe</string>
     <string name="settings_ai_config_type_description">Kies watter KI-agterkant Flare gebruik</string>
     <string name="settings_ai_config_type_on_device">KI op toestel</string>
-    <string name="settings_ai_config_type_openai">OpenAI-versoenbare API</string>
+    <string name="settings_ai_config_type_openai">KI-versoenbare API</string>
     <string name="settings_ai_config_api_key">API-sleutel</string>
     <string name="settings_ai_config_api_key_hint">Voer API-sleutel in</string>
     <string name="settings_ai_config_model">Model</string>

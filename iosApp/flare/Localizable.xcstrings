@@ -3197,186 +3197,186 @@
         }
       }
     },
-    "AI Compatible" : {
+    "AI-compatible API" : {
       "localizations" : {
         "af" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "AI-versoenbaar"
+            "value" : "KI-versoenbare API"
           }
         },
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "متوافق مع الذكاء الاصطناعي"
+            "value" : "واجهة API متوافقة مع الذكاء الاصطناعي"
           }
         },
         "bg" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Съвместим с ИИ"
+            "value" : "API, съвместим с ИИ"
           }
         },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Compatible amb IA"
+            "value" : "API compatible amb IA"
           }
         },
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kompatibilní s AI"
+            "value" : "API kompatibilní s AI"
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "AI-kompatibel"
+            "value" : "AI-kompatibel API"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "KI-kompatibel"
+            "value" : "KI-kompatible API"
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Συμβατό με ΤΝ"
+            "value" : "API συμβατό με AI"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Compatible con IA"
+            "value" : "API compatible con IA"
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "tekoäly-yhteensopiva"
+            "value" : "AI-yhteensopiva API"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Compatible IA"
+            "value" : "API compatible IA"
           }
         },
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "תואם בינה מלאכותית"
+            "value" : "API תואם בינה מלאכותית"
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "MI-kompatibilis"
+            "value" : "MI-kompatibilis API"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Compatibile con IA"
+            "value" : "API compatibile con IA"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "AI互換"
+            "value" : "AI互換API"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "AI 호환"
+            "value" : "AI 호환 API"
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "AI-kompatibel"
+            "value" : "AI-kompatibel API"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "AI-compatibel"
+            "value" : "AI-compatibele API"
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Zgodny z AI"
+            "value" : "API zgodne z AI"
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Compatível com IA"
+            "value" : "API compatível com IA"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Compatível com IA"
+            "value" : "API compatível com IA"
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Compatibil cu IA"
+            "value" : "API compatibil cu AI"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Совместимо с ИИ"
+            "value" : "AI-совместимый API"
           }
         },
         "sr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Компатибилно са ВИ"
+            "value" : "API компатибилан са ВИ"
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "AI-kompatibel"
+            "value" : "AI-kompatibel API"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "YZ Uyumlu"
+            "value" : "YZ uyumlu API"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Сумісний з ШІ"
+            "value" : "AI-сумісний API"
           }
         },
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tương thích AI"
+            "value" : "API tương thích AI"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "AI 兼容"
+            "value" : "AI 兼容 API"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "AI 相容"
+            "value" : "AI 相容 API"
           }
         }
       }

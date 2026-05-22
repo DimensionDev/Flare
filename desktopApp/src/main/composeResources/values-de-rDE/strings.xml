@@ -187,7 +187,7 @@
     <string name="settings_ai_config_type">KI-Typ</string>
     <string name="settings_ai_config_type_description">Wählen Sie das KI-Backend für Flare</string>
     <string name="settings_ai_config_type_on_device">On-Device KI</string>
-    <string name="settings_ai_config_type_openai">OpenAI-kompatible API</string>
+    <string name="settings_ai_config_type_openai">KI-kompatible API</string>
     <string name="settings_ai_config_api_key">API-Schlüssel</string>
     <string name="settings_ai_config_api_key_hint">API-Schlüssel eingeben</string>
     <string name="settings_ai_config_model">Modell</string>

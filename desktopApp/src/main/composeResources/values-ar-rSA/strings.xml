@@ -191,7 +191,7 @@
     <string name="settings_ai_config_type">نوع الذكاء الاصطناعي</string>
     <string name="settings_ai_config_type_description">اختر محرك الذكاء الاصطناعي الذي يستخدمه Flare</string>
     <string name="settings_ai_config_type_on_device">ذكاء اصطناعي على الجهاز</string>
-    <string name="settings_ai_config_type_openai">واجهة برمجة تطبيقات متوافقة مع OpenAI</string>
+    <string name="settings_ai_config_type_openai">واجهة API متوافقة مع الذكاء الاصطناعي</string>
     <string name="settings_ai_config_api_key">مفتاح واجهة برمجة التطبيقات (API Key)</string>
     <string name="settings_ai_config_api_key_hint">أدخل مفتاح واجهة برمجة التطبيقات</string>
     <string name="settings_ai_config_model">النموذج</string>

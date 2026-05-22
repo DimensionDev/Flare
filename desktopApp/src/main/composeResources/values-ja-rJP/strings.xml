@@ -187,7 +187,7 @@
     <string name="settings_ai_config_type">AIタイプ</string>
     <string name="settings_ai_config_type_description">Flareで使用するAIバックエンドを選択</string>
     <string name="settings_ai_config_type_on_device">デバイス上のAI</string>
-    <string name="settings_ai_config_type_openai">OpenAI互換API</string>
+    <string name="settings_ai_config_type_openai">AI互換API</string>
     <string name="settings_ai_config_api_key">APIキー</string>
     <string name="settings_ai_config_api_key_hint">APIキーを入力</string>
     <string name="settings_ai_config_model">モデル</string>

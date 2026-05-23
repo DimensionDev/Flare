@@ -242,7 +242,13 @@ internal data class TimelinePostTraits(
 internal fun UiTimelineV2.Post.traits(): TimelinePostTraits {
     val kinds =
         buildSet {
-            if (replyToHandle != null) {
+            val currentUserKey = user?.key
+            val hasParentFromOtherUser =
+                currentUserKey != null &&
+                    parents.any { parent ->
+                        parent.user?.key?.let { it != currentUserKey } == true
+                    }
+            if (hasParentFromOtherUser) {
                 add(TimelinePostKind.Reply)
             }
             if (internalRepost != null) {

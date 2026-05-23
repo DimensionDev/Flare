@@ -5,6 +5,7 @@ import dev.dimension.flare.data.model.tab.TimelineFilterConfig
 import dev.dimension.flare.data.model.tab.TimelinePostContent
 import dev.dimension.flare.data.model.tab.TimelinePostKind
 import dev.dimension.flare.data.repository.KeywordFilterPattern
+import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.humanizer.PlatformFormatter
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.createSampleStatus
@@ -40,9 +41,12 @@ class TimelinePresenterFilterTest {
 
     @Test
     fun postTraitsCaptureKindsAndContents() {
-        val base = createSampleStatus(createSampleUser())
+        val currentUser = createSampleUser()
+        val parentUser = currentUser.copy(key = MicroBlogKey("parentKey", "sampleHost"))
+        val base = createSampleStatus(currentUser)
         val repost = base.copy(statusKey = base.statusKey.copy(id = "repost"))
         val quote = base.copy(statusKey = base.statusKey.copy(id = "quote"))
+        val parent = createSampleStatus(parentUser)
         val filtered =
             base.copy(
                 content = "".toUiPlainText(),
@@ -64,7 +68,7 @@ class TimelinePresenterFilterTest {
                             width = 100f,
                         ),
                     ),
-                replyToHandle = "@flare",
+                parents = persistentListOf(parent),
                 quote = persistentListOf(quote),
                 internalRepost = repost,
             )
@@ -83,7 +87,9 @@ class TimelinePresenterFilterTest {
 
     @Test
     fun matchesTimelineFilterExcludesConfiguredKindsAndContents() {
-        val originalTextOnly = createSampleStatus(createSampleUser())
+        val currentUser = createSampleUser()
+        val parentUser = currentUser.copy(key = MicroBlogKey("parentKey", "sampleHost"))
+        val originalTextOnly = createSampleStatus(currentUser)
         val replyWithImage =
             originalTextOnly.copy(
                 statusKey = originalTextOnly.statusKey.copy(id = "reply"),
@@ -98,7 +104,7 @@ class TimelinePresenterFilterTest {
                             sensitive = false,
                         ),
                     ),
-                replyToHandle = "@flare",
+                parents = persistentListOf(createSampleStatus(parentUser)),
             )
         val filter =
             TimelineFilterConfig(
@@ -108,6 +114,30 @@ class TimelinePresenterFilterTest {
 
         assertTrue(originalTextOnly.matchesTimelineFilter(filter))
         assertFalse(replyWithImage.matchesTimelineFilter(filter))
+    }
+
+    @Test
+    fun postTraitsOnlyMarksReplyWhenParentUserDiffersFromCurrentUser() {
+        val currentUser = createSampleUser()
+        val original = createSampleStatus(currentUser)
+        val selfThread =
+            original.copy(
+                statusKey = original.statusKey.copy(id = "self-thread"),
+                parents = persistentListOf(createSampleStatus(currentUser)),
+            )
+        val replyToOtherUser =
+            original.copy(
+                statusKey = original.statusKey.copy(id = "reply-to-other-user"),
+                parents =
+                    persistentListOf(
+                        createSampleStatus(
+                            currentUser.copy(key = MicroBlogKey("parentKey", "sampleHost")),
+                        ),
+                    ),
+            )
+
+        assertFalse(TimelinePostKind.Reply in selfThread.traits().kinds)
+        assertTrue(TimelinePostKind.Reply in replyToOtherUser.traits().kinds)
     }
 
     @Test

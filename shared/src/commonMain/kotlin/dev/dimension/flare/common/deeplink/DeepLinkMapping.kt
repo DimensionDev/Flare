@@ -37,6 +37,18 @@ internal object DeepLinkMapping {
         }
 
         @Serializable
+        data class BlueskyProfile(
+            val handle: String,
+        ) : Type {
+            override fun deepLink(accountKey: MicroBlogKey): DeeplinkRoute =
+                DeeplinkRoute.Profile.UserNameWithHost(
+                    accountType = AccountType.Specific(accountKey),
+                    userName = handle.removePrefix("@"),
+                    host = accountKey.host,
+                )
+        }
+
+        @Serializable
         data class Post(
             val handle: String? = null,
             val id: String,

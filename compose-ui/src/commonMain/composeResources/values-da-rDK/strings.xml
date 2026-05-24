@@ -15,7 +15,7 @@
     <string name="profile_header_button_is_fans">Følger dig</string>
     <string name="mastodon_notification_item_followed_you">fulgte dig</string>
     <string name="mastodon_notification_item_favourited_your_status">favoriserede dit indlæg</string>
-    <string name="mastodon_notification_item_reblogged_your_status">delte igen</string>
+    <string name="mastodon_notification_item_reblogged_your_status">postede et indlæg igen</string>
     <string name="mastodon_notification_item_poll_ended">En afstemning, du deltog i, er afsluttet</string>
     <string name="mastodon_notification_item_mentioned_you">nævnte dig</string>
     <string name="mastodon_notification_item_requested_follow">anmodede om at følge dig</string>
@@ -28,7 +28,7 @@
     <string name="post_show_full_text">Vis fuld tekst</string>
     <string name="bluesky_notification_item_followed_you">fulgte dig</string>
     <string name="bluesky_notification_item_favourited_your_status">kunne lide dit indlæg</string>
-    <string name="bluesky_notification_item_reblogged_your_status">postede dit indlæg igen</string>
+    <string name="bluesky_notification_item_reblogged_your_status">postede et indlæg igen</string>
     <string name="bluesky_notification_item_poll_ended">En afstemning, du deltog i, er afsluttet</string>
     <string name="bluesky_notification_item_mentioned_you">nævnte dig</string>
     <string name="bluesky_item_reblogged_status">postede igen</string>
@@ -39,7 +39,7 @@
     <string name="bluesky_notification_item_pin">fastgjorde et indlæg</string>
     <string name="misskey_notification_item_mentioned_you">nævnte dig</string>
     <string name="misskey_notification_item_replied_to_you">svarede dig</string>
-    <string name="misskey_notification_item_reposted_your_status">postede dit indlæg igen</string>
+    <string name="misskey_notification_item_reposted_your_status">postede et indlæg igen</string>
     <string name="misskey_notification_item_quoted_your_status">citerede dit indlæg</string>
     <string name="misskey_notification_item_reacted_to_your_status">reagerede på dit indlæg</string>
     <string name="misskey_notification_item_poll_ended">En afstemning, du deltog i, er afsluttet</string>

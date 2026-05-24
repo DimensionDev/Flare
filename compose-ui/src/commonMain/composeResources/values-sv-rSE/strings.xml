@@ -18,7 +18,7 @@
 
     <string name="mastodon_notification_item_followed_you">följde dig</string>
     <string name="mastodon_notification_item_favourited_your_status">favoritmarkerade ditt inlägg</string>
-    <string name="mastodon_notification_item_reblogged_your_status">delade vidare</string>
+    <string name="mastodon_notification_item_reblogged_your_status">repostade ett inlägg</string>
     <string name="mastodon_notification_item_poll_ended">En omröstning du deltog i har avslutats</string>
     <string name="mastodon_notification_item_mentioned_you">nämnde dig</string>
     <string name="mastodon_notification_item_requested_follow">begärde att få följa dig</string>
@@ -33,7 +33,7 @@
 
     <string name="bluesky_notification_item_followed_you">följde dig</string>
     <string name="bluesky_notification_item_favourited_your_status">gillade ditt inlägg</string>
-    <string name="bluesky_notification_item_reblogged_your_status">repostade ditt inlägg</string>
+    <string name="bluesky_notification_item_reblogged_your_status">repostade ett inlägg</string>
     <string name="bluesky_notification_item_poll_ended">En omröstning du deltog i har avslutats</string>
     <string name="bluesky_notification_item_mentioned_you">nämnde dig</string>
     <string name="bluesky_item_reblogged_status">repostade</string>
@@ -45,7 +45,7 @@
 
     <string name="misskey_notification_item_mentioned_you">nämnde dig</string>
     <string name="misskey_notification_item_replied_to_you">svarade dig</string>
-    <string name="misskey_notification_item_reposted_your_status">repostade ditt inlägg</string>
+    <string name="misskey_notification_item_reposted_your_status">repostade ett inlägg</string>
     <string name="misskey_notification_item_quoted_your_status">citerade ditt inlägg</string>
     <string name="misskey_notification_item_reacted_to_your_status">reagerade på ditt inlägg</string>
     <string name="misskey_notification_item_poll_ended">En omröstning du deltog i har avslutats</string>

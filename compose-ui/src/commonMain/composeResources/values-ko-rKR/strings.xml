@@ -28,7 +28,7 @@
     <string name="post_show_full_text">전문 보기</string>
     <string name="bluesky_notification_item_followed_you">님이 나를 팔로우했습니다</string>
     <string name="bluesky_notification_item_favourited_your_status">님이 내 게시물을 좋아합니다</string>
-    <string name="bluesky_notification_item_reblogged_your_status">님이 내 게시물을 리포스트했습니다</string>
+    <string name="bluesky_notification_item_reblogged_your_status">님이 게시물을 리포스트했습니다</string>
     <string name="bluesky_notification_item_poll_ended">참여하신 설문조사가 종료되었습니다</string>
     <string name="bluesky_notification_item_mentioned_you">님이 나를 언급했습니다</string>
     <string name="bluesky_item_reblogged_status">리포스트함</string>
@@ -39,7 +39,7 @@
     <string name="bluesky_notification_item_pin">님이 게시물을 고정했습니다</string>
     <string name="misskey_notification_item_mentioned_you">님이 나를 언급했습니다</string>
     <string name="misskey_notification_item_replied_to_you">님이 답글을 남겼습니다</string>
-    <string name="misskey_notification_item_reposted_your_status">님이 내 게시물을 리노트했습니다</string>
+    <string name="misskey_notification_item_reposted_your_status">님이 게시물을 리노트했습니다</string>
     <string name="misskey_notification_item_quoted_your_status">님이 내 게시물을 인용했습니다</string>
     <string name="misskey_notification_item_reacted_to_your_status">님이 내 게시물에 반응을 남겼습니다</string>
     <string name="misskey_notification_item_poll_ended">참여하신 설문조사가 종료되었습니다</string>

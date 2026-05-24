@@ -15,7 +15,7 @@
     <string name="profile_header_button_is_fans">Σας ακολουθεί</string>
     <string name="mastodon_notification_item_followed_you">σας ακολούθησε</string>
     <string name="mastodon_notification_item_favourited_your_status">πρόσθεσε στα αγαπημένα τη δημοσίευσή σας</string>
-    <string name="mastodon_notification_item_reblogged_your_status">αναδημοσίευσε</string>
+    <string name="mastodon_notification_item_reblogged_your_status">αναδημοσίευσε μια δημοσίευση</string>
     <string name="mastodon_notification_item_poll_ended">Μια δημοσκόπηση στην οποία συμμετείχατε έληξε</string>
     <string name="mastodon_notification_item_mentioned_you">σας ανέφερε</string>
     <string name="mastodon_notification_item_requested_follow">ζήτησε να σας ακολουθήσει</string>
@@ -28,7 +28,7 @@
     <string name="post_show_full_text">Εμφάνιση πλήρους κειμένου</string>
     <string name="bluesky_notification_item_followed_you">σας ακολούθησε</string>
     <string name="bluesky_notification_item_favourited_your_status">του/της άρεσε η δημοσίευσή σας</string>
-    <string name="bluesky_notification_item_reblogged_your_status">αναδημοσίευσε τη δημοσίευσή σας</string>
+    <string name="bluesky_notification_item_reblogged_your_status">αναδημοσίευσε μια δημοσίευση</string>
     <string name="bluesky_notification_item_poll_ended">Μια δημοσκόπηση στην οποία συμμετείχατε έληξε</string>
     <string name="bluesky_notification_item_mentioned_you">σας ανέφερε</string>
     <string name="bluesky_item_reblogged_status">αναδημοσίευσε</string>
@@ -39,7 +39,7 @@
     <string name="bluesky_notification_item_pin">κάρφωσε μια δημοσίευση</string>
     <string name="misskey_notification_item_mentioned_you">σας ανέφερε</string>
     <string name="misskey_notification_item_replied_to_you">σας απάντησε</string>
-    <string name="misskey_notification_item_reposted_your_status">αναδημοσίευσε τη δημοσίευσή σας</string>
+    <string name="misskey_notification_item_reposted_your_status">αναδημοσίευσε μια δημοσίευση</string>
     <string name="misskey_notification_item_quoted_your_status">παρέθεσε τη δημοσίευσή σας</string>
     <string name="misskey_notification_item_reacted_to_your_status">αντέδρασε στη δημοσίευσή σας</string>
     <string name="misskey_notification_item_poll_ended">Μια δημοσκόπηση στην οποία συμμετείχατε έληξε</string>

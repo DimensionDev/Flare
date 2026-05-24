@@ -18,7 +18,7 @@
 
     <string name="mastodon_notification_item_followed_you">followed you</string>
     <string name="mastodon_notification_item_favourited_your_status">favorited your post</string>
-    <string name="mastodon_notification_item_reblogged_your_status">reblogged</string>
+    <string name="mastodon_notification_item_reblogged_your_status">reblogged a post</string>
     <string name="mastodon_notification_item_poll_ended">A poll you were participating in has ended</string>
     <string name="mastodon_notification_item_mentioned_you">mentioned you</string>
     <string name="mastodon_notification_item_requested_follow">requested to follow you</string>
@@ -33,7 +33,7 @@
 
     <string name="bluesky_notification_item_followed_you">followed you</string>
     <string name="bluesky_notification_item_favourited_your_status">liked your post</string>
-    <string name="bluesky_notification_item_reblogged_your_status">reposted your post</string>
+    <string name="bluesky_notification_item_reblogged_your_status">reposted a post</string>
     <string name="bluesky_notification_item_poll_ended">A poll you were participating in has ended</string>
     <string name="bluesky_notification_item_mentioned_you">mentioned you</string>
     <string name="bluesky_item_reblogged_status">reposted</string>
@@ -45,7 +45,7 @@
 
     <string name="misskey_notification_item_mentioned_you">mentioned you</string>
     <string name="misskey_notification_item_replied_to_you">replied to you</string>
-    <string name="misskey_notification_item_reposted_your_status">reposted your post</string>
+    <string name="misskey_notification_item_reposted_your_status">reposted a post</string>
     <string name="misskey_notification_item_quoted_your_status">quoted your post</string>
     <string name="misskey_notification_item_reacted_to_your_status">reacted to your post</string>
     <string name="misskey_notification_item_poll_ended">A poll you were participating in has ended</string>

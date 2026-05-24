@@ -15,7 +15,7 @@
     <string name="profile_header_button_is_fans">フォローされています</string>
     <string name="mastodon_notification_item_followed_you">さんにフォローされました</string>
     <string name="mastodon_notification_item_favourited_your_status">さんがあなたの投稿をお気に入りに登録しました</string>
-    <string name="mastodon_notification_item_reblogged_your_status">さんがリブロードしました</string>
+    <string name="mastodon_notification_item_reblogged_your_status">さんが投稿をブーストしました</string>
     <string name="mastodon_notification_item_poll_ended">参加したアンケートが終了しました</string>
     <string name="mastodon_notification_item_mentioned_you">さんがあなたに返信しました</string>
     <string name="mastodon_notification_item_requested_follow">さんからフォローリクエストが届きました</string>
@@ -28,7 +28,7 @@
     <string name="post_show_full_text">全文を表示</string>
     <string name="bluesky_notification_item_followed_you">さんにフォローされました</string>
     <string name="bluesky_notification_item_favourited_your_status">さんがあなたの投稿に「いいね」しました</string>
-    <string name="bluesky_notification_item_reblogged_your_status">さんがあなたの投稿をリポストしました</string>
+    <string name="bluesky_notification_item_reblogged_your_status">さんが投稿をリポストしました</string>
     <string name="bluesky_notification_item_poll_ended">参加したアンケートが終了しました</string>
     <string name="bluesky_notification_item_mentioned_you">さんがあなたにメンションしました</string>
     <string name="bluesky_item_reblogged_status">さんがリポストしました</string>
@@ -39,7 +39,7 @@
     <string name="bluesky_notification_item_pin">さんが投稿をピン留めしました</string>
     <string name="misskey_notification_item_mentioned_you">さんがあなたにメンションしました</string>
     <string name="misskey_notification_item_replied_to_you">さんがあなたに返信しました</string>
-    <string name="misskey_notification_item_reposted_your_status">さんがあなたの投稿をリノートしました</string>
+    <string name="misskey_notification_item_reposted_your_status">さんが投稿をリノートしました</string>
     <string name="misskey_notification_item_quoted_your_status">さんがあなたの投稿を引用しました</string>
     <string name="misskey_notification_item_reacted_to_your_status">さんがあなたの投稿にリアクションしました</string>
     <string name="misskey_notification_item_poll_ended">参加したアンケートが終了しました</string>

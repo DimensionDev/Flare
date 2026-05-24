@@ -18,7 +18,7 @@
 
     <string name="mastodon_notification_item_followed_you">vas prati</string>
     <string name="mastodon_notification_item_favourited_your_status">je označio vašu objavu kao omiljenu</string>
-    <string name="mastodon_notification_item_reblogged_your_status">je podelio vašu objavu</string>
+    <string name="mastodon_notification_item_reblogged_your_status">je ponovo objavio objavu</string>
     <string name="mastodon_notification_item_poll_ended">Anketa u kojoj ste učestvovali je završena</string>
     <string name="mastodon_notification_item_mentioned_you">vas je pomenuo</string>
     <string name="mastodon_notification_item_requested_follow">je poslao zahtev da vas prati</string>
@@ -33,7 +33,7 @@
 
     <string name="bluesky_notification_item_followed_you">vas prati</string>
     <string name="bluesky_notification_item_favourited_your_status">mu se sviđa vaša objava</string>
-    <string name="bluesky_notification_item_reblogged_your_status">je ponovo objavio vašu objavu</string>
+    <string name="bluesky_notification_item_reblogged_your_status">je ponovo objavio objavu</string>
     <string name="bluesky_notification_item_poll_ended">Anketa u kojoj ste učestvovali je završena</string>
     <string name="bluesky_notification_item_mentioned_you">vas je pomenuo</string>
     <string name="bluesky_item_reblogged_status">je ponovo objavio</string>
@@ -45,7 +45,7 @@
 
     <string name="misskey_notification_item_mentioned_you">vas je pomenuo</string>
     <string name="misskey_notification_item_replied_to_you">vam je odgovorio</string>
-    <string name="misskey_notification_item_reposted_your_status">je ponovo objavio vašu objavu</string>
+    <string name="misskey_notification_item_reposted_your_status">je ponovo objavio objavu</string>
     <string name="misskey_notification_item_quoted_your_status">je citirao vašu objavu</string>
     <string name="misskey_notification_item_reacted_to_your_status">je reagovao na vašu objavu</string>
     <string name="misskey_notification_item_poll_ended">Anketa u kojoj ste učestvovali je završena</string>

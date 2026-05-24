@@ -18,7 +18,7 @@
 
     <string name="mastodon_notification_item_followed_you">підписався(-лася) на вас</string>
     <string name="mastodon_notification_item_favourited_your_status">додав(-ла) ваш допис до обраного</string>
-    <string name="mastodon_notification_item_reblogged_your_status">поширив(-ла)</string>
+    <string name="mastodon_notification_item_reblogged_your_status">поширив(-ла) допис</string>
     <string name="mastodon_notification_item_poll_ended">Опитування, в якому ви брали участь, завершилося</string>
     <string name="mastodon_notification_item_mentioned_you">згадав(-ла) вас</string>
     <string name="mastodon_notification_item_requested_follow">надіслав(-ла) запит на підписку</string>
@@ -33,7 +33,7 @@
 
     <string name="bluesky_notification_item_followed_you">підписався(-лася) на вас</string>
     <string name="bluesky_notification_item_favourited_your_status">вподобав(-ла) ваш допис</string>
-    <string name="bluesky_notification_item_reblogged_your_status">поширив(-ла) ваш допис</string>
+    <string name="bluesky_notification_item_reblogged_your_status">поширив(-ла) допис</string>
     <string name="bluesky_notification_item_poll_ended">Опитування, в якому ви брали участь, завершилося</string>
     <string name="bluesky_notification_item_mentioned_you">згадав(-ла) вас</string>
     <string name="bluesky_item_reblogged_status">поширив(-ла)</string>
@@ -45,7 +45,7 @@
 
     <string name="misskey_notification_item_mentioned_you">згадав(-ла) вас</string>
     <string name="misskey_notification_item_replied_to_you">відповів(-ла) вам</string>
-    <string name="misskey_notification_item_reposted_your_status">поширив(-ла) ваш допис</string>
+    <string name="misskey_notification_item_reposted_your_status">поширив(-ла) допис</string>
     <string name="misskey_notification_item_quoted_your_status">процитував(-ла) ваш допис</string>
     <string name="misskey_notification_item_reacted_to_your_status">відреагував(-ла) на ваш допис</string>
     <string name="misskey_notification_item_poll_ended">Опитування, в якому ви брали участь, завершилося</string>

@@ -18,7 +18,7 @@
 
     <string name="mastodon_notification_item_followed_you">seni takip etti</string>
     <string name="mastodon_notification_item_favourited_your_status">gönderini favorilerine ekledi</string>
-    <string name="mastodon_notification_item_reblogged_your_status">paylaştı</string>
+    <string name="mastodon_notification_item_reblogged_your_status">bir gönderiyi yeniden paylaştı</string>
     <string name="mastodon_notification_item_poll_ended">Katıldığınız bir anket sona erdi</string>
     <string name="mastodon_notification_item_mentioned_you">senden bahsetti</string>
     <string name="mastodon_notification_item_requested_follow">seni takip etmek için istek gönderdi</string>
@@ -33,7 +33,7 @@
 
     <string name="bluesky_notification_item_followed_you">seni takip etti</string>
     <string name="bluesky_notification_item_favourited_your_status">gönderini beğendi</string>
-    <string name="bluesky_notification_item_reblogged_your_status">gönderini yeniden paylaştı</string>
+    <string name="bluesky_notification_item_reblogged_your_status">bir gönderiyi yeniden paylaştı</string>
     <string name="bluesky_notification_item_poll_ended">Katıldığınız bir anket sona erdi</string>
     <string name="bluesky_notification_item_mentioned_you">senden bahsetti</string>
     <string name="bluesky_item_reblogged_status">yeniden paylaştı</string>
@@ -45,7 +45,7 @@
 
     <string name="misskey_notification_item_mentioned_you">senden bahsetti</string>
     <string name="misskey_notification_item_replied_to_you">sana yanıt verdi</string>
-    <string name="misskey_notification_item_reposted_your_status">gönderini yeniden paylaştı</string>
+    <string name="misskey_notification_item_reposted_your_status">bir gönderiyi yeniden paylaştı</string>
     <string name="misskey_notification_item_quoted_your_status">gönderini alıntıladı</string>
     <string name="misskey_notification_item_reacted_to_your_status">gönderine tepki verdi</string>
     <string name="misskey_notification_item_poll_ended">Katıldığınız bir anket sona erdi</string>

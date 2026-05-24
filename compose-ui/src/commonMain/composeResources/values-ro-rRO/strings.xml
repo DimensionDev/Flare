@@ -14,7 +14,7 @@
     <string name="profile_header_button_is_fans">Te urmărește</string>
     <string name="mastodon_notification_item_followed_you">te-a urmărit</string>
     <string name="mastodon_notification_item_favourited_your_status">ți-a apreciat postarea</string>
-    <string name="mastodon_notification_item_reblogged_your_status">a redistribuit</string>
+    <string name="mastodon_notification_item_reblogged_your_status">a repostat o postare</string>
     <string name="mastodon_notification_item_poll_ended">Un sondaj la care ai participat s-a încheiat</string>
     <string name="mastodon_notification_item_mentioned_you">te-a menționat</string>
     <string name="mastodon_notification_item_requested_follow">a solicitat să te urmărească</string>
@@ -27,7 +27,7 @@
     <string name="post_show_full_text">Arată textul complet</string>
     <string name="bluesky_notification_item_followed_you">te-a urmărit</string>
     <string name="bluesky_notification_item_favourited_your_status">ți-a apreciat postarea</string>
-    <string name="bluesky_notification_item_reblogged_your_status">a repostat postarea ta</string>
+    <string name="bluesky_notification_item_reblogged_your_status">a repostat o postare</string>
     <string name="bluesky_notification_item_poll_ended">Un sondaj la care ai participat s-a încheiat</string>
     <string name="bluesky_notification_item_mentioned_you">te-a menționat</string>
     <string name="bluesky_item_reblogged_status">repostat</string>
@@ -38,7 +38,7 @@
     <string name="bluesky_notification_item_pin">a fixat o postare</string>
     <string name="misskey_notification_item_mentioned_you">te-a menționat</string>
     <string name="misskey_notification_item_replied_to_you">ți-a răspuns</string>
-    <string name="misskey_notification_item_reposted_your_status">a repostat postarea ta</string>
+    <string name="misskey_notification_item_reposted_your_status">a repostat o postare</string>
     <string name="misskey_notification_item_quoted_your_status">ți-a citat postarea</string>
     <string name="misskey_notification_item_reacted_to_your_status">a reacționat la postarea ta</string>
     <string name="misskey_notification_item_poll_ended">Un sondaj la care ai participat s-a încheiat</string>

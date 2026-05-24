@@ -14,7 +14,7 @@
     <string name="profile_header_button_is_fans">Obserwuje Cię</string>
     <string name="mastodon_notification_item_followed_you">zaczął Cię obserwować</string>
     <string name="mastodon_notification_item_favourited_your_status">dodał Twój wpis do ulubionych</string>
-    <string name="mastodon_notification_item_reblogged_your_status">podał dalej</string>
+    <string name="mastodon_notification_item_reblogged_your_status">podał dalej wpis</string>
     <string name="mastodon_notification_item_poll_ended">Ankieta, w której brałeś udział, zakończyła się</string>
     <string name="mastodon_notification_item_mentioned_you">wspomniał o Tobie</string>
     <string name="mastodon_notification_item_requested_follow">poprosił o możliwość obserwowania Cię</string>
@@ -27,7 +27,7 @@
     <string name="post_show_full_text">Pokaż pełny tekst</string>
     <string name="bluesky_notification_item_followed_you">zaczął Cię obserwować</string>
     <string name="bluesky_notification_item_favourited_your_status">polubił Twój wpis</string>
-    <string name="bluesky_notification_item_reblogged_your_status">podał dalej Twój wpis</string>
+    <string name="bluesky_notification_item_reblogged_your_status">podał dalej wpis</string>
     <string name="bluesky_notification_item_poll_ended">Ankieta, w której brałeś udział, zakończyła się</string>
     <string name="bluesky_notification_item_mentioned_you">wspomniał o Tobie</string>
     <string name="bluesky_item_reblogged_status">podał dalej</string>
@@ -38,7 +38,7 @@
     <string name="bluesky_notification_item_pin">przypiął wpis</string>
     <string name="misskey_notification_item_mentioned_you">wspomniał o Tobie</string>
     <string name="misskey_notification_item_replied_to_you">odpowiedział Ci</string>
-    <string name="misskey_notification_item_reposted_your_status">podał dalej Twój wpis</string>
+    <string name="misskey_notification_item_reposted_your_status">podał dalej wpis</string>
     <string name="misskey_notification_item_quoted_your_status">zacytował Twój wpis</string>
     <string name="misskey_notification_item_reacted_to_your_status">zareagował na Twój wpis</string>
     <string name="misskey_notification_item_poll_ended">Ankieta, w której brałeś udział, zakończyła się</string>

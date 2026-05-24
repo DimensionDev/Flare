@@ -14,7 +14,7 @@
     <string name="profile_header_button_is_fans">Volgt jou</string>
     <string name="mastodon_notification_item_followed_you">heeft je gevolgd</string>
     <string name="mastodon_notification_item_favourited_your_status">heeft je bericht als favoriet gemarkeerd</string>
-    <string name="mastodon_notification_item_reblogged_your_status">heeft geboost</string>
+    <string name="mastodon_notification_item_reblogged_your_status">heeft een bericht gedeeld</string>
     <string name="mastodon_notification_item_poll_ended">Een enquête waaraan je deelnam is beëindigd</string>
     <string name="mastodon_notification_item_mentioned_you">noemde je</string>
     <string name="mastodon_notification_item_requested_follow">verzocht om je te volgen</string>
@@ -27,7 +27,7 @@
     <string name="post_show_full_text">Toon volledige tekst</string>
     <string name="bluesky_notification_item_followed_you">heeft je gevolgd</string>
     <string name="bluesky_notification_item_favourited_your_status">vond je bericht leuk</string>
-    <string name="bluesky_notification_item_reblogged_your_status">heeft je bericht gedeeld</string>
+    <string name="bluesky_notification_item_reblogged_your_status">heeft een bericht gedeeld</string>
     <string name="bluesky_notification_item_poll_ended">Een enquête waaraan je deelnam is beëindigd</string>
     <string name="bluesky_notification_item_mentioned_you">noemde je</string>
     <string name="bluesky_item_reblogged_status">gedeeld</string>
@@ -38,7 +38,7 @@
     <string name="bluesky_notification_item_pin">heeft een bericht vastgezet</string>
     <string name="misskey_notification_item_mentioned_you">noemde je</string>
     <string name="misskey_notification_item_replied_to_you">reageerde op jou</string>
-    <string name="misskey_notification_item_reposted_your_status">heeft je bericht gedeeld</string>
+    <string name="misskey_notification_item_reposted_your_status">heeft een bericht gedeeld</string>
     <string name="misskey_notification_item_quoted_your_status">citeerde je bericht</string>
     <string name="misskey_notification_item_reacted_to_your_status">reageerde op je bericht</string>
     <string name="misskey_notification_item_poll_ended">Een enquête waaraan je deelnam is beëindigd</string>

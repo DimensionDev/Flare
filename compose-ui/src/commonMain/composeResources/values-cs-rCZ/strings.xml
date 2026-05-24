@@ -15,7 +15,7 @@
     <string name="profile_header_button_is_fans">Sleduje vás</string>
     <string name="mastodon_notification_item_followed_you">vás začal(a) sledovat</string>
     <string name="mastodon_notification_item_favourited_your_status">přidal(a) váš příspěvek do oblíbených</string>
-    <string name="mastodon_notification_item_reblogged_your_status">sdílel(a)</string>
+    <string name="mastodon_notification_item_reblogged_your_status">přesdílel(a) příspěvek</string>
     <string name="mastodon_notification_item_poll_ended">Anketa, které jste se účastnili, skončila</string>
     <string name="mastodon_notification_item_mentioned_you">vás zmínil(a)</string>
     <string name="mastodon_notification_item_requested_follow">požádal(a) o sledování</string>
@@ -28,7 +28,7 @@
     <string name="post_show_full_text">Zobrazit celý text</string>
     <string name="bluesky_notification_item_followed_you">vás začal(a) sledovat</string>
     <string name="bluesky_notification_item_favourited_your_status">olajkoval(a) váš příspěvek</string>
-    <string name="bluesky_notification_item_reblogged_your_status">přesdílel(a) váš příspěvek</string>
+    <string name="bluesky_notification_item_reblogged_your_status">přesdílel(a) příspěvek</string>
     <string name="bluesky_notification_item_poll_ended">Anketa, které jste se účastnili, skončila</string>
     <string name="bluesky_notification_item_mentioned_you">vás zmínil(a)</string>
     <string name="bluesky_item_reblogged_status">přesdílel(a)</string>
@@ -39,7 +39,7 @@
     <string name="bluesky_notification_item_pin">přišpendlil(a) příspěvek</string>
     <string name="misskey_notification_item_mentioned_you">vás zmínil(a)</string>
     <string name="misskey_notification_item_replied_to_you">vám odpověděl(a)</string>
-    <string name="misskey_notification_item_reposted_your_status">přesdílel(a) váš příspěvek</string>
+    <string name="misskey_notification_item_reposted_your_status">přesdílel(a) příspěvek</string>
     <string name="misskey_notification_item_quoted_your_status">citoval(a) váš příspěvek</string>
     <string name="misskey_notification_item_reacted_to_your_status">reagoval(a) na váš příspěvek</string>
     <string name="misskey_notification_item_poll_ended">Anketa, které jste se účastnili, skončila</string>

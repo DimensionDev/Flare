@@ -22178,187 +22178,187 @@
         "af" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "het jou plasing hergeplaas"
+            "value" : "het 'n plasing herplaas"
           }
         },
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "أعاد نشر منشورك"
+            "value" : "أعاد نشر منشور"
           }
         },
         "bg" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "препубликува вашата публикация"
+            "value" : "препубликува публикация"
           }
         },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ha tornat a publicar el teu paràgraf"
+            "value" : "ha republicat una publicació"
           }
         },
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "přeposlal(a) váš příspěvek"
+            "value" : "přesdílel(a) příspěvek"
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "repostede dit opslag"
+            "value" : "repostede et opslag"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "hat deinen Beitrag geteilt"
+            "value" : "hat einen Beitrag geteilt"
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "αναδημοσίευσε την ανάρτησή σας"
+            "value" : "αναδημοσίευσε μια ανάρτηση"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "reposted your post"
+            "value" : "reposted a post"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "republicó tu publicación"
+            "value" : "republicó una publicación"
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "uudelleenjulkaisi julkaisusi"
+            "value" : "uudelleenjulkaisi julkaisun"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "a repartagé votre message"
+            "value" : "a repartagé une publication"
           }
         },
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "פרסם מחדש את הפוסט שלך"
+            "value" : "פרסם מחדש פוסט"
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "újraközölte a bejegyzésedet"
+            "value" : "újraközölt egy bejegyzést"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ha ripubblicato il tuo post"
+            "value" : "ha ripubblicato un post"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "あなたの投稿をリポストしました"
+            "value" : "投稿をリポストしました"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "회원님의 게시물을 리포스트했습니다"
+            "value" : "게시물을 리포스트했습니다"
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "repostet innlegget ditt"
+            "value" : "repostet et innlegg"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "heeft je bericht gedeeld"
+            "value" : "heeft een bericht gedeeld"
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "podał Twój post dalej"
+            "value" : "podał dalej wpis"
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "republicou a sua publicação"
+            "value" : "republicou uma publicação"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "repostou sua postagem"
+            "value" : "repostou uma postagem"
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ți-a redistribuit postarea"
+            "value" : "a redistribuit o postare"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "сделал репост вашего поста"
+            "value" : "сделал репост поста"
           }
         },
         "sr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "је поново објавио вашу објаву"
+            "value" : "је поново објавио објаву"
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "repostade ditt inlägg"
+            "value" : "repostade ett inlägg"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "gönderini paylaştı"
+            "value" : "bir gönderiyi yeniden paylaştı"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "перепостив ваш допис"
+            "value" : "перепостив допис"
           }
         },
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "đã đăng lại bài đăng của bạn"
+            "value" : "đã đăng lại một bài đăng"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "转发了您的帖子"
+            "value" : "转发了帖子"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "轉發了您的貼文"
+            "value" : "轉發了貼文"
           }
         }
       }
@@ -52066,187 +52066,187 @@
         "af" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "herblogged"
+            "value" : "het 'n plasing herplaas"
           }
         },
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "إعادة التدوين"
+            "value" : "أعاد نشر منشور"
           }
         },
         "bg" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "препубликува"
+            "value" : "препубликува публикация"
           }
         },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "reblogat"
+            "value" : "ha republicat una publicació"
           }
         },
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "sdíleno"
+            "value" : "přesdílel(a) příspěvek"
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "rebloggede"
+            "value" : "repostede et opslag"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "hat geboostet"
+            "value" : "hat einen Beitrag geteilt"
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "αναδημοσίευσε"
+            "value" : "αναδημοσίευσε μια ανάρτηση"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "reblogged"
+            "value" : "reblogged a post"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ha compartido"
+            "value" : "republicó una publicación"
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "uudelleenbloggasi"
+            "value" : "uudelleenjulkaisi julkaisun"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "a boosté"
+            "value" : "a repartagé une publication"
           }
         },
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "שיתף מחדש"
+            "value" : "פרסם מחדש פוסט"
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "továbbosztotta"
+            "value" : "újraközölt egy bejegyzést"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ha amplificato"
+            "value" : "ha ripubblicato un post"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "がブーストしました"
+            "value" : "投稿をブーストしました"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "부스트함"
+            "value" : "게시물을 부스트했습니다"
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "fremhevet"
+            "value" : "repostet et innlegg"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "heeft geboost"
+            "value" : "heeft een bericht gedeeld"
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "podbił(a)"
+            "value" : "podał dalej wpis"
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "impulsionou"
+            "value" : "republicou uma publicação"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "repostou"
+            "value" : "repostou uma postagem"
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "a promovat"
+            "value" : "a redistribuit o postare"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "продвинул(а)"
+            "value" : "сделал репост поста"
           }
         },
         "sr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "је проследио/ла"
+            "value" : "је поново објавио објаву"
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "boostade"
+            "value" : "repostade ett inlägg"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "boostladı"
+            "value" : "bir gönderiyi yeniden paylaştı"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "поширив(-ла)"
+            "value" : "перепостив допис"
           }
         },
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "đã thúc đẩy"
+            "value" : "đã đăng lại một bài đăng"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "转推了"
+            "value" : "转发了帖子"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "轉推了"
+            "value" : "轉發了貼文"
           }
         }
       }

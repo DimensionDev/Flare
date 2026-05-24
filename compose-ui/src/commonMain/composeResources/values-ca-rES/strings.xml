@@ -15,7 +15,7 @@
     <string name="profile_header_button_is_fans">Et segueix</string>
     <string name="mastodon_notification_item_followed_you">t\'ha seguit</string>
     <string name="mastodon_notification_item_favourited_your_status">ha marcat com a preferida la teva publicació</string>
-    <string name="mastodon_notification_item_reblogged_your_status">ha republicat</string>
+    <string name="mastodon_notification_item_reblogged_your_status">ha republicat una publicació</string>
     <string name="mastodon_notification_item_poll_ended">Ha finalitzat una enquesta en què participaves</string>
     <string name="mastodon_notification_item_mentioned_you">t\'ha esmentat</string>
     <string name="mastodon_notification_item_requested_follow">ha sol·licitat seguir-te</string>
@@ -28,7 +28,7 @@
     <string name="post_show_full_text">Mostra el text complet</string>
     <string name="bluesky_notification_item_followed_you">t\'ha seguit</string>
     <string name="bluesky_notification_item_favourited_your_status">li ha agradat la teva publicació</string>
-    <string name="bluesky_notification_item_reblogged_your_status">ha republicat la teva publicació</string>
+    <string name="bluesky_notification_item_reblogged_your_status">ha republicat una publicació</string>
     <string name="bluesky_notification_item_poll_ended">Ha finalitzat una enquesta en què participaves</string>
     <string name="bluesky_notification_item_mentioned_you">t\'ha esmentat</string>
     <string name="bluesky_item_reblogged_status">ha republicat</string>
@@ -39,7 +39,7 @@
     <string name="bluesky_notification_item_pin">ha fixat una publicació</string>
     <string name="misskey_notification_item_mentioned_you">t\'ha esmentat</string>
     <string name="misskey_notification_item_replied_to_you">t\'ha respost</string>
-    <string name="misskey_notification_item_reposted_your_status">ha republicat la teva publicació</string>
+    <string name="misskey_notification_item_reposted_your_status">ha republicat una publicació</string>
     <string name="misskey_notification_item_quoted_your_status">ha citat la teva publicació</string>
     <string name="misskey_notification_item_reacted_to_your_status">ha reaccionat a la teva publicació</string>
     <string name="misskey_notification_item_poll_ended">Ha finalitzat una enquesta en què participaves</string>

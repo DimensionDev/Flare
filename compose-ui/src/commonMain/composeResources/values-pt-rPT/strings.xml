@@ -14,7 +14,7 @@
     <string name="profile_header_button_is_fans">Segue-o</string>
     <string name="mastodon_notification_item_followed_you">seguiu-o</string>
     <string name="mastodon_notification_item_favourited_your_status">marcou como favorita a sua publicação</string>
-    <string name="mastodon_notification_item_reblogged_your_status">repartilhou</string>
+    <string name="mastodon_notification_item_reblogged_your_status">republicou uma publicação</string>
     <string name="mastodon_notification_item_poll_ended">Uma sondagem em que participou terminou</string>
     <string name="mastodon_notification_item_mentioned_you">mencionou-o</string>
     <string name="mastodon_notification_item_requested_follow">solicitou segui-lo</string>
@@ -27,7 +27,7 @@
     <string name="post_show_full_text">Mostrar texto completo</string>
     <string name="bluesky_notification_item_followed_you">seguiu-o</string>
     <string name="bluesky_notification_item_favourited_your_status">gostou da sua publicação</string>
-    <string name="bluesky_notification_item_reblogged_your_status">republicou a sua publicação</string>
+    <string name="bluesky_notification_item_reblogged_your_status">republicou uma publicação</string>
     <string name="bluesky_notification_item_poll_ended">Uma sondagem em que participou terminou</string>
     <string name="bluesky_notification_item_mentioned_you">mencionou-o</string>
     <string name="bluesky_item_reblogged_status">republicou</string>
@@ -38,7 +38,7 @@
     <string name="bluesky_notification_item_pin">fixou uma publicação</string>
     <string name="misskey_notification_item_mentioned_you">mencionou-o</string>
     <string name="misskey_notification_item_replied_to_you">respondeu-lhe</string>
-    <string name="misskey_notification_item_reposted_your_status">republicou a sua publicação</string>
+    <string name="misskey_notification_item_reposted_your_status">republicou uma publicação</string>
     <string name="misskey_notification_item_quoted_your_status">citou a sua publicação</string>
     <string name="misskey_notification_item_reacted_to_your_status">reagiu à sua publicação</string>
     <string name="misskey_notification_item_poll_ended">Uma sondagem em que participou terminou</string>

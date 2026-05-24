@@ -15,7 +15,7 @@
     <string name="profile_header_button_is_fans">עוקב אחריך</string>
     <string name="mastodon_notification_item_followed_you">עקב אחריך</string>
     <string name="mastodon_notification_item_favourited_your_status">סימן את הפוסט שלך כמועדף</string>
-    <string name="mastodon_notification_item_reblogged_your_status">שיתף מחדש</string>
+    <string name="mastodon_notification_item_reblogged_your_status">פרסם מחדש פוסט</string>
     <string name="mastodon_notification_item_poll_ended">סקר שהשתתפת בו הסתיים</string>
     <string name="mastodon_notification_item_mentioned_you">הזכיר אותך</string>
     <string name="mastodon_notification_item_requested_follow">ביקש לעקוב אחריך</string>
@@ -28,7 +28,7 @@
     <string name="post_show_full_text">הצג טקסט מלא</string>
     <string name="bluesky_notification_item_followed_you">עקב אחריך</string>
     <string name="bluesky_notification_item_favourited_your_status">אהב את הפוסט שלך</string>
-    <string name="bluesky_notification_item_reblogged_your_status">פרסם מחדש את הפוסט שלך</string>
+    <string name="bluesky_notification_item_reblogged_your_status">פרסם מחדש פוסט</string>
     <string name="bluesky_notification_item_poll_ended">סקר שהשתתפת בו הסתיים</string>
     <string name="bluesky_notification_item_mentioned_you">הזכיר אותך</string>
     <string name="bluesky_item_reblogged_status">פרסם מחדש</string>
@@ -39,7 +39,7 @@
     <string name="bluesky_notification_item_pin">נעץ פוסט</string>
     <string name="misskey_notification_item_mentioned_you">הזכיר אותך</string>
     <string name="misskey_notification_item_replied_to_you">ענה לך</string>
-    <string name="misskey_notification_item_reposted_your_status">פרסם מחדש את הפוסט שלך</string>
+    <string name="misskey_notification_item_reposted_your_status">פרסם מחדש פוסט</string>
     <string name="misskey_notification_item_quoted_your_status">ציטט את הפוסט שלך</string>
     <string name="misskey_notification_item_reacted_to_your_status">הגיב לפוסט שלך</string>
     <string name="misskey_notification_item_poll_ended">סקר שהשתתפת בו הסתיים</string>

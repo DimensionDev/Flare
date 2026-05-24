@@ -15,7 +15,7 @@
     <string name="profile_header_button_is_fans">Követ téged</string>
     <string name="mastodon_notification_item_followed_you">követni kezdett téged</string>
     <string name="mastodon_notification_item_favourited_your_status">kedvencnek jelölte a bejegyzésedet</string>
-    <string name="mastodon_notification_item_reblogged_your_status">megosztotta</string>
+    <string name="mastodon_notification_item_reblogged_your_status">újraközölt egy bejegyzést</string>
     <string name="mastodon_notification_item_poll_ended">Egy szavazás, amiben részt vettél, véget ért</string>
     <string name="mastodon_notification_item_mentioned_you">megemlített téged</string>
     <string name="mastodon_notification_item_requested_follow">követési kérést küldött</string>
@@ -28,7 +28,7 @@
     <string name="post_show_full_text">Teljes szöveg megjelenítése</string>
     <string name="bluesky_notification_item_followed_you">követni kezdett téged</string>
     <string name="bluesky_notification_item_favourited_your_status">kedvelte a bejegyzésedet</string>
-    <string name="bluesky_notification_item_reblogged_your_status">újraközölte a bejegyzésedet</string>
+    <string name="bluesky_notification_item_reblogged_your_status">újraközölt egy bejegyzést</string>
     <string name="bluesky_notification_item_poll_ended">Egy szavazás, amiben részt vettél, véget ért</string>
     <string name="bluesky_notification_item_mentioned_you">megemlített téged</string>
     <string name="bluesky_item_reblogged_status">újraközölte</string>
@@ -39,7 +39,7 @@
     <string name="bluesky_notification_item_pin">rögzített egy bejegyzést</string>
     <string name="misskey_notification_item_mentioned_you">megemlített téged</string>
     <string name="misskey_notification_item_replied_to_you">válaszolt neked</string>
-    <string name="misskey_notification_item_reposted_your_status">újraközölte a bejegyzésedet</string>
+    <string name="misskey_notification_item_reposted_your_status">újraközölt egy bejegyzést</string>
     <string name="misskey_notification_item_quoted_your_status">idézte a bejegyzésedet</string>
     <string name="misskey_notification_item_reacted_to_your_status">reagált a bejegyzésedre</string>
     <string name="misskey_notification_item_poll_ended">Egy szavazás, amiben részt vettél, véget ért</string>

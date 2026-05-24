@@ -15,7 +15,7 @@
     <string name="profile_header_button_is_fans">Следва ви</string>
     <string name="mastodon_notification_item_followed_you">ви последва</string>
     <string name="mastodon_notification_item_favourited_your_status">хареса публикацията ви</string>
-    <string name="mastodon_notification_item_reblogged_your_status">сподели</string>
+    <string name="mastodon_notification_item_reblogged_your_status">препубликува публикация</string>
     <string name="mastodon_notification_item_poll_ended">Анкета, в която сте участвали, приключи</string>
     <string name="mastodon_notification_item_mentioned_you">ви спомена</string>
     <string name="mastodon_notification_item_requested_follow">поиска да ви последва</string>
@@ -28,7 +28,7 @@
     <string name="post_show_full_text">Покажи целия текст</string>
     <string name="bluesky_notification_item_followed_you">ви последва</string>
     <string name="bluesky_notification_item_favourited_your_status">хареса публикацията ви</string>
-    <string name="bluesky_notification_item_reblogged_your_status">препубликува публикацията ви</string>
+    <string name="bluesky_notification_item_reblogged_your_status">препубликува публикация</string>
     <string name="bluesky_notification_item_poll_ended">Анкета, в която сте участвали, приключи</string>
     <string name="bluesky_notification_item_mentioned_you">ви спомена</string>
     <string name="bluesky_item_reblogged_status">препубликува</string>
@@ -39,7 +39,7 @@
     <string name="bluesky_notification_item_pin">закачи публикация</string>
     <string name="misskey_notification_item_mentioned_you">ви спомена</string>
     <string name="misskey_notification_item_replied_to_you">ви отговори</string>
-    <string name="misskey_notification_item_reposted_your_status">препубликува публикацията ви</string>
+    <string name="misskey_notification_item_reposted_your_status">препубликува публикация</string>
     <string name="misskey_notification_item_quoted_your_status">цитира публикацията ви</string>
     <string name="misskey_notification_item_reacted_to_your_status">реагира на публикацията ви</string>
     <string name="misskey_notification_item_poll_ended">Анкета, в която сте участвали, приключи</string>

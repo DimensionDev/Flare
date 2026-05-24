@@ -15,7 +15,7 @@
     <string name="profile_header_button_is_fans">Seuraa sinua</string>
     <string name="mastodon_notification_item_followed_you">seurasi sinua</string>
     <string name="mastodon_notification_item_favourited_your_status">tykkäsi julkaisustasi</string>
-    <string name="mastodon_notification_item_reblogged_your_status">jakoi julkaisusi</string>
+    <string name="mastodon_notification_item_reblogged_your_status">jakoi julkaisun</string>
     <string name="mastodon_notification_item_poll_ended">Kysely, johon osallistuit, on päättynyt</string>
     <string name="mastodon_notification_item_mentioned_you">mainitsi sinut</string>
     <string name="mastodon_notification_item_requested_follow">pyysi saada seurata sinua</string>
@@ -28,7 +28,7 @@
     <string name="post_show_full_text">Näytä koko teksti</string>
     <string name="bluesky_notification_item_followed_you">seurasi sinua</string>
     <string name="bluesky_notification_item_favourited_your_status">tykkäsi julkaisustasi</string>
-    <string name="bluesky_notification_item_reblogged_your_status">jakoi julkaisusi</string>
+    <string name="bluesky_notification_item_reblogged_your_status">jakoi julkaisun</string>
     <string name="bluesky_notification_item_poll_ended">Kysely, johon osallistuit, on päättynyt</string>
     <string name="bluesky_notification_item_mentioned_you">mainitsi sinut</string>
     <string name="bluesky_item_reblogged_status">jakoi</string>
@@ -39,7 +39,7 @@
     <string name="bluesky_notification_item_pin">kiinnitti julkaisun</string>
     <string name="misskey_notification_item_mentioned_you">mainitsi sinut</string>
     <string name="misskey_notification_item_replied_to_you">vastasi sinulle</string>
-    <string name="misskey_notification_item_reposted_your_status">jakoi julkaisusi</string>
+    <string name="misskey_notification_item_reposted_your_status">jakoi julkaisun</string>
     <string name="misskey_notification_item_quoted_your_status">lainasi julkaisuasi</string>
     <string name="misskey_notification_item_reacted_to_your_status">reagoi julkaisuusi</string>
     <string name="misskey_notification_item_poll_ended">Kysely, johon osallistuit, on päättynyt</string>

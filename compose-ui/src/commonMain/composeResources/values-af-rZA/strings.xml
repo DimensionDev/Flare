@@ -15,7 +15,7 @@
     <string name="profile_header_button_is_fans">Volg jou</string>
     <string name="mastodon_notification_item_followed_you">het jou begin volg</string>
     <string name="mastodon_notification_item_favourited_your_status">het jou plasing as gunsteling gemerk</string>
-    <string name="mastodon_notification_item_reblogged_your_status">het herplasing gedoen</string>
+    <string name="mastodon_notification_item_reblogged_your_status">het 'n plasing herplaas</string>
     <string name="mastodon_notification_item_poll_ended">\'n Meningspeiling waaraan jy deelgeneem het, het geëindig</string>
     <string name="mastodon_notification_item_mentioned_you">het jou genoem</string>
     <string name="mastodon_notification_item_requested_follow">het versoek om jou te volg</string>
@@ -28,7 +28,7 @@
     <string name="post_show_full_text">Wys volledige teks</string>
     <string name="bluesky_notification_item_followed_you">het jou begin volg</string>
     <string name="bluesky_notification_item_favourited_your_status">hou van jou plasing</string>
-    <string name="bluesky_notification_item_reblogged_your_status">het jou plasing herplaas</string>
+    <string name="bluesky_notification_item_reblogged_your_status">het 'n plasing herplaas</string>
     <string name="bluesky_notification_item_poll_ended">\'n Meningspeiling waaraan jy deelgeneem het, het geëindig</string>
     <string name="bluesky_notification_item_mentioned_you">het jou genoem</string>
     <string name="bluesky_item_reblogged_status">herplaas</string>
@@ -39,7 +39,7 @@
     <string name="bluesky_notification_item_pin">het \'n plasing vasgespeld</string>
     <string name="misskey_notification_item_mentioned_you">het jou genoem</string>
     <string name="misskey_notification_item_replied_to_you">het op jou geantwoord</string>
-    <string name="misskey_notification_item_reposted_your_status">het jou plasing herplaas</string>
+    <string name="misskey_notification_item_reposted_your_status">het 'n plasing herplaas</string>
     <string name="misskey_notification_item_quoted_your_status">het jou plasing aangehaal</string>
     <string name="misskey_notification_item_reacted_to_your_status">het op jou plasing gereageer</string>
     <string name="misskey_notification_item_poll_ended">\'n Meningspeiling waaraan jy deelgeneem het, het geëindig</string>

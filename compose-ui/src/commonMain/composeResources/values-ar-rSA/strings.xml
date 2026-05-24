@@ -15,7 +15,7 @@
     <string name="profile_header_button_is_fans">يتابعك</string>
     <string name="mastodon_notification_item_followed_you">تابعك</string>
     <string name="mastodon_notification_item_favourited_your_status">أعجب بمنشورك</string>
-    <string name="mastodon_notification_item_reblogged_your_status">أعاد النشر</string>
+    <string name="mastodon_notification_item_reblogged_your_status">أعاد نشر منشور</string>
     <string name="mastodon_notification_item_poll_ended">انتهى استطلاع كنت تشارك فيه</string>
     <string name="mastodon_notification_item_mentioned_you">ذكرك</string>
     <string name="mastodon_notification_item_requested_follow">طلب متابعتك</string>
@@ -28,7 +28,7 @@
     <string name="post_show_full_text">عرض النص الكامل</string>
     <string name="bluesky_notification_item_followed_you">تابعك</string>
     <string name="bluesky_notification_item_favourited_your_status">أعجب بمنشورك</string>
-    <string name="bluesky_notification_item_reblogged_your_status">أعاد نشر منشورك</string>
+    <string name="bluesky_notification_item_reblogged_your_status">أعاد نشر منشور</string>
     <string name="bluesky_notification_item_poll_ended">انتهى استطلاع كنت تشارك فيه</string>
     <string name="bluesky_notification_item_mentioned_you">ذكرك</string>
     <string name="bluesky_item_reblogged_status">أعاد النشر</string>
@@ -39,7 +39,7 @@
     <string name="bluesky_notification_item_pin">ثبت منشوراً</string>
     <string name="misskey_notification_item_mentioned_you">ذكرك</string>
     <string name="misskey_notification_item_replied_to_you">رد عليك</string>
-    <string name="misskey_notification_item_reposted_your_status">أعاد نشر منشورك</string>
+    <string name="misskey_notification_item_reposted_your_status">أعاد نشر منشور</string>
     <string name="misskey_notification_item_quoted_your_status">اقتبس منشورك</string>
     <string name="misskey_notification_item_reacted_to_your_status">تفاعل مع منشورك</string>
     <string name="misskey_notification_item_poll_ended">انتهى استطلاع كنت تشارك فيه</string>

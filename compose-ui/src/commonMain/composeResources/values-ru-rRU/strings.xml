@@ -14,7 +14,7 @@
     <string name="profile_header_button_is_fans">Подписан на вас</string>
     <string name="mastodon_notification_item_followed_you">подписался на вас</string>
     <string name="mastodon_notification_item_favourited_your_status">добавил ваш пост в избранное</string>
-    <string name="mastodon_notification_item_reblogged_your_status">сделал репост</string>
+    <string name="mastodon_notification_item_reblogged_your_status">сделал репост поста</string>
     <string name="mastodon_notification_item_poll_ended">Опрос, в котором вы участвовали, завершен</string>
     <string name="mastodon_notification_item_mentioned_you">упомянул вас</string>
     <string name="mastodon_notification_item_requested_follow">отправил запрос на подписку</string>
@@ -27,7 +27,7 @@
     <string name="post_show_full_text">Показать весь текст</string>
     <string name="bluesky_notification_item_followed_you">подписался на вас</string>
     <string name="bluesky_notification_item_favourited_your_status">лайкнул ваш пост</string>
-    <string name="bluesky_notification_item_reblogged_your_status">репостнул ваш пост</string>
+    <string name="bluesky_notification_item_reblogged_your_status">сделал репост поста</string>
     <string name="bluesky_notification_item_poll_ended">Опрос, в котором вы участвовали, завершен</string>
     <string name="bluesky_notification_item_mentioned_you">упомянул вас</string>
     <string name="bluesky_item_reblogged_status">сделал репост</string>
@@ -38,7 +38,7 @@
     <string name="bluesky_notification_item_pin">закрепил пост</string>
     <string name="misskey_notification_item_mentioned_you">упомянул вас</string>
     <string name="misskey_notification_item_replied_to_you">ответил вам</string>
-    <string name="misskey_notification_item_reposted_your_status">репостнул ваш пост</string>
+    <string name="misskey_notification_item_reposted_your_status">сделал репост поста</string>
     <string name="misskey_notification_item_quoted_your_status">процитировал ваш пост</string>
     <string name="misskey_notification_item_reacted_to_your_status">отреагировал на ваш пост</string>
     <string name="misskey_notification_item_poll_ended">Опрос, в котором вы участвовали, завершен</string>

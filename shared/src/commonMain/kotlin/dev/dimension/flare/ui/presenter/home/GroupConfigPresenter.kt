@@ -17,7 +17,7 @@ import dev.dimension.flare.data.model.tab.TimelineSlot
 import dev.dimension.flare.data.model.tab.TimelineSlotContent
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.data.repository.SettingsRepository
-import dev.dimension.flare.ui.model.UiIcon
+import dev.dimension.flare.ui.model.TabPickerUiIcons
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
@@ -37,7 +37,7 @@ public class GroupConfigPresenter :
     override fun body(): State {
         val availableIcons =
             remember {
-                UiIcon.entries.map { IconType.Material(it) }.toImmutableList()
+                TabPickerUiIcons.map { IconType.Material(it) }.toImmutableList()
             }
 
         return object : State {

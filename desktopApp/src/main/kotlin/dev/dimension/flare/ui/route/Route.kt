@@ -1,7 +1,7 @@
 package dev.dimension.flare.ui.route
 
 import androidx.navigation3.runtime.NavKey
-import dev.dimension.flare.data.model.tab.TimelineSourceRef
+import dev.dimension.flare.data.model.tab.SourceTimelineTabItemV2
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -28,10 +28,6 @@ internal sealed interface Route : NavKey {
 
     data class Timeline(
         val tabItem: TimelineTabItemV2,
-    ) : ScreenRoute
-
-    data class TimelineSource(
-        val source: TimelineSourceRef,
     ) : ScreenRoute
 
     data class DeckTimeline(
@@ -301,8 +297,8 @@ internal sealed interface Route : NavKey {
             return when (deeplinkRoute) {
                 is DeeplinkRoute.Timeline.XQTDeviceFollow -> {
                     val accountKey = (deeplinkRoute.accountType as? AccountType.Specific)?.accountKey ?: return null
-                    Route.TimelineSource(
-                        source = TimelineSourceRef.xqtDeviceFollow(accountKey),
+                    Route.Timeline(
+                        tabItem = SourceTimelineTabItemV2.xqtDeviceFollow(accountKey),
                     )
                 }
 

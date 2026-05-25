@@ -31,7 +31,6 @@ import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.tab.ShortcutSpec
 import dev.dimension.flare.data.model.tab.TimelineSpec
-import dev.dimension.flare.data.model.tab.toSlot
 import dev.dimension.flare.data.network.vvo.VVOService
 import dev.dimension.flare.data.network.vvo.model.StatusDetailItem
 import dev.dimension.flare.data.platform.CommonTimelineSpecs
@@ -93,10 +92,10 @@ internal class VVODataSource(
     override val defaultTabs by lazy {
         persistentListOf(
             CommonTimelineSpecs.home
-                .target(
+                .tabItem(
                     data = TimelineSpec.AccountBasedData(accountKey),
                     icon = IconType.Material(UiIcon.Weibo),
-                ).toSlot(),
+                ),
         )
     }
 
@@ -122,7 +121,7 @@ internal class VVODataSource(
                 icon = UiIcon.Featured,
                 target =
                     ShortcutSpec.Target.Timeline(
-                        CommonTimelineSpecs.discover.target(TimelineSpec.AccountBasedData(accountKey)),
+                        CommonTimelineSpecs.discover.tabItem(TimelineSpec.AccountBasedData(accountKey)),
                     ),
             ),
             ShortcutSpec(
@@ -130,7 +129,7 @@ internal class VVODataSource(
                 icon = UiIcon.Bookmark,
                 target =
                     ShortcutSpec.Target.Timeline(
-                        VvoPlatformSpec.favoriteTimelineSpec.target(TimelineSpec.AccountBasedData(accountKey)),
+                        VvoPlatformSpec.favoriteTimelineSpec.tabItem(TimelineSpec.AccountBasedData(accountKey)),
                     ),
             ),
             ShortcutSpec(
@@ -138,7 +137,7 @@ internal class VVODataSource(
                 icon = UiIcon.Heart,
                 target =
                     ShortcutSpec.Target.Timeline(
-                        VvoPlatformSpec.likedTimelineSpec.target(TimelineSpec.AccountBasedData(accountKey)),
+                        VvoPlatformSpec.likedTimelineSpec.tabItem(TimelineSpec.AccountBasedData(accountKey)),
                     ),
             ),
         )

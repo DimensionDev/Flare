@@ -61,7 +61,6 @@ import dev.dimension.flare.data.datasource.microblog.pagingConfig
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.tab.ShortcutSpec
 import dev.dimension.flare.data.model.tab.TimelineSpec
-import dev.dimension.flare.data.model.tab.toSlot
 import dev.dimension.flare.data.network.bluesky.BlueskyService
 import dev.dimension.flare.data.network.bluesky.model.DidDoc
 import dev.dimension.flare.data.platform.BlueskyCredential
@@ -778,10 +777,10 @@ internal class BlueskyDataSource(
     override val defaultTabs by lazy {
         persistentListOf(
             CommonTimelineSpecs.home
-                .target(
+                .tabItem(
                     data = TimelineSpec.AccountBasedData(accountKey),
                     icon = IconType.FavIcon(accountKey.host),
-                ).toSlot(),
+                ),
         )
     }
 
@@ -818,7 +817,7 @@ internal class BlueskyDataSource(
                 icon = UiIcon.Bookmark,
                 target =
                     ShortcutSpec.Target.Timeline(
-                        BlueskyPlatformSpec.bookmarkTimelineSpec.target(TimelineSpec.AccountBasedData(accountKey)),
+                        BlueskyPlatformSpec.bookmarkTimelineSpec.tabItem(TimelineSpec.AccountBasedData(accountKey)),
                     ),
             ),
             ShortcutSpec(

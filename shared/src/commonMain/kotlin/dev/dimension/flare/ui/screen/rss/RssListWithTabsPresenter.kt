@@ -7,8 +7,7 @@ import dev.dimension.flare.data.database.app.model.SubscriptionType
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.tab.RssTimelineData
 import dev.dimension.flare.data.model.tab.SubscriptionTimelineData
-import dev.dimension.flare.data.model.tab.TimelineSlot
-import dev.dimension.flare.data.model.tab.toSlot
+import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.data.platform.RssTimelineSpecs
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiRssSource
@@ -21,17 +20,17 @@ import dev.dimension.flare.ui.presenter.invoke
 public class RssListWithTabsPresenter : PresenterBase<RssListWithTabsPresenter.State>() {
     private val pinTabsPresenter by lazy {
         object : PinTabsPresenter<UiRssSource>() {
-            override fun getTimelineTabItem(item: UiRssSource): TimelineSlot =
+            override fun getTimelineTabItem(item: UiRssSource): TimelineTabItemV2 =
                 if (item.type == SubscriptionType.RSS) {
                     RssTimelineSpecs.rss
-                        .target(
+                        .tabItem(
                             data = RssTimelineData(item.url),
                             title = UiText.Raw(item.title ?: item.url),
                             icon = item.favIcon?.let { IconType.Url(it) } ?: IconType.Material(UiIcon.Rss),
-                        ).toSlot()
+                        )
                 } else {
                     RssTimelineSpecs.subscription
-                        .target(
+                        .tabItem(
                             data =
                                 SubscriptionTimelineData(
                                     subscriptionUrl = item.url,
@@ -45,7 +44,7 @@ public class RssListWithTabsPresenter : PresenterBase<RssListWithTabsPresenter.S
                                     } else {
                                         IconType.FavIcon(item.host)
                                     },
-                        ).toSlot()
+                        )
                 }
         }
     }

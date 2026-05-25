@@ -21,8 +21,6 @@ import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Sliders
 import dev.dimension.flare.R
 import dev.dimension.flare.data.model.BottomBarBehavior
-import dev.dimension.flare.data.model.tab.TimelineResolver
-import dev.dimension.flare.data.model.tab.TimelineSourceRef
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.data.model.tab.resolveTimelineAppearance
 import dev.dimension.flare.ui.component.BackButton
@@ -41,7 +39,6 @@ import dev.dimension.flare.ui.presenter.home.LoggedInState
 import dev.dimension.flare.ui.presenter.invoke
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
-import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -128,23 +125,6 @@ internal fun DeckTimelineScreen(
             }
         }
     }
-}
-
-@Composable
-internal fun TimelineScreen(
-    source: TimelineSourceRef,
-    onBack: () -> Unit,
-) {
-    val state by producePresenter("timeline-source:${source.id}") {
-        val resolver: TimelineResolver = koinInject()
-        remember {
-            resolver.toTabItem(source)
-        }
-    }
-    TimelineScreen(
-        tabItem = state,
-        onBack = onBack,
-    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

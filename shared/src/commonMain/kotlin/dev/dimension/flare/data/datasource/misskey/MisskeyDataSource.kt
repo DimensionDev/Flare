@@ -40,7 +40,6 @@ import dev.dimension.flare.data.datasource.microblog.pagingConfig
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.tab.ShortcutSpec
 import dev.dimension.flare.data.model.tab.TimelineSpec
-import dev.dimension.flare.data.model.tab.toSlot
 import dev.dimension.flare.data.network.misskey.api.model.AdminAccountsDeleteRequest
 import dev.dimension.flare.data.network.misskey.api.model.ChannelsFeaturedRequest
 import dev.dimension.flare.data.network.misskey.api.model.ChannelsFollowRequest
@@ -710,10 +709,10 @@ internal class MisskeyDataSource(
     override val defaultTabs by lazy {
         persistentListOf(
             CommonTimelineSpecs.home
-                .target(
+                .tabItem(
                     data = TimelineSpec.AccountBasedData(accountKey),
                     icon = IconType.FavIcon(accountKey.host),
-                ).toSlot(),
+                ),
         )
     }
 
@@ -741,7 +740,7 @@ internal class MisskeyDataSource(
                 icon = UiIcon.Favourite,
                 target =
                     ShortcutSpec.Target.Timeline(
-                        MisskeyPlatformSpec.favouriteTimelineSpec.target(TimelineSpec.AccountBasedData(accountKey)),
+                        MisskeyPlatformSpec.favouriteTimelineSpec.tabItem(TimelineSpec.AccountBasedData(accountKey)),
                     ),
             ),
             ShortcutSpec(
@@ -757,7 +756,7 @@ internal class MisskeyDataSource(
                 icon = UiIcon.Featured,
                 target =
                     ShortcutSpec.Target.Timeline(
-                        MisskeyPlatformSpec.hybridTimelineSpec.target(TimelineSpec.AccountBasedData(accountKey)),
+                        MisskeyPlatformSpec.hybridTimelineSpec.tabItem(TimelineSpec.AccountBasedData(accountKey)),
                     ),
             ),
             ShortcutSpec(
@@ -765,7 +764,7 @@ internal class MisskeyDataSource(
                 icon = UiIcon.Local,
                 target =
                     ShortcutSpec.Target.Timeline(
-                        MisskeyPlatformSpec.localTimelineSpec.target(TimelineSpec.AccountBasedData(accountKey)),
+                        MisskeyPlatformSpec.localTimelineSpec.tabItem(TimelineSpec.AccountBasedData(accountKey)),
                     ),
             ),
             ShortcutSpec(
@@ -773,7 +772,7 @@ internal class MisskeyDataSource(
                 icon = UiIcon.World,
                 target =
                     ShortcutSpec.Target.Timeline(
-                        MisskeyPlatformSpec.globalTimelineSpec.target(TimelineSpec.AccountBasedData(accountKey)),
+                        MisskeyPlatformSpec.globalTimelineSpec.tabItem(TimelineSpec.AccountBasedData(accountKey)),
                     ),
             ),
             ShortcutSpec(

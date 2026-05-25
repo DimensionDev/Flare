@@ -55,7 +55,6 @@ import compose.icons.fontawesomeicons.solid.Pen
 import compose.icons.fontawesomeicons.solid.PenToSquare
 import compose.icons.fontawesomeicons.solid.SquareRss
 import dev.dimension.flare.R
-import dev.dimension.flare.data.model.tab.SourceTimelineTabItemV2
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.common.OnNewIntent
 import dev.dimension.flare.ui.component.AvatarComponent
@@ -485,7 +484,7 @@ private fun getDirection(data: SecondaryTabsPresenter.Tab): Route? =
         }
 
         is SecondaryTabsPresenter.Destination.Timeline -> {
-            (target.tabItem as? SourceTimelineTabItemV2)?.source?.let { Route.Timeline(it) }
+            Route.Timeline(target.tabItem)
         }
     }
 

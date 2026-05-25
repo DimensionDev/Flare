@@ -1,7 +1,6 @@
 package dev.dimension.flare.data.platform
 
 import dev.dimension.flare.data.model.IconType
-import dev.dimension.flare.data.model.tab.SourceTimelineTabItemV2
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.model.tab.TimelineSpecIds
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
@@ -61,14 +60,10 @@ internal object CommonTimelineSpecs {
         )
 }
 
-internal fun UiList.List.toTimelineTabItemV2(accountKey: MicroBlogKey): TimelineTabItemV2 {
-    val source =
-        CommonTimelineSpecs.list.target(
+internal fun UiList.List.toTimelineTabItemV2(accountKey: MicroBlogKey): TimelineTabItemV2 =
+    CommonTimelineSpecs.list
+        .tabItem(
             data = TimelineSpec.AccountResourceData(accountKey, id),
             title = UiText.Raw(title),
             icon = avatar?.let { IconType.Url(it) } ?: UiIcon.List.asType(),
         )
-    return SourceTimelineTabItemV2.fromSource(source) {
-        CommonTimelineSpecs.list.createPresenter(source.data)
-    }
-}

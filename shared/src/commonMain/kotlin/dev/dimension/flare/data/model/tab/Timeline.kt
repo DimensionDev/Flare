@@ -9,6 +9,7 @@ import dev.dimension.flare.data.model.appearance.toBag
 import dev.dimension.flare.data.model.appearance.toPatch
 import dev.dimension.flare.data.model.appearance.withPatch
 import dev.dimension.flare.data.platform.RssTimelineSpecs
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformRegistry
 import dev.dimension.flare.ui.model.UiIcon
@@ -19,6 +20,7 @@ import dev.dimension.flare.ui.model.asType
 import dev.dimension.flare.ui.presenter.home.MixedTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.SystemHomeMixedTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.TimelinePresenter
+import dev.dimension.flare.ui.presenter.home.xqt.XQTDeviceFollowTimelinePresenter
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
@@ -87,7 +89,7 @@ public fun TimelineTabItemV2.resolveTimelineAppearance(base: TimelineAppearance)
 @Immutable
 public class SourceTimelineTabItemV2 private constructor(
     override val id: String,
-    public val source: TimelineSourceRef?,
+    internal val source: TimelineSourceRef?,
     internal val presentation: TimelinePresentation?,
     override val title: UiText,
     override val icon: IconType,
@@ -151,6 +153,18 @@ public class SourceTimelineTabItemV2 private constructor(
                 appearancePatch = appearancePatch,
                 enabled = enabled,
                 presenterFactory = createPresenter,
+            )
+
+        public fun xqtDeviceFollow(accountKey: MicroBlogKey): SourceTimelineTabItemV2 =
+            runtime(
+                id = "${TimelineSpecIds.XQT_DEVICE_FOLLOW}:$accountKey",
+                title = UiStrings.Posts.asText(),
+                icon = UiIcon.List.asType(),
+                createPresenter = {
+                    XQTDeviceFollowTimelinePresenter(
+                        AccountType.Specific(accountKey),
+                    )
+                },
             )
 
         internal fun fromSlot(
@@ -384,23 +398,7 @@ public data class TimelineSourceRef(
     val title: UiText,
     val icon: IconType,
     val data: String,
-) {
-    public companion object {
-        @OptIn(ExperimentalSerializationApi::class)
-        public fun xqtDeviceFollow(accountKey: MicroBlogKey): TimelineSourceRef =
-            TimelineSourceRef(
-                id = "${TimelineSpecIds.XQT_DEVICE_FOLLOW}:$accountKey",
-                specId = TimelineSpecIds.XQT_DEVICE_FOLLOW,
-                title = UiStrings.Posts.asText(),
-                icon = UiIcon.List.asType(),
-                data =
-                    ProtoBuf.encodeToHexString(
-                        TimelineSpec.AccountBasedData.serializer(),
-                        TimelineSpec.AccountBasedData(accountKey),
-                    ),
-            )
-    }
-}
+)
 
 internal fun TimelineSourceRef.toSlot(
     slotId: String = id,
@@ -420,14 +418,16 @@ public data class TimelineSpec<T : TimelineSpec.Data>(
     val targetId: (data: T) -> String,
     private val presenterFactory: (data: T) -> TimelinePresenter,
 ) {
+    public fun itemId(data: T): String = "$id:${targetId(data)}"
+
     @OptIn(ExperimentalSerializationApi::class)
-    public fun target(
+    internal fun target(
         data: T,
         title: UiText = this.title.asText(),
         icon: IconType = this.icon,
     ): TimelineSourceRef =
         TimelineSourceRef(
-            id = "$id:${targetId(data)}",
+            id = itemId(data),
             specId = id,
             title = title,
             icon = icon,
@@ -481,7 +481,7 @@ public data class ShortcutSpec(
 ) {
     public sealed interface Target {
         public data class Timeline(
-            val source: TimelineSourceRef,
+            val tabItem: SourceTimelineTabItemV2,
         ) : Target
 
         public data class Route(

@@ -8,7 +8,6 @@ import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.tab.AllRssTimelineData
 import dev.dimension.flare.data.model.tab.RssTimelineData
 import dev.dimension.flare.data.model.tab.SubscriptionTimelineData
-import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.data.platform.RssTimelineSpecs
 import dev.dimension.flare.model.AccountType
@@ -27,15 +26,10 @@ import dev.dimension.flare.ui.presenter.settings.AccountsPresenter
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 
 public class AllTabsPresenter(
 //    private val filterIsTimeline: Boolean = false,
-) : PresenterBase<AllTabsPresenter.State>(),
-    KoinComponent {
-    private val timelineResolver: TimelineResolver by inject()
-
+) : PresenterBase<AllTabsPresenter.State>() {
     @Composable
     override fun body(): State {
         val accountState = remember { AccountsPresenter() }.body()
@@ -62,16 +56,14 @@ public class AllTabsPresenter(
                 (
                     listOfNotNull(
                         if (rssSources.sources.isNotEmpty()) {
-                            timelineResolver.toTabItem(
-                                RssTimelineSpecs.allRss.target(
-                                    data = AllRssTimelineData,
-                                ),
+                            RssTimelineSpecs.allRss.tabItem(
+                                data = AllRssTimelineData,
                             )
                         } else {
                             null
                         },
                     ) +
-                        rssSources.sources.map { source -> source.toTimelineTabItemV2(timelineResolver) }
+                        rssSources.sources.map { source -> source.toTimelineTabItemV2() }
                 ).toImmutableList()
             }
 
@@ -102,7 +94,7 @@ public class AllTabsPresenter(
     }
 }
 
-private fun UiRssSource.toTimelineTabItemV2(timelineResolver: TimelineResolver): TimelineTabItemV2 {
+private fun UiRssSource.toTimelineTabItemV2(): TimelineTabItemV2 {
     val title = UiText.Raw(title ?: url)
     val icon =
         favIcon?.let { IconType.Url(it) }
@@ -111,23 +103,21 @@ private fun UiRssSource.toTimelineTabItemV2(timelineResolver: TimelineResolver):
             } else {
                 IconType.FavIcon(host)
             }
-    val source =
-        if (type == SubscriptionType.RSS) {
-            RssTimelineSpecs.rss.target(
-                data = RssTimelineData(url),
-                title = title,
-                icon = icon,
-            )
-        } else {
-            RssTimelineSpecs.subscription.target(
-                data =
-                    SubscriptionTimelineData(
-                        subscriptionUrl = url,
-                        subscriptionType = type,
-                    ),
-                title = title,
-                icon = icon,
-            )
-        }
-    return timelineResolver.toTabItem(source)
+    return if (type == SubscriptionType.RSS) {
+        RssTimelineSpecs.rss.tabItem(
+            data = RssTimelineData(url),
+            title = title,
+            icon = icon,
+        )
+    } else {
+        RssTimelineSpecs.subscription.tabItem(
+            data =
+                SubscriptionTimelineData(
+                    subscriptionUrl = url,
+                    subscriptionType = type,
+                ),
+            title = title,
+            icon = icon,
+        )
+    }
 }

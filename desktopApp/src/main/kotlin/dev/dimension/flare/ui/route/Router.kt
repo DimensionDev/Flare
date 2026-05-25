@@ -27,7 +27,6 @@ import dev.dimension.flare.common.OnDeepLink
 import dev.dimension.flare.data.database.app.model.SubscriptionType
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.tab.SourceTimelineTabItemV2
-import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.model.AccountType.Specific
 import dev.dimension.flare.ui.component.platform.isBigScreen
@@ -104,7 +103,6 @@ import io.github.composefluent.component.FluentDialog
 import io.github.composefluent.component.Flyout
 import io.github.composefluent.component.Text
 import kotlinx.collections.immutable.ImmutableList
-import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
@@ -649,13 +647,6 @@ internal fun Router(
                 entry<Timeline> { args ->
                     TimelineScreen(
                         args.tabItem,
-                    )
-                }
-
-                entry<Route.TimelineSource> { args ->
-                    val resolver = koinInject<TimelineResolver>()
-                    TimelineScreen(
-                        resolver.toTabItem(args.source),
                     )
                 }
 

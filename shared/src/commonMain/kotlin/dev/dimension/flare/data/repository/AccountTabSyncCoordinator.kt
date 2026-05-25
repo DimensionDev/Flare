@@ -58,14 +58,15 @@ internal class AccountTabSyncCoordinator(
     }
 
     private suspend fun addDefaultTabs(account: UiAccount) {
-        val defaultSlots =
+        val defaultTabs =
             (accountRepository.getOrCreateDataSource(account) as? TimelineTabConfigurationDataSource)
                 ?.defaultTabs
                 .orEmpty()
-        if (defaultSlots.isEmpty()) {
+        if (defaultTabs.isEmpty()) {
             return
         }
         settingsRepository.updateTabSettingsV2 {
+            val defaultSlots = defaultTabs.map(timelineResolver::toSlot)
             val shouldEnableSystemHomeMixedTimeline =
                 homeSlots.anySystemHomeMixedTimeline() ||
                     homeSlots.countNonSystemHomeTabs() < 2

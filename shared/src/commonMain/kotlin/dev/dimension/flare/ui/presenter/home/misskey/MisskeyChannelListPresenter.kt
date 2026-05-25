@@ -13,7 +13,6 @@ import dev.dimension.flare.common.refreshSuspend
 import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
 import dev.dimension.flare.data.model.IconType
-import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.data.platform.MisskeyPlatformSpec
@@ -37,7 +36,6 @@ public class MisskeyChannelListPresenter(
 ) : PresenterBase<MisskeyChannelListPresenter.State>(),
     KoinComponent {
     private val accountRepository: AccountRepository by inject()
-    private val timelineResolver: TimelineResolver by inject()
 
     public interface State {
         public val type: Type
@@ -96,12 +94,10 @@ public class MisskeyChannelListPresenter(
             }
 
             override fun timelineTabItem(item: UiList.Channel): TimelineTabItemV2 =
-                timelineResolver.toTabItem(
-                    MisskeyPlatformSpec.channelTimelineSpec.target(
-                        data = TimelineSpec.AccountResourceData((accountType as AccountType.Specific).accountKey, item.id),
-                        title = UiText.Raw(item.title),
-                        icon = item.banner?.let { IconType.Url(it) } ?: IconType.Material(UiIcon.Channel),
-                    ),
+                MisskeyPlatformSpec.channelTimelineSpec.tabItem(
+                    data = TimelineSpec.AccountResourceData((accountType as AccountType.Specific).accountKey, item.id),
+                    title = UiText.Raw(item.title),
+                    icon = item.banner?.let { IconType.Url(it) } ?: IconType.Material(UiIcon.Channel),
                 )
 
             override suspend fun refreshSuspend() {

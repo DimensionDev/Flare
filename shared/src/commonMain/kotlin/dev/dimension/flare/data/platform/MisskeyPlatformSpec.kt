@@ -3,7 +3,6 @@ package dev.dimension.flare.data.platform
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
 import dev.dimension.flare.data.model.IconType
-import dev.dimension.flare.data.model.tab.SourceTimelineTabItemV2
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.model.tab.TimelineSpecIds
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
@@ -210,26 +209,18 @@ private fun profileRoute(
     )
 }
 
-internal fun UiList.Antenna.toTimelineTabItemV2(accountKey: MicroBlogKey): TimelineTabItemV2 {
-    val source =
-        MisskeyPlatformSpec.antennaTimelineSpec.target(
+internal fun UiList.Antenna.toTimelineTabItemV2(accountKey: MicroBlogKey): TimelineTabItemV2 =
+    MisskeyPlatformSpec.antennaTimelineSpec
+        .tabItem(
             data = TimelineSpec.AccountResourceData(accountKey, id),
             title = UiText.Raw(title),
             icon = UiIcon.Rss.asType(),
         )
-    return SourceTimelineTabItemV2.fromSource(source) {
-        MisskeyPlatformSpec.antennaTimelineSpec.createPresenter(source.data)
-    }
-}
 
-internal fun UiList.Channel.toTimelineTabItemV2(accountKey: MicroBlogKey): TimelineTabItemV2 {
-    val source =
-        MisskeyPlatformSpec.channelTimelineSpec.target(
+internal fun UiList.Channel.toTimelineTabItemV2(accountKey: MicroBlogKey): TimelineTabItemV2 =
+    MisskeyPlatformSpec.channelTimelineSpec
+        .tabItem(
             data = TimelineSpec.AccountResourceData(accountKey, id),
             title = UiText.Raw(title),
             icon = banner?.let { IconType.Url(it) } ?: UiIcon.Channel.asType(),
         )
-    return SourceTimelineTabItemV2.fromSource(source) {
-        MisskeyPlatformSpec.channelTimelineSpec.createPresenter(source.data)
-    }
-}

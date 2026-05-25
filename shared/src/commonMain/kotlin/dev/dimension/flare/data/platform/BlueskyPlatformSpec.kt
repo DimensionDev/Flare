@@ -3,7 +3,6 @@ package dev.dimension.flare.data.platform
 import dev.dimension.flare.data.datasource.bluesky.BlueskyDataSource
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.model.IconType
-import dev.dimension.flare.data.model.tab.SourceTimelineTabItemV2
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.model.tab.TimelineSpecIds
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
@@ -171,14 +170,10 @@ private fun profileRoute(
     )
 }
 
-internal fun UiList.Feed.toTimelineTabItemV2(accountKey: MicroBlogKey): TimelineTabItemV2 {
-    val source =
-        BlueskyPlatformSpec.feedTimelineSpec.target(
+internal fun UiList.Feed.toTimelineTabItemV2(accountKey: MicroBlogKey): TimelineTabItemV2 =
+    BlueskyPlatformSpec.feedTimelineSpec
+        .tabItem(
             data = TimelineSpec.AccountResourceData(accountKey, id),
             title = UiText.Raw(title),
             icon = avatar?.let { IconType.Url(it) } ?: UiIcon.Feeds.asType(),
         )
-    return SourceTimelineTabItemV2.fromSource(source) {
-        BlueskyPlatformSpec.feedTimelineSpec.createPresenter(source.data)
-    }
-}

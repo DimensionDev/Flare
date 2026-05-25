@@ -2,7 +2,8 @@ package dev.dimension.flare.ui.route
 
 import androidx.compose.runtime.Immutable
 import androidx.navigation3.runtime.NavKey
-import dev.dimension.flare.data.model.tab.TimelineSourceRef
+import dev.dimension.flare.data.model.tab.SourceTimelineTabItemV2
+import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import kotlinx.collections.immutable.ImmutableMap
@@ -10,7 +11,6 @@ import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.serialization.Serializable
 
 @Immutable
-@Serializable
 internal sealed interface Route : NavKey {
     @Serializable
     sealed interface Status : Route {
@@ -174,9 +174,8 @@ internal sealed interface Route : NavKey {
     @Serializable
     data object Home : Route
 
-    @Serializable
     data class Timeline(
-        val source: TimelineSourceRef,
+        val tabItem: TimelineTabItemV2,
     ) : Route
 
     @Serializable
@@ -470,7 +469,7 @@ internal sealed interface Route : NavKey {
                         (deeplinkRoute.accountType as? AccountType.Specific)?.accountKey
                             ?: return null
                     Route.Timeline(
-                        source = TimelineSourceRef.xqtDeviceFollow(accountKey),
+                        tabItem = SourceTimelineTabItemV2.xqtDeviceFollow(accountKey),
                     )
                 }
 

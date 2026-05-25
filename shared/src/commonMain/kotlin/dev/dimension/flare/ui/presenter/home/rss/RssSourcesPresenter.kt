@@ -99,18 +99,17 @@ private suspend fun SettingsRepository.removeHomeTimelineTabForRssSource(source:
         when (source.type) {
             SubscriptionType.RSS -> {
                 RssTimelineSpecs.rss
-                    .target(RssTimelineData(source.url))
-                    .id
+                    .itemId(RssTimelineData(source.url))
             }
 
             else -> {
                 RssTimelineSpecs.subscription
-                    .target(
+                    .itemId(
                         SubscriptionTimelineData(
                             subscriptionUrl = source.url,
                             subscriptionType = source.type,
                         ),
-                    ).id
+                    )
             }
         }
     updateTabSettingsV2 {

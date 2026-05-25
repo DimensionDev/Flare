@@ -11,6 +11,7 @@
     <string name="profile_misskey_header_status_count">%1$s Gönderi</string>
 
     <string name="profile_header_button_follow">Takip Et</string>
+    <string name="profile_header_button_request_follow">Request follow</string>
     <string name="profile_header_button_following">Takip Ediliyor</string>
     <string name="profile_header_button_requested">İstek Gönderildi</string>
     <string name="profile_header_button_blocked">Engellendi</string>

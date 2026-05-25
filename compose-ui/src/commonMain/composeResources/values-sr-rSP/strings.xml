@@ -11,6 +11,7 @@
     <string name="profile_misskey_header_status_count">%1$s Objave</string>
 
     <string name="profile_header_button_follow">Prati</string>
+    <string name="profile_header_button_request_follow">Request follow</string>
     <string name="profile_header_button_following">Pratite</string>
     <string name="profile_header_button_requested">Poslat zahtev</string>
     <string name="profile_header_button_blocked">Blokirano</string>

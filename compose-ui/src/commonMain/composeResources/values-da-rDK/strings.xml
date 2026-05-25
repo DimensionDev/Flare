@@ -9,6 +9,7 @@
     <string name="profile_header_toots_count">%1$s Indlæg</string>
     <string name="profile_misskey_header_status_count">%1$s Indlæg</string>
     <string name="profile_header_button_follow">Følg</string>
+    <string name="profile_header_button_request_follow">Request follow</string>
     <string name="profile_header_button_following">Følger</string>
     <string name="profile_header_button_requested">Anmodet</string>
     <string name="profile_header_button_blocked">Blokeret</string>

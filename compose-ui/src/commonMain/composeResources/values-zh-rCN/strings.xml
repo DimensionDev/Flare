@@ -11,6 +11,7 @@
     <string name="profile_misskey_header_status_count">%1$s 帖子</string>
 
     <string name="profile_header_button_follow">关注</string>
+    <string name="profile_header_button_request_follow">请求关注</string>
     <string name="profile_header_button_following">正在关注</string>
     <string name="profile_header_button_requested">已请求</string>
     <string name="profile_header_button_blocked">已屏蔽</string>

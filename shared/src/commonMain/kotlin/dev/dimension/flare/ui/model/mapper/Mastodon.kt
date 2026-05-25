@@ -1079,8 +1079,10 @@ internal fun RelationshipResponse.toUi(): UiRelation =
         following = following ?: false,
         isFans = followedBy ?: false,
         blocking = blocking ?: false,
+        blockedBy = blockedBy ?: false,
         muted = muting ?: false,
         hasPendingFollowRequestFromYou = requested ?: false,
+        hasPendingFollowRequestToYou = requestedBy ?: false,
     )
 
 private fun parseName(status: Account): UiRichText {

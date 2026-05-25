@@ -11,6 +11,7 @@
     <string name="profile_misskey_header_status_count">%1$s Posts</string>
 
     <string name="profile_header_button_follow">Follow</string>
+    <string name="profile_header_button_request_follow">Request follow</string>
     <string name="profile_header_button_following">Following</string>
     <string name="profile_header_button_requested">Requested</string>
     <string name="profile_header_button_blocked">Blocked</string>

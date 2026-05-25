@@ -9,6 +9,7 @@
     <string name="profile_header_toots_count">%1$s פוסטים</string>
     <string name="profile_misskey_header_status_count">%1$s פוסטים</string>
     <string name="profile_header_button_follow">מעקב</string>
+    <string name="profile_header_button_request_follow">Request follow</string>
     <string name="profile_header_button_following">במעקב</string>
     <string name="profile_header_button_requested">נשלחה בקשה</string>
     <string name="profile_header_button_blocked">חסום</string>

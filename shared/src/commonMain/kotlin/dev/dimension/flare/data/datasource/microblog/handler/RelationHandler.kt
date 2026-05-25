@@ -45,51 +45,55 @@ internal class RelationHandler(
             },
         )
 
-    fun follow(userKey: MicroBlogKey) =
-        coroutineScope.launch {
-            tryRun {
+    fun follow(
+        userKey: MicroBlogKey,
+        requestFollow: Boolean = false,
+    ) = coroutineScope.launch {
+        var previousRelation: UiRelation? = null
+        tryRun {
+            previousRelation =
                 updateRelation(
                     userKey = userKey,
                     update = { relation ->
                         relation.copy(
-                            following = true,
+                            following = !requestFollow,
+                            hasPendingFollowRequestFromYou = requestFollow,
                         )
                     },
                 )
-                dataSource.follow(userKey)
-            }.onFailure {
-                updateRelation(
+            dataSource.follow(userKey)
+        }.onFailure {
+            previousRelation?.let { relation ->
+                setRelation(
                     userKey = userKey,
-                    update = { relation ->
-                        relation.copy(
-                            following = false,
-                        )
-                    },
+                    relation = relation,
                 )
             }
         }
+    }
 
     fun unfollow(userKey: MicroBlogKey) =
         coroutineScope.launch {
+            var previousRelation: UiRelation? = null
             tryRun {
-                updateRelation(
-                    userKey = userKey,
-                    update = { relation ->
-                        relation.copy(
-                            following = false,
-                        )
-                    },
-                )
+                previousRelation =
+                    updateRelation(
+                        userKey = userKey,
+                        update = { relation ->
+                            relation.copy(
+                                following = false,
+                                hasPendingFollowRequestFromYou = false,
+                            )
+                        },
+                    )
                 dataSource.unfollow(userKey)
             }.onFailure {
-                updateRelation(
-                    userKey = userKey,
-                    update = { relation ->
-                        relation.copy(
-                            following = true,
-                        )
-                    },
-                )
+                previousRelation?.let { relation ->
+                    setRelation(
+                        userKey = userKey,
+                        relation = relation,
+                    )
+                }
             }
         }
 
@@ -216,7 +220,7 @@ internal class RelationHandler(
     private suspend fun updateRelation(
         userKey: MicroBlogKey,
         update: (UiRelation) -> UiRelation,
-    ) {
+    ): UiRelation? {
         val currentRelation =
             database
                 .userDao()
@@ -224,13 +228,24 @@ internal class RelationHandler(
                     accountType = accountType as DbAccountType,
                     userKey = userKey,
                 ).mapNotNull { it?.relation }
-                .firstOrNull() ?: return
+                .firstOrNull() ?: return null
         val newRelation = update(currentRelation)
+        setRelation(
+            userKey = userKey,
+            relation = newRelation,
+        )
+        return currentRelation
+    }
+
+    private suspend fun setRelation(
+        userKey: MicroBlogKey,
+        relation: UiRelation,
+    ) {
         database.userDao().insertUserRelation(
             DbUserRelation(
                 accountType = accountType as DbAccountType,
                 userKey = userKey,
-                relation = newRelation,
+                relation = relation,
             ),
         )
     }

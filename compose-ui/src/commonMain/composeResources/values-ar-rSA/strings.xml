@@ -9,6 +9,7 @@
     <string name="profile_header_toots_count">%1$s منشورات</string>
     <string name="profile_misskey_header_status_count">%1$s منشورات</string>
     <string name="profile_header_button_follow">متابعة</string>
+    <string name="profile_header_button_request_follow">Request follow</string>
     <string name="profile_header_button_following">يتابع</string>
     <string name="profile_header_button_requested">تم الطلب</string>
     <string name="profile_header_button_blocked">محظور</string>

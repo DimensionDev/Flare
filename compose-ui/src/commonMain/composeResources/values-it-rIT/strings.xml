@@ -9,6 +9,7 @@
     <string name="profile_header_toots_count">%1$s Post</string>
     <string name="profile_misskey_header_status_count">%1$s Post</string>
     <string name="profile_header_button_follow">Segui</string>
+    <string name="profile_header_button_request_follow">Request follow</string>
     <string name="profile_header_button_following">Segui già</string>
     <string name="profile_header_button_requested">Richiesto</string>
     <string name="profile_header_button_blocked">Bloccato</string>

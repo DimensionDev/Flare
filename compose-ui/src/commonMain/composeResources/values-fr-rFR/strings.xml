@@ -9,6 +9,7 @@
     <string name="profile_header_toots_count">%1$s publications</string>
     <string name="profile_misskey_header_status_count">%1$s publications</string>
     <string name="profile_header_button_follow">Suivre</string>
+    <string name="profile_header_button_request_follow">Request follow</string>
     <string name="profile_header_button_following">Abonné</string>
     <string name="profile_header_button_requested">En attente</string>
     <string name="profile_header_button_blocked">Bloqué</string>

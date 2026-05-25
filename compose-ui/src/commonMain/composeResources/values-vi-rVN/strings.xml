@@ -11,6 +11,7 @@
     <string name="profile_misskey_header_status_count">%1$s Bài đăng</string>
 
     <string name="profile_header_button_follow">Theo dõi</string>
+    <string name="profile_header_button_request_follow">Request follow</string>
     <string name="profile_header_button_following">Đang theo dõi</string>
     <string name="profile_header_button_requested">Đã gửi yêu cầu</string>
     <string name="profile_header_button_blocked">Đã chặn</string>

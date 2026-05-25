@@ -11,6 +11,7 @@
     <string name="profile_misskey_header_status_count">%1$s Дописи</string>
 
     <string name="profile_header_button_follow">Підписатися</string>
+    <string name="profile_header_button_request_follow">Request follow</string>
     <string name="profile_header_button_following">Ви підписані</string>
     <string name="profile_header_button_requested">Запит надіслано</string>
     <string name="profile_header_button_blocked">Заблоковано</string>

@@ -9,6 +9,7 @@
     <string name="profile_header_toots_count">%1$s 投稿</string>
     <string name="profile_misskey_header_status_count">%1$s 投稿</string>
     <string name="profile_header_button_follow">フォロー</string>
+    <string name="profile_header_button_request_follow">フォローをリクエスト</string>
     <string name="profile_header_button_following">フォロー中</string>
     <string name="profile_header_button_requested">承認待ち</string>
     <string name="profile_header_button_blocked">ブロック中</string>

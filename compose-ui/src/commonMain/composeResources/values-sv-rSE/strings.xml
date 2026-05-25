@@ -11,6 +11,7 @@
     <string name="profile_misskey_header_status_count">%1$s Inlägg</string>
 
     <string name="profile_header_button_follow">Följ</string>
+    <string name="profile_header_button_request_follow">Request follow</string>
     <string name="profile_header_button_following">Följer</string>
     <string name="profile_header_button_requested">Begärt</string>
     <string name="profile_header_button_blocked">Blockerad</string>

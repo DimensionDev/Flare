@@ -88,9 +88,10 @@ struct ProfileScreen: View {
                     ProfileHeader(
                         user: presenter.state.userState,
                         relation: presenter.state.relationState,
+                        followButtonState: presenter.state.followButtonState,
                         isMe: presenter.state.isMe,
-                        onFollowClick: { user, relation in
-                            handleFollowAction(user: user, relation: relation)
+                        onFollowClick: { user, followButtonState in
+                            handleFollowAction(user: user, followButtonState: followButtonState)
                         },
                         onFollowingClick: onFollowingClick,
                         onFansClick: onFansClick
@@ -122,8 +123,8 @@ struct ProfileScreen: View {
                 profileState: presenter.state,
                 tabs: tabs,
                 selectedTab: $selectedTab,
-                onFollowClick: { user, relation in
-                    handleFollowAction(user: user, relation: relation)
+                onFollowClick: { user, followButtonState in
+                    handleFollowAction(user: user, followButtonState: followButtonState)
                 },
                 onFollowingClick: onFollowingClick,
                 onFansClick: onFansClick,
@@ -161,17 +162,18 @@ struct ProfileScreen: View {
         }
     }
 
-    private func handleFollowAction(user: UiProfile, relation: UiRelation) {
-        if relation.blocking {
+    private func handleFollowAction(user: UiProfile, followButtonState: FollowButtonState) {
+        switch onEnum(of: followButtonState) {
+        case .blocked:
             if case .success(let state) = onEnum(of: presenter.state.myAccountKey) {
                 let route = DeeplinkRoute.UnblockUser(accountKey: state.data, userKey: user.key)
                 if let url = URL(string: route.toUri()) {
                     openURL(url)
                 }
             }
-        } else if relation.following || relation.hasPendingFollowRequestFromYou {
+        case .following, .requested:
             presenter.state.unfollow(userKey: user.key)
-        } else {
+        case .follow, .requestFollow:
             presenter.state.follow(userKey: user.key)
         }
     }
@@ -231,7 +233,7 @@ private struct ProfileCompatTimelineView: UIViewControllerRepresentable {
     let profileState: ProfileState
     let tabs: [ProfileState.Tab]
     @Binding var selectedTab: Int
-    let onFollowClick: (UiProfile, UiRelation) -> Void
+    let onFollowClick: (UiProfile, FollowButtonState) -> Void
     let onFollowingClick: (MicroBlogKey) -> Void
     let onFansClick: (MicroBlogKey) -> Void
     let onHeaderVisibilityChanged: (Bool) -> Void
@@ -330,7 +332,7 @@ private struct ProfileCompatTimelineView: UIViewControllerRepresentable {
             timelineAppearance: TimelineAppearance,
             openURL: OpenURLAction,
             horizontalSizeClass: UserInterfaceSizeClass?,
-            onFollowClick: @escaping (UiProfile, UiRelation) -> Void,
+            onFollowClick: @escaping (UiProfile, FollowButtonState) -> Void,
             onFollowingClick: @escaping (MicroBlogKey) -> Void,
             onFansClick: @escaping (MicroBlogKey) -> Void,
             onHeaderVisibilityChanged: @escaping (Bool) -> Void,
@@ -350,6 +352,7 @@ private struct ProfileCompatTimelineView: UIViewControllerRepresentable {
                         ProfileHeader(
                             user: profileState.userState,
                             relation: profileState.relationState,
+                            followButtonState: profileState.followButtonState,
                             isMe: profileState.isMe,
                             onFollowClick: onFollowClick,
                             onFollowingClick: onFollowingClick,
@@ -482,6 +485,7 @@ private struct ProfileCompatTimelineView: UIViewControllerRepresentable {
 private struct ProfileHeaderAccessorySignature: Equatable {
     let userState: String
     let relationState: String
+    let followButtonState: String
     let isMeState: String
     let appearance: TimelineUIKitAppearance
     let horizontalSizeClass: UserInterfaceSizeClass?
@@ -493,6 +497,7 @@ private struct ProfileHeaderAccessorySignature: Equatable {
     ) {
         userState = Self.userStateSignature(profileState.userState)
         relationState = Self.relationStateSignature(profileState.relationState)
+        followButtonState = Self.followButtonStateSignature(profileState.followButtonState)
         isMeState = Self.isMeStateSignature(profileState.isMe)
         appearance = TimelineUIKitAppearance(timeline: timelineAppearance)
         self.horizontalSizeClass = horizontalSizeClass
@@ -537,6 +542,17 @@ private struct ProfileHeaderAccessorySignature: Equatable {
                 String(success.data.hasPendingFollowRequestFromYou),
                 String(success.data.hasPendingFollowRequestToYou),
             ].joined(separator: "|")
+        }
+    }
+
+    private static func followButtonStateSignature(_ state: UiState<FollowButtonState>) -> String {
+        switch onEnum(of: state) {
+        case .error:
+            "error"
+        case .loading:
+            "loading"
+        case .success(let success):
+            "success|\(success.data.id)"
         }
     }
 
@@ -650,8 +666,9 @@ extension ProfileScreen {
 struct ProfileHeader: View {
     let user: UiState<UiProfile>
     let relation: UiState<UiRelation>
+    let followButtonState: UiState<FollowButtonState>
     let isMe: UiState<KotlinBoolean>
-    let onFollowClick: (UiProfile, UiRelation) -> Void
+    let onFollowClick: (UiProfile, FollowButtonState) -> Void
     let onFollowingClick: (MicroBlogKey) -> Void
     let onFansClick: (MicroBlogKey) -> Void
     var body: some View {
@@ -662,6 +679,7 @@ struct ProfileHeader: View {
             CommonProfileHeader(
                 user: createSampleUser(),
                 relation: relation,
+                followButtonState: followButtonState,
                 isMe: isMe,
                 onFollowClick: { _ in },
                 onFollowingClick: {},
@@ -672,8 +690,9 @@ struct ProfileHeader: View {
             ProfileHeaderSuccess(
                 user: data.data,
                 relation: relation,
+                followButtonState: followButtonState,
                 isMe: isMe,
-                onFollowClick: { relation in onFollowClick(data.data, relation) },
+                onFollowClick: { followButtonState in onFollowClick(data.data, followButtonState) },
                 onFollowingClick: onFollowingClick,
                 onFansClick: onFansClick
             )
@@ -684,14 +703,16 @@ struct ProfileHeader: View {
 struct ProfileHeaderSuccess: View {
     let user: UiProfile
     let relation: UiState<UiRelation>
+    let followButtonState: UiState<FollowButtonState>
     let isMe: UiState<KotlinBoolean>
-    let onFollowClick: (UiRelation) -> Void
+    let onFollowClick: (FollowButtonState) -> Void
     let onFollowingClick: (MicroBlogKey) -> Void
     let onFansClick: (MicroBlogKey) -> Void
     var body: some View {
         CommonProfileHeader(
             user: user,
             relation: relation,
+            followButtonState: followButtonState,
             isMe: isMe,
             onFollowClick: onFollowClick,
             onFollowingClick: {

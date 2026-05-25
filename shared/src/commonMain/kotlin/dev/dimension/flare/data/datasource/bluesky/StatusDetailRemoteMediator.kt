@@ -92,7 +92,7 @@ internal class StatusDetailRemoteMediator(
     }
 }
 
-private fun List<GetPostThreadV2ThreadItem>.renderThread(accountKey: MicroBlogKey): List<UiTimelineV2> {
+internal fun List<GetPostThreadV2ThreadItem>.renderThread(accountKey: MicroBlogKey): List<UiTimelineV2> {
     val renderedPosts = mutableListOf<Pair<Long, UiTimelineV2.Post>>()
     val stack = mutableListOf<Pair<Long, UiTimelineV2.Post>>()
 
@@ -128,10 +128,21 @@ private fun List<GetPostThreadV2ThreadItem>.renderThread(accountKey: MicroBlogKe
             .flatMap { it.collectParentKeys() }
             .toSet()
 
-    return visiblePosts
-        .filterNot { (depth, post) ->
-            depth > 0L && post.statusKey in descendantParentKeys
-        }.map { it.second }
+    val topLevelPosts =
+        visiblePosts
+            .filterNot { (depth, post) ->
+                depth > 0L && post.statusKey in descendantParentKeys
+            }.map { it.second }
+    val topLevelPostKeys = topLevelPosts.map { it.statusKey }.toSet()
+
+    return topLevelPosts.map { post ->
+        post.copy(
+            parents =
+                post.parents
+                    .filterNot { it.statusKey in topLevelPostKeys }
+                    .toPersistentList(),
+        )
+    }
 }
 
 private fun UiTimelineV2.Post.collectParentKeys(): Set<MicroBlogKey> =

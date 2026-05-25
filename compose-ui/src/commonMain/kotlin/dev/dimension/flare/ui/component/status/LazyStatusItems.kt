@@ -104,47 +104,7 @@ public fun LazyStaggeredGridScope.status(
                     )
                 }
             }
-            appendState
-                .onError {
-                    item(
-                        span = StaggeredGridItemSpan.FullLine,
-                    ) {
-                        OnError(
-//                            modifier = Modifier.animateItem(),
-                            error = it,
-                            onRetry = { retry() },
-                        )
-                    }
-                }.onLoading {
-                    item(
-                        span = StaggeredGridItemSpan.FullLine,
-                    ) {
-                        PlatformLinearProgressIndicator(
-                            modifier =
-                                Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = screenHorizontalPadding),
-                        )
-                    }
-                }.onEndOfList {
-                    item(
-                        span = StaggeredGridItemSpan.FullLine,
-                    ) {
-                        Column(
-                            modifier =
-                                Modifier
-//                                    .animateItem()
-                                    .fillMaxWidth(),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                        ) {
-                            Spacer(modifier = Modifier.height(8.dp))
-                            PlatformText(
-                                text = stringResource(Res.string.status_loadmore_end),
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                        }
-                    }
-                }
+            appendStateUI(this@onSuccess)
         }
         onError {
             item(
@@ -189,6 +149,51 @@ public fun LazyStaggeredGridScope.status(
             }
         }
     }
+
+@HiddenFromObjC
+public fun <T : Any> LazyStaggeredGridScope.appendStateUI(success: PagingState.Success<T>) {
+    success.appendState
+        .onError {
+            item(
+                span = StaggeredGridItemSpan.FullLine,
+            ) {
+                OnError(
+//                            modifier = Modifier.animateItem(),
+                    error = it,
+                    onRetry = { success.retry() },
+                )
+            }
+        }.onLoading {
+            item(
+                span = StaggeredGridItemSpan.FullLine,
+            ) {
+                PlatformLinearProgressIndicator(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = screenHorizontalPadding, vertical = 8.dp),
+                )
+            }
+        }.onEndOfList {
+            item(
+                span = StaggeredGridItemSpan.FullLine,
+            ) {
+                Column(
+                    modifier =
+                        Modifier
+//                                    .animateItem()
+                            .fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    PlatformText(
+                        text = stringResource(Res.string.status_loadmore_end),
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+            }
+        }
+}
 
 @Composable
 public fun ListEmptyView(modifier: Modifier = Modifier) {

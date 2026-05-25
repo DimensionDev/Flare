@@ -1,16 +1,20 @@
 {
   "fill" : {
-    "automatic-gradient" : "extended-srgb:0.00000,0.78431,0.70196,1.00000"
+    "automatic-gradient" : "extended-srgb:0.00000,0.75294,0.90980,1.00000"
   },
   "groups" : [
     {
       "blur-material" : 0.5,
       "layers" : [
         {
+          "blend-mode" : "normal",
+          "fill" : {
+            "solid" : "extended-gray:1.00000,1.00000"
+          },
           "glass" : true,
           "hidden-specializations" : [
             {
-              "value" : true
+              "value" : false
             },
             {
               "appearance" : "dark",
@@ -30,10 +34,10 @@
         {
           "blend-mode" : "normal",
           "fill" : "automatic",
-          "glass" : true,
+          "glass" : false,
           "hidden-specializations" : [
             {
-              "value" : false
+              "value" : true
             },
             {
               "appearance" : "dark",

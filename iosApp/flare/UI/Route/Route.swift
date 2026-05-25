@@ -80,6 +80,8 @@ enum Route: Hashable, Identifiable {
             AppearanceDisplayScreen()
         case .appearanceMedia:
             AppearanceMediaScreen()
+        case .appIconSettings:
+            AppIconSettingsScreen()
         case .about:
             AboutScreen()
         case .localHostory:
@@ -190,6 +192,7 @@ enum Route: Hashable, Identifiable {
     case appearanceLayout
     case appearanceDisplay
     case appearanceMedia
+    case appIconSettings
     case settings
     case about
     case notification

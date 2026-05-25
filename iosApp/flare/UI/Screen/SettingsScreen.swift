@@ -46,6 +46,14 @@ struct SettingsScreen: View {
                         Image(.faPhotoFilm)
                     }
                 }
+                NavigationLink(value: Route.appIconSettings) {
+                    Label {
+                        Text("App Icon")
+                        Text("Choose the icon shown on your Home Screen")
+                    } icon: {
+                        Image("fa-palette")
+                    }
+                }
                 if let url = URL(string: UIApplication.openSettingsURLString) {
                     Button {
                         UIApplication.shared.open(url)

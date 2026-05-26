@@ -22,12 +22,12 @@ internal object Formatter : KoinComponent {
     internal fun Instant.absolute(): String = platformFormatter.formatAbsoluteInstant(this)
 }
 
-internal interface PlatformFormatter {
-    fun formatNumber(number: Long): String
+public interface PlatformFormatter {
+    public fun formatNumber(number: Long): String
 
-    fun formatRelativeInstant(instant: Instant): String
+    public fun formatRelativeInstant(instant: Instant): String
 
-    fun formatFullInstant(instant: Instant): String
+    public fun formatFullInstant(instant: Instant): String
 
-    fun formatAbsoluteInstant(instant: Instant): String
+    public fun formatAbsoluteInstant(instant: Instant): String
 }

@@ -6,11 +6,11 @@ import java.nio.file.Files
 
 public actual class FileItem(
     private val file: File,
-    internal actual val name: String? = file.name,
-    internal actual val type: FileType = resolveType(file.name),
-    internal actual val mimeType: String? = resolveMimeType(file),
+    public actual val name: String? = file.name,
+    public actual val type: FileType = resolveType(file.name),
+    public actual val mimeType: String? = resolveMimeType(file),
 ) {
-    internal actual suspend fun readBytes(): ByteArray = file.readBytes()
+    public actual suspend fun readBytes(): ByteArray = file.readBytes()
 
     private companion object {
         fun resolveType(fileName: String): FileType {

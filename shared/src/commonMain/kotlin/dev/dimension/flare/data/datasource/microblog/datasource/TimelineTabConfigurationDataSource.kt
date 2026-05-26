@@ -4,8 +4,8 @@ import dev.dimension.flare.data.model.tab.ShortcutSpec
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import kotlinx.collections.immutable.ImmutableList
 
-internal interface TimelineTabConfigurationDataSource {
-    val defaultTabs: ImmutableList<TimelineTabItemV2>
-    val builtInTimelineTabs: ImmutableList<TimelineTabItemV2>
-    val shortcuts: ImmutableList<ShortcutSpec>
+public interface TimelineTabConfigurationDataSource {
+    public val defaultTabs: ImmutableList<TimelineTabItemV2>
+    public val builtInTimelineTabs: ImmutableList<TimelineTabItemV2>
+    public val shortcuts: ImmutableList<ShortcutSpec>
 }

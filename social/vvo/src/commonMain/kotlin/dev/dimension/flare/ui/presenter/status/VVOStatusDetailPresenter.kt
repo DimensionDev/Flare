@@ -1,0 +1,131 @@
+package dev.dimension.flare.ui.presenter.status
+
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.paging.Pager
+import androidx.paging.cachedIn
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.map
+import dev.dimension.flare.common.PagingState
+import dev.dimension.flare.common.toPagingState
+import dev.dimension.flare.data.datasource.microblog.paging.toPagingSource
+import dev.dimension.flare.data.datasource.microblog.pagingConfig
+import dev.dimension.flare.data.datasource.vvo.VVODataSource
+import dev.dimension.flare.data.repository.AccountService
+import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.model.UiState
+import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.flattenUiState
+import dev.dimension.flare.ui.model.map
+import dev.dimension.flare.ui.model.mapper.renderVVOText
+import dev.dimension.flare.ui.presenter.PresenterBase
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
+
+@OptIn(ExperimentalCoroutinesApi::class)
+public class VVOStatusDetailPresenter(
+    private val accountType: AccountType,
+    private val statusKey: MicroBlogKey,
+) : PresenterBase<VVOStatusDetailState>(),
+    KoinComponent {
+    private val accountService: AccountService by inject()
+    private val serviceFlow by lazy {
+        accountService.accountServiceFlow(accountType)
+    }
+    private val rawStatusFlow by lazy {
+        serviceFlow.flatMapLatest { service ->
+            require(service is VVODataSource)
+            service.status(statusKey)
+        }
+    }
+    private val extendedTextFlow by lazy {
+        serviceFlow.flatMapLatest { service ->
+            require(service is VVODataSource)
+            service.statusExtendedText(statusKey)
+        }
+    }
+    private val statusFlow by lazy {
+        combine(
+            rawStatusFlow,
+            extendedTextFlow,
+            serviceFlow,
+        ) { status, extendedText, service ->
+            status.map { item ->
+                if (extendedText is UiState.Success && item is UiTimelineV2.Post) {
+                    require(service is VVODataSource)
+                    item.copy(
+                        content =
+                            renderVVOText(
+                                extendedText.data,
+                                service.accountKey,
+                            ),
+                    )
+                } else {
+                    item
+                }
+            }
+        }
+    }
+    private val repostFlow by lazy {
+        serviceFlow.flatMapLatest { service ->
+            require(service is VVODataSource)
+            Pager(config = pagingConfig) {
+                service.statusRepost(statusKey = statusKey).toPagingSource()
+            }.flow.map { data ->
+                data.map { item ->
+                    if (item is UiTimelineV2.Post) {
+                        item.copy(
+                            quote = persistentListOf(),
+                        )
+                    } else {
+                        item
+                    }
+                }
+            }
+        }
+    }
+    private val commentFlow by lazy {
+        serviceFlow.flatMapLatest { service ->
+            require(service is VVODataSource)
+            Pager(config = pagingConfig) {
+                service.statusComment(statusKey = statusKey).toPagingSource()
+            }.flow
+        }
+    }
+
+    @Composable
+    override fun body(): VVOStatusDetailState {
+        val scope = rememberCoroutineScope()
+        val status by statusFlow.flattenUiState()
+        remember { LogStatusHistoryPresenter(accountType = accountType, statusKey = statusKey) }.body()
+        val repost =
+            remember {
+                repostFlow.cachedIn(scope)
+            }.collectAsLazyPagingItems().toPagingState()
+        val comment =
+            remember {
+                commentFlow.cachedIn(scope)
+            }.collectAsLazyPagingItems().toPagingState()
+        return object : VVOStatusDetailState {
+            override val status = status
+            override val comment = comment
+            override val repost = repost
+        }
+    }
+}
+
+@Immutable
+public interface VVOStatusDetailState {
+    public val status: UiState<UiTimelineV2>
+    public val comment: PagingState<UiTimelineV2>
+    public val repost: PagingState<UiTimelineV2>
+}

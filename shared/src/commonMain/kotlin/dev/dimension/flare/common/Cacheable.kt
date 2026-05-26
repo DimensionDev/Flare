@@ -23,7 +23,7 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.withContext
 
-internal class Cacheable<T>(
+public class Cacheable<T>(
     fetchSource: suspend () -> Unit,
     cacheSource: () -> Flow<T>,
 ) : CacheData<T>(
@@ -32,7 +32,7 @@ internal class Cacheable<T>(
     )
 
 @Suppress("UNCHECKED_CAST")
-internal class MemCacheable<T>(
+public class MemCacheable<T>(
     private val key: String,
     fetchSource: suspend () -> T,
 ) : CacheData<T>(
@@ -43,17 +43,17 @@ internal class MemCacheable<T>(
             subscribe(key)
         },
     ) {
-    companion object {
+    public companion object {
         private val caches = mutableMapOf<String, MutableStateFlow<Any?>>()
 
-        fun <T> update(
+        public fun <T> update(
             key: String,
             value: T,
         ) {
             caches[key]?.value = value
         }
 
-        fun <T> updateWith(
+        public fun <T> updateWith(
             key: String,
             update: (T) -> T,
         ) {
@@ -62,7 +62,7 @@ internal class MemCacheable<T>(
             }
         }
 
-        fun <T> subscribe(key: String): Flow<T> =
+        public fun <T> subscribe(key: String): Flow<T> =
             caches
                 .getOrPut(key) {
                     MutableStateFlow(null)
@@ -70,7 +70,7 @@ internal class MemCacheable<T>(
     }
 }
 
-internal sealed class CacheData<T>(
+public sealed class CacheData<T>(
     private val fetchSource: suspend () -> Unit,
     private val cacheSource: () -> Flow<T>,
 ) {
@@ -78,7 +78,7 @@ internal sealed class CacheData<T>(
     private val cacheFlow by lazy {
         cacheSource.invoke()
     }
-    val refreshState: Flow<LoadState> =
+    public val refreshState: Flow<LoadState> =
         refreshFlow
             .transform {
                 emit(LoadState.Loading)
@@ -94,7 +94,7 @@ internal sealed class CacheData<T>(
                 )
             }.catch { emit(LoadState.Error(it)) }
 
-    val data: Flow<CacheState<T>> =
+    public val data: Flow<CacheState<T>> =
         cacheFlow
             .map<T, CacheState<T>> {
                 CacheState.Success(it)
@@ -102,21 +102,21 @@ internal sealed class CacheData<T>(
                 emit(CacheState.Empty())
             }
 
-    fun refresh() {
+    public fun refresh() {
         refreshFlow.value++
     }
 }
 
-internal sealed class CacheState<T> {
-    class Empty<T> : CacheState<T>()
+public sealed class CacheState<T> {
+    public class Empty<T> : CacheState<T>()
 
-    data class Success<T>(
+    public data class Success<T>(
         val data: T,
     ) : CacheState<T>()
 }
 
 @Composable
-internal fun <T> CacheData<T>.collectAsState(): CacheableState<T> {
+public fun <T> CacheData<T>.collectAsState(): CacheableState<T> {
     val state =
         remember(this) {
             CacheableState(this)
@@ -133,17 +133,17 @@ internal fun <T> CacheData<T>.collectAsState(): CacheableState<T> {
     return state
 }
 
-internal class CacheableState<T>(
+public class CacheableState<T>(
     private val cacheData: CacheData<T>,
 ) {
-    fun refresh() {
+    public fun refresh() {
         cacheData.refresh()
     }
 
-    var refreshState: LoadState by mutableStateOf(LoadState.Loading)
+    public var refreshState: LoadState by mutableStateOf(LoadState.Loading)
         private set
 
-    var data: T? by mutableStateOf(null)
+    public var data: T? by mutableStateOf(null)
         private set
 
     internal suspend fun collectRefreshState() {
@@ -162,7 +162,7 @@ internal class CacheableState<T>(
 }
 
 @Composable
-internal fun <T : Any> UiState<CacheData<ImmutableList<T>>>.toPagingState(): PagingState<T> =
+public fun <T : Any> UiState<CacheData<ImmutableList<T>>>.toPagingState(): PagingState<T> =
     when (this) {
         is UiState.Loading -> PagingState.Loading()
         is UiState.Error -> PagingState.Error(throwable, onRetry = {})

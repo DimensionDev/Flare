@@ -20,7 +20,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-internal class PostEventHandler(
+public class PostEventHandler(
     private val accountType: AccountType,
     private val handler: Handler,
 ) : KoinComponent,
@@ -29,14 +29,14 @@ internal class PostEventHandler(
     private val database: CacheDatabase by inject()
     private val dbAccountType = accountType as DbAccountType
 
-    interface Handler {
-        suspend fun handle(
+    public interface Handler {
+        public suspend fun handle(
             event: PostEvent,
             updater: DatabaseUpdater,
         )
     }
 
-    fun handleEvent(event: PostEvent) {
+    public fun handleEvent(event: PostEvent) {
         coroutineScope.launch {
             val originalData =
                 database
@@ -107,7 +107,7 @@ internal class PostEventHandler(
         }
     }
 
-    override suspend fun deleteFromCache(postKey: MicroBlogKey) {
+    public override suspend fun deleteFromCache(postKey: MicroBlogKey) {
         database.connect {
             database.statusDao().delete(
                 statusKey = postKey,
@@ -120,7 +120,7 @@ internal class PostEventHandler(
         }
     }
 
-    override suspend fun updateCache(
+    public override suspend fun updateCache(
         postKey: MicroBlogKey,
         update: suspend (UiTimelineV2) -> UiTimelineV2,
     ) {
@@ -144,7 +144,7 @@ internal class PostEventHandler(
         }
     }
 
-    override suspend fun updateActionMenu(
+    public override suspend fun updateActionMenu(
         postKey: MicroBlogKey,
         newActionMenu: ActionMenu.Item,
     ) {

@@ -6,9 +6,9 @@ import java.io.File
 
 public actual class FileItem {
     private val source: Source
-    internal actual val name: String?
-    internal actual val type: FileType
-    internal actual val mimeType: String?
+    public actual val name: String?
+    public actual val type: FileType
+    public actual val mimeType: String?
 
     public constructor(
         context: Context,
@@ -32,7 +32,7 @@ public actual class FileItem {
         this.mimeType = mimeType
     }
 
-    internal actual suspend fun readBytes(): ByteArray = source.readBytes()
+    public actual suspend fun readBytes(): ByteArray = source.readBytes()
 
     internal sealed interface Source {
         suspend fun readBytes(): ByteArray

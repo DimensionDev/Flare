@@ -9,12 +9,14 @@ import dev.dimension.flare.data.network.ai.AiCompletionService
 import dev.dimension.flare.data.network.ai.OpenAIService
 import dev.dimension.flare.data.network.rss.Readability
 import dev.dimension.flare.data.repository.AccountRepository
+import dev.dimension.flare.data.repository.AccountService
 import dev.dimension.flare.data.repository.AccountTabSyncCoordinator
 import dev.dimension.flare.data.repository.ApplicationRepository
 import dev.dimension.flare.data.repository.DraftMediaStore
 import dev.dimension.flare.data.repository.DraftRepository
 import dev.dimension.flare.data.repository.DraftSendingRecoveryCoordinator
 import dev.dimension.flare.data.repository.LocalFilterRepository
+import dev.dimension.flare.data.repository.RepositoryAccountService
 import dev.dimension.flare.data.repository.SearchHistoryRepository
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.data.translation.OnlinePreTranslationService
@@ -34,6 +36,7 @@ internal fun commonModule(platformRegistry: PlatformRegistry) =
     module {
         single { platformRegistry }
         singleOf(::AccountRepository)
+        single<AccountService> { RepositoryAccountService(get()) }
         single(createdAtStart = true) { AccountTabSyncCoordinator(get(), get(), get(), get()) }
         singleOf(::provideAppDatabase)
         singleOf(::provideCacheDatabase)

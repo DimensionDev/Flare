@@ -19,7 +19,7 @@ internal class NotSupportRemoteLoader<T : Any> : RemoteLoader<T> {
     ): PagingResult<T> = PagingResult(endOfPaginationReached = true)
 }
 
-internal fun <T : Any> RemoteLoader<T>.toPagingSource() =
+public fun <T : Any> RemoteLoader<T>.toPagingSource(): PagingSource<String, T> =
     object : PagingSource<String, T>() {
         override suspend fun load(params: LoadParams<String>): LoadResult<String, T> {
             val request =

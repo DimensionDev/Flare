@@ -204,14 +204,14 @@ public inline val LoadState.isError: Boolean
 public inline val LoadState.isEndOfList: Boolean
     get() = this is LoadState.NotLoading && endOfPaginationReached
 
-internal fun <T : Any> UiState<LazyPagingItems<T>>.toPagingState(): PagingState<T> =
+public fun <T : Any> UiState<LazyPagingItems<T>>.toPagingState(): PagingState<T> =
     when (this) {
         is UiState.Loading -> PagingState.Loading()
         is UiState.Error -> PagingState.Error(throwable, {})
         is UiState.Success -> data.toPagingState()
     }
 
-internal fun <T : Any> LazyPagingItems<T>.toPagingState(): PagingState<T> {
+public fun <T : Any> LazyPagingItems<T>.toPagingState(): PagingState<T> {
     val snapshot = snapshot()
     if (itemCount > 0) {
         return PagingState.Success.PagingSuccess(

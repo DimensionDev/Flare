@@ -89,13 +89,6 @@ internal data class XQTCredential(
 
 @Immutable
 @Serializable
-@SerialName("VVoCredential")
-internal data class VVoCredential(
-    val chocolate: String,
-)
-
-@Immutable
-@Serializable
 internal sealed interface NostrSignerCredential {
     val stableId: String
 

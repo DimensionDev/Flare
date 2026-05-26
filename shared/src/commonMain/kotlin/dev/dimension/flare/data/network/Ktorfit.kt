@@ -1,5 +1,6 @@
 package dev.dimension.flare.data.network
 
+import de.jensklingenberg.ktorfit.Ktorfit
 import de.jensklingenberg.ktorfit.converter.CallConverterFactory
 import de.jensklingenberg.ktorfit.converter.FlowConverterFactory
 import de.jensklingenberg.ktorfit.converter.ResponseConverterFactory
@@ -18,11 +19,11 @@ import kotlinx.serialization.json.Json
 import kotlin.experimental.ExperimentalObjCRefinement
 import kotlin.native.HiddenFromObjC
 
-internal fun ktorfit(
+public fun ktorfit(
     baseUrl: String,
     json: Json = JSON,
     config: HttpClientConfig<*>.() -> Unit = {},
-) = de.jensklingenberg.ktorfit.ktorfit {
+): Ktorfit = de.jensklingenberg.ktorfit.ktorfit {
     baseUrl(baseUrl)
     httpClient(
         ktorClient {

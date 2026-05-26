@@ -16,6 +16,7 @@ import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
@@ -24,9 +25,9 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-internal class PostHandler(
-    val accountType: AccountType,
-    val loader: PostLoader,
+public class PostHandler(
+    public val accountType: AccountType,
+    public val loader: PostLoader,
 ) : KoinComponent {
     private val database: CacheDatabase by inject()
     private val coroutineScope: CoroutineScope by inject()
@@ -37,7 +38,7 @@ internal class PostHandler(
         TranslationSettingsSupport.displayOptionsFlow(appDataStore)
     }
 
-    fun post(postKey: MicroBlogKey): Cacheable<UiTimelineV2> {
+    public fun post(postKey: MicroBlogKey): Cacheable<UiTimelineV2> {
         val pagingKey = "post_only_$postKey"
         return Cacheable(
             fetchSource = {
@@ -80,7 +81,7 @@ internal class PostHandler(
         )
     }
 
-    fun delete(postKey: MicroBlogKey) {
+    public fun delete(postKey: MicroBlogKey): Job =
         coroutineScope.launch {
             tryRun {
                 loader.deleteStatus(postKey)
@@ -99,5 +100,4 @@ internal class PostHandler(
                 }
             }
         }
-    }
 }

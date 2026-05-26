@@ -17,7 +17,7 @@ import kotlinx.serialization.Transient
 
 @Serializable
 @Immutable
-public data class UiProfile internal constructor(
+public data class UiProfile public constructor(
     val key: MicroBlogKey,
     val handle: UiHandle,
     val avatar: String,
@@ -26,7 +26,7 @@ public data class UiProfile internal constructor(
     private val clickEvent: ClickEvent,
     public val banner: String?,
     public val description: UiRichText?,
-    internal val sourceLanguages: SerializableImmutableList<String> = persistentListOf(),
+    public val sourceLanguages: SerializableImmutableList<String> = persistentListOf(),
     @Transient
     public val translationDisplayState: TranslationDisplayState = TranslationDisplayState.Hidden,
     public val matrices: Matrices,
@@ -84,7 +84,7 @@ public data class UiProfile internal constructor(
 
     @Serializable
     @Immutable
-    public data class Matrices internal constructor(
+    public data class Matrices public constructor(
         val fansCount: Long,
         val followsCount: Long,
         val statusesCount: Long,
@@ -116,12 +116,12 @@ public data class UiProfile internal constructor(
     @Serializable
     public sealed interface BottomContent {
         @Serializable
-        public data class Fields internal constructor(
+        public data class Fields public constructor(
             val fields: SerializableImmutableMap<String, UiRichText>,
         ) : BottomContent
 
         @Serializable
-        public data class Iconify internal constructor(
+        public data class Iconify public constructor(
             val items: SerializableImmutableMap<Icon, UiRichText>,
         ) : BottomContent {
             public enum class Icon {

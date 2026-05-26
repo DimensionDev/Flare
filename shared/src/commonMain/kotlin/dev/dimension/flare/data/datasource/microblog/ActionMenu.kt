@@ -18,7 +18,7 @@ import kotlinx.serialization.Serializable
 public sealed class ActionMenu {
     @Immutable
     @Serializable
-    public data class Group internal constructor(
+    public data class Group public constructor(
         val displayItem: Item,
         val actions: SerializableImmutableList<ActionMenu>,
     ) : ActionMenu()
@@ -36,8 +36,8 @@ public sealed class ActionMenu {
 
     @Immutable
     @Serializable
-    public data class Item internal constructor(
-        internal val updateKey: String = "",
+    public data class Item public constructor(
+        public val updateKey: String = "",
         val icon: UiIcon? = null,
         val text: Text? = null,
         val count: UiNumber? = null,

@@ -34,6 +34,7 @@ kotlin {
             baseName = "KotlinSharedUI"
             isStatic = true
             export(projects.shared)
+            export(projects.social.vvo)
         }
     }
 
@@ -41,6 +42,7 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 implementation(projects.shared)
+                implementation(projects.social.vvo)
                 implementation(compose("org.jetbrains.compose.ui:ui"))
                 implementation(compose("org.jetbrains.compose.runtime:runtime"))
                 implementation(compose("org.jetbrains.compose.foundation:foundation"))
@@ -96,6 +98,7 @@ kotlin {
         val iosMain by getting {
             dependencies {
                 api(projects.shared)
+                api(projects.social.vvo)
                 implementation(libs.cupertino)
                 api(compose("org.jetbrains.compose.ui:ui-util"))
                 implementation(libs.lifecycle.viewmodel.compose)

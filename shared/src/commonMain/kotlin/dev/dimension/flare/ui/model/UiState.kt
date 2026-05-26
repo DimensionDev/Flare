@@ -192,7 +192,7 @@ public fun <T : Any> Flow<UiState<T>>.flattenUiState(initial: UiState<T> = UiSta
         }
     }
 
-internal fun <T : Any> CacheableState<T>.toUi(): UiState<T> =
+public fun <T : Any> CacheableState<T>.toUi(): UiState<T> =
     data?.let {
         UiState.Success(it)
     } ?: run {
@@ -203,7 +203,7 @@ internal fun <T : Any> CacheableState<T>.toUi(): UiState<T> =
         }
     }
 
-internal fun <T : Any> CacheData<T>.toUi(): Flow<UiState<T>> =
+public fun <T : Any> CacheData<T>.toUi(): Flow<UiState<T>> =
     combine(data, refreshState) { data, refresh ->
         if (data is CacheState.Success) {
             UiState.Success(data.data)

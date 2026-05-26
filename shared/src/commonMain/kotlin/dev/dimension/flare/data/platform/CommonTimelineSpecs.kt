@@ -15,8 +15,8 @@ import dev.dimension.flare.ui.presenter.home.DiscoverStatusTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.HomeTimelinePresenter
 import dev.dimension.flare.ui.presenter.list.ListTimelinePresenter
 
-internal object CommonTimelineSpecs {
-    val home =
+public object CommonTimelineSpecs {
+    public val home: TimelineSpec<TimelineSpec.AccountBasedData> =
         TimelineSpec(
             id = TimelineSpecIds.COMMON_HOME,
             title = UiStrings.Home,
@@ -30,7 +30,7 @@ internal object CommonTimelineSpecs {
             },
         )
 
-    val discover =
+    public val discover: TimelineSpec<TimelineSpec.AccountBasedData> =
         TimelineSpec(
             id = TimelineSpecIds.COMMON_DISCOVER,
             title = UiStrings.Discover,
@@ -44,7 +44,7 @@ internal object CommonTimelineSpecs {
             },
         )
 
-    val list =
+    public val list: TimelineSpec<TimelineSpec.AccountResourceData> =
         TimelineSpec(
             id = TimelineSpecIds.COMMON_LIST,
             title = UiStrings.List,

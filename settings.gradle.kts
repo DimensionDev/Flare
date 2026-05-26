@@ -24,6 +24,7 @@ dependencyResolutionManagement {
 rootProject.name = "Flare"
 include(":app")
 include(":shared")
+include(":social:vvo")
 include(":compose-ui")
 include(":desktopApp")
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")

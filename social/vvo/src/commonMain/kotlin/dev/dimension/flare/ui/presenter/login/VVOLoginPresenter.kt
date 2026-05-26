@@ -9,7 +9,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import dev.dimension.flare.data.network.vvo.VVOService
 import dev.dimension.flare.data.platform.VVoCredential
-import dev.dimension.flare.data.repository.AccountRepository
+import dev.dimension.flare.data.repository.AccountService
+import dev.dimension.flare.data.repository.addAccount
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.vvoHost
@@ -24,7 +25,7 @@ public class VVOLoginPresenter(
     private val toHome: () -> Unit,
 ) : PresenterBase<VVOLoginState>(),
     KoinComponent {
-    private val accountRepository: AccountRepository by inject()
+    private val accountService: AccountService by inject()
 
     @Composable
     override fun body(): VVOLoginState {
@@ -45,7 +46,7 @@ public class VVOLoginPresenter(
                     runCatching {
                         vvoLoginUseCase(
                             chocolate = chocolate,
-                            accountRepository = accountRepository,
+                            accountService = accountService,
                         )
                         toHome.invoke()
                     }.onFailure {
@@ -59,7 +60,7 @@ public class VVOLoginPresenter(
 
     private suspend fun vvoLoginUseCase(
         chocolate: String,
-        accountRepository: AccountRepository,
+        accountService: AccountService,
     ) {
         val service = VVOService(flowOf(chocolate))
         val config = service.config()
@@ -69,7 +70,7 @@ public class VVOLoginPresenter(
         requireNotNull(st) { "st is null" }
         val profile = service.profileInfo(uid, st)
         requireNotNull(profile.data) { "profile is null" }
-        accountRepository.addAccount(
+        accountService.addAccount(
             UiAccount(
                 accountKey =
                     MicroBlogKey(

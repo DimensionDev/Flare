@@ -198,7 +198,7 @@ public abstract class TimelinePresenter :
         timelineTabItemIdFlow.value = id
     }
 
-    internal abstract val loader: Flow<RemoteLoader<UiTimelineV2>>
+    public abstract val loader: Flow<RemoteLoader<UiTimelineV2>>
 }
 
 @Immutable

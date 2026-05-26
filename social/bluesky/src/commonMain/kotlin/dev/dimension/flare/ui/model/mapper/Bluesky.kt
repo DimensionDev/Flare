@@ -31,7 +31,6 @@ import chat.bsky.convo.DeletedMessageView
 import chat.bsky.convo.MessageView
 import dev.dimension.flare.common.SerializableImmutableList
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
-import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.data.datasource.microblog.userActionsMenu
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -970,113 +969,6 @@ internal fun PostView.render(accountKey: MicroBlogKey): UiTimelineV2.Post {
             ),
     )
 }
-
-internal fun ActionMenu.Companion.blueskyReblog(
-    accountKey: MicroBlogKey,
-    postKey: MicroBlogKey,
-    count: Long,
-    cid: String,
-    uri: String,
-    repostUri: String?,
-): ActionMenu.Item =
-    ActionMenu.Item(
-        updateKey = "bluesky_reblog_$postKey",
-        icon = if (repostUri != null) UiIcon.Unretweet else UiIcon.Retweet,
-        text =
-            ActionMenu.Item.Text.Localized(
-                if (repostUri != null) {
-                    ActionMenu.Item.Text.Localized.Type.Unretweet
-                } else {
-                    ActionMenu.Item.Text.Localized.Type.Retweet
-                },
-            ),
-        count = UiNumber(count),
-        color = if (repostUri != null) ActionMenu.Item.Color.PrimaryColor else null,
-        clickEvent =
-            ClickEvent.event(
-                accountKey,
-            ) { accountKey ->
-                PostEvent.Bluesky.Reblog(
-                    postKey = postKey,
-                    cid = cid,
-                    uri = uri,
-                    repostUri = repostUri,
-                    count = count,
-                    accountKey = accountKey,
-                )
-            },
-    )
-
-internal fun ActionMenu.Companion.blueskyLike(
-    accountKey: MicroBlogKey,
-    postKey: MicroBlogKey,
-    count: Long,
-    cid: String,
-    uri: String,
-    likedUri: String?,
-): ActionMenu.Item =
-    ActionMenu.Item(
-        updateKey = "bluesky_like_$postKey",
-        icon = if (likedUri != null) UiIcon.Unlike else UiIcon.Like,
-        text =
-            ActionMenu.Item.Text.Localized(
-                if (likedUri != null) {
-                    ActionMenu.Item.Text.Localized.Type.Unlike
-                } else {
-                    ActionMenu.Item.Text.Localized.Type.Like
-                },
-            ),
-        color = if (likedUri != null) ActionMenu.Item.Color.Red else null,
-        count = UiNumber(count), // like count is updated via websocket, so we don't update it here
-        clickEvent =
-            ClickEvent.event(
-                accountKey,
-            ) { accountKey ->
-                PostEvent.Bluesky.Like(
-                    postKey = postKey,
-                    cid = cid,
-                    uri = uri,
-                    likedUri = likedUri,
-                    count = count,
-                    accountKey = accountKey,
-                )
-            },
-    )
-
-internal fun ActionMenu.Companion.blueskyBookmark(
-    accountKey: MicroBlogKey,
-    postKey: MicroBlogKey,
-    uri: String,
-    cid: String,
-    count: Long,
-    bookmarked: Boolean,
-): ActionMenu.Item =
-    ActionMenu.Item(
-        updateKey = "bluesky_bookmark_$postKey",
-        icon = if (bookmarked) UiIcon.Unbookmark else UiIcon.Bookmark,
-        text =
-            ActionMenu.Item.Text.Localized(
-                if (bookmarked) {
-                    ActionMenu.Item.Text.Localized.Type.Unbookmark
-                } else {
-                    ActionMenu.Item.Text.Localized.Type.Bookmark
-                },
-            ),
-        count = UiNumber(count),
-        clickEvent =
-            ClickEvent.event(
-                accountKey,
-            ) { accountKey ->
-                PostEvent.Bluesky.Bookmark(
-                    postKey = postKey,
-                    uri = uri,
-                    cid = cid,
-                    bookmarked = bookmarked,
-                    accountKey = accountKey,
-                    count = count,
-                )
-            },
-    )
 
 internal fun chat.bsky.actor.ProfileViewBasic.render(accountKey: MicroBlogKey): UiProfile {
     val userKey =

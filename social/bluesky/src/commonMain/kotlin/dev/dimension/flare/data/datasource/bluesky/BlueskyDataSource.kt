@@ -26,7 +26,6 @@ import com.atproto.repo.DeleteRecordRequest
 import com.atproto.repo.StrongRef
 import dev.dimension.flare.common.BasePagingSource
 import dev.dimension.flare.common.FileType
-import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
@@ -131,7 +130,6 @@ internal class BlueskyDataSource(
     RelationDataSource,
     DirectMessageDataSource,
     PostEventHandler.Handler {
-    private val database: CacheDatabase by inject()
     private val coroutineScope: CoroutineScope by inject()
     private val imageCompressor: ImageCompressor by inject()
     private var cachedPdsService: BlueskyService? = null

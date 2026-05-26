@@ -160,7 +160,7 @@ public class ServiceSelectPresenter(
 public interface ServiceSelectState : NodeInfoState {
     public val nostrLoginState: NostrLoginState
     public val blueskyLoginState: BlueskyLoginState
-    public val blueskyOauthLoginState: BlueskyOAuthLoginPresenter.State
+    public val blueskyOauthLoginState: BlueskyOAuthLoginState
     public val mastodonLoginState: MastodonLoginState
     public val misskeyLoginState: MisskeyLoginState
     public val loading: Boolean

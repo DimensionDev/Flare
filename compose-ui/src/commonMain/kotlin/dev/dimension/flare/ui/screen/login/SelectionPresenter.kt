@@ -34,17 +34,16 @@ public class SelectionPresenter(
     @Composable
     override fun body(): State {
         val instanceInputState = rememberTextFieldState()
+        val toHome = {
+            instanceInputState.edit {
+                replace(0, instanceInputState.text.length, "")
+            }
+            onBack.invoke()
+        }
 
         val baseState: ServiceSelectState =
             remember {
-                ServiceSelectPresenter(
-                    toHome = {
-                        instanceInputState.edit {
-                            replace(0, instanceInputState.text.length, "")
-                        }
-                        onBack.invoke()
-                    },
-                )
+                ServiceSelectPresenter(toHome = toHome)
             }.body()
 
         LaunchedEffect(Unit) {

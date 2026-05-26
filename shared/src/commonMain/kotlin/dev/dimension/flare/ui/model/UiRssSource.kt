@@ -9,7 +9,6 @@ import dev.dimension.flare.model.vvoHostLong
 import dev.dimension.flare.model.vvoHostShort
 import dev.dimension.flare.ui.render.UiDateTime
 import io.ktor.http.Url
-import sh.christian.ozone.api.xrpc.BSKY_SOCIAL
 
 @Immutable
 public data class UiRssSource internal constructor(
@@ -36,7 +35,7 @@ public data class UiRssSource internal constructor(
                 } else {
                     Url("https://$url")
                 }
-            if (parsedUrl.host == BSKY_SOCIAL.host) {
+            if (parsedUrl.host == "bsky.social") {
                 return "https://web-cdn.bsky.app/static/apple-touch-icon.png"
             } else if (parsedUrl.host in listOf(vvo, vvoHostShort, vvoHost, vvoHostLong)) {
                 return "https://upload.wikimedia.org/wikipedia/en/thumb/6/6e/Sina_Weibo.svg/2560px-Sina_Weibo.svg.png"

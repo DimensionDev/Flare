@@ -9,7 +9,7 @@ import androidx.compose.runtime.setValue
 import dev.dimension.flare.data.network.bluesky.OAuthCodeChallengeMethodS256
 import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.data.platform.BlueskyCredential
-import dev.dimension.flare.data.repository.AccountRepository
+import dev.dimension.flare.data.repository.AccountService
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
@@ -30,9 +30,9 @@ private const val REDIRECT_URI = "https://flareapp.moe/callback"
 
 public class BlueskyOAuthLoginPresenter(
     private val toHome: () -> Unit,
-) : PresenterBase<BlueskyOAuthLoginPresenter.State>(),
+) : PresenterBase<BlueskyOAuthLoginState>(),
     KoinComponent {
-    private val accountRepository: AccountRepository by inject()
+    private val accountService: AccountService by inject()
     private var oauthApi: OAuthApi? = null
 
     private val oauthClient by lazy {
@@ -44,28 +44,12 @@ public class BlueskyOAuthLoginPresenter(
 
     private var request: OAuthAuthorizationRequest? = null
 
-    @androidx.compose.runtime.Immutable
-    public interface State {
-        public val loading: Boolean
-        public val error: String?
-
-        public fun login(
-            baseUrl: String,
-            userName: String,
-            launchUrl: (String) -> Unit,
-        )
-
-        public fun resume(url: String)
-
-        public fun clear()
-    }
-
     @Composable
-    override fun body(): State {
+    override fun body(): BlueskyOAuthLoginState {
         var loading by remember { mutableStateOf(false) }
         var error by remember { mutableStateOf<String?>(null) }
         val scope = rememberCoroutineScope()
-        return object : State {
+        return object : BlueskyOAuthLoginState {
             override val loading = loading
             override val error = error
 
@@ -170,12 +154,12 @@ public class BlueskyOAuthLoginPresenter(
         requireNotNull(token) {
             "Failed to obtain access token from $iss"
         }
-        val credential =
+        val credential: BlueskyCredential =
             BlueskyCredential.OAuthCredential(
                 baseUrl = iss,
                 oAuthToken = token,
             )
-        accountRepository.addAccount(
+        accountService.addAccount(
             account =
                 UiAccount(
                     accountKey =

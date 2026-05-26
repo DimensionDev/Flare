@@ -7,17 +7,17 @@ import dev.dimension.flare.ui.model.UiApplication
 import dev.dimension.flare.ui.model.UiApplication.Companion.toUi
 import kotlinx.coroutines.flow.firstOrNull
 
-internal class ApplicationRepository(
+public class ApplicationRepository internal constructor(
     private val database: AppDatabase,
 ) {
-    suspend fun findByHost(host: String): UiApplication? =
+    public suspend fun findByHost(host: String): UiApplication? =
         database
             .applicationDao()
             .get(host)
             .firstOrNull()
             ?.toUi()
 
-    suspend fun addApplication(
+    public suspend fun addApplication(
         host: String,
         credentialJson: String,
         platformType: PlatformType,
@@ -31,14 +31,14 @@ internal class ApplicationRepository(
         )
     }
 
-    suspend fun setPendingOAuth(
+    public suspend fun setPendingOAuth(
         host: String,
         pendingOAuth: Boolean,
     ) {
         database.applicationDao().updatePending(host, if (pendingOAuth) 1L else 0L)
     }
 
-    suspend fun getPendingOAuth(): UiApplication? =
+    public suspend fun getPendingOAuth(): UiApplication? =
         database
             .applicationDao()
             .getPending()
@@ -46,7 +46,7 @@ internal class ApplicationRepository(
             ?.firstOrNull()
             ?.toUi()
 
-    suspend fun clearPendingOAuth() {
+    public suspend fun clearPendingOAuth() {
         database.applicationDao().clearPending()
     }
 }

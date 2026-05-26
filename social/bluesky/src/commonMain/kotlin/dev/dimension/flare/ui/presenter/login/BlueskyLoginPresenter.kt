@@ -1,7 +1,6 @@
 package dev.dimension.flare.ui.presenter.login
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -11,7 +10,7 @@ import com.atproto.server.CreateSessionRequest
 import com.atproto.server.CreateSessionResponse
 import dev.dimension.flare.data.network.bluesky.BlueskyService
 import dev.dimension.flare.data.platform.BlueskyCredential
-import dev.dimension.flare.data.repository.AccountRepository
+import dev.dimension.flare.data.repository.AccountService
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
@@ -27,7 +26,7 @@ public class BlueskyLoginPresenter(
     private val toHome: () -> Unit,
 ) : PresenterBase<BlueskyLoginState>(),
     KoinComponent {
-    private val accountRepository: AccountRepository by inject()
+    private val accountService: AccountService by inject()
 
     @Composable
     override fun body(): BlueskyLoginState {
@@ -39,6 +38,15 @@ public class BlueskyLoginPresenter(
         return object : BlueskyLoginState {
             override val loading = loading
             override val error = error
+            override val errorMessage: String?
+                get() =
+                    error?.let {
+                        if (it is AtpException) {
+                            it.error?.message ?: it.message
+                        } else {
+                            it.message
+                        }
+                    }
             override val require2FA = require2FA
 
             override fun login(
@@ -56,7 +64,7 @@ public class BlueskyLoginPresenter(
                             username = username,
                             password = password,
                             authFactorToken = authFactorToken?.takeIf { it.isNotEmpty() && require2FA },
-                            accountRepository = accountRepository,
+                            accountService = accountService,
                         )
                         toHome.invoke()
                     }.onFailure {
@@ -83,7 +91,7 @@ public class BlueskyLoginPresenter(
         username: String,
         password: String,
         authFactorToken: String?,
-        accountRepository: AccountRepository,
+        accountService: AccountService,
     ) {
         val service = BlueskyService(baseUrl)
         val response =
@@ -124,7 +132,13 @@ public class BlueskyLoginPresenter(
                 }
             }
 
-        accountRepository.addAccount(
+        val credential: BlueskyCredential =
+            BlueskyCredential.Password(
+                baseUrl = baseUrl,
+                accessToken = response.accessJwt,
+                refreshToken = response.refreshJwt,
+            )
+        accountService.addAccount(
             account =
                 UiAccount(
                     accountKey =
@@ -134,29 +148,8 @@ public class BlueskyLoginPresenter(
                         ),
                     platformType = PlatformType.Bluesky,
                 ),
-            credential =
-                BlueskyCredential.Password(
-                    baseUrl = baseUrl,
-                    accessToken = response.accessJwt,
-                    refreshToken = response.refreshJwt,
-                ),
+            credential = credential,
             serializer = BlueskyCredential.serializer(),
         )
     }
-}
-
-@Immutable
-public interface BlueskyLoginState {
-    public val loading: Boolean
-    public val error: Throwable?
-    public val require2FA: Boolean
-
-    public fun login(
-        baseUrl: String,
-        username: String,
-        password: String,
-        authFactorToken: String? = null,
-    )
-
-    public fun clear()
 }

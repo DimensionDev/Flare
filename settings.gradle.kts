@@ -24,6 +24,7 @@ dependencyResolutionManagement {
 rootProject.name = "Flare"
 include(":app")
 include(":shared")
+include(":social:bluesky")
 include(":social:vvo")
 include(":social:xqt")
 include(":compose-ui")

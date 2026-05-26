@@ -13,13 +13,14 @@ import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.refreshSuspend
 import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.datasource.bluesky.BlueskyDataSource
-import dev.dimension.flare.data.repository.AccountRepository
-import dev.dimension.flare.data.repository.accountServiceProvider
+import dev.dimension.flare.data.repository.AccountService
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiList
+import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.PresenterBase
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -28,17 +29,23 @@ public class BlueskyFeedsPresenter(
     private val accountType: AccountType,
 ) : PresenterBase<BlueskyFeedsState>(),
     KoinComponent {
-    private val accountRepository: AccountRepository by inject()
+    private val accountService: AccountService by inject()
+
+    private val serviceFlow by lazy {
+        accountService.accountServiceFlow(accountType).map {
+            require(it is BlueskyDataSource)
+            it
+        }
+    }
 
     @Composable
     override fun body(): BlueskyFeedsState {
         val scope = rememberCoroutineScope()
         var query by remember { mutableStateOf<String?>(null) }
-        val serviceState = accountServiceProvider(accountType = accountType, repository = accountRepository)
+        val serviceState by serviceFlow.collectAsUiState()
         val myFeeds =
             serviceState
                 .map { service ->
-                    require(service is BlueskyDataSource)
                     val flow =
                         remember(service) {
                             service.feedHandler.data.cachedIn(scope)
@@ -48,7 +55,6 @@ public class BlueskyFeedsPresenter(
         val popularFeeds =
             serviceState
                 .map { service ->
-                    require(service is BlueskyDataSource)
                     remember(service, query) {
                         service.popularFeeds(query = query, scope = scope)
                     }.collectAsLazyPagingItems()
@@ -70,7 +76,6 @@ public class BlueskyFeedsPresenter(
             override fun subscribe(list: UiList.Feed) {
                 serviceState.onSuccess {
                     scope.launch {
-                        require(it is BlueskyDataSource)
                         it.subscribeFeed(list)
                     }
                 }
@@ -79,7 +84,6 @@ public class BlueskyFeedsPresenter(
             override fun unsubscribe(list: UiList.Feed) {
                 serviceState.onSuccess {
                     scope.launch {
-                        require(it is BlueskyDataSource)
                         it.unsubscribeFeed(list)
                     }
                 }

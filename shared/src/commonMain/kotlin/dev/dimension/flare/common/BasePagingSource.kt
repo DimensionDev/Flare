@@ -6,7 +6,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
 
-internal abstract class BasePagingSource<Key : Any, Value : Any> : PagingSource<Key, Value>() {
+public abstract class BasePagingSource<Key : Any, Value : Any> : PagingSource<Key, Value>() {
     override suspend fun load(params: LoadParams<Key>): LoadResult<Key, Value> =
         withContext(Dispatchers.IO) {
             try {
@@ -18,7 +18,7 @@ internal abstract class BasePagingSource<Key : Any, Value : Any> : PagingSource<
             }
         }
 
-    abstract suspend fun doLoad(params: LoadParams<Key>): LoadResult<Key, Value>
+    public abstract suspend fun doLoad(params: LoadParams<Key>): LoadResult<Key, Value>
 
     protected open fun onError(e: Throwable) {
     }

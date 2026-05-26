@@ -103,7 +103,6 @@ import io.github.alexzhirkevich.qrose.rememberQrCodePainter
 import kotlinx.collections.immutable.persistentListOf
 import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.stringResource
-import sh.christian.ozone.api.response.AtpException
 import kotlin.native.HiddenFromObjC
 
 @HiddenFromObjC
@@ -392,16 +391,10 @@ public fun ServiceSelectionScreenContent(
                                             )
                                         }
                                     } else {
-                                        state.blueskyLoginState.error?.let {
-                                            if (it is AtpException) {
-                                                PlatformText(
-                                                    text = it.error?.message ?: it.message.toString(),
-                                                )
-                                            } else {
-                                                PlatformText(
-                                                    text = it.message ?: "Unknown error",
-                                                )
-                                            }
+                                        state.blueskyLoginState.errorMessage?.let {
+                                            PlatformText(
+                                                text = it,
+                                            )
                                         }
                                     }
                                     PlatformFilledTonalButton(

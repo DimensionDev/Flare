@@ -5,11 +5,11 @@ import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.ui.model.UiStrings
 import kotlinx.coroutines.flow.Flow
 
-internal interface PinnableTimelineTabDataSource {
-    val pinnableTimelineTabs: List<PinnableTimelineTabSection>
+public interface PinnableTimelineTabDataSource {
+    public val pinnableTimelineTabs: List<PinnableTimelineTabSection>
 }
 
-internal data class PinnableTimelineTabSection(
+public data class PinnableTimelineTabSection(
     val title: UiStrings,
     val data: Flow<PagingData<TimelineTabItemV2>>,
 )

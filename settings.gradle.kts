@@ -25,6 +25,7 @@ rootProject.name = "Flare"
 include(":app")
 include(":shared")
 include(":social:vvo")
+include(":social:xqt")
 include(":compose-ui")
 include(":desktopApp")
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")

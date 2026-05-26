@@ -6,9 +6,9 @@ import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiTimelineV2
 
-internal interface ListDataSource {
-    fun listTimeline(listId: String): RemoteLoader<UiTimelineV2>
+public interface ListDataSource {
+    public fun listTimeline(listId: String): RemoteLoader<UiTimelineV2>
 
-    val listHandler: ListHandler<UiList.List>
-    val listMemberHandler: ListMemberHandler
+    public val listHandler: ListHandler<UiList.List>
+    public val listMemberHandler: ListMemberHandler
 }

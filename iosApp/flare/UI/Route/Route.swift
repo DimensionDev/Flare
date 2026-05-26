@@ -364,7 +364,7 @@ enum Route: Hashable, Identifiable {
         case .timeline(let data):
             switch onEnum(of: data) {
             case .xQTDeviceFollow(let data):
-                if let tabItem = TimelineTabItemV2Helpers.shared.xqtDeviceFollow(accountType: data.accountType) {
+                if let tabItem = XQTTimelineTabItemV2Helpers.shared.xqtDeviceFollow(accountType: data.accountType) {
                     return .timeline(tabItem)
                 } else {
                     return nil

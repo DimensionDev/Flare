@@ -35,6 +35,7 @@ kotlin {
             isStatic = true
             export(projects.shared)
             export(projects.social.vvo)
+            export(projects.social.xqt)
         }
     }
 
@@ -43,6 +44,7 @@ kotlin {
             dependencies {
                 implementation(projects.shared)
                 implementation(projects.social.vvo)
+                implementation(projects.social.xqt)
                 implementation(compose("org.jetbrains.compose.ui:ui"))
                 implementation(compose("org.jetbrains.compose.runtime:runtime"))
                 implementation(compose("org.jetbrains.compose.foundation:foundation"))
@@ -99,6 +101,7 @@ kotlin {
             dependencies {
                 api(projects.shared)
                 api(projects.social.vvo)
+                api(projects.social.xqt)
                 implementation(libs.cupertino)
                 api(compose("org.jetbrains.compose.ui:ui-util"))
                 implementation(libs.lifecycle.viewmodel.compose)

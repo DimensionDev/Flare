@@ -82,13 +82,6 @@ internal sealed interface BlueskyCredential {
 
 @Immutable
 @Serializable
-@SerialName("XQTCredential")
-internal data class XQTCredential(
-    val chocolate: String,
-)
-
-@Immutable
-@Serializable
 internal sealed interface NostrSignerCredential {
     val stableId: String
 

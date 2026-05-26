@@ -116,7 +116,7 @@ public sealed class ActionMenu {
     }
 }
 
-internal fun userActionsMenu(
+public fun userActionsMenu(
     accountKey: MicroBlogKey?,
     userKey: MicroBlogKey,
     handle: String,

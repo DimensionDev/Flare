@@ -340,7 +340,7 @@ public sealed class UiTimelineV2 {
 
     @Serializable
     @Immutable
-    public data class User internal constructor(
+    public data class User public constructor(
         val message: Message? = null,
         val value: UiProfile,
         override val createdAt: UiDateTime,

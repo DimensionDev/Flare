@@ -5,11 +5,11 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import dev.dimension.flare.data.datasource.xqt.XQTDataSource
-import dev.dimension.flare.data.repository.AccountRepository
-import dev.dimension.flare.data.repository.accountServiceProvider
+import dev.dimension.flare.data.repository.AccountService
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTwitterArticle
+import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.mapper.renderArticle
 import dev.dimension.flare.ui.presenter.PresenterBase
 import org.koin.core.component.KoinComponent
@@ -21,7 +21,10 @@ public class TwitterArticlePresenter(
     private val articleId: String? = null,
 ) : PresenterBase<TwitterArticlePresenter.State>(),
     KoinComponent {
-    private val accountRepository: AccountRepository by inject()
+    private val accountService: AccountService by inject()
+    private val serviceFlow by lazy {
+        accountService.accountServiceFlow(accountType)
+    }
 
     @Immutable
     public interface State {
@@ -30,7 +33,7 @@ public class TwitterArticlePresenter(
 
     @Composable
     override fun body(): State {
-        val serviceState = accountServiceProvider(accountType = accountType, repository = accountRepository)
+        val serviceState by serviceFlow.collectAsUiState()
         val data by produceState<UiState<UiTwitterArticle>>(
             initialValue = UiState.Loading(),
             serviceState,
@@ -38,17 +41,17 @@ public class TwitterArticlePresenter(
             articleId,
         ) {
             value =
-                when (serviceState) {
+                when (val state = serviceState) {
                     is UiState.Loading -> {
                         UiState.Loading()
                     }
 
                     is UiState.Error -> {
-                        UiState.Error(serviceState.throwable)
+                        UiState.Error(state.throwable)
                     }
 
                     is UiState.Success -> {
-                        val service = serviceState.data as? XQTDataSource
+                        val service = state.data as? XQTDataSource
                         if (service == null) {
                             UiState.Error(IllegalStateException("Twitter article requires an XQT account"))
                         } else {

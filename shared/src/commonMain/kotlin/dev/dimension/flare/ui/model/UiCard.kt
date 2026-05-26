@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 @Immutable
-public data class UiCard internal constructor(
+public data class UiCard public constructor(
     val title: String,
     val description: String?,
     val media: UiMedia?,

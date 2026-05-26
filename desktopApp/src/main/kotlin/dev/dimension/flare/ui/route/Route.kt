@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.route
 import androidx.navigation3.runtime.NavKey
 import dev.dimension.flare.data.model.tab.SourceTimelineTabItemV2
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
+import dev.dimension.flare.data.model.tab.xqtDeviceFollow
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiRssSource

@@ -29,7 +29,7 @@ private val jsonWithEncodeDefault =
 public val JSON: Json get() = json
 public val JSON_WITH_ENCODE_DEFAULT: Json get() = jsonWithEncodeDefault
 
-internal inline fun <reified T> T.encodeJson(): String = JSON.encodeToString(this)
+public inline fun <reified T> T.encodeJson(): String = JSON.encodeToString(this)
 
 @OptIn(ExperimentalObjCRefinement::class)
 @HiddenFromObjC
@@ -45,7 +45,7 @@ internal val JsonElement.jsonObjectOrNull: JsonObject?
     get() = if (this is JsonObject) this else null
 
 @OptIn(ExperimentalSerializationApi::class)
-internal class SafePolymorphicSerializer<T : Any>(
+public class SafePolymorphicSerializer<T : Any>(
     private val baseSerializer: KSerializer<T>,
     private val discriminator: String,
 ) : KSerializer<T?> {

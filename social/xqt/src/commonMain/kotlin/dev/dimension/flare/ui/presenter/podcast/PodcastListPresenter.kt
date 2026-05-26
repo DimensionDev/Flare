@@ -3,13 +3,14 @@ package dev.dimension.flare.ui.presenter.podcast
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import dev.dimension.flare.data.datasource.xqt.XQTDataSource
-import dev.dimension.flare.data.repository.AccountRepository
-import dev.dimension.flare.data.repository.accountServiceProvider
+import dev.dimension.flare.data.repository.AccountService
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiPodcast
 import dev.dimension.flare.ui.model.UiState
+import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.collections.immutable.ImmutableList
@@ -21,7 +22,10 @@ public class PodcastListPresenter(
     private val accountType: AccountType,
 ) : PresenterBase<PodcastListPresenter.State>(),
     KoinComponent {
-    private val accountRepository: AccountRepository by inject()
+    private val accountService: AccountService by inject()
+    private val serviceFlow by lazy {
+        accountService.accountServiceFlow(accountType)
+    }
 
     @Immutable
     public interface State {
@@ -30,7 +34,7 @@ public class PodcastListPresenter(
 
     @Composable
     override fun body(): State {
-        val service = accountServiceProvider(accountType, accountRepository)
+        val service by serviceFlow.collectAsUiState()
         val podcasts =
             service.flatMap {
                 require(it is XQTDataSource)

@@ -10,7 +10,7 @@ public interface RemoteLoader<T : Any> {
     ): PagingResult<T>
 }
 
-internal fun <T : Any> notSupported(): RemoteLoader<T> = NotSupportRemoteLoader()
+public fun <T : Any> notSupported(): RemoteLoader<T> = NotSupportRemoteLoader()
 
 internal class NotSupportRemoteLoader<T : Any> : RemoteLoader<T> {
     override suspend fun load(

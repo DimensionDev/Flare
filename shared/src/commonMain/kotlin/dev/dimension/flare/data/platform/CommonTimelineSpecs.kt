@@ -60,7 +60,7 @@ public object CommonTimelineSpecs {
         )
 }
 
-internal fun UiList.List.toTimelineTabItemV2(accountKey: MicroBlogKey): TimelineTabItemV2 =
+public fun UiList.List.toTimelineTabItemV2(accountKey: MicroBlogKey): TimelineTabItemV2 =
     CommonTimelineSpecs.list
         .tabItem(
             data = TimelineSpec.AccountResourceData(accountKey, id),

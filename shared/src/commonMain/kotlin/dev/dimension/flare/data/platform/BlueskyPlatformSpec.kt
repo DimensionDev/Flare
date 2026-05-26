@@ -170,7 +170,7 @@ private fun profileRoute(
     )
 }
 
-internal fun UiList.Feed.toTimelineTabItemV2(accountKey: MicroBlogKey): TimelineTabItemV2 =
+public fun UiList.Feed.toTimelineTabItemV2(accountKey: MicroBlogKey): TimelineTabItemV2 =
     BlueskyPlatformSpec.feedTimelineSpec
         .tabItem(
             data = TimelineSpec.AccountResourceData(accountKey, id),

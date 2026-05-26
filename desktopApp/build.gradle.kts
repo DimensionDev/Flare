@@ -16,6 +16,7 @@ plugins {
 dependencies {
     implementation(projects.shared)
     implementation(projects.social.vvo)
+    implementation(projects.social.xqt)
     implementation(projects.composeUi)
 
     implementation(compose("org.jetbrains.compose.runtime:runtime"))

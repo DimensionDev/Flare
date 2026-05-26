@@ -10,8 +10,6 @@ import dev.dimension.flare.common.Cacheable
 import dev.dimension.flare.common.FileType
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.common.encodeJson
-import dev.dimension.flare.data.database.cache.CacheDatabase
-import dev.dimension.flare.data.database.cache.mapper.XQT
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
@@ -121,7 +119,6 @@ internal class XQTDataSource(
     DirectMessageDataSource,
     RelationDataSource,
     PostEventHandler.Handler {
-    private val database: CacheDatabase by inject()
     private val coroutineScope: CoroutineScope by inject()
     private val imageCompressor: ImageCompressor by inject()
     private val credentialFlow by lazy {

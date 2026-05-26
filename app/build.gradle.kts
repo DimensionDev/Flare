@@ -125,6 +125,7 @@ dependencies {
     implementation(libs.compose.webview)
     implementation(projects.shared)
     implementation(projects.social.vvo)
+    implementation(projects.social.xqt)
     implementation(projects.composeUi)
     implementation(libs.androidx.splash)
     implementation(libs.materialKolor)

@@ -11,7 +11,8 @@ import dev.dimension.flare.data.datasource.xqt.userById
 import dev.dimension.flare.data.network.xqt.XQTService
 import dev.dimension.flare.data.network.xqt.model.User
 import dev.dimension.flare.data.platform.XQTCredential
-import dev.dimension.flare.data.repository.AccountRepository
+import dev.dimension.flare.data.repository.AccountService
+import dev.dimension.flare.data.repository.addAccount
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.xqtHost
@@ -26,7 +27,7 @@ public class XQTLoginPresenter(
     private val toHome: () -> Unit,
 ) : PresenterBase<XQTLoginState>(),
     KoinComponent {
-    private val accountRepository: AccountRepository by inject()
+    private val accountService: AccountService by inject()
 
     @Composable
     override fun body(): XQTLoginState {
@@ -46,7 +47,7 @@ public class XQTLoginPresenter(
                     runCatching {
                         xqtLoginUseCase(
                             chocolate = chocolate,
-                            accountRepository = accountRepository,
+                            accountService = accountService,
                         )
                         toHome.invoke()
                     }.onFailure {
@@ -60,7 +61,7 @@ public class XQTLoginPresenter(
 
     private suspend fun xqtLoginUseCase(
         chocolate: String,
-        accountRepository: AccountRepository,
+        accountService: AccountService,
     ) {
         val xqtService = XQTService(flowOf(chocolate))
         val userId = xqtService.getInitialUserId(chocolate = chocolate)
@@ -74,7 +75,7 @@ public class XQTLoginPresenter(
                 ?.result
         requireNotNull(account)
         require(account is User)
-        accountRepository.addAccount(
+        accountService.addAccount(
             UiAccount(
                 accountKey =
                     MicroBlogKey(

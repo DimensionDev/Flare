@@ -9,7 +9,6 @@ import dev.dimension.flare.data.model.appearance.toBag
 import dev.dimension.flare.data.model.appearance.toPatch
 import dev.dimension.flare.data.model.appearance.withPatch
 import dev.dimension.flare.data.platform.RssTimelineSpecs
-import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformRegistry
 import dev.dimension.flare.ui.model.UiIcon
@@ -20,7 +19,6 @@ import dev.dimension.flare.ui.model.asType
 import dev.dimension.flare.ui.presenter.home.MixedTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.SystemHomeMixedTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.TimelinePresenter
-import dev.dimension.flare.ui.presenter.home.xqt.XQTDeviceFollowTimelinePresenter
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
@@ -153,18 +151,6 @@ public class SourceTimelineTabItemV2 private constructor(
                 appearancePatch = appearancePatch,
                 enabled = enabled,
                 presenterFactory = createPresenter,
-            )
-
-        public fun xqtDeviceFollow(accountKey: MicroBlogKey): SourceTimelineTabItemV2 =
-            runtime(
-                id = "${TimelineSpecIds.XQT_DEVICE_FOLLOW}:$accountKey",
-                title = UiStrings.Posts.asText(),
-                icon = UiIcon.List.asType(),
-                createPresenter = {
-                    XQTDeviceFollowTimelinePresenter(
-                        AccountType.Specific(accountKey),
-                    )
-                },
             )
 
         internal fun fromSlot(

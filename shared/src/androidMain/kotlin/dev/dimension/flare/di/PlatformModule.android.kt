@@ -4,14 +4,10 @@ import dev.dimension.flare.data.database.DriverFactory
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.io.AndroidPlatformPathProducer
 import dev.dimension.flare.data.io.PlatformPathProducer
-import dev.dimension.flare.data.network.nostr.AmberIntentLauncherRegistry
-import dev.dimension.flare.data.network.nostr.AmberSignerBridge
-import dev.dimension.flare.data.network.nostr.AndroidAmberSignerBridge
 import dev.dimension.flare.shared.image.AndroidImageCompressor
 import dev.dimension.flare.shared.image.ImageCompressor
 import dev.dimension.flare.ui.humanizer.AndroidFormatter
 import dev.dimension.flare.ui.humanizer.PlatformFormatter
-import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.bind
@@ -21,8 +17,6 @@ internal actual val platformModule: Module =
     module {
         singleOf(::AppDataStore)
         singleOf(::DriverFactory)
-        singleOf(::AmberIntentLauncherRegistry)
-        single<AmberSignerBridge> { AndroidAmberSignerBridge(androidContext(), get()) }
         singleOf(::AndroidPlatformPathProducer) bind PlatformPathProducer::class
         singleOf(::AndroidFormatter) bind PlatformFormatter::class
         singleOf(::AndroidImageCompressor) bind ImageCompressor::class

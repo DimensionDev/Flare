@@ -12,7 +12,8 @@ import dev.dimension.flare.data.network.nostr.AmberSignerBridge
 import dev.dimension.flare.data.network.nostr.NostrService
 import dev.dimension.flare.data.network.nostr.defaultNostrRelays
 import dev.dimension.flare.data.platform.NostrCredential
-import dev.dimension.flare.data.repository.AccountRepository
+import dev.dimension.flare.data.repository.AccountService
+import dev.dimension.flare.data.repository.addAccount
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
@@ -27,7 +28,7 @@ public class NostrLoginPresenter(
     private val toHome: () -> Unit,
 ) : PresenterBase<NostrLoginState>(),
     KoinComponent {
-    private val accountRepository: AccountRepository by inject()
+    private val accountService: AccountService by inject()
     private val amberSignerBridge: AmberSignerBridge by inject()
 
     @Composable
@@ -77,7 +78,7 @@ public class NostrLoginPresenter(
                             runCatching {
                                 NostrService.resolvePublicRelays(connection.pubkeyHex)
                             }.getOrDefault(defaultNostrRelays)
-                        accountRepository.addAccount(
+                        accountService.addAccount(
                             account =
                                 UiAccount(
                                     accountKey =
@@ -154,7 +155,7 @@ public class NostrLoginPresenter(
                     runCatching {
                         NostrService.resolvePublicRelays(imported.pubkeyHex)
                     }.getOrDefault(defaultNostrRelays)
-                accountRepository.addAccount(
+                accountService.addAccount(
                     account =
                         UiAccount(
                             accountKey =

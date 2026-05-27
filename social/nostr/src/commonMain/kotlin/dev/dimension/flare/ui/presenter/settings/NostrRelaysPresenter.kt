@@ -5,7 +5,9 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import dev.dimension.flare.data.platform.NostrCredential
-import dev.dimension.flare.data.repository.AccountRepository
+import dev.dimension.flare.data.repository.AccountService
+import dev.dimension.flare.data.repository.credentialFlow
+import dev.dimension.flare.data.repository.updateCredential
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
@@ -21,7 +23,7 @@ public class NostrRelaysPresenter(
     private val accountKey: MicroBlogKey,
 ) : PresenterBase<NostrRelaysPresenter.State>(),
     KoinComponent {
-    private val accountRepository: AccountRepository by inject()
+    private val accountService: AccountService by inject()
 
     @Immutable
     public interface State {
@@ -35,7 +37,7 @@ public class NostrRelaysPresenter(
     @Composable
     override fun body(): State {
         val credential by remember {
-            accountRepository.credentialFlow<NostrCredential>(accountKey)
+            accountService.credentialFlow<NostrCredential>(accountKey)
         }.collectAsUiState()
 
         return object : State {
@@ -46,7 +48,7 @@ public class NostrRelaysPresenter(
                     if (relay in credential.relays) return
                     val newRelays = credential.relays + relay
                     val newCredential = credential.copy(relays = newRelays)
-                    accountRepository.updateCredential(
+                    accountService.updateCredential(
                         accountKey = accountKey,
                         credential = newCredential,
                     )
@@ -58,7 +60,7 @@ public class NostrRelaysPresenter(
                     if (relay !in credential.relays) return
                     val newRelays = credential.relays - relay
                     val newCredential = credential.copy(relays = newRelays)
-                    accountRepository.updateCredential(
+                    accountService.updateCredential(
                         accountKey = accountKey,
                         credential = newCredential,
                     )

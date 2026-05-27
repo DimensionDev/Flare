@@ -3,7 +3,6 @@ package dev.dimension.flare
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
-import dev.dimension.flare.data.platform.NostrPlatformSpec
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformDataSourceContext
@@ -26,7 +25,7 @@ import kotlinx.serialization.Serializable
 internal fun testPlatformRegistry(): PlatformRegistry =
     PlatformRegistry(
         listOf(
-            NostrPlatformSpec,
+            TestNostrPlatformSpec,
             TestMastodonPlatformSpec,
             TestMisskeyPlatformSpec,
             TestBlueskyPlatformSpec,
@@ -65,6 +64,14 @@ private abstract class TestDeepLinkPlatformSpec(
         host: String,
         locale: String,
     ): MicroblogDataSource = throw UnsupportedOperationException("${type.name} guest data source is not available in tests")
+}
+
+private data object TestNostrPlatformSpec : TestDeepLinkPlatformSpec(
+    type = PlatformType.Nostr,
+    displayName = "Nostr",
+    icon = UiIcon.Nostr,
+) {
+    override fun deepLinks(accountKey: MicroBlogKey): ImmutableList<PlatformDeepLink<*>> = persistentListOf()
 }
 
 private data object TestBlueskyPlatformSpec : TestDeepLinkPlatformSpec(

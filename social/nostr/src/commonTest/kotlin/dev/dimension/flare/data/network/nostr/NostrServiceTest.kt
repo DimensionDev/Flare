@@ -191,12 +191,12 @@ class NostrServiceTest {
         assertEquals(listOf(ROOT_EVENT_ID), quote.references.filter { it.type == ReferenceType.Quote }.map { it.statusKey.id })
 
         val repost = timeline.first { it.statusKey.id == REPOST_EVENT_ID }
-        assertNotNull(repost.internalRepost)
-        assertEquals(ROOT_EVENT_ID, repost.internalRepost.statusKey.id)
-        assertNotNull(repost.message)
+        val internalRepost = assertNotNull(repost.internalRepost)
+        assertEquals(ROOT_EVENT_ID, internalRepost.statusKey.id)
+        val message = assertNotNull(repost.message)
         assertEquals(
             UiTimelineV2.Message.Type.Localized.MessageId.Repost,
-            assertIs<UiTimelineV2.Message.Type.Localized>(repost.message.type).data,
+            assertIs<UiTimelineV2.Message.Type.Localized>(message.type).data,
         )
     }
 

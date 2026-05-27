@@ -2,8 +2,8 @@ package dev.dimension.flare.di
 
 import dev.dimension.flare.data.database.provideAppDatabase
 import dev.dimension.flare.data.database.provideCacheDatabase
-import dev.dimension.flare.data.datasource.nostr.DatabaseNostrCache
-import dev.dimension.flare.data.datasource.nostr.NostrCache
+import dev.dimension.flare.data.datasource.microblog.DatabaseMicroblogCacheLookup
+import dev.dimension.flare.data.datasource.microblog.MicroblogCacheLookup
 import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.network.ai.AiCompletionService
@@ -45,7 +45,7 @@ internal fun commonModule(
     single(createdAtStart = true) { AccountTabSyncCoordinator(get(), get(), get(), get()) }
     singleOf(::provideAppDatabase)
     singleOf(::provideCacheDatabase)
-    single<NostrCache> { DatabaseNostrCache(get()) }
+    single<MicroblogCacheLookup> { DatabaseMicroblogCacheLookup(get()) }
     single {
         DraftMediaStore(get())
     }

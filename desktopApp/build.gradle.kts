@@ -18,6 +18,7 @@ dependencies {
     implementation(projects.social.bluesky)
     implementation(projects.social.mastodon)
     implementation(projects.social.misskey)
+    implementation(projects.social.nostr)
     implementation(projects.social.vvo)
     implementation(projects.social.xqt)
     implementation(projects.feature.subscription)

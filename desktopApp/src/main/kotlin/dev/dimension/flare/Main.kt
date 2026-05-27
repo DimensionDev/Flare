@@ -32,6 +32,7 @@ import dev.dimension.flare.data.platform.RssTimelineSpecs
 import dev.dimension.flare.data.platform.VvoPlatformSpec
 import dev.dimension.flare.data.platform.XqtPlatformSpec
 import dev.dimension.flare.di.KoinHelper
+import dev.dimension.flare.di.NostrModule
 import dev.dimension.flare.di.desktopModule
 import dev.dimension.flare.model.PlatformRegistry
 import dev.dimension.flare.ui.component.PlatformTitleBar
@@ -95,7 +96,7 @@ fun main(args: Array<String>) {
     val timelineSpecs = registry.all.flatMap { it.timelineSpecs } + RssTimelineSpecs.timelineSpecs
     startKoin {
         modules(
-            desktopModule + KoinHelper.modules(registry, timelineSpecs),
+            desktopModule + KoinHelper.modules(registry, timelineSpecs) + NostrModule.modules(),
         )
     }
     application {

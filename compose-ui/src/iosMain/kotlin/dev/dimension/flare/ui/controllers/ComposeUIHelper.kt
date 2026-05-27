@@ -20,6 +20,7 @@ import dev.dimension.flare.data.platform.RssTimelineSpecs
 import dev.dimension.flare.data.platform.VvoPlatformSpec
 import dev.dimension.flare.data.platform.XqtPlatformSpec
 import dev.dimension.flare.di.KoinHelper
+import dev.dimension.flare.di.NostrModule
 import dev.dimension.flare.model.PlatformRegistry
 import dev.dimension.flare.ui.humanizer.SwiftFormatter
 import dev.dimension.flare.ui.render.SwiftPlatformTextRenderer
@@ -46,7 +47,7 @@ public object ComposeUIHelper {
         val registry = supportedPlatformRegistry()
         val timelineSpecs = registry.all.flatMap { it.timelineSpecs } + RssTimelineSpecs.timelineSpecs
         startKoin {
-            modules(KoinHelper.modules(registry, timelineSpecs))
+            modules(KoinHelper.modules(registry, timelineSpecs) + NostrModule.modules())
             modules(
                 module {
                     single {

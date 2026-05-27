@@ -25,7 +25,6 @@ import dev.dimension.flare.data.database.cache.model.translationPayload
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.paging.TimelinePagingMapper
 import dev.dimension.flare.data.datastore.model.AppSettings
-import dev.dimension.flare.data.network.nostr.NostrService
 import dev.dimension.flare.data.network.nostr.bech32PublicKey
 import dev.dimension.flare.data.translation.PreTranslationStoreSupport
 import dev.dimension.flare.data.translation.cacheKey
@@ -60,6 +59,8 @@ import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import kotlin.time.Clock
+
+private const val NOSTR_TEST_HOST = "nostr"
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class MicroblogTest : RobolectricTest() {
@@ -1919,16 +1920,16 @@ class MicroblogTest : RobolectricTest() {
     @Test
     fun saveToDatabaseKeepsExistingNostrProfileWhenIncomingUsesFallbackNpub() =
         runTest {
-            val accountKey = MicroBlogKey(id = "nostr-account", host = NostrService.NOSTR_HOST)
+            val accountKey = MicroBlogKey(id = "nostr-account", host = NOSTR_TEST_HOST)
             val userKey =
                 MicroBlogKey(
                     id = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
-                    host = NostrService.NOSTR_HOST,
+                    host = NOSTR_TEST_HOST,
                 )
             val detailedUser =
                 UiProfile(
                     key = userKey,
-                    handle = UiHandle(raw = "alice", host = NostrService.NOSTR_HOST),
+                    handle = UiHandle(raw = "alice", host = NOSTR_TEST_HOST),
                     avatar = "https://example.com/alice.png",
                     nameInternal = "Alice".toUiPlainText(),
                     platformType = dev.dimension.flare.model.PlatformType.Nostr,
@@ -1943,7 +1944,7 @@ class MicroblogTest : RobolectricTest() {
             val fallbackUser =
                 UiProfile(
                     key = userKey,
-                    handle = UiHandle(raw = fallback, host = NostrService.NOSTR_HOST),
+                    handle = UiHandle(raw = fallback, host = NOSTR_TEST_HOST),
                     avatar = "",
                     nameInternal = fallback.toUiPlainText(),
                     platformType = dev.dimension.flare.model.PlatformType.Nostr,
@@ -1962,7 +1963,7 @@ class MicroblogTest : RobolectricTest() {
                         createPost(
                             accountKey = accountKey,
                             user = detailedUser,
-                            statusKey = MicroBlogKey(id = "status-detailed", host = NostrService.NOSTR_HOST),
+                            statusKey = MicroBlogKey(id = "status-detailed", host = NOSTR_TEST_HOST),
                             text = "detailed",
                         ),
                         pagingKey = "home",
@@ -1976,7 +1977,7 @@ class MicroblogTest : RobolectricTest() {
                         createPost(
                             accountKey = accountKey,
                             user = fallbackUser,
-                            statusKey = MicroBlogKey(id = "status-fallback", host = NostrService.NOSTR_HOST),
+                            statusKey = MicroBlogKey(id = "status-fallback", host = NOSTR_TEST_HOST),
                             text = "fallback",
                         ),
                         pagingKey = "home",

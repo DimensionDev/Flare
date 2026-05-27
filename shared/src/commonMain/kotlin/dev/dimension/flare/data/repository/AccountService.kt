@@ -2,6 +2,7 @@ package dev.dimension.flare.data.repository
 
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiAccount
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
@@ -16,6 +17,17 @@ public interface AccountService {
         credential: T,
         serializer: KSerializer<T>,
     ): Job
+
+    public fun <T : Any> credentialFlow(
+        accountKey: MicroBlogKey,
+        serializer: KSerializer<T>,
+    ): Flow<T>
+
+    public fun <T : Any> updateCredential(
+        accountKey: MicroBlogKey,
+        credential: T,
+        serializer: KSerializer<T>,
+    ): Job
 }
 
 public inline fun <reified T : Any> AccountService.addAccount(
@@ -24,6 +36,22 @@ public inline fun <reified T : Any> AccountService.addAccount(
 ): Job =
     addAccount(
         account = account,
+        credential = credential,
+        serializer = serializer(),
+    )
+
+public inline fun <reified T : Any> AccountService.credentialFlow(accountKey: MicroBlogKey): Flow<T> =
+    credentialFlow(
+        accountKey = accountKey,
+        serializer = serializer(),
+    )
+
+public inline fun <reified T : Any> AccountService.updateCredential(
+    accountKey: MicroBlogKey,
+    credential: T,
+): Job =
+    updateCredential(
+        accountKey = accountKey,
         credential = credential,
         serializer = serializer(),
     )
@@ -44,6 +72,26 @@ internal class RepositoryAccountService(
     ): Job =
         repository.addAccount(
             account = account,
+            credential = credential,
+            serializer = serializer,
+        )
+
+    override fun <T : Any> credentialFlow(
+        accountKey: MicroBlogKey,
+        serializer: KSerializer<T>,
+    ): Flow<T> =
+        repository.credentialFlow(
+            accountKey = accountKey,
+            serializer = serializer,
+        )
+
+    override fun <T : Any> updateCredential(
+        accountKey: MicroBlogKey,
+        credential: T,
+        serializer: KSerializer<T>,
+    ): Job =
+        repository.updateCredential(
+            accountKey = accountKey,
             credential = credential,
             serializer = serializer,
         )

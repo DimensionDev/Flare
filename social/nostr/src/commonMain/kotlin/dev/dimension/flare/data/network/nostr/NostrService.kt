@@ -71,7 +71,7 @@ import rust.nostr.sdk.TagKind as RustTagKind
 import rust.nostr.sdk.Timestamp as RustTimestamp
 import rust.nostr.sdk.UnsignedEvent as RustUnsignedEvent
 
-public val defaultNostrRelays: List<String> =
+internal val defaultNostrRelays: List<String> =
     listOf(
         "wss://relay.damus.io",
         "wss://nos.lol",

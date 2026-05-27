@@ -41,7 +41,7 @@ public inline fun <reified T> String.decodeJson(): T = JSON.decodeFromString(thi
 @HiddenFromObjC
 public fun <T> String.decodeJson(serializer: KSerializer<T>): T = JSON.decodeFromString(serializer, this)
 
-internal val JsonElement.jsonObjectOrNull: JsonObject?
+public val JsonElement.jsonObjectOrNull: JsonObject?
     get() = if (this is JsonObject) this else null
 
 @OptIn(ExperimentalSerializationApi::class)

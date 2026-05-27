@@ -401,14 +401,15 @@ internal class NostrDataSource(
         require(event is PostEvent.Nostr)
         when (event) {
             is PostEvent.Nostr.Like -> {
-                if (event.reactionEventId != null) {
+                val reactionEventId = event.reactionEventId
+                if (reactionEventId != null) {
                     serviceManager.withService {
                         it.deleteStatus(
-                            statusKey = MicroBlogKey(event.reactionEventId, NostrService.NOSTR_HOST),
+                            statusKey = MicroBlogKey(reactionEventId, NostrService.NOSTR_HOST),
                         )
                     }
                 } else {
-                    val reactionEventId =
+                    val createdReactionEventId =
                         serviceManager.withService {
                             it.react(
                                 statusKey = event.postKey,
@@ -418,7 +419,7 @@ internal class NostrDataSource(
                         event.postKey,
                         ActionMenu.nostrLike(
                             statusKey = event.postKey,
-                            reactionEventId = reactionEventId,
+                            reactionEventId = createdReactionEventId,
                             count = event.count + 1,
                             accountKey = accountKey,
                         ),
@@ -435,14 +436,15 @@ internal class NostrDataSource(
             }
 
             is PostEvent.Nostr.Repost -> {
-                if (event.repostEventId != null) {
+                val repostEventId = event.repostEventId
+                if (repostEventId != null) {
                     serviceManager.withService {
                         it.deleteStatus(
-                            statusKey = MicroBlogKey(event.repostEventId, NostrService.NOSTR_HOST),
+                            statusKey = MicroBlogKey(repostEventId, NostrService.NOSTR_HOST),
                         )
                     }
                 } else {
-                    val repostEventId =
+                    val createdRepostEventId =
                         serviceManager.withService {
                             it.repost(
                                 statusKey = event.postKey,
@@ -452,7 +454,7 @@ internal class NostrDataSource(
                         event.postKey,
                         ActionMenu.nostrRepost(
                             statusKey = event.postKey,
-                            repostEventId = repostEventId,
+                            repostEventId = createdRepostEventId,
                             count = event.count + 1,
                             accountKey = accountKey,
                         ),

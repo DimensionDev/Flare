@@ -140,7 +140,7 @@ class NostrServiceTest {
                 input = normalizedSecret,
             )
         assertEquals(account.pubkeyHex, reImported.pubkeyHex)
-        assertEquals(account.npub, bech32PublicKey(account.pubkeyHex))
+        assertEquals(account.npub, nostrBech32PublicKey(account.pubkeyHex))
     }
 
     @Test

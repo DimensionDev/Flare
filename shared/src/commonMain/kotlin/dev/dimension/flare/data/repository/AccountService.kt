@@ -9,7 +9,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.serializer
 import org.koin.core.annotation.Single
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 public interface AccountService {
     public fun accountServiceFlow(accountType: AccountType): Flow<MicroblogDataSource>
 

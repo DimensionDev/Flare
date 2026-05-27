@@ -12,7 +12,9 @@ import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.http.URLBuilder
 import io.ktor.http.URLProtocol
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 public data object NodeInfoService {
     private val supportedSchemas =
         listOf(
@@ -114,6 +116,7 @@ public data object NodeInfoService {
     }
 }
 
+@HiddenFromObjC
 public data class NodeData(
     val host: String,
     val platformType: PlatformType,

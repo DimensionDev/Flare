@@ -1,5 +1,7 @@
 package dev.dimension.flare.data.datasource.microblog.paging
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 public data class PagingResult<T : Any>(
     val data: List<T> = emptyList(),
     val nextKey: String? = null,

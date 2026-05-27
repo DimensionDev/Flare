@@ -21,8 +21,10 @@ import dev.dimension.flare.ui.model.mapper.xqtLike
 import dev.dimension.flare.ui.model.mapper.xqtRetweet
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.serialization.Serializable
+import kotlin.native.HiddenFromObjC
 
 @Serializable
+@HiddenFromObjC
 public sealed interface PostEvent {
     public val postKey: MicroBlogKey
 
@@ -431,6 +433,7 @@ public sealed interface PostEvent {
     }
 }
 
+@HiddenFromObjC
 public interface UpdatePostActionMenuEvent : PostEvent {
     public fun nextActionMenu(): ActionMenu.Item
 }

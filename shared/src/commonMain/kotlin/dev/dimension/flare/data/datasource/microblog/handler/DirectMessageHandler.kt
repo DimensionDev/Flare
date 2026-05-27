@@ -38,8 +38,10 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import kotlin.native.HiddenFromObjC
 
 @OptIn(ExperimentalPagingApi::class)
+@HiddenFromObjC
 public class DirectMessageHandler(
     private val accountKey: MicroBlogKey,
     private val loader: DirectMessageLoader,

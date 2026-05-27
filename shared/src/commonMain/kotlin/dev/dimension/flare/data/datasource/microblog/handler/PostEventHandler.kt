@@ -19,7 +19,9 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 public class PostEventHandler(
     private val accountType: AccountType,
     private val handler: Handler,

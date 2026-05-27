@@ -1,5 +1,6 @@
 package dev.dimension.flare.ui.humanizer
 
+import kotlin.native.HiddenFromObjC
 import kotlin.time.Duration
 
 private fun Int.withLeadingZero(): String =
@@ -9,6 +10,7 @@ private fun Int.withLeadingZero(): String =
         this.toString()
     }
 
+@HiddenFromObjC
 public fun Duration.humanize(): String =
     this.toComponents { days, hours, minutes, seconds, _ ->
         buildString {

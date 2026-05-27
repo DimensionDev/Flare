@@ -26,7 +26,10 @@ private val jsonWithEncodeDefault =
         encodeDefaults = true
     }
 
+@HiddenFromObjC
 public val JSON: Json get() = json
+
+@HiddenFromObjC
 public val JSON_WITH_ENCODE_DEFAULT: Json get() = jsonWithEncodeDefault
 
 public inline fun <reified T> T.encodeJson(): String = JSON.encodeToString(this)
@@ -41,10 +44,12 @@ public inline fun <reified T> String.decodeJson(): T = JSON.decodeFromString(thi
 @HiddenFromObjC
 public fun <T> String.decodeJson(serializer: KSerializer<T>): T = JSON.decodeFromString(serializer, this)
 
+@HiddenFromObjC
 public val JsonElement.jsonObjectOrNull: JsonObject?
     get() = if (this is JsonObject) this else null
 
 @OptIn(ExperimentalSerializationApi::class)
+@HiddenFromObjC
 public class SafePolymorphicSerializer<T : Any>(
     private val baseSerializer: KSerializer<T>,
     private val discriminator: String,

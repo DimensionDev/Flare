@@ -113,7 +113,7 @@ internal class NostrService(
                     }
                 return ImportedAccount.LocalKey(
                     pubkeyHex = pubkeyHex,
-                    npub = bech32PublicKey(pubkeyHex),
+                    npub = nostrBech32PublicKey(pubkeyHex),
                     nsec = secretKey.toBech32(),
                 )
             }
@@ -121,7 +121,7 @@ internal class NostrService(
             parsePublicKeyHex(value)?.let { pubkeyHex ->
                 return ImportedAccount.ReadOnly(
                     pubkeyHex = pubkeyHex,
-                    npub = bech32PublicKey(pubkeyHex),
+                    npub = nostrBech32PublicKey(pubkeyHex),
                 )
             }
 
@@ -190,7 +190,7 @@ internal class NostrService(
             val normalizedSecret = parseSecret(secretKey)?.use { it.toBech32() }
             return ImportedAccount.LocalKey(
                 pubkeyHex = credential.pubkeyHex.ifBlank { error("Nostr account is missing a public key") },
-                npub = bech32PublicKey(credential.pubkeyHex.ifBlank { error("Nostr account is missing a public key") }),
+                npub = nostrBech32PublicKey(credential.pubkeyHex.ifBlank { error("Nostr account is missing a public key") }),
                 nsec = normalizedSecret ?: error("Failed to normalize exported secret"),
             )
         }
@@ -204,7 +204,7 @@ internal class NostrService(
                 val pubkeyHex = connect.getPublicKey().use { it.toHex() }
                 ImportedAccount.RemoteSigner(
                     pubkeyHex = pubkeyHex,
-                    npub = bech32PublicKey(pubkeyHex),
+                    npub = nostrBech32PublicKey(pubkeyHex),
                     signerCredential =
                         NostrSignerCredential.Bunker(
                             uri = uri,
@@ -317,7 +317,7 @@ internal class NostrService(
                     connect.relays().firstOrNull()?.use { it.toString() }
                 return ImportedAccount.RemoteSigner(
                     pubkeyHex = pubkeyHex,
-                    npub = bech32PublicKey(pubkeyHex),
+                    npub = nostrBech32PublicKey(pubkeyHex),
                     signerCredential =
                         NostrSignerCredential.Bunker(
                             uri = bunkerUri,
@@ -2483,7 +2483,7 @@ internal class NostrService(
         metadata: UserMetadata?,
     ): UiProfile {
         val bestName = metadata?.bestName().orEmpty()
-        val npub = bech32PublicKey(pubKey)
+        val npub = nostrBech32PublicKey(pubKey)
         val handleRaw =
             metadata?.name?.takeIf { it.isNotBlank() }
                 ?: metadata?.nip05?.substringBefore("@")?.takeIf { it.isNotBlank() }

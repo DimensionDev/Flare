@@ -9,7 +9,9 @@ import dev.dimension.flare.ui.model.UiDMRoom
 import dev.dimension.flare.ui.model.UiState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 public interface DirectMessageLoader {
     public val platformType: PlatformType
 
@@ -53,11 +55,13 @@ public interface DirectMessageLoader {
     public suspend fun loadBadgeCount(): Int
 }
 
+@HiddenFromObjC
 public data class DirectMessageDelta(
     val messages: List<UiDMItem> = emptyList(),
     val deletedMessageKeys: List<MicroBlogKey> = emptyList(),
 )
 
+@HiddenFromObjC
 public data class DirectMessageRuntimeTransformer(
     val room: (UiDMRoom) -> UiDMRoom = { it },
     val item: (UiDMItem) -> UiDMItem = { it },

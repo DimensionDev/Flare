@@ -17,7 +17,9 @@ import dev.dimension.flare.ui.model.UiInstance
 import dev.dimension.flare.ui.model.UiInstanceMetadata
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 public data object NostrPlatformSpec : PlatformSpec {
     public override val type: PlatformType = PlatformType.Nostr
     public override val metadata: PlatformTypeMetadata =

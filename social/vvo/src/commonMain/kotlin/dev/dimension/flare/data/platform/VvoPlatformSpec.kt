@@ -22,7 +22,9 @@ import dev.dimension.flare.ui.presenter.home.vvo.VVOFavouriteTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.vvo.VVOLikeTimelinePresenter
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 public data object VvoPlatformSpec : PlatformSpec {
     public override val type: PlatformType = PlatformType.VVo
     public override val metadata: PlatformTypeMetadata =

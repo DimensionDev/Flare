@@ -2,7 +2,9 @@ package dev.dimension.flare.data.datasource.microblog
 
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimelineV2
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 public interface DatabaseUpdater {
     public suspend fun updateCache(
         postKey: MicroBlogKey,

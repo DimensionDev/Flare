@@ -14,7 +14,9 @@ import dev.dimension.flare.ui.model.asType
 import dev.dimension.flare.ui.presenter.home.DiscoverStatusTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.HomeTimelinePresenter
 import dev.dimension.flare.ui.presenter.list.ListTimelinePresenter
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 public object CommonTimelineSpecs {
     public val home: TimelineSpec<TimelineSpec.AccountBasedData> =
         TimelineSpec(

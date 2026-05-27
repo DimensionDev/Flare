@@ -3,7 +3,9 @@ package dev.dimension.flare.data.datasource.microblog.handler
 import dev.dimension.flare.common.MemCacheable
 import dev.dimension.flare.data.datasource.microblog.loader.NotificationLoader
 import dev.dimension.flare.model.MicroBlogKey
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 public class NotificationHandler(
     public val accountKey: MicroBlogKey,
     public val loader: NotificationLoader,

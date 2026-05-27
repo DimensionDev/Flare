@@ -32,6 +32,7 @@ import org.koin.core.annotation.KoinApplication
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Single
 import org.koin.plugin.module.dsl.startKoin
+import kotlin.native.HiddenFromObjC
 
 public object ComposeUIHelper {
     @OptIn(
@@ -71,9 +72,11 @@ public object ComposeUIHelper {
     }
 }
 
+@HiddenFromObjC
 @KoinApplication
 internal class IosKoinApplication
 
+@HiddenFromObjC
 @Module
 @Configuration
 @ComponentScan("dev.dimension.flare.ui.controllers")

@@ -42,6 +42,7 @@ import kotlinx.serialization.KSerializer
 import kotlinx.serialization.serializer
 import org.koin.core.annotation.Provided
 import org.koin.core.annotation.Single
+import kotlin.native.HiddenFromObjC
 import kotlin.time.Clock
 
 @Stable
@@ -299,6 +300,7 @@ private fun DbAccount.toUi(): UiAccount =
         platformType = platform_type,
     )
 
+@HiddenFromObjC
 public data object NoActiveAccountException : Exception("No active account.")
 
 @Immutable

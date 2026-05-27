@@ -11,8 +11,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import org.koin.core.annotation.Single
+import kotlin.native.HiddenFromObjC
 import kotlin.time.Instant
 
+@HiddenFromObjC
 public data class SubscriptionSourceInput(
     val id: Int = 0,
     val url: String,
@@ -23,6 +25,7 @@ public data class SubscriptionSourceInput(
     val type: SubscriptionType = SubscriptionType.RSS,
 )
 
+@HiddenFromObjC
 public interface SubscriptionRepository {
     public fun observeAll(): Flow<List<UiRssSource>>
 
@@ -107,6 +110,7 @@ private fun SubscriptionSourceInput.toDatabase(): DbRssSources =
         type = type,
     )
 
+@HiddenFromObjC
 public fun SubscriptionSourceInput.toUiRssSource(): UiRssSource =
     UiRssSource(
         id = id,

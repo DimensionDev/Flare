@@ -21,6 +21,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
+import kotlin.native.HiddenFromObjC
 
 @Immutable
 public sealed class PagingState<T> {
@@ -115,6 +116,7 @@ public sealed class PagingState<T> {
     }
 }
 
+@HiddenFromObjC
 public val <T : Any> PagingState<T>.isLoading: Boolean
     get() = this is PagingState.Loading
 
@@ -125,6 +127,7 @@ public val <T : Any> PagingState<T>.isEmpty: Boolean
     get() = this is PagingState.Empty
 
 @OptIn(ExperimentalContracts::class)
+@HiddenFromObjC
 public fun <T : Any> PagingState<T>.isSuccess(): Boolean {
     contract {
         returns(true) implies (this@isSuccess is PagingState.Success<T>)
@@ -146,6 +149,7 @@ public suspend fun <T : Any> PagingState<T>.refreshSuspend() {
     }
 }
 
+@HiddenFromObjC
 public inline fun <T : Any> PagingState<T>.onLoading(block: () -> Unit): PagingState<T> {
     if (this is PagingState.Loading) {
         block()
@@ -153,6 +157,7 @@ public inline fun <T : Any> PagingState<T>.onLoading(block: () -> Unit): PagingS
     return this
 }
 
+@HiddenFromObjC
 public inline fun <T : Any> PagingState<T>.onError(block: PagingState.Error<T>.(Throwable) -> Unit): PagingState<T> {
     if (this is PagingState.Error) {
         block(error)
@@ -160,6 +165,7 @@ public inline fun <T : Any> PagingState<T>.onError(block: PagingState.Error<T>.(
     return this
 }
 
+@HiddenFromObjC
 public inline fun <T : Any> PagingState<T>.onEmpty(block: PagingState.Empty<T>.() -> Unit): PagingState<T> {
     if (this is PagingState.Empty) {
         block(this)
@@ -167,6 +173,7 @@ public inline fun <T : Any> PagingState<T>.onEmpty(block: PagingState.Empty<T>.(
     return this
 }
 
+@HiddenFromObjC
 public inline fun <T : Any> PagingState<T>.onSuccess(block: PagingState.Success<T>.() -> Unit): PagingState<T> {
     if (this is PagingState.Success) {
         block(this)
@@ -174,6 +181,7 @@ public inline fun <T : Any> PagingState<T>.onSuccess(block: PagingState.Success<
     return this
 }
 
+@HiddenFromObjC
 public inline fun LoadState.onLoading(block: () -> Unit): LoadState {
     if (this is LoadState.Loading) {
         block()
@@ -181,6 +189,7 @@ public inline fun LoadState.onLoading(block: () -> Unit): LoadState {
     return this
 }
 
+@HiddenFromObjC
 public inline fun LoadState.onError(block: (Throwable) -> Unit): LoadState {
     if (this is LoadState.Error) {
         block(error)
@@ -188,6 +197,7 @@ public inline fun LoadState.onError(block: (Throwable) -> Unit): LoadState {
     return this
 }
 
+@HiddenFromObjC
 public inline fun LoadState.onEndOfList(block: () -> Unit): LoadState {
     if (this is LoadState.NotLoading && endOfPaginationReached) {
         block()
@@ -195,15 +205,19 @@ public inline fun LoadState.onEndOfList(block: () -> Unit): LoadState {
     return this
 }
 
+@HiddenFromObjC
 public inline val LoadState.isLoading: Boolean
     get() = this is LoadState.Loading
 
+@HiddenFromObjC
 public inline val LoadState.isError: Boolean
     get() = this is LoadState.Error
 
+@HiddenFromObjC
 public inline val LoadState.isEndOfList: Boolean
     get() = this is LoadState.NotLoading && endOfPaginationReached
 
+@HiddenFromObjC
 public fun <T : Any> UiState<LazyPagingItems<T>>.toPagingState(): PagingState<T> =
     when (this) {
         is UiState.Loading -> PagingState.Loading()
@@ -211,6 +225,7 @@ public fun <T : Any> UiState<LazyPagingItems<T>>.toPagingState(): PagingState<T>
         is UiState.Success -> data.toPagingState()
     }
 
+@HiddenFromObjC
 public fun <T : Any> LazyPagingItems<T>.toPagingState(): PagingState<T> {
     val snapshot = snapshot()
     if (itemCount > 0) {

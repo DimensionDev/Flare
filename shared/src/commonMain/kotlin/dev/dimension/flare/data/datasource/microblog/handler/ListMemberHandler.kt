@@ -26,8 +26,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import kotlin.native.HiddenFromObjC
 
 @OptIn(ExperimentalPagingApi::class)
+@HiddenFromObjC
 public class ListMemberHandler(
     private val pagingKey: String,
     private val accountKey: MicroBlogKey,

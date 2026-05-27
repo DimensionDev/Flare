@@ -38,7 +38,9 @@ import dev.dimension.flare.ui.route.DeeplinkRoute
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.serialization.Serializable
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 public data object MisskeyPlatformSpec : PlatformSpec {
     public override val type: PlatformType = PlatformType.Misskey
     public override val metadata: PlatformTypeMetadata =

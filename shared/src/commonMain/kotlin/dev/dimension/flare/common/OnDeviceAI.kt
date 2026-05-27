@@ -1,5 +1,7 @@
 package dev.dimension.flare.common
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 public interface OnDeviceAI {
     public suspend fun isAvailable(): Boolean
 

@@ -2,13 +2,16 @@ package dev.dimension.flare.data.datasource.microblog.loader
 
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiRelation
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 public enum class RelationActionType {
     Follow,
     Block,
     Mute,
 }
 
+@HiddenFromObjC
 public interface RelationLoader {
     public val supportedTypes: Set<RelationActionType>
 

@@ -19,6 +19,7 @@ import kotlinx.serialization.json.Json
 import kotlin.experimental.ExperimentalObjCRefinement
 import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 public fun ktorfit(
     baseUrl: String,
     json: Json = JSON,

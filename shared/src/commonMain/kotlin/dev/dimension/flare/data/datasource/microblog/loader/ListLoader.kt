@@ -6,7 +6,9 @@ import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.ui.model.UiList
 import kotlinx.collections.immutable.ImmutableList
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 public interface ListLoader<T : UiList> {
     public suspend fun load(
         pageSize: Int,

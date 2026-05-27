@@ -2,7 +2,9 @@ package dev.dimension.flare.data.datasource.microblog.paging
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 public interface RemoteLoader<T : Any> {
     public suspend fun load(
         pageSize: Int,
@@ -10,6 +12,7 @@ public interface RemoteLoader<T : Any> {
     ): PagingResult<T>
 }
 
+@HiddenFromObjC
 public fun <T : Any> notSupported(): RemoteLoader<T> = NotSupportRemoteLoader()
 
 internal class NotSupportRemoteLoader<T : Any> : RemoteLoader<T> {
@@ -19,6 +22,7 @@ internal class NotSupportRemoteLoader<T : Any> : RemoteLoader<T> {
     ): PagingResult<T> = PagingResult(endOfPaginationReached = true)
 }
 
+@HiddenFromObjC
 public fun <T : Any> RemoteLoader<T>.toPagingSource(): PagingSource<String, T> =
     object : PagingSource<String, T>() {
         override suspend fun load(params: LoadParams<String>): LoadResult<String, T> {

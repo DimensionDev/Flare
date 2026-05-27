@@ -50,13 +50,13 @@ struct ServiceSelectionScreen : View {
                     if vvoLoginPresenter.state.checkChocolate(cookie: cookie) {
                         vvoLoginPresenter.state.login(chocolate: cookie)
                     }
-                }, url: UiApplicationVVo.shared.loginUrl)
+                }, url: "https://\(PlatformTypeKt.vvoHost)/login?backURL=https://\(PlatformTypeKt.vvoHost)/")
             } else {
                 BackportWebLoginScreen(onCookie: { cookie in
                     if vvoLoginPresenter.state.checkChocolate(cookie: cookie) {
                         vvoLoginPresenter.state.login(chocolate: cookie)
                     }
-                }, url: UiApplicationVVo.shared.loginUrl)
+                }, url: "https://\(PlatformTypeKt.vvoHost)/login?backURL=https://\(PlatformTypeKt.vvoHost)/")
             }
         })
         .sheet(isPresented: $showXQTLoginSheet) {
@@ -67,13 +67,13 @@ struct ServiceSelectionScreen : View {
                     if xqtLoginPresenter.state.checkChocolate(cookie: cookie) {
                         xqtLoginPresenter.state.login(chocolate: cookie)
                     }
-                }, url: "https://" + UiApplicationXQT.shared.host)
+                }, url: "https://\(PlatformTypeKt.xqtHost)")
             } else {
                 BackportWebLoginScreen(onCookie: { cookie in
                     if xqtLoginPresenter.state.checkChocolate(cookie: cookie) {
                         xqtLoginPresenter.state.login(chocolate: cookie)
                     }
-                }, url: "https://" + UiApplicationXQT.shared.host)
+                }, url: "https://\(PlatformTypeKt.xqtHost)")
             }
         }
 

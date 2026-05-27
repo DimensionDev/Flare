@@ -17,9 +17,11 @@ import dev.dimension.flare.ui.render.toUiPlainText
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlin.native.HiddenFromObjC
 import kotlin.time.Clock
 import kotlin.uuid.Uuid
 
+@HiddenFromObjC
 public interface DirectMessageDataSource : AuthenticatedMicroblogDataSource {
     public val directMessageHandler: DirectMessageHandler
 

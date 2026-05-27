@@ -5,7 +5,9 @@ import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiProfile
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 public interface ListMemberLoader {
     public suspend fun loadMembers(
         pageSize: Int,

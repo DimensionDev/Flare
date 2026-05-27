@@ -19,4 +19,5 @@ public fun Element.toUi(sourceLanguages: List<String> = emptyList()): UiRichText
     )
 }
 
+@HiddenFromObjC
 public fun parseHtml(html: String): Element = Ksoup.parse(html).body()

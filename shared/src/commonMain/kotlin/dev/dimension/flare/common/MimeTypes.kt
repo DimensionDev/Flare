@@ -1,5 +1,8 @@
 package dev.dimension.flare.common
 
+import kotlin.native.HiddenFromObjC
+
+@HiddenFromObjC
 public object MimeTypes {
     public fun detectFromBytes(bytes: ByteArray): String? {
         if (bytes.size < 4) return null

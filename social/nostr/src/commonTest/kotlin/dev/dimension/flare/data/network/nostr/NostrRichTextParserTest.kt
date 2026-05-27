@@ -67,7 +67,7 @@ class NostrRichTextParserTest {
     @Test
     fun parsesNpubAsProfileLink() {
         val pubKeyHex = "1111111111111111111111111111111111111111111111111111111111111111"
-        val npub = bech32PublicKey(pubKeyHex)
+        val npub = nostrBech32PublicKey(pubKeyHex)
         val result = parseNostrRichText("nostr:$npub", accountKey)
 
         val content = assertIs<RenderContent.Text>(result.renderRuns.single())
@@ -82,7 +82,7 @@ class NostrRichTextParserTest {
     @Test
     fun rendersNpubAsAtHandleWhenProfileIsAvailable() {
         val pubKeyHex = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-        val npub = bech32PublicKey(pubKeyHex)
+        val npub = nostrBech32PublicKey(pubKeyHex)
         val result =
             parseNostrRichText(
                 text = "nostr:$npub",
@@ -117,7 +117,7 @@ class NostrRichTextParserTest {
     @Test
     fun extractsMentionedProfilePubkeysFromNostrUris() {
         val pubKeyHex = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
-        val npub = bech32PublicKey(pubKeyHex)
+        val npub = nostrBech32PublicKey(pubKeyHex)
 
         val result = extractMentionedProfilePubkeys("hello nostr:$npub")
 
@@ -127,7 +127,7 @@ class NostrRichTextParserTest {
     @Test
     fun buildRenderContextCollectsMentionAndPreprocessedMedia() {
         val pubKeyHex = "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
-        val npub = bech32PublicKey(pubKeyHex)
+        val npub = nostrBech32PublicKey(pubKeyHex)
         val mediaUrl = "https://cdn.example.com/final-image.webp"
 
         val context = buildNostrTextRenderContext("hello nostr:$npub $mediaUrl", emptyArray())

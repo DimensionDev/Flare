@@ -15,8 +15,10 @@ import kotlinx.coroutines.flow.first
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.koin.core.annotation.Single
+import kotlin.native.HiddenFromObjC
 
 @Single
+@HiddenFromObjC
 public class HtmlArticleTranslationService internal constructor(
     private val appDataStore: AppDataStore,
     private val aiCompletionService: AiCompletionService,

@@ -43,7 +43,9 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.serialization.Serializable
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 public data object MastodonPlatformSpec : PlatformSpec {
     public override val type: PlatformType = PlatformType.Mastodon
     public override val metadata: PlatformTypeMetadata =

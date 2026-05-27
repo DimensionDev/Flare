@@ -1,5 +1,8 @@
 package dev.dimension.flare.data.model.tab
 
+import kotlin.native.HiddenFromObjC
+
+@HiddenFromObjC
 public object TimelineSpecIds {
     public const val COMMON_HOME: String = "common.home"
     public const val COMMON_DISCOVER: String = "common.discover"

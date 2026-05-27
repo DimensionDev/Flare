@@ -160,8 +160,13 @@ public fun <T : Any> UiState<T>.takeSuccess(): T? = (this as? UiState.Success)?.
 
 public fun <T : Any> UiState<T>.takeSuccessOr(value: T): T = (this as? UiState.Success)?.data ?: value
 
+@HiddenFromObjC
 public val <T : Any> UiState<T>.isSuccess: Boolean get() = this is UiState.Success
+
+@HiddenFromObjC
 public val <T : Any> UiState<T>.isError: Boolean get() = this is UiState.Error
+
+@HiddenFromObjC
 public val <T : Any> UiState<T>.isLoading: Boolean get() = this is UiState.Loading
 
 @OptIn(ExperimentalObjCRefinement::class)

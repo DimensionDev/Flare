@@ -5,7 +5,9 @@ import dev.dimension.flare.data.repository.DebugRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 public abstract class BasePagingSource<Key : Any, Value : Any> : PagingSource<Key, Value>() {
     override suspend fun load(params: LoadParams<Key>): LoadResult<Key, Value> =
         withContext(Dispatchers.IO) {

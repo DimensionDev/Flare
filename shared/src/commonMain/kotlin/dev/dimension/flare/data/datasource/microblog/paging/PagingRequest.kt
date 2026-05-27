@@ -1,5 +1,7 @@
 package dev.dimension.flare.data.datasource.microblog.paging
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 public sealed interface PagingRequest {
     public data object Refresh : PagingRequest
 

@@ -22,7 +22,9 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.withContext
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 public class Cacheable<T>(
     fetchSource: suspend () -> Unit,
     cacheSource: () -> Flow<T>,
@@ -32,6 +34,7 @@ public class Cacheable<T>(
     )
 
 @Suppress("UNCHECKED_CAST")
+@HiddenFromObjC
 public class MemCacheable<T>(
     private val key: String,
     fetchSource: suspend () -> T,
@@ -70,6 +73,7 @@ public class MemCacheable<T>(
     }
 }
 
+@HiddenFromObjC
 public sealed class CacheData<T>(
     private val fetchSource: suspend () -> Unit,
     private val cacheSource: () -> Flow<T>,
@@ -107,6 +111,7 @@ public sealed class CacheData<T>(
     }
 }
 
+@HiddenFromObjC
 public sealed class CacheState<T> {
     public class Empty<T> : CacheState<T>()
 
@@ -116,6 +121,7 @@ public sealed class CacheState<T> {
 }
 
 @Composable
+@HiddenFromObjC
 public fun <T> CacheData<T>.collectAsState(): CacheableState<T> {
     val state =
         remember(this) {
@@ -133,6 +139,7 @@ public fun <T> CacheData<T>.collectAsState(): CacheableState<T> {
     return state
 }
 
+@HiddenFromObjC
 public class CacheableState<T>(
     private val cacheData: CacheData<T>,
 ) {
@@ -162,6 +169,7 @@ public class CacheableState<T>(
 }
 
 @Composable
+@HiddenFromObjC
 public fun <T : Any> UiState<CacheData<ImmutableList<T>>>.toPagingState(): PagingState<T> =
     when (this) {
         is UiState.Loading -> PagingState.Loading()

@@ -15,7 +15,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.serialization.KSerializer
 import org.koin.core.annotation.Provided
 import org.koin.core.annotation.Single
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 public interface PlatformSpec {
     public val type: PlatformType
     public val metadata: PlatformTypeMetadata
@@ -40,6 +42,7 @@ public interface PlatformSpec {
     ): MicroblogDataSource
 }
 
+@HiddenFromObjC
 public interface SubscriptionTimelineSpec {
     public val type: SubscriptionType
 
@@ -54,6 +57,7 @@ public interface SubscriptionTimelineSpec {
     ): CacheableRemoteLoader<UiTimelineV2>
 }
 
+@HiddenFromObjC
 public interface PlatformDataSourceContext {
     public val accountKey: MicroBlogKey
 
@@ -67,18 +71,21 @@ public interface PlatformDataSourceContext {
     )
 }
 
+@HiddenFromObjC
 public data class PlatformDeepLink<T>(
     public val uriPattern: String,
     public val serializer: KSerializer<T>,
     public val callback: (T) -> DeeplinkRoute,
 )
 
+@HiddenFromObjC
 public data class RecommendedInstance(
     public val instance: UiInstance,
     public val priority: Int = 0,
 )
 
 @Provided
+@HiddenFromObjC
 public data class PlatformRuntimeData(
     public val platformSpecs: List<PlatformSpec>,
     public val extraTimelineSpecs: List<TimelineSpec<out TimelineSpec.Data>>,
@@ -91,6 +98,7 @@ public data class PlatformRuntimeData(
 }
 
 @Single
+@HiddenFromObjC
 public class PlatformRegistry(
     data: PlatformRuntimeData,
 ) {
@@ -137,10 +145,12 @@ public class PlatformRegistry(
         getSubscriptionTimelineSpec(type) ?: throw UnsupportedSubscriptionTimelineException(type)
 }
 
+@HiddenFromObjC
 public class UnsupportedPlatformException(
     public val type: PlatformType,
 ) : IllegalArgumentException("Platform is not registered: $type")
 
+@HiddenFromObjC
 public class UnsupportedSubscriptionTimelineException(
     public val type: SubscriptionType,
 ) : IllegalArgumentException("Subscription timeline is not registered: $type")

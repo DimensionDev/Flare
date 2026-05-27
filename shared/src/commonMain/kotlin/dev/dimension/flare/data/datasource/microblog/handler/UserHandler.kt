@@ -22,7 +22,9 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.mapNotNull
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 public class UserHandler(
     private val host: String,
     private val loader: UserLoader,

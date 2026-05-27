@@ -6,7 +6,9 @@ import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlinx.collections.immutable.ImmutableList
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 public interface MicroblogDataSource {
     public fun homeTimeline(): RemoteLoader<UiTimelineV2>
 

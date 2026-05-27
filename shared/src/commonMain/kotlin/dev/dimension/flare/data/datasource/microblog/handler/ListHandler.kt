@@ -27,8 +27,10 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import kotlin.native.HiddenFromObjC
 
 @OptIn(ExperimentalPagingApi::class)
+@HiddenFromObjC
 public class ListHandler<T : UiList>(
     private val pagingKey: String,
     private val accountKey: MicroBlogKey,

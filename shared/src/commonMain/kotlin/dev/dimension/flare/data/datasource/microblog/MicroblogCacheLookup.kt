@@ -8,7 +8,9 @@ import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlinx.coroutines.flow.firstOrNull
 import org.koin.core.annotation.Single
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 public interface MicroblogCacheLookup {
     public suspend fun findProfiles(keys: Collection<MicroBlogKey>): Map<MicroBlogKey, UiProfile>
 

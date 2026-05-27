@@ -24,7 +24,9 @@ import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 public class PostHandler(
     public val accountType: AccountType,
     public val loader: PostLoader,

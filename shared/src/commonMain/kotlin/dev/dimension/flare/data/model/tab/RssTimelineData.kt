@@ -2,6 +2,7 @@ package dev.dimension.flare.data.model.tab
 
 import dev.dimension.flare.data.database.app.model.SubscriptionType
 import kotlinx.serialization.Serializable
+import kotlin.native.HiddenFromObjC
 
 @Serializable
 public data class RssTimelineData(
@@ -9,6 +10,7 @@ public data class RssTimelineData(
 ) : TimelineSpec.Data
 
 @Serializable
+@HiddenFromObjC
 public data object AllRssTimelineData : TimelineSpec.Data
 
 @Serializable

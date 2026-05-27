@@ -12,6 +12,7 @@ import dev.dimension.flare.ui.route.DeeplinkRoute
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlin.native.HiddenFromObjC
 
 @Serializable
 @Immutable
@@ -116,6 +117,7 @@ public sealed class ActionMenu {
     }
 }
 
+@HiddenFromObjC
 public fun userActionsMenu(
     accountKey: MicroBlogKey?,
     userKey: MicroBlogKey,

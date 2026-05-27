@@ -5,6 +5,7 @@ import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.render.UiDateTime
 import kotlinx.collections.immutable.ImmutableList
+import kotlin.native.HiddenFromObjC
 
 @Immutable
 public data class UiDraft(
@@ -44,5 +45,6 @@ public enum class UiDraftStatus {
     DRAFT,
 }
 
+@HiddenFromObjC
 public val UiDraft.primaryAccountKey: MicroBlogKey?
     get() = accounts.firstOrNull()?.account?.accountKey

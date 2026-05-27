@@ -48,8 +48,7 @@ public interface DirectMessageDataSource : AuthenticatedMicroblogDataSource {
         directMessageHandler.delete(roomKey, messageKey)
     }
 
-    public fun getDirectMessageConversationInfo(roomKey: MicroBlogKey): CacheData<UiDMRoom> =
-        directMessageHandler.roomInfo(roomKey)
+    public fun getDirectMessageConversationInfo(roomKey: MicroBlogKey): CacheData<UiDMRoom> = directMessageHandler.roomInfo(roomKey)
 
     public suspend fun fetchNewDirectMessageForConversation(roomKey: MicroBlogKey) {
         directMessageHandler.fetchNew(roomKey)
@@ -62,8 +61,7 @@ public interface DirectMessageDataSource : AuthenticatedMicroblogDataSource {
         directMessageHandler.leave(roomKey)
     }
 
-    public fun createDirectMessageRoom(userKey: MicroBlogKey): Flow<UiState<MicroBlogKey>> =
-        directMessageHandler.createRoom(userKey)
+    public fun createDirectMessageRoom(userKey: MicroBlogKey): Flow<UiState<MicroBlogKey>> = directMessageHandler.createRoom(userKey)
 
     public suspend fun canSendDirectMessage(userKey: MicroBlogKey): Boolean = directMessageHandler.canSend(userKey)
 }

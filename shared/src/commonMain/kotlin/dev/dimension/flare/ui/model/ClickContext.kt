@@ -27,30 +27,32 @@ public sealed interface ClickEvent {
         public fun event(
             accountKey: MicroBlogKey?,
             postEvent: PostEvent,
-        ): ClickEvent = if (accountKey == null) {
-            Noop
-        } else {
-            Deeplink(
-                DeeplinkEvent(
-                    accountKey = accountKey,
-                    postEvent = postEvent,
-                ),
-            )
-        }
+        ): ClickEvent =
+            if (accountKey == null) {
+                Noop
+            } else {
+                Deeplink(
+                    DeeplinkEvent(
+                        accountKey = accountKey,
+                        postEvent = postEvent,
+                    ),
+                )
+            }
 
         public fun event(
             accountKey: MicroBlogKey?,
             eventCreator: (accountKey: MicroBlogKey) -> PostEvent,
-        ): ClickEvent = if (accountKey == null) {
-            Noop
-        } else {
-            Deeplink(
-                DeeplinkEvent(
-                    accountKey = accountKey,
-                    postEvent = eventCreator.invoke(accountKey),
-                ),
-            )
-        }
+        ): ClickEvent =
+            if (accountKey == null) {
+                Noop
+            } else {
+                Deeplink(
+                    DeeplinkEvent(
+                        accountKey = accountKey,
+                        postEvent = eventCreator.invoke(accountKey),
+                    ),
+                )
+            }
     }
 }
 

@@ -23,23 +23,24 @@ public fun ktorfit(
     baseUrl: String,
     json: Json = JSON,
     config: HttpClientConfig<*>.() -> Unit = {},
-): Ktorfit = de.jensklingenberg.ktorfit.ktorfit {
-    baseUrl(baseUrl)
-    httpClient(
-        ktorClient {
-            install(ContentNegotiation) {
-                json(json)
-            }
-            config.invoke(this)
-        },
-    )
-    converterFactories(
-        FlowConverterFactory(),
-        CallConverterFactory(),
-        ResponseConverterFactory(),
-        MastodonPagingConverterFactory(),
-    )
-}
+): Ktorfit =
+    de.jensklingenberg.ktorfit.ktorfit {
+        baseUrl(baseUrl)
+        httpClient(
+            ktorClient {
+                install(ContentNegotiation) {
+                    json(json)
+                }
+                config.invoke(this)
+            },
+        )
+        converterFactories(
+            FlowConverterFactory(),
+            CallConverterFactory(),
+            ResponseConverterFactory(),
+            MastodonPagingConverterFactory(),
+        )
+    }
 
 @OptIn(ExperimentalObjCRefinement::class)
 @HiddenFromObjC

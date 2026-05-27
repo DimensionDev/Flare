@@ -1,13 +1,19 @@
 package dev.dimension.flare
 
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
+import dev.dimension.flare.data.model.tab.AllRssTimelineData
+import dev.dimension.flare.data.model.tab.RssTimelineData
+import dev.dimension.flare.data.model.tab.SubscriptionTimelineData
 import dev.dimension.flare.data.model.tab.TimelineSpec
+import dev.dimension.flare.data.model.tab.TimelineSpecIds
 import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
+import dev.dimension.flare.data.platform.CommonTimelineSpecs
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformDataSourceContext
 import dev.dimension.flare.model.PlatformDeepLink
 import dev.dimension.flare.model.PlatformRegistry
+import dev.dimension.flare.model.PlatformRuntimeData
 import dev.dimension.flare.model.PlatformSpec
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.PlatformTypeMetadata
@@ -16,25 +22,118 @@ import dev.dimension.flare.model.xqtHost
 import dev.dimension.flare.model.xqtOldHost
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiInstanceMetadata
+import dev.dimension.flare.ui.model.UiStrings
+import dev.dimension.flare.ui.model.asType
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.serialization.Serializable
 
-internal fun testPlatformRegistry(): PlatformRegistry =
-    PlatformRegistry(
-        listOf(
-            TestNostrPlatformSpec,
-            TestMastodonPlatformSpec,
-            TestMisskeyPlatformSpec,
-            TestBlueskyPlatformSpec,
-            TestXqtPlatformSpec,
-            TestVvoPlatformSpec,
-        ),
+internal fun testPlatformRegistry(): PlatformRegistry = PlatformRegistry(testPlatformRuntimeData())
+
+internal fun testPlatformRuntimeData(): PlatformRuntimeData =
+    PlatformRuntimeData(
+        platformSpecs =
+            listOf(
+                TestNostrPlatformSpec,
+                TestMastodonPlatformSpec,
+                TestMisskeyPlatformSpec,
+                TestBlueskyPlatformSpec,
+                TestXqtPlatformSpec,
+                TestVvoPlatformSpec,
+            ),
+        extraTimelineSpecs = testExtraTimelineSpecs,
     )
 
-internal fun testTimelineSpecs(): List<TimelineSpec<out TimelineSpec.Data>> = testPlatformRegistry().all.flatMap { it.timelineSpecs }
+internal fun testTimelineSpecs(): List<TimelineSpec<out TimelineSpec.Data>> = testPlatformRuntimeData().timelineSpecs
+
+private val testExtraTimelineSpecs: List<TimelineSpec<out TimelineSpec.Data>> =
+    listOf(
+        CommonTimelineSpecs.home,
+        CommonTimelineSpecs.discover,
+        CommonTimelineSpecs.list,
+        rssTimelineSpec(),
+        allRssTimelineSpec(),
+        subscriptionTimelineSpec(),
+        accountBasedTimelineSpec(TimelineSpecIds.MASTODON_LOCAL, UiStrings.MastodonLocal, UiIcon.Local),
+        accountBasedTimelineSpec(TimelineSpecIds.MASTODON_PUBLIC, UiStrings.MastodonPublic, UiIcon.World),
+        accountBasedTimelineSpec(TimelineSpecIds.MASTODON_BOOKMARK, UiStrings.Bookmark, UiIcon.Bookmark),
+        accountBasedTimelineSpec(TimelineSpecIds.MASTODON_FAVOURITE, UiStrings.Favourite, UiIcon.Favourite),
+        accountBasedTimelineSpec(TimelineSpecIds.MISSKEY_FAVOURITE, UiStrings.Favourite, UiIcon.Favourite),
+        accountBasedTimelineSpec(TimelineSpecIds.MISSKEY_HYBRID, UiStrings.Social, UiIcon.World),
+        accountBasedTimelineSpec(TimelineSpecIds.MISSKEY_LOCAL, UiStrings.MastodonLocal, UiIcon.Local),
+        accountBasedTimelineSpec(TimelineSpecIds.MISSKEY_GLOBAL, UiStrings.MastodonPublic, UiIcon.World),
+        accountResourceTimelineSpec(TimelineSpecIds.MISSKEY_ANTENNA, UiStrings.Antenna, UiIcon.Rss),
+        accountResourceTimelineSpec(TimelineSpecIds.MISSKEY_CHANNEL, UiStrings.Channel, UiIcon.Channel),
+        accountBasedTimelineSpec(TimelineSpecIds.BLUESKY_BOOKMARK, UiStrings.Bookmark, UiIcon.Bookmark),
+        accountResourceTimelineSpec(TimelineSpecIds.BLUESKY_FEED, UiStrings.Feeds, UiIcon.Bluesky),
+        accountBasedTimelineSpec(TimelineSpecIds.XQT_FEATURED, UiStrings.Featured, UiIcon.Featured),
+        accountBasedTimelineSpec(TimelineSpecIds.XQT_BOOKMARK, UiStrings.Bookmark, UiIcon.Bookmark),
+        accountBasedTimelineSpec(TimelineSpecIds.XQT_DEVICE_FOLLOW, UiStrings.List, UiIcon.List),
+        accountBasedTimelineSpec(TimelineSpecIds.VVO_FAVORITE, UiStrings.Favourite, UiIcon.Favourite),
+        accountBasedTimelineSpec(TimelineSpecIds.VVO_LIKED, UiStrings.Liked, UiIcon.Heart),
+    )
+
+private fun accountBasedTimelineSpec(
+    id: String,
+    title: UiStrings,
+    icon: UiIcon,
+): TimelineSpec<TimelineSpec.AccountBasedData> =
+    TimelineSpec(
+        id = id,
+        title = title,
+        icon = icon.asType(),
+        serializer = TimelineSpec.AccountBasedData.serializer(),
+        targetId = { it.accountKey.toString() },
+        presenterFactory = { unavailablePresenter(id) },
+    )
+
+private fun accountResourceTimelineSpec(
+    id: String,
+    title: UiStrings,
+    icon: UiIcon,
+): TimelineSpec<TimelineSpec.AccountResourceData> =
+    TimelineSpec(
+        id = id,
+        title = title,
+        icon = icon.asType(),
+        serializer = TimelineSpec.AccountResourceData.serializer(),
+        targetId = { "${it.accountKey}:${it.resourceId}" },
+        presenterFactory = { unavailablePresenter(id) },
+    )
+
+private fun rssTimelineSpec(): TimelineSpec<RssTimelineData> =
+    TimelineSpec(
+        id = TimelineSpecIds.RSS_FEED,
+        title = UiStrings.Rss,
+        icon = UiIcon.Rss.asType(),
+        serializer = RssTimelineData.serializer(),
+        targetId = { it.feedUrl },
+        presenterFactory = { unavailablePresenter(TimelineSpecIds.RSS_FEED) },
+    )
+
+private fun allRssTimelineSpec(): TimelineSpec<AllRssTimelineData> =
+    TimelineSpec(
+        id = TimelineSpecIds.RSS_ALL,
+        title = UiStrings.AllRssFeeds,
+        icon = UiIcon.Rss.asType(),
+        serializer = AllRssTimelineData.serializer(),
+        targetId = { "all" },
+        presenterFactory = { unavailablePresenter(TimelineSpecIds.RSS_ALL) },
+    )
+
+private fun subscriptionTimelineSpec(): TimelineSpec<SubscriptionTimelineData> =
+    TimelineSpec(
+        id = TimelineSpecIds.RSS_SUBSCRIPTION,
+        title = UiStrings.Rss,
+        icon = UiIcon.Rss.asType(),
+        serializer = SubscriptionTimelineData.serializer(),
+        targetId = { "${it.subscriptionType.name}:${it.subscriptionUrl}" },
+        presenterFactory = { unavailablePresenter(TimelineSpecIds.RSS_SUBSCRIPTION) },
+    )
+
+private fun unavailablePresenter(id: String): Nothing = throw UnsupportedOperationException("$id presenter is not available in tests")
 
 private abstract class TestDeepLinkPlatformSpec(
     final override val type: PlatformType,
@@ -129,7 +228,7 @@ private data object TestMisskeyPlatformSpec : TestDeepLinkPlatformSpec(
             ),
             PlatformDeepLink(
                 uriPattern = "https://${accountKey.host}/notes/{id}",
-                serializer = TestPostDeepLink.serializer(),
+                serializer = TestIdDeepLink.serializer(),
                 callback = { data ->
                     DeeplinkRoute.Status.Detail(
                         accountType = AccountType.Specific(accountKey),
@@ -279,6 +378,11 @@ private data class TestProfileDeepLink(
 @Serializable
 private data class TestPostDeepLink(
     val handle: String,
+    val id: String,
+)
+
+@Serializable
+private data class TestIdDeepLink(
     val id: String,
 )
 

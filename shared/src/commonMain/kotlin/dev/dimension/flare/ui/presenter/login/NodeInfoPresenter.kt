@@ -54,7 +54,7 @@ public class NodeInfoPresenter :
                     Pager(
                         config = pagingConfig,
                     ) {
-                        RecommendInstancePagingSource()
+                        RecommendInstancePagingSource(platformRegistry)
                     }.flow.cachedIn(scope),
                     filterFlow,
                 ) { pagingData, filter ->

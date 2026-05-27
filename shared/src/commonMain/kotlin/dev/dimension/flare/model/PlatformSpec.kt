@@ -3,6 +3,7 @@ package dev.dimension.flare.model
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
+import dev.dimension.flare.ui.model.UiInstance
 import dev.dimension.flare.ui.model.UiInstanceMetadata
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import kotlinx.collections.immutable.ImmutableList
@@ -20,6 +21,8 @@ public interface PlatformSpec {
     public fun deepLinks(accountKey: MicroBlogKey): ImmutableList<PlatformDeepLink<*>>
 
     public suspend fun instanceMetadata(host: String): UiInstanceMetadata
+
+    public suspend fun recommendInstances(): List<RecommendedInstance> = emptyList()
 
     public fun createDataSource(context: PlatformDataSourceContext): MicroblogDataSource
 
@@ -46,6 +49,11 @@ public data class PlatformDeepLink<T>(
     public val uriPattern: String,
     public val serializer: KSerializer<T>,
     public val callback: (T) -> DeeplinkRoute,
+)
+
+public data class RecommendedInstance(
+    public val instance: UiInstance,
+    public val priority: Int = 0,
 )
 
 public class PlatformRegistry(

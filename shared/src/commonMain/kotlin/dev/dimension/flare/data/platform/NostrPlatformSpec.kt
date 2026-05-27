@@ -11,7 +11,9 @@ import dev.dimension.flare.model.PlatformDeepLink
 import dev.dimension.flare.model.PlatformSpec
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.PlatformTypeMetadata
+import dev.dimension.flare.model.RecommendedInstance
 import dev.dimension.flare.ui.model.UiIcon
+import dev.dimension.flare.ui.model.UiInstance
 import dev.dimension.flare.ui.model.UiInstanceMetadata
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -36,6 +38,25 @@ public data object NostrPlatformSpec : PlatformSpec {
 
     override suspend fun instanceMetadata(host: String): UiInstanceMetadata =
         throw UnsupportedOperationException("${type.name} is not supported yet")
+
+    override suspend fun recommendInstances(): List<RecommendedInstance> =
+        listOf(
+            RecommendedInstance(
+                instance =
+                    UiInstance(
+                        name = metadata.displayName,
+                        description =
+                            "A decentralized network based on cryptographic keypairs and that is not peer-to-peer, " +
+                                "it is super simple and scalable and therefore has a chance of working.",
+                        iconUrl = null,
+                        domain = "nostr",
+                        type = type,
+                        bannerUrl = null,
+                        usersCount = 0,
+                    ),
+                priority = 60,
+            ),
+        )
 
     override fun createDataSource(context: PlatformDataSourceContext): MicroblogDataSource =
         NostrDataSource(

@@ -13,9 +13,11 @@ import dev.dimension.flare.model.PlatformDeepLink
 import dev.dimension.flare.model.PlatformSpec
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.PlatformTypeMetadata
+import dev.dimension.flare.model.RecommendedInstance
 import dev.dimension.flare.model.xqtHost
 import dev.dimension.flare.model.xqtOldHost
 import dev.dimension.flare.ui.model.UiIcon
+import dev.dimension.flare.ui.model.UiInstance
 import dev.dimension.flare.ui.model.UiInstanceMetadata
 import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.asType
@@ -121,6 +123,25 @@ public data object XqtPlatformSpec : PlatformSpec {
 
     override suspend fun instanceMetadata(host: String): UiInstanceMetadata =
         throw UnsupportedOperationException("${type.name} is not supported yet")
+
+    override suspend fun recommendInstances(): List<RecommendedInstance> =
+        listOf(
+            RecommendedInstance(
+                instance =
+                    UiInstance(
+                        name = metadata.displayName,
+                        description =
+                            "From breaking news and entertainment to sports and politics," +
+                                " get the full story with all the live commentary.",
+                        iconUrl = null,
+                        domain = xqtHost,
+                        type = type,
+                        bannerUrl = null,
+                        usersCount = 0,
+                    ),
+                priority = 80,
+            ),
+        )
 
     override fun createDataSource(context: PlatformDataSourceContext): MicroblogDataSource =
         XQTDataSource(

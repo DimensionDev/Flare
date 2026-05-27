@@ -73,6 +73,17 @@
     <string name="settings_storage_subtitle">Spravovat mezipaměť, protokoly a zálohy</string>
     <string name="settings_about_title">O aplikaci</string>
     <string name="settings_about_subtitle">Další informace o Flare</string>
+    <string name="settings_about_description">Open-source klient poháněný AI pro decentralizované sociální platformy.</string>
+    <string name="settings_about_source_code">Zdrojový kód</string>
+    <string name="settings_about_telegram">Telegram</string>
+    <string name="settings_about_telegram_description">Připojte se k naší skupině na Telegramu</string>
+    <string name="settings_about_discord" translatable="false">Discord</string>
+    <string name="settings_about_discord_description">Připojte se k našemu Discord serveru</string>
+    <string name="settings_about_line" translatable="false">Line</string>
+    <string name="settings_about_line_description">Připojte se k naší skupině na Line</string>
+    <string name="settings_about_localization">Crowdin</string>
+    <string name="settings_about_localization_description">Pomozte nám přeložit Flare</string>
+    <string name="settings_privacy_policy">Zásady ochrany osobních údajů</string>
     <string name="settings_side_panel">Přizpůsobení bočního panelu</string>
     <string name="settings_side_panel_description">Přizpůsobit boční panel</string>
     <string name="settings_local_filter_title">Místní filtry</string>

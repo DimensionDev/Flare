@@ -516,16 +516,5 @@
     <string name="posts_title">Objave</string>
     <string name="settings_appearance_absolute_timestamp">Apsolutno vreme</string>
     <string name="settings_appearance_absolute_timestamp_description">Prikaži tačno vreme na objavama</string>
-    <string name="settings_about_description">Klijent otvorenog koda za decentralizovane društvene platforme, pokretan veštačkom inteligencijom.</string>
-    <string name="settings_about_source_code">Izvorni kod</string>
-    <string name="settings_about_telegram">Telegram</string>
-    <string name="settings_about_telegram_description">Pridružite se našoj Telegram grupi</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
-    <string name="settings_about_discord_description">Pridružite se našem Discord serveru</string>
-    <string name="settings_about_line" translatable="false">Line</string>
-    <string name="settings_about_line_description">Pridružite se našoj Line grupi</string>
-    <string name="settings_about_localization">Crowdin</string>
-    <string name="settings_about_localization_description">Pomozite nam u prevođenju Flare-a</string>
-    <string name="settings_privacy_policy">Politika privatnosti</string>
     <string name="channel_title">Kanal</string>
 </resources>

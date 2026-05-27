@@ -405,16 +405,5 @@
     <string name="posts_title">Plasings</string>
     <string name="settings_appearance_absolute_timestamp">Absoluut tydstempel</string>
     <string name="settings_appearance_absolute_timestamp_description">Wys presiese tydstempels op plasings</string>
-    <string name="settings_about_description">\'n Oopbron, KI-aangedrewe kliënt vir gedesentraliseerde sosiale platforms.</string>
-    <string name="settings_about_source_code">Bronkode</string>
-    <string name="settings_about_telegram">Telegram</string>
-    <string name="settings_about_telegram_description">Sluit aan by ons Telegram-groep</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
-    <string name="settings_about_discord_description">Sluit aan by ons Discord-bediener</string>
-    <string name="settings_about_line" translatable="false">Line</string>
-    <string name="settings_about_line_description">Sluit aan by ons Line-groep</string>
-    <string name="settings_about_localization">Crowdin</string>
-    <string name="settings_about_localization_description">Help ons om Flare te vertaal</string>
-    <string name="settings_privacy_policy">Privaatheidsbeleid</string>
     <string name="channel_title">Kanaal</string>
 </resources>

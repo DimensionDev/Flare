@@ -68,6 +68,17 @@
     <string name="settings_storage_subtitle">캐시된 파일, 로그 및 백업 관리</string>
     <string name="settings_about_title">정보</string>
     <string name="settings_about_subtitle">Flare에 대해 자세히 알아보기</string>
+    <string name="settings_about_description">탈중앙화 소셜 플랫폼을 위한 오픈 소스 AI 기반 클라이언트입니다.</string>
+    <string name="settings_about_source_code">소스 코드</string>
+    <string name="settings_about_telegram">Telegram</string>
+    <string name="settings_about_telegram_description">저희 Telegram 그룹에 참여하세요</string>
+    <string name="settings_about_discord" translatable="false">Discord</string>
+    <string name="settings_about_discord_description">저희 Discord 서버에 참여하세요</string>
+    <string name="settings_about_line" translatable="false">Line</string>
+    <string name="settings_about_line_description">저희 Line 그룹에 참여하세요</string>
+    <string name="settings_about_localization">Crowdin</string>
+    <string name="settings_about_localization_description">Flare 번역을 도와주세요</string>
+    <string name="settings_privacy_policy">개인정보 처리방침</string>
     <string name="settings_side_panel">사이드 패널 사용자 정의</string>
     <string name="settings_side_panel_description">사이드 패널을 사용자 정의합니다</string>
     <string name="settings_local_filter_title">로컬 필터</string>

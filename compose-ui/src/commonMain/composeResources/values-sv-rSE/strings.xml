@@ -516,16 +516,5 @@
     <string name="posts_title">Inlägg</string>
     <string name="settings_appearance_absolute_timestamp">Absolut tidsstämpel</string>
     <string name="settings_appearance_absolute_timestamp_description">Visa exakta tidsstämplar på inlägg</string>
-    <string name="settings_about_description">En AI-driven klient med öppen källkod för decentraliserade sociala plattformar.</string>
-    <string name="settings_about_source_code">Källkod</string>
-    <string name="settings_about_telegram">Telegram</string>
-    <string name="settings_about_telegram_description">Gå med i vår Telegram-grupp</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
-    <string name="settings_about_discord_description">Gå med i vår Discord-server</string>
-    <string name="settings_about_line" translatable="false">Line</string>
-    <string name="settings_about_line_description">Gå med i vår Line-grupp</string>
-    <string name="settings_about_localization">Crowdin</string>
-    <string name="settings_about_localization_description">Hjälp oss översätta Flare</string>
-    <string name="settings_privacy_policy">Integritetspolicy</string>
     <string name="channel_title">Kanal</string>
 </resources>

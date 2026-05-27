@@ -405,16 +405,5 @@
     <string name="posts_title">Julkaisut</string>
     <string name="settings_appearance_absolute_timestamp">Absoluuttinen aikaleima</string>
     <string name="settings_appearance_absolute_timestamp_description">Näytä tarkat aikaleimat julkaisuissa</string>
-    <string name="settings_about_description">Avoimen lähdekoodin tekoälypohjainen asiakasohjelma hajautetuille sosiaalisen median alustoille.</string>
-    <string name="settings_about_source_code">Lähdekoodi</string>
-    <string name="settings_about_telegram">Telegram</string>
-    <string name="settings_about_telegram_description">Liity Telegram-ryhmäämme</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
-    <string name="settings_about_discord_description">Liity Discord-palvelimellemme</string>
-    <string name="settings_about_line" translatable="false">Line</string>
-    <string name="settings_about_line_description">Liity Line-ryhmäämme</string>
-    <string name="settings_about_localization">Crowdin</string>
-    <string name="settings_about_localization_description">Auta meitä kääntämään Flare</string>
-    <string name="settings_privacy_policy">Tietosuojakäytäntö</string>
     <string name="channel_title">Kanava</string>
 </resources>

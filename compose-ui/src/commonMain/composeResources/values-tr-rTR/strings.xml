@@ -516,16 +516,5 @@
     <string name="posts_title">Gönderiler</string>
     <string name="settings_appearance_absolute_timestamp">Mutlak zaman damgası</string>
     <string name="settings_appearance_absolute_timestamp_description">Gönderilerde tam zaman damgalarını göster</string>
-    <string name="settings_about_description">Merkezi olmayan sosyal platformlar için açık kaynaklı, yapay zeka destekli bir istemci.</string>
-    <string name="settings_about_source_code">Kaynak kod</string>
-    <string name="settings_about_telegram">Telegram</string>
-    <string name="settings_about_telegram_description">Telegram grubumuza katılın</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
-    <string name="settings_about_discord_description">Discord sunucumuza katılın</string>
-    <string name="settings_about_line" translatable="false">Line</string>
-    <string name="settings_about_line_description">Line grubumuza katılın</string>
-    <string name="settings_about_localization">Crowdin</string>
-    <string name="settings_about_localization_description">Flare\'i çevirmemize yardımcı olun</string>
-    <string name="settings_privacy_policy">Gizlilik Politikası</string>
     <string name="channel_title">Kanal</string>
 </resources>

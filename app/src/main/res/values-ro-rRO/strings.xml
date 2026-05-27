@@ -72,6 +72,17 @@
     <string name="settings_storage_subtitle">Gestionează fișierele cache, log-urile și backup-urile</string>
     <string name="settings_about_title">Despre</string>
     <string name="settings_about_subtitle">Află mai multe despre Flare</string>
+    <string name="settings_about_description">Un client open-source, bazat pe AI, pentru platforme sociale descentralizate.</string>
+    <string name="settings_about_source_code">Cod sursă</string>
+    <string name="settings_about_telegram">Telegram</string>
+    <string name="settings_about_telegram_description">Alătură-te grupului nostru de Telegram</string>
+    <string name="settings_about_discord" translatable="false">Discord</string>
+    <string name="settings_about_discord_description">Alătură-te serverului nostru de Discord</string>
+    <string name="settings_about_line" translatable="false">Line</string>
+    <string name="settings_about_line_description">Alătură-te grupului nostru de Line</string>
+    <string name="settings_about_localization">Crowdin</string>
+    <string name="settings_about_localization_description">Ajută-ne să traducem Flare</string>
+    <string name="settings_privacy_policy">Politică de Confidențialitate</string>
     <string name="settings_side_panel">Personalizare panou lateral</string>
     <string name="settings_side_panel_description">Personalizează panoul lateral</string>
     <string name="settings_local_filter_title">Filtre locale</string>

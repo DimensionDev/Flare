@@ -516,16 +516,5 @@
     <string name="posts_title">Дописи</string>
     <string name="settings_appearance_absolute_timestamp">Абсолютна мітка часу</string>
     <string name="settings_appearance_absolute_timestamp_description">Показувати точний час на дописах</string>
-    <string name="settings_about_description">Клієнт з відкритим вихідним кодом на базі ШІ для децентралізованих соціальних платформ.</string>
-    <string name="settings_about_source_code">Вихідний код</string>
-    <string name="settings_about_telegram">Telegram</string>
-    <string name="settings_about_telegram_description">Приєднуйтесь до нашої групи в Telegram</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
-    <string name="settings_about_discord_description">Приєднуйтесь до нашого сервера в Discord</string>
-    <string name="settings_about_line" translatable="false">Line</string>
-    <string name="settings_about_line_description">Приєднуйтесь до нашої групи в Line</string>
-    <string name="settings_about_localization">Crowdin</string>
-    <string name="settings_about_localization_description">Допоможіть нам перекласти Flare</string>
-    <string name="settings_privacy_policy">Політика конфіденційності</string>
     <string name="channel_title">Канал</string>
 </resources>

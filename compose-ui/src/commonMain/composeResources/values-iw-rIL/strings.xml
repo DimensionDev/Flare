@@ -405,16 +405,5 @@
     <string name="posts_title">פוסטים</string>
     <string name="settings_appearance_absolute_timestamp">חותמת זמן מוחלטת</string>
     <string name="settings_appearance_absolute_timestamp_description">הצג חותמות זמן מדויקות בפוסטים</string>
-    <string name="settings_about_description">לקוח קוד פתוח המבוסס על בינה מלאכותית עבור פלטפורמות חברתיות מבוזרות.</string>
-    <string name="settings_about_source_code">קוד מקור</string>
-    <string name="settings_about_telegram">Telegram</string>
-    <string name="settings_about_telegram_description">הצטרף לקבוצת הטלגרם שלנו</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
-    <string name="settings_about_discord_description">הצטרפו לשרת ה-Discord שלנו</string>
-    <string name="settings_about_line" translatable="false">Line</string>
-    <string name="settings_about_line_description">הצטרפו לקבוצת ה-Line שלנו</string>
-    <string name="settings_about_localization">Crowdin</string>
-    <string name="settings_about_localization_description">עזור לנו לתרגם את Flare</string>
-    <string name="settings_privacy_policy">מדיניות פרטיות</string>
     <string name="channel_title">ערוץ</string>
 </resources>

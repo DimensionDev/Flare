@@ -405,16 +405,5 @@
     <string name="posts_title">게시물</string>
     <string name="settings_appearance_absolute_timestamp">절대 타임스탬프</string>
     <string name="settings_appearance_absolute_timestamp_description">게시물에 정확한 타임스탬프 표시</string>
-    <string name="settings_about_description">탈중앙화 소셜 플랫폼을 위한 오픈 소스 AI 기반 클라이언트입니다.</string>
-    <string name="settings_about_source_code">소스 코드</string>
-    <string name="settings_about_telegram">Telegram</string>
-    <string name="settings_about_telegram_description">저희 Telegram 그룹에 참여하세요</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
-    <string name="settings_about_discord_description">저희 Discord 서버에 참여하세요</string>
-    <string name="settings_about_line" translatable="false">Line</string>
-    <string name="settings_about_line_description">저희 Line 그룹에 참여하세요</string>
-    <string name="settings_about_localization">Crowdin</string>
-    <string name="settings_about_localization_description">Flare 번역을 도와주세요</string>
-    <string name="settings_privacy_policy">개인정보 처리방침</string>
     <string name="channel_title">채널</string>
 </resources>

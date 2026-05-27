@@ -404,16 +404,5 @@
     <string name="posts_title">Wpisy</string>
     <string name="settings_appearance_absolute_timestamp">Bezwzględny znacznik czasu</string>
     <string name="settings_appearance_absolute_timestamp_description">Pokazuj dokładne daty i godziny przy wpisach</string>
-    <string name="settings_about_description">Otwartoźródłowy klient dla zdecentralizowanych platform społecznościowych, napędzany przez AI.</string>
-    <string name="settings_about_source_code">Kod źródłowy</string>
-    <string name="settings_about_telegram">Telegram</string>
-    <string name="settings_about_telegram_description">Dołącz do naszej grupy na Telegramie</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
-    <string name="settings_about_discord_description">Dołącz do naszego serwera Discord</string>
-    <string name="settings_about_line" translatable="false">Line</string>
-    <string name="settings_about_line_description">Dołącz do naszej grupy Line</string>
-    <string name="settings_about_localization">Crowdin</string>
-    <string name="settings_about_localization_description">Pomóż nam tłumaczyć Flare</string>
-    <string name="settings_privacy_policy">Polityka prywatności</string>
     <string name="channel_title">Kanał</string>
 </resources>

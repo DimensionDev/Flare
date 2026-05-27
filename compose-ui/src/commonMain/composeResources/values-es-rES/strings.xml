@@ -405,16 +405,5 @@
     <string name="posts_title">Publicaciones</string>
     <string name="settings_appearance_absolute_timestamp">Marca de tiempo absoluta</string>
     <string name="settings_appearance_absolute_timestamp_description">Mostrar marcas de tiempo exactas en las publicaciones</string>
-    <string name="settings_about_description">Un cliente de código abierto impulsado por IA para plataformas sociales descentralizadas.</string>
-    <string name="settings_about_source_code">Código fuente</string>
-    <string name="settings_about_telegram">Telegram</string>
-    <string name="settings_about_telegram_description">Únete a nuestro grupo de Telegram</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
-    <string name="settings_about_discord_description">Únete a nuestro servidor de Discord</string>
-    <string name="settings_about_line" translatable="false">Line</string>
-    <string name="settings_about_line_description">Únete a nuestro grupo de Line</string>
-    <string name="settings_about_localization">Crowdin</string>
-    <string name="settings_about_localization_description">Ayúdanos a traducir Flare</string>
-    <string name="settings_privacy_policy">Política de Privacidad</string>
     <string name="channel_title">Canal</string>
 </resources>

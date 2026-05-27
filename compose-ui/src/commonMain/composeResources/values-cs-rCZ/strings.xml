@@ -405,16 +405,5 @@
     <string name="posts_title">Příspěvky</string>
     <string name="settings_appearance_absolute_timestamp">Absolutní časové razítko</string>
     <string name="settings_appearance_absolute_timestamp_description">Zobrazovat u příspěvků přesný čas</string>
-    <string name="settings_about_description">Open-source klient poháněný AI pro decentralizované sociální platformy.</string>
-    <string name="settings_about_source_code">Zdrojový kód</string>
-    <string name="settings_about_telegram">Telegram</string>
-    <string name="settings_about_telegram_description">Připojte se k naší skupině na Telegramu</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
-    <string name="settings_about_discord_description">Připojte se k našemu Discord serveru</string>
-    <string name="settings_about_line" translatable="false">Line</string>
-    <string name="settings_about_line_description">Připojte se k naší skupině na Line</string>
-    <string name="settings_about_localization">Crowdin</string>
-    <string name="settings_about_localization_description">Pomozte nám přeložit Flare</string>
-    <string name="settings_privacy_policy">Zásady ochrany osobních údajů</string>
     <string name="channel_title">Kanál</string>
 </resources>

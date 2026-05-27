@@ -404,16 +404,5 @@
     <string name="posts_title">Publicações</string>
     <string name="settings_appearance_absolute_timestamp">Carimbo de data/hora absoluto</string>
     <string name="settings_appearance_absolute_timestamp_description">Mostrar horários exatos nas publicações</string>
-    <string name="settings_about_description">Um cliente de código aberto, alimentado por IA, para plataformas sociais descentralizadas.</string>
-    <string name="settings_about_source_code">Código fonte</string>
-    <string name="settings_about_telegram">Telegram</string>
-    <string name="settings_about_telegram_description">Junte-se ao nosso grupo no Telegram</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
-    <string name="settings_about_discord_description">Junte-se ao nosso servidor no Discord</string>
-    <string name="settings_about_line" translatable="false">Line</string>
-    <string name="settings_about_line_description">Junte-se ao nosso grupo no Line</string>
-    <string name="settings_about_localization">Crowdin</string>
-    <string name="settings_about_localization_description">Ajude-nos a traduzir o Flare</string>
-    <string name="settings_privacy_policy">Política de Privacidade</string>
     <string name="channel_title">Canal</string>
 </resources>

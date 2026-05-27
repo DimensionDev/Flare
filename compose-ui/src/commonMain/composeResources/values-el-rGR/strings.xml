@@ -405,16 +405,5 @@
     <string name="posts_title">Δημοσιεύσεις</string>
     <string name="settings_appearance_absolute_timestamp">Απόλυτη χρονοσήμανση</string>
     <string name="settings_appearance_absolute_timestamp_description">Εμφάνιση ακριβούς ώρας στις δημοσιεύσεις</string>
-    <string name="settings_about_description">Ένας ανοιχτού κώδικα πελάτης με τεχνητή νοημοσύνη για αποκεντρωμένες κοινωνικές πλατφόρμες.</string>
-    <string name="settings_about_source_code">Πηγαίος κώδικας</string>
-    <string name="settings_about_telegram">Telegram</string>
-    <string name="settings_about_telegram_description">Γίνετε μέλος στην ομάδα μας στο Telegram</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
-    <string name="settings_about_discord_description">Γίνετε μέλος στον διακομιστή μας στο Discord</string>
-    <string name="settings_about_line" translatable="false">Line</string>
-    <string name="settings_about_line_description">Γίνετε μέλος στην ομάδα μας στο Line</string>
-    <string name="settings_about_localization">Crowdin</string>
-    <string name="settings_about_localization_description">Βοηθήστε μας να μεταφράσουμε το Flare</string>
-    <string name="settings_privacy_policy">Πολιτική Απορρήτου</string>
     <string name="channel_title">Κανάλι</string>
 </resources>

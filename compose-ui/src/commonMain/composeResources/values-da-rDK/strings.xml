@@ -405,16 +405,5 @@
     <string name="posts_title">Indlæg</string>
     <string name="settings_appearance_absolute_timestamp">Absolut tidsstempel</string>
     <string name="settings_appearance_absolute_timestamp_description">Vis præcise tidsstempler på indlæg</string>
-    <string name="settings_about_description">En open source, AI-drevet klient til decentraliserede sociale platforme.</string>
-    <string name="settings_about_source_code">Kildekode</string>
-    <string name="settings_about_telegram">Telegram</string>
-    <string name="settings_about_telegram_description">Bliv medlem af vores Telegram-gruppe</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
-    <string name="settings_about_discord_description">Bliv medlem af vores Discord-server</string>
-    <string name="settings_about_line" translatable="false">Line</string>
-    <string name="settings_about_line_description">Bliv medlem af vores Line-gruppe</string>
-    <string name="settings_about_localization">Crowdin</string>
-    <string name="settings_about_localization_description">Hjælp os med at oversætte Flare</string>
-    <string name="settings_privacy_policy">Privatlivspolitik</string>
     <string name="channel_title">Kanal</string>
 </resources>

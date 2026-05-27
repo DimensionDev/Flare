@@ -405,16 +405,5 @@
     <string name="posts_title">投稿</string>
     <string name="settings_appearance_absolute_timestamp">絶対時刻表示</string>
     <string name="settings_appearance_absolute_timestamp_description">投稿に正確な日時を表示します</string>
-    <string name="settings_about_description">分散型SNSプラットフォーム向けのオープンソースAI搭載クライアントです。</string>
-    <string name="settings_about_source_code">ソースコード</string>
-    <string name="settings_about_telegram">Telegram</string>
-    <string name="settings_about_telegram_description">Telegramグループに参加する</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
-    <string name="settings_about_discord_description">Discordサーバーに参加する</string>
-    <string name="settings_about_line" translatable="false">Line</string>
-    <string name="settings_about_line_description">Lineグループに参加する</string>
-    <string name="settings_about_localization">Crowdin</string>
-    <string name="settings_about_localization_description">Flareの翻訳に協力する</string>
-    <string name="settings_privacy_policy">プライバシーポリシー</string>
     <string name="channel_title">チャンネル</string>
 </resources>

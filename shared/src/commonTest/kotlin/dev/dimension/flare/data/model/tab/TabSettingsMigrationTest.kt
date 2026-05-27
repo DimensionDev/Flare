@@ -16,10 +16,9 @@ import dev.dimension.flare.data.model.SubscriptionTimelineTabItem
 import dev.dimension.flare.data.model.TabMetaData
 import dev.dimension.flare.data.model.TabSettings
 import dev.dimension.flare.data.model.TitleType
-import dev.dimension.flare.data.platform.RssTimelineSpecs
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.testPlatformRegistry
+import dev.dimension.flare.testTimelineSpecs
 import dev.dimension.flare.ui.model.UiIcon
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
@@ -183,9 +182,9 @@ class TabSettingsMigrationTest {
 
         assertEquals(
             listOf(
-                RssTimelineSpecs.rss.id,
-                RssTimelineSpecs.allRss.id,
-                RssTimelineSpecs.subscription.id,
+                TimelineSpecIds.RSS_FEED,
+                TimelineSpecIds.RSS_ALL,
+                TimelineSpecIds.RSS_SUBSCRIPTION,
             ),
             slots.map { assertIs<TimelineSlotContent.Source>(it.content).source.specId },
         )
@@ -218,10 +217,19 @@ class TabSettingsMigrationTest {
     @Test
     fun legacyMigrationIdsResolveAgainstRegisteredTimelineSpecs() {
         val runtimeIds =
-            (
-                testPlatformRegistry().all.flatMap { it.timelineSpecs } +
-                    RssTimelineSpecs.timelineSpecs
-            ).map { it.id }.toSet()
+            testTimelineSpecs().map { it.id }.toSet() +
+                setOf(
+                    TimelineSpecIds.RSS_FEED,
+                    TimelineSpecIds.RSS_ALL,
+                    TimelineSpecIds.RSS_SUBSCRIPTION,
+                    TimelineSpecIds.BLUESKY_BOOKMARK,
+                    TimelineSpecIds.BLUESKY_FEED,
+                    TimelineSpecIds.XQT_FEATURED,
+                    TimelineSpecIds.XQT_BOOKMARK,
+                    TimelineSpecIds.XQT_DEVICE_FOLLOW,
+                    TimelineSpecIds.VVO_FAVORITE,
+                    TimelineSpecIds.VVO_LIKED,
+                )
 
         assertEquals(emptySet(), TimelineSpecIds.legacyMigrationIds - runtimeIds)
     }

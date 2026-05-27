@@ -147,7 +147,7 @@ internal fun RssSourceEditSheet(
                                 )
                             }
 
-                            is CheckRssSourcePresenter.State.RssState.MastodonInstance -> {
+                            is CheckRssSourcePresenter.State.RssState.SubscriptionInstance -> {
                                 FAIcon(
                                     FontAwesomeIcons.Solid.CircleCheck,
                                     contentDescription = null,
@@ -252,7 +252,7 @@ internal fun RssSourceEditSheet(
                                                     )
                                                 }
 
-                                                is CheckRssSourcePresenter.State.RssState.MastodonInstance -> {
+                                                is CheckRssSourcePresenter.State.RssState.SubscriptionInstance -> {
                                                     FAIcon(
                                                         FontAwesomeIcons.Solid.CircleCheck,
                                                         contentDescription = null,
@@ -353,7 +353,7 @@ internal fun RssSourceEditSheet(
                     }
                 }
 
-                is CheckRssSourcePresenter.State.RssState.MastodonInstance -> {
+                is CheckRssSourcePresenter.State.RssState.SubscriptionInstance -> {
                     Text(
                         text = stringResource(id = R.string.mastodon_available_timelines),
                         style = MaterialTheme.typography.labelMedium,
@@ -408,7 +408,7 @@ internal fun RssSourceEditSheet(
         }
 
         state.inputState.onSuccess { inputState ->
-            if (inputState !is EditRssSourcePresenter.State.RssInputState.MastodonInstance) {
+            if (inputState !is EditRssSourcePresenter.State.RssInputState.SubscriptionInstance) {
                 val openInBrowserString = stringResource(id = R.string.rss_sources_open_in_browser)
                 val fullContentString = stringResource(id = R.string.rss_sources_full_content)
                 val descriptionOnlyString =
@@ -564,7 +564,7 @@ internal fun RssSourceEditSheet(
                     }
                 }
 
-                is EditRssSourcePresenter.State.RssInputState.MastodonInstance -> {
+                is EditRssSourcePresenter.State.RssInputState.SubscriptionInstance -> {
                     val typeNames =
                         mapOf(
                             SubscriptionType.MASTODON_TRENDS to stringResource(id = R.string.mastodon_trending_statuses),

@@ -1,8 +1,13 @@
 package dev.dimension.flare.data.platform
 
+import dev.dimension.flare.data.database.app.model.SubscriptionType
 import dev.dimension.flare.data.datasource.guest.mastodon.GuestMastodonDataSource
+import dev.dimension.flare.data.datasource.guest.mastodon.GuestPublicTimelineRemoteMediator
+import dev.dimension.flare.data.datasource.guest.mastodon.GuestTrendsRemoteMediator
 import dev.dimension.flare.data.datasource.mastodon.MastodonDataSource
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
+import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
+import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.pleroma.PleromaDataSource
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.model.tab.TimelineSpecIds
@@ -19,10 +24,12 @@ import dev.dimension.flare.model.PlatformSpec
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.PlatformTypeMetadata
 import dev.dimension.flare.model.RecommendedInstance
+import dev.dimension.flare.model.SubscriptionTimelineSpec
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiInstance
 import dev.dimension.flare.ui.model.UiInstanceMetadata
 import dev.dimension.flare.ui.model.UiStrings
+import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.asType
 import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.presenter.home.mastodon.MastodonBookmarkTimelinePresenter
@@ -134,6 +141,39 @@ public data object MastodonPlatformSpec : PlatformSpec {
             favouriteTimelineSpec,
         )
 
+    override val subscriptionTimelineSpecs: ImmutableList<SubscriptionTimelineSpec> =
+        persistentListOf(
+            MastodonSubscriptionTimelineSpec(
+                type = SubscriptionType.MASTODON_TRENDS,
+                loaderFactory = { host, locale ->
+                    GuestTrendsRemoteMediator(
+                        host = host,
+                        locale = locale,
+                    )
+                },
+            ),
+            MastodonSubscriptionTimelineSpec(
+                type = SubscriptionType.MASTODON_PUBLIC,
+                loaderFactory = { host, locale ->
+                    GuestPublicTimelineRemoteMediator(
+                        host = host,
+                        locale = locale,
+                        local = false,
+                    )
+                },
+            ),
+            MastodonSubscriptionTimelineSpec(
+                type = SubscriptionType.MASTODON_LOCAL,
+                loaderFactory = { host, locale ->
+                    GuestPublicTimelineRemoteMediator(
+                        host = host,
+                        locale = locale,
+                        local = true,
+                    )
+                },
+            ),
+        )
+
     override suspend fun instanceMetadata(host: String): UiInstanceMetadata = MastodonInstanceService("https://$host/").instance().render()
 
     override suspend fun recommendInstances(): List<RecommendedInstance> {
@@ -234,6 +274,25 @@ public data object MastodonPlatformSpec : PlatformSpec {
             bannerUrl = null,
             usersCount = 0,
         )
+}
+
+private class MastodonSubscriptionTimelineSpec(
+    override val type: SubscriptionType,
+    private val loaderFactory: (host: String, locale: String) -> CacheableRemoteLoader<UiTimelineV2>,
+) : SubscriptionTimelineSpec {
+    override suspend fun isAvailable(
+        host: String,
+        locale: String,
+    ): Boolean =
+        runCatching {
+            createLoader(host, locale).load(1, PagingRequest.Refresh)
+            true
+        }.getOrDefault(false)
+
+    override fun createLoader(
+        host: String,
+        locale: String,
+    ): CacheableRemoteLoader<UiTimelineV2> = loaderFactory(host, locale)
 }
 
 @Serializable

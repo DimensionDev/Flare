@@ -127,6 +127,7 @@ dependencies {
     implementation(projects.social.bluesky)
     implementation(projects.social.vvo)
     implementation(projects.social.xqt)
+    implementation(projects.feature.subscription)
     implementation(projects.composeUi)
     implementation(libs.androidx.splash)
     implementation(libs.materialKolor)

@@ -1,0 +1,74 @@
+package dev.dimension.flare.ui.presenter.home.rss
+
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import dev.dimension.flare.data.network.rss.DocumentData
+import dev.dimension.flare.data.network.rss.Readability
+import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.model.UiState
+import dev.dimension.flare.ui.model.mapper.fromRss
+import dev.dimension.flare.ui.presenter.PresenterBase
+import dev.dimension.flare.ui.presenter.status.LogStatusHistoryPresenter
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
+
+public class RssDetailPresenter(
+    private val url: String,
+    private val descriptionHtml: String? = null,
+    private val descriptionTitle: String? = null,
+) : PresenterBase<RssDetailPresenter.State>() {
+    private val readability = Readability()
+
+    @Immutable
+    public interface State {
+        public val data: UiState<DocumentData>
+    }
+
+    @Composable
+    override fun body(): State {
+        remember {
+            LogStatusHistoryPresenter(
+                accountType = AccountType.Guest,
+                statusKey = MicroBlogKey.fromRss(url),
+            )
+        }.body()
+        val data by remember(url, descriptionHtml) {
+            if (descriptionHtml != null) {
+                kotlinx.coroutines.flow.flowOf(
+                    UiState.Success(
+                        DocumentData(
+                            title = descriptionTitle ?: "",
+                            content = descriptionHtml,
+                            textContent = descriptionHtml,
+                            length = null,
+                            excerpt = null,
+                            byline = null,
+                            dir = null,
+                            siteName = null,
+                            lang = null,
+                            publishedTime = null,
+                        ),
+                    ),
+                )
+            } else {
+                readability
+                    .parse(url)
+                    .map {
+                        it.fold(
+                            onSuccess = { UiState.Success(it) },
+                            onFailure = { UiState.Error(it) },
+                        )
+                    }.onStart {
+                        emit(UiState.Loading())
+                    }
+            }
+        }.collectAsState(UiState.Loading())
+        return object : State {
+            override val data = data
+        }
+    }
+}

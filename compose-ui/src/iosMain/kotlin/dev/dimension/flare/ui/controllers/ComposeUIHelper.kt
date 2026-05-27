@@ -16,6 +16,7 @@ import dev.dimension.flare.data.platform.BlueskyPlatformSpec
 import dev.dimension.flare.data.platform.MastodonPlatformSpec
 import dev.dimension.flare.data.platform.MisskeyPlatformSpec
 import dev.dimension.flare.data.platform.NostrPlatformSpec
+import dev.dimension.flare.data.platform.RssTimelineSpecs
 import dev.dimension.flare.data.platform.VvoPlatformSpec
 import dev.dimension.flare.data.platform.XqtPlatformSpec
 import dev.dimension.flare.di.KoinHelper
@@ -42,8 +43,10 @@ public object ComposeUIHelper {
         swiftPlatformTextRenderer: SwiftPlatformTextRenderer,
         swiftOnDeviceAI: SwiftOnDeviceAI,
     ) {
+        val registry = supportedPlatformRegistry()
+        val timelineSpecs = registry.all.flatMap { it.timelineSpecs } + RssTimelineSpecs.timelineSpecs
         startKoin {
-            modules(KoinHelper.modules(supportedPlatformRegistry()))
+            modules(KoinHelper.modules(registry, timelineSpecs))
             modules(
                 module {
                     single {

@@ -1,5 +1,5 @@
 package dev.dimension.flare.common
 
-internal expect object Locale {
-    val language: String
+public expect object Locale {
+    public val language: String
 }

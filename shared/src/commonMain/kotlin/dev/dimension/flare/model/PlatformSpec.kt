@@ -1,12 +1,16 @@
 package dev.dimension.flare.model
 
+import dev.dimension.flare.data.database.app.model.SubscriptionType
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
+import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
 import dev.dimension.flare.ui.model.UiInstance
 import dev.dimension.flare.ui.model.UiInstanceMetadata
+import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.Flow
 import kotlinx.serialization.KSerializer
 
@@ -15,6 +19,8 @@ public interface PlatformSpec {
     public val metadata: PlatformTypeMetadata
     public val detector: PlatformDetector
     public val timelineSpecs: ImmutableList<TimelineSpec<out TimelineSpec.Data>>
+    public val subscriptionTimelineSpecs: ImmutableList<SubscriptionTimelineSpec>
+        get() = persistentListOf()
 
     public fun agreementUrl(host: String): String?
 
@@ -30,6 +36,20 @@ public interface PlatformSpec {
         host: String,
         locale: String,
     ): MicroblogDataSource
+}
+
+public interface SubscriptionTimelineSpec {
+    public val type: SubscriptionType
+
+    public suspend fun isAvailable(
+        host: String,
+        locale: String,
+    ): Boolean
+
+    public fun createLoader(
+        host: String,
+        locale: String,
+    ): CacheableRemoteLoader<UiTimelineV2>
 }
 
 public interface PlatformDataSourceContext {
@@ -72,11 +92,39 @@ public class PlatformRegistry(
                 }
             }.associateBy { it.type }
 
+    public val subscriptionTimelineSpecs: List<SubscriptionTimelineSpec> by lazy {
+        all
+            .flatMap { it.subscriptionTimelineSpecs }
+            .also { specs ->
+                val duplicateTypes =
+                    specs
+                        .groupBy { it.type }
+                        .filterValues { it.size > 1 }
+                        .keys
+                require(duplicateTypes.isEmpty()) {
+                    "Duplicate subscription timeline specs: ${duplicateTypes.joinToString()}"
+                }
+            }
+    }
+
+    private val subscriptionTimelineSpecsByType: Map<SubscriptionType, SubscriptionTimelineSpec> by lazy {
+        subscriptionTimelineSpecs.associateBy { it.type }
+    }
+
     public fun get(type: PlatformType): PlatformSpec? = byType[type]
 
     public fun require(type: PlatformType): PlatformSpec = get(type) ?: throw UnsupportedPlatformException(type)
+
+    public fun getSubscriptionTimelineSpec(type: SubscriptionType): SubscriptionTimelineSpec? = subscriptionTimelineSpecsByType[type]
+
+    public fun requireSubscriptionTimelineSpec(type: SubscriptionType): SubscriptionTimelineSpec =
+        getSubscriptionTimelineSpec(type) ?: throw UnsupportedSubscriptionTimelineException(type)
 }
 
 public class UnsupportedPlatformException(
     public val type: PlatformType,
 ) : IllegalArgumentException("Platform is not registered: $type")
+
+public class UnsupportedSubscriptionTimelineException(
+    public val type: SubscriptionType,
+) : IllegalArgumentException("Subscription timeline is not registered: $type")

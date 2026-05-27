@@ -19,6 +19,7 @@ import dev.dimension.flare.data.platform.BlueskyPlatformSpec
 import dev.dimension.flare.data.platform.MastodonPlatformSpec
 import dev.dimension.flare.data.platform.MisskeyPlatformSpec
 import dev.dimension.flare.data.platform.NostrPlatformSpec
+import dev.dimension.flare.data.platform.RssTimelineSpecs
 import dev.dimension.flare.data.platform.VvoPlatformSpec
 import dev.dimension.flare.data.platform.XqtPlatformSpec
 import dev.dimension.flare.di.KoinHelper
@@ -33,9 +34,11 @@ class App :
     SingletonImageLoader.Factory {
     override fun onCreate() {
         super.onCreate()
+        val registry = supportedPlatformRegistry()
+        val timelineSpecs = registry.all.flatMap { it.timelineSpecs } + RssTimelineSpecs.timelineSpecs
         startKoin {
             androidContext(this@App)
-            modules(KoinHelper.modules(supportedPlatformRegistry()) + androidModule + aiModule)
+            modules(KoinHelper.modules(registry, timelineSpecs) + androidModule + aiModule)
         }
     }
 

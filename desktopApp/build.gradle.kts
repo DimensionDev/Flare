@@ -18,6 +18,7 @@ dependencies {
     implementation(projects.social.bluesky)
     implementation(projects.social.vvo)
     implementation(projects.social.xqt)
+    implementation(projects.feature.subscription)
     implementation(projects.composeUi)
 
     implementation(compose("org.jetbrains.compose.runtime:runtime"))

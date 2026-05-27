@@ -37,6 +37,7 @@ kotlin {
             export(projects.social.bluesky)
             export(projects.social.vvo)
             export(projects.social.xqt)
+            export(projects.feature.subscription)
         }
     }
 
@@ -47,6 +48,7 @@ kotlin {
                 implementation(projects.social.bluesky)
                 implementation(projects.social.vvo)
                 implementation(projects.social.xqt)
+                implementation(projects.feature.subscription)
                 implementation(compose("org.jetbrains.compose.ui:ui"))
                 implementation(compose("org.jetbrains.compose.runtime:runtime"))
                 implementation(compose("org.jetbrains.compose.foundation:foundation"))
@@ -105,6 +107,7 @@ kotlin {
                 api(projects.social.bluesky)
                 api(projects.social.vvo)
                 api(projects.social.xqt)
+                api(projects.feature.subscription)
                 implementation(libs.cupertino)
                 api(compose("org.jetbrains.compose.ui:ui-util"))
                 implementation(libs.lifecycle.viewmodel.compose)

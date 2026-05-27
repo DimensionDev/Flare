@@ -14,7 +14,7 @@ import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.deleteTestRootPath
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.testPlatformRegistry
+import dev.dimension.flare.testTimelineSpecs
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
@@ -49,7 +49,7 @@ class TimelinePresenterBindingTest {
             SettingsRepository(
                 pathProducer = pathProducer,
                 appDataStore = AppDataStore(pathProducer),
-                timelineResolver = TimelineResolver(testPlatformRegistry()),
+                timelineResolver = TimelineResolver(testTimelineSpecs()),
             )
     }
 

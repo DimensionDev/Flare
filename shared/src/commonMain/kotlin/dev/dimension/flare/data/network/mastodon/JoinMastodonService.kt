@@ -11,4 +11,10 @@ internal object JoinMastodonService :
 
 internal class MastodonInstanceService(
     val baseUrl: String,
-) : InstanceResources by ktorfit(baseUrl).createInstanceResources()
+) {
+    private val resources: InstanceResources = ktorfit(baseUrl).createInstanceResources()
+
+    internal suspend fun instance() = resources.instance()
+
+    internal suspend fun instanceV1() = resources.instanceV1()
+}

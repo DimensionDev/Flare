@@ -21,6 +21,8 @@ import dev.dimension.flare.data.model.appearance.toPatch
 import dev.dimension.flare.data.model.appearance.toTimelineAppearance
 import dev.dimension.flare.data.model.tab.TabSettingsV2
 import dev.dimension.flare.data.model.tab.TimelineResolver
+import dev.dimension.flare.data.model.tab.TimelineSlot
+import dev.dimension.flare.data.model.tab.TimelineSlotContent
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.data.model.tab.findById
 import dev.dimension.flare.data.model.tab.isSystemHomeMixedTimeline
@@ -180,6 +182,17 @@ public class SettingsRepository internal constructor(
         tabSettingsV2Store.updateData(block)
     }
 
+    public suspend fun removeHomeTimelineTabBySourceId(sourceId: String) {
+        updateTabSettingsV2 {
+            copy(
+                homeSlots =
+                    homeSlots
+                        .mapNotNull { it.removeSource(sourceId) }
+                        .distinctBy { it.id },
+            )
+        }
+    }
+
     internal suspend fun replaceHomeTimelineTabs(tabs: List<TimelineTabItemV2>) {
         updateTabSettingsV2 {
             val normalizedTabs =
@@ -226,3 +239,28 @@ public class SettingsRepository internal constructor(
                 ),
         )
 }
+
+private fun TimelineSlot.removeSource(sourceId: String): TimelineSlot? =
+    when (val slotContent = content) {
+        is TimelineSlotContent.Source -> {
+            if (slotContent.source.id == sourceId) {
+                null
+            } else {
+                this
+            }
+        }
+
+        is TimelineSlotContent.Group -> {
+            val sanitizedChildren =
+                slotContent.children
+                    .mapNotNull { it.removeSource(sourceId) }
+                    .distinctBy { it.id }
+            if (sanitizedChildren.isEmpty()) {
+                null
+            } else if (sanitizedChildren == slotContent.children) {
+                this
+            } else {
+                copy(content = slotContent.copy(children = sanitizedChildren))
+            }
+        }
+    }

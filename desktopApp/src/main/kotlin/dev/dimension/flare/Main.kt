@@ -28,6 +28,7 @@ import dev.dimension.flare.data.platform.BlueskyPlatformSpec
 import dev.dimension.flare.data.platform.MastodonPlatformSpec
 import dev.dimension.flare.data.platform.MisskeyPlatformSpec
 import dev.dimension.flare.data.platform.NostrPlatformSpec
+import dev.dimension.flare.data.platform.RssTimelineSpecs
 import dev.dimension.flare.data.platform.VvoPlatformSpec
 import dev.dimension.flare.data.platform.XqtPlatformSpec
 import dev.dimension.flare.di.KoinHelper
@@ -90,9 +91,11 @@ fun main(args: Array<String>) {
     if (!isFirstInstance) {
         return
     }
+    val registry = supportedPlatformRegistry()
+    val timelineSpecs = registry.all.flatMap { it.timelineSpecs } + RssTimelineSpecs.timelineSpecs
     startKoin {
         modules(
-            desktopModule + KoinHelper.modules(supportedPlatformRegistry()),
+            desktopModule + KoinHelper.modules(registry, timelineSpecs),
         )
     }
     application {

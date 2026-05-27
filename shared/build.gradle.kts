@@ -60,12 +60,10 @@ kotlin {
                 implementation(libs.sqlite.bundled)
                 implementation(libs.datastore)
                 implementation(libs.kotlinx.serialization.protobuf)
-                implementation(libs.xmlUtil)
                 implementation(libs.ktor.client.resources)
                 implementation(libs.cryptography.provider.optimal)
                 implementation(libs.openai.client)
                 implementation(libs.nostr.sdk.kmp)
-                implementation(libs.readability)
             }
         }
         val commonTest by getting {

@@ -12,7 +12,7 @@ import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.model.tab.toTimelineSlotOrNull
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.testPlatformRegistry
+import dev.dimension.flare.testTimelineSpecs
 import dev.dimension.flare.ui.model.UiIcon
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -21,7 +21,7 @@ import kotlin.test.assertIs
 class GroupConfigPresenterTest {
     @Test
     fun upsertGroupConfigReplacesDuplicateKeyInsteadOfAppending() {
-        val timelineResolver = TimelineResolver(testPlatformRegistry())
+        val timelineResolver = TimelineResolver(testTimelineSpecs())
         val accountKey = MicroBlogKey("1872639344760254464", "x.com")
         val accountType = AccountType.Specific(accountKey)
         val homeTab = timelineResolver.toTabItem(HomeTimelineTabItem(accountType).toTimelineSlotOrNull()!!)

@@ -9,7 +9,8 @@ import androidx.compose.runtime.setValue
 import dev.dimension.flare.data.network.misskey.MisskeyOauthService
 import dev.dimension.flare.data.network.nodeinfo.NodeInfoService
 import dev.dimension.flare.data.platform.MisskeyCredential
-import dev.dimension.flare.data.repository.AccountRepository
+import dev.dimension.flare.data.repository.AccountService
+import dev.dimension.flare.data.repository.addAccount
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
@@ -27,7 +28,7 @@ public class MisskeyCallbackPresenter(
     private val toHome: () -> Unit,
 ) : PresenterBase<UiState<Nothing>>(),
     KoinComponent {
-    private val accountRepository: AccountRepository by inject()
+    private val accountService: AccountService by inject()
 
     @Composable
     override fun body(): UiState<Nothing> {
@@ -46,7 +47,7 @@ public class MisskeyCallbackPresenter(
                 return@LaunchedEffect
             }
             runCatching {
-                misskeyAuthCheckUseCase(pendingOAuth.host, session, accountRepository)
+                misskeyAuthCheckUseCase(pendingOAuth.host, session, accountService)
                 MisskeyLoginSessionStore.clearPending()
                 // TODO: delay to workaround iOS NavigationPath.append not working
                 delay(2.seconds)
@@ -64,7 +65,7 @@ public class MisskeyCallbackPresenter(
     private suspend fun misskeyAuthCheckUseCase(
         host: String,
         session: String,
-        accountRepository: AccountRepository,
+        accountService: AccountService,
     ) {
         val response =
             MisskeyOauthService(
@@ -77,7 +78,7 @@ public class MisskeyCallbackPresenter(
         val id = response.user?.id
         requireNotNull(id) { "No user id" }
         val nodeInfo = NodeInfoService.fetchNodeInfo(host)
-        accountRepository.addAccount(
+        accountService.addAccount(
             UiAccount(
                 accountKey =
                     MicroBlogKey(

@@ -9,9 +9,7 @@ import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.refreshSuspend
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
-import dev.dimension.flare.data.repository.AccountRepository
-import dev.dimension.flare.data.repository.accountServiceFlow
-import dev.dimension.flare.data.repository.accountServiceProvider
+import dev.dimension.flare.data.repository.AccountService
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiState
@@ -38,25 +36,27 @@ public class MisskeyChannelPresenter(
     private val channelId: String,
 ) : PresenterBase<MisskeyChannelState>(),
     KoinComponent {
-    private val accountRepository: AccountRepository by inject()
+    private val accountService: AccountService by inject()
+
+    private val serviceFlow by lazy {
+        accountService.accountServiceFlow(accountType).map {
+            require(it is MisskeyDataSource)
+            it
+        }
+    }
 
     private val timelinePresenter by lazy {
         object : TimelinePresenter() {
             override val loader: Flow<RemoteLoader<UiTimelineV2>> by lazy {
-                accountServiceFlow(accountType, accountRepository)
-                    .map {
-                        require(it is MisskeyDataSource)
-                        it.channelTimelineLoader(channelId)
-                    }
+                serviceFlow.map { it.channelTimelineLoader(channelId) }
             }
         }
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private val infoFlow by lazy {
-        accountServiceFlow(accountType, accountRepository)
+        serviceFlow
             .flatMapLatest {
-                require(it is MisskeyDataSource)
                 it.channelHandler.listInfo(channelId).toUi()
             }.map {
                 it.mapNotNull { it }
@@ -66,13 +66,12 @@ public class MisskeyChannelPresenter(
     @Composable
     override fun body(): MisskeyChannelState {
         val scope = rememberCoroutineScope()
-        val serviceState = accountServiceProvider(accountType = accountType, repository = accountRepository)
+        val serviceState by serviceFlow.collectAsUiState()
         val timeline = timelinePresenter.body().listState
         val info by infoFlow.flattenUiState()
         val followed =
             serviceState
                 .flatMap {
-                    require(it is MisskeyDataSource)
                     remember(it) {
                         it.channelHandler.cacheData
                     }.collectAsUiState().value
@@ -91,7 +90,6 @@ public class MisskeyChannelPresenter(
             override fun follow(list: UiList) {
                 serviceState.onSuccess {
                     scope.launch {
-                        require(it is MisskeyDataSource)
                         it.followChannel(list)
                     }
                 }
@@ -100,7 +98,6 @@ public class MisskeyChannelPresenter(
             override fun unfollow(list: UiList) {
                 serviceState.onSuccess {
                     scope.launch {
-                        require(it is MisskeyDataSource)
                         it.unfollowChannel(list)
                     }
                 }
@@ -109,7 +106,6 @@ public class MisskeyChannelPresenter(
             override fun favorite(list: UiList) {
                 serviceState.onSuccess {
                     scope.launch {
-                        require(it is MisskeyDataSource)
                         it.favoriteChannel(list)
                     }
                 }
@@ -118,7 +114,6 @@ public class MisskeyChannelPresenter(
             override fun unfavorite(list: UiList) {
                 serviceState.onSuccess {
                     scope.launch {
-                        require(it is MisskeyDataSource)
                         it.unfavoriteChannel(list)
                     }
                 }

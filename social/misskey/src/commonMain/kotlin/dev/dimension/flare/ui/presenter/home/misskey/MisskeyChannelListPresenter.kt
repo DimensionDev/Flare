@@ -16,17 +16,18 @@ import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.data.platform.MisskeyPlatformSpec
-import dev.dimension.flare.data.repository.AccountRepository
-import dev.dimension.flare.data.repository.accountServiceProvider
+import dev.dimension.flare.data.repository.AccountService
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiText
+import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -35,7 +36,14 @@ public class MisskeyChannelListPresenter(
     private val accountType: AccountType,
 ) : PresenterBase<MisskeyChannelListPresenter.State>(),
     KoinComponent {
-    private val accountRepository: AccountRepository by inject()
+    private val accountService: AccountService by inject()
+
+    private val serviceFlow by lazy {
+        accountService.accountServiceFlow(accountType).map {
+            require(it is MisskeyDataSource)
+            it
+        }
+    }
 
     public interface State {
         public val type: Type
@@ -71,11 +79,10 @@ public class MisskeyChannelListPresenter(
     override fun body(): State {
         var type by remember { mutableStateOf(State.Type.Following) }
         val scope = rememberCoroutineScope()
-        val serviceState = accountServiceProvider(accountType = accountType, repository = accountRepository)
+        val serviceState by serviceFlow.collectAsUiState()
         val data =
             serviceState
                 .map { service ->
-                    require(service is MisskeyDataSource)
                     remember(type) {
                         when (type) {
                             State.Type.Following -> service.channelHandler.data.cachedIn(scope)
@@ -113,7 +120,6 @@ public class MisskeyChannelListPresenter(
             override fun follow(list: UiList.Channel) {
                 serviceState.onSuccess {
                     scope.launch {
-                        require(it is MisskeyDataSource)
                         it.followChannel(list)
                     }
                 }
@@ -122,7 +128,6 @@ public class MisskeyChannelListPresenter(
             override fun unfollow(list: UiList.Channel) {
                 serviceState.onSuccess {
                     scope.launch {
-                        require(it is MisskeyDataSource)
                         it.unfollowChannel(list)
                     }
                 }
@@ -131,7 +136,6 @@ public class MisskeyChannelListPresenter(
             override fun favorite(list: UiList.Channel) {
                 serviceState.onSuccess {
                     scope.launch {
-                        require(it is MisskeyDataSource)
                         it.favoriteChannel(list)
                     }
                 }
@@ -140,7 +144,6 @@ public class MisskeyChannelListPresenter(
             override fun unfavorite(list: UiList.Channel) {
                 serviceState.onSuccess {
                     scope.launch {
-                        require(it is MisskeyDataSource)
                         it.unfavoriteChannel(list)
                     }
                 }

@@ -3,11 +3,11 @@ package dev.dimension.flare.data.network.misskey.api.model
 import kotlinx.serialization.Serializable
 
 @Serializable
-public data class MisskeyException(
+internal data class MisskeyException(
     val error: Error? = null,
 ) : Exception(error?.message ?: "Unknown error") {
     @Serializable
-    public data class Error(
+    internal data class Error(
         val message: String? = null,
         val code: String? = null,
         val id: String? = null,

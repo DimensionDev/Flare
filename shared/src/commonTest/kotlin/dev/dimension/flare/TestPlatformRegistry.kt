@@ -3,7 +3,6 @@ package dev.dimension.flare
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
-import dev.dimension.flare.data.platform.MisskeyPlatformSpec
 import dev.dimension.flare.data.platform.NostrPlatformSpec
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -29,7 +28,7 @@ internal fun testPlatformRegistry(): PlatformRegistry =
         listOf(
             NostrPlatformSpec,
             TestMastodonPlatformSpec,
-            MisskeyPlatformSpec,
+            TestMisskeyPlatformSpec,
             TestBlueskyPlatformSpec,
             TestXqtPlatformSpec,
             TestVvoPlatformSpec,
@@ -98,6 +97,31 @@ private data object TestMastodonPlatformSpec : TestDeepLinkPlatformSpec(
             ),
             PlatformDeepLink(
                 uriPattern = "https://${accountKey.host}/@{handle}/{id}",
+                serializer = TestPostDeepLink.serializer(),
+                callback = { data ->
+                    DeeplinkRoute.Status.Detail(
+                        accountType = AccountType.Specific(accountKey),
+                        statusKey = MicroBlogKey(data.id, accountKey.host),
+                    )
+                },
+            ),
+        )
+}
+
+private data object TestMisskeyPlatformSpec : TestDeepLinkPlatformSpec(
+    type = PlatformType.Misskey,
+    displayName = "Misskey",
+    icon = UiIcon.Misskey,
+) {
+    override fun deepLinks(accountKey: MicroBlogKey): ImmutableList<PlatformDeepLink<*>> =
+        persistentListOf(
+            PlatformDeepLink(
+                uriPattern = "https://${accountKey.host}/@{handle}",
+                serializer = TestProfileDeepLink.serializer(),
+                callback = { data -> profileRoute(accountKey, data.handle) },
+            ),
+            PlatformDeepLink(
+                uriPattern = "https://${accountKey.host}/notes/{id}",
                 serializer = TestPostDeepLink.serializer(),
                 callback = { data ->
                     DeeplinkRoute.Status.Detail(

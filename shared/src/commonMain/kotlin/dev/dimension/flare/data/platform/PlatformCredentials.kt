@@ -7,15 +7,6 @@ import kotlinx.serialization.Serializable
 
 @Immutable
 @Serializable
-@SerialName("MisskeyCredential")
-internal data class MisskeyCredential(
-    val host: String,
-    val accessToken: String,
-    val nodeType: String? = null,
-)
-
-@Immutable
-@Serializable
 internal sealed interface NostrSignerCredential {
     val stableId: String
 

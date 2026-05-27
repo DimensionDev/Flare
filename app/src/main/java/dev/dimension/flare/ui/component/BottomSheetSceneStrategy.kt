@@ -38,6 +38,31 @@ private class BottomSheetScene<T : Any>(
     override suspend fun onRemove() {
         sheetState.hide()
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || this::class != other::class) return false
+
+        other as BottomSheetScene<*>
+
+        // Compare by contentKey values rather than NavEntry object identity (content ===).
+        // NavEntry wrappers are recreated with new closure instances on every recomposition
+        // (the lambda is passed to a constructor, not a @Composable function, so it is never
+        // a stable ComposableLambda). Using object identity would cause false inequality,
+        // causing LaunchedEffect(overlayScenes) to add a new scene on every recomposition
+        // while the old one is still animating → duplicate ModalBottomSheet dialogs sharing
+        // the same SaveableStateProvider key → crash.
+        return key == other.key &&
+            previousEntries.map { it.contentKey } == other.previousEntries.map { it.contentKey } &&
+            overlaidEntries.map { it.contentKey } == other.overlaidEntries.map { it.contentKey } &&
+            entry.contentKey == other.entry.contentKey
+    }
+
+    override fun hashCode(): Int =
+        key.hashCode() * 31 +
+            previousEntries.map { it.contentKey }.hashCode() * 31 +
+            overlaidEntries.map { it.contentKey }.hashCode() * 31 +
+            entry.contentKey.hashCode()
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

@@ -3,6 +3,8 @@ package dev.dimension.flare.ui.humanizer
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.daysUntil
 import kotlinx.datetime.toLocalDateTime
+import org.koin.core.annotation.Provided
+import org.koin.core.annotation.Single
 import platform.Foundation.NSDate
 import platform.Foundation.NSDateFormatter
 import platform.Foundation.NSDateFormatterLongStyle
@@ -19,8 +21,9 @@ public interface SwiftFormatter {
     public fun formatNumber(number: Long): String
 }
 
+@Single(binds = [PlatformFormatter::class])
 internal class AppleFormatter(
-    private val formatter: SwiftFormatter,
+    @Provided private val formatter: SwiftFormatter,
 ) : PlatformFormatter {
     override fun formatNumber(number: Long): String = formatter.formatNumber(number)
 

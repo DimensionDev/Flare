@@ -13,6 +13,8 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.Flow
 import kotlinx.serialization.KSerializer
+import org.koin.core.annotation.Provided
+import org.koin.core.annotation.Single
 
 public interface PlatformSpec {
     public val type: PlatformType
@@ -76,11 +78,25 @@ public data class RecommendedInstance(
     public val priority: Int = 0,
 )
 
-public class PlatformRegistry(
-    public val all: List<PlatformSpec>,
+@Provided
+public data class PlatformRuntimeData(
+    public val platformSpecs: List<PlatformSpec>,
+    public val extraTimelineSpecs: List<TimelineSpec<out TimelineSpec.Data>>,
 ) {
+    internal val timelineSpecs by lazy {
+        platformSpecs
+            .flatMap { it.timelineSpecs }
+            .plus(extraTimelineSpecs)
+    }
+}
+
+@Single
+public class PlatformRegistry(
+    data: PlatformRuntimeData,
+) {
+    public val all: List<PlatformSpec> = data.platformSpecs
     private val byType: Map<PlatformType, PlatformSpec> =
-        all
+        data.platformSpecs
             .also { specs ->
                 val duplicateTypes =
                     specs
@@ -93,7 +109,7 @@ public class PlatformRegistry(
             }.associateBy { it.type }
 
     public val subscriptionTimelineSpecs: List<SubscriptionTimelineSpec> by lazy {
-        all
+        data.platformSpecs
             .flatMap { it.subscriptionTimelineSpecs }
             .also { specs ->
                 val duplicateTypes =

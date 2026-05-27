@@ -12,8 +12,10 @@ import dev.dimension.flare.ui.model.UiDraftStatus
 import dev.dimension.flare.ui.render.toUi
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.firstOrNull
+import org.koin.core.annotation.Single
 import kotlin.time.Instant
 
+@Single
 public class RestoreDraftUseCase internal constructor(
     private val draftRepository: DraftRepository,
     private val accountRepository: AccountRepository,

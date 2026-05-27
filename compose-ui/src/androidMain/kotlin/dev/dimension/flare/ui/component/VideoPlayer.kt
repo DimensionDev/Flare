@@ -58,6 +58,8 @@ import dev.dimension.flare.ui.component.status.LocalIsScrollingInProgress
 import dev.dimension.flare.ui.theme.PlatformTheme
 import kotlinx.coroutines.android.awaitFrame
 import org.koin.compose.koinInject
+import org.koin.core.annotation.Provided
+import org.koin.core.annotation.Single
 
 private val audioAttributes by lazy {
     AudioAttributes
@@ -302,8 +304,9 @@ private fun rememberSurfaceBinding(uri: String): Pair<ExoPlayer?, SurfaceBinding
 }
 
 @Stable
+@Single
 public class SurfaceBindingManager(
-    private val context: Context,
+    @Provided private val context: Context,
 ) {
     public val player: ExoPlayer by lazy {
         ExoPlayer

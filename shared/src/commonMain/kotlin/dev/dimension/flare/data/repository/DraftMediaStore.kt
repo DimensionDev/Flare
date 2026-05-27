@@ -8,8 +8,10 @@ import dev.dimension.flare.data.io.PlatformPathProducer
 import okio.FileSystem
 import okio.Path.Companion.toPath
 import okio.SYSTEM
+import org.koin.core.annotation.Single
 import kotlin.uuid.Uuid
 
+@Single
 internal class DraftMediaStore(
     private val platformPathProducer: PlatformPathProducer,
     private val fileSystem: FileSystem = FileSystem.SYSTEM,

@@ -3,8 +3,10 @@ package dev.dimension.flare.data.database
 import androidx.room3.Room
 import androidx.room3.RoomDatabase
 import dev.dimension.flare.common.FileSystemUtilsExt
+import org.koin.core.annotation.Single
 import java.io.File
 
+@Single
 internal actual class DriverFactory {
     actual inline fun <reified T : RoomDatabase> createBuilder(
         name: String,

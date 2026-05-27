@@ -9,6 +9,7 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.koin.compiler)
     alias(libs.plugins.nucleus)
     id("com.github.gmazzo.buildconfig") version "6.0.9"
 }
@@ -45,6 +46,7 @@ dependencies {
     implementation(platform(libs.koin.bom))
     implementation(libs.koin.core)
     implementation(libs.koin.compose)
+    implementation(libs.koin.annotations)
     implementation(libs.commons.lang3)
     implementation(libs.zoomable)
     implementation(libs.datastore)

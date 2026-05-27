@@ -1,0 +1,38 @@
+package dev.dimension.flare.di
+
+import dev.dimension.flare.data.platform.BlueskyPlatformSpec
+import dev.dimension.flare.data.platform.MastodonPlatformSpec
+import dev.dimension.flare.data.platform.MisskeyPlatformSpec
+import dev.dimension.flare.data.platform.NostrPlatformSpec
+import dev.dimension.flare.data.platform.RssTimelineSpecs
+import dev.dimension.flare.data.platform.VvoPlatformSpec
+import dev.dimension.flare.data.platform.XqtPlatformSpec
+import dev.dimension.flare.model.PlatformRuntimeData
+import org.koin.core.annotation.ComponentScan
+import org.koin.core.annotation.Configuration
+import org.koin.core.annotation.KoinApplication
+import org.koin.core.annotation.Module
+import org.koin.core.annotation.Single
+
+@KoinApplication
+internal class DesktopKoinApplication
+
+@Module
+@Configuration
+@ComponentScan("dev.dimension.flare.common", "dev.dimension.flare.di", "dev.dimension.flare.ui.component")
+internal class DesktopKoinModule
+
+@Single
+internal fun runtimeData(): PlatformRuntimeData =
+    PlatformRuntimeData(
+        platformSpecs =
+            listOf(
+                NostrPlatformSpec,
+                MastodonPlatformSpec,
+                MisskeyPlatformSpec,
+                BlueskyPlatformSpec,
+                XqtPlatformSpec,
+                VvoPlatformSpec,
+            ),
+        extraTimelineSpecs = RssTimelineSpecs.timelineSpecs,
+    )

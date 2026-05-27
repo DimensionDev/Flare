@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.koin.compiler)
     alias(libs.plugins.compose.compiler)
 }
 
@@ -33,6 +34,7 @@ kotlin {
                 implementation(libs.bundles.kotlinx)
                 implementation(dependencies.platform(libs.koin.bom))
                 implementation(libs.koin.core)
+                implementation(libs.koin.annotations)
                 implementation(libs.bundles.ktor)
                 implementation(libs.ktor.client.resources)
                 implementation(libs.cryptography.provider.optimal)

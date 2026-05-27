@@ -2,6 +2,7 @@ package dev.dimension.flare.shared.image
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.koin.core.annotation.Single
 import java.awt.Graphics2D
 import java.awt.Image
 import java.awt.image.BufferedImage
@@ -12,6 +13,7 @@ import javax.imageio.ImageIO
 import javax.imageio.ImageWriteParam
 import kotlin.math.min
 
+@Single(binds = [ImageCompressor::class])
 public class JvmImageCompressor : ImageCompressor {
     override suspend fun compress(
         imageBytes: ByteArray,

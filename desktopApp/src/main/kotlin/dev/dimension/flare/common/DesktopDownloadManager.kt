@@ -14,12 +14,14 @@ import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.readAvailable
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.koin.core.annotation.Single
 import java.io.Closeable
 import java.io.File
 import java.nio.file.AtomicMoveNotSupportedException
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 
+@Single
 internal class DesktopDownloadManager(
     private val inAppNotification: ComposeInAppNotification,
     private val client: HttpClient = ktorClient(),

@@ -7,6 +7,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlinx.coroutines.flow.firstOrNull
+import org.koin.core.annotation.Single
 
 public interface MicroblogCacheLookup {
     public suspend fun findProfiles(keys: Collection<MicroBlogKey>): Map<MicroBlogKey, UiProfile>
@@ -17,6 +18,7 @@ public interface MicroblogCacheLookup {
     ): UiTimelineV2.Post?
 }
 
+@Single(binds = [MicroblogCacheLookup::class])
 internal class DatabaseMicroblogCacheLookup(
     private val database: CacheDatabase,
 ) : MicroblogCacheLookup {

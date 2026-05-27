@@ -3,11 +3,13 @@ package dev.dimension.flare.data.io
 import kotlinx.cinterop.ExperimentalForeignApi
 import okio.Path
 import okio.Path.Companion.toPath
+import org.koin.core.annotation.Single
 import platform.Foundation.NSDocumentDirectory
 import platform.Foundation.NSFileManager
 import platform.Foundation.NSURL
 import platform.Foundation.NSUserDomainMask
 
+@Single(binds = [PlatformPathProducer::class])
 internal class ApplePlatformPathProducer : PlatformPathProducer {
     override fun dataStoreFile(fileName: String): Path = "${fileDirectory()}/$fileName".toPath()
 

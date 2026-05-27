@@ -9,6 +9,7 @@ import dev.dimension.flare.data.model.appearance.toBag
 import dev.dimension.flare.data.model.appearance.toPatch
 import dev.dimension.flare.data.model.appearance.withPatch
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.PlatformRuntimeData
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.UiText
@@ -25,6 +26,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromHexString
 import kotlinx.serialization.encodeToHexString
 import kotlinx.serialization.protobuf.ProtoBuf
+import org.koin.core.annotation.Single
 
 @Immutable
 @Serializable
@@ -474,11 +476,12 @@ public data class ShortcutSpec(
     }
 }
 
-public class TimelineResolver internal constructor(
-    timelineSpecs: List<TimelineSpec<out TimelineSpec.Data>>,
+@Single
+public class TimelineResolver(
+    data: PlatformRuntimeData,
 ) {
     private val specs: Map<String, TimelineSpec<out TimelineSpec.Data>> by lazy {
-        timelineSpecs
+        data.timelineSpecs
             .distinctBy { it.id }
             .associateBy { it.id }
     }

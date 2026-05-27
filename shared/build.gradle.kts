@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.ktorfit)
+    alias(libs.plugins.koin.compiler)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.room)
 }
@@ -45,6 +46,7 @@ kotlin {
                 implementation(libs.bundles.kotlinx)
                 implementation(dependencies.platform(libs.koin.bom))
                 implementation(libs.koin.core)
+                implementation(libs.koin.annotations)
                 api(libs.paging.common)
                 api(libs.paging.compose)
                 implementation(libs.bundles.ktorfit)

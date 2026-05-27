@@ -5,7 +5,9 @@ import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import org.koin.core.annotation.Single
 
+@Single
 internal fun provideAppDatabase(driverFactory: DriverFactory): AppDatabase =
     driverFactory
         .createBuilder<AppDatabase>("app.db")
@@ -13,13 +15,13 @@ internal fun provideAppDatabase(driverFactory: DriverFactory): AppDatabase =
             AppDatabase.MIGRATION_8_9,
             AppDatabase.MIGRATION_9_10,
             AppDatabase.MIGRATION_10_11,
-        )
-        .setDriver(BundledSQLiteDriver())
+        ).setDriver(BundledSQLiteDriver())
         .setQueryCoroutineContext(Dispatchers.IO)
         .build()
 
 internal const val CACHE_DATABASE_NAME = "cache.db"
 
+@Single
 internal fun provideCacheDatabase(driverFactory: DriverFactory): CacheDatabase =
     driverFactory
         .createBuilder<CacheDatabase>(CACHE_DATABASE_NAME, isCache = true)

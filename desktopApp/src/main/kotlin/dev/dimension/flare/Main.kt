@@ -24,17 +24,7 @@ import coil3.network.ktor3.KtorNetworkFetcherFactory
 import coil3.request.crossfade
 import dev.dimension.flare.common.DeeplinkHandler
 import dev.dimension.flare.data.network.ktorClient
-import dev.dimension.flare.data.platform.BlueskyPlatformSpec
-import dev.dimension.flare.data.platform.MastodonPlatformSpec
-import dev.dimension.flare.data.platform.MisskeyPlatformSpec
-import dev.dimension.flare.data.platform.NostrPlatformSpec
-import dev.dimension.flare.data.platform.RssTimelineSpecs
-import dev.dimension.flare.data.platform.VvoPlatformSpec
-import dev.dimension.flare.data.platform.XqtPlatformSpec
-import dev.dimension.flare.di.KoinHelper
-import dev.dimension.flare.di.NostrModule
-import dev.dimension.flare.di.desktopModule
-import dev.dimension.flare.model.PlatformRegistry
+import dev.dimension.flare.di.DesktopKoinApplication
 import dev.dimension.flare.ui.component.PlatformTitleBar
 import dev.dimension.flare.ui.component.PlatformWindow
 import dev.dimension.flare.ui.theme.FlareTheme
@@ -49,7 +39,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import org.apache.commons.lang3.SystemUtils
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import org.koin.core.context.startKoin
+import org.koin.plugin.module.dsl.startKoin
 import kotlin.system.exitProcess
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.toJavaDuration
@@ -92,13 +82,7 @@ fun main(args: Array<String>) {
     if (!isFirstInstance) {
         return
     }
-    val registry = supportedPlatformRegistry()
-    val timelineSpecs = registry.all.flatMap { it.timelineSpecs } + RssTimelineSpecs.timelineSpecs
-    startKoin {
-        modules(
-            desktopModule + KoinHelper.modules(registry, timelineSpecs) + NostrModule.modules(),
-        )
-    }
+    startKoin<DesktopKoinApplication>()
     application {
         setSingletonImageLoaderFactory { context ->
             ImageLoader
@@ -168,18 +152,6 @@ fun main(args: Array<String>) {
         }
     }
 }
-
-private fun supportedPlatformRegistry(): PlatformRegistry =
-    PlatformRegistry(
-        listOf(
-            NostrPlatformSpec,
-            MastodonPlatformSpec,
-            MisskeyPlatformSpec,
-            BlueskyPlatformSpec,
-            XqtPlatformSpec,
-            VvoPlatformSpec,
-        ),
-    )
 
 internal class NavigationBackButtonState {
     var canGoBack by mutableStateOf(false)

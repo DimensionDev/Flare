@@ -14,7 +14,9 @@ import dev.dimension.flare.ui.render.parseHtml
 import kotlinx.coroutines.flow.first
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import org.koin.core.annotation.Single
 
+@Single
 public class HtmlArticleTranslationService internal constructor(
     private val appDataStore: AppDataStore,
     private val aiCompletionService: AiCompletionService,

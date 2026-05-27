@@ -14,9 +14,11 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiAccount
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import org.koin.core.annotation.Single
 import kotlin.time.Clock
 import kotlin.uuid.Uuid
 
+@Single
 internal class DraftRepository(
     private val database: AppDatabase,
     private val draftMediaStore: DraftMediaStore,

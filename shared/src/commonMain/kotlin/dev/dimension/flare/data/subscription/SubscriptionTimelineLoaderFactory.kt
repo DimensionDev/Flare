@@ -4,7 +4,9 @@ import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.datasource.microblog.MixedRemoteMediator
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.ui.model.UiTimelineV2
+import org.koin.core.annotation.Single
 
+@Single
 public class SubscriptionTimelineLoaderFactory internal constructor(
     private val database: CacheDatabase,
 ) {

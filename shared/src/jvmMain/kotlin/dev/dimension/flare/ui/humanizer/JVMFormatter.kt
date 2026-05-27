@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.humanizer
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.daysUntil
 import kotlinx.datetime.toLocalDateTime
+import org.koin.core.annotation.Single
 import org.ocpsoft.prettytime.PrettyTime
 import java.math.RoundingMode
 import java.text.NumberFormat
@@ -22,6 +23,7 @@ public fun updateTimeFormatterLocale(locale: Locale) {
     prettyTime.setLocale(locale)
 }
 
+@Single(binds = [PlatformFormatter::class])
 internal class JVMFormatter : PlatformFormatter {
     override fun formatNumber(number: Long): String {
         val fmt =

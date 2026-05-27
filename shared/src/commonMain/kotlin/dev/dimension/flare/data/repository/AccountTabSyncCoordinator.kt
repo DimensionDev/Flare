@@ -17,7 +17,9 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import org.koin.core.annotation.Single
 
+@Single(createdAtStart = true)
 internal class AccountTabSyncCoordinator(
     private val accountRepository: AccountRepository,
     private val settingsRepository: SettingsRepository,

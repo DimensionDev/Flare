@@ -9,6 +9,8 @@ import dev.dimension.flare.data.platform.NostrSignerCredential
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import org.koin.core.annotation.Provided
+import org.koin.core.annotation.Single
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
@@ -17,6 +19,7 @@ internal data class AmberIntentResult(
     val data: Intent?,
 )
 
+@Single
 internal class AmberIntentLauncherRegistry {
     private val mutex = Mutex()
     private var launcher: ((Intent, (AmberIntentResult) -> Unit) -> Unit)? = null
@@ -49,8 +52,9 @@ internal class AmberIntentLauncherRegistry {
         }
 }
 
+@Single(binds = [AmberSignerBridge::class])
 internal class AndroidAmberSignerBridge(
-    private val context: Context,
+    @Provided private val context: Context,
     private val launcherRegistry: AmberIntentLauncherRegistry,
 ) : AmberSignerBridge {
     override fun isAvailable(): Boolean {

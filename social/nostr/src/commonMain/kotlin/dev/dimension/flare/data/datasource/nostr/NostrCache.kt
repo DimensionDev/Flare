@@ -6,6 +6,7 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
+import org.koin.core.annotation.Single
 
 internal interface NostrCache {
     suspend fun getProfiles(pubKeys: List<String>): Map<String, UiProfile>
@@ -16,6 +17,7 @@ internal interface NostrCache {
     ): UiTimelineV2.Post?
 }
 
+@Single(binds = [NostrCache::class])
 internal class SharedNostrCache(
     private val cacheLookup: MicroblogCacheLookup,
 ) : NostrCache {

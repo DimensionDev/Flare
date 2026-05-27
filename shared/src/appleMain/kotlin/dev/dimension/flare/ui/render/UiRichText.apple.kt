@@ -3,6 +3,8 @@ package dev.dimension.flare.ui.render
 import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.autoreleasepool
 import kotlinx.collections.immutable.ImmutableList
+import org.koin.core.annotation.Provided
+import org.koin.core.annotation.Single
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import platform.Foundation.NSArray
@@ -17,8 +19,9 @@ public interface SwiftPlatformTextRenderer {
     public fun render(renderRuns: ImmutableList<RenderContent>): PlatformText
 }
 
+@Single(binds = [PlatformTextRendering::class])
 internal class ApplePlatformTextRenderer(
-    private val renderer: SwiftPlatformTextRenderer,
+    @Provided private val renderer: SwiftPlatformTextRenderer,
 ) : PlatformTextRendering {
     override fun render(renderRuns: ImmutableList<RenderContent>): PlatformText = renderer.render(renderRuns)
 }

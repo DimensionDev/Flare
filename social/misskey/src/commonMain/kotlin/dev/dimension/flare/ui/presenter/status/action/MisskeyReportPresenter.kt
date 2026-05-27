@@ -29,9 +29,11 @@ public class MisskeyReportPresenter(
         object : MisskeyReportState {
             override fun report(comment: String) {
                 scope.launch {
-                    accountService.accountServiceFlow(accountType).mapNotNull {
-                        it as? MisskeyDataSource
-                    }.firstOrNull()
+                    accountService
+                        .accountServiceFlow(accountType)
+                        .mapNotNull {
+                            it as? MisskeyDataSource
+                        }.firstOrNull()
                         ?.report(userKey, statusKey, comment)
                 }
             }

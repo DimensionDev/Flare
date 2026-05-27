@@ -8,15 +8,16 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import kotlin.coroutines.cancellation.CancellationException
 
-public object DebugRepository {
+@PublishedApi
+internal object DebugRepository {
     private const val MAX_MESSAGES = 25
     private const val DEBUG_MAX_MESSAGES = 1000
     private val _messages = MutableStateFlow<List<String>>(emptyList())
     private val _enabled = MutableStateFlow(false)
     private val scope = CoroutineScope(Dispatchers.IO)
 
-    internal val enabled get() = _enabled.asSharedFlow()
-    internal val messages get() = _messages.asSharedFlow()
+    val enabled get() = _enabled.asSharedFlow()
+    val messages get() = _messages.asSharedFlow()
 
     internal fun setEnabled(enabled: Boolean) {
         _enabled.value = enabled

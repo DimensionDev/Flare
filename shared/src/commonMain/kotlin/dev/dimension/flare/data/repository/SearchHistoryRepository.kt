@@ -8,9 +8,11 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import org.koin.core.annotation.Single
 import kotlin.time.Clock
 import kotlin.time.Instant
 
+@Single
 internal class SearchHistoryRepository(
     private val database: AppDatabase,
     private val coroutineScope: CoroutineScope,

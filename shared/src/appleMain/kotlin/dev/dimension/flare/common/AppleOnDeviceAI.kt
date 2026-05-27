@@ -1,7 +1,11 @@
 package dev.dimension.flare.common
 
+import org.koin.core.annotation.Provided
+import org.koin.core.annotation.Single
+
+@Single(binds = [OnDeviceAI::class])
 internal class AppleOnDeviceAI(
-    private val delegate: SwiftOnDeviceAI,
+    @Provided private val delegate: SwiftOnDeviceAI,
 ) : OnDeviceAI {
     override suspend fun isAvailable(): Boolean =
         runCatching {

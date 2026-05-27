@@ -29,9 +29,11 @@ public class MastodonReportPresenter(
         object : MastodonReportState {
             override fun report() {
                 scope.launch {
-                    accountService.accountServiceFlow(accountType).mapNotNull {
-                        it as? MastodonDataSource
-                    }.firstOrNull()
+                    accountService
+                        .accountServiceFlow(accountType)
+                        .mapNotNull {
+                            it as? MastodonDataSource
+                        }.firstOrNull()
                         ?.report(userKey, statusKey)
                 }
             }

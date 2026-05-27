@@ -11,14 +11,17 @@ import android.webkit.MimeTypeMap
 import androidx.compose.runtime.Stable
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
+import org.koin.core.annotation.Provided
+import org.koin.core.annotation.Single
 
 /**
  * Download Manager Helper - Simplified Version
  * Encapsulates Android's DownloadManager, provides simple video download functionality
  */
 @Stable
+@Single
 internal class VideoDownloadHelper(
-    private val context: Context,
+    @Provided private val context: Context,
 ) {
     companion object {
         private const val TAG = "VideoDownloadHelper"

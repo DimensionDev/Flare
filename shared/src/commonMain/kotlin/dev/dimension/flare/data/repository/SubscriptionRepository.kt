@@ -10,6 +10,7 @@ import dev.dimension.flare.ui.render.toUi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import org.koin.core.annotation.Single
 import kotlin.time.Instant
 
 public data class SubscriptionSourceInput(
@@ -41,6 +42,7 @@ public interface SubscriptionRepository {
     public suspend fun delete(id: Int): UiRssSource?
 }
 
+@Single(binds = [SubscriptionRepository::class])
 internal class DatabaseSubscriptionRepository(
     private val appDatabase: AppDatabase,
 ) : SubscriptionRepository {

@@ -40,15 +40,18 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.serializer
+import org.koin.core.annotation.Provided
+import org.koin.core.annotation.Single
 import kotlin.time.Clock
 
 @Stable
+@Single
 internal class AccountRepository internal constructor(
     private val appDatabase: AppDatabase,
     private val coroutineScope: CoroutineScope,
     internal val appDataStore: AppDataStore,
     private val cacheDatabase: CacheDatabase,
-    internal val platformRegistry: PlatformRegistry,
+    @Provided internal val platformRegistry: PlatformRegistry,
 ) {
     internal val activeAccount: Flow<UiState<UiAccount>> by lazy {
         appDatabase

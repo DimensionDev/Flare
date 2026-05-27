@@ -15,31 +15,17 @@ import coil3.video.VideoFrameDecoder
 import dev.dimension.flare.common.AnimatedPngDecoder
 import dev.dimension.flare.common.AnimatedWebPDecoder
 import dev.dimension.flare.data.network.ktorClient
-import dev.dimension.flare.data.platform.BlueskyPlatformSpec
-import dev.dimension.flare.data.platform.MastodonPlatformSpec
-import dev.dimension.flare.data.platform.MisskeyPlatformSpec
-import dev.dimension.flare.data.platform.NostrPlatformSpec
-import dev.dimension.flare.data.platform.RssTimelineSpecs
-import dev.dimension.flare.data.platform.VvoPlatformSpec
-import dev.dimension.flare.data.platform.XqtPlatformSpec
-import dev.dimension.flare.di.KoinHelper
-import dev.dimension.flare.di.NostrModule
-import dev.dimension.flare.di.aiModule
-import dev.dimension.flare.di.androidModule
-import dev.dimension.flare.model.PlatformRegistry
+import dev.dimension.flare.di.AndroidKoinApplication
 import org.koin.android.ext.koin.androidContext
-import org.koin.core.context.startKoin
+import org.koin.plugin.module.dsl.startKoin
 
 class App :
     Application(),
     SingletonImageLoader.Factory {
     override fun onCreate() {
         super.onCreate()
-        val registry = supportedPlatformRegistry()
-        val timelineSpecs = registry.all.flatMap { it.timelineSpecs } + RssTimelineSpecs.timelineSpecs
-        startKoin {
+        startKoin<AndroidKoinApplication> {
             androidContext(this@App)
-            modules(KoinHelper.modules(registry, timelineSpecs) + NostrModule.modules() + androidModule + aiModule)
         }
     }
 
@@ -68,15 +54,3 @@ class App :
             }.crossfade(true)
             .build()
 }
-
-private fun supportedPlatformRegistry(): PlatformRegistry =
-    PlatformRegistry(
-        listOf(
-            NostrPlatformSpec,
-            MastodonPlatformSpec,
-            MisskeyPlatformSpec,
-            BlueskyPlatformSpec,
-            XqtPlatformSpec,
-            VvoPlatformSpec,
-        ),
-    )

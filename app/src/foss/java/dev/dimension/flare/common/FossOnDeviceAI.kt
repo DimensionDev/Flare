@@ -1,9 +1,12 @@
 package dev.dimension.flare.common
 
 import android.content.Context
+import org.koin.core.annotation.Provided
+import org.koin.core.annotation.Single
 
+@Single(binds = [OnDeviceAI::class])
 internal class FossOnDeviceAI(
-    private val context: Context,
+    @Provided private val context: Context,
 ) : OnDeviceAI {
     override suspend fun isAvailable(): Boolean = false
 

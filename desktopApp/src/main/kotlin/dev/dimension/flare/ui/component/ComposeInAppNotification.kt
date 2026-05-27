@@ -35,6 +35,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
+import org.koin.core.annotation.Single
 import kotlin.time.Duration.Companion.seconds
 
 internal sealed interface Notification {
@@ -53,6 +54,7 @@ internal sealed interface Notification {
     ) : Notification
 }
 
+@Single(binds = [InAppNotification::class])
 internal class ComposeInAppNotification : InAppNotification {
     private val _source = MutableStateFlow(Event<Notification>(null, initialHandled = true))
     val source

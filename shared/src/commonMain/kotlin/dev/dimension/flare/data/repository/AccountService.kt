@@ -8,6 +8,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.serializer
+import org.koin.core.annotation.Single
 
 public interface AccountService {
     public fun accountServiceFlow(accountType: AccountType): Flow<MicroblogDataSource>
@@ -56,6 +57,7 @@ public inline fun <reified T : Any> AccountService.updateCredential(
         serializer = serializer(),
     )
 
+@Single(binds = [AccountService::class])
 internal class RepositoryAccountService(
     private val repository: AccountRepository,
 ) : AccountService {

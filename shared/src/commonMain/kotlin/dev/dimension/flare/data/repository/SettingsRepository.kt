@@ -38,8 +38,10 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import okio.FileSystem
 import okio.SYSTEM
+import org.koin.core.annotation.Single
 
 @Stable
+@Single
 public class SettingsRepository internal constructor(
     private val pathProducer: PlatformPathProducer,
     private val appDataStore: AppDataStore,

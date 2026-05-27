@@ -10,7 +10,9 @@ import dev.dimension.flare.data.datastore.model.FlareConfig
 import dev.dimension.flare.data.io.PlatformPathProducer
 import okio.FileSystem
 import okio.SYSTEM
+import org.koin.core.annotation.Single
 
+@Single
 internal class AppDataStore(
     private val platformPathProducer: PlatformPathProducer,
 ) {

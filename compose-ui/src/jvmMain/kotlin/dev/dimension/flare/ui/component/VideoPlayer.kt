@@ -38,6 +38,7 @@ import dev.dimension.flare.ui.theme.PlatformTheme
 import io.github.composefluent.component.ProgressRing
 import io.github.kdroidfilter.composemediaplayer.VideoPlayerState
 import io.github.kdroidfilter.composemediaplayer.VideoPlayerSurface
+import org.koin.core.annotation.Single
 import kotlin.math.roundToLong
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -259,6 +260,7 @@ private fun rememberSurfaceBinding(uri: String): Pair<VideoPlayerState?, Surface
 }
 
 @androidx.compose.runtime.Stable
+@Single
 public class SurfaceBindingManager {
     public val player: VideoPlayerState by lazy {
         io.github.kdroidfilter.composemediaplayer.createVideoPlayerState().apply {

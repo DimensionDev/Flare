@@ -305,7 +305,7 @@ public sealed class UiTimelineV2 {
 
         @Serializable
         @Immutable
-        public data class EmojiReaction internal constructor(
+        public data class EmojiReaction(
             val name: String,
             val url: String,
             val count: UiNumber,

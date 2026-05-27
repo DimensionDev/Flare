@@ -13,7 +13,7 @@ import io.ktor.client.request.get
 import io.ktor.http.URLBuilder
 import io.ktor.http.URLProtocol
 
-internal data object NodeInfoService {
+public data object NodeInfoService {
     private val supportedSchemas =
         listOf(
             "http://nodeinfo.diaspora.software/ns/schema/1.0",
@@ -22,7 +22,7 @@ internal data object NodeInfoService {
             "http://nodeinfo.diaspora.software/ns/schema/2.1",
         )
 
-    internal val pleromaNodeInfoName =
+    public val pleromaNodeInfoName: List<String> =
         listOf(
             "pleroma",
             "akkoma",
@@ -33,7 +33,7 @@ internal data object NodeInfoService {
             "wafrn",
         )
 
-    internal fun isUnsupportedSoftware(name: String?): Boolean = unsupportedNodeInfoName.any { it.equals(name, ignoreCase = true) }
+    public fun isUnsupportedSoftware(name: String?): Boolean = unsupportedNodeInfoName.any { it.equals(name, ignoreCase = true) }
 
     internal fun normalizeHost(host: String): String =
         host
@@ -42,7 +42,7 @@ internal data object NodeInfoService {
             .removePrefix("http://")
             .removeSuffix("/")
 
-    suspend fun fetchNodeInfo(host: String): String? {
+    public suspend fun fetchNodeInfo(host: String): String? {
         val normalizedHost = normalizeHost(host)
         val response =
             ktorClient()
@@ -100,7 +100,7 @@ internal data object NodeInfoService {
             }.first()
     }
 
-    suspend fun detectPlatformType(
+    public suspend fun detectPlatformType(
         host: String,
         platformRegistry: PlatformRegistry,
     ): NodeData {

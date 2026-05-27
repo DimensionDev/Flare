@@ -1,7 +1,7 @@
 package dev.dimension.flare.common
 
-internal object MimeTypes {
-    fun detectFromBytes(bytes: ByteArray): String? {
+public object MimeTypes {
+    public fun detectFromBytes(bytes: ByteArray): String? {
         if (bytes.size < 4) return null
         val b0 = bytes[0].toInt() and 0xFF
         val b1 = bytes[1].toInt() and 0xFF
@@ -30,7 +30,7 @@ internal object MimeTypes {
         return null
     }
 
-    fun extensionFor(mimeType: String?): String? =
+    public fun extensionFor(mimeType: String?): String? =
         when (mimeType?.lowercase()?.substringBefore(';')?.trim()) {
             "image/jpeg", "image/jpg" -> "jpg"
             "image/png" -> "png"
@@ -48,7 +48,7 @@ internal object MimeTypes {
             else -> null
         }
 
-    fun hasExtension(name: String): Boolean {
+    public fun hasExtension(name: String): Boolean {
         val dot = name.lastIndexOf('.')
         if (dot <= 0 || dot == name.lastIndex) return false
         val ext = name.substring(dot + 1)

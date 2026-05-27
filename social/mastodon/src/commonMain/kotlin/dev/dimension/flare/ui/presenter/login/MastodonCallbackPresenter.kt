@@ -6,16 +6,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.network.mastodon.MastodonOAuthService
+import dev.dimension.flare.data.network.mastodon.api.model.CreateApplicationResponse
 import dev.dimension.flare.data.network.nodeinfo.NodeInfoService
 import dev.dimension.flare.data.platform.MastodonCredential
-import dev.dimension.flare.data.repository.AccountRepository
-import dev.dimension.flare.data.repository.ApplicationRepository
+import dev.dimension.flare.data.repository.AccountService
+import dev.dimension.flare.data.repository.addAccount
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
-import dev.dimension.flare.ui.model.UiApplication
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.route.DeeplinkRoute
@@ -28,8 +27,7 @@ public class MastodonCallbackPresenter(
     private val toHome: () -> Unit,
 ) : PresenterBase<UiState<Nothing>>(),
     KoinComponent {
-    private val applicationRepository: ApplicationRepository by inject()
-    private val accountRepository: AccountRepository by inject()
+    private val accountService: AccountService by inject()
 
     @Composable
     override fun body(): UiState<Nothing> {
@@ -38,20 +36,17 @@ public class MastodonCallbackPresenter(
         }
         var error by remember { mutableStateOf<Throwable?>(null) }
         LaunchedEffect(code) {
-            val pendingOAuth = applicationRepository.getPendingOAuth()
-            if (pendingOAuth == null) {
-                error = Exception("No pending OAuth")
-            }
-            if (pendingOAuth is UiApplication.Mastodon) {
-                try {
-                    tryPendingOAuth(pendingOAuth, code, accountRepository)
-                    applicationRepository.setPendingOAuth(pendingOAuth.host, false)
-                    toHome.invoke()
-                } catch (e: Exception) {
-                    error = e
+            val pendingOAuth =
+                MastodonLoginSessionStore.pending ?: run {
+                    error = Exception("No pending OAuth")
+                    return@LaunchedEffect
                 }
-            } else {
-                error = Exception("Invalid pending OAuth: $pendingOAuth")
+            try {
+                tryPendingOAuth(pendingOAuth, code, accountService)
+                MastodonLoginSessionStore.clearPending()
+                toHome.invoke()
+            } catch (e: Exception) {
+                error = e
             }
         }
         if (error != null) {
@@ -61,9 +56,9 @@ public class MastodonCallbackPresenter(
     }
 
     private suspend fun tryPendingOAuth(
-        application: UiApplication.Mastodon,
+        application: MastodonLoginSessionStore.Pending,
         code: String,
-        accountRepository: AccountRepository,
+        accountService: AccountService,
     ) {
         val host = application.host
         val service =
@@ -85,7 +80,7 @@ public class MastodonCallbackPresenter(
             } else {
                 MastodonCredential.ForkType.Mastodon
             }
-        accountRepository.addAccount(
+        accountService.addAccount(
             UiAccount(
                 accountKey =
                     MicroBlogKey(
@@ -107,7 +102,6 @@ public class MastodonCallbackPresenter(
 
 public suspend fun mastodonLoginUseCase(
     domain: String,
-    applicationRepository: ApplicationRepository,
     launchOAuth: (String) -> Unit,
 ): Result<Unit> =
     runCatching {
@@ -132,21 +126,39 @@ public suspend fun mastodonLoginUseCase(
             )
 
         val application =
-            applicationRepository.findByHost(host)?.let {
-                if (it is UiApplication.Mastodon) {
-                    it.application
-                } else {
-                    null
+            MastodonLoginSessionStore.application(host)
+                ?: service.createApplication().also {
+                    MastodonLoginSessionStore.saveApplication(host, it)
                 }
-            } ?: service.createApplication().also {
-                applicationRepository.addApplication(
-                    host,
-                    it.encodeJson(),
-                    platformType = PlatformType.Mastodon,
-                )
-            }
-        applicationRepository.clearPendingOAuth()
-        applicationRepository.setPendingOAuth(host, true)
+        MastodonLoginSessionStore.pending =
+            MastodonLoginSessionStore.Pending(
+                host = host,
+                application = application,
+            )
         val target = service.getWebOAuthUrl(application)
         launchOAuth(target)
     }
+
+private object MastodonLoginSessionStore {
+    private val applications = mutableMapOf<String, CreateApplicationResponse>()
+
+    var pending: Pending? = null
+
+    fun application(host: String): CreateApplicationResponse? = applications[host]
+
+    fun saveApplication(
+        host: String,
+        application: CreateApplicationResponse,
+    ) {
+        applications[host] = application
+    }
+
+    fun clearPending() {
+        pending = null
+    }
+
+    data class Pending(
+        val host: String,
+        val application: CreateApplicationResponse,
+    )
+}

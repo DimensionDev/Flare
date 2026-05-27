@@ -35,6 +35,7 @@ kotlin {
             isStatic = true
             export(projects.shared)
             export(projects.social.bluesky)
+            export(projects.social.mastodon)
             export(projects.social.vvo)
             export(projects.social.xqt)
             export(projects.feature.subscription)
@@ -46,6 +47,7 @@ kotlin {
             dependencies {
                 implementation(projects.shared)
                 implementation(projects.social.bluesky)
+                implementation(projects.social.mastodon)
                 implementation(projects.social.vvo)
                 implementation(projects.social.xqt)
                 implementation(projects.feature.subscription)
@@ -105,6 +107,7 @@ kotlin {
             dependencies {
                 api(projects.shared)
                 api(projects.social.bluesky)
+                api(projects.social.mastodon)
                 api(projects.social.vvo)
                 api(projects.social.xqt)
                 api(projects.feature.subscription)

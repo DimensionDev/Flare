@@ -9,7 +9,11 @@ import kotlinx.coroutines.IO
 internal fun provideAppDatabase(driverFactory: DriverFactory): AppDatabase =
     driverFactory
         .createBuilder<AppDatabase>("app.db")
-        .addMigrations(AppDatabase.MIGRATION_8_9, AppDatabase.MIGRATION_9_10)
+        .addMigrations(
+            AppDatabase.MIGRATION_8_9,
+            AppDatabase.MIGRATION_9_10,
+            AppDatabase.MIGRATION_10_11,
+        )
         .setDriver(BundledSQLiteDriver())
         .setQueryCoroutineContext(Dispatchers.IO)
         .build()

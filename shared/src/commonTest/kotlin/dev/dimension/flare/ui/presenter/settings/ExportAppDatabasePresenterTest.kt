@@ -8,7 +8,6 @@ import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.app.model.AppDatabaseExport
 import dev.dimension.flare.data.database.app.model.DbAccount
-import dev.dimension.flare.data.database.app.model.DbApplication
 import dev.dimension.flare.data.database.app.model.DbKeywordFilter
 import dev.dimension.flare.data.database.app.model.DbRssSources
 import dev.dimension.flare.data.database.app.model.DbSearchHistory
@@ -73,14 +72,6 @@ class ExportAppDatabasePresenterTest : RobolectricTest() {
                 )
             db.accountDao().insert(account)
 
-            val application =
-                DbApplication(
-                    host = "example.com",
-                    credential_json = "{}",
-                    platform_type = PlatformType.Mastodon,
-                )
-            db.applicationDao().insert(application)
-
             val keywordFilter =
                 DbKeywordFilter(
                     keyword = "spam",
@@ -130,9 +121,6 @@ class ExportAppDatabasePresenterTest : RobolectricTest() {
 
             assertEquals(1, export.accounts.size)
             assertEquals(account, export.accounts.first())
-
-            assertEquals(1, export.applications.size)
-            assertEquals(application, export.applications.first())
 
             assertEquals(1, export.keywordFilters.size)
             assertEquals(keywordFilter, export.keywordFilters.first())

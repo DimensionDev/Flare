@@ -7,7 +7,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import dev.dimension.flare.data.repository.ApplicationRepository
 import dev.dimension.flare.model.PlatformRegistry
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiIcon
@@ -21,7 +20,6 @@ public class ServiceSelectPresenter(
     private val toHome: () -> Unit,
 ) : PresenterBase<ServiceSelectState>(),
     KoinComponent {
-    private val applicationRepository: ApplicationRepository by inject()
     private val platformRegistry: PlatformRegistry by inject()
 
     @Composable
@@ -91,7 +89,6 @@ public class ServiceSelectPresenter(
                     error = null
                     misskeyLoginUseCase(
                         host = host,
-                        applicationRepository = applicationRepository,
                         launchOAuth = launchUrl,
                     ).onFailure {
                         error = it.message
@@ -140,7 +137,6 @@ public class ServiceSelectPresenter(
                     error = null
                     mastodonLoginUseCase(
                         domain = host,
-                        applicationRepository = applicationRepository,
                         launchOAuth = launchUrl,
                     ).onFailure {
                         error = it.message

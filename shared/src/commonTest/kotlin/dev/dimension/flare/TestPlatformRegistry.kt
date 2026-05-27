@@ -3,7 +3,6 @@ package dev.dimension.flare
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
-import dev.dimension.flare.data.platform.MastodonPlatformSpec
 import dev.dimension.flare.data.platform.MisskeyPlatformSpec
 import dev.dimension.flare.data.platform.NostrPlatformSpec
 import dev.dimension.flare.model.AccountType
@@ -29,7 +28,7 @@ internal fun testPlatformRegistry(): PlatformRegistry =
     PlatformRegistry(
         listOf(
             NostrPlatformSpec,
-            MastodonPlatformSpec,
+            TestMastodonPlatformSpec,
             MisskeyPlatformSpec,
             TestBlueskyPlatformSpec,
             TestXqtPlatformSpec,
@@ -83,6 +82,31 @@ private data object TestBlueskyPlatformSpec : TestDeepLinkPlatformSpec(
                 add(blueskyPostDeepLink(accountKey, "https://bsky.app/profile/{handle}/post/{id}"))
             }
         }.toImmutableList()
+}
+
+private data object TestMastodonPlatformSpec : TestDeepLinkPlatformSpec(
+    type = PlatformType.Mastodon,
+    displayName = "Mastodon",
+    icon = UiIcon.Mastodon,
+) {
+    override fun deepLinks(accountKey: MicroBlogKey): ImmutableList<PlatformDeepLink<*>> =
+        persistentListOf(
+            PlatformDeepLink(
+                uriPattern = "https://${accountKey.host}/@{handle}",
+                serializer = TestProfileDeepLink.serializer(),
+                callback = { data -> profileRoute(accountKey, data.handle) },
+            ),
+            PlatformDeepLink(
+                uriPattern = "https://${accountKey.host}/@{handle}/{id}",
+                serializer = TestPostDeepLink.serializer(),
+                callback = { data ->
+                    DeeplinkRoute.Status.Detail(
+                        accountType = AccountType.Specific(accountKey),
+                        statusKey = MicroBlogKey(data.id, accountKey.host),
+                    )
+                },
+            ),
+        )
 }
 
 private data object TestXqtPlatformSpec : TestDeepLinkPlatformSpec(

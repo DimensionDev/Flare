@@ -10,11 +10,9 @@ import dev.dimension.flare.data.network.misskey.MisskeyOauthService
 import dev.dimension.flare.data.network.nodeinfo.NodeInfoService
 import dev.dimension.flare.data.platform.MisskeyCredential
 import dev.dimension.flare.data.repository.AccountRepository
-import dev.dimension.flare.data.repository.ApplicationRepository
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
-import dev.dimension.flare.ui.model.UiApplication
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.route.DeeplinkRoute
@@ -29,7 +27,6 @@ public class MisskeyCallbackPresenter(
     private val toHome: () -> Unit,
 ) : PresenterBase<UiState<Nothing>>(),
     KoinComponent {
-    private val applicationRepository: ApplicationRepository by inject()
     private val accountRepository: AccountRepository by inject()
 
     @Composable
@@ -39,22 +36,23 @@ public class MisskeyCallbackPresenter(
         }
         var error by remember { mutableStateOf<Throwable?>(null) }
         LaunchedEffect(session) {
-            val pendingOAuth = applicationRepository.getPendingOAuth()
-            if (pendingOAuth == null) {
-                error = Exception("No pending OAuth")
-            }
-            if (pendingOAuth is UiApplication.Misskey) {
-                runCatching {
-                    misskeyAuthCheckUseCase(pendingOAuth.host, session, accountRepository)
-                    applicationRepository.setPendingOAuth(pendingOAuth.host, false)
-                    // TODO: delay to workaround iOS NavigationPath.append not working
-                    delay(2.seconds)
-                    toHome.invoke()
-                }.onFailure {
-                    error = it
+            val pendingOAuth =
+                MisskeyLoginSessionStore.pending ?: run {
+                    error = Exception("No pending OAuth")
+                    return@LaunchedEffect
                 }
-            } else {
-                error = Exception("Invalid pending OAuth: $pendingOAuth")
+            if (pendingOAuth.session != session) {
+                error = Exception("Invalid pending OAuth")
+                return@LaunchedEffect
+            }
+            runCatching {
+                misskeyAuthCheckUseCase(pendingOAuth.host, session, accountRepository)
+                MisskeyLoginSessionStore.clearPending()
+                // TODO: delay to workaround iOS NavigationPath.append not working
+                delay(2.seconds)
+                toHome.invoke()
+            }.onFailure {
+                error = it
             }
         }
         if (error != null) {
@@ -100,7 +98,6 @@ public class MisskeyCallbackPresenter(
 
 public suspend fun misskeyLoginUseCase(
     host: String,
-    applicationRepository: ApplicationRepository,
     launchOAuth: (String) -> Unit,
 ): Result<Unit> =
     runCatching {
@@ -112,13 +109,24 @@ public suspend fun misskeyLoginUseCase(
                 callback = DeeplinkRoute.Companion.Callback.MISSKEY,
                 session = session,
             )
-        applicationRepository.addApplication(
-            host = host,
-            credentialJson = session,
-            platformType = PlatformType.Misskey,
-        )
-        applicationRepository.clearPendingOAuth()
-        applicationRepository.setPendingOAuth(host, true)
+        MisskeyLoginSessionStore.pending =
+            MisskeyLoginSessionStore.Pending(
+                host = host,
+                session = session,
+            )
         val target = service.getAuthorizeUrl()
         launchOAuth(target)
     }
+
+private object MisskeyLoginSessionStore {
+    var pending: Pending? = null
+
+    fun clearPending() {
+        pending = null
+    }
+
+    data class Pending(
+        val host: String,
+        val session: String,
+    )
+}

@@ -17,8 +17,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import com.kevinnzou.web.WebView
 import com.kevinnzou.web.rememberWebViewState
+import dev.dimension.flare.model.xqtHost
 import dev.dimension.flare.ui.component.FlareScaffold
-import dev.dimension.flare.ui.model.UiApplication
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.login.XQTLoginPresenter
 import kotlinx.coroutines.delay
@@ -37,7 +37,7 @@ private val userAgent =
 @Composable
 internal fun XQTLoginScreen(toHome: () -> Unit) {
     val state by producePresenter { xQtLoginPresenter(toHome) }
-    val webViewState = rememberWebViewState("https://${UiApplication.XQT.host}/i/flow/login")
+    val webViewState = rememberWebViewState("https://$xqtHost/i/flow/login")
     LaunchedEffect(Unit) {
         while (true) {
             if (!state.loading) {

@@ -11,7 +11,6 @@ import dev.dimension.flare.data.network.ai.OpenAIService
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.AccountService
 import dev.dimension.flare.data.repository.AccountTabSyncCoordinator
-import dev.dimension.flare.data.repository.ApplicationRepository
 import dev.dimension.flare.data.repository.DatabaseSubscriptionRepository
 import dev.dimension.flare.data.repository.DraftMediaStore
 import dev.dimension.flare.data.repository.DraftRepository
@@ -47,7 +46,6 @@ internal fun commonModule(
     singleOf(::provideAppDatabase)
     singleOf(::provideCacheDatabase)
     single<NostrCache> { DatabaseNostrCache(get()) }
-    singleOf(::ApplicationRepository)
     single {
         DraftMediaStore(get())
     }

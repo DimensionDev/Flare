@@ -15,8 +15,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import com.kevinnzou.web.WebView
 import com.kevinnzou.web.rememberWebViewState
+import dev.dimension.flare.model.vvoHost
 import dev.dimension.flare.ui.component.FlareScaffold
-import dev.dimension.flare.ui.model.UiApplication
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.login.VVOLoginPresenter
 import kotlinx.coroutines.delay
@@ -26,7 +26,7 @@ import kotlin.time.Duration.Companion.seconds
 @Composable
 internal fun VVOLoginScreen(toHome: () -> Unit) {
     val state by producePresenter { presenter(toHome) }
-    val webViewState = rememberWebViewState(UiApplication.VVo.loginUrl)
+    val webViewState = rememberWebViewState("https://$vvoHost/login?backURL=https://$vvoHost/")
     LaunchedEffect(Unit) {
         while (true) {
             if (!state.loading) {

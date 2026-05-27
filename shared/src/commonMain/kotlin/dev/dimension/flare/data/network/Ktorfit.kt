@@ -2,11 +2,11 @@ package dev.dimension.flare.data.network
 
 import de.jensklingenberg.ktorfit.Ktorfit
 import de.jensklingenberg.ktorfit.converter.CallConverterFactory
+import de.jensklingenberg.ktorfit.converter.Converter
 import de.jensklingenberg.ktorfit.converter.FlowConverterFactory
 import de.jensklingenberg.ktorfit.converter.ResponseConverterFactory
 import dev.dimension.flare.common.BuildConfig
 import dev.dimension.flare.common.JSON
-import dev.dimension.flare.data.network.mastodon.api.model.MastodonPagingConverterFactory
 import dev.dimension.flare.data.repository.DebugRepository
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
@@ -22,6 +22,7 @@ import kotlin.native.HiddenFromObjC
 public fun ktorfit(
     baseUrl: String,
     json: Json = JSON,
+    extraConverterFactories: List<Converter.Factory> = emptyList(),
     config: HttpClientConfig<*>.() -> Unit = {},
 ): Ktorfit =
     de.jensklingenberg.ktorfit.ktorfit {
@@ -38,7 +39,7 @@ public fun ktorfit(
             FlowConverterFactory(),
             CallConverterFactory(),
             ResponseConverterFactory(),
-            MastodonPagingConverterFactory(),
+            *extraConverterFactories.toTypedArray(),
         )
     }
 

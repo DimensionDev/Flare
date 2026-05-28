@@ -60,9 +60,7 @@ struct TimelineCollection: @MainActor RandomAccessCollection {
 }
 
 struct TimelinePagingContent: View {
-    @AppStorage("pref_timeline_use_compose_view") private var useComposeView: Bool = false
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
-    @Environment(\.openURL) private var openURL
     @Environment(\.timelineAppearance.timelineDisplayMode) private var timelineDisplayMode
     @Environment(\.refresh) private var refreshAction: RefreshAction?
     let data: PagingState<UiTimelineV2>
@@ -92,22 +90,6 @@ struct TimelinePagingContent: View {
         if allowGalleryMode && timelineDisplayMode == .gallery {
             GalleryTimelinePagingView(data: data)
                 .ignoresSafeArea(edges: .vertical)
-        } else if useComposeView {
-            ComposeTimelineView(
-                key: key,
-                data: data,
-                detailStatusKey: detailStatusKey,
-                topPadding: 0,
-                onOpenLink: { url in
-                    if let targetURL = URL(string: url) {
-                        openURL.callAsFunction(targetURL)
-                    }
-                },
-                onExpand: {},
-                onCollapse: {}
-            )
-            .ignoresSafeArea(edges: .vertical)
-            .background(Color(.systemGroupedBackground))
         } else if horizontalSizeClass == .compact {
             singleListView
         } else {

@@ -34,7 +34,7 @@ struct Router<Root: View>: View {
             .navigationDestination(for: Route.self) { route in
                 route.view(
                     onNavigate: { route in navigate(route: route) },
-                    clearToHome: { backStack.removeAll() }
+                    goBack: { backStack.removeLast() }
                 )
             }
         }
@@ -42,7 +42,7 @@ struct Router<Root: View>: View {
             NavigationStack {
                 route.view(
                     onNavigate: { route in navigate(route: route) },
-                    clearToHome: { backStack.removeAll() }
+                    goBack: { backStack.removeLast() }
                 )
             }
         }
@@ -50,7 +50,7 @@ struct Router<Root: View>: View {
             NavigationStack {
                 route.view(
                     onNavigate: { route in navigate(route: route) },
-                    clearToHome: { backStack.removeAll() }
+                    goBack: { backStack.removeLast() }
                 )
             }
             .background(ClearFullScreenBackground())

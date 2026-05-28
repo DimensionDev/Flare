@@ -46,6 +46,7 @@ import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStrings
+import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.model.toUi
@@ -95,6 +96,7 @@ internal class VVODataSource(
                 .tabItem(
                     data = TimelineSpec.AccountBasedData(accountKey),
                     icon = IconType.Material(UiIcon.Weibo),
+                    title = UiText.Raw("Weibo"),
                 ),
         )
     }

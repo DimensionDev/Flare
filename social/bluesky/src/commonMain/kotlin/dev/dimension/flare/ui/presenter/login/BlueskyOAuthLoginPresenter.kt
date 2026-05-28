@@ -17,7 +17,9 @@ import dev.dimension.flare.ui.presenter.PresenterBase
 import io.ktor.client.plugins.DefaultRequest
 import io.ktor.http.Url
 import io.ktor.http.takeFrom
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import sh.christian.ozone.oauth.OAuthApi
@@ -81,7 +83,11 @@ public class BlueskyOAuthLoginPresenter(
                         }
                     request?.let {
                         if (it.authorizeRequestUrl.isNotEmpty()) {
-                            launchUrl(it.authorizeRequestUrl)
+                            scope.launch {
+                                withContext(Dispatchers.Main) {
+                                    launchUrl(it.authorizeRequestUrl)
+                                }
+                            }
                         } else {
                             error = "Invalid authorization request URL"
                             loading = false

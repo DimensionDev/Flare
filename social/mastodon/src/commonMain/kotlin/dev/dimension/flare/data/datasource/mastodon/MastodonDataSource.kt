@@ -54,6 +54,7 @@ import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiStrings
+import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import dev.dimension.flare.ui.route.DeeplinkRoute
@@ -499,6 +500,7 @@ internal open class MastodonDataSource(
                 .tabItem(
                     data = TimelineSpec.AccountBasedData(accountKey),
                     icon = IconType.FavIcon(accountKey.host),
+                    title = UiText.Raw("Mastodon"),
                 ),
         )
     }

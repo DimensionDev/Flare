@@ -12,7 +12,9 @@ import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.presenter.PresenterBase
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -89,7 +91,13 @@ public class ServiceSelectPresenter(
                     error = null
                     misskeyLoginUseCase(
                         host = host,
-                        launchOAuth = launchUrl,
+                        launchOAuth = {
+                            scope.launch {
+                                withContext(Dispatchers.Main) {
+                                    launchUrl(it)
+                                }
+                            }
+                        },
                     ).onFailure {
                         error = it.message
                     }
@@ -137,7 +145,13 @@ public class ServiceSelectPresenter(
                     error = null
                     mastodonLoginUseCase(
                         domain = host,
-                        launchOAuth = launchUrl,
+                        launchOAuth = {
+                            scope.launch {
+                                withContext(Dispatchers.Main) {
+                                    launchUrl(it)
+                                }
+                            }
+                        },
                     ).onFailure {
                         error = it.message
                         loading = false

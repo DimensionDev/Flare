@@ -1,12 +1,7 @@
 package dev.dimension.flare.data.datasource.xqt
 
 import androidx.paging.ExperimentalPagingApi
-import androidx.paging.Pager
-import androidx.paging.PagingData
-import androidx.paging.cachedIn
 import androidx.paging.map
-import dev.dimension.flare.common.CacheData
-import dev.dimension.flare.common.Cacheable
 import dev.dimension.flare.common.FileType
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.common.encodeJson
@@ -37,7 +32,6 @@ import dev.dimension.flare.data.datasource.microblog.handler.RelationHandler
 import dev.dimension.flare.data.datasource.microblog.handler.UserHandler
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.notSupported
-import dev.dimension.flare.data.datasource.microblog.pagingConfig
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.tab.ShortcutSpec
 import dev.dimension.flare.data.model.tab.TimelineSpec
@@ -72,8 +66,8 @@ import dev.dimension.flare.shared.image.ImageCompressor
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiPodcast
-import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStrings
+import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
@@ -88,18 +82,13 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.mapNotNull
-import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.time.Duration.Companion.seconds
-import kotlin.uuid.Uuid
 
 private const val BULK_SIZE: Long = 512 * 1024L // 512 Kib
 private const val MAX_ASYNC_UPLOAD_SIZE = 10
@@ -316,6 +305,7 @@ internal class XQTDataSource(
                 .tabItem(
                     data = TimelineSpec.AccountBasedData(accountKey),
                     icon = IconType.FavIcon(accountKey.host),
+                    title = UiText.Raw("X"),
                 ),
             XqtPlatformSpec.featuredTimelineSpec
                 .tabItem(

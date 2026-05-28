@@ -74,8 +74,8 @@ import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiProfile
-import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStrings
+import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.blueskyLike
 import dev.dimension.flare.ui.model.mapper.blueskyReblog
@@ -85,6 +85,7 @@ import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import dev.dimension.flare.ui.presenter.status.action.BlueskyReportStatusState
 import dev.dimension.flare.ui.route.DeeplinkRoute
+import kotlin.time.Clock
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -92,11 +93,7 @@ import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.mapNotNull
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.koin.core.component.KoinComponent
@@ -110,7 +107,6 @@ import sh.christian.ozone.api.Nsid
 import sh.christian.ozone.api.RKey
 import sh.christian.ozone.api.model.JsonContent
 import sh.christian.ozone.api.model.JsonContent.Companion.encodeAsJsonContent
-import kotlin.time.Clock
 
 private const val AT_PROTO_PERSONAL_DATA_SERVER = "AtprotoPersonalDataServer"
 
@@ -778,6 +774,7 @@ internal class BlueskyDataSource(
                 .tabItem(
                     data = TimelineSpec.AccountBasedData(accountKey),
                     icon = IconType.FavIcon(accountKey.host),
+                    title = UiText.Raw("Bluesky"),
                 ),
         )
     }

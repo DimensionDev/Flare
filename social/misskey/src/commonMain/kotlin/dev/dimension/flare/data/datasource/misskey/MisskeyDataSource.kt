@@ -63,6 +63,7 @@ import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiNumber
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiStrings
+import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
@@ -712,6 +713,7 @@ internal class MisskeyDataSource(
                 .tabItem(
                     data = TimelineSpec.AccountBasedData(accountKey),
                     icon = IconType.FavIcon(accountKey.host),
+                    title = UiText.Raw("Misskey"),
                 ),
         )
     }

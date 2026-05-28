@@ -116,7 +116,6 @@ public data object NodeInfoService {
     }
 }
 
-@HiddenFromObjC
 public data class NodeData(
     val host: String,
     val platformType: PlatformType,

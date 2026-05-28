@@ -29,7 +29,7 @@ enum Route: Hashable, Identifiable {
     @ViewBuilder
     func view(
         onNavigate: @escaping (Route) -> Void,
-        clearToHome: @escaping () -> Void
+        goBack: @escaping () -> Void
     ) -> some View {
         switch self {
         case .home: HomeTimelineScreen(
@@ -43,7 +43,7 @@ enum Route: Hashable, Identifiable {
             TimelineScreen(tabItem: item)
                 .navigationTitle(item.title.text)
         case .serviceSelect:
-            ServiceSelectionScreen(toHome: { clearToHome() })
+            ServiceSelectionScreen(toHome: { goBack() })
         case .statusDetail(let accountType, let statusKey):
             StatusDetailScreen(accountType: accountType, statusKey: statusKey)
         case .profileUser(let accountType, let userKey):

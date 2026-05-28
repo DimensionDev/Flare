@@ -18,7 +18,7 @@ struct FlareRoot: View {
                 ForEach(items, id: \.name) { tab in
                     Tab(value: homeTabKey(tab), role: homeTabRoute(tab) == .discover ? .some(.search) : .none) {
                         Router { onNavigate in
-                            homeTabRoute(tab).view(onNavigate: onNavigate, clearToHome: {})
+                            homeTabRoute(tab).view(onNavigate: onNavigate, goBack: {})
                         }
                     } label: {
                         Label {
@@ -117,7 +117,7 @@ struct BackportFlareRoot: View {
             TabView(selection: $selectedTab) {
                 ForEach(items, id: \.name) { tab in
                     Router { onNavigate in
-                        homeTabRoute(tab).view(onNavigate: onNavigate, clearToHome: {})
+                        homeTabRoute(tab).view(onNavigate: onNavigate, goBack: {})
                     }
                     .tabItem {
                         Label {
@@ -182,7 +182,7 @@ private struct SidebarRouteScreen: View {
         Router { onNavigate in
             route.view(
                 onNavigate: onNavigate,
-                clearToHome: {}
+                goBack: {}
             )
         }
     }

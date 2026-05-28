@@ -4,17 +4,14 @@ import dev.dimension.flare.common.FileItem
 import dev.dimension.flare.common.FileType
 import dev.dimension.flare.data.database.app.model.DraftMediaType
 import dev.dimension.flare.data.datasource.microblog.ComposeData
-import dev.dimension.flare.data.io.PlatformPathProducer
-import okio.FileSystem
+import dev.dimension.flare.data.io.FileStorage
 import okio.Path.Companion.toPath
-import okio.SYSTEM
 import org.koin.core.annotation.Single
 import kotlin.uuid.Uuid
 
 @Single
 internal class DraftMediaStore(
-    private val platformPathProducer: PlatformPathProducer,
-    private val fileSystem: FileSystem = FileSystem.SYSTEM,
+    private val fileStorage: FileStorage,
 ) {
     suspend fun persist(
         groupId: String,
@@ -27,11 +24,9 @@ internal class DraftMediaStore(
                         ?.sanitizeFileName()
                         .orEmpty()
                         .ifBlank { "${Uuid.random()}.bin" }
-                val path = platformPathProducer.draftMediaFile(groupId, "${index}_$fileName")
-                fileSystem.createDirectories(checkNotNull(path.parent))
-                fileSystem.write(path) {
-                    write(media.file.readBytes())
-                }
+                val path = fileStorage.draftMediaFile(groupId, "${index}_$fileName")
+                fileStorage.createDirectories(checkNotNull(path.parent))
+                fileStorage.write(path, media.file.readBytes())
                 SaveDraftMedia(
                     cachePath = path.toString(),
                     fileName = media.file.name,
@@ -55,6 +50,9 @@ internal class DraftMediaStore(
                         path = media.cachePath,
                         name = media.fileName,
                         type = media.mediaType.toFileType(),
+                        loader = {
+                            fileStorage.read(media.cachePath.toPath())
+                        },
                     ),
                 altText = media.altText,
             )
@@ -63,8 +61,8 @@ internal class DraftMediaStore(
     fun delete(medias: List<DraftMedia>) {
         medias.forEach { media ->
             val path = media.cachePath.toPath()
-            if (fileSystem.exists(path)) {
-                fileSystem.delete(path)
+            if (fileStorage.exists(path)) {
+                fileStorage.delete(path)
             }
             cleanupEmptyGroupDirectory(media.groupId)
         }
@@ -75,18 +73,18 @@ internal class DraftMediaStore(
         keepPaths: Set<okio.Path>,
     ) {
         val groupDirectory =
-            platformPathProducer
+            fileStorage
                 .draftMediaFile(groupId, "__placeholder__")
                 .parent ?: return
-        if (!fileSystem.exists(groupDirectory)) {
+        if (!fileStorage.exists(groupDirectory)) {
             return
         }
-        fileSystem
+        fileStorage
             .list(groupDirectory)
             .filterNot { keepPaths.contains(it) }
             .forEach { stalePath ->
-                if (fileSystem.exists(stalePath)) {
-                    fileSystem.delete(stalePath)
+                if (fileStorage.exists(stalePath)) {
+                    fileStorage.delete(stalePath)
                 }
             }
         cleanupEmptyGroupDirectory(groupId)
@@ -94,14 +92,14 @@ internal class DraftMediaStore(
 
     private fun cleanupEmptyGroupDirectory(groupId: String) {
         val groupDirectory =
-            platformPathProducer
+            fileStorage
                 .draftMediaFile(groupId, "__placeholder__")
                 .parent ?: return
-        if (!fileSystem.exists(groupDirectory)) {
+        if (!fileStorage.exists(groupDirectory)) {
             return
         }
-        if (fileSystem.list(groupDirectory).isEmpty()) {
-            fileSystem.delete(groupDirectory)
+        if (fileStorage.list(groupDirectory).isEmpty()) {
+            fileStorage.delete(groupDirectory)
         }
     }
 }
@@ -110,6 +108,7 @@ internal expect fun draftFileItem(
     path: String,
     name: String?,
     type: FileType,
+    loader: suspend () -> ByteArray,
 ): FileItem
 
 private fun FileType.toDraftMediaType(): DraftMediaType =

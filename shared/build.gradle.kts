@@ -1,5 +1,6 @@
 import dev.dimension.flare.buildlogic.FlarePlatform
 import dev.dimension.flare.buildlogic.flare
+import org.jetbrains.kotlin.gradle.tasks.Kotlin2JsCompile
 
 plugins {
     id("dev.dimension.flare.multiplatform-library")
@@ -20,6 +21,7 @@ kotlin {
             FlarePlatform.ANDROID,
             FlarePlatform.JVM,
             FlarePlatform.IOS,
+            FlarePlatform.WEB,
         )
         ksp(
             libs.ktorfit.ksp,
@@ -59,12 +61,19 @@ kotlin {
                 implementation(libs.molecule.runtime)
                 implementation(libs.room.runtime)
                 implementation(libs.room.paging)
-                implementation(libs.sqlite.bundled)
-                implementation(libs.datastore)
+                implementation(libs.sqlite)
+                implementation(libs.sqlite.async)
+                implementation(libs.datastore.core)
+                implementation(libs.datastore.core.okio)
                 implementation(libs.kotlinx.serialization.protobuf)
                 implementation(libs.ktor.client.resources)
                 implementation(libs.cryptography.provider.optimal)
                 implementation(libs.openai.client)
+            }
+        }
+        val nonWebMain by getting {
+            dependencies {
+                implementation(libs.sqlite.bundled)
             }
         }
         val commonTest by getting {
@@ -105,6 +114,14 @@ kotlin {
         val appleMain by getting {
             dependencies {
                 implementation(libs.ktor.client.darwin)
+            }
+        }
+        val wasmJsMain by getting {
+            dependencies {
+                implementation(libs.ktor.client.js)
+                implementation(libs.sqlite.web)
+                implementation(libs.kotlinx.browser)
+                implementation(npm("@androidx/sqlite-web-worker", file("sqlite-web-worker")))
             }
         }
     }

@@ -12,7 +12,7 @@ import dev.dimension.flare.data.database.app.model.DraftMediaType
 import dev.dimension.flare.data.database.app.model.DraftReferenceType
 import dev.dimension.flare.data.database.app.model.DraftTargetStatus
 import dev.dimension.flare.data.datasource.microblog.ComposeData
-import dev.dimension.flare.data.io.PlatformPathProducer
+import dev.dimension.flare.data.io.OkioFileStorage
 import dev.dimension.flare.deleteTestRootPath
 import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.MicroBlogKey
@@ -21,7 +21,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import okio.FileSystem
-import okio.Path
 import okio.Path.Companion.toPath
 import okio.SYSTEM
 import kotlin.test.AfterTest
@@ -35,15 +34,7 @@ import kotlin.test.assertNull
 class DraftRepositoryTest : RobolectricTest() {
     private val root = createTestRootPath()
     private val fileSystem = FileSystem.SYSTEM
-    private val pathProducer =
-        object : PlatformPathProducer {
-            override fun dataStoreFile(fileName: String): Path = root.resolve(fileName)
-
-            override fun draftMediaFile(
-                groupId: String,
-                fileName: String,
-            ): Path = root.resolve("draft_media").resolve(groupId).resolve(fileName)
-        }
+    private val fileStorage = OkioFileStorage(fileSystem, root)
 
     private lateinit var db: AppDatabase
     private lateinit var repository: DraftRepository
@@ -57,7 +48,7 @@ class DraftRepositoryTest : RobolectricTest() {
                 .setDriver(BundledSQLiteDriver())
                 .setQueryCoroutineContext(Dispatchers.Unconfined)
                 .build()
-        mediaStore = DraftMediaStore(pathProducer, fileSystem)
+        mediaStore = DraftMediaStore(fileStorage)
         repository = DraftRepository(db, mediaStore)
     }
 

@@ -4,7 +4,7 @@ import androidx.datastore.core.DataStoreFactory
 import androidx.datastore.core.okio.OkioStorage
 import dev.dimension.flare.common.protobufSerializer
 import dev.dimension.flare.data.database.app.model.SubscriptionType
-import dev.dimension.flare.data.io.PlatformPathProducer
+import dev.dimension.flare.data.io.OkioFileStorage
 import dev.dimension.flare.data.model.AllRssTimelineTabItem
 import dev.dimension.flare.data.model.Bluesky
 import dev.dimension.flare.data.model.IconType
@@ -26,7 +26,6 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.encodeToByteArray
 import kotlinx.serialization.protobuf.ProtoBuf
 import okio.FileSystem
-import okio.Path
 import okio.Path.Companion.toPath
 import okio.SYSTEM
 import kotlin.random.Random
@@ -241,16 +240,8 @@ class TabSettingsMigrationTest {
             val root = "/tmp/flare-tab-settings-${Random.nextLong()}".toPath()
             val fs = FileSystem.SYSTEM
             fs.createDirectories(root)
-            val pathProducer =
-                object : PlatformPathProducer {
-                    override fun dataStoreFile(fileName: String): Path = root.resolve(fileName)
-
-                    override fun draftMediaFile(
-                        groupId: String,
-                        fileName: String,
-                    ): Path = root.resolve(groupId).resolve(fileName)
-                }
-            val oldPath = pathProducer.dataStoreFile("tab_settings.pb")
+            val fileStorage = OkioFileStorage(fs, root)
+            val oldPath = fileStorage.dataStoreFile("tab_settings.pb")
             fs.write(oldPath) {
                 write(
                     ProtoBuf.encodeToByteArray(
@@ -284,11 +275,11 @@ class TabSettingsMigrationTest {
                         OkioStorage(
                             fileSystem = fs,
                             serializer = protobufSerializer(TabSettingsV2()),
-                            producePath = { pathProducer.dataStoreFile("tab_settings_v2.pb") },
+                            producePath = { fileStorage.dataStoreFile("tab_settings_v2.pb") },
                         ),
                 )
 
-            migrateTabSettingsV1ToV2(pathProducer, store)
+            migrateTabSettingsV1ToV2(fileStorage, store)
 
             val settings = store.data.first()
             assertEquals(

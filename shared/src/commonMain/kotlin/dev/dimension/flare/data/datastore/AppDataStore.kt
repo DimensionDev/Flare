@@ -2,56 +2,49 @@ package dev.dimension.flare.data.datastore
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.DataStoreFactory
-import androidx.datastore.core.okio.OkioStorage
+import androidx.datastore.core.okio.OkioSerializer
 import dev.dimension.flare.common.protobufSerializer
 import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.datastore.model.ComposeConfigData
 import dev.dimension.flare.data.datastore.model.FlareConfig
-import dev.dimension.flare.data.io.PlatformPathProducer
-import okio.FileSystem
-import okio.SYSTEM
+import dev.dimension.flare.data.io.FileStorage
 import org.koin.core.annotation.Single
 
 @Single
 internal class AppDataStore(
-    private val platformPathProducer: PlatformPathProducer,
+    private val fileStorage: FileStorage,
 ) {
     val flareDataStore: DataStore<FlareConfig> by lazy {
-        DataStoreFactory.create(
-            storage =
-                OkioStorage(
-                    fileSystem = FileSystem.SYSTEM,
-                    serializer = protobufSerializer(FlareConfig()),
-                    producePath = {
-                        platformPathProducer.dataStoreFile("flare_config.pb")
-                    },
-                ),
+        createDataStore(
+            name = "flare_config.pb",
+            serializer = protobufSerializer(FlareConfig()),
         )
     }
 
     val composeConfigData: DataStore<ComposeConfigData> by lazy {
-        DataStoreFactory.create(
-            storage =
-                OkioStorage(
-                    fileSystem = FileSystem.SYSTEM,
-                    serializer = protobufSerializer(ComposeConfigData()),
-                    producePath = {
-                        platformPathProducer.dataStoreFile("compose_config.pb")
-                    },
-                ),
+        createDataStore(
+            name = "compose_config.pb",
+            serializer = protobufSerializer(ComposeConfigData()),
         )
     }
 
     val appSettingsStore: DataStore<AppSettings> by lazy {
-        DataStoreFactory.create(
-            storage =
-                OkioStorage(
-                    fileSystem = FileSystem.SYSTEM,
-                    serializer = protobufSerializer(AppSettings(version = "")),
-                    producePath = {
-                        platformPathProducer.dataStoreFile("app_settings.pb")
-                    },
-                ),
+        createDataStore(
+            name = "app_settings.pb",
+            serializer = protobufSerializer(AppSettings(version = "")),
         )
     }
+
+    private fun <T> createDataStore(
+        name: String,
+        serializer: OkioSerializer<T>,
+    ): DataStore<T> =
+        DataStoreFactory.create(
+            storage =
+                createDataStoreStorage(
+                    name = name,
+                    serializer = serializer,
+                    fileStorage = fileStorage,
+                ),
+        )
 }

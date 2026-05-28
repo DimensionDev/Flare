@@ -3,11 +3,12 @@ package dev.dimension.flare.data.repository
 import androidx.compose.runtime.Stable
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.DataStoreFactory
-import androidx.datastore.core.okio.OkioStorage
+import androidx.datastore.core.okio.OkioSerializer
 import dev.dimension.flare.common.protobufSerializer
 import dev.dimension.flare.data.datastore.AppDataStore
+import dev.dimension.flare.data.datastore.createDataStoreStorage
 import dev.dimension.flare.data.datastore.model.AppSettings
-import dev.dimension.flare.data.io.PlatformPathProducer
+import dev.dimension.flare.data.io.FileStorage
 import dev.dimension.flare.data.model.AppearanceSettings
 import dev.dimension.flare.data.model.appearance.AppearanceBag
 import dev.dimension.flare.data.model.appearance.AppearanceKey
@@ -36,8 +37,6 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import okio.FileSystem
-import okio.SYSTEM
 import org.koin.core.annotation.Single
 import kotlin.native.HiddenFromObjC
 
@@ -45,7 +44,7 @@ import kotlin.native.HiddenFromObjC
 @Single
 @HiddenFromObjC
 public class SettingsRepository internal constructor(
-    private val pathProducer: PlatformPathProducer,
+    private val fileStorage: FileStorage,
     private val appDataStore: AppDataStore,
     private val timelineResolver: TimelineResolver,
 ) {
@@ -95,7 +94,7 @@ public class SettingsRepository internal constructor(
         if (appearanceMigrationCompleted) return
         appearanceMigrationMutex.withLock {
             if (appearanceMigrationCompleted) return
-            migrateAppearanceV1ToV2(pathProducer, appearanceBagStore)
+            migrateAppearanceV1ToV2(fileStorage, appearanceBagStore)
             appearanceMigrationCompleted = true
         }
     }
@@ -217,7 +216,7 @@ public class SettingsRepository internal constructor(
         tabSettingsMigrationMutex.withLock {
             if (tabSettingsMigrationCompleted) return
             migrateTabSettingsV1ToV2(
-                pathProducer = pathProducer,
+                fileStorage = fileStorage,
                 tabSettingsV2Store = tabSettingsV2Store,
             )
             tabSettingsMigrationCompleted = true
@@ -230,16 +229,14 @@ public class SettingsRepository internal constructor(
 
     private inline fun <reified T> createDataStore(
         name: String,
-        serializer: androidx.datastore.core.okio.OkioSerializer<T>,
+        serializer: OkioSerializer<T>,
     ): DataStore<T> =
         DataStoreFactory.create(
             storage =
-                OkioStorage(
-                    fileSystem = FileSystem.SYSTEM,
+                createDataStoreStorage(
+                    name = name,
                     serializer = serializer,
-                    producePath = {
-                        pathProducer.dataStoreFile(name)
-                    },
+                    fileStorage = fileStorage,
                 ),
         )
 }

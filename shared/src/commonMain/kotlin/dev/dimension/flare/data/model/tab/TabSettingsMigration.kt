@@ -1,8 +1,9 @@
 package dev.dimension.flare.data.model.tab
 
 import androidx.datastore.core.DataStore
+import dev.dimension.flare.common.PlatformDispatchers
 import dev.dimension.flare.data.database.app.model.SubscriptionType
-import dev.dimension.flare.data.io.PlatformPathProducer
+import dev.dimension.flare.data.io.FileStorage
 import dev.dimension.flare.data.model.AllRssTimelineTabItem
 import dev.dimension.flare.data.model.Bluesky
 import dev.dimension.flare.data.model.HomeTimelineTabItem
@@ -24,41 +25,34 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.model.asText
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.decodeFromByteArray
 import kotlinx.serialization.encodeToHexString
 import kotlinx.serialization.protobuf.ProtoBuf
-import okio.FileSystem
-import okio.SYSTEM
 
 @OptIn(ExperimentalSerializationApi::class)
 internal suspend fun migrateTabSettingsV1ToV2(
-    pathProducer: PlatformPathProducer,
+    fileStorage: FileStorage,
     tabSettingsV2Store: DataStore<TabSettingsV2>,
 ) {
-    withContext(Dispatchers.IO) {
-        val v1Path = pathProducer.dataStoreFile("tab_settings.pb")
-        val fs = FileSystem.SYSTEM
-        if (!fs.exists(v1Path)) return@withContext
+    withContext(PlatformDispatchers.IO) {
+        val v1Path = fileStorage.dataStoreFile("tab_settings.pb")
+        if (!fileStorage.exists(v1Path)) return@withContext
 
         if (tabSettingsV2Store.data
                 .first()
                 .homeSlots
                 .isNotEmpty()
         ) {
-            runCatching { fs.delete(v1Path) }
+            runCatching { fileStorage.delete(v1Path) }
             return@withContext
         }
 
         val v1 =
             runCatching {
-                fs.read(v1Path) {
-                    ProtoBuf.decodeFromByteArray<TabSettings>(readByteArray())
-                }
+                ProtoBuf.decodeFromByteArray<TabSettings>(fileStorage.read(v1Path))
             }.getOrNull()
 
         if (v1 != null) {
@@ -73,7 +67,7 @@ internal suspend fun migrateTabSettingsV1ToV2(
                 }
             }
         }
-        runCatching { fs.delete(v1Path) }
+        runCatching { fileStorage.delete(v1Path) }
     }
 }
 

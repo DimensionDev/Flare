@@ -5,11 +5,10 @@ import dev.dimension.flare.createTestFileItem
 import dev.dimension.flare.createTestRootPath
 import dev.dimension.flare.data.database.app.model.DraftMediaType
 import dev.dimension.flare.data.datasource.microblog.ComposeData
-import dev.dimension.flare.data.io.PlatformPathProducer
+import dev.dimension.flare.data.io.OkioFileStorage
 import dev.dimension.flare.deleteTestRootPath
 import kotlinx.coroutines.test.runTest
 import okio.FileSystem
-import okio.Path
 import okio.Path.Companion.toPath
 import okio.SYSTEM
 import kotlin.test.AfterTest
@@ -24,15 +23,7 @@ import kotlin.test.assertTrue
 class DraftMediaStoreTest {
     private val root = createTestRootPath()
     private val fileSystem = FileSystem.SYSTEM
-    private val pathProducer =
-        object : PlatformPathProducer {
-            override fun dataStoreFile(fileName: String): Path = root.resolve(fileName)
-
-            override fun draftMediaFile(
-                groupId: String,
-                fileName: String,
-            ): Path = root.resolve("draft_media").resolve(groupId).resolve(fileName)
-        }
+    private val fileStorage = OkioFileStorage(fileSystem, root)
 
     @AfterTest
     fun tearDown() {
@@ -42,7 +33,7 @@ class DraftMediaStoreTest {
     @Test
     fun persistRestoreDeleteFlow() =
         runTest {
-            val store = DraftMediaStore(pathProducer, fileSystem)
+            val store = DraftMediaStore(fileStorage)
             val medias =
                 listOf(
                     media(name = "a.png", bytes = byteArrayOf(1, 2, 3), type = FileType.Image, altText = "a"),
@@ -74,7 +65,7 @@ class DraftMediaStoreTest {
     @Test
     fun persistRestorePersistDoesNotCreateNewFiles() =
         runTest {
-            val store = DraftMediaStore(pathProducer, fileSystem)
+            val store = DraftMediaStore(fileStorage)
             val firstPersist =
                 store.persist(
                     "group-2",
@@ -102,7 +93,7 @@ class DraftMediaStoreTest {
     @Test
     fun persistRestorePersistWithSameFileNameOverwritesContent() =
         runTest {
-            val store = DraftMediaStore(pathProducer, fileSystem)
+            val store = DraftMediaStore(fileStorage)
             val firstPersist =
                 store.persist(
                     "group-same-name",
@@ -130,7 +121,7 @@ class DraftMediaStoreTest {
     @Test
     fun persistRestoreModifyPersistDeletesRemovedAndAddsNewFiles() =
         runTest {
-            val store = DraftMediaStore(pathProducer, fileSystem)
+            val store = DraftMediaStore(fileStorage)
             val firstPersist =
                 store.persist(
                     "group-3",
@@ -165,7 +156,7 @@ class DraftMediaStoreTest {
     @Test
     fun persistHandlesNullAndBlankFileNames() =
         runTest {
-            val store = DraftMediaStore(pathProducer, fileSystem)
+            val store = DraftMediaStore(fileStorage)
             val persisted =
                 store.persist(
                     "group-4",
@@ -192,7 +183,7 @@ class DraftMediaStoreTest {
     @Test
     fun persistSanitizesIllegalCharactersInFileName() =
         runTest {
-            val store = DraftMediaStore(pathProducer, fileSystem)
+            val store = DraftMediaStore(fileStorage)
             val persisted =
                 store.persist(
                     "group-5",
@@ -216,7 +207,7 @@ class DraftMediaStoreTest {
     @Test
     fun persistSanitizesWhitespaceAndUnicodeFileName() =
         runTest {
-            val store = DraftMediaStore(pathProducer, fileSystem)
+            val store = DraftMediaStore(fileStorage)
 
             val persisted =
                 store.persist(
@@ -240,7 +231,7 @@ class DraftMediaStoreTest {
     @Test
     fun persistEmptyListClearsDraftGroupFiles() =
         runTest {
-            val store = DraftMediaStore(pathProducer, fileSystem)
+            val store = DraftMediaStore(fileStorage)
             val firstPersist =
                 store.persist(
                     "group-6",
@@ -263,7 +254,7 @@ class DraftMediaStoreTest {
     @Test
     fun deleteIgnoresMissingFilesAndRepeatedDeletes() =
         runTest {
-            val store = DraftMediaStore(pathProducer, fileSystem)
+            val store = DraftMediaStore(fileStorage)
             val missing =
                 DraftMedia(
                     mediaId = "missing",
@@ -300,7 +291,7 @@ class DraftMediaStoreTest {
     @Test
     fun restoreFailsWhenCachedFileIsMissing() =
         runTest {
-            val store = DraftMediaStore(pathProducer, fileSystem)
+            val store = DraftMediaStore(fileStorage)
             val missingMedia =
                 DraftMedia(
                     mediaId = "missing-restore",
@@ -330,23 +321,11 @@ class DraftMediaStoreTest {
     @Test
     fun persistFailsWhenDraftDirectoryCannotBeCreated() =
         runTest {
-            val blockedParent = root.resolve("blocked")
+            val blockedParent = root.resolve("draft_media")
             fileSystem.write(blockedParent) {
                 writeUtf8("not a directory")
             }
-            val blockedStore =
-                DraftMediaStore(
-                    platformPathProducer =
-                        object : PlatformPathProducer {
-                            override fun dataStoreFile(fileName: String): Path = root.resolve(fileName)
-
-                            override fun draftMediaFile(
-                                groupId: String,
-                                fileName: String,
-                            ): Path = blockedParent.resolve(groupId).resolve(fileName)
-                        },
-                    fileSystem = fileSystem,
-                )
+            val blockedStore = DraftMediaStore(fileStorage)
 
             assertFailsWith<Throwable> {
                 blockedStore.persist(

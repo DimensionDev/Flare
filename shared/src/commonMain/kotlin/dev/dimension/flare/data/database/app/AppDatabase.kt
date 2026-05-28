@@ -8,7 +8,7 @@ import androidx.room3.RoomDatabaseConstructor
 import androidx.room3.TypeConverters
 import androidx.room3.migration.Migration
 import androidx.sqlite.SQLiteConnection
-import androidx.sqlite.execSQL
+import androidx.sqlite.async.executeSQL
 import dev.dimension.flare.data.database.app.dao.AccountDao
 import dev.dimension.flare.data.database.app.dao.DraftDao
 import dev.dimension.flare.data.database.app.dao.KeywordFilterDao
@@ -73,13 +73,13 @@ internal abstract class AppDatabase : RoomDatabase() {
         val MIGRATION_8_9 =
             object : Migration(8, 9) {
                 override suspend fun migrate(connection: SQLiteConnection) {
-                    connection.execSQL(
+                    connection.executeSQL(
                         "ALTER TABLE DbRssSources ADD COLUMN displayMode TEXT NOT NULL DEFAULT 'FULL_CONTENT'",
                     )
-                    connection.execSQL(
+                    connection.executeSQL(
                         "UPDATE DbRssSources SET displayMode = 'OPEN_IN_BROWSER' WHERE openInBrowser = 1",
                     )
-                    connection.execSQL(
+                    connection.executeSQL(
                         "ALTER TABLE DbRssSources DROP COLUMN openInBrowser",
                     )
                 }
@@ -87,7 +87,7 @@ internal abstract class AppDatabase : RoomDatabase() {
         val MIGRATION_9_10 =
             object : Migration(9, 10) {
                 override suspend fun migrate(connection: SQLiteConnection) {
-                    connection.execSQL(
+                    connection.executeSQL(
                         "ALTER TABLE DbKeywordFilter ADD COLUMN is_regex INTEGER NOT NULL DEFAULT 0",
                     )
                 }
@@ -95,7 +95,7 @@ internal abstract class AppDatabase : RoomDatabase() {
         val MIGRATION_10_11 =
             object : Migration(10, 11) {
                 override suspend fun migrate(connection: SQLiteConnection) {
-                    connection.execSQL("DROP TABLE IF EXISTS DbApplication")
+                    connection.executeSQL("DROP TABLE IF EXISTS DbApplication")
                 }
             }
     }

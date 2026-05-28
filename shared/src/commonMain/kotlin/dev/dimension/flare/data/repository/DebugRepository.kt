@@ -1,8 +1,7 @@
 package dev.dimension.flare.data.repository
 
+import dev.dimension.flare.common.PlatformDispatchers
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
@@ -14,7 +13,7 @@ internal object DebugRepository {
     private const val DEBUG_MAX_MESSAGES = 1000
     private val _messages = MutableStateFlow<List<String>>(emptyList())
     private val _enabled = MutableStateFlow(false)
-    private val scope = CoroutineScope(Dispatchers.IO)
+    private val scope = CoroutineScope(PlatformDispatchers.IO)
 
     val enabled get() = _enabled.asSharedFlow()
     val messages get() = _messages.asSharedFlow()

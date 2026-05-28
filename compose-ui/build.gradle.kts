@@ -1,9 +1,7 @@
 
-import co.touchlab.skie.configuration.DefaultArgumentInterop
 import dev.dimension.flare.buildlogic.FlarePlatform
 import dev.dimension.flare.buildlogic.flare
 import org.jetbrains.compose.compose
-import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 
 plugins {
     id("dev.dimension.flare.multiplatform-library")
@@ -13,7 +11,6 @@ plugins {
     alias(libs.plugins.koin.compiler)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.composeMultiplatform)
-    alias(libs.plugins.skie)
 }
 
 kotlin {
@@ -22,32 +19,15 @@ kotlin {
         platforms(
             FlarePlatform.ANDROID,
             FlarePlatform.JVM,
-            FlarePlatform.IOS,
         )
     }
     android {
         experimentalProperties["android.experimental.kmp.enableAndroidResources"] = true
     }
-    listOf("iosArm64", "iosSimulatorArm64")
-        .map { targetName -> targets.getByName(targetName) as KotlinNativeTarget }
-        .forEach { appleTarget ->
-        appleTarget.binaries.framework {
-            baseName = "KotlinSharedUI"
-            isStatic = true
-            export(projects.shared)
-            export(projects.social.bluesky)
-            export(projects.social.mastodon)
-            export(projects.social.misskey)
-            export(projects.social.nostr)
-            export(projects.social.vvo)
-            export(projects.social.xqt)
-            export(projects.feature.subscription)
-        }
-    }
-
     sourceSets {
         val commonMain by getting {
             dependencies {
+                api(projects.feature.login)
                 implementation(projects.shared)
                 implementation(projects.social.bluesky)
                 implementation(projects.social.mastodon)
@@ -109,34 +89,6 @@ kotlin {
                 }
             }
         }
-        val iosMain by getting {
-            dependencies {
-                api(projects.shared)
-                api(projects.social.bluesky)
-                api(projects.social.mastodon)
-                api(projects.social.misskey)
-                api(projects.social.nostr)
-                api(projects.social.vvo)
-                api(projects.social.xqt)
-                api(projects.feature.subscription)
-                implementation(libs.cupertino)
-                api(compose("org.jetbrains.compose.ui:ui-util"))
-                implementation(libs.lifecycle.viewmodel.compose)
-            }
-        }
-    }
-}
-
-skie {
-    analytics {
-        disableUpload.set(true)
-        enabled.set(false)
-    }
-    features {
-        group {
-            DefaultArgumentInterop.Enabled(true)
-        }
-        enableFlowCombineConvertorPreview = true
     }
 }
 

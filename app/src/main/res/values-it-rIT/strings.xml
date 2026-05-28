@@ -495,6 +495,11 @@
     <string name="tab_settings_mixed_timeline">Abilita scheda timeline mista</string>
     <string name="tab_settings_mixed_timeline_desc">Combina i post di tutte le schede in un\'unica scheda Home.</string>
     <string name="home_tab_social_timeline_title">Social</string>
+    <string name="social_title">Social</string>
+    <string name="antenna_title">Antenne</string>
+    <string name="liked_title">Mi piace</string>
+    <string name="all_rss_feeds_title">Tutte le iscrizioni</string>
+    <string name="posts_title">Post</string>
 
     <string name="deeplink_account_selection_title">Seleziona account</string>
     <string name="deeplink_account_selection_message">Seleziona un account per aprire questo link</string>

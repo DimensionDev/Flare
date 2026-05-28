@@ -6,11 +6,12 @@ asset_catalog="iosApp/flare/Assets.xcassets"
 swift_output="iosApp/flare/Common/AppIconOption.swift"
 project_file="iosApp/Flare.xcodeproj/project.pbxproj"
 prefix="app_icon_preview"
-size="1024"
+size="256"
 platform="iOS"
 rendition="Default"
 overwrite="false"
 generate_previews="true"
+generate_appiconsets="true"
 generate_swift="true"
 update_project="true"
 ictool="/Applications/Xcode.app/Contents/Applications/Icon Composer.app/Contents/Executables/ictool"
@@ -28,11 +29,12 @@ Options:
   --swift-output <path>    Output AppIconOption.swift path. Default: iosApp/flare/Common/AppIconOption.swift
   --project-file <path>    Xcode project.pbxproj to update. Default: iosApp/Flare.xcodeproj/project.pbxproj
   --prefix <name>          Output image asset prefix. Default: app_icon_preview
-  --size <px>              PNG width/height. Default: 1024
+  --size <px>              PNG width/height. Default: 256
   --platform <name>        ictool platform. Default: iOS
   --rendition <name>       ictool rendition. Default: Default
   --ictool <path>          Path to Icon Composer ictool.
   --overwrite              Replace existing preview .imageset directories.
+  --skip-appiconsets       Do not generate alternate .appiconset assets.
   --skip-previews          Only generate the Swift icon list.
   --skip-swift             Only generate preview image assets.
   --skip-project           Do not update alternate app icon names in the Xcode project.
@@ -82,6 +84,10 @@ while [[ $# -gt 0 ]]; do
       overwrite="true"
       shift
       ;;
+    --skip-appiconsets)
+      generate_appiconsets="false"
+      shift
+      ;;
     --skip-previews)
       generate_previews="false"
       shift
@@ -106,7 +112,7 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-if [[ "$generate_previews" == "true" && ! -x "$ictool" ]]; then
+if [[ ( "$generate_previews" == "true" || "$generate_appiconsets" == "true" ) && ! -x "$ictool" ]]; then
   echo "error: ictool not found at: $ictool" >&2
   echo "Install/open Xcode with Icon Composer, or pass --ictool <path>." >&2
   exit 1
@@ -117,14 +123,19 @@ if [[ ! -d "$icon_dir" ]]; then
   exit 1
 fi
 
-if [[ "$generate_previews" == "true" && ! -d "$asset_catalog" ]]; then
+if [[ ( "$generate_previews" == "true" || "$generate_appiconsets" == "true" ) && ! -d "$asset_catalog" ]]; then
   echo "error: asset catalog does not exist: $asset_catalog" >&2
   exit 1
 fi
 
-if [[ "$generate_previews" == "true" ]] && { ! [[ "$size" =~ ^[0-9]+$ ]] || [[ "$size" -le 0 ]]; }; then
+if [[ "$generate_previews" == "true" || "$generate_appiconsets" == "true" ]] && { ! [[ "$size" =~ ^[0-9]+$ ]] || [[ "$size" -le 0 ]]; }; then
   echo "error: --size must be a positive integer" >&2
   exit 1
+fi
+
+export_size="$size"
+if command -v sips >/dev/null 2>&1 && [[ "$size" -gt 1 ]]; then
+  export_size="$((size + 1))"
 fi
 
 shopt -s nullglob
@@ -136,7 +147,20 @@ if [[ "${#icon_bundles[@]}" -eq 0 ]]; then
   exit 1
 fi
 
-IFS=$'\n' icon_bundles=($(printf '%s\n' "${icon_bundles[@]}" | sort))
+IFS=$'\n' icon_bundles=($(printf '%s\n' "${icon_bundles[@]}" | sort | awk '
+  /\/AppIcon\.icon$/ {
+    primary = $0
+    next
+  }
+  {
+    print
+  }
+  END {
+    if (primary != "") {
+      print primary
+    }
+  }
+'))
 unset IFS
 
 preview_suffix_for_icon_name() {
@@ -165,6 +189,14 @@ title_for_icon_name() {
       }
       print
     }'
+  fi
+}
+
+normalize_png() {
+  local png_path="$1"
+
+  if command -v sips >/dev/null 2>&1; then
+    sips -Z "$size" "$png_path" --out "$png_path" >/dev/null
   fi
 }
 
@@ -236,9 +268,23 @@ if [[ "$update_project" == "true" ]]; then
     perl -0pi -e "s/ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES = \"[^\"]*\";/ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES = \"$alternate_names_string\";/g" "$project_file"
     echo "Updated alternate app icon names in $project_file"
   fi
+
+  perl -0pi -e 's/ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;/ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;/g' "$project_file"
+  echo "Disabled include-all app icon assets in $project_file"
+
+  exception_lines=$'\t\t\t\tInfo.plist,\n'
+  for icon_name in "${alternate_names[@]}"; do
+    exception_lines+=$'\t\t\t\t'"$icon_name.icon"$',\n'
+  done
+
+  EXCEPTION_LINES="$exception_lines" perl -0pi -e '
+    my $lines = $ENV{"EXCEPTION_LINES"};
+    s/membershipExceptions = \(\n.*?\t\t\t\);/membershipExceptions = (\n$lines\t\t\t);/s;
+  ' "$project_file"
+  echo "Excluded alternate .icon sources from the Flare target in $project_file"
 fi
 
-if [[ "$generate_previews" != "true" ]]; then
+if [[ "$generate_previews" != "true" && "$generate_appiconsets" != "true" ]]; then
   exit 0
 fi
 
@@ -246,37 +292,38 @@ for icon_bundle in "${icon_bundles[@]}"; do
   icon_name="$(basename "$icon_bundle" .icon)"
   suffix="$(preview_suffix_for_icon_name "$icon_name")"
 
-  asset_name="${prefix}_${suffix}"
-  imageset="$asset_catalog/${asset_name}.imageset"
-  png_name="${asset_name}.png"
-  png_path="$imageset/$png_name"
+  if [[ "$generate_previews" == "true" ]]; then
+    asset_name="${prefix}_${suffix}"
+    imageset="$asset_catalog/${asset_name}.imageset"
+    png_name="${asset_name}.png"
+    png_path="$imageset/$png_name"
 
-  if [[ -e "$imageset" ]]; then
-    if [[ "$overwrite" == "true" ]]; then
-      rm -rf "$imageset"
-    else
+    if [[ -e "$imageset" && "$overwrite" != "true" ]]; then
       echo "Skipping existing $(basename "$imageset"). Use --overwrite to replace it."
-      continue
-    fi
-  fi
+    else
+      if [[ -e "$imageset" ]]; then
+        rm -rf "$imageset"
+      fi
 
-  mkdir -p "$imageset"
+      mkdir -p "$imageset"
 
-  if ! "$ictool" "$icon_bundle" \
-    --export-image \
-    --output-file "$png_path" \
-    --platform "$platform" \
-    --rendition "$rendition" \
-    --width "$size" \
-    --height "$size" \
-    --scale 1; then
-    rm -rf "$imageset"
-    echo "error: ictool failed for $icon_bundle" >&2
-    echo "If this happens only inside Codex, run this script from Terminal or allow the ictool command outside the sandbox." >&2
-    exit 1
-  fi
+      if ! "$ictool" "$icon_bundle" \
+        --export-image \
+        --output-file "$png_path" \
+        --platform "$platform" \
+        --rendition "$rendition" \
+        --width "$export_size" \
+        --height "$export_size" \
+        --scale 1; then
+        rm -rf "$imageset"
+        echo "error: ictool failed for $icon_bundle" >&2
+        echo "If this happens only inside Codex, run this script from Terminal or allow the ictool command outside the sandbox." >&2
+        exit 1
+      fi
 
-  cat > "$imageset/Contents.json" <<EOF
+      normalize_png "$png_path"
+
+      cat > "$imageset/Contents.json" <<EOF
 {
   "images" : [
     {
@@ -292,5 +339,59 @@ for icon_bundle in "${icon_bundles[@]}"; do
 }
 EOF
 
-  echo "Generated $imageset"
+      echo "Generated $imageset"
+    fi
+  fi
+
+  if [[ "$generate_appiconsets" == "true" && "$icon_name" != "AppIcon" ]]; then
+    appiconset="$asset_catalog/${icon_name}.appiconset"
+    png_name="${icon_name}.png"
+    png_path="$appiconset/$png_name"
+
+    if [[ -e "$appiconset" ]]; then
+      if [[ "$overwrite" == "true" ]]; then
+        rm -rf "$appiconset"
+      else
+        echo "Skipping existing $(basename "$appiconset"). Use --overwrite to replace it."
+        continue
+      fi
+    fi
+
+    mkdir -p "$appiconset"
+
+    if ! "$ictool" "$icon_bundle" \
+      --export-image \
+      --output-file "$png_path" \
+      --platform "$platform" \
+      --rendition "$rendition" \
+      --width "$export_size" \
+      --height "$export_size" \
+      --scale 1; then
+      rm -rf "$appiconset"
+      echo "error: ictool failed for $icon_bundle" >&2
+      echo "If this happens only inside Codex, run this script from Terminal or allow the ictool command outside the sandbox." >&2
+      exit 1
+    fi
+
+    normalize_png "$png_path"
+
+    cat > "$appiconset/Contents.json" <<EOF
+{
+  "images" : [
+    {
+      "filename" : "$png_name",
+      "idiom" : "universal",
+      "platform" : "ios",
+      "size" : "${size}x${size}"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
+EOF
+
+    echo "Generated $appiconset"
+  fi
 done

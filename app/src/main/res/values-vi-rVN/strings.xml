@@ -494,6 +494,11 @@
     <string name="tab_settings_mixed_timeline">Bật tab dòng thời gian hỗn hợp</string>
     <string name="tab_settings_mixed_timeline_desc">Kết hợp các bài đăng từ tất cả các tab vào một tab Trang chủ duy nhất.</string>
     <string name="home_tab_social_timeline_title">Mạng xã hội</string>
+    <string name="social_title">Xã hội</string>
+    <string name="antenna_title">Anten</string>
+    <string name="liked_title">Đã thích</string>
+    <string name="all_rss_feeds_title">Tất cả đăng ký</string>
+    <string name="posts_title">Bài đăng</string>
 
     <string name="deeplink_account_selection_title">Chọn tài khoản</string>
     <string name="deeplink_account_selection_message">Chọn một tài khoản để mở liên kết này</string>

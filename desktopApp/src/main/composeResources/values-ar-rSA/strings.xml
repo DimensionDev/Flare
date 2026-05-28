@@ -133,6 +133,9 @@
 
     <string name="antenna_title">الهوائيات (Antennas)</string>
     <string name="mixed_timeline_title">مختلط</string>
+    <string name="liked_title">المعجب بها</string>
+    <string name="all_rss_feeds_title">كل الاشتراكات</string>
+    <string name="posts_title">المنشورات</string>
 
     <string name="bluesky_login_username">اسم المستخدم</string>
     <string name="bluesky_login_password">كلمة المرور</string>

@@ -129,6 +129,9 @@
 
     <string name="antenna_title">Antenas</string>
     <string name="mixed_timeline_title">Mixto</string>
+    <string name="liked_title">Me gusta</string>
+    <string name="all_rss_feeds_title">Todas las suscripciones</string>
+    <string name="posts_title">Publicaciones</string>
 
     <string name="bluesky_login_username">Nombre de usuario</string>
     <string name="bluesky_login_password">Contraseña</string>

@@ -492,6 +492,11 @@
     <string name="tab_settings_mixed_timeline">혼합 타임라인 탭 활성화</string>
     <string name="tab_settings_mixed_timeline_desc">모든 탭의 게시물을 단일 홈 탭으로 결합합니다.</string>
     <string name="home_tab_social_timeline_title">소셜</string>
+    <string name="social_title">소셜</string>
+    <string name="antenna_title">안테나</string>
+    <string name="liked_title">좋아요 표시함</string>
+    <string name="all_rss_feeds_title">모든 구독</string>
+    <string name="posts_title">게시물</string>
 
     <string name="deeplink_account_selection_title">계정 선택</string>
     <string name="deeplink_account_selection_message">이 링크를 열 계정을 선택하세요</string>

@@ -495,6 +495,11 @@
     <string name="tab_settings_mixed_timeline">Activar pestaña mixta</string>
     <string name="tab_settings_mixed_timeline_desc">Combina los posts de todas las pestañas en una cronología de inicio única.</string>
     <string name="home_tab_social_timeline_title">Social</string>
+    <string name="social_title">Social</string>
+    <string name="antenna_title">Antenas</string>
+    <string name="liked_title">Me gusta</string>
+    <string name="all_rss_feeds_title">Todas las suscripciones</string>
+    <string name="posts_title">Publicaciones</string>
 
     <string name="deeplink_account_selection_title">Seleccionar cuenta</string>
     <string name="deeplink_account_selection_message">Selecciona una cuenta para abrir este enlace</string>

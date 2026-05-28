@@ -492,6 +492,11 @@
     <string name="tab_settings_mixed_timeline">混合タイムラインタブを有効にする</string>
     <string name="tab_settings_mixed_timeline_desc">すべてのタブの投稿を 1 つのホームタブにまとめます。</string>
     <string name="home_tab_social_timeline_title">ソーシャル</string>
+    <string name="social_title">ソーシャル</string>
+    <string name="antenna_title">アンテナ</string>
+    <string name="liked_title">いいねした投稿</string>
+    <string name="all_rss_feeds_title">すべての購読</string>
+    <string name="posts_title">投稿</string>
 
     <string name="deeplink_account_selection_title">アカウントを選択</string>
     <string name="deeplink_account_selection_message">このリンクを開くアカウントを選択してください</string>

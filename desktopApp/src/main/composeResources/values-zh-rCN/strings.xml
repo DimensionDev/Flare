@@ -112,6 +112,9 @@
     <string name="social_title">社交</string>
     <string name="antenna_title">天线</string>
     <string name="mixed_timeline_title">混合时间轴</string>
+    <string name="liked_title">已赞</string>
+    <string name="all_rss_feeds_title">所有订阅</string>
+    <string name="posts_title">帖子</string>
     <string name="bluesky_login_username">用户名</string>
     <string name="bluesky_login_password">密码</string>
     <string name="bluesky_login_2fa">2FA 验证码</string>

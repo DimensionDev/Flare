@@ -129,6 +129,9 @@
 
     <string name="antenna_title">Antennák</string>
     <string name="mixed_timeline_title">Vegyes</string>
+    <string name="liked_title">Kedvelt</string>
+    <string name="all_rss_feeds_title">Minden feliratkozás</string>
+    <string name="posts_title">Bejegyzések</string>
 
     <string name="bluesky_login_username">Felhasználónév</string>
     <string name="bluesky_login_password">Jelszó</string>

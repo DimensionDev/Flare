@@ -497,6 +497,11 @@
     <string name="tab_settings_mixed_timeline">Увімкнути змішану вкладку</string>
     <string name="tab_settings_mixed_timeline_desc">Об’єднайте дописи з усіх вкладок в одну головну вкладку.</string>
     <string name="home_tab_social_timeline_title">Соціальна</string>
+    <string name="social_title">Соціальне</string>
+    <string name="antenna_title">Антени</string>
+    <string name="liked_title">Сподобалося</string>
+    <string name="all_rss_feeds_title">Усі підписки</string>
+    <string name="posts_title">Дописи</string>
 
     <string name="deeplink_account_selection_title">Виберіть обліковий запис</string>
     <string name="deeplink_account_selection_message">Виберіть обліковий запис, щоб відкрити посилання</string>

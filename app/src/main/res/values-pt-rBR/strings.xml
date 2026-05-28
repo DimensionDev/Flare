@@ -495,6 +495,11 @@
     <string name="tab_settings_mixed_timeline">Ativar aba de linha do tempo mista</string>
     <string name="tab_settings_mixed_timeline_desc">Combinar postagens de todas as abas em uma única aba inicial.</string>
     <string name="home_tab_social_timeline_title">Social</string>
+    <string name="social_title">Social</string>
+    <string name="antenna_title">Antenas</string>
+    <string name="liked_title">Curtido</string>
+    <string name="all_rss_feeds_title">Todas as assinaturas</string>
+    <string name="posts_title">Postagens</string>
 
     <string name="deeplink_account_selection_title">Selecionar conta</string>
     <string name="deeplink_account_selection_message">Selecione uma conta para abrir este link</string>

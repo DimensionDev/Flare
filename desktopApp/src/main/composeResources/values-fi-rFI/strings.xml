@@ -129,6 +129,9 @@
 
     <string name="antenna_title">Antennit</string>
     <string name="mixed_timeline_title">Sekoitettu</string>
+    <string name="liked_title">Tykätyt</string>
+    <string name="all_rss_feeds_title">Kaikki tilaukset</string>
+    <string name="posts_title">Julkaisut</string>
 
     <string name="bluesky_login_username">Käyttäjätunnus</string>
     <string name="bluesky_login_password">Salasana</string>

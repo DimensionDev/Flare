@@ -129,6 +129,9 @@
 
     <string name="antenna_title">Antennas</string>
     <string name="mixed_timeline_title">Gemeng</string>
+    <string name="liked_title">Hou van</string>
+    <string name="all_rss_feeds_title">Alle Subskripsies</string>
+    <string name="posts_title">Plasings</string>
 
     <string name="bluesky_login_username">Gebruikersnaam</string>
     <string name="bluesky_login_password">Wagwoord</string>

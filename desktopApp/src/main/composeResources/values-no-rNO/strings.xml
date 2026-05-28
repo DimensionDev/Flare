@@ -113,6 +113,9 @@
     <string name="social_title">Sosialt</string>
     <string name="antenna_title">Antenner</string>
     <string name="mixed_timeline_title">Blandet</string>
+    <string name="liked_title">Likt</string>
+    <string name="all_rss_feeds_title">Alle abonnementer</string>
+    <string name="posts_title">Innlegg</string>
     <string name="bluesky_login_username">Brukernavn</string>
     <string name="bluesky_login_password">Passord</string>
     <string name="bluesky_login_2fa">2FA-token</string>

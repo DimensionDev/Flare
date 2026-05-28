@@ -114,6 +114,9 @@
     <string name="social_title">Social</string>
     <string name="antenna_title">Antene</string>
     <string name="mixed_timeline_title">Mixt</string>
+    <string name="liked_title">Apreciate</string>
+    <string name="all_rss_feeds_title">Toate abonamentele</string>
+    <string name="posts_title">Postări</string>
     <string name="bluesky_login_username">Nume utilizator</string>
     <string name="bluesky_login_password">Parolă</string>
     <string name="bluesky_login_2fa">Token 2FA</string>

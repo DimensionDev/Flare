@@ -113,6 +113,9 @@
     <string name="social_title">소셜</string>
     <string name="antenna_title">안테나</string>
     <string name="mixed_timeline_title">혼합</string>
+    <string name="liked_title">좋아요 표시함</string>
+    <string name="all_rss_feeds_title">모든 구독</string>
+    <string name="posts_title">게시물</string>
     <string name="bluesky_login_username">사용자 이름</string>
     <string name="bluesky_login_password">비밀번호</string>
     <string name="bluesky_login_2fa">2FA 토큰</string>

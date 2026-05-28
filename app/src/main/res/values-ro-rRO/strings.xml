@@ -496,6 +496,11 @@
     <string name="tab_settings_mixed_timeline">Activează tab-ul cronologie mixtă</string>
     <string name="tab_settings_mixed_timeline_desc">Combină postările din toate tab-urile într-un singur tab Acasă.</string>
     <string name="home_tab_social_timeline_title">Social</string>
+    <string name="social_title">Social</string>
+    <string name="antenna_title">Antene</string>
+    <string name="liked_title">Apreciate</string>
+    <string name="all_rss_feeds_title">Toate abonamentele</string>
+    <string name="posts_title">Postări</string>
 
     <string name="deeplink_account_selection_title">Selectează contul</string>
     <string name="deeplink_account_selection_message">Selectează un cont pentru a deschide acest link</string>

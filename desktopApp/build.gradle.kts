@@ -22,7 +22,9 @@ dependencies {
     implementation(projects.social.nostr)
     implementation(projects.social.vvo)
     implementation(projects.social.xqt)
+    implementation(projects.feature.login)
     implementation(projects.feature.subscription)
+    implementation(projects.feature.tab)
     implementation(projects.composeUi)
 
     implementation(compose("org.jetbrains.compose.runtime:runtime"))

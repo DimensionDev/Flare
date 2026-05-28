@@ -495,6 +495,11 @@
     <string name="tab_settings_mixed_timeline">Vegyes idővonal fül engedélyezése</string>
     <string name="tab_settings_mixed_timeline_desc">Az összes fül bejegyzéseinek egyesítése egyetlen kezdőlapi fülön.</string>
     <string name="home_tab_social_timeline_title">Közösségi</string>
+    <string name="social_title">Közösség</string>
+    <string name="antenna_title">Antennák</string>
+    <string name="liked_title">Kedvelt</string>
+    <string name="all_rss_feeds_title">Minden feliratkozás</string>
+    <string name="posts_title">Bejegyzések</string>
 
     <string name="deeplink_account_selection_title">Fiók kiválasztása</string>
     <string name="deeplink_account_selection_message">Válassz egy fiókot a link megnyitásához</string>

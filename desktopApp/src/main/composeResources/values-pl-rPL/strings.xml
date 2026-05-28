@@ -115,6 +115,9 @@
     <string name="social_title">Społeczność</string>
     <string name="antenna_title">Anteny</string>
     <string name="mixed_timeline_title">Mieszana</string>
+    <string name="liked_title">Polubione</string>
+    <string name="all_rss_feeds_title">Wszystkie subskrypcje</string>
+    <string name="posts_title">Wpisy</string>
     <string name="bluesky_login_username">Nazwa użytkownika</string>
     <string name="bluesky_login_password">Hasło</string>
     <string name="bluesky_login_2fa">Token 2FA</string>

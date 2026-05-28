@@ -493,6 +493,11 @@
     <string name="tab_settings_mixed_timeline">Gemengde tijdlijntab inschakelen</string>
     <string name="tab_settings_mixed_timeline_desc">Combineer berichten van alle tabs in één Home-tab.</string>
     <string name="home_tab_social_timeline_title">Sociaal</string>
+    <string name="social_title">Sociaal</string>
+    <string name="antenna_title">Antennes</string>
+    <string name="liked_title">Leuk gevonden</string>
+    <string name="all_rss_feeds_title">Alle abonnementen</string>
+    <string name="posts_title">Berichten</string>
 
     <string name="deeplink_account_selection_title">Selecteer account</string>
     <string name="deeplink_account_selection_message">Selecteer een account om deze link te openen</string>

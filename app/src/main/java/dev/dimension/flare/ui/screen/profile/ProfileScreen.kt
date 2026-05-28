@@ -27,7 +27,6 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ScaffoldDefaults
@@ -57,13 +56,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
 import dev.dimension.flare.R
 import dev.dimension.flare.common.PagingState
-import dev.dimension.flare.common.onLoading
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.common.refreshSuspend
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
 import dev.dimension.flare.data.model.VideoAutoplay
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.common.items
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
@@ -546,56 +545,45 @@ private fun ProfileMediaTab(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             contentPadding = PaddingValues(vertical = 8.dp, horizontal = screenHorizontalPadding),
         ) {
-            mediaState
-                .onSuccess {
-                    items(itemCount) { index ->
-                        val item = get(index)
-                        if (item != null) {
-                            val media = item.media
-                            MediaItem(
-                                media = media,
-                                showCountdown = false,
-                                modifier =
-                                    Modifier
-                                        .clip(MaterialTheme.shapes.medium)
-                                        .clipToBounds()
-                                        .clickable {
-                                            val content = item.status
-                                            if (content is UiTimelineV2.Post) {
-                                                onItemClicked(
-                                                    item.statusKey,
-                                                    item.index,
-                                                    when (media) {
-                                                        is UiMedia.Image -> media.previewUrl
-                                                        is UiMedia.Video -> media.thumbnailUrl
-                                                        is UiMedia.Gif -> media.previewUrl
-                                                        else -> null
-                                                    },
-                                                )
-                                            }
+            items(
+                mediaState,
+                key = {
+                    it.key
+                },
+                loadingContent = {
+                    Box(
+                        modifier =
+                            Modifier
+                                .size(120.dp)
+                                .placeholder(true),
+                    )
+                },
+            ) { item ->
+                val media = item.media
+                MediaItem(
+                    media = media,
+                    showCountdown = false,
+                    modifier =
+                        Modifier
+                            .clip(MaterialTheme.shapes.medium)
+                            .clipToBounds()
+                            .clickable {
+                                val content = item.status
+                                if (content is UiTimelineV2.Post) {
+                                    onItemClicked(
+                                        item.statusKey,
+                                        item.index,
+                                        when (media) {
+                                            is UiMedia.Image -> media.previewUrl
+                                            is UiMedia.Video -> media.thumbnailUrl
+                                            is UiMedia.Gif -> media.previewUrl
+                                            else -> null
                                         },
-                            )
-                        } else {
-                            Card {
-                                Box(
-                                    modifier =
-                                        Modifier
-                                            .size(120.dp)
-                                            .placeholder(true),
-                                )
-                            }
-                        }
-                    }
-                }.onLoading {
-                    items(10) {
-                        Box(
-                            modifier =
-                                Modifier
-                                    .size(120.dp)
-                                    .placeholder(true),
-                        )
-                    }
-                }
+                                    )
+                                }
+                            },
+                )
+            }
         }
     }
 }

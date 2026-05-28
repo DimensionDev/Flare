@@ -167,7 +167,7 @@
     <string name="settings_ai_config_type">AI 類型</string>
     <string name="settings_ai_config_type_description">選擇 Flare 使用的 AI 後端</string>
     <string name="settings_ai_config_type_on_device">裝置端 AI</string>
-    <string name="settings_ai_config_type_openai">OpenAI 相容 API</string>
+    <string name="settings_ai_config_type_openai">AI 相容 API</string>
     <string name="settings_ai_config_api_key">API 密鑰</string>
     <string name="settings_ai_config_api_key_hint">輸入 API 密鑰</string>
     <string name="settings_ai_config_model">模型</string>

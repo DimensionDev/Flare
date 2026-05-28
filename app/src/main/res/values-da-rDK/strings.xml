@@ -71,6 +71,17 @@
     <string name="settings_storage_subtitle">Administrer cachede filer, logs og sikkerhedskopier</string>
     <string name="settings_about_title">Om</string>
     <string name="settings_about_subtitle">Lær mere om Flare</string>
+    <string name="settings_about_description">En open source, AI-drevet klient til decentraliserede sociale platforme.</string>
+    <string name="settings_about_source_code">Kildekode</string>
+    <string name="settings_about_telegram">Telegram</string>
+    <string name="settings_about_telegram_description">Bliv medlem af vores Telegram-gruppe</string>
+    <string name="settings_about_discord" translatable="false">Discord</string>
+    <string name="settings_about_discord_description">Bliv medlem af vores Discord-server</string>
+    <string name="settings_about_line" translatable="false">Line</string>
+    <string name="settings_about_line_description">Bliv medlem af vores Line-gruppe</string>
+    <string name="settings_about_localization">Crowdin</string>
+    <string name="settings_about_localization_description">Hjælp os med at oversætte Flare</string>
+    <string name="settings_privacy_policy">Privatlivspolitik</string>
     <string name="settings_side_panel">Tilpasning af sidepanel</string>
     <string name="settings_side_panel_description">Tilpas sidepanelet</string>
     <string name="settings_local_filter_title">Lokale filtre</string>

@@ -9,13 +9,14 @@
     <string name="profile_header_toots_count">%1$s Δημοσιεύσεις</string>
     <string name="profile_misskey_header_status_count">%1$s Δημοσιεύσεις</string>
     <string name="profile_header_button_follow">Ακολουθήστε</string>
+    <string name="profile_header_button_request_follow">Request follow</string>
     <string name="profile_header_button_following">Ακολουθείτε</string>
     <string name="profile_header_button_requested">Εκκρεμεί αίτημα</string>
     <string name="profile_header_button_blocked">Αποκλεισμένος</string>
     <string name="profile_header_button_is_fans">Σας ακολουθεί</string>
     <string name="mastodon_notification_item_followed_you">σας ακολούθησε</string>
     <string name="mastodon_notification_item_favourited_your_status">πρόσθεσε στα αγαπημένα τη δημοσίευσή σας</string>
-    <string name="mastodon_notification_item_reblogged_your_status">αναδημοσίευσε</string>
+    <string name="mastodon_notification_item_reblogged_your_status">αναδημοσίευσε μια δημοσίευση</string>
     <string name="mastodon_notification_item_poll_ended">Μια δημοσκόπηση στην οποία συμμετείχατε έληξε</string>
     <string name="mastodon_notification_item_mentioned_you">σας ανέφερε</string>
     <string name="mastodon_notification_item_requested_follow">ζήτησε να σας ακολουθήσει</string>
@@ -28,7 +29,7 @@
     <string name="post_show_full_text">Εμφάνιση πλήρους κειμένου</string>
     <string name="bluesky_notification_item_followed_you">σας ακολούθησε</string>
     <string name="bluesky_notification_item_favourited_your_status">του/της άρεσε η δημοσίευσή σας</string>
-    <string name="bluesky_notification_item_reblogged_your_status">αναδημοσίευσε τη δημοσίευσή σας</string>
+    <string name="bluesky_notification_item_reblogged_your_status">αναδημοσίευσε μια δημοσίευση</string>
     <string name="bluesky_notification_item_poll_ended">Μια δημοσκόπηση στην οποία συμμετείχατε έληξε</string>
     <string name="bluesky_notification_item_mentioned_you">σας ανέφερε</string>
     <string name="bluesky_item_reblogged_status">αναδημοσίευσε</string>
@@ -39,7 +40,7 @@
     <string name="bluesky_notification_item_pin">κάρφωσε μια δημοσίευση</string>
     <string name="misskey_notification_item_mentioned_you">σας ανέφερε</string>
     <string name="misskey_notification_item_replied_to_you">σας απάντησε</string>
-    <string name="misskey_notification_item_reposted_your_status">αναδημοσίευσε τη δημοσίευσή σας</string>
+    <string name="misskey_notification_item_reposted_your_status">αναδημοσίευσε μια δημοσίευση</string>
     <string name="misskey_notification_item_quoted_your_status">παρέθεσε τη δημοσίευσή σας</string>
     <string name="misskey_notification_item_reacted_to_your_status">αντέδρασε στη δημοσίευσή σας</string>
     <string name="misskey_notification_item_poll_ended">Μια δημοσκόπηση στην οποία συμμετείχατε έληξε</string>
@@ -404,16 +405,5 @@
     <string name="posts_title">Δημοσιεύσεις</string>
     <string name="settings_appearance_absolute_timestamp">Απόλυτη χρονοσήμανση</string>
     <string name="settings_appearance_absolute_timestamp_description">Εμφάνιση ακριβούς ώρας στις δημοσιεύσεις</string>
-    <string name="settings_about_description">Ένας ανοιχτού κώδικα πελάτης με τεχνητή νοημοσύνη για αποκεντρωμένες κοινωνικές πλατφόρμες.</string>
-    <string name="settings_about_source_code">Πηγαίος κώδικας</string>
-    <string name="settings_about_telegram">Telegram</string>
-    <string name="settings_about_telegram_description">Γίνετε μέλος στην ομάδα μας στο Telegram</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
-    <string name="settings_about_discord_description">Γίνετε μέλος στον διακομιστή μας στο Discord</string>
-    <string name="settings_about_line" translatable="false">Line</string>
-    <string name="settings_about_line_description">Γίνετε μέλος στην ομάδα μας στο Line</string>
-    <string name="settings_about_localization">Crowdin</string>
-    <string name="settings_about_localization_description">Βοηθήστε μας να μεταφράσουμε το Flare</string>
-    <string name="settings_privacy_policy">Πολιτική Απορρήτου</string>
     <string name="channel_title">Κανάλι</string>
 </resources>

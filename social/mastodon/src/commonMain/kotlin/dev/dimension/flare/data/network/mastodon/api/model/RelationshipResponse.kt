@@ -18,9 +18,14 @@ internal data class RelationshipResponse(
     val muting: Boolean? = null,
     @SerialName("muting_notifications")
     val mutingNotifications: Boolean? = null,
+    @SerialName("muting_expires_at")
+    val mutingExpiresAt: String? = null,
     val requested: Boolean? = null,
+    @SerialName("requested_by")
+    val requestedBy: Boolean? = null,
     @SerialName("domain_blocking")
     val domainBlocking: Boolean? = null,
     val endorsed: Boolean? = null,
+    val languages: List<String>? = null,
     val note: String? = null,
 )

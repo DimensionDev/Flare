@@ -2,12 +2,15 @@
 <resources>
     <string name="changelog_title">Velkommen tilbake!</string>
     <string name="changelog_message">Vi har gjort noen endringer siden sist du logget inn. Her er detaljer:</string>
-    <string name="changelog_current"><![CDATA[            <span>Versjon %1$s:</span>
+    <string name="changelog_current">
+        <![CDATA[
+            <span>Versjon %1$s:</span>
             <ul>
-                <li>La til nye tidslinjevisningsmodus, inkludert et galleri layout.</li>
-                <li>Forbedret RSS-avlesning, deling, oversettelse, og oppsummeringer.</li>
-                <li>Reorganisert Innstilling for enklere tilpasning.</li>
-                <li>Feilrettinger og ytelsesforbedringer.</li>
+                <li>Lagt til Deck Mode for en tidslinjeopplevelse med flere kolonner.</li>
+                <li>Lagt til rikere tilpasning av tidslinjefaner, inkludert ikoner, filtre, grupper og utseende per fane.</li>
+                <li>Lagt til regex-støtte for lokale nøkkelordfiltre.</li>
+                <li>Ytelsesforbedringer og feilrettinger.</li>
             </ul>
-        ]]></string>
+        ]]>
+    </string>
 </resources>

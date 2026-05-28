@@ -169,7 +169,7 @@
     <string name="settings_ai_config_type">Tip AI</string>
     <string name="settings_ai_config_type_description">Izaberite koji AI pozadinski sistem Flare koristi</string>
     <string name="settings_ai_config_type_on_device">AI na uređaju</string>
-    <string name="settings_ai_config_type_openai">OpenAI-kompatibilan API</string>
+    <string name="settings_ai_config_type_openai">API компатибилан са ВИ</string>
     <string name="settings_ai_config_api_key">API ključ</string>
     <string name="settings_ai_config_api_key_hint">Unesite API ključ</string>
     <string name="settings_ai_config_model">Model</string>

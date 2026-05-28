@@ -9,13 +9,14 @@
     <string name="profile_header_toots_count">%1$s Publicaciones</string>
     <string name="profile_misskey_header_status_count">%1$s Publicaciones</string>
     <string name="profile_header_button_follow">Seguir</string>
+    <string name="profile_header_button_request_follow">Request follow</string>
     <string name="profile_header_button_following">Siguiendo</string>
     <string name="profile_header_button_requested">Solicitado</string>
     <string name="profile_header_button_blocked">Bloqueado</string>
     <string name="profile_header_button_is_fans">Te sigue</string>
     <string name="mastodon_notification_item_followed_you">te ha seguido</string>
     <string name="mastodon_notification_item_favourited_your_status">ha marcado como favorito tu publicación</string>
-    <string name="mastodon_notification_item_reblogged_your_status">ha compartido</string>
+    <string name="mastodon_notification_item_reblogged_your_status">ha compartido una publicación</string>
     <string name="mastodon_notification_item_poll_ended">Una encuesta en la que participabas ha terminado</string>
     <string name="mastodon_notification_item_mentioned_you">te ha mencionado</string>
     <string name="mastodon_notification_item_requested_follow">ha solicitado seguirte</string>
@@ -28,7 +29,7 @@
     <string name="post_show_full_text">Mostrar texto completo</string>
     <string name="bluesky_notification_item_followed_you">te ha seguido</string>
     <string name="bluesky_notification_item_favourited_your_status">le ha gustado tu publicación</string>
-    <string name="bluesky_notification_item_reblogged_your_status">ha compartido tu publicación</string>
+    <string name="bluesky_notification_item_reblogged_your_status">ha compartido una publicación</string>
     <string name="bluesky_notification_item_poll_ended">Una encuesta en la que participabas ha terminado</string>
     <string name="bluesky_notification_item_mentioned_you">te ha mencionado</string>
     <string name="bluesky_item_reblogged_status">ha compartido</string>
@@ -39,7 +40,7 @@
     <string name="bluesky_notification_item_pin">ha fijado una publicación</string>
     <string name="misskey_notification_item_mentioned_you">te ha mencionado</string>
     <string name="misskey_notification_item_replied_to_you">te ha respondido</string>
-    <string name="misskey_notification_item_reposted_your_status">ha compartido tu publicación</string>
+    <string name="misskey_notification_item_reposted_your_status">ha compartido una publicación</string>
     <string name="misskey_notification_item_quoted_your_status">ha citado tu publicación</string>
     <string name="misskey_notification_item_reacted_to_your_status">ha reaccionado a tu publicación</string>
     <string name="misskey_notification_item_poll_ended">Una encuesta en la que participabas ha terminado</string>
@@ -404,16 +405,5 @@
     <string name="posts_title">Publicaciones</string>
     <string name="settings_appearance_absolute_timestamp">Marca de tiempo absoluta</string>
     <string name="settings_appearance_absolute_timestamp_description">Mostrar marcas de tiempo exactas en las publicaciones</string>
-    <string name="settings_about_description">Un cliente de código abierto impulsado por IA para plataformas sociales descentralizadas.</string>
-    <string name="settings_about_source_code">Código fuente</string>
-    <string name="settings_about_telegram">Telegram</string>
-    <string name="settings_about_telegram_description">Únete a nuestro grupo de Telegram</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
-    <string name="settings_about_discord_description">Únete a nuestro servidor de Discord</string>
-    <string name="settings_about_line" translatable="false">Line</string>
-    <string name="settings_about_line_description">Únete a nuestro grupo de Line</string>
-    <string name="settings_about_localization">Crowdin</string>
-    <string name="settings_about_localization_description">Ayúdanos a traducir Flare</string>
-    <string name="settings_privacy_policy">Política de Privacidad</string>
     <string name="channel_title">Canal</string>
 </resources>

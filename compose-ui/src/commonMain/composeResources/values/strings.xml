@@ -11,6 +11,7 @@
     <string name="profile_misskey_header_status_count">%1$s Posts</string>
 
     <string name="profile_header_button_follow">Follow</string>
+    <string name="profile_header_button_request_follow">Request follow</string>
     <string name="profile_header_button_following">Following</string>
     <string name="profile_header_button_requested">Requested</string>
     <string name="profile_header_button_blocked">Blocked</string>
@@ -18,7 +19,7 @@
 
     <string name="mastodon_notification_item_followed_you">followed you</string>
     <string name="mastodon_notification_item_favourited_your_status">favorited your post</string>
-    <string name="mastodon_notification_item_reblogged_your_status">reblogged</string>
+    <string name="mastodon_notification_item_reblogged_your_status">reblogged a post</string>
     <string name="mastodon_notification_item_poll_ended">A poll you were participating in has ended</string>
     <string name="mastodon_notification_item_mentioned_you">mentioned you</string>
     <string name="mastodon_notification_item_requested_follow">requested to follow you</string>
@@ -33,7 +34,7 @@
 
     <string name="bluesky_notification_item_followed_you">followed you</string>
     <string name="bluesky_notification_item_favourited_your_status">liked your post</string>
-    <string name="bluesky_notification_item_reblogged_your_status">reposted your post</string>
+    <string name="bluesky_notification_item_reblogged_your_status">reposted a post</string>
     <string name="bluesky_notification_item_poll_ended">A poll you were participating in has ended</string>
     <string name="bluesky_notification_item_mentioned_you">mentioned you</string>
     <string name="bluesky_item_reblogged_status">reposted</string>
@@ -45,7 +46,7 @@
 
     <string name="misskey_notification_item_mentioned_you">mentioned you</string>
     <string name="misskey_notification_item_replied_to_you">replied to you</string>
-    <string name="misskey_notification_item_reposted_your_status">reposted your post</string>
+    <string name="misskey_notification_item_reposted_your_status">reposted a post</string>
     <string name="misskey_notification_item_quoted_your_status">quoted your post</string>
     <string name="misskey_notification_item_reacted_to_your_status">reacted to your post</string>
     <string name="misskey_notification_item_poll_ended">A poll you were participating in has ended</string>
@@ -515,16 +516,5 @@
     <string name="posts_title">Posts</string>
     <string name="settings_appearance_absolute_timestamp">Absolute timestamp</string>
     <string name="settings_appearance_absolute_timestamp_description">Show exact timestamps on posts</string>
-    <string name="settings_about_description">An open-source, AI-powered client for decentralized social platforms.</string>
-    <string name="settings_about_source_code">Source code</string>
-    <string name="settings_about_telegram">Telegram</string>
-    <string name="settings_about_telegram_description">Join our Telegram group</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
-    <string name="settings_about_discord_description">Join our Discord server</string>
-    <string name="settings_about_line" translatable="false">Line</string>
-    <string name="settings_about_line_description">Join our Line group</string>
-    <string name="settings_about_localization">Crowdin</string>
-    <string name="settings_about_localization_description">Help us translate Flare</string>
-    <string name="settings_privacy_policy">Privacy Policy</string>
     <string name="channel_title">Channel</string>
 </resources>

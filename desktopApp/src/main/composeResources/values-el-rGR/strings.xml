@@ -187,7 +187,7 @@
     <string name="settings_ai_config_type">Τύπος AI</string>
     <string name="settings_ai_config_type_description">Επιλέξτε ποιο σύστημα AI χρησιμοποιεί το Flare</string>
     <string name="settings_ai_config_type_on_device">AI στη συσκευή</string>
-    <string name="settings_ai_config_type_openai">API συμβατό με OpenAI</string>
+    <string name="settings_ai_config_type_openai">API συμβατό με AI</string>
     <string name="settings_ai_config_api_key">Κλειδί API</string>
     <string name="settings_ai_config_api_key_hint">Εισαγάγετε το κλειδί API</string>
     <string name="settings_ai_config_model">Μοντέλο</string>

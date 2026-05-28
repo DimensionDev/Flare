@@ -9,13 +9,14 @@
     <string name="profile_header_toots_count">%1$s פוסטים</string>
     <string name="profile_misskey_header_status_count">%1$s פוסטים</string>
     <string name="profile_header_button_follow">מעקב</string>
+    <string name="profile_header_button_request_follow">Request follow</string>
     <string name="profile_header_button_following">במעקב</string>
     <string name="profile_header_button_requested">נשלחה בקשה</string>
     <string name="profile_header_button_blocked">חסום</string>
     <string name="profile_header_button_is_fans">עוקב אחריך</string>
     <string name="mastodon_notification_item_followed_you">עקב אחריך</string>
     <string name="mastodon_notification_item_favourited_your_status">סימן את הפוסט שלך כמועדף</string>
-    <string name="mastodon_notification_item_reblogged_your_status">שיתף מחדש</string>
+    <string name="mastodon_notification_item_reblogged_your_status">פרסם מחדש פוסט</string>
     <string name="mastodon_notification_item_poll_ended">סקר שהשתתפת בו הסתיים</string>
     <string name="mastodon_notification_item_mentioned_you">הזכיר אותך</string>
     <string name="mastodon_notification_item_requested_follow">ביקש לעקוב אחריך</string>
@@ -28,7 +29,7 @@
     <string name="post_show_full_text">הצג טקסט מלא</string>
     <string name="bluesky_notification_item_followed_you">עקב אחריך</string>
     <string name="bluesky_notification_item_favourited_your_status">אהב את הפוסט שלך</string>
-    <string name="bluesky_notification_item_reblogged_your_status">פרסם מחדש את הפוסט שלך</string>
+    <string name="bluesky_notification_item_reblogged_your_status">פרסם מחדש פוסט</string>
     <string name="bluesky_notification_item_poll_ended">סקר שהשתתפת בו הסתיים</string>
     <string name="bluesky_notification_item_mentioned_you">הזכיר אותך</string>
     <string name="bluesky_item_reblogged_status">פרסם מחדש</string>
@@ -39,7 +40,7 @@
     <string name="bluesky_notification_item_pin">נעץ פוסט</string>
     <string name="misskey_notification_item_mentioned_you">הזכיר אותך</string>
     <string name="misskey_notification_item_replied_to_you">ענה לך</string>
-    <string name="misskey_notification_item_reposted_your_status">פרסם מחדש את הפוסט שלך</string>
+    <string name="misskey_notification_item_reposted_your_status">פרסם מחדש פוסט</string>
     <string name="misskey_notification_item_quoted_your_status">ציטט את הפוסט שלך</string>
     <string name="misskey_notification_item_reacted_to_your_status">הגיב לפוסט שלך</string>
     <string name="misskey_notification_item_poll_ended">סקר שהשתתפת בו הסתיים</string>
@@ -404,16 +405,5 @@
     <string name="posts_title">פוסטים</string>
     <string name="settings_appearance_absolute_timestamp">חותמת זמן מוחלטת</string>
     <string name="settings_appearance_absolute_timestamp_description">הצג חותמות זמן מדויקות בפוסטים</string>
-    <string name="settings_about_description">לקוח קוד פתוח המבוסס על בינה מלאכותית עבור פלטפורמות חברתיות מבוזרות.</string>
-    <string name="settings_about_source_code">קוד מקור</string>
-    <string name="settings_about_telegram">Telegram</string>
-    <string name="settings_about_telegram_description">הצטרף לקבוצת הטלגרם שלנו</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
-    <string name="settings_about_discord_description">הצטרפו לשרת ה-Discord שלנו</string>
-    <string name="settings_about_line" translatable="false">Line</string>
-    <string name="settings_about_line_description">הצטרפו לקבוצת ה-Line שלנו</string>
-    <string name="settings_about_localization">Crowdin</string>
-    <string name="settings_about_localization_description">עזור לנו לתרגם את Flare</string>
-    <string name="settings_privacy_policy">מדיניות פרטיות</string>
     <string name="channel_title">ערוץ</string>
 </resources>

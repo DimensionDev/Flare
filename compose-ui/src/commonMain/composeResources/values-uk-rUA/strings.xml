@@ -11,6 +11,7 @@
     <string name="profile_misskey_header_status_count">%1$s Дописи</string>
 
     <string name="profile_header_button_follow">Підписатися</string>
+    <string name="profile_header_button_request_follow">Request follow</string>
     <string name="profile_header_button_following">Ви підписані</string>
     <string name="profile_header_button_requested">Запит надіслано</string>
     <string name="profile_header_button_blocked">Заблоковано</string>
@@ -18,7 +19,7 @@
 
     <string name="mastodon_notification_item_followed_you">підписався(-лася) на вас</string>
     <string name="mastodon_notification_item_favourited_your_status">додав(-ла) ваш допис до обраного</string>
-    <string name="mastodon_notification_item_reblogged_your_status">поширив(-ла)</string>
+    <string name="mastodon_notification_item_reblogged_your_status">поширив(-ла) допис</string>
     <string name="mastodon_notification_item_poll_ended">Опитування, в якому ви брали участь, завершилося</string>
     <string name="mastodon_notification_item_mentioned_you">згадав(-ла) вас</string>
     <string name="mastodon_notification_item_requested_follow">надіслав(-ла) запит на підписку</string>
@@ -33,7 +34,7 @@
 
     <string name="bluesky_notification_item_followed_you">підписався(-лася) на вас</string>
     <string name="bluesky_notification_item_favourited_your_status">вподобав(-ла) ваш допис</string>
-    <string name="bluesky_notification_item_reblogged_your_status">поширив(-ла) ваш допис</string>
+    <string name="bluesky_notification_item_reblogged_your_status">поширив(-ла) допис</string>
     <string name="bluesky_notification_item_poll_ended">Опитування, в якому ви брали участь, завершилося</string>
     <string name="bluesky_notification_item_mentioned_you">згадав(-ла) вас</string>
     <string name="bluesky_item_reblogged_status">поширив(-ла)</string>
@@ -45,7 +46,7 @@
 
     <string name="misskey_notification_item_mentioned_you">згадав(-ла) вас</string>
     <string name="misskey_notification_item_replied_to_you">відповів(-ла) вам</string>
-    <string name="misskey_notification_item_reposted_your_status">поширив(-ла) ваш допис</string>
+    <string name="misskey_notification_item_reposted_your_status">поширив(-ла) допис</string>
     <string name="misskey_notification_item_quoted_your_status">процитував(-ла) ваш допис</string>
     <string name="misskey_notification_item_reacted_to_your_status">відреагував(-ла) на ваш допис</string>
     <string name="misskey_notification_item_poll_ended">Опитування, в якому ви брали участь, завершилося</string>
@@ -515,16 +516,5 @@
     <string name="posts_title">Дописи</string>
     <string name="settings_appearance_absolute_timestamp">Абсолютна мітка часу</string>
     <string name="settings_appearance_absolute_timestamp_description">Показувати точний час на дописах</string>
-    <string name="settings_about_description">Клієнт з відкритим вихідним кодом на базі ШІ для децентралізованих соціальних платформ.</string>
-    <string name="settings_about_source_code">Вихідний код</string>
-    <string name="settings_about_telegram">Telegram</string>
-    <string name="settings_about_telegram_description">Приєднуйтесь до нашої групи в Telegram</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
-    <string name="settings_about_discord_description">Приєднуйтесь до нашого сервера в Discord</string>
-    <string name="settings_about_line" translatable="false">Line</string>
-    <string name="settings_about_line_description">Приєднуйтесь до нашої групи в Line</string>
-    <string name="settings_about_localization">Crowdin</string>
-    <string name="settings_about_localization_description">Допоможіть нам перекласти Flare</string>
-    <string name="settings_privacy_policy">Політика конфіденційності</string>
     <string name="channel_title">Канал</string>
 </resources>

@@ -1,2 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <string name="changelog_current">
+        <![CDATA[
+            <span>版本 %1$s：</span>
+            <ul>
+                <li>新增 Deck Mode，帶來多欄時間軸體驗。</li>
+                <li>新增更豐富的時間軸分頁自訂，包括圖示、篩選器、群組和單一分頁外觀。</li>
+                <li>本機關鍵字篩選新增正規表示式支援。</li>
+                <li>效能改善與錯誤修正。</li>
+            </ul>
+        ]]>
+    </string>
+</resources>

@@ -5,13 +5,17 @@ import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.ui.ComposeUiFlags
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.core.content.IntentCompat
 import dev.dimension.flare.ui.FlareApp
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 
 class ShortcutComposeActivity : ComponentActivity() {
+    @OptIn(ExperimentalComposeUiApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
+        ComposeUiFlags.isMediaQueryIntegrationEnabled = true
         super.onCreate(savedInstanceState)
         val initialText =
             when {

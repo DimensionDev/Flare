@@ -72,6 +72,17 @@
     <string name="settings_storage_subtitle">Управљајте кешираним датотекама, дневницима и резервним копијама</string>
     <string name="settings_about_title">О апликацији</string>
     <string name="settings_about_subtitle">Сазнајте више о Flare-у</string>
+    <string name="settings_about_description">Klijent otvorenog koda za decentralizovane društvene platforme, pokretan veštačkom inteligencijom.</string>
+    <string name="settings_about_source_code">Izvorni kod</string>
+    <string name="settings_about_telegram">Telegram</string>
+    <string name="settings_about_telegram_description">Pridružite se našoj Telegram grupi</string>
+    <string name="settings_about_discord" translatable="false">Discord</string>
+    <string name="settings_about_discord_description">Pridružite se našem Discord serveru</string>
+    <string name="settings_about_line" translatable="false">Line</string>
+    <string name="settings_about_line_description">Pridružite se našoj Line grupi</string>
+    <string name="settings_about_localization">Crowdin</string>
+    <string name="settings_about_localization_description">Pomozite nam u prevođenju Flare-a</string>
+    <string name="settings_privacy_policy">Politika privatnosti</string>
     <string name="settings_side_panel">Прилагођавање бочне плоче</string>
     <string name="settings_side_panel_description">Прилагодите бочну плочу</string>
     <string name="settings_local_filter_title">Локални филтери</string>

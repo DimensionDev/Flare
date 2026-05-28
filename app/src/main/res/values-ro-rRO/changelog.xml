@@ -2,12 +2,15 @@
 <resources>
     <string name="changelog_title">Bine ai revenit!</string>
     <string name="changelog_message">Am făcut unele modificări de când v-ați autentificat ultima dată. Iată detaliile:</string>
-    <string name="changelog_current"><![CDATA[            <span>Versiunea %1$s:</span>
+    <string name="changelog_current">
+        <![CDATA[
+            <span>Versiunea %1$s:</span>
             <ul>
-                <li>a adăugat noi moduri de afişare a cronologiei, incluzând un aspect de galerie.</li>
-                <li>S-a îmbunătățit citirea RSS, partajarea, traducerea și rezumatele.</li>
-                <li>Setări reorganizate de Appearance pentru o personalizare mai ușoară.</li>
-                <li>Remedierea erorilor şi îmbunătăţirea performanţei.</li>
+                <li>A fost adăugat Deck Mode pentru o cronologie pe mai multe coloane.</li>
+                <li>A fost adăugată personalizare mai bogată pentru filele cronologiei, inclusiv pictograme, filtre, grupuri și aspect per filă.</li>
+                <li>A fost adăugat suport regex pentru filtrele locale de cuvinte-cheie.</li>
+                <li>Îmbunătățiri de performanță și remedieri de erori.</li>
             </ul>
-        ]]></string>
+        ]]>
+    </string>
 </resources>

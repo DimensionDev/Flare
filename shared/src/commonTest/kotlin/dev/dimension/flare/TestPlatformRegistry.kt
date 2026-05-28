@@ -182,10 +182,8 @@ private data object TestBlueskyPlatformSpec : TestDeepLinkPlatformSpec(
         buildList {
             add(blueskyProfileDeepLink(accountKey, "https://${accountKey.host}/profile/{handle}"))
             add(blueskyPostDeepLink(accountKey, "https://${accountKey.host}/profile/{handle}/post/{id}"))
-            if (accountKey.host == "bsky.social") {
-                add(blueskyProfileDeepLink(accountKey, "https://bsky.app/profile/{handle}"))
-                add(blueskyPostDeepLink(accountKey, "https://bsky.app/profile/{handle}/post/{id}"))
-            }
+            add(blueskyProfileDeepLink(accountKey, "https://bsky.app/profile/{handle}"))
+            add(blueskyPostDeepLink(accountKey, "https://bsky.app/profile/{handle}/post/{id}"))
         }.toImmutableList()
 }
 

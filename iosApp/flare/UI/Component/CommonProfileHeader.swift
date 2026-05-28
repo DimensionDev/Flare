@@ -7,32 +7,17 @@ enum CommonProfileHeaderConstants {
     static let avatarSize: CGFloat = 96
 }
 
-private enum FollowButtonState: Equatable {
-    case blocked
-    case following
-    case requested
-    case follow
-
-    init(_ relation: UiRelation) {
-        if relation.blocking {
-            self = .blocked
-        } else if relation.following {
-            self = .following
-        } else if relation.hasPendingFollowRequestFromYou {
-            self = .requested
-        } else {
-            self = .follow
-        }
-    }
-
+private extension FollowButtonState {
     var titleKey: LocalizedStringKey {
-        switch self {
+        switch onEnum(of: self) {
         case .blocked:
             "relation_blocked"
         case .following:
             "relation_following"
         case .requested:
             "relation_requested"
+        case .requestFollow:
+            "relation_request_follow"
         case .follow:
             "relation_follow"
         }
@@ -45,8 +30,9 @@ struct CommonProfileHeader: View {
     @Environment(\.openURL) private var openURL
     let user: UiProfile
     let relation: UiState<UiRelation>
+    let followButtonState: UiState<FollowButtonState>
     let isMe: UiState<KotlinBoolean>
-    let onFollowClick: (UiRelation) -> Void
+    let onFollowClick: (FollowButtonState) -> Void
     let onFollowingClick: () -> Void
     let onFansClick: () -> Void
 
@@ -91,24 +77,23 @@ struct CommonProfileHeader: View {
                         Spacer()
                             .frame(height: CommonProfileHeaderConstants.headerHeight)
                         if case .success(let data) = onEnum(of: isMe), !data.data.boolValue {
-                            switch onEnum(of: relation) {
-                            case .success(let relationState):
-                                let buttonState = FollowButtonState(relationState.data)
+                            switch onEnum(of: followButtonState) {
+                            case .success(let buttonState):
                                 VStack(spacing: 4) {
-                                    followButton(state: buttonState) {
-                                        onFollowClick(relationState.data)
+                                    followButton(state: buttonState.data) {
+                                        onFollowClick(buttonState.data)
                                     }
-                                    .id(buttonState)
+                                    .id(buttonState.data.id)
                                     .transition(.opacity.combined(with: .scale(scale: 0.92)))
 
-                                    if relationState.data.isFans {
+                                    if case .success(let relationState) = onEnum(of: relation), relationState.data.isFans {
                                         Text("relation_is_fans")
                                             .font(.caption)
                                             .foregroundStyle(.secondary)
                                             .multilineTextAlignment(.center)
                                     }
                                 }
-                                .animation(.spring(response: 0.25, dampingFraction: 0.86), value: buttonState)
+                                .animation(.spring(response: 0.25, dampingFraction: 0.86), value: buttonState.data.id)
                             case .loading: Button(action: {}, label: {
                                 Text("#loading")
                             })
@@ -136,7 +121,7 @@ struct CommonProfileHeader: View {
 
     @ViewBuilder
     private func followButton(state: FollowButtonState, action: @escaping () -> Void) -> some View {
-        switch state {
+        switch onEnum(of: state) {
         case .blocked:
             Button(action: action) {
                 Text(state.titleKey)
@@ -149,7 +134,7 @@ struct CommonProfileHeader: View {
             }
             .backport
             .glassButtonStyle(fallbackStyle: .bordered)
-        case .follow:
+        case .follow, .requestFollow:
             Button(action: action) {
                 Text(state.titleKey)
             }

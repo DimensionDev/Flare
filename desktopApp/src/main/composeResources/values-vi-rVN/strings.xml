@@ -168,7 +168,7 @@
     <string name="settings_ai_config_type">Loại AI</string>
     <string name="settings_ai_config_type_description">Chọn phần phụ trợ AI mà Flare sử dụng</string>
     <string name="settings_ai_config_type_on_device">AI trên thiết bị</string>
-    <string name="settings_ai_config_type_openai">API tương thích với OpenAI</string>
+    <string name="settings_ai_config_type_openai">API tương thích AI</string>
     <string name="settings_ai_config_api_key">Khóa API</string>
     <string name="settings_ai_config_api_key_hint">Nhập khóa API</string>
     <string name="settings_ai_config_model">Mô hình</string>

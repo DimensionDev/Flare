@@ -88,7 +88,7 @@ private fun Status.renderStatusV2(accountKey: MicroBlogKey): UiTimelineV2.Post {
                     url = url,
                     width = it.large?.geoValue?.widthValue ?: it.geoValue?.widthValue ?: 0f,
                     height = it.large?.geoValue?.heightValue ?: it.geoValue?.heightValue ?: 0f,
-                    previewUrl = it.url ?: url,
+                    previewUrl = (it.url ?: url).replace("orj360", "mw600"),
                     description = null,
                     sensitive = false,
                 )
@@ -322,7 +322,7 @@ private fun Comment.renderStatusV2(accountKey: MicroBlogKey): UiTimelineV2.Post 
                         url = imageUrl,
                         width = it.large?.geoValue?.widthValue ?: it.geoValue?.widthValue ?: 0f,
                         height = it.large?.geoValue?.heightValue ?: it.geoValue?.heightValue ?: 0f,
-                        previewUrl = previewUrl,
+                        previewUrl = previewUrl.replace("orj360", "mw600"),
                         description = null,
                         sensitive = false,
                     )

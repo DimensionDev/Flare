@@ -43,18 +43,9 @@ class PlatformDeepLinkMatcherTest {
 
         val deepLinks = PlatformType.Bluesky.deepLinks(accountKey)
 
-        assertEquals(2, deepLinks.size)
+        assertEquals(4, deepLinks.size)
         assertEquals("https://bsky.example/profile/{handle}", deepLinks[0].uriPattern)
         assertEquals("https://bsky.example/profile/{handle}/post/{id}", deepLinks[1].uriPattern)
-    }
-
-    @Test
-    fun blueskySocialAccountIncludesBskyAppAlias() {
-        val accountKey = MicroBlogKey(id = "1", host = "bsky.social")
-
-        val deepLinks = PlatformType.Bluesky.deepLinks(accountKey)
-
-        assertEquals(4, deepLinks.size)
         assertEquals("https://bsky.app/profile/{handle}", deepLinks[2].uriPattern)
         assertEquals("https://bsky.app/profile/{handle}/post/{id}", deepLinks[3].uriPattern)
     }
@@ -137,6 +128,39 @@ class PlatformDeepLinkMatcherTest {
                 host = "mastodon.social",
             ),
             matches[account2],
+        )
+    }
+
+    @Test
+    fun bskyAppLinksMatchBlueskyAccountOnCustomPds() {
+        val account =
+            UiAccount(
+                accountKey = MicroBlogKey(id = "did:plc:alice", host = "example.com"),
+                platformType = PlatformType.Bluesky,
+            )
+        val mapping = deepLinkMapping(account)
+
+        val profileMatch = PlatformDeepLinkMatcher.matches("https://bsky.app/profile/example.com", mapping)
+        assertEquals(
+            DeeplinkRoute.Profile.UserNameWithHost(
+                accountType = AccountType.Specific(account.accountKey),
+                userName = "example.com",
+                host = "example.com",
+            ),
+            profileMatch[account],
+        )
+
+        val postMatch = PlatformDeepLinkMatcher.matches("https://bsky.app/profile/example.com/post/12345", mapping)
+        assertEquals(
+            DeeplinkRoute.Status.Detail(
+                accountType = AccountType.Specific(account.accountKey),
+                statusKey =
+                    MicroBlogKey(
+                        id = "at://example.com/app.bsky.feed.post/12345",
+                        host = "example.com",
+                    ),
+            ),
+            postMatch[account],
         )
     }
 

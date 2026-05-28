@@ -71,6 +71,17 @@
     <string name="settings_storage_subtitle">Gyorsítótár, naplók és biztonsági mentések</string>
     <string name="settings_about_title">Névjegy</string>
     <string name="settings_about_subtitle">Tudj meg többet a Flare-ről</string>
+    <string name="settings_about_description">Nyílt forráskódú, MI-vel segített kliens decentralizált közösségi platformokhoz.</string>
+    <string name="settings_about_source_code">Forráskód</string>
+    <string name="settings_about_telegram">Telegram</string>
+    <string name="settings_about_telegram_description">Csatlakozz a Telegram csoportunkhoz</string>
+    <string name="settings_about_discord" translatable="false">Discord</string>
+    <string name="settings_about_discord_description">Csatlakozz a Discord szerverünkhöz</string>
+    <string name="settings_about_line" translatable="false">Line</string>
+    <string name="settings_about_line_description">Csatlakozz a Line csoportunkhoz</string>
+    <string name="settings_about_localization">Crowdin</string>
+    <string name="settings_about_localization_description">Segíts lefordítani a Flare-t</string>
+    <string name="settings_privacy_policy">Adatvédelmi nyilatkozat</string>
     <string name="settings_side_panel">Oldalpanel testreszabása</string>
     <string name="settings_side_panel_description">Az oldalpanel testreszabása</string>
     <string name="settings_local_filter_title">Helyi szűrők</string>

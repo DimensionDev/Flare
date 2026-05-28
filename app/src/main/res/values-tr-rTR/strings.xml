@@ -71,6 +71,17 @@
     <string name="settings_storage_subtitle">Önbelleğe alınan dosyaları, günlükleri ve yedekleri yönet</string>
     <string name="settings_about_title">Hakkında</string>
     <string name="settings_about_subtitle">Flare hakkında daha fazla bilgi edin</string>
+    <string name="settings_about_description">Merkezi olmayan sosyal platformlar için açık kaynaklı, yapay zeka destekli bir istemci.</string>
+    <string name="settings_about_source_code">Kaynak kod</string>
+    <string name="settings_about_telegram">Telegram</string>
+    <string name="settings_about_telegram_description">Telegram grubumuza katılın</string>
+    <string name="settings_about_discord" translatable="false">Discord</string>
+    <string name="settings_about_discord_description">Discord sunucumuza katılın</string>
+    <string name="settings_about_line" translatable="false">Line</string>
+    <string name="settings_about_line_description">Line grubumuza katılın</string>
+    <string name="settings_about_localization">Crowdin</string>
+    <string name="settings_about_localization_description">Flare\'i çevirmemize yardımcı olun</string>
+    <string name="settings_privacy_policy">Gizlilik Politikası</string>
     <string name="settings_side_panel">Yan Panel özelleştirme</string>
     <string name="settings_side_panel_description">Yan paneli özelleştir</string>
     <string name="settings_local_filter_title">Yerel Filtreler</string>

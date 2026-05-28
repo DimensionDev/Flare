@@ -75,6 +75,17 @@
     <string name="settings_storage_subtitle">إدارة الملفات المؤقتة والسجلات والنسخ الاحتياطي</string>
     <string name="settings_about_title">حول</string>
     <string name="settings_about_subtitle">تعرف على المزيد حول Flare</string>
+    <string name="settings_about_description">عميل مفتوح المصدر مدعوم بالذكاء الاصطناعي لمنصات التواصل الاجتماعي اللامركزية.</string>
+    <string name="settings_about_source_code">كود المصدر</string>
+    <string name="settings_about_telegram">تيليجرام</string>
+    <string name="settings_about_telegram_description">انضم إلى مجموعتنا على تيليجرام</string>
+    <string name="settings_about_discord" translatable="false">Discord</string>
+    <string name="settings_about_discord_description">انضم إلى خادم Discord الخاص بنا</string>
+    <string name="settings_about_line" translatable="false">Line</string>
+    <string name="settings_about_line_description">انضم إلى مجموعة Line الخاصة بنا</string>
+    <string name="settings_about_localization">Crowdin</string>
+    <string name="settings_about_localization_description">ساعدنا في ترجمة Flare</string>
+    <string name="settings_privacy_policy">سياسة الخصوصية</string>
     <string name="settings_side_panel">تخصيص اللوحة الجانبية</string>
     <string name="settings_side_panel_description">تخصيص اللوحة الجانبية</string>
     <string name="settings_local_filter_title">الفلاتر المحلية</string>

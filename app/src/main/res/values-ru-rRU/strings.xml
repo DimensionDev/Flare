@@ -73,6 +73,17 @@
     <string name="settings_storage_subtitle">Управление кешем, логами и резервными копиями</string>
     <string name="settings_about_title">О приложении</string>
     <string name="settings_about_subtitle">Узнать больше о Flare</string>
+    <string name="settings_about_description">Клиент для децентрализованных соцсетей с открытым исходным кодом и функциями ИИ.</string>
+    <string name="settings_about_source_code">Исходный код</string>
+    <string name="settings_about_telegram">Telegram</string>
+    <string name="settings_about_telegram_description">Вступить в нашу группу в Telegram</string>
+    <string name="settings_about_discord" translatable="false">Discord</string>
+    <string name="settings_about_discord_description">Присоединиться к нашему серверу Discord</string>
+    <string name="settings_about_line" translatable="false">Line</string>
+    <string name="settings_about_line_description">Вступить в нашу группу в Line</string>
+    <string name="settings_about_localization">Crowdin</string>
+    <string name="settings_about_localization_description">Помочь с переводом Flare</string>
+    <string name="settings_privacy_policy">Политика конфиденциальности</string>
     <string name="settings_side_panel">Настройка боковой панели</string>
     <string name="settings_side_panel_description">Настроить боковую панель</string>
     <string name="settings_local_filter_title">Локальные фильтры</string>

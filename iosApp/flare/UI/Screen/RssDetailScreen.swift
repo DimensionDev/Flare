@@ -21,6 +21,7 @@ Maecenas fringilla vitae leo sit amet lacinia. Donec in dui a ex hendrerit volut
     
     @StateObject private var presenter: KotlinPresenter<RssDetailPresenterState>
     @Environment(\.translateConfig) private var translateConfig
+    @Environment(\.openURL) private var openURL
     let url: String
     @State private var showTLDR = false
     @State private var showTranslate = false
@@ -83,7 +84,7 @@ Maecenas fringilla vitae leo sit amet lacinia. Donec in dui a ex hendrerit volut
             ToolbarItem {
                 if let url = URL(string: url) {
                     Button {
-                        UIApplication.shared.open(url)
+                        openURL(url)
                     } label: {
                         Label {
                             Text("Open in Browser")

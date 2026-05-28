@@ -91,7 +91,10 @@ internal fun RssDetailScreen(
     val inAppNotification: ComposeInAppNotification = koinInject()
     val scrollState = rememberScrollState()
     androidx.compose.foundation.layout.Box(
-        modifier = Modifier.fillMaxSize(),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(FluentTheme.colors.background.card.default),
         contentAlignment = Alignment.TopCenter,
     ) {
         FlareScrollBar(

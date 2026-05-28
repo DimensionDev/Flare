@@ -25,6 +25,7 @@ import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.presenter.home.TimelinePresenter
 import dev.dimension.flare.ui.presenter.home.TimelineState
+import dev.dimension.flare.ui.render.UiDateTime
 import dev.dimension.flare.ui.render.compareTo
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
@@ -111,31 +112,10 @@ public class StatusContextPresenter(
 
             override suspend fun transform(data: UiTimelineV2): UiTimelineV2 {
                 val currentCreatedAt = currentStatusFlow.firstOrNull()?.takeSuccess()?.createdAt
-                if (data !is UiTimelineV2.Post) {
-                    return data
-                }
-                return if ((
-                        currentCreatedAt != null &&
-                            data.createdAt <= currentCreatedAt
-                    ) ||
-                    data.parents.all { it.statusKey == statusKey }
-                ) {
-                    data.copy(
-                        parents = persistentListOf(),
-                    )
-                } else {
-                    data.copy(
-                        parents =
-                            data.parents
-                                .filter {
-                                    (
-                                        currentCreatedAt == null ||
-                                            it.createdAt > currentCreatedAt
-                                    ) &&
-                                        it.statusKey != statusKey
-                                }.toPersistentList(),
-                    )
-                }
+                return data.filterDetailParents(
+                    statusKey = statusKey,
+                    currentCreatedAt = currentCreatedAt,
+                )
             }
         }
     }
@@ -156,4 +136,35 @@ public class StatusContextPresenter(
             override val current = current
         }
     }
+}
+
+internal fun UiTimelineV2.filterDetailParents(
+    statusKey: MicroBlogKey,
+    currentCreatedAt: UiDateTime?,
+): UiTimelineV2 {
+    if (this !is UiTimelineV2.Post) {
+        return this
+    }
+    if (
+        this.statusKey == statusKey ||
+        (
+            currentCreatedAt != null &&
+                createdAt <= currentCreatedAt
+        )
+    ) {
+        return copy(
+            parents = persistentListOf(),
+        )
+    }
+    return copy(
+        parents =
+            parents
+                .filter {
+                    (
+                        currentCreatedAt == null ||
+                            it.createdAt > currentCreatedAt
+                    ) &&
+                        it.statusKey != statusKey
+                }.toPersistentList(),
+    )
 }

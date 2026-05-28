@@ -48,10 +48,8 @@ public data object BlueskyPlatformSpec : PlatformSpec {
         buildList {
             add(profileDeepLink(accountKey, "https://${accountKey.host}/profile/{handle}"))
             add(postDeepLink(accountKey, "https://${accountKey.host}/profile/{handle}/post/{id}"))
-            if (accountKey.host == "bsky.social") {
-                add(profileDeepLink(accountKey, "https://bsky.app/profile/{handle}"))
-                add(postDeepLink(accountKey, "https://bsky.app/profile/{handle}/post/{id}"))
-            }
+            add(profileDeepLink(accountKey, "https://bsky.app/profile/{handle}"))
+            add(postDeepLink(accountKey, "https://bsky.app/profile/{handle}/post/{id}"))
         }.toImmutableList()
 
     internal val bookmarkTimelineSpec =

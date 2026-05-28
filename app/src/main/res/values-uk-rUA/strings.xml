@@ -73,6 +73,17 @@
     <string name="settings_storage_subtitle">Керування кешем, логами та резервними копіями</string>
     <string name="settings_about_title">Про додаток</string>
     <string name="settings_about_subtitle">Дізнайтеся більше про Flare</string>
+    <string name="settings_about_description">Клієнт з відкритим вихідним кодом на базі ШІ для децентралізованих соціальних платформ.</string>
+    <string name="settings_about_source_code">Вихідний код</string>
+    <string name="settings_about_telegram">Telegram</string>
+    <string name="settings_about_telegram_description">Приєднуйтесь до нашої групи в Telegram</string>
+    <string name="settings_about_discord" translatable="false">Discord</string>
+    <string name="settings_about_discord_description">Приєднуйтесь до нашого сервера в Discord</string>
+    <string name="settings_about_line" translatable="false">Line</string>
+    <string name="settings_about_line_description">Приєднуйтесь до нашої групи в Line</string>
+    <string name="settings_about_localization">Crowdin</string>
+    <string name="settings_about_localization_description">Допоможіть нам перекласти Flare</string>
+    <string name="settings_privacy_policy">Політика конфіденційності</string>
     <string name="settings_side_panel">Налаштування бічної панелі</string>
     <string name="settings_side_panel_description">Налаштуйте бічну панель</string>
     <string name="settings_local_filter_title">Локальні фільтри</string>

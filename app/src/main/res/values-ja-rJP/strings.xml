@@ -68,6 +68,17 @@
     <string name="settings_storage_subtitle">キャッシュ、ログ、バックアップの管理</string>
     <string name="settings_about_title">このアプリについて</string>
     <string name="settings_about_subtitle">Flare について詳しく知る</string>
+    <string name="settings_about_description">分散型SNSプラットフォーム向けのオープンソースAI搭載クライアントです。</string>
+    <string name="settings_about_source_code">ソースコード</string>
+    <string name="settings_about_telegram">Telegram</string>
+    <string name="settings_about_telegram_description">Telegramグループに参加する</string>
+    <string name="settings_about_discord" translatable="false">Discord</string>
+    <string name="settings_about_discord_description">Discordサーバーに参加する</string>
+    <string name="settings_about_line" translatable="false">Line</string>
+    <string name="settings_about_line_description">Lineグループに参加する</string>
+    <string name="settings_about_localization">Crowdin</string>
+    <string name="settings_about_localization_description">Flareの翻訳に協力する</string>
+    <string name="settings_privacy_policy">プライバシーポリシー</string>
     <string name="settings_side_panel">サイドパネルのカスタマイズ</string>
     <string name="settings_side_panel_description">サイドパネルをカスタマイズする</string>
     <string name="settings_local_filter_title">ローカルフィルター</string>

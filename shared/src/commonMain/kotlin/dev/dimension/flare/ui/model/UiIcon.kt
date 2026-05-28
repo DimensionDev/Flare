@@ -62,4 +62,58 @@ public enum class UiIcon {
     UnFavourite,
 }
 
+/**
+ * Icons exposed by the tab/group icon picker.
+ *
+ * Keep this list in sync with UiIcon.toImageVector(): entries that render to the
+ * same Font Awesome icon should appear only once here.
+ */
+public val TabPickerUiIcons: List<UiIcon> =
+    listOf(
+        UiIcon.Twitter,
+        UiIcon.Mastodon,
+        UiIcon.Misskey,
+        UiIcon.Bluesky,
+        UiIcon.Weibo,
+        UiIcon.Nostr,
+        UiIcon.X,
+        UiIcon.Home,
+        UiIcon.Notification,
+        UiIcon.Search,
+        UiIcon.Profile,
+        UiIcon.Settings,
+        UiIcon.Local,
+        UiIcon.World,
+        UiIcon.Featured,
+        UiIcon.Bookmark,
+        UiIcon.Heart,
+        UiIcon.List,
+        UiIcon.Messages,
+        UiIcon.Rss,
+        UiIcon.Channel,
+        UiIcon.Translate,
+        UiIcon.Like,
+        UiIcon.Retweet,
+        UiIcon.Reply,
+        UiIcon.Comment,
+        UiIcon.Unbookmark,
+        UiIcon.More,
+        UiIcon.MoreVerticel,
+        UiIcon.Delete,
+        UiIcon.React,
+        UiIcon.UnReact,
+        UiIcon.Share,
+        UiIcon.Mute,
+        UiIcon.Block,
+        UiIcon.Follow,
+        UiIcon.Favourite,
+        UiIcon.Mention,
+        UiIcon.Poll,
+        UiIcon.Edit,
+        UiIcon.Info,
+        UiIcon.Pin,
+        UiIcon.Check,
+        UiIcon.UnFavourite,
+    )
+
 public fun UiIcon.asType(): IconType = IconType.Material(this)

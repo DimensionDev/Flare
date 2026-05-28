@@ -8,13 +8,14 @@
     <string name="profile_header_toots_count">%1$s Посты</string>
     <string name="profile_misskey_header_status_count">%1$s Посты</string>
     <string name="profile_header_button_follow">Подписаться</string>
+    <string name="profile_header_button_request_follow">Request follow</string>
     <string name="profile_header_button_following">Вы подписаны</string>
     <string name="profile_header_button_requested">Запрос отправлен</string>
     <string name="profile_header_button_blocked">Заблокирован</string>
     <string name="profile_header_button_is_fans">Подписан на вас</string>
     <string name="mastodon_notification_item_followed_you">подписался на вас</string>
     <string name="mastodon_notification_item_favourited_your_status">добавил ваш пост в избранное</string>
-    <string name="mastodon_notification_item_reblogged_your_status">сделал репост</string>
+    <string name="mastodon_notification_item_reblogged_your_status">сделал репост поста</string>
     <string name="mastodon_notification_item_poll_ended">Опрос, в котором вы участвовали, завершен</string>
     <string name="mastodon_notification_item_mentioned_you">упомянул вас</string>
     <string name="mastodon_notification_item_requested_follow">отправил запрос на подписку</string>
@@ -27,7 +28,7 @@
     <string name="post_show_full_text">Показать весь текст</string>
     <string name="bluesky_notification_item_followed_you">подписался на вас</string>
     <string name="bluesky_notification_item_favourited_your_status">лайкнул ваш пост</string>
-    <string name="bluesky_notification_item_reblogged_your_status">репостнул ваш пост</string>
+    <string name="bluesky_notification_item_reblogged_your_status">сделал репост поста</string>
     <string name="bluesky_notification_item_poll_ended">Опрос, в котором вы участвовали, завершен</string>
     <string name="bluesky_notification_item_mentioned_you">упомянул вас</string>
     <string name="bluesky_item_reblogged_status">сделал репост</string>
@@ -38,7 +39,7 @@
     <string name="bluesky_notification_item_pin">закрепил пост</string>
     <string name="misskey_notification_item_mentioned_you">упомянул вас</string>
     <string name="misskey_notification_item_replied_to_you">ответил вам</string>
-    <string name="misskey_notification_item_reposted_your_status">репостнул ваш пост</string>
+    <string name="misskey_notification_item_reposted_your_status">сделал репост поста</string>
     <string name="misskey_notification_item_quoted_your_status">процитировал ваш пост</string>
     <string name="misskey_notification_item_reacted_to_your_status">отреагировал на ваш пост</string>
     <string name="misskey_notification_item_poll_ended">Опрос, в котором вы участвовали, завершен</string>
@@ -403,16 +404,5 @@
     <string name="posts_title">Посты</string>
     <string name="settings_appearance_absolute_timestamp">Абсолютное время</string>
     <string name="settings_appearance_absolute_timestamp_description">Показывать точное время публикации</string>
-    <string name="settings_about_description">Клиент для децентрализованных соцсетей с открытым исходным кодом и функциями ИИ.</string>
-    <string name="settings_about_source_code">Исходный код</string>
-    <string name="settings_about_telegram">Telegram</string>
-    <string name="settings_about_telegram_description">Вступить в нашу группу в Telegram</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
-    <string name="settings_about_discord_description">Присоединиться к нашему серверу Discord</string>
-    <string name="settings_about_line" translatable="false">Line</string>
-    <string name="settings_about_line_description">Вступить в нашу группу в Line</string>
-    <string name="settings_about_localization">Crowdin</string>
-    <string name="settings_about_localization_description">Помочь с переводом Flare</string>
-    <string name="settings_privacy_policy">Политика конфиденциальности</string>
     <string name="channel_title">Канал</string>
 </resources>

@@ -17,7 +17,7 @@ import dev.dimension.flare.data.model.tab.TimelineSlot
 import dev.dimension.flare.data.model.tab.TimelineSlotContent
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.data.repository.SettingsRepository
-import dev.dimension.flare.ui.model.UiIcon
+import dev.dimension.flare.ui.model.TabPickerUiIcons
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
@@ -37,11 +37,43 @@ public class GroupConfigPresenter :
     override fun body(): State {
         val availableIcons =
             remember {
-                UiIcon.entries.map { IconType.Material(it) }.toImmutableList()
+                TabPickerUiIcons.map { IconType.Material(it) }.toImmutableList()
             }
 
         return object : State {
             override val availableIcons: ImmutableList<IconType> = availableIcons
+
+            override fun buildGroupItem(
+                initialItem: GroupTimelineTabItemV2?,
+                name: String,
+                icon: IconType,
+                appearancePatch: AppearancePatch?,
+                enabled: Boolean,
+                tabs: List<TimelineTabItemV2>,
+                mergePolicy: TimelineMergePolicy,
+                filterConfig: TimelineFilterConfig,
+                defaultGroupName: String,
+            ): GroupTimelineTabItemV2? {
+                val childSlots =
+                    tabs
+                        .distinctBy { it.id }
+                        .map { timelineResolver.toSlot(it) }
+                if (childSlots.isEmpty()) {
+                    return null
+                }
+                return timelineResolver.toTabItem(
+                    buildGroupSlot(
+                        name = name,
+                        icon = icon,
+                        appearancePatch = appearancePatch,
+                        enabled = enabled,
+                        mergePolicy = mergePolicy,
+                        filterConfig = filterConfig,
+                        defaultGroupName = defaultGroupName,
+                        childSlots = childSlots,
+                    ),
+                ) as GroupTimelineTabItemV2
+            }
 
             override fun commit(
                 initialItem: GroupTimelineTabItemV2?,
@@ -77,6 +109,18 @@ public class GroupConfigPresenter :
     @Immutable
     public interface State {
         public val availableIcons: ImmutableList<IconType>
+
+        public fun buildGroupItem(
+            initialItem: GroupTimelineTabItemV2?,
+            name: String,
+            icon: IconType,
+            appearancePatch: AppearancePatch?,
+            enabled: Boolean,
+            tabs: List<TimelineTabItemV2>,
+            mergePolicy: TimelineMergePolicy = initialItem?.mergePolicy ?: TimelineMergePolicy.TimePerPage,
+            filterConfig: TimelineFilterConfig = initialItem?.filterConfig ?: TimelineFilterConfig(),
+            defaultGroupName: String,
+        ): GroupTimelineTabItemV2?
 
         public fun commit(
             initialItem: GroupTimelineTabItemV2?,

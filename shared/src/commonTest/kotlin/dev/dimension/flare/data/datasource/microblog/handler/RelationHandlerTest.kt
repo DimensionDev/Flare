@@ -123,6 +123,36 @@ class RelationHandlerTest : RobolectricTest() {
         }
 
     @Test
+    fun followRequestSuccessSetsPendingRequestTrue() =
+        runTest {
+            startKoin {
+                modules(
+                    module {
+                        single { db }
+                        single<CoroutineScope> { this@runTest }
+                    },
+                )
+            }
+
+            db.userDao().insertUserRelation(
+                DbUserRelation(
+                    accountType = AccountType.Specific(accountKey),
+                    userKey = userKey,
+                    relation = UiRelation(following = false, hasPendingFollowRequestFromYou = false),
+                ),
+            )
+
+            handler = RelationHandler(accountType = AccountType.Specific(accountKey), dataSource = loader)
+            handler.follow(userKey, requestFollow = true)
+            advanceUntilIdle()
+
+            val saved = assertNotNull(db.userDao().getUserRelation(AccountType.Specific(accountKey), userKey).first())
+            assertTrue(saved.relation.following == false)
+            assertTrue(saved.relation.hasPendingFollowRequestFromYou == true)
+            assertEquals(1, loader.followCallCount)
+        }
+
+    @Test
     fun followFailureRevertsFollowingFlag() =
         runTest {
             startKoin {
@@ -150,6 +180,35 @@ class RelationHandlerTest : RobolectricTest() {
             val saved = db.userDao().getUserRelation(AccountType.Specific(accountKey), userKey).first()
             assertTrue(saved?.relation?.following == false)
             assertEquals(1, loader.followCallCount)
+        }
+
+    @Test
+    fun unfollowSuccessClearsPendingRequest() =
+        runTest {
+            startKoin {
+                modules(
+                    module {
+                        single { db }
+                        single<CoroutineScope> { this@runTest }
+                    },
+                )
+            }
+
+            db.userDao().insertUserRelation(
+                DbUserRelation(
+                    accountType = AccountType.Specific(accountKey),
+                    userKey = userKey,
+                    relation = UiRelation(following = false, hasPendingFollowRequestFromYou = true),
+                ),
+            )
+
+            handler = RelationHandler(accountType = AccountType.Specific(accountKey), dataSource = loader)
+            handler.unfollow(userKey)
+            advanceUntilIdle()
+
+            val saved = assertNotNull(db.userDao().getUserRelation(AccountType.Specific(accountKey), userKey).first())
+            assertTrue(saved.relation.following == false)
+            assertTrue(saved.relation.hasPendingFollowRequestFromYou == false)
         }
 
     @Test

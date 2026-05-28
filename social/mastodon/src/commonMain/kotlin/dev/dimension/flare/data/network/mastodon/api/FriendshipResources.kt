@@ -5,7 +5,6 @@ import de.jensklingenberg.ktorfit.http.GET
 import de.jensklingenberg.ktorfit.http.POST
 import de.jensklingenberg.ktorfit.http.Path
 import de.jensklingenberg.ktorfit.http.Query
-import dev.dimension.flare.data.network.mastodon.api.model.Account
 import dev.dimension.flare.data.network.mastodon.api.model.PostReport
 import dev.dimension.flare.data.network.mastodon.api.model.RelationshipResponse
 
@@ -13,12 +12,12 @@ internal interface FriendshipResources {
     @POST("api/v1/accounts/{id}/follow")
     suspend fun follow(
         @Path(value = "id") id: String,
-    ): Account
+    ): RelationshipResponse
 
     @POST("api/v1/accounts/{id}/unfollow")
     suspend fun unfollow(
         @Path(value = "id") id: String,
-    ): Account
+    ): RelationshipResponse
 
     @GET("api/v1/accounts/relationships")
     suspend fun showFriendships(

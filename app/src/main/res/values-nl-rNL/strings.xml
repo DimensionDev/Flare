@@ -69,6 +69,17 @@
     <string name="settings_storage_subtitle">Beheer gecachte bestanden, logs en back-ups</string>
     <string name="settings_about_title">Over</string>
     <string name="settings_about_subtitle">Leer meer over Flare</string>
+    <string name="settings_about_description">Een open-source, AI-gestuurde cliënt voor gedecentraliseerde sociale platforms.</string>
+    <string name="settings_about_source_code">Broncode</string>
+    <string name="settings_about_telegram">Telegram</string>
+    <string name="settings_about_telegram_description">Sluit je aan bij onze Telegram-groep</string>
+    <string name="settings_about_discord" translatable="false">Discord</string>
+    <string name="settings_about_discord_description">Sluit je aan bij onze Discord-server</string>
+    <string name="settings_about_line" translatable="false">Line</string>
+    <string name="settings_about_line_description">Sluit je aan bij onze Line-groep</string>
+    <string name="settings_about_localization">Crowdin</string>
+    <string name="settings_about_localization_description">Help ons Flare te vertalen</string>
+    <string name="settings_privacy_policy">Privacybeleid</string>
     <string name="settings_side_panel">Zijpaneel aanpassen</string>
     <string name="settings_side_panel_description">Pas het zijpaneel aan</string>
     <string name="settings_local_filter_title">Lokale filters</string>

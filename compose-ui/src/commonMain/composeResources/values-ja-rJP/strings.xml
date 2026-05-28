@@ -9,13 +9,14 @@
     <string name="profile_header_toots_count">%1$s 投稿</string>
     <string name="profile_misskey_header_status_count">%1$s 投稿</string>
     <string name="profile_header_button_follow">フォロー</string>
+    <string name="profile_header_button_request_follow">フォローをリクエスト</string>
     <string name="profile_header_button_following">フォロー中</string>
     <string name="profile_header_button_requested">承認待ち</string>
     <string name="profile_header_button_blocked">ブロック中</string>
     <string name="profile_header_button_is_fans">フォローされています</string>
     <string name="mastodon_notification_item_followed_you">さんにフォローされました</string>
     <string name="mastodon_notification_item_favourited_your_status">さんがあなたの投稿をお気に入りに登録しました</string>
-    <string name="mastodon_notification_item_reblogged_your_status">さんがリブロードしました</string>
+    <string name="mastodon_notification_item_reblogged_your_status">さんが投稿をブーストしました</string>
     <string name="mastodon_notification_item_poll_ended">参加したアンケートが終了しました</string>
     <string name="mastodon_notification_item_mentioned_you">さんがあなたに返信しました</string>
     <string name="mastodon_notification_item_requested_follow">さんからフォローリクエストが届きました</string>
@@ -28,7 +29,7 @@
     <string name="post_show_full_text">全文を表示</string>
     <string name="bluesky_notification_item_followed_you">さんにフォローされました</string>
     <string name="bluesky_notification_item_favourited_your_status">さんがあなたの投稿に「いいね」しました</string>
-    <string name="bluesky_notification_item_reblogged_your_status">さんがあなたの投稿をリポストしました</string>
+    <string name="bluesky_notification_item_reblogged_your_status">さんが投稿をリポストしました</string>
     <string name="bluesky_notification_item_poll_ended">参加したアンケートが終了しました</string>
     <string name="bluesky_notification_item_mentioned_you">さんがあなたにメンションしました</string>
     <string name="bluesky_item_reblogged_status">さんがリポストしました</string>
@@ -39,7 +40,7 @@
     <string name="bluesky_notification_item_pin">さんが投稿をピン留めしました</string>
     <string name="misskey_notification_item_mentioned_you">さんがあなたにメンションしました</string>
     <string name="misskey_notification_item_replied_to_you">さんがあなたに返信しました</string>
-    <string name="misskey_notification_item_reposted_your_status">さんがあなたの投稿をリノートしました</string>
+    <string name="misskey_notification_item_reposted_your_status">さんが投稿をリノートしました</string>
     <string name="misskey_notification_item_quoted_your_status">さんがあなたの投稿を引用しました</string>
     <string name="misskey_notification_item_reacted_to_your_status">さんがあなたの投稿にリアクションしました</string>
     <string name="misskey_notification_item_poll_ended">参加したアンケートが終了しました</string>
@@ -404,16 +405,5 @@
     <string name="posts_title">投稿</string>
     <string name="settings_appearance_absolute_timestamp">絶対時刻表示</string>
     <string name="settings_appearance_absolute_timestamp_description">投稿に正確な日時を表示します</string>
-    <string name="settings_about_description">分散型SNSプラットフォーム向けのオープンソースAI搭載クライアントです。</string>
-    <string name="settings_about_source_code">ソースコード</string>
-    <string name="settings_about_telegram">Telegram</string>
-    <string name="settings_about_telegram_description">Telegramグループに参加する</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
-    <string name="settings_about_discord_description">Discordサーバーに参加する</string>
-    <string name="settings_about_line" translatable="false">Line</string>
-    <string name="settings_about_line_description">Lineグループに参加する</string>
-    <string name="settings_about_localization">Crowdin</string>
-    <string name="settings_about_localization_description">Flareの翻訳に協力する</string>
-    <string name="settings_privacy_policy">プライバシーポリシー</string>
     <string name="channel_title">チャンネル</string>
 </resources>

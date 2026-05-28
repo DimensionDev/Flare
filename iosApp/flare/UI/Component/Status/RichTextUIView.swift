@@ -127,6 +127,8 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
         traitRegistration = registerForTraitChanges([
             UITraitUserInterfaceStyle.self,
             UITraitPreferredContentSizeCategory.self,
+            UITraitLegibilityWeight.self,
+            UITraitAccessibilityContrast.self,
         ]) { (view: RichTextUIView, _) in
             view.update(force: true)
         }
@@ -650,8 +652,39 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
     private func preferredFont(forTextStyle textStyle: UIFont.TextStyle) -> UIFont {
         UIFont.preferredFont(
             forTextStyle: textStyle,
-            compatibleWith: UITraitCollection(preferredContentSizeCategory: preferredContentSizeCategory)
+            compatibleWith: effectiveFontTraitCollection()
         )
+    }
+
+    private func effectiveFontTraitCollection() -> UITraitCollection {
+        UITraitCollection(traitsFrom: [
+            traitCollection,
+            UITraitCollection(preferredContentSizeCategory: preferredContentSizeCategory),
+        ])
+    }
+
+    private func systemFont(size: CGFloat, weight: UIFont.Weight) -> UIFont {
+        let resolvedWeight: UIFont.Weight = traitCollection.legibilityWeight == .bold && weight == .regular
+            ? .semibold
+            : weight
+        return UIFont.systemFont(ofSize: size, weight: resolvedWeight)
+    }
+
+    private func monospacedFont(size: CGFloat, weight: UIFont.Weight) -> UIFont {
+        let resolvedWeight: UIFont.Weight = traitCollection.legibilityWeight == .bold && weight == .regular
+            ? .semibold
+            : weight
+        return UIFont.monospacedSystemFont(ofSize: size, weight: resolvedWeight)
+    }
+
+    private func addingItalicIfNeeded(_ font: UIFont, enabled: Bool) -> UIFont {
+        guard enabled,
+              let descriptor = font.fontDescriptor.withSymbolicTraits(
+                  font.fontDescriptor.symbolicTraits.union(.traitItalic)
+              ) else {
+            return font
+        }
+        return UIFont(descriptor: descriptor, size: font.pointSize)
     }
 
     private func color(for style: RenderTextStyle, block: RenderBlockStyle) -> UIColor {
@@ -690,28 +723,25 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
         let baseSize = preferredFont(forTextStyle: textStyle).pointSize
         let baseFont: UIFont
         if style.code || style.monospace {
-            baseFont = UIFont.monospacedSystemFont(
-                ofSize: style.small ? baseSize * 0.8 : baseSize,
-                weight: style.bold ? .bold : .regular
+            return addingItalicIfNeeded(
+                monospacedFont(
+                    size: style.small ? baseSize * 0.8 : baseSize,
+                    weight: style.bold ? .bold : .regular
+                ),
+                enabled: style.italic || block.isBlockQuote || block.isFigCaption
             )
         } else if style.small {
-            baseFont = UIFont.systemFont(ofSize: baseSize * 0.8)
+            baseFont = systemFont(size: baseSize * 0.8, weight: style.bold ? .bold : .regular)
+        } else if style.bold {
+            baseFont = systemFont(size: baseSize, weight: .bold)
         } else {
             baseFont = preferredFont(forTextStyle: textStyle)
         }
 
-        var traits: UIFontDescriptor.SymbolicTraits = []
-        if style.bold {
-            traits.insert(.traitBold)
-        }
-        if style.italic || block.isBlockQuote || block.isFigCaption {
-            traits.insert(.traitItalic)
-        }
-        guard !traits.isEmpty,
-              let descriptor = baseFont.fontDescriptor.withSymbolicTraits(traits) else {
-            return baseFont
-        }
-        return UIFont(descriptor: descriptor, size: baseFont.pointSize)
+        return addingItalicIfNeeded(
+            baseFont,
+            enabled: style.italic || block.isBlockQuote || block.isFigCaption
+        )
     }
 
     private func font(for descriptor: PlatformTextStyleDescriptor) -> UIFont {
@@ -735,28 +765,25 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
         let baseSize = preferredFont(forTextStyle: baseTextStyle).pointSize
         let baseFont: UIFont
         if descriptor.code || descriptor.monospace {
-            baseFont = UIFont.monospacedSystemFont(
-                ofSize: descriptor.small ? baseSize * 0.8 : baseSize,
-                weight: descriptor.bold ? .bold : .regular
+            return addingItalicIfNeeded(
+                monospacedFont(
+                    size: descriptor.small ? baseSize * 0.8 : baseSize,
+                    weight: descriptor.bold ? .bold : .regular
+                ),
+                enabled: descriptor.italic || descriptor.isBlockQuote || descriptor.isFigCaption
             )
         } else if descriptor.small {
-            baseFont = UIFont.systemFont(ofSize: baseSize * 0.8)
+            baseFont = systemFont(size: baseSize * 0.8, weight: descriptor.bold ? .bold : .regular)
+        } else if descriptor.bold {
+            baseFont = systemFont(size: baseSize, weight: .bold)
         } else {
             baseFont = preferredFont(forTextStyle: baseTextStyle)
         }
 
-        var traits: UIFontDescriptor.SymbolicTraits = []
-        if descriptor.bold {
-            traits.insert(.traitBold)
-        }
-        if descriptor.italic || descriptor.isBlockQuote || descriptor.isFigCaption {
-            traits.insert(.traitItalic)
-        }
-        guard !traits.isEmpty,
-              let fontDescriptor = baseFont.fontDescriptor.withSymbolicTraits(traits) else {
-            return baseFont
-        }
-        return UIFont(descriptor: fontDescriptor, size: baseFont.pointSize)
+        return addingItalicIfNeeded(
+            baseFont,
+            enabled: descriptor.italic || descriptor.isBlockQuote || descriptor.isFigCaption
+        )
     }
 
     private func linkColor() -> UIColor {

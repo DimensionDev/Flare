@@ -171,7 +171,7 @@
     <string name="settings_ai_config_type">AI Type</string>
     <string name="settings_ai_config_type_description">Нажмите, чтобы выбрать тип AI бэкэнда</string>
     <string name="settings_ai_config_type_on_device">На устройстве ИИ</string>
-    <string name="settings_ai_config_type_openai">AI Compatible API</string>
+    <string name="settings_ai_config_type_openai">AI-совместимый API</string>
     <string name="settings_ai_config_api_key">Ключ API</string>
     <string name="settings_ai_config_api_key_hint">Введите ключ API</string>
     <string name="settings_ai_config_model">Модель</string>

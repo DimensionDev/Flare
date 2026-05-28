@@ -175,13 +175,13 @@ internal object TimelinePagingMapper {
                 val currentKey = current.statusKey
                 resolvedPosts[currentKey]?.let {
                     resolvingKeys -= currentKey
-                    stack.removeLast()
+                    stack.removeAt(stack.lastIndex)
                     continue
                 }
 
                 if (!frame.expanded) {
                     if (!resolvingKeys.add(currentKey)) {
-                        stack.removeLast()
+                        stack.removeAt(stack.lastIndex)
                         continue
                     }
                     frame.expanded = true
@@ -205,7 +205,7 @@ internal object TimelinePagingMapper {
                     )
                 resolvedPosts[currentKey] = resolved
                 resolvingKeys -= currentKey
-                stack.removeLast()
+                stack.removeAt(stack.lastIndex)
             }
 
             return resolvedPosts[post.statusKey] ?: post

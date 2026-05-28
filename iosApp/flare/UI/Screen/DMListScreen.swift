@@ -105,12 +105,15 @@ struct DMConversationScreen: View {
     @Environment(\.openURL) private var openURL
     @StateObject private var presenter: KotlinPresenter<DMConversationState>
     var body: some View {
-        ComposeDMConversationView(key: presenter.key, data: presenter.state, onOpenLink: { url in
-            if let targetURL = URL(string: url) {
-                openURL(targetURL)
+        DMConversationMessagesView(
+            data: presenter.state.items,
+            onRetry: { key in
+                presenter.state.retry(key: key)
+            },
+            onOpenURL: { url in
+                openURL(url)
             }
-        })
-//            .ignoresSafeArea()
+        )
             .background(Color(.systemGroupedBackground))
             .safeAreaInset(edge: .bottom) {
                 HStack {
@@ -139,35 +142,5 @@ struct DMConversationScreen: View {
 extension DMConversationScreen {
     init(accountType: AccountType, roomKey: MicroBlogKey) {
         self._presenter = .init(wrappedValue: .init(presenter: DMConversationPresenter(accountType: accountType, roomKey: roomKey)))
-    }
-}
-
-
-struct ComposeDMConversationView : UIViewControllerRepresentable {
-    let key: String
-    let data: DMConversationState
-    let state: ComposeUIStateProxy<DMConversationState>
-    
-    init(key: String, data: DMConversationState, onOpenLink: @escaping (String) -> Void) {
-        self.key = key
-        self.data = data
-        if let state = ComposeUIStateProxyCache.shared.getOrCreate(key: key, factory: {
-            .init(initialState: data, onOpenLink: onOpenLink)
-        }) as? ComposeUIStateProxy<any DMConversationState> {
-            self.state = state
-        } else {
-            self.state = ComposeUIStateProxy(initialState: data, onOpenLink: onOpenLink)
-        }
-    }
-    
-    func makeUIViewController(context: Context) -> some UIViewController {
-        return KotlinSharedUI.DMConversationController(state: state)
-    }
-    func updateUIViewController(_ uiViewController: UIViewControllerType, context: Context) {
-        state.update(newState: data)
-    }
-    
-    func dismantleUIViewController(_ uiViewController: UIViewController, coordinator: Coordinator) {
-        ComposeUIStateProxyCache.shared.remove(key: key)
     }
 }

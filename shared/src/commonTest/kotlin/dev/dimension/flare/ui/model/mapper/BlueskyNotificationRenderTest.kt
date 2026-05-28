@@ -105,6 +105,62 @@ class BlueskyNotificationRenderTest {
     }
 
     @Test
+    fun likesOnDifferentPosts_renderAsSeparateGroups() {
+        val firstUri = AtUri("at://did:plc:post/app.bsky.feed.post/100")
+        val secondUri = AtUri("at://did:plc:post/app.bsky.feed.post/200")
+        val references =
+            persistentMapOf(
+                firstUri to
+                    createPostView(
+                        uri = firstUri.atUri,
+                        author = createProfileBasic("first-author", "first-author.bsky.social"),
+                        text = "first liked content",
+                    ),
+                secondUri to
+                    createPostView(
+                        uri = secondUri.atUri,
+                        author = createProfileBasic("second-author", "second-author.bsky.social"),
+                        text = "second liked content",
+                    ),
+            )
+        val firstLike =
+            createNotification(
+                reason = ListNotificationsNotificationReason.Like,
+                uri = "at://did:plc:noti/app.bsky.notification/1",
+                author = createProfile("liker1", "liker1.bsky.social"),
+                record =
+                    bskyJson.encodeAsJsonContent(
+                        Like(
+                            subject = StrongRef(uri = firstUri, cid = Cid("cid-first")),
+                            createdAt = Instant.parse("2024-01-01T00:00:00Z"),
+                        ),
+                    ),
+            )
+        val secondLike =
+            createNotification(
+                reason = ListNotificationsNotificationReason.Like,
+                uri = "at://did:plc:noti/app.bsky.notification/2",
+                author = createProfile("liker2", "liker2.bsky.social"),
+                record =
+                    bskyJson.encodeAsJsonContent(
+                        Like(
+                            subject = StrongRef(uri = secondUri, cid = Cid("cid-second")),
+                            createdAt = Instant.parse("2024-01-01T00:00:00Z"),
+                        ),
+                    ),
+            )
+
+        val result = listOf(firstLike, secondLike).render(accountKey, references)
+        val userLists = result.map { assertIs<UiTimelineV2.UserList>(it) }
+        assertEquals(2, userLists.size)
+        assertEquals(
+            setOf("first liked content", "second liked content"),
+            userLists.map { it.post?.content?.innerText }.toSet(),
+        )
+        assertEquals(listOf(1, 1), userLists.map { it.users.size })
+    }
+
+    @Test
     fun follow_rendersMessageAndUsers() {
         val n1 =
             createNotification(

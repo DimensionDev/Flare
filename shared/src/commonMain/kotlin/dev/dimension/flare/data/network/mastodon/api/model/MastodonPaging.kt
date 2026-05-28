@@ -50,18 +50,10 @@ internal class MastodonPagingConverterFactory : Converter.Factory {
                                 )
                             val link = result.response.headers["link"]
                             if (result.response.headers.contains("link") && link != null) {
-                                val next =
-                                    "max_id=([\\dabcdef]+)"
-                                        .toRegex()
-                                        .find(link)
-                                        ?.groupValues
-                                        ?.getOrNull(1)
+                                val next = link.extractPagingParameter("max_id")
                                 val prev =
-                                    "(?:since|min)_id=([\\dabcdef]+)"
-                                        .toRegex()
-                                        .find(link)
-                                        ?.groupValues
-                                        ?.getOrNull(1)
+                                    link.extractPagingParameter("since_id")
+                                        ?: link.extractPagingParameter("min_id")
                                 MastodonPaging(
                                     data = body,
                                     next = next,
@@ -88,3 +80,10 @@ internal class MastodonPagingConverterFactory : Converter.Factory {
         return null
     }
 }
+
+private fun String.extractPagingParameter(name: String): String? =
+    "(?:[?&])$name=([^&>;]+)"
+        .toRegex()
+        .find(this)
+        ?.groupValues
+        ?.getOrNull(1)

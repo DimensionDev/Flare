@@ -11,9 +11,7 @@ import dev.dimension.flare.common.onError
 import dev.dimension.flare.common.onLoading
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.ui.component.status.appendStateUI
-import kotlin.native.HiddenFromObjC
 
-@HiddenFromObjC
 public fun <T : Any> LazyListScope.items(
     state: PagingState<T>,
     emptyContent: @Composable LazyItemScope.() -> Unit = {},
@@ -62,7 +60,6 @@ public fun <T : Any> LazyListScope.items(
         }
 }
 
-@HiddenFromObjC
 public fun <T : Any> LazyListScope.itemsIndexed(
     state: PagingState<T>,
     emptyContent: @Composable LazyItemScope.() -> Unit = {},
@@ -111,7 +108,6 @@ public fun <T : Any> LazyListScope.itemsIndexed(
         }
 }
 
-@HiddenFromObjC
 public fun <T : Any> LazyStaggeredGridScope.items(
     state: PagingState<T>,
     emptyContent: @Composable LazyStaggeredGridItemScope.() -> Unit = {},
@@ -161,7 +157,6 @@ public fun <T : Any> LazyStaggeredGridScope.items(
         }
 }
 
-@HiddenFromObjC
 public fun <T : Any> LazyStaggeredGridScope.itemsIndexed(
     state: PagingState<T>,
     emptyContent: @Composable LazyStaggeredGridItemScope.() -> Unit = {},

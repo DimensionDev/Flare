@@ -103,9 +103,7 @@ import io.github.alexzhirkevich.qrose.rememberQrCodePainter
 import kotlinx.collections.immutable.persistentListOf
 import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.stringResource
-import kotlin.native.HiddenFromObjC
 
-@HiddenFromObjC
 @Composable
 public fun ServiceSelectionScreenContent(
     onXQT: () -> Unit,

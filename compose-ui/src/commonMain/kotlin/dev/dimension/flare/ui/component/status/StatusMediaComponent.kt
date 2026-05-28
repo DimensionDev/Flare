@@ -54,7 +54,6 @@ import dev.dimension.flare.ui.route.toUri
 import dev.dimension.flare.ui.theme.PlatformTheme
 import kotlinx.collections.immutable.ImmutableList
 import org.jetbrains.compose.resources.stringResource
-import kotlin.native.HiddenFromObjC
 import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
@@ -236,7 +235,6 @@ internal fun StatusMediaComponent(
     }
 }
 
-@HiddenFromObjC
 @Composable
 public fun MediaItem(
     media: UiMedia,

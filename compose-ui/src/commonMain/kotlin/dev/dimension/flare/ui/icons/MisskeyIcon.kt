@@ -11,9 +11,7 @@ import androidx.compose.ui.graphics.vector.group
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 import compose.icons.fontawesomeicons.BrandsGroup
-import kotlin.native.HiddenFromObjC
 
-@HiddenFromObjC
 public val BrandsGroup.Misskey: ImageVector
     get() =
         ImageVector
@@ -197,7 +195,6 @@ public val BrandsGroup.Misskey: ImageVector
                 }
             }.build()
 
-@HiddenFromObjC
 public val BrandsGroup.Nostr: ImageVector
     get() {
         if (_nostr != null) {

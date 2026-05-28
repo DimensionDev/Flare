@@ -85,7 +85,6 @@ import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import dev.dimension.flare.ui.presenter.status.action.BlueskyReportStatusState
 import dev.dimension.flare.ui.route.DeeplinkRoute
-import kotlin.time.Clock
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -107,6 +106,7 @@ import sh.christian.ozone.api.Nsid
 import sh.christian.ozone.api.RKey
 import sh.christian.ozone.api.model.JsonContent
 import sh.christian.ozone.api.model.JsonContent.Companion.encodeAsJsonContent
+import kotlin.time.Clock
 
 private const val AT_PROTO_PERSONAL_DATA_SERVER = "AtprotoPersonalDataServer"
 

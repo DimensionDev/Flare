@@ -1,8 +1,10 @@
 package dev.dimension.flare.common
 
 import dev.dimension.flare.ui.humanizer.PlatformFormatter
+import kotlin.native.HiddenFromObjC
 import kotlin.time.Instant
 
+@HiddenFromObjC
 internal class TestFormatter : PlatformFormatter {
     override fun formatNumber(number: Long): String = number.toString()
 

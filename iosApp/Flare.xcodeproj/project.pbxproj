@@ -13,6 +13,7 @@
 		068923482E82A80700981D8E /* Flow in Frameworks */ = {isa = PBXBuildFile; productRef = 068923472E82A80700981D8E /* Flow */; };
 		069DA28C2F96716700720BE0 /* CHTCollectionViewWaterfallLayout in Frameworks */ = {isa = PBXBuildFile; productRef = 069DA28B2F96716700720BE0 /* CHTCollectionViewWaterfallLayout */; };
 		069DA4CF2F969C9A00720BE0 /* GSPlayer in Frameworks */ = {isa = PBXBuildFile; productRef = 069DA4CE2F969C9A00720BE0 /* GSPlayer */; };
+		06AB10002FA1000000000001 /* ChatLayout in Frameworks */ = {isa = PBXBuildFile; productRef = 06AB10022FA1000000000001 /* ChatLayout */; };
 		06C6B5482E853AAF00CCD388 /* SwiftUIIntrospect in Frameworks */ = {isa = PBXBuildFile; productRef = 06C6B5472E853AAF00CCD388 /* SwiftUIIntrospect */; };
 		06C7FC172E7D474900A0D01A /* LazyPager in Frameworks */ = {isa = PBXBuildFile; productRef = 06C7FC162E7D474900A0D01A /* LazyPager */; };
 		06F36AAD2E8F7BEC00F5905F /* SwiftUIBackports in Frameworks */ = {isa = PBXBuildFile; productRef = 06F36AAC2E8F7BEC00F5905F /* SwiftUIBackports */; };
@@ -27,6 +28,15 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
+				AppIcon_black.icon,
+				AppIcon_blue.icon,
+				AppIcon_cyan.icon,
+				AppIcon_light_blue.icon,
+				AppIcon_orange.icon,
+				AppIcon_red.icon,
+				AppIcon_teal.icon,
+				AppIcon_white.icon,
+				AppIcon_yellow.icon,
 			);
 			target = 06E433FD2E6A9A2600CD0826 /* Flare */;
 		};
@@ -53,6 +63,7 @@
 				0672EE122E8689C70092AD1F /* Drops in Frameworks */,
 				06C6B5482E853AAF00CCD388 /* SwiftUIIntrospect in Frameworks */,
 				0646B2622E7151A700535A3E /* Kingfisher in Frameworks */,
+				06AB10002FA1000000000001 /* ChatLayout in Frameworks */,
 				069DA28C2F96716700720BE0 /* CHTCollectionViewWaterfallLayout in Frameworks */,
 				06F36AAD2E8F7BEC00F5905F /* SwiftUIBackports in Frameworks */,
 				069DA4CF2F969C9A00720BE0 /* GSPlayer in Frameworks */,
@@ -109,6 +120,7 @@
 				06310D702E96120700B6E081 /* VideoPlayer */,
 				069DA28B2F96716700720BE0 /* CHTCollectionViewWaterfallLayout */,
 				069DA4CE2F969C9A00720BE0 /* GSPlayer */,
+				06AB10022FA1000000000001 /* ChatLayout */,
 			);
 			productName = flare;
 			productReference = 06E433FE2E6A9A2600CD0826 /* Flare.app */;
@@ -149,6 +161,7 @@
 				06310D6F2E96120700B6E081 /* XCRemoteSwiftPackageReference "VideoPlayer" */,
 				069DA28A2F96716700720BE0 /* XCRemoteSwiftPackageReference "CHTCollectionViewWaterfallLayout" */,
 				069DA4CD2F969C9A00720BE0 /* XCRemoteSwiftPackageReference "GSPlayer" */,
+				06AB10012FA1000000000001 /* XCRemoteSwiftPackageReference "ChatLayout" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 06E433FF2E6A9A2600CD0826 /* Products */;
@@ -187,7 +200,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\ncd \"$SRCROOT/..\"\n./gradlew :compose-ui:embedAndSignAppleFrameworkForXcode\n";
+			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\ncd \"$SRCROOT/..\"\n./gradlew :ios-shared:embedAndSignAppleFrameworkForXcode\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -333,9 +346,9 @@
 				ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES = "AppIcon_black AppIcon_blue AppIcon_cyan AppIcon_light_blue AppIcon_orange AppIcon_red AppIcon_teal AppIcon_white AppIcon_yellow";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1501;
+				CURRENT_PROJECT_VERSION = 1600;
 				DEVELOPMENT_TEAM = 7LFDZ96332;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
@@ -355,7 +368,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.5.0;
+				MARKETING_VERSION = 1.6.0;
 				PRODUCT_BUNDLE_IDENTIFIER = dev.dimension.flare;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -374,9 +387,9 @@
 				ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES = "AppIcon_black AppIcon_blue AppIcon_cyan AppIcon_light_blue AppIcon_orange AppIcon_red AppIcon_teal AppIcon_white AppIcon_yellow";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1501;
+				CURRENT_PROJECT_VERSION = 1600;
 				DEVELOPMENT_TEAM = 7LFDZ96332;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
@@ -396,7 +409,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.5.0;
+				MARKETING_VERSION = 1.6.0;
 				PRODUCT_BUNDLE_IDENTIFIER = dev.dimension.flare;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -489,6 +502,14 @@
 				minimumVersion = 0.2.30;
 			};
 		};
+		06AB10012FA1000000000001 /* XCRemoteSwiftPackageReference "ChatLayout" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/ekazaev/ChatLayout";
+			requirement = {
+				kind = exactVersion;
+				version = 2.4.2;
+			};
+		};
 		06C6B5462E853AAF00CCD388 /* XCRemoteSwiftPackageReference "swiftui-introspect" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/siteline/swiftui-introspect";
@@ -545,6 +566,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 069DA4CD2F969C9A00720BE0 /* XCRemoteSwiftPackageReference "GSPlayer" */;
 			productName = GSPlayer;
+		};
+		06AB10022FA1000000000001 /* ChatLayout */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 06AB10012FA1000000000001 /* XCRemoteSwiftPackageReference "ChatLayout" */;
+			productName = ChatLayout;
 		};
 		06C6B5472E853AAF00CCD388 /* SwiftUIIntrospect */ = {
 			isa = XCSwiftPackageProductDependency;

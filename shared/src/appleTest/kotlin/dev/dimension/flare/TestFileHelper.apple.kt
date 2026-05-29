@@ -20,6 +20,8 @@ internal actual fun deleteTestRootPath(path: Path) {
     }
 }
 
+internal actual fun createTestFileSystem(): FileSystem = FileSystem.SYSTEM
+
 internal actual fun createTestFileItem(
     root: Path,
     name: String?,

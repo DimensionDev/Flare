@@ -9,56 +9,60 @@ import dev.dimension.flare.ui.model.UiDMRoom
 import dev.dimension.flare.ui.model.UiState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
+import kotlin.native.HiddenFromObjC
 
-internal interface DirectMessageLoader {
-    val platformType: PlatformType
+@HiddenFromObjC
+public interface DirectMessageLoader {
+    public val platformType: PlatformType
 
-    val runtimeTransformer: Flow<DirectMessageRuntimeTransformer>
+    public val runtimeTransformer: Flow<DirectMessageRuntimeTransformer>
         get() = flowOf(DirectMessageRuntimeTransformer())
 
-    suspend fun loadRooms(
+    public suspend fun loadRooms(
         pageSize: Int,
         request: PagingRequest,
     ): PagingResult<UiDMRoom>
 
-    suspend fun loadMessages(
+    public suspend fun loadMessages(
         roomKey: MicroBlogKey,
         pageSize: Int,
         request: PagingRequest,
     ): PagingResult<UiDMItem>
 
-    suspend fun fetchRoomInfo(roomKey: MicroBlogKey): UiDMRoom
+    public suspend fun fetchRoomInfo(roomKey: MicroBlogKey): UiDMRoom
 
-    suspend fun sendMessage(
+    public suspend fun sendMessage(
         roomKey: MicroBlogKey,
         message: String,
     ): UiDMItem
 
-    suspend fun deleteMessage(
+    public suspend fun deleteMessage(
         roomKey: MicroBlogKey,
         messageKey: MicroBlogKey,
     )
 
-    suspend fun fetchNewMessages(
+    public suspend fun fetchNewMessages(
         roomKey: MicroBlogKey,
         cursor: String?,
     ): DirectMessageDelta
 
-    suspend fun leaveRoom(roomKey: MicroBlogKey)
+    public suspend fun leaveRoom(roomKey: MicroBlogKey)
 
-    fun createRoom(userKey: MicroBlogKey): Flow<UiState<UiDMRoom>>
+    public fun createRoom(userKey: MicroBlogKey): Flow<UiState<UiDMRoom>>
 
-    suspend fun canSend(userKey: MicroBlogKey): Boolean
+    public suspend fun canSend(userKey: MicroBlogKey): Boolean
 
-    suspend fun loadBadgeCount(): Int
+    public suspend fun loadBadgeCount(): Int
 }
 
-internal data class DirectMessageDelta(
+@HiddenFromObjC
+public data class DirectMessageDelta(
     val messages: List<UiDMItem> = emptyList(),
     val deletedMessageKeys: List<MicroBlogKey> = emptyList(),
 )
 
-internal data class DirectMessageRuntimeTransformer(
+@HiddenFromObjC
+public data class DirectMessageRuntimeTransformer(
     val room: (UiDMRoom) -> UiDMRoom = { it },
     val item: (UiDMItem) -> UiDMItem = { it },
 )

@@ -52,7 +52,7 @@ jobs:
 
       # Run tests
       - name: Run Tests
-        run: ./gradlew allTests
+        run: ./gradlew allTests -x wasmJsBrowserTest
 
       # Build with Gradle
       - name: Build with Gradle

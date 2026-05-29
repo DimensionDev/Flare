@@ -6,7 +6,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalUriHandler
 import dev.dimension.flare.LocalWindowPadding
 import dev.dimension.flare.common.OnDeepLink
-import dev.dimension.flare.ui.model.UiApplication
+import dev.dimension.flare.model.vvoHost
+import dev.dimension.flare.model.xqtHost
 import dev.dimension.flare.ui.presenter.login.VVOLoginPresenter
 import dev.dimension.flare.ui.presenter.login.XQTLoginPresenter
 import dev.dimension.flare.ui.screen.login.ServiceSelectionScreenContent
@@ -33,7 +34,7 @@ internal fun ServiceSelectScreen(
         contentPadding = LocalWindowPadding.current,
         onXQT = {
             onWebViewLogin.invoke(
-                "https://${UiApplication.XQT.host}",
+                "https://$xqtHost",
                 { cookies ->
                     if (cookies.isNullOrEmpty()) {
                         false
@@ -49,7 +50,7 @@ internal fun ServiceSelectScreen(
         },
         onVVO = {
             onWebViewLogin.invoke(
-                UiApplication.VVo.loginUrl,
+                "https://$vvoHost/login?backURL=https://$vvoHost/",
                 { cookies ->
                     if (cookies.isNullOrEmpty()) {
                         false

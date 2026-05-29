@@ -22,8 +22,10 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.mapNotNull
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import kotlin.native.HiddenFromObjC
 
-internal class UserHandler(
+@HiddenFromObjC
+public class UserHandler(
     private val host: String,
     private val loader: UserLoader,
 ) : KoinComponent {
@@ -35,7 +37,7 @@ internal class UserHandler(
         TranslationSettingsSupport.displayOptionsFlow(appDataStore)
     }
 
-    fun userByHandleAndHost(uiHandle: UiHandle) =
+    public fun userByHandleAndHost(uiHandle: UiHandle): Cacheable<dev.dimension.flare.ui.model.UiProfile> =
         Cacheable(
             fetchSource = {
                 val user = loader.userByHandleAndHost(uiHandle)
@@ -57,7 +59,7 @@ internal class UserHandler(
             },
         )
 
-    fun userById(id: String) =
+    public fun userById(id: String): Cacheable<dev.dimension.flare.ui.model.UiProfile> =
         Cacheable(
             fetchSource = {
                 val user = loader.userById(id)

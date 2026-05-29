@@ -7,7 +7,9 @@ import dev.dimension.flare.data.repository.DraftMediaStore
 import dev.dimension.flare.data.repository.DraftRepository
 import dev.dimension.flare.data.repository.SaveDraftInput
 import dev.dimension.flare.data.repository.SaveDraftTarget
+import org.koin.core.annotation.Single
 
+@Single
 internal class SaveDraftUseCase(
     private val draftRepository: DraftRepository,
     private val draftMediaStore: DraftMediaStore,

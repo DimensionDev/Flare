@@ -113,6 +113,9 @@
     <string name="social_title">Social</string>
     <string name="antenna_title">Antenas</string>
     <string name="mixed_timeline_title">Mista</string>
+    <string name="liked_title">Curtido</string>
+    <string name="all_rss_feeds_title">Todas as assinaturas</string>
+    <string name="posts_title">Postagens</string>
     <string name="bluesky_login_username">Usuário</string>
     <string name="bluesky_login_password">Senha</string>
     <string name="bluesky_login_2fa">Token 2FA</string>

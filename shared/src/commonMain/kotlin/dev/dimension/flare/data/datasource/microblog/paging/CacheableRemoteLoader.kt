@@ -1,11 +1,14 @@
 package dev.dimension.flare.data.datasource.microblog.paging
+import kotlin.native.HiddenFromObjC
 
-internal interface CacheableRemoteLoader<T : Any> : RemoteLoader<T> {
-    val pagingKey: String
-    val supportPrepend: Boolean
+@HiddenFromObjC
+public interface CacheableRemoteLoader<T : Any> : RemoteLoader<T> {
+    public val pagingKey: String
+    public val supportPrepend: Boolean
         get() = false
 }
 
-internal interface ReportableRemoteLoader {
-    var reportError: ((Throwable) -> Unit)?
+@HiddenFromObjC
+public interface ReportableRemoteLoader {
+    public var reportError: ((Throwable) -> Unit)?
 }

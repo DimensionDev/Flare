@@ -5,6 +5,7 @@ import dev.dimension.flare.R
 import dev.dimension.flare.data.repository.LoginExpiredException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import org.koin.core.annotation.Single
 
 internal sealed interface Notification {
     data class Progress(
@@ -24,6 +25,7 @@ internal sealed interface Notification {
     ) : Notification
 }
 
+@Single(binds = [InAppNotification::class])
 internal class ComposeInAppNotification : InAppNotification {
     private val _source = MutableStateFlow(Event<Notification>(null, initialHandled = true))
     val source

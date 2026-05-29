@@ -113,6 +113,9 @@
     <string name="social_title">Xã hội</string>
     <string name="antenna_title">Antenna</string>
     <string name="mixed_timeline_title">Hỗn hợp</string>
+    <string name="liked_title">Đã thích</string>
+    <string name="all_rss_feeds_title">Tất cả đăng ký</string>
+    <string name="posts_title">Bài đăng</string>
     <string name="bluesky_login_username">Tên người dùng</string>
     <string name="bluesky_login_password">Mật khẩu</string>
     <string name="bluesky_login_2fa">Mã 2FA</string>

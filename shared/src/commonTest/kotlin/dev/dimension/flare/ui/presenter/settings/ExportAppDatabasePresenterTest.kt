@@ -1,17 +1,16 @@
 package dev.dimension.flare.ui.presenter.settings
 
 import androidx.room3.Room
-import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import app.cash.molecule.RecompositionMode
 import app.cash.molecule.moleculeFlow
 import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.app.model.AppDatabaseExport
 import dev.dimension.flare.data.database.app.model.DbAccount
-import dev.dimension.flare.data.database.app.model.DbApplication
 import dev.dimension.flare.data.database.app.model.DbKeywordFilter
 import dev.dimension.flare.data.database.app.model.DbRssSources
 import dev.dimension.flare.data.database.app.model.DbSearchHistory
+import dev.dimension.flare.data.database.createDatabaseDriver
 import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
@@ -40,7 +39,7 @@ class ExportAppDatabasePresenterTest : RobolectricTest() {
         val db =
             Room
                 .memoryDatabaseBuilder<AppDatabase>()
-                .setDriver(BundledSQLiteDriver())
+                .setDriver(createDatabaseDriver())
                 .setQueryCoroutineContext(Dispatchers.Unconfined)
                 .build()
         this.db = db
@@ -72,14 +71,6 @@ class ExportAppDatabasePresenterTest : RobolectricTest() {
                     last_active = 123456789L,
                 )
             db.accountDao().insert(account)
-
-            val application =
-                DbApplication(
-                    host = "example.com",
-                    credential_json = "{}",
-                    platform_type = PlatformType.Mastodon,
-                )
-            db.applicationDao().insert(application)
 
             val keywordFilter =
                 DbKeywordFilter(
@@ -130,9 +121,6 @@ class ExportAppDatabasePresenterTest : RobolectricTest() {
 
             assertEquals(1, export.accounts.size)
             assertEquals(account, export.accounts.first())
-
-            assertEquals(1, export.applications.size)
-            assertEquals(application, export.applications.first())
 
             assertEquals(1, export.keywordFilters.size)
             assertEquals(keywordFilter, export.keywordFilters.first())

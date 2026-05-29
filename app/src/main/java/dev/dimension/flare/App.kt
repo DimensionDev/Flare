@@ -15,20 +15,17 @@ import coil3.video.VideoFrameDecoder
 import dev.dimension.flare.common.AnimatedPngDecoder
 import dev.dimension.flare.common.AnimatedWebPDecoder
 import dev.dimension.flare.data.network.ktorClient
-import dev.dimension.flare.di.KoinHelper
-import dev.dimension.flare.di.aiModule
-import dev.dimension.flare.di.androidModule
+import dev.dimension.flare.di.AndroidKoinApplication
 import org.koin.android.ext.koin.androidContext
-import org.koin.core.context.startKoin
+import org.koin.plugin.module.dsl.startKoin
 
 class App :
     Application(),
     SingletonImageLoader.Factory {
     override fun onCreate() {
         super.onCreate()
-        startKoin {
+        startKoin<AndroidKoinApplication> {
             androidContext(this@App)
-            modules(KoinHelper.modules() + androidModule + aiModule)
         }
     }
 

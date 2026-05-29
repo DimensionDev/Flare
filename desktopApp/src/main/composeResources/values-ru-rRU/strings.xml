@@ -116,6 +116,9 @@
     <string name="social_title">Соцсети</string>
     <string name="antenna_title">Антенны</string>
     <string name="mixed_timeline_title">Общая</string>
+    <string name="liked_title">Понравилось</string>
+    <string name="all_rss_feeds_title">Все подписки</string>
+    <string name="posts_title">Посты</string>
     <string name="bluesky_login_username">Имя пользователя</string>
     <string name="bluesky_login_password">Пароль</string>
     <string name="bluesky_login_2fa">Код двухфакторной аутентификации</string>

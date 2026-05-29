@@ -3,8 +3,9 @@ package dev.dimension.flare.data.model.tab
 import androidx.datastore.core.DataStoreFactory
 import androidx.datastore.core.okio.OkioStorage
 import dev.dimension.flare.common.protobufSerializer
+import dev.dimension.flare.createTestFileSystem
 import dev.dimension.flare.data.database.app.model.SubscriptionType
-import dev.dimension.flare.data.io.PlatformPathProducer
+import dev.dimension.flare.data.io.OkioFileStorage
 import dev.dimension.flare.data.model.AllRssTimelineTabItem
 import dev.dimension.flare.data.model.Bluesky
 import dev.dimension.flare.data.model.IconType
@@ -16,9 +17,9 @@ import dev.dimension.flare.data.model.SubscriptionTimelineTabItem
 import dev.dimension.flare.data.model.TabMetaData
 import dev.dimension.flare.data.model.TabSettings
 import dev.dimension.flare.data.model.TitleType
-import dev.dimension.flare.data.platform.RssTimelineSpecs
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.testTimelineSpecs
 import dev.dimension.flare.ui.model.UiIcon
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
@@ -26,9 +27,7 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.encodeToByteArray
 import kotlinx.serialization.protobuf.ProtoBuf
 import okio.FileSystem
-import okio.Path
 import okio.Path.Companion.toPath
-import okio.SYSTEM
 import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -56,8 +55,8 @@ class TabSettingsMigrationTest {
 
         assertNotNull(slot)
         val source = assertIs<TimelineSlotContent.Source>(slot.content).source
-        assertEquals("mastodon.local", source.specId)
-        assertEquals("mastodon.local:$accountKey", slot.id)
+        assertEquals(TimelineSpecIds.MASTODON_LOCAL, source.specId)
+        assertEquals("${TimelineSpecIds.MASTODON_LOCAL}:$accountKey", slot.id)
         assertEquals(IconType.FavIcon("example.com"), slot.icon)
         assertEquals("Local custom", assertIs<dev.dimension.flare.ui.model.UiText.Raw>(slot.title).string)
     }
@@ -77,8 +76,8 @@ class TabSettingsMigrationTest {
 
         assertNotNull(slot)
         val source = assertIs<TimelineSlotContent.Source>(slot.content).source
-        assertEquals("common.list", source.specId)
-        assertEquals("common.list:$accountKey:list-1", slot.id)
+        assertEquals(TimelineSpecIds.COMMON_LIST, source.specId)
+        assertEquals("${TimelineSpecIds.COMMON_LIST}:$accountKey:list-1", slot.id)
     }
 
     @Test
@@ -146,7 +145,10 @@ class TabSettingsMigrationTest {
         assertEquals(GroupSource.SystemHome, group.source)
         assertEquals(TimelineMergePolicy.TimePerPage, group.mergePolicy)
         assertEquals(
-            listOf("mastodon.local:$accountKey", "rss.feed:https://example.com/rss.xml"),
+            listOf(
+                "${TimelineSpecIds.MASTODON_LOCAL}:$accountKey",
+                "${TimelineSpecIds.RSS_FEED}:https://example.com/rss.xml",
+            ),
             group.children.map { it.id },
         )
     }
@@ -179,9 +181,9 @@ class TabSettingsMigrationTest {
 
         assertEquals(
             listOf(
-                RssTimelineSpecs.rss.id,
-                RssTimelineSpecs.allRss.id,
-                RssTimelineSpecs.subscription.id,
+                TimelineSpecIds.RSS_FEED,
+                TimelineSpecIds.RSS_ALL,
+                TimelineSpecIds.RSS_SUBSCRIPTION,
             ),
             slots.map { assertIs<TimelineSlotContent.Source>(it.content).source.specId },
         )
@@ -207,8 +209,28 @@ class TabSettingsMigrationTest {
         val slots = listOf(duplicate, duplicate.copy(), unsupported).toTimelineSlots()
 
         assertEquals(1, slots.size)
-        assertEquals("mastodon.favourite:$accountKey", slots.single().id)
+        assertEquals("${TimelineSpecIds.MASTODON_FAVOURITE}:$accountKey", slots.single().id)
         assertNull(unsupported.toTimelineSlotOrNull())
+    }
+
+    @Test
+    fun legacyMigrationIdsResolveAgainstRegisteredTimelineSpecs() {
+        val runtimeIds =
+            testTimelineSpecs().map { it.id }.toSet() +
+                setOf(
+                    TimelineSpecIds.RSS_FEED,
+                    TimelineSpecIds.RSS_ALL,
+                    TimelineSpecIds.RSS_SUBSCRIPTION,
+                    TimelineSpecIds.BLUESKY_BOOKMARK,
+                    TimelineSpecIds.BLUESKY_FEED,
+                    TimelineSpecIds.XQT_FEATURED,
+                    TimelineSpecIds.XQT_BOOKMARK,
+                    TimelineSpecIds.XQT_DEVICE_FOLLOW,
+                    TimelineSpecIds.VVO_FAVORITE,
+                    TimelineSpecIds.VVO_LIKED,
+                )
+
+        assertEquals(emptySet(), TimelineSpecIds.legacyMigrationIds - runtimeIds)
     }
 
     @OptIn(ExperimentalSerializationApi::class)
@@ -216,18 +238,10 @@ class TabSettingsMigrationTest {
     fun v1FileMigratesToV2StoreAndDeletesOldFile() =
         runTest {
             val root = "/tmp/flare-tab-settings-${Random.nextLong()}".toPath()
-            val fs = FileSystem.SYSTEM
+            val fs = createTestFileSystem()
             fs.createDirectories(root)
-            val pathProducer =
-                object : PlatformPathProducer {
-                    override fun dataStoreFile(fileName: String): Path = root.resolve(fileName)
-
-                    override fun draftMediaFile(
-                        groupId: String,
-                        fileName: String,
-                    ): Path = root.resolve(groupId).resolve(fileName)
-                }
-            val oldPath = pathProducer.dataStoreFile("tab_settings.pb")
+            val fileStorage = OkioFileStorage(fs, root)
+            val oldPath = fileStorage.dataStoreFile("tab_settings.pb")
             fs.write(oldPath) {
                 write(
                     ProtoBuf.encodeToByteArray(
@@ -261,18 +275,18 @@ class TabSettingsMigrationTest {
                         OkioStorage(
                             fileSystem = fs,
                             serializer = protobufSerializer(TabSettingsV2()),
-                            producePath = { pathProducer.dataStoreFile("tab_settings_v2.pb") },
+                            producePath = { fileStorage.dataStoreFile("tab_settings_v2.pb") },
                         ),
                 )
 
-            migrateTabSettingsV1ToV2(pathProducer, store)
+            migrateTabSettingsV1ToV2(fileStorage, store)
 
             val settings = store.data.first()
             assertEquals(
                 listOf(
                     SYSTEM_HOME_MIXED_TIMELINE_ID,
-                    "mastodon.local:$accountKey",
-                    "rss.feed:https://example.com/rss.xml",
+                    "${TimelineSpecIds.MASTODON_LOCAL}:$accountKey",
+                    "${TimelineSpecIds.RSS_FEED}:https://example.com/rss.xml",
                 ),
                 settings.homeSlots.map { it.id },
             )

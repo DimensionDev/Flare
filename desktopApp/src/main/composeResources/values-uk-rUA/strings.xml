@@ -115,6 +115,9 @@
     <string name="social_title">Соціальні мережі</string>
     <string name="antenna_title">Антени</string>
     <string name="mixed_timeline_title">Змішана</string>
+    <string name="liked_title">Сподобалося</string>
+    <string name="all_rss_feeds_title">Усі підписки</string>
+    <string name="posts_title">Дописи</string>
     <string name="bluesky_login_username">Ім\'я користувача</string>
     <string name="bluesky_login_password">Пароль</string>
     <string name="bluesky_login_2fa">Токен 2FA</string>

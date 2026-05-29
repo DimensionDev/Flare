@@ -25,7 +25,6 @@ public class ExportAppDatabasePresenter :
         val export =
             AppDatabaseExport(
                 accounts = appDatabase.accountDao().allAccounts().first(),
-                applications = appDatabase.applicationDao().allApplication().first(),
                 keywordFilters = appDatabase.keywordFilterDao().selectAll().first(),
                 searchHistories = appDatabase.searchHistoryDao().select().first(),
                 rssSources = appDatabase.rssSourceDao().getAll().first(),

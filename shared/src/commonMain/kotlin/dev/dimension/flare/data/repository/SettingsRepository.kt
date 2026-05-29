@@ -3,11 +3,12 @@ package dev.dimension.flare.data.repository
 import androidx.compose.runtime.Stable
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.DataStoreFactory
-import androidx.datastore.core.okio.OkioStorage
+import androidx.datastore.core.okio.OkioSerializer
 import dev.dimension.flare.common.protobufSerializer
 import dev.dimension.flare.data.datastore.AppDataStore
+import dev.dimension.flare.data.datastore.createDataStoreStorage
 import dev.dimension.flare.data.datastore.model.AppSettings
-import dev.dimension.flare.data.io.PlatformPathProducer
+import dev.dimension.flare.data.io.FileStorage
 import dev.dimension.flare.data.model.AppearanceSettings
 import dev.dimension.flare.data.model.appearance.AppearanceBag
 import dev.dimension.flare.data.model.appearance.AppearanceKey
@@ -21,6 +22,8 @@ import dev.dimension.flare.data.model.appearance.toPatch
 import dev.dimension.flare.data.model.appearance.toTimelineAppearance
 import dev.dimension.flare.data.model.tab.TabSettingsV2
 import dev.dimension.flare.data.model.tab.TimelineResolver
+import dev.dimension.flare.data.model.tab.TimelineSlot
+import dev.dimension.flare.data.model.tab.TimelineSlotContent
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.data.model.tab.findById
 import dev.dimension.flare.data.model.tab.isSystemHomeMixedTimeline
@@ -34,12 +37,14 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import okio.FileSystem
-import okio.SYSTEM
+import org.koin.core.annotation.Single
+import kotlin.native.HiddenFromObjC
 
 @Stable
+@Single
+@HiddenFromObjC
 public class SettingsRepository internal constructor(
-    private val pathProducer: PlatformPathProducer,
+    private val fileStorage: FileStorage,
     private val appDataStore: AppDataStore,
     private val timelineResolver: TimelineResolver,
 ) {
@@ -89,7 +94,7 @@ public class SettingsRepository internal constructor(
         if (appearanceMigrationCompleted) return
         appearanceMigrationMutex.withLock {
             if (appearanceMigrationCompleted) return
-            migrateAppearanceV1ToV2(pathProducer, appearanceBagStore)
+            migrateAppearanceV1ToV2(fileStorage, appearanceBagStore)
             appearanceMigrationCompleted = true
         }
     }
@@ -180,6 +185,17 @@ public class SettingsRepository internal constructor(
         tabSettingsV2Store.updateData(block)
     }
 
+    public suspend fun removeHomeTimelineTabBySourceId(sourceId: String) {
+        updateTabSettingsV2 {
+            copy(
+                homeSlots =
+                    homeSlots
+                        .mapNotNull { it.removeSource(sourceId) }
+                        .distinctBy { it.id },
+            )
+        }
+    }
+
     internal suspend fun replaceHomeTimelineTabs(tabs: List<TimelineTabItemV2>) {
         updateTabSettingsV2 {
             val normalizedTabs =
@@ -200,7 +216,7 @@ public class SettingsRepository internal constructor(
         tabSettingsMigrationMutex.withLock {
             if (tabSettingsMigrationCompleted) return
             migrateTabSettingsV1ToV2(
-                pathProducer = pathProducer,
+                fileStorage = fileStorage,
                 tabSettingsV2Store = tabSettingsV2Store,
             )
             tabSettingsMigrationCompleted = true
@@ -213,16 +229,39 @@ public class SettingsRepository internal constructor(
 
     private inline fun <reified T> createDataStore(
         name: String,
-        serializer: androidx.datastore.core.okio.OkioSerializer<T>,
+        serializer: OkioSerializer<T>,
     ): DataStore<T> =
         DataStoreFactory.create(
             storage =
-                OkioStorage(
-                    fileSystem = FileSystem.SYSTEM,
+                createDataStoreStorage(
+                    name = name,
                     serializer = serializer,
-                    producePath = {
-                        pathProducer.dataStoreFile(name)
-                    },
+                    fileStorage = fileStorage,
                 ),
         )
 }
+
+private fun TimelineSlot.removeSource(sourceId: String): TimelineSlot? =
+    when (val slotContent = content) {
+        is TimelineSlotContent.Source -> {
+            if (slotContent.source.id == sourceId) {
+                null
+            } else {
+                this
+            }
+        }
+
+        is TimelineSlotContent.Group -> {
+            val sanitizedChildren =
+                slotContent.children
+                    .mapNotNull { it.removeSource(sourceId) }
+                    .distinctBy { it.id }
+            if (sanitizedChildren.isEmpty()) {
+                null
+            } else if (sanitizedChildren == slotContent.children) {
+                this
+            } else {
+                copy(content = slotContent.copy(children = sanitizedChildren))
+            }
+        }
+    }

@@ -497,6 +497,11 @@
     <string name="tab_settings_mixed_timeline">Povolit kartu smíšené časové osy</string>
     <string name="tab_settings_mixed_timeline_desc">Kombinovat příspěvky ze všech karet do jediné karty Domů.</string>
     <string name="home_tab_social_timeline_title">Sociální</string>
+    <string name="social_title">Sociální</string>
+    <string name="antenna_title">Antény</string>
+    <string name="liked_title">To se mi líbí</string>
+    <string name="all_rss_feeds_title">Všechny odběry</string>
+    <string name="posts_title">Příspěvky</string>
 
     <string name="deeplink_account_selection_title">Vybrat účet</string>
     <string name="deeplink_account_selection_message">Vyberte účet, ve kterém chcete tento odkaz otevřít</string>

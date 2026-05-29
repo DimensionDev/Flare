@@ -129,6 +129,9 @@
 
     <string name="antenna_title">Κεραίες (Antennas)</string>
     <string name="mixed_timeline_title">Μικτή</string>
+    <string name="liked_title">Μου αρέσει</string>
+    <string name="all_rss_feeds_title">Όλες οι συνδρομές</string>
+    <string name="posts_title">Δημοσιεύσεις</string>
 
     <string name="bluesky_login_username">Όνομα χρήστη</string>
     <string name="bluesky_login_password">Κωδικός πρόσβασης</string>

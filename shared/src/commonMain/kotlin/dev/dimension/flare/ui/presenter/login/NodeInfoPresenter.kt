@@ -19,6 +19,7 @@ import dev.dimension.flare.data.datasource.microblog.RecommendInstancePagingSour
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
 import dev.dimension.flare.data.network.nodeinfo.NodeData
 import dev.dimension.flare.data.network.nodeinfo.NodeInfoService
+import dev.dimension.flare.model.PlatformRegistry
 import dev.dimension.flare.ui.model.UiInstance
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.isSuccess
@@ -29,8 +30,14 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
-public class NodeInfoPresenter : PresenterBase<NodeInfoState>() {
+public class NodeInfoPresenter :
+    PresenterBase<NodeInfoState>(),
+    KoinComponent {
+    private val platformRegistry: PlatformRegistry by inject()
+
     @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
     @Composable
     override fun body(): NodeInfoState {
@@ -47,7 +54,7 @@ public class NodeInfoPresenter : PresenterBase<NodeInfoState>() {
                     Pager(
                         config = pagingConfig,
                     ) {
-                        RecommendInstancePagingSource()
+                        RecommendInstancePagingSource(platformRegistry)
                     }.flow.cachedIn(scope),
                     filterFlow,
                 ) { pagingData, filter ->
@@ -63,7 +70,7 @@ public class NodeInfoPresenter : PresenterBase<NodeInfoState>() {
                 flow {
                     runCatching {
                         emit(UiState.Loading())
-                        NodeInfoService.detectPlatformType(it)
+                        NodeInfoService.detectPlatformType(it, platformRegistry)
                     }.onSuccess {
                         emit(UiState.Success(it))
                     }.onFailure {

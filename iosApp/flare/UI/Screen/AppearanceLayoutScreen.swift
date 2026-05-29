@@ -2,7 +2,6 @@ import SwiftUI
 import KotlinSharedUI
 
 struct AppearanceLayoutScreen: View {
-    @AppStorage("pref_timeline_use_compose_view") private var useComposeView: Bool = false
     @StateObject private var statusPresenter = KotlinPresenter(presenter: AppearancePresenter())
     @StateObject private var presenter = KotlinPresenter(presenter: SettingsPresenter())
     @Environment(\.globalAppearance) private var globalAppearance
@@ -21,10 +20,6 @@ struct AppearanceLayoutScreen: View {
                 } label: {
                     Text("appearance_timeline_display_mode")
                     Text("appearance_timeline_display_mode_description")
-                }
-                Toggle(isOn: $useComposeView) {
-                    Text("appearance_use_compose_view")
-                    Text("appearance_use_compose_view_description")
                 }
                 Toggle(isOn: Binding(get: {
                     globalAppearance.showBottomBarLabels

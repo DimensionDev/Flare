@@ -1,22 +1,24 @@
 package dev.dimension.flare.ui.presenter.compose
 
 import androidx.room3.Room
-import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.common.FileType
 import dev.dimension.flare.createTestFileItem
+import dev.dimension.flare.createTestFileSystem
 import dev.dimension.flare.createTestRootPath
 import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.app.model.DraftMediaType
 import dev.dimension.flare.data.database.app.model.DraftReferenceType
+import dev.dimension.flare.data.database.createDatabaseDriver
 import dev.dimension.flare.data.datasource.microblog.ComposeData
-import dev.dimension.flare.data.io.PlatformPathProducer
+import dev.dimension.flare.data.io.OkioFileStorage
 import dev.dimension.flare.data.repository.ComposeDraftBundle
 import dev.dimension.flare.data.repository.DraftMediaStore
 import dev.dimension.flare.data.repository.DraftRepository
 import dev.dimension.flare.deleteTestRootPath
 import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlinx.coroutines.Dispatchers
@@ -24,9 +26,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import okio.FileSystem
-import okio.Path
 import okio.Path.Companion.toPath
-import okio.SYSTEM
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -41,16 +41,8 @@ import kotlin.uuid.Uuid
 
 class SaveDraftUseCaseTest : RobolectricTest() {
     private val root = createTestRootPath()
-    private val fileSystem = FileSystem.SYSTEM
-    private val pathProducer =
-        object : PlatformPathProducer {
-            override fun dataStoreFile(fileName: String): Path = root.resolve(fileName)
-
-            override fun draftMediaFile(
-                groupId: String,
-                fileName: String,
-            ): Path = root.resolve("draft_media").resolve(groupId).resolve(fileName)
-        }
+    private val fileSystem = createTestFileSystem()
+    private val fileStorage = OkioFileStorage(fileSystem, root)
 
     private lateinit var db: AppDatabase
     private lateinit var repository: DraftRepository
@@ -62,10 +54,10 @@ class SaveDraftUseCaseTest : RobolectricTest() {
         db =
             Room
                 .memoryDatabaseBuilder<AppDatabase>()
-                .setDriver(BundledSQLiteDriver())
+                .setDriver(createDatabaseDriver())
                 .setQueryCoroutineContext(Dispatchers.Unconfined)
                 .build()
-        mediaStore = DraftMediaStore(pathProducer, fileSystem)
+        mediaStore = DraftMediaStore(fileStorage)
         repository = DraftRepository(db, mediaStore)
         useCase = SaveDraftUseCase(repository, mediaStore)
     }
@@ -529,9 +521,9 @@ class SaveDraftUseCaseTest : RobolectricTest() {
         id: String,
         host: String,
     ): UiAccount =
-        UiAccount.Mastodon(
+        UiAccount(
             accountKey = MicroBlogKey(id, host),
-            instance = host,
+            platformType = PlatformType.Mastodon,
         )
 
     private fun media(

@@ -1,18 +1,16 @@
 
-import co.touchlab.skie.configuration.DefaultArgumentInterop
 import dev.dimension.flare.buildlogic.FlarePlatform
 import dev.dimension.flare.buildlogic.flare
 import org.jetbrains.compose.compose
-import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 
 plugins {
     id("dev.dimension.flare.multiplatform-library")
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.koin.compiler)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.composeMultiplatform)
-    alias(libs.plugins.skie)
 }
 
 kotlin {
@@ -21,26 +19,23 @@ kotlin {
         platforms(
             FlarePlatform.ANDROID,
             FlarePlatform.JVM,
-            FlarePlatform.IOS,
         )
     }
     android {
         experimentalProperties["android.experimental.kmp.enableAndroidResources"] = true
     }
-    listOf("iosArm64", "iosSimulatorArm64")
-        .map { targetName -> targets.getByName(targetName) as KotlinNativeTarget }
-        .forEach { appleTarget ->
-        appleTarget.binaries.framework {
-            baseName = "KotlinSharedUI"
-            isStatic = true
-            export(projects.shared)
-        }
-    }
-
     sourceSets {
         val commonMain by getting {
             dependencies {
+                api(projects.feature.login)
                 implementation(projects.shared)
+                implementation(projects.social.bluesky)
+                implementation(projects.social.mastodon)
+                implementation(projects.social.misskey)
+                implementation(projects.social.nostr)
+                implementation(projects.social.vvo)
+                implementation(projects.social.xqt)
+                implementation(projects.feature.subscription)
                 implementation(compose("org.jetbrains.compose.ui:ui"))
                 implementation(compose("org.jetbrains.compose.runtime:runtime"))
                 implementation(compose("org.jetbrains.compose.foundation:foundation"))
@@ -61,6 +56,7 @@ kotlin {
                 implementation(project.dependencies.platform(libs.koin.bom))
                 implementation(libs.koin.core)
                 implementation(libs.koin.compose)
+                implementation(libs.koin.annotations)
                 implementation(libs.qrose)
             }
         }
@@ -93,27 +89,6 @@ kotlin {
                 }
             }
         }
-        val iosMain by getting {
-            dependencies {
-                api(projects.shared)
-                implementation(libs.cupertino)
-                api(compose("org.jetbrains.compose.ui:ui-util"))
-                implementation(libs.lifecycle.viewmodel.compose)
-            }
-        }
-    }
-}
-
-skie {
-    analytics {
-        disableUpload.set(true)
-        enabled.set(false)
-    }
-    features {
-        group {
-            DefaultArgumentInterop.Enabled(true)
-        }
-        enableFlowCombineConvertorPreview = true
     }
 }
 

@@ -2,6 +2,7 @@ package dev.dimension.flare.data.model.appearance
 
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.builtins.serializer
+import kotlin.native.HiddenFromObjC
 import dev.dimension.flare.data.model.AvatarShape as AppearanceAvatarShape
 import dev.dimension.flare.data.model.BottomBarBehavior as AppearanceBottomBarBehavior
 import dev.dimension.flare.data.model.BottomBarStyle as AppearanceBottomBarStyle
@@ -10,6 +11,7 @@ import dev.dimension.flare.data.model.Theme as AppearanceTheme
 import dev.dimension.flare.data.model.TimelineDisplayMode as AppearanceTimelineDisplayMode
 import dev.dimension.flare.data.model.VideoAutoplay as AppearanceVideoAutoplay
 
+@HiddenFromObjC
 public object AppearanceKeys {
     public object Theme : Global<AppearanceTheme>("app.theme", AppearanceTheme.SYSTEM, AppearanceTheme.serializer())
 

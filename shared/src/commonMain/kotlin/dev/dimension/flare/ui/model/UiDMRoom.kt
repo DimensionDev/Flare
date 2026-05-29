@@ -9,7 +9,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 @Immutable
-public data class UiDMRoom internal constructor(
+public data class UiDMRoom public constructor(
     val key: MicroBlogKey,
     val users: SerializableImmutableList<UiProfile>,
     val lastMessage: UiDMItem?,
@@ -34,7 +34,7 @@ public data class UiDMRoom internal constructor(
 
 @Serializable
 @Immutable
-public data class UiDMItem internal constructor(
+public data class UiDMItem public constructor(
     val key: MicroBlogKey,
     val user: UiProfile,
     val content: Message,

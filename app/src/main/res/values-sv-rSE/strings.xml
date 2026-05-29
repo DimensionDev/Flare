@@ -495,6 +495,11 @@
     <string name="tab_settings_mixed_timeline">Aktivera flik för blandad tidslinje</string>
     <string name="tab_settings_mixed_timeline_desc">Kombinera inlägg från alla flikar till en enda hem-flik.</string>
     <string name="home_tab_social_timeline_title">Socialt</string>
+    <string name="social_title">Socialt</string>
+    <string name="antenna_title">Antenner</string>
+    <string name="liked_title">Gillat</string>
+    <string name="all_rss_feeds_title">Alla prenumerationer</string>
+    <string name="posts_title">Inlägg</string>
 
     <string name="deeplink_account_selection_title">Välj konto</string>
     <string name="deeplink_account_selection_message">Välj ett konto för att öppna denna länk</string>

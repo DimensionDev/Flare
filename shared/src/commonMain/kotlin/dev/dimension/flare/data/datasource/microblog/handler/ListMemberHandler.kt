@@ -4,6 +4,7 @@ import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
 import androidx.paging.PagingData
 import androidx.paging.map
+import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.common.Cacheable
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.connect
@@ -19,14 +20,17 @@ import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiProfile
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import kotlin.native.HiddenFromObjC
 
 @OptIn(ExperimentalPagingApi::class)
-internal class ListMemberHandler(
+@HiddenFromObjC
+public class ListMemberHandler(
     private val pagingKey: String,
     private val accountKey: MicroBlogKey,
     private val loader: ListMemberLoader,
@@ -36,7 +40,7 @@ internal class ListMemberHandler(
     private val memberPagingKey: String
         get() = "${pagingKey}_members"
 
-    fun listMembers(listId: String): Flow<PagingData<UiProfile>> {
+    public fun listMembers(listId: String): Flow<PagingData<UiProfile>> {
         val listKey = MicroBlogKey(listId, accountKey.host)
         return Pager(
             config = pagingConfig,
@@ -80,7 +84,7 @@ internal class ListMemberHandler(
         }
     }
 
-    fun listMembersListFlow(listId: String) =
+    public fun listMembersListFlow(listId: String): Flow<List<UiProfile>> =
         database
             .listDao()
             .getListMembersFlow(
@@ -91,7 +95,7 @@ internal class ListMemberHandler(
                 }
             }
 
-    suspend fun addMember(
+    public suspend fun addMember(
         listId: String,
         userKey: MicroBlogKey,
     ) {
@@ -124,7 +128,7 @@ internal class ListMemberHandler(
         }
     }
 
-    suspend fun removeMember(
+    public suspend fun removeMember(
         listId: String,
         userKey: MicroBlogKey,
     ) {
@@ -154,7 +158,7 @@ internal class ListMemberHandler(
     private val userListsPagingKey: String
         get() = "${pagingKey}_user_lists"
 
-    fun userLists(userKey: MicroBlogKey) =
+    public fun userLists(userKey: MicroBlogKey): CacheData<List<UiList>> =
         Cacheable(
             fetchSource = {
                 tryRun {

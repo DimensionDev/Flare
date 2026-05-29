@@ -3,7 +3,6 @@ package dev.dimension.flare.ui.presenter
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import dev.dimension.flare.data.model.tab.TimelineResolver
-import dev.dimension.flare.data.model.tab.TimelineSlot
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.ui.model.UiState
@@ -15,10 +14,10 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 public class PinTabs<T> internal constructor(
-    private val slots: List<TimelineSlot>,
-    private val matches: (TimelineSlot, T) -> Boolean,
+    private val pinnedIds: Set<String>,
+    private val itemId: (T) -> String,
 ) {
-    public fun contains(item: T): Boolean = slots.any { matches(it, item) }
+    public fun contains(item: T): Boolean = itemId(item) in pinnedIds
 }
 
 public abstract class PinTabsPresenter<T> :
@@ -43,7 +42,10 @@ public abstract class PinTabsPresenter<T> :
         val tabSettings by settingsRepository.tabSettingsV2.collectAsUiState()
         val pins =
             tabSettings.map {
-                PinTabs(it.homeSlots, ::matches)
+                PinTabs(
+                    pinnedIds = it.homeSlots.mapTo(mutableSetOf()) { slot -> slot.id },
+                    itemId = ::getTimelineTabItemId,
+                )
             }
 
         return object : State<T> {
@@ -52,12 +54,13 @@ public abstract class PinTabsPresenter<T> :
             override fun pinTab(item: T) {
                 appScope.launch {
                     settingsRepository.updateTabSettingsV2 {
-                        if (homeSlots.any { matches(it, item) }) {
+                        val tabItem = getTimelineTabItem(item)
+                        if (homeSlots.any { it.id == tabItem.id }) {
                             return@updateTabSettingsV2 this
                         }
                         copy(
                             homeSlots =
-                                homeSlots + getTimelineTabItem(item),
+                                homeSlots + timelineResolver.toSlot(tabItem),
                         )
                     }
                 }
@@ -66,21 +69,19 @@ public abstract class PinTabsPresenter<T> :
             override fun unpinTab(item: T) {
                 appScope.launch {
                     settingsRepository.updateTabSettingsV2 {
+                        val tabItemId = getTimelineTabItemId(item)
                         copy(
-                            homeSlots = homeSlots.filterNot { matches(it, item) },
+                            homeSlots = homeSlots.filterNot { it.id == tabItemId },
                         )
                     }
                 }
             }
 
-            override fun timelineTabItem(item: T): TimelineTabItemV2 = timelineResolver.toTabItem(getTimelineTabItem(item))
+            override fun timelineTabItem(item: T): TimelineTabItemV2 = getTimelineTabItem(item)
         }
     }
 
-    protected abstract fun getTimelineTabItem(item: T): TimelineSlot
+    protected abstract fun getTimelineTabItem(item: T): TimelineTabItemV2
 
-    protected open fun matches(
-        slot: TimelineSlot,
-        item: T,
-    ): Boolean = slot.id == getTimelineTabItem(item).id
+    protected open fun getTimelineTabItemId(item: T): String = getTimelineTabItem(item).id
 }

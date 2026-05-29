@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 @Immutable
-public data class UiEmoji internal constructor(
+public data class UiEmoji public constructor(
     val shortcode: String,
     val url: String,
     val category: String,

@@ -5,10 +5,12 @@ import android.graphics.BitmapFactory
 import androidx.core.graphics.scale
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.koin.core.annotation.Single
 import java.io.ByteArrayOutputStream
 import kotlin.math.min
 import kotlin.math.roundToInt
 
+@Single(binds = [ImageCompressor::class])
 public class AndroidImageCompressor : ImageCompressor {
     override suspend fun compress(
         imageBytes: ByteArray,

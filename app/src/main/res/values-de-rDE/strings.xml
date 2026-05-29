@@ -495,6 +495,11 @@
     <string name="tab_settings_mixed_timeline">Gemischten Timeline-Tab aktivieren</string>
     <string name="tab_settings_mixed_timeline_desc">Beiträge aus allen Tabs in einem einzigen Home-Tab kombinieren.</string>
     <string name="home_tab_social_timeline_title">Sozial</string>
+    <string name="social_title">Soziales</string>
+    <string name="antenna_title">Antennen</string>
+    <string name="liked_title">Gefällt mir</string>
+    <string name="all_rss_feeds_title">Alle Abonnements</string>
+    <string name="posts_title">Beiträge</string>
 
     <string name="deeplink_account_selection_title">Konto auswählen</string>
     <string name="deeplink_account_selection_message">Konto auswählen, um diesen Link zu öffnen</string>

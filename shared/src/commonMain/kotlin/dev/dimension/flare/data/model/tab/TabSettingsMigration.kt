@@ -1,10 +1,13 @@
 package dev.dimension.flare.data.model.tab
 
 import androidx.datastore.core.DataStore
-import dev.dimension.flare.data.io.PlatformPathProducer
+import dev.dimension.flare.common.PlatformDispatchers
+import dev.dimension.flare.data.database.app.model.SubscriptionType
+import dev.dimension.flare.data.io.FileStorage
 import dev.dimension.flare.data.model.AllRssTimelineTabItem
 import dev.dimension.flare.data.model.Bluesky
 import dev.dimension.flare.data.model.HomeTimelineTabItem
+import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.ListTimelineTabItem
 import dev.dimension.flare.data.model.Mastodon
 import dev.dimension.flare.data.model.Misskey
@@ -17,52 +20,39 @@ import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.data.model.TitleType
 import dev.dimension.flare.data.model.VVo
 import dev.dimension.flare.data.model.XQT
-import dev.dimension.flare.data.platform.BlueskyPlatformSpec
-import dev.dimension.flare.data.platform.CommonTimelineSpecs
-import dev.dimension.flare.data.platform.MastodonPlatformSpec
-import dev.dimension.flare.data.platform.MisskeyPlatformSpec
-import dev.dimension.flare.data.platform.RssTimelineSpecs
-import dev.dimension.flare.data.platform.VvoPlatformSpec
-import dev.dimension.flare.data.platform.XqtPlatformSpec
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.model.asText
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.decodeFromByteArray
+import kotlinx.serialization.encodeToHexString
 import kotlinx.serialization.protobuf.ProtoBuf
-import okio.FileSystem
-import okio.SYSTEM
 
 @OptIn(ExperimentalSerializationApi::class)
 internal suspend fun migrateTabSettingsV1ToV2(
-    pathProducer: PlatformPathProducer,
+    fileStorage: FileStorage,
     tabSettingsV2Store: DataStore<TabSettingsV2>,
 ) {
-    withContext(Dispatchers.IO) {
-        val v1Path = pathProducer.dataStoreFile("tab_settings.pb")
-        val fs = FileSystem.SYSTEM
-        if (!fs.exists(v1Path)) return@withContext
+    withContext(PlatformDispatchers.IO) {
+        val v1Path = fileStorage.dataStoreFile("tab_settings.pb")
+        if (!fileStorage.exists(v1Path)) return@withContext
 
         if (tabSettingsV2Store.data
                 .first()
                 .homeSlots
                 .isNotEmpty()
         ) {
-            runCatching { fs.delete(v1Path) }
+            runCatching { fileStorage.delete(v1Path) }
             return@withContext
         }
 
         val v1 =
             runCatching {
-                fs.read(v1Path) {
-                    ProtoBuf.decodeFromByteArray<TabSettings>(readByteArray())
-                }
+                ProtoBuf.decodeFromByteArray<TabSettings>(fileStorage.read(v1Path))
             }.getOrNull()
 
         if (v1 != null) {
@@ -77,7 +67,7 @@ internal suspend fun migrateTabSettingsV1ToV2(
                 }
             }
         }
-        runCatching { fs.delete(v1Path) }
+        runCatching { fileStorage.delete(v1Path) }
     }
 }
 
@@ -110,30 +100,25 @@ private fun List<TimelineSlot>.withLegacySystemHomeMixedTimeline(enabled: Boolea
 internal fun TimelineTabItem.toTimelineSlotOrNull(): TimelineSlot? =
     when (this) {
         is HomeTimelineTabItem -> {
-            account.specificAccountKey()?.let { accountKey ->
-                CommonTimelineSpecs.home
-                    .target(
-                        data = TimelineSpec.AccountBasedData(accountKey),
-                        title = metaData.title.toUiText(UiStrings.Home.asText()),
-                        icon = metaData.icon,
-                    ).toSlot(presentation = metaData.toPresentation())
-            }
+            account.toAccountBasedSlot(
+                specId = TimelineSpecIds.COMMON_HOME,
+                metaData = metaData,
+                fallbackTitle = UiStrings.Home,
+            )
         }
 
         is ListTimelineTabItem -> {
-            account.specificAccountKey()?.let { accountKey ->
-                CommonTimelineSpecs.list
-                    .target(
-                        data = TimelineSpec.AccountResourceData(accountKey, listId),
-                        title = metaData.title.toUiText(UiStrings.List.asText()),
-                        icon = metaData.icon,
-                    ).toSlot(presentation = metaData.toPresentation())
-            }
+            account.toAccountResourceSlot(
+                specId = TimelineSpecIds.COMMON_LIST,
+                resourceId = listId,
+                metaData = metaData,
+                fallbackTitle = UiStrings.List,
+            )
         }
 
         is Mastodon.LocalTimelineTabItem -> {
             account.toAccountBasedSlot(
-                spec = MastodonPlatformSpec.localTimelineSpec,
+                specId = TimelineSpecIds.MASTODON_LOCAL,
                 metaData = metaData,
                 fallbackTitle = UiStrings.MastodonLocal,
             )
@@ -141,7 +126,7 @@ internal fun TimelineTabItem.toTimelineSlotOrNull(): TimelineSlot? =
 
         is Mastodon.PublicTimelineTabItem -> {
             account.toAccountBasedSlot(
-                spec = MastodonPlatformSpec.publicTimelineSpec,
+                specId = TimelineSpecIds.MASTODON_PUBLIC,
                 metaData = metaData,
                 fallbackTitle = UiStrings.MastodonPublic,
             )
@@ -149,7 +134,7 @@ internal fun TimelineTabItem.toTimelineSlotOrNull(): TimelineSlot? =
 
         is Mastodon.BookmarkTimelineTabItem -> {
             account.toAccountBasedSlot(
-                spec = MastodonPlatformSpec.bookmarkTimelineSpec,
+                specId = TimelineSpecIds.MASTODON_BOOKMARK,
                 metaData = metaData,
                 fallbackTitle = UiStrings.Bookmark,
             )
@@ -157,7 +142,7 @@ internal fun TimelineTabItem.toTimelineSlotOrNull(): TimelineSlot? =
 
         is Mastodon.FavouriteTimelineTabItem -> {
             account.toAccountBasedSlot(
-                spec = MastodonPlatformSpec.favouriteTimelineSpec,
+                specId = TimelineSpecIds.MASTODON_FAVOURITE,
                 metaData = metaData,
                 fallbackTitle = UiStrings.Favourite,
             )
@@ -165,7 +150,7 @@ internal fun TimelineTabItem.toTimelineSlotOrNull(): TimelineSlot? =
 
         is Misskey.LocalTimelineTabItem -> {
             account.toAccountBasedSlot(
-                spec = MisskeyPlatformSpec.localTimelineSpec,
+                specId = TimelineSpecIds.MISSKEY_LOCAL,
                 metaData = metaData,
                 fallbackTitle = UiStrings.MastodonLocal,
             )
@@ -173,7 +158,7 @@ internal fun TimelineTabItem.toTimelineSlotOrNull(): TimelineSlot? =
 
         is Misskey.GlobalTimelineTabItem -> {
             account.toAccountBasedSlot(
-                spec = MisskeyPlatformSpec.globalTimelineSpec,
+                specId = TimelineSpecIds.MISSKEY_GLOBAL,
                 metaData = metaData,
                 fallbackTitle = UiStrings.MastodonPublic,
             )
@@ -181,7 +166,7 @@ internal fun TimelineTabItem.toTimelineSlotOrNull(): TimelineSlot? =
 
         is Misskey.HybridTimelineTabItem -> {
             account.toAccountBasedSlot(
-                spec = MisskeyPlatformSpec.hybridTimelineSpec,
+                specId = TimelineSpecIds.MISSKEY_HYBRID,
                 metaData = metaData,
                 fallbackTitle = UiStrings.Social,
             )
@@ -189,7 +174,7 @@ internal fun TimelineTabItem.toTimelineSlotOrNull(): TimelineSlot? =
 
         is Misskey.FavouriteTimelineTabItem -> {
             account.toAccountBasedSlot(
-                spec = MisskeyPlatformSpec.favouriteTimelineSpec,
+                specId = TimelineSpecIds.MISSKEY_FAVOURITE,
                 metaData = metaData,
                 fallbackTitle = UiStrings.Favourite,
             )
@@ -197,7 +182,7 @@ internal fun TimelineTabItem.toTimelineSlotOrNull(): TimelineSlot? =
 
         is Misskey.AntennasTimelineTabItem -> {
             account.toAccountResourceSlot(
-                spec = MisskeyPlatformSpec.antennaTimelineSpec,
+                specId = TimelineSpecIds.MISSKEY_ANTENNA,
                 resourceId = antennasId,
                 metaData = metaData,
                 fallbackTitle = UiStrings.Antenna,
@@ -206,7 +191,7 @@ internal fun TimelineTabItem.toTimelineSlotOrNull(): TimelineSlot? =
 
         is Misskey.ChannelTimelineTabItem -> {
             account.toAccountResourceSlot(
-                spec = MisskeyPlatformSpec.channelTimelineSpec,
+                specId = TimelineSpecIds.MISSKEY_CHANNEL,
                 resourceId = channelId,
                 metaData = metaData,
                 fallbackTitle = UiStrings.Channel,
@@ -215,7 +200,7 @@ internal fun TimelineTabItem.toTimelineSlotOrNull(): TimelineSlot? =
 
         is XQT.FeaturedTimelineTabItem -> {
             account.toAccountBasedSlot(
-                spec = XqtPlatformSpec.featuredTimelineSpec,
+                specId = TimelineSpecIds.XQT_FEATURED,
                 metaData = metaData,
                 fallbackTitle = UiStrings.Featured,
             )
@@ -223,7 +208,7 @@ internal fun TimelineTabItem.toTimelineSlotOrNull(): TimelineSlot? =
 
         is XQT.BookmarkTimelineTabItem -> {
             account.toAccountBasedSlot(
-                spec = XqtPlatformSpec.bookmarkTimelineSpec,
+                specId = TimelineSpecIds.XQT_BOOKMARK,
                 metaData = metaData,
                 fallbackTitle = UiStrings.Bookmark,
             )
@@ -231,7 +216,7 @@ internal fun TimelineTabItem.toTimelineSlotOrNull(): TimelineSlot? =
 
         is XQT.DeviceFollowTimelineTabItem -> {
             account.toAccountBasedSlot(
-                spec = XqtPlatformSpec.deviceFollowTimelineSpec,
+                specId = TimelineSpecIds.XQT_DEVICE_FOLLOW,
                 metaData = metaData,
                 fallbackTitle = UiStrings.Posts,
             )
@@ -239,7 +224,7 @@ internal fun TimelineTabItem.toTimelineSlotOrNull(): TimelineSlot? =
 
         is Bluesky.FeedTabItem -> {
             account.toAccountResourceSlot(
-                spec = BlueskyPlatformSpec.feedTimelineSpec,
+                specId = TimelineSpecIds.BLUESKY_FEED,
                 resourceId = uri,
                 metaData = metaData,
                 fallbackTitle = UiStrings.Feeds,
@@ -248,7 +233,7 @@ internal fun TimelineTabItem.toTimelineSlotOrNull(): TimelineSlot? =
 
         is Bluesky.BookmarkTimelineTabItem -> {
             account.toAccountBasedSlot(
-                spec = BlueskyPlatformSpec.bookmarkTimelineSpec,
+                specId = TimelineSpecIds.BLUESKY_BOOKMARK,
                 metaData = metaData,
                 fallbackTitle = UiStrings.Bookmark,
             )
@@ -256,7 +241,7 @@ internal fun TimelineTabItem.toTimelineSlotOrNull(): TimelineSlot? =
 
         is VVo.FeaturedTimelineTabItem -> {
             account.toAccountBasedSlot(
-                spec = CommonTimelineSpecs.discover,
+                specId = TimelineSpecIds.COMMON_DISCOVER,
                 metaData = metaData,
                 fallbackTitle = UiStrings.Featured,
             )
@@ -264,7 +249,7 @@ internal fun TimelineTabItem.toTimelineSlotOrNull(): TimelineSlot? =
 
         is VVo.FavoriteTimelineTabItem -> {
             account.toAccountBasedSlot(
-                spec = VvoPlatformSpec.favoriteTimelineSpec,
+                specId = TimelineSpecIds.VVO_FAVORITE,
                 metaData = metaData,
                 fallbackTitle = UiStrings.Bookmark,
             )
@@ -272,41 +257,34 @@ internal fun TimelineTabItem.toTimelineSlotOrNull(): TimelineSlot? =
 
         is VVo.LikedTimelineTabItem -> {
             account.toAccountBasedSlot(
-                spec = VvoPlatformSpec.likedTimelineSpec,
+                specId = TimelineSpecIds.VVO_LIKED,
                 metaData = metaData,
                 fallbackTitle = UiStrings.Liked,
             )
         }
 
         is RssTimelineTabItem -> {
-            RssTimelineSpecs.rss
-                .target(
-                    data = RssTimelineSpecs.RssData(feedUrl),
-                    title = metaData.title.toUiText(UiStrings.Rss.asText()),
-                    icon = metaData.icon,
-                ).toSlot(presentation = metaData.toPresentation())
+            rssSlot(
+                feedUrl = feedUrl,
+                metaData = metaData,
+                fallbackTitle = UiStrings.Rss,
+            )
         }
 
         is AllRssTimelineTabItem -> {
-            RssTimelineSpecs.allRss
-                .target(
-                    data = RssTimelineSpecs.AllRssData,
-                    title = metaData.title.toUiText(UiStrings.AllRssFeeds.asText()),
-                    icon = metaData.icon,
-                ).toSlot(presentation = metaData.toPresentation())
+            allRssSlot(
+                metaData = metaData,
+                fallbackTitle = UiStrings.AllRssFeeds,
+            )
         }
 
         is SubscriptionTimelineTabItem -> {
-            RssTimelineSpecs.subscription
-                .target(
-                    data =
-                        RssTimelineSpecs.SubscriptionData(
-                            subscriptionUrl = subscriptionUrl,
-                            subscriptionType = subscriptionType,
-                        ),
-                    title = metaData.title.toUiText(UiStrings.Rss.asText()),
-                    icon = metaData.icon,
-                ).toSlot(presentation = metaData.toPresentation())
+            subscriptionSlot(
+                subscriptionUrl = subscriptionUrl,
+                subscriptionType = subscriptionType,
+                metaData = metaData,
+                fallbackTitle = UiStrings.Rss,
+            )
         }
 
         is MixedTimelineTabItem -> {
@@ -329,33 +307,130 @@ internal fun TimelineTabItem.toTimelineSlotOrNull(): TimelineSlot? =
     }
 
 private fun AccountType.toAccountBasedSlot(
-    spec: TimelineSpec<TimelineSpec.AccountBasedData>,
+    specId: String,
     metaData: TabMetaData,
     fallbackTitle: UiStrings,
 ): TimelineSlot? =
     specificAccountKey()?.let { accountKey ->
-        spec
-            .target(
-                data = TimelineSpec.AccountBasedData(accountKey),
-                title = metaData.title.toUiText(fallbackTitle.asText()),
-                icon = metaData.icon,
-            ).toSlot(presentation = metaData.toPresentation())
+        accountBasedSource(
+            specId = specId,
+            accountKey = accountKey,
+            title = metaData.title.toUiText(fallbackTitle.asText()),
+            icon = metaData.icon,
+        ).toSlot(presentation = metaData.toPresentation())
     }
 
 private fun AccountType.toAccountResourceSlot(
-    spec: TimelineSpec<TimelineSpec.AccountResourceData>,
+    specId: String,
     resourceId: String,
     metaData: TabMetaData,
     fallbackTitle: UiStrings,
 ): TimelineSlot? =
     specificAccountKey()?.let { accountKey ->
-        spec
-            .target(
-                data = TimelineSpec.AccountResourceData(accountKey, resourceId),
-                title = metaData.title.toUiText(fallbackTitle.asText()),
-                icon = metaData.icon,
-            ).toSlot(presentation = metaData.toPresentation())
+        accountResourceSource(
+            specId = specId,
+            accountKey = accountKey,
+            resourceId = resourceId,
+            title = metaData.title.toUiText(fallbackTitle.asText()),
+            icon = metaData.icon,
+        ).toSlot(presentation = metaData.toPresentation())
     }
+
+@OptIn(ExperimentalSerializationApi::class)
+private fun accountBasedSource(
+    specId: String,
+    accountKey: MicroBlogKey,
+    title: UiText,
+    icon: IconType,
+): TimelineSourceRef =
+    TimelineSourceRef(
+        id = "$specId:$accountKey",
+        specId = specId,
+        title = title,
+        icon = icon,
+        data =
+            ProtoBuf.encodeToHexString(
+                TimelineSpec.AccountBasedData.serializer(),
+                TimelineSpec.AccountBasedData(accountKey),
+            ),
+    )
+
+@OptIn(ExperimentalSerializationApi::class)
+private fun accountResourceSource(
+    specId: String,
+    accountKey: MicroBlogKey,
+    resourceId: String,
+    title: UiText,
+    icon: IconType,
+): TimelineSourceRef =
+    TimelineSourceRef(
+        id = "$specId:$accountKey:$resourceId",
+        specId = specId,
+        title = title,
+        icon = icon,
+        data =
+            ProtoBuf.encodeToHexString(
+                TimelineSpec.AccountResourceData.serializer(),
+                TimelineSpec.AccountResourceData(accountKey, resourceId),
+            ),
+    )
+
+@OptIn(ExperimentalSerializationApi::class)
+private fun rssSlot(
+    feedUrl: String,
+    metaData: TabMetaData,
+    fallbackTitle: UiStrings,
+): TimelineSlot =
+    TimelineSourceRef(
+        id = "${TimelineSpecIds.RSS_FEED}:$feedUrl",
+        specId = TimelineSpecIds.RSS_FEED,
+        title = metaData.title.toUiText(fallbackTitle.asText()),
+        icon = metaData.icon,
+        data =
+            ProtoBuf.encodeToHexString(
+                RssTimelineData.serializer(),
+                RssTimelineData(feedUrl),
+            ),
+    ).toSlot(presentation = metaData.toPresentation())
+
+@OptIn(ExperimentalSerializationApi::class)
+private fun allRssSlot(
+    metaData: TabMetaData,
+    fallbackTitle: UiStrings,
+): TimelineSlot =
+    TimelineSourceRef(
+        id = "${TimelineSpecIds.RSS_ALL}:all",
+        specId = TimelineSpecIds.RSS_ALL,
+        title = metaData.title.toUiText(fallbackTitle.asText()),
+        icon = metaData.icon,
+        data =
+            ProtoBuf.encodeToHexString(
+                AllRssTimelineData.serializer(),
+                AllRssTimelineData,
+            ),
+    ).toSlot(presentation = metaData.toPresentation())
+
+@OptIn(ExperimentalSerializationApi::class)
+private fun subscriptionSlot(
+    subscriptionUrl: String,
+    subscriptionType: SubscriptionType,
+    metaData: TabMetaData,
+    fallbackTitle: UiStrings,
+): TimelineSlot =
+    TimelineSourceRef(
+        id = "${TimelineSpecIds.RSS_SUBSCRIPTION}:${subscriptionType.name}:$subscriptionUrl",
+        specId = TimelineSpecIds.RSS_SUBSCRIPTION,
+        title = metaData.title.toUiText(fallbackTitle.asText()),
+        icon = metaData.icon,
+        data =
+            ProtoBuf.encodeToHexString(
+                SubscriptionTimelineData.serializer(),
+                SubscriptionTimelineData(
+                    subscriptionUrl = subscriptionUrl,
+                    subscriptionType = subscriptionType,
+                ),
+            ),
+    ).toSlot(presentation = metaData.toPresentation())
 
 private fun AccountType.specificAccountKey(): MicroBlogKey? = (this as? AccountType.Specific)?.accountKey
 

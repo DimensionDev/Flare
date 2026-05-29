@@ -20,10 +20,13 @@ import dev.dimension.flare.ui.model.UiPodcast
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import org.koin.core.annotation.Provided
+import org.koin.core.annotation.Single
 
 @Stable
+@Single
 internal class PodcastManager(
-    private val context: Context,
+    @Provided private val context: Context,
 ) : AutoCloseable {
     private var currentController: MediaController? = null
     private val _currentPodcast = MutableStateFlow<UiPodcast?>(null)

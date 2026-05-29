@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 @Immutable
-public data class UiTwitterArticle internal constructor(
+public data class UiTwitterArticle public constructor(
     val profile: UiProfile,
     val image: String? = null,
     val title: String,

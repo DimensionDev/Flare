@@ -56,9 +56,7 @@ import dev.dimension.flare.ui.theme.PlatformTheme
 import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
-import kotlin.native.HiddenFromObjC
 
-@HiddenFromObjC
 @Composable
 public fun Text(
     text: UiText,
@@ -81,7 +79,6 @@ public fun Text(
     )
 }
 
-@HiddenFromObjC
 @Composable
 public fun TabIcon(
     tabItem: TimelineTabItemV2,
@@ -102,7 +99,6 @@ public fun TabIcon(
     )
 }
 
-@HiddenFromObjC
 @Composable
 public fun TabIcon(
     icon: IconType,
@@ -209,7 +205,6 @@ public fun TabIcon(
     }
 }
 
-@HiddenFromObjC
 @Composable
 public fun FavIcon(
     host: String,

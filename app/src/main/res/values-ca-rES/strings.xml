@@ -495,6 +495,11 @@
     <string name="tab_settings_mixed_timeline">Activa la pestanya de línia de temps mixta</string>
     <string name="tab_settings_mixed_timeline_desc">Combina publicacions de totes les pestanyes en una única pestanya d\'Inici.</string>
     <string name="home_tab_social_timeline_title">Social</string>
+    <string name="social_title">Social</string>
+    <string name="antenna_title">Antenes</string>
+    <string name="liked_title">M\'agrada</string>
+    <string name="all_rss_feeds_title">Totes les subscripcions</string>
+    <string name="posts_title">Publicacions</string>
 
     <string name="deeplink_account_selection_title">Selecciona el compte</string>
     <string name="deeplink_account_selection_message">Selecciona un compte per obrir aquest enllaç</string>

@@ -14,13 +14,15 @@ import kotlinx.coroutines.flow.transform
 import kotlinx.serialization.SerializationException
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import kotlin.native.HiddenFromObjC
 
-internal class EmojiHandler(
+@HiddenFromObjC
+public class EmojiHandler(
     private val host: String,
     private val loader: EmojiLoader,
 ) : KoinComponent {
     private val database: CacheDatabase by inject()
-    val emoji: Cacheable<ImmutableMap<String, ImmutableList<UiEmoji>>> =
+    public val emoji: Cacheable<ImmutableMap<String, ImmutableList<UiEmoji>>> =
         Cacheable(
             fetchSource = {
                 val emojis = loader.emojis()

@@ -12,13 +12,14 @@ import dev.dimension.flare.ui.route.DeeplinkRoute
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlin.native.HiddenFromObjC
 
 @Serializable
 @Immutable
 public sealed class ActionMenu {
     @Immutable
     @Serializable
-    public data class Group internal constructor(
+    public data class Group public constructor(
         val displayItem: Item,
         val actions: SerializableImmutableList<ActionMenu>,
     ) : ActionMenu()
@@ -36,8 +37,8 @@ public sealed class ActionMenu {
 
     @Immutable
     @Serializable
-    public data class Item internal constructor(
-        internal val updateKey: String = "",
+    public data class Item public constructor(
+        public val updateKey: String = "",
         val icon: UiIcon? = null,
         val text: Text? = null,
         val count: UiNumber? = null,
@@ -116,7 +117,8 @@ public sealed class ActionMenu {
     }
 }
 
-internal fun userActionsMenu(
+@HiddenFromObjC
+public fun userActionsMenu(
     accountKey: MicroBlogKey?,
     userKey: MicroBlogKey,
     handle: String,

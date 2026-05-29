@@ -494,6 +494,11 @@
     <string name="tab_settings_mixed_timeline">啟用混合時間軸分頁</string>
     <string name="tab_settings_mixed_timeline_desc">將所有分頁的貼文合併至單一首頁分頁。</string>
     <string name="home_tab_social_timeline_title">社交</string>
+    <string name="social_title">社交</string>
+    <string name="antenna_title">天線</string>
+    <string name="liked_title">已讚</string>
+    <string name="all_rss_feeds_title">所有訂閱</string>
+    <string name="posts_title">貼文</string>
 
     <string name="deeplink_account_selection_title">選擇帳號</string>
     <string name="deeplink_account_selection_message">選擇一個帳號來開啟此連結</string>

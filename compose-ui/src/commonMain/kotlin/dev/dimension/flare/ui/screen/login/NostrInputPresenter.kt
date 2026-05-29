@@ -8,9 +8,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import dev.dimension.flare.ui.presenter.PresenterBase
-import kotlin.native.HiddenFromObjC
 
-@HiddenFromObjC
 public class NostrInputPresenter : PresenterBase<NostrInputPresenter.State>() {
     public enum class Mode {
         Key,

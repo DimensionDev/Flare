@@ -13,13 +13,15 @@ import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.descriptors.serialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
+import kotlin.native.HiddenFromObjC
 
 // https://github.com/Kotlin/kotlinx.collections.immutable/issues/63
-internal typealias SerializableImmutableList<T> =
+public typealias SerializableImmutableList<T> =
     @Serializable(ImmutableListSerializer::class)
     ImmutableList<T>
 
-internal class ImmutableListSerializer<T>(
+@HiddenFromObjC
+public class ImmutableListSerializer<T>(
     private val dataSerializer: KSerializer<T>,
 ) : KSerializer<ImmutableList<T>> {
     @OptIn(SealedSerializationApi::class)
@@ -32,7 +34,7 @@ internal class ImmutableListSerializer<T>(
     override fun serialize(
         encoder: Encoder,
         value: ImmutableList<T>,
-    ) = ListSerializer(dataSerializer).serialize(encoder, value.toList())
+    ): Unit = ListSerializer(dataSerializer).serialize(encoder, value.toList())
 
     override fun deserialize(decoder: Decoder): ImmutableList<T> = ListSerializer(dataSerializer).deserialize(decoder).toPersistentList()
 }

@@ -6,7 +6,7 @@ import AVFAudio
 struct FlareApp: App {
     init() {
         configureAudioSessionForMixing()
-        ComposeUIHelper.shared.initialize(
+        IosSharedHelper.shared.initialize(
             inAppNotification: SwiftInAppNotification.shared,
             swiftFormatter: Formatter.shared,
             swiftPlatformTextRenderer: PlatformTextRenderer.shared,

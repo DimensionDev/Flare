@@ -26,26 +26,31 @@ private val jsonWithEncodeDefault =
         encodeDefaults = true
     }
 
-internal val JSON get() = json
-internal val JSON_WITH_ENCODE_DEFAULT get() = jsonWithEncodeDefault
+@HiddenFromObjC
+public val JSON: Json get() = json
 
-internal inline fun <reified T> T.encodeJson(): String = JSON.encodeToString(this)
+@HiddenFromObjC
+public val JSON_WITH_ENCODE_DEFAULT: Json get() = jsonWithEncodeDefault
+
+public inline fun <reified T> T.encodeJson(): String = JSON.encodeToString(this)
 
 @OptIn(ExperimentalObjCRefinement::class)
 @HiddenFromObjC
 public fun <T> T.encodeJson(serializer: KSerializer<T>): String = JSON.encodeToString(serializer, this)
 
-internal inline fun <reified T> String.decodeJson(): T = JSON.decodeFromString(this)
+public inline fun <reified T> String.decodeJson(): T = JSON.decodeFromString(this)
 
 @OptIn(ExperimentalObjCRefinement::class)
 @HiddenFromObjC
 public fun <T> String.decodeJson(serializer: KSerializer<T>): T = JSON.decodeFromString(serializer, this)
 
-internal val JsonElement.jsonObjectOrNull: JsonObject?
+@HiddenFromObjC
+public val JsonElement.jsonObjectOrNull: JsonObject?
     get() = if (this is JsonObject) this else null
 
 @OptIn(ExperimentalSerializationApi::class)
-internal class SafePolymorphicSerializer<T : Any>(
+@HiddenFromObjC
+public class SafePolymorphicSerializer<T : Any>(
     private val baseSerializer: KSerializer<T>,
     private val discriminator: String,
 ) : KSerializer<T?> {

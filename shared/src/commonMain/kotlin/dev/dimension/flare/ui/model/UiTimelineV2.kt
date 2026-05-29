@@ -25,10 +25,10 @@ public sealed class UiTimelineV2 {
         itemKey
     }
 
-    internal abstract val searchText: String?
-    internal abstract val statusKey: MicroBlogKey
+    public abstract val searchText: String?
+    public abstract val statusKey: MicroBlogKey
     public abstract val createdAt: UiDateTime
-    internal abstract val accountType: AccountType
+    public abstract val accountType: AccountType
 
     public abstract val itemKey: String?
     public abstract val renderHash: Int
@@ -45,7 +45,7 @@ public sealed class UiTimelineV2 {
 
     @Serializable
     @Immutable
-    public data class Message internal constructor(
+    public data class Message public constructor(
         val user: UiProfile? = null,
         override val statusKey: MicroBlogKey,
         val icon: UiIcon,
@@ -78,19 +78,19 @@ public sealed class UiTimelineV2 {
         public sealed class Type {
             @Serializable
             @Immutable
-            public data class Unknown internal constructor(
+            public data class Unknown public constructor(
                 val rawType: String,
             ) : Type()
 
             @Serializable
             @Immutable
-            public data class Raw internal constructor(
+            public data class Raw public constructor(
                 val content: String,
             ) : Type()
 
             @Serializable
             @Immutable
-            public data class Localized internal constructor(
+            public data class Localized public constructor(
                 val data: MessageId,
                 val args: SerializableImmutableList<String> = persistentListOf(),
             ) : Type() {
@@ -129,12 +129,12 @@ public sealed class UiTimelineV2 {
 
     @Serializable
     @Immutable
-    public data class Feed internal constructor(
+    public data class Feed public constructor(
         val title: String?,
         val description: String?,
         val descriptionHtml: String? = null,
         val url: String,
-        internal val sourceLanguages: SerializableImmutableList<String> = persistentListOf(),
+        public val sourceLanguages: SerializableImmutableList<String> = persistentListOf(),
         @Transient
         public val translationDisplayState: TranslationDisplayState = TranslationDisplayState.Hidden,
         override val createdAt: UiDateTime,
@@ -199,7 +199,7 @@ public sealed class UiTimelineV2 {
 
         @Serializable
         @Immutable
-        public data class Source internal constructor(
+        public data class Source public constructor(
             val name: String,
             val icon: String?,
         )
@@ -207,14 +207,14 @@ public sealed class UiTimelineV2 {
 
     @Serializable
     @Immutable
-    public data class Post internal constructor(
+    public data class Post public constructor(
         val message: Message? = null,
         val platformType: PlatformType,
         val images: SerializableImmutableList<UiMedia>,
         val sensitive: Boolean,
         val contentWarning: UiRichText?,
         val user: UiProfile?,
-        internal val sourceLanguages: SerializableImmutableList<String> = persistentListOf(),
+        public val sourceLanguages: SerializableImmutableList<String> = persistentListOf(),
         @Transient
         public val translationDisplayState: TranslationDisplayState = TranslationDisplayState.Hidden,
         @Transient
@@ -229,12 +229,12 @@ public sealed class UiTimelineV2 {
         val sourceChannel: SourceChannel? = null,
         val visibility: Visibility? = null,
         val replyToHandle: String? = null,
-        internal val references: SerializableImmutableList<Reference> = persistentListOf(),
+        public val references: SerializableImmutableList<Reference> = persistentListOf(),
         @Transient
         val parents: SerializableImmutableList<Post> = persistentListOf(),
         @Transient
-        internal val internalRepost: Post? = null,
-        internal val clickEvent: ClickEvent,
+        public val internalRepost: Post? = null,
+        public val clickEvent: ClickEvent,
         public override val accountType: AccountType,
         @Transient
         override val itemKey: String? = null,
@@ -310,7 +310,7 @@ public sealed class UiTimelineV2 {
 
         @Serializable
         @Immutable
-        public data class EmojiReaction internal constructor(
+        public data class EmojiReaction(
             val name: String,
             val url: String,
             val count: UiNumber,
@@ -328,7 +328,7 @@ public sealed class UiTimelineV2 {
 
         @Serializable
         @Immutable
-        internal data class Reference internal constructor(
+        public data class Reference public constructor(
             val statusKey: MicroBlogKey,
             val type: ReferenceType,
         )
@@ -345,7 +345,7 @@ public sealed class UiTimelineV2 {
 
     @Serializable
     @Immutable
-    public data class User internal constructor(
+    public data class User public constructor(
         val message: Message? = null,
         val value: UiProfile,
         override val createdAt: UiDateTime,
@@ -371,7 +371,7 @@ public sealed class UiTimelineV2 {
 
     @Serializable
     @Immutable
-    public data class UserList internal constructor(
+    public data class UserList public constructor(
         val message: Message?,
         val users: SerializableImmutableList<UiProfile>,
         override val createdAt: UiDateTime,

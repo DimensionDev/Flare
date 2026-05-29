@@ -113,6 +113,9 @@
     <string name="social_title">Sociaal</string>
     <string name="antenna_title">Antennes</string>
     <string name="mixed_timeline_title">Gemengd</string>
+    <string name="liked_title">Leuk gevonden</string>
+    <string name="all_rss_feeds_title">Alle abonnementen</string>
+    <string name="posts_title">Berichten</string>
     <string name="bluesky_login_username">Gebruikersnaam</string>
     <string name="bluesky_login_password">Wachtwoord</string>
     <string name="bluesky_login_2fa">2FA-token</string>

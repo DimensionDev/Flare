@@ -1,7 +1,9 @@
 package dev.dimension.flare.data.datasource.microblog.datasource
 
 import dev.dimension.flare.data.datasource.microblog.handler.UserHandler
+import kotlin.native.HiddenFromObjC
 
-internal interface UserDataSource {
-    val userHandler: UserHandler
+@HiddenFromObjC
+public interface UserDataSource {
+    public val userHandler: UserHandler
 }

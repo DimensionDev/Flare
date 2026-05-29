@@ -25,6 +25,7 @@ paging = "3.5.0"
 kotlinx-datetime = "0.8.0"
 kotlinx-collections-immutable = "0.4.0"
 kotlinx-serialization = "1.11.0"
+kotlinx-browser = "0.5.0"
 coil3 = "3.4.0"
 ktorfit = "2.7.4-SNAPSHOT"
 ktor = "3.4.3"
@@ -47,15 +48,17 @@ versionUpdate = "0.54.0"
 bluesky = "0.3.4-SNAPSHOT"
 kotlinx-coroutines = "1.11.0"
 koin = "4.2.1"
+koin-plugin = "1.0.0"
 composeIcons = "1.3.0"
 media3 = "1.10.1"
 desugar_jdk_libs = "2.1.5"
+datastore = "1.3.0-alpha09"
 firebase-bom = "34.13.0"
 google-services = "4.4.4"
 firebase-crashlytics = "3.0.7"
 materialKolor = "4.1.1"
 room = "3.0.0-alpha04"
-sqlite = "2.6.2"
+sqlite = "2.7.0-alpha04"
 compose-multiplatform = "1.11.0"
 navigation3 = "1.1.2"
 zoomable = "0.19.0"
@@ -113,14 +116,19 @@ paging-common = { group = "androidx.paging", name = "paging-common", version.ref
 paging-compose = { group = "androidx.paging", name = "paging-compose", version.ref = "paging" }
 paging-testing = { group = "androidx.paging", name = "paging-testing", version.ref = "paging" }
 composeIcons-fontAwesome = { module = "moe.tlaster.compose.icons:font-awesome", version.ref = "composeIcons" }
-datastore = { group = "androidx.datastore", name = "datastore", version = "1.2.1" }
+datastore = { group = "androidx.datastore", name = "datastore", version.ref = "datastore" }
+datastore-core = { group = "androidx.datastore", name = "datastore-core", version.ref = "datastore" }
+datastore-core-okio = { group = "androidx.datastore", name = "datastore-core-okio", version.ref = "datastore" }
 desugar_jdk_libs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugar_jdk_libs" }
 androidx-window = { group = "androidx.window", name = "window-core", version = "1.5.1" }
 androidx-splash = { group = "androidx.core", name = "core-splashscreen", version = "1.2.0" }
 room-runtime = { group = "androidx.room3", name = "room3-runtime", version.ref = "room" }
 room-paging = { group = "androidx.room3", name = "room3-paging", version.ref = "room" }
 room-compiler = { group = "androidx.room3", name = "room3-compiler", version.ref = "room" }
+sqlite = { group = "androidx.sqlite", name = "sqlite", version.ref = "sqlite" }
+sqlite-async = { group = "androidx.sqlite", name = "sqlite-async", version.ref = "sqlite" }
 sqlite-bundled = { group = "androidx.sqlite", name = "sqlite-bundled", version.ref = "sqlite" }
+sqlite-web = { group = "androidx.sqlite", name = "sqlite-web", version.ref = "sqlite" }
 nestedScrollView = { group = "com.github.Tlaster", name = "NestedScrollView", version = "1.0.3" }
 webkit = { group = "androidx.webkit", name = "webkit", version = "1.16.0" }
 androidx-browser = { group = "androidx.browser", name = "browser", version = "1.10.0" }
@@ -135,16 +143,19 @@ kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime",
 kotlinx-immutable = { group = "org.jetbrains.kotlinx", name = "kotlinx-collections-immutable", version.ref = "kotlinx-collections-immutable" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
 kotlinx-serialization-protobuf = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-protobuf", version.ref = "kotlinx-serialization" }
+kotlinx-browser = { group = "org.jetbrains.kotlinx", name = "kotlinx-browser", version.ref = "kotlinx-browser" }
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
 kotlinx-coroutines-swing = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-swing", version.ref = "kotlinx-coroutines" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
 kotlinx-coroutines-play-services = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-play-services", version.ref = "kotlinx-coroutines" }
+ksp-symbol-processing-api = { group = "com.google.devtools.ksp", name = "symbol-processing-api", version.ref = "ksp" }
 
 koin-bom = { group = "io.insert-koin", name = "koin-bom", version.ref = "koin" }
 koin-core = { group = "io.insert-koin", name = "koin-core" }
 koin-android = { group = "io.insert-koin", name = "koin-android" }
 koin-compose = { group = "io.insert-koin", name = "koin-compose" }
 koin-androidx-compose = { group = "io.insert-koin", name = "koin-androidx-compose" }
+koin-annotations = { group = "io.insert-koin", name = "koin-annotations" }
 
 coil3-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil3" }
 coil3-gif = { group = "io.coil-kt.coil3", name = "coil-gif", version.ref = "coil3" }
@@ -168,6 +179,7 @@ ktor-client-content-negotiation = { group = "io.ktor", name = "ktor-client-conte
 ktor-serialization-kotlinx-json = { group = "io.ktor", name = "ktor-serialization-kotlinx-json", version.ref = "ktor" }
 ktor-serialization-kotlinx-xml = { group = "io.ktor", name = "ktor-serialization-kotlinx-xml", version.ref = "ktor" }
 ktor-client-logging = { group = "io.ktor", name = "ktor-client-logging", version.ref = "ktor" }
+ktor-client-js = { group = "io.ktor", name = "ktor-client-js", version.ref = "ktor" }
 ktor-client-websockets = { group = "io.ktor", name = "ktor-client-websockets", version.ref = "ktor" }
 ktor-client-darwin = { group = "io.ktor", name = "ktor-client-darwin", version.ref = "ktor" }
 ktor-client-okhttp = { group = "io.ktor", name = "ktor-client-okhttp", version.ref = "ktor" }
@@ -256,3 +268,4 @@ compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "
 room = { id = "androidx.room3", version.ref = "room" }
 composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "compose-multiplatform" }
 nucleus = { id = "io.github.kdroidfilter.nucleus", version.ref = "nucleus" }
+koin-compiler = { id = "io.insert-koin.compiler.plugin", version.ref = "koin-plugin" }

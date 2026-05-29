@@ -1,50 +1,156 @@
 package dev.dimension.flare.model
 
-import dev.dimension.flare.common.deeplink.DeepLinkMapping
-import dev.dimension.flare.common.deeplink.DeepLinkPattern
+import dev.dimension.flare.data.database.app.model.SubscriptionType
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
+import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
-import dev.dimension.flare.data.platform.BlueskyPlatformSpec
-import dev.dimension.flare.data.platform.MastodonPlatformSpec
-import dev.dimension.flare.data.platform.MisskeyPlatformSpec
-import dev.dimension.flare.data.platform.NostrPlatformSpec
-import dev.dimension.flare.data.platform.VvoPlatformSpec
-import dev.dimension.flare.data.platform.XqtPlatformSpec
-import dev.dimension.flare.ui.model.UiIcon
+import dev.dimension.flare.ui.model.UiInstance
 import dev.dimension.flare.ui.model.UiInstanceMetadata
+import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.route.DeeplinkRoute
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.coroutines.flow.Flow
+import kotlinx.serialization.KSerializer
+import org.koin.core.annotation.Provided
+import org.koin.core.annotation.Single
+import kotlin.native.HiddenFromObjC
 
-internal interface PlatformSpec {
-    val type: PlatformType
-    val metadata: PlatformTypeMetadata
-    val detector: PlatformDetector
-    val timelineSpecs: ImmutableList<TimelineSpec<out TimelineSpec.Data>>
+@HiddenFromObjC
+public interface PlatformSpec {
+    public val type: PlatformType
+    public val metadata: PlatformTypeMetadata
+    public val detector: PlatformDetector
+    public val timelineSpecs: ImmutableList<TimelineSpec<out TimelineSpec.Data>>
+    public val subscriptionTimelineSpecs: ImmutableList<SubscriptionTimelineSpec>
+        get() = persistentListOf()
 
-    fun agreementUrl(host: String): String?
+    public fun agreementUrl(host: String): String?
 
-    fun deepLinkPatterns(host: String): ImmutableList<DeepLinkPattern<out DeepLinkMapping.Type>>
+    public fun deepLinks(accountKey: MicroBlogKey): ImmutableList<PlatformDeepLink<*>>
 
-    suspend fun instanceMetadata(host: String): UiInstanceMetadata
+    public suspend fun instanceMetadata(host: String): UiInstanceMetadata
 
-    fun guestDataSource(
+    public suspend fun recommendInstances(): List<RecommendedInstance> = emptyList()
+
+    public fun createDataSource(context: PlatformDataSourceContext): MicroblogDataSource
+
+    public fun guestDataSource(
         host: String,
         locale: String,
     ): MicroblogDataSource
 }
 
-public val PlatformType.icon: UiIcon
-    get() = spec.metadata.icon
+@HiddenFromObjC
+public interface SubscriptionTimelineSpec {
+    public val type: SubscriptionType
 
-public fun PlatformType.agreementUrl(host: String): String? = spec.agreementUrl(host)
+    public suspend fun isAvailable(
+        host: String,
+        locale: String,
+    ): Boolean
 
-internal val PlatformType.spec: PlatformSpec
-    get() =
-        when (this) {
-            PlatformType.Nostr -> NostrPlatformSpec
-            PlatformType.Mastodon -> MastodonPlatformSpec
-            PlatformType.Misskey -> MisskeyPlatformSpec
-            PlatformType.Bluesky -> BlueskyPlatformSpec
-            PlatformType.xQt -> XqtPlatformSpec
-            PlatformType.VVo -> VvoPlatformSpec
-        }
+    public fun createLoader(
+        host: String,
+        locale: String,
+    ): CacheableRemoteLoader<UiTimelineV2>
+}
+
+@HiddenFromObjC
+public interface PlatformDataSourceContext {
+    public val accountKey: MicroBlogKey
+
+    public fun <T : Any> credential(serializer: KSerializer<T>): T
+
+    public fun <T : Any> credentialFlow(serializer: KSerializer<T>): Flow<T>
+
+    public suspend fun <T : Any> updateCredential(
+        serializer: KSerializer<T>,
+        credential: T,
+    )
+}
+
+@HiddenFromObjC
+public data class PlatformDeepLink<T>(
+    public val uriPattern: String,
+    public val serializer: KSerializer<T>,
+    public val callback: (T) -> DeeplinkRoute,
+)
+
+@HiddenFromObjC
+public data class RecommendedInstance(
+    public val instance: UiInstance,
+    public val priority: Int = 0,
+)
+
+@Provided
+@HiddenFromObjC
+public data class PlatformRuntimeData(
+    public val platformSpecs: List<PlatformSpec>,
+    public val extraTimelineSpecs: List<TimelineSpec<out TimelineSpec.Data>>,
+) {
+    internal val timelineSpecs by lazy {
+        platformSpecs
+            .flatMap { it.timelineSpecs }
+            .plus(extraTimelineSpecs)
+    }
+}
+
+@Single
+@HiddenFromObjC
+public class PlatformRegistry(
+    data: PlatformRuntimeData,
+) {
+    public val all: List<PlatformSpec> = data.platformSpecs
+    private val byType: Map<PlatformType, PlatformSpec> =
+        data.platformSpecs
+            .also { specs ->
+                val duplicateTypes =
+                    specs
+                        .groupBy { it.type }
+                        .filterValues { it.size > 1 }
+                        .keys
+                require(duplicateTypes.isEmpty()) {
+                    "Duplicate platform specs: ${duplicateTypes.joinToString()}"
+                }
+            }.associateBy { it.type }
+
+    public val subscriptionTimelineSpecs: List<SubscriptionTimelineSpec> by lazy {
+        data.platformSpecs
+            .flatMap { it.subscriptionTimelineSpecs }
+            .also { specs ->
+                val duplicateTypes =
+                    specs
+                        .groupBy { it.type }
+                        .filterValues { it.size > 1 }
+                        .keys
+                require(duplicateTypes.isEmpty()) {
+                    "Duplicate subscription timeline specs: ${duplicateTypes.joinToString()}"
+                }
+            }
+    }
+
+    private val subscriptionTimelineSpecsByType: Map<SubscriptionType, SubscriptionTimelineSpec> by lazy {
+        subscriptionTimelineSpecs.associateBy { it.type }
+    }
+
+    public fun get(type: PlatformType): PlatformSpec? = byType[type]
+
+    public fun require(type: PlatformType): PlatformSpec = get(type) ?: throw UnsupportedPlatformException(type)
+
+    public fun getSubscriptionTimelineSpec(type: SubscriptionType): SubscriptionTimelineSpec? = subscriptionTimelineSpecsByType[type]
+
+    public fun requireSubscriptionTimelineSpec(type: SubscriptionType): SubscriptionTimelineSpec =
+        getSubscriptionTimelineSpec(type) ?: throw UnsupportedSubscriptionTimelineException(type)
+}
+
+@HiddenFromObjC
+public class UnsupportedPlatformException(
+    public val type: PlatformType,
+) : IllegalArgumentException("Platform is not registered: $type")
+
+@HiddenFromObjC
+public class UnsupportedSubscriptionTimelineException(
+    public val type: SubscriptionType,
+) : IllegalArgumentException("Subscription timeline is not registered: $type")

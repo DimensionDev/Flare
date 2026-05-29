@@ -6,14 +6,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import dev.dimension.flare.common.deeplink.DeepLinkMapping
+import dev.dimension.flare.common.deeplink.PlatformDeepLinkMatcher
 import dev.dimension.flare.data.database.cache.model.TranslationDisplayMode
 import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceFlow
 import dev.dimension.flare.data.translation.PreTranslationService
 import dev.dimension.flare.model.AccountType
-import dev.dimension.flare.model.spec
+import dev.dimension.flare.model.PlatformRegistry
 import dev.dimension.flare.ui.model.DeeplinkEvent
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.route.DeeplinkRoute
@@ -32,17 +32,18 @@ public class DeepLinkPresenter(
     KoinComponent {
     private val accountRepository: AccountRepository by inject()
     private val preTranslationService: PreTranslationService by inject()
+    private val platformRegistry: PlatformRegistry by inject()
 
     @androidx.compose.runtime.Immutable
     public interface State {
         public fun handle(url: String)
     }
 
-    private val patternFlow by lazy {
+    private val deepLinkFlow by lazy {
         accountRepository.allAccounts.map {
             it
                 .associateWith {
-                    it.platformType.spec.deepLinkPatterns(it.accountKey.host)
+                    platformRegistry.require(it.platformType).deepLinks(it.accountKey)
                 }.toImmutableMap()
         }
     }
@@ -123,8 +124,8 @@ public class DeepLinkPresenter(
                     }
                     pendingUrl = null
                 } else {
-                    patternFlow.collect { pattern ->
-                        val matches = DeepLinkMapping.matches(url, pattern)
+                    deepLinkFlow.collect { deepLinks ->
+                        val matches = PlatformDeepLinkMatcher.matches(url, deepLinks)
                         if (matches.isEmpty()) {
                             withContext(Dispatchers.Main) {
                                 onLink.invoke(url)
@@ -136,7 +137,7 @@ public class DeepLinkPresenter(
                                     data =
                                         matches
                                             .map {
-                                                it.key.accountKey to it.value.deepLink(it.key.accountKey)
+                                                it.key.accountKey to it.value
                                             }.toMap()
                                             .toImmutableMap(),
                                 )

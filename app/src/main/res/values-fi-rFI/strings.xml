@@ -495,6 +495,11 @@
     <string name="tab_settings_mixed_timeline">Ota sekoitettu aikajana käyttöön</string>
     <string name="tab_settings_mixed_timeline_desc">Yhdistä julkaisut kaikilta välilehdiltä yhdeksi kotivälilehdeksi.</string>
     <string name="home_tab_social_timeline_title">Sosiaalinen</string>
+    <string name="social_title">Sosiaalinen</string>
+    <string name="antenna_title">Antennit</string>
+    <string name="liked_title">Tykätyt</string>
+    <string name="all_rss_feeds_title">Kaikki tilaukset</string>
+    <string name="posts_title">Julkaisut</string>
 
     <string name="deeplink_account_selection_title">Valitse tili</string>
     <string name="deeplink_account_selection_message">Valitse tili avataksesi tämän linkin</string>

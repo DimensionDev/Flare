@@ -1,8 +1,10 @@
 package dev.dimension.flare.data.network.nodeinfo
+import kotlin.native.HiddenFromObjC
 
-internal interface PlatformDetector {
-    val priority: Int
+@HiddenFromObjC
+public interface PlatformDetector {
+    public val priority: Int
         get() = 0
 
-    suspend fun detect(host: String): NodeData?
+    public suspend fun detect(host: String): NodeData?
 }

@@ -1,8 +1,8 @@
 package dev.dimension.flare.data.platform
 
 import dev.dimension.flare.data.model.IconType
-import dev.dimension.flare.data.model.tab.SourceTimelineTabItemV2
 import dev.dimension.flare.data.model.tab.TimelineSpec
+import dev.dimension.flare.data.model.tab.TimelineSpecIds
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -14,11 +14,13 @@ import dev.dimension.flare.ui.model.asType
 import dev.dimension.flare.ui.presenter.home.DiscoverStatusTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.HomeTimelinePresenter
 import dev.dimension.flare.ui.presenter.list.ListTimelinePresenter
+import kotlin.native.HiddenFromObjC
 
-internal object CommonTimelineSpecs {
-    val home =
+@HiddenFromObjC
+public object CommonTimelineSpecs {
+    public val home: TimelineSpec<TimelineSpec.AccountBasedData> =
         TimelineSpec(
-            id = "common.home",
+            id = TimelineSpecIds.COMMON_HOME,
             title = UiStrings.Home,
             icon = UiIcon.Home.asType(),
             serializer = TimelineSpec.AccountBasedData.serializer(),
@@ -30,9 +32,9 @@ internal object CommonTimelineSpecs {
             },
         )
 
-    val discover =
+    public val discover: TimelineSpec<TimelineSpec.AccountBasedData> =
         TimelineSpec(
-            id = "common.discover",
+            id = TimelineSpecIds.COMMON_DISCOVER,
             title = UiStrings.Discover,
             icon = UiIcon.Search.asType(),
             serializer = TimelineSpec.AccountBasedData.serializer(),
@@ -44,9 +46,9 @@ internal object CommonTimelineSpecs {
             },
         )
 
-    val list =
+    public val list: TimelineSpec<TimelineSpec.AccountResourceData> =
         TimelineSpec(
-            id = "common.list",
+            id = TimelineSpecIds.COMMON_LIST,
             title = UiStrings.List,
             icon = UiIcon.List.asType(),
             serializer = TimelineSpec.AccountResourceData.serializer(),
@@ -60,14 +62,10 @@ internal object CommonTimelineSpecs {
         )
 }
 
-internal fun UiList.List.toTimelineTabItemV2(accountKey: MicroBlogKey): TimelineTabItemV2 {
-    val source =
-        CommonTimelineSpecs.list.target(
+public fun UiList.List.toTimelineTabItemV2(accountKey: MicroBlogKey): TimelineTabItemV2 =
+    CommonTimelineSpecs.list
+        .tabItem(
             data = TimelineSpec.AccountResourceData(accountKey, id),
             title = UiText.Raw(title),
             icon = avatar?.let { IconType.Url(it) } ?: UiIcon.List.asType(),
         )
-    return SourceTimelineTabItemV2.fromSource(source) {
-        CommonTimelineSpecs.list.createPresenter(source.data)
-    }
-}

@@ -497,6 +497,11 @@
     <string name="tab_settings_mixed_timeline">Включить вкладку смешанной ленты</string>
     <string name="tab_settings_mixed_timeline_desc">Объединить посты из всех вкладок в одну общую ленту.</string>
     <string name="home_tab_social_timeline_title">Социальная</string>
+    <string name="social_title">Социальное</string>
+    <string name="antenna_title">Антенны</string>
+    <string name="liked_title">Понравилось</string>
+    <string name="all_rss_feeds_title">Все подписки</string>
+    <string name="posts_title">Посты</string>
 
     <string name="deeplink_account_selection_title">Выбор аккаунта</string>
     <string name="deeplink_account_selection_message">Выберите аккаунт, чтобы открыть эту ссылку</string>

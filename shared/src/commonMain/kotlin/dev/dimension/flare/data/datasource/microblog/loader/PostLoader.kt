@@ -2,9 +2,11 @@ package dev.dimension.flare.data.datasource.microblog.loader
 
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimelineV2
+import kotlin.native.HiddenFromObjC
 
-internal interface PostLoader {
-    suspend fun status(statusKey: MicroBlogKey): UiTimelineV2
+@HiddenFromObjC
+public interface PostLoader {
+    public suspend fun status(statusKey: MicroBlogKey): UiTimelineV2
 
-    suspend fun deleteStatus(statusKey: MicroBlogKey)
+    public suspend fun deleteStatus(statusKey: MicroBlogKey)
 }

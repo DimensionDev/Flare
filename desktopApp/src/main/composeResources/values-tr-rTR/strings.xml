@@ -113,6 +113,9 @@
     <string name="social_title">Sosyal</string>
     <string name="antenna_title">Antenler</string>
     <string name="mixed_timeline_title">Karışık</string>
+    <string name="liked_title">Beğenilenler</string>
+    <string name="all_rss_feeds_title">Tüm Abonelikler</string>
+    <string name="posts_title">Gönderiler</string>
     <string name="bluesky_login_username">Kullanıcı Adı</string>
     <string name="bluesky_login_password">Şifre</string>
     <string name="bluesky_login_2fa">2FA kodu</string>

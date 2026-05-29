@@ -14,10 +14,13 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.koin.core.annotation.Provided
+import org.koin.core.annotation.Single
 
+@Single
 internal class ComposeUseCase(
     private val scope: CoroutineScope,
-    private val inAppNotification: InAppNotification,
+    @Provided private val inAppNotification: InAppNotification,
     private val appDataStore: AppDataStore,
     private val saveDraftUseCase: SaveDraftUseCase,
     private val sendDraftUseCase: SendDraftUseCase,

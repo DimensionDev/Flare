@@ -129,6 +129,9 @@
 
     <string name="antenna_title">Antenner</string>
     <string name="mixed_timeline_title">Blandet</string>
+    <string name="liked_title">Kunne lide</string>
+    <string name="all_rss_feeds_title">Alle abonnementer</string>
+    <string name="posts_title">Indlæg</string>
 
     <string name="bluesky_login_username">Brugernavn</string>
     <string name="bluesky_login_password">Adgangskode</string>

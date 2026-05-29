@@ -11,50 +11,52 @@ public data class ClickContext(
 )
 
 @Serializable
-internal sealed interface ClickEvent {
+public sealed interface ClickEvent {
     @Serializable
-    data object Noop : ClickEvent
+    public data object Noop : ClickEvent
 
     @Serializable
-    data class Deeplink private constructor(
+    public data class Deeplink private constructor(
         val url: String,
     ) : ClickEvent {
-        constructor(route: DeeplinkRoute) : this(route.toUri())
-        constructor(route: DeeplinkEvent) : this(route.toUri())
+        public constructor(route: DeeplinkRoute) : this(route.toUri())
+        internal constructor(route: DeeplinkEvent) : this(route.toUri())
     }
 
-    companion object {
-        fun event(
+    public companion object {
+        public fun event(
             accountKey: MicroBlogKey?,
             postEvent: PostEvent,
-        ) = if (accountKey == null) {
-            Noop
-        } else {
-            Deeplink(
-                DeeplinkEvent(
-                    accountKey = accountKey,
-                    postEvent = postEvent,
-                ),
-            )
-        }
+        ): ClickEvent =
+            if (accountKey == null) {
+                Noop
+            } else {
+                Deeplink(
+                    DeeplinkEvent(
+                        accountKey = accountKey,
+                        postEvent = postEvent,
+                    ),
+                )
+            }
 
-        inline fun event(
+        public fun event(
             accountKey: MicroBlogKey?,
             eventCreator: (accountKey: MicroBlogKey) -> PostEvent,
-        ) = if (accountKey == null) {
-            Noop
-        } else {
-            Deeplink(
-                DeeplinkEvent(
-                    accountKey = accountKey,
-                    postEvent = eventCreator.invoke(accountKey),
-                ),
-            )
-        }
+        ): ClickEvent =
+            if (accountKey == null) {
+                Noop
+            } else {
+                Deeplink(
+                    DeeplinkEvent(
+                        accountKey = accountKey,
+                        postEvent = eventCreator.invoke(accountKey),
+                    ),
+                )
+            }
     }
 }
 
-internal val ClickEvent.onClicked: ClickContext.() -> Unit
+public val ClickEvent.onClicked: ClickContext.() -> Unit
     get() {
         when (this) {
             is ClickEvent.Deeplink -> {

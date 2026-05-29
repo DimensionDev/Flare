@@ -8,6 +8,7 @@ import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.useContents
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.koin.core.annotation.Single
 import platform.CoreGraphics.CGRectMake
 import platform.CoreGraphics.CGSizeMake
 import platform.Foundation.NSData
@@ -17,8 +18,11 @@ import platform.UIKit.UIGraphicsGetImageFromCurrentImageContext
 import platform.UIKit.UIImage
 import platform.UIKit.UIImageJPEGRepresentation
 import kotlin.math.min
+import kotlin.native.HiddenFromObjC
 
+@Single(binds = [ImageCompressor::class])
 @OptIn(CryptographyProviderApi::class, ExperimentalForeignApi::class)
+@HiddenFromObjC
 public class IosImageCompressor : ImageCompressor {
     @OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)
     override suspend fun compress(

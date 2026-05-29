@@ -1,0 +1,540 @@
+package dev.dimension.flare.data.datasource.nostr
+
+import dev.dimension.flare.common.FileType
+import dev.dimension.flare.common.SwitchingServiceManager
+import dev.dimension.flare.data.datasource.microblog.ActionMenu
+import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
+import dev.dimension.flare.data.datasource.microblog.ComposeConfig
+import dev.dimension.flare.data.datasource.microblog.ComposeData
+import dev.dimension.flare.data.datasource.microblog.ComposeType
+import dev.dimension.flare.data.datasource.microblog.DatabaseUpdater
+import dev.dimension.flare.data.datasource.microblog.NotificationFilter
+import dev.dimension.flare.data.datasource.microblog.PostEvent
+import dev.dimension.flare.data.datasource.microblog.ProfileTab
+import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
+import dev.dimension.flare.data.datasource.microblog.datasource.RelationDataSource
+import dev.dimension.flare.data.datasource.microblog.datasource.TimelineTabConfigurationDataSource
+import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
+import dev.dimension.flare.data.datasource.microblog.handler.PostEventHandler
+import dev.dimension.flare.data.datasource.microblog.handler.PostHandler
+import dev.dimension.flare.data.datasource.microblog.handler.RelationHandler
+import dev.dimension.flare.data.datasource.microblog.handler.UserHandler
+import dev.dimension.flare.data.datasource.microblog.loader.RelationActionType
+import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
+import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
+import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
+import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
+import dev.dimension.flare.data.datasource.microblog.paging.notSupported
+import dev.dimension.flare.data.model.IconType
+import dev.dimension.flare.data.model.tab.ShortcutSpec
+import dev.dimension.flare.data.model.tab.TimelineSpec
+import dev.dimension.flare.data.network.nostr.AmberSignerBridge
+import dev.dimension.flare.data.network.nostr.NostrService
+import dev.dimension.flare.data.platform.CommonTimelineSpecs
+import dev.dimension.flare.data.platform.NostrCredential
+import dev.dimension.flare.data.platform.normalized
+import dev.dimension.flare.data.platform.signerStableId
+import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.model.UiHashtag
+import dev.dimension.flare.ui.model.UiIcon
+import dev.dimension.flare.ui.model.UiProfile
+import dev.dimension.flare.ui.model.UiText
+import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.mapper.nostrLike
+import dev.dimension.flare.ui.model.mapper.nostrRepost
+import dev.dimension.flare.ui.presenter.compose.ComposeStatus
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChangedBy
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
+
+internal typealias NostrServiceManager = SwitchingServiceManager<NostrCredential, NostrService>
+
+internal class NostrDataSource(
+    override val accountKey: MicroBlogKey,
+    private val credentialFlow: Flow<NostrCredential>,
+) : AuthenticatedMicroblogDataSource,
+    UserDataSource,
+    RelationDataSource,
+    TimelineTabConfigurationDataSource,
+    PostDataSource,
+    PostEventHandler.Handler,
+    KoinComponent,
+    AutoCloseable {
+    private val ioScope: CoroutineScope by inject()
+    private val nostrCache: NostrCache by inject()
+    private val amberSignerBridge: AmberSignerBridge by inject()
+    private val loader by lazy {
+        NostrLoader(
+            accountKey = accountKey,
+            serviceManager = serviceManager,
+        )
+    }
+
+    override val defaultTabs by lazy {
+        persistentListOf(
+            CommonTimelineSpecs.home
+                .tabItem(
+                    data = TimelineSpec.AccountBasedData(accountKey),
+                    icon = IconType.Material(UiIcon.Nostr),
+                    title = UiText.Raw("Nostr"),
+                ),
+        )
+    }
+
+    override val builtInTimelineTabs by lazy {
+        persistentListOf(
+            CommonTimelineSpecs.home.tabItem(
+                data = TimelineSpec.AccountBasedData(accountKey),
+                icon = IconType.Material(UiIcon.Nostr),
+            ),
+        )
+    }
+
+    override val shortcuts by lazy {
+        persistentListOf<ShortcutSpec>()
+    }
+
+    private val serviceManager by lazy {
+        SwitchingServiceManager(
+            credentialFlow.distinctUntilChangedBy { it.signerStableId(accountKey) },
+            ioScope,
+            {
+                NostrService(
+                    nostrCache,
+                    accountKey,
+                    credential = it.normalized(accountKey),
+                    amberSignerBridge = amberSignerBridge,
+                    initialRelays = it.relays,
+                ).also {
+                    it.ensureConnection()
+                }
+            },
+        )
+    }
+    private val relaySyncJob by lazy {
+        ioScope.launch {
+            credentialFlow
+                .distinctUntilChangedBy { it.relays }
+                .collect { credential ->
+                    serviceManager.withService {
+                        it.updateRelays(credential.relays)
+                    }
+                }
+        }
+    }
+
+    override fun close() {
+        relaySyncJob.cancel()
+        serviceManager.close()
+    }
+
+    override val supportedNotificationFilter: List<NotificationFilter> =
+        listOf(
+            NotificationFilter.All,
+            NotificationFilter.Mention,
+        )
+
+    init {
+        relaySyncJob
+    }
+
+    override val userHandler by lazy {
+        UserHandler(
+            host = NostrService.NOSTR_HOST,
+            loader = loader,
+        )
+    }
+    override val relationHandler by lazy {
+        RelationHandler(
+            accountType =
+                dev.dimension.flare.model.AccountType
+                    .Specific(accountKey),
+            dataSource = loader,
+        )
+    }
+    override val supportedRelationTypes: Set<RelationActionType>
+        get() = loader.supportedTypes
+
+    override val postHandler by lazy {
+        PostHandler(
+            accountType =
+                dev.dimension.flare.model.AccountType
+                    .Specific(accountKey),
+            loader = loader,
+        )
+    }
+
+    override val postEventHandler by lazy {
+        PostEventHandler(
+            accountType =
+                dev.dimension.flare.model.AccountType
+                    .Specific(accountKey),
+            handler = this,
+        )
+    }
+
+    override fun homeTimeline(): RemoteLoader<UiTimelineV2> =
+        object : CacheableRemoteLoader<UiTimelineV2> {
+            override val pagingKey: String = "home_$accountKey"
+
+            override suspend fun load(
+                pageSize: Int,
+                request: PagingRequest,
+            ): PagingResult<UiTimelineV2> {
+                if (request is PagingRequest.Prepend) {
+                    return PagingResult(endOfPaginationReached = true)
+                }
+                val until =
+                    when (request) {
+                        PagingRequest.Refresh -> null
+                        is PagingRequest.Append -> request.nextKey.toLongOrNull()
+                        is PagingRequest.Prepend -> null
+                    }
+                val data =
+                    serviceManager.withService { service ->
+                        service.loadHomeTimeline(
+                            pageSize = pageSize,
+                            until = until,
+                        )
+                    }
+                val nextKey =
+                    data
+                        .filterIsInstance<UiTimelineV2.Post>()
+                        .minOfOrNull { it.createdAt.value.epochSeconds - 1 }
+                        ?.takeIf { data.isNotEmpty() }
+                        ?.toString()
+                return PagingResult(
+                    endOfPaginationReached = data.isEmpty(),
+                    data = data,
+                    nextKey = nextKey,
+                )
+            }
+        }
+
+    override fun userTimeline(
+        userKey: MicroBlogKey,
+        mediaOnly: Boolean,
+    ): RemoteLoader<UiTimelineV2> =
+        object : CacheableRemoteLoader<UiTimelineV2> {
+            override val pagingKey: String =
+                buildString {
+                    append("user_timeline")
+                    if (mediaOnly) {
+                        append("media")
+                    }
+                    append(accountKey.toString())
+                    append(userKey.toString())
+                }
+
+            override suspend fun load(
+                pageSize: Int,
+                request: PagingRequest,
+            ): PagingResult<UiTimelineV2> {
+                if (request is PagingRequest.Prepend) {
+                    return PagingResult(endOfPaginationReached = true)
+                }
+                val until =
+                    when (request) {
+                        PagingRequest.Refresh -> null
+                        is PagingRequest.Append -> request.nextKey.toLongOrNull()
+                        is PagingRequest.Prepend -> null
+                    }
+                val data =
+                    serviceManager.withService {
+                        it.loadUserTimeline(
+                            targetPubkey = userKey.id,
+                            pageSize = pageSize,
+                            until = until,
+                            mediaOnly = mediaOnly,
+                        )
+                    }
+                val nextKey =
+                    data
+                        .filterIsInstance<UiTimelineV2.Post>()
+                        .minOfOrNull { it.createdAt.value.epochSeconds - 1 }
+                        ?.takeIf { data.isNotEmpty() }
+                        ?.toString()
+                return PagingResult(
+                    endOfPaginationReached = data.isEmpty(),
+                    data = data,
+                    nextKey = nextKey,
+                )
+            }
+        }
+
+    override fun context(statusKey: MicroBlogKey): RemoteLoader<UiTimelineV2> =
+        StatusDetailRemoteMediator(
+            statusKey = statusKey,
+            accountKey = accountKey,
+            serviceManager = serviceManager,
+        )
+
+    override fun searchStatus(query: String): RemoteLoader<UiTimelineV2> =
+        object : CacheableRemoteLoader<UiTimelineV2> {
+            override val pagingKey: String = "search_status_${accountKey}_$query"
+
+            override suspend fun load(
+                pageSize: Int,
+                request: PagingRequest,
+            ): PagingResult<UiTimelineV2> {
+                if (request is PagingRequest.Prepend) {
+                    return PagingResult(endOfPaginationReached = true)
+                }
+                val until =
+                    when (request) {
+                        PagingRequest.Refresh -> null
+                        is PagingRequest.Append -> request.nextKey.toLongOrNull()
+                        is PagingRequest.Prepend -> null
+                    }
+                val data =
+                    serviceManager.withService {
+                        it.searchStatus(
+                            query = query,
+                            pageSize = pageSize,
+                            until = until,
+                        )
+                    }
+                val nextKey =
+                    data
+                        .filterIsInstance<UiTimelineV2.Post>()
+                        .minOfOrNull { it.createdAt.value.epochSeconds - 1 }
+                        ?.takeIf { data.isNotEmpty() }
+                        ?.toString()
+                return PagingResult(
+                    endOfPaginationReached = data.isEmpty(),
+                    data = data,
+                    nextKey = nextKey,
+                )
+            }
+        }
+
+    override fun searchUser(query: String): RemoteLoader<UiProfile> =
+        object : CacheableRemoteLoader<UiProfile> {
+            override val pagingKey: String = "search_user_${accountKey}_$query"
+
+            override suspend fun load(
+                pageSize: Int,
+                request: PagingRequest,
+            ): PagingResult<UiProfile> {
+                if (request is PagingRequest.Prepend || request is PagingRequest.Append) {
+                    return PagingResult(endOfPaginationReached = true)
+                }
+                val data =
+                    serviceManager.withService {
+                        it.searchUser(
+                            query = query,
+                            pageSize = pageSize,
+                        )
+                    }
+                return PagingResult(
+                    endOfPaginationReached = true,
+                    data = data,
+                )
+            }
+        }
+
+    override fun discoverUsers(): RemoteLoader<UiProfile> = notSupported()
+
+    override fun discoverStatuses(): RemoteLoader<UiTimelineV2> = notSupported()
+
+    override fun discoverHashtags(): RemoteLoader<UiHashtag> = notSupported()
+
+    override fun following(userKey: MicroBlogKey): RemoteLoader<UiProfile> = notSupported()
+
+    override fun fans(userKey: MicroBlogKey): RemoteLoader<UiProfile> = notSupported()
+
+    override fun profileTabs(userKey: MicroBlogKey): ImmutableList<ProfileTab> =
+        persistentListOf(
+            ProfileTab.Timeline(
+                type = ProfileTab.Timeline.Type.Status,
+                loader = userTimeline(userKey = userKey, mediaOnly = false),
+            ),
+        )
+
+    override fun notification(type: NotificationFilter): RemoteLoader<UiTimelineV2> =
+        object : CacheableRemoteLoader<UiTimelineV2> {
+            override val pagingKey: String = "notification_${type.name.lowercase()}_$accountKey"
+
+            override suspend fun load(
+                pageSize: Int,
+                request: PagingRequest,
+            ): PagingResult<UiTimelineV2> {
+                if (request is PagingRequest.Prepend) {
+                    return PagingResult(endOfPaginationReached = true)
+                }
+                val until =
+                    when (request) {
+                        PagingRequest.Refresh -> null
+                        is PagingRequest.Append -> request.nextKey.toLongOrNull()
+                        is PagingRequest.Prepend -> null
+                    }
+                val data =
+                    serviceManager.withService {
+                        it.loadNotifications(
+                            pageSize = pageSize,
+                            until = until,
+                            type = type,
+                        )
+                    }
+                val nextKey =
+                    data
+                        .filterIsInstance<UiTimelineV2.Post>()
+                        .minOfOrNull { it.createdAt.value.epochSeconds - 1 }
+                        ?.takeIf { data.isNotEmpty() }
+                        ?.toString()
+                return PagingResult(
+                    endOfPaginationReached = data.isEmpty(),
+                    data = data,
+                    nextKey = nextKey,
+                )
+            }
+        }
+
+    override suspend fun handle(
+        event: PostEvent,
+        updater: DatabaseUpdater,
+    ) {
+        require(event is PostEvent.Nostr)
+        when (event) {
+            is PostEvent.Nostr.Like -> {
+                val reactionEventId = event.reactionEventId
+                if (reactionEventId != null) {
+                    serviceManager.withService {
+                        it.deleteStatus(
+                            statusKey = MicroBlogKey(reactionEventId, NostrService.NOSTR_HOST),
+                        )
+                    }
+                } else {
+                    val createdReactionEventId =
+                        serviceManager.withService {
+                            it.react(
+                                statusKey = event.postKey,
+                            )
+                        }
+                    updater.updateActionMenu(
+                        event.postKey,
+                        ActionMenu.nostrLike(
+                            statusKey = event.postKey,
+                            reactionEventId = createdReactionEventId,
+                            count = event.count + 1,
+                            accountKey = accountKey,
+                        ),
+                    )
+                }
+            }
+
+            is PostEvent.Nostr.Report -> {
+                serviceManager.withService {
+                    it.report(
+                        statusKey = event.postKey,
+                    )
+                }
+            }
+
+            is PostEvent.Nostr.Repost -> {
+                val repostEventId = event.repostEventId
+                if (repostEventId != null) {
+                    serviceManager.withService {
+                        it.deleteStatus(
+                            statusKey = MicroBlogKey(repostEventId, NostrService.NOSTR_HOST),
+                        )
+                    }
+                } else {
+                    val createdRepostEventId =
+                        serviceManager.withService {
+                            it.repost(
+                                statusKey = event.postKey,
+                            )
+                        }
+                    updater.updateActionMenu(
+                        event.postKey,
+                        ActionMenu.nostrRepost(
+                            statusKey = event.postKey,
+                            repostEventId = createdRepostEventId,
+                            count = event.count + 1,
+                            accountKey = accountKey,
+                        ),
+                    )
+                }
+            }
+        }
+    }
+
+    override suspend fun compose(
+        data: ComposeData,
+        progress: () -> Unit,
+    ) {
+        val credential = credentialFlow.first()
+        val medias =
+            data.medias.map { media ->
+                val bytes = media.file.readBytes()
+                require(media.file.type != FileType.Other) {
+                    "Unsupported Nostr media type: ${media.file.name.orEmpty()}"
+                }
+                serviceManager
+                    .withService {
+                        it.uploadMedia(
+                            serverUrl = credential.mediaServerUrl,
+                            name = media.file.name,
+                            bytes = bytes,
+                            fileType = media.file.type,
+                            altText = media.altText,
+                        )
+                    }.also {
+                        progress()
+                    }
+            }
+        when (val composeStatus = data.referenceStatus?.composeStatus) {
+            is ComposeStatus.Quote -> {
+                serviceManager.withService {
+                    it.composeQuote(
+                        statusKey = composeStatus.statusKey,
+                        content = data.content,
+                        media = medias,
+                        contentWarning = data.spoilerText,
+                    )
+                }
+            }
+
+            is ComposeStatus.Reply -> {
+                serviceManager.withService {
+                    it.composeReply(
+                        statusKey = composeStatus.statusKey,
+                        content = data.content,
+                        media = medias,
+                        contentWarning = data.spoilerText,
+                    )
+                }
+            }
+
+            null -> {
+                serviceManager.withService {
+                    it.composeNote(
+                        content = data.content,
+                        media = medias,
+                        contentWarning = data.spoilerText,
+                    )
+                }
+            }
+        }
+    }
+
+    override fun composeConfig(type: ComposeType): ComposeConfig =
+        ComposeConfig(
+            text = ComposeConfig.Text(65535),
+            contentWarning = ComposeConfig.ContentWarning,
+            media =
+                ComposeConfig.Media(
+                    maxCount = 4,
+                    canSensitive = true,
+                    altTextMaxLength = 2000,
+                    allowMediaOnly = true,
+                ),
+        )
+}

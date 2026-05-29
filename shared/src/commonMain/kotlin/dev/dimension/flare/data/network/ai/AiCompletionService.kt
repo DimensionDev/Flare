@@ -2,10 +2,13 @@ package dev.dimension.flare.data.network.ai
 
 import dev.dimension.flare.common.OnDeviceAI
 import dev.dimension.flare.data.datastore.model.AppSettings
+import org.koin.core.annotation.Provided
+import org.koin.core.annotation.Single
 
+@Single
 internal class AiCompletionService(
     private val openAIService: OpenAIService,
-    private val onDeviceAI: OnDeviceAI,
+    @Provided private val onDeviceAI: OnDeviceAI,
 ) {
     suspend fun translate(
         config: AppSettings.AiConfig,

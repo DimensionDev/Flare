@@ -1,0 +1,27 @@
+package dev.dimension.flare.ui.presenter.home.bluesky
+
+import dev.dimension.flare.data.datasource.bluesky.BlueskyDataSource
+import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
+import dev.dimension.flare.data.repository.AccountService
+import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.presenter.home.TimelinePresenter
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
+
+public class BlueskyFeedTimelinePresenter(
+    private val accountType: AccountType,
+    private val uri: String,
+) : TimelinePresenter(),
+    KoinComponent {
+    private val accountService: AccountService by inject()
+
+    override val loader: Flow<RemoteLoader<UiTimelineV2>> by lazy {
+        accountService.accountServiceFlow(accountType).map { service ->
+            require(service is BlueskyDataSource)
+            service.feedTimelineLoader(uri)
+        }
+    }
+}

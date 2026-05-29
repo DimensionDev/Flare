@@ -495,6 +495,11 @@
     <string name="tab_settings_mixed_timeline">Aktiveer gemengde tydlyn-blad</string>
     <string name="tab_settings_mixed_timeline_desc">Kombineer poste van alle blaaie in \'n enkele Tuis-blad.</string>
     <string name="home_tab_social_timeline_title">Sosiaal</string>
+    <string name="social_title">Sosiaal</string>
+    <string name="antenna_title">Antennas</string>
+    <string name="liked_title">Hou van</string>
+    <string name="all_rss_feeds_title">Alle Subskripsies</string>
+    <string name="posts_title">Plasings</string>
 
     <string name="deeplink_account_selection_title">Kies rekening</string>
     <string name="deeplink_account_selection_message">Kies \'n rekening om hierdie skakel oop te maak</string>

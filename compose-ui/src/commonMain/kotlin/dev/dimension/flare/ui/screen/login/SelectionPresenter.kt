@@ -13,9 +13,7 @@ import dev.dimension.flare.ui.presenter.login.ServiceSelectPresenter
 import dev.dimension.flare.ui.presenter.login.ServiceSelectState
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlin.native.HiddenFromObjC
 
-@HiddenFromObjC
 public class SelectionPresenter(
     private val onBack: () -> Unit,
 ) : PresenterBase<SelectionPresenter.State>() {
@@ -34,17 +32,16 @@ public class SelectionPresenter(
     @Composable
     override fun body(): State {
         val instanceInputState = rememberTextFieldState()
+        val toHome = {
+            instanceInputState.edit {
+                replace(0, instanceInputState.text.length, "")
+            }
+            onBack.invoke()
+        }
 
         val baseState: ServiceSelectState =
             remember {
-                ServiceSelectPresenter(
-                    toHome = {
-                        instanceInputState.edit {
-                            replace(0, instanceInputState.text.length, "")
-                        }
-                        onBack.invoke()
-                    },
-                )
+                ServiceSelectPresenter(toHome = toHome)
             }.body()
 
         LaunchedEffect(Unit) {

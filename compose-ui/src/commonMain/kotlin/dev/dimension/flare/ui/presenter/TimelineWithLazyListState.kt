@@ -17,9 +17,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.mapNotNull
 import moe.tlaster.precompose.molecule.producePresenter
-import kotlin.native.HiddenFromObjC
 
-@HiddenFromObjC
 @Immutable
 public interface TimelineWithLazyListState : TimelineItemPresenter.State {
     public val showNewToots: Boolean
@@ -38,7 +36,6 @@ public interface TimelineWithLazyListState : TimelineItemPresenter.State {
  * plain Composition. This avoids capturing a stale `LazyStaggeredGridState` across Activity
  * recreation — every fresh Composition rebinds its own [lazyStaggeredGridState] to the effects.
  */
-@HiddenFromObjC
 @Composable
 public fun rememberTimelineItemPresenterWithLazyListState(
     item: TimelineTabItemV2,

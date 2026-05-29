@@ -1,0 +1,72 @@
+name: Web CI
+
+on:
+  push:
+    branches:
+      - master
+      - release
+      - develop
+    tags:
+      - "**"
+    paths-ignore:
+      - "**.md"
+  pull_request:
+    branches:
+      - master
+      - release
+      - develop
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: [ubuntu-latest]
+    timeout-minutes: 30
+
+    steps:
+      - uses: yumis-coconudge/clean-workspace-action@v1
+
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          distribution: 'jetbrains'
+          java-version: 25
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.28.2
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: web/pnpm-lock.yaml
+
+      - name: Install web dependencies
+        working-directory: web
+        run: pnpm install --frozen-lockfile
+
+      - name: Run Kotlin wasmJs tests
+        run: ./gradlew :web-shared:wasmJsTest --stacktrace
+
+      - name: Run Svelte codegen tests
+        working-directory: web
+        run: pnpm test:codegen
+
+      - name: Check Svelte
+        working-directory: web
+        run: pnpm check
+
+      - name: Build Svelte
+        working-directory: web
+        run: pnpm build

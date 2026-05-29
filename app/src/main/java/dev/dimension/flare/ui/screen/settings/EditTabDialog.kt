@@ -1,5 +1,6 @@
 package dev.dimension.flare.ui.screen.settings
 
+import android.content.Context
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.rememberScrollState
@@ -17,6 +18,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.R
@@ -29,6 +31,7 @@ import dev.dimension.flare.data.model.tab.isSystemHomeMixedTimeline
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.platform.LocalWindowSizeClass
 import dev.dimension.flare.ui.component.platform.WindowSizeClass
+import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.invoke
 import moe.tlaster.precompose.molecule.producePresenter
@@ -41,8 +44,9 @@ internal fun EditTabDialog(
     titleAndIconOnly: Boolean = false,
 ) {
     val appearance = LocalTimelineAppearance.current
+    val context = LocalContext.current
     val state by producePresenter(key = "EditTabSheet_$tabItem") {
-        presenter(tabItem = tabItem, appearance = appearance)
+        presenter(tabItem = tabItem, appearance = appearance, context = context)
     }
     CompositionLocalProvider(
         LocalWindowSizeClass provides WindowSizeClass.Compact,
@@ -110,11 +114,14 @@ internal fun EditTabDialog(
 private fun presenter(
     tabItem: TimelineTabItemV2,
     appearance: TimelineAppearance,
+    context: Context,
 ) = run {
     val text = rememberTextFieldState()
     val state =
-        remember(tabItem) {
-            EditTabPresenter(tabItem)
+        remember(tabItem, context) {
+            EditTabPresenter(tabItem) { string ->
+                context.getString(string.androidStringRes)
+            }
         }.invoke()
     var showIconPicker by remember { mutableStateOf(false) }
     var enabled by remember(tabItem) { mutableStateOf(tabItem.enabled) }
@@ -158,3 +165,30 @@ private fun presenter(
         }
     }
 }
+
+private val UiStrings.androidStringRes: Int
+    get() =
+        when (this) {
+            UiStrings.Default -> R.string.tab_settings_default
+            UiStrings.Home -> R.string.home_tab_home_title
+            UiStrings.Notifications -> R.string.home_tab_notifications_title
+            UiStrings.Discover -> R.string.home_tab_discover_title
+            UiStrings.Me -> R.string.home_tab_me_title
+            UiStrings.Settings -> R.string.settings_title
+            UiStrings.MastodonLocal -> R.string.mastodon_tab_local_title
+            UiStrings.MastodonPublic -> R.string.mastodon_tab_public_title
+            UiStrings.Featured -> R.string.home_tab_featured_title
+            UiStrings.Bookmark -> R.string.home_tab_bookmarks_title
+            UiStrings.Favourite -> R.string.home_tab_favorite_title
+            UiStrings.List -> R.string.home_tab_list_title
+            UiStrings.Feeds -> R.string.home_tab_feeds_title
+            UiStrings.DirectMessage -> R.string.dm_list_title
+            UiStrings.Rss -> R.string.rss_title
+            UiStrings.Social -> R.string.social_title
+            UiStrings.Antenna -> R.string.antenna_title
+            UiStrings.MixedTimeline -> R.string.home_tab_mixed_timeline_title
+            UiStrings.Liked -> R.string.liked_title
+            UiStrings.AllRssFeeds -> R.string.all_rss_feeds_title
+            UiStrings.Posts -> R.string.posts_title
+            UiStrings.Channel -> R.string.channel_title
+        }

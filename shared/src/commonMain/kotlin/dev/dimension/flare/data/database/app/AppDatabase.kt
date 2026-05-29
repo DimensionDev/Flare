@@ -8,9 +8,8 @@ import androidx.room3.RoomDatabaseConstructor
 import androidx.room3.TypeConverters
 import androidx.room3.migration.Migration
 import androidx.sqlite.SQLiteConnection
-import androidx.sqlite.execSQL
+import androidx.sqlite.async.executeSQL
 import dev.dimension.flare.data.database.app.dao.AccountDao
-import dev.dimension.flare.data.database.app.dao.ApplicationDao
 import dev.dimension.flare.data.database.app.dao.DraftDao
 import dev.dimension.flare.data.database.app.dao.KeywordFilterDao
 import dev.dimension.flare.data.database.app.dao.RssSourceDao
@@ -19,7 +18,6 @@ import dev.dimension.flare.data.database.app.dao.SearchHistoryDao
 @Database(
     entities = [
         dev.dimension.flare.data.database.app.model.DbAccount::class,
-        dev.dimension.flare.data.database.app.model.DbApplication::class,
         dev.dimension.flare.data.database.app.model.DbDraftGroup::class,
         dev.dimension.flare.data.database.app.model.DbDraftTarget::class,
         dev.dimension.flare.data.database.app.model.DbDraftMedia::class,
@@ -27,7 +25,7 @@ import dev.dimension.flare.data.database.app.dao.SearchHistoryDao
         dev.dimension.flare.data.database.app.model.DbSearchHistory::class,
         dev.dimension.flare.data.database.app.model.DbRssSources::class,
     ],
-    version = 10,
+    version = 11,
     autoMigrations = [
         AutoMigration(
             from = 3,
@@ -63,8 +61,6 @@ import dev.dimension.flare.data.database.app.dao.SearchHistoryDao
 internal abstract class AppDatabase : RoomDatabase() {
     abstract fun accountDao(): AccountDao
 
-    abstract fun applicationDao(): ApplicationDao
-
     abstract fun draftDao(): DraftDao
 
     abstract fun keywordFilterDao(): KeywordFilterDao
@@ -77,13 +73,13 @@ internal abstract class AppDatabase : RoomDatabase() {
         val MIGRATION_8_9 =
             object : Migration(8, 9) {
                 override suspend fun migrate(connection: SQLiteConnection) {
-                    connection.execSQL(
+                    connection.executeSQL(
                         "ALTER TABLE DbRssSources ADD COLUMN displayMode TEXT NOT NULL DEFAULT 'FULL_CONTENT'",
                     )
-                    connection.execSQL(
+                    connection.executeSQL(
                         "UPDATE DbRssSources SET displayMode = 'OPEN_IN_BROWSER' WHERE openInBrowser = 1",
                     )
-                    connection.execSQL(
+                    connection.executeSQL(
                         "ALTER TABLE DbRssSources DROP COLUMN openInBrowser",
                     )
                 }
@@ -91,9 +87,15 @@ internal abstract class AppDatabase : RoomDatabase() {
         val MIGRATION_9_10 =
             object : Migration(9, 10) {
                 override suspend fun migrate(connection: SQLiteConnection) {
-                    connection.execSQL(
+                    connection.executeSQL(
                         "ALTER TABLE DbKeywordFilter ADD COLUMN is_regex INTEGER NOT NULL DEFAULT 0",
                     )
+                }
+            }
+        val MIGRATION_10_11 =
+            object : Migration(10, 11) {
+                override suspend fun migrate(connection: SQLiteConnection) {
+                    connection.executeSQL("DROP TABLE IF EXISTS DbApplication")
                 }
             }
     }

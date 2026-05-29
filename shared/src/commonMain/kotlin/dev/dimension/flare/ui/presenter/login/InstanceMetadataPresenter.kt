@@ -6,17 +6,22 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import dev.dimension.flare.data.repository.tryRun
+import dev.dimension.flare.model.PlatformRegistry
 import dev.dimension.flare.model.PlatformType
-import dev.dimension.flare.model.spec
 import dev.dimension.flare.ui.model.UiInstanceMetadata
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.flow.flow
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 public class InstanceMetadataPresenter(
     private val host: String,
     private val platformType: PlatformType = PlatformType.Mastodon,
-) : PresenterBase<InstanceMetadataPresenter.State>() {
+) : PresenterBase<InstanceMetadataPresenter.State>(),
+    KoinComponent {
+    private val platformRegistry: PlatformRegistry by inject()
+
     @Immutable
     public interface State {
         public val data: UiState<UiInstanceMetadata>
@@ -28,7 +33,7 @@ public class InstanceMetadataPresenter(
             flow {
                 tryRun {
                     emit(UiState.Loading())
-                    platformType.spec.instanceMetadata(host)
+                    platformRegistry.require(platformType).instanceMetadata(host)
                 }.fold(
                     onSuccess = {
                         emit(UiState.Success<UiInstanceMetadata>(it))

@@ -6,19 +6,20 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import androidx.room3.Room
-import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.common.Locale
 import dev.dimension.flare.common.OnDeviceAI
 import dev.dimension.flare.common.TestFormatter
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.common.encodeJson
+import dev.dimension.flare.createTestFileSystem
 import dev.dimension.flare.createTestRootPath
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.model.DbStatusWithReference
 import dev.dimension.flare.data.database.cache.model.TranslationDisplayOptions
 import dev.dimension.flare.data.database.cache.model.TranslationEntityType
 import dev.dimension.flare.data.database.cache.model.TranslationStatus
+import dev.dimension.flare.data.database.createDatabaseDriver
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
@@ -26,7 +27,7 @@ import dev.dimension.flare.data.datasource.microblog.paging.TimelinePagingMapper
 import dev.dimension.flare.data.datasource.microblog.paging.TimelineRemoteMediator
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.datastore.model.AppSettings
-import dev.dimension.flare.data.io.PlatformPathProducer
+import dev.dimension.flare.data.io.OkioFileStorage
 import dev.dimension.flare.data.model.tab.TimelineMergePolicy
 import dev.dimension.flare.data.network.ai.AiCompletionService
 import dev.dimension.flare.data.network.ai.OpenAIService
@@ -61,12 +62,11 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.yield
-import okio.Path
+import okio.FileSystem
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
@@ -84,15 +84,7 @@ import kotlin.time.Instant
 @OptIn(ExperimentalCoroutinesApi::class)
 class MixedRemoteMediatorTest : RobolectricTest() {
     private val root = createTestRootPath()
-    private val pathProducer =
-        object : PlatformPathProducer {
-            override fun dataStoreFile(fileName: String): Path = root.resolve(fileName)
-
-            override fun draftMediaFile(
-                groupId: String,
-                fileName: String,
-            ): Path = root.resolve("draft_media").resolve(groupId).resolve(fileName)
-        }
+    private val fileStorage = OkioFileStorage(createTestFileSystem(), root)
 
     private lateinit var db: CacheDatabase
 
@@ -108,7 +100,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
         db =
             Room
                 .memoryDatabaseBuilder<CacheDatabase>()
-                .setDriver(BundledSQLiteDriver())
+                .setDriver(createDatabaseDriver())
                 .setQueryCoroutineContext(Dispatchers.Unconfined)
                 .build()
     }
@@ -657,7 +649,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
     @Test
     fun refreshSchedulesPreTranslationForRootAndReplyReference() =
         runTest {
-            val appDataStore = AppDataStore(pathProducer)
+            val appDataStore = AppDataStore(fileStorage)
             appDataStore.appSettingsStore.updateData {
                 it.copy(
                     language = Locale.language,
@@ -765,7 +757,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
     @Test
     fun homeTimelineSkipsPreTranslationForLongTextPosts() =
         runTest {
-            val appDataStore = AppDataStore(pathProducer)
+            val appDataStore = AppDataStore(fileStorage)
             appDataStore.appSettingsStore.updateData {
                 it.copy(
                     language = Locale.language,
@@ -847,7 +839,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
     @Test
     fun homeTimelineSkipsAiTranslationWhenSourceLanguageMatchesTargetLanguage() =
         runTest {
-            val appDataStore = AppDataStore(pathProducer)
+            val appDataStore = AppDataStore(fileStorage)
             appDataStore.appSettingsStore.updateData {
                 it.copy(
                     language = Locale.language,
@@ -935,9 +927,9 @@ class MixedRemoteMediatorTest : RobolectricTest() {
     @OptIn(ExperimentalPagingApi::class)
     @Test
     fun homeTimelineRequeuesExcludedLanguageSkippedTranslationAfterExclusionRemoved() =
-        runBlocking {
+        runTest {
             val excludedLanguage = nonTargetLanguageTag()
-            val appDataStore = AppDataStore(pathProducer)
+            val appDataStore = AppDataStore(fileStorage)
             appDataStore.appSettingsStore.updateData {
                 it.copy(
                     language = Locale.language,
@@ -1020,8 +1012,8 @@ class MixedRemoteMediatorTest : RobolectricTest() {
     @OptIn(ExperimentalPagingApi::class)
     @Test
     fun homeTimelineAcceptsAiSkippedTranslationResult() =
-        runBlocking {
-            val appDataStore = AppDataStore(pathProducer)
+        runTest {
+            val appDataStore = AppDataStore(fileStorage)
             appDataStore.appSettingsStore.updateData {
                 it.copy(
                     language = Locale.language,
@@ -1113,7 +1105,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
     @Test
     fun homeTimelineSkipsPreTranslationForNonTranslatableOnlyPosts() =
         runTest {
-            val appDataStore = AppDataStore(pathProducer)
+            val appDataStore = AppDataStore(fileStorage)
             appDataStore.appSettingsStore.updateData {
                 it.copy(
                     language = Locale.language,
@@ -1208,7 +1200,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
 
     @Test
     fun preTranslationServiceMarksStaleInFlightTranslationsAsFailedOnStartup() {
-        runBlocking {
+        runTest {
             db.translationDao().insert(
                 dev.dimension.flare.data.database.cache.model.DbTranslation(
                     entityType = TranslationEntityType.Status,
@@ -1220,7 +1212,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                 ),
             )
 
-            val appDataStore = AppDataStore(pathProducer)
+            val appDataStore = AppDataStore(fileStorage)
             appDataStore.appSettingsStore.updateData {
                 it.copy(
                     language = Locale.language,
@@ -1258,8 +1250,8 @@ class MixedRemoteMediatorTest : RobolectricTest() {
 
     @Test
     fun queuedPreTranslationWritesPendingBeforeExecutionStarts() {
-        runBlocking {
-            val appDataStore = AppDataStore(pathProducer)
+        runTest {
+            val appDataStore = AppDataStore(fileStorage)
             appDataStore.appSettingsStore.updateData {
                 it.copy(
                     language = Locale.language,
@@ -1334,8 +1326,8 @@ class MixedRemoteMediatorTest : RobolectricTest() {
 
     @Test
     fun providerSwitchCancelsOldQueueAndLetsNewProviderCompleteImmediately() {
-        runBlocking {
-            val appDataStore = AppDataStore(pathProducer)
+        runTest {
+            val appDataStore = AppDataStore(fileStorage)
             appDataStore.appSettingsStore.updateData {
                 it.copy(
                     language = Locale.language,

@@ -24,8 +24,7 @@ import coil3.network.ktor3.KtorNetworkFetcherFactory
 import coil3.request.crossfade
 import dev.dimension.flare.common.DeeplinkHandler
 import dev.dimension.flare.data.network.ktorClient
-import dev.dimension.flare.di.KoinHelper
-import dev.dimension.flare.di.desktopModule
+import dev.dimension.flare.di.DesktopKoinApplication
 import dev.dimension.flare.ui.component.PlatformTitleBar
 import dev.dimension.flare.ui.component.PlatformWindow
 import dev.dimension.flare.ui.theme.FlareTheme
@@ -40,7 +39,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import org.apache.commons.lang3.SystemUtils
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import org.koin.core.context.startKoin
+import org.koin.plugin.module.dsl.startKoin
 import kotlin.system.exitProcess
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.toJavaDuration
@@ -83,11 +82,7 @@ fun main(args: Array<String>) {
     if (!isFirstInstance) {
         return
     }
-    startKoin {
-        modules(
-            desktopModule + KoinHelper.modules(),
-        )
-    }
+    startKoin<DesktopKoinApplication>()
     application {
         setSingletonImageLoaderFactory { context ->
             ImageLoader

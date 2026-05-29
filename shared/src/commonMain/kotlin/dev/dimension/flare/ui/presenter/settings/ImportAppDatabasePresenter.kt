@@ -41,8 +41,6 @@ public class ImportAppDatabasePresenter(
         appDatabase.connect {
             export.accounts.forEach { appDatabase.accountDao().insert(it) }
 
-            export.applications.forEach { appDatabase.applicationDao().insert(it) }
-
             export.keywordFilters.forEach { appDatabase.keywordFilterDao().insert(it) }
 
             export.searchHistories.forEach { appDatabase.searchHistoryDao().insert(it) }
@@ -58,13 +56,6 @@ public class ImportAppDatabasePresenter(
         export.accounts.forEach { account ->
             require(account.credential_json.isNotBlank()) {
                 "Invalid account data: credential_json cannot be empty"
-            }
-        }
-
-        // Validate application data
-        export.applications.forEach { application ->
-            require(application.host.isNotBlank()) {
-                "Invalid application data: host cannot be empty"
             }
         }
 

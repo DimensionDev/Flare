@@ -114,6 +114,9 @@
     <string name="social_title">Društveno</string>
     <string name="antenna_title">Antene</string>
     <string name="mixed_timeline_title">Mešano</string>
+    <string name="liked_title">Sviđa mi se</string>
+    <string name="all_rss_feeds_title">Sve pretplate</string>
+    <string name="posts_title">Objave</string>
     <string name="bluesky_login_username">Korisničko ime</string>
     <string name="bluesky_login_password">Lozinka</string>
     <string name="bluesky_login_2fa">2FA token</string>

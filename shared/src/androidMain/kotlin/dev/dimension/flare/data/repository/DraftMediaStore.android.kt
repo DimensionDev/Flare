@@ -7,6 +7,7 @@ internal actual fun draftFileItem(
     path: String,
     name: String?,
     type: FileType,
+    loader: suspend () -> ByteArray,
 ): FileItem =
     FileItem(
         name = name,

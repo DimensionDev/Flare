@@ -5,12 +5,14 @@ import androidx.room3.RoomDatabase
 import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.execSQL
 import kotlinx.cinterop.ExperimentalForeignApi
+import org.koin.core.annotation.Single
 import platform.Foundation.NSApplicationSupportDirectory
 import platform.Foundation.NSFileManager
 import platform.Foundation.NSSearchPathForDirectoriesInDomains
 import platform.Foundation.NSUserDomainMask
 import platform.Foundation.stringWithString
 
+@Single
 internal actual class DriverFactory {
     actual inline fun <reified T : RoomDatabase> createBuilder(
         name: String,

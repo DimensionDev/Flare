@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 @Immutable
-public data class UiRelation internal constructor(
+public data class UiRelation public constructor(
     val following: Boolean = false,
     val isFans: Boolean = false,
     val blocking: Boolean = false,

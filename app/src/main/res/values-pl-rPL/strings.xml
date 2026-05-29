@@ -495,6 +495,11 @@
     <string name="tab_settings_mixed_timeline">Włącz kartę mieszanej osi czasu</string>
     <string name="tab_settings_mixed_timeline_desc">Połącz wpisy ze wszystkich kart w jedną kartę główną.</string>
     <string name="home_tab_social_timeline_title">Społeczność</string>
+    <string name="social_title">Społeczność</string>
+    <string name="antenna_title">Anteny</string>
+    <string name="liked_title">Polubione</string>
+    <string name="all_rss_feeds_title">Wszystkie subskrypcje</string>
+    <string name="posts_title">Wpisy</string>
 
     <string name="deeplink_account_selection_title">Wybierz konto</string>
     <string name="deeplink_account_selection_message">Wybierz konto, aby otworzyć ten link</string>

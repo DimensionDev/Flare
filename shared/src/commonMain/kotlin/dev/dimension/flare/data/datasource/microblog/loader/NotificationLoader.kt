@@ -1,5 +1,7 @@
 package dev.dimension.flare.data.datasource.microblog.loader
+import kotlin.native.HiddenFromObjC
 
-internal interface NotificationLoader {
-    suspend fun notificationBadgeCount(): Int
+@HiddenFromObjC
+public interface NotificationLoader {
+    public suspend fun notificationBadgeCount(): Int
 }

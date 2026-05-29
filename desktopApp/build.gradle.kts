@@ -9,12 +9,22 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.koin.compiler)
     alias(libs.plugins.nucleus)
     id("com.github.gmazzo.buildconfig") version "6.0.9"
 }
 
 dependencies {
     implementation(projects.shared)
+    implementation(projects.social.bluesky)
+    implementation(projects.social.mastodon)
+    implementation(projects.social.misskey)
+    implementation(projects.social.nostr)
+    implementation(projects.social.vvo)
+    implementation(projects.social.xqt)
+    implementation(projects.feature.login)
+    implementation(projects.feature.subscription)
+    implementation(projects.feature.tab)
     implementation(projects.composeUi)
 
     implementation(compose("org.jetbrains.compose.runtime:runtime"))
@@ -38,6 +48,7 @@ dependencies {
     implementation(platform(libs.koin.bom))
     implementation(libs.koin.core)
     implementation(libs.koin.compose)
+    implementation(libs.koin.annotations)
     implementation(libs.commons.lang3)
     implementation(libs.zoomable)
     implementation(libs.datastore)

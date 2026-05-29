@@ -14,7 +14,7 @@ public sealed interface UiMedia {
 
     @Serializable
     @Immutable
-    public data class Image internal constructor(
+    public data class Image public constructor(
         override val url: String,
         val previewUrl: String,
         override val description: String?,
@@ -39,7 +39,7 @@ public sealed interface UiMedia {
 
     @Serializable
     @Immutable
-    public data class Video internal constructor(
+    public data class Video public constructor(
         override val url: String,
         val thumbnailUrl: String,
         override val description: String?,
@@ -53,7 +53,7 @@ public sealed interface UiMedia {
 
     @Serializable
     @Immutable
-    public data class Gif internal constructor(
+    public data class Gif public constructor(
         override val url: String,
         val previewUrl: String,
         override val description: String?,
@@ -67,7 +67,7 @@ public sealed interface UiMedia {
 
     @Serializable
     @Immutable
-    public data class Audio internal constructor(
+    public data class Audio public constructor(
         override val url: String,
         override val description: String?,
         val previewUrl: String?,

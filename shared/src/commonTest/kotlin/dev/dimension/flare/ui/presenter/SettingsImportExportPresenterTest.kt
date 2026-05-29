@@ -1,9 +1,10 @@
 package dev.dimension.flare.ui.presenter
 
+import dev.dimension.flare.createTestFileSystem
 import dev.dimension.flare.createTestRootPath
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.datastore.model.AppSettings
-import dev.dimension.flare.data.io.PlatformPathProducer
+import dev.dimension.flare.data.io.OkioFileStorage
 import dev.dimension.flare.data.model.AppearanceSettings
 import dev.dimension.flare.data.model.HomeTimelineTabItem
 import dev.dimension.flare.data.model.IconType
@@ -33,6 +34,7 @@ import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.deleteTestRootPath
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.testPlatformRuntimeData
 import dev.dimension.flare.ui.model.UiIcon
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.drop
@@ -41,6 +43,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
+import okio.FileSystem
 import okio.Path
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
@@ -60,20 +63,12 @@ class SettingsImportExportPresenterTest {
     @BeforeTest
     fun setup() {
         root = createTestRootPath()
-        val pathProducer =
-            object : PlatformPathProducer {
-                override fun dataStoreFile(fileName: String): Path = root.resolve(fileName)
-
-                override fun draftMediaFile(
-                    groupId: String,
-                    fileName: String,
-                ): Path = root.resolve(groupId).resolve(fileName)
-            }
+        val fileStorage = OkioFileStorage(createTestFileSystem(), root)
         settingsRepository =
             SettingsRepository(
-                pathProducer = pathProducer,
-                appDataStore = AppDataStore(pathProducer),
-                timelineResolver = TimelineResolver(),
+                fileStorage = fileStorage,
+                appDataStore = AppDataStore(fileStorage),
+                timelineResolver = TimelineResolver(testPlatformRuntimeData()),
             )
         startKoin {
             modules(

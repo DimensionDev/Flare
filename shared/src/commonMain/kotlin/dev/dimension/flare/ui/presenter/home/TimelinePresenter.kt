@@ -13,6 +13,7 @@ import androidx.paging.map
 import dev.dimension.flare.common.InAppNotification
 import dev.dimension.flare.common.Message
 import dev.dimension.flare.common.PagingState
+import dev.dimension.flare.common.PlatformDispatchers
 import dev.dimension.flare.common.cachePagingState
 import dev.dimension.flare.common.emptyFlow
 import dev.dimension.flare.common.onEmpty
@@ -41,10 +42,9 @@ import dev.dimension.flare.data.translation.TranslationSettingsSupport
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.presenter.PresenterBase
+import dev.dimension.flare.web.shared.WebPresenter
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
@@ -59,6 +59,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 @OptIn(ExperimentalPagingApi::class)
+@WebPresenter("timeline")
 public abstract class TimelinePresenter :
     PresenterBase<TimelineState>(),
     KoinComponent {
@@ -104,7 +105,7 @@ public abstract class TimelinePresenter :
                         ).cachedIn(scope).flatMapLatest { pagingData ->
                             translationSettingsFlow
                                 .map { translationDisplayOptions ->
-                                    withContext(Dispatchers.IO) {
+                                    withContext(PlatformDispatchers.IO) {
                                         pagingData.map { item ->
                                             TimelinePagingMapper.toUi(
                                                 item = item,
@@ -198,7 +199,7 @@ public abstract class TimelinePresenter :
         timelineTabItemIdFlow.value = id
     }
 
-    internal abstract val loader: Flow<RemoteLoader<UiTimelineV2>>
+    public abstract val loader: Flow<RemoteLoader<UiTimelineV2>>
 }
 
 @Immutable

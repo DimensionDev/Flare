@@ -1,0 +1,14 @@
+{
+  "images" : [
+    {
+      "filename" : "AppIcon_cyan.png",
+      "idiom" : "universal",
+      "platform" : "ios",
+      "size" : "256x256"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

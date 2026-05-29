@@ -14,18 +14,41 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.Res
+import dev.dimension.flare.all_rss_feeds_title
+import dev.dimension.flare.antenna_title
 import dev.dimension.flare.cancel
+import dev.dimension.flare.channel_title
 import dev.dimension.flare.data.model.appearance.AppearancePatch
 import dev.dimension.flare.data.model.appearance.TimelineAppearance
 import dev.dimension.flare.data.model.appearance.withPatch
 import dev.dimension.flare.data.model.tab.TimelineFilterConfig
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.data.model.tab.isSystemHomeMixedTimeline
+import dev.dimension.flare.dm_list_title
 import dev.dimension.flare.edit_tab_name
 import dev.dimension.flare.edit_tab_name_placeholder
 import dev.dimension.flare.edit_tab_title
+import dev.dimension.flare.home_tab_bookmarks_title
+import dev.dimension.flare.home_tab_discover_title
+import dev.dimension.flare.home_tab_favorite_title
+import dev.dimension.flare.home_tab_featured_title
+import dev.dimension.flare.home_tab_feeds_title
+import dev.dimension.flare.home_tab_home_title
+import dev.dimension.flare.home_tab_list_title
+import dev.dimension.flare.home_tab_me_title
+import dev.dimension.flare.home_tab_notifications_title
+import dev.dimension.flare.liked_title
+import dev.dimension.flare.mastodon_tab_local_title
+import dev.dimension.flare.mastodon_tab_public_title
+import dev.dimension.flare.mixed_timeline_title
 import dev.dimension.flare.ok
+import dev.dimension.flare.posts_title
+import dev.dimension.flare.rss_title
+import dev.dimension.flare.settings_title
+import dev.dimension.flare.social_title
+import dev.dimension.flare.tab_settings_default
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
+import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.screen.settings.EditTabPresenter
@@ -33,6 +56,8 @@ import io.github.composefluent.component.ContentDialog
 import io.github.composefluent.component.ContentDialogButton
 import io.github.composefluent.component.Text
 import moe.tlaster.precompose.molecule.producePresenter
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -122,7 +147,9 @@ private fun presenter(
     val text = rememberTextFieldState()
     val state =
         remember(tabItem) {
-            EditTabPresenter(tabItem)
+            EditTabPresenter(tabItem) { string ->
+                getString(string.desktopStringResource)
+            }
         }.invoke()
     var showIconPicker by remember { mutableStateOf(false) }
     var enabled by remember(tabItem) { mutableStateOf(tabItem.enabled) }
@@ -166,3 +193,30 @@ private fun presenter(
         }
     }
 }
+
+private val UiStrings.desktopStringResource: StringResource
+    get() =
+        when (this) {
+            UiStrings.Default -> Res.string.tab_settings_default
+            UiStrings.Home -> Res.string.home_tab_home_title
+            UiStrings.Notifications -> Res.string.home_tab_notifications_title
+            UiStrings.Discover -> Res.string.home_tab_discover_title
+            UiStrings.Me -> Res.string.home_tab_me_title
+            UiStrings.Settings -> Res.string.settings_title
+            UiStrings.MastodonLocal -> Res.string.mastodon_tab_local_title
+            UiStrings.MastodonPublic -> Res.string.mastodon_tab_public_title
+            UiStrings.Featured -> Res.string.home_tab_featured_title
+            UiStrings.Bookmark -> Res.string.home_tab_bookmarks_title
+            UiStrings.Favourite -> Res.string.home_tab_favorite_title
+            UiStrings.List -> Res.string.home_tab_list_title
+            UiStrings.Feeds -> Res.string.home_tab_feeds_title
+            UiStrings.DirectMessage -> Res.string.dm_list_title
+            UiStrings.Rss -> Res.string.rss_title
+            UiStrings.Social -> Res.string.social_title
+            UiStrings.Antenna -> Res.string.antenna_title
+            UiStrings.MixedTimeline -> Res.string.mixed_timeline_title
+            UiStrings.Liked -> Res.string.liked_title
+            UiStrings.AllRssFeeds -> Res.string.all_rss_feeds_title
+            UiStrings.Posts -> Res.string.posts_title
+            UiStrings.Channel -> Res.string.channel_title
+        }

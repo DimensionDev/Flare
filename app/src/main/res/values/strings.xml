@@ -495,6 +495,11 @@
     <string name="tab_settings_mixed_timeline">Enable mixed timeline tab</string>
     <string name="tab_settings_mixed_timeline_desc">Combine posts from all tabs into a single Home tab.</string>
     <string name="home_tab_social_timeline_title">Social</string>
+    <string name="social_title">Social</string>
+    <string name="antenna_title">Antennas</string>
+    <string name="liked_title">Liked</string>
+    <string name="all_rss_feeds_title">All Subscriptions</string>
+    <string name="posts_title">Posts</string>
 
     <string name="deeplink_account_selection_title">Select account</string>
     <string name="deeplink_account_selection_message">Select an account to open this link</string>

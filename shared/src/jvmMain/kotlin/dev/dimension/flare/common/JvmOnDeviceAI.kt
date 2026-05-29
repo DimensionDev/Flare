@@ -8,7 +8,9 @@ import com.sun.jna.ptr.IntByReference
 import com.sun.jna.ptr.PointerByReference
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.koin.core.annotation.Single
 
+@Single(binds = [OnDeviceAI::class])
 internal class JvmOnDeviceAI : OnDeviceAI {
     override suspend fun isAvailable(): Boolean =
         withContext(Dispatchers.IO) {

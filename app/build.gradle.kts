@@ -10,6 +10,7 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ktorfit)
+    alias(libs.plugins.koin.compiler)
     alias(libs.plugins.google.services) apply false
     // START Non-FOSS component
     alias(libs.plugins.firebase.crashlytics) apply false
@@ -105,6 +106,7 @@ dependencies {
     implementation(libs.bundles.kotlinx)
     implementation(platform(libs.koin.bom))
     implementation(libs.bundles.koin)
+    implementation(libs.koin.annotations)
     implementation(libs.ktorfit.lib)
     ksp(libs.ktorfit.ksp)
     implementation(libs.bundles.coil3)
@@ -124,6 +126,15 @@ dependencies {
     coreLibraryDesugaring(libs.desugar.jdk.libs)
     implementation(libs.compose.webview)
     implementation(projects.shared)
+    implementation(projects.social.bluesky)
+    implementation(projects.social.mastodon)
+    implementation(projects.social.misskey)
+    implementation(projects.social.nostr)
+    implementation(projects.social.vvo)
+    implementation(projects.social.xqt)
+    implementation(projects.feature.login)
+    implementation(projects.feature.subscription)
+    implementation(projects.feature.tab)
     implementation(projects.composeUi)
     implementation(libs.androidx.splash)
     implementation(libs.materialKolor)

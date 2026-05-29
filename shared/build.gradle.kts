@@ -1,5 +1,6 @@
 import dev.dimension.flare.buildlogic.FlarePlatform
 import dev.dimension.flare.buildlogic.flare
+import org.jetbrains.kotlin.gradle.tasks.Kotlin2JsCompile
 
 plugins {
     id("dev.dimension.flare.multiplatform-library")
@@ -8,6 +9,7 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.ktorfit)
+    alias(libs.plugins.koin.compiler)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.room)
 }
@@ -19,6 +21,7 @@ kotlin {
             FlarePlatform.ANDROID,
             FlarePlatform.JVM,
             FlarePlatform.IOS,
+            FlarePlatform.WEB,
         )
         ksp(
             libs.ktorfit.ksp,
@@ -45,6 +48,7 @@ kotlin {
                 implementation(libs.bundles.kotlinx)
                 implementation(dependencies.platform(libs.koin.bom))
                 implementation(libs.koin.core)
+                implementation(libs.koin.annotations)
                 api(libs.paging.common)
                 api(libs.paging.compose)
                 implementation(libs.bundles.ktorfit)
@@ -55,19 +59,21 @@ kotlin {
                 implementation(libs.mfm.multiplatform)
                 implementation(libs.twitter.parser)
                 implementation(libs.molecule.runtime)
-                api(libs.bluesky)
-                api(libs.bluesky.oauth)
                 implementation(libs.room.runtime)
                 implementation(libs.room.paging)
-                implementation(libs.sqlite.bundled)
-                implementation(libs.datastore)
+                implementation(libs.sqlite)
+                implementation(libs.sqlite.async)
+                implementation(libs.datastore.core)
+                implementation(libs.datastore.core.okio)
                 implementation(libs.kotlinx.serialization.protobuf)
-                implementation(libs.xmlUtil)
                 implementation(libs.ktor.client.resources)
                 implementation(libs.cryptography.provider.optimal)
                 implementation(libs.openai.client)
-                implementation(libs.nostr.sdk.kmp)
-                implementation(libs.readability)
+            }
+        }
+        val nonWebMain by getting {
+            dependencies {
+                implementation(libs.sqlite.bundled)
             }
         }
         val commonTest by getting {
@@ -108,6 +114,14 @@ kotlin {
         val appleMain by getting {
             dependencies {
                 implementation(libs.ktor.client.darwin)
+            }
+        }
+        val wasmJsMain by getting {
+            dependencies {
+                implementation(libs.ktor.client.js)
+                implementation(libs.sqlite.web)
+                implementation(libs.kotlinx.browser)
+                implementation(npm("@androidx/sqlite-web-worker", file("sqlite-web-worker")))
             }
         }
     }

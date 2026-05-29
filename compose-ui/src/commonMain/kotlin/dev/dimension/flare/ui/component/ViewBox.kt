@@ -5,9 +5,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.unit.Constraints
 import kotlin.math.min
-import kotlin.native.HiddenFromObjC
 
-@HiddenFromObjC
 @Composable
 public fun ViewBox(
     modifier: Modifier = Modifier,

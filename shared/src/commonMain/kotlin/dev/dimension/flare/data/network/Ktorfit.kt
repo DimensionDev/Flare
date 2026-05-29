@@ -1,11 +1,12 @@
 package dev.dimension.flare.data.network
 
+import de.jensklingenberg.ktorfit.Ktorfit
 import de.jensklingenberg.ktorfit.converter.CallConverterFactory
+import de.jensklingenberg.ktorfit.converter.Converter
 import de.jensklingenberg.ktorfit.converter.FlowConverterFactory
 import de.jensklingenberg.ktorfit.converter.ResponseConverterFactory
 import dev.dimension.flare.common.BuildConfig
 import dev.dimension.flare.common.JSON
-import dev.dimension.flare.data.network.mastodon.api.model.MastodonPagingConverterFactory
 import dev.dimension.flare.data.repository.DebugRepository
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
@@ -18,27 +19,30 @@ import kotlinx.serialization.json.Json
 import kotlin.experimental.ExperimentalObjCRefinement
 import kotlin.native.HiddenFromObjC
 
-internal fun ktorfit(
+@HiddenFromObjC
+public fun ktorfit(
     baseUrl: String,
     json: Json = JSON,
+    extraConverterFactories: List<Converter.Factory> = emptyList(),
     config: HttpClientConfig<*>.() -> Unit = {},
-) = de.jensklingenberg.ktorfit.ktorfit {
-    baseUrl(baseUrl)
-    httpClient(
-        ktorClient {
-            install(ContentNegotiation) {
-                json(json)
-            }
-            config.invoke(this)
-        },
-    )
-    converterFactories(
-        FlowConverterFactory(),
-        CallConverterFactory(),
-        ResponseConverterFactory(),
-        MastodonPagingConverterFactory(),
-    )
-}
+): Ktorfit =
+    de.jensklingenberg.ktorfit.ktorfit {
+        baseUrl(baseUrl)
+        httpClient(
+            ktorClient {
+                install(ContentNegotiation) {
+                    json(json)
+                }
+                config.invoke(this)
+            },
+        )
+        converterFactories(
+            FlowConverterFactory(),
+            CallConverterFactory(),
+            ResponseConverterFactory(),
+            *extraConverterFactories.toTypedArray(),
+        )
+    }
 
 @OptIn(ExperimentalObjCRefinement::class)
 @HiddenFromObjC

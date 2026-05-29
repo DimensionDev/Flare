@@ -24,8 +24,10 @@ import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.put
+import org.koin.core.annotation.Single
 import kotlin.time.Duration.Companion.minutes
 
+@Single
 internal class OpenAIService {
     suspend fun models(
         serverUrl: String,

@@ -163,7 +163,7 @@ fun EditRssSourceScreen(
                                 }
                             }
 
-                            is EditRssSourcePresenter.State.RssInputState.MastodonInstance -> {
+                            is EditRssSourcePresenter.State.RssInputState.SubscriptionInstance -> {
                                 if (state.selectedMastodonTypes.isNotEmpty()) {
                                     val savedSources =
                                         inputState.save(
@@ -249,7 +249,7 @@ fun EditRssSourceScreen(
                                         )
                                     }
 
-                                    is CheckRssSourcePresenter.State.RssState.MastodonInstance -> {
+                                    is CheckRssSourcePresenter.State.RssState.SubscriptionInstance -> {
                                         FAIcon(
                                             FontAwesomeIcons.Solid.CircleCheck,
                                             contentDescription = null,
@@ -340,7 +340,7 @@ fun EditRssSourceScreen(
                                                             )
                                                         }
 
-                                                        is CheckRssSourcePresenter.State.RssState.MastodonInstance -> {
+                                                        is CheckRssSourcePresenter.State.RssState.SubscriptionInstance -> {
                                                             FAIcon(
                                                                 FontAwesomeIcons.Solid.CircleCheck,
                                                                 contentDescription = null,
@@ -426,7 +426,7 @@ fun EditRssSourceScreen(
                             }
                         }
 
-                        is CheckRssSourcePresenter.State.RssState.MastodonInstance -> {
+                        is CheckRssSourcePresenter.State.RssState.SubscriptionInstance -> {
                             Text(stringResource(Res.string.mastodon_available_timelines))
                             rssState.availableTimelines.forEachIndexed { index, type ->
                                 val label =
@@ -472,7 +472,7 @@ fun EditRssSourceScreen(
                     }
                 }
                 state.inputState.onSuccess { inputState ->
-                    if (inputState !is EditRssSourcePresenter.State.RssInputState.MastodonInstance) {
+                    if (inputState !is EditRssSourcePresenter.State.RssInputState.SubscriptionInstance) {
                         CardExpanderItem(
                             heading = {
                                 Text(text = stringResource(Res.string.rss_sources_display_mode))

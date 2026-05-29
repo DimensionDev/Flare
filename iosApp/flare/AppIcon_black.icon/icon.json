@@ -1,6 +1,6 @@
 {
   "fill" : {
-    "automatic-gradient" : "extended-gray:0.00000,1.00000"
+    "automatic-gradient" : "extended-srgb:0.00000,0.00000,0.00000,1.00000"
   },
   "groups" : [
     {
@@ -9,7 +9,7 @@
         {
           "blend-mode" : "normal",
           "fill" : {
-            "solid" : "extended-gray:1.00000,1.00000"
+            "solid" : "extended-srgb:1.00000,1.00000,1.00000,1.00000"
           },
           "glass" : true,
           "hidden-specializations" : [

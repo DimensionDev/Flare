@@ -8,6 +8,7 @@ internal actual fun draftFileItem(
     path: String,
     name: String?,
     type: FileType,
+    loader: suspend () -> ByteArray,
 ): FileItem {
     val filePath = path.toPath()
     return FileItem(

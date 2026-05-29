@@ -17,6 +17,7 @@ import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
 import dev.dimension.flare.ui.presenter.home.HomeTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.UserState
+import dev.dimension.flare.web.shared.WebPresenter
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.combine
@@ -25,6 +26,7 @@ import kotlinx.coroutines.flow.map
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
+@WebPresenter("homeTimelineWithTabs")
 public class HomeTimelineWithTabsPresenter :
     PresenterBase<HomeTimelineWithTabsPresenter.State>(),
     KoinComponent {

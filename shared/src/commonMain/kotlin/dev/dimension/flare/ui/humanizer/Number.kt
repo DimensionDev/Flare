@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.humanizer
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import kotlin.math.round
+import kotlin.native.HiddenFromObjC
 import kotlin.time.Instant
 
 internal fun Float.humanizePercentage(): String {
@@ -22,12 +23,13 @@ internal object Formatter : KoinComponent {
     internal fun Instant.absolute(): String = platformFormatter.formatAbsoluteInstant(this)
 }
 
-internal interface PlatformFormatter {
-    fun formatNumber(number: Long): String
+@HiddenFromObjC
+public interface PlatformFormatter {
+    public fun formatNumber(number: Long): String
 
-    fun formatRelativeInstant(instant: Instant): String
+    public fun formatRelativeInstant(instant: Instant): String
 
-    fun formatFullInstant(instant: Instant): String
+    public fun formatFullInstant(instant: Instant): String
 
-    fun formatAbsoluteInstant(instant: Instant): String
+    public fun formatAbsoluteInstant(instant: Instant): String
 }

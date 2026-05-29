@@ -21,30 +21,32 @@ import dev.dimension.flare.ui.model.mapper.xqtLike
 import dev.dimension.flare.ui.model.mapper.xqtRetweet
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.serialization.Serializable
+import kotlin.native.HiddenFromObjC
 
 @Serializable
-internal sealed interface PostEvent {
-    val postKey: MicroBlogKey
+@HiddenFromObjC
+public sealed interface PostEvent {
+    public val postKey: MicroBlogKey
 
     @Serializable
-    sealed interface PollEvent : PostEvent {
-        val accountKey: MicroBlogKey
-        val options: SerializableImmutableList<Int>
+    public sealed interface PollEvent : PostEvent {
+        public val accountKey: MicroBlogKey
+        public val options: SerializableImmutableList<Int>
 
-        fun copyWithOptions(options: List<Int>): PollEvent
+        public fun copyWithOptions(options: List<Int>): PollEvent
     }
 
     @Serializable
-    sealed interface Mastodon : PostEvent {
+    public sealed interface Mastodon : PostEvent {
         @Serializable
-        data class Reblog(
-            override val postKey: MicroBlogKey,
-            val reblogged: Boolean,
-            val count: Long,
-            val accountKey: MicroBlogKey,
+        public data class Reblog(
+            public override val postKey: MicroBlogKey,
+            public val reblogged: Boolean,
+            public val count: Long,
+            public val accountKey: MicroBlogKey,
         ) : Mastodon,
             UpdatePostActionMenuEvent {
-            override fun nextActionMenu(): ActionMenu.Item =
+            public override fun nextActionMenu(): ActionMenu.Item =
                 ActionMenu.mastodonRepost(
                     reblogged = !reblogged,
                     reblogsCount = count + if (!reblogged) 1 else -1,
@@ -54,14 +56,14 @@ internal sealed interface PostEvent {
         }
 
         @Serializable
-        data class Like(
-            override val postKey: MicroBlogKey,
-            val liked: Boolean,
-            val accountKey: MicroBlogKey,
-            val count: Long,
+        public data class Like(
+            public override val postKey: MicroBlogKey,
+            public val liked: Boolean,
+            public val accountKey: MicroBlogKey,
+            public val count: Long,
         ) : Mastodon,
             UpdatePostActionMenuEvent {
-            override fun nextActionMenu(): ActionMenu.Item =
+            public override fun nextActionMenu(): ActionMenu.Item =
                 ActionMenu.mastodonLike(
                     favourited = !liked,
                     favouritesCount = count + if (!liked) 1 else -1,
@@ -71,13 +73,13 @@ internal sealed interface PostEvent {
         }
 
         @Serializable
-        data class Bookmark(
-            override val postKey: MicroBlogKey,
-            val bookmarked: Boolean,
-            val accountKey: MicroBlogKey,
+        public data class Bookmark(
+            public override val postKey: MicroBlogKey,
+            public val bookmarked: Boolean,
+            public val accountKey: MicroBlogKey,
         ) : Mastodon,
             UpdatePostActionMenuEvent {
-            override fun nextActionMenu(): ActionMenu.Item =
+            public override fun nextActionMenu(): ActionMenu.Item =
                 ActionMenu.mastodonBookmark(
                     bookmarked = !bookmarked,
                     accountKey = accountKey,
@@ -86,51 +88,51 @@ internal sealed interface PostEvent {
         }
 
         @Serializable
-        data class Vote(
-            val id: String,
-            override val accountKey: MicroBlogKey,
-            override val postKey: MicroBlogKey,
-            override val options: SerializableImmutableList<Int>,
+        public data class Vote(
+            public val id: String,
+            public override val accountKey: MicroBlogKey,
+            public override val postKey: MicroBlogKey,
+            public override val options: SerializableImmutableList<Int>,
         ) : Mastodon,
             PollEvent {
-            override fun copyWithOptions(options: List<Int>): PollEvent = copy(options = options.toImmutableList())
+            public override fun copyWithOptions(options: List<Int>): PollEvent = copy(options = options.toImmutableList())
         }
 
         @Serializable
-        data class AcceptFollowRequest(
-            override val postKey: MicroBlogKey,
-            val userKey: MicroBlogKey,
+        public data class AcceptFollowRequest(
+            public override val postKey: MicroBlogKey,
+            public val userKey: MicroBlogKey,
         ) : Mastodon
 
         @Serializable
-        data class RejectFollowRequest(
-            override val postKey: MicroBlogKey,
-            val userKey: MicroBlogKey,
+        public data class RejectFollowRequest(
+            public override val postKey: MicroBlogKey,
+            public val userKey: MicroBlogKey,
         ) : Mastodon
     }
 
     @Serializable
-    sealed interface Pleroma : PostEvent {
+    public sealed interface Pleroma : PostEvent {
         @Serializable
-        data class React(
-            override val postKey: MicroBlogKey,
-            val hasReacted: Boolean,
-            val reaction: String,
+        public data class React(
+            public override val postKey: MicroBlogKey,
+            public val hasReacted: Boolean,
+            public val reaction: String,
         ) : Pleroma
     }
 
     @Serializable
-    sealed interface Misskey : PostEvent {
+    public sealed interface Misskey : PostEvent {
         @Serializable
-        data class React(
-            override val postKey: MicroBlogKey,
-            val hasReacted: Boolean,
-            val reaction: String,
-            val count: Long = 0,
-            val accountKey: MicroBlogKey? = null,
+        public data class React(
+            public override val postKey: MicroBlogKey,
+            public val hasReacted: Boolean,
+            public val reaction: String,
+            public val count: Long = 0,
+            public val accountKey: MicroBlogKey? = null,
         ) : Misskey,
             UpdatePostActionMenuEvent {
-            override fun nextActionMenu(): ActionMenu.Item =
+            public override fun nextActionMenu(): ActionMenu.Item =
                 ActionMenu.misskeyReact(
                     postKey = postKey,
                     hasReacted = !hasReacted,
@@ -141,13 +143,13 @@ internal sealed interface PostEvent {
         }
 
         @Serializable
-        data class Renote(
-            override val postKey: MicroBlogKey,
-            val count: Long = 0,
-            val accountKey: MicroBlogKey? = null,
+        public data class Renote(
+            public override val postKey: MicroBlogKey,
+            public val count: Long = 0,
+            public val accountKey: MicroBlogKey? = null,
         ) : Misskey,
             UpdatePostActionMenuEvent {
-            override fun nextActionMenu(): ActionMenu.Item =
+            public override fun nextActionMenu(): ActionMenu.Item =
                 ActionMenu.misskeyRenote(
                     postKey = postKey,
                     count = count + 1,
@@ -156,23 +158,23 @@ internal sealed interface PostEvent {
         }
 
         @Serializable
-        data class Vote(
-            override val accountKey: MicroBlogKey,
-            override val postKey: MicroBlogKey,
-            override val options: SerializableImmutableList<Int>,
+        public data class Vote(
+            public override val accountKey: MicroBlogKey,
+            public override val postKey: MicroBlogKey,
+            public override val options: SerializableImmutableList<Int>,
         ) : Misskey,
             PollEvent {
-            override fun copyWithOptions(options: List<Int>): PollEvent = copy(options = options.toImmutableList())
+            public override fun copyWithOptions(options: List<Int>): PollEvent = copy(options = options.toImmutableList())
         }
 
         @Serializable
-        data class Favourite(
-            override val postKey: MicroBlogKey,
-            val favourited: Boolean,
-            val accountKey: MicroBlogKey? = null,
+        public data class Favourite(
+            public override val postKey: MicroBlogKey,
+            public val favourited: Boolean,
+            public val accountKey: MicroBlogKey? = null,
         ) : Misskey,
             UpdatePostActionMenuEvent {
-            override fun nextActionMenu(): ActionMenu.Item =
+            public override fun nextActionMenu(): ActionMenu.Item =
                 ActionMenu.misskeyFavourite(
                     postKey = postKey,
                     favourited = !favourited,
@@ -181,33 +183,33 @@ internal sealed interface PostEvent {
         }
 
         @Serializable
-        data class AcceptFollowRequest(
-            override val postKey: MicroBlogKey,
-            val userKey: MicroBlogKey,
-            val notificationStatusKey: MicroBlogKey,
+        public data class AcceptFollowRequest(
+            public override val postKey: MicroBlogKey,
+            public val userKey: MicroBlogKey,
+            public val notificationStatusKey: MicroBlogKey,
         ) : Misskey
 
         @Serializable
-        data class RejectFollowRequest(
-            override val postKey: MicroBlogKey,
-            val userKey: MicroBlogKey,
-            val notificationStatusKey: MicroBlogKey,
+        public data class RejectFollowRequest(
+            public override val postKey: MicroBlogKey,
+            public val userKey: MicroBlogKey,
+            public val notificationStatusKey: MicroBlogKey,
         ) : Misskey
     }
 
     @Serializable
-    sealed interface Bluesky : PostEvent {
+    public sealed interface Bluesky : PostEvent {
         @Serializable
-        data class Reblog(
-            override val postKey: MicroBlogKey,
-            val count: Long,
-            val cid: String,
-            val uri: String,
-            val repostUri: String?,
-            val accountKey: MicroBlogKey,
+        public data class Reblog(
+            public override val postKey: MicroBlogKey,
+            public val count: Long,
+            public val cid: String,
+            public val uri: String,
+            public val repostUri: String?,
+            public val accountKey: MicroBlogKey,
         ) : Bluesky,
             UpdatePostActionMenuEvent {
-            override fun nextActionMenu(): ActionMenu.Item =
+            public override fun nextActionMenu(): ActionMenu.Item =
                 ActionMenu.blueskyReblog(
                     accountKey = accountKey,
                     postKey = postKey,
@@ -224,16 +226,16 @@ internal sealed interface PostEvent {
         }
 
         @Serializable
-        data class Like(
-            override val postKey: MicroBlogKey,
-            val cid: String,
-            val uri: String,
-            val likedUri: String?,
-            val count: Long,
-            val accountKey: MicroBlogKey,
+        public data class Like(
+            public override val postKey: MicroBlogKey,
+            public val cid: String,
+            public val uri: String,
+            public val likedUri: String?,
+            public val count: Long,
+            public val accountKey: MicroBlogKey,
         ) : Bluesky,
             UpdatePostActionMenuEvent {
-            override fun nextActionMenu(): ActionMenu.Item =
+            public override fun nextActionMenu(): ActionMenu.Item =
                 ActionMenu.blueskyLike(
                     accountKey = accountKey,
                     postKey = postKey,
@@ -250,16 +252,16 @@ internal sealed interface PostEvent {
         }
 
         @Serializable
-        data class Bookmark(
-            override val postKey: MicroBlogKey,
-            val uri: String,
-            val cid: String,
-            val bookmarked: Boolean,
-            val accountKey: MicroBlogKey,
-            val count: Long,
+        public data class Bookmark(
+            public override val postKey: MicroBlogKey,
+            public val uri: String,
+            public val cid: String,
+            public val bookmarked: Boolean,
+            public val accountKey: MicroBlogKey,
+            public val count: Long,
         ) : Bluesky,
             UpdatePostActionMenuEvent {
-            override fun nextActionMenu(): ActionMenu.Item =
+            public override fun nextActionMenu(): ActionMenu.Item =
                 ActionMenu.blueskyBookmark(
                     accountKey = accountKey,
                     postKey = postKey,
@@ -272,16 +274,16 @@ internal sealed interface PostEvent {
     }
 
     @Serializable
-    sealed interface XQT : PostEvent {
+    public sealed interface XQT : PostEvent {
         @Serializable
-        data class Retweet(
-            override val postKey: MicroBlogKey,
-            val retweeted: Boolean,
-            val count: Long = 0,
-            val accountKey: MicroBlogKey,
+        public data class Retweet(
+            public override val postKey: MicroBlogKey,
+            public val retweeted: Boolean,
+            public val count: Long = 0,
+            public val accountKey: MicroBlogKey,
         ) : XQT,
             UpdatePostActionMenuEvent {
-            override fun nextActionMenu(): ActionMenu.Item =
+            public override fun nextActionMenu(): ActionMenu.Item =
                 ActionMenu.xqtRetweet(
                     statusKey = postKey,
                     retweeted = !retweeted,
@@ -291,14 +293,14 @@ internal sealed interface PostEvent {
         }
 
         @Serializable
-        data class Like(
-            override val postKey: MicroBlogKey,
-            val liked: Boolean,
-            val count: Long = 0,
-            val accountKey: MicroBlogKey,
+        public data class Like(
+            public override val postKey: MicroBlogKey,
+            public val liked: Boolean,
+            public val count: Long = 0,
+            public val accountKey: MicroBlogKey,
         ) : XQT,
             UpdatePostActionMenuEvent {
-            override fun nextActionMenu(): ActionMenu.Item =
+            public override fun nextActionMenu(): ActionMenu.Item =
                 ActionMenu.xqtLike(
                     statusKey = postKey,
                     liked = !liked,
@@ -308,14 +310,14 @@ internal sealed interface PostEvent {
         }
 
         @Serializable
-        data class Bookmark(
-            override val postKey: MicroBlogKey,
-            val bookmarked: Boolean,
-            val count: Long = 0,
-            val accountKey: MicroBlogKey,
+        public data class Bookmark(
+            public override val postKey: MicroBlogKey,
+            public val bookmarked: Boolean,
+            public val count: Long = 0,
+            public val accountKey: MicroBlogKey,
         ) : XQT,
             UpdatePostActionMenuEvent {
-            override fun nextActionMenu(): ActionMenu.Item =
+            public override fun nextActionMenu(): ActionMenu.Item =
                 ActionMenu.xqtBookmark(
                     statusKey = postKey,
                     bookmarked = !bookmarked,
@@ -326,16 +328,16 @@ internal sealed interface PostEvent {
     }
 
     @Serializable
-    sealed interface VVO : PostEvent {
+    public sealed interface VVO : PostEvent {
         @Serializable
-        data class Like(
-            override val postKey: MicroBlogKey,
-            val liked: Boolean,
-            val count: Long = 0,
-            val accountKey: MicroBlogKey,
+        public data class Like(
+            public override val postKey: MicroBlogKey,
+            public val liked: Boolean,
+            public val count: Long = 0,
+            public val accountKey: MicroBlogKey,
         ) : VVO,
             UpdatePostActionMenuEvent {
-            override fun nextActionMenu(): ActionMenu.Item =
+            public override fun nextActionMenu(): ActionMenu.Item =
                 ActionMenu.vvoLike(
                     statusKey = postKey,
                     liked = !liked,
@@ -345,14 +347,14 @@ internal sealed interface PostEvent {
         }
 
         @Serializable
-        data class LikeComment(
-            override val postKey: MicroBlogKey,
-            val liked: Boolean,
-            val count: Long = 0,
-            val accountKey: MicroBlogKey,
+        public data class LikeComment(
+            public override val postKey: MicroBlogKey,
+            public val liked: Boolean,
+            public val count: Long = 0,
+            public val accountKey: MicroBlogKey,
         ) : VVO,
             UpdatePostActionMenuEvent {
-            override fun nextActionMenu(): ActionMenu.Item =
+            public override fun nextActionMenu(): ActionMenu.Item =
                 ActionMenu.vvoLikeComment(
                     statusKey = postKey,
                     liked = !liked,
@@ -362,13 +364,13 @@ internal sealed interface PostEvent {
         }
 
         @Serializable
-        data class Favorite(
-            override val postKey: MicroBlogKey,
-            val favorited: Boolean,
-            val accountKey: MicroBlogKey,
+        public data class Favorite(
+            public override val postKey: MicroBlogKey,
+            public val favorited: Boolean,
+            public val accountKey: MicroBlogKey,
         ) : VVO,
             UpdatePostActionMenuEvent {
-            override fun nextActionMenu(): ActionMenu.Item =
+            public override fun nextActionMenu(): ActionMenu.Item =
                 ActionMenu.vvoFavorite(
                     statusKey = postKey,
                     favorited = !favorited,
@@ -378,16 +380,16 @@ internal sealed interface PostEvent {
     }
 
     @Serializable
-    sealed interface Nostr : PostEvent {
+    public sealed interface Nostr : PostEvent {
         @Serializable
-        data class Repost(
-            override val postKey: MicroBlogKey,
-            val repostEventId: String?,
-            val count: Long = 0,
-            val accountKey: MicroBlogKey,
+        public data class Repost(
+            public override val postKey: MicroBlogKey,
+            public val repostEventId: String?,
+            public val count: Long = 0,
+            public val accountKey: MicroBlogKey,
         ) : Nostr,
             UpdatePostActionMenuEvent {
-            override fun nextActionMenu(): ActionMenu.Item =
+            public override fun nextActionMenu(): ActionMenu.Item =
                 ActionMenu.nostrRepost(
                     statusKey = postKey,
                     repostEventId =
@@ -402,14 +404,14 @@ internal sealed interface PostEvent {
         }
 
         @Serializable
-        data class Like(
-            override val postKey: MicroBlogKey,
-            val reactionEventId: String?,
-            val count: Long = 0,
-            val accountKey: MicroBlogKey,
+        public data class Like(
+            public override val postKey: MicroBlogKey,
+            public val reactionEventId: String?,
+            public val count: Long = 0,
+            public val accountKey: MicroBlogKey,
         ) : Nostr,
             UpdatePostActionMenuEvent {
-            override fun nextActionMenu(): ActionMenu.Item =
+            public override fun nextActionMenu(): ActionMenu.Item =
                 ActionMenu.nostrLike(
                     statusKey = postKey,
                     reactionEventId =
@@ -424,13 +426,14 @@ internal sealed interface PostEvent {
         }
 
         @Serializable
-        data class Report(
-            override val postKey: MicroBlogKey,
-            val accountKey: MicroBlogKey,
+        public data class Report(
+            public override val postKey: MicroBlogKey,
+            public val accountKey: MicroBlogKey,
         ) : Nostr
     }
 }
 
-internal interface UpdatePostActionMenuEvent : PostEvent {
-    fun nextActionMenu(): ActionMenu.Item
+@HiddenFromObjC
+public interface UpdatePostActionMenuEvent : PostEvent {
+    public fun nextActionMenu(): ActionMenu.Item
 }

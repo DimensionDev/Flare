@@ -131,7 +131,7 @@ struct EditRssSheet: View {
                                 Image("fa-circle-chevron-down").foregroundColor(.secondary)
                             case .rssSources:
                                 Image("fa-circle-chevron-down").foregroundColor(.secondary)
-                            case .mastodonInstance:
+                            case .subscriptionInstance:
                                 Image("fa-circle-check").foregroundColor(.green)
                             }
                         } errorContent: { _ in
@@ -269,11 +269,11 @@ struct EditRssSheet: View {
                     } header: {
                         Text("rss_hub_server_header")
                     }
-                case .mastodonInstance(let mastodonInstance):
+                case .subscriptionInstance(let subscriptionInstance):
                     Section {
-                        ForEach(mastodonInstance.availableTimelines, id: \.self) { type in
+                        ForEach(subscriptionInstance.availableTimelines, id: \.self) { type in
                             HStack {
-                                if let icon = mastodonInstance.icon, !icon.isEmpty {
+                                if let icon = subscriptionInstance.icon, !icon.isEmpty {
                                     NetworkImage(data: icon)
                                         .frame(width: 24, height: 24)
                                 }
@@ -300,8 +300,8 @@ struct EditRssSheet: View {
                     }
                 }
                 
-                if case .mastodonInstance = onEnum(of: state) {
-                    // No open-in picker for Mastodon instance subscriptions
+                if case .subscriptionInstance = onEnum(of: state) {
+                    // No open-in picker for non-RSS subscriptions
                 } else {
                     Section {
                         Picker("rss_open_in", selection: $displayMode) {
@@ -356,13 +356,13 @@ struct EditRssSheet: View {
                             rssHub.save(title: title, displayMode: displayMode)
                         case .rssSources(let rssSources):
                             rssSources.save(sources: selectedRssSources, displayMode: displayMode)
-                        case .mastodonInstance(let mastodonInstance):
+                        case .subscriptionInstance(let subscriptionInstance):
                             let typeNames: [SubscriptionType: String] = [
                                 SubscriptionType.mastodonTrends: String(localized: "mastodon_trending_statuses"),
                                 SubscriptionType.mastodonPublic: String(localized: "mastodon_federated_timeline"),
                                 SubscriptionType.mastodonLocal: String(localized: "mastodon_local_timeline"),
                             ]
-                            let _ = mastodonInstance.save(selectedTypes: selectedMastodonTypes, typeNames: typeNames)
+                            let _ = subscriptionInstance.save(selectedTypes: selectedMastodonTypes, typeNames: typeNames)
                         }
                     }
                     dismiss()

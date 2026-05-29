@@ -13,7 +13,7 @@ import kotlin.time.Instant
 
 @Serializable
 @Immutable
-public data class UiPoll internal constructor(
+public data class UiPoll public constructor(
     val id: String,
     val options: SerializableImmutableList<Option>,
     val multiple: Boolean,
@@ -47,7 +47,7 @@ public data class UiPoll internal constructor(
 
     @Serializable
     @Immutable
-    public data class Option internal constructor(
+    public data class Option public constructor(
         val title: String,
         val votesCount: Long,
         val percentage: Float,

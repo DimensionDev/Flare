@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import dev.dimension.flare.ui.model.UiIcon
 import kotlinx.serialization.Serializable
 import kotlin.io.encoding.Base64
+import kotlin.native.HiddenFromObjC
 
 @Immutable
 @Serializable
@@ -25,6 +26,7 @@ public data class PlatformTypeMetadata(
     val icon: UiIcon,
 )
 
+@HiddenFromObjC
 public val xqtOldHost: String =
     buildString {
         append(Base64.decode("dHc=").decodeToString())
@@ -39,6 +41,7 @@ public val xqtHost: String =
         append(".com")
     }
 
+@HiddenFromObjC
 public val vvo: String =
     buildString {
         append(Base64.decode("d2Vp").decodeToString())
@@ -52,18 +55,21 @@ public val vvoHost: String =
         append(Base64.decode("by5jbg==").decodeToString())
     }
 
+@HiddenFromObjC
 public val vvoHostShort: String =
     buildString {
         append(vvo)
         append(Base64.decode("LmNu").decodeToString())
     }
 
+@HiddenFromObjC
 public val vvoHostLong: String =
     buildString {
         append(Base64.decode("d2Vp").decodeToString())
         append(Base64.decode("Ym8uY29t").decodeToString())
     }
 
+@HiddenFromObjC
 public val ilink: String =
     buildString {
         append(Base64.decode("aHR0cHM6Ly90").decodeToString())

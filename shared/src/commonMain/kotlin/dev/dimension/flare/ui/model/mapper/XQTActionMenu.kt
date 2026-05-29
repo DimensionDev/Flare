@@ -7,7 +7,7 @@ import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiNumber
 
-internal fun ActionMenu.Companion.xqtRetweet(
+public fun ActionMenu.Companion.xqtRetweet(
     statusKey: MicroBlogKey,
     retweeted: Boolean,
     count: Long,
@@ -34,7 +34,7 @@ internal fun ActionMenu.Companion.xqtRetweet(
             ),
     )
 
-internal fun ActionMenu.Companion.xqtLike(
+public fun ActionMenu.Companion.xqtLike(
     statusKey: MicroBlogKey,
     liked: Boolean,
     count: Long,
@@ -61,7 +61,7 @@ internal fun ActionMenu.Companion.xqtLike(
             ),
     )
 
-internal fun ActionMenu.Companion.xqtBookmark(
+public fun ActionMenu.Companion.xqtBookmark(
     statusKey: MicroBlogKey,
     bookmarked: Boolean,
     count: Long,

@@ -5,8 +5,6 @@ import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import dev.dimension.flare.data.repository.DebugRepository
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalPagingApi::class)
@@ -15,7 +13,7 @@ internal abstract class BaseRemoteMediator<Key : Any, Value : Any> : RemoteMedia
         loadType: LoadType,
         state: PagingState<Key, Value>,
     ): MediatorResult =
-        withContext(Dispatchers.IO) {
+        withContext(PlatformDispatchers.IO) {
             try {
                 doLoad(loadType, state)
             } catch (e: Exception) {

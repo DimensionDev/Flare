@@ -496,6 +496,11 @@
     <string name="tab_settings_mixed_timeline">Омогући картицу мешовите временске линије</string>
     <string name="tab_settings_mixed_timeline_desc">Комбинујте објаве са свих картица у једну почетну картицу.</string>
     <string name="home_tab_social_timeline_title">Друштвено</string>
+    <string name="social_title">Društveno</string>
+    <string name="antenna_title">Antene</string>
+    <string name="liked_title">Sviđa mi se</string>
+    <string name="all_rss_feeds_title">Sve pretplate</string>
+    <string name="posts_title">Objave</string>
 
     <string name="deeplink_account_selection_title">Одаберите налог</string>
     <string name="deeplink_account_selection_message">Одаберите налог за отварање овог линка</string>

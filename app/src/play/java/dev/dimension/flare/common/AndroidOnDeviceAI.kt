@@ -9,12 +9,15 @@ import com.google.mlkit.genai.summarization.SummarizationRequest
 import com.google.mlkit.genai.summarization.SummarizerOptions
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.suspendCancellableCoroutine
+import org.koin.core.annotation.Provided
+import org.koin.core.annotation.Single
 import java.util.concurrent.Executor
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
+@Single(binds = [OnDeviceAI::class])
 internal class AndroidOnDeviceAI(
-    private val context: Context,
+    @Provided private val context: Context,
 ) : OnDeviceAI {
     override suspend fun isAvailable(): Boolean =
         runCatching {

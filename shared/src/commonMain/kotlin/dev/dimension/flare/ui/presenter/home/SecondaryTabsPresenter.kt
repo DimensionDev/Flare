@@ -8,7 +8,6 @@ import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataS
 import dev.dimension.flare.data.datasource.microblog.datasource.TimelineTabConfigurationDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
 import dev.dimension.flare.data.model.tab.ShortcutSpec
-import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.allAccountServicesFlow
@@ -63,7 +62,6 @@ public class SecondaryTabsPresenter :
     }
 
     private val accountRepository: AccountRepository by inject()
-    private val timelineResolver: TimelineResolver by inject()
 
     private val itemsFlow by lazy {
         allAccountServicesFlow(accountRepository)
@@ -146,7 +144,7 @@ public class SecondaryTabsPresenter :
                 Tab(
                     title = shortcut.title,
                     icon = shortcut.icon,
-                    destination = Destination.Timeline(timelineResolver.toTabItem(target.source)),
+                    destination = Destination.Timeline(target.tabItem),
                 )
             }
         }

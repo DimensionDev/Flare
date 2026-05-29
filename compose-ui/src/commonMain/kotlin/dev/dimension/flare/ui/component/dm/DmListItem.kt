@@ -40,9 +40,7 @@ import dev.dimension.flare.ui.model.UiDMRoom
 import dev.dimension.flare.ui.theme.PlatformTheme
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.min
-import kotlin.native.HiddenFromObjC
 
-@HiddenFromObjC
 public fun LazyListScope.dmList(
     data: PagingState<UiDMRoom>,
     onItemClicked: (MicroBlogKey) -> Unit,

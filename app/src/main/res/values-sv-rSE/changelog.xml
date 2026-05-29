@@ -6,9 +6,6 @@
         <![CDATA[
             <span>Version %1$s:</span>
             <ul>
-                <li>Lade till Deck Mode för en tidslinjeupplevelse med flera kolumner.</li>
-                <li>Lade till rikare anpassning av tidslinjeflikar, inklusive ikoner, filter, grupper och utseende per flik.</li>
-                <li>Lade till regex-stöd för lokala nyckelordsfilter.</li>
                 <li>Prestandaförbättringar och buggfixar.</li>
             </ul>
         ]]>

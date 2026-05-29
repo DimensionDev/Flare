@@ -6,9 +6,6 @@
         <![CDATA[
             <span>Version %1$s:</span>
             <ul>
-                <li>Added Deck Mode for a multi-column timeline experience.</li>
-                <li>Added richer timeline tab customization, including icons, filters, groups, and per-tab appearance.</li>
-                <li>Added regex support for local keyword filters.</li>
                 <li>Performance improvements and bug fixes.</li>
             </ul>
         ]]>

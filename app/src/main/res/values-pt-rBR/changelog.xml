@@ -6,9 +6,6 @@
         <![CDATA[
             <span>Versão %1$s:</span>
             <ul>
-                <li>Adicionado Deck Mode para uma experiência de linha do tempo em várias colunas.</li>
-                <li>Adicionada personalização mais completa das abas da linha do tempo, incluindo ícones, filtros, grupos e aparência por aba.</li>
-                <li>Adicionado suporte a regex para filtros locais de palavras-chave.</li>
                 <li>Melhorias de desempenho e correções de bugs.</li>
             </ul>
         ]]>

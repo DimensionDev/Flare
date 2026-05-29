@@ -1,0 +1,38 @@
+{
+  "name": "flare",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "kotlin:build:dev": "../gradlew -p .. :web-shared:wasmJsBrowserDevelopmentLibraryDistribution",
+    "kotlin:build:prod": "../gradlew -p .. :web-shared:wasmJsBrowserProductionLibraryDistribution",
+    "kotlin:patch:prod": "node scripts/patch-kotlin-wasm-import-object.mjs",
+    "dev": "pnpm kotlin:build:dev && vite dev",
+    "build": "pnpm kotlin:build:prod && pnpm kotlin:patch:prod && FLARE_WEB_SHARED_LIBRARY=productionLibrary vite build",
+    "preview": "vite preview",
+    "prepare": "svelte-kit sync || echo ''",
+    "check": "pnpm kotlin:build:dev && svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+    "test:codegen": "node --test scripts/*.test.mjs"
+  },
+  "devDependencies": {
+    "@sveltejs/adapter-auto": "^7.0.1",
+    "@sveltejs/kit": "^2.57.0",
+    "@sveltejs/vite-plugin-svelte": "^7.0.0",
+    "svelte": "^5.55.2",
+    "svelte-check": "^4.4.6",
+    "typescript": "^6.0.2",
+    "vite": "^8.0.7"
+  },
+  "dependencies": {
+    "@androidx/sqlite-web-worker": "file:../shared/sqlite-web-worker",
+    "@fortawesome/fontawesome-svg-core": "^7.1.0",
+    "@fortawesome/free-brands-svg-icons": "^7.1.0",
+    "@fortawesome/free-solid-svg-icons": "^7.1.0",
+    "@fortawesome/svelte-fontawesome": "^0.2.4",
+    "@js-joda/core": "3.2.0",
+    "@sqlite.org/sqlite-wasm": "3.50.1-build1",
+    "@tanstack/svelte-virtual": "^3.13.26",
+    "ws": "8.18.3"
+  }
+}

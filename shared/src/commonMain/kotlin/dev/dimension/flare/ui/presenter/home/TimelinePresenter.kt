@@ -42,6 +42,7 @@ import dev.dimension.flare.data.translation.TranslationSettingsSupport
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.presenter.PresenterBase
+import dev.dimension.flare.web.shared.WebPresenter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -58,6 +59,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 @OptIn(ExperimentalPagingApi::class)
+@WebPresenter("timeline")
 public abstract class TimelinePresenter :
     PresenterBase<TimelineState>(),
     KoinComponent {

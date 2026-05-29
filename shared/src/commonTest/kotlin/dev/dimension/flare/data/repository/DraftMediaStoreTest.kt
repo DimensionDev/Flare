@@ -2,6 +2,7 @@ package dev.dimension.flare.data.repository
 
 import dev.dimension.flare.common.FileType
 import dev.dimension.flare.createTestFileItem
+import dev.dimension.flare.createTestFileSystem
 import dev.dimension.flare.createTestRootPath
 import dev.dimension.flare.data.database.app.model.DraftMediaType
 import dev.dimension.flare.data.datasource.microblog.ComposeData
@@ -10,7 +11,6 @@ import dev.dimension.flare.deleteTestRootPath
 import kotlinx.coroutines.test.runTest
 import okio.FileSystem
 import okio.Path.Companion.toPath
-import okio.SYSTEM
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
@@ -22,7 +22,7 @@ import kotlin.test.assertTrue
 
 class DraftMediaStoreTest {
     private val root = createTestRootPath()
-    private val fileSystem = FileSystem.SYSTEM
+    private val fileSystem = createTestFileSystem()
     private val fileStorage = OkioFileStorage(fileSystem, root)
 
     @AfterTest

@@ -1,5 +1,6 @@
 package dev.dimension.flare.ui.presenter
 
+import dev.dimension.flare.createTestFileSystem
 import dev.dimension.flare.createTestRootPath
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.datastore.model.AppSettings
@@ -44,7 +45,6 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
 import okio.FileSystem
 import okio.Path
-import okio.SYSTEM
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
@@ -63,7 +63,7 @@ class SettingsImportExportPresenterTest {
     @BeforeTest
     fun setup() {
         root = createTestRootPath()
-        val fileStorage = OkioFileStorage(FileSystem.SYSTEM, root)
+        val fileStorage = OkioFileStorage(createTestFileSystem(), root)
         settingsRepository =
             SettingsRepository(
                 fileStorage = fileStorage,

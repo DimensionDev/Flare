@@ -3,6 +3,7 @@ package dev.dimension.flare.data.model.appearance
 import androidx.datastore.core.DataStoreFactory
 import androidx.datastore.core.okio.OkioStorage
 import dev.dimension.flare.common.protobufSerializer
+import dev.dimension.flare.createTestFileSystem
 import dev.dimension.flare.data.io.OkioFileStorage
 import dev.dimension.flare.data.model.AppearanceSettings
 import dev.dimension.flare.data.model.PostActionStyle
@@ -15,7 +16,6 @@ import kotlinx.serialization.encodeToByteArray
 import kotlinx.serialization.protobuf.ProtoBuf
 import okio.FileSystem
 import okio.Path.Companion.toPath
-import okio.SYSTEM
 import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -27,7 +27,7 @@ class AppearanceMigrationTest {
     fun v1FileMigratesToV2BagAndDeletesOldFile() =
         runTest {
             val root = "/tmp/flare-appearance-${Random.nextLong()}".toPath()
-            val fs = FileSystem.SYSTEM
+            val fs = createTestFileSystem()
             fs.createDirectories(root)
             val fileStorage = OkioFileStorage(fs, root)
             val oldPath = fileStorage.dataStoreFile("appearance_settings.pb")

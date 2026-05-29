@@ -1,16 +1,17 @@
 package dev.dimension.flare.ui.presenter.compose
 
 import androidx.room3.Room
-import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.common.FileType
 import dev.dimension.flare.createTestFileItem
+import dev.dimension.flare.createTestFileSystem
 import dev.dimension.flare.createTestRootPath
 import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.app.model.DraftContent
 import dev.dimension.flare.data.database.app.model.DraftMediaType
 import dev.dimension.flare.data.database.app.model.DraftReferenceType
 import dev.dimension.flare.data.database.app.model.DraftTargetStatus
+import dev.dimension.flare.data.database.createDatabaseDriver
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.io.OkioFileStorage
 import dev.dimension.flare.data.repository.ComposeDraftBundle
@@ -31,7 +32,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import okio.FileSystem
-import okio.SYSTEM
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -46,7 +46,7 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalCoroutinesApi::class)
 class SendDraftUseCaseTest : RobolectricTest() {
     private val root = createTestRootPath()
-    private val fileSystem = FileSystem.SYSTEM
+    private val fileSystem = createTestFileSystem()
     private val fileStorage = OkioFileStorage(fileSystem, root)
 
     private lateinit var db: AppDatabase
@@ -58,7 +58,7 @@ class SendDraftUseCaseTest : RobolectricTest() {
         db =
             Room
                 .memoryDatabaseBuilder<AppDatabase>()
-                .setDriver(BundledSQLiteDriver())
+                .setDriver(createDatabaseDriver())
                 .setQueryCoroutineContext(Dispatchers.Unconfined)
                 .build()
         mediaStore = DraftMediaStore(fileStorage)

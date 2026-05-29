@@ -2,7 +2,10 @@ package dev.dimension.flare
 
 import dev.dimension.flare.common.FileItem
 import dev.dimension.flare.common.FileType
+import okio.FileSystem
 import okio.Path
+
+internal expect fun createTestFileSystem(): FileSystem
 
 internal expect fun createTestRootPath(): Path
 

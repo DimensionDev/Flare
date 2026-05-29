@@ -2,13 +2,13 @@ package dev.dimension.flare.data.datasource.microblog.handler
 
 import androidx.paging.LoadState
 import androidx.room3.Room
-import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.common.CacheState
 import dev.dimension.flare.common.Locale
 import dev.dimension.flare.common.OnDeviceAI
 import dev.dimension.flare.common.TestFormatter
 import dev.dimension.flare.common.decodeJson
+import dev.dimension.flare.createTestFileSystem
 import dev.dimension.flare.createTestRootPath
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.model.DbTranslation
@@ -19,6 +19,7 @@ import dev.dimension.flare.data.database.cache.model.TranslationStatus
 import dev.dimension.flare.data.database.cache.model.sourceHash
 import dev.dimension.flare.data.database.cache.model.translationEntityKey
 import dev.dimension.flare.data.database.cache.model.translationPayload
+import dev.dimension.flare.data.database.createDatabaseDriver
 import dev.dimension.flare.data.datasource.microblog.loader.UserLoader
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.datastore.model.AppSettings
@@ -55,7 +56,6 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import okio.FileSystem
-import okio.SYSTEM
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
@@ -70,7 +70,7 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalCoroutinesApi::class)
 class UserHandlerTest : RobolectricTest() {
     private val root = createTestRootPath()
-    private val fileStorage = OkioFileStorage(FileSystem.SYSTEM, root)
+    private val fileStorage = OkioFileStorage(createTestFileSystem(), root)
 
     private lateinit var db: CacheDatabase
     private lateinit var appDataStore: AppDataStore
@@ -88,7 +88,7 @@ class UserHandlerTest : RobolectricTest() {
         db =
             Room
                 .memoryDatabaseBuilder<CacheDatabase>()
-                .setDriver(BundledSQLiteDriver())
+                .setDriver(createDatabaseDriver())
                 .setQueryCoroutineContext(Dispatchers.Unconfined)
                 .build()
         appDataStore = AppDataStore(fileStorage)

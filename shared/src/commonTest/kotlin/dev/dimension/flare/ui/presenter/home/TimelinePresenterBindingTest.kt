@@ -1,5 +1,6 @@
 package dev.dimension.flare.ui.presenter.home
 
+import dev.dimension.flare.createTestFileSystem
 import dev.dimension.flare.createTestRootPath
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.io.OkioFileStorage
@@ -25,7 +26,6 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import okio.FileSystem
 import okio.Path
-import okio.SYSTEM
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -38,7 +38,7 @@ class TimelinePresenterBindingTest {
     @BeforeTest
     fun setup() {
         root = createTestRootPath()
-        val fileStorage = OkioFileStorage(FileSystem.SYSTEM, root)
+        val fileStorage = OkioFileStorage(createTestFileSystem(), root)
         settingsRepository =
             SettingsRepository(
                 fileStorage = fileStorage,

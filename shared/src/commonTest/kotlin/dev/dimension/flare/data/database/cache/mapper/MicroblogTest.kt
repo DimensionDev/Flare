@@ -4,7 +4,6 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingSource
 import androidx.paging.testing.TestPager
 import androidx.room3.Room
-import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.common.Locale
 import dev.dimension.flare.common.TestFormatter
@@ -22,6 +21,7 @@ import dev.dimension.flare.data.database.cache.model.TranslationStatus
 import dev.dimension.flare.data.database.cache.model.sourceHash
 import dev.dimension.flare.data.database.cache.model.translationEntityKey
 import dev.dimension.flare.data.database.cache.model.translationPayload
+import dev.dimension.flare.data.database.createDatabaseDriver
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.paging.TimelinePagingMapper
 import dev.dimension.flare.data.datastore.model.AppSettings
@@ -77,7 +77,7 @@ class MicroblogTest : RobolectricTest() {
         db =
             Room
                 .memoryDatabaseBuilder<CacheDatabase>()
-                .setDriver(BundledSQLiteDriver())
+                .setDriver(createDatabaseDriver())
                 .setQueryCoroutineContext(Dispatchers.Unconfined)
                 .build()
 

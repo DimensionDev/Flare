@@ -1,7 +1,6 @@
 package dev.dimension.flare.ui.presenter.settings
 
 import androidx.room3.Room
-import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import app.cash.molecule.RecompositionMode
 import app.cash.molecule.moleculeFlow
 import dev.dimension.flare.RobolectricTest
@@ -11,6 +10,7 @@ import dev.dimension.flare.data.database.app.model.DbAccount
 import dev.dimension.flare.data.database.app.model.DbKeywordFilter
 import dev.dimension.flare.data.database.app.model.DbRssSources
 import dev.dimension.flare.data.database.app.model.DbSearchHistory
+import dev.dimension.flare.data.database.createDatabaseDriver
 import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
@@ -39,7 +39,7 @@ class ExportAppDatabasePresenterTest : RobolectricTest() {
         val db =
             Room
                 .memoryDatabaseBuilder<AppDatabase>()
-                .setDriver(BundledSQLiteDriver())
+                .setDriver(createDatabaseDriver())
                 .setQueryCoroutineContext(Dispatchers.Unconfined)
                 .build()
         this.db = db

@@ -20,12 +20,13 @@ let sqlite3 = null;
 
 const databases = new Map();
 const statements = new Map();
+const statementDatabases = new Map();
 
 let nextDatabaseId = 0;
 let nextStatementId = 0;
 
 function createDatabase(fileName) {
-  if (typeof sqlite3.oo1.OpfsDb === "function") {
+  if (fileName && typeof sqlite3.oo1.OpfsDb === "function") {
     return new sqlite3.oo1.OpfsDb(fileName);
   }
   return new sqlite3.oo1.DB(fileName || ":memory:", "c");
@@ -57,6 +58,7 @@ function prepareRequest(id, requestData) {
     }
     const statement = database.prepare(requestData.sql);
     statements.set(newStatementId, statement);
+    statementDatabases.set(newStatementId, requestData.databaseId);
     resultData.parameterCount = sqlite3.capi.sqlite3_bind_parameter_count(statement);
     for (let i = 0; i < statement.columnCount; i++) {
       resultData.columnNames.push(sqlite3.capi.sqlite3_column_name(statement, i));
@@ -107,8 +109,10 @@ function closeRequest(id, requestData) {
     try {
       statement.finalize();
       statements.delete(requestData.statementId);
+      statementDatabases.delete(requestData.statementId);
     } catch (error) {
       postMessage({ id, error: error.message });
+      return;
     }
   }
 
@@ -119,11 +123,23 @@ function closeRequest(id, requestData) {
       return;
     }
     try {
+      for (const [statementId, databaseId] of Array.from(statementDatabases.entries())) {
+        if (databaseId === requestData.databaseId) {
+          const statement = statements.get(statementId);
+          if (statement) {
+            statement.finalize();
+          }
+          statements.delete(statementId);
+          statementDatabases.delete(statementId);
+        }
+      }
       database.close();
       databases.delete(requestData.databaseId);
     } catch (error) {
       postMessage({ id, error: error.message });
+      return;
     }
+    postMessage({ id, data: null });
   }
 }
 

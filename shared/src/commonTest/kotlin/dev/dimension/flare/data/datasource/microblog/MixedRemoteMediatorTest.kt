@@ -6,19 +6,20 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import androidx.room3.Room
-import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.common.Locale
 import dev.dimension.flare.common.OnDeviceAI
 import dev.dimension.flare.common.TestFormatter
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.common.encodeJson
+import dev.dimension.flare.createTestFileSystem
 import dev.dimension.flare.createTestRootPath
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.model.DbStatusWithReference
 import dev.dimension.flare.data.database.cache.model.TranslationDisplayOptions
 import dev.dimension.flare.data.database.cache.model.TranslationEntityType
 import dev.dimension.flare.data.database.cache.model.TranslationStatus
+import dev.dimension.flare.data.database.createDatabaseDriver
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
@@ -61,13 +62,11 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.yield
 import okio.FileSystem
-import okio.SYSTEM
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
@@ -85,7 +84,7 @@ import kotlin.time.Instant
 @OptIn(ExperimentalCoroutinesApi::class)
 class MixedRemoteMediatorTest : RobolectricTest() {
     private val root = createTestRootPath()
-    private val fileStorage = OkioFileStorage(FileSystem.SYSTEM, root)
+    private val fileStorage = OkioFileStorage(createTestFileSystem(), root)
 
     private lateinit var db: CacheDatabase
 
@@ -101,7 +100,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
         db =
             Room
                 .memoryDatabaseBuilder<CacheDatabase>()
-                .setDriver(BundledSQLiteDriver())
+                .setDriver(createDatabaseDriver())
                 .setQueryCoroutineContext(Dispatchers.Unconfined)
                 .build()
     }
@@ -928,7 +927,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
     @OptIn(ExperimentalPagingApi::class)
     @Test
     fun homeTimelineRequeuesExcludedLanguageSkippedTranslationAfterExclusionRemoved() =
-        runBlocking {
+        runTest {
             val excludedLanguage = nonTargetLanguageTag()
             val appDataStore = AppDataStore(fileStorage)
             appDataStore.appSettingsStore.updateData {
@@ -1013,7 +1012,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
     @OptIn(ExperimentalPagingApi::class)
     @Test
     fun homeTimelineAcceptsAiSkippedTranslationResult() =
-        runBlocking {
+        runTest {
             val appDataStore = AppDataStore(fileStorage)
             appDataStore.appSettingsStore.updateData {
                 it.copy(
@@ -1201,7 +1200,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
 
     @Test
     fun preTranslationServiceMarksStaleInFlightTranslationsAsFailedOnStartup() {
-        runBlocking {
+        runTest {
             db.translationDao().insert(
                 dev.dimension.flare.data.database.cache.model.DbTranslation(
                     entityType = TranslationEntityType.Status,
@@ -1251,7 +1250,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
 
     @Test
     fun queuedPreTranslationWritesPendingBeforeExecutionStarts() {
-        runBlocking {
+        runTest {
             val appDataStore = AppDataStore(fileStorage)
             appDataStore.appSettingsStore.updateData {
                 it.copy(
@@ -1327,7 +1326,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
 
     @Test
     fun providerSwitchCancelsOldQueueAndLetsNewProviderCompleteImmediately() {
-        runBlocking {
+        runTest {
             val appDataStore = AppDataStore(fileStorage)
             appDataStore.appSettingsStore.updateData {
                 it.copy(

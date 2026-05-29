@@ -2,9 +2,9 @@ package dev.dimension.flare.data.datasource.microblog.handler
 
 import androidx.paging.testing.asSnapshot
 import androidx.room3.Room
-import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.createDatabaseDriver
 import dev.dimension.flare.data.datasource.microblog.list.ListMetaData
 import dev.dimension.flare.data.datasource.microblog.list.ListMetaDataType
 import dev.dimension.flare.data.datasource.microblog.loader.ListLoader
@@ -23,7 +23,6 @@ import kotlinx.coroutines.test.runTest
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
-import kotlin.experimental.ExperimentalNativeApi
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -46,7 +45,7 @@ class ListHandlerTest : RobolectricTest() {
         db =
             Room
                 .memoryDatabaseBuilder<CacheDatabase>()
-                .setDriver(BundledSQLiteDriver())
+                .setDriver(createDatabaseDriver())
                 .setQueryCoroutineContext(Dispatchers.Unconfined)
                 .build()
 
@@ -366,13 +365,16 @@ private class FakeListLoader : ListLoader<UiList.List> {
         return nextCreateResult
     }
 
-    @OptIn(ExperimentalNativeApi::class)
     override suspend fun update(
         listId: String,
         metaData: ListMetaData,
     ): UiList.List {
         if (shouldFail) throw RuntimeException("Fake loader failure")
-        items.replaceAll { if (it.id == listId) nextUpdateResult else it }
+        items.indices.forEach { index ->
+            if (items[index].id == listId) {
+                items[index] = nextUpdateResult
+            }
+        }
         return nextUpdateResult
     }
 

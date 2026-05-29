@@ -1,2 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <string name="changelog_current">
+        <![CDATA[
+            <span>Sürüm %1$s:</span>
+            <ul>
+                <li>Performans iyileştirmeleri ve hata düzeltmeleri.</li>
+            </ul>
+        ]]>
+    </string>
+</resources>

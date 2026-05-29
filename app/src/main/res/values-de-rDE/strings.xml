@@ -71,6 +71,17 @@
     <string name="settings_storage_subtitle">Cache-Dateien, Logs und Backups verwalten</string>
     <string name="settings_about_title">Über</string>
     <string name="settings_about_subtitle">Mehr über Flare erfahren</string>
+    <string name="settings_about_description">Ein quelloffener, KI-gestützter Client für dezentrale soziale Plattformen.</string>
+    <string name="settings_about_source_code">Quellcode</string>
+    <string name="settings_about_telegram">Telegram</string>
+    <string name="settings_about_telegram_description">Tritt unserer Telegram-Gruppe bei</string>
+    <string name="settings_about_discord" translatable="false">Discord</string>
+    <string name="settings_about_discord_description">Tritt unserem Discord-Server bei</string>
+    <string name="settings_about_line" translatable="false">Line</string>
+    <string name="settings_about_line_description">Tritt unserer Line-Gruppe bei</string>
+    <string name="settings_about_localization">Crowdin</string>
+    <string name="settings_about_localization_description">Hilf uns, Flare zu übersetzen</string>
+    <string name="settings_privacy_policy">Datenschutzrichtlinie</string>
     <string name="settings_side_panel">Seitenleiste anpassen</string>
     <string name="settings_side_panel_description">Die Seitenleiste anpassen</string>
     <string name="settings_local_filter_title">Lokale Filter</string>

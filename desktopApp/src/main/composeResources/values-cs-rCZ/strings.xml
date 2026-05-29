@@ -189,7 +189,7 @@
     <string name="settings_ai_config_type">Typ AI</string>
     <string name="settings_ai_config_type_description">Vyberte, které AI rozhraní Flare používá</string>
     <string name="settings_ai_config_type_on_device">AI v zařízení</string>
-    <string name="settings_ai_config_type_openai">API kompatibilní s OpenAI</string>
+    <string name="settings_ai_config_type_openai">API kompatibilní s AI</string>
     <string name="settings_ai_config_api_key">API klíč</string>
     <string name="settings_ai_config_api_key_hint">Zadejte API klíč</string>
     <string name="settings_ai_config_model">Model</string>

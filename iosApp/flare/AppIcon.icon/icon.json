@@ -7,7 +7,7 @@
       "blur-material" : 0.5,
       "layers" : [
         {
-          "glass" : false,
+          "glass" : true,
           "hidden-specializations" : [
             {
               "value" : true
@@ -30,7 +30,7 @@
         {
           "blend-mode" : "normal",
           "fill" : "automatic",
-          "glass" : false,
+          "glass" : true,
           "hidden-specializations" : [
             {
               "value" : false

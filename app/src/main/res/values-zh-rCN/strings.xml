@@ -71,6 +71,17 @@
     <string name="settings_storage_subtitle">管理缓存文件、日志和备份</string>
     <string name="settings_about_title">关于</string>
     <string name="settings_about_subtitle">了解更多关于 Flare 的信息</string>
+    <string name="settings_about_description">一款开源、AI 驱动的去中心化社交平台客户端。</string>
+    <string name="settings_about_source_code">源代码</string>
+    <string name="settings_about_telegram">Telegram</string>
+    <string name="settings_about_telegram_description">加入我们的 Telegram 群组</string>
+    <string name="settings_about_discord" translatable="false">Discord</string>
+    <string name="settings_about_discord_description">加入我们的 Discord 服务器</string>
+    <string name="settings_about_line" translatable="false">Line</string>
+    <string name="settings_about_line_description">加入我们的 Line 群组</string>
+    <string name="settings_about_localization">Crowdin</string>
+    <string name="settings_about_localization_description">帮助我们翻译 Flare</string>
+    <string name="settings_privacy_policy">隐私政策</string>
     <string name="settings_side_panel">侧边栏自定义</string>
     <string name="settings_side_panel_description">自定义侧边栏</string>
     <string name="settings_local_filter_title">本地过滤器</string>

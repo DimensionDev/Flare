@@ -2,12 +2,12 @@
 <resources>
     <string name="changelog_title">Witaj ponownie!</string>
     <string name="changelog_message">Wprowadziliśmy pewne zmiany od ostatniego logowania. Oto szczegóły:</string>
-    <string name="changelog_current"><![CDATA[            <span>Wersja %1$s:</span>
+    <string name="changelog_current">
+        <![CDATA[
+            <span>Wersja %1$s:</span>
             <ul>
-                <li>Dodano nowe tryby wyświetlania osi czasu, łącznie z układem galerii.</li>
-                <li>Ulepszone czytanie RSS, udostępnianie, tłumaczenie i streszczenia.</li>
-                <li>Przeorganizowane ustawienia wyglądu dla łatwiejszego dostosowywania.</li>
-                <li>Poprawki błędów i ulepszenia wydajności.</li>
+                <li>Ulepszenia wydajności i poprawki błędów.</li>
             </ul>
-        ]]></string>
+        ]]>
+    </string>
 </resources>

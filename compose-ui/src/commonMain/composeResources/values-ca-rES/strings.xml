@@ -9,13 +9,14 @@
     <string name="profile_header_toots_count">%1$s Publicacions</string>
     <string name="profile_misskey_header_status_count">%1$s Publicacions</string>
     <string name="profile_header_button_follow">Segueix</string>
+    <string name="profile_header_button_request_follow">Request follow</string>
     <string name="profile_header_button_following">Seguint</string>
     <string name="profile_header_button_requested">Sol·licitat</string>
     <string name="profile_header_button_blocked">Bloquejat</string>
     <string name="profile_header_button_is_fans">Et segueix</string>
     <string name="mastodon_notification_item_followed_you">t\'ha seguit</string>
     <string name="mastodon_notification_item_favourited_your_status">ha marcat com a preferida la teva publicació</string>
-    <string name="mastodon_notification_item_reblogged_your_status">ha republicat</string>
+    <string name="mastodon_notification_item_reblogged_your_status">ha republicat una publicació</string>
     <string name="mastodon_notification_item_poll_ended">Ha finalitzat una enquesta en què participaves</string>
     <string name="mastodon_notification_item_mentioned_you">t\'ha esmentat</string>
     <string name="mastodon_notification_item_requested_follow">ha sol·licitat seguir-te</string>
@@ -28,7 +29,7 @@
     <string name="post_show_full_text">Mostra el text complet</string>
     <string name="bluesky_notification_item_followed_you">t\'ha seguit</string>
     <string name="bluesky_notification_item_favourited_your_status">li ha agradat la teva publicació</string>
-    <string name="bluesky_notification_item_reblogged_your_status">ha republicat la teva publicació</string>
+    <string name="bluesky_notification_item_reblogged_your_status">ha republicat una publicació</string>
     <string name="bluesky_notification_item_poll_ended">Ha finalitzat una enquesta en què participaves</string>
     <string name="bluesky_notification_item_mentioned_you">t\'ha esmentat</string>
     <string name="bluesky_item_reblogged_status">ha republicat</string>
@@ -39,7 +40,7 @@
     <string name="bluesky_notification_item_pin">ha fixat una publicació</string>
     <string name="misskey_notification_item_mentioned_you">t\'ha esmentat</string>
     <string name="misskey_notification_item_replied_to_you">t\'ha respost</string>
-    <string name="misskey_notification_item_reposted_your_status">ha republicat la teva publicació</string>
+    <string name="misskey_notification_item_reposted_your_status">ha republicat una publicació</string>
     <string name="misskey_notification_item_quoted_your_status">ha citat la teva publicació</string>
     <string name="misskey_notification_item_reacted_to_your_status">ha reaccionat a la teva publicació</string>
     <string name="misskey_notification_item_poll_ended">Ha finalitzat una enquesta en què participaves</string>
@@ -404,16 +405,5 @@
     <string name="posts_title">Publicacions</string>
     <string name="settings_appearance_absolute_timestamp">Marca de temps absoluta</string>
     <string name="settings_appearance_absolute_timestamp_description">Mostra marques de temps exactes a les publicacions</string>
-    <string name="settings_about_description">Un client de codi obert i impulsat per IA per a plataformes socials descentralitzades.</string>
-    <string name="settings_about_source_code">Codi font</string>
-    <string name="settings_about_telegram">Telegram</string>
-    <string name="settings_about_telegram_description">Uneix-te al nostre grup de Telegram</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
-    <string name="settings_about_discord_description">Uneix-te al nostre servidor de Discord</string>
-    <string name="settings_about_line" translatable="false">Line</string>
-    <string name="settings_about_line_description">Uneix-te al nostre grup de Line</string>
-    <string name="settings_about_localization">Crowdin</string>
-    <string name="settings_about_localization_description">Ajuda\'ns a traduir Flare</string>
-    <string name="settings_privacy_policy">Política de Privadesa</string>
     <string name="channel_title">Canal</string>
 </resources>

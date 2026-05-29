@@ -1,8 +1,8 @@
 package dev.dimension.flare.data.datasource.vvo
 
+import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
-import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.network.vvo.VVOService
 import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.model.MicroBlogKey
@@ -14,7 +14,9 @@ internal class LikePagingSource(
     private val service: VVOService,
     private val accountKey: MicroBlogKey,
     private val onClearMarker: suspend () -> Unit,
-) : RemoteLoader<UiTimelineV2> {
+) : CacheableRemoteLoader<UiTimelineV2> {
+    override val pagingKey: String = "notification_like_$accountKey"
+
     override suspend fun load(
         pageSize: Int,
         request: PagingRequest,

@@ -6,10 +6,7 @@
         <![CDATA[
             <span>Version %1$s:</span>
             <ul>
-                <li>Added new timeline display modes, including a Gallery layout.</li>
-                <li>Improved RSS reading, sharing, translation, and summaries.</li>
-                <li>Reorganized Appearance settings for easier customization.</li>
-                <li>Bug fixes and performance improvements.</li>
+                <li>Performance improvements and bug fixes.</li>
             </ul>
         ]]>
     </string>

@@ -187,7 +187,7 @@
     <string name="settings_ai_config_type">סוג בינה מלאכותית</string>
     <string name="settings_ai_config_type_description">בחרו באיזה מנוע בינה מלאכותית Flare ישתמש</string>
     <string name="settings_ai_config_type_on_device">בינה מלאכותית על המכשיר</string>
-    <string name="settings_ai_config_type_openai">API תואם OpenAI</string>
+    <string name="settings_ai_config_type_openai">API תואם בינה מלאכותית</string>
     <string name="settings_ai_config_api_key">מפתח API</string>
     <string name="settings_ai_config_api_key_hint">הזינו מפתח API</string>
     <string name="settings_ai_config_model">מודל</string>

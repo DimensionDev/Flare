@@ -80,10 +80,10 @@ class DeepLinkMappingTest {
 
         val patterns = PlatformType.Bluesky.spec.deepLinkPatterns(host)
 
-        assertEquals(2, patterns.size)
+        assertEquals(4, patterns.size)
 
         val profile = patterns[0]
-        assertEquals(DeepLinkMapping.Type.Profile.serializer(), profile.serializer)
+        assertEquals(DeepLinkMapping.Type.BlueskyProfile.serializer(), profile.serializer)
         assertEquals(Url("https://$host/profile/{handle}"), profile.uriPattern)
         assertEquals(
             listOf("profile" to false, "handle" to true),
@@ -101,6 +101,14 @@ class DeepLinkMappingTest {
                 .filter { it.stringValue.isNotEmpty() }
                 .map { it.stringValue to it.isParamArg },
         )
+
+        val bskyAppProfile = patterns[2]
+        assertEquals(DeepLinkMapping.Type.BlueskyProfile.serializer(), bskyAppProfile.serializer)
+        assertEquals(Url("https://bsky.app/profile/{handle}"), bskyAppProfile.uriPattern)
+
+        val bskyAppPost = patterns[3]
+        assertEquals(DeepLinkMapping.Type.BlueskyPost.serializer(), bskyAppPost.serializer)
+        assertEquals(Url("https://bsky.app/profile/{handle}/post/{id}"), bskyAppPost.uriPattern)
     }
 
     @Test
@@ -210,6 +218,34 @@ class DeepLinkMappingTest {
     }
 
     @Test
+    fun bskyAppLinksMatchBlueskyAccountOnExampleComPds() {
+        val account =
+            UiAccount.Bluesky(
+                accountKey = MicroBlogKey(id = "did:plc:alice", host = "example.com"),
+            )
+        val mapping:
+            ImmutableMap<UiAccount, ImmutableList<DeepLinkPattern<out DeepLinkMapping.Type>>> =
+            persistentMapOf(
+                account to
+                    PlatformType.Bluesky.spec.deepLinkPatterns(account.accountKey.host),
+            )
+
+        val profileMatch = DeepLinkMapping.matches("https://bsky.app/profile/example.com", mapping)
+        assertEquals(1, profileMatch.size)
+        assertEquals(
+            DeepLinkMapping.Type.BlueskyProfile("example.com"),
+            profileMatch[account],
+        )
+
+        val postMatch = DeepLinkMapping.matches("https://bsky.app/profile/example.com/post/12345", mapping)
+        assertEquals(1, postMatch.size)
+        assertEquals(
+            DeepLinkMapping.Type.BlueskyPost("example.com", "12345"),
+            postMatch[account],
+        )
+    }
+
+    @Test
     fun matchesReturnsEmptyForNonMatchingUrl() {
         val account =
             UiAccount.Mastodon(
@@ -290,7 +326,7 @@ class DeepLinkMappingTest {
         val bskyProfileMatch =
             DeepLinkMapping.matches("https://bsky.example/profile/alice.bsky.social", mapping)
         assertEquals(
-            DeepLinkMapping.Type.Profile("alice.bsky.social"),
+            DeepLinkMapping.Type.BlueskyProfile("alice.bsky.social"),
             bskyProfileMatch[bskyAccount],
         )
 
@@ -303,6 +339,22 @@ class DeepLinkMappingTest {
         assertEquals(
             DeepLinkMapping.Type.BlueskyPost("alice.bsky.social", "12345"),
             bskyPostMatch[bskyAccount],
+        )
+
+        // https://bsky.app/profile/skircle.me
+        val bskyAppProfileMatch =
+            DeepLinkMapping.matches("https://bsky.app/profile/skircle.me", mapping)
+        assertEquals(
+            DeepLinkMapping.Type.BlueskyProfile("skircle.me"),
+            bskyAppProfileMatch[bskyAccount],
+        )
+
+        // https://bsky.app/profile/skircle.me/post/12345
+        val bskyAppPostMatch =
+            DeepLinkMapping.matches("https://bsky.app/profile/skircle.me/post/12345", mapping)
+        assertEquals(
+            DeepLinkMapping.Type.BlueskyPost("skircle.me", "12345"),
+            bskyAppPostMatch[bskyAccount],
         )
 
         // https://x.example/alice
@@ -353,6 +405,18 @@ class DeepLinkMappingTest {
                 statusKey = MicroBlogKey("12345", "mastodon.social"),
             ),
             post.deepLink(accountKey),
+        )
+
+        // Bluesky profile keeps the full handle as the profile lookup actor
+        val blueskyAccountKey = MicroBlogKey(id = "did:plc:alice", host = "example.pds")
+        val blueskyProfile = DeepLinkMapping.Type.BlueskyProfile("@skircle.me")
+        assertEquals(
+            DeeplinkRoute.Profile.UserNameWithHost(
+                accountType = AccountType.Specific(blueskyAccountKey),
+                userName = "skircle.me",
+                host = "example.pds",
+            ),
+            blueskyProfile.deepLink(blueskyAccountKey),
         )
     }
 }

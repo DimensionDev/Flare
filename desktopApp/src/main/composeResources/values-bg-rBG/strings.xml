@@ -187,7 +187,7 @@
     <string name="settings_ai_config_type">Тип ИИ</string>
     <string name="settings_ai_config_type_description">Изберете кой ИИ бекенд да използва Flare</string>
     <string name="settings_ai_config_type_on_device">ИИ на устройството</string>
-    <string name="settings_ai_config_type_openai">OpenAI-съвместим API</string>
+    <string name="settings_ai_config_type_openai">API, съвместим с ИИ</string>
     <string name="settings_ai_config_api_key">API ключ</string>
     <string name="settings_ai_config_api_key_hint">Въведете API ключ</string>
     <string name="settings_ai_config_model">Модел</string>

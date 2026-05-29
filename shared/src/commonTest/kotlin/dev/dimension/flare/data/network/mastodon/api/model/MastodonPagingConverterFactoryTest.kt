@@ -62,6 +62,25 @@ class MastodonPagingConverterFactoryTest {
         }
 
     @Test
+    fun convert_extractsGoToSocialCursorValuesFromLinkHeader() =
+        runTest {
+            val next = "01J0ABCDEF9GHJKMNPQRSTVWXYZ"
+            val prev = "01J0ZZZZZZ9GHJKMNPQRSTVWXYZ"
+            val response =
+                createResponse(
+                    body = statusesJson("1", "2"),
+                    linkHeader =
+                        "<https://example.com/api?limit=20&max_id=$next>; rel=\"next\", " +
+                            "<https://example.com/api?limit=20&min_id=$prev>; rel=\"prev\"",
+                )
+
+            val paging = converter.convert(KtorfitResult.Success(response))
+
+            assertEquals(next, paging.next)
+            assertEquals(prev, paging.prev)
+        }
+
+    @Test
     fun convert_fallsBackToLastItemIdWhenLinkMissing() =
         runTest {
             val response =

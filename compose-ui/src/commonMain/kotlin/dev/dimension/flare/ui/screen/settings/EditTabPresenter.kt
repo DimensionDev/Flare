@@ -11,7 +11,7 @@ import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.res
-import dev.dimension.flare.ui.model.UiIcon
+import dev.dimension.flare.ui.model.TabPickerUiIcons
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.presenter.PresenterBase
@@ -78,7 +78,7 @@ public class EditTabPresenter(
                                 IconType.FavIcon(it.host),
                             )
                         }.orEmpty() +
-                        UiIcon.entries.map {
+                        TabPickerUiIcons.map {
                             IconType.Material(it)
                         } +
                         listOfNotNull(tabItem.icon as? IconType.Url)

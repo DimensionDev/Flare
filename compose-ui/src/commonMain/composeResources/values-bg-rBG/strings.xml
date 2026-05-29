@@ -9,13 +9,14 @@
     <string name="profile_header_toots_count">%1$s Публикации</string>
     <string name="profile_misskey_header_status_count">%1$s Публикации</string>
     <string name="profile_header_button_follow">Последване</string>
+    <string name="profile_header_button_request_follow">Request follow</string>
     <string name="profile_header_button_following">Следване</string>
     <string name="profile_header_button_requested">Заявено</string>
     <string name="profile_header_button_blocked">Блокиран</string>
     <string name="profile_header_button_is_fans">Следва ви</string>
     <string name="mastodon_notification_item_followed_you">ви последва</string>
     <string name="mastodon_notification_item_favourited_your_status">хареса публикацията ви</string>
-    <string name="mastodon_notification_item_reblogged_your_status">сподели</string>
+    <string name="mastodon_notification_item_reblogged_your_status">препубликува публикация</string>
     <string name="mastodon_notification_item_poll_ended">Анкета, в която сте участвали, приключи</string>
     <string name="mastodon_notification_item_mentioned_you">ви спомена</string>
     <string name="mastodon_notification_item_requested_follow">поиска да ви последва</string>
@@ -28,7 +29,7 @@
     <string name="post_show_full_text">Покажи целия текст</string>
     <string name="bluesky_notification_item_followed_you">ви последва</string>
     <string name="bluesky_notification_item_favourited_your_status">хареса публикацията ви</string>
-    <string name="bluesky_notification_item_reblogged_your_status">препубликува публикацията ви</string>
+    <string name="bluesky_notification_item_reblogged_your_status">препубликува публикация</string>
     <string name="bluesky_notification_item_poll_ended">Анкета, в която сте участвали, приключи</string>
     <string name="bluesky_notification_item_mentioned_you">ви спомена</string>
     <string name="bluesky_item_reblogged_status">препубликува</string>
@@ -39,7 +40,7 @@
     <string name="bluesky_notification_item_pin">закачи публикация</string>
     <string name="misskey_notification_item_mentioned_you">ви спомена</string>
     <string name="misskey_notification_item_replied_to_you">ви отговори</string>
-    <string name="misskey_notification_item_reposted_your_status">препубликува публикацията ви</string>
+    <string name="misskey_notification_item_reposted_your_status">препубликува публикация</string>
     <string name="misskey_notification_item_quoted_your_status">цитира публикацията ви</string>
     <string name="misskey_notification_item_reacted_to_your_status">реагира на публикацията ви</string>
     <string name="misskey_notification_item_poll_ended">Анкета, в която сте участвали, приключи</string>
@@ -404,16 +405,5 @@
     <string name="posts_title">Публикации</string>
     <string name="settings_appearance_absolute_timestamp">Абсолютно клеймо за време</string>
     <string name="settings_appearance_absolute_timestamp_description">Показвай точното време на публикациите</string>
-    <string name="settings_about_description">Клиент с отворен код, задвижван от AI, за децентрализирани социални платформи.</string>
-    <string name="settings_about_source_code">Изходен код</string>
-    <string name="settings_about_telegram">Telegram</string>
-    <string name="settings_about_telegram_description">Присъединете се към нашата Telegram група</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
-    <string name="settings_about_discord_description">Присъединете се към нашия Discord сървър</string>
-    <string name="settings_about_line" translatable="false">Line</string>
-    <string name="settings_about_line_description">Присъединете се към нашата Line група</string>
-    <string name="settings_about_localization">Crowdin</string>
-    <string name="settings_about_localization_description">Помогнете ни да преведем Flare</string>
-    <string name="settings_privacy_policy">Политика за поверителност</string>
     <string name="channel_title">Канал</string>
 </resources>

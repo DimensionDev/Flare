@@ -9,6 +9,7 @@
     <string name="profile_header_toots_count">%1$s 게시물</string>
     <string name="profile_misskey_header_status_count">%1$s 게시물</string>
     <string name="profile_header_button_follow">팔로우</string>
+    <string name="profile_header_button_request_follow">Request follow</string>
     <string name="profile_header_button_following">팔로잉</string>
     <string name="profile_header_button_requested">요청됨</string>
     <string name="profile_header_button_blocked">차단됨</string>
@@ -28,7 +29,7 @@
     <string name="post_show_full_text">전문 보기</string>
     <string name="bluesky_notification_item_followed_you">님이 나를 팔로우했습니다</string>
     <string name="bluesky_notification_item_favourited_your_status">님이 내 게시물을 좋아합니다</string>
-    <string name="bluesky_notification_item_reblogged_your_status">님이 내 게시물을 리포스트했습니다</string>
+    <string name="bluesky_notification_item_reblogged_your_status">님이 게시물을 리포스트했습니다</string>
     <string name="bluesky_notification_item_poll_ended">참여하신 설문조사가 종료되었습니다</string>
     <string name="bluesky_notification_item_mentioned_you">님이 나를 언급했습니다</string>
     <string name="bluesky_item_reblogged_status">리포스트함</string>
@@ -39,7 +40,7 @@
     <string name="bluesky_notification_item_pin">님이 게시물을 고정했습니다</string>
     <string name="misskey_notification_item_mentioned_you">님이 나를 언급했습니다</string>
     <string name="misskey_notification_item_replied_to_you">님이 답글을 남겼습니다</string>
-    <string name="misskey_notification_item_reposted_your_status">님이 내 게시물을 리노트했습니다</string>
+    <string name="misskey_notification_item_reposted_your_status">님이 게시물을 리노트했습니다</string>
     <string name="misskey_notification_item_quoted_your_status">님이 내 게시물을 인용했습니다</string>
     <string name="misskey_notification_item_reacted_to_your_status">님이 내 게시물에 반응을 남겼습니다</string>
     <string name="misskey_notification_item_poll_ended">참여하신 설문조사가 종료되었습니다</string>
@@ -404,16 +405,5 @@
     <string name="posts_title">게시물</string>
     <string name="settings_appearance_absolute_timestamp">절대 타임스탬프</string>
     <string name="settings_appearance_absolute_timestamp_description">게시물에 정확한 타임스탬프 표시</string>
-    <string name="settings_about_description">탈중앙화 소셜 플랫폼을 위한 오픈 소스 AI 기반 클라이언트입니다.</string>
-    <string name="settings_about_source_code">소스 코드</string>
-    <string name="settings_about_telegram">Telegram</string>
-    <string name="settings_about_telegram_description">저희 Telegram 그룹에 참여하세요</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
-    <string name="settings_about_discord_description">저희 Discord 서버에 참여하세요</string>
-    <string name="settings_about_line" translatable="false">Line</string>
-    <string name="settings_about_line_description">저희 Line 그룹에 참여하세요</string>
-    <string name="settings_about_localization">Crowdin</string>
-    <string name="settings_about_localization_description">Flare 번역을 도와주세요</string>
-    <string name="settings_privacy_policy">개인정보 처리방침</string>
     <string name="channel_title">채널</string>
 </resources>

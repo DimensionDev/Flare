@@ -9,13 +9,14 @@
     <string name="profile_header_toots_count">%1$s Beiträge</string>
     <string name="profile_misskey_header_status_count">%1$s Beiträge</string>
     <string name="profile_header_button_follow">Folgen</string>
+    <string name="profile_header_button_request_follow">Request follow</string>
     <string name="profile_header_button_following">Ich folge</string>
     <string name="profile_header_button_requested">Angefragt</string>
     <string name="profile_header_button_blocked">Blockiert</string>
     <string name="profile_header_button_is_fans">Folgt dir</string>
     <string name="mastodon_notification_item_followed_you">folgt dir jetzt</string>
     <string name="mastodon_notification_item_favourited_your_status">hat deinen Beitrag favorisiert</string>
-    <string name="mastodon_notification_item_reblogged_your_status">hat geteilt</string>
+    <string name="mastodon_notification_item_reblogged_your_status">hat einen Beitrag geteilt</string>
     <string name="mastodon_notification_item_poll_ended">Eine Umfrage, an der du teilgenommen hast, ist beendet</string>
     <string name="mastodon_notification_item_mentioned_you">hat dich erwähnt</string>
     <string name="mastodon_notification_item_requested_follow">möchte dir folgen</string>
@@ -28,7 +29,7 @@
     <string name="post_show_full_text">Vollständigen Text anzeigen</string>
     <string name="bluesky_notification_item_followed_you">folgt dir jetzt</string>
     <string name="bluesky_notification_item_favourited_your_status">gefällt dein Beitrag</string>
-    <string name="bluesky_notification_item_reblogged_your_status">hat deinen Beitrag geteilt</string>
+    <string name="bluesky_notification_item_reblogged_your_status">hat einen Beitrag geteilt</string>
     <string name="bluesky_notification_item_poll_ended">Eine Umfrage, an der du teilgenommen hast, ist beendet</string>
     <string name="bluesky_notification_item_mentioned_you">hat dich erwähnt</string>
     <string name="bluesky_item_reblogged_status">geteilt</string>
@@ -39,7 +40,7 @@
     <string name="bluesky_notification_item_pin">hat einen Beitrag angepinnt</string>
     <string name="misskey_notification_item_mentioned_you">hat dich erwähnt</string>
     <string name="misskey_notification_item_replied_to_you">hat dir geantwortet</string>
-    <string name="misskey_notification_item_reposted_your_status">hat deinen Beitrag geteilt</string>
+    <string name="misskey_notification_item_reposted_your_status">hat einen Beitrag geteilt</string>
     <string name="misskey_notification_item_quoted_your_status">hat deinen Beitrag zitiert</string>
     <string name="misskey_notification_item_reacted_to_your_status">hat auf deinen Beitrag reagiert</string>
     <string name="misskey_notification_item_poll_ended">Eine Umfrage, an der du teilgenommen hast, ist beendet</string>
@@ -404,16 +405,5 @@
     <string name="posts_title">Beiträge</string>
     <string name="settings_appearance_absolute_timestamp">Absoluter Zeitstempel</string>
     <string name="settings_appearance_absolute_timestamp_description">Exakte Zeitstempel bei Beiträgen anzeigen</string>
-    <string name="settings_about_description">Ein quelloffener, KI-gestützter Client für dezentrale soziale Plattformen.</string>
-    <string name="settings_about_source_code">Quellcode</string>
-    <string name="settings_about_telegram">Telegram</string>
-    <string name="settings_about_telegram_description">Tritt unserer Telegram-Gruppe bei</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
-    <string name="settings_about_discord_description">Tritt unserem Discord-Server bei</string>
-    <string name="settings_about_line" translatable="false">Line</string>
-    <string name="settings_about_line_description">Tritt unserer Line-Gruppe bei</string>
-    <string name="settings_about_localization">Crowdin</string>
-    <string name="settings_about_localization_description">Hilf uns, Flare zu übersetzen</string>
-    <string name="settings_privacy_policy">Datenschutzrichtlinie</string>
     <string name="channel_title">Kanal</string>
 </resources>

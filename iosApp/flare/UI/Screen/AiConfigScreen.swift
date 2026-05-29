@@ -262,7 +262,7 @@ struct AiConfigScreen: View {
         case .onDevice:
             return "On Device"
         case .openAi:
-            return "AI Compatible"
+            return "AI-compatible API"
         }
     }
 

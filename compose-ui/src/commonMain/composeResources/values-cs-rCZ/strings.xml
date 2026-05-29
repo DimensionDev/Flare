@@ -9,13 +9,14 @@
     <string name="profile_header_toots_count">%1$s Příspěvky</string>
     <string name="profile_misskey_header_status_count">%1$s Příspěvky</string>
     <string name="profile_header_button_follow">Sledovat</string>
+    <string name="profile_header_button_request_follow">Request follow</string>
     <string name="profile_header_button_following">Sleduji</string>
     <string name="profile_header_button_requested">Požádáno</string>
     <string name="profile_header_button_blocked">Blokován</string>
     <string name="profile_header_button_is_fans">Sleduje vás</string>
     <string name="mastodon_notification_item_followed_you">vás začal(a) sledovat</string>
     <string name="mastodon_notification_item_favourited_your_status">přidal(a) váš příspěvek do oblíbených</string>
-    <string name="mastodon_notification_item_reblogged_your_status">sdílel(a)</string>
+    <string name="mastodon_notification_item_reblogged_your_status">přesdílel(a) příspěvek</string>
     <string name="mastodon_notification_item_poll_ended">Anketa, které jste se účastnili, skončila</string>
     <string name="mastodon_notification_item_mentioned_you">vás zmínil(a)</string>
     <string name="mastodon_notification_item_requested_follow">požádal(a) o sledování</string>
@@ -28,7 +29,7 @@
     <string name="post_show_full_text">Zobrazit celý text</string>
     <string name="bluesky_notification_item_followed_you">vás začal(a) sledovat</string>
     <string name="bluesky_notification_item_favourited_your_status">olajkoval(a) váš příspěvek</string>
-    <string name="bluesky_notification_item_reblogged_your_status">přesdílel(a) váš příspěvek</string>
+    <string name="bluesky_notification_item_reblogged_your_status">přesdílel(a) příspěvek</string>
     <string name="bluesky_notification_item_poll_ended">Anketa, které jste se účastnili, skončila</string>
     <string name="bluesky_notification_item_mentioned_you">vás zmínil(a)</string>
     <string name="bluesky_item_reblogged_status">přesdílel(a)</string>
@@ -39,7 +40,7 @@
     <string name="bluesky_notification_item_pin">přišpendlil(a) příspěvek</string>
     <string name="misskey_notification_item_mentioned_you">vás zmínil(a)</string>
     <string name="misskey_notification_item_replied_to_you">vám odpověděl(a)</string>
-    <string name="misskey_notification_item_reposted_your_status">přesdílel(a) váš příspěvek</string>
+    <string name="misskey_notification_item_reposted_your_status">přesdílel(a) příspěvek</string>
     <string name="misskey_notification_item_quoted_your_status">citoval(a) váš příspěvek</string>
     <string name="misskey_notification_item_reacted_to_your_status">reagoval(a) na váš příspěvek</string>
     <string name="misskey_notification_item_poll_ended">Anketa, které jste se účastnili, skončila</string>
@@ -404,16 +405,5 @@
     <string name="posts_title">Příspěvky</string>
     <string name="settings_appearance_absolute_timestamp">Absolutní časové razítko</string>
     <string name="settings_appearance_absolute_timestamp_description">Zobrazovat u příspěvků přesný čas</string>
-    <string name="settings_about_description">Open-source klient poháněný AI pro decentralizované sociální platformy.</string>
-    <string name="settings_about_source_code">Zdrojový kód</string>
-    <string name="settings_about_telegram">Telegram</string>
-    <string name="settings_about_telegram_description">Připojte se k naší skupině na Telegramu</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
-    <string name="settings_about_discord_description">Připojte se k našemu Discord serveru</string>
-    <string name="settings_about_line" translatable="false">Line</string>
-    <string name="settings_about_line_description">Připojte se k naší skupině na Line</string>
-    <string name="settings_about_localization">Crowdin</string>
-    <string name="settings_about_localization_description">Pomozte nám přeložit Flare</string>
-    <string name="settings_privacy_policy">Zásady ochrany osobních údajů</string>
     <string name="channel_title">Kanál</string>
 </resources>

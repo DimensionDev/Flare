@@ -8,13 +8,14 @@
     <string name="profile_header_toots_count">%1$s Publicações</string>
     <string name="profile_misskey_header_status_count">%1$s Publicações</string>
     <string name="profile_header_button_follow">Seguir</string>
+    <string name="profile_header_button_request_follow">Request follow</string>
     <string name="profile_header_button_following">Seguindo</string>
     <string name="profile_header_button_requested">Solicitado</string>
     <string name="profile_header_button_blocked">Bloqueado</string>
     <string name="profile_header_button_is_fans">Segue-o</string>
     <string name="mastodon_notification_item_followed_you">seguiu-o</string>
     <string name="mastodon_notification_item_favourited_your_status">marcou como favorita a sua publicação</string>
-    <string name="mastodon_notification_item_reblogged_your_status">repartilhou</string>
+    <string name="mastodon_notification_item_reblogged_your_status">republicou uma publicação</string>
     <string name="mastodon_notification_item_poll_ended">Uma sondagem em que participou terminou</string>
     <string name="mastodon_notification_item_mentioned_you">mencionou-o</string>
     <string name="mastodon_notification_item_requested_follow">solicitou segui-lo</string>
@@ -27,7 +28,7 @@
     <string name="post_show_full_text">Mostrar texto completo</string>
     <string name="bluesky_notification_item_followed_you">seguiu-o</string>
     <string name="bluesky_notification_item_favourited_your_status">gostou da sua publicação</string>
-    <string name="bluesky_notification_item_reblogged_your_status">republicou a sua publicação</string>
+    <string name="bluesky_notification_item_reblogged_your_status">republicou uma publicação</string>
     <string name="bluesky_notification_item_poll_ended">Uma sondagem em que participou terminou</string>
     <string name="bluesky_notification_item_mentioned_you">mencionou-o</string>
     <string name="bluesky_item_reblogged_status">republicou</string>
@@ -38,7 +39,7 @@
     <string name="bluesky_notification_item_pin">fixou uma publicação</string>
     <string name="misskey_notification_item_mentioned_you">mencionou-o</string>
     <string name="misskey_notification_item_replied_to_you">respondeu-lhe</string>
-    <string name="misskey_notification_item_reposted_your_status">republicou a sua publicação</string>
+    <string name="misskey_notification_item_reposted_your_status">republicou uma publicação</string>
     <string name="misskey_notification_item_quoted_your_status">citou a sua publicação</string>
     <string name="misskey_notification_item_reacted_to_your_status">reagiu à sua publicação</string>
     <string name="misskey_notification_item_poll_ended">Uma sondagem em que participou terminou</string>
@@ -403,16 +404,5 @@
     <string name="posts_title">Publicações</string>
     <string name="settings_appearance_absolute_timestamp">Carimbo de data/hora absoluto</string>
     <string name="settings_appearance_absolute_timestamp_description">Mostrar horários exatos nas publicações</string>
-    <string name="settings_about_description">Um cliente de código aberto, alimentado por IA, para plataformas sociais descentralizadas.</string>
-    <string name="settings_about_source_code">Código fonte</string>
-    <string name="settings_about_telegram">Telegram</string>
-    <string name="settings_about_telegram_description">Junte-se ao nosso grupo no Telegram</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
-    <string name="settings_about_discord_description">Junte-se ao nosso servidor no Discord</string>
-    <string name="settings_about_line" translatable="false">Line</string>
-    <string name="settings_about_line_description">Junte-se ao nosso grupo no Line</string>
-    <string name="settings_about_localization">Crowdin</string>
-    <string name="settings_about_localization_description">Ajude-nos a traduzir o Flare</string>
-    <string name="settings_privacy_policy">Política de Privacidade</string>
     <string name="channel_title">Canal</string>
 </resources>

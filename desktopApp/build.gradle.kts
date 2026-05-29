@@ -63,7 +63,7 @@ val fdroidProp = Properties().apply {
 val desktopVersionName =
     System.getenv("BUILD_VERSION")?.takeIf {
         // match semantic versioning
-        Regex("""\d+\.\d+\.\d+(-\S+)?""").matches(it)
+        Regex("""\d+\.\d+\.\d+""").matches(it)
     } ?: fdroidProp.getProperty("versionName") ?: "1.0.0"
 val desktopVersionCode =
     System.getenv("BUILD_NUMBER")?.toIntOrNull() ?: fdroidProp.getProperty("versionCode")?.toIntOrNull() ?: 1
@@ -158,7 +158,7 @@ nucleus.application {
                 }
                 ?.sorted()
                 ?: emptyList()
-            
+
             val localizationsXml = (listOf("en") + locales).distinct()
                 .joinToString("\n") { "        <string>$it</string>" }
 

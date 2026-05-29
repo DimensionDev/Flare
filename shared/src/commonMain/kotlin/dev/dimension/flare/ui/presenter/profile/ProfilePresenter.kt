@@ -35,6 +35,7 @@ import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.model.takeSuccessOr
 import dev.dimension.flare.ui.model.toUi
+import dev.dimension.flare.ui.model.zipState
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.presenter.home.TimelinePresenter
 import dev.dimension.flare.ui.presenter.home.UserState
@@ -238,10 +239,18 @@ public class ProfilePresenter(
         val myAccountKey by myAccountKeyFlow.collectAsUiState()
         val profileMenus by profileMenusFlow.collectAsState(emptyList<ActionMenu>().toImmutableList())
         val tabs by tabsFlow.collectAsUiState()
+        val followButtonState =
+            zipState(userState, relationState) { user, relation ->
+                FollowButtonState.from(
+                    profile = user,
+                    relation = relation,
+                )
+            }
 
         return object : ProfileState(
             userState = userState,
             relationState = relationState,
+            followButtonState = followButtonState,
             isMe = isMe,
             actions = profileMenus,
             myAccountKey = myAccountKey,
@@ -249,7 +258,10 @@ public class ProfilePresenter(
         ) {
             override fun follow(userKey: MicroBlogKey) {
                 service.onSuccess { service ->
-                    (service as RelationDataSource).relationHandler.follow(userKey)
+                    (service as RelationDataSource).relationHandler.follow(
+                        userKey = userKey,
+                        requestFollow = followButtonState.takeSuccess() == FollowButtonState.RequestFollow,
+                    )
                 }
             }
 
@@ -424,6 +436,7 @@ private fun buildProfileMenus(
 public abstract class ProfileState(
     public val userState: UiState<UiProfile>,
     public val relationState: UiState<UiRelation>,
+    public val followButtonState: UiState<FollowButtonState>,
     public val isMe: UiState<Boolean>,
     public val actions: ImmutableList<ActionMenu>,
     public val myAccountKey: UiState<MicroBlogKey>,
@@ -449,6 +462,50 @@ public abstract class ProfileState(
         public data class Media internal constructor(
             val presenter: ProfileMediaPresenter,
         ) : Tab()
+    }
+}
+
+@Immutable
+public sealed class FollowButtonState {
+    public abstract val id: String
+
+    @Immutable
+    public data object Follow : FollowButtonState() {
+        override val id: String = "follow"
+    }
+
+    @Immutable
+    public data object RequestFollow : FollowButtonState() {
+        override val id: String = "request_follow"
+    }
+
+    @Immutable
+    public data object Requested : FollowButtonState() {
+        override val id: String = "requested"
+    }
+
+    @Immutable
+    public data object Following : FollowButtonState() {
+        override val id: String = "following"
+    }
+
+    @Immutable
+    public data object Blocked : FollowButtonState() {
+        override val id: String = "blocked"
+    }
+
+    public companion object {
+        public fun from(
+            profile: UiProfile,
+            relation: UiRelation,
+        ): FollowButtonState =
+            when {
+                relation.blocking -> Blocked
+                relation.following -> Following
+                relation.hasPendingFollowRequestFromYou -> Requested
+                UiProfile.Mark.Locked in profile.mark -> RequestFollow
+                else -> Follow
+            }
     }
 }
 

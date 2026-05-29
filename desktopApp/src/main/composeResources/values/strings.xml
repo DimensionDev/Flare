@@ -187,7 +187,7 @@
     <string name="settings_ai_config_type">AI Type</string>
     <string name="settings_ai_config_type_description">Choose which AI backend Flare uses</string>
     <string name="settings_ai_config_type_on_device">On-device AI</string>
-    <string name="settings_ai_config_type_openai">OpenAI-compatible API</string>
+    <string name="settings_ai_config_type_openai">AI-compatible API</string>
     <string name="settings_ai_config_api_key">API Key</string>
     <string name="settings_ai_config_api_key_hint">Enter API key</string>
     <string name="settings_ai_config_model">Model</string>

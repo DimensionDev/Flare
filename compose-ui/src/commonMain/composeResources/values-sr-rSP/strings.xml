@@ -11,6 +11,7 @@
     <string name="profile_misskey_header_status_count">%1$s Objave</string>
 
     <string name="profile_header_button_follow">Prati</string>
+    <string name="profile_header_button_request_follow">Request follow</string>
     <string name="profile_header_button_following">Pratite</string>
     <string name="profile_header_button_requested">Poslat zahtev</string>
     <string name="profile_header_button_blocked">Blokirano</string>
@@ -18,7 +19,7 @@
 
     <string name="mastodon_notification_item_followed_you">vas prati</string>
     <string name="mastodon_notification_item_favourited_your_status">je označio vašu objavu kao omiljenu</string>
-    <string name="mastodon_notification_item_reblogged_your_status">je podelio vašu objavu</string>
+    <string name="mastodon_notification_item_reblogged_your_status">je ponovo objavio objavu</string>
     <string name="mastodon_notification_item_poll_ended">Anketa u kojoj ste učestvovali je završena</string>
     <string name="mastodon_notification_item_mentioned_you">vas je pomenuo</string>
     <string name="mastodon_notification_item_requested_follow">je poslao zahtev da vas prati</string>
@@ -33,7 +34,7 @@
 
     <string name="bluesky_notification_item_followed_you">vas prati</string>
     <string name="bluesky_notification_item_favourited_your_status">mu se sviđa vaša objava</string>
-    <string name="bluesky_notification_item_reblogged_your_status">je ponovo objavio vašu objavu</string>
+    <string name="bluesky_notification_item_reblogged_your_status">je ponovo objavio objavu</string>
     <string name="bluesky_notification_item_poll_ended">Anketa u kojoj ste učestvovali je završena</string>
     <string name="bluesky_notification_item_mentioned_you">vas je pomenuo</string>
     <string name="bluesky_item_reblogged_status">je ponovo objavio</string>
@@ -45,7 +46,7 @@
 
     <string name="misskey_notification_item_mentioned_you">vas je pomenuo</string>
     <string name="misskey_notification_item_replied_to_you">vam je odgovorio</string>
-    <string name="misskey_notification_item_reposted_your_status">je ponovo objavio vašu objavu</string>
+    <string name="misskey_notification_item_reposted_your_status">je ponovo objavio objavu</string>
     <string name="misskey_notification_item_quoted_your_status">je citirao vašu objavu</string>
     <string name="misskey_notification_item_reacted_to_your_status">je reagovao na vašu objavu</string>
     <string name="misskey_notification_item_poll_ended">Anketa u kojoj ste učestvovali je završena</string>
@@ -515,16 +516,5 @@
     <string name="posts_title">Objave</string>
     <string name="settings_appearance_absolute_timestamp">Apsolutno vreme</string>
     <string name="settings_appearance_absolute_timestamp_description">Prikaži tačno vreme na objavama</string>
-    <string name="settings_about_description">Klijent otvorenog koda za decentralizovane društvene platforme, pokretan veštačkom inteligencijom.</string>
-    <string name="settings_about_source_code">Izvorni kod</string>
-    <string name="settings_about_telegram">Telegram</string>
-    <string name="settings_about_telegram_description">Pridružite se našoj Telegram grupi</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
-    <string name="settings_about_discord_description">Pridružite se našem Discord serveru</string>
-    <string name="settings_about_line" translatable="false">Line</string>
-    <string name="settings_about_line_description">Pridružite se našoj Line grupi</string>
-    <string name="settings_about_localization">Crowdin</string>
-    <string name="settings_about_localization_description">Pomozite nam u prevođenju Flare-a</string>
-    <string name="settings_privacy_policy">Politika privatnosti</string>
     <string name="channel_title">Kanal</string>
 </resources>

@@ -71,6 +71,17 @@
     <string name="settings_storage_subtitle">Gestiona els fitxers a la memòria cau, els registres i les còpies de seguretat</string>
     <string name="settings_about_title">Sobre l\'aplicació</string>
     <string name="settings_about_subtitle">Més informació sobre Flare</string>
+    <string name="settings_about_description">Un client de codi obert i impulsat per IA per a plataformes socials descentralitzades.</string>
+    <string name="settings_about_source_code">Codi font</string>
+    <string name="settings_about_telegram">Telegram</string>
+    <string name="settings_about_telegram_description">Uneix-te al nostre grup de Telegram</string>
+    <string name="settings_about_discord" translatable="false">Discord</string>
+    <string name="settings_about_discord_description">Uneix-te al nostre servidor de Discord</string>
+    <string name="settings_about_line" translatable="false">Line</string>
+    <string name="settings_about_line_description">Uneix-te al nostre grup de Line</string>
+    <string name="settings_about_localization">Crowdin</string>
+    <string name="settings_about_localization_description">Ajuda\'ns a traduir Flare</string>
+    <string name="settings_privacy_policy">Política de Privadesa</string>
     <string name="settings_side_panel">Personalització del panell lateral</string>
     <string name="settings_side_panel_description">Personalitza el panell lateral</string>
     <string name="settings_local_filter_title">Filtres locals</string>

@@ -75,12 +75,12 @@ private class MediaTimelinePresenter(
         createPager(scope).map { data ->
             data.flatMap { status ->
                 if (status is UiTimelineV2.Post) {
-                    status.images.map {
+                    status.images.mapIndexed { index, it ->
                         ProfileMedia(
                             it,
                             status,
                             status.statusKey,
-                            status.images.indexOf(it),
+                            index,
                         )
                     }
                 } else {
@@ -101,4 +101,6 @@ public data class ProfileMedia internal constructor(
     val status: UiTimelineV2,
     val statusKey: MicroBlogKey,
     val index: Int,
-)
+) {
+    val key: String = "$statusKey-$index"
+}

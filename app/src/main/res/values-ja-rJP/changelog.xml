@@ -2,4 +2,12 @@
 <resources>
     <string name="changelog_title">おかえりなさい！</string>
     <string name="changelog_message">最後にログインしてからいくつかの変更がありました。詳細は次のとおりです:</string>
+    <string name="changelog_current">
+        <![CDATA[
+            <span>バージョン %1$s:</span>
+            <ul>
+                <li>パフォーマンス改善と不具合修正を行いました。</li>
+            </ul>
+        ]]>
+    </string>
 </resources>

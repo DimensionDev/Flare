@@ -71,6 +71,17 @@
     <string name="settings_storage_subtitle">Hantera cachade filer, loggar och säkerhetskopior</string>
     <string name="settings_about_title">Om</string>
     <string name="settings_about_subtitle">Lär dig mer om Flare</string>
+    <string name="settings_about_description">En AI-driven klient med öppen källkod för decentraliserade sociala plattformar.</string>
+    <string name="settings_about_source_code">Källkod</string>
+    <string name="settings_about_telegram">Telegram</string>
+    <string name="settings_about_telegram_description">Gå med i vår Telegram-grupp</string>
+    <string name="settings_about_discord" translatable="false">Discord</string>
+    <string name="settings_about_discord_description">Gå med i vår Discord-server</string>
+    <string name="settings_about_line" translatable="false">Line</string>
+    <string name="settings_about_line_description">Gå med i vår Line-grupp</string>
+    <string name="settings_about_localization">Crowdin</string>
+    <string name="settings_about_localization_description">Hjälp oss översätta Flare</string>
+    <string name="settings_privacy_policy">Integritetspolicy</string>
     <string name="settings_side_panel">Anpassning av sidopanel</string>
     <string name="settings_side_panel_description">Anpassa sidopanelen</string>
     <string name="settings_local_filter_title">Lokala filter</string>

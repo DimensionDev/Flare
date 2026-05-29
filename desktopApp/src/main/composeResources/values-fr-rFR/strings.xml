@@ -187,7 +187,7 @@
     <string name="settings_ai_config_type">Type d\'IA</string>
     <string name="settings_ai_config_type_description">Choisissez quel moteur d\'IA Flare utilise</string>
     <string name="settings_ai_config_type_on_device">IA sur l\'appareil</string>
-    <string name="settings_ai_config_type_openai">API compatible OpenAI</string>
+    <string name="settings_ai_config_type_openai">API compatible IA</string>
     <string name="settings_ai_config_api_key">Clé API</string>
     <string name="settings_ai_config_api_key_hint">Entrez la clé API</string>
     <string name="settings_ai_config_model">Modèle</string>

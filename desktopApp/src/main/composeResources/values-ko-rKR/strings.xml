@@ -168,7 +168,7 @@
     <string name="settings_ai_config_type">AI 유형</string>
     <string name="settings_ai_config_type_description">Flare가 사용할 AI 백엔드 선택</string>
     <string name="settings_ai_config_type_on_device">온디바이스 AI</string>
-    <string name="settings_ai_config_type_openai">OpenAI 호환 API</string>
+    <string name="settings_ai_config_type_openai">AI 호환 API</string>
     <string name="settings_ai_config_api_key">API 키</string>
     <string name="settings_ai_config_api_key_hint">API 키 입력</string>
     <string name="settings_ai_config_model">모델</string>

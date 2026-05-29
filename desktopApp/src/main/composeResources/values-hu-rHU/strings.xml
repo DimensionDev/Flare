@@ -187,7 +187,7 @@
     <string name="settings_ai_config_type">MI típusa</string>
     <string name="settings_ai_config_type_description">Válaszd ki, melyik MI hátteret használja a Flare</string>
     <string name="settings_ai_config_type_on_device">Eszközön lévő MI</string>
-    <string name="settings_ai_config_type_openai">OpenAI-kompatibilis API</string>
+    <string name="settings_ai_config_type_openai">MI-kompatibilis API</string>
     <string name="settings_ai_config_api_key">API kulcs</string>
     <string name="settings_ai_config_api_key_hint">Add meg az API kulcsot</string>
     <string name="settings_ai_config_model">Modell</string>

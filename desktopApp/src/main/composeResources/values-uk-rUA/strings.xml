@@ -170,7 +170,7 @@
     <string name="settings_ai_config_type">Тип ШІ</string>
     <string name="settings_ai_config_type_description">Виберіть, який ШІ-бекенд використовує Flare</string>
     <string name="settings_ai_config_type_on_device">ШІ на пристрої</string>
-    <string name="settings_ai_config_type_openai">OpenAI-сумісний API</string>
+    <string name="settings_ai_config_type_openai">AI-сумісний API</string>
     <string name="settings_ai_config_api_key">Ключ API</string>
     <string name="settings_ai_config_api_key_hint">Введіть ключ API</string>
     <string name="settings_ai_config_model">Модель</string>

@@ -259,7 +259,12 @@ public sealed class UiTimelineV2 {
                         append(" ")
                     }
                 }
+                internalRepost?.content?.raw?.let { repostContent ->
+                    append(repostContent)
+                    append(" ")
+                }
             }
+
         val onClicked: ClickContext.() -> Unit by lazy {
             clickEvent.onClicked
         }

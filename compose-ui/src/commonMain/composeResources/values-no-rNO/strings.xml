@@ -8,13 +8,14 @@
     <string name="profile_header_toots_count">%1$s innlegg</string>
     <string name="profile_misskey_header_status_count">%1$s innlegg</string>
     <string name="profile_header_button_follow">Følg</string>
+    <string name="profile_header_button_request_follow">Request follow</string>
     <string name="profile_header_button_following">Følger</string>
     <string name="profile_header_button_requested">Forespurt</string>
     <string name="profile_header_button_blocked">Blokkert</string>
     <string name="profile_header_button_is_fans">Følger deg</string>
     <string name="mastodon_notification_item_followed_you">fulgte deg</string>
     <string name="mastodon_notification_item_favourited_your_status">likte innlegget ditt</string>
-    <string name="mastodon_notification_item_reblogged_your_status">fremmet</string>
+    <string name="mastodon_notification_item_reblogged_your_status">reposter et innlegg</string>
     <string name="mastodon_notification_item_poll_ended">En avstemning du deltok i er avsluttet</string>
     <string name="mastodon_notification_item_mentioned_you">nevnte deg</string>
     <string name="mastodon_notification_item_requested_follow">ba om å få følge deg</string>
@@ -27,7 +28,7 @@
     <string name="post_show_full_text">Vis full tekst</string>
     <string name="bluesky_notification_item_followed_you">fulgte deg</string>
     <string name="bluesky_notification_item_favourited_your_status">likte innlegget ditt</string>
-    <string name="bluesky_notification_item_reblogged_your_status">reposter innlegget ditt</string>
+    <string name="bluesky_notification_item_reblogged_your_status">reposter et innlegg</string>
     <string name="bluesky_notification_item_poll_ended">En avstemning du deltok i er avsluttet</string>
     <string name="bluesky_notification_item_mentioned_you">nevnte deg</string>
     <string name="bluesky_item_reblogged_status">reposter</string>
@@ -38,7 +39,7 @@
     <string name="bluesky_notification_item_pin">festet et innlegg</string>
     <string name="misskey_notification_item_mentioned_you">nevnte deg</string>
     <string name="misskey_notification_item_replied_to_you">svarte deg</string>
-    <string name="misskey_notification_item_reposted_your_status">reposter innlegget ditt</string>
+    <string name="misskey_notification_item_reposted_your_status">reposter et innlegg</string>
     <string name="misskey_notification_item_quoted_your_status">siterte innlegget ditt</string>
     <string name="misskey_notification_item_reacted_to_your_status">reagerte på innlegget ditt</string>
     <string name="misskey_notification_item_poll_ended">En avstemning du deltok i er avsluttet</string>
@@ -403,16 +404,5 @@
     <string name="posts_title">Innlegg</string>
     <string name="settings_appearance_absolute_timestamp">Absolutt tidsstempel</string>
     <string name="settings_appearance_absolute_timestamp_description">Vis nøyaktige tidsstempler på innlegg</string>
-    <string name="settings_about_description">En åpen kildekode, AI-drevet klient for desentraliserte sosiale plattformer.</string>
-    <string name="settings_about_source_code">Kildekode</string>
-    <string name="settings_about_telegram">Telegram</string>
-    <string name="settings_about_telegram_description">Bli med i vår Telegram-gruppe</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
-    <string name="settings_about_discord_description">Bli med i vår Discord-server</string>
-    <string name="settings_about_line" translatable="false">Line</string>
-    <string name="settings_about_line_description">Bli med i vår Line-gruppe</string>
-    <string name="settings_about_localization">Crowdin</string>
-    <string name="settings_about_localization_description">Hjelp oss med å oversette Flare</string>
-    <string name="settings_privacy_policy">Personvernerklæring</string>
     <string name="channel_title">Kanal</string>
 </resources>

@@ -40,12 +40,10 @@ internal data object BlueskyPlatformSpec : PlatformSpec {
 
     override fun deepLinkPatterns(host: String): ImmutableList<DeepLinkPattern<out DeepLinkMapping.Type>> =
         buildList {
-            add(DeepLinkPattern(DeepLinkMapping.Type.Profile.serializer(), Url("https://$host/profile/{handle}")))
+            add(DeepLinkPattern(DeepLinkMapping.Type.BlueskyProfile.serializer(), Url("https://$host/profile/{handle}")))
             add(DeepLinkPattern(DeepLinkMapping.Type.BlueskyPost.serializer(), Url("https://$host/profile/{handle}/post/{id}")))
-            if (host == "bsky.social") {
-                add(DeepLinkPattern(DeepLinkMapping.Type.Profile.serializer(), Url("https://bsky.app/profile/{handle}")))
-                add(DeepLinkPattern(DeepLinkMapping.Type.BlueskyPost.serializer(), Url("https://bsky.app/profile/{handle}/post/{id}")))
-            }
+            add(DeepLinkPattern(DeepLinkMapping.Type.BlueskyProfile.serializer(), Url("https://bsky.app/profile/{handle}")))
+            add(DeepLinkPattern(DeepLinkMapping.Type.BlueskyPost.serializer(), Url("https://bsky.app/profile/{handle}/post/{id}")))
         }.toImmutableList()
 
     internal val bookmarkTimelineSpec =

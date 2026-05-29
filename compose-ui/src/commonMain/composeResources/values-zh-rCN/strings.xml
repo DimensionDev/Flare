@@ -11,6 +11,7 @@
     <string name="profile_misskey_header_status_count">%1$s 帖子</string>
 
     <string name="profile_header_button_follow">关注</string>
+    <string name="profile_header_button_request_follow">请求关注</string>
     <string name="profile_header_button_following">正在关注</string>
     <string name="profile_header_button_requested">已请求</string>
     <string name="profile_header_button_blocked">已屏蔽</string>
@@ -18,7 +19,7 @@
 
     <string name="mastodon_notification_item_followed_you">关注了你</string>
     <string name="mastodon_notification_item_favourited_your_status">收藏了你的帖子</string>
-    <string name="mastodon_notification_item_reblogged_your_status">转推了你的帖子</string>
+    <string name="mastodon_notification_item_reblogged_your_status">转发了帖子</string>
     <string name="mastodon_notification_item_poll_ended">你参与的投票已结束</string>
     <string name="mastodon_notification_item_mentioned_you">提到了你</string>
     <string name="mastodon_notification_item_requested_follow">请求关注你</string>
@@ -33,7 +34,7 @@
 
     <string name="bluesky_notification_item_followed_you">关注了你</string>
     <string name="bluesky_notification_item_favourited_your_status">赞了你的帖子</string>
-    <string name="bluesky_notification_item_reblogged_your_status">转发了你的帖子</string>
+    <string name="bluesky_notification_item_reblogged_your_status">转发了帖子</string>
     <string name="bluesky_notification_item_poll_ended">你参与的投票已结束</string>
     <string name="bluesky_notification_item_mentioned_you">提到了你</string>
     <string name="bluesky_item_reblogged_status">转发了帖子</string>
@@ -45,7 +46,7 @@
 
     <string name="misskey_notification_item_mentioned_you">提到了你</string>
     <string name="misskey_notification_item_replied_to_you">回复了你</string>
-    <string name="misskey_notification_item_reposted_your_status">转发了你的帖子</string>
+    <string name="misskey_notification_item_reposted_your_status">转发了帖子</string>
     <string name="misskey_notification_item_quoted_your_status">引用了你的帖子</string>
     <string name="misskey_notification_item_reacted_to_your_status">回应了你的帖子</string>
     <string name="misskey_notification_item_poll_ended">你参与的投票已结束</string>
@@ -515,16 +516,5 @@
     <string name="posts_title">帖子</string>
     <string name="settings_appearance_absolute_timestamp">绝对时间戳</string>
     <string name="settings_appearance_absolute_timestamp_description">在帖子上显示确切的时间戳</string>
-    <string name="settings_about_description">一款开源、AI 驱动的去中心化社交平台客户端。</string>
-    <string name="settings_about_source_code">源代码</string>
-    <string name="settings_about_telegram">Telegram</string>
-    <string name="settings_about_telegram_description">加入我们的 Telegram 群组</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
-    <string name="settings_about_discord_description">加入我们的 Discord 服务器</string>
-    <string name="settings_about_line" translatable="false">Line</string>
-    <string name="settings_about_line_description">加入我们的 Line 群组</string>
-    <string name="settings_about_localization">Crowdin</string>
-    <string name="settings_about_localization_description">帮助我们翻译 Flare</string>
-    <string name="settings_privacy_policy">隐私政策</string>
     <string name="channel_title">频道</string>
 </resources>

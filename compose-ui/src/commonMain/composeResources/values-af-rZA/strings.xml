@@ -9,13 +9,14 @@
     <string name="profile_header_toots_count">%1$s Plasings</string>
     <string name="profile_misskey_header_status_count">%1$s Plasings</string>
     <string name="profile_header_button_follow">Volg</string>
+    <string name="profile_header_button_request_follow">Request follow</string>
     <string name="profile_header_button_following">Volg tans</string>
     <string name="profile_header_button_requested">Aangevra</string>
     <string name="profile_header_button_blocked">Geblokkeer</string>
     <string name="profile_header_button_is_fans">Volg jou</string>
     <string name="mastodon_notification_item_followed_you">het jou begin volg</string>
     <string name="mastodon_notification_item_favourited_your_status">het jou plasing as gunsteling gemerk</string>
-    <string name="mastodon_notification_item_reblogged_your_status">het herplasing gedoen</string>
+    <string name="mastodon_notification_item_reblogged_your_status">het 'n plasing herplaas</string>
     <string name="mastodon_notification_item_poll_ended">\'n Meningspeiling waaraan jy deelgeneem het, het geëindig</string>
     <string name="mastodon_notification_item_mentioned_you">het jou genoem</string>
     <string name="mastodon_notification_item_requested_follow">het versoek om jou te volg</string>
@@ -28,7 +29,7 @@
     <string name="post_show_full_text">Wys volledige teks</string>
     <string name="bluesky_notification_item_followed_you">het jou begin volg</string>
     <string name="bluesky_notification_item_favourited_your_status">hou van jou plasing</string>
-    <string name="bluesky_notification_item_reblogged_your_status">het jou plasing herplaas</string>
+    <string name="bluesky_notification_item_reblogged_your_status">het 'n plasing herplaas</string>
     <string name="bluesky_notification_item_poll_ended">\'n Meningspeiling waaraan jy deelgeneem het, het geëindig</string>
     <string name="bluesky_notification_item_mentioned_you">het jou genoem</string>
     <string name="bluesky_item_reblogged_status">herplaas</string>
@@ -39,7 +40,7 @@
     <string name="bluesky_notification_item_pin">het \'n plasing vasgespeld</string>
     <string name="misskey_notification_item_mentioned_you">het jou genoem</string>
     <string name="misskey_notification_item_replied_to_you">het op jou geantwoord</string>
-    <string name="misskey_notification_item_reposted_your_status">het jou plasing herplaas</string>
+    <string name="misskey_notification_item_reposted_your_status">het 'n plasing herplaas</string>
     <string name="misskey_notification_item_quoted_your_status">het jou plasing aangehaal</string>
     <string name="misskey_notification_item_reacted_to_your_status">het op jou plasing gereageer</string>
     <string name="misskey_notification_item_poll_ended">\'n Meningspeiling waaraan jy deelgeneem het, het geëindig</string>
@@ -404,16 +405,5 @@
     <string name="posts_title">Plasings</string>
     <string name="settings_appearance_absolute_timestamp">Absoluut tydstempel</string>
     <string name="settings_appearance_absolute_timestamp_description">Wys presiese tydstempels op plasings</string>
-    <string name="settings_about_description">\'n Oopbron, KI-aangedrewe kliënt vir gedesentraliseerde sosiale platforms.</string>
-    <string name="settings_about_source_code">Bronkode</string>
-    <string name="settings_about_telegram">Telegram</string>
-    <string name="settings_about_telegram_description">Sluit aan by ons Telegram-groep</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
-    <string name="settings_about_discord_description">Sluit aan by ons Discord-bediener</string>
-    <string name="settings_about_line" translatable="false">Line</string>
-    <string name="settings_about_line_description">Sluit aan by ons Line-groep</string>
-    <string name="settings_about_localization">Crowdin</string>
-    <string name="settings_about_localization_description">Help ons om Flare te vertaal</string>
-    <string name="settings_privacy_policy">Privaatheidsbeleid</string>
     <string name="channel_title">Kanaal</string>
 </resources>

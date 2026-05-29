@@ -10,6 +10,7 @@ import dev.dimension.flare.common.onEmpty
 import dev.dimension.flare.common.onError
 import dev.dimension.flare.common.onLoading
 import dev.dimension.flare.common.onSuccess
+import dev.dimension.flare.ui.component.status.appendStateUI
 import kotlin.native.HiddenFromObjC
 
 @HiddenFromObjC
@@ -117,8 +118,8 @@ public fun <T : Any> LazyStaggeredGridScope.items(
     errorContent: @Composable LazyStaggeredGridItemScope.(Throwable) -> Unit = {},
     loadingContent: @Composable LazyStaggeredGridItemScope.() -> Unit = {},
     loadingCount: Int = 10,
-    key: (PagingState.Success<T>.(index: Int) -> Any)? = null,
-    contentType: PagingState.Success<T>.(index: Int) -> Any? = { null },
+    key: ((item: T) -> Any)? = null,
+    contentType: ((item: T) -> Any?)? = { null },
     itemContent: @Composable LazyStaggeredGridItemScope.(T) -> Unit,
 ) {
     state
@@ -127,12 +128,16 @@ public fun <T : Any> LazyStaggeredGridScope.items(
                 count = itemCount,
                 key =
                     key?.let {
-                        {
-                            key(this, it)
+                        this.itemKey {
+                            key(it)
                         }
                     },
                 contentType = {
-                    contentType(this, it)
+                    contentType?.let {
+                        this.itemContentType {
+                            contentType(it)
+                        }
+                    }
                 },
             ) { index ->
                 val item = get(index)
@@ -142,6 +147,7 @@ public fun <T : Any> LazyStaggeredGridScope.items(
                     loadingContent()
                 }
             }
+            appendStateUI(this)
         }.onLoading {
             items(loadingCount) {
                 loadingContent()
@@ -191,6 +197,7 @@ public fun <T : Any> LazyStaggeredGridScope.itemsIndexed(
                     loadingContent()
                 }
             }
+            appendStateUI(this)
         }.onLoading {
             items(loadingCount) {
                 loadingContent()

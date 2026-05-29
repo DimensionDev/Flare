@@ -70,6 +70,17 @@
     <string name="settings_storage_subtitle">Quản lý tệp lưu tạm, nhật ký và bản sao lưu</string>
     <string name="settings_about_title">Giới thiệu</string>
     <string name="settings_about_subtitle">Tìm hiểu thêm về Flare</string>
+    <string name="settings_about_description">Một ứng dụng khách mã nguồn mở, hỗ trợ AI cho các nền tảng xã hội phi tập trung.</string>
+    <string name="settings_about_source_code">Mã nguồn</string>
+    <string name="settings_about_telegram">Telegram</string>
+    <string name="settings_about_telegram_description">Tham gia nhóm Telegram của chúng tôi</string>
+    <string name="settings_about_discord" translatable="false">Discord</string>
+    <string name="settings_about_discord_description">Tham gia máy chủ Discord của chúng tôi</string>
+    <string name="settings_about_line" translatable="false">Line</string>
+    <string name="settings_about_line_description">Tham gia nhóm Line của chúng tôi</string>
+    <string name="settings_about_localization">Crowdin</string>
+    <string name="settings_about_localization_description">Giúp chúng tôi dịch Flare</string>
+    <string name="settings_privacy_policy">Chính sách Bảo mật</string>
     <string name="settings_side_panel">Tùy chỉnh bảng điều khiển bên</string>
     <string name="settings_side_panel_description">Tùy chỉnh bảng điều khiển bên</string>
     <string name="settings_local_filter_title">Bộ lọc nội bộ</string>

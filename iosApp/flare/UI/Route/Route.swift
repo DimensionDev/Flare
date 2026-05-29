@@ -10,8 +10,6 @@ enum Route: Hashable, Identifiable {
         switch (lhs, rhs) {
         case (.timeline(let lhs), .timeline(let rhs)):
             return lhs.id == rhs.id
-        case (.tabGroupConfig(let lhs), .tabGroupConfig(let rhs)):
-            return lhs?.id == rhs?.id
         default:
             return lhs.hashValue == rhs.hashValue
         }
@@ -22,9 +20,6 @@ enum Route: Hashable, Identifiable {
         case .timeline(let item):
             hasher.combine("timeline")
             hasher.combine(item.id)
-        case .tabGroupConfig(let item):
-            hasher.combine("tabGroupConfig")
-            hasher.combine(item?.id)
         default:
             hasher.combine(String(describing: self))
         }
@@ -85,6 +80,8 @@ enum Route: Hashable, Identifiable {
             AppearanceDisplayScreen()
         case .appearanceMedia:
             AppearanceMediaScreen()
+        case .appIconSettings:
+            AppIconSettingsScreen()
         case .about:
             AboutScreen()
         case .localHostory:
@@ -99,8 +96,6 @@ enum Route: Hashable, Identifiable {
             TranslationConfigScreen()
         case .tabSettings:
             TabSettingsScreen()
-        case .tabGroupConfig(let item):
-            GroupConfigScreen(item: item)
         case .rssDetail(let url, let descriptionHtml, let title):
             RssDetailScreen(url: url, descriptionHtml: descriptionHtml, descriptionTitle: title)
         case .twitterArticle(let accountType, let tweetId, let articleId):
@@ -197,6 +192,7 @@ enum Route: Hashable, Identifiable {
     case appearanceLayout
     case appearanceDisplay
     case appearanceMedia
+    case appIconSettings
     case settings
     case about
     case notification
@@ -219,7 +215,6 @@ enum Route: Hashable, Identifiable {
     case allAntennas(AccountType)
     case allChannels(AccountType)
     case allDirectMessages(AccountType)
-    case tabGroupConfig(GroupTimelineTabItemV2?)
     case rssManagement
     case draftBox
     case secondaryMenu

@@ -46,6 +46,7 @@ import dev.dimension.flare.compose.ui.profile_header_button_blocked
 import dev.dimension.flare.compose.ui.profile_header_button_follow
 import dev.dimension.flare.compose.ui.profile_header_button_following
 import dev.dimension.flare.compose.ui.profile_header_button_is_fans
+import dev.dimension.flare.compose.ui.profile_header_button_request_follow
 import dev.dimension.flare.compose.ui.profile_header_button_requested
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.platform.PlatformErrorButton
@@ -60,6 +61,7 @@ import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.takeSuccess
+import dev.dimension.flare.ui.presenter.profile.FollowButtonState
 import dev.dimension.flare.ui.presenter.profile.ProfileState
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import dev.dimension.flare.ui.route.toUri
@@ -117,6 +119,7 @@ public fun ProfileHeader(
                 modifier = modifier,
                 user = userState.data,
                 relationState = state.relationState,
+                followButtonState = state.followButtonState,
                 myAccountKey = state.myAccountKey,
                 onFollowClick = state::follow,
                 onUnfollowClick = state::unfollow,
@@ -136,6 +139,7 @@ public fun ProfileHeader(
 private fun ProfileHeaderSuccess(
     user: UiProfile,
     relationState: UiState<UiRelation>,
+    followButtonState: UiState<FollowButtonState>,
     myAccountKey: UiState<MicroBlogKey>,
     onFollowClick: (userKey: MicroBlogKey) -> Unit,
     onUnfollowClick: (userKey: MicroBlogKey) -> Unit,
@@ -159,7 +163,7 @@ private fun ProfileHeaderSuccess(
         headerTrailing = {
             isMe.onSuccess {
                 if (!it) {
-                    when (relationState) {
+                    when (followButtonState) {
                         is UiState.Error -> {
                             Unit
                         }
@@ -180,12 +184,11 @@ private fun ProfileHeaderSuccess(
                         }
 
                         is UiState.Success -> {
-                            val relation = relationState.data
                             Column(
                                 horizontalAlignment = Alignment.CenterHorizontally,
                             ) {
                                 AnimatedContent(
-                                    targetState = FollowButtonState.from(relation),
+                                    targetState = followButtonState.data,
                                     transitionSpec = {
                                         (fadeIn() + scaleIn(initialScale = 0.92f)) togetherWith
                                             (fadeOut() + scaleOut(targetScale = 0.92f))
@@ -229,6 +232,16 @@ private fun ProfileHeaderSuccess(
                                             }
                                         }
 
+                                        FollowButtonState.RequestFollow -> {
+                                            PlatformFilledTonalButton(
+                                                onClick = {
+                                                    onFollowClick.invoke(user.key)
+                                                },
+                                            ) {
+                                                PlatformText(text = stringResource(Res.string.profile_header_button_request_follow))
+                                            }
+                                        }
+
                                         FollowButtonState.Follow -> {
                                             PlatformFilledTonalButton(
                                                 onClick = {
@@ -240,7 +253,7 @@ private fun ProfileHeaderSuccess(
                                         }
                                     }
                                 }
-                                if (relation.isFans) {
+                                if (relationState.takeSuccess()?.isFans == true) {
                                     PlatformText(
                                         text = stringResource(Res.string.profile_header_button_is_fans),
                                         textAlign = TextAlign.Center,
@@ -369,24 +382,6 @@ private fun ProfileHeaderSuccess(
             )
         },
     )
-}
-
-private enum class FollowButtonState {
-    Follow,
-    Requested,
-    Following,
-    Blocked,
-    ;
-
-    companion object {
-        fun from(relation: UiRelation): FollowButtonState =
-            when {
-                relation.blocking -> Blocked
-                relation.following -> Following
-                relation.hasPendingFollowRequestFromYou -> Requested
-                else -> Follow
-            }
-    }
 }
 
 @Composable

@@ -6,9 +6,6 @@
         <![CDATA[
             <span>Wersja %1$s:</span>
             <ul>
-                <li>Dodano Deck Mode dla wielokolumnowego widoku osi czasu.</li>
-                <li>Dodano bogatsze dostosowywanie kart osi czasu, w tym ikony, filtry, grupy i wygląd każdej karty.</li>
-                <li>Dodano obsługę regex dla lokalnych filtrów słów kluczowych.</li>
                 <li>Ulepszenia wydajności i poprawki błędów.</li>
             </ul>
         ]]>

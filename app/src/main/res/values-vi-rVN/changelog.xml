@@ -4,9 +4,6 @@
         <![CDATA[
             <span>Phiên bản %1$s:</span>
             <ul>
-                <li>Đã thêm Deck Mode cho trải nghiệm dòng thời gian nhiều cột.</li>
-                <li>Đã thêm tùy chỉnh tab dòng thời gian phong phú hơn, bao gồm biểu tượng, bộ lọc, nhóm và giao diện theo từng tab.</li>
-                <li>Đã thêm hỗ trợ regex cho bộ lọc từ khóa cục bộ.</li>
                 <li>Cải thiện hiệu năng và sửa lỗi.</li>
             </ul>
         ]]>

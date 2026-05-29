@@ -6,9 +6,6 @@
         <![CDATA[
             <span>Verze %1$s:</span>
             <ul>
-                <li>Přidán Deck Mode pro vícesloupcové zobrazení časové osy.</li>
-                <li>Přidáno bohatší přizpůsobení karet časové osy včetně ikon, filtrů, skupin a vzhledu jednotlivých karet.</li>
-                <li>Přidána podpora regex pro místní filtry klíčových slov.</li>
                 <li>Vylepšení výkonu a opravy chyb.</li>
             </ul>
         ]]>

@@ -6,9 +6,6 @@
         <![CDATA[
             <span>Version %1$s:</span>
             <ul>
-                <li>Deck Mode für eine mehrspaltige Timeline-Ansicht hinzugefügt.</li>
-                <li>Erweiterte Anpassung von Timeline-Tabs hinzugefügt, einschließlich Symbolen, Filtern, Gruppen und Erscheinungsbild pro Tab.</li>
-                <li>Regex-Unterstützung für lokale Schlüsselwortfilter hinzugefügt.</li>
                 <li>Leistungsverbesserungen und Fehlerbehebungen.</li>
             </ul>
         ]]>

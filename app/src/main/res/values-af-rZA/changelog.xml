@@ -4,9 +4,6 @@
         <![CDATA[
             <span>Weergawe %1$s:</span>
             <ul>
-                <li>Deck Mode bygevoeg vir ’n meerkolom-tydlynervaring.</li>
-                <li>Ryker tydlynoortjie-aanpassing bygevoeg, insluitend ikone, filters, groepe en voorkoms per oortjie.</li>
-                <li>Regex-ondersteuning vir plaaslike sleutelwoordfilters bygevoeg.</li>
                 <li>Werkverrigtingverbeterings en foutoplossings.</li>
             </ul>
         ]]>

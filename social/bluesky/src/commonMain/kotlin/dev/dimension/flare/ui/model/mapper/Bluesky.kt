@@ -525,8 +525,31 @@ internal fun List<ListNotificationsNotification>.render(
     accountKey: MicroBlogKey,
     references: ImmutableMap<AtUri, PostView>,
 ): List<UiTimelineV2> {
-    val grouped = this.groupBy { it.reason }.filter { it.value.any() }
-    return grouped.flatMap { (reason, items) ->
+    val grouped =
+        this
+            .groupBy {
+                when (it.reason) {
+                    ListNotificationsNotificationReason.Repost -> {
+                        it.reason to
+                            it.record
+                                .decodeAs<Repost>()
+                                .subject.uri
+                    }
+
+                    ListNotificationsNotificationReason.Like -> {
+                        it.reason to
+                            it.record
+                                .decodeAs<Like>()
+                                .subject.uri
+                    }
+
+                    else -> {
+                        it.reason to null
+                    }
+                }
+            }.filter { it.value.any() }
+    return grouped.flatMap { (groupKey, items) ->
+        val reason = groupKey.first
         when (reason) {
             ListNotificationsNotificationReason.Repost, ListNotificationsNotificationReason.Like -> {
                 val post =

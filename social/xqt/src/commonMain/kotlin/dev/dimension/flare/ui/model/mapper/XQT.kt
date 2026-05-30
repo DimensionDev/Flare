@@ -707,6 +707,12 @@ internal fun Tweet.renderStatus(
                     count = legacy?.favoriteCount?.toLong() ?: 0,
                     accountKey = accountKey,
                 ),
+                ActionMenu.xqtBookmark(
+                    statusKey = statusKey,
+                    bookmarked = legacy?.bookmarked == true,
+                    count = legacy?.bookmarkCount?.toLong() ?: 0,
+                    accountKey = accountKey,
+                ),
                 ActionMenu.Group(
                     displayItem =
                         ActionMenu.Item(
@@ -715,14 +721,6 @@ internal fun Tweet.renderStatus(
                         ),
                     actions =
                         buildList {
-                            add(
-                                ActionMenu.xqtBookmark(
-                                    statusKey = statusKey,
-                                    bookmarked = legacy?.bookmarked == true,
-                                    count = legacy?.bookmarkCount?.toLong() ?: 0,
-                                    accountKey = accountKey,
-                                ),
-                            )
                             add(
                                 ActionMenu.Item(
                                     icon = UiIcon.Share,

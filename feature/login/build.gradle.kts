@@ -22,10 +22,7 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 api(projects.shared)
-                api(projects.social.bluesky)
-                api(projects.social.nostr)
-                implementation(projects.social.mastodon)
-                implementation(projects.social.misskey)
+                api(projects.feature.loginApi)
                 implementation(dependencies.platform(libs.compose.bom))
                 implementation(libs.compose.runtime)
                 api(dependencies.platform(libs.koin.bom))

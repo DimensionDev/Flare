@@ -51,6 +51,20 @@ extension UiStrings {
         case .posts: String(localized: "posts_title")
         case .channel: String(localized: "channel_title")
         case .default: String(localized: "tab_settings_default")
+        case .login: String(localized: "login_button")
+        case .verify: String(localized: "login_button")
+        case .cancel: String(localized: "cancel_button")
+        case .next: String(localized: "service_select_next_button")
+        case .username: String(localized: "bluesky_login_username_hint")
+        case .password: String(localized: "bluesky_login_password_hint")
+        case .otp: String(localized: "bluesky_login_auth_factor_token_hint")
+        case .oauthLogin: String(localized: "bluesky_login_oauth_button")
+        case .passwordLogin: String(localized: "bluesky_login_use_password_button")
+        case .qrConnect: String(localized: "nostr_login_qr_button")
+        case .credentialImport: String(localized: "nostr_login_title")
+        case .externalSigner: String(localized: "nostr_login_amber_button")
+        case .webCookieLogin: String(localized: "login_button")
+        case .nostrLoginAccount: String(localized: "nostr_login_account_hint")
         }
     }
 }

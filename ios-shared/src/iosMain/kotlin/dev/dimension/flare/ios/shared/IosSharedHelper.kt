@@ -12,6 +12,14 @@ import dev.dimension.flare.data.platform.VvoPlatformSpec
 import dev.dimension.flare.data.platform.XqtPlatformSpec
 import dev.dimension.flare.model.PlatformRuntimeData
 import dev.dimension.flare.ui.humanizer.SwiftFormatter
+import dev.dimension.flare.ui.presenter.login.BlueskyLoginProvider
+import dev.dimension.flare.ui.presenter.login.LoginPlatformRegistry
+import dev.dimension.flare.ui.presenter.login.LoginRuntimeData
+import dev.dimension.flare.ui.presenter.login.MastodonLoginProvider
+import dev.dimension.flare.ui.presenter.login.MisskeyLoginProvider
+import dev.dimension.flare.ui.presenter.login.NostrLoginProvider
+import dev.dimension.flare.ui.presenter.login.VVOLoginProvider
+import dev.dimension.flare.ui.presenter.login.XQTLoginProvider
 import dev.dimension.flare.ui.render.SwiftPlatformTextRenderer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -66,6 +74,23 @@ internal fun runtimeData(): PlatformRuntimeData =
             ),
         extraTimelineSpecs = RssTimelineSpecs.timelineSpecs,
     )
+
+@Single
+internal fun loginRuntimeData(): LoginRuntimeData =
+    LoginRuntimeData(
+        providers =
+            listOf(
+                NostrLoginProvider,
+                MastodonLoginProvider,
+                MisskeyLoginProvider,
+                BlueskyLoginProvider,
+                XQTLoginProvider,
+                VVOLoginProvider,
+            ),
+    )
+
+@Single
+internal fun loginPlatformRegistry(data: LoginRuntimeData): LoginPlatformRegistry = LoginPlatformRegistry(data)
 
 @Single
 internal fun inAppNotification(scope: CoroutineScope): InAppNotification =

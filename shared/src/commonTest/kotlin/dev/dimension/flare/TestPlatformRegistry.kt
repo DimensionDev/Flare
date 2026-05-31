@@ -6,7 +6,6 @@ import dev.dimension.flare.data.model.tab.RssTimelineData
 import dev.dimension.flare.data.model.tab.SubscriptionTimelineData
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.model.tab.TimelineSpecIds
-import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
 import dev.dimension.flare.data.platform.CommonTimelineSpecs
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -21,7 +20,6 @@ import dev.dimension.flare.model.vvo
 import dev.dimension.flare.model.xqtHost
 import dev.dimension.flare.model.xqtOldHost
 import dev.dimension.flare.ui.model.UiIcon
-import dev.dimension.flare.ui.model.UiInstanceMetadata
 import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.asType
 import dev.dimension.flare.ui.route.DeeplinkRoute
@@ -145,16 +143,7 @@ private abstract class TestDeepLinkPlatformSpec(
             displayName = displayName,
             icon = icon,
         )
-    final override val detector: PlatformDetector =
-        object : PlatformDetector {
-            override suspend fun detect(host: String) = null
-        }
     final override val timelineSpecs: ImmutableList<TimelineSpec<out TimelineSpec.Data>> = persistentListOf()
-
-    final override fun agreementUrl(host: String): String? = null
-
-    final override suspend fun instanceMetadata(host: String): UiInstanceMetadata =
-        throw UnsupportedOperationException("${type.name} metadata is not available in tests")
 
     final override fun createDataSource(context: PlatformDataSourceContext): MicroblogDataSource =
         throw UnsupportedOperationException("${type.name} data source is not available in tests")

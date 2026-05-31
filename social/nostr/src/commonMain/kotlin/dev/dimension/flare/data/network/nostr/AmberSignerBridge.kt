@@ -7,6 +7,8 @@ internal data class AmberConnection(
     val pubkeyHex: String,
 )
 
+internal expect val isAmberLoginSupported: Boolean
+
 internal interface AmberSignerBridge {
     fun isAvailable(): Boolean
 

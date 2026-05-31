@@ -4,8 +4,6 @@ import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.vvo.VVODataSource
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.model.tab.TimelineSpecIds
-import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
-import dev.dimension.flare.data.network.vvo.VVOPlatformDetector
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformDataSourceContext
@@ -15,7 +13,6 @@ import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.PlatformTypeMetadata
 import dev.dimension.flare.model.vvo
 import dev.dimension.flare.ui.model.UiIcon
-import dev.dimension.flare.ui.model.UiInstanceMetadata
 import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.asType
 import dev.dimension.flare.ui.presenter.home.vvo.VVOFavouriteTimelinePresenter
@@ -32,9 +29,6 @@ public data object VvoPlatformSpec : PlatformSpec {
             displayName = vvo,
             icon = UiIcon.Weibo,
         )
-    override val detector: PlatformDetector = VVOPlatformDetector
-
-    override fun agreementUrl(host: String): String? = null
 
     override fun deepLinks(accountKey: MicroBlogKey): ImmutableList<PlatformDeepLink<*>> = persistentListOf()
 
@@ -73,9 +67,6 @@ public data object VvoPlatformSpec : PlatformSpec {
             favoriteTimelineSpec,
             likedTimelineSpec,
         )
-
-    override suspend fun instanceMetadata(host: String): UiInstanceMetadata =
-        throw UnsupportedOperationException("${type.name} is not supported yet")
 
     override fun createDataSource(context: PlatformDataSourceContext): MicroblogDataSource =
         VVODataSource(

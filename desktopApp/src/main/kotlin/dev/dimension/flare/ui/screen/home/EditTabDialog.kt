@@ -16,6 +16,11 @@ import androidx.compose.ui.unit.dp
 import dev.dimension.flare.Res
 import dev.dimension.flare.all_rss_feeds_title
 import dev.dimension.flare.antenna_title
+import dev.dimension.flare.bluesky_login_2fa
+import dev.dimension.flare.bluesky_login_oauth_button
+import dev.dimension.flare.bluesky_login_password
+import dev.dimension.flare.bluesky_login_use_password_button
+import dev.dimension.flare.bluesky_login_username
 import dev.dimension.flare.cancel
 import dev.dimension.flare.channel_title
 import dev.dimension.flare.data.model.appearance.AppearancePatch
@@ -44,6 +49,7 @@ import dev.dimension.flare.mixed_timeline_title
 import dev.dimension.flare.ok
 import dev.dimension.flare.posts_title
 import dev.dimension.flare.rss_title
+import dev.dimension.flare.service_select_next_button
 import dev.dimension.flare.settings_title
 import dev.dimension.flare.social_title
 import dev.dimension.flare.tab_settings_default
@@ -219,4 +225,18 @@ private val UiStrings.desktopStringResource: StringResource
             UiStrings.AllRssFeeds -> Res.string.all_rss_feeds_title
             UiStrings.Posts -> Res.string.posts_title
             UiStrings.Channel -> Res.string.channel_title
+            UiStrings.Login -> Res.string.ok
+            UiStrings.Verify -> Res.string.ok
+            UiStrings.Cancel -> Res.string.cancel
+            UiStrings.Next -> Res.string.service_select_next_button
+            UiStrings.Username -> Res.string.bluesky_login_username
+            UiStrings.Password -> Res.string.bluesky_login_password
+            UiStrings.Otp -> Res.string.bluesky_login_2fa
+            UiStrings.OAuthLogin -> Res.string.bluesky_login_oauth_button
+            UiStrings.PasswordLogin -> Res.string.bluesky_login_use_password_button
+            UiStrings.QrConnect -> Res.string.ok
+            UiStrings.CredentialImport -> Res.string.ok
+            UiStrings.ExternalSigner -> Res.string.ok
+            UiStrings.WebCookieLogin -> Res.string.ok
+            UiStrings.NostrLoginAccount -> Res.string.ok
         }

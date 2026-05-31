@@ -26,6 +26,20 @@ public enum class UiStrings {
     Posts,
     Channel,
     Default,
+    Login,
+    Verify,
+    Cancel,
+    Next,
+    Username,
+    Password,
+    Otp,
+    OAuthLogin,
+    PasswordLogin,
+    QrConnect,
+    CredentialImport,
+    ExternalSigner,
+    WebCookieLogin,
+    NostrLoginAccount,
 }
 
 public fun UiStrings.asText(): UiText = UiText.Localized(this)

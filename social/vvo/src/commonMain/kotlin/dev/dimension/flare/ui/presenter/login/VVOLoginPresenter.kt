@@ -21,7 +21,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-public class VVOLoginPresenter(
+internal class VVOLoginPresenter(
     private val toHome: () -> Unit,
 ) : PresenterBase<VVOLoginState>(),
     KoinComponent {
@@ -88,7 +88,7 @@ public class VVOLoginPresenter(
 }
 
 @Immutable
-public interface VVOLoginState {
+internal interface VVOLoginState {
     public val loading: Boolean
     public val error: Throwable?
 

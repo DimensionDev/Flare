@@ -3,7 +3,7 @@ package dev.dimension.flare.ui.presenter.login
 import androidx.compose.runtime.Immutable
 
 @Immutable
-public interface BlueskyLoginState {
+internal interface BlueskyLoginState {
     public val loading: Boolean
     public val error: Throwable?
     public val errorMessage: String?
@@ -20,7 +20,7 @@ public interface BlueskyLoginState {
 }
 
 @Immutable
-public interface BlueskyOAuthLoginState {
+internal interface BlueskyOAuthLoginState {
     public val loading: Boolean
     public val error: String?
 

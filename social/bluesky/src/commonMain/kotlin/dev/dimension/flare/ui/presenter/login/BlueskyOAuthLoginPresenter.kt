@@ -30,7 +30,7 @@ import sh.christian.ozone.oauth.OAuthScope
 private const val CLIENT_METADATA = "https://flareapp.moe/client-metadata.json"
 private const val REDIRECT_URI = "https://flareapp.moe/callback"
 
-public class BlueskyOAuthLoginPresenter(
+internal class BlueskyOAuthLoginPresenter(
     private val toHome: () -> Unit,
 ) : PresenterBase<BlueskyOAuthLoginState>(),
     KoinComponent {

@@ -6,12 +6,6 @@ import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.model.tab.TimelineSpecIds
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
-import dev.dimension.flare.data.network.misskey.JoinMisskeyService
-import dev.dimension.flare.data.network.misskey.MisskeyPlatformDetector
-import dev.dimension.flare.data.network.misskey.MisskeyService
-import dev.dimension.flare.data.network.misskey.api.model.MetaRequest
-import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
-import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformDataSourceContext
@@ -19,15 +13,11 @@ import dev.dimension.flare.model.PlatformDeepLink
 import dev.dimension.flare.model.PlatformSpec
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.PlatformTypeMetadata
-import dev.dimension.flare.model.RecommendedInstance
 import dev.dimension.flare.ui.model.UiIcon
-import dev.dimension.flare.ui.model.UiInstance
-import dev.dimension.flare.ui.model.UiInstanceMetadata
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.model.asType
-import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.presenter.home.misskey.MissKeyLocalTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.misskey.MissKeyPublicTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.misskey.MisskeyFavouriteTimelinePresenter
@@ -48,9 +38,6 @@ public data object MisskeyPlatformSpec : PlatformSpec {
             displayName = "Misskey",
             icon = UiIcon.Misskey,
         )
-    override val detector: PlatformDetector = MisskeyPlatformDetector
-
-    override fun agreementUrl(host: String): String? = "https://$host/about"
 
     override fun deepLinks(accountKey: MicroBlogKey): ImmutableList<PlatformDeepLink<*>> =
         persistentListOf(
@@ -169,33 +156,6 @@ public data object MisskeyPlatformSpec : PlatformSpec {
             antennaTimelineSpec,
             channelTimelineSpec,
         )
-
-    override suspend fun instanceMetadata(host: String): UiInstanceMetadata =
-        MisskeyService("https://$host/api/").meta(MetaRequest()).render()
-
-    override suspend fun recommendInstances(): List<RecommendedInstance> =
-        tryRun {
-            JoinMisskeyService
-                .instances()
-                .instancesInfos
-                .map {
-                    RecommendedInstance(
-                        UiInstance(
-                            name = it.name,
-                            description = it.description,
-                            iconUrl = it.meta?.iconURL,
-                            domain = it.url,
-                            type = type,
-                            bannerUrl = it.meta?.bannerURL,
-                            usersCount =
-                                it.stats?.usersCount ?: it.nodeinfo
-                                    ?.usage
-                                    ?.users
-                                    ?.total ?: 0,
-                        ),
-                    )
-                }
-        }.getOrDefault(emptyList())
 
     override fun createDataSource(context: PlatformDataSourceContext): MicroblogDataSource {
         val credential = context.credential(MisskeyCredential.serializer())

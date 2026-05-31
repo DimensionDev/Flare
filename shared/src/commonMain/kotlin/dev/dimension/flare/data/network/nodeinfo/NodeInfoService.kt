@@ -6,7 +6,6 @@ import dev.dimension.flare.data.network.nodeinfo.model.Schema10
 import dev.dimension.flare.data.network.nodeinfo.model.Schema11
 import dev.dimension.flare.data.network.nodeinfo.model.Schema20
 import dev.dimension.flare.data.network.nodeinfo.model.Schema21
-import dev.dimension.flare.model.PlatformRegistry
 import dev.dimension.flare.model.PlatformType
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -100,19 +99,6 @@ public data object NodeInfoService {
                     }
                 }
             }.first()
-    }
-
-    public suspend fun detectPlatformType(
-        host: String,
-        platformRegistry: PlatformRegistry,
-    ): NodeData {
-        val hostCleaned = normalizeHost(host)
-        return platformRegistry.all
-            .map { it.detector }
-            .distinct()
-            .sortedByDescending { it.priority }
-            .firstNotNullOfOrNull { detector -> detector.detect(hostCleaned) }
-            ?: throw IllegalArgumentException("Unsupported platform: $hostCleaned")
     }
 }
 

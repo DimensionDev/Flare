@@ -85,6 +85,8 @@ private class VVOWebCookieLoginHandler(
         }
     }
 
+    override fun canResume(value: String): Boolean = value.isNotBlank() && VVOService.checkChocolates(value)
+
     override fun clear() {
         _state.value = state()
     }

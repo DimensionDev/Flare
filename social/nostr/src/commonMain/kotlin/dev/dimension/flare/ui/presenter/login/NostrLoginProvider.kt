@@ -5,7 +5,6 @@ import dev.dimension.flare.data.network.nostr.AmberSignerBridge
 import dev.dimension.flare.data.network.nostr.NostrPlatformDetector
 import dev.dimension.flare.data.network.nostr.NostrService
 import dev.dimension.flare.data.network.nostr.defaultNostrRelays
-import dev.dimension.flare.data.network.nostr.isAmberLoginSupported
 import dev.dimension.flare.data.platform.NostrCredential
 import dev.dimension.flare.data.platform.NostrPlatformSpec
 import dev.dimension.flare.data.repository.AccountService
@@ -32,35 +31,40 @@ private const val START_QR_ACTION = "start_qr"
 private const val CANCEL_ACTION = "cancel"
 private const val INPUT_FIELD = "credential"
 
-public data object NostrLoginProvider : LoginPlatformProvider {
+public data object NostrLoginProvider :
+    LoginPlatformProvider,
+    KoinComponent {
+    private val amberSignerBridge: AmberSignerBridge by inject()
+
     override val platformType: PlatformType = PlatformType.Nostr
     override val metadata: PlatformTypeMetadata = NostrPlatformSpec.metadata
     override val detector: PlatformDetector = NostrPlatformDetector
-    override val methods: List<LoginMethodSpec> =
-        buildList {
-            add(
-                LoginMethodSpec(
-                    type = LoginMethodType.CredentialImport,
-                    title = UiStrings.CredentialImport,
-                    priority = 20,
-                ),
-            )
-            add(
-                LoginMethodSpec(
-                    type = LoginMethodType.QrConnect,
-                    title = UiStrings.QrConnect,
-                    priority = 10,
-                ),
-            )
-            if (isAmberLoginSupported) {
+    override val methods: List<LoginMethodSpec>
+        get() =
+            buildList {
                 add(
                     LoginMethodSpec(
-                        type = LoginMethodType.ExternalSigner,
-                        title = UiStrings.ExternalSigner,
+                        type = LoginMethodType.CredentialImport,
+                        title = UiStrings.CredentialImport,
+                        priority = 20,
                     ),
                 )
+                add(
+                    LoginMethodSpec(
+                        type = LoginMethodType.QrConnect,
+                        title = UiStrings.QrConnect,
+                        priority = 10,
+                    ),
+                )
+                if (amberSignerBridge.isAvailable()) {
+                    add(
+                        LoginMethodSpec(
+                            type = LoginMethodType.ExternalSigner,
+                            title = UiStrings.ExternalSigner,
+                        ),
+                    )
+                }
             }
-        }
 
     override fun agreementUrl(host: String): String? = null
 
@@ -150,7 +154,7 @@ private class NostrCredentialLoginHandler(
                 listOf(
                     LoginField(
                         id = INPUT_FIELD,
-                        type = LoginFieldType.Text,
+                        type = LoginFieldType.TextInput,
                         label = UiStrings.NostrLoginAccount,
                         placeholder = UiStrings.NostrLoginAccount,
                         value = input,

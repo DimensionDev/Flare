@@ -23,10 +23,10 @@ public enum class LoginMethodType {
 }
 
 public enum class LoginFieldType {
-    Text,
-    Password,
-    Otp,
-    ReadOnlyText,
+    TextInput,
+    PasswordInput,
+    OtpInput,
+    DisplayText,
 }
 
 public data class LoginMethodSpec(
@@ -105,6 +105,8 @@ public interface LoginMethodHandler : AutoCloseable {
     public suspend fun perform(actionId: String)
 
     public suspend fun resume(value: String)
+
+    public fun canResume(value: String): Boolean = true
 
     public fun clear()
 

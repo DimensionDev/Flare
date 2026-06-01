@@ -153,7 +153,7 @@ private class BlueskyPasswordLoginHandler(
                 add(
                     LoginField(
                         id = USERNAME_FIELD,
-                        type = LoginFieldType.Text,
+                        type = LoginFieldType.TextInput,
                         label = UiStrings.Username,
                         value = username,
                         readOnly = requireOtp,
@@ -162,7 +162,7 @@ private class BlueskyPasswordLoginHandler(
                 add(
                     LoginField(
                         id = PASSWORD_FIELD,
-                        type = LoginFieldType.Password,
+                        type = LoginFieldType.PasswordInput,
                         label = UiStrings.Password,
                         value = password,
                         readOnly = requireOtp,
@@ -172,7 +172,7 @@ private class BlueskyPasswordLoginHandler(
                     add(
                         LoginField(
                             id = OTP_FIELD,
-                            type = LoginFieldType.Otp,
+                            type = LoginFieldType.OtpInput,
                             label = UiStrings.Otp,
                             value = otp,
                         ),
@@ -342,7 +342,7 @@ private class BlueskyOAuthLoginHandler(
                 listOf(
                     LoginField(
                         id = USERNAME_FIELD,
-                        type = LoginFieldType.Text,
+                        type = LoginFieldType.TextInput,
                         label = UiStrings.Username,
                         value = username,
                     ),

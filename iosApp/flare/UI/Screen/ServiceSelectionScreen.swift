@@ -5,6 +5,18 @@ import WebKit
 import CoreImage.CIFilterBuiltins
 import Combine
 
+private enum ServiceSelectionAnimation {
+    static let standard: Animation = .easeInOut(duration: 0.22)
+    static let panel: AnyTransition = .asymmetric(
+        insertion: .opacity.combined(with: .move(edge: .bottom)),
+        removal: .opacity
+    )
+    static let inline: AnyTransition = .asymmetric(
+        insertion: .opacity.combined(with: .scale(scale: 0.96)),
+        removal: .opacity
+    )
+}
+
 struct ServiceSelectionScreen: View {
     let toHome: () -> Void
 
@@ -33,16 +45,21 @@ struct ServiceSelectionScreen: View {
             if let node = detectedNode(from: presenter.state.detectedPlatformType), presenter.state.canNext {
                 Section {
                     loginContent(state: presenter.state, node: node)
+                        .id("login-\(node.platformType)-\(node.host)")
+                        .transition(ServiceSelectionAnimation.panel)
                 }
             } else {
                 Section {
                     recommendedInstances(state: presenter.state)
+                        .id("recommendations")
+                        .transition(ServiceSelectionAnimation.panel)
                 } header: {
                     Text(ServiceSelectCopy.welcomeListHint)
                 }
             }
         }
         .listStyle(.insetGrouped)
+        .animation(ServiceSelectionAnimation.standard, value: serviceContentKey(state: presenter.state))
         .onChange(of: instanceInput) { _, newValue in
             presenter.state.setFilter(value: newValue)
         }
@@ -90,25 +107,31 @@ struct ServiceSelectionScreen: View {
                 .buttonStyle(.plain)
                 .foregroundStyle(.secondary)
                 .disabled(instanceInput.isEmpty)
-                .accessibilityLabel(Text(instanceInput.isEmpty ? "Search" : "Clear"))
+                .accessibilityLabel(Text(instanceInput.isEmpty ? ServiceSelectCopy.search : ServiceSelectCopy.clear))
             }
             .frame(maxWidth: 420)
     }
 
     @ViewBuilder
     private func platformIndicator(state: ServiceSelectState) -> some View {
-        switch onEnum(of: state.detectedPlatformType) {
-        case .success(let success):
-            Image(state.platformIcon(platformType: success.data.platformType).imageName)
-                .resizable()
-                .scaledToFit()
-        case .loading:
-            ProgressView()
-                .controlSize(.small)
-        case .error:
-            Image(systemName: "questionmark.circle")
-                .foregroundStyle(.secondary)
+        ZStack {
+            switch onEnum(of: state.detectedPlatformType) {
+            case .success(let success):
+                Image(state.platformIcon(platformType: success.data.platformType).imageName)
+                    .resizable()
+                    .scaledToFit()
+                    .transition(ServiceSelectionAnimation.inline)
+            case .loading:
+                ProgressView()
+                    .controlSize(.small)
+                    .transition(ServiceSelectionAnimation.inline)
+            case .error:
+                Image(systemName: "questionmark.circle")
+                    .foregroundStyle(.secondary)
+                    .transition(ServiceSelectionAnimation.inline)
+            }
         }
+        .animation(ServiceSelectionAnimation.standard, value: platformIndicatorKey(state: state))
     }
 
     @ViewBuilder
@@ -125,18 +148,24 @@ struct ServiceSelectionScreen: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
+                        .transition(ServiceSelectionAnimation.inline)
                 }
 
                 if methods.count > 1 {
                     Picker("", selection: Binding(
                         get: { selectedMethod },
-                        set: { selectedMethods[key] = $0 }
+                        set: { method in
+                            withAnimation(ServiceSelectionAnimation.standard) {
+                                selectedMethods[key] = method
+                            }
+                        }
                     )) {
                         ForEach(methods.indices, id: \.self) { index in
                             Text(methods[index].title.text).tag(methods[index].type)
                         }
                     }
                     .pickerStyle(.segmented)
+                    .transition(ServiceSelectionAnimation.inline)
                 }
 
                 let handler = state.createLoginHandler(
@@ -146,11 +175,14 @@ struct ServiceSelectionScreen: View {
                 )
                 LoginFlowView(handler: handler)
                     .id("\(key)-\(selectedMethod)")
+                    .transition(ServiceSelectionAnimation.panel)
 
                 LoginAgreementView(
                     urlString: state.agreementUrl(platformType: node.platformType, host: node.host)
                 )
+                .transition(ServiceSelectionAnimation.inline)
             }
+            .animation(ServiceSelectionAnimation.standard, value: "\(selectedMethod)")
         }
     }
 
@@ -199,9 +231,11 @@ struct ServiceSelectionScreen: View {
     }
 
     private func select(instance: UiInstance, state: ServiceSelectState) {
-        instanceInput = instance.domain
-        state.setFilter(value: instance.domain)
-        selectedMethods.removeAll()
+        withAnimation(ServiceSelectionAnimation.standard) {
+            instanceInput = instance.domain
+            state.setFilter(value: instance.domain)
+            selectedMethods.removeAll()
+        }
     }
 
     private func detectedNode(from state: UiState<NodeData>) -> NodeData? {
@@ -209,6 +243,24 @@ struct ServiceSelectionScreen: View {
             return nil
         }
         return success.data
+    }
+
+    private func serviceContentKey(state: ServiceSelectState) -> String {
+        if let node = detectedNode(from: state.detectedPlatformType), state.canNext {
+            return "login-\(node.platformType)-\(node.host)-\(node.compatibleMode)"
+        }
+        return "recommendations"
+    }
+
+    private func platformIndicatorKey(state: ServiceSelectState) -> String {
+        switch onEnum(of: state.detectedPlatformType) {
+        case .success(let success):
+            return "success-\(success.data.platformType)-\(success.data.host)"
+        case .loading:
+            return "loading"
+        case .error:
+            return "error"
+        }
     }
 
     private func platformTitle(_ type: PlatformType) -> String {
@@ -250,17 +302,21 @@ private struct LoginFlowView: View {
                         presenter.state.perform(actionId: action.id)
                     }
                 }
+                .transition(ServiceSelectionAnimation.inline)
             }
 
             if let qrContent {
                 QRLoginView(content: qrContent)
+                    .transition(ServiceSelectionAnimation.panel)
             }
 
             ForEach(presenter.state.flowState.actions, id: \.id) { action in
                 Button {
                     presenter.state.perform(actionId: action.id)
                     if action.label == .cancel {
-                        qrContent = nil
+                        withAnimation(ServiceSelectionAnimation.standard) {
+                            qrContent = nil
+                        }
                     }
                 } label: {
                     progressButtonLabel(title: action.label.text, isLoading: presenter.state.flowState.loading)
@@ -268,10 +324,13 @@ private struct LoginFlowView: View {
                 .buttonStyle(.borderedProminent)
                 .frame(maxWidth: .infinity)
                 .disabled(!action.enabled || presenter.state.flowState.loading)
+                .transition(ServiceSelectionAnimation.inline)
             }
 
             LoginErrorText(message: presenter.state.flowState.error)
+                .transition(ServiceSelectionAnimation.inline)
         }
+        .animation(ServiceSelectionAnimation.standard, value: flowAnimationKey)
         .onReceive(
             presenter.state.effects
                 .toPublisher()
@@ -282,7 +341,9 @@ private struct LoginFlowView: View {
             case .openUrl(let openUrl):
                 authenticate(url: openUrl.url)
             case .showQr(let showQr):
-                qrContent = showQr.content
+                withAnimation(ServiceSelectionAnimation.standard) {
+                    qrContent = showQr.content
+                }
             case .openWebCookieLogin(let webCookie):
                 webCookieUrl = webCookie.url
             }
@@ -298,11 +359,13 @@ private struct LoginFlowView: View {
             if let webCookieUrl {
                 if #available(iOS 26.0, *) {
                     WebLoginScreen(onCookie: { cookie in
+                        guard presenter.state.canResume(value: cookie) else { return }
                         presenter.state.resume(value: cookie)
                         self.webCookieUrl = nil
                     }, url: webCookieUrl)
                 } else {
                     BackportWebLoginScreen(onCookie: { cookie in
+                        guard presenter.state.canResume(value: cookie) else { return }
                         presenter.state.resume(value: cookie)
                         self.webCookieUrl = nil
                     }, url: webCookieUrl)
@@ -316,10 +379,30 @@ private struct LoginFlowView: View {
             if isLoading {
                 ProgressView()
                     .controlSize(.small)
+                    .transition(ServiceSelectionAnimation.inline)
             }
             Text(title)
         }
         .frame(maxWidth: .infinity)
+    }
+
+    private var flowAnimationKey: String {
+        let flowState = presenter.state.flowState
+        let fields =
+            flowState.fields
+                .map { "\($0.id):\($0.type):\($0.readOnly)" }
+                .joined(separator: ",")
+        let actions =
+            flowState.actions
+                .map { "\($0.id):\($0.label):\($0.enabled)" }
+                .joined(separator: ",")
+        return [
+            fields,
+            actions,
+            "\(flowState.loading)",
+            flowState.error ?? "",
+            qrContent ?? "",
+        ].joined(separator: "|")
     }
 
     private func authenticate(url: String) {
@@ -357,10 +440,10 @@ private struct LoginFieldView: View {
     var body: some View {
         Group {
             switch field.type {
-            case .password:
+            case .passwordInput:
                 SecureField(field.label.text, text: $value)
                     .textContentType(.password)
-            case .readOnlyText:
+            case .displayText:
                 Text(field.value)
                     .font(.caption)
                     .foregroundStyle(.secondary)
@@ -369,7 +452,6 @@ private struct LoginFieldView: View {
                 TextField(field.label.text, text: $value)
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
-                    .keyboardType(field.type == .otp ? .numberPad : .default)
                     .textContentType(field.id == "username" ? .username : nil)
             }
         }
@@ -482,6 +564,7 @@ private struct LoginErrorText: View {
                 .foregroundStyle(.red)
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: .infinity)
+                .transition(ServiceSelectionAnimation.inline)
         }
     }
 }
@@ -555,8 +638,16 @@ private enum ServiceSelectCopy {
     static let nostrQRLinkLabel = String(localized: "nostr_login_qr_link_label", defaultValue: "Nostr Connect link")
     static let eulaPrivacyPolicy = String(localized: "eula_privacy_policy", defaultValue: "EULA and Privacy Policy")
     static let loginAgreementPrefix = String(localized: "login_agreement_prefix", defaultValue: "By logging in, you agree to the ")
+    static let search = String(localized: "Search")
+    static let clear = String(localized: "Clear")
 
     static func compatibilityWarning(_ software: String) -> String {
-        "This server uses \(software), Flare will run in compatibility mode. Some features may not work properly."
+        String(
+            format: String(
+                localized: "service_select_compatibility_warning",
+                defaultValue: "This server uses %@, Flare will run in compatibility mode. Some features may not work properly."
+            ),
+            software
+        )
     }
 }

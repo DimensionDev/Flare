@@ -14,8 +14,6 @@ import org.koin.core.annotation.Single
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
-internal actual val isAmberLoginSupported: Boolean = true
-
 internal data class AmberIntentResult(
     val resultCode: Int,
     val data: Intent?,

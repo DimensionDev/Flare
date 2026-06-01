@@ -52,7 +52,7 @@ extension UiStrings {
         case .channel: String(localized: "channel_title")
         case .default: String(localized: "tab_settings_default")
         case .login: String(localized: "login_button")
-        case .verify: String(localized: "login_button")
+        case .verify: String(localized: "verify_button", defaultValue: "Verify")
         case .cancel: String(localized: "cancel_button")
         case .next: String(localized: "service_select_next_button")
         case .username: String(localized: "bluesky_login_username_hint")

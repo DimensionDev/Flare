@@ -105,6 +105,8 @@ private class XQTWebCookieLoginHandler(
         }
     }
 
+    override fun canResume(value: String): Boolean = value.isNotBlank() && XQTService.checkChocolate(value)
+
     override fun clear() {
         _state.value = state()
     }

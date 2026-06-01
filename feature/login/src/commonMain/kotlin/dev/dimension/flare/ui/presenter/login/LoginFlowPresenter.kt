@@ -27,6 +27,8 @@ public class LoginFlowPresenter(
 
         public fun resume(value: String)
 
+        public fun canResume(value: String): Boolean
+
         public fun clear()
     }
 
@@ -61,6 +63,8 @@ public class LoginFlowPresenter(
                     handler.resume(value)
                 }
             }
+
+            override fun canResume(value: String): Boolean = handler.canResume(value)
 
             override fun clear() {
                 handler.clear()

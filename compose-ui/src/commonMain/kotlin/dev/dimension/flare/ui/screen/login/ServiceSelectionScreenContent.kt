@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.screen.login
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -19,6 +20,7 @@ import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.rememberTextFieldState
@@ -29,6 +31,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -194,10 +197,10 @@ public fun ServiceSelectionScreenContent(
                     textAlign = TextAlign.Center,
                     style = PlatformTheme.typography.caption,
                 )
-                AnimatedVisibility(state.canNext && state.detectedPlatformType.isSuccess) {
+                AnimatedVisibility(state.canNext && state.detectedPlatformType.isSuccess && state.instanceInputState.text.isNotEmpty()) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
                         modifier = Modifier.imePadding(),
                     ) {
                         state.detectedPlatformType.takeSuccess()?.let {
@@ -232,7 +235,7 @@ public fun ServiceSelectionScreenContent(
             }
         }
 
-        if (!(state.canNext && state.detectedPlatformType.isSuccess)) {
+        if (!(state.canNext && state.detectedPlatformType.isSuccess && state.instanceInputState.text.isNotEmpty())) {
             item(span = StaggeredGridItemSpan.FullLine) {
                 Spacer(modifier = Modifier.height(16.dp))
             }
@@ -300,15 +303,6 @@ private fun GenericLoginContent(
     if (methods.isEmpty()) return
     var selectedMethod by remember(platformType, host) { mutableStateOf(methods.first().type) }
     val selectedSpec = methods.firstOrNull { it.type == selectedMethod } ?: methods.first()
-    if (methods.size > 1) {
-        LoginMethodPicker(
-            methods = methods,
-            selectedSpec = selectedSpec,
-            onSelected = {
-                selectedMethod = it.type
-            },
-        )
-    }
     val handler =
         remember(platformType, host, selectedMethod) {
             state.createLoginHandler(
@@ -339,6 +333,8 @@ private fun GenericLoginContent(
                     onWebViewLogin(effect.url) { cookies ->
                         if (cookies.isNullOrBlank()) {
                             false
+                        } else if (!loginState.canResume(cookies)) {
+                            false
                         } else {
                             loginState.resume(cookies)
                             true
@@ -347,6 +343,15 @@ private fun GenericLoginContent(
                 }
             }
         }
+    }
+    if (methods.size > 1) {
+        LoginMethodPicker(
+            methods = methods,
+            selectedSpec = selectedSpec,
+            onSelected = {
+                selectedMethod = it.type
+            },
+        )
     }
     LoginFlowContent(
         state = loginState,
@@ -368,6 +373,7 @@ private fun LoginMethodPicker(
             .map { stringResource(it.title.res) }
             .toImmutableList()
     PlatformPicker(
+        modifier = Modifier.horizontalScroll(rememberScrollState()),
         options = labels,
         onSelected = { index ->
             methods.getOrNull(index)?.let(onSelected)
@@ -385,10 +391,9 @@ private fun LoginFlowContent(
     Column(
         modifier =
             Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
+                .fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         flowState.fields.forEach { field ->
             key(field.id) {
@@ -445,6 +450,7 @@ private fun LoginFieldInput(
     onSubmit: () -> Unit,
 ) {
     val textState = rememberTextFieldState(field.value)
+    val currentOnUpdate by rememberUpdatedState(onUpdate)
     LaunchedEffect(field.value) {
         if (textState.text.toString() != field.value) {
             textState.edit {
@@ -452,12 +458,14 @@ private fun LoginFieldInput(
             }
         }
     }
-    LaunchedEffect(textState, field.id) {
-        snapshotFlow { textState.text.toString() }
-            .distinctUntilChanged()
-            .collect {
-                onUpdate(field.id, it)
-            }
+    if (field.type != LoginFieldType.DisplayText) {
+        LaunchedEffect(textState, field.id) {
+            snapshotFlow { textState.text.toString() }
+                .distinctUntilChanged()
+                .collect {
+                    currentOnUpdate(field.id, it)
+                }
+        }
     }
     val label: @Composable () -> Unit = {
         PlatformText(text = stringResource(field.label.res))
@@ -472,19 +480,19 @@ private fun LoginFieldInput(
         KeyboardOptions(
             keyboardType =
                 when (field.type) {
-                    LoginFieldType.Password -> KeyboardType.Password
+                    LoginFieldType.PasswordInput -> KeyboardType.Password
 
-                    LoginFieldType.Otp -> KeyboardType.Text
+                    LoginFieldType.OtpInput -> KeyboardType.Text
 
-                    LoginFieldType.Text,
-                    LoginFieldType.ReadOnlyText,
+                    LoginFieldType.TextInput,
+                    LoginFieldType.DisplayText,
                     -> KeyboardType.Text
                 },
             imeAction = ImeAction.Done,
             autoCorrectEnabled = false,
         )
     when (field.type) {
-        LoginFieldType.Password -> {
+        LoginFieldType.PasswordInput -> {
             PlatformSecureTextField(
                 state = textState,
                 label = label,
@@ -498,8 +506,8 @@ private fun LoginFieldInput(
             )
         }
 
-        LoginFieldType.Text,
-        LoginFieldType.Otp,
+        LoginFieldType.TextInput,
+        LoginFieldType.OtpInput,
         -> {
             PlatformTextField(
                 state = textState,
@@ -515,7 +523,7 @@ private fun LoginFieldInput(
             )
         }
 
-        LoginFieldType.ReadOnlyText -> {
+        LoginFieldType.DisplayText -> {
             PlatformText(
                 text = field.value,
                 textAlign = TextAlign.Center,

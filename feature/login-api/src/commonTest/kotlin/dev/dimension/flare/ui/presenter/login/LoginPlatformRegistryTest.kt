@@ -1,9 +1,9 @@
 package dev.dimension.flare.ui.presenter.login
 
-import dev.dimension.flare.data.network.nodeinfo.NodeData
-import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.model.tab.TimelineSpec
+import dev.dimension.flare.data.network.nodeinfo.NodeData
+import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformDataSourceContext
 import dev.dimension.flare.model.PlatformDeepLink
@@ -60,7 +60,7 @@ class LoginPlatformRegistryTest {
                                 LoginMethodSpec(LoginMethodType.OAuth, UiStrings.OAuthLogin, priority = 20),
                                 LoginMethodSpec(LoginMethodType.WebCookie, UiStrings.WebCookieLogin, priority = 10),
                             ),
-                        ),
+                    ),
                 ),
             )
 
@@ -161,10 +161,13 @@ class LoginPlatformRegistryTest {
             extraTimelineSpecs = emptyList(),
         )
 
-    private interface TestLoginPlatformSpec : PlatformSpec, LoginPlatformProvider
+    private interface TestLoginPlatformSpec :
+        PlatformSpec,
+        LoginPlatformProvider
 
     private fun testLoginPlatformSpec(provider: LoginPlatformProvider): TestLoginPlatformSpec =
-        object : TestLoginPlatformSpec,
+        object :
+            TestLoginPlatformSpec,
             LoginPlatformProvider by provider {
             override val type: PlatformType = provider.platformType
             override val metadata: PlatformTypeMetadata = provider.metadata

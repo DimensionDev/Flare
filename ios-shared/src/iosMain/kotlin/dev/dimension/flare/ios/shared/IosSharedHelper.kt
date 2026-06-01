@@ -63,7 +63,7 @@ internal fun runtimeData(): PlatformRuntimeData =
                 BlueskyPlatformSpec,
                 XqtPlatformSpec,
                 VvoPlatformSpec,
-        ),
+            ),
         extraTimelineSpecs = RssTimelineSpecs.timelineSpecs,
     )
 

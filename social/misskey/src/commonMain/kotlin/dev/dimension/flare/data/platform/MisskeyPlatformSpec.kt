@@ -33,7 +33,8 @@ import kotlinx.serialization.Serializable
 import kotlin.native.HiddenFromObjC
 
 @HiddenFromObjC
-public data object MisskeyPlatformSpec : PlatformSpec,
+public data object MisskeyPlatformSpec :
+    PlatformSpec,
     LoginPlatformProvider by MisskeyLoginProvider {
     public override val type: PlatformType = PlatformType.Misskey
     public override val metadata: PlatformTypeMetadata =

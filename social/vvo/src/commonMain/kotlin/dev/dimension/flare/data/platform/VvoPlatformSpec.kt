@@ -24,7 +24,8 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlin.native.HiddenFromObjC
 
 @HiddenFromObjC
-public data object VvoPlatformSpec : PlatformSpec,
+public data object VvoPlatformSpec :
+    PlatformSpec,
     LoginPlatformProvider by VVOLoginProvider {
     public override val type: PlatformType = PlatformType.VVo
     public override val metadata: PlatformTypeMetadata =

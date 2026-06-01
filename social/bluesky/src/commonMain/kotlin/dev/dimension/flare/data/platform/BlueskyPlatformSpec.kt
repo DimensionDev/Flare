@@ -30,7 +30,8 @@ import kotlinx.serialization.Serializable
 import kotlin.native.HiddenFromObjC
 
 @HiddenFromObjC
-public data object BlueskyPlatformSpec : PlatformSpec,
+public data object BlueskyPlatformSpec :
+    PlatformSpec,
     LoginPlatformProvider by BlueskyLoginProvider {
     public override val type: PlatformType = PlatformType.Bluesky
     public override val metadata: PlatformTypeMetadata =

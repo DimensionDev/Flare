@@ -17,7 +17,8 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlin.native.HiddenFromObjC
 
 @HiddenFromObjC
-public data object NostrPlatformSpec : PlatformSpec,
+public data object NostrPlatformSpec :
+    PlatformSpec,
     LoginPlatformProvider by NostrLoginProvider {
     public override val type: PlatformType = PlatformType.Nostr
     public override val metadata: PlatformTypeMetadata =

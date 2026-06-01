@@ -37,7 +37,8 @@ import kotlinx.serialization.Serializable
 import kotlin.native.HiddenFromObjC
 
 @HiddenFromObjC
-public data object MastodonPlatformSpec : PlatformSpec,
+public data object MastodonPlatformSpec :
+    PlatformSpec,
     LoginPlatformProvider by MastodonLoginProvider {
     public override val type: PlatformType = PlatformType.Mastodon
     public override val metadata: PlatformTypeMetadata =

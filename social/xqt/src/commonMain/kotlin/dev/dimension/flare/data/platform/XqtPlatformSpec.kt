@@ -29,7 +29,8 @@ import kotlinx.serialization.Serializable
 import kotlin.native.HiddenFromObjC
 
 @HiddenFromObjC
-public data object XqtPlatformSpec : PlatformSpec,
+public data object XqtPlatformSpec :
+    PlatformSpec,
     LoginPlatformProvider by XQTLoginProvider {
     public override val type: PlatformType = PlatformType.xQt
     public override val metadata: PlatformTypeMetadata =

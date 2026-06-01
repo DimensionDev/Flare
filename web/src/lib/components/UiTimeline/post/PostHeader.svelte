@@ -1,5 +1,6 @@
 <script lang="ts">
 	import FaIcon from '$lib/components/FaIcon.svelte';
+	import { useDeepLink } from '$lib/deeplink/deepLink.svelte';
 	import type { TimelineAppearance } from '$lib/environment/environmentSettings.svelte';
 	import type { UiTimelineV2Post } from '@flare/web-presenters/timeline.svelte';
 	import PostAvatar from './PostAvatar.svelte';
@@ -16,6 +17,18 @@
 		sideAvatarVisible: boolean;
 		quoteHeader: boolean;
 	} = $props();
+
+	const deepLink = useDeepLink();
+	const userClickable = $derived(
+		post.user ? deepLink.canPerformClickEvent(post.user.clickEvent) : false
+	);
+
+	function performUserClick(event: MouseEvent): void {
+		if (!post.user || !userClickable) return;
+
+		event.stopPropagation();
+		deepLink.performClickEvent(post.user.clickEvent);
+	}
 </script>
 
 {#if post.user ||
@@ -25,6 +38,7 @@
 	<header
 		class:inline-avatar={!sideAvatarVisible && post.user !== null}
 		class:quote-header={quoteHeader}
+		class:full-width={!quoteHeader && appearance.fullWidthPost}
 		class="post-header"
 	>
 		{#if !sideAvatarVisible && post.user}
@@ -36,15 +50,21 @@
 		{/if}
 
 		{#if post.user}
-			<div class="identity-line">
-				<strong>{post.user.name.innerText}</strong>
-				{#if post.user.mark.includes('Verified')}
-					<span class="verified" title="Verified">
-						<FaIcon name="Check" size={11} />
+			{#if userClickable}
+				<button class="identity-line identity-button" type="button" onclick={performUserClick}>
+					<span class="name-row">
+						<strong>{post.user.name.innerText}</strong>
 					</span>
-				{/if}
-				<span class="handle">{post.user.handle.raw}</span>
-			</div>
+					<span class="handle">{post.user.handle.raw}</span>
+				</button>
+			{:else}
+				<div class="identity-line">
+					<span class="name-row">
+						<strong>{post.user.name.innerText}</strong>
+					</span>
+					<span class="handle">{post.user.handle.raw}</span>
+				</div>
+			{/if}
 		{/if}
 
 		<div class="post-meta">
@@ -54,13 +74,13 @@
 				</span>
 			{/if}
 			{#if appearance.showTranslateButton && post.translationDisplayState !== 'Hidden'}
-				<span class="meta-icon translation-meta" title={translationLabel(post.translationDisplayState)}>
-					<FaIcon name="Translate" size={16} />
-					{#if post.translationDisplayState === 'Translating'}
-						<span class="progress-ring" aria-hidden="true"></span>
-					{:else if post.translationDisplayState === 'Failed'}
-						<FaIcon name="CircleExclamation" size={12} />
-					{/if}
+					<span class="meta-icon translation-meta" title={translationLabel(post.translationDisplayState)}>
+						<FaIcon name="Translate" size={16} />
+						{#if post.translationDisplayState === 'Translating'}
+							<span class="loading loading-spinner loading-xs" aria-hidden="true"></span>
+						{:else if post.translationDisplayState === 'Failed'}
+							<FaIcon name="CircleExclamation" size={12} />
+						{/if}
 				</span>
 			{/if}
 			{#if appearance.showPlatformLogo}
@@ -85,6 +105,7 @@
 
 	.post-header.inline-avatar {
 		align-items: center;
+		gap: var(--post-avatar-gap);
 	}
 
 	.identity-line {
@@ -97,6 +118,24 @@
 		width: 0;
 	}
 
+	.identity-button {
+		border: 0;
+		background: transparent;
+		color: inherit;
+		cursor: pointer;
+		font: inherit;
+		padding: 0;
+		text-align: left;
+	}
+
+	.name-row {
+		display: inline-flex;
+		min-width: 0;
+		flex: 0 1 auto;
+		align-items: center;
+		gap: 0.25rem;
+	}
+
 	.identity-line strong,
 	.handle {
 		overflow: hidden;
@@ -107,8 +146,8 @@
 	.identity-line strong {
 		flex: 0 1 auto;
 		min-width: 0;
-		max-width: 56%;
 		font-size: 0.95rem;
+		font-weight: 400;
 		line-height: 1.2;
 	}
 
@@ -120,15 +159,28 @@
 		line-height: 1.2;
 	}
 
-	.verified {
-		display: inline-grid;
-		width: 1rem;
-		height: 1rem;
-		flex: 0 0 auto;
-		place-items: center;
-		border-radius: 999px;
-		background: var(--post-primary);
-		color: var(--post-primary-content);
+	.post-header:not(.full-width) .name-row {
+		max-width: 56%;
+	}
+
+	.post-header.full-width {
+		align-items: center;
+	}
+
+	.post-header.full-width .identity-line {
+		display: grid;
+		gap: 0.05rem;
+		align-items: center;
+		white-space: normal;
+	}
+
+	.post-header.full-width .name-row {
+		width: fit-content;
+		max-width: 100%;
+	}
+
+	.post-header.full-width .handle {
+		width: 100%;
 	}
 
 	.post-meta {
@@ -154,21 +206,6 @@
 		line-height: 1;
 	}
 
-	.progress-ring {
-		width: 0.75rem;
-		height: 0.75rem;
-		border: 1.5px solid currentColor;
-		border-right-color: transparent;
-		border-radius: 999px;
-		animation: progress-spin 0.8s linear infinite;
-	}
-
-	@keyframes progress-spin {
-		to {
-			rotate: 360deg;
-		}
-	}
-
 	@media (max-width: 520px) {
 		.post-header {
 			gap: var(--post-gap);
@@ -178,7 +215,7 @@
 			max-width: 38%;
 		}
 
-		.identity-line strong {
+		.post-header:not(.full-width) .name-row {
 			max-width: 48%;
 		}
 	}

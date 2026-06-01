@@ -754,6 +754,70 @@ class WebPresenterRendererTest {
     }
 
     @Test
+    fun rendersSealedPropertyNamesThatConflictWithTheDiscriminator() {
+        val payload =
+            SealedModel(
+                type = "dev.dimension.flare.web.shared.NotificationPayload",
+                typeName = "NotificationPayload",
+                variants =
+                    listOf(
+                        SealedVariantModel(
+                            type = "dev.dimension.flare.web.shared.NotificationPayload.Message",
+                            typeName = "Message",
+                            tag = "Message",
+                            objectLike = false,
+                            properties =
+                                listOf(
+                                    SealedPropertyModel(
+                                        name = "type_",
+                                        kotlinName = "type",
+                                        webType = WebType.String,
+                                    ),
+                                ),
+                        ),
+                    ),
+            )
+        val presenter =
+            counterPresenter(
+                properties =
+                    listOf(
+                        PropertyModel(
+                            name = "payload",
+                            webType = null,
+                            sealed = payload,
+                            ref = null,
+                        ),
+                    ),
+                actions =
+                    listOf(
+                        ActionModel(
+                            name = "showPayload",
+                            args =
+                                listOf(
+                                    ArgumentModel(
+                                        name = "payload",
+                                        webType = null,
+                                        sealed = payload,
+                                        ref = null,
+                                        callback = null,
+                                    ),
+                                ),
+                        ),
+                    ),
+            )
+        val kotlin = WebPresenterRenderer.renderKotlin(listOf(presenter))
+        val manifest = WebPresenterRenderer.renderManifest(listOf(presenter))
+
+        kotlin.assertContains("""put("type", "Message")""")
+        kotlin.assertContains("""put("type_", JsonPrimitive(value.type))""")
+        kotlin.assertContains(""""Message" -> dev.dimension.flare.web.shared.NotificationPayload.Message(""")
+        kotlin.assertContains("""type = requireNotNull(json["type_"]?.jsonPrimitive).content,""")
+        manifest.assertContains(
+            """{ "name": "Message", "tag": "Message", "properties": [{ "name": "type_", "tsType": "string" }] }""",
+        )
+    }
+
+    @Test
     fun rendersPagingStateWithExplicitPeekCallAndGetDispatch() {
         val item =
             RefModel(

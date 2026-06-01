@@ -43,7 +43,7 @@ public sealed class ActionMenu {
         val text: Text? = null,
         val count: UiNumber? = null,
         val color: Color? = null,
-        private val clickEvent: ClickEvent = ClickEvent.Noop,
+        public val clickEvent: ClickEvent = ClickEvent.Noop,
     ) : ActionMenu() {
         init {
             require(icon != null || text != null) {

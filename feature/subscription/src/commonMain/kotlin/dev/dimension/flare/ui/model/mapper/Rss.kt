@@ -131,7 +131,7 @@ internal fun Feed.Rss20.Item.render(
             },
         displayMode = displayMode,
         createdAt =
-            pubDate
+            (pubDate ?: dcDate)
                 ?.let { input -> parseRssDateToInstant(input) }
                 ?.toUi() ?: Instant.fromEpochMilliseconds(0L).toUi(),
         accountType = AccountType.Guest,

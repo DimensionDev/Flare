@@ -52,7 +52,7 @@ public sealed class UiTimelineV2 {
         @SerialName("messageType")
         val type: Type,
         override val createdAt: UiDateTime,
-        private val clickEvent: ClickEvent,
+        public val clickEvent: ClickEvent,
         override val accountType: AccountType,
         @Transient
         override val itemKey: String? = null,
@@ -141,7 +141,7 @@ public sealed class UiTimelineV2 {
         val source: Source,
         val displayMode: RssDisplayMode = RssDisplayMode.FULL_CONTENT,
         val media: UiMedia.Image? = null,
-        private val clickEvent: ClickEvent =
+        public val clickEvent: ClickEvent =
             when (displayMode) {
                 RssDisplayMode.OPEN_IN_BROWSER -> {
                     ClickEvent.Deeplink(DeeplinkRoute.OpenLinkDirectly(url))
@@ -314,7 +314,7 @@ public sealed class UiTimelineV2 {
             val name: String,
             val url: String,
             val count: UiNumber,
-            private val clickEvent: ClickEvent,
+            public val clickEvent: ClickEvent,
             val isUnicode: Boolean,
             val me: Boolean,
         ) {

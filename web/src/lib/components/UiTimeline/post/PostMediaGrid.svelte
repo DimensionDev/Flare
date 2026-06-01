@@ -1,6 +1,7 @@
 <script lang="ts">
 	import FaIcon from '$lib/components/FaIcon.svelte';
 	import type { TimelineAppearance } from '$lib/environment/environmentSettings.svelte';
+	import { m } from '$lib/paraglide/messages.js';
 	import type { UiMedia } from '@flare/web-presenters/timeline.svelte';
 	import { mediaAlt, mediaAspect, mediaPreview } from './postUtils';
 
@@ -13,6 +14,20 @@
 		appearance: TimelineAppearance;
 		quoteMedia?: boolean;
 	} = $props();
+
+	const componentId = $props.id();
+
+	function altPopoverToken(index: number): string {
+		return `post-media-alt-${componentId.replace(/[^a-zA-Z0-9_-]/g, '-')}-${index}`;
+	}
+
+	function altPopoverId(index: number): string {
+		return `${altPopoverToken(index)}-popover`;
+	}
+
+	function altAnchorName(index: number): string {
+		return `--${altPopoverToken(index)}-anchor`;
+	}
 </script>
 
 <div
@@ -21,7 +36,8 @@
 	class:single-actual-ratio={media.length === 1 && appearance.expandMediaSize}
 	style={media.length === 1 ? `--single-media-ratio: ${mediaAspect(media[0])};` : undefined}
 >
-	{#each media.slice(0, 9) as item}
+	{#each media.slice(0, 9) as item, index}
+		{@const altText = mediaAlt(item)}
 		<figure class={`media-item media-${item.type.toLowerCase()}`}>
 			{#if item.type === 'Audio'}
 				{#if item.previewUrl}
@@ -29,7 +45,7 @@
 				{/if}
 				<figcaption class="audio-caption">
 					<FaIcon name="Messages" size={18} />
-					<span>Audio</span>
+					<span>{m.mediaAudio()}</span>
 					<small>{item.url}</small>
 				</figcaption>
 			{:else}
@@ -41,11 +57,38 @@
 					<FaIcon name="Video" size={12} />
 				</span>
 			{:else if item.type === 'Gif'}
-				<span class="media-badge">GIF</span>
+				<span class="media-badge">{m.mediaGif()}</span>
 			{/if}
 
-			{#if mediaAlt(item)}
-				<span class="alt-badge">ALT</span>
+			{#if altText}
+				{@const popoverId = altPopoverId(index)}
+				{@const anchorName = altAnchorName(index)}
+				<button
+					class="badge badge-sm rounded-box border-0 alt-badge"
+					type="button"
+					title={altText}
+					aria-label={altText}
+					aria-describedby={popoverId}
+					aria-haspopup="dialog"
+					popovertarget={popoverId}
+					style={`anchor-name: ${anchorName};`}
+					onclick={(event) => event.stopPropagation()}
+				>
+					{m.mediaAlt()}
+				</button>
+				<div
+					class="dropdown-content alt-popover rounded-box border border-base-300 bg-base-100 p-3 text-sm leading-relaxed text-base-content shadow-sm"
+					popover="auto"
+					role="dialog"
+					id={popoverId}
+					tabindex="-1"
+					aria-label={m.mediaAlt()}
+					style={`position-anchor: ${anchorName};`}
+					onclick={(event) => event.stopPropagation()}
+					onkeydown={(event) => event.stopPropagation()}
+				>
+					{altText}
+				</div>
 			{/if}
 		</figure>
 	{/each}
@@ -62,7 +105,7 @@
 	}
 
 	.media-grid.quote-media {
-		border-radius: 0.5rem;
+		border-radius: var(--post-corner-radius);
 	}
 
 	.media-count-1.single-actual-ratio {
@@ -153,7 +196,7 @@
 	.media-badge,
 	.alt-badge {
 		position: absolute;
-		border-radius: 0.4rem;
+		border-radius: var(--post-small-corner-radius);
 		background: hsl(0 0% 0% / 0.68);
 		color: white;
 		font-size: 0.7rem;
@@ -173,7 +216,17 @@
 	.alt-badge {
 		right: 0.5rem;
 		bottom: 0.5rem;
+		height: auto;
+		min-height: 0;
 		padding: 0.32rem 0.38rem;
 		letter-spacing: 0;
+	}
+
+	.alt-popover {
+		position-area: top span-left;
+		z-index: 20;
+		width: max-content;
+		max-width: min(18rem, calc(100vw - 2rem));
+		white-space: normal;
 	}
 </style>

@@ -1,10 +1,12 @@
 <script lang="ts">
+	import { useDeepLink } from '$lib/deeplink/deepLink.svelte';
 	import type { TimelineAppearance } from '$lib/environment/environmentSettings.svelte';
 	import type { UiTimelineV2Post } from '@flare/web-presenters/timeline.svelte';
 	import PostCard from './PostCard.svelte';
 	import PostHeader from './PostHeader.svelte';
 	import PostMediaGrid from './PostMediaGrid.svelte';
 	import PostRichText from './PostRichText.svelte';
+	import { shouldIgnorePostContainerClick } from './postUtils';
 
 	let {
 		quote,
@@ -13,9 +15,38 @@
 		quote: UiTimelineV2Post;
 		appearance: TimelineAppearance;
 	} = $props();
+
+	const deepLink = useDeepLink();
+	const quoteClickable = $derived(deepLink.canPerformClickEvent(quote.clickEvent));
+
+	function performQuoteClick(event: MouseEvent): void {
+		if (!quoteClickable || shouldIgnorePostContainerClick(event)) return;
+
+		event.stopPropagation();
+		deepLink.performClickEvent(quote.clickEvent);
+	}
+
+	function performQuoteKeydown(event: KeyboardEvent): void {
+		if (!quoteClickable || event.defaultPrevented || event.key !== 'Enter') {
+			return;
+		}
+		if (event.target !== event.currentTarget) return;
+
+		event.preventDefault();
+		event.stopPropagation();
+		deepLink.performClickEvent(quote.clickEvent);
+	}
 </script>
 
-<div class="quote-content">
+<div
+	class:clickable={quoteClickable}
+	class="quote-content"
+	role="link"
+	aria-disabled={quoteClickable ? undefined : true}
+	tabindex={quoteClickable ? 0 : undefined}
+	onclick={performQuoteClick}
+	onkeydown={performQuoteKeydown}
+>
 	<PostHeader post={quote} {appearance} sideAvatarVisible={false} quoteHeader={true} />
 	{#if !quote.content.isEmpty}
 		<div class="quote-text">
@@ -34,6 +65,10 @@
 	.quote-content {
 		display: grid;
 		gap: var(--post-gap);
+	}
+
+	.quote-content.clickable {
+		cursor: pointer;
 	}
 
 	.quote-text {

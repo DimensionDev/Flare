@@ -2,6 +2,7 @@ import type {
 	ActionMenu,
 	ActionMenuItem,
 	AccountType,
+	ClickEvent,
 	MicroBlogKey,
 	PlatformType,
 	ReferenceType,
@@ -63,9 +64,11 @@ type PostOptions = {
 		reposts?: number;
 		likes?: number;
 	};
+	clickEvent?: ClickEvent;
 };
 
 const guestAccount: AccountType = { type: 'Guest' };
+const noopClickEvent: ClickEvent = { type: 'Noop' };
 
 let nextPresenterRef = 1;
 
@@ -174,6 +177,7 @@ function profile(options: {
 		avatar: options.avatar,
 		banner: null,
 		bottomContent: null,
+		clickEvent: noopClickEvent,
 		description: options.description ? richText(options.description) : null,
 		handle: userHandle,
 		handleWithoutAt,
@@ -200,7 +204,7 @@ function numberValue(value: number): UiNumber {
 }
 
 function image(seed: string, index: number, sensitive = false): UiMedia {
-	return {
+	return withRef({
 		type: 'Image',
 		url: `https://picsum.photos/seed/${seed}-${index}/1440/1080`,
 		previewUrl: `https://picsum.photos/seed/${seed}-${index}/720/540`,
@@ -208,7 +212,7 @@ function image(seed: string, index: number, sensitive = false): UiMedia {
 		width: 1440,
 		height: 1080,
 		sensitive,
-	};
+	});
 }
 
 function images(count: number, options: { sensitive?: boolean; seed?: string } = {}): UiMedia[] {
@@ -218,34 +222,34 @@ function images(count: number, options: { sensitive?: boolean; seed?: string } =
 }
 
 function gif(id: string): UiMedia {
-	return {
+	return withRef({
 		type: 'Gif',
 		url: `https://picsum.photos/seed/${id}/960/720`,
 		previewUrl: `https://picsum.photos/seed/${id}-preview/640/480`,
 		description: 'Looping sample animation',
 		width: 960,
 		height: 720,
-	};
+	});
 }
 
 function video(id: string): UiMedia {
-	return {
+	return withRef({
 		type: 'Video',
 		url: `https://example.com/media/${id}.mp4`,
 		thumbnailUrl: `https://picsum.photos/seed/${id}-thumb/960/540`,
 		description: 'Sample video thumbnail',
 		width: 1920,
 		height: 1080,
-	};
+	});
 }
 
 function audio(id: string): UiMedia {
-	return {
+	return withRef({
 		type: 'Audio',
 		url: `https://example.com/media/${id}.mp3`,
 		previewUrl: `https://picsum.photos/seed/${id}-cover/720/720`,
 		description: 'Field Notes From The Timeline',
-	};
+	});
 }
 
 function card(overrides: Partial<Omit<UiCard, keyof WebPresenterRef>> = {}): UiCard {
@@ -302,6 +306,7 @@ function reaction(
 	const isUnicode = options.isUnicode ?? !options.url;
 
 	return withRef({
+		clickEvent: noopClickEvent,
 		count: numberValue(count),
 		isImageReaction: Boolean(options.url),
 		isUnicode,
@@ -338,6 +343,7 @@ function actionMenuItem(
 	color: ActionMenuItem['color'] = null
 ): ActionMenuItem {
 	return withRef({
+		clickEvent: noopClickEvent,
 		color,
 		count: count === null ? null : numberValue(count),
 		icon,
@@ -353,14 +359,15 @@ function actionItem(
 	updateKey = text.toLowerCase(),
 	color: ActionMenuItem['color'] = null
 ): ActionMenu {
-	return {
+	return withRef({
 		type: 'Item',
+		clickEvent: noopClickEvent,
 		color,
 		count: count === null ? null : numberValue(count),
 		icon,
 		text: { type: 'Raw', text },
 		updateKey,
-	};
+	});
 }
 
 function defaultActions(counts: { replies?: number; reposts?: number; likes?: number } = {}): ActionMenu[] {
@@ -368,7 +375,7 @@ function defaultActions(counts: { replies?: number; reposts?: number; likes?: nu
 		actionItem('Reply', 'Reply', counts.replies ?? 12, 'reply'),
 		actionItem('Retweet', 'Repost', counts.reposts ?? 24, 'repost'),
 		actionItem('Heart', 'Like', counts.likes ?? 128, 'like', 'PrimaryColor'),
-		{
+		withRef({
 			type: 'Group',
 			displayItem: actionMenuItem('More', 'More', null, 'more'),
 			actions: [
@@ -376,7 +383,7 @@ function defaultActions(counts: { replies?: number; reposts?: number; likes?: nu
 				actionItem('Bookmark', 'Bookmark', null, 'bookmark'),
 				actionItem('Report', 'Report', null, 'report', 'Red'),
 			],
-		},
+		}),
 	];
 }
 
@@ -389,6 +396,7 @@ function message(options: {
 }): UiTimelineV2Message {
 	return withRef({
 		accountType: guestAccount,
+		clickEvent: noopClickEvent,
 		createdAt: options.createdAt ?? dateTime('12m', '2026-06-01T09:48:00+09:00'),
 		icon: options.icon,
 		itemKey: `message-${options.id}`,
@@ -418,6 +426,7 @@ function createPost(options: PostOptions): UiTimelineV2Post {
 		accountType: guestAccount,
 		actions: options.actions ?? defaultActions(options.actionCounts),
 		card: options.card ?? null,
+		clickEvent: options.clickEvent ?? noopClickEvent,
 		content: postContent,
 		contentWarning:
 			options.contentWarning === undefined || options.contentWarning === null
@@ -500,6 +509,37 @@ const quotedPost = createPost({
 		likes: 42,
 	},
 });
+
+function parentThread(idPrefix: string): UiTimelineV2Post[] {
+	return [
+		createPost({
+			id: `${idPrefix}-root`,
+			user: authors.kei,
+			createdAt: dateTime('2h', '2026-06-01T08:00:00+09:00', 'Jun 1, 2026'),
+			content:
+				'Parent posts should preserve the conversation path without turning the current reply into a detail page.',
+			actionCounts: {
+				replies: 5,
+				reposts: 8,
+				likes: 64,
+			},
+		}),
+		createPost({
+			id: `${idPrefix}-reply`,
+			user: authors.mira,
+			createdAt: dateTime('90m', '2026-06-01T08:30:00+09:00', 'Jun 1, 2026'),
+			content:
+				'The vertical thread line needs to stay aligned with the avatar column while each parent keeps normal post density.',
+			replyToHandle: authors.kei.handle.raw,
+			references: [reference(`${idPrefix}-root`, 'Reply', authors.kei.host ?? 'bsky.social')],
+			actionCounts: {
+				replies: 2,
+				reposts: 11,
+				likes: 93,
+			},
+		}),
+	];
+}
 
 export const timelinePostSamples = [
 	{
@@ -677,6 +717,26 @@ export const timelinePostSamples = [
 				replies: 3,
 				reposts: 2,
 				likes: 35,
+			},
+		}),
+	},
+	{
+		id: 'parents',
+		label: '带 parents',
+		variant: 'thread',
+		post: createPost({
+			id: 'sample-with-parents',
+			user: authors.flare,
+			createdAt: dateTime('42m', '2026-06-01T09:18:00+09:00', 'Jun 1, 2026'),
+			content:
+				'This is the current reply. The parent chain above should make the local context clear while keeping this post as the focus.',
+			replyToHandle: authors.mira.handle.raw,
+			parents: parentThread('sample-parent-thread'),
+			references: [reference('sample-parent-thread-reply', 'Reply', authors.mira.host ?? 'misskey.io')],
+			actionCounts: {
+				replies: 6,
+				reposts: 14,
+				likes: 128,
 			},
 		}),
 	},
@@ -862,9 +922,11 @@ export const timelinePostSamples = [
 				icon: 'Retweet',
 				type: { type: 'Localized', args: [], data: 'Repost' },
 			}),
+			parents: parentThread('sample-complex-parent'),
 			replyToHandle: authors.kei.handle.raw,
 			references: [
 				reference('complex-ref-reply', 'Reply', authors.kei.host ?? 'bsky.social'),
+				reference('sample-complex-parent-reply', 'Reply', authors.mira.host ?? 'misskey.io'),
 				reference('complex-ref-quote', 'Quote', authors.noAvatar.host ?? 'example.social'),
 				reference('complex-ref-repost', 'Retweet', authors.mira.host ?? 'misskey.io'),
 				reference('complex-ref-notification', 'Notification'),

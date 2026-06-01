@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages.js';
 	import type { UiPoll, UiPollOption } from '@flare/web-presenters/timeline.svelte';
 	import { formatNumber, pollPercentage } from './postUtils';
 
@@ -15,9 +16,11 @@
 
 <div class="poll">
 	<div class="poll-summary">
-		<span>{poll.multiple ? 'Multiple choice' : 'Single choice'}</span>
+		<span>{poll.multiple ? m.pollMultipleChoice() : m.pollSingleChoice()}</span>
 		{#if poll.expiredAt}
-			<span>{poll.expired ? 'Expired' : `Expires ${poll.expiredAt.relative}`}</span>
+			<span>
+				{poll.expired ? m.pollExpired() : m.pollExpires({ time: poll.expiredAt.relative })}
+			</span>
 		{/if}
 	</div>
 	<div class="poll-options">
@@ -26,7 +29,13 @@
 		{/each}
 	</div>
 	{#if poll.canVote}
-		<button class="vote-button" type="button" disabled={selectedOptions.length === 0}>Vote</button>
+		<button
+			class="btn btn-soft btn-sm rounded-box vote-button"
+			type="button"
+			disabled={selectedOptions.length === 0}
+		>
+			{m.pollVote()}
+		</button>
 	{/if}
 </div>
 
@@ -42,11 +51,14 @@
 			<span>{option.title}</span>
 			<span>{option.humanizedPercentage}</span>
 		</div>
-		<div class="poll-track">
-			<span style={`width: ${pollPercentage(option)}%;`}></span>
-		</div>
+		<progress
+			class="progress progress-primary poll-progress"
+			value={pollPercentage(option)}
+			max="100"
+			aria-hidden="true"
+		></progress>
 		{#if option.votesCount > 0}
-			<div class="poll-votes">{formatNumber(option.votesCount)} votes</div>
+			<div class="poll-votes">{m.pollVotes({ count: formatNumber(option.votesCount) })}</div>
 		{/if}
 	</button>
 {/snippet}
@@ -76,7 +88,7 @@
 		gap: 0.35rem;
 		width: 100%;
 		border: 0;
-		border-radius: 0.5rem;
+		border-radius: var(--post-corner-radius);
 		background: var(--post-bg-soft);
 		color: inherit;
 		cursor: pointer;
@@ -106,18 +118,9 @@
 		font-weight: 650;
 	}
 
-	.poll-track {
+	.poll-progress {
+		width: 100%;
 		height: 0.32rem;
-		overflow: hidden;
-		border-radius: 999px;
-		background: var(--post-border);
-	}
-
-	.poll-track span {
-		display: block;
-		height: 100%;
-		border-radius: inherit;
-		background: var(--post-primary);
 	}
 
 	.poll-votes {
@@ -126,22 +129,9 @@
 	}
 
 	.vote-button {
-		display: inline-flex;
 		width: fit-content;
-		align-items: center;
-		gap: 0.38rem;
-		border: 1px solid var(--post-border);
-		border-radius: 0.5rem;
-		background: var(--post-bg-soft);
 		color: var(--post-text-subtle);
-		cursor: pointer;
 		font-size: 0.82rem;
 		font-weight: 700;
-		padding: 0.45rem 0.6rem;
-	}
-
-	.vote-button:disabled {
-		cursor: default;
-		opacity: 0.55;
 	}
 </style>

@@ -714,7 +714,7 @@ internal object WebPresenterRenderer {
                 appendPutValue(
                     key = property.name.kotlinString(),
                     value = property.valueModel(),
-                    valueExpression = "value.${property.name}",
+                    valueExpression = "value.${property.kotlinName}",
                     refsName = "refs",
                     indent = "            ",
                 )
@@ -737,7 +737,7 @@ internal object WebPresenterRenderer {
                 appendLine("        ${variant.tag.kotlinString()} -> ${variant.type}(")
                 variant.properties.forEach { property ->
                     appendLine(
-                        "            ${property.name} = ${
+                        "            ${property.kotlinName} = ${
                             property.valueModel().readJsonExpression(
                                 objectName = "json",
                                 argumentName = property.name,
@@ -893,6 +893,7 @@ internal data class SealedVariantModel(
 
 internal data class SealedPropertyModel(
     val name: String,
+    val kotlinName: String = name,
     val webType: WebType?,
     val enum: EnumModel? = null,
     val sealed: SealedModel? = null,
@@ -2027,14 +2028,14 @@ private class WebTypeAnalyzer(
                 .filter { it.isVal || it.isVar }
                 .mapNotNull { parameter ->
                     val parameterName = parameter.name?.asString() ?: return null
-                    if (parameterName == SEALED_DISCRIMINATOR) return@mapNotNull null
                     val propertyDeclaration =
                         declaration.getAllProperties().firstOrNull { it.simpleName.asString() == parameterName }
                     if (propertyDeclaration?.isBridgeVisible() == false) return@mapNotNull null
                     val parameterType = parameter.type.resolve()
                     val value = value(parameterType, visited = visited, allowRef = true) ?: return@mapNotNull null
                     SealedPropertyModel(
-                        name = parameterName,
+                        name = parameterName.toWebSealedPropertyName(),
+                        kotlinName = parameterName,
                         webType = value.webType,
                         enum = value.enum,
                         sealed = value.sealed,
@@ -2370,6 +2371,13 @@ private fun String.toKotlinIdentifierSuffix(): String =
                 }
             }
         }
+
+private fun String.toWebSealedPropertyName(): String =
+    if (this == SEALED_DISCRIMINATOR) {
+        "${this}_"
+    } else {
+        this
+    }
 
 private fun String.kotlinString(): String =
     buildString {

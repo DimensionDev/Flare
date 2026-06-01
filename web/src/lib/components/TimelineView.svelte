@@ -14,6 +14,9 @@
 	import { createWindowVirtualizer } from '@tanstack/svelte-virtual';
 	import { get } from 'svelte/store';
 	import FaIcon from './FaIcon.svelte';
+	import UiTimelineMessage from './UiTimeline/Message.svelte';
+	import UiTimelineUser from './UiTimeline/User.svelte';
+	import UiTimelineUserList from './UiTimeline/UserList.svelte';
 
 	let { tab }: { tab: TimelineTabItemV2 } = $props();
 
@@ -137,7 +140,7 @@
 
 	function actionLabel(action: ActionDisplayItem): string {
 		if (action.text?.type === 'Raw') return action.text.text;
-		if (action.text?.type === 'Localized') return action.text.type;
+		if (action.text?.type === 'Localized') return action.text.type_;
 		return action.icon ?? 'Action';
 	}
 
@@ -281,36 +284,11 @@
 							</div>
 						</article>
 					{:else if item.type === 'User'}
-						<article class="status compact">
-							<img class="avatar" src={item.value.avatar || '/favicon.svg'} alt="" loading="lazy" />
-							<div class="status-body">
-								<header class="status-header">
-									<div class="identity">
-										<strong>{item.value.name.innerText}</strong>
-										<span>{item.value.handle.raw}</span>
-									</div>
-									<time title={item.createdAt.full}>{item.createdAt.relative}</time>
-								</header>
-								{#if item.value.description}
-									{@render RichTextView({ text: item.value.description, className: 'post-text' })}
-								{/if}
-							</div>
-						</article>
-					{:else}
-						<article class="status compact">
-							<div class="feed-icon">
-								<FaIcon name={item.type === 'Message' ? item.icon : 'List'} size={18} />
-							</div>
-							<div class="status-body">
-								<header class="status-header">
-									<div class="identity">
-										<strong>{item.type}</strong>
-										<span>{item.itemKey ?? item.statusKey.id}</span>
-									</div>
-									<time title={item.createdAt.full}>{item.createdAt.relative}</time>
-								</header>
-							</div>
-						</article>
+						<UiTimelineUser user={item} />
+					{:else if item.type === 'UserList'}
+						<UiTimelineUserList userList={item} />
+					{:else if item.type === 'Message'}
+						<UiTimelineMessage message={item} />
 					{/if}
 				</div>
 			{/each}
@@ -366,7 +344,7 @@
 		display: grid;
 		min-height: 180px;
 		place-items: center;
-		border-bottom: 1px solid #e0e4ea;
+		border-bottom: 1px solid var(--flare-separator-color);
 		color: #697586;
 		font-size: 0.95rem;
 	}
@@ -376,7 +354,7 @@
 		grid-template-columns: 46px minmax(0, 1fr);
 		gap: 12px;
 		padding: 16px 18px;
-		border-bottom: 1px solid #e0e4ea;
+		border-bottom: 1px solid var(--flare-separator-color);
 		background: #ffffff;
 	}
 
@@ -389,7 +367,7 @@
 	}
 
 	.skeleton {
-		border-radius: 8px;
+		border-radius: var(--radius-box);
 		background: linear-gradient(90deg, #eef2f7 0%, #f6f8fb 48%, #eef2f7 100%);
 		background-size: 180% 100%;
 		animation: skeleton-pulse 1.2s ease-in-out infinite;
@@ -421,15 +399,19 @@
 	.feed-icon {
 		width: 46px;
 		height: 46px;
-		border-radius: 50%;
 		background: #eef2f7;
 		color: #536172;
 		object-fit: cover;
 	}
 
+	.avatar {
+		border-radius: 50%;
+	}
+
 	.feed-icon {
 		display: grid;
 		place-items: center;
+		border-radius: var(--radius-box);
 	}
 
 	.status-body {
@@ -475,8 +457,8 @@
 	.content-warning {
 		width: fit-content;
 		max-width: 100%;
-		border: 1px solid #d7dde6;
-		border-radius: 8px;
+		border: 1px solid var(--flare-separator-color);
+		border-radius: var(--radius-box);
 		background: #f5f7fa;
 		padding: 7px 10px;
 		color: #344054;
@@ -514,7 +496,7 @@
 	}
 
 	.rich-text :global(code) {
-		border-radius: 4px;
+		border-radius: var(--radius-box);
 		background: #eef2f7;
 		padding: 0 0.24em;
 		font-family:
@@ -539,8 +521,8 @@
 	.rich-text :global(.rt-block-image) {
 		overflow: hidden;
 		margin: 8px 0 0;
-		border: 1px solid #d8dee8;
-		border-radius: 8px;
+		border: 1px solid var(--flare-separator-color);
+		border-radius: var(--radius-box);
 		background: #f2f4f7;
 	}
 
@@ -552,7 +534,7 @@
 	}
 
 	.rich-text :global(.rt-blockquote) {
-		border-left: 3px solid #d8dee8;
+		border-left: 3px solid var(--flare-separator-color);
 		padding-left: 12px;
 		color: #475467;
 	}
@@ -572,8 +554,8 @@
 		grid-template-columns: repeat(2, minmax(0, 1fr));
 		gap: 6px;
 		overflow: hidden;
-		border-radius: 8px;
-		border: 1px solid #d8dee8;
+		border-radius: var(--radius-box);
+		border: 1px solid var(--flare-separator-color);
 		background: #f2f4f7;
 	}
 
@@ -604,7 +586,7 @@
 		width: 26px;
 		height: 26px;
 		place-items: center;
-		border-radius: 50%;
+		border-radius: var(--radius-box);
 		background: rgb(17 24 39 / 80%);
 		color: #fff;
 	}
@@ -615,8 +597,8 @@
 		gap: 12px;
 		min-width: 0;
 		overflow: hidden;
-		border: 1px solid #d8dee8;
-		border-radius: 8px;
+		border: 1px solid var(--flare-separator-color);
+		border-radius: var(--radius-box);
 		color: inherit;
 		text-decoration: none;
 	}
@@ -658,8 +640,8 @@
 	.quote {
 		display: grid;
 		gap: 4px;
-		border: 1px solid #d8dee8;
-		border-radius: 8px;
+		border: 1px solid var(--flare-separator-color);
+		border-radius: var(--radius-box);
 		padding: 10px 12px;
 		color: #344054;
 	}
@@ -695,7 +677,7 @@
 		justify-content: center;
 		gap: 6px;
 		border: 0;
-		border-radius: 8px;
+		border-radius: var(--radius-box);
 		background: transparent;
 		color: #667085;
 		cursor: pointer;

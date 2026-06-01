@@ -12,7 +12,8 @@
 		"strict": true,
 		"moduleResolution": "bundler",
 		"types": []
-	}
+	},
+	"exclude": ["src/lib/paraglide/server.js"]
 	// Path aliases are handled by https://svelte.dev/docs/kit/configuration#alias
 	// except $lib which is handled by https://svelte.dev/docs/kit/configuration#files
 	//

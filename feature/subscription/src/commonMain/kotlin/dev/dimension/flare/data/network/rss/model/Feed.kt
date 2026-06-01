@@ -357,6 +357,9 @@ internal sealed interface Feed {
             @XmlElement(true)
             val pubDate: String? = null,
             @XmlElement(true)
+            @XmlSerialName(value = "date", namespace = "http://purl.org/dc/elements/1.1/", prefix = "dc")
+            val dcDate: String? = null,
+            @XmlElement(true)
             val source: Source? = null,
             @XmlElement(true)
             @XmlSerialName(value = "content", prefix = "media", namespace = "http://search.yahoo.com/mrss/")

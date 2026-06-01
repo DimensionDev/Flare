@@ -14,8 +14,9 @@
 
 <style>
 	.warning-text {
-		font-size: 0.88rem;
-		font-weight: 700;
+		font-size: 0.96rem;
+		font-weight: 400;
+		line-height: 1.5;
 	}
 
 	.rich-text {

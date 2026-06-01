@@ -3,21 +3,44 @@
 	import {
 		useEnvironmentSettings,
 		type AvatarShape,
+		type GlobalAppearance,
 		type PostActionStyle,
+		type Theme,
 		type TimelineAppearance,
 		type TimelineDisplayMode,
 		type VideoAutoplay,
 	} from '$lib/environment/environmentSettings.svelte';
 
 	const environmentSettings = useEnvironmentSettings();
+	const globalAppearanceState = $derived(environmentSettings.globalAppearance());
+	const globalAppearance = $derived(
+		globalAppearanceState.type === 'Success' ? globalAppearanceState.data : null
+	);
 	const appearanceState = $derived(environmentSettings.timelineAppearance());
 	const appearance = $derived(appearanceState.type === 'Success' ? appearanceState.data : null);
-	const hasOverride = $derived(environmentSettings.timelineAppearanceOverride() !== null);
+	const hasOverride = $derived(
+		environmentSettings.timelineAppearanceOverride() !== null ||
+			environmentSettings.globalAppearanceOverride() !== null
+	);
 
+	const themeOptions: Theme[] = ['SYSTEM', 'LIGHT', 'DARK'];
 	const displayModes: TimelineDisplayMode[] = ['Plain', 'Card', 'Gallery'];
 	const avatarShapes: AvatarShape[] = ['CIRCLE', 'SQUARE'];
 	const actionStyles: PostActionStyle[] = ['LeftAligned', 'RightAligned', 'Stretch', 'Hidden'];
 	const videoAutoplayOptions: VideoAutoplay[] = ['NEVER', 'WIFI', 'ALWAYS'];
+
+	function resetOverrides(): void {
+		environmentSettings.resetGlobalAppearanceOverride();
+		environmentSettings.resetTimelineAppearanceOverride();
+	}
+
+	function updateGlobalAppearance(patch: Partial<GlobalAppearance>): void {
+		if (!globalAppearance) return;
+		environmentSettings.setGlobalAppearanceOverride({
+			...globalAppearance,
+			...patch,
+		} as GlobalAppearance);
+	}
 
 	function updateAppearance(patch: Partial<TimelineAppearance>): void {
 		if (!appearance) return;
@@ -63,14 +86,27 @@
 			title="Reset"
 			aria-label="Reset"
 			disabled={!hasOverride}
-			onclick={() => environmentSettings.resetTimelineAppearanceOverride()}
+			onclick={resetOverrides}
 		>
 			<FaIcon name="Reset" size={15} />
 		</button>
 	</div>
 
-	{#if appearance}
+	{#if appearance && globalAppearance}
 		<div class="control-group">
+			<label class="wide-control">
+				<span>Theme</span>
+				<select
+					class="select select-sm w-full"
+					value={globalAppearance.theme}
+					onchange={(event) => updateGlobalAppearance({ theme: selectValue<Theme>(event) })}
+				>
+					{#each themeOptions as theme}
+						<option value={theme}>{theme}</option>
+					{/each}
+				</select>
+			</label>
+
 			<label>
 				<span>Display</span>
 				<select
@@ -259,7 +295,7 @@
 	.settings-panel {
 		display: grid;
 		gap: 1rem;
-		border: 1px solid var(--color-base-300);
+		border: 1px solid var(--flare-separator-color);
 		background: var(--color-base-100);
 		padding: 1rem;
 	}
@@ -296,6 +332,10 @@
 	.range-control {
 		display: grid;
 		gap: 0.35rem;
+	}
+
+	.wide-control {
+		grid-column: 1 / -1;
 	}
 
 	.range-control > div {

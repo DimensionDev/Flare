@@ -38,7 +38,7 @@
 		display: grid;
 		overflow: hidden;
 		border: 1px solid var(--post-border);
-		border-radius: 0.5rem;
+		border-radius: var(--post-embedded-radius);
 		background: var(--post-bg);
 		color: inherit;
 		text-decoration: none;

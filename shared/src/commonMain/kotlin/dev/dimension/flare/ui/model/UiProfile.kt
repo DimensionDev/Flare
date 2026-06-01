@@ -23,7 +23,7 @@ public data class UiProfile public constructor(
     val avatar: String,
     private val nameInternal: UiRichText,
     val platformType: PlatformType,
-    private val clickEvent: ClickEvent,
+    public val clickEvent: ClickEvent,
     public val banner: String?,
     public val description: UiRichText?,
     public val sourceLanguages: SerializableImmutableList<String> = persistentListOf(),

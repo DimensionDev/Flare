@@ -31,6 +31,9 @@ export type EnvironmentSettingsContext = {
 	appSettings: () => UiState<AppSettings>;
 	globalAppearance: () => UiState<GlobalAppearance>;
 	timelineAppearance: () => UiState<TimelineAppearance>;
+	globalAppearanceOverride: () => GlobalAppearance | null;
+	setGlobalAppearanceOverride: (appearance: GlobalAppearance) => void;
+	resetGlobalAppearanceOverride: () => void;
 	timelineAppearanceOverride: () => TimelineAppearance | null;
 	setTimelineAppearanceOverride: (appearance: TimelineAppearance) => void;
 	resetTimelineAppearanceOverride: () => void;
@@ -42,17 +45,30 @@ export const [useEnvironmentSettings, provideEnvironmentSettings] =
 export function createEnvironmentSettingsContext(
 	state: EnvironmentSettingsPresenterState
 ): EnvironmentSettingsContext {
+	let globalAppearanceOverride = $state<GlobalAppearance | null>(null);
 	let timelineAppearanceOverride = $state<TimelineAppearance | null>(null);
 
 	return {
 		state,
 		appSettings: () => state.appSettings,
-		globalAppearance: () => state.globalAppearance,
+		globalAppearance: () => {
+			if (globalAppearanceOverride) {
+				return { type: 'Success', data: globalAppearanceOverride };
+			}
+			return state.globalAppearance;
+		},
 		timelineAppearance: () => {
 			if (timelineAppearanceOverride) {
 				return { type: 'Success', data: timelineAppearanceOverride };
 			}
 			return state.timelineAppearance;
+		},
+		globalAppearanceOverride: () => globalAppearanceOverride,
+		setGlobalAppearanceOverride: (appearance: GlobalAppearance) => {
+			globalAppearanceOverride = appearance;
+		},
+		resetGlobalAppearanceOverride: () => {
+			globalAppearanceOverride = null;
 		},
 		timelineAppearanceOverride: () => timelineAppearanceOverride,
 		setTimelineAppearanceOverride: (appearance: TimelineAppearance) => {

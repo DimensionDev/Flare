@@ -1,4 +1,5 @@
 import { sveltekit } from '@sveltejs/kit/vite';
+import { paraglideVitePlugin } from '@inlang/paraglide-js';
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vite';
 
@@ -15,7 +16,15 @@ const jsJoda = decodeURI(
 const wsBrowser = decodeURI(new URL('./node_modules/ws/browser.js', import.meta.url).pathname);
 
 export default defineConfig({
-	plugins: [tailwindcss(), sveltekit()],
+	plugins: [
+		tailwindcss(),
+		paraglideVitePlugin({
+			project: './project.inlang',
+			outdir: './src/lib/paraglide',
+			strategy: ['localStorage', 'preferredLanguage', 'baseLocale']
+		}),
+		sveltekit()
+	],
 	resolve: {
 		alias: {
 			'@androidx/sqlite-web-worker/worker.js': sqliteWebWorker,

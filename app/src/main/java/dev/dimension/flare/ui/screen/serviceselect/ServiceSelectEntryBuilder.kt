@@ -10,29 +10,23 @@ internal fun EntryProviderScope<NavKey>.serviceSelectEntryBuilder(
 ) {
     entry<Route.ServiceSelect.Selection> {
         ServiceSelectScreen(
-            onXQT = {
-                navigate(Route.ServiceSelect.XQTLogin)
-            },
-            onVVO = {
-                navigate(Route.ServiceSelect.VVOLogin)
+            onWebViewLogin = { url, callback ->
+                navigate(
+                    Route.ServiceSelect.WebCookieLogin(
+                        url = url,
+                        callback = callback,
+                    ),
+                )
             },
             onBack = onBack,
         )
     }
 
-    entry<Route.ServiceSelect.XQTLogin> {
-        XQTLoginScreen(
-            toHome = {
-                onBack()
-            }
-        )
-    }
-
-    entry<Route.ServiceSelect.VVOLogin> {
-        VVOLoginScreen(
-            toHome = {
-                onBack()
-            }
+    entry<Route.ServiceSelect.WebCookieLogin> { args ->
+        WebCookieLoginScreen(
+            url = args.url,
+            callback = args.callback,
+            onBack = onBack,
         )
     }
 }

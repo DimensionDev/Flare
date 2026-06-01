@@ -1,9 +1,9 @@
 package dev.dimension.flare.ui.screen.login
 
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -20,20 +20,23 @@ import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.autofill.ContentType
-import androidx.compose.ui.autofill.contentType
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -50,19 +53,9 @@ import dev.dimension.flare.common.onEmpty
 import dev.dimension.flare.common.onLoading
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.compose.ui.Res
-import dev.dimension.flare.compose.ui.bluesky_login_auth_factor_token_hint
-import dev.dimension.flare.compose.ui.bluesky_login_oauth_button
-import dev.dimension.flare.compose.ui.bluesky_login_oauth_hint
-import dev.dimension.flare.compose.ui.bluesky_login_password_hint
-import dev.dimension.flare.compose.ui.bluesky_login_use_password_button
-import dev.dimension.flare.compose.ui.bluesky_login_username_hint
-import dev.dimension.flare.compose.ui.cancel_button
 import dev.dimension.flare.compose.ui.eula_privacy_policy
 import dev.dimension.flare.compose.ui.login_agreement
-import dev.dimension.flare.compose.ui.login_button
 import dev.dimension.flare.compose.ui.mastodon_login_verify_message
-import dev.dimension.flare.compose.ui.nostr_login_account_hint
-import dev.dimension.flare.compose.ui.nostr_login_amber_button
 import dev.dimension.flare.compose.ui.nostr_login_qr_button
 import dev.dimension.flare.compose.ui.nostr_login_qr_hint
 import dev.dimension.flare.compose.ui.nostr_login_qr_link_label
@@ -70,7 +63,6 @@ import dev.dimension.flare.compose.ui.nostr_login_qr_waiting
 import dev.dimension.flare.compose.ui.service_select_compatibility_warning
 import dev.dimension.flare.compose.ui.service_select_empty_message
 import dev.dimension.flare.compose.ui.service_select_instance_input_placeholder
-import dev.dimension.flare.compose.ui.service_select_next_button
 import dev.dimension.flare.compose.ui.service_select_welcome_hint
 import dev.dimension.flare.compose.ui.service_select_welcome_list_hint
 import dev.dimension.flare.compose.ui.service_select_welcome_message
@@ -87,27 +79,34 @@ import dev.dimension.flare.ui.component.platform.PlatformPicker
 import dev.dimension.flare.ui.component.platform.PlatformSecureTextField
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.component.platform.PlatformTextField
+import dev.dimension.flare.ui.component.res
 import dev.dimension.flare.ui.component.status.AdaptiveCard
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.toImageVector
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiInstance
+import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.isSuccess
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.takeSuccess
+import dev.dimension.flare.ui.presenter.login.LoginEffect
+import dev.dimension.flare.ui.presenter.login.LoginField
+import dev.dimension.flare.ui.presenter.login.LoginFieldType
+import dev.dimension.flare.ui.presenter.login.LoginFlowPresenter
+import dev.dimension.flare.ui.presenter.login.LoginMethodSpec
 import dev.dimension.flare.ui.theme.PlatformTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.alexzhirkevich.qrose.rememberQrCodePainter
-import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.flow.distinctUntilChanged
 import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
 public fun ServiceSelectionScreenContent(
-    onXQT: () -> Unit,
-    onVVO: () -> Unit,
+    onWebViewLogin: (url: String, cookieCallback: (cookies: String?) -> Boolean) -> Unit,
     onBack: (() -> Unit),
     openUri: (String) -> Unit,
     registerDeeplinkCallback: @Composable ((url: String) -> Unit) -> Unit,
@@ -119,21 +118,16 @@ public fun ServiceSelectionScreenContent(
     }
     LazyStatusVerticalStaggeredGrid(
         state = listState,
-        modifier =
-            Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize(),
         columns = StaggeredGridCells.Adaptive(300.dp),
         contentPadding = contentPadding,
         forceCardMode = true,
     ) {
-        item(
-            span = StaggeredGridItemSpan.FullLine,
-        ) {
+        item(span = StaggeredGridItemSpan.FullLine) {
             Column(
                 modifier =
                     Modifier
-                        .padding(
-                            horizontal = screenHorizontalPadding,
-                        ),
+                        .padding(horizontal = screenHorizontalPadding),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
@@ -154,9 +148,7 @@ public fun ServiceSelectionScreenContent(
                             keyboardType = KeyboardType.Uri,
                         ),
                     placeholder = {
-                        PlatformText(
-                            text = stringResource(Res.string.service_select_instance_input_placeholder),
-                        )
+                        PlatformText(text = stringResource(Res.string.service_select_instance_input_placeholder))
                     },
                     trailingIcon = {
                         PlatformIconButton(onClick = {
@@ -205,13 +197,11 @@ public fun ServiceSelectionScreenContent(
                     textAlign = TextAlign.Center,
                     style = PlatformTheme.typography.caption,
                 )
-                AnimatedVisibility(state.canNext && state.detectedPlatformType.isSuccess) {
+                AnimatedVisibility(state.canNext && state.detectedPlatformType.isSuccess && state.instanceInputState.text.isNotEmpty()) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(16.dp),
-                        modifier =
-                            Modifier
-                                .imePadding(),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.imePadding(),
                     ) {
                         state.detectedPlatformType.takeSuccess()?.let {
                             if (it.compatibleMode) {
@@ -225,315 +215,14 @@ public fun ServiceSelectionScreenContent(
                             }
                         }
                         state.detectedPlatformType.onSuccess { nodeData ->
-                            val passwordFocusRequester = remember { FocusRequester() }
-                            val pinCodeFocusRequester = remember { FocusRequester() }
-                            when (nodeData.platformType) {
-                                PlatformType.Nostr -> {
-                                    NostrLoginContent(state)
-                                }
-
-                                PlatformType.Bluesky -> {
-                                    val oauthString =
-                                        stringResource(Res.string.bluesky_login_oauth_button)
-                                    val passwordString =
-                                        stringResource(Res.string.bluesky_login_use_password_button)
-                                    PlatformPicker(
-                                        options =
-                                            remember {
-                                                persistentListOf(
-                                                    passwordString,
-                                                    oauthString,
-                                                )
-                                            },
-                                        onSelected = {
-                                            when (it) {
-                                                0 -> {
-                                                    state.blueskyLoginState.clear()
-                                                    state.blueskyOauthLoginState.clear()
-                                                    state.blueskyInputState.setUsePasswordLogin(true)
-                                                }
-
-                                                1 -> {
-                                                    state.blueskyLoginState.clear()
-                                                    state.blueskyOauthLoginState.clear()
-                                                    state.blueskyInputState.setUsePasswordLogin(false)
-                                                }
-
-                                                else -> {}
-                                            }
-                                        },
-                                    )
-                                    PlatformTextField(
-                                        state = state.blueskyInputState.username,
-                                        label = {
-                                            PlatformText(text = stringResource(Res.string.bluesky_login_username_hint))
-                                        },
-                                        enabled =
-                                            !state.blueskyOauthLoginState.loading &&
-                                                !state.blueskyLoginState.loading,
-                                        modifier =
-                                            Modifier
-                                                .width(300.dp)
-                                                .contentType(ContentType.Username + ContentType.EmailAddress),
-                                        lineLimits = TextFieldLineLimits.SingleLine,
-                                        keyboardOptions =
-                                            KeyboardOptions(
-                                                keyboardType = KeyboardType.Email,
-                                                imeAction = ImeAction.Done,
-                                                autoCorrectEnabled = false,
-                                            ),
-                                        onKeyboardAction = {
-                                            if (!state.blueskyInputState.usePasswordLogin) {
-                                                if (state.blueskyInputState.canLogin) {
-                                                    state.blueskyOauthLoginState.login(
-                                                        baseUrl = nodeData.host,
-                                                        userName =
-                                                            state.blueskyInputState.username.text
-                                                                .toString(),
-                                                        launchUrl = openUri,
-                                                    )
-                                                }
-                                            } else {
-                                                passwordFocusRequester.requestFocus()
-                                            }
-                                        },
-                                    )
-                                    AnimatedVisibility(state.blueskyInputState.usePasswordLogin) {
-                                        PlatformSecureTextField(
-                                            state = state.blueskyInputState.password,
-                                            label = {
-                                                PlatformText(text = stringResource(Res.string.bluesky_login_password_hint))
-                                            },
-                                            enabled = !state.blueskyLoginState.loading,
-                                            keyboardOptions =
-                                                KeyboardOptions(
-                                                    keyboardType = KeyboardType.Password,
-                                                    imeAction = ImeAction.Done,
-                                                    autoCorrectEnabled = false,
-                                                ),
-                                            modifier =
-                                                Modifier
-                                                    .width(300.dp)
-                                                    .contentType(ContentType.Password)
-                                                    .focusRequester(passwordFocusRequester),
-                                            onKeyboardAction = {
-                                                if (state.blueskyInputState.canLogin) {
-                                                    state.blueskyLoginState.login(
-                                                        baseUrl = nodeData.host,
-                                                        username =
-                                                            state.blueskyInputState.username.text
-                                                                .toString(),
-                                                        password =
-                                                            state.blueskyInputState.password.text
-                                                                .toString(),
-                                                        authFactorToken =
-                                                            state.blueskyInputState.authFactorToken.text
-                                                                .toString(),
-                                                    )
-                                                }
-                                            },
-                                        )
-                                    }
-                                    AnimatedVisibility(state.blueskyLoginState.require2FA && state.blueskyInputState.usePasswordLogin) {
-                                        LaunchedEffect(Unit) {
-                                            pinCodeFocusRequester.requestFocus()
-                                        }
-                                        PlatformTextField(
-                                            state = state.blueskyInputState.authFactorToken,
-                                            label = {
-                                                PlatformText(text = stringResource(Res.string.bluesky_login_auth_factor_token_hint))
-                                            },
-                                            enabled = !state.blueskyLoginState.loading,
-                                            modifier =
-                                                Modifier
-                                                    .width(300.dp)
-                                                    .focusRequester(pinCodeFocusRequester),
-                                            lineLimits = TextFieldLineLimits.SingleLine,
-                                            keyboardOptions =
-                                                KeyboardOptions(
-                                                    keyboardType = KeyboardType.Text,
-                                                    imeAction = ImeAction.Done,
-                                                    autoCorrectEnabled = false,
-                                                ),
-                                            onKeyboardAction = {
-                                                if (state.blueskyInputState.canLogin) {
-                                                    state.blueskyLoginState.login(
-                                                        baseUrl = nodeData.host,
-                                                        username =
-                                                            state.blueskyInputState.username.text
-                                                                .toString(),
-                                                        password =
-                                                            state.blueskyInputState.password.text
-                                                                .toString(),
-                                                        authFactorToken =
-                                                            state.blueskyInputState.authFactorToken.text
-                                                                .toString(),
-                                                    )
-                                                }
-                                            },
-                                        )
-                                    }
-                                    AnimatedVisibility(!state.blueskyInputState.usePasswordLogin) {
-                                        PlatformText(stringResource(Res.string.bluesky_login_oauth_hint))
-                                    }
-                                    if (!state.blueskyInputState.usePasswordLogin) {
-                                        registerDeeplinkCallback.invoke { url ->
-                                            state.blueskyOauthLoginState.resume(url)
-                                        }
-//                                    OnNewIntent {
-//                                        state.blueskyOauthLoginState.resume(it.dataString.orEmpty())
-//                                    }
-                                        if (state.blueskyOauthLoginState.error != null) {
-                                            PlatformText(
-                                                text = state.blueskyOauthLoginState.error.toString(),
-                                            )
-                                        }
-                                    } else {
-                                        state.blueskyLoginState.errorMessage?.let {
-                                            PlatformText(
-                                                text = it,
-                                            )
-                                        }
-                                    }
-                                    PlatformFilledTonalButton(
-                                        onClick = {
-                                            if (state.blueskyInputState.usePasswordLogin) {
-                                                state.blueskyLoginState.login(
-                                                    baseUrl = nodeData.host,
-                                                    username =
-                                                        state.blueskyInputState.username.text
-                                                            .toString(),
-                                                    password =
-                                                        state.blueskyInputState.password.text
-                                                            .toString(),
-                                                    authFactorToken =
-                                                        state.blueskyInputState.authFactorToken.text
-                                                            .toString(),
-                                                )
-                                            } else {
-                                                state.blueskyOauthLoginState.login(
-                                                    baseUrl = nodeData.host,
-                                                    userName =
-                                                        state.blueskyInputState.username.text
-                                                            .toString(),
-                                                    launchUrl = openUri,
-                                                )
-                                            }
-                                        },
-                                        modifier = Modifier.width(300.dp),
-                                        enabled =
-                                            state.blueskyInputState.canLogin &&
-                                                (
-                                                    !state.blueskyOauthLoginState.loading &&
-                                                        !state.blueskyLoginState.loading
-                                                ),
-                                    ) {
-                                        PlatformText(text = stringResource(Res.string.login_button))
-                                    }
-                                    if (state.blueskyOauthLoginState.error != null) {
-                                        PlatformText(
-                                            text = state.blueskyOauthLoginState.error.toString(),
-                                        )
-                                    }
-                                    if (state.blueskyOauthLoginState.loading) {
-                                        PlatformLinearProgressIndicator()
-                                    }
-                                }
-
-                                PlatformType.Misskey -> {
-                                    registerDeeplinkCallback {
-                                        state.misskeyLoginState.resume(it)
-                                    }
-                                    state.misskeyLoginState.resumedState
-                                        ?.onLoading {
-                                            PlatformText(
-                                                text = stringResource(Res.string.mastodon_login_verify_message),
-                                            )
-                                            PlatformLinearProgressIndicator()
-                                        }?.onError {
-                                            PlatformText(text = it.message ?: "Unknown error")
-                                        } ?: run {
-                                        PlatformFilledTonalButton(
-                                            onClick = {
-                                                state.misskeyLoginState.login(
-                                                    nodeData.host,
-                                                    launchUrl = openUri,
-                                                )
-                                            },
-                                            modifier = Modifier.width(300.dp),
-                                            enabled = !state.misskeyLoginState.loading,
-                                        ) {
-                                            PlatformText(
-                                                text = stringResource(Res.string.service_select_next_button),
-                                            )
-                                        }
-                                        state.misskeyLoginState.error?.let {
-                                            PlatformText(text = it)
-                                        }
-                                    }
-                                }
-
-                                PlatformType.Mastodon -> {
-                                    registerDeeplinkCallback {
-                                        state.mastodonLoginState.resume(it)
-                                    }
-                                    state.mastodonLoginState.resumedState
-                                        ?.onLoading {
-                                            PlatformText(
-                                                text = stringResource(Res.string.mastodon_login_verify_message),
-                                            )
-                                            PlatformLinearProgressIndicator()
-                                        }?.onError {
-                                            PlatformText(text = it.message ?: "Unknown error")
-                                        } ?: run {
-                                        PlatformFilledTonalButton(
-                                            onClick = {
-                                                state.mastodonLoginState.login(
-                                                    nodeData.host,
-                                                    launchUrl = openUri,
-                                                )
-                                            },
-                                            modifier = Modifier.width(300.dp),
-                                            enabled = !state.mastodonLoginState.loading,
-                                        ) {
-                                            PlatformText(
-                                                text = stringResource(Res.string.service_select_next_button),
-                                            )
-                                        }
-                                        state.mastodonLoginState.error?.let {
-                                            PlatformText(text = it)
-                                        }
-                                    }
-                                }
-
-                                PlatformType.xQt -> {
-                                    PlatformFilledTonalButton(
-                                        onClick = {
-                                            onXQT.invoke()
-                                        },
-                                        modifier = Modifier.width(300.dp),
-                                        content = {
-                                            PlatformText(
-                                                text = stringResource(Res.string.service_select_next_button),
-                                            )
-                                        },
-                                    )
-                                }
-
-                                PlatformType.VVo -> {
-                                    PlatformFilledTonalButton(
-                                        onClick = {
-                                            onVVO.invoke()
-                                        },
-                                        modifier = Modifier.width(300.dp),
-                                        content = {
-                                            PlatformText(
-                                                text = stringResource(Res.string.service_select_next_button),
-                                            )
-                                        },
-                                    )
-                                }
-                            }
+                            GenericLoginContent(
+                                state = state,
+                                platformType = nodeData.platformType,
+                                host = nodeData.host,
+                                openUri = openUri,
+                                onWebViewLogin = onWebViewLogin,
+                                registerDeeplinkCallback = registerDeeplinkCallback,
+                            )
                             LoginAgreement(
                                 platformType = nodeData.platformType,
                                 host = nodeData.host,
@@ -546,20 +235,12 @@ public fun ServiceSelectionScreenContent(
             }
         }
 
-        if (!(state.canNext && state.detectedPlatformType.isSuccess)) {
-            item(
-                span = StaggeredGridItemSpan.FullLine,
-            ) {
-                Spacer(
-                    modifier =
-                        Modifier
-                            .height(16.dp),
-                )
+        if (!(state.canNext && state.detectedPlatformType.isSuccess && state.instanceInputState.text.isNotEmpty())) {
+            item(span = StaggeredGridItemSpan.FullLine) {
+                Spacer(modifier = Modifier.height(16.dp))
             }
 
-            item(
-                span = StaggeredGridItemSpan.FullLine,
-            ) {
+            item(span = StaggeredGridItemSpan.FullLine) {
                 PlatformText(
                     text = stringResource(Res.string.service_select_welcome_list_hint),
                     textAlign = TextAlign.Center,
@@ -568,9 +249,7 @@ public fun ServiceSelectionScreenContent(
             }
             state.instances
                 .onSuccess {
-                    items(
-                        count = itemCount,
-                    ) {
+                    items(count = itemCount) {
                         val instance = get(it)
                         ServiceSelectItem(
                             instance = instance,
@@ -612,164 +291,300 @@ public fun ServiceSelectionScreenContent(
 }
 
 @Composable
-private fun NostrLoginContent(state: SelectionPresenter.State) {
-    val options =
-        remember(state.nostrLoginState.amberAvailable) {
-            if (state.nostrLoginState.amberAvailable) {
-                persistentListOf("Key", "QR", "Amber")
-            } else {
-                persistentListOf("Key", "QR")
-            }
+private fun GenericLoginContent(
+    state: SelectionPresenter.State,
+    platformType: PlatformType,
+    host: String,
+    openUri: (String) -> Unit,
+    onWebViewLogin: (url: String, cookieCallback: (cookies: String?) -> Boolean) -> Unit,
+    registerDeeplinkCallback: @Composable ((url: String) -> Unit) -> Unit,
+) {
+    val methods = state.loginMethods(platformType)
+    if (methods.isEmpty()) return
+    var selectedMethod by remember(platformType, host) { mutableStateOf(methods.first().type) }
+    val selectedSpec = methods.firstOrNull { it.type == selectedMethod } ?: methods.first()
+    val handler =
+        remember(platformType, host, selectedMethod) {
+            state.createLoginHandler(
+                platformType = platformType,
+                host = host,
+                methodType = selectedMethod,
+            )
         }
-    Column(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        PlatformPicker(
-            options = options,
-            onSelected = { index ->
-                val selected = options.getOrNull(index) ?: return@PlatformPicker
-                state.nostrInputState.setMode(
-                    when (selected) {
-                        "QR" -> NostrInputPresenter.Mode.Qr
-                        "Amber" -> NostrInputPresenter.Mode.Amber
-                        else -> NostrInputPresenter.Mode.Key
-                    },
-                )
-            },
-        )
-        AnimatedContent(
-            state.nostrInputState.mode,
-        ) { mode ->
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                when (mode) {
-                    NostrInputPresenter.Mode.Key -> {
-                        PlatformTextField(
-                            state = state.nostrInputState.credentialInput,
-                            label = {
-                                PlatformText(text = stringResource(Res.string.nostr_login_account_hint))
-                            },
-                            enabled = !state.nostrLoginState.loading,
-                            modifier = Modifier.width(300.dp),
-                            keyboardOptions =
-                                KeyboardOptions(
-                                    keyboardType = KeyboardType.Text,
-                                    imeAction = ImeAction.Done,
-                                    autoCorrectEnabled = false,
-                                ),
-                            onKeyboardAction = {
-                                if (state.nostrInputState.canLogin) {
-                                    state.nostrLoginState.login(
-                                        input =
-                                            state.nostrInputState.credentialInput.text
-                                                .toString(),
-                                    )
-                                }
-                            },
-                        )
-                        PlatformFilledTonalButton(
-                            onClick = {
-                                state.nostrLoginState.login(
-                                    input =
-                                        state.nostrInputState.credentialInput.text
-                                            .toString(),
-                                )
-                            },
-                            modifier = Modifier.width(300.dp),
-                            enabled = state.nostrInputState.canLogin && !state.nostrLoginState.loading,
-                        ) {
-                            PlatformText(text = stringResource(Res.string.login_button))
-                        }
-                    }
+    val loginState by producePresenter("login_flow_${platformType.name}_${host}_$selectedMethod") {
+        remember(handler) { LoginFlowPresenter(handler) }.body()
+    }
+    var qrContent by remember(handler) { mutableStateOf<String?>(null) }
+    registerDeeplinkCallback {
+        loginState.resume(it)
+    }
+    LaunchedEffect(loginState.effects) {
+        loginState.effects.collect { effect ->
+            when (effect) {
+                is LoginEffect.OpenUrl -> {
+                    openUri(effect.url)
+                }
 
-                    NostrInputPresenter.Mode.Qr -> {
-                        PlatformFilledTonalButton(
-                            onClick = state.nostrLoginState::startQrLogin,
-                            modifier = Modifier.width(300.dp),
-                            enabled = !state.nostrLoginState.loading && state.nostrLoginState.qrConnectUri == null,
-                        ) {
-                            PlatformText(text = stringResource(Res.string.nostr_login_qr_button))
-                        }
-                        AnimatedVisibility(
-                            state.nostrLoginState.qrConnectUri != null,
-                        ) {
-                            state.nostrLoginState.qrConnectUri?.let { connectUri ->
-                                Column(
-                                    modifier = Modifier.width(300.dp),
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                                ) {
-                                    PlatformText(
-                                        text = stringResource(Res.string.nostr_login_qr_hint),
-                                        textAlign = TextAlign.Center,
-                                        style = PlatformTheme.typography.caption,
-                                    )
-                                    Image(
-                                        painter = rememberQrCodePainter(connectUri),
-                                        contentDescription = stringResource(Res.string.nostr_login_qr_button),
-                                        modifier = Modifier.size(220.dp),
-                                    )
-                                    PlatformText(
-                                        text = stringResource(Res.string.nostr_login_qr_waiting),
-                                        textAlign = TextAlign.Center,
-                                    )
-                                    Column(
-                                        horizontalAlignment = Alignment.CenterHorizontally,
-                                        verticalArrangement = Arrangement.spacedBy(6.dp),
-                                    ) {
-                                        PlatformText(
-                                            text = stringResource(Res.string.nostr_login_qr_link_label),
-                                            style = PlatformTheme.typography.caption,
-                                        )
-                                        SelectionContainer {
-                                            PlatformText(
-                                                text = connectUri,
-                                                textAlign = TextAlign.Center,
-                                                style = PlatformTheme.typography.caption,
-                                            )
-                                        }
-                                    }
-                                    PlatformFilledTonalButton(
-                                        onClick = state.nostrLoginState::cancelQrLogin,
-                                        modifier = Modifier.width(300.dp),
-                                        enabled = !state.nostrLoginState.loading,
-                                    ) {
-                                        PlatformText(text = stringResource(Res.string.cancel_button))
-                                    }
-                                }
-                            }
-                        }
-                    }
+                is LoginEffect.ShowQr -> {
+                    qrContent = effect.content
+                }
 
-                    NostrInputPresenter.Mode.Amber -> {
-                        if (state.nostrLoginState.amberAvailable) {
-                            PlatformFilledTonalButton(
-                                onClick = state.nostrLoginState::connectAmber,
-                                modifier = Modifier.width(300.dp),
-                                enabled = !state.nostrLoginState.loading,
-                            ) {
-                                PlatformText(text = stringResource(Res.string.nostr_login_amber_button))
-                            }
+                is LoginEffect.OpenWebCookieLogin -> {
+                    onWebViewLogin(effect.url) { cookies ->
+                        if (cookies.isNullOrBlank()) {
+                            false
+                        } else if (!loginState.canResume(cookies)) {
+                            false
+                        } else {
+                            loginState.resume(cookies)
+                            true
                         }
                     }
                 }
             }
         }
-        state.nostrLoginState.error?.let {
+    }
+    if (methods.size > 1) {
+        LoginMethodPicker(
+            methods = methods,
+            selectedSpec = selectedSpec,
+            onSelected = {
+                selectedMethod = it.type
+            },
+        )
+    }
+    LoginFlowContent(
+        state = loginState,
+        qrContent = qrContent,
+        onQrDismiss = {
+            qrContent = null
+        },
+    )
+}
+
+@Composable
+private fun LoginMethodPicker(
+    methods: List<LoginMethodSpec>,
+    selectedSpec: LoginMethodSpec,
+    onSelected: (LoginMethodSpec) -> Unit,
+) {
+    val labels =
+        methods
+            .map { stringResource(it.title.res) }
+            .toImmutableList()
+    PlatformPicker(
+        modifier = Modifier.horizontalScroll(rememberScrollState()),
+        options = labels,
+        onSelected = { index ->
+            methods.getOrNull(index)?.let(onSelected)
+        },
+    )
+}
+
+@Composable
+private fun LoginFlowContent(
+    state: LoginFlowPresenter.State,
+    qrContent: String?,
+    onQrDismiss: () -> Unit,
+) {
+    val flowState = state.flowState
+    Column(
+        modifier =
+            Modifier
+                .fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        flowState.fields.forEach { field ->
+            key(field.id) {
+                LoginFieldInput(
+                    field = field,
+                    enabled = !flowState.loading && !field.readOnly,
+                    onUpdate = state::updateField,
+                    onSubmit = {
+                        flowState.actions.firstOrNull { it.enabled }?.let {
+                            state.perform(it.id)
+                        }
+                    },
+                )
+            }
+        }
+        qrContent?.let {
+            QrLoginContent(
+                content = it,
+                onDismiss = onQrDismiss,
+            )
+        }
+        flowState.actions.forEach { action ->
+            PlatformFilledTonalButton(
+                onClick = {
+                    state.perform(action.id)
+                },
+                modifier = Modifier.width(300.dp),
+                enabled = action.enabled && !flowState.loading,
+            ) {
+                PlatformText(text = stringResource(action.label.res))
+            }
+        }
+        flowState.error?.let {
             PlatformText(
-                text = it.message ?: "Unknown error",
+                text = it,
                 textAlign = TextAlign.Center,
             )
         }
-        if (state.nostrLoginState.loading) {
+        if (flowState.loading) {
+            PlatformText(
+                text = stringResource(Res.string.mastodon_login_verify_message),
+                textAlign = TextAlign.Center,
+            )
             PlatformLinearProgressIndicator()
+        }
+    }
+}
+
+@Composable
+private fun LoginFieldInput(
+    field: LoginField,
+    enabled: Boolean,
+    onUpdate: (String, String) -> Unit,
+    onSubmit: () -> Unit,
+) {
+    val textState = rememberTextFieldState(field.value)
+    val currentOnUpdate by rememberUpdatedState(onUpdate)
+    LaunchedEffect(field.value) {
+        if (textState.text.toString() != field.value) {
+            textState.edit {
+                replace(0, textState.text.length, field.value)
+            }
+        }
+    }
+    if (field.type != LoginFieldType.DisplayText) {
+        LaunchedEffect(textState, field.id) {
+            snapshotFlow { textState.text.toString() }
+                .distinctUntilChanged()
+                .collect {
+                    currentOnUpdate(field.id, it)
+                }
+        }
+    }
+    val label: @Composable () -> Unit = {
+        PlatformText(text = stringResource(field.label.res))
+    }
+    val placeholder: (@Composable () -> Unit)? =
+        field.placeholder?.let { placeholder ->
+            {
+                PlatformText(text = stringResource(placeholder.res))
+            }
+        }
+    val keyboardOptions =
+        KeyboardOptions(
+            keyboardType =
+                when (field.type) {
+                    LoginFieldType.PasswordInput -> KeyboardType.Password
+
+                    LoginFieldType.OtpInput -> KeyboardType.Text
+
+                    LoginFieldType.TextInput,
+                    LoginFieldType.DisplayText,
+                    -> KeyboardType.Text
+                },
+            imeAction = ImeAction.Done,
+            autoCorrectEnabled = false,
+        )
+    when (field.type) {
+        LoginFieldType.PasswordInput -> {
+            PlatformSecureTextField(
+                state = textState,
+                label = label,
+                placeholder = placeholder,
+                enabled = enabled,
+                modifier = Modifier.width(300.dp),
+                keyboardOptions = keyboardOptions,
+                onKeyboardAction = {
+                    onSubmit()
+                },
+            )
+        }
+
+        LoginFieldType.TextInput,
+        LoginFieldType.OtpInput,
+        -> {
+            PlatformTextField(
+                state = textState,
+                label = label,
+                placeholder = placeholder,
+                enabled = enabled,
+                modifier = Modifier.width(300.dp),
+                lineLimits = TextFieldLineLimits.SingleLine,
+                keyboardOptions = keyboardOptions,
+                onKeyboardAction = {
+                    onSubmit()
+                },
+            )
+        }
+
+        LoginFieldType.DisplayText -> {
+            PlatformText(
+                text = field.value,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.width(300.dp),
+            )
+        }
+    }
+    field.error?.let {
+        PlatformText(
+            text = it,
+            textAlign = TextAlign.Center,
+            style = PlatformTheme.typography.caption,
+        )
+    }
+}
+
+@Composable
+private fun QrLoginContent(
+    content: String,
+    onDismiss: () -> Unit,
+) {
+    Column(
+        modifier = Modifier.width(300.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        PlatformText(
+            text = stringResource(Res.string.nostr_login_qr_hint),
+            textAlign = TextAlign.Center,
+            style = PlatformTheme.typography.caption,
+        )
+        Image(
+            painter = rememberQrCodePainter(content),
+            contentDescription = stringResource(Res.string.nostr_login_qr_button),
+            modifier = Modifier.size(220.dp),
+        )
+        PlatformText(
+            text = stringResource(Res.string.nostr_login_qr_waiting),
+            textAlign = TextAlign.Center,
+        )
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            PlatformText(
+                text = stringResource(Res.string.nostr_login_qr_link_label),
+                style = PlatformTheme.typography.caption,
+            )
+            SelectionContainer {
+                PlatformText(
+                    text = content,
+                    textAlign = TextAlign.Center,
+                    style = PlatformTheme.typography.caption,
+                )
+            }
+        }
+        PlatformFilledTonalButton(
+            onClick = onDismiss,
+            modifier = Modifier.width(300.dp),
+        ) {
+            PlatformText(text = stringResource(UiStrings.Cancel.res))
         }
     }
 }
@@ -802,21 +617,15 @@ private fun ServiceSelectItem(
                 NetworkImage(
                     it,
                     contentDescription = null,
-                    modifier =
-                        Modifier
-                            .clip(PlatformTheme.shapes.medium),
+                    modifier = Modifier.clip(PlatformTheme.shapes.medium),
                 )
             }
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
+            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 if (!instance?.iconUrl.isNullOrEmpty()) {
                     NetworkImage(
                         instance.iconUrl,
                         contentDescription = null,
-                        modifier =
-                            Modifier
-                                .size(24.dp),
+                        modifier = Modifier.size(24.dp),
                     )
                 } else if (instance != null) {
                     FAIcon(
@@ -869,10 +678,7 @@ private fun LoginAgreement(
                 if (startIndex != -1) {
                     val endIndex = startIndex + linkText.length
                     addStyle(
-                        style =
-                            SpanStyle(
-                                color = color,
-                            ),
+                        style = SpanStyle(color = color),
                         start = startIndex,
                         end = endIndex,
                     )

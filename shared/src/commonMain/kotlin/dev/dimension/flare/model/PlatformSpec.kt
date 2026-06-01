@@ -4,9 +4,7 @@ import dev.dimension.flare.data.database.app.model.SubscriptionType
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.model.tab.TimelineSpec
-import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
 import dev.dimension.flare.ui.model.UiInstance
-import dev.dimension.flare.ui.model.UiInstanceMetadata
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import kotlinx.collections.immutable.ImmutableList
@@ -21,18 +19,11 @@ import kotlin.native.HiddenFromObjC
 public interface PlatformSpec {
     public val type: PlatformType
     public val metadata: PlatformTypeMetadata
-    public val detector: PlatformDetector
     public val timelineSpecs: ImmutableList<TimelineSpec<out TimelineSpec.Data>>
     public val subscriptionTimelineSpecs: ImmutableList<SubscriptionTimelineSpec>
         get() = persistentListOf()
 
-    public fun agreementUrl(host: String): String?
-
     public fun deepLinks(accountKey: MicroBlogKey): ImmutableList<PlatformDeepLink<*>>
-
-    public suspend fun instanceMetadata(host: String): UiInstanceMetadata
-
-    public suspend fun recommendInstances(): List<RecommendedInstance> = emptyList()
 
     public fun createDataSource(context: PlatformDataSourceContext): MicroblogDataSource
 

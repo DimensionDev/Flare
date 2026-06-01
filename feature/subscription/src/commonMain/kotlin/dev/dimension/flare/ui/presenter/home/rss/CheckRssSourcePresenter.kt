@@ -154,47 +154,36 @@ public class CheckRssSourcePresenter(
 
     private suspend fun detectSubscriptionInstance(host: String): RssState.SubscriptionInstance? =
         coroutineScope {
-            val platform =
-                platformRegistry.all.firstOrNull {
-                    runCatching {
-                        it.detector.detect(host)
-                    }.getOrNull() != null
-                } ?: return@coroutineScope null
+            platformRegistry.all
+                .filter { it.subscriptionTimelineSpecs.isNotEmpty() }
+                .firstNotNullOfOrNull { platform ->
+                    val timelines =
+                        platform.subscriptionTimelineSpecs
+                            .map { spec ->
+                                async {
+                                    if (spec.isAvailable(host, Locale.language)) {
+                                        spec.type
+                                    } else {
+                                        null
+                                    }
+                                }
+                            }.awaitAll()
+                            .filterNotNull()
+                            .toImmutableList()
 
-            val instanceInfo =
-                async {
-                    runCatching {
-                        platform.instanceMetadata(host).instance
-                    }.getOrNull()
+                    if (timelines.isEmpty()) {
+                        return@firstNotNullOfOrNull null
+                    }
+
+                    RssState.SubscriptionInstance(
+                        host = host,
+                        instanceName = host,
+                        icon =
+                            runCatching {
+                                FaviconService.fetchIcon("https://$host/")
+                            }.getOrNull(),
+                        availableTimelines = timelines,
+                    )
                 }
-
-            val timelines =
-                platform.subscriptionTimelineSpecs
-                    .map { spec ->
-                        async {
-                            if (spec.isAvailable(host, Locale.language)) {
-                                spec.type
-                            } else {
-                                null
-                            }
-                        }
-                    }.awaitAll()
-                    .filterNotNull()
-                    .toImmutableList()
-
-            if (timelines.isEmpty()) {
-                throw IllegalArgumentException("No accessible timelines found on $host (authentication may be required)")
-            }
-
-            val instance = instanceInfo.await()
-            RssState.SubscriptionInstance(
-                host = host,
-                instanceName = instance?.name,
-                icon =
-                    instance?.iconUrl ?: runCatching {
-                        FaviconService.fetchIcon("https://$host/")
-                    }.getOrNull(),
-                availableTimelines = timelines,
-            )
         }
 }

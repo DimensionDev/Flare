@@ -6,8 +6,6 @@ import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.model.tab.TimelineSpecIds
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
-import dev.dimension.flare.data.network.bluesky.BlueskyPlatformDetector
-import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformDataSourceContext
@@ -15,16 +13,15 @@ import dev.dimension.flare.model.PlatformDeepLink
 import dev.dimension.flare.model.PlatformSpec
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.PlatformTypeMetadata
-import dev.dimension.flare.model.RecommendedInstance
 import dev.dimension.flare.ui.model.UiIcon
-import dev.dimension.flare.ui.model.UiInstance
-import dev.dimension.flare.ui.model.UiInstanceMetadata
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.model.asType
 import dev.dimension.flare.ui.presenter.home.bluesky.BlueskyBookmarkTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.bluesky.BlueskyFeedTimelinePresenter
+import dev.dimension.flare.ui.presenter.login.BlueskyLoginProvider
+import dev.dimension.flare.ui.presenter.login.LoginPlatformProvider
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -33,16 +30,15 @@ import kotlinx.serialization.Serializable
 import kotlin.native.HiddenFromObjC
 
 @HiddenFromObjC
-public data object BlueskyPlatformSpec : PlatformSpec {
+public data object BlueskyPlatformSpec :
+    PlatformSpec,
+    LoginPlatformProvider by BlueskyLoginProvider {
     public override val type: PlatformType = PlatformType.Bluesky
     public override val metadata: PlatformTypeMetadata =
         PlatformTypeMetadata(
             displayName = "Bluesky",
             icon = UiIcon.Bluesky,
         )
-    override val detector: PlatformDetector = BlueskyPlatformDetector
-
-    override fun agreementUrl(host: String): String? = "https://bsky.social/about/support/tos"
 
     override fun deepLinks(accountKey: MicroBlogKey): ImmutableList<PlatformDeepLink<*>> =
         buildList {
@@ -87,29 +83,6 @@ public data object BlueskyPlatformSpec : PlatformSpec {
             CommonTimelineSpecs.list,
             bookmarkTimelineSpec,
             feedTimelineSpec,
-        )
-
-    override suspend fun instanceMetadata(host: String): UiInstanceMetadata =
-        throw UnsupportedOperationException("${type.name} is not supported yet")
-
-    override suspend fun recommendInstances(): List<RecommendedInstance> =
-        listOf(
-            RecommendedInstance(
-                instance =
-                    UiInstance(
-                        name = metadata.displayName,
-                        description =
-                            "The web. Email. RSS feeds. XMPP chats. " +
-                                "What all these technologies had in common is they allowed people to freely interact " +
-                                "and create content, without a single intermediary.",
-                        iconUrl = null,
-                        domain = "bsky.social",
-                        type = type,
-                        bannerUrl = null,
-                        usersCount = 0,
-                    ),
-                priority = 70,
-            ),
         )
 
     override fun createDataSource(context: PlatformDataSourceContext): MicroblogDataSource =

@@ -19,6 +19,12 @@ import androidx.compose.ui.unit.dp
 import dev.dimension.flare.compose.ui.Res
 import dev.dimension.flare.compose.ui.all_rss_feeds_title
 import dev.dimension.flare.compose.ui.antenna_title
+import dev.dimension.flare.compose.ui.bluesky_login_auth_factor_token_hint
+import dev.dimension.flare.compose.ui.bluesky_login_oauth_button
+import dev.dimension.flare.compose.ui.bluesky_login_password_hint
+import dev.dimension.flare.compose.ui.bluesky_login_use_password_button
+import dev.dimension.flare.compose.ui.bluesky_login_username_hint
+import dev.dimension.flare.compose.ui.cancel_button
 import dev.dimension.flare.compose.ui.channel_title
 import dev.dimension.flare.compose.ui.dm_list_title
 import dev.dimension.flare.compose.ui.home_tab_bookmarks_title
@@ -31,11 +37,17 @@ import dev.dimension.flare.compose.ui.home_tab_list_title
 import dev.dimension.flare.compose.ui.home_tab_me_title
 import dev.dimension.flare.compose.ui.home_tab_notifications_title
 import dev.dimension.flare.compose.ui.liked_title
+import dev.dimension.flare.compose.ui.login_button
 import dev.dimension.flare.compose.ui.mastodon_tab_local_title
 import dev.dimension.flare.compose.ui.mastodon_tab_public_title
 import dev.dimension.flare.compose.ui.mixed_timeline_title
+import dev.dimension.flare.compose.ui.nostr_login_account_hint
+import dev.dimension.flare.compose.ui.nostr_login_amber_button
+import dev.dimension.flare.compose.ui.nostr_login_qr_button
+import dev.dimension.flare.compose.ui.nostr_login_title
 import dev.dimension.flare.compose.ui.posts_title
 import dev.dimension.flare.compose.ui.rss_title
+import dev.dimension.flare.compose.ui.service_select_next_button
 import dev.dimension.flare.compose.ui.settings_title
 import dev.dimension.flare.compose.ui.social_title
 import dev.dimension.flare.compose.ui.tab_settings_default
@@ -268,4 +280,18 @@ internal val UiStrings.res: StringResource
             UiStrings.AllRssFeeds -> Res.string.all_rss_feeds_title
             UiStrings.Posts -> Res.string.posts_title
             UiStrings.Channel -> Res.string.channel_title
+            UiStrings.Login -> Res.string.login_button
+            UiStrings.Verify -> Res.string.login_button
+            UiStrings.Cancel -> Res.string.cancel_button
+            UiStrings.Next -> Res.string.service_select_next_button
+            UiStrings.Username -> Res.string.bluesky_login_username_hint
+            UiStrings.Password -> Res.string.bluesky_login_password_hint
+            UiStrings.Otp -> Res.string.bluesky_login_auth_factor_token_hint
+            UiStrings.OAuthLogin -> Res.string.bluesky_login_oauth_button
+            UiStrings.PasswordLogin -> Res.string.bluesky_login_use_password_button
+            UiStrings.QrConnect -> Res.string.nostr_login_qr_button
+            UiStrings.CredentialImport -> Res.string.nostr_login_title
+            UiStrings.ExternalSigner -> Res.string.nostr_login_amber_button
+            UiStrings.WebCookieLogin -> Res.string.login_button
+            UiStrings.NostrLoginAccount -> Res.string.nostr_login_account_hint
         }

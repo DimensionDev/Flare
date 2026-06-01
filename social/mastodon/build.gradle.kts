@@ -32,6 +32,7 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 api(projects.shared)
+                api(projects.feature.loginApi)
                 implementation(dependencies.platform(libs.compose.bom))
                 implementation(libs.compose.runtime)
                 implementation(libs.bundles.kotlinx)

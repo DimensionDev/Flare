@@ -4,8 +4,6 @@ import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.xqt.XQTDataSource
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.model.tab.TimelineSpecIds
-import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
-import dev.dimension.flare.data.network.xqt.XQTPlatformDetector
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformDataSourceContext
@@ -13,17 +11,16 @@ import dev.dimension.flare.model.PlatformDeepLink
 import dev.dimension.flare.model.PlatformSpec
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.PlatformTypeMetadata
-import dev.dimension.flare.model.RecommendedInstance
 import dev.dimension.flare.model.xqtHost
 import dev.dimension.flare.model.xqtOldHost
 import dev.dimension.flare.ui.model.UiIcon
-import dev.dimension.flare.ui.model.UiInstance
-import dev.dimension.flare.ui.model.UiInstanceMetadata
 import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.asType
 import dev.dimension.flare.ui.presenter.home.xqt.XQTBookmarkTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.xqt.XQTDeviceFollowTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.xqt.XQTFeaturedTimelinePresenter
+import dev.dimension.flare.ui.presenter.login.LoginPlatformProvider
+import dev.dimension.flare.ui.presenter.login.XQTLoginProvider
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -32,16 +29,15 @@ import kotlinx.serialization.Serializable
 import kotlin.native.HiddenFromObjC
 
 @HiddenFromObjC
-public data object XqtPlatformSpec : PlatformSpec {
+public data object XqtPlatformSpec :
+    PlatformSpec,
+    LoginPlatformProvider by XQTLoginProvider {
     public override val type: PlatformType = PlatformType.xQt
     public override val metadata: PlatformTypeMetadata =
         PlatformTypeMetadata(
             displayName = "X",
             icon = UiIcon.X,
         )
-    override val detector: PlatformDetector = XQTPlatformDetector
-
-    override fun agreementUrl(host: String): String = "https://help.x.com/en/rules-and-policies/x-rules"
 
     override fun deepLinks(accountKey: MicroBlogKey): ImmutableList<PlatformDeepLink<*>> {
         val profile =
@@ -121,28 +117,6 @@ public data object XqtPlatformSpec : PlatformSpec {
             featuredTimelineSpec,
             bookmarkTimelineSpec,
             deviceFollowTimelineSpec,
-        )
-
-    override suspend fun instanceMetadata(host: String): UiInstanceMetadata =
-        throw UnsupportedOperationException("${type.name} is not supported yet")
-
-    override suspend fun recommendInstances(): List<RecommendedInstance> =
-        listOf(
-            RecommendedInstance(
-                instance =
-                    UiInstance(
-                        name = metadata.displayName,
-                        description =
-                            "From breaking news and entertainment to sports and politics," +
-                                " get the full story with all the live commentary.",
-                        iconUrl = null,
-                        domain = xqtHost,
-                        type = type,
-                        bannerUrl = null,
-                        usersCount = 0,
-                    ),
-                priority = 80,
-            ),
         )
 
     override fun createDataSource(context: PlatformDataSourceContext): MicroblogDataSource =

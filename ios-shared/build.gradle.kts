@@ -32,6 +32,7 @@ kotlin {
                 export(projects.social.nostr)
                 export(projects.social.vvo)
                 export(projects.social.xqt)
+                export(projects.feature.loginApi)
                 export(projects.feature.login)
                 export(projects.feature.subscription)
                 export(projects.feature.tab)

@@ -191,4 +191,18 @@ private val UiStrings.androidStringRes: Int
             UiStrings.AllRssFeeds -> R.string.all_rss_feeds_title
             UiStrings.Posts -> R.string.posts_title
             UiStrings.Channel -> R.string.channel_title
+            UiStrings.Login -> R.string.login_button
+            UiStrings.Verify -> R.string.login_button
+            UiStrings.Cancel -> R.string.navigate_back
+            UiStrings.Next -> R.string.service_select_next_button
+            UiStrings.Username -> R.string.bluesky_login_username_hint
+            UiStrings.Password -> R.string.bluesky_login_password_hint
+            UiStrings.Otp -> R.string.bluesky_login_auth_factor_token_hint
+            UiStrings.OAuthLogin -> R.string.bluesky_login_oauth_button
+            UiStrings.PasswordLogin -> R.string.bluesky_login_use_password_button
+            UiStrings.QrConnect -> R.string.login_button
+            UiStrings.CredentialImport -> R.string.login_button
+            UiStrings.ExternalSigner -> R.string.login_button
+            UiStrings.WebCookieLogin -> R.string.login_button
+            UiStrings.NostrLoginAccount -> R.string.login_button
         }

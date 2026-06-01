@@ -184,16 +184,13 @@ internal sealed interface Route : NavKey {
         val id: String,
     ) : Route
 
-    @Serializable
     sealed interface ServiceSelect : Route {
-        @Serializable
         data object Selection : ServiceSelect
 
-        @Serializable
-        data object VVOLogin : ServiceSelect
-
-        @Serializable
-        data object XQTLogin : ServiceSelect
+        data class WebCookieLogin(
+            val url: String,
+            val callback: (cookies: String?) -> Boolean,
+        ) : ServiceSelect
     }
 
     @Serializable

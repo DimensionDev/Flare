@@ -23,7 +23,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-public class XQTLoginPresenter(
+internal class XQTLoginPresenter(
     private val toHome: () -> Unit,
 ) : PresenterBase<XQTLoginState>(),
     KoinComponent {
@@ -93,7 +93,7 @@ public class XQTLoginPresenter(
 }
 
 @Immutable
-public interface XQTLoginState {
+internal interface XQTLoginState {
     public val loading: Boolean
     public val error: Throwable?
 

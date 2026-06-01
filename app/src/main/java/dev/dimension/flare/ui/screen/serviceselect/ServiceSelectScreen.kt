@@ -17,8 +17,7 @@ import dev.dimension.flare.ui.screen.login.ServiceSelectionScreenContent
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun ServiceSelectScreen(
-    onXQT: () -> Unit,
-    onVVO: () -> Unit,
+    onWebViewLogin: (url: String, cookieCallback: (cookies: String?) -> Boolean) -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -40,8 +39,7 @@ internal fun ServiceSelectScreen(
         },
     ) { contentPadding ->
         ServiceSelectionScreenContent(
-            onXQT = onXQT,
-            onVVO = onVVO,
+            onWebViewLogin = onWebViewLogin,
             contentPadding = contentPadding,
             openUri = uriHandler::openUri,
             registerDeeplinkCallback = { callback ->

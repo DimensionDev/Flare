@@ -24,7 +24,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import kotlin.time.Duration.Companion.minutes
 
-public class NostrLoginPresenter(
+internal class NostrLoginPresenter(
     private val toHome: () -> Unit,
 ) : PresenterBase<NostrLoginState>(),
     KoinComponent {
@@ -179,7 +179,7 @@ public class NostrLoginPresenter(
 }
 
 @Immutable
-public interface NostrLoginState {
+internal interface NostrLoginState {
     public val loading: Boolean
     public val error: Throwable?
     public val amberAvailable: Boolean

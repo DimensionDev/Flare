@@ -22,7 +22,7 @@ import org.koin.core.component.inject
 import sh.christian.ozone.api.response.AtpException
 import sh.christian.ozone.api.response.AtpResponse
 
-public class BlueskyLoginPresenter(
+internal class BlueskyLoginPresenter(
     private val toHome: () -> Unit,
 ) : PresenterBase<BlueskyLoginState>(),
     KoinComponent {

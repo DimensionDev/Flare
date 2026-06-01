@@ -43,7 +43,8 @@ private const val OTP_FIELD = "otp"
 
 public data object BlueskyLoginProvider : LoginPlatformProvider {
     override val platformType: PlatformType = PlatformType.Bluesky
-    override val metadata: PlatformTypeMetadata = BlueskyPlatformSpec.metadata
+    override val metadata: PlatformTypeMetadata
+        get() = BlueskyPlatformSpec.metadata
     override val detector: PlatformDetector = BlueskyPlatformDetector
     override val methods: List<LoginMethodSpec> =
         listOf(

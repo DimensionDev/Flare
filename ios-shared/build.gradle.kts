@@ -49,7 +49,6 @@ kotlin {
                 api(projects.social.nostr)
                 api(projects.social.vvo)
                 api(projects.social.xqt)
-                api(projects.feature.loginApi)
                 api(projects.feature.login)
                 api(projects.feature.subscription)
                 api(projects.feature.tab)

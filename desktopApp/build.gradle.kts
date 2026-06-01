@@ -22,7 +22,6 @@ dependencies {
     implementation(projects.social.nostr)
     implementation(projects.social.vvo)
     implementation(projects.social.xqt)
-    implementation(projects.feature.loginApi)
     implementation(projects.feature.login)
     implementation(projects.feature.subscription)
     implementation(projects.feature.tab)

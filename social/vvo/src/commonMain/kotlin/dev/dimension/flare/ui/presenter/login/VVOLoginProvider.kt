@@ -27,7 +27,8 @@ private const val LOGIN_ACTION = "login"
 
 public data object VVOLoginProvider : LoginPlatformProvider {
     override val platformType: PlatformType = PlatformType.VVo
-    override val metadata: PlatformTypeMetadata = VvoPlatformSpec.metadata
+    override val metadata: PlatformTypeMetadata
+        get() = VvoPlatformSpec.metadata
     override val detector: PlatformDetector = VVOPlatformDetector
     override val methods: List<LoginMethodSpec> =
         listOf(

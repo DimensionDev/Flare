@@ -30,7 +30,8 @@ private const val LOGIN_ACTION = "login"
 
 public data object XQTLoginProvider : LoginPlatformProvider {
     override val platformType: PlatformType = PlatformType.xQt
-    override val metadata: PlatformTypeMetadata = XqtPlatformSpec.metadata
+    override val metadata: PlatformTypeMetadata
+        get() = XqtPlatformSpec.metadata
     override val detector: PlatformDetector = XQTPlatformDetector
     override val methods: List<LoginMethodSpec> =
         listOf(

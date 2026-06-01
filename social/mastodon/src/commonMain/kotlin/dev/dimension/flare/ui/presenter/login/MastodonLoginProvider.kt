@@ -35,7 +35,8 @@ import org.koin.core.component.inject
 
 public data object MastodonLoginProvider : LoginPlatformProvider {
     override val platformType: PlatformType = PlatformType.Mastodon
-    override val metadata: PlatformTypeMetadata = MastodonPlatformSpec.metadata
+    override val metadata: PlatformTypeMetadata
+        get() = MastodonPlatformSpec.metadata
     override val detector: PlatformDetector = MastodonPlatformDetector
     override val methods: List<LoginMethodSpec> =
         listOf(

@@ -19,6 +19,8 @@ import dev.dimension.flare.ui.model.asType
 import dev.dimension.flare.ui.presenter.home.xqt.XQTBookmarkTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.xqt.XQTDeviceFollowTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.xqt.XQTFeaturedTimelinePresenter
+import dev.dimension.flare.ui.presenter.login.LoginPlatformProvider
+import dev.dimension.flare.ui.presenter.login.XQTLoginProvider
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -27,7 +29,8 @@ import kotlinx.serialization.Serializable
 import kotlin.native.HiddenFromObjC
 
 @HiddenFromObjC
-public data object XqtPlatformSpec : PlatformSpec {
+public data object XqtPlatformSpec : PlatformSpec,
+    LoginPlatformProvider by XQTLoginProvider {
     public override val type: PlatformType = PlatformType.xQt
     public override val metadata: PlatformTypeMetadata =
         PlatformTypeMetadata(

@@ -20,6 +20,8 @@ import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.model.asType
 import dev.dimension.flare.ui.presenter.home.bluesky.BlueskyBookmarkTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.bluesky.BlueskyFeedTimelinePresenter
+import dev.dimension.flare.ui.presenter.login.BlueskyLoginProvider
+import dev.dimension.flare.ui.presenter.login.LoginPlatformProvider
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -28,7 +30,8 @@ import kotlinx.serialization.Serializable
 import kotlin.native.HiddenFromObjC
 
 @HiddenFromObjC
-public data object BlueskyPlatformSpec : PlatformSpec {
+public data object BlueskyPlatformSpec : PlatformSpec,
+    LoginPlatformProvider by BlueskyLoginProvider {
     public override val type: PlatformType = PlatformType.Bluesky
     public override val metadata: PlatformTypeMetadata =
         PlatformTypeMetadata(

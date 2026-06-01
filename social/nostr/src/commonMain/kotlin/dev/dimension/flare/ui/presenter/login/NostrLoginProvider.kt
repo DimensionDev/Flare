@@ -37,7 +37,8 @@ public data object NostrLoginProvider :
     private val amberSignerBridge: AmberSignerBridge by inject()
 
     override val platformType: PlatformType = PlatformType.Nostr
-    override val metadata: PlatformTypeMetadata = NostrPlatformSpec.metadata
+    override val metadata: PlatformTypeMetadata
+        get() = NostrPlatformSpec.metadata
     override val detector: PlatformDetector = NostrPlatformDetector
     override val methods: List<LoginMethodSpec>
         get() =

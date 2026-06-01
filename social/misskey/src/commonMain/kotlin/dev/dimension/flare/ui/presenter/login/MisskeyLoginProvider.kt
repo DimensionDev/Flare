@@ -34,7 +34,8 @@ import kotlin.uuid.Uuid
 
 public data object MisskeyLoginProvider : LoginPlatformProvider {
     override val platformType: PlatformType = PlatformType.Misskey
-    override val metadata: PlatformTypeMetadata = MisskeyPlatformSpec.metadata
+    override val metadata: PlatformTypeMetadata
+        get() = MisskeyPlatformSpec.metadata
     override val detector: PlatformDetector = MisskeyPlatformDetector
     override val methods: List<LoginMethodSpec> =
         listOf(

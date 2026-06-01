@@ -17,12 +17,15 @@ import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.asType
 import dev.dimension.flare.ui.presenter.home.vvo.VVOFavouriteTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.vvo.VVOLikeTimelinePresenter
+import dev.dimension.flare.ui.presenter.login.LoginPlatformProvider
+import dev.dimension.flare.ui.presenter.login.VVOLoginProvider
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlin.native.HiddenFromObjC
 
 @HiddenFromObjC
-public data object VvoPlatformSpec : PlatformSpec {
+public data object VvoPlatformSpec : PlatformSpec,
+    LoginPlatformProvider by VVOLoginProvider {
     public override val type: PlatformType = PlatformType.VVo
     public override val metadata: PlatformTypeMetadata =
         PlatformTypeMetadata(

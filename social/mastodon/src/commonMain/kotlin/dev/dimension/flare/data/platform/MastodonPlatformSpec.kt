@@ -28,6 +28,8 @@ import dev.dimension.flare.ui.presenter.home.mastodon.MastodonBookmarkTimelinePr
 import dev.dimension.flare.ui.presenter.home.mastodon.MastodonFavouriteTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.mastodon.MastodonLocalTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.mastodon.MastodonPublicTimelinePresenter
+import dev.dimension.flare.ui.presenter.login.LoginPlatformProvider
+import dev.dimension.flare.ui.presenter.login.MastodonLoginProvider
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -35,7 +37,8 @@ import kotlinx.serialization.Serializable
 import kotlin.native.HiddenFromObjC
 
 @HiddenFromObjC
-public data object MastodonPlatformSpec : PlatformSpec {
+public data object MastodonPlatformSpec : PlatformSpec,
+    LoginPlatformProvider by MastodonLoginProvider {
     public override val type: PlatformType = PlatformType.Mastodon
     public override val metadata: PlatformTypeMetadata =
         PlatformTypeMetadata(

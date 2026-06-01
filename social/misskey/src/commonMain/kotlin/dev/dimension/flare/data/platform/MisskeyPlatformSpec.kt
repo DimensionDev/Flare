@@ -24,6 +24,8 @@ import dev.dimension.flare.ui.presenter.home.misskey.MisskeyFavouriteTimelinePre
 import dev.dimension.flare.ui.presenter.home.misskey.MisskeyHybridTimelinePresenter
 import dev.dimension.flare.ui.presenter.list.AntennasTimelinePresenter
 import dev.dimension.flare.ui.presenter.list.ChannelTimelinePresenter
+import dev.dimension.flare.ui.presenter.login.LoginPlatformProvider
+import dev.dimension.flare.ui.presenter.login.MisskeyLoginProvider
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -31,7 +33,8 @@ import kotlinx.serialization.Serializable
 import kotlin.native.HiddenFromObjC
 
 @HiddenFromObjC
-public data object MisskeyPlatformSpec : PlatformSpec {
+public data object MisskeyPlatformSpec : PlatformSpec,
+    LoginPlatformProvider by MisskeyLoginProvider {
     public override val type: PlatformType = PlatformType.Misskey
     public override val metadata: PlatformTypeMetadata =
         PlatformTypeMetadata(

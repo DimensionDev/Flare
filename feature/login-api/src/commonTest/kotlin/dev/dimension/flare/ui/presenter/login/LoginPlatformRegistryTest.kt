@@ -2,12 +2,21 @@ package dev.dimension.flare.ui.presenter.login
 
 import dev.dimension.flare.data.network.nodeinfo.NodeData
 import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
+import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
+import dev.dimension.flare.data.model.tab.TimelineSpec
+import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.PlatformDataSourceContext
+import dev.dimension.flare.model.PlatformDeepLink
+import dev.dimension.flare.model.PlatformRuntimeData
+import dev.dimension.flare.model.PlatformSpec
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.PlatformTypeMetadata
 import dev.dimension.flare.model.RecommendedInstance
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiInstanceMetadata
 import dev.dimension.flare.ui.model.UiStrings
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -19,12 +28,9 @@ class LoginPlatformRegistryTest {
     fun duplicatePlatformProvidersFailFast() {
         assertFailsWith<IllegalArgumentException> {
             LoginPlatformRegistry(
-                LoginRuntimeData(
-                    providers =
-                        listOf(
-                            testProvider(PlatformType.Mastodon),
-                            testProvider(PlatformType.Mastodon),
-                        ),
+                testRuntimeData(
+                    testProvider(PlatformType.Mastodon),
+                    testProvider(PlatformType.Mastodon),
                 ),
             )
         }
@@ -32,10 +38,10 @@ class LoginPlatformRegistryTest {
 
     @Test
     fun providerCanBeFoundByPlatformType() {
-        val mastodon = testProvider(PlatformType.Mastodon)
-        val bluesky = testProvider(PlatformType.Bluesky)
+        val mastodon = testLoginPlatformSpec(testProvider(PlatformType.Mastodon))
+        val bluesky = testLoginPlatformSpec(testProvider(PlatformType.Bluesky))
 
-        val registry = LoginPlatformRegistry(LoginRuntimeData(listOf(mastodon, bluesky)))
+        val registry = LoginPlatformRegistry(testRuntimeData(listOf(mastodon, bluesky)))
 
         assertSame(mastodon, registry.get(PlatformType.Mastodon))
         assertSame(bluesky, registry.require(PlatformType.Bluesky))
@@ -45,18 +51,16 @@ class LoginPlatformRegistryTest {
     fun methodsAreSortedByPriorityDescending() {
         val registry =
             LoginPlatformRegistry(
-                LoginRuntimeData(
-                    listOf(
-                        testProvider(
-                            platformType = PlatformType.Bluesky,
-                            methods =
-                                listOf(
-                                    LoginMethodSpec(LoginMethodType.Password, UiStrings.PasswordLogin, priority = 0),
-                                    LoginMethodSpec(LoginMethodType.OAuth, UiStrings.OAuthLogin, priority = 20),
-                                    LoginMethodSpec(LoginMethodType.WebCookie, UiStrings.WebCookieLogin, priority = 10),
-                                ),
+                testRuntimeData(
+                    testProvider(
+                        platformType = PlatformType.Bluesky,
+                        methods =
+                            listOf(
+                                LoginMethodSpec(LoginMethodType.Password, UiStrings.PasswordLogin, priority = 0),
+                                LoginMethodSpec(LoginMethodType.OAuth, UiStrings.OAuthLogin, priority = 20),
+                                LoginMethodSpec(LoginMethodType.WebCookie, UiStrings.WebCookieLogin, priority = 10),
+                            ),
                         ),
-                    ),
                 ),
             )
 
@@ -71,18 +75,16 @@ class LoginPlatformRegistryTest {
         runTest {
             val registry =
                 LoginPlatformRegistry(
-                    LoginRuntimeData(
-                        listOf(
-                            testProvider(
-                                platformType = PlatformType.Mastodon,
-                                detectorPriority = 0,
-                                detectedSoftware = "mastodon",
-                            ),
-                            testProvider(
-                                platformType = PlatformType.Misskey,
-                                detectorPriority = 10,
-                                detectedSoftware = "misskey",
-                            ),
+                    testRuntimeData(
+                        testProvider(
+                            platformType = PlatformType.Mastodon,
+                            detectorPriority = 0,
+                            detectedSoftware = "mastodon",
+                        ),
+                        testProvider(
+                            platformType = PlatformType.Misskey,
+                            detectorPriority = 10,
+                            detectedSoftware = "misskey",
                         ),
                     ),
                 )
@@ -93,6 +95,24 @@ class LoginPlatformRegistryTest {
             assertEquals("example.social", detected.host)
             assertEquals("misskey", detected.software)
         }
+
+    @Test
+    fun runtimeDataDerivesProvidersFromPlatformSpecs() {
+        val mastodon = testProvider(PlatformType.Mastodon)
+        val mastodonSpec = testLoginPlatformSpec(mastodon)
+        val blueskySpec = testPlatformSpec(PlatformType.Bluesky)
+
+        val registry =
+            LoginPlatformRegistry(
+                PlatformRuntimeData(
+                    platformSpecs = listOf(mastodonSpec, blueskySpec),
+                    extraTimelineSpecs = emptyList(),
+                ),
+            )
+
+        assertSame(mastodonSpec, registry.require(PlatformType.Mastodon))
+        assertEquals(null, registry.get(PlatformType.Bluesky))
+    }
 
     private fun testProvider(
         platformType: PlatformType,
@@ -130,5 +150,53 @@ class LoginPlatformRegistryTest {
             override suspend fun instanceMetadata(host: String): UiInstanceMetadata = error("Not used")
 
             override fun createHandler(context: LoginContext): LoginMethodHandler = error("Not used")
+        }
+
+    private fun testRuntimeData(vararg providers: LoginPlatformProvider): PlatformRuntimeData =
+        testRuntimeData(providers.map(::testLoginPlatformSpec))
+
+    private fun testRuntimeData(platformSpecs: List<PlatformSpec>): PlatformRuntimeData =
+        PlatformRuntimeData(
+            platformSpecs = platformSpecs,
+            extraTimelineSpecs = emptyList(),
+        )
+
+    private interface TestLoginPlatformSpec : PlatformSpec, LoginPlatformProvider
+
+    private fun testLoginPlatformSpec(provider: LoginPlatformProvider): TestLoginPlatformSpec =
+        object : TestLoginPlatformSpec,
+            LoginPlatformProvider by provider {
+            override val type: PlatformType = provider.platformType
+            override val metadata: PlatformTypeMetadata = provider.metadata
+            override val timelineSpecs: ImmutableList<TimelineSpec<out TimelineSpec.Data>> = persistentListOf()
+
+            override fun deepLinks(accountKey: MicroBlogKey): ImmutableList<PlatformDeepLink<*>> = persistentListOf()
+
+            override fun createDataSource(context: PlatformDataSourceContext): MicroblogDataSource = error("Not used")
+
+            override fun guestDataSource(
+                host: String,
+                locale: String,
+            ): MicroblogDataSource = error("Not used")
+        }
+
+    private fun testPlatformSpec(platformType: PlatformType): PlatformSpec =
+        object : PlatformSpec {
+            override val type: PlatformType = platformType
+            override val metadata: PlatformTypeMetadata =
+                PlatformTypeMetadata(
+                    displayName = platformType.name,
+                    icon = UiIcon.Mastodon,
+                )
+            override val timelineSpecs: ImmutableList<TimelineSpec<out TimelineSpec.Data>> = persistentListOf()
+
+            override fun deepLinks(accountKey: MicroBlogKey): ImmutableList<PlatformDeepLink<*>> = persistentListOf()
+
+            override fun createDataSource(context: PlatformDataSourceContext): MicroblogDataSource = error("Not used")
+
+            override fun guestDataSource(
+                host: String,
+                locale: String,
+            ): MicroblogDataSource = error("Not used")
         }
 }

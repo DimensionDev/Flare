@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.presenter.login
 
 import dev.dimension.flare.data.network.nodeinfo.NodeData
 import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
+import dev.dimension.flare.model.PlatformRuntimeData
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.PlatformTypeMetadata
 import dev.dimension.flare.model.RecommendedInstance
@@ -114,20 +115,14 @@ public interface LoginMethodHandler : AutoCloseable {
     }
 }
 
-@Provided
-@HiddenFromObjC
-public data class LoginRuntimeData(
-    val providers: List<LoginPlatformProvider>,
-)
-
 @Single
 @HiddenFromObjC
 public class LoginPlatformRegistry(
-    data: LoginRuntimeData,
+    @Provided data: PlatformRuntimeData,
 ) {
-    public val all: List<LoginPlatformProvider> = data.providers
+    public val all: List<LoginPlatformProvider> = data.platformSpecs.filterIsInstance<LoginPlatformProvider>()
     private val byType: Map<PlatformType, LoginPlatformProvider> =
-        data.providers
+        all
             .also { providers ->
                 val duplicateTypes =
                     providers

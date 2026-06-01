@@ -8,14 +8,6 @@ import dev.dimension.flare.data.platform.RssTimelineSpecs
 import dev.dimension.flare.data.platform.VvoPlatformSpec
 import dev.dimension.flare.data.platform.XqtPlatformSpec
 import dev.dimension.flare.model.PlatformRuntimeData
-import dev.dimension.flare.ui.presenter.login.BlueskyLoginProvider
-import dev.dimension.flare.ui.presenter.login.LoginPlatformRegistry
-import dev.dimension.flare.ui.presenter.login.LoginRuntimeData
-import dev.dimension.flare.ui.presenter.login.MastodonLoginProvider
-import dev.dimension.flare.ui.presenter.login.MisskeyLoginProvider
-import dev.dimension.flare.ui.presenter.login.NostrLoginProvider
-import dev.dimension.flare.ui.presenter.login.VVOLoginProvider
-import dev.dimension.flare.ui.presenter.login.XQTLoginProvider
 import org.koin.core.annotation.ComponentScan
 import org.koin.core.annotation.Configuration
 import org.koin.core.annotation.KoinApplication
@@ -41,23 +33,6 @@ internal fun runtimeData(): PlatformRuntimeData =
                 BlueskyPlatformSpec,
                 XqtPlatformSpec,
                 VvoPlatformSpec,
-            ),
+        ),
         extraTimelineSpecs = RssTimelineSpecs.timelineSpecs,
     )
-
-@Single
-internal fun loginRuntimeData(): LoginRuntimeData =
-    LoginRuntimeData(
-        providers =
-            listOf(
-                NostrLoginProvider,
-                MastodonLoginProvider,
-                MisskeyLoginProvider,
-                BlueskyLoginProvider,
-                XQTLoginProvider,
-                VVOLoginProvider,
-            ),
-    )
-
-@Single
-internal fun loginPlatformRegistry(data: LoginRuntimeData): LoginPlatformRegistry = LoginPlatformRegistry(data)

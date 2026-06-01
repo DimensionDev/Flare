@@ -25,6 +25,7 @@ kotlin {
                 api(projects.shared)
                 implementation(libs.bundles.kotlinx)
                 implementation(dependencies.platform(libs.koin.bom))
+                implementation(libs.koin.core)
                 implementation(libs.koin.annotations)
             }
         }

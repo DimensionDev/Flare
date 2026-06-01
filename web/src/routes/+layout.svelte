@@ -1,5 +1,7 @@
 <script lang="ts">
+	import EnvironmentSettingsProvider from '$lib/components/environment/EnvironmentSettingsProvider.svelte';
 	import favicon from '$lib/assets/favicon.svg';
+	import '../app.css';
 
 	let { children } = $props();
 </script>
@@ -8,4 +10,6 @@
 	<link rel="icon" href={favicon} />
 </svelte:head>
 
-{@render children()}
+<EnvironmentSettingsProvider>
+	{@render children()}
+</EnvironmentSettingsProvider>

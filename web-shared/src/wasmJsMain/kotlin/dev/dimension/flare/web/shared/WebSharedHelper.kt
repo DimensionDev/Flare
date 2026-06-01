@@ -5,6 +5,8 @@ package dev.dimension.flare.web.shared
 import dev.dimension.flare.data.platform.MastodonPlatformSpec
 import dev.dimension.flare.data.platform.RssTimelineSpecs
 import dev.dimension.flare.model.PlatformRuntimeData
+import dev.dimension.flare.ui.humanizer.WebFormatterBridge
+import dev.dimension.flare.ui.humanizer.installWebFormatterBridge
 import org.koin.core.annotation.ComponentScan
 import org.koin.core.annotation.Configuration
 import org.koin.core.annotation.KoinApplication
@@ -29,6 +31,27 @@ internal object WebSharedHelper {
 @JsName("webSharedInitialize")
 public fun webSharedInitialize() {
     WebSharedHelper.initialize()
+}
+
+@JsExport
+@JsName("webSharedInstallFormatter")
+public fun webSharedInstallFormatter(
+    formatNumber: (Double) -> String,
+    formatRelativeInstant: (Double) -> String,
+    formatFullInstant: (Double) -> String,
+    formatAbsoluteInstant: (Double) -> String,
+) {
+    installWebFormatterBridge(
+        object : WebFormatterBridge {
+            override fun formatNumber(number: Double): String = formatNumber(number)
+
+            override fun formatRelativeInstant(epochMillis: Double): String = formatRelativeInstant(epochMillis)
+
+            override fun formatFullInstant(epochMillis: Double): String = formatFullInstant(epochMillis)
+
+            override fun formatAbsoluteInstant(epochMillis: Double): String = formatAbsoluteInstant(epochMillis)
+        },
+    )
 }
 
 @KoinApplication

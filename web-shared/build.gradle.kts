@@ -55,6 +55,7 @@ ksp {
     arg(
         "webPresenterTypes",
         listOf(
+            "dev.dimension.flare.ui.presenter.EnvironmentSettingsPresenter",
             "dev.dimension.flare.ui.presenter.HomeTimelineWithTabsPresenter",
             "dev.dimension.flare.ui.presenter.home.TimelinePresenter",
         ).joinToString(","),

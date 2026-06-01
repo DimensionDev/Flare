@@ -1,4 +1,5 @@
 import { sveltekit } from '@sveltejs/kit/vite';
+import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vite';
 
 const workspaceRoot = decodeURI(new URL('..', import.meta.url).pathname);
@@ -14,7 +15,7 @@ const jsJoda = decodeURI(
 const wsBrowser = decodeURI(new URL('./node_modules/ws/browser.js', import.meta.url).pathname);
 
 export default defineConfig({
-	plugins: [sveltekit()],
+	plugins: [tailwindcss(), sveltekit()],
 	resolve: {
 		alias: {
 			'@androidx/sqlite-web-worker/worker.js': sqliteWebWorker,

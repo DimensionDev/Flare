@@ -19,8 +19,11 @@
     "@sveltejs/adapter-auto": "^7.0.1",
     "@sveltejs/kit": "^2.57.0",
     "@sveltejs/vite-plugin-svelte": "^7.0.0",
+    "@tailwindcss/vite": "^4.3.0",
+    "daisyui": "^5.5.20",
     "svelte": "^5.55.2",
     "svelte-check": "^4.4.6",
+    "tailwindcss": "^4.3.0",
     "typescript": "^6.0.2",
     "vite": "^8.0.7"
   },
@@ -33,6 +36,7 @@
     "@js-joda/core": "3.2.0",
     "@sqlite.org/sqlite-wasm": "3.50.1-build1",
     "@tanstack/svelte-virtual": "^3.13.26",
+    "dayjs": "^1.11.21",
     "ws": "8.18.3"
   }
 }

@@ -2,13 +2,13 @@
 	import {
 		bindTimelinePresenter,
 		type ActionMenu,
-		type Image,
-		type Item,
-		type Post,
+		type ActionMenuItem,
 		type UiCard,
 		type UiRichText,
 		type UiMedia,
 		type UiTimelineV2,
+		type UiTimelineV2Post,
+		type UiMediaImage,
 	} from '@flare/web-presenters/timeline.svelte';
 	import type { TimelineTabItemV2 } from '@flare/web-presenters/homeTimelineWithTabs.svelte';
 	import { createWindowVirtualizer } from '@tanstack/svelte-virtual';
@@ -30,7 +30,7 @@
 	});
 
 	type TimelinePost = Extract<UiTimelineV2, { type: 'Post' }>;
-	type ActionDisplayItem = Extract<ActionMenu, { type: 'Item' }> | Item;
+	type ActionDisplayItem = Extract<ActionMenu, { type: 'Item' }> | ActionMenuItem;
 
 	$effect(() => {
 		const count = virtualItemCount;
@@ -99,15 +99,15 @@
 		};
 	}
 
-	function postAuthor(post: TimelinePost | Post): string {
+	function postAuthor(post: TimelinePost | UiTimelineV2Post): string {
 		return post.user?.name.innerText || post.user?.handleWithoutAt || 'Unknown';
 	}
 
-	function postHandle(post: TimelinePost | Post): string {
+	function postHandle(post: TimelinePost | UiTimelineV2Post): string {
 		return post.user?.handle.raw || post.user?.handle.canonical || '';
 	}
 
-	function mediaPreview(media: UiMedia | Image): string | null {
+	function mediaPreview(media: UiMedia | UiMediaImage): string | null {
 		if (!('type' in media)) {
 			return media.previewUrl || media.url;
 		}
@@ -120,6 +120,7 @@
 			case 'Audio':
 				return media.previewUrl;
 		}
+		return null;
 	}
 
 	function actionItems(actions: ActionMenu[]): ActionDisplayItem[] {

@@ -8,9 +8,11 @@ import dev.dimension.flare.data.model.appearance.TimelineAppearance
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
+import dev.dimension.flare.web.shared.WebPresenter
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
+@WebPresenter("environmentSettings")
 public class EnvironmentSettingsPresenter :
     PresenterBase<EnvironmentSettingsPresenter.State>(),
     KoinComponent {

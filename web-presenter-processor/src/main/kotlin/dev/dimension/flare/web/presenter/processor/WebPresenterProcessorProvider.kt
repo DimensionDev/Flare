@@ -1973,7 +1973,7 @@ private class WebTypeAnalyzer(
         if (declaration.classKind != ClassKind.ENUM_CLASS) return null
         return EnumModel(
             type = declaration.qualifiedName?.asString() ?: return null,
-            typeName = declaration.simpleName.asString(),
+            typeName = declaration.webTypeName(),
             values =
                 declaration.declarations
                     .filterIsInstance<KSClassDeclaration>()
@@ -1993,7 +1993,7 @@ private class WebTypeAnalyzer(
         if (qualifiedName in visited) {
             return SealedModel(
                 type = qualifiedName,
-                typeName = declaration.simpleName.asString(),
+                typeName = declaration.webTypeName(),
                 variants = emptyList(),
             )
         }
@@ -2008,7 +2008,7 @@ private class WebTypeAnalyzer(
         if (variants.isEmpty() || variants.size != leafSubclasses.size) return null
         return SealedModel(
             type = qualifiedName,
-            typeName = declaration.simpleName.asString(),
+            typeName = declaration.webTypeName(),
             variants = variants,
         )
     }
@@ -2076,7 +2076,7 @@ private class WebTypeAnalyzer(
     ): RefModel =
         RefModel(
             type = type.kotlinTypeName(includeNullable = false),
-            typeName = declaration.simpleName.asString(),
+            typeName = declaration.webTypeName(),
             properties = emptyList(),
             methods = emptyList(),
             kind = kind,
@@ -2091,7 +2091,7 @@ private class WebTypeAnalyzer(
         if (qualifiedName in visited) {
             return RefModel(
                 type = type.kotlinTypeName(includeNullable = false),
-                typeName = declaration.simpleName.asString(),
+                typeName = declaration.webTypeName(),
                 properties = emptyList(),
                 methods = emptyList(),
             )
@@ -2103,7 +2103,7 @@ private class WebTypeAnalyzer(
 
         return RefModel(
             type = type.kotlinTypeName(includeNullable = false),
-            typeName = declaration.simpleName.asString(),
+            typeName = declaration.webTypeName(),
             properties = properties,
             methods = methods,
         )
@@ -2249,6 +2249,7 @@ private object BridgePolicy {
 
     fun isVisibleProperty(property: KSPropertyDeclaration): Boolean =
         !property.hasAnnotation(WEB_IGNORE_ANNOTATION) &&
+            !property.hasErrorLevelDeprecatedAnnotation() &&
             property.isBridgeVisible()
 
     fun isVisibleMethod(function: KSFunctionDeclaration): Boolean =
@@ -2316,10 +2317,31 @@ private fun KSFunctionDeclaration.returnsUnit(): Boolean =
 
 private fun KSDeclaration.hasAnnotation(shortName: String): Boolean = annotations.any { it.shortName.asString() == shortName }
 
+private fun KSDeclaration.hasErrorLevelDeprecatedAnnotation(): Boolean =
+    annotations.any { annotation ->
+        if (annotation.shortName.asString() != DEPRECATED_ANNOTATION) return@any false
+        val level =
+            annotation.arguments
+                .firstOrNull { argument -> argument.name?.asString() == "level" }
+                ?.value
+                ?.toString()
+        level == "ERROR" || level?.endsWith(".ERROR") == true
+    }
+
 private fun KSDeclaration.isBridgeVisible(): Boolean =
     Modifier.PRIVATE !in modifiers &&
         Modifier.PROTECTED !in modifiers &&
         Modifier.INTERNAL !in modifiers
+
+private fun KSClassDeclaration.webTypeName(): String {
+    val names = ArrayDeque<String>()
+    var current: KSClassDeclaration? = this
+    while (current != null) {
+        names.addFirst(current.simpleName.asString())
+        current = current.parentDeclaration as? KSClassDeclaration
+    }
+    return names.joinToString("")
+}
 
 private fun KSClassDeclaration.webStateTypeName(presenterDeclaration: KSClassDeclaration): String {
     val parent = parentDeclaration as? KSClassDeclaration
@@ -2371,6 +2393,7 @@ private const val WEB_PRESENTER_SHORT_NAME = "WebPresenter"
 private const val WEB_PRESENTER_ANNOTATION = "dev.dimension.flare.web.shared.WebPresenter"
 private const val WEB_IGNORE_ANNOTATION = "WebIgnore"
 private const val COMPOSABLE_ANNOTATION = "Composable"
+private const val DEPRECATED_ANNOTATION = "Deprecated"
 private const val PRESENTER_BASE = "dev.dimension.flare.ui.presenter.PresenterBase"
 private const val UI_STATE = "dev.dimension.flare.ui.model.UiState"
 private const val PAGING_STATE = "dev.dimension.flare.common.PagingState"

@@ -64,7 +64,7 @@
 				{@const popoverId = altPopoverId(index)}
 				{@const anchorName = altAnchorName(index)}
 				<button
-					class="badge badge-sm rounded-box border-0 alt-badge"
+					class="btn btn-neutral btn-xs rounded-box border-0 alt-badge"
 					type="button"
 					title={altText}
 					aria-label={altText}
@@ -152,7 +152,7 @@
 		min-width: 0;
 		min-height: 0;
 		overflow: hidden;
-		background: var(--post-border);
+		background: var(--color-base-300);
 	}
 
 	.media-item img {
@@ -197,8 +197,6 @@
 	.alt-badge {
 		position: absolute;
 		border-radius: var(--post-small-corner-radius);
-		background: hsl(0 0% 0% / 0.68);
-		color: white;
 		font-size: 0.7rem;
 		font-weight: 800;
 		line-height: 1;
@@ -210,16 +208,17 @@
 		display: flex;
 		align-items: center;
 		gap: 0.25rem;
+		background: hsl(0 0% 0% / 0.68);
+		color: white;
 		padding: 0.28rem 0.4rem;
 	}
 
 	.alt-badge {
 		right: 0.5rem;
 		bottom: 0.5rem;
-		height: auto;
-		min-height: 0;
-		padding: 0.32rem 0.38rem;
+		box-shadow: none;
 		letter-spacing: 0;
+		text-shadow: none;
 	}
 
 	.alt-popover {

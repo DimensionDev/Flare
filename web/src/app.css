@@ -1,8 +1,6 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 @plugin 'daisyui' {
-	themes: light --default, dark --prefersdark;
-}
-
-:root {
-	--flare-separator-color: var(--color-base-300);
+    themes:
+        light --default,
+        dark --prefersdark;
 }

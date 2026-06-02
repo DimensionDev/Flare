@@ -14,7 +14,7 @@
 
 <a
 	class:compat={appearance.compatLinkPreview}
-	class="link-card"
+	class="card rounded-box border border-base-300 link-card"
 	href={card.url}
 	target="_blank"
 	rel="noreferrer"
@@ -25,9 +25,9 @@
 		</div>
 	{/if}
 	<div class="card-copy">
-		<strong>{card.title}</strong>
+		<span class="card-title-text">{card.title}</span>
 		{#if card.description}
-			<span>{card.description}</span>
+			<span class="card-description">{card.description}</span>
 		{/if}
 		<small>{cardHost(card.url)}</small>
 	</div>
@@ -37,14 +37,12 @@
 	.link-card {
 		display: grid;
 		overflow: hidden;
-		border: 1px solid var(--post-border);
-		border-radius: var(--post-embedded-radius);
 		background: var(--post-bg);
 		color: inherit;
 		text-decoration: none;
 	}
 
-	.link-card:hover strong {
+	.link-card:hover .card-title-text {
 		text-decoration: underline;
 	}
 
@@ -76,22 +74,23 @@
 		padding: 0.65rem;
 	}
 
-	.card-copy strong,
-	.card-copy span,
+	.card-copy .card-title-text,
+	.card-copy .card-description,
 	.card-copy small {
 		overflow: hidden;
 		display: -webkit-box;
 		-webkit-box-orient: vertical;
 	}
 
-	.card-copy strong {
+	.card-copy .card-title-text {
 		-webkit-line-clamp: 2;
 		line-clamp: 2;
 		font-size: 0.9rem;
+		font-weight: 400;
 		line-height: 1.3;
 	}
 
-	.card-copy span {
+	.card-copy .card-description {
 		-webkit-line-clamp: 2;
 		line-clamp: 2;
 		color: color-mix(in oklab, var(--post-text) 62%, transparent);
@@ -106,8 +105,8 @@
 		font-size: 0.72rem;
 	}
 
-	.link-card.compat .card-copy strong,
-	.link-card.compat .card-copy span,
+	.link-card.compat .card-copy .card-title-text,
+	.link-card.compat .card-copy .card-description,
 	.link-card.compat .card-copy small {
 		-webkit-line-clamp: 1;
 		line-clamp: 1;

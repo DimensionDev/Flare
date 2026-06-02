@@ -37,7 +37,7 @@
 
 		<section class="min-h-screen min-w-0 bg-base-100">
 			<header
-				class="timeline-header sticky top-0 z-10 border-b bg-base-100/90 px-4 py-3 backdrop-blur"
+				class="sticky top-0 z-10 border-b border-base-300 bg-base-100/90 px-4 py-3 backdrop-blur"
 			>
 				<div class="flex flex-wrap items-center justify-between gap-3">
 					<div class="min-w-0">
@@ -67,8 +67,9 @@
 						</div>
 
 						<div
-							class:card-style={cardStyleItems}
-							class="sample-timeline-item"
+							class={`sample-timeline-item rounded-box ${
+								cardStyleItems ? 'border border-base-300 bg-base-100 shadow-sm' : ''
+							}`}
 							data-sample-id={sample.id}
 						>
 							<UiTimelinePost post={sample.post} />
@@ -76,7 +77,7 @@
 					</section>
 				{/each}
 
-				<div class="sample-group-heading">
+				<div class="sample-group-heading border-t border-base-300 pt-5">
 					<h2>UiTimelineV2.Feed samples</h2>
 					<span class="badge badge-outline badge-sm">{timelineFeedSamples.length} samples</span>
 				</div>
@@ -89,8 +90,9 @@
 						</div>
 
 						<div
-							class:card-style={cardStyleItems}
-							class="sample-timeline-item"
+							class={`sample-timeline-item rounded-box ${
+								cardStyleItems ? 'border border-base-300 bg-base-100 shadow-sm' : ''
+							}`}
 							data-sample-id={`feed-${sample.id}`}
 						>
 							<UiTimelineFeed feed={sample.feed} />
@@ -98,7 +100,7 @@
 					</section>
 				{/each}
 
-				<div class="sample-group-heading">
+				<div class="sample-group-heading border-t border-base-300 pt-5">
 					<h2>UiTimelineV2.Message samples</h2>
 					<span class="badge badge-outline badge-sm">{timelineMessageSamples.length} samples</span>
 				</div>
@@ -111,8 +113,9 @@
 						</div>
 
 						<div
-							class:card-style={cardStyleItems}
-							class="sample-timeline-item"
+							class={`sample-timeline-item rounded-box ${
+								cardStyleItems ? 'border border-base-300 bg-base-100 shadow-sm' : ''
+							}`}
 							data-sample-id={`message-${sample.id}`}
 						>
 							<UiTimelineMessage message={sample.message} />
@@ -120,7 +123,7 @@
 					</section>
 				{/each}
 
-				<div class="sample-group-heading">
+				<div class="sample-group-heading border-t border-base-300 pt-5">
 					<h2>UiTimelineV2.User samples</h2>
 					<span class="badge badge-outline badge-sm">{timelineUserSamples.length} samples</span>
 				</div>
@@ -133,8 +136,9 @@
 						</div>
 
 						<div
-							class:card-style={cardStyleItems}
-							class="sample-timeline-item"
+							class={`sample-timeline-item rounded-box ${
+								cardStyleItems ? 'border border-base-300 bg-base-100 shadow-sm' : ''
+							}`}
 							data-sample-id={`user-${sample.id}`}
 						>
 							<UiTimelineUser user={sample.user} />
@@ -142,7 +146,7 @@
 					</section>
 				{/each}
 
-				<div class="sample-group-heading">
+				<div class="sample-group-heading border-t border-base-300 pt-5">
 					<h2>UiTimelineV2.UserList samples</h2>
 					<span class="badge badge-outline badge-sm">{timelineUserListSamples.length} samples</span>
 				</div>
@@ -155,8 +159,9 @@
 						</div>
 
 						<div
-							class:card-style={cardStyleItems}
-							class="sample-timeline-item"
+							class={`sample-timeline-item rounded-box ${
+								cardStyleItems ? 'border border-base-300 bg-base-100 shadow-sm' : ''
+							}`}
 							data-sample-id={`user-list-${sample.id}`}
 						>
 							<UiTimelineUserList userList={sample.userList} />
@@ -174,24 +179,11 @@
 		min-width: 0;
 	}
 
-	.sample-timeline-item.card-style {
-		border: 1px solid var(--flare-separator-color);
-		border-radius: var(--radius-box);
-		background: var(--color-base-100);
-		box-shadow: 0 1px 0 color-mix(in oklab, var(--flare-separator-color) 70%, transparent);
-	}
-
-	.timeline-header {
-		border-bottom-color: var(--flare-separator-color);
-	}
-
 	.sample-group-heading {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
 		gap: 0.75rem;
-		border-top: 1px solid var(--flare-separator-color);
-		padding-top: 1.25rem;
 	}
 
 	.sample-group-heading h2 {

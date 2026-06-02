@@ -220,7 +220,7 @@
                 {/if}
 
                 {#if hasContentWarning && post.contentWarning}
-                    <div class="content-warning">
+                    <div class="content-warning rounded-box border border-base-300">
                         <PostRichText
                             text={post.contentWarning}
                             className="warning-text"
@@ -282,11 +282,13 @@
                                 >
                                     <FaIcon name="Image" size={18} />
                                     <span>{m.postSensitiveMedia()}</span>
-                                    <small class="badge badge-primary badge-sm rounded-box">{m.postShow()}</small>
+                                    <span class="btn btn-primary btn-xs rounded-box sensitive-overlay-action">
+                                        {m.postShow()}
+                                    </span>
                                 </button>
                             {:else if post.sensitive && !appearance.showSensitiveContent}
                                 <button
-                                    class="btn btn-square btn-xs rounded-box hide-sensitive-button"
+                                    class="btn btn-neutral btn-square btn-xs rounded-box hide-sensitive-button"
                                     type="button"
                                     title={m.postHideSensitiveMedia()}
                                     onclick={() => (sensitiveRevealed = false)}
@@ -312,7 +314,7 @@
                 {/if}
 
                 {#if post.quote.length > 0 && !isQuote}
-                    <div class="quote-box">
+                    <div class="quote-box rounded-box border border-base-300">
                         {#each post.quote as quote, index (postKey(quote))}
                             <div class="quote-item">
                                 <PostQuote {quote} {appearance} />
@@ -357,10 +359,7 @@
         --post-parent-gap: 0.25rem;
         --post-corner-radius: var(--radius-box);
         --post-small-corner-radius: var(--radius-box);
-        --post-pill-radius: var(--radius-box);
         --post-quote-padding: 0.5rem;
-        --post-quote-border-width: 1.2px;
-        --post-quote-radius: var(--radius-box);
         --post-embedded-radius: var(--radius-box);
         --post-bg: var(--color-base-100);
         --post-bg-soft: var(--color-base-200);
@@ -369,14 +368,7 @@
             var(--color-base-200) 72%,
             transparent
         );
-        --post-border: var(--flare-separator-color);
-        --post-border-soft: color-mix(
-            in oklab,
-            var(--flare-separator-color) 70%,
-            transparent
-        );
         --post-text: var(--color-base-content);
-        --post-quote-border: var(--flare-separator-color);
         --post-text-weak: color-mix(
             in oklab,
             var(--color-base-content) 52%,
@@ -508,8 +500,6 @@
         width: fit-content;
         max-width: 100%;
         gap: 0.4rem;
-        border: 1px solid var(--post-border);
-        border-radius: var(--post-corner-radius);
         background: var(--post-bg-muted);
         color: var(--post-text-readable);
         padding: 0.55rem 0.65rem;
@@ -570,26 +560,19 @@
         font-weight: 750;
     }
 
-    .sensitive-overlay small {
+    .sensitive-overlay-action {
         font-size: 0.74rem;
+        letter-spacing: 0;
     }
 
     .hide-sensitive-button {
         position: absolute;
         top: 0.55rem;
         left: 0.55rem;
-        border: 0;
-        background: hsl(0 0% 0% / 0.68);
-        color: white;
-        font-size: 0.7rem;
-        font-weight: 800;
-        line-height: 1;
     }
 
     .quote-box {
         overflow: hidden;
-        border: var(--post-quote-border-width) solid var(--post-quote-border);
-        border-radius: var(--post-quote-radius);
     }
 
     .quote-item {

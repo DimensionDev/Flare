@@ -74,7 +74,7 @@
 	}
 </script>
 
-<aside class="settings-panel">
+<aside class="settings-panel rounded-box border border-base-300">
 	<div class="panel-header">
 		<div>
 			<h2>Timeline Appearance</h2>
@@ -295,7 +295,6 @@
 	.settings-panel {
 		display: grid;
 		gap: 1rem;
-		border: 1px solid var(--flare-separator-color);
 		background: var(--color-base-100);
 		padding: 1rem;
 	}

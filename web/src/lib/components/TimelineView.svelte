@@ -305,7 +305,7 @@
 			{/if}
 		{/if}
 		<div>
-			<strong>{card.title}</strong>
+			<span class="link-card-title">{card.title}</span>
 			{#if card.description}
 				<span>{card.description}</span>
 			{/if}
@@ -344,7 +344,7 @@
 		display: grid;
 		min-height: 180px;
 		place-items: center;
-		border-bottom: 1px solid var(--flare-separator-color);
+		border-bottom: var(--border) solid var(--color-base-300);
 		color: #697586;
 		font-size: 0.95rem;
 	}
@@ -354,7 +354,7 @@
 		grid-template-columns: 46px minmax(0, 1fr);
 		gap: 12px;
 		padding: 16px 18px;
-		border-bottom: 1px solid var(--flare-separator-color);
+		border-bottom: var(--border) solid var(--color-base-300);
 		background: #ffffff;
 	}
 
@@ -457,7 +457,7 @@
 	.content-warning {
 		width: fit-content;
 		max-width: 100%;
-		border: 1px solid var(--flare-separator-color);
+		border: var(--border) solid var(--color-base-300);
 		border-radius: var(--radius-box);
 		background: #f5f7fa;
 		padding: 7px 10px;
@@ -521,7 +521,7 @@
 	.rich-text :global(.rt-block-image) {
 		overflow: hidden;
 		margin: 8px 0 0;
-		border: 1px solid var(--flare-separator-color);
+		border: var(--border) solid var(--color-base-300);
 		border-radius: var(--radius-box);
 		background: #f2f4f7;
 	}
@@ -534,7 +534,7 @@
 	}
 
 	.rich-text :global(.rt-blockquote) {
-		border-left: 3px solid var(--flare-separator-color);
+		border-left: 3px solid var(--color-base-300);
 		padding-left: 12px;
 		color: #475467;
 	}
@@ -555,7 +555,7 @@
 		gap: 6px;
 		overflow: hidden;
 		border-radius: var(--radius-box);
-		border: 1px solid var(--flare-separator-color);
+		border: var(--border) solid var(--color-base-300);
 		background: #f2f4f7;
 	}
 
@@ -597,7 +597,7 @@
 		gap: 12px;
 		min-width: 0;
 		overflow: hidden;
-		border: 1px solid var(--flare-separator-color);
+		border: var(--border) solid var(--color-base-300);
 		border-radius: var(--radius-box);
 		color: inherit;
 		text-decoration: none;
@@ -619,7 +619,7 @@
 		padding: 10px 12px 10px 0;
 	}
 
-	.link-card strong,
+	.link-card-title,
 	.link-card span,
 	.link-card small {
 		overflow: hidden;
@@ -627,8 +627,9 @@
 		white-space: nowrap;
 	}
 
-	.link-card strong {
+	.link-card-title {
 		font-size: 0.9rem;
+		font-weight: 400;
 	}
 
 	.link-card span,
@@ -640,7 +641,7 @@
 	.quote {
 		display: grid;
 		gap: 4px;
-		border: 1px solid var(--flare-separator-color);
+		border: var(--border) solid var(--color-base-300);
 		border-radius: var(--radius-box);
 		padding: 10px 12px;
 		color: #344054;

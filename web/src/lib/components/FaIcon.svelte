@@ -92,6 +92,7 @@
 		UnReact: faMinus,
 		Reset: faArrowRotateLeft,
 		Share: faShareNodes,
+		Sliders: faSliders,
 		Mute: faVolumeXmark,
 		UnMute: faVolumeXmark,
 		Block: faUserSlash,

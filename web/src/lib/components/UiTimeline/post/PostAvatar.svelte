@@ -43,7 +43,7 @@
 	<button
 		class={`avatar avatar-button avatar-${placement}`}
 		type="button"
-		aria-label={user.name.innerText || user.handle.raw}
+		aria-label={user.name.innerText || user.handle.canonical}
 		onclick={performAvatarClick}
 	>
 		{@render AvatarFrame()}

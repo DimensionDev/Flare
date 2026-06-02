@@ -24,7 +24,7 @@
 			: defaultTimelineAppearance
 	);
 	const avatarSquare = $derived(appearance.avatarShape === 'SQUARE');
-	const handleText = $derived(user.handle.raw || user.handle.canonical || user.handleWithoutAt);
+	const handleText = $derived(user.handle.canonical);
 	const userClickable = $derived(deepLink.canPerformClickEvent(user.clickEvent));
 
 	function performUserClick(event: MouseEvent): void {

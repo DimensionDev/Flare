@@ -39,7 +39,6 @@
     "@fortawesome/svelte-fontawesome": "^0.2.4",
     "@js-joda/core": "3.2.0",
     "@sqlite.org/sqlite-wasm": "3.50.1-build1",
-    "@tanstack/svelte-virtual": "^3.13.26",
     "dayjs": "^1.11.21",
     "ws": "8.18.3"
   }

@@ -55,14 +55,14 @@
 					<span class="name-row">
 						<strong>{post.user.name.innerText}</strong>
 					</span>
-					<span class="handle">{post.user.handle.raw}</span>
+					<span class="handle">{post.user.handle.canonical}</span>
 				</button>
 			{:else}
 				<div class="identity-line">
 					<span class="name-row">
 						<strong>{post.user.name.innerText}</strong>
 					</span>
-					<span class="handle">{post.user.handle.raw}</span>
+					<span class="handle">{post.user.handle.canonical}</span>
 				</div>
 			{/if}
 		{/if}

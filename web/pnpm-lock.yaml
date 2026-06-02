@@ -29,9 +29,6 @@ importers:
       '@sqlite.org/sqlite-wasm':
         specifier: 3.50.1-build1
         version: 3.50.1-build1
-      '@tanstack/svelte-virtual':
-        specifier: ^3.13.26
-        version: 3.13.26(svelte@5.55.10)
       dayjs:
         specifier: ^1.11.21
         version: 1.11.21
@@ -413,14 +410,6 @@ packages:
     resolution: {integrity: sha512-t6J3OrB5Fc0ExuhohouH0fWUGMYL6PTLhW+E7zIk/pdbnJARZDCwjBznFnkh5ynRnIRSI4YjtTH0t6USjJISrw==}
     peerDependencies:
       vite: ^5.2.0 || ^6 || ^7 || ^8
-
-  '@tanstack/svelte-virtual@3.13.26':
-    resolution: {integrity: sha512-Ty2U7i0IgnJG7mq/0tmx6R8kQiWhcgUgIFXdzpXxM3Zvdmg/MRyUX8G7N8tZ+m3lJF9AQV3GpQZTmHzRAq+Adw==}
-    peerDependencies:
-      svelte: ^3.48.0 || ^4.0.0 || ^5.0.0
-
-  '@tanstack/virtual-core@3.16.0':
-    resolution: {integrity: sha512-Er2N7q3WOiH6y2JLxsxNX+u2/sLqSsL0bxFgDjuiPiA7vKhZRm+IzcS17vRee3GNXr64UsesA5CAp9yTiIYw9A==}
 
   '@tybys/wasm-util@0.10.2':
     resolution: {integrity: sha512-RoBvJ2X0wuKlWFIjrwffGw1IqZHKQqzIchKaadZZfnNpsAYp2mM0h36JtPCjNDAHGgYez/15uMBpfGwchhiMgg==}
@@ -1107,13 +1096,6 @@ snapshots:
       '@tailwindcss/oxide': 4.3.0
       tailwindcss: 4.3.0
       vite: 8.0.14(jiti@2.7.0)
-
-  '@tanstack/svelte-virtual@3.13.26(svelte@5.55.10)':
-    dependencies:
-      '@tanstack/virtual-core': 3.16.0
-      svelte: 5.55.10
-
-  '@tanstack/virtual-core@3.16.0': {}
 
   '@tybys/wasm-util@0.10.2':
     dependencies:

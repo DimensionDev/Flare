@@ -75,6 +75,12 @@ test('generates presenter facade with value and callback parameters', async () =
 		);
 		assert.match(
 			generated,
+			/export function createCounterPresenterController\(initialValue: number, alert: \(value: number\) => void\): WebPresenterController<CounterState>/
+		);
+		assert.match(generated, /export type WebPresenterController<TState> = \{/);
+		assert.match(generated, /const controller = createCounterPresenterController\(initialValue, alert\)/);
+		assert.match(
+			generated,
 			/webPresenterCreate\('counter', JSON\.stringify\(\{ initialValue \}\), \[alert\] as unknown as WebPresenterCallbacks\)/
 		);
 		assert.match(generated, /webPresenterCall/);

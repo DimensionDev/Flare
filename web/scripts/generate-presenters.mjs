@@ -103,7 +103,9 @@ function renderPresenter(presenter) {
 	const callbackParameters = parameters.filter((parameter) => parameter.kind === 'callback');
 	const creatable = presenter.creatable !== false;
 	const factoryName = creatable ? presenter.factory : (presenter.bindFactory ?? `bind${capitalize(presenter.name)}Presenter`);
+	const controllerFactoryName = `${factoryName}Controller`;
 	const factoryParameters = creatable ? renderParameters(parameters) : 'presenter: WebPresenterRef';
+	const factoryArguments = creatable ? parameters.map((parameter) => parameter.name).join(', ') : 'presenter';
 	const enumTypes = collectEnumTypes(presenter);
 	const sealedTypes = collectSealedTypes(presenter);
 	const refTypes = collectRefTypes(presenter);
@@ -145,7 +147,13 @@ ${stateFields.join('\n')}
 ${actionFields.join('\n')}
 };
 
-export function ${factoryName}(${factoryParameters}): ${presenter.stateType} {
+export type WebPresenterController<TState> = {
+\treadonly state: TState;
+\tmount: () => void;
+\tclose: () => void;
+};
+
+export function ${controllerFactoryName}(${factoryParameters}): WebPresenterController<${presenter.stateType}> {
 \tlet presenterId: number | null = null;
 \tlet subscriptionId: number | null = null;
 \tlet closed = false;
@@ -155,15 +163,14 @@ ${initialFields.join('\n')}
 ${actionInitializers.join('\n')}
 \t});
 
-\tonMount(() => {
+\tfunction mount() {
+\t\tif (closed || presenterId !== null) return;
 \t\t${mountPresenterLine}
 \t\tsubscriptionId = webPresenterSubscribe(presenterId, (snapshotJson, refs) => {
 \t\t\tconst snapshot = JSON.parse(snapshotJson) as ${presenter.stateType}Snapshot;
 ${snapshotAssignments.join('\n')}
 \t\t});
-
-\t\treturn close;
-\t});
+\t}
 
 \tfunction dispatch(path: string, args: Record<string, unknown> = {}, refs: unknown[] = []) {
 \t\tif (closed || presenterId === null) return;
@@ -185,7 +192,18 @@ ${renderCallFunction(needsCall)}
 \t\tsubscriptionId = null;
 \t}
 
-\treturn state;
+\treturn { state, mount, close };
+}
+
+export function ${factoryName}(${factoryParameters}): ${presenter.stateType} {
+\tconst controller = ${controllerFactoryName}(${factoryArguments});
+
+\tonMount(() => {
+\t\tcontroller.mount();
+\t\treturn controller.close;
+\t});
+
+\treturn controller.state;
 }
 `;
 }

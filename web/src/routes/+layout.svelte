@@ -85,7 +85,7 @@
 	<DeepLinkProvider>
 		<ThemeController />
 		<main class="app-shell bg-base-100 text-base-content">
-			<nav class="app-sidebar border-r border-base-300 bg-base-100" aria-label="Main">
+			<nav class="app-sidebar border-r border-base-300 bg-base-300" aria-label="Main">
 				<div class="sidebar-brand">
 					<div class="brand-mark rounded-box bg-primary text-primary-content">F</div>
 					<div class="brand-copy">
@@ -153,10 +153,25 @@
 </EnvironmentSettingsProvider>
 
 <style>
+	:global(body) {
+		background: var(--color-base-300);
+	}
+
 	.app-shell {
+		--app-shell-max-width: 880px;
+		--app-sidebar-width: 15rem;
+		--app-sidebar-center-offset: 7.5rem;
+		--app-shell-width: min(100vw, var(--app-shell-max-width));
 		display: grid;
-		grid-template-columns: 15rem minmax(0, 1fr);
+		grid-template-columns: var(--app-sidebar-width) minmax(0, 1fr);
+		width: var(--app-shell-width);
 		min-height: 100vh;
+		margin-inline-start: max(
+			0px,
+			calc((100vw - var(--app-shell-width)) / 2 - var(--app-sidebar-center-offset))
+		);
+		margin-inline-end: auto;
+		background: var(--color-base-100);
 	}
 
 	.app-sidebar {
@@ -164,8 +179,10 @@
 		top: 0;
 		display: flex;
 		height: 100vh;
+		align-self: start;
 		min-width: 0;
 		flex-direction: column;
+		overflow: auto;
 	}
 
 	.sidebar-brand {
@@ -206,11 +223,14 @@
 
 	.app-content {
 		min-height: 100vh;
+		background: var(--color-base-100);
 	}
 
 	.content-stage {
+		width: 100%;
+		min-height: 100%;
 		min-width: 0;
-		padding: 1rem;
+		background: var(--color-base-100);
 	}
 
 	.mobile-dock {
@@ -220,6 +240,9 @@
 	@media (max-width: 760px) {
 		.app-shell {
 			grid-template-columns: minmax(0, 1fr);
+			width: 100%;
+			min-height: 100vh;
+			margin-inline: 0;
 			padding-bottom: 4rem;
 		}
 
@@ -228,6 +251,10 @@
 		}
 
 		.app-content {
+			min-height: calc(100vh - 4rem);
+		}
+
+		.content-stage {
 			min-height: calc(100vh - 4rem);
 		}
 

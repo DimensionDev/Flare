@@ -2,4 +2,4 @@
 	import AppPagePlaceholder from '$lib/components/AppPagePlaceholder.svelte';
 </script>
 
-<AppPagePlaceholder icon="Home" title="Home" />
+<AppPagePlaceholder icon="Settings" title="Settings" />

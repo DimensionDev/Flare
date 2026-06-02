@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { createEnvironmentSettingsPresenter } from '@flare/web-presenters/environmentSettings.svelte';
 	import {
 		createEnvironmentSettingsContext,
@@ -8,9 +9,12 @@
 
 	let { children } = $props();
 
-	installWebFormatter();
 	const environmentSettings = createEnvironmentSettingsPresenter();
 	provideEnvironmentSettings(createEnvironmentSettingsContext(environmentSettings));
+
+	onMount(() => {
+		installWebFormatter();
+	});
 </script>
 
 {@render children()}

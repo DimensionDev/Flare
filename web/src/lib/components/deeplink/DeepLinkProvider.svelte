@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import { createDeepLinkPresenter } from '@flare/web-presenters/deepLink.svelte';
 	import { createDeepLinkContext, provideDeepLink } from '$lib/deeplink/deepLink.svelte';
 
@@ -8,6 +9,11 @@
 	provideDeepLink(createDeepLinkContext(deepLink));
 
 	function handleRoute(routeUrl: string): void {
+		if (routeUrl.startsWith('/')) {
+			void goto(routeUrl);
+			return;
+		}
+
 		console.info('Unhandled deeplink route', routeUrl);
 	}
 

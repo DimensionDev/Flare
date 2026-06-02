@@ -11,7 +11,7 @@
 
 	let { children } = $props();
 
-	type AppTab = HomeTabsPresenterStateHomeTabs | 'Settings';
+	type AppTab = HomeTabsPresenterStateHomeTabs | 'Profile' | 'Settings';
 
 	const fallbackTabs: HomeTabsPresenterStateHomeTabs[] = ['Home', 'Discover'];
 	const homeTabs = createHomeTabsPresenter();
@@ -28,8 +28,17 @@
 		if (pathname === '/') return 'Home';
 		if (pathname === '/discover' || pathname.startsWith('/discover/')) return 'Discover';
 		if (pathname === '/notifications' || pathname.startsWith('/notifications/')) return 'Notifications';
+		if (isProfilePath(pathname)) return 'Profile';
 		if (pathname === '/settings' || pathname.startsWith('/settings/')) return 'Settings';
 		return null;
+	}
+
+	function isProfilePath(pathname: string): boolean {
+		return (
+			pathname === '/profile' ||
+			pathname.startsWith('/profile/') ||
+			/^\/[^/]+\/profile(?:\/|$)/.test(pathname)
+		);
 	}
 
 	function tabTitle(tab: AppTab): string {
@@ -40,6 +49,8 @@
 				return 'Notifications';
 			case 'Discover':
 				return 'Discover';
+			case 'Profile':
+				return 'Profile';
 			case 'Settings':
 				return 'Settings';
 		}
@@ -53,6 +64,8 @@
 				return 'Notification';
 			case 'Discover':
 				return 'Search';
+			case 'Profile':
+				return 'Profile';
 			case 'Settings':
 				return 'Settings';
 		}
@@ -66,6 +79,8 @@
 				return '/notifications';
 			case 'Discover':
 				return '/discover';
+			case 'Profile':
+				return '/profile';
 			case 'Settings':
 				return '/settings';
 		}

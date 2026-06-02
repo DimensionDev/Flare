@@ -27,7 +27,7 @@ export const defaultTimelineAppearance = {
 	showPlatformLogo: true,
 	showSensitiveContent: false,
 	showTranslateButton: true,
-	timelineDisplayMode: 'Plain',
+	timelineDisplayMode: 'Card',
 	videoAutoplay: 'NEVER',
 } as TimelineAppearance;
 

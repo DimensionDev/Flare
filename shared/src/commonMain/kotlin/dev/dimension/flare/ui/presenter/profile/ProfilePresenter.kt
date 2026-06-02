@@ -453,13 +453,13 @@ public abstract class ProfileState(
     @Immutable
     public sealed class Tab {
         @Immutable
-        public data class Timeline internal constructor(
+        public data class Timeline(
             val type: ProfileTab.Timeline.Type,
             val presenter: TimelinePresenter,
         ) : Tab()
 
         @Immutable
-        public data class Media internal constructor(
+        public data class Media(
             val presenter: ProfileMediaPresenter,
         ) : Tab()
     }

@@ -2,6 +2,7 @@
 	import type { IconDefinition } from '@fortawesome/fontawesome-svg-core';
 	import {
 		faAt,
+		faArrowLeft,
 		faArrowRotateLeft,
 		faBell,
 		faBookBookmark,
@@ -61,6 +62,7 @@
 	const brands = brandIcons as unknown as Record<string, IconDefinition | undefined>;
 	const icons: Record<string, IconDefinition> = {
 		Home: faHouse,
+		Back: faArrowLeft,
 		Notification: faBell,
 		Search: faMagnifyingGlass,
 		Profile: faCircleUser,

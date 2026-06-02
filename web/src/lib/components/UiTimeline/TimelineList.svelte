@@ -3,7 +3,9 @@
 	import type { TimelineDisplayMode } from '$lib/environment/environmentSettings.svelte';
 	import type { PagingState, UiTimelineV2 } from '@flare/web-presenters/timeline.svelte';
 	import PostLoadingPlaceholder from './post/PostLoadingPlaceholder.svelte';
+	import { defaultTimelineAppearance } from './post/postUtils';
 	import TimelineItem from './TimelineItem.svelte';
+	import TimelineLoadingPlaceholderList from './TimelineLoadingPlaceholderList.svelte';
 
 	let {
 		listState,
@@ -15,11 +17,10 @@
 	const timelineAppearanceState = $derived(environmentSettings.timelineAppearance());
 	const contentPadding = 16;
 	const cardItemGap = 8;
-	const loadingPlaceholderIndexes = Array.from({ length: 8 }, (_, index) => index);
 	const displayMode = $derived<TimelineDisplayMode>(
 		timelineAppearanceState.type === 'Success'
 			? timelineAppearanceState.data.timelineDisplayMode
-			: 'Plain'
+			: defaultTimelineAppearance.timelineDisplayMode
 	);
 	const galleryMode = $derived(displayMode === 'Gallery');
 	const cardStyleItems = $derived(!galleryMode && displayMode !== 'Plain');
@@ -94,11 +95,7 @@
 	style={`--timeline-content-padding: ${contentPadding}px; --timeline-card-gap: ${cardItemGap}px;`}
 >
 	{#if listState.type === 'Loading'}
-		<div class="timeline-list-state">
-			{#each loadingPlaceholderIndexes as index (index)}
-				<PostLoadingPlaceholder />
-			{/each}
-		</div>
+		<TimelineLoadingPlaceholderList />
 	{:else if listState.type === 'Error'}
 		<div class="timeline-list-state">
 			<div class="alert alert-error">

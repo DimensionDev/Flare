@@ -8,7 +8,7 @@
 	} from '@flare/web-presenters/homeTimelineWithTabs.svelte';
 	import FaIcon from '$lib/components/FaIcon.svelte';
 	import HomeTimelineTabPanel from '$lib/components/home/HomeTimelineTabPanel.svelte';
-	import PostLoadingPlaceholder from '$lib/components/UiTimeline/post/PostLoadingPlaceholder.svelte';
+	import TimelineLoadingPlaceholderList from '$lib/components/UiTimeline/TimelineLoadingPlaceholderList.svelte';
 	import { useRetainedPresenter } from '$lib/presenter/presenterStore.svelte';
 
 	const homeTimeline = useRetainedPresenter(
@@ -23,7 +23,6 @@
 	const selectedTab = $derived(
 		tabs.find((tab) => tab.id === selectedTabId) ?? tabs[0] ?? null
 	);
-	const loadingPlaceholderIndexes = Array.from({ length: 8 }, (_, index) => index);
 
 	$effect(() => {
 		if (tabs.length === 0) {
@@ -197,11 +196,7 @@
 				<HomeTimelineTabPanel tab={selectedTab} />
 			{/key}
 		{:else}
-			<div class="home-state">
-				{#each loadingPlaceholderIndexes as index (index)}
-					<PostLoadingPlaceholder />
-				{/each}
-			</div>
+			<TimelineLoadingPlaceholderList />
 		{/if}
 	</section>
 </div>

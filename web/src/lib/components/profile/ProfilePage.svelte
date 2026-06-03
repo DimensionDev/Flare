@@ -1,5 +1,6 @@
 <script lang="ts">
     import { page } from "$app/state";
+    import AppTopBar from "$lib/components/AppTopBar.svelte";
     import FaIcon from "$lib/components/FaIcon.svelte";
     import RichText from "$lib/components/RichText.svelte";
     import ProfileTimelineTabPanel from "$lib/components/profile/ProfileTimelineTabPanel.svelte";
@@ -370,60 +371,63 @@
 </svelte:head>
 
 <div class="profile-page">
-    <header
-        class="profile-app-bar border-b border-base-300 bg-base-100/95 backdrop-blur"
+    <AppTopBar
+        title={displayProfile ? profileNameText(displayProfile) : undefined}
+        subtitle={displayProfile
+            ? `${displayProfile.matrices.statusesCountHumanized} posts`
+            : undefined}
+        zIndex="z-20"
     >
-        <button
-            class="btn btn-ghost btn-square btn-sm rounded-box"
-            type="button"
-            aria-label="Back"
-            onclick={() => history.back()}
-        >
-            <FaIcon name="Back" size={16} />
-        </button>
-        <div class="profile-app-title">
-            {#if displayProfile}
-                <strong>{profileNameText(displayProfile)}</strong>
-                <span
-                    >{displayProfile.matrices.statusesCountHumanized}
-                    posts</span
-                >
-            {:else}
-                <div class="skeleton h-4 w-32"></div>
-                <div class="skeleton mt-1 h-3 w-20"></div>
+        {#snippet start()}
+            <button
+                class="btn btn-ghost btn-square btn-sm rounded-box"
+                type="button"
+                aria-label="Back"
+                onclick={() => history.back()}
+            >
+                <FaIcon name="Back" size={16} />
+            </button>
+            {#if !displayProfile}
+                <div class="grid min-w-0 gap-1">
+                    <div class="skeleton h-4 w-32"></div>
+                    <div class="skeleton h-3 w-20"></div>
+                </div>
             {/if}
-        </div>
-        {#if profileActions.length > 0}
-            <button
-                class="btn btn-ghost btn-square btn-sm rounded-box"
-                type="button"
-                aria-label="More"
-                popovertarget="profile-action-menu"
-                style="anchor-name: --profile-action-menu-anchor;"
-            >
-                <FaIcon name="More" size={16} />
-            </button>
-            <ul
-                class="dropdown dropdown-end menu bg-base-100 rounded-box w-52 shadow-sm profile-action-menu"
-                popover="auto"
-                id="profile-action-menu"
-                style="position-anchor: --profile-action-menu-anchor;"
-            >
-                {#each profileActions as action}
-                    {@render ProfileActionMenuEntry(action)}
-                {/each}
-            </ul>
-        {:else}
-            <button
-                class="btn btn-ghost btn-square btn-sm rounded-box"
-                type="button"
-                aria-label="More"
-                disabled
-            >
-                <FaIcon name="More" size={16} />
-            </button>
-        {/if}
-    </header>
+        {/snippet}
+
+        {#snippet end()}
+            {#if profileActions.length > 0}
+                <button
+                    class="btn btn-ghost btn-square btn-sm rounded-box"
+                    type="button"
+                    aria-label="More"
+                    popovertarget="profile-action-menu"
+                    style="anchor-name: --profile-action-menu-anchor;"
+                >
+                    <FaIcon name="More" size={16} />
+                </button>
+                <ul
+                    class="dropdown dropdown-end menu bg-base-100 rounded-box w-52 shadow-sm profile-action-menu"
+                    popover="auto"
+                    id="profile-action-menu"
+                    style="position-anchor: --profile-action-menu-anchor;"
+                >
+                    {#each profileActions as action}
+                        {@render ProfileActionMenuEntry(action)}
+                    {/each}
+                </ul>
+            {:else}
+                <button
+                    class="btn btn-ghost btn-square btn-sm rounded-box"
+                    type="button"
+                    aria-label="More"
+                    disabled
+                >
+                    <FaIcon name="More" size={16} />
+                </button>
+            {/if}
+        {/snippet}
+    </AppTopBar>
 
     {#if profileError}
         <section class="profile-state">
@@ -642,41 +646,6 @@
         min-height: 100vh;
         min-width: 0;
         background: var(--color-base-200);
-    }
-
-    .profile-app-bar {
-        position: sticky;
-        top: 0;
-        z-index: 20;
-        display: grid;
-        grid-template-columns: auto minmax(0, 1fr) auto;
-        align-items: center;
-        gap: 0.5rem;
-        min-height: 3.5rem;
-        padding: 0.25rem 0.75rem;
-    }
-
-    .profile-app-title {
-        display: grid;
-        min-width: 0;
-        line-height: 1.15;
-    }
-
-    .profile-app-title strong,
-    .profile-app-title span {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-
-    .profile-app-title strong {
-        font-size: 0.98rem;
-        font-weight: 500;
-    }
-
-    .profile-app-title span {
-        color: color-mix(in oklab, var(--color-base-content) 58%, transparent);
-        font-size: 0.75rem;
     }
 
     .profile-action-menu button span {

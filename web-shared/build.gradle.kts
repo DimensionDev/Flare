@@ -35,8 +35,11 @@ kotlin {
         val wasmJsMain by getting {
             dependencies {
                 implementation(projects.shared)
+                implementation(projects.feature.login)
                 implementation(projects.feature.subscription)
+                implementation(projects.social.bluesky)
                 implementation(projects.social.mastodon)
+                implementation(projects.social.misskey)
                 implementation(dependencies.platform(libs.compose.bom))
                 implementation(libs.compose.runtime)
                 implementation(libs.kotlinx.coroutines.core)
@@ -56,6 +59,10 @@ ksp {
         "webPresenterTypes",
         listOf(
             "dev.dimension.flare.ui.presenter.EnvironmentSettingsPresenter",
+            "dev.dimension.flare.ui.presenter.SettingsPresenter",
+            "dev.dimension.flare.ui.presenter.settings.AppearancePresenter",
+            "dev.dimension.flare.ui.presenter.settings.AccountsPresenter",
+            "dev.dimension.flare.ui.presenter.login.NodeInfoPresenter",
             "dev.dimension.flare.ui.presenter.HomeTabsPresenter",
             "dev.dimension.flare.ui.presenter.HomeTimelineWithTabsPresenter",
             "dev.dimension.flare.ui.presenter.home.WebDeepLinkPresenter",

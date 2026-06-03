@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
+	import AppTopBar from '$lib/components/AppTopBar.svelte';
 	import FaIcon from '$lib/components/FaIcon.svelte';
 	import TimelineList from '$lib/components/UiTimeline/TimelineList.svelte';
 	import TimelineLoadingPlaceholderList from '$lib/components/UiTimeline/TimelineLoadingPlaceholderList.svelte';
@@ -93,14 +94,14 @@
 </script>
 
 <section class="min-h-screen bg-base-100">
-	<header class="sticky top-0 z-10 border-b border-base-300 bg-base-100/95 backdrop-blur">
-		<div class="flex min-h-14 w-full items-center gap-2 px-3">
+	<AppTopBar title="Post detail">
+		{#snippet start()}
 			<button class="btn btn-ghost btn-square btn-sm rounded-box" type="button" aria-label="Back" onclick={goBack}>
 				<FaIcon name="Back" size={16} />
 			</button>
-			<div class="min-w-0 flex-1">
-				<h1 class="truncate text-base font-semibold">Post detail</h1>
-			</div>
+		{/snippet}
+
+		{#snippet end()}
 			<button
 				class="btn btn-ghost btn-square btn-sm rounded-box"
 				type="button"
@@ -110,11 +111,14 @@
 			>
 				<FaIcon name="Reset" size={15} />
 			</button>
-		</div>
-		{#if isRefreshing}
-			<progress class="progress progress-primary block h-0.5 w-full"></progress>
-		{/if}
-	</header>
+		{/snippet}
+
+		{#snippet bottom()}
+			{#if isRefreshing}
+				<progress class="progress progress-primary block h-0.5 w-full"></progress>
+			{/if}
+		{/snippet}
+	</AppTopBar>
 
 	<div class="min-h-[calc(100vh-3.5rem)] w-full bg-base-100">
 		{#if currentError || listError}

@@ -2,7 +2,9 @@
 
 package dev.dimension.flare.web.shared
 
+import dev.dimension.flare.data.platform.BlueskyPlatformSpec
 import dev.dimension.flare.data.platform.MastodonPlatformSpec
+import dev.dimension.flare.data.platform.MisskeyPlatformSpec
 import dev.dimension.flare.data.platform.RssTimelineSpecs
 import dev.dimension.flare.model.PlatformRuntimeData
 import dev.dimension.flare.ui.humanizer.WebFormatterBridge
@@ -13,9 +15,6 @@ import org.koin.core.annotation.KoinApplication
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Single
 import org.koin.plugin.module.dsl.startKoin
-import kotlin.js.ExperimentalJsExport
-import kotlin.js.JsExport
-import kotlin.js.JsName
 
 internal object WebSharedHelper {
     private var initialized = false
@@ -68,6 +67,8 @@ internal fun runtimeData(): PlatformRuntimeData =
         platformSpecs =
             listOf(
                 MastodonPlatformSpec,
+                MisskeyPlatformSpec,
+                BlueskyPlatformSpec,
             ),
         extraTimelineSpecs = RssTimelineSpecs.timelineSpecs,
     )

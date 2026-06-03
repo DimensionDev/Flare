@@ -35,7 +35,7 @@ internal data object MastodonPlatformDetector : PlatformDetector {
                     host = host,
                     platformType = PlatformType.Mastodon,
                     software = nodeInfo ?: PlatformType.Mastodon.name,
-                    compatibleMode = true,
+                    compatibleMode = nodeInfo != null,
                 )
             }
         }.getOrElse {
@@ -46,7 +46,7 @@ internal data object MastodonPlatformDetector : PlatformDetector {
                         host = host,
                         platformType = PlatformType.Mastodon,
                         software = nodeInfo ?: PlatformType.Mastodon.name,
-                        compatibleMode = true,
+                        compatibleMode = nodeInfo != null,
                     )
                 }
             }.getOrNull()

@@ -9,7 +9,9 @@ import dev.dimension.flare.ui.model.createSampleStatus
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
+import dev.dimension.flare.web.shared.WebPresenter
 
+@WebPresenter("appearance")
 public class AppearancePresenter : PresenterBase<AppearanceState>() {
     @Composable
     override fun body(): AppearanceState {

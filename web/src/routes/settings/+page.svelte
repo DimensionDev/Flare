@@ -67,6 +67,7 @@
 			title: m.settingsLocalFilterTitle(),
 			description: m.settingsLocalFilterDescription(),
 			icon: 'Filter',
+			href: '/settings/local-filter',
 		},
 		{
 			title: m.settingsStorageTitle(),
@@ -81,11 +82,13 @@
 			title: m.settingsAiConfigTitle(),
 			description: m.settingsAiConfigDescription(),
 			icon: 'Bot',
+			href: '/settings/ai',
 		},
 		{
 			title: m.settingsTranslationTitle(),
 			description: m.settingsTranslationDescription(),
 			icon: 'Translate',
+			href: '/settings/translation',
 		},
 	]);
 
@@ -94,6 +97,7 @@
 			title: m.settingsAboutTitle(),
 			description: m.settingsAboutSubtitle(),
 			icon: 'Info',
+			href: '/settings/about',
 			status: appVersion,
 		},
 	]);

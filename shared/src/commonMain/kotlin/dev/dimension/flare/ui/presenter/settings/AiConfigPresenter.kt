@@ -17,6 +17,8 @@ import dev.dimension.flare.data.network.ai.OpenAIService
 import dev.dimension.flare.data.translation.PreTranslationContentRules
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.presenter.PresenterBase
+import dev.dimension.flare.web.shared.WebIgnore
+import dev.dimension.flare.web.shared.WebPresenter
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -53,6 +55,7 @@ public enum class TranslateProviderOption {
     LibreTranslate,
 }
 
+@WebPresenter("aiConfig")
 public class AiConfigPresenter :
     PresenterBase<AiConfigPresenter.State>(),
     KoinComponent {
@@ -121,7 +124,10 @@ public class AiConfigPresenter :
 
         public fun setPreTranslate(value: Boolean)
 
+        @WebIgnore
         public fun setAutoTranslateExcludedLanguages(value: List<String>)
+
+        public fun setAutoTranslateExcludedLanguagesText(value: String)
     }
 
     @OptIn(FlowPreview::class)
@@ -314,6 +320,14 @@ public class AiConfigPresenter :
                 updateTranslateConfig {
                     copy(
                         autoTranslateExcludedLanguages = value,
+                    )
+                }
+            }
+
+            override fun setAutoTranslateExcludedLanguagesText(value: String) {
+                updateTranslateConfig {
+                    copy(
+                        autoTranslateExcludedLanguages = normalizeExcludedLanguages(listOf(value)),
                     )
                 }
             }

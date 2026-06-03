@@ -1,5 +1,8 @@
 package dev.dimension.flare.ui.render
 
+import dev.dimension.flare.ui.route.DeeplinkRoute
+import dev.dimension.flare.ui.route.toUri
+import dev.dimension.flare.ui.route.toWebPath
 import kotlinx.collections.immutable.ImmutableList
 
 public actual typealias PlatformText = String
@@ -42,7 +45,7 @@ private fun StringBuilder.appendTextRun(run: RenderRun.Text) {
     val style = run.style
     val href = style.link?.safeHref()
     if (href != null) {
-        append("""<a href="${href.escapeHtmlAttribute()}" target="_blank" rel="noreferrer">""")
+        appendAnchorStart(href)
         tags.add("a")
     }
     if (style.bold) {
@@ -97,7 +100,7 @@ private fun StringBuilder.appendBlockImage(content: RenderContent.BlockImage) {
     val href = content.href?.safeHref()
     append("""<figure class="rt-block-image">""")
     if (href != null) {
-        append("""<a href="${href.escapeHtmlAttribute()}" target="_blank" rel="noreferrer">""")
+        appendAnchorStart(href)
     }
     append("""<img src="${src.escapeHtmlAttribute()}" alt="">""")
     if (href != null) {
@@ -105,6 +108,18 @@ private fun StringBuilder.appendBlockImage(content: RenderContent.BlockImage) {
     }
     append("</figure>")
 }
+
+private fun StringBuilder.appendAnchorStart(href: String) {
+    append("<a href=\"")
+    append(href.escapeHtmlAttribute())
+    append('"')
+    if (href.isExternalHref()) {
+        append(" target=\"_blank\" rel=\"noreferrer\"")
+    }
+    append(">")
+}
+
+private fun String.isExternalHref(): Boolean = !startsWith("/")
 
 private fun RenderBlockStyle.htmlTag(): String =
     when {
@@ -139,12 +154,17 @@ private fun String.safeHref(): String? {
         lower.startsWith("https://") -> value
         lower.startsWith("mailto:") -> value
         lower.startsWith("acct:") -> value
-        lower.startsWith("flare://") -> value
+        lower.startsWith("flare://") -> value.toWebHref()
         lower.startsWith("nostr:") -> value
         lower.matches(Regex("""web\+[a-z0-9.+-]+:.*""")) -> value
         value.startsWith("/") && !value.startsWith("//") -> value
         else -> null
     }
+}
+
+private fun String.toWebHref(): String? {
+    val route = DeeplinkRoute.parse(this) ?: return null
+    return route.toWebPath() ?: route.toUri()
 }
 
 private fun String.safeImageUrl(): String? {

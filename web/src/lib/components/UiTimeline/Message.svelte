@@ -2,7 +2,7 @@
 	import FaIcon from '$lib/components/FaIcon.svelte';
 	import { useDeepLink } from '$lib/deeplink/deepLink.svelte';
 	import type { UiTimelineV2, UiTimelineV2Message } from '@flare/web-presenters/timeline.svelte';
-	import PostRichText from './post/PostRichText.svelte';
+	import RichText from '$lib/components/RichText.svelte';
 	import { messageText } from './post/postUtils';
 
 	type UiTimelineMessage = Extract<UiTimelineV2, { type: 'Message' }>;
@@ -59,7 +59,7 @@
 		<div class="message-content">
 			{#if message.user}
 				<div class="message-user">
-					<PostRichText text={message.user.name} className="message-user-name" />
+					<RichText text={message.user.name} className="message-user-name" maxLines={1} />
 				</div>
 			{/if}
 			{#if hasText}

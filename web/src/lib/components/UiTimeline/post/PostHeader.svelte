@@ -4,6 +4,7 @@
 	import type { TimelineAppearance } from '$lib/environment/environmentSettings.svelte';
 	import type { UiTimelineV2Post } from '@flare/web-presenters/timeline.svelte';
 	import PostAvatar from './PostAvatar.svelte';
+	import RichText from '$lib/components/RichText.svelte';
 	import { platformIcon, translationLabel, visibilityIcon, visibilityLabel } from './postUtils';
 
 	let {
@@ -53,14 +54,14 @@
 			{#if userClickable}
 				<button class="identity-line identity-button" type="button" onclick={performUserClick}>
 					<span class="name-row">
-						<strong>{post.user.name.innerText}</strong>
+						<RichText text={post.user.name} className="post-user-name" maxLines={1} />
 					</span>
 					<span class="handle">{post.user.handle.canonical}</span>
 				</button>
 			{:else}
 				<div class="identity-line">
 					<span class="name-row">
-						<strong>{post.user.name.innerText}</strong>
+						<RichText text={post.user.name} className="post-user-name" maxLines={1} />
 					</span>
 					<span class="handle">{post.user.handle.canonical}</span>
 				</div>
@@ -136,19 +137,25 @@
 		gap: 0.25rem;
 	}
 
-	.identity-line strong,
+	.identity-line :global(.post-user-name),
 	.handle {
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
 	}
 
-	.identity-line strong {
+	.identity-line :global(.post-user-name) {
 		flex: 0 1 auto;
 		min-width: 0;
 		font-size: 0.95rem;
 		font-weight: 400;
 		line-height: 1.2;
+	}
+
+	.identity-line :global(.post-user-name .rt-block),
+	.identity-line :global(.post-user-name p) {
+		display: inline;
+		margin: 0;
 	}
 
 	.handle {

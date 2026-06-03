@@ -1155,6 +1155,7 @@ private object PagingStateCodec : StateCodec {
         builder: StringBuilder,
         value: StateCodecValue,
     ) {
+        val loadStateEncoderName = "${encoderName(value)}LoadState"
         builder.appendLine("private fun ${encoderName(value)}(")
         builder.appendLine("    value: ${value.type},")
         builder.appendLine("    refs: MutableList<JsReference<Any>>,")
@@ -1174,6 +1175,22 @@ private object PagingStateCodec : StateCodec {
         builder.appendLine("            put($SEALED_DISCRIMINATOR_JSON, \"Success\")")
         builder.appendLine("            put(\"itemCount\", value.itemCount)")
         builder.appendLine("            put(\"isRefreshing\", value.isRefreshing)")
+        builder.appendLine("            put(\"appendState\", $loadStateEncoderName(value.appendState))")
+        builder.appendLine("        }")
+        builder.appendLine("    }")
+        builder.appendLine()
+        builder.appendLine("private fun $loadStateEncoderName(value: androidx.paging.LoadState): JsonElement =")
+        builder.appendLine("    when (value) {")
+        builder.appendLine("        is androidx.paging.LoadState.Loading -> buildJsonObject {")
+        builder.appendLine("            put($SEALED_DISCRIMINATOR_JSON, \"Loading\")")
+        builder.appendLine("        }")
+        builder.appendLine("        is androidx.paging.LoadState.Error -> buildJsonObject {")
+        builder.appendLine("            put($SEALED_DISCRIMINATOR_JSON, \"Error\")")
+        builder.appendLine("            put(\"message\", value.error.message)")
+        builder.appendLine("        }")
+        builder.appendLine("        is androidx.paging.LoadState.NotLoading -> buildJsonObject {")
+        builder.appendLine("            put($SEALED_DISCRIMINATOR_JSON, \"NotLoading\")")
+        builder.appendLine("            put(\"endOfPaginationReached\", value.endOfPaginationReached)")
         builder.appendLine("        }")
         builder.appendLine("    }")
     }
@@ -1190,6 +1207,12 @@ private object PagingStateCodec : StateCodec {
             "                        if (pagingState is dev.dimension.flare.common.PagingState.Success<*> && index >= 0 && index < pagingState.itemCount) {",
         )
         builder.appendLine("                            pagingState[index]")
+        builder.appendLine("                        }")
+        builder.appendLine("                    }")
+        builder.appendLine("                    ${property.pagingRetryPath().kotlinString()} -> {")
+        builder.appendLine("                        val pagingState = state.${property.name}")
+        builder.appendLine("                        if (pagingState is dev.dimension.flare.common.PagingState.Success<*>) {")
+        builder.appendLine("                            pagingState.retry()")
         builder.appendLine("                        }")
         builder.appendLine("                    }")
     }
@@ -1538,6 +1561,8 @@ private fun RefModel.methodPath(method: RefMethodModel): String = "$type.${metho
 private fun PropertyModel.pagingGetPath(): String = "__webPagingGet:$name"
 
 private fun PropertyModel.pagingPeekPath(): String = "__webPagingPeek:$name"
+
+private fun PropertyModel.pagingRetryPath(): String = "__webPagingRetry:$name"
 
 private fun WebValueModel.stateCodecValue(): StateCodecValue? = stateCodecs.firstNotNullOfOrNull { codec -> codec.model(this) }
 

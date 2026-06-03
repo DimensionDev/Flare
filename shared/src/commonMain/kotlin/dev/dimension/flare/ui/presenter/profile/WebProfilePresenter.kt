@@ -61,9 +61,7 @@ public class WebProfilePresenter(
     }
 }
 
-private fun emptyProfileState(
-    userState: UiState<UiProfile> = UiState.Loading(),
-): ProfileState =
+private fun emptyProfileState(userState: UiState<UiProfile> = UiState.Loading()): ProfileState =
     object : ProfileState(
         userState = userState,
         relationState = UiState.Loading(),

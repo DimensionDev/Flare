@@ -1,5 +1,5 @@
 import { browser } from '$app/environment';
-import { onMount } from 'svelte';
+import { onMount, untrack } from 'svelte';
 
 export type RetainedPresenterController<TState> = {
 	readonly state: TState;
@@ -42,6 +42,46 @@ export function useRetainedPresenter<TState>(
 	});
 
 	return entry.controller.state;
+}
+
+export function useReactiveRetainedPresenter<TState extends object>(
+	key: () => string,
+	create: () => RetainedPresenterController<TState>,
+	options: RetainedPresenterOptions = {}
+): TState {
+	if (!browser) {
+		return create().state;
+	}
+
+	const initialKey = key();
+	const initialEntry = getOrCreateEntry(initialKey, create, options);
+	const state = $state(clonePresenterState(initialEntry.controller.state)) as TState;
+	let activeEntry = initialEntry;
+	let activeKey = $state(initialKey);
+
+	$effect(() => {
+		const nextKey = key();
+		const nextEntry = getOrCreateEntry(nextKey, create, options);
+		activeEntry = nextEntry;
+		activeKey = nextKey;
+
+		retainEntry(nextEntry);
+		nextEntry.controller.mount();
+
+		return () => {
+			releaseEntry(nextKey, nextEntry);
+		};
+	});
+
+	$effect(() => {
+		activeKey;
+		const nextState = clonePresenterState(activeEntry.controller.state);
+		untrack(() => {
+			syncPresenterState(state, nextState);
+		});
+	});
+
+	return state;
 }
 
 export function clearRetainedPresenters(match?: string | ((key: string) => boolean)): void {
@@ -107,6 +147,24 @@ function closeEntry(entry: RetainedPresenterEntry<unknown>): void {
 	}
 	entry.refCount = 0;
 	entry.controller.close();
+}
+
+function clonePresenterState<TState extends object>(source: TState): TState {
+	return { ...(source as Record<string, unknown>) } as TState;
+}
+
+function syncPresenterState<TState extends object>(target: TState, source: TState): void {
+	const targetRecord = target as Record<string, unknown>;
+	const sourceRecord = source as Record<string, unknown>;
+
+	for (const key of Object.keys(targetRecord)) {
+		if (!(key in sourceRecord)) {
+			delete targetRecord[key];
+		}
+	}
+	for (const key of Object.keys(sourceRecord)) {
+		targetRecord[key] = sourceRecord[key];
+	}
 }
 
 function shouldClear(key: string, match?: string | ((key: string) => boolean)): boolean {

@@ -848,12 +848,20 @@ class WebPresenterRendererTest {
         val manifest = WebPresenterRenderer.renderManifest(listOf(presenter))
 
         assertTrue(!kotlin.contains("""put("items", buildJsonArray"""), kotlin)
+        kotlin.assertContains(
+            """put("appendState", encodeDevDimensionFlareCommonPagingStateDevDimensionFlareWebSharedSampleWebPagingStateLoadState(value.appendState))""",
+        )
+        kotlin.assertContains(
+            """private fun encodeDevDimensionFlareCommonPagingStateDevDimensionFlareWebSharedSampleWebPagingStateLoadState(value: androidx.paging.LoadState): JsonElement =""",
+        )
         kotlin.assertContains(""""__webPagingPeek:items" -> {""")
         kotlin.assertContains("pagingState.peek(index)")
         kotlin.assertContains(""""__webPagingGet:items" -> {""")
         kotlin.assertContains("""val index = requireNotNull(requireNotNull(args)["index"]?.jsonPrimitive).int""")
         kotlin.assertContains("val pagingState = state.items")
         kotlin.assertContains("pagingState[index]")
+        kotlin.assertContains(""""__webPagingRetry:items" -> {""")
+        kotlin.assertContains("pagingState.retry()")
 
         manifest.assertContains(
             """"items", "kind": "pagingState", "item": { "kind": "ref", "tsType": "Sample"""",

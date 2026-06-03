@@ -135,6 +135,21 @@
 					{/if}
 				</article>
 			{/each}
+
+			{#if listState.appendState.type === 'Loading'}
+				<div class="timeline-append-state">
+					<progress class="progress progress-primary timeline-append-progress"></progress>
+				</div>
+			{:else if listState.appendState.type === 'Error'}
+				<div class="timeline-append-state">
+					<div class="alert alert-error timeline-append-error">
+						<span>{listState.appendState.message ?? 'Unable to load more posts'}</span>
+						<button class="btn btn-sm" type="button" onclick={() => listState.retry()}>Retry</button>
+					</div>
+				</div>
+			{:else if listState.appendState.endOfPaginationReached}
+				<div class="timeline-append-end">No more posts</div>
+			{/if}
 		</div>
 	{/if}
 </div>
@@ -213,5 +228,34 @@
 
 	.timeline-row-divider {
 		--divider-m: 0;
+	}
+
+	.timeline-append-state {
+		min-width: 0;
+		padding: 0.5rem 0;
+	}
+
+	.plain-mode .timeline-append-state {
+		padding-inline: var(--timeline-content-padding);
+	}
+
+	.timeline-append-progress {
+		display: block;
+		width: 100%;
+		height: 0.15rem;
+	}
+
+	.timeline-append-error {
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.75rem;
+	}
+
+	.timeline-append-end {
+		min-width: 0;
+		padding: 0.5rem var(--timeline-content-padding);
+		text-align: center;
+		color: color-mix(in oklab, var(--color-base-content) 56%, transparent);
+		font-size: 0.9rem;
 	}
 </style>

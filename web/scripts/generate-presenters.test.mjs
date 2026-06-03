@@ -620,12 +620,14 @@ test('generates paging state get bridge for visible items', async () => {
 		const generated = await fs.readFile(path.join(outDir, 'timeline.svelte.ts'), 'utf8');
 
 		assert.match(generated, /type PagingStateSnapshot =/);
+		assert.match(generated, /export type PagingLoadState =/);
 		assert.match(
 			generated,
-			/export type PagingState<T> =\n\t\| \{ type: "Loading" \}\n\t\| \{ type: "Error"; message: string \| null \}\n\t\| \{ type: "Empty" \}\n\t\| \{ type: "Success"; itemCount: number; isRefreshing: boolean; peek\(index: number\): T \| null; get\(index: number\): void \};/
+			/export type PagingState<T> =\n\t\| \{ type: "Loading" \}\n\t\| \{ type: "Error"; message: string \| null \}\n\t\| \{ type: "Empty" \}\n\t\| \{ type: "Success"; itemCount: number; isRefreshing: boolean; appendState: PagingLoadState; peek\(index: number\): T \| null; get\(index: number\): void; retry\(\): void \};/
 		);
 		assert.match(generated, /call\("__webPagingPeek:listState", \{ index \}\)/);
 		assert.match(generated, /dispatch\("__webPagingGet:listState", \{ index \}\)/);
+		assert.match(generated, /dispatch\("__webPagingRetry:listState"\)/);
 		assert.doesNotMatch(generated, /items: Array<T>/);
 		assert.doesNotMatch(generated, /value\.items/);
 	} finally {

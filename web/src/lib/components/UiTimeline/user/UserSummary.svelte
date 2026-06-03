@@ -2,7 +2,7 @@
 	import { useDeepLink } from '$lib/deeplink/deepLink.svelte';
 	import { useEnvironmentSettings } from '$lib/environment/environmentSettings.svelte';
 	import type { UiProfile } from '@flare/web-presenters/timeline.svelte';
-	import PostRichText from '../post/PostRichText.svelte';
+	import RichText from '$lib/components/RichText.svelte';
 	import { defaultTimelineAppearance, initials } from '../post/postUtils';
 
 	type UserSummaryVariant = 'standalone' | 'compact';
@@ -66,7 +66,7 @@
 		<header class="user-header">
 			<div class="identity">
 				<div class="name-line">
-					<PostRichText text={user.name} className="user-name" />
+					<RichText text={user.name} className="user-name" maxLines={1} />
 				</div>
 				<div class="handle-line">
 					<span class="handle">{handleText}</span>

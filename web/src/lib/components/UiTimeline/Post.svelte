@@ -13,7 +13,7 @@
     import PostPoll from "./post/PostPoll.svelte";
     import PostQuote from "./post/PostQuote.svelte";
     import PostReactions from "./post/PostReactions.svelte";
-    import PostRichText from "./post/PostRichText.svelte";
+    import RichText from "$lib/components/RichText.svelte";
     import PostTopMessage from "./post/PostTopMessage.svelte";
     import UiTimelinePost from "./Post.svelte";
     import {
@@ -221,7 +221,7 @@
 
                 {#if hasContentWarning && post.contentWarning}
                     <div class="content-warning rounded-box border border-base-300">
-                        <PostRichText
+                        <RichText
                             text={post.contentWarning}
                             className="warning-text"
                         />
@@ -242,7 +242,7 @@
                         class="post-text"
                         style={`--line-limit: ${lineLimit};`}
                     >
-                        <PostRichText
+                        <RichText
                             text={post.content}
                             className="rich-body"
                         />

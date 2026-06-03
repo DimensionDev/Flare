@@ -2,7 +2,7 @@ package dev.dimension.flare.data.datastore
 
 import androidx.datastore.core.Storage
 import androidx.datastore.core.okio.OkioSerializer
-import androidx.datastore.core.okio.WebOpfsStorage
+import androidx.datastore.core.okio.WebLocalStorage
 import dev.dimension.flare.data.io.FileStorage
 
 internal actual fun <T> createDataStoreStorage(
@@ -10,7 +10,7 @@ internal actual fun <T> createDataStoreStorage(
     serializer: OkioSerializer<T>,
     @Suppress("UNUSED_PARAMETER") fileStorage: FileStorage,
 ): Storage<T> =
-    WebOpfsStorage(
+    WebLocalStorage(
         serializer = serializer,
         name = name,
     )

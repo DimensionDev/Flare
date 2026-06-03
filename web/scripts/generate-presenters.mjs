@@ -56,17 +56,22 @@ export type UiState<T> =
 		kind: 'pagingState',
 		is: (item) => item?.kind === 'pagingState',
 		content: (item) => item.item,
-		renderTypes: () => `type PagingStateSnapshot =
+		renderTypes: () => `export type PagingLoadState =
+\t| { type: "Loading" }
+\t| { type: "Error"; message: string | null }
+\t| { type: "NotLoading"; endOfPaginationReached: boolean };
+
+type PagingStateSnapshot =
 \t| { type: "Loading" }
 \t| { type: "Error"; message: string | null }
 \t| { type: "Empty" }
-\t| { type: "Success"; itemCount: number; isRefreshing: boolean };
+\t| { type: "Success"; itemCount: number; isRefreshing: boolean; appendState: PagingLoadState };
 
 export type PagingState<T> =
 \t| { type: "Loading" }
 \t| { type: "Error"; message: string | null }
 \t| { type: "Empty" }
-\t| { type: "Success"; itemCount: number; isRefreshing: boolean; peek(index: number): T | null; get(index: number): void };
+\t| { type: "Success"; itemCount: number; isRefreshing: boolean; appendState: PagingLoadState; peek(index: number): T | null; get(index: number): void; retry(): void };
 
 `,
 		snapshotType: () => 'PagingStateSnapshot',
@@ -77,12 +82,13 @@ export type PagingState<T> =
 		toPublicExpression: (item, valueExpression, refsExpression, callExpression, refTypes, options = {}) => {
 			const getStatement = options.getStatement ?? 'void index';
 			const peekPath = options.peekPath;
+			const retryStatement = options.retryStatement ?? '';
 			const peekReturn = { ...item.item, nullable: true };
 			const peekStatement =
 				peekPath === undefined
 					? 'return null;'
 					: `const result = ${callExpression}(${JSON.stringify(peekPath)}, { index });\n\t\treturn ${decodeReturnExpression('result', peekReturn)};`;
-			return `((value: ${snapshotTsType(item)}) => value.type === "Success" ? { ...value, peek(index: number) { ${peekStatement} }, get(index: number) { ${getStatement}; } } : value)(${valueExpression})`;
+			return `((value: ${snapshotTsType(item)}) => value.type === "Success" ? { ...value, peek(index: number) { ${peekStatement} }, get(index: number) { ${getStatement}; }, retry() { ${retryStatement}; } } : value)(${valueExpression})`;
 		},
 		toBridgeExpression: (item, valueExpression, refsExpression, refTypes, visitedRefs) =>
 			valueExpression
@@ -678,7 +684,8 @@ function renderSnapshotAssignment(property, refTypes) {
 		stateCodec?.kind === 'pagingState'
 			? {
 					peekPath: pagingPeekPath(property.name),
-					getStatement: `dispatch(${JSON.stringify(pagingGetPath(property.name))}, { index })`
+					getStatement: `dispatch(${JSON.stringify(pagingGetPath(property.name))}, { index })`,
+					retryStatement: `dispatch(${JSON.stringify(pagingRetryPath(property.name))})`
 				}
 			: {};
 	return `\t\t\tstate.${property.name} = ${toPublicValueExpression(property, `snapshot.${property.name}`, 'refs', 'call', refTypes, options)};`;
@@ -1021,4 +1028,8 @@ function pagingGetPath(propertyName) {
 
 function pagingPeekPath(propertyName) {
 	return `__webPagingPeek:${propertyName}`;
+}
+
+function pagingRetryPath(propertyName) {
+	return `__webPagingRetry:${propertyName}`;
 }

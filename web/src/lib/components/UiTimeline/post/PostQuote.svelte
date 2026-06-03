@@ -5,7 +5,7 @@
 	import PostCard from './PostCard.svelte';
 	import PostHeader from './PostHeader.svelte';
 	import PostMediaGrid from './PostMediaGrid.svelte';
-	import PostRichText from './PostRichText.svelte';
+	import RichText from '$lib/components/RichText.svelte';
 	import { shouldIgnorePostContainerClick } from './postUtils';
 
 	let {
@@ -50,7 +50,7 @@
 	<PostHeader post={quote} {appearance} sideAvatarVisible={false} quoteHeader={true} />
 	{#if !quote.content.isEmpty}
 		<div class="quote-text">
-			<PostRichText text={quote.content} className="rich-body" />
+			<RichText text={quote.content} className="rich-body" />
 		</div>
 	{/if}
 	{#if quote.images.length > 0}

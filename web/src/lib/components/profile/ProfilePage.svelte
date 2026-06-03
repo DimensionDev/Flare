@@ -99,9 +99,9 @@
     );
     const profileError = $derived(
         hasProfileRoute && lookupState.user.type === "Error"
-            ? (lookupState.user.message ?? "Unable to load profile")
+            ? (lookupState.user.message ?? m.profileUnableToLoad())
             : hasResolvedProfileRoute && profileState.userState.type === "Error"
-            ? (profileState.userState.message ?? "Unable to load profile")
+            ? (profileState.userState.message ?? m.profileUnableToLoad())
             : null,
     );
     const followButtonState = $derived(
@@ -208,12 +208,12 @@
 
     function profileStats(user: UiProfile) {
         return [
-            { label: "Posts", value: user.matrices.statusesCountHumanized },
+            { label: m.profileStatPosts(), value: user.matrices.statusesCountHumanized },
             {
-                label: "Following",
+                label: m.profileStatFollowing(),
                 value: user.matrices.followsCountHumanized,
             },
-            { label: "Followers", value: user.matrices.fansCountHumanized },
+            { label: m.profileStatFollowers(), value: user.matrices.fansCountHumanized },
         ];
     }
 
@@ -231,15 +231,15 @@
     }
 
     function profileTabTitle(tab: ProfileStateTab): string {
-        if (tab.type === "Media") return "Media";
+        if (tab.type === "Media") return m.profileTabMedia();
 
         switch (tab.type_) {
             case "Status":
-                return "Posts";
+                return m.profileTabTimeline();
             case "StatusWithReplies":
-                return "Replies";
+                return m.profileTabTimelineWithReply();
             case "Likes":
-                return "Likes";
+                return m.profileTabLikes();
         }
     }
 
@@ -318,19 +318,19 @@
     function localizedActionText(type: ActionMenuItemTextLocalizedType): string {
         switch (type) {
             case "EditUserList":
-                return "Edit list";
+                return m.actionEditList();
             case "SendMessage":
-                return "Message";
+                return m.actionMessage();
             case "Mute":
-                return "Mute";
+                return m.actionMute();
             case "UnMute":
-                return "Unmute";
+                return m.actionUnmute();
             case "Block":
-                return "Block";
+                return m.actionBlock();
             case "UnBlock":
-                return "Unblock";
+                return m.actionUnblock();
             case "Report":
-                return "Report";
+                return m.actionReport();
             default:
                 return type;
         }
@@ -352,20 +352,20 @@
     function profileMarkLabel(mark: UiProfileMark): string {
         switch (mark) {
             case "Cat":
-                return "Cat";
+                return m.profileMarkCat();
             case "Verified":
-                return "Verified";
+                return m.profileMarkVerified();
             case "Locked":
-                return "Locked";
+                return m.profileMarkLocked();
             case "Bot":
-                return "Bot";
+                return m.profileMarkBot();
         }
     }
 </script>
 
 <svelte:head>
     <title
-        >{displayProfile ? profileNameText(displayProfile) : "Profile"} |
+        >{displayProfile ? profileNameText(displayProfile) : m.profileTitle()} |
         Flare</title
     >
 </svelte:head>
@@ -374,7 +374,7 @@
     <AppTopBar
         title={displayProfile ? profileNameText(displayProfile) : undefined}
         subtitle={displayProfile
-            ? `${displayProfile.matrices.statusesCountHumanized} posts`
+            ? m.profilePostsCount({ count: displayProfile.matrices.statusesCountHumanized })
             : undefined}
         zIndex="z-20"
     >
@@ -382,7 +382,7 @@
             <button
                 class="btn btn-ghost btn-square btn-sm rounded-box"
                 type="button"
-                aria-label="Back"
+                aria-label={m.navigateBack()}
                 onclick={() => history.back()}
             >
                 <FaIcon name="Back" size={16} />
@@ -400,7 +400,7 @@
                 <button
                     class="btn btn-ghost btn-square btn-sm rounded-box"
                     type="button"
-                    aria-label="More"
+                    aria-label={m.actionMore()}
                     popovertarget="profile-action-menu"
                     style="anchor-name: --profile-action-menu-anchor;"
                 >
@@ -420,7 +420,7 @@
                 <button
                     class="btn btn-ghost btn-square btn-sm rounded-box"
                     type="button"
-                    aria-label="More"
+                    aria-label={m.actionMore()}
                     disabled
                 >
                     <FaIcon name="More" size={16} />
@@ -441,7 +441,7 @@
                 class:clickable={profileClickable}
                 class="banner-button"
                 type="button"
-                aria-label="Open banner"
+                aria-label={m.profileOpenBanner()}
                 onclick={performProfileClick}
             >
                 {#if displayProfile.banner}
@@ -454,7 +454,7 @@
                     class:clickable={profileClickable}
                     class="profile-avatar rounded-full bg-base-100"
                     type="button"
-                    aria-label="Open avatar"
+                    aria-label={m.profileOpenAvatar()}
                     onclick={performProfileClick}
                 >
                     {#if displayProfile.avatar}
@@ -565,7 +565,7 @@
 
     <nav
         class="profile-tabs-shell border-b border-base-300 bg-base-100"
-        aria-label="Profile timelines"
+        aria-label={m.profileTimelinesAriaLabel()}
     >
         <div class="tabs tabs-border profile-tabs" role="tablist">
             {#if hasProfileRoute && profileState.tabs.type === "Loading"}
@@ -596,7 +596,7 @@
                 <div class="alert alert-error">
                     <span
                         >{profileState.tabs.message ??
-                            "Unable to load profile tabs"}</span
+                            m.profileUnableToLoadTabs()}</span
                     >
                 </div>
             </div>

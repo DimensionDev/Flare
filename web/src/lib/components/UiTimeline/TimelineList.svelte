@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { useEnvironmentSettings } from '$lib/environment/environmentSettings.svelte';
+	import { m } from '$lib/paraglide/messages.js';
 	import type { TimelineDisplayMode } from '$lib/environment/environmentSettings.svelte';
 	import type { MicroBlogKey, PagingState, UiTimelineV2 } from '@flare/web-presenters/timeline.svelte';
 	import PostLoadingPlaceholder from './post/PostLoadingPlaceholder.svelte';
@@ -101,21 +102,17 @@
 	{:else if listState.type === 'Error'}
 		<div class="timeline-list-state">
 			<div class="alert alert-error">
-				<span>{listState.message ?? 'Unable to load timeline'}</span>
+				<span>{listState.message ?? m.timelineUnableToLoadTimeline()}</span>
 			</div>
 		</div>
 	{:else if listState.type === 'Empty'}
 		<div class="timeline-list-empty">
-			<span>Empty</span>
+			<span>{m.timelineEmpty()}</span>
 		</div>
 	{:else if galleryMode}
 		<div class="timeline-gallery-slot"></div>
 	{:else}
 		<div class="timeline-list-body">
-			{#if listState.isRefreshing}
-				<progress class="progress progress-primary timeline-progress"></progress>
-			{/if}
-
 			{#each itemIndexes as index (index)}
 				{@const item = listState.peek(index)}
 				<article
@@ -145,12 +142,12 @@
 			{:else if listState.appendState.type === 'Error'}
 				<div class="timeline-append-state">
 					<div class="alert alert-error timeline-append-error">
-						<span>{listState.appendState.message ?? 'Unable to load more posts'}</span>
-						<button class="btn btn-sm" type="button" onclick={() => listState.retry()}>Retry</button>
+						<span>{listState.appendState.message ?? m.timelineUnableToLoadMorePosts()}</span>
+						<button class="btn btn-sm" type="button" onclick={() => listState.retry()}>{m.actionRetry()}</button>
 					</div>
 				</div>
 			{:else if listState.appendState.endOfPaginationReached}
-				<div class="timeline-append-end">No more posts</div>
+				<div class="timeline-append-end">{m.timelineNoMorePosts()}</div>
 			{/if}
 		</div>
 	{/if}
@@ -207,15 +204,6 @@
 
 	.plain-mode .timeline-list-body {
 		background: var(--color-base-100);
-	}
-
-	.timeline-progress {
-		position: sticky;
-		top: 0;
-		z-index: 2;
-		display: block;
-		width: 100%;
-		height: 0.15rem;
 	}
 
 	.timeline-row {

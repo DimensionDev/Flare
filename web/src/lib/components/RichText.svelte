@@ -70,8 +70,9 @@
 	}
 
 	.rich-text :global(.rt-inline-image) {
-		max-width: 1.4em;
-		max-height: 1.4em;
+		display: inline-block;
+		width: auto;
+		height: 1.4em;
 		vertical-align: -0.25em;
 	}
 

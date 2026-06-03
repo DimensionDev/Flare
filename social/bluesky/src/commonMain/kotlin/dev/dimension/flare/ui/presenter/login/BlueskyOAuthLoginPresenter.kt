@@ -6,6 +6,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import dev.dimension.flare.data.datastore.PlatformOAuthPending
+import dev.dimension.flare.data.datastore.PlatformOAuthPendingRepository
 import dev.dimension.flare.data.network.bluesky.OAuthCodeChallengeMethodS256
 import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.data.platform.BlueskyCredential
@@ -26,6 +28,8 @@ import sh.christian.ozone.oauth.OAuthApi
 import sh.christian.ozone.oauth.OAuthAuthorizationRequest
 import sh.christian.ozone.oauth.OAuthClient
 import sh.christian.ozone.oauth.OAuthScope
+import kotlin.time.Clock
+import kotlin.time.Duration.Companion.milliseconds
 
 private const val CLIENT_METADATA = "https://flareapp.moe/client-metadata.json"
 private const val REDIRECT_URI = "https://flareapp.moe/callback"
@@ -35,14 +39,13 @@ internal class BlueskyOAuthLoginPresenter(
 ) : PresenterBase<BlueskyOAuthLoginState>(),
     KoinComponent {
     private val accountService: AccountService by inject()
-    private var oauthApi: OAuthApi? = null
+    private val pendingRepository: PlatformOAuthPendingRepository by inject()
 
-    private val oauthClient by lazy {
+    private val oauthClient =
         OAuthClient(
             clientId = CLIENT_METADATA,
             redirectUri = REDIRECT_URI,
         )
-    }
 
     private var request: OAuthAuthorizationRequest? = null
 
@@ -64,19 +67,17 @@ internal class BlueskyOAuthLoginPresenter(
                     loading = true
                     error = null
                     request = null
-                    oauthApi =
-                        OAuthApi(
-                            ktorClient {
-                                install(DefaultRequest) {
-                                    url.takeFrom("https://$baseUrl")
-                                }
-                            },
-                            { OAuthCodeChallengeMethodS256 },
-                        )
 
                     request =
                         try {
-                            login(userName)
+                            login(baseUrl, userName).also {
+                                pendingRepository.save(
+                                    it.toPlatformOAuthPending(
+                                        host = baseUrl,
+                                        redirectUri = REDIRECT_URI,
+                                    ),
+                                )
+                            }
                         } catch (e: Exception) {
                             error = e.message
                             null
@@ -100,12 +101,18 @@ internal class BlueskyOAuthLoginPresenter(
 
             override fun resume(url: String) {
                 scope.launch {
-                    if (request == null) {
-                        error = "No pending authorization request"
-                        return@launch
-                    }
                     try {
-                        resume(url, request!!)
+                        val state = Url(url).parameters["state"]
+                        val pending =
+                            pendingRepository
+                                .all(PlatformType.Bluesky)
+                                .firstOrNull { it.attributes["state"] == state }
+                        if (pending == null) {
+                            error = "No pending authorization request"
+                            return@launch
+                        }
+                        resume(url, pending.toBlueskyAuthorizationRequest())
+                        pendingRepository.clear(pending)
                         toHome.invoke()
                     } catch (e: Exception) {
                         error = e.message
@@ -123,8 +130,11 @@ internal class BlueskyOAuthLoginPresenter(
         }
     }
 
-    private suspend fun login(userName: String): OAuthAuthorizationRequest? =
-        oauthApi?.buildAuthorizationRequest(
+    private suspend fun login(
+        host: String,
+        userName: String,
+    ): OAuthAuthorizationRequest =
+        createOAuthApi(host).buildAuthorizationRequest(
             oauthClient = oauthClient,
             scopes =
                 listOf(
@@ -151,15 +161,12 @@ internal class BlueskyOAuthLoginPresenter(
         }
         val host = Url(iss).host
         val token =
-            oauthApi?.requestToken(
+            createOAuthApi(host).requestToken(
                 oauthClient = oauthClient,
                 code = code,
                 nonce = request.nonce,
                 codeVerifier = request.codeVerifier,
             )
-        requireNotNull(token) {
-            "Failed to obtain access token from $iss"
-        }
         val credential: BlueskyCredential =
             BlueskyCredential.OAuthCredential(
                 baseUrl = iss,
@@ -180,3 +187,41 @@ internal class BlueskyOAuthLoginPresenter(
         )
     }
 }
+
+private fun createOAuthApi(host: String): OAuthApi =
+    OAuthApi(
+        ktorClient {
+            install(DefaultRequest) {
+                url.takeFrom("https://$host")
+            }
+        },
+        { OAuthCodeChallengeMethodS256 },
+    )
+
+private fun OAuthAuthorizationRequest.toPlatformOAuthPending(
+    host: String,
+    redirectUri: String,
+): PlatformOAuthPending =
+    PlatformOAuthPending(
+        platformType = PlatformType.Bluesky,
+        host = host,
+        createdAtEpochMillis = Clock.System.now().toEpochMilliseconds(),
+        attributes =
+            mapOf(
+                "authorize_request_url" to authorizeRequestUrl,
+                "expires_in_millis" to expiresIn.inWholeMilliseconds.toString(),
+                "code_verifier" to codeVerifier,
+                "state" to state,
+                "nonce" to nonce,
+                "redirect_uri" to redirectUri,
+            ),
+    )
+
+private fun PlatformOAuthPending.toBlueskyAuthorizationRequest(): OAuthAuthorizationRequest =
+    OAuthAuthorizationRequest(
+        authorizeRequestUrl = attributes.getValue("authorize_request_url"),
+        expiresIn = attributes.getValue("expires_in_millis").toLong().milliseconds,
+        codeVerifier = attributes.getValue("code_verifier"),
+        state = attributes.getValue("state"),
+        nonce = attributes.getValue("nonce"),
+    )

@@ -2,6 +2,7 @@
 	import AppTopBar from '$lib/components/AppTopBar.svelte';
 	import FaIcon from '$lib/components/FaIcon.svelte';
 	import UiTimelinePost from '$lib/components/UiTimeline/Post.svelte';
+	import { m } from '$lib/paraglide/messages.js';
 	import {
 		useEnvironmentSettings,
 		type AvatarShape,
@@ -36,42 +37,42 @@
 	const pageTitle = $derived(titleForKind(kind));
 	const sampleStatus = $derived(appearancePreview.sampleStatus);
 
-	const themeOptions: SelectOption<Theme>[] = [
-		{ label: 'System', value: 'SYSTEM' },
-		{ label: 'Light', value: 'LIGHT' },
-		{ label: 'Dark', value: 'DARK' },
-	];
-	const avatarShapeOptions: SelectOption<AvatarShape>[] = [
-		{ label: 'Round', value: 'CIRCLE' },
-		{ label: 'Square', value: 'SQUARE' },
-	];
-	const timelineDisplayOptions: SelectOption<TimelineDisplayMode>[] = [
-		{ label: 'Card', value: 'Card' },
-		{ label: 'Plain (single column only)', value: 'Plain' },
-		{ label: 'Gallery (home timeline only)', value: 'Gallery' },
-	];
-	const postActionOptions: SelectOption<PostActionStyle>[] = [
-		{ label: 'Hidden', value: 'Hidden' },
-		{ label: 'Left aligned', value: 'LeftAligned' },
-		{ label: 'Right aligned', value: 'RightAligned' },
-		{ label: 'Stretch', value: 'Stretch' },
-	];
-	const videoAutoplayOptions: SelectOption<VideoAutoplay>[] = [
-		{ label: 'Never', value: 'NEVER' },
-		{ label: 'Wi-Fi only', value: 'WIFI' },
-		{ label: 'Always', value: 'ALWAYS' },
-	];
+	const themeOptions = $derived<SelectOption<Theme>[]>([
+		{ label: m.settingsAppearanceThemeAuto(), value: 'SYSTEM' },
+		{ label: m.settingsAppearanceThemeLight(), value: 'LIGHT' },
+		{ label: m.settingsAppearanceThemeDark(), value: 'DARK' },
+	]);
+	const avatarShapeOptions = $derived<SelectOption<AvatarShape>[]>([
+		{ label: m.settingsAppearanceAvatarShapeRound(), value: 'CIRCLE' },
+		{ label: m.settingsAppearanceAvatarShapeSquare(), value: 'SQUARE' },
+	]);
+	const timelineDisplayOptions = $derived<SelectOption<TimelineDisplayMode>[]>([
+		{ label: m.settingsAppearanceTimelineDisplayModeCard(), value: 'Card' },
+		{ label: m.settingsAppearanceTimelineDisplayModePlain(), value: 'Plain' },
+		{ label: m.settingsAppearanceTimelineDisplayModeGallery(), value: 'Gallery' },
+	]);
+	const postActionOptions = $derived<SelectOption<PostActionStyle>[]>([
+		{ label: m.settingsAppearancePostActionStyleHidden(), value: 'Hidden' },
+		{ label: m.settingsAppearancePostActionStyleLeftAligned(), value: 'LeftAligned' },
+		{ label: m.settingsAppearancePostActionStyleRightAligned(), value: 'RightAligned' },
+		{ label: m.settingsAppearancePostActionStyleStretch(), value: 'Stretch' },
+	]);
+	const videoAutoplayOptions = $derived<SelectOption<VideoAutoplay>[]>([
+		{ label: m.settingsAppearanceVideoAutoplayNever(), value: 'NEVER' },
+		{ label: m.settingsAppearanceVideoAutoplayWifi(), value: 'WIFI' },
+		{ label: m.settingsAppearanceVideoAutoplayAlways(), value: 'ALWAYS' },
+	]);
 
 	function titleForKind(value: PageKind): string {
 		switch (value) {
 			case 'theme':
-				return 'Theme';
+				return m.settingsAppearanceThemeGroupTitle();
 			case 'layout':
-				return 'Layout';
+				return m.settingsAppearanceLayoutGroupTitle();
 			case 'display':
-				return 'Display';
+				return m.settingsAppearanceDisplayGroupTitle();
 			case 'media':
-				return 'Media';
+				return m.settingsAppearanceMediaGroupTitle();
 		}
 	}
 
@@ -95,7 +96,7 @@
 <div class="appearance-page bg-base-200">
 	<AppTopBar title={pageTitle}>
 		{#snippet start()}
-			<a class="btn btn-ghost btn-square btn-sm rounded-box" href="/settings" aria-label="Back to Settings">
+			<a class="btn btn-ghost btn-square btn-sm rounded-box" href="/settings" aria-label={m.navigateBack()}>
 				<FaIcon name="Back" size={16} />
 			</a>
 		{/snippet}
@@ -107,23 +108,23 @@
 				<div class="list rounded-box border border-base-300 bg-base-100">
 					{@render SelectRow(
 						'Palette',
-						'Theme',
-						'Choose the app theme',
+						m.settingsAppearanceTheme(),
+						m.settingsAppearanceThemeDescription(),
 						globalAppearance.theme,
 						themeOptions,
 						(event) => appearanceSettings.updateTheme(selectValue<Theme>(event))
 					)}
 					{@render SelectRow(
 						'Profile',
-						'Avatar shape',
-						'Choose how avatars are displayed',
+						m.settingsAppearanceAvatarShape(),
+						m.settingsAppearanceAvatarShapeDescription(),
 						timelineAppearance.avatarShape,
 						avatarShapeOptions,
 						(event) => appearanceSettings.updateAvatarShape(selectValue<AvatarShape>(event))
 					)}
 					{@render RangeRow(
 						'Edit',
-						'Font Size',
+						m.settingsAppearanceFontSizeDiff(),
 						`${globalAppearance.fontSizeDiff > 0 ? '+' : ''}${globalAppearance.fontSizeDiff}`,
 						-2,
 						4,
@@ -136,8 +137,8 @@
 				<div class="list rounded-box border border-base-300 bg-base-100">
 					{@render SelectRow(
 						'TableList',
-						'Timeline display mode',
-						'Choose how posts are displayed in timelines',
+						m.settingsAppearanceTimelineDisplayMode(),
+						m.settingsAppearanceTimelineDisplayModeDescription(),
 						timelineAppearance.timelineDisplayMode,
 						timelineDisplayOptions,
 						(event) =>
@@ -145,15 +146,15 @@
 					)}
 					{@render ToggleRow(
 						'List',
-						'Show bottom bar text',
-						'Show text labels in bottom navigation and the side rail',
+						m.settingsAppearanceShowBottomBarLabels(),
+						m.settingsAppearanceShowBottomBarLabelsDescription(),
 						globalAppearance.showBottomBarLabels,
 						(event) => appearanceSettings.updateShowBottomBarLabels(checked(event))
 					)}
 					{@render ToggleRow(
 						'TableList',
-						'Deck mode',
-						'Use a deck layout for supported timelines',
+						m.settingsAppearanceDeckMode(),
+						m.settingsAppearanceDeckModeDescription(),
 						globalAppearance.deckMode,
 						(event) => appearanceSettings.updateDeckMode(checked(event))
 					)}
@@ -164,15 +165,15 @@
 				<div class="list rounded-box border border-base-300 bg-base-100">
 					{@render ToggleRow(
 						'News',
-						'Full-width posts',
-						'Let posts span the full available width',
+						m.settingsAppearanceFullWidthPost(),
+						m.settingsAppearanceFullWidthPostDescription(),
 						timelineAppearance.fullWidthPost,
 						(event) => appearanceSettings.updateFullWidthPost(checked(event))
 					)}
 					{@render SelectRow(
 						'Reply',
-						'Post action style',
-						'Choose how action buttons are laid out',
+						m.settingsAppearancePostActionStyle(),
+						m.settingsAppearancePostActionStyleDescription(),
 						timelineAppearance.postActionStyle,
 						postActionOptions,
 						(event) =>
@@ -181,8 +182,8 @@
 					{#if timelineAppearance.postActionStyle !== 'Hidden'}
 						{@render ToggleRow(
 							'List',
-							'Show numbers',
-							'Show counts below each post',
+							m.settingsAppearanceShowNumbers(),
+							m.settingsAppearanceShowNumbersDescription(),
 							timelineAppearance.showNumbers,
 							(event) => appearanceSettings.updateShowNumbers(checked(event))
 						)}
@@ -194,38 +195,38 @@
 				<div class="list rounded-box border border-base-300 bg-base-100">
 					{@render ToggleRow(
 						'News',
-						'Absolute timestamp',
-						'Show exact timestamps on posts',
+						m.settingsAppearanceAbsoluteTimestamp(),
+						m.settingsAppearanceAbsoluteTimestampDescription(),
 						timelineAppearance.absoluteTimestamp,
 						(event) => appearanceSettings.updateAbsoluteTimestamp(checked(event))
 					)}
 					{@render ToggleRow(
 						'World',
-						'Show source platform icons',
-						'Show which platform each post came from',
+						m.settingsAppearanceShowPlatformLogo(),
+						m.settingsAppearanceShowPlatformLogoDescription(),
 						timelineAppearance.showPlatformLogo,
 						(event) => appearanceSettings.updateShowPlatformLogo(checked(event))
 					)}
 					{@render ToggleRow(
 						'World',
-						'Show link previews',
-						'Show link previews in posts',
+						m.settingsAppearanceShowLinkPreviews(),
+						m.settingsAppearanceShowLinkPreviewsDescription(),
 						timelineAppearance.showLinkPreview,
 						(event) => appearanceSettings.updateShowLinkPreview(checked(event))
 					)}
 					{#if timelineAppearance.showLinkPreview}
 						{@render ToggleRow(
 							'List',
-							'Compact link previews',
-							'Use a simplified layout for link previews',
+							m.settingsAppearanceCompatLinkPreviews(),
+							m.settingsAppearanceCompatLinkPreviewsDescription(),
 							timelineAppearance.compatLinkPreview,
 							(event) => appearanceSettings.updateCompatLinkPreview(checked(event))
 						)}
 					{/if}
 					{@render ToggleRow(
 						'World',
-						'In-app browser',
-						'Open external links inside Flare',
+						m.settingsAppearanceInAppBrowser(),
+						m.settingsAppearanceInAppBrowserDescription(),
 						globalAppearance.inAppBrowser,
 						(event) => appearanceSettings.updateInAppBrowser(checked(event))
 					)}
@@ -236,30 +237,30 @@
 				<div class="list rounded-box border border-base-300 bg-base-100">
 					{@render ToggleRow(
 						'Image',
-						'Show media',
-						'Show media attachments in posts',
+						m.settingsAppearanceShowMedia(),
+						m.settingsAppearanceShowMediaDescription(),
 						timelineAppearance.showMedia,
 						(event) => appearanceSettings.updateShowMedia(checked(event))
 					)}
 					{#if timelineAppearance.showMedia}
 						{@render ToggleRow(
 							'PhotoFilm',
-							'Preserve media aspect ratio',
-							'Show media at its original aspect ratio in timelines',
+							m.settingsAppearanceExpandMedia(),
+							m.settingsAppearanceExpandMediaDescription(),
 							timelineAppearance.expandMediaSize,
 							(event) => appearanceSettings.updateExpandMediaSize(checked(event))
 						)}
 						{@render ToggleRow(
 							'CircleExclamation',
-							'Show sensitive content',
-							'Always reveal sensitive media in posts',
+							m.settingsAppearanceShowCwImg(),
+							m.settingsAppearanceShowCwImgDescription(),
 							timelineAppearance.showSensitiveContent,
 							(event) => appearanceSettings.updateShowSensitiveContent(checked(event))
 						)}
 						{@render SelectRow(
 							'Video',
-							'Video autoplay',
-							'Automatically play videos in posts',
+							m.settingsAppearanceVideoAutoplay(),
+							m.settingsAppearanceVideoAutoplayDescription(),
 							timelineAppearance.videoAutoplay,
 							videoAutoplayOptions,
 							(event) =>
@@ -271,7 +272,7 @@
 		{:else if globalAppearanceState.type === 'Error' || timelineAppearanceState.type === 'Error'}
 			<div class="alert alert-error">
 				<FaIcon name="CircleExclamation" size={18} />
-				<span>Unable to load appearance settings.</span>
+				<span>{m.settingsAppearanceLoadError()}</span>
 			</div>
 		{:else}
 			<div class="settings-loading rounded-box border border-base-300 bg-base-100">
@@ -348,7 +349,7 @@
 
 {#snippet PreviewBlock()}
 	{#if sampleStatus.type !== 'Error'}
-		<section class="preview-section" aria-label="Preview">
+		<section class="preview-section" aria-label={m.previewAriaLabel()}>
 			{#if sampleStatus.type === 'Success'}
 				<div class="preview-post">
 					<UiTimelinePost

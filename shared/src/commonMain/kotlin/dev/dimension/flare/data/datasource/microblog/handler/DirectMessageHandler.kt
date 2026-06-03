@@ -31,6 +31,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiDMItem
 import dev.dimension.flare.ui.model.UiDMRoom
 import dev.dimension.flare.ui.model.UiState
+import kotlin.native.HiddenFromObjC
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -42,7 +43,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import kotlin.native.HiddenFromObjC
 
 @OptIn(ExperimentalPagingApi::class)
 @HiddenFromObjC
@@ -69,7 +69,7 @@ public class DirectMessageHandler(
                     onLoad = { pageSize, request ->
                         loader.loadRooms(pageSize, request)
                     },
-                    onSave = { request, data ->
+                    onSaveInTransaction = { request, data ->
                         if (request == PagingRequest.Refresh) {
                             database.messageDao().clearMessageTimeline(accountType)
                         }
@@ -108,7 +108,7 @@ public class DirectMessageHandler(
                     onLoad = { pageSize, request ->
                         loader.loadMessages(roomKey, pageSize, request)
                     },
-                    onSave = { request, data ->
+                    onSaveInTransaction = { request, data ->
                         if (request == PagingRequest.Refresh) {
                             database.messageDao().clearRoomMessage(roomKey = roomKey)
                             database.messageDao().clearUnreadCount(roomKey, accountType)

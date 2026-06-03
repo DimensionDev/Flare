@@ -1,6 +1,8 @@
 <script lang="ts">
 	import AppTopBar from '$lib/components/AppTopBar.svelte';
 	import FaIcon from '$lib/components/FaIcon.svelte';
+	import UserDisplay from '$lib/components/user/UserDisplay.svelte';
+	import { m } from '$lib/paraglide/messages.js';
 	import {
 		createAccountsPresenter,
 		type AccountsStateAccountItem,
@@ -69,19 +71,19 @@
 
 	function removeAccount(item: AccountsStateAccountItem): void {
 		const title = accountTitle(item);
-		if (!confirm(`Remove ${title} from Flare?`)) return;
+		if (!confirm(m.settingsAccountsRemoveConfirm({ name: title }))) return;
 		accountsPresenter.removeAccount(item.account.accountKey);
 	}
 </script>
 
 <svelte:head>
-	<title>Accounts | Flare</title>
+	<title>{m.settingsAccountsTitle()} | Flare</title>
 </svelte:head>
 
 <div class="accounts-page bg-base-200">
-	<AppTopBar title="Accounts">
+	<AppTopBar title={m.settingsAccountsTitle()}>
 		{#snippet start()}
-			<a class="btn btn-ghost btn-square btn-sm rounded-box" href="/settings" aria-label="Back to Settings">
+			<a class="btn btn-ghost btn-square btn-sm rounded-box" href="/settings" aria-label={m.navigateBack()}>
 				<FaIcon name="Back" size={16} />
 			</a>
 		{/snippet}
@@ -89,30 +91,34 @@
 
 	<div class="accounts-content">
 		<section class="accounts-section" aria-labelledby="signed-in-heading">
-			<h2 id="signed-in-heading" class="section-title">Signed in</h2>
+			<h2 id="signed-in-heading" class="section-title">{m.settingsAccountsSignedIn()}</h2>
 
 			{#if accountsState.type === 'Success'}
 				{#if accountsState.data.length > 0}
 					<div class="list rounded-box border border-base-300 bg-base-100">
 						{#each accountsState.data as item (accountKeyText(item.account.accountKey))}
 							<div class="list-row account-row">
-								<div class="account-avatar bg-base-200 text-base-content">
-									{#if item.profile.type === 'Success' && item.profile.data.avatar}
-										<img src={item.profile.data.avatar} alt="" loading="lazy" />
-									{:else}
-										<FaIcon name={platformIcon(item.account.platformType)} size={18} />
-									{/if}
-								</div>
-
-								<div class="account-copy">
-									<div class="account-title-line">
-										<span class="account-title">{accountTitle(item)}</span>
+								{#if item.profile.type === 'Success'}
+									<div class="account-user">
+										<UserDisplay user={item.profile.data} variant="account" clickable={false} />
 										{#if isActiveAccount(item.account)}
-											<span class="badge badge-primary badge-sm">Current</span>
+											<span class="badge badge-primary badge-sm">{m.settingsAccountsCurrent()}</span>
 										{/if}
 									</div>
-									<span class="account-description">{accountDescription(item)}</span>
-								</div>
+								{:else}
+									<div class="account-avatar bg-base-200 text-base-content">
+										<FaIcon name={platformIcon(item.account.platformType)} size={18} />
+									</div>
+									<div class="account-copy">
+										<div class="account-title-line">
+											<span class="account-title">{accountTitle(item)}</span>
+											{#if isActiveAccount(item.account)}
+												<span class="badge badge-primary badge-sm">{m.settingsAccountsCurrent()}</span>
+											{/if}
+										</div>
+										<span class="account-description">{accountDescription(item)}</span>
+									</div>
+								{/if}
 
 								<div class="account-actions">
 									<button
@@ -122,12 +128,12 @@
 										onclick={() => setActive(item)}
 									>
 										<FaIcon name="Check" size={13} />
-										<span>Use</span>
+										<span>{m.actionUse()}</span>
 									</button>
 									<button
 										class="btn btn-ghost btn-square btn-sm text-error"
 										type="button"
-										aria-label={`Remove ${accountTitle(item)}`}
+										aria-label={m.settingsAccountsRemoveAriaLabel({ name: accountTitle(item) })}
 										onclick={() => removeAccount(item)}
 									>
 										<FaIcon name="Delete" size={14} />
@@ -142,15 +148,15 @@
 							<FaIcon name="Profile" size={18} />
 						</span>
 						<div>
-							<h3>No accounts</h3>
-							<p>Add an account to start using authenticated timelines.</p>
+							<h3>{m.settingsAccountsNoAccounts()}</h3>
+							<p>{m.settingsAccountsNoAccountsDescription()}</p>
 						</div>
 					</div>
 				{/if}
 			{:else if accountsState.type === 'Error'}
 				<div class="alert alert-error">
 					<FaIcon name="CircleExclamation" size={18} />
-					<span>{accountsState.message ?? 'Unable to load accounts.'}</span>
+					<span>{accountsState.message ?? m.settingsAccountsLoadError()}</span>
 				</div>
 			{:else}
 				<div class="list rounded-box border border-base-300 bg-base-100">
@@ -169,19 +175,19 @@
 		</section>
 
 		<section class="accounts-section" aria-labelledby="add-account-heading">
-			<h2 id="add-account-heading" class="section-title">Add account</h2>
+			<h2 id="add-account-heading" class="section-title">{m.settingsAccountsAddTitle()}</h2>
 			<div class="list rounded-box border border-base-300 bg-base-100">
 				<div class="list-row account-row">
 					<span class="setting-icon bg-primary/10 text-primary">
 						<FaIcon name="React" size={18} />
 					</span>
 					<span class="account-copy">
-						<span class="account-title">Add account</span>
-						<span class="account-description">Sign in with another platform or identity</span>
+						<span class="account-title">{m.settingsAccountsAddTitle()}</span>
+						<span class="account-description">{m.settingsAccountsAddDescription()}</span>
 					</span>
 					<a class="btn btn-primary btn-sm" href="/login">
 						<FaIcon name="React" size={13} />
-						<span>Add</span>
+						<span>{m.actionAdd()}</span>
 					</a>
 				</div>
 			</div>
@@ -235,10 +241,13 @@
 		overflow: hidden;
 	}
 
-	.account-avatar img {
-		width: 100%;
-		height: 100%;
-		object-fit: cover;
+	.account-user {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) auto;
+		align-items: center;
+		gap: 0.5rem;
+		grid-column: 1 / span 2;
+		min-width: 0;
 	}
 
 	.account-copy {
@@ -261,6 +270,21 @@
 		font-size: 0.96rem;
 		font-weight: 650;
 		line-height: 1.25;
+	}
+
+	.account-title-line :global(.account-title) {
+		min-width: 0;
+		font-size: 0.96rem;
+		font-weight: 650;
+		line-height: 1.25;
+	}
+
+	.account-title-line :global(.account-title),
+	.account-title-line :global(.account-title p),
+	.account-title-line :global(.account-title .rt-block) {
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
 	}
 
 	.account-description {

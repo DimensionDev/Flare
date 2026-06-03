@@ -6,6 +6,7 @@ import dev.dimension.flare.data.platform.BlueskyPlatformSpec
 import dev.dimension.flare.data.platform.MastodonPlatformSpec
 import dev.dimension.flare.data.platform.MisskeyPlatformSpec
 import dev.dimension.flare.data.platform.RssTimelineSpecs
+import dev.dimension.flare.di.ensureSharedStartupCoordinators
 import dev.dimension.flare.model.PlatformRuntimeData
 import dev.dimension.flare.ui.humanizer.WebFormatterBridge
 import dev.dimension.flare.ui.humanizer.installWebFormatterBridge
@@ -22,6 +23,7 @@ internal object WebSharedHelper {
     fun initialize() {
         if (initialized) return
         startKoin<WebKoinApplication>()
+        ensureSharedStartupCoordinators()
         initialized = true
     }
 }

@@ -2,6 +2,8 @@ package dev.dimension.flare.ui.presenter.login
 
 import com.atproto.server.CreateSessionRequest
 import com.atproto.server.CreateSessionResponse
+import dev.dimension.flare.data.datastore.PlatformOAuthPending
+import dev.dimension.flare.data.datastore.PlatformOAuthPendingRepository
 import dev.dimension.flare.data.network.bluesky.BlueskyPlatformDetector
 import dev.dimension.flare.data.network.bluesky.BlueskyService
 import dev.dimension.flare.data.network.bluesky.OAuthCodeChallengeMethodS256
@@ -33,6 +35,8 @@ import sh.christian.ozone.oauth.OAuthApi
 import sh.christian.ozone.oauth.OAuthAuthorizationRequest
 import sh.christian.ozone.oauth.OAuthClient
 import sh.christian.ozone.oauth.OAuthScope
+import kotlin.time.Clock
+import kotlin.time.Duration.Companion.milliseconds
 
 private const val CLIENT_METADATA = "https://flareapp.moe/client-metadata.json"
 private const val REDIRECT_URI = "https://flareapp.moe/callback"
@@ -270,15 +274,16 @@ private class BlueskyOAuthLoginHandler(
 ) : LoginMethodHandler,
     KoinComponent {
     private val accountService: AccountService by inject()
+    private val pendingRepository: PlatformOAuthPendingRepository by inject()
     private val values = mutableMapOf<String, String>()
-    private var oauthApi: OAuthApi? = null
     private var request: OAuthAuthorizationRequest? = null
-    private val oauthClient by lazy {
+
+    private fun oauthClient(redirectUri: String) =
         OAuthClient(
             clientId = CLIENT_METADATA,
-            redirectUri = REDIRECT_URI,
+            redirectUri = redirectUri,
         )
-    }
+
     private val _state = MutableStateFlow(oauthState())
     private val _effects = MutableSharedFlow<LoginEffect>(extraBufferCapacity = 1)
 
@@ -297,18 +302,22 @@ private class BlueskyOAuthLoginHandler(
         if (actionId != LOGIN_ACTION) return
         _state.value = oauthState(loading = true)
         request = null
-        oauthApi =
-            OAuthApi(
-                ktorClient {
-                    install(DefaultRequest) {
-                        url.takeFrom("https://${context.host}")
-                    }
-                },
-                { OAuthCodeChallengeMethodS256 },
-            )
         runCatching {
-            request = login(values[USERNAME_FIELD].orEmpty())
-            val authorizeUrl = request?.authorizeRequestUrl.orEmpty()
+            val redirectUri = context.redirectUri ?: REDIRECT_URI
+            request =
+                login(
+                    host = context.host,
+                    userName = values[USERNAME_FIELD].orEmpty(),
+                    redirectUri = redirectUri,
+                )
+            val request = request ?: error("No authorization request")
+            pendingRepository.save(
+                request.toPlatformOAuthPending(
+                    host = context.host,
+                    redirectUri = redirectUri,
+                ),
+            )
+            val authorizeUrl = request.authorizeRequestUrl
             require(authorizeUrl.isNotEmpty()) { "Invalid authorization request URL" }
             _effects.emit(LoginEffect.OpenUrl(authorizeUrl))
         }.onFailure {
@@ -319,8 +328,18 @@ private class BlueskyOAuthLoginHandler(
     override suspend fun resume(value: String) {
         _state.value = oauthState(loading = true)
         runCatching {
-            val request = request ?: error("No pending authorization request")
-            resumeOAuth(value, request)
+            val state = Url(value).parameters["state"]
+            val pending =
+                pendingRepository
+                    .all(PlatformType.Bluesky)
+                    .firstOrNull { it.attributes["state"] == state }
+                    ?: error("No pending authorization request")
+            resumeOAuth(
+                url = value,
+                request = pending.toBlueskyAuthorizationRequest(),
+                redirectUri = pending.attributes["redirect_uri"] ?: REDIRECT_URI,
+            )
+            pendingRepository.clear(pending)
             context.onSuccess()
         }.onFailure {
             _state.value = oauthState(error = it.message)
@@ -361,9 +380,13 @@ private class BlueskyOAuthLoginHandler(
         )
     }
 
-    private suspend fun login(userName: String): OAuthAuthorizationRequest? =
-        oauthApi?.buildAuthorizationRequest(
-            oauthClient = oauthClient,
+    private suspend fun login(
+        host: String,
+        userName: String,
+        redirectUri: String,
+    ): OAuthAuthorizationRequest =
+        createOAuthApi(host).buildAuthorizationRequest(
+            oauthClient = oauthClient(redirectUri),
             scopes =
                 listOf(
                     OAuthScope("atproto"),
@@ -376,6 +399,7 @@ private class BlueskyOAuthLoginHandler(
     private suspend fun resumeOAuth(
         url: String,
         request: OAuthAuthorizationRequest,
+        redirectUri: String,
     ) {
         val parsedUrl = Url(url)
         val code = parsedUrl.parameters["code"]
@@ -389,15 +413,12 @@ private class BlueskyOAuthLoginHandler(
         }
         val host = Url(iss).host
         val token =
-            oauthApi?.requestToken(
-                oauthClient = oauthClient,
+            createOAuthApi(host).requestToken(
+                oauthClient = oauthClient(redirectUri),
                 code = code,
                 nonce = request.nonce,
                 codeVerifier = request.codeVerifier,
             )
-        requireNotNull(token) {
-            "Failed to obtain access token from $iss"
-        }
         val credential: BlueskyCredential =
             BlueskyCredential.OAuthCredential(
                 baseUrl = iss,
@@ -418,6 +439,44 @@ private class BlueskyOAuthLoginHandler(
         )
     }
 }
+
+private fun createOAuthApi(host: String): OAuthApi =
+    OAuthApi(
+        ktorClient {
+            install(DefaultRequest) {
+                url.takeFrom("https://$host")
+            }
+        },
+        { OAuthCodeChallengeMethodS256 },
+    )
+
+private fun OAuthAuthorizationRequest.toPlatformOAuthPending(
+    host: String,
+    redirectUri: String,
+): PlatformOAuthPending =
+    PlatformOAuthPending(
+        platformType = PlatformType.Bluesky,
+        host = host,
+        createdAtEpochMillis = Clock.System.now().toEpochMilliseconds(),
+        attributes =
+            mapOf(
+                "authorize_request_url" to authorizeRequestUrl,
+                "expires_in_millis" to expiresIn.inWholeMilliseconds.toString(),
+                "code_verifier" to codeVerifier,
+                "state" to state,
+                "nonce" to nonce,
+                "redirect_uri" to redirectUri,
+            ),
+    )
+
+private fun PlatformOAuthPending.toBlueskyAuthorizationRequest(): OAuthAuthorizationRequest =
+    OAuthAuthorizationRequest(
+        authorizeRequestUrl = attributes.getValue("authorize_request_url"),
+        expiresIn = attributes.getValue("expires_in_millis").toLong().milliseconds,
+        codeVerifier = attributes.getValue("code_verifier"),
+        state = attributes.getValue("state"),
+        nonce = attributes.getValue("nonce"),
+    )
 
 private fun errorMessage(error: Throwable): String? =
     if (error is AtpException) {

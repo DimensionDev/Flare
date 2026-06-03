@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages.js';
+	import UserDisplay from '$lib/components/user/UserDisplay.svelte';
 	import type { UiTimelineV2 } from '@flare/web-presenters/timeline.svelte';
 	import UiTimelineMessage from './Message.svelte';
 	import UiTimelinePost from './Post.svelte';
-	import UserSummary from './user/UserSummary.svelte';
 
 	type UiTimelineUserList = Extract<UiTimelineV2, { type: 'UserList' }>;
 
@@ -28,7 +28,7 @@
 					class="user-list-card rounded-box border border-base-300"
 					aria-label={user.name.innerText || user.handle.canonical}
 				>
-					<UserSummary {user} variant="compact" />
+					<UserDisplay {user} variant="compact" />
 				</section>
 			{/each}
 		</div>

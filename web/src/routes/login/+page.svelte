@@ -1,6 +1,8 @@
 <script lang="ts">
     import AppTopBar from "$lib/components/AppTopBar.svelte";
     import FaIcon from "$lib/components/FaIcon.svelte";
+    import LoginFlowPanel from "$lib/components/login/LoginFlowPanel.svelte";
+    import { m } from "$lib/paraglide/messages.js";
     import {
         createLoginServiceSelectPresenter,
         type NodeData,
@@ -58,13 +60,14 @@
             switch (platformType) {
                 case "Mastodon":
                 case "Misskey":
-                case "xQt":
-                case "VVo":
                     return ["OAuth"];
                 case "Bluesky":
                     return ["Password", "OAuth"];
-                case "Nostr":
+                case "xQt":
+                case "VVo":
                     return [];
+                case "Nostr":
+                    return ["QrConnect"];
             }
         })();
         return methods.filter((method) => supportedMethods.includes(method));
@@ -73,13 +76,13 @@
     function methodLabel(method: LoginMethodType): string {
         switch (method) {
             case "OAuth":
-                return "OAuth";
+                return m.loginOauth();
             case "Password":
-                return "Password";
+                return m.loginPassword();
             case "CredentialImport":
-                return "Import key";
+                return m.loginImportKey();
             case "QrConnect":
-                return "QR connect";
+                return m.loginQrConnect();
         }
     }
 
@@ -131,9 +134,9 @@
 
     function usersCountText(value: number): string {
         if (value >= 1_000_000)
-            return `${(value / 1_000_000).toFixed(1)}M users`;
-        if (value >= 1_000) return `${Math.round(value / 1_000)}K users`;
-        if (value > 0) return `${value} users`;
+            return m.serviceSelectUserCount({ count: `${(value / 1_000_000).toFixed(1)}M` });
+        if (value >= 1_000) return m.serviceSelectUserCount({ count: `${Math.round(value / 1_000)}K` });
+        if (value > 0) return m.serviceSelectUserCount({ count: value });
         return "";
     }
 
@@ -150,16 +153,16 @@
 </script>
 
 <svelte:head>
-    <title>Login | Flare</title>
+    <title>{m.loginButton()} | Flare</title>
 </svelte:head>
 
 <div class="login-page bg-base-200">
-    <AppTopBar title="Login">
+    <AppTopBar title={m.loginButton()}>
         {#snippet start()}
             <a
                 class="btn btn-ghost btn-square btn-sm rounded-box"
                 href="/settings/accounts"
-                aria-label="Back"
+                aria-label={m.navigateBack()}
             >
                 <FaIcon name="Back" size={16} />
             </a>
@@ -168,14 +171,13 @@
 
     <main class="login-content">
         <section class="welcome-panel">
-            <h1>Welcome to Flare</h1>
+            <h1>{m.serviceSelectWelcomeTitle()}</h1>
             <p>
-                Enter a server to start. Flare supports Mastodon, Misskey,
-                Bluesky, Weibo, and X.
+                {m.serviceSelectWelcomeMessage()}
             </p>
         </section>
 
-        <section class="service-input-section" aria-label="Service">
+        <section class="service-input-section" aria-label={m.serviceSelectLoginMethod()}>
             <label class="input input-bordered service-input">
                 <span class="service-leading" aria-hidden="true">
                     {#if detectedNode}
@@ -189,7 +191,7 @@
                 </span>
                 <input
                     type="text"
-                    placeholder="Instance URL"
+                    placeholder={m.serviceSelectInstanceInputPlaceholder()}
                     autocomplete="off"
                     autocapitalize="none"
                     spellcheck="false"
@@ -199,7 +201,7 @@
                 <button
                     class="btn btn-ghost btn-square btn-xs rounded-box"
                     type="button"
-                    aria-label="Clear instance URL"
+                    aria-label={m.serviceSelectClearInstanceUrl()}
                     disabled={!instanceInput}
                     onclick={clearInput}
                 >
@@ -209,10 +211,10 @@
             {#if instanceInput && detectedPlatform.type === "Loading"}
                 <span
                     class="loading loading-bars loading-sm text-primary service-detect-progress"
-                    aria-label="Detecting service platform"
+                    aria-label={m.serviceSelectDetectingPlatform()}
                 ></span>
             {/if}
-            <p class="service-hint">Or choose from these servers</p>
+            <p class="service-hint">{m.serviceSelectChooseServers()}</p>
         </section>
 
         {#if detectedNode && instanceInput}
@@ -243,23 +245,23 @@
             <div class="alert alert-warning">
                 <FaIcon name="CircleExclamation" size={18} />
                 <span>
-                    This server uses {node.software}; Flare will run in
-                    compatibility mode.
+                    {m.serviceSelectCompatibleMode({ software: node.software })}
                 </span>
             </div>
         {/if}
 
         {#if filteredMethods.length > 1}
             <div
-                class="join method-tabs"
-                role="group"
-                aria-label="Login method"
+                class="tabs tabs-box method-tabs"
+                role="tablist"
+                aria-label={m.serviceSelectLoginMethod()}
             >
                 {#each filteredMethods as method (method)}
                     <button
-                        class="btn join-item btn-sm"
-                        class:btn-primary={activeMethod === method}
-                        class:btn-ghost={activeMethod !== method}
+                        class="tab"
+                        class:tab-active={activeMethod === method}
+                        role="tab"
+                        aria-selected={activeMethod === method}
                         type="button"
                         onclick={() => (selectedMethod = method)}
                     >
@@ -269,28 +271,20 @@
             </div>
         {/if}
 
-        <div class="login-placeholder rounded-box bg-base-200">
-            <span class="placeholder-icon bg-base-100 text-base-content">
-                <FaIcon
-                    name={activeMethod === "QrConnect" ? "QrCode" : "LockOpen"}
-                    size={20}
+        {#if activeMethod}
+            {#key `${node.platformType}:${node.host}:${activeMethod}`}
+                <LoginFlowPanel
+                    platformType={node.platformType}
+                    host={node.host}
+                    methodType={activeMethod}
                 />
-            </span>
-            <div>
-                <h2>
-                    {activeMethod ? methodLabel(activeMethod) : "Login"} login
-                </h2>
-                <p>This login flow is not wired on Web yet.</p>
-            </div>
-            <button class="btn btn-primary btn-sm" type="button" disabled>
-                Continue
-            </button>
-        </div>
+            {/key}
+        {/if}
     </section>
 {/snippet}
 
 {#snippet RecommendedInstances()}
-    <section class="instances-section" aria-label="Recommended servers">
+    <section class="instances-section" aria-label={m.serviceSelectRecommendedServers()}>
         {#if instances.type === "Loading"}
             {@render InstancePlaceholders(6)}
         {:else if visibleInstances().length > 0}
@@ -351,14 +345,14 @@
                 class="empty-state rounded-box border border-base-300 bg-base-100"
             >
                 <FaIcon name="CircleExclamation" size={18} />
-                <span>No instances found</span>
+                <span>{m.serviceSelectEmptyMessage()}</span>
             </div>
         {/if}
     </section>
 {/snippet}
 
 {#snippet InstancePlaceholders(count: number)}
-    <div class="instances-grid" aria-label="Loading servers" aria-busy="true">
+    <div class="instances-grid" aria-label={m.serviceSelectLoadingServers()} aria-busy="true">
         {@render InstancePlaceholderCards(count)}
     </div>
 {/snippet}
@@ -478,8 +472,7 @@
     }
 
     .service-icon,
-    .instance-icon,
-    .placeholder-icon {
+    .instance-icon {
         display: grid;
         width: 2.15rem;
         height: 2.15rem;
@@ -512,28 +505,8 @@
         width: 100%;
     }
 
-    .method-tabs > .btn {
+    .method-tabs > .tab {
         flex: 1 1 0;
-    }
-
-    .login-placeholder {
-        display: grid;
-        grid-template-columns: auto minmax(0, 1fr) auto;
-        align-items: center;
-        gap: 0.75rem;
-        padding: 0.9rem;
-    }
-
-    .login-placeholder h2 {
-        font-size: 0.96rem;
-        font-weight: 650;
-        line-height: 1.25;
-    }
-
-    .login-placeholder p {
-        color: color-mix(in oklab, var(--color-base-content) 60%, transparent);
-        font-size: 0.8rem;
-        line-height: 1.35;
     }
 
     .instances-grid {
@@ -720,17 +693,6 @@
         to {
             opacity: 1;
             transform: scaleX(1);
-        }
-    }
-
-    @media (max-width: 560px) {
-        .login-placeholder {
-            grid-template-columns: auto minmax(0, 1fr);
-        }
-
-        .login-placeholder > .btn {
-            grid-column: 2;
-            justify-self: start;
         }
     }
 

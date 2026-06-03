@@ -52,7 +52,7 @@ public class ListHandler<T : UiList>(
                     onLoad = { pageSize, request ->
                         loader.load(pageSize, request)
                     },
-                    onSave = { request, data ->
+                    onSaveInTransaction = { request, data ->
                         if (request == PagingRequest.Refresh) {
                             database.listDao().deleteByPagingKey(pagingKey)
                         }

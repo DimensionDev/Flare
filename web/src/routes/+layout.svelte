@@ -2,11 +2,18 @@
 	import { page } from '$app/state';
 	import { createHomeTabsPresenter } from '@flare/web-presenters/homeTabs.svelte';
 	import type { HomeTabsPresenterStateHomeTabs } from '@flare/web-presenters/homeTabs.svelte';
+	import type { TimelineTabItemV2 as SecondaryTimelineTabItemV2 } from '@flare/web-presenters/secondaryTabs.svelte';
 	import DeepLinkProvider from '$lib/components/deeplink/DeepLinkProvider.svelte';
 	import EnvironmentSettingsProvider from '$lib/components/environment/EnvironmentSettingsProvider.svelte';
 	import FaIcon from '$lib/components/FaIcon.svelte';
+	import HomeTimelineTabPanel from '$lib/components/home/HomeTimelineTabPanel.svelte';
+	import { m } from '$lib/paraglide/messages.js';
+	import SecondarySidebar from '$lib/components/secondary/SecondarySidebar.svelte';
+	import { timelineTabTitle } from '$lib/components/secondary/secondaryTabs';
 	import ThemeController from '$lib/components/environment/ThemeController.svelte';
+	import type { TimelineTabItemV2 } from '@flare/web-presenters/homeTimelineWithTabs.svelte';
 	import favicon from '$lib/assets/favicon.svg';
+	import logo from '$lib/assets/logo.svg';
 	import '../app.css';
 
 	let { children } = $props();
@@ -15,6 +22,7 @@
 
 	const fallbackTabs: HomeTabsPresenterStateHomeTabs[] = ['Home', 'Discover'];
 	const homeTabs = createHomeTabsPresenter();
+	let selectedSecondaryTimeline = $state<SecondaryTimelineTabItemV2 | null>(null);
 	const presenterTabs = $derived(
 		homeTabs.tabs.type === 'Success'
 			? homeTabs.tabs.data
@@ -22,7 +30,14 @@
 	);
 	const navigationTabs = $derived(presenterTabs.length > 0 ? presenterTabs : fallbackTabs);
 	const activeTab = $derived(tabForPath(page.url.pathname));
-	const pageTitle = $derived(activeTab ? tabTitle(activeTab) : 'Flare');
+	const pageTitle = $derived(
+		selectedSecondaryTimeline ? timelineTabTitle(selectedSecondaryTimeline) : activeTab ? tabTitle(activeTab) : 'Flare'
+	);
+
+	$effect(() => {
+		page.url.pathname;
+		selectedSecondaryTimeline = null;
+	});
 
 	function tabForPath(pathname: string): AppTab | null {
 		if (pathname === '/') return 'Home';
@@ -44,15 +59,15 @@
 	function tabTitle(tab: AppTab): string {
 		switch (tab) {
 			case 'Home':
-				return 'Home';
+				return m.homeTabHomeTitle();
 			case 'Notifications':
-				return 'Notifications';
+				return m.homeTabNotificationsTitle();
 			case 'Discover':
-				return 'Discover';
+				return m.homeTabDiscoverTitle();
 			case 'Profile':
-				return 'Profile';
+				return m.profileTitle();
 			case 'Settings':
-				return 'Settings';
+				return m.settingsTitle();
 		}
 	}
 
@@ -99,68 +114,67 @@
 <EnvironmentSettingsProvider>
 	<DeepLinkProvider>
 		<ThemeController />
-		<main class="app-shell bg-base-100 text-base-content">
-			<nav class="app-sidebar border-r border-base-300 bg-base-300" aria-label="Main">
+		<main class="app-shell bg-base-300 text-base-content">
+			<nav class="app-sidebar bg-base-300" aria-label={m.navigationMainAriaLabel()}>
 				<div class="sidebar-brand">
-					<div class="brand-mark rounded-box bg-primary text-primary-content">F</div>
-					<div class="brand-copy">
-						<strong>Flare</strong>
-					</div>
+					<img class="brand-mark" src={logo} alt="Flare" />
 				</div>
 
-				<ul class="menu menu-lg w-full gap-1 p-2">
+				<ul class="menu menu-lg w-full items-center gap-2 p-2">
 					{#each navigationTabs as tab (tab)}
 						<li>
 							<a
-								class:menu-active={isTabActive(tab)}
+								class:active-primary={isTabActive(tab)}
+								class="tooltip tooltip-right rounded-box"
 								href={tabHref(tab)}
+								aria-label={tabTitle(tab)}
 								aria-current={isTabActive(tab) ? 'page' : undefined}
+								data-tip={tabTitle(tab)}
 							>
 								<FaIcon name={tabIcon(tab)} size={18} />
-								<span>{tabTitle(tab)}</span>
 							</a>
 						</li>
 					{/each}
-				</ul>
-
-				<ul class="menu menu-lg sidebar-settings w-full p-2">
-					<li>
-						<a
-							class:menu-active={isTabActive('Settings')}
-							href="/settings"
-							aria-current={isTabActive('Settings') ? 'page' : undefined}
-						>
-							<FaIcon name="Settings" size={18} />
-							<span>Settings</span>
-						</a>
-					</li>
 				</ul>
 			</nav>
 
 			<section class="app-content min-w-0 bg-base-100" aria-label={pageTitle}>
 				<div class="content-stage">
-					{@render children()}
+					{#if selectedSecondaryTimeline}
+						{#key selectedSecondaryTimeline.id}
+							<HomeTimelineTabPanel tab={selectedSecondaryTimeline as unknown as TimelineTabItemV2} />
+						{/key}
+					{:else}
+						{@render children()}
+					{/if}
 				</div>
 			</section>
 
-			<nav class="dock mobile-dock border-t border-base-300 bg-base-100" aria-label="Main">
+			<SecondarySidebar
+				selectedTimelineKey={selectedSecondaryTimeline?.key ?? null}
+				onTimelineSelected={(tab) => {
+					selectedSecondaryTimeline = tab;
+				}}
+			/>
+
+			<nav class="dock mobile-dock border-t border-base-300 bg-base-300" aria-label={m.navigationMainAriaLabel()}>
 				{#each navigationTabs as tab (tab)}
 					<a
 						class:dock-active={isTabActive(tab)}
 						href={tabHref(tab)}
+						aria-label={tabTitle(tab)}
 						aria-current={isTabActive(tab) ? 'page' : undefined}
 					>
 						<FaIcon name={tabIcon(tab)} size={18} />
-						<span class="dock-label">{tabTitle(tab)}</span>
 					</a>
 				{/each}
 				<a
 					class:dock-active={isTabActive('Settings')}
 					href="/settings"
+					aria-label={m.settingsTitle()}
 					aria-current={isTabActive('Settings') ? 'page' : undefined}
 				>
 					<FaIcon name="Settings" size={18} />
-					<span class="dock-label">Settings</span>
 				</a>
 			</nav>
 		</main>
@@ -173,67 +187,69 @@
 	}
 
 	.app-shell {
-		--app-shell-max-width: 880px;
-		--app-sidebar-width: 15rem;
-		--app-sidebar-center-offset: 7.5rem;
-		--app-shell-width: min(100vw, var(--app-shell-max-width));
+		--app-content-width: 640px;
+		--app-sidebar-width: 4.5rem;
+		--app-secondary-width: 15rem;
 		display: grid;
-		grid-template-columns: var(--app-sidebar-width) minmax(0, 1fr);
-		width: var(--app-shell-width);
+		grid-template-columns:
+			minmax(var(--app-sidebar-width), 1fr)
+			minmax(0, var(--app-content-width))
+			minmax(var(--app-secondary-width), 1fr);
+		width: 100%;
 		min-height: 100vh;
-		margin-inline-start: max(
-			0px,
-			calc((100vw - var(--app-shell-width)) / 2 - var(--app-sidebar-center-offset))
-		);
-		margin-inline-end: auto;
-		background: var(--color-base-100);
+		background: var(--color-base-300);
 	}
 
 	.app-sidebar {
 		position: sticky;
 		top: 0;
 		display: flex;
+		width: var(--app-sidebar-width);
 		height: 100vh;
 		align-self: start;
+		justify-self: end;
 		min-width: 0;
 		flex-direction: column;
-		overflow: auto;
+		align-items: center;
+		overflow-x: hidden;
+		overflow-y: auto;
 	}
 
 	.sidebar-brand {
 		display: flex;
 		align-items: center;
-		gap: 0.75rem;
+		justify-content: center;
 		min-width: 0;
-		padding: 1rem;
+		padding: 1rem 0.75rem;
 	}
 
 	.brand-mark {
-		display: grid;
 		width: 2.25rem;
 		height: 2.25rem;
 		flex: 0 0 auto;
+		object-fit: contain;
+	}
+
+	.app-sidebar :global(.menu li) {
+		display: grid;
 		place-items: center;
-		font-size: 1rem;
-		font-weight: 700;
 	}
 
-	.brand-copy {
-		min-width: 0;
-	}
-
-	.brand-copy strong {
-		display: block;
+	.app-sidebar :global(.menu a) {
+		display: grid;
+		width: 2.75rem;
+		height: 2.75rem;
+		place-items: center;
+		justify-content: center;
+		align-content: center;
+		padding: 0;
+		color: color-mix(in oklab, var(--color-base-content) 72%, transparent);
 		overflow: hidden;
-		font-size: 0.95rem;
-		font-weight: 600;
-		line-height: 1.2;
-		text-overflow: ellipsis;
-		white-space: nowrap;
 	}
 
-	.sidebar-settings {
-		margin-top: auto;
+	.app-sidebar :global(.menu a.active-primary) {
+		background: color-mix(in oklab, var(--color-primary) 12%, transparent);
+		color: var(--color-primary);
 	}
 
 	.app-content {

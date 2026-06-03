@@ -7,8 +7,10 @@
 
 	let {
 		tab,
+		onRefreshingChange = () => {},
 	}: {
 		tab: TimelineTabItemV2;
+		onRefreshingChange?: (isRefreshing: boolean) => void;
 	} = $props();
 
 	// svelte-ignore state_referenced_locally -- parent keys this component by tab id.
@@ -19,6 +21,17 @@
 		() => bindTimelinePresenterController(tab.createPresenter() as unknown as TimelineWebPresenterRef),
 		{ ttlMs: Infinity }
 	);
+	const isRefreshing = $derived(
+		timeline.listState.type === 'Success' ? timeline.listState.isRefreshing : false
+	);
+
+	$effect(() => {
+		onRefreshingChange(isRefreshing);
+
+		return () => {
+			onRefreshingChange(false);
+		};
+	});
 </script>
 
 <div class="home-timeline-tab-panel">

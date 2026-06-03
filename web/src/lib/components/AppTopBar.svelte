@@ -18,8 +18,8 @@
 	} = $props();
 </script>
 
-<header class={`sticky top-0 ${zIndex} border-b border-base-300 bg-base-100/95 backdrop-blur`}>
-	<div class="navbar app-top-bar min-h-14 gap-2 px-3 py-1">
+<header class={`sticky top-0 ${zIndex} min-w-0 max-w-full border-b border-base-300 bg-base-100/95 backdrop-blur`}>
+	<div class="navbar app-top-bar min-h-14 w-full min-w-0 max-w-full gap-2 px-3 py-1">
 		<div class="navbar-start app-top-bar-start">
 			{#if start}
 				{@render start()}

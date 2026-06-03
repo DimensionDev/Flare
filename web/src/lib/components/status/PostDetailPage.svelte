@@ -3,6 +3,7 @@
 	import { page } from '$app/state';
 	import AppTopBar from '$lib/components/AppTopBar.svelte';
 	import FaIcon from '$lib/components/FaIcon.svelte';
+	import { m } from '$lib/paraglide/messages.js';
 	import TimelineList from '$lib/components/UiTimeline/TimelineList.svelte';
 	import TimelineLoadingPlaceholderList from '$lib/components/UiTimeline/TimelineLoadingPlaceholderList.svelte';
 	import { useReactiveRetainedPresenter } from '$lib/presenter/presenterStore.svelte';
@@ -23,11 +24,11 @@
 		{ ttlMs: Infinity }
 	);
 	const currentError = $derived(
-		statusState.current.type === 'Error' ? (statusState.current.message ?? 'Unable to load post') : null
+		statusState.current.type === 'Error' ? (statusState.current.message ?? m.statusUnableToLoadPost()) : null
 	);
 	const listError = $derived(
 		statusState.listState.type === 'Error'
-			? (statusState.listState.message ?? 'Unable to load conversation')
+			? (statusState.listState.message ?? m.statusUnableToLoadConversation())
 			: null
 	);
 	const isLoading = $derived(statusState.listState.type === 'Loading');
@@ -94,9 +95,9 @@
 </script>
 
 <section class="min-h-screen bg-base-100">
-	<AppTopBar title="Post detail">
+	<AppTopBar title={m.statusDetailTitle()}>
 		{#snippet start()}
-			<button class="btn btn-ghost btn-square btn-sm rounded-box" type="button" aria-label="Back" onclick={goBack}>
+			<button class="btn btn-ghost btn-square btn-sm rounded-box" type="button" aria-label={m.navigateBack()} onclick={goBack}>
 				<FaIcon name="Back" size={16} />
 			</button>
 		{/snippet}
@@ -105,8 +106,8 @@
 			<button
 				class="btn btn-ghost btn-square btn-sm rounded-box"
 				type="button"
-				aria-label="Retry"
-				title="Retry"
+				aria-label={m.actionRetry()}
+				title={m.actionRetry()}
 				onclick={retry}
 			>
 				<FaIcon name="Reset" size={15} />
@@ -127,7 +128,7 @@
 					<span>{currentError ?? listError}</span>
 				</div>
 				<button class="btn btn-primary btn-sm rounded-box justify-self-start" type="button" onclick={retry}>
-					Retry
+					{m.actionRetry()}
 				</button>
 			</div>
 		{:else if isLoading}

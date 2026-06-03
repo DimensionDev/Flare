@@ -1,14 +1,16 @@
 <script lang="ts">
 	import { createHomeTimelineWithTabsPresenterController } from '@flare/web-presenters/homeTimelineWithTabs.svelte';
+	import { tick } from 'svelte';
 	import type {
 		IconType,
 		TimelineTabItemV2,
-		UiStrings,
 		UiText,
 	} from '@flare/web-presenters/homeTimelineWithTabs.svelte';
 	import AppTopBar from '$lib/components/AppTopBar.svelte';
 	import FaIcon from '$lib/components/FaIcon.svelte';
 	import HomeTimelineTabPanel from '$lib/components/home/HomeTimelineTabPanel.svelte';
+	import { localizedUiString } from '$lib/i18n/uiStrings';
+	import { m } from '$lib/paraglide/messages.js';
 	import TimelineLoadingPlaceholderList from '$lib/components/UiTimeline/TimelineLoadingPlaceholderList.svelte';
 	import { useRetainedPresenter } from '$lib/presenter/presenterStore.svelte';
 
@@ -18,6 +20,10 @@
 		{ ttlMs: Infinity }
 	);
 	let selectedTabId = $state<string | null>(null);
+	let tabsElement = $state<HTMLDivElement | null>(null);
+	let tabsExpanded = $state(false);
+	let tabsOverflowing = $state(false);
+	let selectedTimelineRefreshing = $state(false);
 	const tabs = $derived(
 		homeTimeline.tabState.type === 'Success' ? homeTimeline.tabState.data : []
 	);
@@ -28,94 +34,61 @@
 	$effect(() => {
 		if (tabs.length === 0) {
 			selectedTabId = null;
+			selectedTimelineRefreshing = false;
 			return;
 		}
 
 		if (!selectedTabId || !tabs.some((tab) => tab.id === selectedTabId)) {
 			selectedTabId = tabs[0].id;
+			selectedTimelineRefreshing = false;
 		}
 	});
+
+	$effect(() => {
+		selectedTabId;
+		selectedTimelineRefreshing = false;
+	});
+
+	$effect(() => {
+		tabs.length;
+		tabsExpanded;
+		void tick().then(updateTabsOverflow);
+	});
+
+	$effect(() => {
+		if (!tabsElement) return;
+
+		const observer = new ResizeObserver(() => {
+			updateTabsOverflow();
+		});
+		observer.observe(tabsElement);
+
+		return () => {
+			observer.disconnect();
+		};
+	});
+
+	function updateTabsOverflow(): void {
+		if (!tabsElement) return;
+
+		const tabItems = Array.from(
+			tabsElement.querySelectorAll<HTMLElement>('.home-tab, .home-tab-skeleton')
+		);
+		const styles = getComputedStyle(tabsElement);
+		const columnGap = Number.parseFloat(styles.columnGap || styles.gap || '0') || 0;
+		const tabsWidth = tabItems.reduce((total, item) => total + item.offsetWidth, 0);
+		const totalWidth = tabsWidth + Math.max(0, tabItems.length - 1) * columnGap;
+		const nextOverflowing = Math.ceil(totalWidth) > Math.floor(tabsElement.clientWidth);
+
+		tabsOverflowing = nextOverflowing;
+		if (!nextOverflowing && tabsExpanded) {
+			tabsExpanded = false;
+		}
+	}
 
 	function tabTitle(title: UiText): string {
 		if (title.type === 'Raw') return title.string;
 		return localizedUiString(title.string);
-	}
-
-	function localizedUiString(value: UiStrings): string {
-		switch (value) {
-			case 'Home':
-				return 'Home';
-			case 'Notifications':
-				return 'Notifications';
-			case 'Discover':
-				return 'Discover';
-			case 'Me':
-				return 'Me';
-			case 'Settings':
-				return 'Settings';
-			case 'MastodonLocal':
-				return 'Local';
-			case 'MastodonPublic':
-				return 'Public';
-			case 'Featured':
-				return 'Featured';
-			case 'Bookmark':
-				return 'Bookmarks';
-			case 'Favourite':
-				return 'Favorites';
-			case 'List':
-				return 'List';
-			case 'Feeds':
-				return 'Feeds';
-			case 'DirectMessage':
-				return 'Messages';
-			case 'Rss':
-				return 'RSS';
-			case 'Antenna':
-				return 'Antenna';
-			case 'MixedTimeline':
-				return 'Mixed';
-			case 'Social':
-				return 'Social';
-			case 'Liked':
-				return 'Liked';
-			case 'AllRssFeeds':
-				return 'All feeds';
-			case 'Posts':
-				return 'Posts';
-			case 'Channel':
-				return 'Channel';
-			case 'Default':
-				return 'Default';
-			case 'Login':
-				return 'Login';
-			case 'Verify':
-				return 'Verify';
-			case 'Cancel':
-				return 'Cancel';
-			case 'Next':
-				return 'Next';
-			case 'Username':
-				return 'Username';
-			case 'Password':
-				return 'Password';
-			case 'Otp':
-				return 'OTP';
-			case 'OAuthLogin':
-				return 'OAuth';
-			case 'PasswordLogin':
-				return 'Password';
-			case 'QrConnect':
-				return 'QR connect';
-			case 'CredentialImport':
-				return 'Credential import';
-			case 'ExternalSigner':
-				return 'External signer';
-			case 'WebCookieLogin':
-				return 'Web cookie';
-			case 'NostrLoginAccount':
-				return 'Nostr';
-		}
 	}
 
 	function tabIconName(tab: TimelineTabItemV2): string {
@@ -144,7 +117,13 @@
 <div class="home-page">
 	<AppTopBar>
 		{#snippet start()}
-			<div class="tabs tabs-border home-tabs" role="tablist" aria-label="Home timelines">
+			<div
+				bind:this={tabsElement}
+				class:home-tabs-expanded={tabsExpanded}
+				class="tabs tabs-border home-tabs"
+				role="tablist"
+				aria-label={m.homeTabHomeTitle()}
+			>
 				{#if homeTimeline.tabState.type === 'Loading'}
 					<div class="tab home-tab-skeleton">
 						<div class="skeleton h-5 w-24"></div>
@@ -175,30 +154,62 @@
 			</div>
 		{/snippet}
 
-		{#snippet end()}
+			{#snippet end()}
+				{#if tabsOverflowing || tabsExpanded}
+					<button
+						class:swap-active={tabsExpanded}
+						class="btn btn-ghost btn-square btn-sm swap swap-rotate rounded-box"
+						type="button"
+					aria-label={tabsExpanded ? m.tabsCollapse() : m.tabsExpand()}
+					aria-expanded={tabsExpanded}
+					title={tabsExpanded ? m.tabsCollapse() : m.tabsExpand()}
+						onclick={() => {
+							tabsExpanded = !tabsExpanded;
+						}}
+					>
+						<span class="swap-on">
+						<FaIcon name="ChevronUp" size={14} />
+					</span>
+					<span class="swap-off">
+						<FaIcon name="ChevronDown" size={14} />
+					</span>
+				</button>
+			{/if}
+
 			<button
 				class="btn btn-ghost btn-square btn-sm rounded-box"
 				type="button"
-				aria-label="Edit tabs"
-				title="Edit tabs"
-			>
-				<FaIcon name="Sliders" size={16} />
-			</button>
-		{/snippet}
-	</AppTopBar>
+				aria-label={m.tabSettingsTitle()}
+					title={m.tabSettingsTitle()}
+				>
+					<FaIcon name="Sliders" size={16} />
+				</button>
+			{/snippet}
+
+			{#snippet bottom()}
+				{#if selectedTimelineRefreshing}
+					<progress class="progress progress-primary block h-0.5 w-full"></progress>
+				{/if}
+			{/snippet}
+		</AppTopBar>
 
 	<section class="home-content">
 		{#if homeTimeline.tabState.type === 'Error'}
 			<div class="home-state">
 				<div class="alert alert-error">
-					<span>{homeTimeline.tabState.message ?? 'Unable to load tabs'}</span>
+					<span>{homeTimeline.tabState.message ?? m.timelineUnableToLoadTabs()}</span>
 				</div>
 			</div>
 		{:else if homeTimeline.tabState.type === 'Success' && tabs.length === 0}
-			<div class="home-empty">No timelines</div>
+			<div class="home-empty">{m.timelineNoTimelines()}</div>
 		{:else if selectedTab}
 			{#key selectedTab.id}
-				<HomeTimelineTabPanel tab={selectedTab} />
+				<HomeTimelineTabPanel
+					tab={selectedTab}
+					onRefreshingChange={(isRefreshing) => {
+						selectedTimelineRefreshing = isRefreshing;
+					}}
+				/>
 			{/key}
 		{:else}
 			<TimelineLoadingPlaceholderList />
@@ -216,10 +227,29 @@
 
 	.home-tabs {
 		flex: 1 1 auto;
+		width: 100%;
+		max-width: 100%;
+		max-height: 2.75rem;
 		min-width: 0;
-		overflow-x: auto;
+		flex-wrap: nowrap;
+		overflow-x: hidden;
 		overflow-y: hidden;
 		scrollbar-width: none;
+	}
+
+	.home-tabs-expanded {
+		max-height: none;
+		flex-wrap: wrap;
+		overflow: visible;
+	}
+
+	:global(.home-page .app-top-bar) {
+		align-items: flex-start;
+	}
+
+	:global(.home-page .app-top-bar-end) {
+		align-items: flex-start;
+		padding-top: 0.375rem;
 	}
 
 	.home-tabs::-webkit-scrollbar {

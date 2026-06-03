@@ -2,6 +2,7 @@
 	import AppTopBar from '$lib/components/AppTopBar.svelte';
 	import FaIcon from '$lib/components/FaIcon.svelte';
 	import { useEnvironmentSettings } from '$lib/environment/environmentSettings.svelte';
+	import { m } from '$lib/paraglide/messages.js';
 	import { createAccountsPresenter } from '@flare/web-presenters/accounts.svelte';
 
 	type SettingsItem = {
@@ -21,74 +22,76 @@
 	);
 	const accountsItems = $derived<SettingsItem[]>([
 		{
-			title: 'Accounts',
-			description: 'Manage signed-in accounts',
+			title: m.settingsAccountsTitle(),
+			description: m.settingsAccountsSubtitle(),
 			icon: 'Profile',
 			href: '/settings/accounts',
 			status:
 				accountsState.type === 'Success'
-					? `${accountsState.data.length} ${accountsState.data.length === 1 ? 'account' : 'accounts'}`
+					? accountsState.data.length === 1
+						? m.settingsAccountCountOne()
+						: m.settingsAccountCountOther({ count: accountsState.data.length })
 					: undefined,
 		},
 	]);
 
-	const appearanceItems: SettingsItem[] = [
+	const appearanceItems = $derived<SettingsItem[]>([
 		{
-			title: 'Theme',
-			description: 'Colors, font size, and avatar shape',
+			title: m.settingsAppearanceThemeGroupTitle(),
+			description: m.settingsAppearanceThemeGroupSubtitle(),
 			icon: 'Palette',
 			href: '/settings/appearance/theme',
 		},
 		{
-			title: 'Layout',
-			description: 'Timeline layout, navigation, and post actions',
+			title: m.settingsAppearanceLayoutGroupTitle(),
+			description: m.settingsAppearanceLayoutGroupSubtitle(),
 			icon: 'TableList',
 			href: '/settings/appearance/layout',
 		},
 		{
-			title: 'Display',
-			description: 'Timestamps, source badges, links, and browser behavior',
+			title: m.settingsAppearanceDisplayGroupTitle(),
+			description: m.settingsAppearanceDisplayGroupSubtitle(),
 			icon: 'News',
 			href: '/settings/appearance/display',
 		},
 		{
-			title: 'Media',
-			description: 'Media visibility, playback, and sensitive content',
+			title: m.settingsAppearanceMediaGroupTitle(),
+			description: m.settingsAppearanceMediaGroupSubtitle(),
 			icon: 'PhotoFilm',
 			href: '/settings/appearance/media',
 		},
-	];
+	]);
 
-	const dataItems: SettingsItem[] = [
+	const dataItems = $derived<SettingsItem[]>([
 		{
-			title: 'Local Filters',
-			description: 'Hide matching content in timelines, notifications, and search',
+			title: m.settingsLocalFilterTitle(),
+			description: m.settingsLocalFilterDescription(),
 			icon: 'Filter',
 		},
 		{
-			title: 'Storage',
-			description: 'Manage cached files, logs, and backups',
+			title: m.settingsStorageTitle(),
+			description: m.settingsStorageSubtitle(),
 			icon: 'Database',
 		},
-	];
+	]);
 
-	const intelligenceItems: SettingsItem[] = [
+	const intelligenceItems = $derived<SettingsItem[]>([
 		{
-			title: 'AI',
-			description: 'Set up AI providers and summarization',
+			title: m.settingsAiConfigTitle(),
+			description: m.settingsAiConfigDescription(),
 			icon: 'Bot',
 		},
 		{
-			title: 'Translation',
-			description: 'Configure translation provider and settings',
+			title: m.settingsTranslationTitle(),
+			description: m.settingsTranslationDescription(),
 			icon: 'Translate',
 		},
-	];
+	]);
 
 	const aboutItems = $derived<SettingsItem[]>([
 		{
-			title: 'About',
-			description: 'Learn more about Flare',
+			title: m.settingsAboutTitle(),
+			description: m.settingsAboutSubtitle(),
 			icon: 'Info',
 			status: appVersion,
 		},
@@ -96,14 +99,14 @@
 </script>
 
 <div class="settings-page bg-base-200">
-	<AppTopBar title="Settings" />
+	<AppTopBar title={m.settingsTitle()} />
 
 	<div class="settings-content">
-		{@render SettingsList(accountsItems, 'Accounts')}
-		{@render SettingsList(appearanceItems, 'Appearance')}
-		{@render SettingsList(dataItems, 'Local data')}
-		{@render SettingsList(intelligenceItems, 'Intelligence')}
-		{@render SettingsList(aboutItems, 'About')}
+		{@render SettingsList(accountsItems, m.settingsAccountsTitle())}
+		{@render SettingsList(appearanceItems, m.settingsAppearanceTitle())}
+		{@render SettingsList(dataItems, m.settingsSectionLocalData())}
+		{@render SettingsList(intelligenceItems, m.settingsSectionIntelligence())}
+		{@render SettingsList(aboutItems, m.settingsAboutTitle())}
 	</div>
 </div>
 

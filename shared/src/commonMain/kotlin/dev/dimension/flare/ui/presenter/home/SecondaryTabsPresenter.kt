@@ -21,6 +21,9 @@ import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.route.DeeplinkRoute
+import dev.dimension.flare.ui.route.toWebPath
+import dev.dimension.flare.web.shared.WebIgnore
+import dev.dimension.flare.web.shared.WebPresenter
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -29,6 +32,7 @@ import kotlinx.coroutines.flow.map
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
+@WebPresenter("secondaryTabs")
 public class SecondaryTabsPresenter :
     PresenterBase<SecondaryTabsPresenter.State>(),
     KoinComponent {
@@ -47,8 +51,12 @@ public class SecondaryTabsPresenter :
     public data class Tab(
         val title: UiStrings,
         val icon: UiIcon,
+        @WebIgnore
         val destination: Destination,
-    )
+    ) {
+        public val href: String? = (destination as? Destination.Route)?.route?.toWebPath()
+        public val timelineTabItem: TimelineTabItemV2? = (destination as? Destination.Timeline)?.tabItem
+    }
 
     @Immutable
     public sealed interface Destination {

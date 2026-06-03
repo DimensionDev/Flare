@@ -12,7 +12,7 @@ internal fun <Key : Any, T : Any, R : Any> createPagingRemoteMediator(
     database: CacheDatabase,
     pagingKey: String,
     onLoad: suspend (pageSize: Int, request: PagingRequest) -> PagingResult<R>,
-    onSave: suspend (request: PagingRequest, data: List<R>) -> Unit,
+    onSaveInTransaction: suspend (request: PagingRequest, data: List<R>) -> Unit,
 ): BasePagingRemoteMediator<Key, T, R> =
     object : BasePagingRemoteMediator<Key, T, R>(database) {
         override val pagingKey: String = pagingKey
@@ -26,7 +26,7 @@ internal fun <Key : Any, T : Any, R : Any> createPagingRemoteMediator(
             request: PagingRequest,
             data: List<R>,
         ) {
-            onSave(request, data)
+            onSaveInTransaction(request, data)
         }
     }
 
@@ -87,6 +87,7 @@ internal abstract class BasePagingRemoteMediator<Key : Any, T : Any, R : Any>(
                     nextKey = result.nextKey,
                 )
             }
+            // Keep paging cache writes under one transaction. Callers must not open another one here.
             onSaveCache(request, result.data)
         }
         return MediatorResult.Success(

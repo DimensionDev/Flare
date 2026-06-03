@@ -2,10 +2,10 @@
 	import FaIcon from '$lib/components/FaIcon.svelte';
 	import { useDeepLink } from '$lib/deeplink/deepLink.svelte';
 	import { m } from '$lib/paraglide/messages.js';
+	import UserDisplay from '$lib/components/user/UserDisplay.svelte';
 	import type { UiTimelineV2 } from '@flare/web-presenters/timeline.svelte';
 	import UiTimelineMessage from './Message.svelte';
 	import { actionLabel } from './post/postUtils';
-	import UserSummary from './user/UserSummary.svelte';
 
 	type UiTimelineUser = Extract<UiTimelineV2, { type: 'User' }>;
 
@@ -25,7 +25,7 @@
 		</div>
 	{/if}
 
-	<UserSummary user={user.value} />
+	<UserDisplay user={user.value} />
 
 	{#if user.button.length > 0}
 		<div class="user-actions" aria-label={m.userActionsAriaLabel()}>

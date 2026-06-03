@@ -7,6 +7,7 @@
 	import { actionLabel } from './postUtils';
 
 	type ActionMenuActionItem = Extract<ActionMenu, { type: 'Item' }>;
+	type ActionMenuActionColor = ActionMenuActionItem['color'];
 
 	let {
 		actions,
@@ -42,6 +43,19 @@
 	function dropdownAnchorName(index: number): string {
 		return `--${dropdownToken(index)}-anchor`;
 	}
+
+	function actionColorClass(color: ActionMenuActionColor): string | null {
+		switch (color) {
+			case 'PrimaryColor':
+				return 'action-color-primary';
+			case 'Red':
+				return 'action-color-red';
+			case 'ContentColor':
+				return 'action-color-content';
+			default:
+				return null;
+		}
+	}
 </script>
 
 <div
@@ -57,7 +71,7 @@
 {#snippet ActionControl(action: ActionMenu, appearance: TimelineAppearance, index: number)}
 	{#if action.type === 'Item'}
 		<button
-			class="btn btn-ghost btn-sm rounded-box"
+			class={['btn btn-ghost btn-sm rounded-box action-button', actionColorClass(action.color)]}
 			type="button"
 			title={actionLabel(action)}
 			aria-label={actionLabel(action)}
@@ -72,7 +86,10 @@
 		{@const popoverId = dropdownPopoverId(index)}
 		{@const anchorName = dropdownAnchorName(index)}
 		<button
-			class="btn btn-ghost btn-sm rounded-box"
+			class={[
+				'btn btn-ghost btn-sm rounded-box action-button',
+				actionColorClass(action.displayItem.color),
+			]}
 			type="button"
 			title={actionLabel(action.displayItem)}
 			aria-label={actionLabel(action.displayItem)}
@@ -103,8 +120,7 @@
 	{:else if action.type === 'Item'}
 		<li>
 			<button
-				class:destructive={action.color === 'Red'}
-				class="rounded-box"
+				class={['rounded-box action-menu-button', actionColorClass(action.color)]}
 				type="button"
 				title={actionLabel(action)}
 				onclick={(event) => performMenuAction(event, action)}
@@ -144,6 +160,24 @@
 		height: 2.25rem;
 	}
 
+	.action-button,
+	.action-menu-button {
+		color: var(--action-color, inherit);
+		--btn-fg: var(--action-color, currentColor);
+	}
+
+	.action-color-primary {
+		--action-color: var(--post-primary);
+	}
+
+	.action-color-red {
+		--action-color: var(--post-error);
+	}
+
+	.action-color-content {
+		--action-color: var(--post-text-readable);
+	}
+
 	.actions-rightaligned {
 		justify-content: flex-end;
 	}
@@ -167,10 +201,6 @@
 	.dropdown button small {
 		color: var(--post-text-weak);
 		font-size: 0.72rem;
-	}
-
-	.dropdown button.destructive {
-		color: var(--post-error);
 	}
 
 	.action-menu-divider {

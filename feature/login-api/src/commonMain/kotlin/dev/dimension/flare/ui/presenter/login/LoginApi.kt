@@ -93,6 +93,7 @@ public data class LoginContext(
     val host: String,
     val methodType: LoginMethodType,
     val onSuccess: suspend () -> Unit,
+    val redirectUri: String? = null,
 )
 
 public interface LoginMethodHandler : AutoCloseable {

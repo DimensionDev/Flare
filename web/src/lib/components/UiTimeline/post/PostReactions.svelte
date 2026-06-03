@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { useDeepLink } from '$lib/deeplink/deepLink.svelte';
+	import { m } from '$lib/paraglide/messages.js';
 	import type { UiTimelineV2PostEmojiReaction } from '@flare/web-presenters/timeline.svelte';
 
 	let {
@@ -11,7 +12,7 @@
 	const deepLink = useDeepLink();
 </script>
 
-<div class="reaction-strip" aria-label="Emoji reactions">
+<div class="reaction-strip" aria-label={m.reactionsAriaLabel()}>
 	{#each reactions as reaction}
 		<button
 			class:btn-primary={reaction.me}

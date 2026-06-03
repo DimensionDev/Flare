@@ -35,11 +35,13 @@ public class ServiceSelectPresenter(
                 platformType: PlatformType,
                 host: String,
                 methodType: LoginMethodType,
+                redirectUri: String?,
             ): LoginMethodHandler =
                 loginPlatformRegistry.require(platformType).createHandler(
                     LoginContext(
                         host = host,
                         methodType = methodType,
+                        redirectUri = redirectUri,
                         onSuccess = {
                             toHome.invoke()
                         },
@@ -66,5 +68,6 @@ public interface ServiceSelectState : NodeInfoState {
         platformType: PlatformType,
         host: String,
         methodType: LoginMethodType,
+        redirectUri: String? = null,
     ): LoginMethodHandler
 }

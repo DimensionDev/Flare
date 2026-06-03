@@ -224,9 +224,6 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
 
     // Maps item identifier → index for timeline cells
     private var itemIndexMap: [String: Int] = [:]
-    private var stableTimelineItemIDs: Set<String> = []
-    private var lastKnownTimelineItemIDByIndex: [Int: String] = [:]
-    private var lastKnownTimelineRenderHashByItemID: [String: Int32] = [:]
 
     private struct SnapshotSignature: Equatable, Sendable {
         let accessoryIDs: [String]
@@ -241,7 +238,6 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
         let footerIDs: [String]
         let indexMap: [String: Int]
         let renderHashMap: [String: Int32]
-        let stableTimelineItemIDs: Set<String>
         let loadedTimelineItemIDs: Set<String>
         let isRefreshing: Bool
     }
@@ -404,13 +400,6 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
         "\(itemID):\(renderHash):\(heightCacheWidthKey(for: width))"
     }
 
-    private func cachedStabilizedHeight(for itemID: String, width: CGFloat) -> CGFloat? {
-        guard let renderHash = lastKnownTimelineRenderHashByItemID[itemID] else {
-            return nil
-        }
-        return heightCache[timelineHeightCacheKey(itemID: itemID, renderHash: renderHash, width: width)]
-    }
-
     private func measuredCompressedCardHeight(_ card: UIView, width: CGFloat) -> CGFloat {
         card.bounds = CGRect(x: 0, y: 0, width: width, height: UIView.layoutFittingCompressedSize.height)
         card.setNeedsLayout()
@@ -452,15 +441,6 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
                     }
                 }
             }
-        }
-    }
-
-    private func pruneStabilizedPagingCache(keepingItemIDs: Set<String>, itemCount: Int) {
-        lastKnownTimelineItemIDByIndex = lastKnownTimelineItemIDByIndex.filter { index, itemID in
-            index >= 0 && index < itemCount && keepingItemIDs.contains(itemID)
-        }
-        lastKnownTimelineRenderHashByItemID = lastKnownTimelineRenderHashByItemID.filter { itemID, _ in
-            keepingItemIDs.contains(itemID)
         }
     }
 
@@ -853,8 +833,8 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
         return min(max(offsetY, minY), maxY)
     }
 
-    private func isStableTimelineItemID(_ itemID: String) -> Bool {
-        itemID.hasPrefix(Self.timelinePrefix) && stableTimelineItemIDs.contains(itemID)
+    private func isTimelineDataItemID(_ itemID: String) -> Bool {
+        itemID.hasPrefix(Self.timelinePrefix)
     }
 
     private func captureScrollAnchor() -> ScrollAnchor? {
@@ -870,7 +850,7 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
         return collectionView.indexPathsForVisibleItems
             .compactMap { indexPath -> (itemID: String, frame: CGRect)? in
                 guard let itemID = dataSource.itemIdentifier(for: indexPath),
-                      isStableTimelineItemID(itemID) else {
+                      isTimelineDataItemID(itemID) else {
                     return nil
                 }
                 let frame = collectionView.layoutAttributesForItem(at: indexPath)?.frame
@@ -939,7 +919,6 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
     private func makeSnapshotPlan(data: PagingState<UiTimelineV2>) -> SnapshotPlan {
         var newIndexMap: [String: Int] = [:]
         var newRenderHashMap: [String: Int32] = [:]
-        var newStableTimelineItemIDs = Set<String>()
         var newLoadedTimelineItemIDs = Set<String>()
         let accessoryIDs = accessoryItems.map { "\(Self.accessoryPrefix)\($0.id)" }
         var itemIDs: [String] = []
@@ -976,38 +955,20 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
             }
 
             var items: [String] = []
-            var usedItemIDs = Set<String>()
             items.reserveCapacity(itemCount)
             for i in 0..<itemCount {
                 let id: String
                 if let loadedID = loadedIDsByIndex[i] {
                     id = loadedID
-                    newStableTimelineItemIDs.insert(id)
                     newRenderHashMap[id] = loadedRenderHashByItemID[id]
-                } else if let cachedID = lastKnownTimelineItemIDByIndex[i],
-                          !loadedTimelineItemIDs.contains(cachedID),
-                          !usedItemIDs.contains(cachedID) {
-                    id = cachedID
-                    newStableTimelineItemIDs.insert(id)
-                    if let renderHash = lastKnownTimelineRenderHashByItemID[id] {
-                        newRenderHashMap[id] = renderHash
-                    }
                 } else {
-                    id = "\(Self.timelinePrefix)idx_\(i)"
+                    id = "\(Self.placeholderPrefix)\(i)"
                 }
                 items.append(id)
                 newIndexMap[id] = i
-                usedItemIDs.insert(id)
             }
             itemIDs = items
             newLoadedTimelineItemIDs = loadedTimelineItemIDs
-            for (index, id) in loadedIDsByIndex {
-                lastKnownTimelineItemIDByIndex[index] = id
-            }
-            for (id, renderHash) in loadedRenderHashByItemID {
-                lastKnownTimelineRenderHashByItemID[id] = renderHash
-            }
-            pruneStabilizedPagingCache(keepingItemIDs: Set(itemIDs), itemCount: itemCount)
 
             // Footer
             let footer = footerItemIDs(for: success)
@@ -1022,7 +983,6 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
             footerIDs: footerIDs,
             indexMap: newIndexMap,
             renderHashMap: newRenderHashMap,
-            stableTimelineItemIDs: newStableTimelineItemIDs,
             loadedTimelineItemIDs: newLoadedTimelineItemIDs,
             isRefreshing: pagingIsRefreshing(data)
         )
@@ -1057,7 +1017,6 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
             : nil
 
         itemIndexMap = plan.indexMap
-        stableTimelineItemIDs = plan.stableTimelineItemIDs
         scheduleHeightCachePrune(keepingItemIDs: Set(plan.indexMap.keys))
 
         if previousSignature?.accessoryIDs == newSignature.accessoryIDs,
@@ -1571,11 +1530,6 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
             heightCache[key] = height
             heightCacheKeysByItemID[itemID, default: []].insert(key)
             return CGSize(width: width, height: height)
-        }
-
-        if itemID.hasPrefix(Self.timelinePrefix),
-           let cachedHeight = cachedStabilizedHeight(for: itemID, width: width) {
-            return CGSize(width: width, height: cachedHeight)
         }
 
         return CGSize(width: width, height: 200)

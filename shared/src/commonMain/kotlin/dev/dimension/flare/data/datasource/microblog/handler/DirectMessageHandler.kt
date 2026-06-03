@@ -18,15 +18,20 @@ import dev.dimension.flare.data.database.cache.model.DbMessageRoomReference
 import dev.dimension.flare.data.datasource.microblog.createSendingDirectMessage
 import dev.dimension.flare.data.datasource.microblog.loader.DirectMessageDelta
 import dev.dimension.flare.data.datasource.microblog.loader.DirectMessageLoader
+import dev.dimension.flare.data.datasource.microblog.offsetPagingConfig
+import dev.dimension.flare.data.datasource.microblog.paging.DirectMessageItemDbPageLoader
+import dev.dimension.flare.data.datasource.microblog.paging.DirectMessageTimelineDbPageLoader
+import dev.dimension.flare.data.datasource.microblog.paging.OffsetFromStartPagingKey
+import dev.dimension.flare.data.datasource.microblog.paging.OffsetFromStartPagingSource
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.createPagingRemoteMediator
-import dev.dimension.flare.data.datasource.microblog.pagingConfig
 import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiDMItem
 import dev.dimension.flare.ui.model.UiDMRoom
 import dev.dimension.flare.ui.model.UiState
+import kotlin.native.HiddenFromObjC
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -38,7 +43,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import kotlin.native.HiddenFromObjC
 
 @OptIn(ExperimentalPagingApi::class)
 @HiddenFromObjC
@@ -53,9 +57,13 @@ public class DirectMessageHandler(
 
     public fun list(scope: CoroutineScope): Flow<PagingData<UiDMRoom>> =
         Pager(
-            config = pagingConfig,
+            config = offsetPagingConfig,
             remoteMediator =
-                createPagingRemoteMediator(
+                createPagingRemoteMediator<
+                    OffsetFromStartPagingKey,
+                    DbDirectMessageTimeline,
+                    UiDMRoom,
+                >(
                     database = database,
                     pagingKey = "direct-message-list-$accountKey",
                     onLoad = { pageSize, request ->
@@ -69,7 +77,12 @@ public class DirectMessageHandler(
                     },
                 ),
             pagingSourceFactory = {
-                database.messageDao().getRoomPagingSource(accountType = accountType)
+                OffsetFromStartPagingSource(
+                    DirectMessageTimelineDbPageLoader(
+                        database = database,
+                        accountType = accountType,
+                    ),
+                )
             },
         ).flow
             .map { paging ->
@@ -83,9 +96,13 @@ public class DirectMessageHandler(
         scope: CoroutineScope,
     ): Flow<PagingData<UiDMItem>> =
         Pager(
-            config = pagingConfig,
+            config = offsetPagingConfig,
             remoteMediator =
-                createPagingRemoteMediator(
+                createPagingRemoteMediator<
+                    OffsetFromStartPagingKey,
+                    DbMessageItem,
+                    UiDMItem,
+                >(
                     database = database,
                     pagingKey = "direct-message-conversation-$accountKey-$roomKey",
                     onLoad = { pageSize, request ->
@@ -103,7 +120,12 @@ public class DirectMessageHandler(
                     },
                 ),
             pagingSourceFactory = {
-                database.messageDao().getRoomMessagesPagingSource(roomKey = roomKey)
+                OffsetFromStartPagingSource(
+                    DirectMessageItemDbPageLoader(
+                        database = database,
+                        roomKey = roomKey,
+                    ),
+                )
             },
         ).flow
             .map { paging ->

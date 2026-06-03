@@ -6,6 +6,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
+import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.filter
@@ -22,9 +23,12 @@ import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.model.DbStatusWithReference
 import dev.dimension.flare.data.database.cache.model.TranslationDisplayOptions
+import dev.dimension.flare.data.datasource.microblog.offsetPagingConfig
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.NotSupportRemoteLoader
+import dev.dimension.flare.data.datasource.microblog.paging.OffsetFromStartPagingSource
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
+import dev.dimension.flare.data.datasource.microblog.paging.TimelineDbPageLoader
 import dev.dimension.flare.data.datasource.microblog.paging.TimelinePagingMapper
 import dev.dimension.flare.data.datasource.microblog.paging.TimelineRemoteMediator
 import dev.dimension.flare.data.datasource.microblog.paging.toPagingSource
@@ -141,7 +145,7 @@ public abstract class TimelinePresenter :
         run {
             val allowLongText = allowLongTextTranslationDisplay(loader)
             Pager(
-                config = pagingConfig,
+                config = offsetPagingConfig,
                 remoteMediator =
                     TimelineRemoteMediator(
                         loader = loader,
@@ -155,8 +159,11 @@ public abstract class TimelinePresenter :
                         },
                     ),
                 pagingSourceFactory = {
-                    database.pagingTimelineDao().getPagingSource(
-                        pagingKey = loader.pagingKey,
+                    OffsetFromStartPagingSource(
+                        TimelineDbPageLoader(
+                            database = database,
+                            pagingKey = loader.pagingKey,
+                        ),
                     )
                 },
             ).flow

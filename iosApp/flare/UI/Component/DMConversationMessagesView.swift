@@ -68,8 +68,6 @@ final class DMConversationMessagesController: UIViewController, UICollectionView
     private var itemIndexMap: [String: Int] = [:]
     private var lastAppliedIDs: [String] = []
     private var lastAppliedRenderHashes: [String: Int] = [:]
-    private var lastKnownMessageIDByIndex: [Int: String] = [:]
-    private var lastKnownMessageRenderHashByItemID: [String: Int] = [:]
     private var heightCache: [String: CGFloat] = [:]
     private var heightCacheKeysByItemID: [String: Set<String>] = [:]
     private var didApplyInitialData = false
@@ -195,27 +193,32 @@ final class DMConversationMessagesController: UIViewController, UICollectionView
             return
         }
 
-        let item = success.get(index: Int32(pagingIndex))
-        let renderHash = item?.hash ?? lastKnownMessageRenderHashByItemID[id]
+        guard let item = success.get(index: Int32(pagingIndex)) else {
+            cell.configure(
+                mode: .placeholder,
+                appearance: appearance,
+                onRetry: nil,
+                onOpenURL: onOpenURL,
+                cachedPreferredHeight: nil,
+                onPreferredHeightChanged: nil
+            )
+            return
+        }
+
         cell.configure(
             mode: .message(item),
             appearance: appearance,
             onRetry: { [weak self] key in self?.onRetry?(key) },
             onOpenURL: onOpenURL,
             cachedPreferredHeight: cachedPreferredHeightProvider(for: id),
-            onPreferredHeightChanged: item.map { item in
-                { [weak self] width, height in
-                    self?.applyMeasuredHeight(
-                        itemID: id,
-                        width: width,
-                        height: height
-                    )
-                }
+            onPreferredHeightChanged: { [weak self] width, height in
+                self?.applyMeasuredHeight(
+                    itemID: id,
+                    width: width,
+                    height: height
+                )
             }
         )
-        if let renderHash {
-            lastKnownMessageRenderHashByItemID[id] = renderHash
-        }
     }
 
     private var currentErrorMessage: String? {
@@ -277,7 +280,6 @@ final class DMConversationMessagesController: UIViewController, UICollectionView
 
             var loadedIDsByIndex: [Int: String] = [:]
             var loadedRenderHashesByItemID: [String: Int] = [:]
-            var loadedMessageIDs = Set<String>()
 
             for pagingIndex in 0..<itemCount {
                 guard let item = success.peek(index: Int32(pagingIndex)) else {
@@ -286,12 +288,10 @@ final class DMConversationMessagesController: UIViewController, UICollectionView
                 let id = messageItemID(for: item)
                 loadedIDsByIndex[pagingIndex] = id
                 loadedRenderHashesByItemID[id] = item.hash
-                loadedMessageIDs.insert(id)
             }
 
             var ids: [String] = []
             var renderHashes: [String: Int] = [:]
-            var usedMessageIDs = Set<String>()
             ids.reserveCapacity(itemCount)
 
             for displayIndex in 0..<itemCount {
@@ -302,16 +302,6 @@ final class DMConversationMessagesController: UIViewController, UICollectionView
                     if let renderHash = loadedRenderHashesByItemID[id] {
                         renderHashes[id] = renderHash
                     }
-                    lastKnownMessageIDByIndex[pagingIndex] = id
-                    usedMessageIDs.insert(id)
-                } else if let cachedID = lastKnownMessageIDByIndex[pagingIndex],
-                          !loadedMessageIDs.contains(cachedID),
-                          !usedMessageIDs.contains(cachedID) {
-                    id = cachedID
-                    if let renderHash = lastKnownMessageRenderHashByItemID[id] {
-                        renderHashes[id] = renderHash
-                    }
-                    usedMessageIDs.insert(id)
                 } else {
                     id = "\(ItemID.placeholderPrefix)\(pagingIndex)"
                 }
@@ -319,12 +309,8 @@ final class DMConversationMessagesController: UIViewController, UICollectionView
                 itemIndexMap[id] = pagingIndex
             }
 
-            for (itemID, renderHash) in loadedRenderHashesByItemID {
-                lastKnownMessageRenderHashByItemID[itemID] = renderHash
-            }
             let currentIDs = Set(ids)
             pruneHeightCache(keepingItemIDs: currentIDs)
-            pruneStabilizedPagingCache(keepingItemIDs: currentIDs, itemCount: itemCount)
             return SnapshotPlan(ids: ids, renderHashes: renderHashes)
         }
     }
@@ -392,15 +378,6 @@ final class DMConversationMessagesController: UIViewController, UICollectionView
             for key in keys {
                 heightCache.removeValue(forKey: key)
             }
-        }
-    }
-
-    private func pruneStabilizedPagingCache(keepingItemIDs: Set<String>, itemCount: Int) {
-        lastKnownMessageIDByIndex = lastKnownMessageIDByIndex.filter { index, itemID in
-            index >= 0 && index < itemCount && keepingItemIDs.contains(itemID)
-        }
-        lastKnownMessageRenderHashByItemID = lastKnownMessageRenderHashByItemID.filter { itemID, _ in
-            keepingItemIDs.contains(itemID)
         }
     }
 

@@ -7,6 +7,18 @@ import kotlin.native.HiddenFromObjC
 public val pagingConfig: PagingConfig =
     PagingConfig(
         pageSize = 20,
-        prefetchDistance = 2,
+        prefetchDistance = 1,
         initialLoadSize = 20,
     )
+
+@HiddenFromObjC
+public val offsetPagingConfig: PagingConfig
+    get() =
+        PagingConfig(
+            pageSize = pagingConfig.pageSize,
+            prefetchDistance = pagingConfig.prefetchDistance,
+            enablePlaceholders = false,
+            initialLoadSize = pagingConfig.initialLoadSize,
+            maxSize = pagingConfig.maxSize,
+            jumpThreshold = pagingConfig.jumpThreshold,
+        )

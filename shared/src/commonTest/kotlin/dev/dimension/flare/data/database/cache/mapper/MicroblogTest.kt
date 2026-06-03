@@ -8,6 +8,7 @@ import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.common.Locale
 import dev.dimension.flare.common.TestFormatter
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
 import dev.dimension.flare.data.database.cache.model.DbStatus
 import dev.dimension.flare.data.database.cache.model.DbStatusReference
 import dev.dimension.flare.data.database.cache.model.DbStatusReferenceWithStatus
@@ -23,6 +24,7 @@ import dev.dimension.flare.data.database.cache.model.translationEntityKey
 import dev.dimension.flare.data.database.cache.model.translationPayload
 import dev.dimension.flare.data.database.createDatabaseDriver
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
+import dev.dimension.flare.data.datasource.microblog.paging.TimelineDbPageLoader
 import dev.dimension.flare.data.datasource.microblog.paging.TimelinePagingMapper
 import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.network.nostr.bech32PublicKey
@@ -429,6 +431,61 @@ class MicroblogTest : RobolectricTest() {
             val pager = TestPager(config = PagingConfig(pageSize = 20), paging)
             val refreshResult = pager.refresh()
             assertIs<PagingSource.LoadResult.Page<Int, DbStatusWithReference>>(refreshResult)
+        }
+
+    @Test
+    fun timelineOffsetPageSkipsTimelineRowsWithoutStatus() =
+        runTest {
+            val accountKey = MicroBlogKey(id = "account", host = "test.com")
+            val user = createUser(MicroBlogKey(id = "user", host = "test.com"), "User")
+            val first =
+                TimelinePagingMapper.toDb(
+                    createPost(
+                        accountKey = accountKey,
+                        user = user,
+                        statusKey = MicroBlogKey(id = "first-status", host = "test.com"),
+                        text = "first",
+                    ),
+                    pagingKey = "home",
+                    sortId = 10,
+                )
+            val second =
+                TimelinePagingMapper.toDb(
+                    createPost(
+                        accountKey = accountKey,
+                        user = user,
+                        statusKey = MicroBlogKey(id = "second-status", host = "test.com"),
+                        text = "second",
+                    ),
+                    pagingKey = "home",
+                    sortId = 30,
+                )
+
+            saveToDatabase(db, listOf(first, second))
+            db.pagingTimelineDao().insertAll(
+                listOf(
+                    DbPagingTimeline(
+                        pagingKey = "home",
+                        statusId = "missing-status",
+                        sortId = 20,
+                    ),
+                ),
+            )
+
+            val loader = TimelineDbPageLoader(db, "home")
+
+            assertEquals(
+                listOf(first.timeline.statusId),
+                loader.load(offset = 0, limit = 1).map { it.status.data.id },
+            )
+            assertEquals(
+                listOf(second.timeline.statusId),
+                loader.load(offset = 1, limit = 1).map { it.status.data.id },
+            )
+            assertEquals(
+                emptyList(),
+                loader.load(offset = 2, limit = 1).map { it.status.data.id },
+            )
         }
 
     @Test

@@ -43,6 +43,20 @@ internal interface PagingTimelineDao {
     fun getPagingSource(pagingKey: String): PagingSource<Int, DbStatusWithReference>
 
     @Transaction
+    @Query(
+        "SELECT DbStatus.* FROM DbStatus " +
+            "INNER JOIN DbPagingTimeline ON DbStatus.id = DbPagingTimeline.statusId " +
+            "WHERE DbPagingTimeline.pagingKey = :pagingKey " +
+            "ORDER BY DbPagingTimeline.sortId " +
+            "LIMIT :limit OFFSET :offset",
+    )
+    suspend fun getTimelinePage(
+        pagingKey: String,
+        offset: Int,
+        limit: Int,
+    ): List<DbStatusWithReference>
+
+    @Transaction
     @RewriteQueriesToDropUnusedColumns
     @Query(
         "SELECT * FROM DbStatus " +

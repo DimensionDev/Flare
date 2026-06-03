@@ -60,7 +60,9 @@ ksp {
             "dev.dimension.flare.ui.presenter.HomeTimelineWithTabsPresenter",
             "dev.dimension.flare.ui.presenter.home.WebDeepLinkPresenter",
             "dev.dimension.flare.ui.presenter.home.TimelinePresenter",
-            "dev.dimension.flare.ui.presenter.profile.WebProfilePresenter",
+            "dev.dimension.flare.ui.presenter.profile.ProfilePresenter",
+            "dev.dimension.flare.ui.presenter.profile.ProfileWithUserNameAndHostPresenter",
+            "dev.dimension.flare.ui.presenter.status.StatusContextPresenter",
         ).joinToString(","),
     )
 }

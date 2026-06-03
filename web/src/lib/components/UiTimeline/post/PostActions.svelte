@@ -11,9 +11,11 @@
 	let {
 		actions,
 		appearance,
+		detailActions = false,
 	}: {
 		actions: ActionMenu[];
 		appearance: TimelineAppearance;
+		detailActions?: boolean;
 	} = $props();
 
 	const deepLink = useDeepLink();
@@ -42,7 +44,11 @@
 	}
 </script>
 
-<div class={`actions actions-${appearance.postActionStyle.toLowerCase()}`} aria-label={m.postActionsAriaLabel()}>
+<div
+	class:detail-actions={detailActions}
+	class={`actions actions-${appearance.postActionStyle.toLowerCase()}`}
+	aria-label={m.postActionsAriaLabel()}
+>
 	{#each actions as action, index}
 		{@render ActionControl(action, appearance, index)}
 	{/each}
@@ -125,6 +131,17 @@
 		min-height: 1.9rem;
 		padding-top: 0;
 		color: var(--post-text-muted);
+	}
+
+	.actions.detail-actions {
+		min-height: 2.25rem;
+		color: var(--post-text-readable);
+		font-size: 0.95rem;
+	}
+
+	.actions.detail-actions :global(.btn) {
+		min-height: 2.25rem;
+		height: 2.25rem;
 	}
 
 	.actions-rightaligned {

@@ -54,7 +54,13 @@ export function shouldIgnorePostContainerClick(event: MouseEvent): boolean {
 	if (event.defaultPrevented) return true;
 
 	const target = event.target;
-	return target instanceof Element && Boolean(target.closest(postClickIgnoreSelector));
+	const currentTarget = event.currentTarget;
+	if (!(target instanceof Element) || !(currentTarget instanceof Element)) {
+		return false;
+	}
+
+	const ignoredElement = target.closest(postClickIgnoreSelector);
+	return ignoredElement !== null && ignoredElement !== currentTarget;
 }
 
 export function initials(name: string | null | undefined): string {

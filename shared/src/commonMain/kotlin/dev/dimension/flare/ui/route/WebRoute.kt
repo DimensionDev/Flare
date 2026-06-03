@@ -5,6 +5,10 @@ import dev.dimension.flare.model.MicroBlogKey
 
 public fun DeeplinkRoute.toWebPath(): String? =
     when (this) {
+        is DeeplinkRoute.Status.Detail -> {
+            "/${accountType.toWebAccountSegment()}/status/${statusKey.toWebPathSegment()}"
+        }
+
         is DeeplinkRoute.Profile.User -> {
             "/${accountType.toWebAccountSegment()}/profile/${userKey.toWebPathSegment()}"
         }

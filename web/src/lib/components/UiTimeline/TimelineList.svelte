@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { useEnvironmentSettings } from '$lib/environment/environmentSettings.svelte';
 	import type { TimelineDisplayMode } from '$lib/environment/environmentSettings.svelte';
-	import type { PagingState, UiTimelineV2 } from '@flare/web-presenters/timeline.svelte';
+	import type { MicroBlogKey, PagingState, UiTimelineV2 } from '@flare/web-presenters/timeline.svelte';
 	import PostLoadingPlaceholder from './post/PostLoadingPlaceholder.svelte';
 	import { defaultTimelineAppearance } from './post/postUtils';
 	import TimelineItem from './TimelineItem.svelte';
@@ -9,8 +9,10 @@
 
 	let {
 		listState,
+		detailStatusKey = null,
 	}: {
 		listState: PagingState<UiTimelineV2>;
+		detailStatusKey?: MicroBlogKey | null;
 	} = $props();
 
 	const environmentSettings = useEnvironmentSettings();
@@ -124,7 +126,7 @@
 				>
 					<div class:rounded-box={cardStyleItems} class="timeline-row-content bg-base-100">
 						{#if item}
-							<TimelineItem {item} />
+							<TimelineItem {item} {detailStatusKey} />
 						{:else}
 							<PostLoadingPlaceholder />
 						{/if}

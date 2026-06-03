@@ -112,6 +112,7 @@ function renderPresenter(presenter) {
 	const controllerFactoryName = `${factoryName}Controller`;
 	const factoryParameters = creatable ? renderParameters(parameters) : 'presenter: WebPresenterRef';
 	const factoryArguments = creatable ? parameters.map((parameter) => parameter.name).join(', ') : 'presenter';
+	const structTypes = collectStructTypes(presenter);
 	const enumTypes = collectEnumTypes(presenter);
 	const sealedTypes = collectSealedTypes(presenter);
 	const refTypes = collectRefTypes(presenter);
@@ -143,7 +144,7 @@ ${creatable ? '\twebPresenterCreate,\n' : ''}\twebPresenterDispatch,
 \twebPresenterUnsubscribe
 } from '@flare/web-shared';
 
-${creatable ? renderWebPresenterCallbacksType() : ''}${renderWebPresenterRefsType()}${renderWebPresenterCallTypes(needsCall)}${renderStateCodecTypes(usedStateCodecs)}${renderEnumTypes(enumTypes)}${renderSealedTypes(sealedTypes, refTypes)}${renderRefTypes(refTypes, needsRefHelpers)}
+${creatable ? renderWebPresenterCallbacksType() : ''}${renderWebPresenterRefsType()}${renderWebPresenterCallTypes(needsCall)}${renderStateCodecTypes(usedStateCodecs)}${renderStructTypes(structTypes)}${renderEnumTypes(enumTypes)}${renderSealedTypes(sealedTypes, refTypes)}${renderRefTypes(refTypes, needsRefHelpers)}
 type ${presenter.stateType}Snapshot = {
 ${snapshotFields.join('\n')}
 };
@@ -253,6 +254,32 @@ function collectRefTypes(presenter) {
 		visitValue(action.return, addRef);
 	}
 	return [...refs.values()];
+}
+
+function collectStructTypes(presenter) {
+	const structs = new Map();
+	const addStruct = (item) => {
+		if (isStructValue(item) && !structs.has(item.tsType)) {
+			structs.set(item.tsType, {
+				name: item.tsType,
+				fields: item.fields ?? []
+			});
+		}
+	};
+
+	for (const parameter of presenter.parameters ?? []) {
+		if (parameter.kind === 'callback') {
+			for (const arg of parameter.args ?? []) visitValue(arg, addStruct);
+		} else {
+			visitValue(parameter, addStruct);
+		}
+	}
+	for (const property of presenter.properties ?? []) visitValue(property, addStruct);
+	for (const action of presenter.actions ?? []) {
+		for (const arg of action.args ?? []) visitValue(arg, addStruct);
+		visitValue(action.return, addStruct);
+	}
+	return [...structs.values()];
 }
 
 function collectEnumTypes(presenter) {
@@ -379,6 +406,18 @@ function presenterUses(presenter, predicate) {
 		visitValue(action.return, visitor);
 	}
 	return found;
+}
+
+function renderStructTypes(structTypes) {
+	if (structTypes.length === 0) return '';
+	return `${structTypes.map((structType) => renderStructType(structType)).join('\n')}\n`;
+}
+
+function renderStructType(structType) {
+	const fields = (structType.fields ?? []).map((field) => `\t${field.name}: ${nullableTsType(field.tsType, field)};`).join('\n');
+	return `export type ${structType.name} = {
+${fields}
+};`;
 }
 
 function renderEnumTypes(enumTypes) {
@@ -980,6 +1019,10 @@ function isValue(item) {
 		isArray(item) ||
 		stateCodecFor(item) !== undefined
 	);
+}
+
+function isStructValue(item) {
+	return Array.isArray(item?.fields) && item.fields.length > 0;
 }
 
 function isRef(item) {

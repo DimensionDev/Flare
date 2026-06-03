@@ -11,13 +11,16 @@
         createProfilePresenterController,
         type ActionMenu as ProfileActionMenu,
         type ActionMenuItemTextLocalizedType,
+        type AccountType,
         type ClickEvent as ProfileClickEvent,
         type FollowButtonState,
+        type MicroBlogKey,
         type ProfileStateTab,
         type TimelinePresenter,
         type UiProfile,
         type UiProfileMark,
     } from "@flare/web-presenters/profile.svelte";
+    import { createProfileUserLookupPresenterController } from "@flare/web-presenters/profileUserLookup.svelte";
     import type { ClickEvent as TimelineClickEvent } from "@flare/web-presenters/timeline.svelte";
 
     let selectedTabId = $state<string | null>(null);
@@ -31,33 +34,52 @@
             routeAccountKey && (routeUserKey || (routeUserName && routeHost)),
         ),
     );
+    const accountType = $derived(parseAccountType(routeAccountKey));
+    const routeUserMicroBlogKey = $derived(routeUserKey ? parseMicroBlogKey(routeUserKey) : null);
+    const shouldResolveUserKey = $derived(!routeUserMicroBlogKey && Boolean(routeUserName && routeHost));
+    const lookupState = useReactiveRetainedPresenter(
+        () =>
+            shouldResolveUserKey
+                ? `profile-user-lookup:${routeAccountKey}:${routeHost}:${routeUserName}`
+                : "profile-user-lookup:empty",
+        () =>
+            shouldResolveUserKey && routeUserName && routeHost
+                ? createProfileUserLookupPresenterController(routeUserName, routeHost, accountType)
+                : createEmptyUserLookupController(),
+        { ttlMs: Infinity },
+    );
+    const resolvedUserKey = $derived(
+        routeUserMicroBlogKey ??
+            (lookupState.user.type === "Success"
+                ? lookupState.user.data.key
+                : null),
+    );
+    const hasResolvedProfileRoute = $derived(hasProfileRoute && resolvedUserKey !== null);
     const profilePresenterKey = $derived(
         routeAccountKey
-            ? `${routeAccountKey}:${routeUserKey ?? `handle:${routeHost}:${routeUserName}`}`
+            ? `${routeAccountKey}:${resolvedUserKey ? `${resolvedUserKey.id}@${resolvedUserKey.host}` : `handle:${routeHost}:${routeUserName}`}`
             : "empty",
     );
     const profileState = useReactiveRetainedPresenter(
         () => `profile:${profilePresenterKey}`,
         () =>
             createProfilePresenterController(
-                routeAccountKey,
-                routeUserKey,
-                routeUserName,
-                routeHost,
+                accountType,
+                resolvedUserKey,
             ),
         { ttlMs: Infinity },
     );
     const deepLink = useDeepLink();
     const displayProfile = $derived(
-        hasProfileRoute && profileState.userState.type === "Success"
+        hasResolvedProfileRoute && profileState.userState.type === "Success"
             ? profileState.userState.data
             : null,
     );
     const profileActions = $derived(
-        hasProfileRoute ? profileState.actions : [],
+        hasResolvedProfileRoute ? profileState.actions : [],
     );
     const profileTabs = $derived<ProfileStateTab[]>(
-        hasProfileRoute && profileState.tabs.type === "Success"
+        hasResolvedProfileRoute && profileState.tabs.type === "Success"
             ? profileState.tabs.data
             : [],
     );
@@ -70,16 +92,19 @@
     );
     const showFollowControls = $derived(
         hasProfileRoute &&
+            hasResolvedProfileRoute &&
             profileState.isMe.type === "Success" &&
             !profileState.isMe.data,
     );
     const profileError = $derived(
-        hasProfileRoute && profileState.userState.type === "Error"
+        hasProfileRoute && lookupState.user.type === "Error"
+            ? (lookupState.user.message ?? "Unable to load profile")
+            : hasResolvedProfileRoute && profileState.userState.type === "Error"
             ? (profileState.userState.message ?? "Unable to load profile")
             : null,
     );
     const followButtonState = $derived(
-        hasProfileRoute && profileState.followButtonState.type === "Success"
+        hasResolvedProfileRoute && profileState.followButtonState.type === "Success"
             ? profileState.followButtonState.data
             : null,
     );
@@ -88,6 +113,57 @@
             ? followLabel(followButtonState)
             : m.profileFollowButtonFollow(),
     );
+
+    function createEmptyUserLookupController() {
+        return {
+            state: {
+                user: { type: "Loading" as const },
+            },
+            mount() {},
+            close() {},
+        };
+    }
+
+    function parseAccountType(value: string | null): AccountType {
+        if (!value || value === "guest") return { type: "Guest" };
+        if (value.startsWith("guest@")) {
+            return { type: "GuestHost", host: value.slice("guest@".length) };
+        }
+        return { type: "Specific", accountKey: parseMicroBlogKey(value) };
+    }
+
+    function parseMicroBlogKey(value: string): MicroBlogKey {
+        let escaping = false;
+        let idFinished = false;
+        let id = "";
+        let host = "";
+
+        for (const char of value) {
+            if (escaping) {
+                if (idFinished) host += char;
+                else id += char;
+                escaping = false;
+                continue;
+            }
+
+            if (char === "\\") {
+                escaping = true;
+                continue;
+            }
+
+            if (char === "@" && !idFinished) {
+                idFinished = true;
+                continue;
+            }
+
+            if (char === ",") break;
+
+            if (idFinished) host += char;
+            else id += char;
+        }
+
+        return { id, host };
+    }
     const followButtonOutlined = $derived(
         followButtonState?.type === "Following" ||
             followButtonState?.type === "Requested",

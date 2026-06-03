@@ -30,6 +30,7 @@
         showParents = true,
         withLeadingPadding = false,
         isParent = false,
+        isDetail = false,
     }: {
         post: UiTimelineV2Post;
         isQuote?: boolean;
@@ -37,6 +38,7 @@
         showParents?: boolean;
         withLeadingPadding?: boolean;
         isParent?: boolean;
+        isDetail?: boolean;
     } = $props();
 
     const environmentSettings = useEnvironmentSettings();
@@ -73,7 +75,8 @@
     });
 
     const showSideAvatar = $derived(
-        (!appearance.fullWidthPost || withLeadingPadding) &&
+        !isDetail &&
+            (!appearance.fullWidthPost || withLeadingPadding) &&
             !isQuote &&
             post.user !== null,
     );
@@ -84,6 +87,7 @@
     const lineLimit = $derived(Math.max(appearance.lineLimit || 5, 1));
     const shouldClampBody = $derived(
         !bodyExpanded &&
+            !isDetail &&
             !isQuote &&
             !post.shouldExpandTextByDefault &&
             lineLimit > 0 &&
@@ -111,10 +115,10 @@
     const visibleActions = $derived(
         !forceHideActions &&
             !isQuote &&
-            appearance.postActionStyle !== "Hidden" &&
+            (isDetail || appearance.postActionStyle !== "Hidden") &&
             hasActionControls(post.actions),
     );
-    const postClickable = $derived(deepLink.canPerformClickEvent(post.clickEvent));
+    const postClickable = $derived(!isDetail && deepLink.canPerformClickEvent(post.clickEvent));
 
     $effect(() => {
         const element = bodyTextElement;
@@ -163,6 +167,7 @@
 <div
     class:quote={isQuote}
     class:parent={isParent}
+    class:detail={isDetail}
     class:full-width={!showSideAvatar}
     class:clickable={postClickable}
     class="timeline-post"
@@ -209,6 +214,7 @@
                 {appearance}
                 sideAvatarVisible={showSideAvatar}
                 quoteHeader={isQuote}
+                detailHeader={isDetail}
             />
 
             <div class="content-stack">
@@ -337,8 +343,14 @@
                     <PostReactions reactions={post.emojiReactions} />
                 {/if}
 
+                {#if isDetail}
+                    <time class="detail-time" datetime={post.createdAt.full} title={post.createdAt.full}>
+                        {post.createdAt.full}
+                    </time>
+                {/if}
+
                 {#if visibleActions}
-                    <PostActions actions={post.actions} {appearance} />
+                    <PostActions actions={post.actions} {appearance} detailActions={isDetail} />
                 {/if}
             </div>
         </div>
@@ -415,6 +427,14 @@
 
     .timeline-post.clickable {
         cursor: pointer;
+    }
+
+    .timeline-post.detail {
+        --post-padding-x: 1rem;
+        --post-padding-y: 1rem;
+        --post-padding-bottom: 0.75rem;
+        --post-gap: 0.5rem;
+        --post-avatar-gap: 0.75rem;
     }
 
     .timeline-post.quote {
@@ -521,6 +541,19 @@
         font-size: 0.96rem;
         line-height: 1.5;
         overflow-wrap: anywhere;
+    }
+
+    .timeline-post.detail .post-text {
+        font-size: 1rem;
+        line-height: 1.55;
+    }
+
+    .detail-time {
+        display: block;
+        width: fit-content;
+        color: var(--post-text-muted);
+        font-size: 0.82rem;
+        line-height: 1.35;
     }
 
     .post-text.clamped {

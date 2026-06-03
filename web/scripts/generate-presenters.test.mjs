@@ -155,6 +155,82 @@ test('generates dispatch refs type without complex references', async () => {
 	}
 });
 
+test('generates struct value types for domain values', async () => {
+	const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'flare-web-presenters-'));
+
+	try {
+		const manifestPath = path.join(tmp, 'manifest.json');
+		const outDir = path.join(tmp, 'out');
+
+		await fs.writeFile(
+			manifestPath,
+			JSON.stringify({
+				presenters: [
+					{
+						name: 'profile',
+						factory: 'createProfilePresenter',
+						stateType: 'ProfileState',
+						parameters: [
+							{
+								name: 'accountType',
+								kind: 'sealed',
+								tsType: 'AccountType',
+								discriminator: 'type',
+								variants: [
+									{ name: 'Guest', tag: 'Guest', properties: [] },
+									{
+										name: 'Specific',
+										tag: 'Specific',
+										properties: [
+											{
+												name: 'accountKey',
+												kind: 'value',
+												tsType: 'MicroBlogKey',
+												fields: [
+													{ name: 'id', tsType: 'string' },
+													{ name: 'host', tsType: 'string' }
+												]
+											}
+										]
+									}
+								]
+							},
+							{
+								name: 'userKey',
+								kind: 'value',
+								tsType: 'MicroBlogKey',
+								fields: [
+									{ name: 'id', tsType: 'string' },
+									{ name: 'host', tsType: 'string' }
+								],
+								nullable: true
+							}
+						],
+						properties: [],
+						actions: []
+					}
+				]
+			})
+		);
+
+		await execFileAsync(process.execPath, [generatorPath, manifestPath, outDir]);
+
+		const generated = await fs.readFile(path.join(outDir, 'profile.svelte.ts'), 'utf8');
+
+		assert.match(generated, /export type MicroBlogKey = \{\n\tid: string;\n\thost: string;\n\};/);
+		assert.match(generated, /export type AccountType =\n\t\| \{ "type": "Guest" \}\n\t\| \{ "type": "Specific"; "accountKey": MicroBlogKey \};/);
+		assert.match(
+			generated,
+			/export function createProfilePresenter\(accountType: AccountType, userKey: MicroBlogKey \| null\): ProfileState/
+		);
+		assert.match(generated, /JSON\.stringify\(\{ accountType, userKey \}\)/);
+		assert.doesNotMatch(generated, /export type MicroBlogKey = WebPresenterRef/);
+		assert.doesNotMatch(generated, /attachMicroBlogKey/);
+	} finally {
+		await fs.rm(tmp, { recursive: true, force: true });
+	}
+});
+
 test('generates arbitrary reference facade properties and methods', async () => {
 	const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'flare-web-presenters-'));
 

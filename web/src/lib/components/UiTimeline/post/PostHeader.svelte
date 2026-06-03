@@ -12,11 +12,13 @@
 		appearance,
 		sideAvatarVisible,
 		quoteHeader,
+		detailHeader = false,
 	}: {
 		post: UiTimelineV2Post;
 		appearance: TimelineAppearance;
 		sideAvatarVisible: boolean;
 		quoteHeader: boolean;
+		detailHeader?: boolean;
 	} = $props();
 
 	const deepLink = useDeepLink();
@@ -39,7 +41,8 @@
 	<header
 		class:inline-avatar={!sideAvatarVisible && post.user !== null}
 		class:quote-header={quoteHeader}
-		class:full-width={!quoteHeader && appearance.fullWidthPost}
+		class:full-width={!quoteHeader && (appearance.fullWidthPost || detailHeader)}
+		class:detail-header={detailHeader}
 		class="post-header"
 	>
 		{#if !sideAvatarVisible && post.user}
@@ -89,9 +92,11 @@
 					<FaIcon name={platformIcon(post.platformType)} size={14} />
 				</span>
 			{/if}
-			<time datetime={post.createdAt.full} title={post.createdAt.full}>
-				{appearance.absoluteTimestamp ? post.createdAt.absolute : post.createdAt.relative}
-			</time>
+			{#if !detailHeader}
+				<time datetime={post.createdAt.full} title={post.createdAt.full}>
+					{appearance.absoluteTimestamp ? post.createdAt.absolute : post.createdAt.relative}
+				</time>
+			{/if}
 		</div>
 	</header>
 {/if}
@@ -172,6 +177,11 @@
 
 	.post-header.full-width {
 		align-items: center;
+	}
+
+	.post-header.detail-header {
+		align-items: center;
+		gap: var(--post-avatar-gap);
 	}
 
 	.post-header.full-width .identity-line {

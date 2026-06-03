@@ -283,6 +283,19 @@ class DeeplinkRouteTest {
     }
 
     @Test
+    fun testSearchWebPath() {
+        val route =
+            DeeplinkRoute.Search(
+                accountType = activeAccountType,
+                query = "#flare search",
+            )
+        assertEquals(
+            "/search?account=active@example.com&q=%23flare%20search",
+            route.toWebPath(),
+        )
+    }
+
+    @Test
     fun testDeepLinkAccountPicker() {
         val route =
             DeeplinkRoute.DeepLinkAccountPicker(

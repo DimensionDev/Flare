@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { createHomeTabsPresenter } from '@flare/web-presenters/homeTabs.svelte';
+	import { createNotificationBadgePresenter } from '@flare/web-presenters/notificationBadge.svelte';
 	import type { HomeTabsPresenterStateHomeTabs } from '@flare/web-presenters/homeTabs.svelte';
 	import type { TimelineTabItemV2 as SecondaryTimelineTabItemV2 } from '@flare/web-presenters/secondaryTabs.svelte';
 	import DeepLinkProvider from '$lib/components/deeplink/DeepLinkProvider.svelte';
@@ -18,10 +19,11 @@
 
 	let { children } = $props();
 
-	type AppTab = HomeTabsPresenterStateHomeTabs | 'Profile' | 'Settings';
+	type AppTab = HomeTabsPresenterStateHomeTabs | 'Profile' | 'Settings' | 'Search';
 
 	const fallbackTabs: HomeTabsPresenterStateHomeTabs[] = ['Home', 'Discover'];
 	const homeTabs = createHomeTabsPresenter();
+	const notificationBadge = createNotificationBadgePresenter();
 	let selectedSecondaryTimeline = $state<SecondaryTimelineTabItemV2 | null>(null);
 	const presenterTabs = $derived(
 		homeTabs.tabs.type === 'Success'
@@ -41,6 +43,7 @@
 
 	function tabForPath(pathname: string): AppTab | null {
 		if (pathname === '/') return 'Home';
+		if (pathname === '/search' || pathname.startsWith('/search/')) return 'Search';
 		if (pathname === '/discover' || pathname.startsWith('/discover/')) return 'Discover';
 		if (pathname === '/notifications' || pathname.startsWith('/notifications/')) return 'Notifications';
 		if (isProfilePath(pathname)) return 'Profile';
@@ -64,6 +67,8 @@
 				return m.homeTabNotificationsTitle();
 			case 'Discover':
 				return m.homeTabDiscoverTitle();
+			case 'Search':
+				return m.searchTitle();
 			case 'Profile':
 				return m.profileTitle();
 			case 'Settings':
@@ -78,6 +83,8 @@
 			case 'Notifications':
 				return 'Notification';
 			case 'Discover':
+				return 'Search';
+			case 'Search':
 				return 'Search';
 			case 'Profile':
 				return 'Profile';
@@ -94,6 +101,8 @@
 				return '/notifications';
 			case 'Discover':
 				return '/discover';
+			case 'Search':
+				return '/search';
 			case 'Profile':
 				return '/profile';
 			case 'Settings':
@@ -103,6 +112,10 @@
 
 	function isTabActive(tab: AppTab): boolean {
 		return activeTab === tab;
+	}
+
+	function badgeLabel(count: number): string {
+		return count > 99 ? '99+' : `${count}`;
 	}
 </script>
 
@@ -131,7 +144,14 @@
 								aria-current={isTabActive(tab) ? 'page' : undefined}
 								data-tip={tabTitle(tab)}
 							>
-								<FaIcon name={tabIcon(tab)} size={18} />
+								<span class="nav-icon-indicator indicator">
+									{#if tab === 'Notifications' && notificationBadge.count > 0}
+										<span class="badge badge-primary indicator-item notification-badge">
+											{badgeLabel(notificationBadge.count)}
+										</span>
+									{/if}
+									<FaIcon name={tabIcon(tab)} size={18} />
+								</span>
 							</a>
 						</li>
 					{/each}
@@ -165,7 +185,14 @@
 						aria-label={tabTitle(tab)}
 						aria-current={isTabActive(tab) ? 'page' : undefined}
 					>
-						<FaIcon name={tabIcon(tab)} size={18} />
+						<span class="nav-icon-indicator indicator">
+							{#if tab === 'Notifications' && notificationBadge.count > 0}
+								<span class="badge badge-primary indicator-item notification-badge">
+									{badgeLabel(notificationBadge.count)}
+								</span>
+							{/if}
+							<FaIcon name={tabIcon(tab)} size={18} />
+						</span>
 					</a>
 				{/each}
 				<a
@@ -192,9 +219,10 @@
 		--app-secondary-width: 15rem;
 		display: grid;
 		grid-template-columns:
-			minmax(var(--app-sidebar-width), 1fr)
+			var(--app-sidebar-width)
 			minmax(0, var(--app-content-width))
-			minmax(var(--app-secondary-width), 1fr);
+			var(--app-secondary-width);
+		justify-content: center;
 		width: 100%;
 		min-height: 100vh;
 		background: var(--color-base-300);
@@ -207,7 +235,6 @@
 		width: var(--app-sidebar-width);
 		height: 100vh;
 		align-self: start;
-		justify-self: end;
 		min-width: 0;
 		flex-direction: column;
 		align-items: center;
@@ -244,12 +271,28 @@
 		align-content: center;
 		padding: 0;
 		color: color-mix(in oklab, var(--color-base-content) 72%, transparent);
-		overflow: hidden;
+		overflow: visible;
 	}
 
 	.app-sidebar :global(.menu a.active-primary) {
 		background: color-mix(in oklab, var(--color-primary) 12%, transparent);
 		color: var(--color-primary);
+	}
+
+	.nav-icon-indicator {
+		display: grid;
+		width: 1.5rem;
+		height: 1.5rem;
+		place-items: center;
+	}
+
+	.notification-badge {
+		min-width: 1rem;
+		height: 1rem;
+		padding-inline: 0.2rem;
+		border-width: 0;
+		font-size: 0.58rem;
+		line-height: 1;
 	}
 
 	.app-content {

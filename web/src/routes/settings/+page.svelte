@@ -72,6 +72,7 @@
 			title: m.settingsStorageTitle(),
 			description: m.settingsStorageSubtitle(),
 			icon: 'Database',
+			href: '/settings/storage',
 		},
 	]);
 

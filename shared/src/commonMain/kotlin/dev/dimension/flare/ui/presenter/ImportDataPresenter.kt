@@ -18,7 +18,7 @@ public class ImportDataPresenter(
             }
         }
 
-    private suspend fun import() {
+    internal suspend fun import() {
         val export = jsonContent.decodeJson(DataExport.serializer())
 
         val importAppDatabasePresenter = ImportAppDatabasePresenter(export.appDatabase.toString())

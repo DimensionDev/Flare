@@ -17,6 +17,10 @@ public fun DeeplinkRoute.toWebPath(): String? =
             "/${accountType.toWebAccountSegment()}/profile/by-handle/${host.toWebPathSegment()}/${userName.toWebPathSegment()}"
         }
 
+        is DeeplinkRoute.Search -> {
+            "/search?account=${accountType.toWebAccountSegment()}&q=${query.toWebPathSegment()}"
+        }
+
         else -> {
             null
         }

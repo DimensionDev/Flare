@@ -7,11 +7,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import dev.dimension.flare.data.repository.DebugRepository
 import dev.dimension.flare.ui.presenter.PresenterBase
+import dev.dimension.flare.web.shared.WebPresenter
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.map
 
+@WebPresenter("devMode")
 public class DevModePresenter : PresenterBase<DevModePresenter.State>() {
     @Immutable
     public interface State {

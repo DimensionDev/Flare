@@ -8,16 +8,13 @@
 		type AccountsStateAccountItem,
 		type MicroBlogKey,
 		type PlatformType,
-		type UiAccount,
 		type UiProfile,
 	} from '@flare/web-presenters/accounts.svelte';
 
 	const accountsPresenter = createAccountsPresenter();
 	const accountsState = $derived(accountsPresenter.accounts);
-	const activeAccountState = $derived(accountsPresenter.activeAccount);
-	const activeAccount = $derived(
-		activeAccountState.type === 'Success' ? activeAccountState.data : null
-	);
+	let removeDialog = $state<HTMLDialogElement | null>(null);
+	let pendingRemoval = $state<AccountsStateAccountItem | null>(null);
 
 	function profileNameText(user: UiProfile): string {
 		return user.name.innerText || user.handle.canonical || user.handle.raw;
@@ -35,14 +32,6 @@
 
 	function accountKeyText(key: MicroBlogKey): string {
 		return key.host ? `${key.id}@${key.host}` : key.id;
-	}
-
-	function accountKeyEquals(first: MicroBlogKey | null | undefined, second: MicroBlogKey): boolean {
-		return first?.id === second.id && first?.host === second.host;
-	}
-
-	function isActiveAccount(account: UiAccount): boolean {
-		return accountKeyEquals(activeAccount?.accountKey, account.accountKey);
 	}
 
 	function platformIcon(platformType: PlatformType): string {
@@ -64,15 +53,15 @@
 		}
 	}
 
-	function setActive(item: AccountsStateAccountItem): void {
-		if (isActiveAccount(item.account)) return;
-		accountsPresenter.setActiveAccount(item.account.accountKey);
+	function requestRemoveAccount(item: AccountsStateAccountItem): void {
+		pendingRemoval = item;
+		removeDialog?.showModal();
 	}
 
-	function removeAccount(item: AccountsStateAccountItem): void {
-		const title = accountTitle(item);
-		if (!confirm(m.settingsAccountsRemoveConfirm({ name: title }))) return;
-		accountsPresenter.removeAccount(item.account.accountKey);
+	function confirmRemoveAccount(): void {
+		if (!pendingRemoval) return;
+		accountsPresenter.removeAccount(pendingRemoval.account.accountKey);
+		pendingRemoval = null;
 	}
 </script>
 
@@ -101,40 +90,23 @@
 								{#if item.profile.type === 'Success'}
 									<div class="account-user">
 										<UserDisplay user={item.profile.data} variant="account" clickable={false} />
-										{#if isActiveAccount(item.account)}
-											<span class="badge badge-primary badge-sm">{m.settingsAccountsCurrent()}</span>
-										{/if}
 									</div>
 								{:else}
 									<div class="account-avatar bg-base-200 text-base-content">
 										<FaIcon name={platformIcon(item.account.platformType)} size={18} />
 									</div>
 									<div class="account-copy">
-										<div class="account-title-line">
-											<span class="account-title">{accountTitle(item)}</span>
-											{#if isActiveAccount(item.account)}
-												<span class="badge badge-primary badge-sm">{m.settingsAccountsCurrent()}</span>
-											{/if}
-										</div>
+										<span class="account-title">{accountTitle(item)}</span>
 										<span class="account-description">{accountDescription(item)}</span>
 									</div>
 								{/if}
 
 								<div class="account-actions">
 									<button
-										class="btn btn-ghost btn-sm"
-										type="button"
-										disabled={isActiveAccount(item.account)}
-										onclick={() => setActive(item)}
-									>
-										<FaIcon name="Check" size={13} />
-										<span>{m.actionUse()}</span>
-									</button>
-									<button
 										class="btn btn-ghost btn-square btn-sm text-error"
 										type="button"
 										aria-label={m.settingsAccountsRemoveAriaLabel({ name: accountTitle(item) })}
-										onclick={() => removeAccount(item)}
+										onclick={() => requestRemoveAccount(item)}
 									>
 										<FaIcon name="Delete" size={14} />
 									</button>
@@ -167,7 +139,7 @@
 								<div class="skeleton h-4 w-36"></div>
 								<div class="skeleton h-3 w-48"></div>
 							</div>
-							<div class="skeleton h-8 w-24 rounded-box"></div>
+							<div class="skeleton h-8 w-8 rounded-box"></div>
 						</div>
 					{/each}
 				</div>
@@ -193,6 +165,48 @@
 			</div>
 		</section>
 	</div>
+
+	<dialog
+		bind:this={removeDialog}
+		class="modal modal-middle"
+		onclose={() => {
+			pendingRemoval = null;
+		}}
+	>
+		<div class="modal-box">
+			{#if pendingRemoval}
+				<h3 class="text-lg font-bold">{m.settingsAccountsRemoveTitle()}</h3>
+				<p class="mt-2 text-sm text-base-content/70">
+					{m.settingsAccountsRemoveConfirm()}
+				</p>
+				<div class="mt-4 rounded-box border border-base-300 bg-base-100 p-3">
+					{#if pendingRemoval.profile.type === 'Success'}
+						<UserDisplay user={pendingRemoval.profile.data} variant="account" clickable={false} />
+					{:else}
+						<div class="flex items-center gap-3">
+							<span class="account-avatar bg-base-200 text-base-content">
+								<FaIcon name={platformIcon(pendingRemoval.account.platformType)} size={18} />
+							</span>
+							<span class="account-copy">
+								<span class="account-title">{accountTitle(pendingRemoval)}</span>
+								<span class="account-description">{accountDescription(pendingRemoval)}</span>
+							</span>
+						</div>
+					{/if}
+				</div>
+			{/if}
+			<form method="dialog" class="modal-action">
+				<button class="btn btn-ghost" type="submit">{m.loginCancel()}</button>
+				<button class="btn btn-error" type="submit" onclick={confirmRemoveAccount}>
+					<FaIcon name="Delete" size={14} />
+					<span>{m.actionDelete()}</span>
+				</button>
+			</form>
+		</div>
+		<form method="dialog" class="modal-backdrop">
+			<button>{m.loginCancel()}</button>
+		</form>
+	</dialog>
 </div>
 
 <style>
@@ -256,13 +270,6 @@
 		min-width: 0;
 	}
 
-	.account-title-line {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		min-width: 0;
-	}
-
 	.account-title {
 		overflow: hidden;
 		text-overflow: ellipsis;
@@ -270,21 +277,6 @@
 		font-size: 0.96rem;
 		font-weight: 650;
 		line-height: 1.25;
-	}
-
-	.account-title-line :global(.account-title) {
-		min-width: 0;
-		font-size: 0.96rem;
-		font-weight: 650;
-		line-height: 1.25;
-	}
-
-	.account-title-line :global(.account-title),
-	.account-title-line :global(.account-title p),
-	.account-title-line :global(.account-title .rt-block) {
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
 	}
 
 	.account-description {

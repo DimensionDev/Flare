@@ -25,7 +25,7 @@ kotlin {
 
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs {
-        outputModuleName.set("web-shared")
+        outputModuleName.set("flare")
         browser()
         binaries.library()
         generateTypeScriptDefinitions()

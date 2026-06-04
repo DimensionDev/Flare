@@ -75,7 +75,7 @@ export function localizedUiString(value: UiStrings): string {
 			return m.loginExternalSigner();
 		case 'WebCookieLogin':
 			return m.loginWebCookie();
-		case 'NostrLoginAccount':
-			return 'Nostr';
+		default:
+			return m.loginCredentialImport();
 	}
 }

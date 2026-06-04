@@ -66,9 +66,8 @@
                     return ["Password", "OAuth"];
                 case "xQt":
                 case "VVo":
+                default:
                     return [];
-                case "Nostr":
-                    return ["QrConnect"];
             }
         })();
         return methods.filter((method) => supportedMethods.includes(method));
@@ -106,11 +105,9 @@
             case "Misskey":
                 return "Misskey";
             case "xQt":
-                return "X";
-            case "Nostr":
-                return "Nostr";
+                return "World";
             case "VVo":
-                return "Weibo";
+                return "World";
             default:
                 return "World";
         }
@@ -125,11 +122,11 @@
             case "Misskey":
                 return "Misskey";
             case "xQt":
-                return "X";
-            case "Nostr":
-                return "Nostr";
+                return "Unsupported";
             case "VVo":
-                return "Weibo";
+                return "Unsupported";
+            default:
+                return "Unsupported";
         }
     }
 

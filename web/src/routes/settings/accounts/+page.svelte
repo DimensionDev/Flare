@@ -44,11 +44,9 @@
 			case 'Misskey':
 				return 'Misskey';
 			case 'xQt':
-				return 'X';
-			case 'Nostr':
-				return 'Nostr';
+				return 'World';
 			case 'VVo':
-				return 'Weibo';
+				return 'World';
 			default:
 				return 'World';
 		}

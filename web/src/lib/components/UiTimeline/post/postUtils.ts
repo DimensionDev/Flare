@@ -137,9 +137,9 @@ export function visibilityLabel(visibility: UiTimelineV2PostVisibility): string 
 export function platformIcon(platform: PlatformType): string {
 	switch (platform) {
 		case 'xQt':
-			return 'X';
+			return 'World';
 		case 'VVo':
-			return 'Weibo';
+			return 'World';
 		default:
 			return platform;
 	}

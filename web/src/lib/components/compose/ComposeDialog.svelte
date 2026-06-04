@@ -181,9 +181,9 @@
 	function platformIcon(platformType: UiProfile['platformType']): string {
 		switch (platformType) {
 			case 'xQt':
-				return 'X';
+				return 'World';
 			case 'VVo':
-				return 'Weibo';
+				return 'World';
 			default:
 				return platformType;
 		}

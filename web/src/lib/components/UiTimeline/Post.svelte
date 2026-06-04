@@ -31,6 +31,7 @@
         withLeadingPadding = false,
         isParent = false,
         isDetail = false,
+        showMedia = true,
     }: {
         post: UiTimelineV2Post;
         isQuote?: boolean;
@@ -39,6 +40,7 @@
         withLeadingPadding?: boolean;
         isParent?: boolean;
         isDetail?: boolean;
+        showMedia?: boolean;
     } = $props();
 
     const environmentSettings = useEnvironmentSettings();
@@ -96,7 +98,7 @@
     );
     const shouldShowBodyExpand = $derived(shouldClampBody && bodyOverflows);
     const shouldShowMediaGrid = $derived(
-        post.images.length > 0 && (appearance.showMedia || mediaExpanded),
+        showMedia && post.images.length > 0 && (appearance.showMedia || mediaExpanded),
     );
     const hideSensitiveMedia = $derived(
         shouldShowMediaGrid &&
@@ -272,7 +274,7 @@
                     />
                 {/if}
 
-                {#if post.images.length > 0}
+                {#if showMedia && post.images.length > 0}
                     {#if shouldShowMediaGrid}
                         <div class="media-shell">
                             <PostMediaGrid

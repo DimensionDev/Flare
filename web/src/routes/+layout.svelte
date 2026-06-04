@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import { goto } from '$app/navigation';
 	import { createHomeTabsPresenter } from '@flare/web-presenters/homeTabs.svelte';
 	import { createNotificationBadgePresenter } from '@flare/web-presenters/notificationBadge.svelte';
 	import type { HomeTabsPresenterStateHomeTabs } from '@flare/web-presenters/homeTabs.svelte';
@@ -15,6 +16,8 @@
 	import type { TimelineTabItemV2 } from '@flare/web-presenters/homeTimelineWithTabs.svelte';
 	import favicon from '$lib/assets/favicon.svg';
 	import logo from '$lib/assets/logo.svg';
+	import ComposeDialog from '$lib/components/compose/ComposeDialog.svelte';
+	import { onMount } from 'svelte';
 	import '../app.css';
 
 	let { children } = $props();
@@ -25,20 +28,73 @@
 	const homeTabs = createHomeTabsPresenter();
 	const notificationBadge = createNotificationBadgePresenter();
 	let selectedSecondaryTimeline = $state<SecondaryTimelineTabItemV2 | null>(null);
+	let composeOverlayOpen = $state(false);
+	let composeOverlayUrl = $state('/compose');
+	let backgroundSnapshotElement = $state<HTMLElement | null>(null);
+	let backgroundSnapshotHost = $state<HTMLDivElement | null>(null);
+	let shallowPath = $state<string | null>(null);
 	const presenterTabs = $derived(
 		homeTabs.tabs.type === 'Success'
 			? homeTabs.tabs.data
 			: ([] as HomeTabsPresenterStateHomeTabs[])
 	);
 	const navigationTabs = $derived(presenterTabs.length > 0 ? presenterTabs : fallbackTabs);
-	const activeTab = $derived(tabForPath(page.url.pathname));
+	const visiblePathname = $derived(shallowPath ?? page.url.pathname);
+	const activeTab = $derived(tabForPath(visiblePathname));
 	const pageTitle = $derived(
 		selectedSecondaryTimeline ? timelineTabTitle(selectedSecondaryTimeline) : activeTab ? tabTitle(activeTab) : 'Flare'
 	);
 
 	$effect(() => {
+		const host = backgroundSnapshotHost;
+		const snapshot = backgroundSnapshotElement;
+		if (!host) return;
+
+		host.replaceChildren();
+		if (!composeOverlayOpen || !snapshot) return;
+		host.replaceChildren(...Array.from(snapshot.childNodes).map((node) => node.cloneNode(true)));
+	});
+
+	$effect(() => {
 		page.url.pathname;
+		if (composeOverlayOpen) return;
 		selectedSecondaryTimeline = null;
+	});
+
+	onMount(() => {
+		const handlePopState = () => {
+			composeOverlayOpen = false;
+			backgroundSnapshotElement = null;
+			shallowPath = null;
+		};
+		const handleDocumentClick = (event: MouseEvent) => {
+			if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+				return;
+			}
+			if (!(event.target instanceof Element)) return;
+
+			const anchor = event.target.closest<HTMLAnchorElement>('a[href]');
+			const href = anchor?.getAttribute('href');
+			if (!href || anchor?.target || !isComposeRouteUrl(href)) return;
+
+			event.preventDefault();
+			openComposeUrl(href);
+		};
+		const handleComposeRoute = (event: Event) => {
+			const routeUrl = (event as CustomEvent<string>).detail;
+			if (!isComposeRouteUrl(routeUrl)) return;
+			event.preventDefault();
+			openComposeUrl(routeUrl);
+		};
+
+		addEventListener('popstate', handlePopState);
+		document.addEventListener('click', handleDocumentClick, true);
+		addEventListener('flare:compose-route', handleComposeRoute);
+		return () => {
+			removeEventListener('popstate', handlePopState);
+			document.removeEventListener('click', handleDocumentClick, true);
+			removeEventListener('flare:compose-route', handleComposeRoute);
+		};
 	});
 
 	function tabForPath(pathname: string): AppTab | null {
@@ -124,6 +180,48 @@
 	function badgeLabel(count: number): string {
 		return count > 99 ? '99+' : `${count}`;
 	}
+
+	function openCompose(event: MouseEvent): void {
+		if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+			return;
+		}
+		if (page.url.pathname === '/compose' && composeOverlayOpen) return;
+
+		event.preventDefault();
+		openComposeUrl('/compose');
+	}
+
+	function openComposeUrl(routeUrl: string): void {
+		if (!composeOverlayOpen) {
+			captureBackgroundSnapshot();
+		}
+		history.pushState({ composeOverlay: true }, '', routeUrl);
+		composeOverlayUrl = routeUrl;
+		shallowPath = '/compose';
+		composeOverlayOpen = true;
+	}
+
+	function closeComposeOverlay(): void {
+		if (composeOverlayOpen && history.length > 1) {
+			history.back();
+			return;
+		}
+		void goto('/');
+	}
+
+	function captureBackgroundSnapshot(): void {
+		const stage = document.querySelector<HTMLElement>('.content-stage');
+		backgroundSnapshotElement = stage?.cloneNode(true) as HTMLElement | null;
+	}
+
+	function isComposeRouteUrl(routeUrl: string): boolean {
+		try {
+			const url = new URL(routeUrl, page.url.origin);
+			return url.origin === page.url.origin && url.pathname === '/compose';
+		} catch {
+			return false;
+		}
+	}
 </script>
 
 <svelte:head>
@@ -171,22 +269,27 @@
 					aria-label="Compose"
 					aria-current={activeTab === 'Compose' ? 'page' : undefined}
 					data-tip="Compose"
+					onclick={openCompose}
 				>
 					<FaIcon name="Edit" size={17} />
 				</a>
 			</nav>
 
-			<section class="app-content min-w-0 bg-base-100" aria-label={pageTitle}>
-				<div class="content-stage">
-					{#if selectedSecondaryTimeline}
-						{#key selectedSecondaryTimeline.id}
-							<HomeTimelineTabPanel tab={selectedSecondaryTimeline as unknown as TimelineTabItemV2} />
-						{/key}
+				<section class="app-content min-w-0 bg-base-100" aria-label={pageTitle}>
+					{#if composeOverlayOpen && backgroundSnapshotElement}
+						<div class="content-stage background-snapshot-host" bind:this={backgroundSnapshotHost}></div>
 					{:else}
-						{@render children()}
+						<div class="content-stage">
+							{#if selectedSecondaryTimeline}
+								{#key selectedSecondaryTimeline.id}
+									<HomeTimelineTabPanel tab={selectedSecondaryTimeline as unknown as TimelineTabItemV2} />
+								{/key}
+							{:else}
+								{@render children()}
+							{/if}
+						</div>
 					{/if}
-				</div>
-			</section>
+				</section>
 
 			<SecondarySidebar
 				selectedTimelineKey={selectedSecondaryTimeline?.key ?? null}
@@ -218,6 +321,7 @@
 					href="/compose"
 					aria-label="Compose"
 					aria-current={activeTab === 'Compose' ? 'page' : undefined}
+					onclick={openCompose}
 				>
 					<FaIcon name="Edit" size={18} />
 				</a>
@@ -230,6 +334,10 @@
 					<FaIcon name="Settings" size={18} />
 				</a>
 			</nav>
+
+			{#if composeOverlayOpen}
+				<ComposeDialog routeUrl={composeOverlayUrl} onClose={closeComposeOverlay} />
+			{/if}
 		</main>
 	</DeepLinkProvider>
 </EnvironmentSettingsProvider>
@@ -339,6 +447,11 @@
 		min-height: 100%;
 		min-width: 0;
 		background: var(--color-base-100);
+	}
+
+	.background-snapshot-host {
+		pointer-events: none;
+		user-select: none;
 	}
 
 	.mobile-dock {

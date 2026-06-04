@@ -10,6 +10,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import dev.dimension.flare.common.FileType
 import dev.dimension.flare.common.combineLatestFlowLists
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
@@ -21,6 +22,7 @@ import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.DraftRepository
 import dev.dimension.flare.data.repository.accountServiceFlow
+import dev.dimension.flare.data.repository.draftFileItem
 import dev.dimension.flare.data.repository.newDraftGroupId
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -28,6 +30,7 @@ import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.EmojiData
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiDraft
+import dev.dimension.flare.ui.model.UiEmoji
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimelineV2
@@ -58,8 +61,13 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import kotlin.io.encoding.Base64
+import kotlin.io.encoding.ExperimentalEncodingApi
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @WebPresenter("compose")
@@ -457,6 +465,12 @@ public class ComposePresenter(
                 ?.media
                 ?.canSensitive
                 ?: false
+        val mediaMaxCount =
+            composeConfig
+                .takeSuccess()
+                ?.media
+                ?.maxCount
+                ?: 0
         val languageCodes =
             composeConfig
                 .takeSuccess()
@@ -474,6 +488,18 @@ public class ComposePresenter(
                 .takeSuccess()
                 ?.allVisibilities
                 ?: persistentListOf()
+        val webEmojis =
+            emojiState
+                .takeSuccess()
+                ?.data
+                ?.values
+                ?.flatten()
+                ?.toImmutableList()
+                ?: persistentListOf()
+        val webEmojiAccountType =
+            emojiState
+                .takeSuccess()
+                ?.accountType
 
         val showDraft by showDraftFlow.collectAsState(false)
 
@@ -481,6 +507,7 @@ public class ComposePresenter(
             canSend = canSend,
             visibilityState = visibilityState,
             replyState = replyState,
+            referencePost = replyState.takeSuccess(),
             emojiState = emojiState,
             composeConfig = composeConfig,
             enableCrossPost = enableCrossPost,
@@ -497,7 +524,10 @@ public class ComposePresenter(
             contentWarningEnabled = contentWarningEnabled,
             mediaEnabled = mediaEnabled,
             mediaCanSensitive = mediaCanSensitive,
+            mediaMaxCount = mediaMaxCount,
             languageCodes = languageCodes,
+            emojiAccountType = webEmojiAccountType,
+            emojis = webEmojis,
             visibility = webVisibility,
             allVisibilities = webVisibilities,
         ) {
@@ -535,6 +565,7 @@ public class ComposePresenter(
                 pollOptionsText: String,
                 pollExpiredAfter: Long,
                 pollMultiple: Boolean,
+                mediaItemsJson: String,
             ) {
                 if (directSendState.phase == ComposeDirectSendPhase.Sending) {
                     return
@@ -559,6 +590,7 @@ public class ComposePresenter(
                             content = content,
                             visibility = visibility,
                             language = language.takeIf { it.isNotBlank() }?.let { listOf(it) } ?: listOf("en"),
+                            medias = decodeWebComposeMedia(mediaItemsJson),
                             sensitive = sensitive,
                             spoilerText = spoilerText,
                             localOnly = localOnly,
@@ -758,7 +790,41 @@ public class ComposePresenter(
             }
         }
     }
+
+    @OptIn(ExperimentalEncodingApi::class)
+    private fun decodeWebComposeMedia(value: String): List<ComposeData.Media> {
+        if (value.isBlank()) return emptyList()
+        return Json
+            .decodeFromString<List<WebComposeMedia>>(value)
+            .map { item ->
+                ComposeData.Media(
+                    file =
+                        draftFileItem(
+                            path = item.name ?: "web-compose-media",
+                            name = item.name,
+                            type =
+                                when (item.type) {
+                                    "Image" -> FileType.Image
+                                    "Video" -> FileType.Video
+                                    else -> FileType.Other
+                                },
+                            mimeType = item.mimeType,
+                            loader = { Base64.decode(item.bytesBase64) },
+                        ),
+                    altText = item.altText?.takeIf { it.isNotBlank() },
+                )
+            }
+    }
 }
+
+@Serializable
+private data class WebComposeMedia(
+    val name: String?,
+    val mimeType: String?,
+    val type: String,
+    val bytesBase64: String,
+    val altText: String?,
+)
 
 @Immutable
 public interface VisibilityState {
@@ -800,6 +866,7 @@ public abstract class ComposeState(
     public val visibilityState: UiState<VisibilityState>,
     @WebIgnore
     public val replyState: UiState<UiTimelineV2>?,
+    public val referencePost: UiTimelineV2?,
     @WebIgnore
     public val initialTextState: UiState<InitialText>?,
     @WebIgnore
@@ -821,7 +888,10 @@ public abstract class ComposeState(
     public val contentWarningEnabled: Boolean,
     public val mediaEnabled: Boolean,
     public val mediaCanSensitive: Boolean,
+    public val mediaMaxCount: Int,
     public val languageCodes: ImmutableList<String>,
+    public val emojiAccountType: AccountType?,
+    public val emojis: ImmutableList<UiEmoji>,
     public val visibility: UiTimelineV2.Post.Visibility,
     public val allVisibilities: ImmutableList<UiTimelineV2.Post.Visibility>,
 ) {
@@ -842,6 +912,7 @@ public abstract class ComposeState(
         pollOptionsText: String,
         pollExpiredAfter: Long,
         pollMultiple: Boolean,
+        mediaItemsJson: String,
     )
 
     public abstract fun clearDirectSendState()

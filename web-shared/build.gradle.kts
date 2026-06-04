@@ -72,6 +72,7 @@ ksp {
             "dev.dimension.flare.ui.presenter.settings.DevModePresenter",
             "dev.dimension.flare.ui.presenter.settings.LocalCacheSearchPresenter",
             "dev.dimension.flare.ui.presenter.compose.ComposePresenter",
+            "dev.dimension.flare.ui.presenter.compose.WebEmojiHistoryPresenter",
             "dev.dimension.flare.ui.presenter.login.NodeInfoPresenter",
             "dev.dimension.flare.ui.presenter.login.WebLoginFlowPresenter",
             "dev.dimension.flare.ui.presenter.HomeTabsPresenter",

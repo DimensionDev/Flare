@@ -21,6 +21,22 @@ public fun DeeplinkRoute.toWebPath(): String? =
             "/search?account=${accountType.toWebAccountSegment()}&q=${query.toWebPathSegment()}"
         }
 
+        DeeplinkRoute.Compose.New -> {
+            "/compose"
+        }
+
+        is DeeplinkRoute.Compose.Quote -> {
+            "/compose?account=${accountKey.toWebPathSegment()}&type=quote&status=${statusKey.toWebPathSegment()}"
+        }
+
+        is DeeplinkRoute.Compose.Reply -> {
+            "/compose?account=${accountKey.toWebPathSegment()}&type=reply&status=${statusKey.toWebPathSegment()}"
+        }
+
+        is DeeplinkRoute.Compose.VVOReplyComment -> {
+            "/compose?account=${accountKey.toWebPathSegment()}&type=reply&status=${replyTo.toWebPathSegment()}&rootId=${rootId.toWebPathSegment()}"
+        }
+
         else -> {
             null
         }

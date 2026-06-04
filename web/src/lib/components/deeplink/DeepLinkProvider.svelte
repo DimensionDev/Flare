@@ -10,6 +10,12 @@
 
 	function handleRoute(routeUrl: string): void {
 		if (routeUrl.startsWith('/')) {
+			const composeRouteEvent = new CustomEvent('flare:compose-route', {
+				detail: routeUrl,
+				cancelable: true,
+			});
+			if (!dispatchEvent(composeRouteEvent)) return;
+
 			void goto(routeUrl);
 			return;
 		}

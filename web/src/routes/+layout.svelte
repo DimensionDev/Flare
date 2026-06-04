@@ -15,6 +15,7 @@
 	import ThemeController from '$lib/components/environment/ThemeController.svelte';
 	import type { TimelineTabItemV2 } from '@flare/web-presenters/homeTimelineWithTabs.svelte';
 	import favicon from '$lib/assets/favicon.svg';
+	import { initializeFirebaseAnalytics } from '$lib/firebase/firebase';
 	import logo from '$lib/assets/logo.svg';
 	import ComposeDialog from '$lib/components/compose/ComposeDialog.svelte';
 	import { onMount } from 'svelte';
@@ -62,6 +63,10 @@
 	});
 
 	onMount(() => {
+		void initializeFirebaseAnalytics().catch((error: unknown) => {
+			console.warn('Failed to initialize Firebase Analytics.', error);
+		});
+
 		const handlePopState = () => {
 			composeOverlayOpen = false;
 			backgroundSnapshotElement = null;

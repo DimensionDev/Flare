@@ -19,7 +19,7 @@
 
 	let { children } = $props();
 
-	type AppTab = HomeTabsPresenterStateHomeTabs | 'Profile' | 'Settings' | 'Search';
+	type AppTab = HomeTabsPresenterStateHomeTabs | 'Profile' | 'Settings' | 'Search' | 'Compose';
 
 	const fallbackTabs: HomeTabsPresenterStateHomeTabs[] = ['Home', 'Discover'];
 	const homeTabs = createHomeTabsPresenter();
@@ -44,6 +44,7 @@
 	function tabForPath(pathname: string): AppTab | null {
 		if (pathname === '/') return 'Home';
 		if (pathname === '/search' || pathname.startsWith('/search/')) return 'Search';
+		if (pathname === '/compose') return 'Compose';
 		if (pathname === '/discover' || pathname.startsWith('/discover/')) return 'Discover';
 		if (pathname === '/notifications' || pathname.startsWith('/notifications/')) return 'Notifications';
 		if (isProfilePath(pathname)) return 'Profile';
@@ -73,6 +74,8 @@
 				return m.profileTitle();
 			case 'Settings':
 				return m.settingsTitle();
+			case 'Compose':
+				return 'Compose';
 		}
 	}
 
@@ -90,6 +93,8 @@
 				return 'Profile';
 			case 'Settings':
 				return 'Settings';
+			case 'Compose':
+				return 'Edit';
 		}
 	}
 
@@ -107,6 +112,8 @@
 				return '/profile';
 			case 'Settings':
 				return '/settings';
+			case 'Compose':
+				return '/compose';
 		}
 	}
 
@@ -156,6 +163,17 @@
 						</li>
 					{/each}
 				</ul>
+
+				<a
+					class:btn-active={activeTab === 'Compose'}
+					class="btn btn-primary btn-square compose-nav-button tooltip tooltip-right"
+					href="/compose"
+					aria-label="Compose"
+					aria-current={activeTab === 'Compose' ? 'page' : undefined}
+					data-tip="Compose"
+				>
+					<FaIcon name="Edit" size={17} />
+				</a>
 			</nav>
 
 			<section class="app-content min-w-0 bg-base-100" aria-label={pageTitle}>
@@ -195,6 +213,14 @@
 						</span>
 					</a>
 				{/each}
+				<a
+					class:dock-active={activeTab === 'Compose'}
+					href="/compose"
+					aria-label="Compose"
+					aria-current={activeTab === 'Compose' ? 'page' : undefined}
+				>
+					<FaIcon name="Edit" size={18} />
+				</a>
 				<a
 					class:dock-active={isTabActive('Settings')}
 					href="/settings"
@@ -284,6 +310,14 @@
 		width: 1.5rem;
 		height: 1.5rem;
 		place-items: center;
+	}
+
+	.compose-nav-button {
+		width: 2.75rem;
+		height: 2.75rem;
+		min-height: 2.75rem;
+		margin-top: 0.35rem;
+		border-radius: var(--radius-box);
 	}
 
 	.notification-badge {

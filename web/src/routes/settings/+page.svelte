@@ -37,6 +37,12 @@
 
 	const appearanceItems = $derived<SettingsItem[]>([
 		{
+			title: m.tabSettingsTitle(),
+			description: m.tabSettingsDescription(),
+			icon: 'Sliders',
+			href: '/tabs',
+		},
+		{
 			title: m.settingsAppearanceThemeGroupTitle(),
 			description: m.settingsAppearanceThemeGroupSubtitle(),
 			icon: 'Palette',

@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 kotlin {
@@ -15,6 +16,7 @@ kotlin {
             FlarePlatform.ANDROID,
             FlarePlatform.JVM,
             FlarePlatform.IOS,
+            FlarePlatform.WEB,
         )
     }
 
@@ -28,6 +30,7 @@ kotlin {
                 implementation(dependencies.platform(libs.koin.bom))
                 implementation(libs.koin.core)
                 implementation(libs.kotlinx.immutable)
+                implementation(libs.kotlinx.serialization.json)
             }
         }
     }

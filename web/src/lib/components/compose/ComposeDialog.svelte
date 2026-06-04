@@ -5,6 +5,7 @@
 	import FaIcon from '$lib/components/FaIcon.svelte';
 	import UiTimelinePost from '$lib/components/UiTimeline/Post.svelte';
 	import UserDisplay from '$lib/components/user/UserDisplay.svelte';
+	import { m } from '$lib/paraglide/messages.js';
 	import { useReactiveRetainedPresenter } from '$lib/presenter/presenterStore.svelte';
 	import { tick } from 'svelte';
 	import {
@@ -466,7 +467,7 @@
 				mediaItemsJson
 			);
 		} catch (error) {
-			mediaError = error instanceof Error ? error.message : 'Unable to prepare media.';
+			mediaError = error instanceof Error ? error.message : m.composeUnableToPrepareMedia();
 		} finally {
 			mediaPreparing = false;
 		}
@@ -565,7 +566,7 @@
 					if (blob) {
 						resolve(blob);
 					} else {
-						reject(new Error('Unable to compress media.'));
+						reject(new Error(m.composeUnableToCompressMedia()));
 					}
 				},
 				'image/jpeg',
@@ -581,7 +582,7 @@
 				const result = typeof reader.result === 'string' ? reader.result : '';
 				resolve(result.includes(',') ? result.slice(result.indexOf(',') + 1) : result);
 			};
-			reader.onerror = () => reject(reader.error ?? new Error('Unable to read media file.'));
+			reader.onerror = () => reject(reader.error ?? new Error(m.composeUnableToReadMedia()));
 			reader.readAsDataURL(blob);
 		});
 	}
@@ -595,13 +596,13 @@
 		switch (item) {
 			case 'Public':
 			case 'Channel':
-				return 'Public';
+				return m.composeVisibilityPublic();
 			case 'Home':
-				return 'Home';
+				return m.composeVisibilityHome();
 			case 'Followers':
-				return 'Followers';
+				return m.composeVisibilityFollowers();
 			case 'Specified':
-				return 'Specified';
+				return m.composeVisibilitySpecified();
 		}
 	}
 
@@ -609,13 +610,13 @@
 		switch (item) {
 			case 'Public':
 			case 'Channel':
-				return 'Visible to everyone';
+				return m.composeVisibilityPublicDescription();
 			case 'Home':
-				return 'Visible on home timelines';
+				return m.composeVisibilityHomeDescription();
 			case 'Followers':
-				return 'Only followers can see it';
+				return m.composeVisibilityFollowersDescription();
 			case 'Specified':
-				return 'Only mentioned users can see it';
+				return m.composeVisibilitySpecifiedDescription();
 		}
 	}
 
@@ -670,13 +671,13 @@
 <div class="modal modal-open compose-modal" role="presentation">
 	<div class="modal-box compose-dialog">
 		<div class="compose-app-bar">
-			<button class="btn btn-ghost btn-square btn-sm" type="button" disabled={composeBusy} aria-label="Close" onclick={closeDialog}>
+			<button class="btn btn-ghost btn-square btn-sm" type="button" disabled={composeBusy} aria-label={m.close()} onclick={closeDialog}>
 				<FaIcon name="Close" size={16} />
 			</button>
 			{#if accountProfiles.length > 0}
 				<div class="title-account-selector">
 					{#if selectedProfiles.length > 0}
-						<button class="account-avatar-list" type="button" disabled={composeBusy} aria-label="Select accounts" onclick={toggleAccountPopover}>
+						<button class="account-avatar-list" type="button" disabled={composeBusy} aria-label={m.composeSelectAccounts()} onclick={toggleAccountPopover}>
 							{#each selectedProfiles as profile (profileKey(profile))}
 								<span class="account-avatar-button">
 									<span class="account-avatar">
@@ -698,7 +699,7 @@
 							class="btn btn-ghost btn-square btn-sm account-plus-button"
 							type="button"
 							disabled={composeBusy}
-							aria-label="Add account"
+							aria-label={m.composeAddAccount()}
 							onclick={toggleAccountPopover}
 						>
 							<FaIcon name="Plus" size={13} />
@@ -711,7 +712,7 @@
 		{#if compose.directSendState.phase === 'Error'}
 			<div class="alert alert-error">
 				<FaIcon name="CircleExclamation" size={16} />
-				<span>{compose.directSendState.errorMessage ?? 'Unable to publish.'}</span>
+				<span>{compose.directSendState.errorMessage ?? m.composeUnableToPublish()}</span>
 			</div>
 		{:else if mediaError}
 			<div class="alert alert-error">
@@ -725,7 +726,7 @@
 				class="input compose-inline-input"
 				bind:value={spoilerText}
 				disabled={composeBusy}
-				placeholder="Content warning"
+				placeholder={m.composeContentWarningHint()}
 			/>
 			<div class="compose-divider"></div>
 		{/if}
@@ -735,7 +736,7 @@
 			class="textarea compose-textarea"
 			bind:value={text}
 			disabled={composeBusy}
-			placeholder="What's happening?"
+			placeholder={m.composeHint()}
 		></textarea>
 
 		{#if postReference}
@@ -759,7 +760,7 @@
 							class="btn btn-ghost btn-square btn-xs media-remove-button"
 							type="button"
 							disabled={composeBusy}
-							aria-label="Remove media"
+							aria-label={m.composeRemoveMedia()}
 							onclick={() => removeMedia(index)}
 						>
 							<FaIcon name="Close" size={12} />
@@ -768,7 +769,7 @@
 							class="input input-sm media-alt-input"
 							value={item.altText}
 							disabled={composeBusy}
-							placeholder="Alt text"
+							placeholder={m.composeAltText()}
 							oninput={(event) => updateMediaAltText(index, event.currentTarget.value)}
 						/>
 					</div>
@@ -787,7 +788,7 @@
 							disabled={composeBusy}
 							onclick={() => (pollSingleChoice = true)}
 						>
-							Single choice
+							{m.composePollSingleChoice()}
 						</button>
 						<button
 							class:btn-primary={!pollSingleChoice}
@@ -796,14 +797,14 @@
 							disabled={composeBusy}
 							onclick={() => (pollSingleChoice = false)}
 						>
-							Multiple choice
+							{m.composePollMultipleChoice()}
 						</button>
 					</div>
 					<button
 						class="btn btn-ghost btn-square btn-sm"
 						type="button"
 						disabled={composeBusy || pollOptions.length >= maxPollOptions}
-						aria-label="Add option"
+						aria-label={m.composeAddPollOption()}
 						onclick={addPollOption}
 					>
 						<FaIcon name="Plus" size={13} />
@@ -815,14 +816,14 @@
 							class="input input-bordered join-item min-w-0 flex-1"
 							value={option}
 							disabled={composeBusy}
-							placeholder={`Option ${index + 1}`}
+							placeholder={m.composePollOptionHint({ option: index + 1 })}
 							oninput={(event) => updatePollOption(index, event.currentTarget.value)}
 						/>
 						<button
 							class="btn join-item"
 							type="button"
 							disabled={composeBusy || pollOptions.length <= 2}
-							aria-label="Remove option"
+							aria-label={m.composeRemovePollOption()}
 							onclick={() => removePollOption(index)}
 						>
 							<FaIcon name="Close" size={13} />
@@ -831,14 +832,14 @@
 				{/each}
 				<div class="poll-actions">
 					<select class="select select-bordered select-sm" bind:value={pollExpiredAfter} disabled={composeBusy}>
-						<option value={5 * 60 * 1000}>Expires in 5 minutes</option>
-						<option value={30 * 60 * 1000}>Expires in 30 minutes</option>
-						<option value={60 * 60 * 1000}>Expires in 1 hour</option>
-						<option value={6 * 60 * 60 * 1000}>Expires in 6 hours</option>
-						<option value={12 * 60 * 60 * 1000}>Expires in 12 hours</option>
-						<option value={24 * 60 * 60 * 1000}>Expires in 1 day</option>
-						<option value={3 * 24 * 60 * 60 * 1000}>Expires in 3 days</option>
-						<option value={7 * 24 * 60 * 60 * 1000}>Expires in 7 days</option>
+						<option value={5 * 60 * 1000}>{m.composePollExpiration5Minutes()}</option>
+						<option value={30 * 60 * 1000}>{m.composePollExpiration30Minutes()}</option>
+						<option value={60 * 60 * 1000}>{m.composePollExpiration1Hour()}</option>
+						<option value={6 * 60 * 60 * 1000}>{m.composePollExpiration6Hours()}</option>
+						<option value={12 * 60 * 60 * 1000}>{m.composePollExpiration12Hours()}</option>
+						<option value={24 * 60 * 60 * 1000}>{m.composePollExpiration1Day()}</option>
+						<option value={3 * 24 * 60 * 60 * 1000}>{m.composePollExpiration3Days()}</option>
+						<option value={7 * 24 * 60 * 60 * 1000}>{m.composePollExpiration7Days()}</option>
 					</select>
 				</div>
 			</div>
@@ -867,7 +868,7 @@
 					class="btn btn-ghost btn-square btn-sm"
 					type="button"
 					disabled={composeBusy || !canAddMedia}
-					aria-label="Add media"
+					aria-label={m.composeAddMedia()}
 					onclick={openMediaPicker}
 				>
 					<FaIcon name="Image" size={16} />
@@ -879,14 +880,14 @@
 					class="btn btn-ghost btn-square btn-sm"
 					type="button"
 					disabled={composeBusy || !canPoll}
-					aria-label="Poll"
+					aria-label={m.composePoll()}
 					onclick={togglePoll}
 				>
 					<FaIcon name="Poll" size={16} />
 				</button>
 			{/if}
 			<div class="dropdown dropdown-top">
-				<button class="btn btn-ghost btn-square btn-sm" type="button" disabled={composeBusy} tabindex="0" aria-label="Visibility">
+				<button class="btn btn-ghost btn-square btn-sm" type="button" disabled={composeBusy} tabindex="0" aria-label={m.composeVisibility()}>
 					{#key currentVisibility}
 						<FaIcon name={visibilityIcon(currentVisibility)} size={16} />
 					{/key}
@@ -916,7 +917,7 @@
 					class="btn btn-ghost btn-square btn-sm"
 					type="button"
 					disabled={composeBusy}
-					aria-label="Content warning"
+					aria-label={m.composeContentWarningHint()}
 					onclick={toggleContentWarning}
 				>
 					<FaIcon name="CircleExclamation" size={16} />
@@ -928,7 +929,7 @@
 					class="btn btn-ghost btn-square btn-sm"
 					type="button"
 					disabled={composeBusy}
-					aria-label="Emoji"
+					aria-label={m.composeEmoji()}
 					onclick={toggleEmojiPopover}
 				>
 					<FaIcon name="FaceSmile" size={16} />
@@ -940,7 +941,7 @@
 					class="btn btn-ghost btn-sm language-button"
 					type="button"
 					disabled={composeBusy}
-					aria-label="Language"
+					aria-label={m.composeLanguage()}
 					onclick={toggleLanguagePopover}
 				>
 					{languageName(selectedLanguage)}
@@ -950,7 +951,7 @@
 			{#if remainingLength !== null}
 				<span class:over-limit={remainingLength < 0} class="counter">{remainingLength}</span>
 			{/if}
-			<button class="btn btn-primary btn-square btn-sm" type="button" disabled={!canSubmit} aria-label="Post" onclick={submit}>
+			<button class="btn btn-primary btn-square btn-sm" type="button" disabled={!canSubmit} aria-label={m.draftBoxSend()} onclick={submit}>
 				{#if sending || mediaPreparing}
 					<span class="loading loading-spinner loading-xs"></span>
 				{:else}
@@ -959,7 +960,7 @@
 			</button>
 		</div>
 	</div>
-	<button class="modal-backdrop" type="button" disabled={composeBusy} aria-label="Close compose" onclick={closeDialog}></button>
+	<button class="modal-backdrop" type="button" disabled={composeBusy} aria-label={m.composeClose()} onclick={closeDialog}></button>
 </div>
 
 {#if accountProfiles.length > 0}
@@ -1012,8 +1013,8 @@
 {#if showCloseConfirmDialog}
 	<dialog class="modal" open>
 		<div class="modal-box discard-dialog">
-			<h3>Discard post?</h3>
-			<p>Your current compose content will be lost.</p>
+			<h3>{m.composeDiscardConfirmTitle()}</h3>
+			<p>{m.composeDiscardConfirmMessage()}</p>
 			<div class="modal-action">
 				<button
 					class="btn btn-ghost btn-sm"
@@ -1021,7 +1022,7 @@
 					disabled={composeBusy}
 					onclick={() => (showCloseConfirmDialog = false)}
 				>
-					Cancel
+					{m.actionCancel()}
 				</button>
 				<button
 					class="btn btn-error btn-sm"
@@ -1029,7 +1030,7 @@
 					disabled={composeBusy}
 					onclick={discardAndClose}
 				>
-					Discard
+					{m.composeCloseDiscard()}
 				</button>
 			</div>
 		</div>
@@ -1037,7 +1038,7 @@
 			class="modal-backdrop"
 			type="button"
 			disabled={composeBusy}
-			aria-label="Cancel discard"
+			aria-label={m.composeCancelDiscard()}
 			onclick={() => (showCloseConfirmDialog = false)}
 		></button>
 	</dialog>

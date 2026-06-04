@@ -181,14 +181,14 @@
 				</button>
 			{/if}
 
-			<button
+			<a
 				class="btn btn-ghost btn-square btn-sm rounded-box"
-				type="button"
+				href="/tabs"
 				aria-label={m.tabSettingsTitle()}
 				title={m.tabSettingsTitle()}
 			>
 				<FaIcon name="Sliders" size={16} />
-			</button>
+			</a>
 
 			<button
 				class="btn btn-ghost btn-square btn-sm rounded-box"

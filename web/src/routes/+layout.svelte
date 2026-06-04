@@ -266,9 +266,9 @@
 					class:btn-active={activeTab === 'Compose'}
 					class="btn btn-primary btn-square compose-nav-button tooltip tooltip-right"
 					href="/compose"
-					aria-label="Compose"
+					aria-label={m.composeTitle()}
 					aria-current={activeTab === 'Compose' ? 'page' : undefined}
-					data-tip="Compose"
+					data-tip={m.composeTitle()}
 					onclick={openCompose}
 				>
 					<FaIcon name="Edit" size={17} />
@@ -319,7 +319,7 @@
 				<a
 					class:dock-active={activeTab === 'Compose'}
 					href="/compose"
-					aria-label="Compose"
+					aria-label={m.composeTitle()}
 					aria-current={activeTab === 'Compose' ? 'page' : undefined}
 					onclick={openCompose}
 				>

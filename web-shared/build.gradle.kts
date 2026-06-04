@@ -37,6 +37,7 @@ kotlin {
                 implementation(projects.shared)
                 implementation(projects.feature.login)
                 implementation(projects.feature.subscription)
+                implementation(projects.feature.tab)
                 implementation(projects.social.bluesky)
                 implementation(projects.social.mastodon)
                 implementation(projects.social.misskey)
@@ -77,6 +78,8 @@ ksp {
             "dev.dimension.flare.ui.presenter.login.WebLoginFlowPresenter",
             "dev.dimension.flare.ui.presenter.HomeTabsPresenter",
             "dev.dimension.flare.ui.presenter.HomeTimelineWithTabsPresenter",
+            "dev.dimension.flare.ui.presenter.home.HomeTabSettingsPresenter",
+            "dev.dimension.flare.ui.screen.settings.AllTabsPresenter",
             "dev.dimension.flare.ui.presenter.home.WebDeepLinkPresenter",
             "dev.dimension.flare.ui.presenter.home.DiscoverPresenter",
             "dev.dimension.flare.ui.presenter.home.SearchPresenter",

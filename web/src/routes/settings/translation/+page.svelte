@@ -1,4 +1,5 @@
 <script lang="ts">
+	import AppBackButton from '$lib/components/AppBackButton.svelte';
 	import AppTopBar from '$lib/components/AppTopBar.svelte';
 	import FaIcon from '$lib/components/FaIcon.svelte';
 	import RichText from '$lib/components/RichText.svelte';
@@ -55,9 +56,7 @@
 <div class="settings-subpage bg-base-200">
 	<AppTopBar title={m.settingsTranslationTitle()}>
 		{#snippet start()}
-			<a class="btn btn-ghost btn-square btn-sm rounded-box" href="/settings" aria-label={m.navigateBack()}>
-				<FaIcon name="Back" size={16} />
-			</a>
+			<AppBackButton />
 		{/snippet}
 	</AppTopBar>
 

@@ -34,134 +34,133 @@
 </script>
 
 <aside class="secondary-sidebar border-l border-base-300 bg-base-300" aria-label={m.secondarySidebarAriaLabel()}>
-	<div class="secondary-scroll">
-		{#if secondaryTabs.items.type === 'Loading'}
-			<div class="secondary-loading p-4">
-				<div class="skeleton h-8 w-32"></div>
-				<div class="skeleton h-10 w-full"></div>
-				<div class="skeleton h-10 w-full"></div>
-			</div>
-		{:else if secondaryTabs.items.type === 'Success'}
-			{#if secondaryItems.length === 0}
-				<div class="px-3 py-3">
-					<a class="btn btn-primary btn-sm w-full" href="/login">
-						<FaIcon name="Follow" size={16} />
-						<span>{m.loginButton()}</span>
-					</a>
-				</div>
-			{:else}
-				{#each secondaryItems as item (item.__webPresenterRef)}
-					<div class="collapse collapse-arrow secondary-account">
-						<input type="checkbox" aria-label={m.secondaryToggleAccountShortcuts()} />
-						<div class="collapse-title secondary-account-title">
-							{#if item.user.type === 'Success'}
-								<UserDisplay user={item.user.data} variant="sidebar" clickable={false} />
-							{:else}
-								<div class="secondary-user px-1 py-2">
-									<div class="avatar placeholder">
-										<div class="h-8 w-8 rounded-full bg-base-300"></div>
-									</div>
-									<div class="secondary-user-copy">
-										<span>{m.settingsAccountsTitle()}</span>
-									</div>
-								</div>
-							{/if}
-						</div>
-
-						<div class="collapse-content secondary-account-content">
-							<ul class="menu menu-sm w-full gap-1 p-0">
-								{#each item.tabs as tab (secondaryTabKey(tab))}
-									<li class="w-full">
-										{#if tab.timelineTabItem}
-											<button
-												class="w-full justify-start"
-												type="button"
-												class:menu-active={selectedTimelineKey === tab.timelineTabItem.key}
-												onclick={() => {
-													if (tab.timelineTabItem) {
-														onTimelineSelected(tab.timelineTabItem);
-													}
-												}}
-											>
-												<FaIcon name={tab.icon} size={16} />
-												<span>{localizedUiString(tab.title)}</span>
-											</button>
-										{:else if tab.href}
-											<a
-												class="w-full justify-start"
-												class:menu-active={isHrefActive(tab.href)}
-												href={tab.href}
-												aria-current={isHrefActive(tab.href) ? 'page' : undefined}
-											>
-												<FaIcon name={tab.icon} size={16} />
-												<span>{localizedUiString(tab.title)}</span>
-											</a>
-										{:else}
-											<button class="w-full justify-start" type="button" disabled>
-												<FaIcon name={tab.icon} size={16} />
-												<span>{localizedUiString(tab.title)}</span>
-											</button>
-										{/if}
-									</li>
-								{/each}
-							</ul>
-						</div>
+	<div class="secondary-scroll flex flex-col gap-4 py-4 pl-4 pr-3">
+		<div class="card bg-base-100 shadow-sm">
+			<div class="card-body px-2 pb-2 pt-4">
+				{#if secondaryTabs.items.type === 'Loading'}
+					<div class="secondary-loading p-2">
+						<div class="skeleton h-8 w-32"></div>
+						<div class="skeleton h-10 w-full"></div>
+						<div class="skeleton h-10 w-full"></div>
 					</div>
-				{/each}
-			{/if}
-		{/if}
+				{:else if secondaryTabs.items.type === 'Success'}
+					{#if secondaryItems.length === 0}
+						<a class="btn btn-primary btn-sm w-full" href="/login">
+							<FaIcon name="Follow" size={16} />
+							<span>{m.loginButton()}</span>
+						</a>
+					{:else}
+						{#each secondaryItems as item (item.__webPresenterRef)}
+							<div class="collapse collapse-arrow secondary-account">
+								<input type="checkbox" aria-label={m.secondaryToggleAccountShortcuts()} />
+								<div class="collapse-title secondary-account-title">
+									{#if item.user.type === 'Success'}
+										<UserDisplay user={item.user.data} variant="sidebar" clickable={false} />
+									{:else}
+										<div class="secondary-user">
+											<div class="avatar placeholder">
+												<div class="h-8 w-8 rounded-full bg-base-300"></div>
+											</div>
+											<div class="secondary-user-copy">
+												<span>{m.settingsAccountsTitle()}</span>
+											</div>
+										</div>
+									{/if}
+								</div>
 
-		<div class="divider my-2"></div>
-		<ul class="menu menu-sm w-full gap-1 px-3 pb-4">
-			<li class="w-full">
-				<button class="w-full justify-start" type="button" disabled>
-					<FaIcon name="PenToSquare" size={16} />
-					<span>{m.draftBoxTitle()}</span>
-				</button>
-			</li>
-			<li class="w-full">
-				<a
-					class="w-full justify-start"
-					class:menu-active={isHrefActive('/subscriptions')}
-					href="/subscriptions"
-					aria-current={isHrefActive('/subscriptions') ? 'page' : undefined}
-				>
-					<FaIcon name="Rss" size={16} />
-					<span>{m.settingsRssManagementTitle()}</span>
-				</a>
-			</li>
-			<li class="w-full">
-				<a
-					class="w-full justify-start"
-					class:menu-active={isHrefActive('/history')}
-					href="/history"
-					aria-current={isHrefActive('/history') ? 'page' : undefined}
-				>
-					<FaIcon name="ClockRotateLeft" size={16} />
-					<span>{m.settingsLocalHistoryTitle()}</span>
-				</a>
-			</li>
-			<li class="w-full">
-				<a
-					class="w-full justify-start"
-					class:menu-active={isHrefActive('/settings')}
-					href="/settings"
-					aria-current={isHrefActive('/settings') ? 'page' : undefined}
-				>
-					<FaIcon name="Settings" size={16} />
-					<span>{m.settingsTitle()}</span>
-				</a>
-			</li>
-		</ul>
+								<div class="collapse-content secondary-account-content">
+									<ul class="menu menu-sm w-full gap-1 p-0">
+										{#each item.tabs as tab (secondaryTabKey(tab))}
+											<li class="w-full">
+												{#if tab.timelineTabItem}
+													<button
+														class="w-full justify-start"
+														type="button"
+														class:menu-active={selectedTimelineKey === tab.timelineTabItem.key}
+														onclick={() => {
+															if (tab.timelineTabItem) {
+																onTimelineSelected(tab.timelineTabItem);
+															}
+														}}
+													>
+														<FaIcon name={tab.icon} size={16} />
+														<span>{localizedUiString(tab.title)}</span>
+													</button>
+												{:else if tab.href}
+													<a
+														class="w-full justify-start"
+														class:menu-active={isHrefActive(tab.href)}
+														href={tab.href}
+														aria-current={isHrefActive(tab.href) ? 'page' : undefined}
+													>
+														<FaIcon name={tab.icon} size={16} />
+														<span>{localizedUiString(tab.title)}</span>
+													</a>
+												{:else}
+													<button class="w-full justify-start" type="button" disabled>
+														<FaIcon name={tab.icon} size={16} />
+														<span>{localizedUiString(tab.title)}</span>
+													</button>
+												{/if}
+											</li>
+										{/each}
+									</ul>
+								</div>
+							</div>
+						{/each}
+					{/if}
+				{/if}
+			</div>
+		</div>
+
+		<div class="card bg-base-100 shadow-sm">
+			<div class="card-body p-2">
+				<ul class="menu menu-sm w-full gap-1 p-0">
+					<li class="w-full">
+						<a
+							class="w-full justify-start"
+							class:menu-active={isHrefActive('/subscriptions')}
+							href="/subscriptions"
+							aria-current={isHrefActive('/subscriptions') ? 'page' : undefined}
+						>
+							<FaIcon name="Rss" size={16} />
+							<span>{m.settingsRssManagementTitle()}</span>
+						</a>
+					</li>
+					<li class="w-full">
+						<a
+							class="w-full justify-start"
+							class:menu-active={isHrefActive('/history')}
+							href="/history"
+							aria-current={isHrefActive('/history') ? 'page' : undefined}
+						>
+							<FaIcon name="ClockRotateLeft" size={16} />
+							<span>{m.settingsLocalHistoryTitle()}</span>
+						</a>
+					</li>
+					<li class="w-full">
+						<a
+							class="w-full justify-start"
+							class:menu-active={isHrefActive('/settings')}
+							href="/settings"
+							aria-current={isHrefActive('/settings') ? 'page' : undefined}
+						>
+							<FaIcon name="Settings" size={16} />
+							<span>{m.settingsTitle()}</span>
+						</a>
+					</li>
+				</ul>
+			</div>
+		</div>
 	</div>
 </aside>
 
 <style>
 	.secondary-sidebar {
 		position: sticky;
-		top: 0;
-		width: min(15rem, 100%);
-		height: 100vh;
+		top: 3.5rem;
+		width: min(var(--app-secondary-width, 24rem), 100%);
+		height: calc(100vh - 3.5rem);
 		min-width: 0;
 		align-self: start;
 		justify-self: start;
@@ -179,11 +178,16 @@
 
 	.secondary-account {
 		border-radius: 0;
+		margin: 0;
 	}
 
 	.secondary-account-title {
 		min-height: 0;
-		padding: 0.25rem 2.5rem 0.25rem 0.75rem;
+		padding: 0.25rem 0.5rem;
+	}
+
+	.secondary-account-title :global(.user-display.sidebar) {
+		padding: 0;
 	}
 
 	.secondary-account-content {

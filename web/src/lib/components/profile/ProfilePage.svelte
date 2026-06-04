@@ -1,5 +1,6 @@
 <script lang="ts">
     import { page } from "$app/state";
+    import AppBackButton from "$lib/components/AppBackButton.svelte";
     import AppTopBar from "$lib/components/AppTopBar.svelte";
     import FaIcon from "$lib/components/FaIcon.svelte";
     import RichText from "$lib/components/RichText.svelte";
@@ -496,14 +497,7 @@
         {/snippet}
 
         {#snippet start()}
-            <button
-                class="btn btn-ghost btn-square btn-sm rounded-box"
-                type="button"
-                aria-label={m.navigateBack()}
-                onclick={() => history.back()}
-            >
-                <FaIcon name="Back" size={16} />
-            </button>
+            <AppBackButton />
             {#if !displayProfile}
                 <div class="grid min-w-0 gap-1">
                     <div class="skeleton h-4 w-32"></div>

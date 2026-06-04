@@ -1,16 +1,20 @@
 <script lang="ts">
 	import type { TimelineTabItemV2 } from '@flare/web-presenters/homeTimelineWithTabs.svelte';
+	import type { TimelineAppearance } from '$lib/environment/environmentSettings.svelte';
 	import { bindTimelinePresenterController } from '@flare/web-presenters/timeline.svelte';
 	import type { WebPresenterRef as TimelineWebPresenterRef } from '@flare/web-presenters/timeline.svelte';
+	import TimelineAppearanceProvider from '$lib/components/environment/TimelineAppearanceProvider.svelte';
 	import TimelineList from '$lib/components/UiTimeline/TimelineList.svelte';
 	import { useRetainedPresenter } from '$lib/presenter/presenterStore.svelte';
 
 	let {
 		tab,
+		appearance = null,
 		refreshRequestId = 0,
 		onRefreshingChange = () => {},
 	}: {
 		tab: TimelineTabItemV2;
+		appearance?: TimelineAppearance | null;
 		refreshRequestId?: number;
 		onRefreshingChange?: (isRefreshing: boolean) => void;
 	} = $props();
@@ -48,7 +52,9 @@
 </script>
 
 <div class="home-timeline-tab-panel">
-	<TimelineList listState={timeline.listState} />
+	<TimelineAppearanceProvider {appearance}>
+		<TimelineList listState={timeline.listState} />
+	</TimelineAppearanceProvider>
 </div>
 
 <style>

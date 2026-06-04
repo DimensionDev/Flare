@@ -13,12 +13,17 @@
 	import { m } from '$lib/paraglide/messages.js';
 	import TimelineLoadingPlaceholderList from '$lib/components/UiTimeline/TimelineLoadingPlaceholderList.svelte';
 	import { useRetainedPresenter } from '$lib/presenter/presenterStore.svelte';
+	import {
+		useEnvironmentSettings,
+		type TimelineAppearance,
+	} from '$lib/environment/environmentSettings.svelte';
 
 	const homeTimeline = useRetainedPresenter(
 		'home:timeline-tabs',
 		() => createHomeTimelineWithTabsPresenterController(),
 		{ ttlMs: Infinity }
 	);
+	const environmentSettings = useEnvironmentSettings();
 	let selectedTabId = $state<string | null>(null);
 	let tabsElement = $state<HTMLDivElement | null>(null);
 	let tabsExpanded = $state(false);
@@ -30,6 +35,15 @@
 	);
 	const selectedTab = $derived(
 		selectedTabId ? (tabs.find((tab) => tab.id === selectedTabId) ?? null) : null
+	);
+	const timelineAppearanceState = $derived(environmentSettings.timelineAppearance());
+	const timelineAppearance = $derived<TimelineAppearance | null>(
+		timelineAppearanceState.type === 'Success' ? timelineAppearanceState.data : null
+	);
+	const selectedTabAppearance = $derived<TimelineAppearance | null>(
+		selectedTab && timelineAppearance
+			? homeTimeline.resolveAppearance(selectedTab, timelineAppearance)
+			: timelineAppearance
 	);
 
 	$effect(() => {
@@ -222,6 +236,7 @@
 			{#key selectedTab.id}
 				<HomeTimelineTabPanel
 					tab={selectedTab}
+					appearance={selectedTabAppearance}
 					{refreshRequestId}
 					onRefreshingChange={(isRefreshing) => {
 						selectedTimelineRefreshing = isRefreshing;

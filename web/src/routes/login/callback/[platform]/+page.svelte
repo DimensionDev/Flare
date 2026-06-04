@@ -2,6 +2,7 @@
     import { browser } from "$app/environment";
     import { goto } from "$app/navigation";
     import { onMount } from "svelte";
+    import AppBackButton from "$lib/components/AppBackButton.svelte";
     import AppTopBar from "$lib/components/AppTopBar.svelte";
     import FaIcon from "$lib/components/FaIcon.svelte";
     import { m } from "$lib/paraglide/messages.js";
@@ -42,13 +43,7 @@
 <div class="callback-page bg-base-200">
     <AppTopBar title={m.loginButton()}>
         {#snippet start()}
-            <a
-                class="btn btn-ghost btn-square btn-sm rounded-box"
-                href="/login"
-                aria-label={m.navigateBack()}
-            >
-                <FaIcon name="Back" size={16} />
-            </a>
+            <AppBackButton />
         {/snippet}
     </AppTopBar>
 

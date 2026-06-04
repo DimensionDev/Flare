@@ -1,4 +1,5 @@
 <script lang="ts">
+	import AppBackButton from '$lib/components/AppBackButton.svelte';
 	import AppTopBar from '$lib/components/AppTopBar.svelte';
 	import FaIcon from '$lib/components/FaIcon.svelte';
 	import RssSourceDialog from '$lib/components/subscriptions/RssSourceDialog.svelte';
@@ -66,9 +67,7 @@
 <div class="subscriptions-page bg-base-200">
 	<AppTopBar title={m.rssSourcesTitle()}>
 		{#snippet start()}
-			<a class="btn btn-ghost btn-square btn-sm rounded-box" href="/" aria-label={m.navigateBack()}>
-				<FaIcon name="Back" size={16} />
-			</a>
+			<AppBackButton />
 		{/snippet}
 		{#snippet end()}
 			<button class="btn btn-primary btn-sm" type="button" onclick={openAdd}>

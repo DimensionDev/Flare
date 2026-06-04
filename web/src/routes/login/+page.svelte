@@ -1,4 +1,5 @@
 <script lang="ts">
+    import AppBackButton from "$lib/components/AppBackButton.svelte";
     import AppTopBar from "$lib/components/AppTopBar.svelte";
     import FaIcon from "$lib/components/FaIcon.svelte";
     import LoginFlowPanel from "$lib/components/login/LoginFlowPanel.svelte";
@@ -159,13 +160,7 @@
 <div class="login-page bg-base-200">
     <AppTopBar title={m.loginButton()}>
         {#snippet start()}
-            <a
-                class="btn btn-ghost btn-square btn-sm rounded-box"
-                href="/settings/accounts"
-                aria-label={m.navigateBack()}
-            >
-                <FaIcon name="Back" size={16} />
-            </a>
+            <AppBackButton />
         {/snippet}
     </AppTopBar>
 

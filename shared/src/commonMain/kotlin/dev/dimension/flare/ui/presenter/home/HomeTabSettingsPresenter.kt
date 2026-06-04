@@ -44,14 +44,9 @@ public class HomeTabSettingsPresenter :
             .map { it.toImmutableList() }
     }
 
-    private val timelineAppearance by lazy {
-        settingsRepository.timelineAppearance
-    }
-
     @Composable
     override fun body(): State {
         val tabs by homeTimelineTabs.collectAsUiState()
-        val timelineAppearance by timelineAppearance.collectAsUiState()
         val groupConfigState = remember { GroupConfigPresenter() }.body()
         val availableIcons =
             remember {
@@ -60,7 +55,6 @@ public class HomeTabSettingsPresenter :
 
         return object : State {
             override val homeTimelineTabs: UiState<ImmutableList<TimelineTabItemV2>> = tabs
-            override val timelineAppearance: UiState<TimelineAppearance> = timelineAppearance
             override val availableIcons: ImmutableList<IconType> = availableIcons
 
             override fun replaceHomeTimelineTabs(tabs: List<TimelineTabItemV2>) {
@@ -260,7 +254,6 @@ public class HomeTabSettingsPresenter :
 
     public interface State {
         public val homeTimelineTabs: UiState<ImmutableList<TimelineTabItemV2>>
-        public val timelineAppearance: UiState<TimelineAppearance>
         public val availableIcons: ImmutableList<IconType>
 
         public fun replaceHomeTimelineTabs(tabs: List<TimelineTabItemV2>)

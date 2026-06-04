@@ -350,7 +350,7 @@
 	.app-shell {
 		--app-content-width: 640px;
 		--app-sidebar-width: 4.5rem;
-		--app-secondary-width: 15rem;
+		--app-secondary-width: 21rem;
 		display: grid;
 		grid-template-columns:
 			var(--app-sidebar-width)

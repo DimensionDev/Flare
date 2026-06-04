@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
+	import AppBackButton from '$lib/components/AppBackButton.svelte';
 	import AppTopBar from '$lib/components/AppTopBar.svelte';
 	import DiscoverSection from '$lib/components/discover/DiscoverSection.svelte';
 	import FaIcon from '$lib/components/FaIcon.svelte';
@@ -88,14 +89,6 @@
 		if (query.trim()) {
 			search.search(query.trim());
 		}
-	}
-
-	function goBack(): void {
-		if (globalThis.history.length > 1) {
-			globalThis.history.back();
-			return;
-		}
-		void goto('/discover');
 	}
 
 	function searchUrl(nextQuery: string, nextAccountSegment: string): string {
@@ -204,15 +197,7 @@
 	<div class="search-page">
 		<AppTopBar>
 			{#snippet start()}
-				<button
-					class="btn btn-ghost btn-square btn-sm rounded-box"
-					type="button"
-					aria-label={m.navigateBack()}
-					title={m.navigateBack()}
-					onclick={goBack}
-				>
-					<FaIcon name="Back" size={14} />
-					</button>
+				<AppBackButton iconSize={14} />
 					<form class="search-shell" role="search" onsubmit={(event) => { event.preventDefault(); submitSearch(); }}>
 						<label class="input input-bordered input-sm search-input rounded-box">
 							<FaIcon name="Search" size={14} />

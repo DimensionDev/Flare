@@ -1,4 +1,5 @@
 <script lang="ts">
+	import AppBackButton from '$lib/components/AppBackButton.svelte';
 	import AppTopBar from '$lib/components/AppTopBar.svelte';
 	import FaIcon from '$lib/components/FaIcon.svelte';
 	import { m } from '$lib/paraglide/messages.js';
@@ -36,9 +37,7 @@
 <div class="logs-page bg-base-200">
 	<AppTopBar title={m.settingsAppLogsTitle()} subtitle={m.settingsAppLogsCount({ count: logs.length })}>
 		{#snippet start()}
-			<a class="btn btn-ghost btn-square btn-sm rounded-box" href="/settings/storage" aria-label={m.navigateBack()}>
-				<FaIcon name="Back" size={16} />
-			</a>
+			<AppBackButton />
 		{/snippet}
 		{#snippet end()}
 			<button class="btn btn-ghost btn-square btn-sm rounded-box" type="button" aria-label={m.settingsStorageExport()} onclick={exportLogs}>

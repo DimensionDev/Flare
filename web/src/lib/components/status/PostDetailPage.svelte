@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
+	import AppBackButton from '$lib/components/AppBackButton.svelte';
 	import AppTopBar from '$lib/components/AppTopBar.svelte';
 	import FaIcon from '$lib/components/FaIcon.svelte';
 	import { m } from '$lib/paraglide/messages.js';
@@ -35,14 +35,6 @@
 	const isRefreshing = $derived(
 		statusState.listState.type === 'Success' ? statusState.listState.isRefreshing : false
 	);
-
-	function goBack(): void {
-		if (globalThis.history.length > 1) {
-			globalThis.history.back();
-			return;
-		}
-		void goto('/');
-	}
 
 	function retry(): void {
 		if (statusState.listState.type === 'Success') {
@@ -97,9 +89,7 @@
 <section class="min-h-screen bg-base-100">
 	<AppTopBar title={m.statusDetailTitle()}>
 		{#snippet start()}
-			<button class="btn btn-ghost btn-square btn-sm rounded-box" type="button" aria-label={m.navigateBack()} onclick={goBack}>
-				<FaIcon name="Back" size={16} />
-			</button>
+			<AppBackButton />
 		{/snippet}
 
 		{#snippet end()}

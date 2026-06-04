@@ -1,4 +1,5 @@
 <script lang="ts">
+	import AppBackButton from '$lib/components/AppBackButton.svelte';
 	import AppTopBar from '$lib/components/AppTopBar.svelte';
 	import FaIcon from '$lib/components/FaIcon.svelte';
 	import UiTimelinePost from '$lib/components/UiTimeline/Post.svelte';
@@ -96,9 +97,7 @@
 <div class="appearance-page bg-base-200">
 	<AppTopBar title={pageTitle}>
 		{#snippet start()}
-			<a class="btn btn-ghost btn-square btn-sm rounded-box" href="/settings" aria-label={m.navigateBack()}>
-				<FaIcon name="Back" size={16} />
-			</a>
+			<AppBackButton />
 		{/snippet}
 	</AppTopBar>
 

@@ -1,6 +1,8 @@
 <script lang="ts">
+	import AppBackButton from '$lib/components/AppBackButton.svelte';
 	import AppTopBar from '$lib/components/AppTopBar.svelte';
 	import FaIcon from '$lib/components/FaIcon.svelte';
+	import { useEnvironmentSettings } from '$lib/environment/environmentSettings.svelte';
 	import { localizedUiString } from '$lib/i18n/uiStrings';
 	import { m } from '$lib/paraglide/messages.js';
 	import {
@@ -25,6 +27,7 @@
 	const SYSTEM_HOME_MIXED_TIMELINE_ID = 'mixed_timeline_system_home';
 	const tabSettings = createHomeTabSettingsPresenter();
 	const allTabs = createAllTabsPresenter();
+	const environmentSettings = useEnvironmentSettings();
 	const mergePolicyOptions: Array<{ value: TimelineMergePolicy; label: string }> = [
 		{ value: 'TimePerPage', label: m.tabSettingsMergePolicyTimePerPage() },
 		{ value: 'Time', label: m.tabSettingsMergePolicyTime() },
@@ -157,6 +160,7 @@
 	const accountGroups = $derived(
 		allTabs.flattenedAccountTabs.type === 'Success' ? allTabs.flattenedAccountTabs.data : []
 	);
+	const timelineAppearanceState = $derived(environmentSettings.timelineAppearance());
 
 	$effect(() => {
 		if (loadedTabs || tabSettings.homeTimelineTabs.type !== 'Success') return;
@@ -351,8 +355,8 @@
 	}
 
 	function baseTimelineAppearance(): TimelineAppearance {
-		return tabSettings.timelineAppearance.type === 'Success'
-			? tabSettings.timelineAppearance.data
+		return timelineAppearanceState.type === 'Success'
+			? (timelineAppearanceState.data as TimelineAppearance)
 			: defaultTimelineAppearance;
 	}
 
@@ -521,9 +525,7 @@
 <div class="tab-settings-page bg-base-200">
 	<AppTopBar title={m.tabSettingsTitle()}>
 		{#snippet start()}
-			<a class="btn btn-ghost btn-square btn-sm rounded-box" href="/settings" aria-label={m.navigateBack()}>
-				<FaIcon name="Back" size={16} />
-			</a>
+			<AppBackButton />
 		{/snippet}
 
 		{#snippet end()}

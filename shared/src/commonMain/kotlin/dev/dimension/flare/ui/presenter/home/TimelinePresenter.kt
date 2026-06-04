@@ -6,7 +6,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
-import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.filter
@@ -58,6 +57,7 @@ import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -189,6 +189,12 @@ public abstract class TimelinePresenter :
         return object : TimelineState {
             override val listState = listState
 
+            override fun refreshAsync() {
+                scope.launch {
+                    refresh()
+                }
+            }
+
             override suspend fun refresh() {
                 listState
                     .onSuccess {
@@ -212,6 +218,8 @@ public abstract class TimelinePresenter :
 @Immutable
 public interface TimelineState {
     public val listState: PagingState<UiTimelineV2>
+
+    public fun refreshAsync()
 
     public suspend fun refresh()
 }

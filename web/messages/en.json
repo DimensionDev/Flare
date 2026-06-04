@@ -107,6 +107,7 @@
   "tabsExpand": "Expand tabs",
   "timelineUnableToLoadTabs": "Unable to load tabs",
   "timelineNoTimelines": "No timelines",
+  "timelineRefresh": "Refresh timeline",
   "timelineUnableToLoadTimeline": "Unable to load timeline",
   "timelineUnableToLoadMorePosts": "Unable to load more posts",
   "timelineEmpty": "Empty",

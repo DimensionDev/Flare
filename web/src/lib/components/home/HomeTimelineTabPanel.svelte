@@ -7,9 +7,11 @@
 
 	let {
 		tab,
+		refreshRequestId = 0,
 		onRefreshingChange = () => {},
 	}: {
 		tab: TimelineTabItemV2;
+		refreshRequestId?: number;
 		onRefreshingChange?: (isRefreshing: boolean) => void;
 	} = $props();
 
@@ -24,6 +26,7 @@
 	const isRefreshing = $derived(
 		timeline.listState.type === 'Success' ? timeline.listState.isRefreshing : false
 	);
+	let handledRefreshRequestId = $state<number | null>(null);
 
 	$effect(() => {
 		onRefreshingChange(isRefreshing);
@@ -31,6 +34,16 @@
 		return () => {
 			onRefreshingChange(false);
 		};
+	});
+
+	$effect(() => {
+		if (handledRefreshRequestId === null) {
+			handledRefreshRequestId = refreshRequestId;
+			return;
+		}
+		if (refreshRequestId === handledRefreshRequestId) return;
+		handledRefreshRequestId = refreshRequestId;
+		timeline.refreshAsync();
 	});
 </script>
 

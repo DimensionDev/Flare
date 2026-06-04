@@ -107,6 +107,7 @@
   "tabsExpand": "展开选项卡",
   "timelineUnableToLoadTabs": "加载选项卡失败",
   "timelineNoTimelines": "暂无时间轴",
+  "timelineRefresh": "刷新时间轴",
   "timelineUnableToLoadTimeline": "加载时间轴失败",
   "timelineUnableToLoadMorePosts": "加载更多动态失败",
   "timelineEmpty": "暂无内容",

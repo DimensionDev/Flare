@@ -24,11 +24,12 @@
 	let tabsExpanded = $state(false);
 	let tabsOverflowing = $state(false);
 	let selectedTimelineRefreshing = $state(false);
+	let refreshRequestId = $state(0);
 	const tabs = $derived(
 		homeTimeline.tabState.type === 'Success' ? homeTimeline.tabState.data : []
 	);
 	const selectedTab = $derived(
-		tabs.find((tab) => tab.id === selectedTabId) ?? tabs[0] ?? null
+		selectedTabId ? (tabs.find((tab) => tab.id === selectedTabId) ?? null) : null
 	);
 
 	$effect(() => {
@@ -112,6 +113,10 @@
 				return null;
 		}
 	}
+
+	function refreshSelectedTimeline(): void {
+		refreshRequestId += 1;
+	}
 </script>
 
 <div class="home-page">
@@ -154,20 +159,20 @@
 			</div>
 		{/snippet}
 
-			{#snippet end()}
-				{#if tabsOverflowing || tabsExpanded}
-					<button
-						class:swap-active={tabsExpanded}
-						class="btn btn-ghost btn-square btn-sm swap swap-rotate rounded-box"
-						type="button"
+		{#snippet end()}
+			{#if tabsOverflowing || tabsExpanded}
+				<button
+					class:swap-active={tabsExpanded}
+					class="btn btn-ghost btn-square btn-sm swap swap-rotate rounded-box"
+					type="button"
 					aria-label={tabsExpanded ? m.tabsCollapse() : m.tabsExpand()}
 					aria-expanded={tabsExpanded}
 					title={tabsExpanded ? m.tabsCollapse() : m.tabsExpand()}
-						onclick={() => {
-							tabsExpanded = !tabsExpanded;
-						}}
-					>
-						<span class="swap-on">
+					onclick={() => {
+						tabsExpanded = !tabsExpanded;
+					}}
+				>
+					<span class="swap-on">
 						<FaIcon name="ChevronUp" size={14} />
 					</span>
 					<span class="swap-off">
@@ -180,18 +185,29 @@
 				class="btn btn-ghost btn-square btn-sm rounded-box"
 				type="button"
 				aria-label={m.tabSettingsTitle()}
-					title={m.tabSettingsTitle()}
-				>
-					<FaIcon name="Sliders" size={16} />
-				</button>
-			{/snippet}
+				title={m.tabSettingsTitle()}
+			>
+				<FaIcon name="Sliders" size={16} />
+			</button>
 
-			{#snippet bottom()}
-				{#if selectedTimelineRefreshing}
-					<progress class="progress progress-primary block h-0.5 w-full"></progress>
-				{/if}
-			{/snippet}
-		</AppTopBar>
+			<button
+				class="btn btn-ghost btn-square btn-sm rounded-box"
+				type="button"
+				aria-label={m.timelineRefresh()}
+				title={m.timelineRefresh()}
+				disabled={!selectedTab || selectedTimelineRefreshing}
+				onclick={refreshSelectedTimeline}
+			>
+				<FaIcon name="Refresh" size={16} />
+			</button>
+		{/snippet}
+
+		{#snippet bottom()}
+			{#if selectedTimelineRefreshing}
+				<progress class="progress progress-primary block h-0.5 w-full"></progress>
+			{/if}
+		{/snippet}
+	</AppTopBar>
 
 	<section class="home-content">
 		{#if homeTimeline.tabState.type === 'Error'}
@@ -206,6 +222,7 @@
 			{#key selectedTab.id}
 				<HomeTimelineTabPanel
 					tab={selectedTab}
+					{refreshRequestId}
 					onRefreshingChange={(isRefreshing) => {
 						selectedTimelineRefreshing = isRefreshing;
 					}}

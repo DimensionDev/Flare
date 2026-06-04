@@ -1,6 +1,6 @@
+
 import dev.dimension.flare.buildlogic.FlarePlatform
 import dev.dimension.flare.buildlogic.flare
-import org.jetbrains.kotlin.gradle.tasks.Kotlin2JsCompile
 
 plugins {
     id("dev.dimension.flare.multiplatform-library")
@@ -132,7 +132,7 @@ room3 {
 }
 
 ktorfit {
-    compilerPluginVersion.set("2.3.3")
+    compilerPluginVersion.set("2.3.4")
 }
 
 afterEvaluate {

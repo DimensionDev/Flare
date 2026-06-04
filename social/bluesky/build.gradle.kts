@@ -76,7 +76,7 @@ kotlin {
 }
 
 ktorfit {
-    compilerPluginVersion.set("2.3.3")
+    compilerPluginVersion.set("2.3.4")
 }
 
 afterEvaluate {

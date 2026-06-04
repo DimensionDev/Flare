@@ -243,10 +243,15 @@
 	}
 
 	.account-tab {
+		display: inline-flex;
+		flex: 0 0 auto;
+		flex-wrap: nowrap;
+		align-items: center;
 		gap: 0.4rem;
 		max-width: 15rem;
 		min-height: 2.5rem;
 		padding-inline: 0.75rem;
+		white-space: nowrap;
 	}
 
 	.account-handle {
@@ -254,6 +259,11 @@
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
+	}
+
+	.account-tab :global(.indicator),
+	.account-tab :global(.badge) {
+		flex: 0 0 auto;
 	}
 
 	.account-avatar {

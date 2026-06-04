@@ -5,13 +5,13 @@ compileSdk = "37"
 composemediaplayer = "0.9.0"
 composewebview = "1.0.0-beta-02"
 cryptographyProviderOptimal = "0.5.0"
-jna = "5.18.1"
+jna = "5.19.0"
 lifecycleViewmodelComposeVersion = "2.10.0"
 minSdk = "26"
 java = "25"
 agp = "9.2.1"
-kotlin = "2.3.20"
-core-ktx = "1.18.0"
+kotlin = "2.3.21"
+core-ktx = "1.19.0"
 junit = "4.13.2"
 androidx-test-ext-junit = "1.3.0"
 espresso-core = "3.7.0"
@@ -29,16 +29,16 @@ kotlinx-browser = "0.5.0"
 coil3 = "3.4.0"
 ktorfit = "2.7.3"
 ktorfitConverters = "2.7.2"
-ktor = "3.4.3"
+ktor = "3.5.0"
 prettytime = "5.0.9.Final"
 readability = "1.0.0"
 reorderable = "3.1.0"
 richtextUiMaterial3 = "1.0.0-alpha04"
-sentry = "8.41.0"
+sentry = "8.43.1"
 twitter-parser = "0.5.9"
 molecule = "2.2.0"
 accompanist = "0.37.3"
-compose-lint-checks = "1.4.3"
+compose-lint-checks = "1.5.2"
 ktlintPlugin = "14.2.0"
 apng-android = "3.0.5"
 ktlint = "1.5.0"
@@ -54,13 +54,13 @@ composeIcons = "1.3.0"
 media3 = "1.10.1"
 desugar_jdk_libs = "2.1.5"
 datastore = "1.3.0-alpha09"
-firebase-bom = "34.13.0"
+firebase-bom = "34.14.0"
 google-services = "4.4.4"
 firebase-crashlytics = "3.0.7"
 materialKolor = "4.1.1"
 room = "3.0.0-alpha06"
 sqlite = "2.7.0-alpha06"
-compose-multiplatform = "1.11.0"
+compose-multiplatform = "1.11.1"
 navigation3 = "1.1.2"
 zoomable = "0.19.0"
 cupertino = "2.3.1"
@@ -107,7 +107,7 @@ ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
-material3 = { group = "androidx.compose.material3", name = "material3", version = "1.5.0-alpha20" }
+material3 = { group = "androidx.compose.material3", name = "material3", version = "1.5.0-alpha21" }
 material3WindowSizeClass = { group = "androidx.compose.material3", name = "material3-window-size-class" }
 material3-adaptive-navigation-suite = { group = "androidx.compose.material3", name = "material3-adaptive-navigation-suite" }
 material3-adaptive = { group = "androidx.compose.material3.adaptive", name = "adaptive" }
@@ -259,7 +259,7 @@ kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref 
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
-ktorfit = { id = "de.jensklingenberg.ktorfit", version = "2.7.3" }
+ktorfit = { id = "de.jensklingenberg.ktorfit", version.ref = "ktorfit" }
 ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlintPlugin" }
 skie = { id = "co.touchlab.skie", version.ref = "skie" }
 ben-manes-versions = { id = "com.github.ben-manes.versions", version.ref = "versionUpdate" }

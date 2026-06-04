@@ -13,7 +13,7 @@ internal class SerialWebSQLiteDriver(
     private val connections = mutableMapOf<String, SerialWebSQLiteConnection>()
 
     override val hasConnectionPool: Boolean
-        get() = true
+        get() = false
 
     override suspend fun open(fileName: String): SQLiteConnection =
         openMutex.withLock {

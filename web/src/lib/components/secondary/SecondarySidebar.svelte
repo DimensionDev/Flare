@@ -120,16 +120,26 @@
 				</button>
 			</li>
 			<li class="w-full">
-				<button class="w-full justify-start" type="button" disabled>
+				<a
+					class="w-full justify-start"
+					class:menu-active={isHrefActive('/subscriptions')}
+					href="/subscriptions"
+					aria-current={isHrefActive('/subscriptions') ? 'page' : undefined}
+				>
 					<FaIcon name="Rss" size={16} />
 					<span>{m.settingsRssManagementTitle()}</span>
-				</button>
+				</a>
 			</li>
 			<li class="w-full">
-				<button class="w-full justify-start" type="button" disabled>
+				<a
+					class="w-full justify-start"
+					class:menu-active={isHrefActive('/history')}
+					href="/history"
+					aria-current={isHrefActive('/history') ? 'page' : undefined}
+				>
 					<FaIcon name="ClockRotateLeft" size={16} />
 					<span>{m.settingsLocalHistoryTitle()}</span>
-				</button>
+				</a>
 			</li>
 			<li class="w-full">
 				<a

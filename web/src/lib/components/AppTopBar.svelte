@@ -3,6 +3,8 @@
 
 	let {
 		title,
+		titleContent,
+		showTitle = title !== undefined || titleContent !== undefined,
 		subtitle,
 		start,
 		end,
@@ -10,6 +12,8 @@
 		zIndex = 'z-10',
 	}: {
 		title?: string;
+		titleContent?: Snippet;
+		showTitle?: boolean;
 		subtitle?: string;
 		start?: Snippet;
 		end?: Snippet;
@@ -25,9 +29,15 @@
 				{@render start()}
 			{/if}
 
-			{#if title}
+			{#if showTitle}
 				<div class="app-top-bar-title">
-					<h1>{title}</h1>
+					<h1>
+						{#if titleContent}
+							{@render titleContent()}
+						{:else}
+							{title}
+						{/if}
+					</h1>
 					{#if subtitle}
 						<span>{subtitle}</span>
 					{/if}
@@ -73,6 +83,11 @@
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
+	}
+
+	.app-top-bar-title h1 :global(*) {
+		display: inline;
+		margin: 0;
 	}
 
 	.app-top-bar-title h1 {

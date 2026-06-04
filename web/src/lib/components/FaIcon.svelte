@@ -108,6 +108,7 @@
 		MoreVerticel: faEllipsisVertical,
 		Delete: faTrash,
 		Report: faCircleInfo,
+		Plus: faPlus,
 		React: faPlus,
 		UnReact: faMinus,
 		Close: faXmark,

@@ -16,7 +16,7 @@
 	} = $props();
 
 	// svelte-ignore state_referenced_locally -- parent keys this component by tab id.
-	const timelinePresenterKey = `profile:timeline:${profileKey}:${tabKey}`;
+	const timelinePresenterKey = `profile:timeline:v2:${profileKey}:${tabKey}`;
 	// svelte-ignore state_referenced_locally -- parent keys this component by tab id.
 	const timeline = useRetainedPresenter(
 		timelinePresenterKey,

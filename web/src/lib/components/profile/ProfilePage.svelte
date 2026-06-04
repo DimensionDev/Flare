@@ -7,7 +7,10 @@
     import TimelineLoadingPlaceholderList from "$lib/components/UiTimeline/TimelineLoadingPlaceholderList.svelte";
     import { useDeepLink } from "$lib/deeplink/deepLink.svelte";
     import { m } from "$lib/paraglide/messages.js";
-    import { useReactiveRetainedPresenter } from "$lib/presenter/presenterStore.svelte";
+    import {
+        type RetainedPresenterController,
+        useReactiveRetainedPresenter,
+    } from "$lib/presenter/presenterStore.svelte";
     import {
         createProfilePresenterController,
         type ActionMenu as ProfileActionMenu,
@@ -25,6 +28,17 @@
     import type { ClickEvent as TimelineClickEvent } from "@flare/web-presenters/timeline.svelte";
 
     let selectedTabId = $state<string | null>(null);
+    type UserLookupController = ReturnType<
+        typeof createProfileUserLookupPresenterController
+    >;
+    type RoutedUserLookupState = {
+        readonly user: UserLookupController["state"]["user"];
+        lookupRouteKey: string | null;
+    };
+    type ProfileController = ReturnType<typeof createProfilePresenterController>;
+    type RoutedProfileState = ProfileController["state"] & {
+        profileRouteKey: string;
+    };
 
     const routeAccountKey = $derived(page.params.accountKey ?? null);
     const routeUserKey = $derived(page.params.userKey ?? null);
@@ -38,20 +52,32 @@
     const accountType = $derived(parseAccountType(routeAccountKey));
     const routeUserMicroBlogKey = $derived(routeUserKey ? parseMicroBlogKey(routeUserKey) : null);
     const shouldResolveUserKey = $derived(!routeUserMicroBlogKey && Boolean(routeUserName && routeHost));
+    const lookupRouteKey = $derived(
+        shouldResolveUserKey
+            ? `${routeAccountKey ?? ""}:${routeHost ?? ""}:${routeUserName ?? ""}`
+            : null,
+    );
     const lookupState = useReactiveRetainedPresenter(
         () =>
             shouldResolveUserKey
                 ? `profile-user-lookup:${routeAccountKey}:${routeHost}:${routeUserName}`
                 : "profile-user-lookup:empty",
         () =>
-            shouldResolveUserKey && routeUserName && routeHost
-                ? createProfileUserLookupPresenterController(routeUserName, routeHost, accountType)
+            shouldResolveUserKey && routeUserName && routeHost && lookupRouteKey
+                ? createRoutedUserLookupController(
+                      routeUserName,
+                      routeHost,
+                      accountType,
+                      lookupRouteKey,
+                  )
                 : createEmptyUserLookupController(),
         { ttlMs: Infinity },
     );
     const resolvedUserKey = $derived(
         routeUserMicroBlogKey ??
-            (lookupState.user.type === "Success"
+            (shouldResolveUserKey &&
+            lookupState.lookupRouteKey === lookupRouteKey &&
+            lookupState.user.type === "Success"
                 ? lookupState.user.data.key
                 : null),
     );
@@ -64,23 +90,27 @@
     const profileState = useReactiveRetainedPresenter(
         () => `profile:${profilePresenterKey}`,
         () =>
-            createProfilePresenterController(
+            createRoutedProfileController(
                 accountType,
                 resolvedUserKey,
+                profilePresenterKey,
             ),
         { ttlMs: Infinity },
     );
     const deepLink = useDeepLink();
+    const hasCurrentProfileState = $derived(
+        profileState.profileRouteKey === profilePresenterKey,
+    );
     const displayProfile = $derived(
-        hasResolvedProfileRoute && profileState.userState.type === "Success"
+        hasResolvedProfileRoute && hasCurrentProfileState && profileState.userState.type === "Success"
             ? profileState.userState.data
             : null,
     );
     const profileActions = $derived(
-        hasResolvedProfileRoute ? profileState.actions : [],
+        hasResolvedProfileRoute && hasCurrentProfileState ? profileState.actions : [],
     );
     const profileTabs = $derived<ProfileStateTab[]>(
-        hasResolvedProfileRoute && profileState.tabs.type === "Success"
+        hasResolvedProfileRoute && hasCurrentProfileState && profileState.tabs.type === "Success"
             ? profileState.tabs.data
             : [],
     );
@@ -94,18 +124,21 @@
     const showFollowControls = $derived(
         hasProfileRoute &&
             hasResolvedProfileRoute &&
+            hasCurrentProfileState &&
             profileState.isMe.type === "Success" &&
             !profileState.isMe.data,
     );
     const profileError = $derived(
-        hasProfileRoute && lookupState.user.type === "Error"
+        hasProfileRoute &&
+        lookupState.lookupRouteKey === lookupRouteKey &&
+        lookupState.user.type === "Error"
             ? (lookupState.user.message ?? m.profileUnableToLoad())
-            : hasResolvedProfileRoute && profileState.userState.type === "Error"
+            : hasResolvedProfileRoute && hasCurrentProfileState && profileState.userState.type === "Error"
             ? (profileState.userState.message ?? m.profileUnableToLoad())
             : null,
     );
     const followButtonState = $derived(
-        hasResolvedProfileRoute && profileState.followButtonState.type === "Success"
+        hasResolvedProfileRoute && hasCurrentProfileState && profileState.followButtonState.type === "Success"
             ? profileState.followButtonState.data
             : null,
     );
@@ -115,13 +148,87 @@
             : m.profileFollowButtonFollow(),
     );
 
-    function createEmptyUserLookupController() {
+    function createRoutedUserLookupController(
+        userName: string,
+        host: string,
+        account: AccountType,
+        lookupKey: string,
+    ): RetainedPresenterController<RoutedUserLookupState> {
+        const controller = createProfileUserLookupPresenterController(
+            userName,
+            host,
+            account,
+        );
+
+        return {
+            state: {
+                get user() {
+                    return controller.state.user;
+                },
+                lookupRouteKey: lookupKey,
+            },
+            mount: controller.mount,
+            close: controller.close,
+        };
+    }
+
+    function createEmptyUserLookupController(): RetainedPresenterController<RoutedUserLookupState> {
         return {
             state: {
                 user: { type: "Loading" as const },
+                lookupRouteKey: null,
             },
             mount() {},
             close() {},
+        };
+    }
+
+    function createRoutedProfileController(
+        account: AccountType,
+        userKey: MicroBlogKey | null,
+        profileKey: string,
+    ): RetainedPresenterController<RoutedProfileState> {
+        const controller = createProfilePresenterController(account, userKey);
+
+        return {
+            state: {
+                get userState() {
+                    return controller.state.userState;
+                },
+                get relationState() {
+                    return controller.state.relationState;
+                },
+                get followButtonState() {
+                    return controller.state.followButtonState;
+                },
+                get isMe() {
+                    return controller.state.isMe;
+                },
+                get actions() {
+                    return controller.state.actions;
+                },
+                get myAccountKey() {
+                    return controller.state.myAccountKey;
+                },
+                get tabs() {
+                    return controller.state.tabs;
+                },
+                profileRouteKey: profileKey,
+                follow(userKey) {
+                    controller.state.follow(userKey);
+                },
+                unfollow(userKey) {
+                    controller.state.unfollow(userKey);
+                },
+                unblock(userKey) {
+                    controller.state.unblock(userKey);
+                },
+                report(userKey) {
+                    controller.state.report(userKey);
+                },
+            },
+            mount: controller.mount,
+            close: controller.close,
         };
     }
 
@@ -175,7 +282,7 @@
             followButtonState?.type === "RequestFollow",
     );
     const followsYou = $derived(
-        hasProfileRoute && profileState.relationState.type === "Success"
+        hasProfileRoute && hasCurrentProfileState && profileState.relationState.type === "Success"
             ? profileState.relationState.data.isFans
             : false,
     );
@@ -372,12 +479,22 @@
 
 <div class="profile-page">
     <AppTopBar
-        title={displayProfile ? profileNameText(displayProfile) : undefined}
+        showTitle={Boolean(displayProfile)}
         subtitle={displayProfile
             ? m.profilePostsCount({ count: displayProfile.matrices.statusesCountHumanized })
             : undefined}
         zIndex="z-20"
     >
+        {#snippet titleContent()}
+            {#if displayProfile}
+                <RichText
+                    text={displayProfile.name}
+                    className="profile-top-bar-name"
+                    maxLines={1}
+                />
+            {/if}
+        {/snippet}
+
         {#snippet start()}
             <button
                 class="btn btn-ghost btn-square btn-sm rounded-box"
@@ -568,7 +685,7 @@
         aria-label={m.profileTimelinesAriaLabel()}
     >
         <div class="tabs tabs-border profile-tabs" role="tablist">
-            {#if hasProfileRoute && profileState.tabs.type === "Loading"}
+            {#if hasProfileRoute && (!hasCurrentProfileState || profileState.tabs.type === "Loading")}
                 <div class="tab profile-tab">
                     <div class="skeleton h-5 w-20"></div>
                 </div>
@@ -591,7 +708,7 @@
     </nav>
 
     <section class="profile-tab-content">
-        {#if hasProfileRoute && profileState.tabs.type === "Error"}
+        {#if hasProfileRoute && hasCurrentProfileState && profileState.tabs.type === "Error"}
             <div class="profile-state">
                 <div class="alert alert-error">
                     <span

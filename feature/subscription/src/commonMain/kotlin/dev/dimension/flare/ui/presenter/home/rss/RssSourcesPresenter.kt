@@ -14,6 +14,7 @@ import dev.dimension.flare.data.repository.SubscriptionRepository
 import dev.dimension.flare.data.repository.SubscriptionSourceInput
 import dev.dimension.flare.ui.model.UiRssSource
 import dev.dimension.flare.ui.presenter.PresenterBase
+import dev.dimension.flare.web.shared.WebPresenter
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -22,6 +23,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
+@WebPresenter("rssSources")
 public class RssSourcesPresenter :
     PresenterBase<RssSourcesPresenter.State>(),
     KoinComponent {

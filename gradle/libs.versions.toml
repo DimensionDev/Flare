@@ -27,7 +27,8 @@ kotlinx-collections-immutable = "0.4.0"
 kotlinx-serialization = "1.11.0"
 kotlinx-browser = "0.5.0"
 coil3 = "3.4.0"
-ktorfit = "2.7.4-SNAPSHOT"
+ktorfit = "2.7.3"
+ktorfitConverters = "2.7.2"
 ktor = "3.4.3"
 prettytime = "5.0.9.Final"
 readability = "1.0.0"
@@ -171,9 +172,9 @@ zoomable = { group = "me.saket.telephoto", name = "zoomable", version.ref = "zoo
 
 ktorfit-lib = { group = "de.jensklingenberg.ktorfit", name = "ktorfit-lib", version.ref = "ktorfit" }
 ktorfit-ksp = { group = "de.jensklingenberg.ktorfit", name = "ktorfit-ksp", version.ref = "ktorfit" }
-ktorfit-converters-response = { group = "de.jensklingenberg.ktorfit", name = "ktorfit-converters-response", version.ref = "ktorfit" }
-ktorfit-converters-call = { group = "de.jensklingenberg.ktorfit", name = "ktorfit-converters-call", version.ref = "ktorfit" }
-ktorfit-converters-flow = { group = "de.jensklingenberg.ktorfit", name = "ktorfit-converters-flow", version.ref = "ktorfit" }
+ktorfit-converters-response = { group = "de.jensklingenberg.ktorfit", name = "ktorfit-converters-response", version.ref = "ktorfitConverters" }
+ktorfit-converters-call = { group = "de.jensklingenberg.ktorfit", name = "ktorfit-converters-call", version.ref = "ktorfitConverters" }
+ktorfit-converters-flow = { group = "de.jensklingenberg.ktorfit", name = "ktorfit-converters-flow", version.ref = "ktorfitConverters" }
 
 ktor-client-content-negotiation = { group = "io.ktor", name = "ktor-client-content-negotiation", version.ref = "ktor" }
 ktor-serialization-kotlinx-json = { group = "io.ktor", name = "ktor-serialization-kotlinx-json", version.ref = "ktor" }

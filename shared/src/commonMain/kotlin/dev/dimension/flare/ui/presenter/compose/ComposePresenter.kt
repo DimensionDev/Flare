@@ -10,6 +10,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import dev.dimension.flare.common.FileType
 import dev.dimension.flare.common.combineLatestFlowLists
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
@@ -21,6 +22,7 @@ import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.DraftRepository
 import dev.dimension.flare.data.repository.accountServiceFlow
+import dev.dimension.flare.data.repository.draftFileItem
 import dev.dimension.flare.data.repository.newDraftGroupId
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -28,6 +30,7 @@ import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.EmojiData
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiDraft
+import dev.dimension.flare.ui.model.UiEmoji
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimelineV2
@@ -38,6 +41,8 @@ import dev.dimension.flare.ui.model.mapNotNull
 import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
+import dev.dimension.flare.web.shared.WebIgnore
+import dev.dimension.flare.web.shared.WebPresenter
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -56,10 +61,16 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import kotlin.io.encoding.Base64
+import kotlin.io.encoding.ExperimentalEncodingApi
 
 @OptIn(ExperimentalCoroutinesApi::class)
+@WebPresenter("compose")
 public class ComposePresenter(
     private val accountType: AccountType?,
     private val status: ComposeStatus? = null,
@@ -361,6 +372,9 @@ public class ComposePresenter(
         val loadedDraftState by loadedDraftStateFlow.collectAsState()
         val editingDraftGroupId by editingDraftGroupIdFlow.collectAsState()
         val composeStatus by activeStatusFlow.collectAsState()
+        var directSendState by remember {
+            mutableStateOf(ComposeDirectSendState.idle())
+        }
         if (draftGroupId != null) {
             LaunchedEffect(Unit) {
                 selectedAccountsKeyFlow.value = persistentListOf()
@@ -425,6 +439,67 @@ public class ComposePresenter(
                 }.map {
                     visibilityPresenter()
                 }
+        val textMaxLength =
+            composeConfig
+                .takeSuccess()
+                ?.text
+                ?.maxLength
+        val pollMaxOptions =
+            composeConfig
+                .takeSuccess()
+                ?.poll
+                ?.maxOptions
+        val contentWarningEnabled =
+            composeConfig
+                .takeSuccess()
+                ?.contentWarning != null
+        val mediaEnabled =
+            composeConfig
+                .takeSuccess()
+                ?.media
+                ?.let { it.maxCount > 0 }
+                ?: false
+        val mediaCanSensitive =
+            composeConfig
+                .takeSuccess()
+                ?.media
+                ?.canSensitive
+                ?: false
+        val mediaMaxCount =
+            composeConfig
+                .takeSuccess()
+                ?.media
+                ?.maxCount
+                ?: 0
+        val languageCodes =
+            composeConfig
+                .takeSuccess()
+                ?.language
+                ?.sortedIsoCodes
+                ?.toImmutableList()
+                ?: persistentListOf()
+        val webVisibility =
+            visibilityState
+                .takeSuccess()
+                ?.visibility
+                ?: UiTimelineV2.Post.Visibility.Public
+        val webVisibilities =
+            visibilityState
+                .takeSuccess()
+                ?.allVisibilities
+                ?: persistentListOf()
+        val webEmojis =
+            emojiState
+                .takeSuccess()
+                ?.data
+                ?.values
+                ?.flatten()
+                ?.toImmutableList()
+                ?: persistentListOf()
+        val webEmojiAccountType =
+            emojiState
+                .takeSuccess()
+                ?.accountType
 
         val showDraft by showDraftFlow.collectAsState(false)
 
@@ -432,6 +507,7 @@ public class ComposePresenter(
             canSend = canSend,
             visibilityState = visibilityState,
             replyState = replyState,
+            referencePost = replyState.takeSuccess(),
             emojiState = emojiState,
             composeConfig = composeConfig,
             enableCrossPost = enableCrossPost,
@@ -442,6 +518,18 @@ public class ComposePresenter(
             editingDraftGroupId = editingDraftGroupId,
             composeStatus = composeStatus,
             showDraft = showDraft,
+            directSendState = directSendState,
+            textMaxLength = textMaxLength,
+            pollMaxOptions = pollMaxOptions,
+            contentWarningEnabled = contentWarningEnabled,
+            mediaEnabled = mediaEnabled,
+            mediaCanSensitive = mediaCanSensitive,
+            mediaMaxCount = mediaMaxCount,
+            languageCodes = languageCodes,
+            emojiAccountType = webEmojiAccountType,
+            emojis = webEmojis,
+            visibility = webVisibility,
+            allVisibilities = webVisibilities,
         ) {
             override fun send(
                 data: ComposeData,
@@ -464,6 +552,108 @@ public class ComposePresenter(
                         }
                     }
                 }
+            }
+
+            override fun sendDirect(
+                content: String,
+                accountKeys: List<MicroBlogKey>,
+                visibility: UiTimelineV2.Post.Visibility,
+                language: String,
+                sensitive: Boolean,
+                spoilerText: String?,
+                localOnly: Boolean,
+                pollOptionsText: String,
+                pollExpiredAfter: Long,
+                pollMultiple: Boolean,
+                mediaItemsJson: String,
+            ) {
+                if (directSendState.phase == ComposeDirectSendPhase.Sending) {
+                    return
+                }
+                scope.launch {
+                    val selectedAccounts =
+                        if (accountKeys.isNotEmpty()) {
+                            accountKeys.mapNotNull { accountRepository.find(it) }
+                        } else {
+                            selectedAccountsFlow.firstOrNull().orEmpty()
+                        }
+                    if (selectedAccounts.isEmpty()) {
+                        directSendState =
+                            ComposeDirectSendState.error(
+                                message = "No account selected.",
+                            )
+                        return@launch
+                    }
+
+                    val data =
+                        ComposeData(
+                            content = content,
+                            visibility = visibility,
+                            language = language.takeIf { it.isNotBlank() }?.let { listOf(it) } ?: listOf("en"),
+                            medias = decodeWebComposeMedia(mediaItemsJson),
+                            sensitive = sensitive,
+                            spoilerText = spoilerText,
+                            localOnly = localOnly,
+                            referenceStatus =
+                                activeStatusFlow.value?.let {
+                                    ComposeData.ReferenceStatus(it)
+                                },
+                            poll =
+                                pollOptionsText
+                                    .lines()
+                                    .map { it.trim() }
+                                    .filter { it.isNotEmpty() }
+                                    .takeIf { it.isNotEmpty() }
+                                    ?.let {
+                                        ComposeData.Poll(
+                                            options = it,
+                                            expiredAfter = pollExpiredAfter,
+                                            multiple = pollMultiple,
+                                        )
+                                    },
+                        )
+
+                    val max = selectedAccounts.size
+                    var current = 0
+                    directSendState = ComposeDirectSendState.sending(current = current, max = max)
+                    runCatching {
+                        appDataStore.composeConfigData.updateData {
+                            it.copy(
+                                visibility = data.visibility,
+                                lastAccounts =
+                                    if (data.referenceStatus == null) {
+                                        selectedAccounts.map { account -> account.accountKey }
+                                    } else {
+                                        it.lastAccounts
+                                    },
+                            )
+                        }
+                        selectedAccounts.forEach { account ->
+                            val dataSource =
+                                accountRepository.getOrCreateDataSource(account)
+                                    as? AuthenticatedMicroblogDataSource
+                                    ?: error("Account is not authenticated: ${account.accountKey}")
+                            dataSource.compose(data = data) {
+                                // Media upload progress is not surfaced by this web-only entry yet.
+                            }
+                            current += 1
+                            directSendState = ComposeDirectSendState.sending(current = current, max = max)
+                        }
+                    }.onSuccess {
+                        directSendState = ComposeDirectSendState.success(max = max)
+                    }.onFailure { throwable ->
+                        directSendState =
+                            ComposeDirectSendState.error(
+                                message = throwable.message ?: "Send failed.",
+                                current = current,
+                                max = max,
+                            )
+                    }
+                }
+            }
+
+            override fun clearDirectSendState() {
+                directSendState = ComposeDirectSendState.idle()
             }
 
             override fun selectAccount(accountKey: MicroBlogKey) {
@@ -600,7 +790,41 @@ public class ComposePresenter(
             }
         }
     }
+
+    @OptIn(ExperimentalEncodingApi::class)
+    private fun decodeWebComposeMedia(value: String): List<ComposeData.Media> {
+        if (value.isBlank()) return emptyList()
+        return Json
+            .decodeFromString<List<WebComposeMedia>>(value)
+            .map { item ->
+                ComposeData.Media(
+                    file =
+                        draftFileItem(
+                            path = item.name ?: "web-compose-media",
+                            name = item.name,
+                            type =
+                                when (item.type) {
+                                    "Image" -> FileType.Image
+                                    "Video" -> FileType.Video
+                                    else -> FileType.Other
+                                },
+                            mimeType = item.mimeType,
+                            loader = { Base64.decode(item.bytesBase64) },
+                        ),
+                    altText = item.altText?.takeIf { it.isNotBlank() },
+                )
+            }
+    }
 }
+
+@Serializable
+private data class WebComposeMedia(
+    val name: String?,
+    val mimeType: String?,
+    val type: String,
+    val bytesBase64: String,
+    val altText: String?,
+)
 
 @Immutable
 public interface VisibilityState {
@@ -638,23 +862,60 @@ public sealed class ComposeStatus {
 @Immutable
 public abstract class ComposeState(
     public val canSend: Boolean,
+    @WebIgnore
     public val visibilityState: UiState<VisibilityState>,
+    @WebIgnore
     public val replyState: UiState<UiTimelineV2>?,
+    public val referencePost: UiTimelineV2?,
+    @WebIgnore
     public val initialTextState: UiState<InitialText>?,
+    @WebIgnore
     public val emojiState: UiState<EmojiData>,
+    @WebIgnore
     public val composeConfig: UiState<ComposeConfig>,
+    @WebIgnore
     public val enableCrossPost: UiState<Boolean>,
     public val otherUsers: UiState<ImmutableList<UiState<UiProfile>>>,
     public val selectedUsers: UiState<ImmutableList<UiState<UiProfile>>>,
+    @WebIgnore
     public val loadedDraftState: UiState<UiDraft>?,
     public val editingDraftGroupId: String?,
     public val composeStatus: ComposeStatus?,
     public val showDraft: Boolean,
+    public val directSendState: ComposeDirectSendState,
+    public val textMaxLength: Int?,
+    public val pollMaxOptions: Int?,
+    public val contentWarningEnabled: Boolean,
+    public val mediaEnabled: Boolean,
+    public val mediaCanSensitive: Boolean,
+    public val mediaMaxCount: Int,
+    public val languageCodes: ImmutableList<String>,
+    public val emojiAccountType: AccountType?,
+    public val emojis: ImmutableList<UiEmoji>,
+    public val visibility: UiTimelineV2.Post.Visibility,
+    public val allVisibilities: ImmutableList<UiTimelineV2.Post.Visibility>,
 ) {
+    @WebIgnore
     public abstract fun send(
         data: ComposeData,
         onDispatched: (Boolean) -> Unit,
     )
+
+    public abstract fun sendDirect(
+        content: String,
+        accountKeys: List<MicroBlogKey>,
+        visibility: UiTimelineV2.Post.Visibility,
+        language: String,
+        sensitive: Boolean,
+        spoilerText: String?,
+        localOnly: Boolean,
+        pollOptionsText: String,
+        pollExpiredAfter: Long,
+        pollMultiple: Boolean,
+        mediaItemsJson: String,
+    )
+
+    public abstract fun clearDirectSendState()
 
     public abstract fun selectAccount(accountKey: MicroBlogKey)
 
@@ -666,6 +927,7 @@ public abstract class ComposeState(
 
     public abstract fun consumeLoadedDraft()
 
+    @WebIgnore
     public abstract fun saveDraft(
         data: ComposeData,
         onDispatched: (Boolean) -> Unit,
@@ -677,3 +939,59 @@ public data class InitialText internal constructor(
     val text: String,
     val cursorPosition: Int,
 )
+
+@Immutable
+public data class ComposeDirectSendState(
+    val phase: ComposeDirectSendPhase,
+    val current: Int,
+    val max: Int,
+    val errorMessage: String?,
+) {
+    public companion object {
+        public fun idle(): ComposeDirectSendState =
+            ComposeDirectSendState(
+                phase = ComposeDirectSendPhase.Idle,
+                current = 0,
+                max = 0,
+                errorMessage = null,
+            )
+
+        public fun sending(
+            current: Int,
+            max: Int,
+        ): ComposeDirectSendState =
+            ComposeDirectSendState(
+                phase = ComposeDirectSendPhase.Sending,
+                current = current,
+                max = max,
+                errorMessage = null,
+            )
+
+        public fun success(max: Int): ComposeDirectSendState =
+            ComposeDirectSendState(
+                phase = ComposeDirectSendPhase.Success,
+                current = max,
+                max = max,
+                errorMessage = null,
+            )
+
+        public fun error(
+            message: String,
+            current: Int = 0,
+            max: Int = 0,
+        ): ComposeDirectSendState =
+            ComposeDirectSendState(
+                phase = ComposeDirectSendPhase.Error,
+                current = current,
+                max = max,
+                errorMessage = message,
+            )
+    }
+}
+
+public enum class ComposeDirectSendPhase {
+    Idle,
+    Sending,
+    Success,
+    Error,
+}

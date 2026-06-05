@@ -7,6 +7,7 @@ import dev.dimension.flare.common.protobufSerializer
 import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.datastore.model.ComposeConfigData
 import dev.dimension.flare.data.datastore.model.FlareConfig
+import dev.dimension.flare.data.datastore.model.PlatformOAuthPendingData
 import dev.dimension.flare.data.io.FileStorage
 import org.koin.core.annotation.Single
 
@@ -32,6 +33,13 @@ internal class AppDataStore(
         createDataStore(
             name = "app_settings.pb",
             serializer = protobufSerializer(AppSettings(version = "")),
+        )
+    }
+
+    val platformOAuthPendingStore: DataStore<PlatformOAuthPendingData> by lazy {
+        createDataStore(
+            name = "platform_oauth_pending.pb",
+            serializer = protobufSerializer(PlatformOAuthPendingData()),
         )
     }
 

@@ -18,6 +18,7 @@ import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceFlow
 import dev.dimension.flare.data.repository.allAccountServicesFlow
 import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimelineV2
@@ -28,6 +29,8 @@ import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
+import dev.dimension.flare.web.shared.WebIgnore
+import dev.dimension.flare.web.shared.WebPresenter
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -48,6 +51,7 @@ public data class NotificationAccountItem(
     val badge: Int,
 )
 
+@WebPresenter("notifications")
 public class AllNotificationPresenter :
     PresenterBase<AllNotificationPresenter.State>(),
     KoinComponent {
@@ -64,7 +68,10 @@ public class AllNotificationPresenter :
         public val selectedAccount: UiProfile?
         public val selectedAccountIndex: Int
 
+        @WebIgnore
         public fun setAccount(profile: UiProfile)
+
+        public fun setAccountKey(key: MicroBlogKey)
 
         public fun setFilter(filter: NotificationFilter)
 
@@ -198,6 +205,12 @@ public class AllNotificationPresenter :
 
             override fun setAccount(profile: UiProfile) {
                 selectedAccountFlow.value = profile
+            }
+
+            override fun setAccountKey(key: MicroBlogKey) {
+                notifications.firstOrNull { it.profile.key == key }?.let {
+                    selectedAccountFlow.value = it.profile
+                }
             }
 
             override fun setFilter(filter: NotificationFilter) {

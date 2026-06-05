@@ -7,6 +7,7 @@ import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.activeAccountFlow
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
+import dev.dimension.flare.web.shared.WebPresenter
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -14,6 +15,7 @@ import kotlinx.coroutines.flow.map
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
+@WebPresenter("homeTabs")
 public class HomeTabsPresenter :
     PresenterBase<HomeTabsPresenter.State>(),
     KoinComponent {

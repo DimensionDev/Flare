@@ -17,6 +17,7 @@ import dev.dimension.flare.ui.model.UiInstanceMetadata
 import dev.dimension.flare.ui.model.UiStrings
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -97,6 +98,53 @@ class LoginPlatformRegistryTest {
         }
 
     @Test
+    fun detectionContinuesWhenDetectorFails() =
+        runTest {
+            val registry =
+                LoginPlatformRegistry(
+                    testRuntimeData(
+                        testProvider(
+                            platformType = PlatformType.Bluesky,
+                            detectorPriority = 10,
+                            detectorFailure = IllegalStateException("probe failed"),
+                        ),
+                        testProvider(
+                            platformType = PlatformType.Mastodon,
+                            detectorPriority = 0,
+                            detectedSoftware = "mastodon",
+                        ),
+                    ),
+                )
+
+            val detected = registry.detectPlatformType("mstdn.jp")
+
+            assertEquals(PlatformType.Mastodon, detected.platformType)
+            assertEquals("mstdn.jp", detected.host)
+        }
+
+    @Test
+    fun detectionDoesNotSwallowCancellation() =
+        runTest {
+            val registry =
+                LoginPlatformRegistry(
+                    testRuntimeData(
+                        testProvider(
+                            platformType = PlatformType.Bluesky,
+                            detectorFailure = CancellationException("cancelled"),
+                        ),
+                        testProvider(
+                            platformType = PlatformType.Mastodon,
+                            detectedSoftware = "mastodon",
+                        ),
+                    ),
+                )
+
+            assertFailsWith<CancellationException> {
+                registry.detectPlatformType("mstdn.jp")
+            }
+        }
+
+    @Test
     fun runtimeDataDerivesProvidersFromPlatformSpecs() {
         val mastodon = testProvider(PlatformType.Mastodon)
         val mastodonSpec = testLoginPlatformSpec(mastodon)
@@ -119,6 +167,7 @@ class LoginPlatformRegistryTest {
         methods: List<LoginMethodSpec> = emptyList(),
         detectorPriority: Int = 0,
         detectedSoftware: String? = null,
+        detectorFailure: Throwable? = null,
     ): LoginPlatformProvider =
         object : LoginPlatformProvider {
             override val platformType: PlatformType = platformType
@@ -131,8 +180,9 @@ class LoginPlatformRegistryTest {
                 object : PlatformDetector {
                     override val priority: Int = detectorPriority
 
-                    override suspend fun detect(host: String): NodeData? =
-                        detectedSoftware?.let {
+                    override suspend fun detect(host: String): NodeData? {
+                        detectorFailure?.let { throw it }
+                        return detectedSoftware?.let {
                             NodeData(
                                 host = host,
                                 platformType = platformType,
@@ -140,6 +190,7 @@ class LoginPlatformRegistryTest {
                                 compatibleMode = false,
                             )
                         }
+                    }
                 }
             override val methods: List<LoginMethodSpec> = methods
 

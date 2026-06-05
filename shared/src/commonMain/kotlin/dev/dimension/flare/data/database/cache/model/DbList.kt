@@ -64,8 +64,8 @@ internal data class DbListWithContent(
     @Embedded
     val paging: DbListPaging,
     @Relation(
-        parentColumn = "listKey",
-        entityColumn = "listKey",
+        parentColumns = ["listKey"],
+        entityColumns = ["listKey"],
         entity = DbList::class,
     )
     val list: DbList,
@@ -93,8 +93,8 @@ internal data class DbListMemberWithContent(
     @Embedded
     val member: DbListMember,
     @Relation(
-        parentColumn = "memberKey",
-        entityColumn = "userKey",
+        parentColumns = ["memberKey"],
+        entityColumns = ["userKey"],
         entity = DbUser::class,
     )
     val user: DbUser,
@@ -104,8 +104,8 @@ internal data class DbListMemberWithList(
     @Embedded
     val member: DbListMember,
     @Relation(
-        parentColumn = "listKey",
-        entityColumn = "listKey",
+        parentColumns = ["listKey"],
+        entityColumns = ["listKey"],
         entity = DbList::class,
     )
     val list: DbList,
@@ -115,8 +115,8 @@ internal data class DbUserWithListMembership(
     @Embedded
     val user: DbUser,
     @Relation(
-        parentColumn = "userKey",
-        entityColumn = "memberKey",
+        parentColumns = ["userKey"],
+        entityColumns = ["memberKey"],
         entity = DbListMember::class,
     )
     val listMemberships: List<DbListMemberWithList>,

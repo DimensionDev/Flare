@@ -15,12 +15,15 @@ import dev.dimension.flare.data.model.appearance.AppearancePatch
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
+import dev.dimension.flare.web.shared.WebIgnore
+import dev.dimension.flare.web.shared.WebPresenter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
+@WebPresenter("settings")
 public class SettingsPresenter :
     PresenterBase<SettingsPresenter.State>(),
     KoinComponent {
@@ -110,14 +113,19 @@ public class SettingsPresenter :
     }
 
     public interface State {
+        @WebIgnore
         public val appearance: UiState<AppearancePatch>
+
+        @WebIgnore
         public val appSettings: UiState<AppSettings>
 
+        @WebIgnore
         public fun <T : Any> update(
             key: AppearanceKey<T>,
             value: T,
         )
 
+        @WebIgnore
         public fun clear(key: AppearanceKey<*>)
 
         public fun updateFontScale(fontSizeDiff: Float)
@@ -156,6 +164,7 @@ public class SettingsPresenter :
 
         public fun updateShowNumbers(value: Boolean)
 
+        @WebIgnore
         public fun updateAppSettings(block: AppSettings.() -> AppSettings)
     }
 }

@@ -154,49 +154,49 @@ private fun StatusContent(
     detailStatusKey: MicroBlogKey,
     modifier: Modifier = Modifier,
 ) {
-    statusState
-        .onSuccess { status ->
-            key(status.itemKey) {
+    Column(modifier = modifier) {
+        statusState
+            .onSuccess { status ->
+                key(status.itemKey) {
+                    StatusItem(
+                        item = status,
+                        detailStatusKey = detailStatusKey,
+//                        modifier =
+//                            modifier.sharedBounds(
+//                                rememberSharedContentState(key = status.itemKey),
+//                                animatedVisibilityScope = this@AnimatedVisibilityScope,
+//                                // ANY transition will lead to the entire screen being animated to
+//                                // exit state after list -> detail -> go back -> scroll a little bit,
+//                                // I have no idea why, so just use None here
+//                                enter = EnterTransition.None,
+//                                exit = ExitTransition.None,
+//                                renderInOverlayDuringTransition = false,
+//                                placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize,
+//                            ),
+                    )
+                }
+            }.onLoading {
                 StatusItem(
-                    item = status,
-                    detailStatusKey = detailStatusKey,
-                    modifier = modifier,
-//                    modifier =
-//                        modifier.sharedBounds(
-//                            rememberSharedContentState(key = status.itemKey),
-//                            animatedVisibilityScope = this@AnimatedVisibilityScope,
-//                            // ANY transition will lead to the entire screen being animated to
-//                            // exit state after list -> detail -> go back -> scroll a little bit,
-//                            // I have no idea why, so just use None here
-//                            enter = EnterTransition.None,
-//                            exit = ExitTransition.None,
-//                            renderInOverlayDuringTransition = false,
-//                            placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize,
-//                        ),
+                    item = null,
                 )
+            }.onError {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    FAIcon(
+                        imageVector = FontAwesomeIcons.Solid.FileCircleExclamation,
+                        contentDescription = null,
+                        modifier = Modifier.size(48.dp),
+                    )
+                    Text(
+                        text = stringResource(id = R.string.status_loadmore_error_retry),
+                        modifier = Modifier.padding(16.dp),
+                    )
+                }
             }
-        }.onLoading {
-            StatusItem(
-                item = null,
-                modifier = modifier,
-            )
-        }.onError {
-            Column(
-                modifier = modifier,
-                verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                FAIcon(
-                    imageVector = FontAwesomeIcons.Solid.FileCircleExclamation,
-                    contentDescription = null,
-                    modifier = Modifier.size(48.dp),
-                )
-                Text(
-                    text = stringResource(id = R.string.status_loadmore_error_retry),
-                    modifier = Modifier.padding(16.dp),
-                )
-            }
-        }
+    }
 }
 
 private fun LazyStaggeredGridScope.reactionContent(

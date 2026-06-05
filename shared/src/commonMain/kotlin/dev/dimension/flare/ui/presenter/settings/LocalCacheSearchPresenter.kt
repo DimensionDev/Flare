@@ -23,10 +23,12 @@ import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.presenter.status.LogStatusHistoryPresenter
+import dev.dimension.flare.web.shared.WebPresenter
 import kotlinx.coroutines.flow.map
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
+@WebPresenter("localCacheSearch")
 public class LocalCacheSearchPresenter :
     PresenterBase<LocalCacheSearchPresenter.State>(),
     KoinComponent {

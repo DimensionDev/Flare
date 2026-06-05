@@ -171,7 +171,8 @@ struct ServiceSelectionScreen: View {
                 let handler = state.createLoginHandler(
                     platformType: node.platformType,
                     host: node.host,
-                    methodType: selectedMethod
+                    methodType: selectedMethod,
+                    redirectUri: nil,
                 )
                 LoginFlowView(handler: handler)
                     .id("\(key)-\(selectedMethod)")

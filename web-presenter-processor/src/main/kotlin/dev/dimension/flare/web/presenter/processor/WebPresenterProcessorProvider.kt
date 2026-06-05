@@ -180,6 +180,7 @@ private class WebPresenterProcessor(
         return PropertyModel(
             name = name,
             webType = value.webType,
+            customValue = value.customValue,
             enum = value.enum,
             sealed = value.sealed,
             ref = value.ref,
@@ -240,6 +241,7 @@ private class WebPresenterProcessor(
         return ArgumentModel(
             name = parameterName,
             webType = value?.webType,
+            customValue = value?.customValue,
             enum = value?.enum,
             sealed = value?.sealed,
             ref = value?.ref,
@@ -279,6 +281,7 @@ internal object WebPresenterRenderer {
         buildString {
             val allRefs = presenters.flatMap { it.referencedRefs() }.distinctBy { it.type }
             val allRefMethods = allRefs.flatMap { ref -> ref.methods }
+            val allCustomValues = presenters.flatMap { it.referencedCustomValues() }.distinctBy { it.type }
             val allArrays = presenters.flatMap { it.referencedArrays() }.distinctBy { it.type }
             val allStateCodecValues =
                 presenters
@@ -346,6 +349,10 @@ internal object WebPresenterRenderer {
 
             allRefs.forEach { ref ->
                 appendRefJsonFunctions(ref)
+                appendLine()
+            }
+            allCustomValues.forEach { customValue ->
+                appendCustomValueJsonFunctions(customValue)
                 appendLine()
             }
             allSealeds.forEach { sealed ->
@@ -698,6 +705,35 @@ internal object WebPresenterRenderer {
         appendLine("    }")
     }
 
+    private fun StringBuilder.appendCustomValueJsonFunctions(customValue: CustomValueModel) {
+        appendLine("private fun ${customValue.encoderName()}(")
+        appendLine("    value: ${customValue.type},")
+        appendLine("): JsonElement =")
+        appendLine("    buildJsonObject {")
+        customValue.fields.forEach { field ->
+            appendLine(
+                "        put(${field.name.kotlinString()}, ${field.webType.writeJsonElementExpression("value.${field.kotlinName}")})",
+            )
+        }
+        appendLine("    }")
+        appendLine()
+        appendLine("private fun ${customValue.decoderName()}(value: JsonElement): ${customValue.type} {")
+        appendLine("    val json = value.jsonObject")
+        appendLine("    return ${customValue.type}(")
+        customValue.fields.forEach { field ->
+            appendLine(
+                "        ${field.kotlinName} = ${
+                    field.webType.readJsonExpression(
+                        objectName = "json",
+                        argumentName = field.name,
+                    )
+                },",
+            )
+        }
+        appendLine("    )")
+        appendLine("}")
+    }
+
     private fun StringBuilder.appendSealedJsonFunctions(
         sealed: SealedModel,
         renderDecoder: Boolean,
@@ -714,7 +750,7 @@ internal object WebPresenterRenderer {
                 appendPutValue(
                     key = property.name.kotlinString(),
                     value = property.valueModel(),
-                    valueExpression = "value.${property.name}",
+                    valueExpression = "value.${property.kotlinName}",
                     refsName = "refs",
                     indent = "            ",
                 )
@@ -737,7 +773,7 @@ internal object WebPresenterRenderer {
                 appendLine("        ${variant.tag.kotlinString()} -> ${variant.type}(")
                 variant.properties.forEach { property ->
                     appendLine(
-                        "            ${property.name} = ${
+                        "            ${property.kotlinName} = ${
                             property.valueModel().readJsonExpression(
                                 objectName = "json",
                                 argumentName = property.name,
@@ -843,6 +879,7 @@ internal data class PresenterModel(
 internal data class PropertyModel(
     val name: String,
     val webType: WebType?,
+    val customValue: CustomValueModel? = null,
     val enum: EnumModel? = null,
     val sealed: SealedModel? = null,
     val ref: RefModel?,
@@ -861,6 +898,7 @@ internal data class ActionModel(
 internal data class ArgumentModel(
     val name: String,
     val webType: WebType?,
+    val customValue: CustomValueModel? = null,
     val enum: EnumModel? = null,
     val sealed: SealedModel? = null,
     val ref: RefModel?,
@@ -875,6 +913,18 @@ internal data class EnumModel(
     val type: String,
     val typeName: String,
     val values: List<String>,
+)
+
+internal data class CustomValueModel(
+    val type: String,
+    val typeName: String,
+    val fields: List<CustomValueFieldModel>,
+)
+
+internal data class CustomValueFieldModel(
+    val name: String,
+    val kotlinName: String = name,
+    val webType: WebType,
 )
 
 internal data class SealedModel(
@@ -893,7 +943,9 @@ internal data class SealedVariantModel(
 
 internal data class SealedPropertyModel(
     val name: String,
+    val kotlinName: String = name,
     val webType: WebType?,
+    val customValue: CustomValueModel? = null,
     val enum: EnumModel? = null,
     val sealed: SealedModel? = null,
     val ref: RefModel? = null,
@@ -921,6 +973,7 @@ internal enum class RefModelKind(
 internal data class RefPropertyModel(
     val name: String,
     val webType: WebType?,
+    val customValue: CustomValueModel? = null,
     val enum: EnumModel? = null,
     val sealed: SealedModel? = null,
     val ref: RefModel? = null,
@@ -938,6 +991,7 @@ internal data class RefMethodModel(
 
 internal data class ReturnModel(
     val webType: WebType?,
+    val customValue: CustomValueModel? = null,
     val enum: EnumModel? = null,
     val sealed: SealedModel? = null,
     val ref: RefModel?,
@@ -954,6 +1008,7 @@ internal data class CallbackModel(
 internal data class CallbackArgumentModel(
     val name: String,
     val webType: WebType?,
+    val customValue: CustomValueModel? = null,
     val enum: EnumModel? = null,
     val sealed: SealedModel? = null,
     val array: ArrayModel? = null,
@@ -1154,6 +1209,7 @@ private object PagingStateCodec : StateCodec {
         builder: StringBuilder,
         value: StateCodecValue,
     ) {
+        val loadStateEncoderName = "${encoderName(value)}LoadState"
         builder.appendLine("private fun ${encoderName(value)}(")
         builder.appendLine("    value: ${value.type},")
         builder.appendLine("    refs: MutableList<JsReference<Any>>,")
@@ -1173,6 +1229,22 @@ private object PagingStateCodec : StateCodec {
         builder.appendLine("            put($SEALED_DISCRIMINATOR_JSON, \"Success\")")
         builder.appendLine("            put(\"itemCount\", value.itemCount)")
         builder.appendLine("            put(\"isRefreshing\", value.isRefreshing)")
+        builder.appendLine("            put(\"appendState\", $loadStateEncoderName(value.appendState))")
+        builder.appendLine("        }")
+        builder.appendLine("    }")
+        builder.appendLine()
+        builder.appendLine("private fun $loadStateEncoderName(value: androidx.paging.LoadState): JsonElement =")
+        builder.appendLine("    when (value) {")
+        builder.appendLine("        is androidx.paging.LoadState.Loading -> buildJsonObject {")
+        builder.appendLine("            put($SEALED_DISCRIMINATOR_JSON, \"Loading\")")
+        builder.appendLine("        }")
+        builder.appendLine("        is androidx.paging.LoadState.Error -> buildJsonObject {")
+        builder.appendLine("            put($SEALED_DISCRIMINATOR_JSON, \"Error\")")
+        builder.appendLine("            put(\"message\", value.error.message)")
+        builder.appendLine("        }")
+        builder.appendLine("        is androidx.paging.LoadState.NotLoading -> buildJsonObject {")
+        builder.appendLine("            put($SEALED_DISCRIMINATOR_JSON, \"NotLoading\")")
+        builder.appendLine("            put(\"endOfPaginationReached\", value.endOfPaginationReached)")
         builder.appendLine("        }")
         builder.appendLine("    }")
     }
@@ -1189,6 +1261,12 @@ private object PagingStateCodec : StateCodec {
             "                        if (pagingState is dev.dimension.flare.common.PagingState.Success<*> && index >= 0 && index < pagingState.itemCount) {",
         )
         builder.appendLine("                            pagingState[index]")
+        builder.appendLine("                        }")
+        builder.appendLine("                    }")
+        builder.appendLine("                    ${property.pagingRetryPath().kotlinString()} -> {")
+        builder.appendLine("                        val pagingState = state.${property.name}")
+        builder.appendLine("                        if (pagingState is dev.dimension.flare.common.PagingState.Success<*>) {")
+        builder.appendLine("                            pagingState.retry()")
         builder.appendLine("                        }")
         builder.appendLine("                    }")
     }
@@ -1290,6 +1368,7 @@ private val refCodecs: List<RefCodec> = listOf(PresenterRefCodec, ObjectRefCodec
 
 internal data class WebValueModel(
     val webType: WebType? = null,
+    val customValue: CustomValueModel? = null,
     val enum: EnumModel? = null,
     val sealed: SealedModel? = null,
     val ref: RefModel? = null,
@@ -1315,6 +1394,7 @@ internal enum class WebType(
 private fun PropertyModel.valueModel(): WebValueModel =
     WebValueModel(
         webType = webType,
+        customValue = customValue,
         enum = enum,
         sealed = sealed,
         ref = ref,
@@ -1327,6 +1407,7 @@ private fun PropertyModel.valueModel(): WebValueModel =
 private fun ArgumentModel.valueModel(): WebValueModel =
     WebValueModel(
         webType = webType,
+        customValue = customValue,
         enum = enum,
         sealed = sealed,
         ref = ref,
@@ -1339,6 +1420,7 @@ private fun ArgumentModel.valueModel(): WebValueModel =
 private fun SealedPropertyModel.valueModel(): WebValueModel =
     WebValueModel(
         webType = webType,
+        customValue = customValue,
         enum = enum,
         sealed = sealed,
         ref = ref,
@@ -1351,6 +1433,7 @@ private fun SealedPropertyModel.valueModel(): WebValueModel =
 private fun RefPropertyModel.valueModel(): WebValueModel =
     WebValueModel(
         webType = webType,
+        customValue = customValue,
         enum = enum,
         sealed = sealed,
         ref = ref,
@@ -1363,6 +1446,7 @@ private fun RefPropertyModel.valueModel(): WebValueModel =
 private fun ReturnModel.valueModel(): WebValueModel =
     WebValueModel(
         webType = webType,
+        customValue = customValue,
         enum = enum,
         sealed = sealed,
         ref = ref,
@@ -1375,6 +1459,7 @@ private fun ReturnModel.valueModel(): WebValueModel =
 private fun CallbackArgumentModel.valueModel(): WebValueModel =
     WebValueModel(
         webType = webType,
+        customValue = customValue,
         enum = enum,
         sealed = sealed,
         array = array,
@@ -1391,6 +1476,17 @@ private fun PresenterModel.referencedRefs(): List<RefModel> =
         actions.forEach { action ->
             action.args.forEach { it.valueModel().collectRefs(this) }
             action.returnValue?.valueModel()?.collectRefs(this)
+        }
+    }
+
+private fun PresenterModel.referencedCustomValues(): List<CustomValueModel> =
+    buildList {
+        parameters.forEach { it.valueModel().collectCustomValues(this) }
+        parameters.mapNotNull { it.callback }.flatMap { it.args }.forEach { it.valueModel().collectCustomValues(this) }
+        properties.forEach { it.valueModel().collectCustomValues(this) }
+        actions.forEach { action ->
+            action.args.forEach { it.valueModel().collectCustomValues(this) }
+            action.returnValue?.valueModel()?.collectCustomValues(this)
         }
     }
 
@@ -1453,6 +1549,11 @@ private fun MutableList<RefModel>.addRef(ref: RefModel) {
     }
 }
 
+private fun MutableList<CustomValueModel>.addCustomValue(customValue: CustomValueModel) {
+    if (any { it.type == customValue.type }) return
+    add(customValue)
+}
+
 private fun MutableList<SealedModel>.addSealed(sealed: SealedModel) {
     if (any { it.type == sealed.type }) return
     add(sealed)
@@ -1478,6 +1579,13 @@ private fun WebValueModel.collectRefs(refs: MutableList<RefModel>) {
     sealed?.variants?.forEach { variant -> variant.properties.forEach { it.valueModel().collectRefs(refs) } }
     array?.item?.collectRefs(refs)
     stateCodecValue()?.content?.collectRefs(refs)
+}
+
+private fun WebValueModel.collectCustomValues(customValues: MutableList<CustomValueModel>) {
+    customValue?.let(customValues::addCustomValue)
+    sealed?.variants?.forEach { variant -> variant.properties.forEach { it.valueModel().collectCustomValues(customValues) } }
+    array?.item?.collectCustomValues(customValues)
+    stateCodecValue()?.content?.collectCustomValues(customValues)
 }
 
 private fun WebValueModel.collectSealeds(sealeds: MutableList<SealedModel>) {
@@ -1538,6 +1646,8 @@ private fun PropertyModel.pagingGetPath(): String = "__webPagingGet:$name"
 
 private fun PropertyModel.pagingPeekPath(): String = "__webPagingPeek:$name"
 
+private fun PropertyModel.pagingRetryPath(): String = "__webPagingRetry:$name"
+
 private fun WebValueModel.stateCodecValue(): StateCodecValue? = stateCodecs.firstNotNullOfOrNull { codec -> codec.model(this) }
 
 private fun ReturnModel?.toManifestJson(): String {
@@ -1597,6 +1707,22 @@ private fun StringBuilder.appendValueManifest(
             append("\"kind\": \"value\", ")
         }
         append("\"tsType\": ${it.tsType.jsonString()}")
+        appendNullable(value.nullable)
+        return
+    }
+    value.customValue?.let { customValue ->
+        if (includeValueKind) {
+            append("\"kind\": \"value\", ")
+        }
+        append("\"tsType\": ${customValue.typeName.jsonString()}, ")
+        append("\"fields\": [")
+        customValue.fields.forEachIndexed { index, field ->
+            append("{ \"name\": ${field.name.jsonString()}, \"tsType\": ${field.webType.tsType.jsonString()} }")
+            if (index != customValue.fields.lastIndex) {
+                append(", ")
+            }
+        }
+        append("]")
         appendNullable(value.nullable)
         return
     }
@@ -1680,6 +1806,8 @@ private fun WebType.readJsonExpression(
     }
 }
 
+private fun WebType.writeJsonElementExpression(valueExpression: String): String = "JsonPrimitive($valueExpression)"
+
 private fun EnumModel.readJsonExpression(
     objectName: String,
     argumentName: String,
@@ -1727,6 +1855,13 @@ private fun WebValueModel.readJsonElementExpression(
             elementExpression = elementExpression,
             nullable = nullable,
         )
+    }
+    customValue?.let {
+        return if (nullable) {
+            "$elementExpression?.takeUnless { it == JsonNull }?.let { value -> ${it.decoderName()}(value) }"
+        } else {
+            "${it.decoderName()}(requireNotNull($elementExpression))"
+        }
     }
     sealed?.let {
         return if (nullable) {
@@ -1782,6 +1917,14 @@ private fun WebValueModel.writeJsonElementExpression(
                 "$valueExpression?.name?.let { JsonPrimitive(it) } ?: JsonNull"
             } else {
                 "JsonPrimitive($valueExpression.name)"
+            }
+        }
+
+        customValue != null -> {
+            if (nullable) {
+                "$valueExpression?.let { ${customValue.encoderName()}(it) } ?: JsonNull"
+            } else {
+                "${customValue.encoderName()}($valueExpression)"
             }
         }
 
@@ -1855,6 +1998,10 @@ private fun EnumModel.readJsonElementExpression(
 
 private fun RefModel.encoderName(): String = "encode${type.toKotlinIdentifierSuffix()}WebRef"
 
+private fun CustomValueModel.encoderName(): String = "encode${type.toKotlinIdentifierSuffix()}WebValue"
+
+private fun CustomValueModel.decoderName(): String = "decode${type.toKotlinIdentifierSuffix()}WebValue"
+
 private fun SealedModel.encoderName(): String = "encode${type.toKotlinIdentifierSuffix()}WebSealed"
 
 private fun SealedModel.decoderName(): String = "decode${type.toKotlinIdentifierSuffix()}WebSealed"
@@ -1864,6 +2011,7 @@ private fun ArrayModel.encoderName(): String = "encode${type.toKotlinIdentifierS
 private fun WebValueModel.kotlinType(): String =
     when {
         webType != null -> webType.kotlinType
+        customValue != null -> customValue.type
         enum != null -> enum.type
         sealed != null -> sealed.type
         ref != null -> ref.type
@@ -1882,6 +2030,9 @@ private class WebTypeAnalyzer(
     ): WebValueModel? {
         policy.primitive(type)?.let {
             return WebValueModel(webType = it, nullable = type.isMarkedNullable)
+        }
+        policy.customValue(type)?.let {
+            return WebValueModel(customValue = it, nullable = type.isMarkedNullable)
         }
         enum(type)?.let {
             return WebValueModel(enum = it, nullable = type.isMarkedNullable)
@@ -1916,6 +2067,7 @@ private class WebTypeAnalyzer(
         val value = value(type, visited = visited, allowRef = true) ?: return null
         return ReturnModel(
             webType = value.webType,
+            customValue = value.customValue,
             enum = value.enum,
             sealed = value.sealed,
             ref = value.ref,
@@ -1940,6 +2092,7 @@ private class WebTypeAnalyzer(
                     CallbackArgumentModel(
                         name = if (resolvedArguments.size == 2) "value" else "value$index",
                         webType = value.webType,
+                        customValue = value.customValue,
                         enum = value.enum,
                         sealed = value.sealed,
                         array = value.array,
@@ -1973,7 +2126,7 @@ private class WebTypeAnalyzer(
         if (declaration.classKind != ClassKind.ENUM_CLASS) return null
         return EnumModel(
             type = declaration.qualifiedName?.asString() ?: return null,
-            typeName = declaration.simpleName.asString(),
+            typeName = declaration.webTypeName(),
             values =
                 declaration.declarations
                     .filterIsInstance<KSClassDeclaration>()
@@ -1993,7 +2146,7 @@ private class WebTypeAnalyzer(
         if (qualifiedName in visited) {
             return SealedModel(
                 type = qualifiedName,
-                typeName = declaration.simpleName.asString(),
+                typeName = declaration.webTypeName(),
                 variants = emptyList(),
             )
         }
@@ -2008,7 +2161,7 @@ private class WebTypeAnalyzer(
         if (variants.isEmpty() || variants.size != leafSubclasses.size) return null
         return SealedModel(
             type = qualifiedName,
-            typeName = declaration.simpleName.asString(),
+            typeName = declaration.webTypeName(),
             variants = variants,
         )
     }
@@ -2027,15 +2180,16 @@ private class WebTypeAnalyzer(
                 .filter { it.isVal || it.isVar }
                 .mapNotNull { parameter ->
                     val parameterName = parameter.name?.asString() ?: return null
-                    if (parameterName == SEALED_DISCRIMINATOR) return@mapNotNull null
                     val propertyDeclaration =
                         declaration.getAllProperties().firstOrNull { it.simpleName.asString() == parameterName }
                     if (propertyDeclaration?.isBridgeVisible() == false) return@mapNotNull null
                     val parameterType = parameter.type.resolve()
                     val value = value(parameterType, visited = visited, allowRef = true) ?: return@mapNotNull null
                     SealedPropertyModel(
-                        name = parameterName,
+                        name = parameterName.toWebSealedPropertyName(),
+                        kotlinName = parameterName,
                         webType = value.webType,
+                        customValue = value.customValue,
                         enum = value.enum,
                         sealed = value.sealed,
                         ref = value.ref,
@@ -2076,7 +2230,7 @@ private class WebTypeAnalyzer(
     ): RefModel =
         RefModel(
             type = type.kotlinTypeName(includeNullable = false),
-            typeName = declaration.simpleName.asString(),
+            typeName = declaration.webTypeName(),
             properties = emptyList(),
             methods = emptyList(),
             kind = kind,
@@ -2091,7 +2245,7 @@ private class WebTypeAnalyzer(
         if (qualifiedName in visited) {
             return RefModel(
                 type = type.kotlinTypeName(includeNullable = false),
-                typeName = declaration.simpleName.asString(),
+                typeName = declaration.webTypeName(),
                 properties = emptyList(),
                 methods = emptyList(),
             )
@@ -2103,7 +2257,7 @@ private class WebTypeAnalyzer(
 
         return RefModel(
             type = type.kotlinTypeName(includeNullable = false),
-            typeName = declaration.simpleName.asString(),
+            typeName = declaration.webTypeName(),
             properties = properties,
             methods = methods,
         )
@@ -2123,6 +2277,7 @@ private class WebTypeAnalyzer(
                 RefPropertyModel(
                     name = property.simpleName.asString(),
                     webType = value.webType,
+                    customValue = value.customValue,
                     enum = value.enum,
                     sealed = value.sealed,
                     ref = value.ref,
@@ -2236,6 +2391,25 @@ private object BridgePolicy {
 
     fun isArrayLike(type: KSType): Boolean = type.declaration.qualifiedName?.asString() in supportedArrayTypes
 
+    fun customValue(type: KSType): CustomValueModel? =
+        when (type.declaration.qualifiedName?.asString()) {
+            "dev.dimension.flare.model.MicroBlogKey" -> {
+                CustomValueModel(
+                    type = "dev.dimension.flare.model.MicroBlogKey",
+                    typeName = "MicroBlogKey",
+                    fields =
+                        listOf(
+                            CustomValueFieldModel(name = "id", webType = WebType.String),
+                            CustomValueFieldModel(name = "host", webType = WebType.String),
+                        ),
+                )
+            }
+
+            else -> {
+                null
+            }
+        }
+
     fun isFunctionType(type: KSType): Boolean =
         type.declaration.qualifiedName
             ?.asString()
@@ -2249,6 +2423,7 @@ private object BridgePolicy {
 
     fun isVisibleProperty(property: KSPropertyDeclaration): Boolean =
         !property.hasAnnotation(WEB_IGNORE_ANNOTATION) &&
+            !property.hasErrorLevelDeprecatedAnnotation() &&
             property.isBridgeVisible()
 
     fun isVisibleMethod(function: KSFunctionDeclaration): Boolean =
@@ -2316,10 +2491,31 @@ private fun KSFunctionDeclaration.returnsUnit(): Boolean =
 
 private fun KSDeclaration.hasAnnotation(shortName: String): Boolean = annotations.any { it.shortName.asString() == shortName }
 
+private fun KSDeclaration.hasErrorLevelDeprecatedAnnotation(): Boolean =
+    annotations.any { annotation ->
+        if (annotation.shortName.asString() != DEPRECATED_ANNOTATION) return@any false
+        val level =
+            annotation.arguments
+                .firstOrNull { argument -> argument.name?.asString() == "level" }
+                ?.value
+                ?.toString()
+        level == "ERROR" || level?.endsWith(".ERROR") == true
+    }
+
 private fun KSDeclaration.isBridgeVisible(): Boolean =
     Modifier.PRIVATE !in modifiers &&
         Modifier.PROTECTED !in modifiers &&
         Modifier.INTERNAL !in modifiers
+
+private fun KSClassDeclaration.webTypeName(): String {
+    val names = ArrayDeque<String>()
+    var current: KSClassDeclaration? = this
+    while (current != null) {
+        names.addFirst(current.simpleName.asString())
+        current = current.parentDeclaration as? KSClassDeclaration
+    }
+    return names.joinToString("")
+}
 
 private fun KSClassDeclaration.webStateTypeName(presenterDeclaration: KSClassDeclaration): String {
     val parent = parentDeclaration as? KSClassDeclaration
@@ -2349,6 +2545,13 @@ private fun String.toKotlinIdentifierSuffix(): String =
             }
         }
 
+private fun String.toWebSealedPropertyName(): String =
+    if (this == SEALED_DISCRIMINATOR) {
+        "${this}_"
+    } else {
+        this
+    }
+
 private fun String.kotlinString(): String =
     buildString {
         append('"')
@@ -2371,6 +2574,7 @@ private const val WEB_PRESENTER_SHORT_NAME = "WebPresenter"
 private const val WEB_PRESENTER_ANNOTATION = "dev.dimension.flare.web.shared.WebPresenter"
 private const val WEB_IGNORE_ANNOTATION = "WebIgnore"
 private const val COMPOSABLE_ANNOTATION = "Composable"
+private const val DEPRECATED_ANNOTATION = "Deprecated"
 private const val PRESENTER_BASE = "dev.dimension.flare.ui.presenter.PresenterBase"
 private const val UI_STATE = "dev.dimension.flare.ui.model.UiState"
 private const val PAGING_STATE = "dev.dimension.flare.common.PagingState"

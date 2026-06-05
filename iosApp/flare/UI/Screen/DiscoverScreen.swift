@@ -95,7 +95,7 @@ struct DiscoverScreen: View {
         .onChange(of: searchText) {
             if isSearchPresented && searchText.isEmpty {
                 committedSearchText = ""
-                searchPresenter.state.search(new: "")
+                searchPresenter.state.search(query: "")
             } else if !isSearchPresented && searchText.isEmpty && !committedSearchText.isEmpty {
                 DispatchQueue.main.async {
                     searchText = committedSearchText
@@ -247,7 +247,7 @@ struct DiscoverScreen: View {
         searchText = query
         committedSearchText = query
         searchHistoryPresenter.state.addSearchHistory(keyword: query)
-        searchPresenter.state.search(new: query)
+        searchPresenter.state.search(query: query)
         isSearchPresented = false
     }
 }

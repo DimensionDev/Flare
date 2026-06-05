@@ -77,7 +77,7 @@ internal object DebugRepository {
 public inline fun <R> tryRun(block: () -> R): Result<R> =
     try {
         Result.success(block())
-    } catch (e: Exception) {
+    } catch (e: Throwable) {
         DebugRepository.error(e)
         Result.failure(e)
     }

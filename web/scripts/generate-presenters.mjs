@@ -56,17 +56,22 @@ export type UiState<T> =
 		kind: 'pagingState',
 		is: (item) => item?.kind === 'pagingState',
 		content: (item) => item.item,
-		renderTypes: () => `type PagingStateSnapshot =
+		renderTypes: () => `export type PagingLoadState =
+\t| { type: "Loading" }
+\t| { type: "Error"; message: string | null }
+\t| { type: "NotLoading"; endOfPaginationReached: boolean };
+
+type PagingStateSnapshot =
 \t| { type: "Loading" }
 \t| { type: "Error"; message: string | null }
 \t| { type: "Empty" }
-\t| { type: "Success"; itemCount: number; isRefreshing: boolean };
+\t| { type: "Success"; itemCount: number; isRefreshing: boolean; appendState: PagingLoadState };
 
 export type PagingState<T> =
 \t| { type: "Loading" }
 \t| { type: "Error"; message: string | null }
 \t| { type: "Empty" }
-\t| { type: "Success"; itemCount: number; isRefreshing: boolean; peek(index: number): T | null; get(index: number): void };
+\t| { type: "Success"; itemCount: number; isRefreshing: boolean; appendState: PagingLoadState; peek(index: number): T | null; get(index: number): void; retry(): void };
 
 `,
 		snapshotType: () => 'PagingStateSnapshot',
@@ -77,12 +82,13 @@ export type PagingState<T> =
 		toPublicExpression: (item, valueExpression, refsExpression, callExpression, refTypes, options = {}) => {
 			const getStatement = options.getStatement ?? 'void index';
 			const peekPath = options.peekPath;
+			const retryStatement = options.retryStatement ?? '';
 			const peekReturn = { ...item.item, nullable: true };
 			const peekStatement =
 				peekPath === undefined
 					? 'return null;'
 					: `const result = ${callExpression}(${JSON.stringify(peekPath)}, { index });\n\t\treturn ${decodeReturnExpression('result', peekReturn)};`;
-			return `((value: ${snapshotTsType(item)}) => value.type === "Success" ? { ...value, peek(index: number) { ${peekStatement} }, get(index: number) { ${getStatement}; } } : value)(${valueExpression})`;
+			return `((value: ${snapshotTsType(item)}) => value.type === "Success" ? { ...value, peek(index: number) { ${peekStatement} }, get(index: number) { ${getStatement}; }, retry() { ${retryStatement}; } } : value)(${valueExpression})`;
 		},
 		toBridgeExpression: (item, valueExpression, refsExpression, refTypes, visitedRefs) =>
 			valueExpression
@@ -103,7 +109,10 @@ function renderPresenter(presenter) {
 	const callbackParameters = parameters.filter((parameter) => parameter.kind === 'callback');
 	const creatable = presenter.creatable !== false;
 	const factoryName = creatable ? presenter.factory : (presenter.bindFactory ?? `bind${capitalize(presenter.name)}Presenter`);
+	const controllerFactoryName = `${factoryName}Controller`;
 	const factoryParameters = creatable ? renderParameters(parameters) : 'presenter: WebPresenterRef';
+	const factoryArguments = creatable ? parameters.map((parameter) => parameter.name).join(', ') : 'presenter';
+	const structTypes = collectStructTypes(presenter);
 	const enumTypes = collectEnumTypes(presenter);
 	const sealedTypes = collectSealedTypes(presenter);
 	const refTypes = collectRefTypes(presenter);
@@ -135,7 +144,7 @@ ${creatable ? '\twebPresenterCreate,\n' : ''}\twebPresenterDispatch,
 \twebPresenterUnsubscribe
 } from '@flare/web-shared';
 
-${creatable ? renderWebPresenterCallbacksType() : ''}${renderWebPresenterRefsType()}${renderWebPresenterCallTypes(needsCall)}${renderStateCodecTypes(usedStateCodecs)}${renderEnumTypes(enumTypes)}${renderSealedTypes(sealedTypes, refTypes)}${renderRefTypes(refTypes, needsRefHelpers)}
+${creatable ? renderWebPresenterCallbacksType() : ''}${renderWebPresenterRefsType()}${renderWebPresenterCallTypes(needsCall)}${renderStateCodecTypes(usedStateCodecs)}${renderStructTypes(structTypes)}${renderEnumTypes(enumTypes)}${renderSealedTypes(sealedTypes, refTypes)}${renderRefTypes(refTypes, needsRefHelpers)}
 type ${presenter.stateType}Snapshot = {
 ${snapshotFields.join('\n')}
 };
@@ -145,7 +154,13 @@ ${stateFields.join('\n')}
 ${actionFields.join('\n')}
 };
 
-export function ${factoryName}(${factoryParameters}): ${presenter.stateType} {
+export type WebPresenterController<TState> = {
+\treadonly state: TState;
+\tmount: () => void;
+\tclose: () => void;
+};
+
+export function ${controllerFactoryName}(${factoryParameters}): WebPresenterController<${presenter.stateType}> {
 \tlet presenterId: number | null = null;
 \tlet subscriptionId: number | null = null;
 \tlet closed = false;
@@ -155,15 +170,14 @@ ${initialFields.join('\n')}
 ${actionInitializers.join('\n')}
 \t});
 
-\tonMount(() => {
+\tfunction mount() {
+\t\tif (closed || presenterId !== null) return;
 \t\t${mountPresenterLine}
 \t\tsubscriptionId = webPresenterSubscribe(presenterId, (snapshotJson, refs) => {
 \t\t\tconst snapshot = JSON.parse(snapshotJson) as ${presenter.stateType}Snapshot;
 ${snapshotAssignments.join('\n')}
 \t\t});
-
-\t\treturn close;
-\t});
+\t}
 
 \tfunction dispatch(path: string, args: Record<string, unknown> = {}, refs: unknown[] = []) {
 \t\tif (closed || presenterId === null) return;
@@ -185,7 +199,18 @@ ${renderCallFunction(needsCall)}
 \t\tsubscriptionId = null;
 \t}
 
-\treturn state;
+\treturn { state, mount, close };
+}
+
+export function ${factoryName}(${factoryParameters}): ${presenter.stateType} {
+\tconst controller = ${controllerFactoryName}(${factoryArguments});
+
+\tonMount(() => {
+\t\tcontroller.mount();
+\t\treturn controller.close;
+\t});
+
+\treturn controller.state;
 }
 `;
 }
@@ -229,6 +254,32 @@ function collectRefTypes(presenter) {
 		visitValue(action.return, addRef);
 	}
 	return [...refs.values()];
+}
+
+function collectStructTypes(presenter) {
+	const structs = new Map();
+	const addStruct = (item) => {
+		if (isStructValue(item) && !structs.has(item.tsType)) {
+			structs.set(item.tsType, {
+				name: item.tsType,
+				fields: item.fields ?? []
+			});
+		}
+	};
+
+	for (const parameter of presenter.parameters ?? []) {
+		if (parameter.kind === 'callback') {
+			for (const arg of parameter.args ?? []) visitValue(arg, addStruct);
+		} else {
+			visitValue(parameter, addStruct);
+		}
+	}
+	for (const property of presenter.properties ?? []) visitValue(property, addStruct);
+	for (const action of presenter.actions ?? []) {
+		for (const arg of action.args ?? []) visitValue(arg, addStruct);
+		visitValue(action.return, addStruct);
+	}
+	return [...structs.values()];
 }
 
 function collectEnumTypes(presenter) {
@@ -355,6 +406,18 @@ function presenterUses(presenter, predicate) {
 		visitValue(action.return, visitor);
 	}
 	return found;
+}
+
+function renderStructTypes(structTypes) {
+	if (structTypes.length === 0) return '';
+	return `${structTypes.map((structType) => renderStructType(structType)).join('\n')}\n`;
+}
+
+function renderStructType(structType) {
+	const fields = (structType.fields ?? []).map((field) => `\t${field.name}: ${nullableTsType(field.tsType, field)};`).join('\n');
+	return `export type ${structType.name} = {
+${fields}
+};`;
 }
 
 function renderEnumTypes(enumTypes) {
@@ -660,7 +723,8 @@ function renderSnapshotAssignment(property, refTypes) {
 		stateCodec?.kind === 'pagingState'
 			? {
 					peekPath: pagingPeekPath(property.name),
-					getStatement: `dispatch(${JSON.stringify(pagingGetPath(property.name))}, { index })`
+					getStatement: `dispatch(${JSON.stringify(pagingGetPath(property.name))}, { index })`,
+					retryStatement: `dispatch(${JSON.stringify(pagingRetryPath(property.name))})`
 				}
 			: {};
 	return `\t\t\tstate.${property.name} = ${toPublicValueExpression(property, `snapshot.${property.name}`, 'refs', 'call', refTypes, options)};`;
@@ -957,6 +1021,10 @@ function isValue(item) {
 	);
 }
 
+function isStructValue(item) {
+	return Array.isArray(item?.fields) && item.fields.length > 0;
+}
+
 function isRef(item) {
 	return item?.kind === 'ref';
 }
@@ -1003,4 +1071,8 @@ function pagingGetPath(propertyName) {
 
 function pagingPeekPath(propertyName) {
 	return `__webPagingPeek:${propertyName}`;
+}
+
+function pagingRetryPath(propertyName) {
+	return `__webPagingRetry:${propertyName}`;
 }

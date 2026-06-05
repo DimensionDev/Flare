@@ -17,6 +17,8 @@ import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.flattenUiState
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
+import dev.dimension.flare.web.shared.WebIgnore
+import dev.dimension.flare.web.shared.WebPresenter
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -26,6 +28,7 @@ import kotlinx.coroutines.flow.map
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
+@WebPresenter("accounts")
 public class AccountsPresenter :
     PresenterBase<AccountsState>(),
     KoinComponent {
@@ -95,6 +98,7 @@ public interface AccountsState {
 
     public fun removeAccount(accountKey: MicroBlogKey)
 
+    @WebIgnore
     public fun updateOrder(newOrder: List<MicroBlogKey>)
 
     @Immutable

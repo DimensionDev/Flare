@@ -108,6 +108,7 @@ internal expect fun draftFileItem(
     path: String,
     name: String?,
     type: FileType,
+    mimeType: String? = null,
     loader: suspend () -> ByteArray,
 ): FileItem
 

@@ -15,12 +15,15 @@ import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.createTestFileSystem
 import dev.dimension.flare.createTestRootPath
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.mapper.saveToDatabase
+import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.database.cache.model.DbStatusWithReference
 import dev.dimension.flare.data.database.cache.model.TranslationDisplayOptions
 import dev.dimension.flare.data.database.cache.model.TranslationEntityType
 import dev.dimension.flare.data.database.cache.model.TranslationStatus
 import dev.dimension.flare.data.database.createDatabaseDriver
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
+import dev.dimension.flare.data.datasource.microblog.paging.OffsetFromStartPagingKey
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.datasource.microblog.paging.TimelinePagingMapper
@@ -231,6 +234,75 @@ class MixedRemoteMediatorTest : RobolectricTest() {
 
     @OptIn(ExperimentalPagingApi::class)
     @Test
+    fun timelineMediatorSkipsInitialRefreshWhenPrependCacheExists() =
+        runTest {
+            val cached = feed("https://example.com/cached", 1000L)
+            val loader =
+                FakeLoader(
+                    pagingKey = "refresh_existing_cache",
+                    supportPrepend = true,
+                ) { request ->
+                    when (request) {
+                        PagingRequest.Refresh -> {
+                            PagingResult(
+                                data = listOf(feed("https://example.com/fresh", 2000L)),
+                                nextKey = null,
+                            )
+                        }
+
+                        is PagingRequest.Append,
+                        is PagingRequest.Prepend,
+                        -> {
+                            error("No boundary load expected")
+                        }
+                    }
+                }
+            val mediator = TimelineRemoteMediator(loader = loader, database = db, allowLongText = false)
+
+            saveToDatabase(db, listOf(TimelinePagingMapper.toDb(cached, pagingKey = loader.pagingKey)))
+
+            assertEquals(
+                androidx.paging.RemoteMediator.InitializeAction.SKIP_INITIAL_REFRESH,
+                mediator.initialize(),
+            )
+        }
+
+    @OptIn(ExperimentalPagingApi::class)
+    @Test
+    fun timelineRefreshClearsExistingCacheWhenRemoteReturnsEmpty() =
+        runTest {
+            val cached = feed("https://example.com/cached", 1000L)
+            val loader =
+                FakeLoader("empty_refresh") { request ->
+                    when (request) {
+                        PagingRequest.Refresh -> PagingResult(endOfPaginationReached = true)
+
+                        is PagingRequest.Append,
+                        is PagingRequest.Prepend,
+                        -> error("No boundary load expected")
+                    }
+                }
+            val mediator = TimelineRemoteMediator(loader = loader, database = db, allowLongText = false)
+            saveToDatabase(db, listOf(TimelinePagingMapper.toDb(cached, pagingKey = loader.pagingKey)))
+
+            val mediatorResult =
+                mediator.load(
+                    loadType = LoadType.REFRESH,
+                    state =
+                        PagingState(
+                            pages = emptyList(),
+                            anchorPosition = null,
+                            config = PagingConfig(pageSize = 20),
+                            leadingPlaceholderCount = 0,
+                        ),
+                )
+
+            assertTrue(mediatorResult is androidx.paging.RemoteMediator.MediatorResult.Success)
+            assertTrue(db.pagingTimelineDao().getByPagingKey(loader.pagingKey).isEmpty())
+        }
+
+    @OptIn(ExperimentalPagingApi::class)
+    @Test
     fun refreshWithMultipleItemsPerSubPersistsSortedOrderInDatabase() =
         runTest {
             val first =
@@ -416,7 +488,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
             val mixed = MixedRemoteMediator(db, listOf(loader), TimelineMergePolicy.Time)
             val timelineRemoteMediator = TimelineRemoteMediator(loader = mixed, database = db, allowLongText = false)
             val state =
-                PagingState<Int, DbStatusWithReference>(
+                PagingState<OffsetFromStartPagingKey, DbStatusWithReference>(
                     pages = emptyList(),
                     anchorPosition = null,
                     config = PagingConfig(pageSize = 20),
@@ -447,6 +519,88 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                     (it.status.data.content as? UiTimelineV2.Feed)?.url
                 },
             )
+        }
+
+    @OptIn(ExperimentalPagingApi::class)
+    @Test
+    fun timelinePrependInsertsNewItemsBeforeExistingItemsAndKeepsExistingOffsetPage() =
+        runTest {
+            val refreshItems =
+                listOf(
+                    feed("https://example.com/old_1", 1_000L),
+                    feed("https://example.com/old_2", 900L),
+                )
+            val prependItems =
+                listOf(
+                    feed("https://example.com/new_1", 2_000L),
+                    feed("https://example.com/new_2", 1_900L),
+                )
+            val loader =
+                FakeLoader(
+                    pagingKey = "prepend_offset_page",
+                    supportPrepend = true,
+                ) { request ->
+                    when (request) {
+                        PagingRequest.Refresh -> {
+                            PagingResult(
+                                data = refreshItems,
+                                nextKey = null,
+                                previousKey = "prev_1",
+                            )
+                        }
+
+                        is PagingRequest.Prepend -> {
+                            assertEquals("prev_1", request.previousKey)
+                            PagingResult(
+                                data = prependItems,
+                                nextKey = null,
+                                previousKey = null,
+                            )
+                        }
+
+                        is PagingRequest.Append -> {
+                            error("No append expected")
+                        }
+                    }
+                }
+            val mediator = TimelineRemoteMediator(loader = loader, database = db, allowLongText = false)
+            val state =
+                PagingState<OffsetFromStartPagingKey, DbStatusWithReference>(
+                    pages = emptyList(),
+                    anchorPosition = null,
+                    config = PagingConfig(pageSize = 20),
+                    leadingPlaceholderCount = 0,
+                )
+
+            val refreshResult = mediator.load(loadType = LoadType.REFRESH, state = state)
+            assertTrue(refreshResult is androidx.paging.RemoteMediator.MediatorResult.Success)
+            val prependResult = mediator.load(loadType = LoadType.PREPEND, state = state)
+            assertTrue(prependResult is androidx.paging.RemoteMediator.MediatorResult.Success)
+
+            assertEquals(
+                listOf(PagingRequest.Refresh, PagingRequest.Prepend("prev_1")),
+                loader.requests,
+            )
+            val page =
+                db.pagingTimelineDao().getTimelinePage(
+                    pagingKey = loader.pagingKey,
+                    offset = 0,
+                    limit = 20,
+                )
+            val urls =
+                page.mapNotNull {
+                    (it.status.data.content as? UiTimelineV2.Feed)?.url
+                }
+            assertEquals(
+                listOf(
+                    "https://example.com/new_1",
+                    "https://example.com/new_2",
+                    "https://example.com/old_1",
+                    "https://example.com/old_2",
+                ),
+                urls,
+            )
+            assertEquals(urls.size, urls.toSet().size)
         }
 
     @OptIn(ExperimentalPagingApi::class)
@@ -1592,6 +1746,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
 
     private class FakeLoader(
         override val pagingKey: String,
+        override val supportPrepend: Boolean = false,
         private val onLoad: suspend (PagingRequest) -> PagingResult<UiTimelineV2>,
     ) : CacheableRemoteLoader<UiTimelineV2> {
         val requests = mutableListOf<PagingRequest>()

@@ -4,8 +4,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import dev.dimension.flare.data.model.IconType
+import dev.dimension.flare.data.model.appearance.TimelineAppearance
 import dev.dimension.flare.data.model.tab.SourceTimelineTabItemV2
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
+import dev.dimension.flare.data.model.tab.resolveTimelineAppearance
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.model.AccountType
@@ -35,6 +37,11 @@ public class HomeTimelineWithTabsPresenter :
 
     public interface State : UserState {
         public val tabState: UiState<ImmutableList<TimelineTabItemV2>>
+
+        public fun resolveAppearance(
+            tab: TimelineTabItemV2,
+            base: TimelineAppearance,
+        ): TimelineAppearance
     }
 
     private val isLoggedInFlow by lazy {
@@ -62,6 +69,11 @@ public class HomeTimelineWithTabsPresenter :
 
         return object : State, UserState by accountState {
             override val tabState = tabs
+
+            override fun resolveAppearance(
+                tab: TimelineTabItemV2,
+                base: TimelineAppearance,
+            ): TimelineAppearance = tab.resolveTimelineAppearance(base)
         }
     }
 }

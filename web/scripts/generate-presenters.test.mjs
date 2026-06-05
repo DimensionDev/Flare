@@ -75,6 +75,12 @@ test('generates presenter facade with value and callback parameters', async () =
 		);
 		assert.match(
 			generated,
+			/export function createCounterPresenterController\(initialValue: number, alert: \(value: number\) => void\): WebPresenterController<CounterState>/
+		);
+		assert.match(generated, /export type WebPresenterController<TState> = \{/);
+		assert.match(generated, /const controller = createCounterPresenterController\(initialValue, alert\)/);
+		assert.match(
+			generated,
 			/webPresenterCreate\('counter', JSON\.stringify\(\{ initialValue \}\), \[alert\] as unknown as WebPresenterCallbacks\)/
 		);
 		assert.match(generated, /webPresenterCall/);
@@ -144,6 +150,82 @@ test('generates dispatch refs type without complex references', async () => {
 			/webPresenterDispatch\(presenterId, JSON\.stringify\(\{ path, args \}\), refs as unknown as WebPresenterRefs\)/
 		);
 		assert.doesNotMatch(generated, /export type WebPresenterRef/);
+	} finally {
+		await fs.rm(tmp, { recursive: true, force: true });
+	}
+});
+
+test('generates struct value types for domain values', async () => {
+	const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'flare-web-presenters-'));
+
+	try {
+		const manifestPath = path.join(tmp, 'manifest.json');
+		const outDir = path.join(tmp, 'out');
+
+		await fs.writeFile(
+			manifestPath,
+			JSON.stringify({
+				presenters: [
+					{
+						name: 'profile',
+						factory: 'createProfilePresenter',
+						stateType: 'ProfileState',
+						parameters: [
+							{
+								name: 'accountType',
+								kind: 'sealed',
+								tsType: 'AccountType',
+								discriminator: 'type',
+								variants: [
+									{ name: 'Guest', tag: 'Guest', properties: [] },
+									{
+										name: 'Specific',
+										tag: 'Specific',
+										properties: [
+											{
+												name: 'accountKey',
+												kind: 'value',
+												tsType: 'MicroBlogKey',
+												fields: [
+													{ name: 'id', tsType: 'string' },
+													{ name: 'host', tsType: 'string' }
+												]
+											}
+										]
+									}
+								]
+							},
+							{
+								name: 'userKey',
+								kind: 'value',
+								tsType: 'MicroBlogKey',
+								fields: [
+									{ name: 'id', tsType: 'string' },
+									{ name: 'host', tsType: 'string' }
+								],
+								nullable: true
+							}
+						],
+						properties: [],
+						actions: []
+					}
+				]
+			})
+		);
+
+		await execFileAsync(process.execPath, [generatorPath, manifestPath, outDir]);
+
+		const generated = await fs.readFile(path.join(outDir, 'profile.svelte.ts'), 'utf8');
+
+		assert.match(generated, /export type MicroBlogKey = \{\n\tid: string;\n\thost: string;\n\};/);
+		assert.match(generated, /export type AccountType =\n\t\| \{ "type": "Guest" \}\n\t\| \{ "type": "Specific"; "accountKey": MicroBlogKey \};/);
+		assert.match(
+			generated,
+			/export function createProfilePresenter\(accountType: AccountType, userKey: MicroBlogKey \| null\): ProfileState/
+		);
+		assert.match(generated, /JSON\.stringify\(\{ accountType, userKey \}\)/);
+		assert.doesNotMatch(generated, /export type MicroBlogKey = WebPresenterRef/);
+		assert.doesNotMatch(generated, /attachMicroBlogKey/);
 	} finally {
 		await fs.rm(tmp, { recursive: true, force: true });
 	}
@@ -614,12 +696,14 @@ test('generates paging state get bridge for visible items', async () => {
 		const generated = await fs.readFile(path.join(outDir, 'timeline.svelte.ts'), 'utf8');
 
 		assert.match(generated, /type PagingStateSnapshot =/);
+		assert.match(generated, /export type PagingLoadState =/);
 		assert.match(
 			generated,
-			/export type PagingState<T> =\n\t\| \{ type: "Loading" \}\n\t\| \{ type: "Error"; message: string \| null \}\n\t\| \{ type: "Empty" \}\n\t\| \{ type: "Success"; itemCount: number; isRefreshing: boolean; peek\(index: number\): T \| null; get\(index: number\): void \};/
+			/export type PagingState<T> =\n\t\| \{ type: "Loading" \}\n\t\| \{ type: "Error"; message: string \| null \}\n\t\| \{ type: "Empty" \}\n\t\| \{ type: "Success"; itemCount: number; isRefreshing: boolean; appendState: PagingLoadState; peek\(index: number\): T \| null; get\(index: number\): void; retry\(\): void \};/
 		);
 		assert.match(generated, /call\("__webPagingPeek:listState", \{ index \}\)/);
 		assert.match(generated, /dispatch\("__webPagingGet:listState", \{ index \}\)/);
+		assert.match(generated, /dispatch\("__webPagingRetry:listState"\)/);
 		assert.doesNotMatch(generated, /items: Array<T>/);
 		assert.doesNotMatch(generated, /value\.items/);
 	} finally {

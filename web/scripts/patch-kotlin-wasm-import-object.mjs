@@ -6,14 +6,14 @@ const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(scriptDir, '../..');
 
 const defaultPaths = {
-	wasmPath: path.join(repoRoot, 'web-shared/build/dist/wasmJs/productionLibrary/web-shared.wasm'),
+	wasmPath: path.join(repoRoot, 'web-shared/build/dist/wasmJs/productionLibrary/flare.wasm'),
 	targetImportObjectPath: path.join(
 		repoRoot,
-		'web-shared/build/dist/wasmJs/productionLibrary/web-shared.import-object.mjs'
+		'web-shared/build/dist/wasmJs/productionLibrary/flare.import-object.mjs'
 	),
 	sourceImportObjectPath: path.join(
 		repoRoot,
-		'web-shared/build/compileSync/wasmJs/main/productionLibrary/kotlin/web-shared.import-object.mjs'
+		'web-shared/build/compileSync/wasmJs/main/productionLibrary/kotlin/flare.import-object.mjs'
 	)
 };
 

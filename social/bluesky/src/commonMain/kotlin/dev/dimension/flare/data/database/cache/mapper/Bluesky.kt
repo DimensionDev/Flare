@@ -76,6 +76,7 @@ private fun ConvoViewLastMessageUnion.toUiDMItem(
         is ConvoViewLastMessageUnion.MessageView -> value.toUiDMItem(roomKey, users, accountKey)
         is ConvoViewLastMessageUnion.DeletedMessageView -> value.toUiDMItem(roomKey, users, accountKey)
         is ConvoViewLastMessageUnion.Unknown -> null
+        is ConvoViewLastMessageUnion.SystemMessageView -> null
     }
 
 private fun MessageView.toUiDMItem(

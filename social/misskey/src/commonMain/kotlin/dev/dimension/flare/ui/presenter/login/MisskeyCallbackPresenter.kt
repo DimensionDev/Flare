@@ -6,6 +6,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import dev.dimension.flare.data.datastore.PlatformOAuthPending
+import dev.dimension.flare.data.datastore.PlatformOAuthPendingRepository
 import dev.dimension.flare.data.network.misskey.MisskeyOauthService
 import dev.dimension.flare.data.network.nodeinfo.NodeInfoService
 import dev.dimension.flare.data.platform.MisskeyCredential
@@ -20,6 +22,7 @@ import dev.dimension.flare.ui.route.DeeplinkRoute
 import kotlinx.coroutines.delay
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import kotlin.time.Clock
 import kotlin.time.Duration.Companion.seconds
 import kotlin.uuid.Uuid
 
@@ -29,6 +32,7 @@ public class MisskeyCallbackPresenter(
 ) : PresenterBase<UiState<Nothing>>(),
     KoinComponent {
     private val accountService: AccountService by inject()
+    private val pendingRepository: PlatformOAuthPendingRepository by inject()
 
     @Composable
     override fun body(): UiState<Nothing> {
@@ -38,17 +42,19 @@ public class MisskeyCallbackPresenter(
         var error by remember { mutableStateOf<Throwable?>(null) }
         LaunchedEffect(session) {
             val pendingOAuth =
-                MisskeyLoginSessionStore.pending ?: run {
+                pendingRepository
+                    .all(PlatformType.Misskey)
+                    .firstOrNull { it.attributes["session"] == session }
+                    ?.toMisskeyPending() ?: run {
                     error = Exception("No pending OAuth")
                     return@LaunchedEffect
                 }
-            if (pendingOAuth.session != session) {
-                error = Exception("Invalid pending OAuth")
-                return@LaunchedEffect
-            }
             runCatching {
                 misskeyAuthCheckUseCase(pendingOAuth.host, session, accountService)
-                MisskeyLoginSessionStore.clearPending()
+                pendingRepository.clear(
+                    platformType = PlatformType.Misskey,
+                    host = pendingOAuth.host,
+                )
                 // TODO: delay to workaround iOS NavigationPath.append not working
                 delay(2.seconds)
                 toHome.invoke()
@@ -110,24 +116,38 @@ public suspend fun misskeyLoginUseCase(
                 callback = DeeplinkRoute.Companion.Callback.MISSKEY,
                 session = session,
             )
-        MisskeyLoginSessionStore.pending =
-            MisskeyLoginSessionStore.Pending(
-                host = host,
-                session = session,
-            )
+        MisskeyOAuthPendingBridge.pendingRepository.save(
+            MisskeyLoginSessionStore
+                .Pending(
+                    host = host,
+                    session = session,
+                ).toPlatformOAuthPending(),
+        )
         val target = service.getAuthorizeUrl()
         launchOAuth(target)
     }
 
+private object MisskeyOAuthPendingBridge : KoinComponent {
+    val pendingRepository: PlatformOAuthPendingRepository by inject()
+}
+
 private object MisskeyLoginSessionStore {
-    var pending: Pending? = null
-
-    fun clearPending() {
-        pending = null
-    }
-
     data class Pending(
         val host: String,
         val session: String,
     )
 }
+
+private fun MisskeyLoginSessionStore.Pending.toPlatformOAuthPending(): PlatformOAuthPending =
+    PlatformOAuthPending(
+        platformType = PlatformType.Misskey,
+        host = host,
+        createdAtEpochMillis = Clock.System.now().toEpochMilliseconds(),
+        attributes = mapOf("session" to session),
+    )
+
+private fun PlatformOAuthPending.toMisskeyPending(): MisskeyLoginSessionStore.Pending =
+    MisskeyLoginSessionStore.Pending(
+        host = host,
+        session = attributes.getValue("session"),
+    )

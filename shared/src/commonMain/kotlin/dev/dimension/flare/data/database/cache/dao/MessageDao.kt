@@ -1,11 +1,8 @@
 package dev.dimension.flare.data.database.cache.dao
 
-import androidx.paging.PagingSource
 import androidx.room3.Dao
-import androidx.room3.DaoReturnTypeConverters
 import androidx.room3.Insert
 import androidx.room3.Query
-import androidx.room3.paging.PagingSourceDaoReturnTypeConverter
 import dev.dimension.flare.data.database.cache.model.DbDirectMessageTimeline
 import dev.dimension.flare.data.database.cache.model.DbMessageItem
 import dev.dimension.flare.data.database.cache.model.DbMessageRoom
@@ -15,22 +12,43 @@ import dev.dimension.flare.model.MicroBlogKey
 import kotlinx.coroutines.flow.Flow
 
 @Dao
-@DaoReturnTypeConverters(PagingSourceDaoReturnTypeConverter::class)
 internal interface MessageDao {
     @Query("SELECT * FROM DbDirectMessageTimeline WHERE accountType = :accountType ORDER BY sortId DESC")
-    fun getRoomPagingSource(accountType: DbAccountType): PagingSource<Int, DbDirectMessageTimeline>
-
-    @Query("SELECT * FROM DbDirectMessageTimeline WHERE accountType = :accountType ORDER BY sortId DESC")
     fun getRoomTimeline(accountType: DbAccountType): Flow<List<DbDirectMessageTimeline>>
-
-    @Query("SELECT * FROM DbMessageItem WHERE roomKey = :roomKey ORDER BY timestamp DESC")
-    fun getRoomMessagesPagingSource(roomKey: MicroBlogKey): PagingSource<Int, DbMessageItem>
 
     @Query("SELECT * FROM DbDirectMessageTimeline WHERE roomKey = :roomKey AND accountType = :accountType")
     fun getRoomInfo(
         roomKey: MicroBlogKey,
         accountType: DbAccountType,
     ): Flow<DbDirectMessageTimeline?>
+
+    @Query(
+        """
+        SELECT * FROM DbDirectMessageTimeline
+        WHERE accountType = :accountType
+        ORDER BY sortId DESC, _id DESC
+        LIMIT :limit OFFSET :offset
+        """,
+    )
+    suspend fun getRoomTimelinePage(
+        accountType: DbAccountType,
+        offset: Int,
+        limit: Int,
+    ): List<DbDirectMessageTimeline>
+
+    @Query(
+        """
+        SELECT * FROM DbMessageItem
+        WHERE roomKey = :roomKey
+        ORDER BY timestamp DESC, messageKey DESC
+        LIMIT :limit OFFSET :offset
+        """,
+    )
+    suspend fun getRoomMessagesPage(
+        roomKey: MicroBlogKey,
+        offset: Int,
+        limit: Int,
+    ): List<DbMessageItem>
 
     @Insert(onConflict = androidx.room3.OnConflictStrategy.REPLACE)
     suspend fun insert(items: List<DbMessageRoom>)

@@ -7,20 +7,27 @@
     "kotlin:build:dev": "../gradlew -p .. :web-shared:wasmJsBrowserDevelopmentLibraryDistribution",
     "kotlin:build:prod": "../gradlew -p .. :web-shared:wasmJsBrowserProductionLibraryDistribution",
     "kotlin:patch:prod": "node scripts/patch-kotlin-wasm-import-object.mjs",
+    "i18n:compile": "paraglide-js compile --project ./project.inlang --outdir ./src/lib/paraglide --strategy localStorage preferredLanguage baseLocale",
     "dev": "pnpm kotlin:build:dev && vite dev",
     "build": "pnpm kotlin:build:prod && pnpm kotlin:patch:prod && FLARE_WEB_SHARED_LIBRARY=productionLibrary vite build",
     "preview": "vite preview",
-    "prepare": "svelte-kit sync || echo ''",
-    "check": "pnpm kotlin:build:dev && svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+    "prepare": "pnpm i18n:compile && svelte-kit sync || echo ''",
+    "check": "pnpm kotlin:build:dev && pnpm i18n:compile && svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+    "check:watch": "pnpm i18n:compile && svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
     "test:codegen": "node --test scripts/*.test.mjs"
   },
   "devDependencies": {
-    "@sveltejs/adapter-auto": "^7.0.1",
+    "@inlang/paraglide-js": "^2.18.1",
+    "@inlang/plugin-m-function-matcher": "^2.2.6",
+    "@inlang/plugin-message-format": "^4.4.0",
+    "@sveltejs/adapter-static": "^3.0.10",
     "@sveltejs/kit": "^2.57.0",
     "@sveltejs/vite-plugin-svelte": "^7.0.0",
+    "@tailwindcss/vite": "^4.3.0",
+    "daisyui": "^5.5.20",
     "svelte": "^5.55.2",
     "svelte-check": "^4.4.6",
+    "tailwindcss": "^4.3.0",
     "typescript": "^6.0.2",
     "vite": "^8.0.7"
   },
@@ -32,7 +39,8 @@
     "@fortawesome/svelte-fontawesome": "^0.2.4",
     "@js-joda/core": "3.2.0",
     "@sqlite.org/sqlite-wasm": "3.50.1-build1",
-    "@tanstack/svelte-virtual": "^3.13.26",
+    "dayjs": "^1.11.21",
+    "firebase": "^12.14.0",
     "ws": "8.18.3"
   }
 }

@@ -25,6 +25,6 @@ internal data class DbUserHistory(
 internal data class DbUserHistoryWithUser(
     @Embedded
     val data: DbUserHistory,
-    @Relation(parentColumn = "userKey", entityColumn = "userKey")
+    @Relation(parentColumns = ["userKey"], entityColumns = ["userKey"])
     val user: DbUser,
 )

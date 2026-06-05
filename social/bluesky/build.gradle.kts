@@ -18,6 +18,7 @@ kotlin {
             FlarePlatform.ANDROID,
             FlarePlatform.JVM,
             FlarePlatform.IOS,
+            FlarePlatform.WEB,
         )
         ksp(libs.ktorfit.ksp)
     }
@@ -75,7 +76,7 @@ kotlin {
 }
 
 ktorfit {
-    compilerPluginVersion.set("2.3.3")
+    compilerPluginVersion.set("2.3.4")
 }
 
 afterEvaluate {

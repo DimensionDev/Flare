@@ -1,0 +1,10 @@
+@import "tailwindcss";
+@plugin 'daisyui' {
+    themes:
+        light --default,
+        dark --prefersdark;
+}
+
+html {
+    scrollbar-gutter: stable;
+}

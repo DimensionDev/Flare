@@ -57,9 +57,6 @@ final class GalleryTimelineController: UIViewController, UICollectionViewDelegat
     private var currentData: PagingState<UiTimelineV2>?
     private var currentSuccess: PagingStateSuccess<UiTimelineV2>?
     private var itemIndexMap: [String: Int] = [:]
-    private var stableGalleryItemIDs: Set<String> = []
-    private var lastKnownItemIDByIndex: [Int: String] = [:]
-    private var lastKnownRenderHashByItemID: [String: Int32] = [:]
     private var lastAppliedSignature: SnapshotSignature?
     private var lastRenderHashMap: [String: Int32] = [:]
     private var lastLoadedItemIDs: Set<String> = []
@@ -101,7 +98,6 @@ final class GalleryTimelineController: UIViewController, UICollectionViewDelegat
         let itemIDs: [String]
         let indexMap: [String: Int]
         let renderHashMap: [String: Int32]
-        let stableItemIDs: Set<String>
         let loadedItemIDs: Set<String>
     }
 
@@ -308,7 +304,7 @@ final class GalleryTimelineController: UIViewController, UICollectionViewDelegat
         case .empty:
             return .empty
         case .success(let success):
-            let itemState = makeItemSnapshotState(for: success, updatesLastKnownItems: false)
+            let itemState = makeItemSnapshotState(for: success)
             return .success(
                 itemIDs: itemState.itemIDs,
                 renderHashMap: itemState.renderHashMap,
@@ -319,10 +315,7 @@ final class GalleryTimelineController: UIViewController, UICollectionViewDelegat
         }
     }
 
-    private func makeItemSnapshotState(
-        for success: PagingStateSuccess<UiTimelineV2>,
-        updatesLastKnownItems: Bool
-    ) -> ItemSnapshotState {
+    private func makeItemSnapshotState(for success: PagingStateSuccess<UiTimelineV2>) -> ItemSnapshotState {
         let itemCount = Int(success.itemCount)
         var loadedIDsByIndex: [Int: String] = [:]
         var loadedRenderHashByItemID: [String: Int32] = [:]
@@ -343,47 +336,24 @@ final class GalleryTimelineController: UIViewController, UICollectionViewDelegat
         var itemIDs: [String] = []
         var indexMap: [String: Int] = [:]
         var renderHashMap: [String: Int32] = [:]
-        var stableItemIDs = Set<String>()
-        var usedItemIDs = Set<String>()
         itemIDs.reserveCapacity(itemCount)
 
         for i in 0..<itemCount {
             let id: String
             if let loadedID = loadedIDsByIndex[i] {
                 id = loadedID
-                stableItemIDs.insert(id)
                 renderHashMap[id] = loadedRenderHashByItemID[id]
-            } else if let cachedID = lastKnownItemIDByIndex[i],
-                      !loadedItemIDs.contains(cachedID),
-                      !usedItemIDs.contains(cachedID) {
-                id = cachedID
-                stableItemIDs.insert(id)
-                if let renderHash = lastKnownRenderHashByItemID[id] {
-                    renderHashMap[id] = renderHash
-                }
             } else {
-                id = "\(Self.itemPrefix)idx_\(i)"
+                id = "\(Self.placeholderPrefix)\(i)"
             }
             itemIDs.append(id)
             indexMap[id] = i
-            usedItemIDs.insert(id)
-        }
-
-        if updatesLastKnownItems {
-            for (index, id) in loadedIDsByIndex {
-                lastKnownItemIDByIndex[index] = id
-            }
-            for (id, renderHash) in loadedRenderHashByItemID {
-                lastKnownRenderHashByItemID[id] = renderHash
-            }
-            pruneStabilizedPagingCache(keepingItemIDs: Set(itemIDs), itemCount: itemCount)
         }
 
         return ItemSnapshotState(
             itemIDs: itemIDs,
             indexMap: indexMap,
             renderHashMap: renderHashMap,
-            stableItemIDs: stableItemIDs,
             loadedItemIDs: loadedItemIDs
         )
     }
@@ -408,17 +378,8 @@ final class GalleryTimelineController: UIViewController, UICollectionViewDelegat
         return min(max(offsetY, minY), maxY)
     }
 
-    private func isStableGalleryItemID(_ itemID: String) -> Bool {
-        itemID.hasPrefix(Self.itemPrefix) && stableGalleryItemIDs.contains(itemID)
-    }
-
-    private func pruneStabilizedPagingCache(keepingItemIDs: Set<String>, itemCount: Int) {
-        lastKnownItemIDByIndex = lastKnownItemIDByIndex.filter { index, itemID in
-            index >= 0 && index < itemCount && keepingItemIDs.contains(itemID)
-        }
-        lastKnownRenderHashByItemID = lastKnownRenderHashByItemID.filter { itemID, _ in
-            keepingItemIDs.contains(itemID)
-        }
+    private func isGalleryDataItemID(_ itemID: String) -> Bool {
+        itemID.hasPrefix(Self.itemPrefix)
     }
 
     private func captureScrollAnchor() -> ScrollAnchor? {
@@ -434,7 +395,7 @@ final class GalleryTimelineController: UIViewController, UICollectionViewDelegat
         return collectionView.indexPathsForVisibleItems
             .compactMap { indexPath -> (itemID: String, frame: CGRect)? in
                 guard let itemID = dataSource.itemIdentifier(for: indexPath),
-                      isStableGalleryItemID(itemID) else {
+                      isGalleryDataItemID(itemID) else {
                     return nil
                 }
                 let frame = collectionView.layoutAttributesForItem(at: indexPath)?.frame
@@ -502,7 +463,6 @@ final class GalleryTimelineController: UIViewController, UICollectionViewDelegat
         var snapshot = NSDiffableDataSourceSnapshot<Int, String>()
         var newIndexMap: [String: Int] = [:]
         var newRenderHashMap: [String: Int32] = [:]
-        var newStableItemIDs = Set<String>()
         var newLoadedItemIDs = Set<String>()
         var itemIDs: [String] = []
         var footerIDs: [String] = []
@@ -523,11 +483,10 @@ final class GalleryTimelineController: UIViewController, UICollectionViewDelegat
             snapshot.appendItems(itemIDs, toSection: Self.sectionMain)
         case .success(let success):
             snapshot.appendSections([Self.sectionMain])
-            let itemState = makeItemSnapshotState(for: success, updatesLastKnownItems: true)
+            let itemState = makeItemSnapshotState(for: success)
             itemIDs = itemState.itemIDs
             newIndexMap = itemState.indexMap
             newRenderHashMap = itemState.renderHashMap
-            newStableItemIDs = itemState.stableItemIDs
             newLoadedItemIDs = itemState.loadedItemIDs
             snapshot.appendItems(itemIDs, toSection: Self.sectionMain)
 
@@ -548,7 +507,6 @@ final class GalleryTimelineController: UIViewController, UICollectionViewDelegat
             : nil
 
         itemIndexMap = newIndexMap
-        stableGalleryItemIDs = newStableItemIDs
         pruneHeightCache(keepingItemIDs: Set(newIndexMap.keys))
 
         if previousSignature == newSignature {
@@ -728,11 +686,6 @@ final class GalleryTimelineController: UIViewController, UICollectionViewDelegat
             return CGSize(width: width, height: estimatedHeight(for: item, itemID: itemID, width: width))
         }
 
-        if itemID.hasPrefix(Self.itemPrefix),
-           let cachedHeight = cachedStabilizedHeight(for: itemID, width: width) {
-            return CGSize(width: width, height: cachedHeight)
-        }
-
         return CGSize(width: width, height: 200)
     }
 
@@ -781,13 +734,6 @@ final class GalleryTimelineController: UIViewController, UICollectionViewDelegat
             appearance.avatarShapeID,
             traitCollection.preferredContentSizeCategory.rawValue,
         ].joined(separator: "|")
-    }
-
-    private func cachedStabilizedHeight(for itemID: String, width: CGFloat) -> CGFloat? {
-        guard let renderHash = lastKnownRenderHashByItemID[itemID] else {
-            return nil
-        }
-        return heightCache[heightCacheKey(itemID: itemID, renderHash: renderHash, width: width)]
     }
 
     private func setCachedHeight(_ height: CGFloat, for key: String, itemID: String) {

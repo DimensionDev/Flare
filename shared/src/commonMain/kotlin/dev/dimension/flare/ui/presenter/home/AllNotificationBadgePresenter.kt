@@ -9,12 +9,14 @@ import dev.dimension.flare.data.datasource.microblog.datasource.NotificationData
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.allAccountServicesFlow
 import dev.dimension.flare.ui.presenter.PresenterBase
+import dev.dimension.flare.web.shared.WebPresenter
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.map
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import kotlin.time.Duration.Companion.minutes
 
+@WebPresenter("notificationBadge")
 public class AllNotificationBadgePresenter :
     PresenterBase<AllNotificationBadgePresenter.State>(),
     KoinComponent {

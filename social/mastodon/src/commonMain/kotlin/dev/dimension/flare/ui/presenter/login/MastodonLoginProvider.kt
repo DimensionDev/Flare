@@ -1,5 +1,7 @@
 package dev.dimension.flare.ui.presenter.login
 
+import dev.dimension.flare.data.datastore.PlatformOAuthPending
+import dev.dimension.flare.data.datastore.PlatformOAuthPendingRepository
 import dev.dimension.flare.data.network.mastodon.JoinMastodonService
 import dev.dimension.flare.data.network.mastodon.MastodonInstanceService
 import dev.dimension.flare.data.network.mastodon.MastodonOAuthService
@@ -32,6 +34,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import kotlin.time.Clock
 
 public data object MastodonLoginProvider : LoginPlatformProvider {
     override val platformType: PlatformType = PlatformType.Mastodon
@@ -131,6 +134,7 @@ private class MastodonOAuthLoginHandler(
 ) : LoginMethodHandler,
     KoinComponent {
     private val accountService: AccountService by inject()
+    private val pendingRepository: PlatformOAuthPendingRepository by inject()
     private val _state = MutableStateFlow(oauthState())
     private val _effects = MutableSharedFlow<LoginEffect>(extraBufferCapacity = 1)
 
@@ -160,18 +164,20 @@ private class MastodonOAuthLoginHandler(
                     baseUrl = baseUrl.toString(),
                     client_name = "Flare",
                     website = "https://github.com/DimensionDev/Flare",
-                    redirect_uri = DeeplinkRoute.Companion.Callback.MASTODON,
+                    redirect_uri = context.redirectUri ?: DeeplinkRoute.Companion.Callback.MASTODON,
                 )
             val application =
                 MastodonLoginStore.application(host)
                     ?: service.createApplication().also {
                         MastodonLoginStore.saveApplication(host, it)
                     }
-            MastodonLoginStore.pending =
-                MastodonLoginStore.Pending(
-                    host = host,
-                    application = application,
-                )
+            pendingRepository.save(
+                MastodonLoginStore
+                    .Pending(
+                        host = host,
+                        application = application,
+                    ).toPlatformOAuthPending(),
+            )
             _effects.emit(LoginEffect.OpenUrl(service.getWebOAuthUrl(application)))
         }.onFailure {
             _state.value = oauthState(error = it.message)
@@ -183,9 +189,21 @@ private class MastodonOAuthLoginHandler(
         runCatching {
             val code = value.substringAfter("code=").substringBeforeLast('&')
             require(code.isNotBlank() && code != value) { "No code" }
-            val pendingOAuth = MastodonLoginStore.pending ?: error("No pending OAuth")
+            val pendingOAuth =
+                pendingRepository
+                    .get(
+                        platformType = PlatformType.Mastodon,
+                        host = context.host,
+                    )?.toMastodonPending()
+                    ?: pendingRepository
+                        .latest(PlatformType.Mastodon)
+                        ?.toMastodonPending()
+                    ?: error("No pending OAuth")
             tryPendingOAuth(pendingOAuth, code)
-            MastodonLoginStore.clearPending()
+            pendingRepository.clear(
+                platformType = PlatformType.Mastodon,
+                host = pendingOAuth.host,
+            )
             context.onSuccess()
         }.onFailure {
             _state.value = oauthState(error = it.message)
@@ -206,7 +224,7 @@ private class MastodonOAuthLoginHandler(
                 baseUrl = "https://$host/",
                 client_name = "Flare",
                 website = "https://github.com/DimensionDev/Flare",
-                redirect_uri = DeeplinkRoute.Companion.Callback.MASTODON,
+                redirect_uri = application.application.redirectURI,
             )
         val accessTokenResponse = service.getAccessToken(code, application.application)
         requireNotNull(accessTokenResponse.accessToken) { "Invalid access token" }
@@ -259,7 +277,6 @@ private fun oauthState(
 
 private object MastodonLoginStore {
     private val applications = mutableMapOf<String, CreateApplicationResponse>()
-    var pending: Pending? = null
 
     fun application(host: String): CreateApplicationResponse? = applications[host]
 
@@ -270,13 +287,45 @@ private object MastodonLoginStore {
         applications[host] = application
     }
 
-    fun clearPending() {
-        pending = null
-    }
-
     data class Pending(
         val host: String,
         val application: CreateApplicationResponse,
+    )
+}
+
+private fun MastodonLoginStore.Pending.toPlatformOAuthPending(): PlatformOAuthPending =
+    PlatformOAuthPending(
+        platformType = PlatformType.Mastodon,
+        host = host,
+        createdAtEpochMillis = Clock.System.now().toEpochMilliseconds(),
+        attributes =
+            mapOf(
+                "application_id" to application.id.orEmpty(),
+                "application_name" to application.name.orEmpty(),
+                "application_website" to application.website.orEmpty(),
+                "redirect_uri" to application.redirectURI,
+                "client_id" to application.clientID,
+                "client_secret" to application.clientSecret,
+                "vapid_key" to application.vapidKey.orEmpty(),
+            ),
+    )
+
+private fun PlatformOAuthPending.toMastodonPending(): MastodonLoginStore.Pending {
+    val redirectUri = attributes.getValue("redirect_uri")
+    val clientId = attributes.getValue("client_id")
+    val clientSecret = attributes.getValue("client_secret")
+    return MastodonLoginStore.Pending(
+        host = host,
+        application =
+            CreateApplicationResponse(
+                id = attributes["application_id"]?.takeIf { it.isNotBlank() },
+                name = attributes["application_name"]?.takeIf { it.isNotBlank() },
+                website = attributes["application_website"]?.takeIf { it.isNotBlank() },
+                redirectURI = redirectUri,
+                clientID = clientId,
+                clientSecret = clientSecret,
+                vapidKey = attributes["vapid_key"]?.takeIf { it.isNotBlank() },
+            ),
     )
 }
 

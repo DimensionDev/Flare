@@ -22,9 +22,12 @@ import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.model.DbStatusWithReference
 import dev.dimension.flare.data.database.cache.model.TranslationDisplayOptions
+import dev.dimension.flare.data.datasource.microblog.offsetPagingConfig
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.NotSupportRemoteLoader
+import dev.dimension.flare.data.datasource.microblog.paging.OffsetFromStartPagingSource
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
+import dev.dimension.flare.data.datasource.microblog.paging.TimelineDbPageLoader
 import dev.dimension.flare.data.datasource.microblog.paging.TimelinePagingMapper
 import dev.dimension.flare.data.datasource.microblog.paging.TimelineRemoteMediator
 import dev.dimension.flare.data.datasource.microblog.paging.toPagingSource
@@ -54,6 +57,7 @@ import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -141,7 +145,7 @@ public abstract class TimelinePresenter :
         run {
             val allowLongText = allowLongTextTranslationDisplay(loader)
             Pager(
-                config = pagingConfig,
+                config = offsetPagingConfig,
                 remoteMediator =
                     TimelineRemoteMediator(
                         loader = loader,
@@ -155,8 +159,11 @@ public abstract class TimelinePresenter :
                         },
                     ),
                 pagingSourceFactory = {
-                    database.pagingTimelineDao().getPagingSource(
-                        pagingKey = loader.pagingKey,
+                    OffsetFromStartPagingSource(
+                        TimelineDbPageLoader(
+                            database = database,
+                            pagingKey = loader.pagingKey,
+                        ),
                     )
                 },
             ).flow
@@ -182,6 +189,12 @@ public abstract class TimelinePresenter :
         return object : TimelineState {
             override val listState = listState
 
+            override fun refreshAsync() {
+                scope.launch {
+                    refresh()
+                }
+            }
+
             override suspend fun refresh() {
                 listState
                     .onSuccess {
@@ -205,6 +218,8 @@ public abstract class TimelinePresenter :
 @Immutable
 public interface TimelineState {
     public val listState: PagingState<UiTimelineV2>
+
+    public fun refreshAsync()
 
     public suspend fun refresh()
 }

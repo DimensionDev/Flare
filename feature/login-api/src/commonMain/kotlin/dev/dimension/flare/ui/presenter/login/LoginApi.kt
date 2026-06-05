@@ -8,6 +8,7 @@ import dev.dimension.flare.model.PlatformTypeMetadata
 import dev.dimension.flare.model.RecommendedInstance
 import dev.dimension.flare.ui.model.UiInstanceMetadata
 import dev.dimension.flare.ui.model.UiStrings
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import org.koin.core.annotation.Provided
@@ -92,6 +93,7 @@ public data class LoginContext(
     val host: String,
     val methodType: LoginMethodType,
     val onSuccess: suspend () -> Unit,
+    val redirectUri: String? = null,
 )
 
 public interface LoginMethodHandler : AutoCloseable {
@@ -143,11 +145,21 @@ public class LoginPlatformRegistry(
 
     public suspend fun detectPlatformType(host: String): NodeData {
         val hostCleaned = normalizeHost(host)
+        require(hostCleaned.isNotBlank()) { "Host is blank" }
         return all
             .map { it.detector }
             .distinct()
             .sortedByDescending { it.priority }
-            .firstNotNullOfOrNull { detector -> detector.detect(hostCleaned) }
+            .firstNotNullOfOrNull { detector ->
+                runCatching {
+                    detector.detect(hostCleaned)
+                }.getOrElse {
+                    if (it is CancellationException) {
+                        throw it
+                    }
+                    null
+                }
+            }
             ?: throw IllegalArgumentException("Unsupported platform: $hostCleaned")
     }
 
@@ -156,7 +168,10 @@ public class LoginPlatformRegistry(
             .trim()
             .removePrefix("https://")
             .removePrefix("http://")
+            .substringBefore("/")
+            .substringBefore("?")
             .removeSuffix("/")
+            .lowercase()
 }
 
 @HiddenFromObjC

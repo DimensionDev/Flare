@@ -6,6 +6,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import dev.dimension.flare.data.datastore.PlatformOAuthPending
+import dev.dimension.flare.data.datastore.PlatformOAuthPendingRepository
 import dev.dimension.flare.data.network.mastodon.MastodonOAuthService
 import dev.dimension.flare.data.network.mastodon.api.model.CreateApplicationResponse
 import dev.dimension.flare.data.network.nodeinfo.NodeInfoService
@@ -21,6 +23,7 @@ import dev.dimension.flare.ui.route.DeeplinkRoute
 import io.ktor.http.Url
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import kotlin.time.Clock
 
 public class MastodonCallbackPresenter(
     private val code: String?,
@@ -28,6 +31,7 @@ public class MastodonCallbackPresenter(
 ) : PresenterBase<UiState<Nothing>>(),
     KoinComponent {
     private val accountService: AccountService by inject()
+    private val pendingRepository: PlatformOAuthPendingRepository by inject()
 
     @Composable
     override fun body(): UiState<Nothing> {
@@ -37,13 +41,16 @@ public class MastodonCallbackPresenter(
         var error by remember { mutableStateOf<Throwable?>(null) }
         LaunchedEffect(code) {
             val pendingOAuth =
-                MastodonLoginSessionStore.pending ?: run {
+                pendingRepository.latest(PlatformType.Mastodon)?.toMastodonPending() ?: run {
                     error = Exception("No pending OAuth")
                     return@LaunchedEffect
                 }
             try {
                 tryPendingOAuth(pendingOAuth, code, accountService)
-                MastodonLoginSessionStore.clearPending()
+                pendingRepository.clear(
+                    platformType = PlatformType.Mastodon,
+                    host = pendingOAuth.host,
+                )
                 toHome.invoke()
             } catch (e: Exception) {
                 error = e
@@ -66,7 +73,7 @@ public class MastodonCallbackPresenter(
                 baseUrl = "https://$host/",
                 client_name = "Flare",
                 website = "https://github.com/DimensionDev/Flare",
-                redirect_uri = DeeplinkRoute.Companion.Callback.MASTODON,
+                redirect_uri = application.application.redirectURI,
             )
         val accessTokenResponse = service.getAccessToken(code, application.application)
         requireNotNull(accessTokenResponse.accessToken) { "Invalid access token" }
@@ -130,19 +137,23 @@ public suspend fun mastodonLoginUseCase(
                 ?: service.createApplication().also {
                     MastodonLoginSessionStore.saveApplication(host, it)
                 }
-        MastodonLoginSessionStore.pending =
-            MastodonLoginSessionStore.Pending(
-                host = host,
-                application = application,
-            )
+        MastodonOAuthPendingBridge.pendingRepository.save(
+            MastodonLoginSessionStore
+                .Pending(
+                    host = host,
+                    application = application,
+                ).toPlatformOAuthPending(),
+        )
         val target = service.getWebOAuthUrl(application)
         launchOAuth(target)
     }
 
+private object MastodonOAuthPendingBridge : KoinComponent {
+    val pendingRepository: PlatformOAuthPendingRepository by inject()
+}
+
 private object MastodonLoginSessionStore {
     private val applications = mutableMapOf<String, CreateApplicationResponse>()
-
-    var pending: Pending? = null
 
     fun application(host: String): CreateApplicationResponse? = applications[host]
 
@@ -153,12 +164,44 @@ private object MastodonLoginSessionStore {
         applications[host] = application
     }
 
-    fun clearPending() {
-        pending = null
-    }
-
     data class Pending(
         val host: String,
         val application: CreateApplicationResponse,
+    )
+}
+
+private fun MastodonLoginSessionStore.Pending.toPlatformOAuthPending(): PlatformOAuthPending =
+    PlatformOAuthPending(
+        platformType = PlatformType.Mastodon,
+        host = host,
+        createdAtEpochMillis = Clock.System.now().toEpochMilliseconds(),
+        attributes =
+            mapOf(
+                "application_id" to application.id.orEmpty(),
+                "application_name" to application.name.orEmpty(),
+                "application_website" to application.website.orEmpty(),
+                "redirect_uri" to application.redirectURI,
+                "client_id" to application.clientID,
+                "client_secret" to application.clientSecret,
+                "vapid_key" to application.vapidKey.orEmpty(),
+            ),
+    )
+
+private fun PlatformOAuthPending.toMastodonPending(): MastodonLoginSessionStore.Pending {
+    val redirectUri = attributes.getValue("redirect_uri")
+    val clientId = attributes.getValue("client_id")
+    val clientSecret = attributes.getValue("client_secret")
+    return MastodonLoginSessionStore.Pending(
+        host = host,
+        application =
+            CreateApplicationResponse(
+                id = attributes["application_id"]?.takeIf { it.isNotBlank() },
+                name = attributes["application_name"]?.takeIf { it.isNotBlank() },
+                website = attributes["application_website"]?.takeIf { it.isNotBlank() },
+                redirectURI = redirectUri,
+                clientID = clientId,
+                clientSecret = clientSecret,
+                vapidKey = attributes["vapid_key"]?.takeIf { it.isNotBlank() },
+            ),
     )
 }

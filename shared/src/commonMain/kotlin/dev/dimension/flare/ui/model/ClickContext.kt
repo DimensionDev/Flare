@@ -16,7 +16,7 @@ public sealed interface ClickEvent {
     public data object Noop : ClickEvent
 
     @Serializable
-    public data class Deeplink private constructor(
+    public data class Deeplink public constructor(
         val url: String,
     ) : ClickEvent {
         public constructor(route: DeeplinkRoute) : this(route.toUri())

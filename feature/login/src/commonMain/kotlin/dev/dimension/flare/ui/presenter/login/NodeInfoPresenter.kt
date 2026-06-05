@@ -24,6 +24,7 @@ import dev.dimension.flare.ui.model.UiInstance
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.isSuccess
 import dev.dimension.flare.ui.presenter.PresenterBase
+import dev.dimension.flare.web.shared.WebPresenter
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.async
@@ -36,6 +37,7 @@ import kotlinx.coroutines.flow.flow
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
+@WebPresenter("loginServiceSelect")
 public class NodeInfoPresenter :
     PresenterBase<NodeInfoState>(),
     KoinComponent {

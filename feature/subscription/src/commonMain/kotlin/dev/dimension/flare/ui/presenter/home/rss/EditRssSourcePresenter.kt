@@ -21,6 +21,7 @@ import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.presenter.home.rss.CheckRssSourcePresenter.State.RssState
+import dev.dimension.flare.web.shared.WebPresenter
 import io.ktor.http.Url
 import io.ktor.http.buildUrl
 import io.ktor.http.set
@@ -30,6 +31,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
+@WebPresenter("editRssSource")
 public class EditRssSourcePresenter(
     private val id: Int?,
 ) : PresenterBase<EditRssSourcePresenter.State>(),
@@ -91,13 +93,35 @@ public class EditRssSourcePresenter(
 
         public val data: UiState<UiRssSource>
         public val checkState: UiState<CheckRssSourcePresenter.State.RssState>
+        public val rssHubCheckState: UiState<CheckRssSourcePresenter.State.RssState>?
+        public val actualRssHubUrl: String
 
         public val canSave: Boolean
+
+        public fun checkRssHubServer(value: String)
+
+        public fun saveRssFeed(
+            title: String,
+            displayMode: RssDisplayMode,
+        )
+
+        public fun saveRssHub(
+            title: String,
+            displayMode: RssDisplayMode,
+        )
+
+        public fun saveSourcesByUrl(
+            selectedUrls: String,
+            displayMode: RssDisplayMode,
+        )
+
+        public fun saveSubscriptionTypes(selectedTypes: String)
     }
 
     @Composable
     override fun body(): State {
         var url by remember { mutableStateOf("") }
+        var rssHubServer by remember { mutableStateOf("") }
         val checkRssSourcePresenterState =
             remember(
                 url,
@@ -109,6 +133,24 @@ public class EditRssSourcePresenter(
         val data by remember(id) {
             subscriptionRepository.observe(id ?: -1)
         }.collectAsUiState()
+        val actualRssHubUrl =
+            remember(rssHubServer, url) {
+                buildRssHubUrl(
+                    server = rssHubServer,
+                    path = url,
+                )
+            }
+        val rssHubCheckState =
+            if (
+                rssHubServer.isNotBlank() &&
+                (checkRssSourcePresenterState.state as? UiState.Success)?.data == RssState.RssHub
+            ) {
+                remember(actualRssHubUrl) {
+                    CheckRssSourcePresenter(actualRssHubUrl)
+                }.body().state
+            } else {
+                null
+            }
         val inputState =
             checkRssSourcePresenterState.state.map {
                 when (it) {
@@ -136,47 +178,13 @@ public class EditRssSourcePresenter(
                     }
 
                     RssState.RssHub -> {
-                        var serverStr by remember { mutableStateOf("") }
-                        val checkRssHubState =
-                            remember(serverStr, url) {
-                                val actualUrl =
-                                    buildUrl {
-                                        serverStr
-                                            .removePrefix("https://")
-                                            .removePrefix("http://")
-                                            .let {
-                                                set(host = it)
-                                            }
-                                        url
-                                            .removePrefix("rsshub://")
-                                            .let {
-                                                set(path = it)
-                                            }
-                                        set(scheme = "https")
-                                    }.toString()
-                                CheckRssSourcePresenter(actualUrl)
-                            }.body()
                         object : State.RssInputState.RssHub {
-                            override val checkState = checkRssHubState.state
+                            override val checkState = rssHubCheckState ?: UiState.Loading()
 
-                            override val actualUrl =
-                                buildUrl {
-                                    serverStr
-                                        .removePrefix("https://")
-                                        .removePrefix("http://")
-                                        .let {
-                                            set(host = it)
-                                        }
-                                    url
-                                        .removePrefix("rsshub://")
-                                        .let {
-                                            set(path = it)
-                                        }
-                                    set(scheme = "https")
-                                }.toString()
+                            override val actualUrl = actualRssHubUrl
 
                             override fun checkWithServer(server: String) {
-                                serverStr = server
+                                rssHubServer = server
                             }
 
                             override fun save(
@@ -266,15 +274,8 @@ public class EditRssSourcePresenter(
                         }
 
                         RssState.RssHub -> {
-                            when (val inputState = inputState) {
-                                is State.RssInputState.RssHub -> {
-                                    inputState.checkState is UiState.Success
-                                }
-
-                                else -> {
-                                    false
-                                }
-                            }
+                            rssHubCheckState is UiState.Success &&
+                                rssHubCheckState.data is RssState.RssFeed
                         }
 
                         is RssState.RssSources -> {
@@ -297,9 +298,101 @@ public class EditRssSourcePresenter(
             override val inputState = inputState
 
             override val canSave = canSave
+            override val rssHubCheckState = rssHubCheckState
+            override val actualRssHubUrl = actualRssHubUrl
 
             override fun checkUrl(value: String) {
                 url = value
+                rssHubServer = ""
+            }
+
+            override fun checkRssHubServer(value: String) {
+                rssHubServer = value
+            }
+
+            override fun saveRssFeed(
+                title: String,
+                displayMode: RssDisplayMode,
+            ) {
+                val rssState = (checkState as? UiState.Success)?.data as? RssState.RssFeed ?: return
+                scope.launch {
+                    subscriptionRepository.upsert(
+                        SubscriptionSourceInput(
+                            id = id ?: 0,
+                            url = rssState.url,
+                            title = title.ifBlank { rssState.title },
+                            lastUpdateMillis = 0,
+                            displayMode = displayMode,
+                            icon = rssState.icon,
+                        ),
+                    )
+                }
+            }
+
+            override fun saveRssHub(
+                title: String,
+                displayMode: RssDisplayMode,
+            ) {
+                val rssState = (rssHubCheckState as? UiState.Success)?.data as? RssState.RssFeed ?: return
+                scope.launch {
+                    subscriptionRepository.upsert(
+                        SubscriptionSourceInput(
+                            id = 0,
+                            url = actualRssHubUrl,
+                            title = title.ifBlank { rssState.title },
+                            lastUpdateMillis = 0,
+                            displayMode = displayMode,
+                            icon = rssState.icon ?: favIconUrl(actualRssHubUrl),
+                        ),
+                    )
+                }
+            }
+
+            override fun saveSourcesByUrl(
+                selectedUrls: String,
+                displayMode: RssDisplayMode,
+            ) {
+                val rssState = (checkState as? UiState.Success)?.data as? RssState.RssSources ?: return
+                val selected = selectedUrls.splitCsv().toSet()
+                scope.launch {
+                    subscriptionRepository.upsertAll(
+                        rssState.sources
+                            .filter { it.url in selected }
+                            .map {
+                                SubscriptionSourceInput(
+                                    id = it.id,
+                                    url = it.url,
+                                    title = it.title,
+                                    lastUpdateMillis = 0,
+                                    displayMode = displayMode,
+                                    icon = it.favIcon,
+                                )
+                            },
+                    )
+                }
+            }
+
+            override fun saveSubscriptionTypes(selectedTypes: String) {
+                val rssState = (checkState as? UiState.Success)?.data as? RssState.SubscriptionInstance ?: return
+                val selected =
+                    selectedTypes
+                        .splitCsv()
+                        .mapNotNull { runCatching { SubscriptionType.valueOf(it) }.getOrNull() }
+                scope.launch {
+                    subscriptionRepository.upsertAll(
+                        selected.map { type ->
+                            SubscriptionSourceInput(
+                                id = 0,
+                                url = rssState.host,
+                                title = "${rssState.instanceName ?: rssState.host} - ${type.name}",
+                                lastUpdateMillis = 0,
+                                displayMode = RssDisplayMode.FULL_CONTENT,
+                                icon = rssState.icon,
+                                type = type,
+                            )
+                        },
+                    )
+                }
             }
 
             override val data: UiState<UiRssSource>
@@ -307,6 +400,30 @@ public class EditRssSourcePresenter(
         }
     }
 }
+
+private fun buildRssHubUrl(
+    server: String,
+    path: String,
+): String =
+    buildUrl {
+        server
+            .removePrefix("https://")
+            .removePrefix("http://")
+            .let {
+                set(host = it)
+            }
+        path
+            .removePrefix("rsshub://")
+            .let {
+                set(path = it)
+            }
+        set(scheme = "https")
+    }.toString()
+
+private fun String.splitCsv(): List<String> =
+    split(",")
+        .map { it.trim() }
+        .filter { it.isNotEmpty() }
 
 private fun favIconUrl(url: String): String {
     val parsedUrl =

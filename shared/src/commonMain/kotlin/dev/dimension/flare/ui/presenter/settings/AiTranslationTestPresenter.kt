@@ -26,12 +26,14 @@ import dev.dimension.flare.ui.render.applyTranslationJson
 import dev.dimension.flare.ui.render.toTranslationJson
 import dev.dimension.flare.ui.render.toUiPlainText
 import dev.dimension.flare.ui.render.uiRichTextOf
+import dev.dimension.flare.web.shared.WebPresenter
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
+@WebPresenter("aiTranslationTest")
 public class AiTranslationTestPresenter :
     PresenterBase<AiTranslationTestPresenter.State>(),
     KoinComponent {

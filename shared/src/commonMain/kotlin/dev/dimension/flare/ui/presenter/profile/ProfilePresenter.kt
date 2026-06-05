@@ -41,6 +41,7 @@ import dev.dimension.flare.ui.presenter.home.TimelinePresenter
 import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.status.LogUserHistoryPresenter
 import dev.dimension.flare.ui.route.DeeplinkRoute
+import dev.dimension.flare.web.shared.WebPresenter
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -55,6 +56,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 @OptIn(ExperimentalCoroutinesApi::class)
+@WebPresenter("profile")
 public class ProfilePresenter(
     private val accountType: AccountType,
     private val userKey: MicroBlogKey?,
@@ -453,13 +455,13 @@ public abstract class ProfileState(
     @Immutable
     public sealed class Tab {
         @Immutable
-        public data class Timeline internal constructor(
+        public data class Timeline(
             val type: ProfileTab.Timeline.Type,
             val presenter: TimelinePresenter,
         ) : Tab()
 
         @Immutable
-        public data class Media internal constructor(
+        public data class Media(
             val presenter: ProfileMediaPresenter,
         ) : Tab()
     }
@@ -509,6 +511,7 @@ public sealed class FollowButtonState {
     }
 }
 
+@WebPresenter("profileUserLookup")
 public class ProfileWithUserNameAndHostPresenter(
     private val userName: String,
     private val host: String,

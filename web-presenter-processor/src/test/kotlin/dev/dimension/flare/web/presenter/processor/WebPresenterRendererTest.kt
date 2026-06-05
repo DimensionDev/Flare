@@ -754,6 +754,70 @@ class WebPresenterRendererTest {
     }
 
     @Test
+    fun rendersSealedPropertyNamesThatConflictWithTheDiscriminator() {
+        val payload =
+            SealedModel(
+                type = "dev.dimension.flare.web.shared.NotificationPayload",
+                typeName = "NotificationPayload",
+                variants =
+                    listOf(
+                        SealedVariantModel(
+                            type = "dev.dimension.flare.web.shared.NotificationPayload.Message",
+                            typeName = "Message",
+                            tag = "Message",
+                            objectLike = false,
+                            properties =
+                                listOf(
+                                    SealedPropertyModel(
+                                        name = "type_",
+                                        kotlinName = "type",
+                                        webType = WebType.String,
+                                    ),
+                                ),
+                        ),
+                    ),
+            )
+        val presenter =
+            counterPresenter(
+                properties =
+                    listOf(
+                        PropertyModel(
+                            name = "payload",
+                            webType = null,
+                            sealed = payload,
+                            ref = null,
+                        ),
+                    ),
+                actions =
+                    listOf(
+                        ActionModel(
+                            name = "showPayload",
+                            args =
+                                listOf(
+                                    ArgumentModel(
+                                        name = "payload",
+                                        webType = null,
+                                        sealed = payload,
+                                        ref = null,
+                                        callback = null,
+                                    ),
+                                ),
+                        ),
+                    ),
+            )
+        val kotlin = WebPresenterRenderer.renderKotlin(listOf(presenter))
+        val manifest = WebPresenterRenderer.renderManifest(listOf(presenter))
+
+        kotlin.assertContains("""put("type", "Message")""")
+        kotlin.assertContains("""put("type_", JsonPrimitive(value.type))""")
+        kotlin.assertContains(""""Message" -> dev.dimension.flare.web.shared.NotificationPayload.Message(""")
+        kotlin.assertContains("""type = requireNotNull(json["type_"]?.jsonPrimitive).content,""")
+        manifest.assertContains(
+            """{ "name": "Message", "tag": "Message", "properties": [{ "name": "type_", "tsType": "string" }] }""",
+        )
+    }
+
+    @Test
     fun rendersPagingStateWithExplicitPeekCallAndGetDispatch() {
         val item =
             RefModel(
@@ -784,12 +848,20 @@ class WebPresenterRendererTest {
         val manifest = WebPresenterRenderer.renderManifest(listOf(presenter))
 
         assertTrue(!kotlin.contains("""put("items", buildJsonArray"""), kotlin)
+        kotlin.assertContains(
+            """put("appendState", encodeDevDimensionFlareCommonPagingStateDevDimensionFlareWebSharedSampleWebPagingStateLoadState(value.appendState))""",
+        )
+        kotlin.assertContains(
+            """private fun encodeDevDimensionFlareCommonPagingStateDevDimensionFlareWebSharedSampleWebPagingStateLoadState(value: androidx.paging.LoadState): JsonElement =""",
+        )
         kotlin.assertContains(""""__webPagingPeek:items" -> {""")
         kotlin.assertContains("pagingState.peek(index)")
         kotlin.assertContains(""""__webPagingGet:items" -> {""")
         kotlin.assertContains("""val index = requireNotNull(requireNotNull(args)["index"]?.jsonPrimitive).int""")
         kotlin.assertContains("val pagingState = state.items")
         kotlin.assertContains("pagingState[index]")
+        kotlin.assertContains(""""__webPagingRetry:items" -> {""")
+        kotlin.assertContains("pagingState.retry()")
 
         manifest.assertContains(
             """"items", "kind": "pagingState", "item": { "kind": "ref", "tsType": "Sample"""",

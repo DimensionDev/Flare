@@ -7,10 +7,12 @@ internal actual fun draftFileItem(
     path: String,
     name: String?,
     type: FileType,
+    mimeType: String?,
     loader: suspend () -> ByteArray,
 ): FileItem =
     FileItem(
         name = name,
         type = type,
+        mimeType = mimeType,
         loader = loader,
     )

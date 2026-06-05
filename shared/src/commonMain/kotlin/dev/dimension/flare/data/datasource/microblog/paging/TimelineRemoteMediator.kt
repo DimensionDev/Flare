@@ -20,7 +20,11 @@ internal class TimelineRemoteMediator(
     private val allowLongText: Boolean,
     private val notifyError: (Throwable) -> Unit = {},
     private val preTranslationService: PreTranslationService = NoopPreTranslationService,
-) : BasePagingRemoteMediator<DbStatusWithReference, DbPagingTimelineWithStatus>(
+) : BasePagingRemoteMediator<
+        OffsetFromStartPagingKey,
+        DbStatusWithReference,
+        DbPagingTimelineWithStatus,
+    >(
         database = database,
     ),
     RemoteLoader<DbPagingTimelineWithStatus> {
@@ -91,11 +95,16 @@ internal class TimelineRemoteMediator(
         data: List<DbPagingTimelineWithStatus>,
     ) {
         if (request is PagingRequest.Refresh) {
-            data.groupBy { it.timeline.pagingKey }.keys.forEach { key ->
-                database
-                    .pagingTimelineDao()
-                    .delete(pagingKey = key)
-            }
+            data
+                .groupBy { it.timeline.pagingKey }
+                .keys
+                .plus(loader.pagingKey)
+                .distinct()
+                .forEach { key ->
+                    database
+                        .pagingTimelineDao()
+                        .delete(pagingKey = key)
+                }
         }
         if (request is PagingRequest.Prepend && loader.supportPrepend) {
             // load current timeline caches

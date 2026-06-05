@@ -372,111 +372,110 @@ fun AccountItem(
     onLongClick: (() -> Unit)? = null,
     onLongClickLabel: String? = null,
 ) {
-    userState
-        .onSuccess { data ->
-            SegmentedListItem(
-                selected = selected,
-                elevation = elevation,
-                modifier = modifier,
-                onClick = {
-                    onClick.invoke(data.key)
-                },
-                onLongClick = onLongClick,
-                onLongClickLabel = onLongClickLabel,
-                shapes = shapes,
-                content = {
-                    headlineContent.invoke(data)
-                },
-//                modifier =
-//                    modifier
-//                        .clickable {
-//                            onClick.invoke(data.key)
-//                        },
-                leadingContent = {
-                    AvatarComponent(data = data.avatar, size = avatarSize)
-                },
-                trailingContent = {
-                    trailingContent.invoke(data)
-                },
-                supportingContent = {
-                    supportingContent.invoke(data)
-                },
-                colors = colors,
-            )
-        }.onLoading {
-            SegmentedListItem(
-                selected = selected,
-                onClick = {},
-                onLongClick = onLongClick,
-                onLongClickLabel = onLongClickLabel,
-                elevation = elevation,
-                shapes = shapes,
-                content = {
-                    Text(text = "Loading...", modifier = Modifier.placeholder(true))
-                },
-                modifier = modifier,
-                leadingContent = {
-                    AvatarComponent(
-                        data = null,
-                        modifier = Modifier.placeholder(true, shape = CircleShape),
-                        size = avatarSize,
-                    )
-                },
-                supportingContent = {
-                    Text(text = "Loading...", modifier = Modifier.placeholder(true))
-                },
-                colors = colors,
-            )
-        }.onError { throwable ->
-            SegmentedListItem(
-                selected = selected,
-                onClick = {},
-                onLongClick = onLongClick,
-                onLongClickLabel = onLongClickLabel,
-                elevation = elevation,
-                shapes = shapes,
-                content = {
-                    if (throwable is LoginExpiredException) {
-                        Text(
-                            text =
-                                stringResource(
-                                    id = R.string.login_expired,
-                                    throwable.accountKey.toString(),
-                                ),
-                        )
-                    } else {
-                        Text(text = stringResource(id = R.string.account_item_error_title))
-                    }
-                },
-                modifier = modifier,
-                leadingContent = {
-                    ThemedIcon(
-                        FontAwesomeIcons.Solid.FaceSadTear,
-                        contentDescription = stringResource(id = R.string.account_item_error_title),
-                        color = ThemeIconData.Color.ImperialMagenta,
-                        size = avatarSize,
-                    )
-                },
-                supportingContent = {
-                    if (throwable is LoginExpiredException) {
-                        Text(text = throwable.accountKey.toString())
-                    } else {
-                        Text(text = stringResource(id = R.string.account_item_error_message))
-                    }
-                },
-                trailingContent =
-                    if (throwable is LoginExpiredException) {
-                        {
-                            TextButton(onClick = toLogin) {
-                                Text(text = stringResource(id = R.string.login_expired_relogin))
-                            }
-                        }
-                    } else {
-                        null
+    Box(modifier = modifier) {
+        userState
+            .onSuccess { data ->
+                SegmentedListItem(
+                    selected = selected,
+                    elevation = elevation,
+                    onClick = {
+                        onClick.invoke(data.key)
                     },
-                colors = colors,
-            )
-        }
+                    onLongClick = onLongClick,
+                    onLongClickLabel = onLongClickLabel,
+                    shapes = shapes,
+                    content = {
+                        headlineContent.invoke(data)
+                    },
+//                    modifier =
+//                        modifier
+//                            .clickable {
+//                                onClick.invoke(data.key)
+//                            },
+                    leadingContent = {
+                        AvatarComponent(data = data.avatar, size = avatarSize)
+                    },
+                    trailingContent = {
+                        trailingContent.invoke(data)
+                    },
+                    supportingContent = {
+                        supportingContent.invoke(data)
+                    },
+                    colors = colors,
+                )
+            }.onLoading {
+                SegmentedListItem(
+                    selected = selected,
+                    onClick = {},
+                    onLongClick = onLongClick,
+                    onLongClickLabel = onLongClickLabel,
+                    elevation = elevation,
+                    shapes = shapes,
+                    content = {
+                        Text(text = "Loading...", modifier = Modifier.placeholder(true))
+                    },
+                    leadingContent = {
+                        AvatarComponent(
+                            data = null,
+                            modifier = Modifier.placeholder(true, shape = CircleShape),
+                            size = avatarSize,
+                        )
+                    },
+                    supportingContent = {
+                        Text(text = "Loading...", modifier = Modifier.placeholder(true))
+                    },
+                    colors = colors,
+                )
+            }.onError { throwable ->
+                SegmentedListItem(
+                    selected = selected,
+                    onClick = {},
+                    onLongClick = onLongClick,
+                    onLongClickLabel = onLongClickLabel,
+                    elevation = elevation,
+                    shapes = shapes,
+                    content = {
+                        if (throwable is LoginExpiredException) {
+                            Text(
+                                text =
+                                    stringResource(
+                                        id = R.string.login_expired,
+                                        throwable.accountKey.toString(),
+                                    ),
+                            )
+                        } else {
+                            Text(text = stringResource(id = R.string.account_item_error_title))
+                        }
+                    },
+                    leadingContent = {
+                        ThemedIcon(
+                            FontAwesomeIcons.Solid.FaceSadTear,
+                            contentDescription = stringResource(id = R.string.account_item_error_title),
+                            color = ThemeIconData.Color.ImperialMagenta,
+                            size = avatarSize,
+                        )
+                    },
+                    supportingContent = {
+                        if (throwable is LoginExpiredException) {
+                            Text(text = throwable.accountKey.toString())
+                        } else {
+                            Text(text = stringResource(id = R.string.account_item_error_message))
+                        }
+                    },
+                    trailingContent =
+                        if (throwable is LoginExpiredException) {
+                            {
+                                TextButton(onClick = toLogin) {
+                                    Text(text = stringResource(id = R.string.login_expired_relogin))
+                                }
+                            }
+                        } else {
+                            null
+                        },
+                    colors = colors,
+                )
+            }
+    }
 }
 
 @Composable

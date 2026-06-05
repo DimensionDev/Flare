@@ -27,6 +27,7 @@ import dev.dimension.flare.ui.presenter.home.TimelinePresenter
 import dev.dimension.flare.ui.presenter.home.TimelineState
 import dev.dimension.flare.ui.render.UiDateTime
 import dev.dimension.flare.ui.render.compareTo
+import dev.dimension.flare.web.shared.WebPresenter
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -41,6 +42,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 @OptIn(ExperimentalCoroutinesApi::class)
+@WebPresenter("statusContext")
 public class StatusContextPresenter(
     private val accountType: AccountType,
     private val statusKey: MicroBlogKey,

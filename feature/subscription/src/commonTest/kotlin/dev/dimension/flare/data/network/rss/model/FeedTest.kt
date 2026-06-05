@@ -53,7 +53,7 @@ class FeedTest {
     fun deserializesRss20Feed() {
         val xml =
             """
-            <rss version="2.0">
+            <rss version="2.0" xmlns:dc="http://purl.org/dc/elements/1.1/">
               <channel>
                 <title>RSS Title</title>
                 <link>https://example.com/</link>
@@ -65,6 +65,7 @@ class FeedTest {
                   <description>This is an example description</description>
                   <author>editor@example.com</author>
                   <pubDate>Thu, 20 Nov 2025 10:00:00 +0000</pubDate>
+                  <dc:date>2025-11-20T10:00:00Z</dc:date>
                   <guid isPermaLink="false">abc123</guid>
                 </item>
               </channel>
@@ -87,6 +88,7 @@ class FeedTest {
         assertEquals("This is an example description", item.description)
         assertEquals("editor@example.com", item.author)
         assertEquals("Thu, 20 Nov 2025 10:00:00 +0000", item.pubDate)
+        assertEquals("2025-11-20T10:00:00Z", item.dcDate)
         assertNotNull(item.guid)
         assertEquals("abc123", item.guid.value)
         assertEquals(false, item.guid.isPermaLink)

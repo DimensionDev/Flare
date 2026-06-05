@@ -256,6 +256,46 @@ class DeeplinkRouteTest {
     }
 
     @Test
+    fun testProfileUserWebPath() {
+        val route =
+            DeeplinkRoute.Profile.User(
+                accountType = AccountType.Specific(MicroBlogKey("did:plc:alice", "bsky.social")),
+                userKey = MicroBlogKey("did:plc:bob", "bsky.social"),
+            )
+        assertEquals(
+            "/did%3Aplc%3Aalice@bsky.social/profile/did%3Aplc%3Abob@bsky.social",
+            route.toWebPath(),
+        )
+    }
+
+    @Test
+    fun testProfileUserNameWithHostWebPath() {
+        val route =
+            DeeplinkRoute.Profile.UserNameWithHost(
+                accountType = AccountType.GuestHost("mastodon.example"),
+                userName = "alice+news",
+                host = "mastodon.example",
+            )
+        assertEquals(
+            "/guest@mastodon.example/profile/by-handle/mastodon.example/alice%2Bnews",
+            route.toWebPath(),
+        )
+    }
+
+    @Test
+    fun testSearchWebPath() {
+        val route =
+            DeeplinkRoute.Search(
+                accountType = activeAccountType,
+                query = "#flare search",
+            )
+        assertEquals(
+            "/search?account=active@example.com&q=%23flare%20search",
+            route.toWebPath(),
+        )
+    }
+
+    @Test
     fun testDeepLinkAccountPicker() {
         val route =
             DeeplinkRoute.DeepLinkAccountPicker(

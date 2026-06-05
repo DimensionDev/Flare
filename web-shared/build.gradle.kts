@@ -25,7 +25,7 @@ kotlin {
 
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs {
-        outputModuleName.set("web-shared")
+        outputModuleName.set("flare")
         browser()
         binaries.library()
         generateTypeScriptDefinitions()
@@ -35,8 +35,12 @@ kotlin {
         val wasmJsMain by getting {
             dependencies {
                 implementation(projects.shared)
+                implementation(projects.feature.login)
                 implementation(projects.feature.subscription)
+                implementation(projects.feature.tab)
+                implementation(projects.social.bluesky)
                 implementation(projects.social.mastodon)
+                implementation(projects.social.misskey)
                 implementation(dependencies.platform(libs.compose.bom))
                 implementation(libs.compose.runtime)
                 implementation(libs.kotlinx.coroutines.core)
@@ -55,8 +59,37 @@ ksp {
     arg(
         "webPresenterTypes",
         listOf(
+            "dev.dimension.flare.ui.presenter.EnvironmentSettingsPresenter",
+            "dev.dimension.flare.ui.presenter.SettingsPresenter",
+            "dev.dimension.flare.ui.presenter.WebDataTransferPresenter",
+            "dev.dimension.flare.ui.presenter.WebLocalFilterPresenter",
+            "dev.dimension.flare.ui.presenter.home.rss.EditRssSourcePresenter",
+            "dev.dimension.flare.ui.presenter.home.rss.RssSourcesPresenter",
+            "dev.dimension.flare.ui.presenter.settings.AiConfigPresenter",
+            "dev.dimension.flare.ui.presenter.settings.AiTranslationTestPresenter",
+            "dev.dimension.flare.ui.presenter.settings.AppearancePresenter",
+            "dev.dimension.flare.ui.presenter.settings.AccountsPresenter",
+            "dev.dimension.flare.ui.presenter.settings.StoragePresenter",
+            "dev.dimension.flare.ui.presenter.settings.DevModePresenter",
+            "dev.dimension.flare.ui.presenter.settings.LocalCacheSearchPresenter",
+            "dev.dimension.flare.ui.presenter.compose.ComposePresenter",
+            "dev.dimension.flare.ui.presenter.compose.WebEmojiHistoryPresenter",
+            "dev.dimension.flare.ui.presenter.login.NodeInfoPresenter",
+            "dev.dimension.flare.ui.presenter.login.WebLoginFlowPresenter",
+            "dev.dimension.flare.ui.presenter.HomeTabsPresenter",
             "dev.dimension.flare.ui.presenter.HomeTimelineWithTabsPresenter",
+            "dev.dimension.flare.ui.presenter.home.HomeTabSettingsPresenter",
+            "dev.dimension.flare.ui.screen.settings.AllTabsPresenter",
+            "dev.dimension.flare.ui.presenter.home.WebDeepLinkPresenter",
+            "dev.dimension.flare.ui.presenter.home.DiscoverPresenter",
+            "dev.dimension.flare.ui.presenter.home.SearchPresenter",
+            "dev.dimension.flare.ui.presenter.home.AllNotificationPresenter",
+            "dev.dimension.flare.ui.presenter.home.AllNotificationBadgePresenter",
+            "dev.dimension.flare.ui.presenter.home.SecondaryTabsPresenter",
             "dev.dimension.flare.ui.presenter.home.TimelinePresenter",
+            "dev.dimension.flare.ui.presenter.profile.ProfilePresenter",
+            "dev.dimension.flare.ui.presenter.profile.ProfileWithUserNameAndHostPresenter",
+            "dev.dimension.flare.ui.presenter.status.StatusContextPresenter",
         ).joinToString(","),
     )
 }

@@ -152,14 +152,14 @@ internal data class DbDraftGroupWithRelations(
     @Embedded
     val group: DbDraftGroup,
     @Relation(
-        parentColumn = "group_id",
-        entityColumn = "group_id",
+        parentColumns = ["group_id"],
+        entityColumns = ["group_id"],
         entity = DbDraftTarget::class,
     )
     val targets: List<DbDraftTarget>,
     @Relation(
-        parentColumn = "group_id",
-        entityColumn = "group_id",
+        parentColumns = ["group_id"],
+        entityColumns = ["group_id"],
         entity = DbDraftMedia::class,
     )
     val medias: List<DbDraftMedia>,

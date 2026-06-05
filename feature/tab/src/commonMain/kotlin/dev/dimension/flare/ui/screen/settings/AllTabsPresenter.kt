@@ -17,16 +17,19 @@ import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRssSource
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiText
+import dev.dimension.flare.ui.model.asText
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.presenter.home.rss.RssSourcesPresenter
 import dev.dimension.flare.ui.presenter.list.PinnableTimelineTabPresenter
 import dev.dimension.flare.ui.presenter.settings.AccountsPresenter
+import dev.dimension.flare.web.shared.WebPresenter
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 
+@WebPresenter("allTabs")
 public class AllTabsPresenter : PresenterBase<AllTabsPresenter.State>() {
     @Composable
     override fun body(): State {
@@ -43,6 +46,36 @@ public class AllTabsPresenter : PresenterBase<AllTabsPresenter.State>() {
                             tabs = tabs?.toImmutableList() ?: persistentListOf(),
                         )
                     }.toImmutableList()
+            }
+        val flattenedAccountTabs =
+            accountTabs.map { groups ->
+                groups
+                    .map { group ->
+                        State.FlattenedAccountTabs(
+                            profile = group.profile,
+                            sections =
+                                group.tabs
+                                    .map { section ->
+                                        State.FlattenedTabSection(
+                                            title = section.title.asText(),
+                                            data =
+                                                when (val data = section.data) {
+                                                    is dev.dimension.flare.common.PagingState.Success -> {
+                                                        (0 until data.itemCount)
+                                                            .mapNotNull { data.peek(it) }
+                                                            .toImmutableList()
+                                                    }
+
+                                                    else -> {
+                                                        persistentListOf()
+                                                    }
+                                                },
+                                        )
+                                    }.filter { section -> section.data.isNotEmpty() }
+                                    .toImmutableList(),
+                        )
+                    }.filter { group -> group.sections.isNotEmpty() }
+                    .toImmutableList()
             }
 
         val rssSources =
@@ -67,6 +100,7 @@ public class AllTabsPresenter : PresenterBase<AllTabsPresenter.State>() {
 
         return object : State {
             override val accountTabs = accountTabs
+            override val flattenedAccountTabs = flattenedAccountTabs
             override val rssTabs = rssTabs
         }
     }
@@ -83,11 +117,24 @@ public class AllTabsPresenter : PresenterBase<AllTabsPresenter.State>() {
     public interface State {
         public val rssTabs: ImmutableList<TimelineTabItemV2>
         public val accountTabs: UiState<ImmutableList<AccountTabs>>
+        public val flattenedAccountTabs: UiState<ImmutableList<FlattenedAccountTabs>>
 
         @Immutable
         public data class AccountTabs(
             val profile: UiProfile,
             val tabs: ImmutableList<PinnableTimelineTabPresenter.PinnableTimelineTab>,
+        )
+
+        @Immutable
+        public data class FlattenedAccountTabs(
+            val profile: UiProfile,
+            val sections: ImmutableList<FlattenedTabSection>,
+        )
+
+        @Immutable
+        public data class FlattenedTabSection(
+            val title: UiText,
+            val data: ImmutableList<TimelineTabItemV2>,
         )
     }
 }

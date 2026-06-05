@@ -141,64 +141,115 @@
                         <!-- Download Buttons -->
                         <div>
                             <div
-                                class="flex flex-wrap justify-center md:justify-start gap-4 p-2"
+                                class="flex flex-wrap items-center justify-center md:justify-start gap-4 p-2"
                             >
                                 <a
                                     href="https://play.google.com/store/apps/details?id=dev.dimension.flare"
+                                    class="inline-flex h-12 items-center"
                                     ><img
                                         alt="Get it on Google Play"
                                         src="GetItOnGooglePlay_Badge_Web_color_English.svg"
+                                        class="block max-h-12 object-contain"
                                         width="170"
                                 /></a>
                                 <a
                                     href="https://apps.apple.com/us/app/flare-social-network-client/id6476077738"
+                                    class="inline-flex h-12 items-center"
                                     ><img
                                         alt="Get it on App Store"
                                         src="https://developer.apple.com/app-store/marketing/guidelines/images/badge-example-preferred_2x.png"
+                                        class="block max-h-12 object-contain"
                                         width="150"
                                 /></a>
                                 <a
                                     href="https://apps.microsoft.com/detail/9NLRN0BKZ357?referrer=appbadge&mode=direct"
+                                    class="inline-flex h-12 items-center"
                                 >
                                     <img
                                         src="https://get.microsoft.com/images/en-us%20dark.svg"
+                                        class="block max-h-12 object-contain"
                                         width="200"
                                     />
                                 </a>
                                 <a
                                     href="https://github.com/DimensionDev/Flare"
                                     target="_blank"
-                                    class="cta-button bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-6 rounded-lg inline-flex items-center"
+                                    class="cta-button inline-flex h-12 items-center bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold px-6 rounded-lg"
                                     width="150"
                                     height="50"
                                 >
-                                    <img
-                                        src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Octicons-mark-github.svg/1024px-Octicons-mark-github.svg.png"
-                                        alt="GitHub Icon"
-                                        class="w-6 h-6 mr-2"
-                                    />
+                                    <svg
+                                        viewBox="0 0 16 16"
+                                        aria-hidden="true"
+                                        class="w-6 h-6 mr-2 fill-current"
+                                    >
+                                        <path
+                                            d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82A7.62 7.62 0 0 1 8 3.86c.68 0 1.36.09 2 .26 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"
+                                        />
+                                    </svg>
                                     <span data-i18n-key="githubButton"
                                         >GitHub</span
                                     >
                                 </a>
                             </div>
                             <div
-                                class="flex flex-wrap justify-center md:justify-start gap-4"
+                                class="flex flex-wrap items-center justify-center md:justify-start gap-4"
                             >
                                 <a
                                     href="https://f-droid.org/packages/dev.dimension.flare"
+                                    class="inline-flex h-12 items-center"
                                     ><img
                                         alt="Get it on F-Droid"
                                         src="https://f-droid.org/badge/get-it-on.svg"
-                                        width="190"
+                                        class="block h-14 w-auto max-w-none object-contain"
                                 /></a>
                                 <a
                                     href="https://github.com/DimensionDev/Flare/releases/latest"
+                                    class="inline-flex h-12 items-center"
                                     ><img
                                         alt="Download AppImage"
                                         src="appimage_badge.svg"
+                                        class="block max-h-12 object-contain"
                                         width="162"
                                 /></a>
+                            </div>
+                            <div
+                                class="relative group inline-flex justify-center md:justify-start mt-4"
+                            >
+                                <a
+                                    href="https://web.flareapp.moe"
+                                    target="_blank"
+                                    aria-describedby="web-beta-tooltip"
+                                    class="cta-button inline-flex h-12 items-center bg-teal-500 hover:bg-teal-600 text-white font-bold px-6 rounded-lg"
+                                    width="150"
+                                    height="50"
+                                >
+                                    <svg
+                                        viewBox="0 0 24 24"
+                                        aria-hidden="true"
+                                        class="w-6 h-6 mr-2 fill-none stroke-current stroke-2"
+                                    >
+                                        <path
+                                            d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Z"
+                                        />
+                                        <path d="M2 12h20" />
+                                        <path
+                                            d="M12 2c2.5 2.74 4 6.27 4 10s-1.5 7.26-4 10c-2.5-2.74-4-6.27-4-10s1.5-7.26 4-10Z"
+                                        />
+                                    </svg>
+                                    <span data-i18n-key="webButton"
+                                        >Web Beta</span
+                                    >
+                                </a>
+                                <span
+                                    id="web-beta-tooltip"
+                                    role="tooltip"
+                                    class="pointer-events-none absolute left-1/2 md:left-0 bottom-full z-20 mb-3 w-72 -translate-x-1/2 md:translate-x-0 rounded-lg bg-gray-900 px-4 py-3 text-sm font-medium leading-relaxed text-white opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100 group-focus-within:opacity-100"
+                                    data-i18n-key="webBetaNote"
+                                >
+                                    web.flareapp.moe 是测试版，仍有很多功能尚未完整，目前仅支持
+                                    Mastodon/Misskey 和 Bluesky。
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -472,6 +523,9 @@
                         googlePlayButton: "Google Play",
                         testFlightButton: "TestFlight",
                         githubButton: "GitHub",
+                        webButton: "Web Beta",
+                        webBetaNote:
+                            "web.flareapp.moe is a beta version. Many features are still incomplete, and it currently supports only Mastodon/Misskey and Bluesky.",
                         featuresTitle: "Powerful Features, All in One Place",
                         featuresSubtitle:
                             "Flare is more than just a client; it's a whole new social hub.",
@@ -511,6 +565,9 @@
                         googlePlayButton: "Google Play",
                         testFlightButton: "TestFlight",
                         githubButton: "GitHub",
+                        webButton: "Webベータ",
+                        webBetaNote:
+                            "web.flareapp.moeはベータ版です。まだ多くの機能が未完成で、現在はMastodon/MisskeyとBlueskyのみをサポートしています。",
                         featuresTitle: "強力な機能を、一つに",
                         featuresSubtitle:
                             "Flareは単なるクライアントではなく、全く新しいソーシャルハブです。",
@@ -551,6 +608,9 @@
                         googlePlayButton: "Google Play",
                         testFlightButton: "TestFlight",
                         githubButton: "GitHub",
+                        webButton: "网页版测试版",
+                        webBetaNote:
+                            "web.flareapp.moe 是测试版，仍有很多功能尚未完整，目前仅支持 Mastodon/Misskey 和 Bluesky。",
                         featuresTitle: "强大功能，一站式体验",
                         featuresSubtitle:
                             "Flare 不仅仅是一个客户端，更是一个全新的社交中心。",

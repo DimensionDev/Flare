@@ -22,6 +22,7 @@ import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceFlow
 import dev.dimension.flare.data.repository.allAccountServicesFlow
 import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimelineV2
@@ -30,6 +31,8 @@ import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
+import dev.dimension.flare.web.shared.WebIgnore
+import dev.dimension.flare.web.shared.WebPresenter
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
@@ -42,6 +45,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 @OptIn(ExperimentalCoroutinesApi::class)
+@WebPresenter("search")
 public class SearchPresenter(
     private val accountType: AccountType,
     private val initialQuery: String = "",
@@ -147,8 +151,8 @@ public class SearchPresenter(
             override val accounts = accounts
             override val selectedAccount = selectedAccount
 
-            override fun search(new: String) {
-                queryFlow.value = new
+            override fun search(query: String) {
+                queryFlow.value = query
             }
 
             override suspend fun refreshSuspend() {
@@ -158,6 +162,12 @@ public class SearchPresenter(
 
             override fun setAccount(profile: UiProfile) {
                 selectedAccountFlow.value = profile
+            }
+
+            override fun setAccountKey(key: MicroBlogKey) {
+                accounts.takeSuccess()?.firstOrNull { it.key == key }?.let {
+                    selectedAccountFlow.value = it
+                }
             }
         }
     }
@@ -171,9 +181,12 @@ public interface SearchState {
     public val accounts: UiState<ImmutableList<UiProfile>>
     public val selectedAccount: UiProfile?
 
-    public fun search(new: String)
+    public fun search(query: String)
 
     public suspend fun refreshSuspend()
 
+    @WebIgnore
     public fun setAccount(profile: UiProfile)
+
+    public fun setAccountKey(key: MicroBlogKey)
 }

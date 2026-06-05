@@ -55,21 +55,19 @@ public class ListMemberHandler(
                             listId = listId,
                         )
                     },
-                    onSave = { request, data ->
-                        database.connect {
-                            if (request == PagingRequest.Refresh) {
-                                database.listDao().deleteMembersByListKey(listKey)
-                            }
-                            database.listDao().insertAllMember(
-                                data.map { item ->
-                                    DbListMember(
-                                        listKey = listKey,
-                                        memberKey = item.key,
-                                    )
-                                },
-                            )
-                            database.upsertUsers(data.map { it.toDbUser() })
+                    onSaveInTransaction = { request, data ->
+                        if (request == PagingRequest.Refresh) {
+                            database.listDao().deleteMembersByListKey(listKey)
                         }
+                        database.listDao().insertAllMember(
+                            data.map { item ->
+                                DbListMember(
+                                    listKey = listKey,
+                                    memberKey = item.key,
+                                )
+                            },
+                        )
+                        database.upsertUsers(data.map { it.toDbUser() })
                     },
                 ),
             pagingSourceFactory = {

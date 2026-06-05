@@ -1,5 +1,7 @@
 package dev.dimension.flare.ui.presenter.login
 
+import dev.dimension.flare.data.datastore.PlatformOAuthPending
+import dev.dimension.flare.data.datastore.PlatformOAuthPendingRepository
 import dev.dimension.flare.data.network.misskey.JoinMisskeyService
 import dev.dimension.flare.data.network.misskey.MisskeyOauthService
 import dev.dimension.flare.data.network.misskey.MisskeyPlatformDetector
@@ -29,6 +31,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import kotlin.time.Clock
 import kotlin.time.Duration.Companion.seconds
 import kotlin.uuid.Uuid
 
@@ -87,6 +90,7 @@ private class MisskeyOAuthLoginHandler(
 ) : LoginMethodHandler,
     KoinComponent {
     private val accountService: AccountService by inject()
+    private val pendingRepository: PlatformOAuthPendingRepository by inject()
     private val _state = MutableStateFlow(misskeyOAuthState())
     private val _effects = MutableSharedFlow<LoginEffect>(extraBufferCapacity = 1)
 
@@ -107,14 +111,16 @@ private class MisskeyOAuthLoginHandler(
                 MisskeyOauthService(
                     host = context.host,
                     name = "Flare",
-                    callback = DeeplinkRoute.Companion.Callback.MISSKEY,
+                    callback = context.redirectUri ?: DeeplinkRoute.Companion.Callback.MISSKEY,
                     session = session,
                 )
-            MisskeyLoginStore.pending =
-                MisskeyLoginStore.Pending(
-                    host = context.host,
-                    session = session,
-                )
+            pendingRepository.save(
+                MisskeyLoginStore
+                    .Pending(
+                        host = context.host,
+                        session = session,
+                    ).toPlatformOAuthPending(),
+            )
             _effects.emit(LoginEffect.OpenUrl(service.getAuthorizeUrl()))
         }.onFailure {
             _state.value = misskeyOAuthState(error = it.message)
@@ -126,10 +132,17 @@ private class MisskeyOAuthLoginHandler(
         runCatching {
             val session = value.substringAfter("session=")
             require(session.isNotBlank() && session != value) { "No session" }
-            val pendingOAuth = MisskeyLoginStore.pending ?: error("No pending OAuth")
-            require(pendingOAuth.session == session) { "Invalid pending OAuth" }
+            val pendingOAuth =
+                pendingRepository
+                    .all(PlatformType.Misskey)
+                    .firstOrNull { it.attributes["session"] == session }
+                    ?.toMisskeyPending()
+                    ?: error("No pending OAuth")
             misskeyAuthCheckUseCase(pendingOAuth.host, session)
-            MisskeyLoginStore.clearPending()
+            pendingRepository.clear(
+                platformType = PlatformType.Misskey,
+                host = pendingOAuth.host,
+            )
             // Preserve the existing iOS NavigationPath workaround.
             delay(2.seconds)
             context.onSuccess()
@@ -194,12 +207,6 @@ private fun misskeyOAuthState(
     )
 
 private object MisskeyLoginStore {
-    var pending: Pending? = null
-
-    fun clearPending() {
-        pending = null
-    }
-
     data class Pending(
         val host: String,
         val session: String,
@@ -207,3 +214,17 @@ private object MisskeyLoginStore {
 }
 
 private const val LOGIN_ACTION = "login"
+
+private fun MisskeyLoginStore.Pending.toPlatformOAuthPending(): PlatformOAuthPending =
+    PlatformOAuthPending(
+        platformType = PlatformType.Misskey,
+        host = host,
+        createdAtEpochMillis = Clock.System.now().toEpochMilliseconds(),
+        attributes = mapOf("session" to session),
+    )
+
+private fun PlatformOAuthPending.toMisskeyPending(): MisskeyLoginStore.Pending =
+    MisskeyLoginStore.Pending(
+        host = host,
+        session = attributes.getValue("session"),
+    )

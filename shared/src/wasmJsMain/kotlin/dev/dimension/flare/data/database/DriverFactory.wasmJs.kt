@@ -10,9 +10,10 @@ internal actual class DriverFactory {
         name: String,
         isCache: Boolean,
     ): RoomDatabase.Builder<T> =
-        Room.databaseBuilder<T>(
-            name = name,
-        )
+        Room
+            .databaseBuilder<T>(
+                name = name,
+            ).setSingleConnectionPool()
 
     actual fun deleteDatabase(
         name: String,

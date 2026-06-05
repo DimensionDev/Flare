@@ -32,6 +32,7 @@ import dev.dimension.flare.compose.ui.home_tab_discover_title
 import dev.dimension.flare.compose.ui.home_tab_favorite_title
 import dev.dimension.flare.compose.ui.home_tab_featured_title
 import dev.dimension.flare.compose.ui.home_tab_feeds_title
+import dev.dimension.flare.compose.ui.home_tab_following_title
 import dev.dimension.flare.compose.ui.home_tab_home_title
 import dev.dimension.flare.compose.ui.home_tab_list_title
 import dev.dimension.flare.compose.ui.home_tab_me_title
@@ -269,6 +270,7 @@ internal val UiStrings.res: StringResource
             UiStrings.Featured -> Res.string.home_tab_featured_title
             UiStrings.Bookmark -> Res.string.home_tab_bookmarks_title
             UiStrings.Favourite -> Res.string.home_tab_favorite_title
+            UiStrings.Following -> Res.string.home_tab_following_title
             UiStrings.List -> Res.string.home_tab_list_title
             UiStrings.Feeds -> Res.string.home_tab_feeds_title
             UiStrings.DirectMessage -> Res.string.dm_list_title

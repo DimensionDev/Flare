@@ -13,6 +13,7 @@ import dev.dimension.flare.ui.model.mapper.misskeyReact
 import dev.dimension.flare.ui.model.mapper.misskeyRenote
 import dev.dimension.flare.ui.model.mapper.nostrLike
 import dev.dimension.flare.ui.model.mapper.nostrRepost
+import dev.dimension.flare.ui.model.mapper.pixivBookmark
 import dev.dimension.flare.ui.model.mapper.vvoFavorite
 import dev.dimension.flare.ui.model.mapper.vvoLike
 import dev.dimension.flare.ui.model.mapper.vvoLikeComment
@@ -430,6 +431,26 @@ public sealed interface PostEvent {
             public override val postKey: MicroBlogKey,
             public val accountKey: MicroBlogKey,
         ) : Nostr
+    }
+
+    @Serializable
+    public sealed interface Pixiv : PostEvent {
+        @Serializable
+        public data class Bookmark(
+            public override val postKey: MicroBlogKey,
+            public val bookmarked: Boolean,
+            public val count: Long = 0,
+            public val accountKey: MicroBlogKey,
+        ) : Pixiv,
+            UpdatePostActionMenuEvent {
+            public override fun nextActionMenu(): ActionMenu.Item =
+                ActionMenu.pixivBookmark(
+                    statusKey = postKey,
+                    bookmarked = !bookmarked,
+                    count = (count + if (!bookmarked) 1 else -1).coerceAtLeast(0),
+                    accountKey = accountKey,
+                )
+        }
     }
 }
 

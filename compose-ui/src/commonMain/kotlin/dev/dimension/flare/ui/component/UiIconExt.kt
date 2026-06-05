@@ -30,6 +30,7 @@ import compose.icons.fontawesomeicons.solid.Language
 import compose.icons.fontawesomeicons.solid.List
 import compose.icons.fontawesomeicons.solid.MagnifyingGlass
 import compose.icons.fontawesomeicons.solid.Message
+import compose.icons.fontawesomeicons.solid.Image
 import compose.icons.fontawesomeicons.solid.Minus
 import compose.icons.fontawesomeicons.solid.Pen
 import compose.icons.fontawesomeicons.solid.Plus
@@ -100,6 +101,7 @@ public fun UiIcon.toImageVector(): ImageVector =
         UiIcon.Mastodon -> FontAwesomeIcons.Brands.Mastodon
         UiIcon.Misskey -> FontAwesomeIcons.Brands.Misskey
         UiIcon.Bluesky -> FontAwesomeIcons.Brands.Bluesky
+        UiIcon.Pixiv -> FontAwesomeIcons.Solid.Image
         UiIcon.Nostr -> FontAwesomeIcons.Brands.Nostr
         UiIcon.Twitter -> FontAwesomeIcons.Brands.Twitter
         UiIcon.X -> FontAwesomeIcons.Brands.XTwitter

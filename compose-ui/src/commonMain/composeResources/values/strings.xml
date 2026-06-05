@@ -505,6 +505,7 @@
     <string name="home_tab_featured_title">Featured</string>
     <string name="home_tab_bookmarks_title">Bookmarks</string>
     <string name="home_tab_favorite_title">Favorites</string>
+    <string name="home_tab_following_title">Following</string>
     <string name="home_tab_list_title">Lists</string>
     <string name="home_tab_feeds_title">Feeds</string>
     <string name="dm_list_title">Direct Messages</string>

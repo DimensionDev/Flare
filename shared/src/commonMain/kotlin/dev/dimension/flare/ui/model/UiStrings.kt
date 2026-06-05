@@ -14,6 +14,7 @@ public enum class UiStrings {
     Featured,
     Bookmark,
     Favourite,
+    Following,
     List,
     Feeds,
     DirectMessage,

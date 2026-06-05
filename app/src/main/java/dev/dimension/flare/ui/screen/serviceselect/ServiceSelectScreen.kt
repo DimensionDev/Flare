@@ -44,8 +44,9 @@ internal fun ServiceSelectScreen(
             openUri = uriHandler::openUri,
             registerDeeplinkCallback = { callback ->
                 OnNewIntent {
-                    if (it.dataString?.startsWith("$APPSCHEMA://", ignoreCase = true) == true) {
-                        callback.invoke(it.dataString.orEmpty())
+                    val url = it.dataString.orEmpty()
+                    if (url.startsWith("$APPSCHEMA://", ignoreCase = true) || url.isPixivOAuthCallback()) {
+                        callback.invoke(url)
                     }
                 }
             },
@@ -53,3 +54,9 @@ internal fun ServiceSelectScreen(
         )
     }
 }
+
+private fun String.isPixivOAuthCallback(): Boolean =
+    startsWith(
+        prefix = "https://app-api.pixiv.net/web/v1/users/auth/pixiv/callback",
+        ignoreCase = true,
+    )

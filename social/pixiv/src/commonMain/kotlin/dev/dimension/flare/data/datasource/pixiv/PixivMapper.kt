@@ -1,0 +1,201 @@
+package dev.dimension.flare.data.datasource.pixiv
+
+import dev.dimension.flare.data.datasource.microblog.ActionMenu
+import dev.dimension.flare.data.network.pixiv.PIXIV_IMAGE_REFERER
+import dev.dimension.flare.data.network.pixiv.model.PixivIllust
+import dev.dimension.flare.data.network.pixiv.model.PixivTrendTag
+import dev.dimension.flare.data.network.pixiv.model.PixivUser
+import dev.dimension.flare.data.network.pixiv.model.PixivUserDetailResponse
+import dev.dimension.flare.data.platform.PIXIV_HOST
+import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.ui.model.ClickEvent
+import dev.dimension.flare.ui.model.UiHandle
+import dev.dimension.flare.ui.model.UiHashtag
+import dev.dimension.flare.ui.model.UiMedia
+import dev.dimension.flare.ui.model.UiProfile
+import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.mapper.pixivBookmark
+import dev.dimension.flare.ui.render.toUi
+import dev.dimension.flare.ui.render.toUiPlainText
+import dev.dimension.flare.ui.route.DeeplinkRoute
+import kotlin.time.Clock
+import kotlin.time.Instant
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.toPersistentList
+import kotlinx.collections.immutable.toPersistentMap
+
+internal fun PixivIllust.toUiTimeline(accountKey: MicroBlogKey): UiTimelineV2.Post {
+    val statusKey = pixivIllustKey(id)
+    return UiTimelineV2.Post(
+        platformType = PlatformType.Pixiv,
+        images = toUiMedia().toPersistentList(),
+        sensitive = xRestrict > 0 || sanityLevel >= 6,
+        contentWarning = null,
+        user = user.toUiProfile(accountKey),
+        content = renderContent().toUiPlainText(),
+        actions =
+            persistentListOf(
+                ActionMenu.pixivBookmark(
+                    statusKey = statusKey,
+                    bookmarked = isBookmarked,
+                    count = totalBookmarks,
+                    accountKey = accountKey,
+                ),
+            ),
+        poll = null,
+        statusKey = statusKey,
+        card = null,
+        createdAt = parsePixivDate(createDate).toUi(),
+        visibility = null,
+        clickEvent =
+            ClickEvent.Deeplink(
+                DeeplinkRoute.Status.Detail(
+                    statusKey = statusKey,
+                    accountType = AccountType.Specific(accountKey),
+                ),
+            ),
+        accountType = AccountType.Specific(accountKey),
+    )
+}
+
+internal fun PixivUser.toUiProfile(accountKey: MicroBlogKey? = null): UiProfile =
+    UiProfile(
+        key = pixivUserKey(id),
+        handle = UiHandle(raw = account, host = PIXIV_HOST),
+        avatar = profileImageUrls?.medium ?: profileImageUrls?.px170x170 ?: profileImageUrls?.px50x50.orEmpty(),
+        nameInternal = name.toUiPlainText(),
+        platformType = PlatformType.Pixiv,
+        clickEvent =
+            ClickEvent.Deeplink(
+                DeeplinkRoute.Profile.User(
+                    accountType = accountKey?.let { AccountType.Specific(it) } ?: AccountType.GuestHost(PIXIV_HOST),
+                    userKey = pixivUserKey(id),
+                ),
+            ),
+        banner = null,
+        description = comment?.stripPixivHtml()?.toUiPlainText(),
+        matrices =
+            UiProfile.Matrices(
+                fansCount = 0,
+                followsCount = 0,
+                statusesCount = 0,
+            ),
+        mark =
+            if (isPremium) {
+                persistentListOf(UiProfile.Mark.Verified)
+            } else {
+                persistentListOf()
+            },
+        bottomContent = null,
+    )
+
+internal fun PixivUserDetailResponse.toUiProfile(accountKey: MicroBlogKey? = null): UiProfile {
+    val base = user.toUiProfile(accountKey)
+    return base.copy(
+        banner = profile?.backgroundImageUrl,
+        description = profile?.webpage?.takeIf { it.isNotBlank() }?.let { webpage ->
+            listOfNotNull(user.comment, webpage).joinToString("\n").stripPixivHtml().toUiPlainText()
+        } ?: user.comment?.stripPixivHtml()?.toUiPlainText(),
+        matrices =
+            UiProfile.Matrices(
+                fansCount = 0,
+                followsCount = profile?.totalFollowUsers ?: 0,
+                statusesCount = (profile?.totalIllusts ?: 0) + (profile?.totalManga ?: 0),
+            ),
+        bottomContent =
+            buildMap {
+                profile?.region?.takeIf { it.isNotBlank() }?.let {
+                    put(UiProfile.BottomContent.Iconify.Icon.Location, it.toUiPlainText())
+                }
+                profile?.webpage?.takeIf { it.isNotBlank() }?.let {
+                    put(UiProfile.BottomContent.Iconify.Icon.Url, it.toUiPlainText())
+                }
+            }.takeIf { it.isNotEmpty() }?.let {
+                UiProfile.BottomContent.Iconify(it.toPersistentMap())
+            },
+    )
+}
+
+internal fun PixivTrendTag.toUiHashtag(): UiHashtag =
+    UiHashtag(
+        hashtag = tag,
+        description = translatedName,
+        searchContent = tag,
+    )
+
+internal fun pixivIllustKey(id: Long): MicroBlogKey = MicroBlogKey(id.toString(), PIXIV_HOST)
+
+internal fun pixivUserKey(id: Long): MicroBlogKey = MicroBlogKey(id.toString(), PIXIV_HOST)
+
+private fun PixivIllust.renderContent(): String =
+    buildString {
+        append(title)
+        caption.stripPixivHtml().takeIf { it.isNotBlank() }?.let {
+            append("\n\n")
+            append(it)
+        }
+        if (tags.isNotEmpty()) {
+            append("\n\n")
+            append(tags.joinToString(" ") { "#${it.name}" })
+        }
+    }
+
+private fun PixivIllust.toUiMedia(): List<UiMedia> {
+    val headers = persistentMapOf("Referer" to PIXIV_IMAGE_REFERER)
+    return if (metaPages.isNotEmpty()) {
+        metaPages.mapNotNull { page ->
+            page.imageUrls.toUiImage(
+                width = width.toFloat(),
+                height = height.toFloat(),
+                sensitive = xRestrict > 0 || sanityLevel >= 6,
+                headers = headers,
+            )
+        }
+    } else {
+        imageUrls.toUiImage(
+            width = width.toFloat(),
+            height = height.toFloat(),
+            sensitive = xRestrict > 0 || sanityLevel >= 6,
+            headers = headers,
+        )?.let(::listOf).orEmpty()
+    }
+}
+
+private fun dev.dimension.flare.data.network.pixiv.model.PixivImageUrls.toUiImage(
+    width: Float,
+    height: Float,
+    sensitive: Boolean,
+    headers: kotlinx.collections.immutable.ImmutableMap<String, String>,
+): UiMedia.Image? {
+    val url = original ?: large ?: medium ?: squareMedium ?: return null
+    return UiMedia.Image(
+        url = url,
+        previewUrl = medium ?: squareMedium ?: url,
+        description = null,
+        height = height,
+        width = width,
+        sensitive = sensitive,
+        customHeaders = headers,
+    )
+}
+
+private fun String.stripPixivHtml(): String =
+    replace(Regex("<br\\s*/?>", RegexOption.IGNORE_CASE), "\n")
+        .replace(Regex("</p\\s*>", RegexOption.IGNORE_CASE), "\n")
+        .replace(Regex("<[^>]+>"), "")
+        .replace("&amp;", "&")
+        .replace("&lt;", "<")
+        .replace("&gt;", ">")
+        .replace("&quot;", "\"")
+        .replace("&#39;", "'")
+        .trim()
+
+private fun parsePixivDate(value: String): Instant =
+    runCatching {
+        Instant.parse(value)
+    }.getOrElse {
+        Clock.System.now()
+    }

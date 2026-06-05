@@ -264,6 +264,7 @@ public sealed class DeeplinkRoute {
             public const val MASTODON: String = "$APPSCHEMA://Callback/SignIn/Mastodon"
             public const val MISSKEY: String = "$APPSCHEMA://Callback/SignIn/Misskey"
             public const val BLUESKY: String = "$APPSCHEMA://Callback/SignIn/Bluesky"
+            public const val PIXIV: String = "$APPSCHEMA://Callback/SignIn/Pixiv"
         }
 
         @OptIn(ExperimentalSerializationApi::class)

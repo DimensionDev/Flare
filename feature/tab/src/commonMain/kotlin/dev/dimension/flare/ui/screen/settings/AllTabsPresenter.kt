@@ -60,11 +60,15 @@ public class AllTabsPresenter : PresenterBase<AllTabsPresenter.State>() {
                                             title = section.title.asText(),
                                             data =
                                                 when (val data = section.data) {
-                                                    is dev.dimension.flare.common.PagingState.Success ->
+                                                    is dev.dimension.flare.common.PagingState.Success -> {
                                                         (0 until data.itemCount)
                                                             .mapNotNull { data.peek(it) }
                                                             .toImmutableList()
-                                                    else -> persistentListOf()
+                                                    }
+
+                                                    else -> {
+                                                        persistentListOf()
+                                                    }
                                                 },
                                         )
                                     }.filter { section -> section.data.isNotEmpty() }

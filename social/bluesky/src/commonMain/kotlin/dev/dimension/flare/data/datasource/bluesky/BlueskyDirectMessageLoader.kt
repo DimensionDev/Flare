@@ -104,6 +104,10 @@ internal class BlueskyDirectMessageLoader(
                         is GetMessagesResponseMessageUnion.Unknown -> {
                             null
                         }
+
+                        is GetMessagesResponseMessageUnion.SystemMessageView -> {
+                            null
+                        }
                     }
                 },
             nextKey = response.cursor,

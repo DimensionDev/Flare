@@ -83,10 +83,11 @@ public class HomeTabSettingsPresenter :
                 enabled: Boolean,
                 mergePolicy: TimelineMergePolicy,
             ): ImmutableList<TimelineTabItemV2> =
-                tabs.withSystemHomeMixedTimelineEnabled(
-                    enabled = enabled,
-                    mergePolicy = mergePolicy,
-                ).toImmutableList()
+                tabs
+                    .withSystemHomeMixedTimelineEnabled(
+                        enabled = enabled,
+                        mergePolicy = mergePolicy,
+                    ).toImmutableList()
 
             override fun updateTabPresentation(
                 tab: TimelineTabItemV2,
@@ -248,7 +249,6 @@ public class HomeTabSettingsPresenter :
 
             override fun hasThemeAppearanceOverride(tab: TimelineTabItemV2): Boolean =
                 tab.appearancePatch?.contains(AppearanceKeys.AvatarShape) == true
-
         }
     }
 
@@ -345,7 +345,6 @@ public class HomeTabSettingsPresenter :
         public fun hasMediaAppearanceOverride(tab: TimelineTabItemV2): Boolean
 
         public fun hasThemeAppearanceOverride(tab: TimelineTabItemV2): Boolean
-
     }
 }
 

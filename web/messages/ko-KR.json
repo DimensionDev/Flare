@@ -529,5 +529,7 @@
   "visibilityFollowers": "팔로워",
   "visibilityHome": "홈",
   "visibilityPublic": "공개",
-  "visibilitySpecified": "지정됨"
+  "visibilitySpecified": "지정됨",
+  "secondaryFooterDownloadApp": "Download app",
+  "secondaryFooterVersion": "Version {version}"
 }

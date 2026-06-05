@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
+	import { createAccountsPresenter } from '@flare/web-presenters/accounts.svelte';
 	import { createHomeTabsPresenter } from '@flare/web-presenters/homeTabs.svelte';
 	import { createNotificationBadgePresenter } from '@flare/web-presenters/notificationBadge.svelte';
 	import type { HomeTabsPresenterStateHomeTabs } from '@flare/web-presenters/homeTabs.svelte';
@@ -26,6 +27,7 @@
 	type AppTab = HomeTabsPresenterStateHomeTabs | 'Profile' | 'Settings' | 'Search' | 'Compose';
 
 	const fallbackTabs: HomeTabsPresenterStateHomeTabs[] = ['Home', 'Discover'];
+	const accountsPresenter = createAccountsPresenter();
 	const homeTabs = createHomeTabsPresenter();
 	const notificationBadge = createNotificationBadgePresenter();
 	let selectedSecondaryTimeline = $state<SecondaryTimelineTabItemV2 | null>(null);
@@ -40,6 +42,9 @@
 			: ([] as HomeTabsPresenterStateHomeTabs[])
 	);
 	const navigationTabs = $derived(presenterTabs.length > 0 ? presenterTabs : fallbackTabs);
+	const hasSignedInAccount = $derived(
+		accountsPresenter.accounts.type === 'Success' && accountsPresenter.accounts.data.length > 0
+	);
 	const visiblePathname = $derived(shallowPath ?? page.url.pathname);
 	const activeTab = $derived(tabForPath(visiblePathname));
 	const pageTitle = $derived(
@@ -267,17 +272,19 @@
 					{/each}
 				</ul>
 
-				<a
-					class:btn-active={activeTab === 'Compose'}
-					class="btn btn-primary btn-square compose-nav-button tooltip tooltip-right"
-					href="/compose"
-					aria-label={m.composeTitle()}
-					aria-current={activeTab === 'Compose' ? 'page' : undefined}
-					data-tip={m.composeTitle()}
-					onclick={openCompose}
-				>
-					<FaIcon name="Edit" size={17} />
-				</a>
+				{#if hasSignedInAccount}
+					<a
+						class:btn-active={activeTab === 'Compose'}
+						class="btn btn-primary btn-square compose-nav-button tooltip tooltip-right"
+						href="/compose"
+						aria-label={m.composeTitle()}
+						aria-current={activeTab === 'Compose' ? 'page' : undefined}
+						data-tip={m.composeTitle()}
+						onclick={openCompose}
+					>
+						<FaIcon name="Edit" size={17} />
+					</a>
+				{/if}
 			</nav>
 
 				<section class="app-content min-w-0 bg-base-100" aria-label={pageTitle}>
@@ -322,15 +329,6 @@
 					</a>
 				{/each}
 				<a
-					class:dock-active={activeTab === 'Compose'}
-					href="/compose"
-					aria-label={m.composeTitle()}
-					aria-current={activeTab === 'Compose' ? 'page' : undefined}
-					onclick={openCompose}
-				>
-					<FaIcon name="Edit" size={18} />
-				</a>
-				<a
 					class:dock-active={isTabActive('Settings')}
 					href="/settings"
 					aria-label={m.settingsTitle()}
@@ -339,6 +337,21 @@
 					<FaIcon name="Settings" size={18} />
 				</a>
 			</nav>
+
+			{#if hasSignedInAccount}
+				<div class="fab fab-end mobile-compose-fab">
+					<a
+						class:btn-active={activeTab === 'Compose'}
+						class="btn btn-primary btn-circle btn-lg shadow-lg"
+						href="/compose"
+						aria-label={m.composeTitle()}
+						aria-current={activeTab === 'Compose' ? 'page' : undefined}
+						onclick={openCompose}
+					>
+						<FaIcon name="Edit" size={20} />
+					</a>
+				</div>
+			{/if}
 
 			{#if composeOverlayOpen}
 				<ComposeDialog routeUrl={composeOverlayUrl} onClose={closeComposeOverlay} />
@@ -463,6 +476,10 @@
 		display: none;
 	}
 
+	.mobile-compose-fab {
+		display: none;
+	}
+
 	@media (max-width: 760px) {
 		.app-shell {
 			grid-template-columns: minmax(0, 1fr);
@@ -486,6 +503,13 @@
 
 		.mobile-dock {
 			display: flex;
+		}
+
+		.mobile-compose-fab {
+			display: flex;
+			inset-block-end: calc(4.75rem + env(safe-area-inset-bottom, 0px));
+			inset-inline-end: calc(1rem + env(safe-area-inset-right, 0px));
+			z-index: 30;
 		}
 	}
 </style>

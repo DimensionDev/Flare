@@ -529,5 +529,7 @@
   "visibilityFollowers": "仅关注者",
   "visibilityHome": "主页时间线",
   "visibilityPublic": "公开",
-  "visibilitySpecified": "指定用户"
+  "visibilitySpecified": "指定用户",
+  "secondaryFooterDownloadApp": "下载应用",
+  "secondaryFooterVersion": "版本 {version}"
 }

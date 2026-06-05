@@ -529,5 +529,7 @@
   "visibilityFollowers": "Последователи",
   "visibilityHome": "Начало",
   "visibilityPublic": "Публично",
-  "visibilitySpecified": "Указани лица"
+  "visibilitySpecified": "Указани лица",
+  "secondaryFooterDownloadApp": "Download app",
+  "secondaryFooterVersion": "Version {version}"
 }

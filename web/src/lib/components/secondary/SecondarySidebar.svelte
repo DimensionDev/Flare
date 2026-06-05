@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import { goto } from '$app/navigation';
 	import { createSecondaryTabsPresenter } from '@flare/web-presenters/secondaryTabs.svelte';
 	import type {
 		SecondaryTabsPresenterTab,
@@ -18,10 +19,56 @@
 		onTimelineSelected: (tab: TimelineTabItemV2) => void;
 	} = $props();
 
+	let searchQuery = $state('');
 	const secondaryTabs = createSecondaryTabsPresenter();
+	const appVersion = __FLARE_APP_VERSION__;
 	const secondaryItems = $derived(
 		secondaryTabs.items.type === 'Success' ? secondaryTabs.items.data : []
 	);
+	const projectFooterLinks = $derived([
+		{
+			label: m.settingsAboutSourceCode(),
+			href: 'https://github.com/DimensionDev/Flare',
+			icon: 'Github',
+		},
+		{
+			label: m.settingsAboutTelegram(),
+			href: 'https://t.me/+VZ63fqNQXIA0MzVl',
+			icon: 'Telegram',
+		},
+		{
+			label: m.settingsAboutDiscord(),
+			href: 'https://discord.gg/De9NhXBryT',
+			icon: 'Discord',
+		},
+		{
+			label: m.settingsPrivacyPolicy(),
+			href: 'https://legal.mask.io/maskbook/',
+			icon: 'Lock',
+		},
+	]);
+	const downloadFooterLinks = $derived([
+		{
+			label: 'App Store',
+			href: 'https://apps.apple.com/us/app/flare-social-network-client/id6476077738',
+			icon: 'Apple',
+		},
+		{
+			label: 'Google Play',
+			href: 'https://play.google.com/store/apps/details?id=dev.dimension.flare',
+			icon: 'GooglePlay',
+		},
+		{
+			label: 'F-Droid',
+			href: 'https://f-droid.org/packages/dev.dimension.flare',
+			icon: 'Android',
+		},
+		{
+			label: 'AppImage',
+			href: 'https://github.com/DimensionDev/Flare/releases/latest',
+			icon: 'Github',
+		},
+	]);
 
 	function secondaryTabKey(tab: SecondaryTabsPresenterTab): string {
 		if (tab.timelineTabItem) return `timeline:${tab.timelineTabItem.key}`;
@@ -31,10 +78,37 @@
 	function isHrefActive(href: string): boolean {
 		return page.url.pathname === href || page.url.pathname.startsWith(`${href}/`);
 	}
+
+	function submitSearch(): void {
+		const next = searchQuery.trim();
+		const params = new URLSearchParams();
+		if (next) params.set('q', next);
+		const queryString = params.toString();
+		void goto(queryString ? `/search?${queryString}` : '/search');
+	}
 </script>
 
 <aside class="secondary-sidebar border-l border-base-300 bg-base-300" aria-label={m.secondarySidebarAriaLabel()}>
-	<div class="secondary-scroll flex flex-col gap-4 py-4 pl-4 pr-3">
+	<div class="secondary-scroll flex flex-col gap-4 pb-4 pl-4 pr-3">
+		<form
+			class="secondary-search"
+			role="search"
+			onsubmit={(event) => {
+				event.preventDefault();
+				submitSearch();
+			}}
+		>
+			<label class="input input-bordered input-sm rounded-box">
+				<FaIcon name="Search" size={14} />
+				<input
+					bind:value={searchQuery}
+					type="search"
+					placeholder={m.discoverSearchPlaceholder()}
+					aria-label={m.discoverSearchPlaceholder()}
+				/>
+			</label>
+		</form>
+
 		<div class="card bg-base-100 shadow-sm">
 			<div class="card-body px-2 pb-2 pt-4">
 				{#if secondaryTabs.items.type === 'Loading'}
@@ -152,15 +226,37 @@
 				</ul>
 			</div>
 		</div>
+
+		<footer class="secondary-footer">
+			<nav class="footer-links" aria-label={m.settingsAboutTitle()}>
+				{#each projectFooterLinks as link (link.href)}
+					<a href={link.href} target="_blank" rel="noreferrer">
+						<FaIcon name={link.icon} size={12} />
+						<span>{link.label}</span>
+					</a>
+				{/each}
+			</nav>
+			<nav class="footer-links" aria-label={m.secondaryFooterDownloadApp()}>
+				{#each downloadFooterLinks as link (link.href)}
+					<a href={link.href} target="_blank" rel="noreferrer">
+						<FaIcon name={link.icon} size={12} />
+						<span>{link.label}</span>
+					</a>
+				{/each}
+			</nav>
+			{#if appVersion}
+				<p>{m.secondaryFooterVersion({ version: appVersion })}</p>
+			{/if}
+		</footer>
 	</div>
 </aside>
 
 <style>
 	.secondary-sidebar {
 		position: sticky;
-		top: 3.5rem;
+		top: 0;
 		width: min(var(--app-secondary-width, 24rem), 100%);
-		height: calc(100vh - 3.5rem);
+		height: 100vh;
 		min-width: 0;
 		align-self: start;
 		justify-self: start;
@@ -169,6 +265,61 @@
 	.secondary-scroll {
 		height: 100%;
 		overflow: auto;
+	}
+
+	.secondary-search {
+		display: flex;
+		min-height: 3.5rem;
+		min-width: 0;
+		align-items: center;
+	}
+
+	.secondary-search label {
+		display: flex;
+		width: 100%;
+		align-items: center;
+		gap: 0.5rem;
+		background: var(--color-base-100);
+	}
+
+	.secondary-search input {
+		min-width: 0;
+	}
+
+	.secondary-footer {
+		display: grid;
+		gap: 0.6rem;
+		padding: 0.25rem 0.25rem 0.5rem;
+		color: color-mix(in oklab, var(--color-base-content) 56%, transparent);
+		font-size: 0.74rem;
+		line-height: 1.25;
+	}
+
+	.footer-links {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.35rem 0.75rem;
+	}
+
+	.footer-links a {
+		display: inline-flex;
+		min-width: 0;
+		align-items: center;
+		gap: 0.3rem;
+		color: inherit;
+		text-decoration: none;
+	}
+
+	.footer-links a:hover {
+		color: var(--color-base-content);
+		text-decoration: underline;
+		text-underline-offset: 0.15rem;
+	}
+
+	.secondary-footer p {
+		margin: 0;
+		font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+		color: color-mix(in oklab, var(--color-base-content) 44%, transparent);
 	}
 
 	.secondary-loading {

@@ -529,5 +529,7 @@
   "visibilityFollowers": "Для підписників",
   "visibilityHome": "Домашній",
   "visibilityPublic": "Публічно",
-  "visibilitySpecified": "Для вказаних осіб"
+  "visibilitySpecified": "Для вказаних осіб",
+  "secondaryFooterDownloadApp": "Download app",
+  "secondaryFooterVersion": "Version {version}"
 }

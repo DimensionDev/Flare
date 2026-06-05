@@ -529,5 +529,7 @@
   "visibilityFollowers": "Sledující",
   "visibilityHome": "Domov",
   "visibilityPublic": "Veřejný",
-  "visibilitySpecified": "Určení uživatelé"
+  "visibilitySpecified": "Určení uživatelé",
+  "secondaryFooterDownloadApp": "Download app",
+  "secondaryFooterVersion": "Version {version}"
 }

@@ -529,5 +529,7 @@
   "visibilityFollowers": "المتابعون",
   "visibilityHome": "الرئيسية",
   "visibilityPublic": "عام",
-  "visibilitySpecified": "محدد"
+  "visibilitySpecified": "محدد",
+  "secondaryFooterDownloadApp": "Download app",
+  "secondaryFooterVersion": "Version {version}"
 }

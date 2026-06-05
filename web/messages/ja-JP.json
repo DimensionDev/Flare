@@ -529,5 +529,7 @@
   "visibilityFollowers": "フォロワー",
   "visibilityHome": "ホーム",
   "visibilityPublic": "公開",
-  "visibilitySpecified": "ダイレクト"
+  "visibilitySpecified": "ダイレクト",
+  "secondaryFooterDownloadApp": "Download app",
+  "secondaryFooterVersion": "Version {version}"
 }

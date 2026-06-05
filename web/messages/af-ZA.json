@@ -529,5 +529,7 @@
   "visibilityFollowers": "Volgelinge",
   "visibilityHome": "Tuis",
   "visibilityPublic": "Publiek",
-  "visibilitySpecified": "Gekies"
+  "visibilitySpecified": "Gekies",
+  "secondaryFooterDownloadApp": "Download app",
+  "secondaryFooterVersion": "Version {version}"
 }

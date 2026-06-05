@@ -529,5 +529,7 @@
   "visibilityFollowers": "Seguidores",
   "visibilityHome": "Inicio",
   "visibilityPublic": "Público",
-  "visibilitySpecified": "Especificado"
+  "visibilitySpecified": "Especificado",
+  "secondaryFooterDownloadApp": "Download app",
+  "secondaryFooterVersion": "Version {version}"
 }

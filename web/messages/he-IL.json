@@ -529,5 +529,7 @@
   "visibilityFollowers": "עוקבים",
   "visibilityHome": "בית",
   "visibilityPublic": "ציבורי",
-  "visibilitySpecified": "מסוים"
+  "visibilitySpecified": "מסוים",
+  "secondaryFooterDownloadApp": "Download app",
+  "secondaryFooterVersion": "Version {version}"
 }

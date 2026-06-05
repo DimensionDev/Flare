@@ -529,5 +529,7 @@
   "visibilityFollowers": "Seuraajat",
   "visibilityHome": "Koti",
   "visibilityPublic": "Julkinen",
-  "visibilitySpecified": "Määritetty"
+  "visibilitySpecified": "Määritetty",
+  "secondaryFooterDownloadApp": "Download app",
+  "secondaryFooterVersion": "Version {version}"
 }

@@ -529,5 +529,7 @@
   "visibilityFollowers": "Ακόλουθοι",
   "visibilityHome": "Αρχική",
   "visibilityPublic": "Δημόσιο",
-  "visibilitySpecified": "Καθορισμένο"
+  "visibilitySpecified": "Καθορισμένο",
+  "secondaryFooterDownloadApp": "Download app",
+  "secondaryFooterVersion": "Version {version}"
 }

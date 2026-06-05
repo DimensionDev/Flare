@@ -1,6 +1,7 @@
 import { sveltekit } from '@sveltejs/kit/vite';
 import { paraglideVitePlugin } from '@inlang/paraglide-js';
 import tailwindcss from '@tailwindcss/vite';
+import fs from 'node:fs';
 import { defineConfig } from 'vite';
 import type { Plugin, PreviewServer, ViteDevServer } from 'vite';
 
@@ -19,6 +20,26 @@ const crossOriginIsolationHeaders = {
 	'Cross-Origin-Opener-Policy': 'same-origin',
 	'Cross-Origin-Embedder-Policy': 'credentialless'
 };
+const fdroidPropertiesPath = new URL('../fdroid.properties', import.meta.url);
+
+function readFdroidVersion(): string | undefined {
+	const text = fs.readFileSync(fdroidPropertiesPath, 'utf8');
+	const properties = Object.fromEntries(
+		text
+			.split(/\r?\n/)
+			.map((line) => line.trim())
+			.filter((line) => line && !line.startsWith('#'))
+			.map((line) => {
+				const separatorIndex = line.indexOf('=');
+				if (separatorIndex === -1) return [line, ''];
+				return [line.slice(0, separatorIndex).trim(), line.slice(separatorIndex + 1).trim()];
+			})
+	);
+	const versionName = properties.versionName;
+	const versionCode = properties.versionCode;
+	if (!versionName || !versionCode) return undefined;
+	return `${versionName}(${versionCode})`;
+}
 
 function applyCrossOriginIsolationHeaders(server: ViteDevServer | PreviewServer): void {
 	server.middlewares.use((_request, response, next) => {
@@ -38,6 +59,9 @@ function crossOriginIsolation(): Plugin {
 }
 
 export default defineConfig({
+	define: {
+		__FLARE_APP_VERSION__: JSON.stringify(readFdroidVersion())
+	},
 	plugins: [
 		crossOriginIsolation(),
 		tailwindcss(),

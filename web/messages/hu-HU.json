@@ -529,5 +529,7 @@
   "visibilityFollowers": "Követők",
   "visibilityHome": "Kezdőlap",
   "visibilityPublic": "Nyilvános",
-  "visibilitySpecified": "Megadott"
+  "visibilitySpecified": "Megadott",
+  "secondaryFooterDownloadApp": "Download app",
+  "secondaryFooterVersion": "Version {version}"
 }

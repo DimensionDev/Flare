@@ -529,5 +529,7 @@
   "visibilityFollowers": "Пратиоци",
   "visibilityHome": "Почетна",
   "visibilityPublic": "Javno",
-  "visibilitySpecified": "Наведено"
+  "visibilitySpecified": "Наведено",
+  "secondaryFooterDownloadApp": "Download app",
+  "secondaryFooterVersion": "Version {version}"
 }

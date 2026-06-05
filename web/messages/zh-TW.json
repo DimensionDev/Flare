@@ -529,5 +529,7 @@
   "visibilityFollowers": "追蹤者",
   "visibilityHome": "首頁",
   "visibilityPublic": "公開",
-  "visibilitySpecified": "指定人士"
+  "visibilitySpecified": "指定人士",
+  "secondaryFooterDownloadApp": "下載應用",
+  "secondaryFooterVersion": "版本 {version}"
 }

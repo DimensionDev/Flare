@@ -529,5 +529,7 @@
   "visibilityFollowers": "Takipçiler",
   "visibilityHome": "Ana Sayfa",
   "visibilityPublic": "Genel",
-  "visibilitySpecified": "Belirtilen"
+  "visibilitySpecified": "Belirtilen",
+  "secondaryFooterDownloadApp": "Download app",
+  "secondaryFooterVersion": "Version {version}"
 }

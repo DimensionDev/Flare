@@ -529,5 +529,7 @@
   "visibilityFollowers": "Người theo dõi",
   "visibilityHome": "Trang chủ",
   "visibilityPublic": "Công khai",
-  "visibilitySpecified": "Chỉ định"
+  "visibilitySpecified": "Chỉ định",
+  "secondaryFooterDownloadApp": "Download app",
+  "secondaryFooterVersion": "Version {version}"
 }

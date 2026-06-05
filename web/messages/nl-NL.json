@@ -529,5 +529,7 @@
   "visibilityFollowers": "Volgers",
   "visibilityHome": "Home",
   "visibilityPublic": "Openbaar",
-  "visibilitySpecified": "Gespecificeerd"
+  "visibilitySpecified": "Gespecificeerd",
+  "secondaryFooterDownloadApp": "Download app",
+  "secondaryFooterVersion": "Version {version}"
 }

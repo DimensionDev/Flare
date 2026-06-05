@@ -22,6 +22,7 @@
 		UiTimelineV2,
 	} from '@flare/web-presenters/timeline.svelte';
 
+	const hasAccountParam = $derived(page.url.searchParams.has('account'));
 	const accountSegment = $derived(initialAccountFromUrl());
 	const searchQuerySegment = $derived(initialQueryFromUrl());
 	const accountType = $derived(parseAccountType(accountSegment));
@@ -60,12 +61,25 @@
 		search.setAccountKey(accountType.accountKey);
 	});
 
+	$effect(() => {
+		if (hasAccountParam || search.accounts.type !== 'Success') return;
+		const firstAccount = search.accounts.data[0];
+		if (!firstAccount) return;
+
+		search.setAccountKey(firstAccount.key);
+		void goto(searchUrl(query.trim(), accountSegmentFromKey(firstAccount.key)), {
+			keepFocus: true,
+			noScroll: true,
+			replaceState: true,
+		});
+	});
+
 	function initialQueryFromUrl(): string {
 		return page.url.searchParams.get('q') ?? '';
 	}
 
 	function initialAccountFromUrl(): string {
-		return page.url.searchParams.get('account') ?? 'guest';
+		return page.url.searchParams.get('account') ?? '';
 	}
 
 	function submitSearch(): void {
@@ -93,7 +107,7 @@
 
 	function searchUrl(nextQuery: string, nextAccountSegment: string): string {
 		const params = new URLSearchParams();
-		if (nextAccountSegment !== 'guest') {
+		if (nextAccountSegment && nextAccountSegment !== 'guest') {
 			params.set('account', nextAccountSegment);
 		}
 		if (nextQuery) {

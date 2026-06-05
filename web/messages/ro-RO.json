@@ -529,5 +529,7 @@
   "visibilityFollowers": "Urmăritori",
   "visibilityHome": "Acasă",
   "visibilityPublic": "Public",
-  "visibilitySpecified": "Specificat"
+  "visibilitySpecified": "Specificat",
+  "secondaryFooterDownloadApp": "Download app",
+  "secondaryFooterVersion": "Version {version}"
 }

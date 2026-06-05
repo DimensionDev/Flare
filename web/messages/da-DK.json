@@ -529,5 +529,7 @@
   "visibilityFollowers": "Følgere",
   "visibilityHome": "Hjem",
   "visibilityPublic": "Offentlig",
-  "visibilitySpecified": "Specificeret"
+  "visibilitySpecified": "Specificeret",
+  "secondaryFooterDownloadApp": "Download app",
+  "secondaryFooterVersion": "Version {version}"
 }

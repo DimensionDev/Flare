@@ -6,9 +6,11 @@ import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
+import dev.dimension.flare.data.datasource.microblog.ComposeDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeType
 import dev.dimension.flare.data.datasource.microblog.DatabaseUpdater
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
+import dev.dimension.flare.data.datasource.microblog.NotificationTimelineDataSource
 import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
 import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
@@ -59,6 +61,8 @@ internal class NostrDataSource(
     override val accountKey: MicroBlogKey,
     private val credentialFlow: Flow<NostrCredential>,
 ) : AuthenticatedMicroblogDataSource,
+    NotificationTimelineDataSource,
+    ComposeDataSource,
     UserDataSource,
     RelationDataSource,
     TimelineTabConfigurationDataSource,

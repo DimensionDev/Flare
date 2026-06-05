@@ -11,6 +11,7 @@ import dev.dimension.flare.common.combineLatestFlowLists
 import dev.dimension.flare.common.refreshSuspend
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
+import dev.dimension.flare.data.datasource.microblog.NotificationTimelineDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.NotificationDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
@@ -84,6 +85,7 @@ public class AllNotificationPresenter :
                 it
                     .filterIsInstance<UserDataSource>()
                     .filterIsInstance<AuthenticatedMicroblogDataSource>()
+                    .filterIsInstance<NotificationTimelineDataSource>()
             }.map { accounts ->
                 accounts.map { dataSource ->
                     when (dataSource) {
@@ -137,7 +139,7 @@ public class AllNotificationPresenter :
             .flatMapLatest {
                 accountServiceFlow(AccountType.Specific(it.key), accountRepository)
             }.map {
-                require(it is AuthenticatedMicroblogDataSource)
+                require(it is NotificationTimelineDataSource)
                 it.supportedNotificationFilter.toImmutableList()
             }.distinctUntilChanged()
     }
@@ -154,7 +156,7 @@ public class AllNotificationPresenter :
                     .flatMapLatest { (filter, accountKey) ->
                         accountServiceFlow(AccountType.Specific(accountKey), accountRepository)
                             .map {
-                                require(it is AuthenticatedMicroblogDataSource)
+                                require(it is NotificationTimelineDataSource)
                                 it.notification(filter)
                             }.distinctUntilChanged()
                     }

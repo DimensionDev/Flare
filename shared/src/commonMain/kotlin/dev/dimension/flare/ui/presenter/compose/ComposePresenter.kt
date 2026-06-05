@@ -12,9 +12,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import dev.dimension.flare.common.FileType
 import dev.dimension.flare.common.combineLatestFlowLists
-import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
+import dev.dimension.flare.data.datasource.microblog.ComposeDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeType
 import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
@@ -120,7 +120,7 @@ public class ComposePresenter(
                         accountType = AccountType.Specific(account.accountKey),
                         repository = accountRepository,
                     ).mapNotNull { service ->
-                        if (service is UserDataSource && service is AuthenticatedMicroblogDataSource) {
+                        if (service is UserDataSource && service is ComposeDataSource) {
                             service.userHandler.userById(service.accountKey.id).toUi().map {
                                 service.accountKey to it
                             }
@@ -180,7 +180,7 @@ public class ComposePresenter(
         combine(selectedAccountServicesFlow, activeStatusFlow) { services, composeStatus ->
             val configs =
                 services.mapNotNull {
-                    if (it is AuthenticatedMicroblogDataSource) {
+                    if (it is ComposeDataSource) {
                         it.composeConfig(
                             type =
                                 when (composeStatus) {
@@ -631,8 +631,8 @@ public class ComposePresenter(
                         selectedAccounts.forEach { account ->
                             val dataSource =
                                 accountRepository.getOrCreateDataSource(account)
-                                    as? AuthenticatedMicroblogDataSource
-                                    ?: error("Account is not authenticated: ${account.accountKey}")
+                                    as? ComposeDataSource
+                                    ?: error("Account does not support compose: ${account.accountKey}")
                             dataSource.compose(data = data) {
                                 // Media upload progress is not surfaced by this web-only entry yet.
                             }

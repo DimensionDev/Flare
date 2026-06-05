@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import dev.dimension.flare.common.collectAsState
-import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
+import dev.dimension.flare.data.datasource.microblog.ComposeDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeType
 import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
@@ -41,7 +41,7 @@ public class AddReactionPresenter(
     override fun body(): AddReactionState {
         val service =
             accountServiceProvider(accountType = accountType, repository = accountRepository).map { service ->
-                service as AuthenticatedMicroblogDataSource
+                service as ComposeDataSource
             }
         val data =
             service

@@ -10,6 +10,7 @@
 ![badge-Windows](https://img.shields.io/badge/Windows_10-1809-blue)
 ![badge-macOS](https://img.shields.io/badge/macOS-Sonoma-black)
 ![badge-Linux](https://img.shields.io/badge/Linux-AppImage-black)
+![badge-Web](https://img.shields.io/badge/Web-Svelte-black)
 
 Flare is an open-source, privacy-first social client that brings Mastodon, Misskey, Bluesky, X, Nostr, and RSS into one unified timeline. It supports cross-posting, lists, feeds, DMs, RSS management, and AI-powered features such as translation and summaries. Built with Kotlin Multiplatform, Flare shares its core logic across Android, iOS, macOS, Windows, and Linux, turning fragmented social feeds into a personal information hub.
 
@@ -43,7 +44,7 @@ Here're some features we're planning to implement in the future.
  - [ ] Support for Discourse forum
  - [x] Support for Nostr
  - [x] Desktop Client
- - [ ] Web Client(?)
+ - [x] Web Client
 
 ## Building
 ### Android

@@ -51,7 +51,7 @@ struct StatusView: View {
                 spacing: 8,
             ) {
                 if showAsFullWidth, let user = data.user {
-                    AvatarView(data: user.avatar)
+                    AvatarView(data: user.avatar?.url, customHeader: user.avatar?.customHeaders)
                         .frame(width: 44, height: 44)
                         .onTapGesture {
                             user.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
@@ -282,7 +282,10 @@ struct StatusView: View {
                     Image("fa-nostr")
                         .font(.caption)
                         .foregroundStyle(.secondary)
-                    
+                case .pixiv:
+                    Image("fa-pixiv")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
             }
             if !isDetail {

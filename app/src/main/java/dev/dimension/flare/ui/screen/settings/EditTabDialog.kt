@@ -205,4 +205,5 @@ private val UiStrings.androidStringRes: Int
             UiStrings.ExternalSigner -> R.string.login_button
             UiStrings.WebCookieLogin -> R.string.login_button
             UiStrings.NostrLoginAccount -> R.string.login_button
+            UiStrings.Following -> R.string.following_title
         }

@@ -40,9 +40,7 @@ internal abstract class PixivTimelineLoader(
         )
     }
 
-    protected abstract suspend fun loadFirstPage(
-        pageSize: Int,
-    ): PixivIllustListResponse
+    protected abstract suspend fun loadFirstPage(pageSize: Int): PixivIllustListResponse
 
     private suspend fun loadNextPage(nextUrl: String?): PixivIllustListResponse =
         if (nextUrl == null) {
@@ -58,9 +56,7 @@ internal class PixivHomeTimelineLoader(
 ) : PixivTimelineLoader(service, accountKey) {
     override val pagingKey: String = "pixiv_home_$accountKey"
 
-    override suspend fun loadFirstPage(
-        pageSize: Int,
-    ): PixivIllustListResponse =
+    override suspend fun loadFirstPage(pageSize: Int): PixivIllustListResponse =
         service.recommendedIllusts(
             includeRankingIllusts = true,
         )
@@ -72,9 +68,7 @@ internal class PixivDiscoverTimelineLoader(
 ) : PixivTimelineLoader(service, accountKey) {
     override val pagingKey: String = "pixiv_discover_$accountKey"
 
-    override suspend fun loadFirstPage(
-        pageSize: Int,
-    ): PixivIllustListResponse =
+    override suspend fun loadFirstPage(pageSize: Int): PixivIllustListResponse =
         service.rankingIllusts(
             mode = PixivRankingMode.Day,
         )
@@ -86,9 +80,7 @@ internal class PixivFollowingTimelineLoader(
 ) : PixivTimelineLoader(service, accountKey) {
     override val pagingKey: String = "pixiv_following_$accountKey"
 
-    override suspend fun loadFirstPage(
-        pageSize: Int,
-    ): PixivIllustListResponse = service.followedIllusts()
+    override suspend fun loadFirstPage(pageSize: Int): PixivIllustListResponse = service.followedIllusts()
 }
 
 internal class PixivSearchTimelineLoader(
@@ -98,9 +90,7 @@ internal class PixivSearchTimelineLoader(
 ) : PixivTimelineLoader(service, accountKey) {
     override val pagingKey: String = "pixiv_search_${query}_$accountKey"
 
-    override suspend fun loadFirstPage(
-        pageSize: Int,
-    ): PixivIllustListResponse =
+    override suspend fun loadFirstPage(pageSize: Int): PixivIllustListResponse =
         service.searchIllusts(
             word = query,
             sort = PixivSearchSort.DateDesc,

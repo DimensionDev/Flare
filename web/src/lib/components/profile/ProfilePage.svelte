@@ -555,8 +555,8 @@
                 aria-label={m.profileOpenBanner()}
                 onclick={performProfileClick}
             >
-                {#if displayProfile.banner}
-                    <img src={displayProfile.banner} alt="" loading="lazy" />
+                {#if displayProfile.banner?.url}
+                    <img src={displayProfile.banner?.url} alt="" loading="lazy" />
                 {/if}
             </button>
 
@@ -568,9 +568,9 @@
                     aria-label={m.profileOpenAvatar()}
                     onclick={performProfileClick}
                 >
-                    {#if displayProfile.avatar}
+                    {#if displayProfile.avatar?.url}
                         <img
-                            src={displayProfile.avatar}
+                            src={displayProfile.avatar?.url}
                             alt=""
                             loading="lazy"
                         />

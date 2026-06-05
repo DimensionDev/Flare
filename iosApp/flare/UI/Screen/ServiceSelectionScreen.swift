@@ -278,6 +278,8 @@ struct ServiceSelectionScreen: View {
             return "X"
         case .vvo:
             return "Weibo"
+        case .pixiv:
+            return "Pixiv"
         }
     }
 }
@@ -411,12 +413,20 @@ private struct LoginFlowView: View {
             guard let authURL = URL(string: url) else { return }
             let response = try? await webAuthenticationSession.authenticate(
                 using: authURL,
-                callbackURLScheme: APPSCHEMA
+                callbackURLScheme: authURL.isPixivOAuthUrl ? "pixiv" : APPSCHEMA
             )
             if let responseString = response?.absoluteString {
                 presenter.state.resume(value: responseString)
             }
         }
+    }
+}
+
+private extension URL {
+    var isPixivOAuthUrl: Bool {
+        scheme == "https" &&
+            host == "app-api.pixiv.net" &&
+            path == "/web/v1/login"
     }
 }
 

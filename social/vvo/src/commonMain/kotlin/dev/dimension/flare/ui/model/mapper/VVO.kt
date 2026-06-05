@@ -20,6 +20,7 @@ import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiNumber
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.toUiImage
 import dev.dimension.flare.ui.render.UiRichText
 import dev.dimension.flare.ui.render.parseHtml
 import dev.dimension.flare.ui.render.toUi
@@ -448,7 +449,7 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
         )
     return UiProfile(
         key = userKey,
-        avatar = avatarHD ?: profileImageURL ?: "",
+        avatar = (avatarHD ?: profileImageURL).toUiImage(),
         handle =
             UiHandle(
                 raw = screenName.orEmpty(),
@@ -456,7 +457,7 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
             ),
         nameInternal = screenName.toString().toUiPlainText(persistentListOf("zh-CN")),
         description = description?.toUiPlainText(persistentListOf("zh-CN")),
-        banner = coverImagePhone,
+        banner = coverImagePhone.toUiImage(),
         sourceLanguages = persistentListOf("zh-CN"),
         matrices =
             UiProfile.Matrices(

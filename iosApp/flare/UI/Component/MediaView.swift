@@ -18,7 +18,7 @@ struct MediaView: View {
                 Color.gray
 //                    .opacity(0.2)
                     .overlay {
-                        NetworkImage(data: image.previewUrl)
+                        NetworkImage(data: image.previewUrl, customHeader: image.customHeaders)
                             .allowsHitTesting(false)
                     }
                     .clipped()
@@ -28,7 +28,7 @@ struct MediaView: View {
                 Color.gray
 //                    .opacity(0.2)
                     .overlay {
-                        NetworkImage(data: gif.url)
+                        NetworkImage(data: gif.url, customHeader: gif.customHeaders)
                             .allowsHitTesting(false)
                     }
                     .clipped()
@@ -69,7 +69,7 @@ struct MediaVideoView: View {
         Color.gray
 //            .opacity(0.2)
             .overlay {
-                NetworkImage(data: data.thumbnailUrl)
+                NetworkImage(data: data.thumbnailUrl, customHeader: data.customHeaders)
                     .allowsHitTesting(false)
             }
             .clipped()

@@ -120,7 +120,7 @@
 								{#if account.badge > 0}
 									<span class="badge badge-primary badge-xs indicator-item"></span>
 								{/if}
-								<img class="account-avatar" src={account.profile.avatar} alt="" />
+								<img class="account-avatar" src={account.profile.avatar?.url} alt="" />
 							</span>
 							<span class="account-handle">{account.profile.handle.canonical}</span>
 							{#if account.badge > 0}

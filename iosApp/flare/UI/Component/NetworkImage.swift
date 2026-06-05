@@ -18,7 +18,7 @@ struct NetworkImage: View {
                 })
                 .placeholder {
                     if let placeholder {
-                        NetworkImage(data: placeholder)
+                        NetworkImage(data: placeholder, customHeader: customHeader)
                     } else {
                         Rectangle()
                             .fill(.placeholder)
@@ -46,7 +46,7 @@ struct NetworkImage: View {
                 })
                 .placeholder {
                     if let placeholder {
-                        NetworkImage(data: placeholder)
+                        NetworkImage(data: placeholder, customHeader: customHeader)
                     } else {
                         Rectangle()
                             .fill(.placeholder)
@@ -66,13 +66,19 @@ struct NetworkImage: View {
 }
 
 extension NetworkImage {
+    init(data: String?, customHeader: [String: String]? = nil) {
+        self.init(data: data.flatMap(URL.init(string:)), placeholder: nil, customHeader: customHeader)
+    }
     init(data: String, customHeader: [String: String]? = nil) {
         self.init(data: .init(string: data), placeholder: nil, customHeader: customHeader)
     }
-    init(data: String, placeholder: String) {
-        self.init(data: .init(string: data), placeholder: .init(string: placeholder), customHeader: nil)
+    init(data: String, placeholder: String, customHeader: [String: String]? = nil) {
+        self.init(data: .init(string: data), placeholder: .init(string: placeholder), customHeader: customHeader)
     }
     init(data: URL?) {
         self.init(data: data, placeholder: nil, customHeader: nil)
+    }
+    init(data: URL?, customHeader: [String: String]?) {
+        self.init(data: data, placeholder: nil, customHeader: customHeader)
     }
 }

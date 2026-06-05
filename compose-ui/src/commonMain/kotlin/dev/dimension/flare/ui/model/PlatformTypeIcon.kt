@@ -6,6 +6,8 @@ import compose.icons.fontawesomeicons.Brands
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.brands.Bluesky
 import compose.icons.fontawesomeicons.brands.Mastodon
+import compose.icons.fontawesomeicons.brands.Pix
+import compose.icons.fontawesomeicons.brands.Pixiv
 import compose.icons.fontawesomeicons.brands.Weibo
 import compose.icons.fontawesomeicons.brands.XTwitter
 import compose.icons.fontawesomeicons.solid.Image
@@ -20,7 +22,7 @@ public val PlatformType.brandIcon: ImageVector
             PlatformType.Mastodon -> FontAwesomeIcons.Brands.Mastodon
             PlatformType.Misskey -> FontAwesomeIcons.Brands.Misskey
             PlatformType.Bluesky -> FontAwesomeIcons.Brands.Bluesky
-            PlatformType.Pixiv -> FontAwesomeIcons.Solid.Image
+            PlatformType.Pixiv -> FontAwesomeIcons.Brands.Pixiv
             PlatformType.xQt -> FontAwesomeIcons.Brands.XTwitter
             PlatformType.VVo -> FontAwesomeIcons.Brands.Weibo
         }

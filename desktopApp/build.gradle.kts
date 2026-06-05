@@ -143,6 +143,7 @@ nucleus.application {
         artifactName = $$"Flare-$${desktopVersionName}.${ext}"
 
         protocol("Flare", "flare")
+        protocol("Pixiv", "pixiv")
 
         macOS {
             val hasSigningProps = project.file("embedded.provisionprofile").exists() && project.file("runtime.provisionprofile").exists()

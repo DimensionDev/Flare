@@ -785,7 +785,7 @@
 							}}
 						>
 							<summary class="ios-disclosure-summary">
-								<img class="picker-avatar" src={group.profile.avatar} alt="" loading="lazy" />
+								<img class="picker-avatar" src={group.profile.avatar?.url} alt="" loading="lazy" />
 								<span class="setting-copy">
 									<span class="setting-title">{group.profile.handleWithoutAt}</span>
 									<span class="setting-description">{group.profile.host ?? group.profile.platformType}</span>

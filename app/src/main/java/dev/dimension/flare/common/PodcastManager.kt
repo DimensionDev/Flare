@@ -56,8 +56,11 @@ internal class PodcastManager(
                                     .Builder()
                                     .setTitle(podcast.title)
                                     .setArtist(podcast.creator.name.innerText)
-                                    .setArtworkUri(podcast.creator.avatar.toUri())
-                                    .build(),
+                                    .setArtworkUri(
+                                        podcast.creator.avatar
+                                            ?.url
+                                            ?.toUri(),
+                                    ).build(),
                             ).build(),
                     )
                     it.prepare()

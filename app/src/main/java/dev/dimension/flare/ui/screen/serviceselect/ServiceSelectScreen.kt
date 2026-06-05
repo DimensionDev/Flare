@@ -59,4 +59,8 @@ private fun String.isPixivOAuthCallback(): Boolean =
     startsWith(
         prefix = "https://app-api.pixiv.net/web/v1/users/auth/pixiv/callback",
         ignoreCase = true,
-    )
+    ) ||
+        startsWith(
+            prefix = "pixiv://account/login",
+            ignoreCase = true,
+        )

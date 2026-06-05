@@ -53,9 +53,8 @@ internal class PixivLoader(
             .toUiTimeline(accountKey)
     }
 
-    override suspend fun deleteStatus(statusKey: MicroBlogKey) {
+    override suspend fun deleteStatus(statusKey: MicroBlogKey): Unit =
         throw UnsupportedOperationException("Pixiv does not support deleting illustrations through this data source")
-    }
 
     override suspend fun relation(userKey: MicroBlogKey): UiRelation {
         val userId = userKey.pixivId()
@@ -78,22 +77,13 @@ internal class PixivLoader(
         )
     }
 
-    override suspend fun block(userKey: MicroBlogKey) {
-        throw UnsupportedOperationException("Pixiv block is not supported")
-    }
+    override suspend fun block(userKey: MicroBlogKey): Unit = throw UnsupportedOperationException("Pixiv block is not supported")
 
-    override suspend fun unblock(userKey: MicroBlogKey) {
-        throw UnsupportedOperationException("Pixiv block is not supported")
-    }
+    override suspend fun unblock(userKey: MicroBlogKey): Unit = throw UnsupportedOperationException("Pixiv block is not supported")
 
-    override suspend fun mute(userKey: MicroBlogKey) {
-        throw UnsupportedOperationException("Pixiv mute is not supported")
-    }
+    override suspend fun mute(userKey: MicroBlogKey): Unit = throw UnsupportedOperationException("Pixiv mute is not supported")
 
-    override suspend fun unmute(userKey: MicroBlogKey) {
-        throw UnsupportedOperationException("Pixiv mute is not supported")
-    }
+    override suspend fun unmute(userKey: MicroBlogKey): Unit = throw UnsupportedOperationException("Pixiv mute is not supported")
 
-    private fun MicroBlogKey.pixivId(): Long =
-        id.toLongOrNull() ?: throw IllegalArgumentException("Invalid Pixiv id: $id")
+    private fun MicroBlogKey.pixivId(): Long = id.toLongOrNull() ?: throw IllegalArgumentException("Invalid Pixiv id: $id")
 }

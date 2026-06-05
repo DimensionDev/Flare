@@ -413,7 +413,7 @@ struct ComposeScreen: View {
                             Label {
                                 Text(user.handle.canonical)
                             } icon: {
-                                AvatarView(data: user.avatar)
+                                AvatarView(data: user.avatar?.url, customHeader: user.avatar?.customHeaders)
                                     .scaledToFit()
                                     .frame(width: 20, height: 20)
                             }
@@ -439,7 +439,7 @@ struct ComposeScreen: View {
                                         Label {
                                             Text(user.handle.canonical)
                                         } icon: {
-                                            AvatarView(data: user.avatar)
+                                            AvatarView(data: user.avatar?.url, customHeader: user.avatar?.customHeaders)
                                                 .scaledToFit()
                                                 .frame(maxWidth: 20, maxHeight: 20)
                                         }

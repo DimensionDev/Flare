@@ -38,12 +38,12 @@ struct CommonProfileHeader: View {
 
     var body: some View {
         ZStack(alignment: .top) {
-            if let banner = user.banner, !banner.isEmpty {
+            if let banner = user.banner {
                 Color.clear.overlay {
-                    NetworkImage(data: banner)
+                    NetworkImage(data: banner.url, customHeader: banner.customHeaders)
                         .frame(height: CommonProfileHeaderConstants.headerHeight)
                         .onTapGesture {
-                            if let url = URL(string: DeeplinkRoute.Media.MediaImage(uri: banner, previewUrl: nil).toUri()) {
+                            if let url = URL(string: DeeplinkRoute.Media.MediaImage(uri: banner.url, previewUrl: nil).toUri()) {
                                 openURL.callAsFunction(url)
                             }
                         }
@@ -64,10 +64,11 @@ struct CommonProfileHeader: View {
                                 height: CommonProfileHeaderConstants.headerHeight -
                                 CommonProfileHeaderConstants.avatarSize / 2
                             )
-                        AvatarView(data: user.avatar)
+                        AvatarView(data: user.avatar?.url, customHeader: user.avatar?.customHeaders)
                             .frame(width: CommonProfileHeaderConstants.avatarSize, height: CommonProfileHeaderConstants.avatarSize)
                             .onTapGesture {
-                                if let url = URL(string: DeeplinkRoute.Media.MediaImage(uri: user.avatar, previewUrl: nil).toUri()) {
+                                if let avatar = user.avatar,
+                                   let url = URL(string: DeeplinkRoute.Media.MediaImage(uri: avatar.url, previewUrl: nil).toUri()) {
                                     openURL.callAsFunction(url)
                                 }
                             }

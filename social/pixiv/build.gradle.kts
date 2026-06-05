@@ -27,6 +27,7 @@ kotlin {
                 api(projects.shared)
                 api(projects.feature.loginApi)
                 implementation(libs.bundles.kotlinx)
+                implementation(libs.ksoup)
                 implementation(libs.bundles.ktorfit)
                 implementation(libs.bundles.ktor)
                 implementation(libs.ktor.client.resources)

@@ -53,6 +53,7 @@ import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.UiTwitterArticle
+import dev.dimension.flare.ui.model.toUiImage
 import dev.dimension.flare.ui.render.RenderBlockStyle
 import dev.dimension.flare.ui.render.RenderContent
 import dev.dimension.flare.ui.render.RenderRun
@@ -810,14 +811,14 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
         )
     return UiProfile(
         key = userKey,
-        avatar = avatarUrl,
+        avatar = avatarUrl.toUiImage(),
         nameInternal = name.toUiPlainText(),
         handle =
             UiHandle(
                 raw = screenName,
                 host = accountKey.host,
             ),
-        banner = legacy.profileBannerUrl,
+        banner = legacy.profileBannerUrl.toUiImage(),
         description =
             legacy.description?.takeIf { it.isNotEmpty() }?.let {
                 twitterParser
@@ -1227,7 +1228,7 @@ private fun Admin.render(accountKey: MicroBlogKey): UiProfile {
         )
     return UiProfile(
         key = key,
-        avatar = avatarURL?.replaceWithOriginImageUrl().orEmpty(),
+        avatar = avatarURL?.replaceWithOriginImageUrl().toUiImage(),
         nameInternal = displayName.orEmpty().toUiPlainText(),
         handle =
             UiHandle(

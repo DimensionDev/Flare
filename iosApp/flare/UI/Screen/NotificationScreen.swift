@@ -265,7 +265,7 @@ struct NotificationAccountsMenu: View {
                         Label {
                             Text(item.profile.handle.canonical)
                         } icon: {
-                            AvatarView(data: item.profile.avatar)
+                            AvatarView(data: item.profile.avatar?.url, customHeader: item.profile.avatar?.customHeaders)
                         }
                         if let unreadText = unreadText(for: Int(item.badge)) {
                             Text(unreadText)
@@ -276,7 +276,7 @@ struct NotificationAccountsMenu: View {
                 if let selectedItem {
                     let selectedAccount = selectedItem.profile
                     HStack(spacing: 8) {
-                        AvatarView(data: selectedAccount.avatar)
+                        AvatarView(data: selectedAccount.avatar?.url, customHeader: selectedAccount.avatar?.customHeaders)
                             .frame(width: 24, height: 24)
                         VStack(alignment: .leading, spacing: 2) {
                             Text(selectedAccount.handle.canonical)

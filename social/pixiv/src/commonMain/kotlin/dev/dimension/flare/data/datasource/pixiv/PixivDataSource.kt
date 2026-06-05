@@ -30,6 +30,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiProfile
+import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlinx.collections.immutable.ImmutableList
@@ -122,7 +123,50 @@ internal class PixivDataSource(
     }
 
     override val shortcuts: ImmutableList<ShortcutSpec> by lazy {
-        persistentListOf()
+        persistentListOf(
+            ShortcutSpec(
+                title = UiStrings.Home,
+                icon = UiIcon.Home,
+                target =
+                    ShortcutSpec.Target.Timeline(
+                        CommonTimelineSpecs.home.tabItem(
+                            data = TimelineSpec.AccountBasedData(accountKey),
+                            icon = IconType.Material(UiIcon.Pixiv),
+                        ),
+                    ),
+            ),
+            ShortcutSpec(
+                title = UiStrings.Discover,
+                icon = UiIcon.Search,
+                target =
+                    ShortcutSpec.Target.Timeline(
+                        CommonTimelineSpecs.discover.tabItem(
+                            data = TimelineSpec.AccountBasedData(accountKey),
+                            icon = IconType.Material(UiIcon.Pixiv),
+                        ),
+                    ),
+            ),
+            ShortcutSpec(
+                title = UiStrings.Following,
+                icon = UiIcon.Follow,
+                target =
+                    ShortcutSpec.Target.Timeline(
+                        PixivPlatformSpec.followingTimelineSpec.tabItem(
+                            data = TimelineSpec.AccountBasedData(accountKey),
+                        ),
+                    ),
+            ),
+            ShortcutSpec(
+                title = UiStrings.Bookmark,
+                icon = UiIcon.Bookmark,
+                target =
+                    ShortcutSpec.Target.Timeline(
+                        PixivPlatformSpec.bookmarkTimelineSpec.tabItem(
+                            data = TimelineSpec.AccountBasedData(accountKey),
+                        ),
+                    ),
+            ),
+        )
     }
 
     override fun homeTimeline(): RemoteLoader<UiTimelineV2> =

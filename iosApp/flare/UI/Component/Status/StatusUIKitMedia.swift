@@ -25,6 +25,7 @@ private struct MediaItemSignature: Equatable {
     let primaryURL: String
     let altText: String
     let aspectRatio: CGFloat?
+    let customHeaders: [String: String]?
 
     init(media: UiMedia) {
         altText = media.description_ ?? ""
@@ -33,15 +34,19 @@ private struct MediaItemSignature: Equatable {
         case .image(let image):
             kind = "image"
             primaryURL = image.previewUrl
+            customHeaders = image.customHeaders
         case .video(let video):
             kind = "video"
             primaryURL = video.thumbnailUrl
+            customHeaders = video.customHeaders
         case .gif(let gif):
             kind = "gif"
             primaryURL = gif.url
+            customHeaders = gif.customHeaders
         case .audio:
             kind = "audio"
             primaryURL = ""
+            customHeaders = nil
         }
     }
 }
@@ -161,12 +166,12 @@ final class MediaUIView: UIView {
 
         switch onEnum(of: media) {
         case .image(let image):
-            loadImage(url: image.previewUrl)
+            loadImage(url: image.previewUrl, customHeaders: image.customHeaders)
         case .video(let video):
-            loadImage(url: video.thumbnailUrl)
+            loadImage(url: video.thumbnailUrl, customHeaders: video.customHeaders)
             setAutoplayOverlay(.idle)
         case .gif(let gif):
-            loadGif(url: gif.url)
+            loadGif(url: gif.url, customHeaders: gif.customHeaders)
         case .audio:
             imageView.image = nil
         }
@@ -243,14 +248,31 @@ final class MediaUIView: UIView {
         return String(format: "%d:%02d", minutes, remainder)
     }
 
-    private func loadImage(url: String?) {
+    private func loadImage(url: String?, customHeaders: [String: String]?) {
         guard let u = url.flatMap(URL.init(string:)) else { return }
-        imageView.kf.setImage(with: u, options: [.transition(.fade(0.25)), .cacheOriginalImage, .backgroundDecode])
+        imageView.kf.setImage(with: u, options: imageOptions(customHeaders: customHeaders, cacheOriginalImage: true))
     }
 
-    private func loadGif(url: String?) {
+    private func loadGif(url: String?, customHeaders: [String: String]?) {
         guard let u = url.flatMap(URL.init(string:)) else { return }
-        imageView.kf.setImage(with: u, options: [.transition(.fade(0.25)), .backgroundDecode])
+        imageView.kf.setImage(with: u, options: imageOptions(customHeaders: customHeaders, cacheOriginalImage: false))
+    }
+
+    private func imageOptions(customHeaders: [String: String]?, cacheOriginalImage: Bool) -> KingfisherOptionsInfo {
+        var options: KingfisherOptionsInfo = [.transition(.fade(0.25)), .backgroundDecode]
+        if cacheOriginalImage {
+            options.append(.cacheOriginalImage)
+        }
+        if let customHeaders, !customHeaders.isEmpty {
+            options.append(.requestModifier(AnyModifier { request in
+                var request = request
+                for (key, value) in customHeaders {
+                    request.setValue(value, forHTTPHeaderField: key)
+                }
+                return request
+            }))
+        }
+        return options
     }
 }
 

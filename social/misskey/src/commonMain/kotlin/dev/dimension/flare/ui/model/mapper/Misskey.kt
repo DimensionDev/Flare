@@ -32,6 +32,7 @@ import dev.dimension.flare.ui.model.UiNumber
 import dev.dimension.flare.ui.model.UiPoll
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.toUiImage
 import dev.dimension.flare.ui.render.RenderBlockStyle
 import dev.dimension.flare.ui.render.RenderContent
 import dev.dimension.flare.ui.render.RenderRun
@@ -769,7 +770,7 @@ internal fun UserLite.render(accountKey: MicroBlogKey): UiProfile {
             host = accountKey.host,
         )
     return UiProfile(
-        avatar = avatarUrl.orEmpty(),
+        avatar = avatarUrl.toUiImage(),
         nameInternal = parseName(name.orEmpty(), accountKey, emojis),
         handle =
             UiHandle(
@@ -813,7 +814,7 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
         )
     val sourceLanguages = listOfNotNull(lang).toPersistentList()
     return UiProfile(
-        avatar = avatarUrl.orEmpty(),
+        avatar = avatarUrl.toUiImage(),
         nameInternal = parseName(name.orEmpty(), accountKey, emojis, sourceLanguages),
         handle =
             UiHandle(
@@ -821,7 +822,7 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
                 host = remoteHost,
             ),
         key = userKey,
-        banner = bannerUrl,
+        banner = bannerUrl.toUiImage(),
         description =
             description?.let {
                 parseMisskeyText(it, accountKey, emojis, remoteHost, sourceLanguages)

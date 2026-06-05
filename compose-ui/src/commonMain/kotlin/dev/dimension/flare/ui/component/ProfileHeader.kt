@@ -153,8 +153,8 @@ private fun ProfileHeaderSuccess(
     val uriLauncher = LocalUriHandler.current
     CommonProfileHeader(
         modifier = modifier,
-        bannerUrl = user.banner,
-        avatarUrl = user.avatar,
+        banner = user.banner,
+        avatar = user.avatar,
         displayName = user.name,
         userKey = user.key,
         handle = user.handle,
@@ -266,10 +266,10 @@ private fun ProfileHeaderSuccess(
             menu.invoke(this)
         },
         onAvatarClick = {
-            uriLauncher.openUri(DeeplinkRoute.Media.Image(user.avatar, null).toUri())
+            user.avatar?.let { uriLauncher.openUri(DeeplinkRoute.Media.Image(it.url, null).toUri()) }
         },
         onBannerClick = {
-            user.banner?.let { uriLauncher.openUri(DeeplinkRoute.Media.Image(it, null).toUri()) }
+            user.banner?.let { uriLauncher.openUri(DeeplinkRoute.Media.Image(it.url, null).toUri()) }
         },
         handleTrailing = {
             user.mark.fastForEach {

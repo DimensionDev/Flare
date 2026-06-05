@@ -119,7 +119,6 @@ internal class PixivAuthPlugin(
         }
         return refreshToken(clientId, clientSecret, credential.refreshToken)
     }
-
 }
 
 private fun PixivCredential.shouldRefresh(): Boolean =

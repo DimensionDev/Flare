@@ -145,7 +145,7 @@ private class PixivOAuthLoginHandler(
         }
     }
 
-    override fun canResume(value: String): Boolean = value.contains("code=") && value.contains("state=")
+    override fun canResume(value: String): Boolean = value.isPixivOAuthCallback() && value.contains("code=")
 
     override fun clear() {
         _state.value = oauthState()
@@ -191,3 +191,13 @@ private fun PlatformOAuthPending.toPixivAuthorizationRequest(): PixivAuthorizati
         state = attributes.getValue("state"),
         redirectUri = attributes.getValue("redirect_uri"),
     )
+
+private fun String.isPixivOAuthCallback(): Boolean =
+    startsWith(
+        prefix = "https://app-api.pixiv.net/web/v1/users/auth/pixiv/callback",
+        ignoreCase = true,
+    ) ||
+        startsWith(
+            prefix = "pixiv://account/login",
+            ignoreCase = true,
+        )

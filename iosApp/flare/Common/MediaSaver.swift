@@ -9,14 +9,14 @@ class MediaSaver: NSObject {
     
     static let shared = MediaSaver()
     
-    func saveImage(url: String) {
+    func saveImage(url: String, customHeaders: [String: String]? = nil) {
         if let remoteUrl = URL(string: url) {
-            saveRemoteOriginalDataToPhotos(from: remoteUrl)
+            saveRemoteOriginalDataToPhotos(from: remoteUrl, customHeaders: customHeaders)
         }
     }
 
-    private func saveRemoteOriginalDataToPhotos(from url: URL) {
-        KingfisherManager.shared.downloader.downloadImage(with: url, options: [], progressBlock: nil) { result in
+    private func saveRemoteOriginalDataToPhotos(from url: URL, customHeaders: [String: String]?) {
+        KingfisherManager.shared.downloader.downloadImage(with: url, options: kingfisherOptions(customHeaders: customHeaders), progressBlock: nil) { result in
             switch result {
             case .success(let v):
                 UIImageWriteToSavedPhotosAlbum(v.image, self, #selector(self.saveCompleted), nil)
@@ -31,6 +31,19 @@ class MediaSaver: NSObject {
                 }
             }
         }
+    }
+
+    private func kingfisherOptions(customHeaders: [String: String]?) -> KingfisherOptionsInfo {
+        guard let customHeaders, !customHeaders.isEmpty else {
+            return []
+        }
+        return [.requestModifier(AnyModifier { request in
+            var request = request
+            for (key, value) in customHeaders {
+                request.setValue(value, forHTTPHeaderField: key)
+            }
+            return request
+        })]
     }
     
     @objc func saveCompleted(_ image: UIImage, didFinishSavingWithError error: Error?, contextInfo: UnsafeRawPointer) {

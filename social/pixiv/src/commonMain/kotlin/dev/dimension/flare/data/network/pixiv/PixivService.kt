@@ -36,12 +36,11 @@ private val PixivHeaderPlugin =
 private fun pixivKtorfit(
     baseUrl: String,
     configure: HttpClientConfigBuilder = {},
-) =
-    ktorfit(baseUrl) {
-        expectSuccess = false
-        install(PixivHeaderPlugin)
-        configure()
-    }
+) = ktorfit(baseUrl) {
+    expectSuccess = false
+    install(PixivHeaderPlugin)
+    configure()
+}
 
 private typealias HttpClientConfigBuilder = io.ktor.client.HttpClientConfig<*>.() -> Unit
 
@@ -137,18 +136,14 @@ internal class PixivService private constructor(
             includePolicy = includePolicy,
         )
 
-    suspend fun recommendedIllusts(
-        includeRankingIllusts: Boolean = true,
-    ): PixivIllustListResponse =
+    suspend fun recommendedIllusts(includeRankingIllusts: Boolean = true): PixivIllustListResponse =
         appResources.recommendedIllusts(
             includeRankingIllusts = includeRankingIllusts,
         )
 
     suspend fun recommendedManga(): PixivIllustListResponse = appResources.recommendedManga()
 
-    suspend fun followedIllusts(
-        restrict: PixivRestrict = PixivRestrict.Public,
-    ): PixivIllustListResponse =
+    suspend fun followedIllusts(restrict: PixivRestrict = PixivRestrict.Public): PixivIllustListResponse =
         appResources.followedIllusts(
             restrict = restrict.value,
         )
@@ -190,16 +185,12 @@ internal class PixivService private constructor(
             endDate = endDate,
         )
 
-    suspend fun illustDetail(
-        illustId: Long,
-    ): PixivIllustDetailResponse =
+    suspend fun illustDetail(illustId: Long): PixivIllustDetailResponse =
         appResources.illustDetail(
             illustId = illustId,
         )
 
-    suspend fun relatedIllusts(
-        illustId: Long,
-    ): PixivIllustListResponse =
+    suspend fun relatedIllusts(illustId: Long): PixivIllustListResponse =
         appResources.relatedIllusts(
             illustId = illustId,
         )
@@ -224,39 +215,29 @@ internal class PixivService private constructor(
             tag = tag,
         )
 
-    suspend fun userDetail(
-        userId: Long,
-    ): PixivUserDetailResponse =
+    suspend fun userDetail(userId: Long): PixivUserDetailResponse =
         appResources.userDetail(
             userId = userId,
         )
 
-    suspend fun searchUsers(
-        word: String,
-    ): PixivUserListResponse =
+    suspend fun searchUsers(word: String): PixivUserListResponse =
         appResources.searchUsers(
             word = word,
         )
 
     suspend fun recommendedUsers(): PixivUserListResponse = appResources.recommendedUsers()
 
-    suspend fun trendingTags(
-        type: PixivTrendingTagType = PixivTrendingTagType.Illust,
-    ): PixivTrendingTagsResponse =
+    suspend fun trendingTags(type: PixivTrendingTagType = PixivTrendingTagType.Illust): PixivTrendingTagsResponse =
         appResources.trendingTags(
             type = type.value,
         )
 
-    suspend fun ugoiraMetadata(
-        illustId: Long,
-    ): PixivUgoiraMetadataResponse =
+    suspend fun ugoiraMetadata(illustId: Long): PixivUgoiraMetadataResponse =
         appResources.ugoiraMetadata(
             illustId = illustId,
         )
 
-    suspend fun bookmarkDetail(
-        illustId: Long,
-    ): PixivBookmarkDetailResponse =
+    suspend fun bookmarkDetail(illustId: Long): PixivBookmarkDetailResponse =
         appResources.bookmarkDetail(
             illustId = illustId,
         )
@@ -272,9 +253,7 @@ internal class PixivService private constructor(
             tags = tags,
         )
 
-    suspend fun deleteBookmark(
-        illustId: Long,
-    ): PixivNullResponse =
+    suspend fun deleteBookmark(illustId: Long): PixivNullResponse =
         appResources.deleteBookmark(
             illustId = illustId,
         )
@@ -288,20 +267,14 @@ internal class PixivService private constructor(
             restrict = restrict.value,
         )
 
-    suspend fun unfollowUser(
-        userId: Long,
-    ): PixivNullResponse =
+    suspend fun unfollowUser(userId: Long): PixivNullResponse =
         appResources.unfollowUser(
             userId = userId,
         )
 
-    suspend fun nextIllusts(
-        nextUrl: String,
-    ): PixivIllustListResponse = nextClient.get(nextUrl).body()
+    suspend fun nextIllusts(nextUrl: String): PixivIllustListResponse = nextClient.get(nextUrl).body()
 
-    suspend fun nextUsers(
-        nextUrl: String,
-    ): PixivUserListResponse = nextClient.get(nextUrl).body()
+    suspend fun nextUsers(nextUrl: String): PixivUserListResponse = nextClient.get(nextUrl).body()
 }
 
 private suspend fun PixivTokenResponse.toCredentialFallback(credentialFlow: Flow<PixivCredential>): PixivCredential? {

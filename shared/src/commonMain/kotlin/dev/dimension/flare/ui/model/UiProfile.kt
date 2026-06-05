@@ -20,11 +20,11 @@ import kotlinx.serialization.Transient
 public data class UiProfile public constructor(
     val key: MicroBlogKey,
     val handle: UiHandle,
-    val avatar: String,
+    val avatar: UiMedia.Image?,
     private val nameInternal: UiRichText,
     val platformType: PlatformType,
     public val clickEvent: ClickEvent,
-    public val banner: String?,
+    public val banner: UiMedia.Image?,
     public val description: UiRichText?,
     public val sourceLanguages: SerializableImmutableList<String> = persistentListOf(),
     @Transient
@@ -33,6 +33,36 @@ public data class UiProfile public constructor(
     public val mark: SerializableImmutableList<Mark>,
     public val bottomContent: BottomContent?,
 ) {
+    public constructor(
+        key: MicroBlogKey,
+        handle: UiHandle,
+        avatar: String,
+        nameInternal: UiRichText,
+        platformType: PlatformType,
+        clickEvent: ClickEvent,
+        banner: String?,
+        description: UiRichText?,
+        sourceLanguages: SerializableImmutableList<String> = persistentListOf(),
+        translationDisplayState: TranslationDisplayState = TranslationDisplayState.Hidden,
+        matrices: Matrices,
+        mark: SerializableImmutableList<Mark>,
+        bottomContent: BottomContent?,
+    ) : this(
+        key = key,
+        handle = handle,
+        avatar = avatar.toUiImage(),
+        nameInternal = nameInternal,
+        platformType = platformType,
+        clickEvent = clickEvent,
+        banner = banner.toUiImage(),
+        description = description,
+        sourceLanguages = sourceLanguages,
+        translationDisplayState = translationDisplayState,
+        matrices = matrices,
+        mark = mark,
+        bottomContent = bottomContent,
+    )
+
     // If name is blank, use handle without @ as display name
     val name: UiRichText by lazy {
         if (nameInternal.raw.isEmpty() || nameInternal.raw.isBlank()) {
@@ -55,7 +85,7 @@ public data class UiProfile public constructor(
                 } else {
                     handle
                 },
-            avatar = avatar.ifBlank { existing.avatar },
+            avatar = avatar ?: existing.avatar,
             nameInternal =
                 if (nameInternal.raw.isBlank() || (isNostrFallbackName() && !existing.isNostrFallbackName())) {
                     existing.nameInternal
@@ -149,11 +179,11 @@ public fun createSampleUser(): UiProfile =
                 raw = "sampleUser",
                 host = "sampleHost",
             ),
-        avatar = "https://example.com/avatar.jpg",
+        avatar = "https://example.com/avatar.jpg".toUiImage(),
         nameInternal = "".toUiPlainText(),
         platformType = PlatformType.Mastodon,
         clickEvent = ClickEvent.Noop,
-        banner = "https://example.com/banner.jpg",
+        banner = "https://example.com/banner.jpg".toUiImage(),
         description = null,
         matrices =
             UiProfile.Matrices(

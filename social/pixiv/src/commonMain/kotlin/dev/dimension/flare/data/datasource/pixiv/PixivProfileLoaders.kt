@@ -23,15 +23,19 @@ internal class PixivSearchUserLoader(
 
         val response =
             when (request) {
-                PagingRequest.Refresh ->
+                PagingRequest.Refresh -> {
                     service.searchUsers(
                         word = query,
                     )
+                }
 
-                is PagingRequest.Append ->
+                is PagingRequest.Append -> {
                     service.nextUsers(request.nextKey)
+                }
 
-                is PagingRequest.Prepend -> error("Handled above")
+                is PagingRequest.Prepend -> {
+                    error("Handled above")
+                }
             }
 
         return PagingResult(
@@ -56,11 +60,17 @@ internal class PixivDiscoverUserLoader(
 
         val response =
             when (request) {
-                PagingRequest.Refresh -> service.recommendedUsers()
-                is PagingRequest.Append ->
-                    service.nextUsers(request.nextKey)
+                PagingRequest.Refresh -> {
+                    service.recommendedUsers()
+                }
 
-                is PagingRequest.Prepend -> error("Handled above")
+                is PagingRequest.Append -> {
+                    service.nextUsers(request.nextKey)
+                }
+
+                is PagingRequest.Prepend -> {
+                    error("Handled above")
+                }
             }
 
         return PagingResult(

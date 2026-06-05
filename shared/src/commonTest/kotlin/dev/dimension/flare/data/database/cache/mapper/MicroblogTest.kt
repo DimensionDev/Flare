@@ -41,6 +41,7 @@ import dev.dimension.flare.ui.model.UiHandle
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.toUiImage
 import dev.dimension.flare.ui.render.toUi
 import dev.dimension.flare.ui.render.toUiPlainText
 import kotlinx.collections.immutable.persistentListOf
@@ -1352,7 +1353,7 @@ class MicroblogTest : RobolectricTest() {
             val detailedUser =
                 createUser(userKey, "Detailed").copy(
                     platformType = dev.dimension.flare.model.PlatformType.Bluesky,
-                    banner = "https://bsky.social/banner.png",
+                    banner = "https://bsky.social/banner.png".toUiImage(),
                     description = "full profile".toUiPlainText(),
                     matrices =
                         UiProfile.Matrices(
@@ -1405,7 +1406,7 @@ class MicroblogTest : RobolectricTest() {
 
             val savedUser = db.userDao().findByKey(userKey).first()
             val savedProfile = assertNotNull(savedUser).content
-            assertEquals("https://bsky.social/banner.png", savedProfile.banner)
+            assertEquals("https://bsky.social/banner.png", savedProfile.banner?.url)
             assertEquals("full profile", savedProfile.description?.raw)
             assertEquals(12, savedProfile.matrices.fansCount)
             assertEquals(34, savedProfile.matrices.followsCount)
@@ -2046,8 +2047,8 @@ class MicroblogTest : RobolectricTest() {
             val savedProfile = assertNotNull(savedUser).content
             assertEquals("alice", savedProfile.handle.raw)
             assertEquals("Alice", savedProfile.name.raw)
-            assertEquals("https://example.com/alice.png", savedProfile.avatar)
-            assertEquals("https://example.com/banner.png", savedProfile.banner)
+            assertEquals("https://example.com/alice.png", savedProfile.avatar?.url)
+            assertEquals("https://example.com/banner.png", savedProfile.banner?.url)
             assertEquals("hello", savedProfile.description?.raw)
         }
 

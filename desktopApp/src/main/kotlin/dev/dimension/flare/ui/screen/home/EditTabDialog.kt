@@ -45,6 +45,7 @@ import dev.dimension.flare.home_tab_notifications_title
 import dev.dimension.flare.liked_title
 import dev.dimension.flare.mastodon_tab_local_title
 import dev.dimension.flare.mastodon_tab_public_title
+import dev.dimension.flare.misskey_channel_tab_following
 import dev.dimension.flare.mixed_timeline_title
 import dev.dimension.flare.ok
 import dev.dimension.flare.posts_title
@@ -239,4 +240,5 @@ private val UiStrings.desktopStringResource: StringResource
             UiStrings.ExternalSigner -> Res.string.ok
             UiStrings.WebCookieLogin -> Res.string.ok
             UiStrings.NostrLoginAccount -> Res.string.ok
+            UiStrings.Following -> Res.string.misskey_channel_tab_following
         }

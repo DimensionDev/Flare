@@ -10,7 +10,7 @@ struct UserOnelineView<TrailingContent: View>: View {
     var body: some View {
         HStack {
             if showAvatar {
-                AvatarView(data: data.avatar)
+                AvatarView(data: data.avatar?.url, customHeader: data.avatar?.customHeaders)
                     .frame(width: 20, height: 20)
                     .onTapGesture {
                         onClicked?()

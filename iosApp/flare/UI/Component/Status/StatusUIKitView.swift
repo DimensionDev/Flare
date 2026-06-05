@@ -589,7 +589,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
         if newWantsAvatar, let user = data.user {
             let avatarView = resolvedAvatarView()
             avatarView.avatarShape = appearance.avatarShape
-            avatarView.set(url: user.avatar)
+            avatarView.set(url: user.avatar?.url, customHeaders: user.avatar?.customHeaders)
             if avatarView.superview !== self { addSubview(avatarView) }
         } else if avatarViewStorage?.superview === self {
             avatarViewStorage?.removeFromSuperview()

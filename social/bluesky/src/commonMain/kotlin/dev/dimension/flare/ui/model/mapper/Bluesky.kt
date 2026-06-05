@@ -46,6 +46,7 @@ import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiNumber
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.toUiImage
 import dev.dimension.flare.ui.render.RenderContent
 import dev.dimension.flare.ui.render.RenderRun
 import dev.dimension.flare.ui.render.RenderTextStyle
@@ -1000,7 +1001,7 @@ internal fun chat.bsky.actor.ProfileViewBasic.render(accountKey: MicroBlogKey): 
             host = accountKey.host,
         )
     return UiProfile(
-        avatar = avatar?.uri.orEmpty(),
+        avatar = avatar?.uri.toUiImage(),
         nameInternal = displayName.orEmpty().toUiPlainText(),
         handle =
             UiHandle(
@@ -1037,7 +1038,7 @@ internal fun ProfileViewBasic.render(accountKey: MicroBlogKey): UiProfile {
             host = accountKey.host,
         )
     return UiProfile(
-        avatar = avatar?.uri.orEmpty(),
+        avatar = avatar?.uri.toUiImage(),
         nameInternal = displayName.orEmpty().toUiPlainText(),
         handle =
             UiHandle(
@@ -1074,7 +1075,7 @@ internal fun ProfileView.render(accountKey: MicroBlogKey): UiProfile {
             host = accountKey.host,
         )
     return UiProfile(
-        avatar = avatar?.uri.orEmpty(),
+        avatar = avatar?.uri.toUiImage(),
         nameInternal = displayName.orEmpty().toUiPlainText(),
         handle =
             UiHandle(
@@ -1111,7 +1112,7 @@ internal fun ProfileViewDetailed.render(accountKey: MicroBlogKey): UiProfile {
             host = accountKey.host,
         )
     return UiProfile(
-        avatar = avatar?.uri.orEmpty(),
+        avatar = avatar?.uri.toUiImage(),
         nameInternal = displayName.orEmpty().toUiPlainText(),
         handle =
             UiHandle(
@@ -1119,7 +1120,7 @@ internal fun ProfileViewDetailed.render(accountKey: MicroBlogKey): UiProfile {
                 host = accountKey.host,
             ),
         key = userKey,
-        banner = banner?.uri,
+        banner = banner?.uri.toUiImage(),
         description = description?.let { parser.parse(it) }?.toUiRichText(accountKey),
         matrices =
             UiProfile.Matrices(

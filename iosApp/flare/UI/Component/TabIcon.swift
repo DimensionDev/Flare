@@ -65,6 +65,7 @@ extension UiStrings {
         case .externalSigner: String(localized: "nostr_login_amber_button")
         case .webCookieLogin: String(localized: "login_button")
         case .nostrLoginAccount: String(localized: "nostr_login_account_hint")
+        case .following: String(localized: "misskey_channel_tab_following")
         }
     }
 }
@@ -150,7 +151,7 @@ struct AvatarTabIcon: View {
 
     var body: some View {
         StateView(state: presenter.state.user) { user in
-            AvatarView(data: user.avatar)
+            AvatarView(data: user.avatar?.url, customHeader: user.avatar?.customHeaders)
         } loadingContent: {
             Image("fa-globe")
                 .resizable()

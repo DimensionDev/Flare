@@ -1,8 +1,8 @@
 package dev.dimension.flare.data.network.pixiv
 
-import dev.dimension.flare.data.platform.PixivCredential
-import dev.dimension.flare.data.platform.PIXIV_HOST
 import dev.dimension.flare.data.network.pixiv.model.PixivTokenResponse
+import dev.dimension.flare.data.platform.PIXIV_HOST
+import dev.dimension.flare.data.platform.PixivCredential
 import dev.dimension.flare.model.MicroBlogKey
 import dev.whyoleg.cryptography.CryptographyProvider
 import dev.whyoleg.cryptography.algorithms.SHA256
@@ -31,7 +31,6 @@ internal suspend fun buildPixivAuthorizationRequest(redirectUri: String): PixivA
                 parameters.append("code_challenge", codeChallenge)
                 parameters.append("code_challenge_method", "S256")
                 parameters.append("client", "pixiv-android")
-                parameters.append("state", state)
                 parameters.append("redirect_uri", redirectUri)
             }.buildString()
     return PixivAuthorizationRequest(
@@ -47,11 +46,8 @@ internal fun parsePixivCallbackCode(
     expectedState: String,
 ): String {
     val url = Url(callbackUrl)
-    val state = url.parameters["state"]
     val code = url.parameters["code"]
-    require(state == expectedState) {
-        "State mismatch: expected $expectedState, got $state"
-    }
+    // Pixiv returns its own callback state here; the PKCE code verifier is what binds this flow.
     require(!code.isNullOrBlank()) {
         "No Pixiv authorization code"
     }

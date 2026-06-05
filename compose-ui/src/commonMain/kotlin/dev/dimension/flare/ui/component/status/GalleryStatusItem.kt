@@ -32,6 +32,7 @@ import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.model.ClickContext
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.toUiImage
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import dev.dimension.flare.ui.route.toUri
 import dev.dimension.flare.ui.theme.PlatformTheme
@@ -141,7 +142,7 @@ private fun GalleryPostTile(
             }
         }
         GalleryBottomRow(
-            avatarUrl = post.user?.avatar,
+            avatar = post.user?.avatar,
             name =
                 post.user
                     ?.name
@@ -210,7 +211,7 @@ private fun GalleryFeedTile(
             }
         }
         GalleryBottomRow(
-            avatarUrl = feed.source.icon,
+            avatar = feed.source.icon.toUiImage(),
             name = feed.source.name,
             isCircle = false,
             modifier =
@@ -223,7 +224,7 @@ private fun GalleryFeedTile(
 
 @Composable
 private fun GalleryBottomRow(
-    avatarUrl: String?,
+    avatar: UiMedia.Image?,
     name: String,
     isCircle: Boolean,
     modifier: Modifier = Modifier,
@@ -234,13 +235,14 @@ private fun GalleryBottomRow(
     ) {
         if (isCircle) {
             AvatarComponent(
-                data = avatarUrl,
+                data = avatar,
                 size = GalleryAvatarSize,
             )
         } else {
             NetworkImage(
-                model = avatarUrl,
+                model = avatar?.url,
                 contentDescription = null,
+                customHeaders = avatar?.customHeaders,
                 modifier =
                     Modifier
                         .size(GalleryAvatarSize)

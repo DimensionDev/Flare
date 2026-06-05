@@ -149,13 +149,13 @@ struct HomeTimelineScreen: View {
     private var leadingToolbarContent: some ToolbarContent {
         ToolbarItem(placement: .topBarLeading) {
             StateView(state: activeAccountPresenter.state.user) { user in
-                if user.avatar.isEmpty {
+                if user.avatar == nil {
                     Image(.faGear)
                 } else {
                     if #available(iOS 26.0, *) {
-                        AvatarView(data: user.avatar)
+                        AvatarView(data: user.avatar?.url, customHeader: user.avatar?.customHeaders)
                     } else {
-                        AvatarView(data: user.avatar)
+                        AvatarView(data: user.avatar?.url, customHeader: user.avatar?.customHeaders)
                             .frame(width: 24, height: 24)
                     }
                 }

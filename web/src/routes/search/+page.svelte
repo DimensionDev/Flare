@@ -236,14 +236,14 @@
 							showAccountMenu = !showAccountMenu;
 						}}
 					>
-						<img class="account-avatar" src={search.selectedAccount.avatar} alt="" />
+						<img class="account-avatar" src={search.selectedAccount.avatar?.url} alt="" />
 					</button>
 					{#if showAccountMenu && hasMultipleAccounts}
 						<ul class="menu dropdown-content z-20 mt-2 w-64 rounded-box border border-base-300 bg-base-100 p-2 shadow-lg">
 							{#each accounts as account (account.key.host + ':' + account.key.id)}
 								<li>
 									<button type="button" onclick={() => selectAccount(account)}>
-										<img class="menu-avatar" src={account.avatar} alt="" />
+										<img class="menu-avatar" src={account.avatar?.url} alt="" />
 										<span>{account.handle.canonical}</span>
 									</button>
 								</li>
@@ -272,7 +272,7 @@
 						type="button"
 						onclick={() => selectAccount(account)}
 					>
-						<img class="chip-avatar" src={account.avatar} alt="" />
+						<img class="chip-avatar" src={account.avatar?.url} alt="" />
 						<span>{account.handle.canonical}</span>
 					</button>
 				{/each}

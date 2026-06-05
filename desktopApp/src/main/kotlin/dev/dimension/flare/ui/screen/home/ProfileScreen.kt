@@ -221,14 +221,14 @@ internal fun ProfileScreen(
                                 },
                                 onAvatarClick = {
                                     state.state.userState.onSuccess {
-                                        if (it.avatar.isNotBlank()) {
-                                            onRawMediaClick(it.avatar)
+                                        it.avatar?.let { avatar ->
+                                            onRawMediaClick(avatar.url)
                                         }
                                     }
                                 },
                                 onBannerClick = {
                                     state.state.userState.onSuccess {
-                                        it.banner?.let(onRawMediaClick)
+                                        it.banner?.let { banner -> onRawMediaClick(banner.url) }
                                     }
                                 },
                                 isBigScreen = true,

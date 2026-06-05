@@ -8,7 +8,7 @@ struct UserCompatView<TrailingContent: View>: View {
     let onClicked: (() -> Void)?
     var body: some View {
         HStack {
-            AvatarView(data: data.avatar)
+            AvatarView(data: data.avatar?.url, customHeader: data.avatar?.customHeaders)
                 .frame(width: 44, height: 44)
                 .if(onClicked != nil) { view in
                     view

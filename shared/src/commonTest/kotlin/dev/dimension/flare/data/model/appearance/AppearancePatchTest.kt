@@ -22,6 +22,7 @@ class AppearancePatchTest {
     @Test
     fun emptyPatchSynthesizesDefaultAppearanceSettings() {
         assertEquals(AppearanceSettings.Default, AppearancePatch.EMPTY.toAppearanceSettings())
+        assertFalse(TimelineAppearance.Default.expandContentWarning)
     }
 
     @Test
@@ -47,6 +48,7 @@ class AppearancePatchTest {
                 .set(AppearanceKeys.DeckMode, true)
                 .set(AppearanceKeys.AvatarShape, AvatarShape.SQUARE)
                 .set(AppearanceKeys.ShowMedia, false)
+                .set(AppearanceKeys.ExpandContentWarning, true)
                 .set(AppearanceKeys.TimelineDisplayMode, TimelineDisplayMode.Gallery)
 
         assertEquals(
@@ -61,6 +63,7 @@ class AppearancePatchTest {
             TimelineAppearance(
                 avatarShape = AvatarShape.SQUARE,
                 showMedia = false,
+                expandContentWarning = true,
                 timelineDisplayMode = TimelineDisplayMode.Gallery,
             ),
             patch.toTimelineAppearance(),
@@ -73,13 +76,16 @@ class AppearancePatchTest {
             AppearancePatch.EMPTY
                 .set(AppearanceKeys.ShowMedia, false)
                 .set(AppearanceKeys.ShowNumbers, false)
+                .set(AppearanceKeys.ExpandContentWarning, false)
         val timelinePatch =
             AppearancePatch.EMPTY
                 .set(AppearanceKeys.ShowMedia, true)
+                .set(AppearanceKeys.ExpandContentWarning, true)
 
         assertEquals(
             TimelineAppearance(
                 showMedia = true,
+                expandContentWarning = true,
                 showNumbers = false,
             ),
             globalPatch.toTimelineAppearance(timelinePatch),
@@ -99,11 +105,13 @@ class AppearancePatchTest {
         val patch =
             AppearancePatch.EMPTY
                 .set(AppearanceKeys.ShowMedia, true)
+                .set(AppearanceKeys.ExpandContentWarning, true)
                 .set(AppearanceKeys.TimelineDisplayMode, TimelineDisplayMode.Gallery)
 
         assertEquals(
             TimelineAppearance(
                 showMedia = true,
+                expandContentWarning = true,
                 showNumbers = false,
                 timelineDisplayMode = TimelineDisplayMode.Gallery,
                 aiConfig = TimelineAppearance.AiConfig(translation = true, tldr = true),
@@ -124,6 +132,7 @@ class AppearancePatchTest {
                 appearancePatch =
                     AppearancePatch.EMPTY
                         .set(AppearanceKeys.ShowNumbers, false)
+                        .set(AppearanceKeys.ExpandContentWarning, true)
                         .set(AppearanceKeys.AbsoluteTimestamp, true),
                 createPresenter = { error("unused in test") },
             )
@@ -138,6 +147,7 @@ class AppearancePatchTest {
         assertEquals(
             TimelineAppearance(
                 showNumbers = false,
+                expandContentWarning = true,
                 absoluteTimestamp = true,
                 aiConfig = TimelineAppearance.AiConfig(translation = true),
                 lineLimit = 7,
@@ -150,7 +160,12 @@ class AppearancePatchTest {
     @Test
     fun activeAppearanceSettingsFieldsAreCoveredByCatalog() {
         val deprecatedFields = setOf("showActions")
-        val bagOnlyFields = setOf(AppearanceKeys.ShowBottomBarLabels, AppearanceKeys.DeckMode)
+        val bagOnlyFields =
+            setOf(
+                AppearanceKeys.ShowBottomBarLabels,
+                AppearanceKeys.DeckMode,
+                AppearanceKeys.ExpandContentWarning,
+            )
         val activeFields =
             AppearanceSettings
                 .serializer()
@@ -204,6 +219,7 @@ class AppearancePatchTest {
                 .set(AppearanceKeys.ShowBottomBarLabels, false)
                 .set(AppearanceKeys.DeckMode, true)
                 .set(AppearanceKeys.ShowMedia, false)
+                .set(AppearanceKeys.ExpandContentWarning, true)
                 .set(AppearanceKeys.VideoAutoplay, VideoAutoplay.ALWAYS)
                 .set(AppearanceKeys.PostActionStyle, PostActionStyle.Stretch)
 

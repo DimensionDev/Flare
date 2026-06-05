@@ -360,6 +360,8 @@
   "settingsAppearanceExpandMediaDescription": "Показване на медията в оригиналните ѝ пропорции във времевите линии",
   "settingsAppearanceShowCwImg": "Показване на чувствително съдържание",
   "settingsAppearanceShowCwImgDescription": "Винаги разкриване на чувствителна медия в публикациите",
+  "settingsAppearanceExpandContentWarning": "Show content behind content warnings",
+  "settingsAppearanceExpandContentWarningDescription": "Always reveal post content hidden by content warnings",
   "settingsAppearanceVideoAutoplay": "Автоматично пускане на видео",
   "settingsAppearanceVideoAutoplayDescription": "Автоматично пускане на видеоклипове в публикациите",
   "settingsAppearanceVideoAutoplayWifi": "Само при Wi-Fi",

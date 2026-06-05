@@ -360,6 +360,8 @@
   "settingsAppearanceExpandMediaDescription": "Medien in ihrem Original-Seitenverhältnis in Timelines anzeigen",
   "settingsAppearanceShowCwImg": "Sensible Inhalte anzeigen",
   "settingsAppearanceShowCwImgDescription": "Sensible Medien in Beiträgen immer enthüllen",
+  "settingsAppearanceExpandContentWarning": "Show content behind content warnings",
+  "settingsAppearanceExpandContentWarningDescription": "Always reveal post content hidden by content warnings",
   "settingsAppearanceVideoAutoplay": "Automatische Videowiedergabe",
   "settingsAppearanceVideoAutoplayDescription": "Videos in Beiträgen automatisch abspielen",
   "settingsAppearanceVideoAutoplayWifi": "Nur WLAN",

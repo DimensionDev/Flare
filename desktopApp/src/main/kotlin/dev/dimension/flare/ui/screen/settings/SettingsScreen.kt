@@ -143,6 +143,8 @@ import dev.dimension.flare.settings_appearance_deck_mode
 import dev.dimension.flare.settings_appearance_deck_mode_description
 import dev.dimension.flare.settings_appearance_display_group_subtitle
 import dev.dimension.flare.settings_appearance_display_group_title
+import dev.dimension.flare.settings_appearance_expand_content_warning
+import dev.dimension.flare.settings_appearance_expand_content_warning_description
 import dev.dimension.flare.settings_appearance_expand_media
 import dev.dimension.flare.settings_appearance_expand_media_description
 import dev.dimension.flare.settings_appearance_full_width_post
@@ -1032,6 +1034,24 @@ internal fun SettingsScreen(
                                     checked = LocalTimelineAppearance.current.showSensitiveContent,
                                     {
                                         state.appearanceState.update(AppearanceKeys.ShowSensitiveContent, it)
+                                    },
+                                    textBefore = true,
+                                )
+                            },
+                        )
+                        ExpanderItemSeparator()
+                        ExpanderItem(
+                            heading = {
+                                Text(stringResource(Res.string.settings_appearance_expand_content_warning))
+                            },
+                            caption = {
+                                Text(stringResource(Res.string.settings_appearance_expand_content_warning_description))
+                            },
+                            trailing = {
+                                Switcher(
+                                    checked = LocalTimelineAppearance.current.expandContentWarning,
+                                    {
+                                        state.appearanceState.update(AppearanceKeys.ExpandContentWarning, it)
                                     },
                                     textBefore = true,
                                 )

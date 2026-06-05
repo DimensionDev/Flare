@@ -15728,6 +15728,26 @@
         }
       }
     },
+    "appearance_expand_content_warning" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show content behind content warnings"
+          }
+        }
+      }
+    },
+    "appearance_expand_content_warning_description" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Always reveal post content hidden by content warnings"
+          }
+        }
+      }
+    },
     "appearance_theme" : {
       "localizations" : {
         "af" : {

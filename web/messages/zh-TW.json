@@ -360,6 +360,8 @@
   "settingsAppearanceExpandMediaDescription": "在時間軸中以原始寬高比顯示媒體",
   "settingsAppearanceShowCwImg": "顯示敏感內容",
   "settingsAppearanceShowCwImgDescription": "一律展開貼文中的敏感媒體",
+  "settingsAppearanceExpandContentWarning": "Show content behind content warnings",
+  "settingsAppearanceExpandContentWarningDescription": "Always reveal post content hidden by content warnings",
   "settingsAppearanceVideoAutoplay": "影片自動播放",
   "settingsAppearanceVideoAutoplayDescription": "自動播放貼文中的影片",
   "settingsAppearanceVideoAutoplayWifi": "僅限 Wi-Fi",

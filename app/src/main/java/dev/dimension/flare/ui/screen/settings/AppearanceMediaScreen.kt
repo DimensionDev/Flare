@@ -137,6 +137,28 @@ internal fun AppearanceMediaScreen(onBack: () -> Unit) {
             AnimatedVisibility(timelineAppearance.showMedia) {
                 SegmentedListItem(
                     onClick = {
+                        state.update(AppearanceKeys.ExpandContentWarning, !timelineAppearance.expandContentWarning)
+                    },
+                    shapes = ListItemDefaults.item(),
+                    content = {
+                        Text(text = stringResource(id = R.string.settings_appearance_expand_content_warning))
+                    },
+                    supportingContent = {
+                        Text(text = stringResource(id = R.string.settings_appearance_expand_content_warning_description))
+                    },
+                    trailingContent = {
+                        Switch(
+                            checked = timelineAppearance.expandContentWarning,
+                            onCheckedChange = {
+                                state.update(AppearanceKeys.ExpandContentWarning, it)
+                            },
+                        )
+                    },
+                )
+            }
+            AnimatedVisibility(timelineAppearance.showMedia) {
+                SegmentedListItem(
+                    onClick = {
                         state.update(AppearanceKeys.ExpandMediaSize, !timelineAppearance.expandMediaSize)
                     },
                     shapes = ListItemDefaults.item(),

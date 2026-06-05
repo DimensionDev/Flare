@@ -360,6 +360,8 @@
   "settingsAppearanceExpandMediaDescription": "Mostrar multimedia en su formato original en el timeline",
   "settingsAppearanceShowCwImg": "Mostrar contenido sensible",
   "settingsAppearanceShowCwImgDescription": "Mostrar siempre multimedia sensible en los posts",
+  "settingsAppearanceExpandContentWarning": "Show content behind content warnings",
+  "settingsAppearanceExpandContentWarningDescription": "Always reveal post content hidden by content warnings",
   "settingsAppearanceVideoAutoplay": "Autorreproducción de vídeo",
   "settingsAppearanceVideoAutoplayDescription": "Reproducir vídeos automáticamente en los posts",
   "settingsAppearanceVideoAutoplayWifi": "Solo Wi-Fi",

@@ -360,6 +360,8 @@
   "settingsAppearanceExpandMediaDescription": "Wys media teen hul oorspronklike aspekverhouding in tydlyne",
   "settingsAppearanceShowCwImg": "Wys sensitiewe inhoud",
   "settingsAppearanceShowCwImgDescription": "Onthul altyd sensitiewe media in poste",
+  "settingsAppearanceExpandContentWarning": "Show content behind content warnings",
+  "settingsAppearanceExpandContentWarningDescription": "Always reveal post content hidden by content warnings",
   "settingsAppearanceVideoAutoplay": "Video-outospeel",
   "settingsAppearanceVideoAutoplayDescription": "Speel video's outomaties in poste",
   "settingsAppearanceVideoAutoplayWifi": "Slegs Wi-Fi",

@@ -360,6 +360,8 @@
   "settingsAppearanceExpandMediaDescription": "Toon media in de originele aspectratio in tijdlijnen",
   "settingsAppearanceShowCwImg": "Gevoelige inhoud tonen",
   "settingsAppearanceShowCwImgDescription": "Onthul altijd gevoelige media in berichten",
+  "settingsAppearanceExpandContentWarning": "Show content behind content warnings",
+  "settingsAppearanceExpandContentWarningDescription": "Always reveal post content hidden by content warnings",
   "settingsAppearanceVideoAutoplay": "Video automatisch afspelen",
   "settingsAppearanceVideoAutoplayDescription": "Speel video's in berichten automatisch af",
   "settingsAppearanceVideoAutoplayWifi": "Alleen via wifi",

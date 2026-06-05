@@ -360,6 +360,8 @@
   "settingsAppearanceExpandMediaDescription": "Zobrazovat média v jejich původním poměru stran v časových osách",
   "settingsAppearanceShowCwImg": "Zobrazit citlivý obsah",
   "settingsAppearanceShowCwImgDescription": "Vždy odkrývat citlivá média v příspěvcích",
+  "settingsAppearanceExpandContentWarning": "Show content behind content warnings",
+  "settingsAppearanceExpandContentWarningDescription": "Always reveal post content hidden by content warnings",
   "settingsAppearanceVideoAutoplay": "Automatické přehrávání videa",
   "settingsAppearanceVideoAutoplayDescription": "Automaticky přehrávat videa v příspěvcích",
   "settingsAppearanceVideoAutoplayWifi": "Pouze přes Wi-Fi",

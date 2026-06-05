@@ -8,6 +8,7 @@ struct StatusView: View {
     @Environment(\.timelineAppearance.compatLinkPreview) private var compatLinkPreview
     @Environment(\.timelineAppearance.postActionStyle) private var postActionStyle
     @Environment(\.timelineAppearance.showPlatformLogo) private var showPlatformLogo
+    @Environment(\.timelineAppearance.expandContentWarning) private var expandContentWarning
     @Environment(\.openURL) private var openURL
     let data: UiTimelineV2.Post
     var isDetail: Bool = false
@@ -101,22 +102,24 @@ struct StatusView: View {
                                     view.textSelection(.enabled)
                                 }
                             
-                            Button {
-                                withAnimation {
-                                    expand = !expand
+                            if !expandContentWarning {
+                                Button {
+                                    withAnimation {
+                                        expand = !expand
+                                    }
+                                } label: {
+                                    if expand {
+                                        Text("mastodon_item_show_less")
+                                    } else {
+                                        Text("mastodon_item_show_more")
+                                    }
                                 }
-                            } label: {
-                                if expand {
-                                    Text("mastodon_item_show_less")
-                                } else {
-                                    Text("mastodon_item_show_more")
-                                }
+                                .backport
+                                .glassProminentButtonStyle()
                             }
-                            .backport
-                            .glassProminentButtonStyle()
                         }
 
-                        if expand || data.contentWarning == nil || data.contentWarning?.isEmpty == true {
+                        if expand || expandContentWarning || data.contentWarning == nil || data.contentWarning?.isEmpty == true {
                             if !data.content.isEmpty {
                                 RichText(text: data.content)
                                     .frame(maxWidth: .infinity, alignment: .leading)

@@ -360,6 +360,8 @@
   "settingsAppearanceExpandMediaDescription": "Medyayı zaman akışlarında orijinal en boy oranında göster",
   "settingsAppearanceShowCwImg": "Hassas içeriği göster",
   "settingsAppearanceShowCwImgDescription": "Gönderilerdeki hassas medyayı her zaman göster",
+  "settingsAppearanceExpandContentWarning": "Show content behind content warnings",
+  "settingsAppearanceExpandContentWarningDescription": "Always reveal post content hidden by content warnings",
   "settingsAppearanceVideoAutoplay": "Video otomatik oynatma",
   "settingsAppearanceVideoAutoplayDescription": "Gönderilerdeki videoları otomatik olarak oynat",
   "settingsAppearanceVideoAutoplayWifi": "Yalnızca Wi-Fi",

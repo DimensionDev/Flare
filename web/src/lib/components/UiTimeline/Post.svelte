@@ -85,7 +85,9 @@
     const hasContentWarning = $derived(
         Boolean(post.contentWarning && !post.contentWarning.isEmpty),
     );
-    const contentVisible = $derived(!hasContentWarning || contentExpanded);
+    const contentVisible = $derived(
+        !hasContentWarning || contentExpanded || appearance.expandContentWarning,
+    );
     const lineLimit = $derived(Math.max(appearance.lineLimit || 5, 1));
     const shouldClampBody = $derived(
         !bodyExpanded &&
@@ -233,13 +235,15 @@
                             text={post.contentWarning}
                             className="warning-text"
                         />
-                        <button
-                            class="btn btn-link btn-xs h-auto min-h-0 rounded-box p-0 text-button"
-                            type="button"
-                            onclick={() => (contentExpanded = !contentExpanded)}
-                        >
-                            {contentExpanded ? m.postShowLess() : m.postShowMore()}
-                        </button>
+                        {#if !appearance.expandContentWarning}
+                            <button
+                                class="btn btn-link btn-xs h-auto min-h-0 rounded-box p-0 text-button"
+                                type="button"
+                                onclick={() => (contentExpanded = !contentExpanded)}
+                            >
+                                {contentExpanded ? m.postShowLess() : m.postShowMore()}
+                            </button>
+                        {/if}
                     </div>
                 {/if}
 

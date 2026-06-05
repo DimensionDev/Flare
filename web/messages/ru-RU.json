@@ -360,6 +360,8 @@
   "settingsAppearanceExpandMediaDescription": "Показывать медиа с оригинальным соотношением сторон в лентах",
   "settingsAppearanceShowCwImg": "Показывать чувствительный контент",
   "settingsAppearanceShowCwImgDescription": "Всегда открывать чувствительные медиа в постах",
+  "settingsAppearanceExpandContentWarning": "Show content behind content warnings",
+  "settingsAppearanceExpandContentWarningDescription": "Always reveal post content hidden by content warnings",
   "settingsAppearanceVideoAutoplay": "Автозапуск видео",
   "settingsAppearanceVideoAutoplayDescription": "Автоматически воспроизводить видео в постах",
   "settingsAppearanceVideoAutoplayWifi": "Только через Wi-Fi",

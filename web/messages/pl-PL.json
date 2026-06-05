@@ -360,6 +360,8 @@
   "settingsAppearanceExpandMediaDescription": "Pokazuj multimedia w ich oryginalnych proporcjach na osi czasu",
   "settingsAppearanceShowCwImg": "Pokaż wrażliwe treści",
   "settingsAppearanceShowCwImgDescription": "Zawsze pokazuj wrażliwe multimedia we wpisach",
+  "settingsAppearanceExpandContentWarning": "Show content behind content warnings",
+  "settingsAppearanceExpandContentWarningDescription": "Always reveal post content hidden by content warnings",
   "settingsAppearanceVideoAutoplay": "Automatyczne odtwarzanie wideo",
   "settingsAppearanceVideoAutoplayDescription": "Automatycznie odtwarzaj wideo we wpisach",
   "settingsAppearanceVideoAutoplayWifi": "Tylko Wi-Fi",

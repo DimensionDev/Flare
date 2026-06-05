@@ -256,6 +256,13 @@
 							timelineAppearance.showSensitiveContent,
 							(event) => appearanceSettings.updateShowSensitiveContent(checked(event))
 						)}
+						{@render ToggleRow(
+							'Eye',
+							m.settingsAppearanceExpandContentWarning(),
+							m.settingsAppearanceExpandContentWarningDescription(),
+							timelineAppearance.expandContentWarning,
+							(event) => appearanceSettings.updateExpandContentWarning(checked(event))
+						)}
 						{@render SelectRow(
 							'Video',
 							m.settingsAppearanceVideoAutoplay(),

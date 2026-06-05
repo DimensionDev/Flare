@@ -243,6 +243,8 @@
     <string name="settings_appearance_show_numbers_description">Show counts below each post</string>
     <string name="settings_appearance_show_cw_img">Show sensitive content</string>
     <string name="settings_appearance_show_cw_img_description">Always reveal sensitive media in posts</string>
+    <string name="settings_appearance_expand_content_warning">Show content behind content warnings</string>
+    <string name="settings_appearance_expand_content_warning_description">Always reveal post content hidden by content warnings</string>
     <string name="settings_appearance_expand_media">Preserve media aspect ratio</string>
     <string name="settings_appearance_expand_media_description">Show media at its original aspect ratio in timelines</string>
     <string name="settings_appearance_video_autoplay">Video autoplay</string>

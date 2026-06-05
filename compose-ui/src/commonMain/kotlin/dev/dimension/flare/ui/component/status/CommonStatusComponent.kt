@@ -1090,6 +1090,7 @@ private fun StatusContentComponent(
     showExpandButton: Boolean,
     modifier: Modifier = Modifier,
 ) {
+    val appearanceSettings = LocalTimelineAppearance.current
     var expanded by rememberSaveable {
         mutableStateOf(false)
     }
@@ -1099,6 +1100,7 @@ private fun StatusContentComponent(
     Column(
         modifier = modifier,
     ) {
+        val expandContentWarning = appearanceSettings.expandContentWarning
         contentWarning?.let {
             if (it.raw.isNotEmpty()) {
                 Column(
@@ -1111,24 +1113,26 @@ private fun StatusContentComponent(
                     RichText(
                         text = it,
                     )
-                    PlatformFilledTonalButton(
-                        modifier =
-                            Modifier
-                                .fillMaxWidth(),
-                        onClick = {
-                            expanded = !expanded
-                        },
-                    ) {
-                        if (expanded) {
-                            PlatformText(stringResource(Res.string.mastodon_item_show_less))
-                        } else {
-                            PlatformText(stringResource(Res.string.mastodon_item_show_more))
+                    if (!expandContentWarning) {
+                        PlatformFilledTonalButton(
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth(),
+                            onClick = {
+                                expanded = !expanded
+                            },
+                        ) {
+                            if (expanded) {
+                                PlatformText(stringResource(Res.string.mastodon_item_show_less))
+                            } else {
+                                PlatformText(stringResource(Res.string.mastodon_item_show_more))
+                            }
                         }
                     }
                 }
             }
         }
-        AnimatedVisibility(visible = expanded || contentWarning?.raw.isNullOrEmpty()) {
+        AnimatedVisibility(visible = expanded || expandContentWarning || contentWarning?.raw.isNullOrEmpty()) {
             Column {
                 if (!content.isEmpty) {
                     RichText(

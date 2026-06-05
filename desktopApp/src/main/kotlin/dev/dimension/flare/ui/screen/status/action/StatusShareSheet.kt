@@ -163,6 +163,7 @@ internal fun StatusShareSheet(
                                     CompositionLocalProvider(
                                         LocalTimelineAppearance provides
                                             LocalTimelineAppearance.current.copy(
+                                                expandContentWarning = true,
                                                 showTranslateButton = false,
                                                 videoAutoplay = VideoAutoplay.NEVER,
                                             ),

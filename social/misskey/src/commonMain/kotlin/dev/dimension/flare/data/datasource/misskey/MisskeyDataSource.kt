@@ -9,9 +9,11 @@ import dev.dimension.flare.common.FileType
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
+import dev.dimension.flare.data.datasource.microblog.ComposeDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeType
 import dev.dimension.flare.data.datasource.microblog.DatabaseUpdater
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
+import dev.dimension.flare.data.datasource.microblog.NotificationTimelineDataSource
 import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
 import dev.dimension.flare.data.datasource.microblog.ReactionDataSource
@@ -86,6 +88,8 @@ internal class MisskeyDataSource(
     private val host: String,
     private val credentialFlow: Flow<MisskeyCredential>,
 ) : AuthenticatedMicroblogDataSource,
+    NotificationTimelineDataSource,
+    ComposeDataSource,
     UserDataSource,
     PostDataSource,
     KoinComponent,
@@ -620,8 +624,8 @@ internal class MisskeyDataSource(
 
     override fun profileTabs(userKey: MicroBlogKey): ImmutableList<ProfileTab> =
         listOfNotNull(
-            ProfileTab.Timeline(
-                type = ProfileTab.Timeline.Type.Status,
+            ProfileTab(
+                name = UiStrings.Posts,
                 loader =
                     UserTimelineRemoteMediator(
                         accountKey = accountKey,
@@ -630,8 +634,8 @@ internal class MisskeyDataSource(
                         withPinned = true,
                     ),
             ),
-            ProfileTab.Timeline(
-                type = ProfileTab.Timeline.Type.StatusWithReplies,
+            ProfileTab(
+                name = UiStrings.PostsWithReplies,
                 loader =
                     UserTimelineRemoteMediator(
                         service = service,
@@ -640,7 +644,11 @@ internal class MisskeyDataSource(
                         withReplies = true,
                     ),
             ),
-            ProfileTab.Media,
+            ProfileTab(
+                name = UiStrings.Media,
+                displayType = ProfileTab.DisplayType.Gallery,
+                loader = userTimeline(userKey, mediaOnly = true),
+            ),
         ).toPersistentList()
 
     fun favouriteTimelineLoader() =

@@ -52,14 +52,14 @@ struct DiscoverScreen: View {
                                     Label {
                                         Text(account.handle.canonical)
                                     } icon: {
-                                        AvatarView(data: account.avatar)
+                                        AvatarView(data: account.avatar?.url, customHeader: account.avatar?.customHeaders)
                                     }
                                 }
                             }
                         } label: {
                             if let selectedAccount = presenter.state.selectedAccount {
                                 HStack {
-                                    AvatarView(data: selectedAccount.avatar)
+                                    AvatarView(data: selectedAccount.avatar?.url, customHeader: selectedAccount.avatar?.customHeaders)
                                         .frame(width: 24, height: 24)
                                     Text(selectedAccount.handle.canonical)
                                     Image("fa-chevron-down")

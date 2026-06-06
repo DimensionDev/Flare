@@ -34,6 +34,9 @@ public object TimelineSpecIds {
     public const val VVO_FAVORITE: String = "vvo.favorite"
     public const val VVO_LIKED: String = "vvo.liked"
 
+    public const val PIXIV_FOLLOWING: String = "pixiv.following"
+    public const val PIXIV_BOOKMARK: String = "pixiv.bookmark"
+
     public val legacyMigrationIds: Set<String> =
         setOf(
             COMMON_HOME,
@@ -59,5 +62,7 @@ public object TimelineSpecIds {
             XQT_DEVICE_FOLLOW,
             VVO_FAVORITE,
             VVO_LIKED,
+            PIXIV_FOLLOWING,
+            PIXIV_BOOKMARK,
         )
 }

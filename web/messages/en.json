@@ -360,6 +360,8 @@
   "settingsAppearanceExpandMediaDescription": "Show media at its original aspect ratio in timelines",
   "settingsAppearanceShowCwImg": "Show sensitive content",
   "settingsAppearanceShowCwImgDescription": "Always reveal sensitive media in posts",
+  "settingsAppearanceExpandContentWarning": "Show content behind content warnings",
+  "settingsAppearanceExpandContentWarningDescription": "Always reveal post content hidden by content warnings",
   "settingsAppearanceVideoAutoplay": "Video autoplay",
   "settingsAppearanceVideoAutoplayDescription": "Automatically play videos in posts",
   "settingsAppearanceVideoAutoplayWifi": "Wi-Fi only",

@@ -522,6 +522,17 @@ private struct MediaAppearanceOverrideGroup: View {
                     Text("appearance_show_sensitive_content")
                     Text("appearance_show_sensitive_content_description")
                 }
+                Toggle(isOn: Binding(get: {
+                    timelineAppearance.expandContentWarning
+                }, set: { value in
+                    appearancePatch = TimelinePresentationAppearancePatchHelper.shared.setExpandContentWarning(
+                        patch: appearancePatch,
+                        value: value
+                    )
+                })) {
+                    Text("appearance_expand_content_warning")
+                    Text("appearance_expand_content_warning_description")
+                }
                 Picker(selection: Binding(get: {
                     timelineAppearance.videoAutoplay
                 }, set: { value in

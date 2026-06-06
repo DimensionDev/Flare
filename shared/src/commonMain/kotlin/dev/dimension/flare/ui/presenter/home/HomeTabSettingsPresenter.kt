@@ -109,6 +109,7 @@ public class HomeTabSettingsPresenter :
                 mediaEnabled: Boolean,
                 showMedia: Boolean,
                 showSensitiveContent: Boolean,
+                expandContentWarning: Boolean,
                 expandMediaSize: Boolean,
                 videoAutoplay: VideoAutoplay,
                 themeEnabled: Boolean,
@@ -132,6 +133,7 @@ public class HomeTabSettingsPresenter :
                             mediaEnabled = mediaEnabled,
                             showMedia = showMedia,
                             showSensitiveContent = showSensitiveContent,
+                            expandContentWarning = expandContentWarning,
                             expandMediaSize = expandMediaSize,
                             videoAutoplay = videoAutoplay,
                             themeEnabled = themeEnabled,
@@ -167,6 +169,7 @@ public class HomeTabSettingsPresenter :
                 mediaEnabled: Boolean,
                 showMedia: Boolean,
                 showSensitiveContent: Boolean,
+                expandContentWarning: Boolean,
                 expandMediaSize: Boolean,
                 videoAutoplay: VideoAutoplay,
                 themeEnabled: Boolean,
@@ -192,6 +195,7 @@ public class HomeTabSettingsPresenter :
                             mediaEnabled = mediaEnabled,
                             showMedia = showMedia,
                             showSensitiveContent = showSensitiveContent,
+                            expandContentWarning = expandContentWarning,
                             expandMediaSize = expandMediaSize,
                             videoAutoplay = videoAutoplay,
                             themeEnabled = themeEnabled,
@@ -243,6 +247,7 @@ public class HomeTabSettingsPresenter :
                 tab.appearancePatch.hasAny(
                     AppearanceKeys.ShowMedia,
                     AppearanceKeys.ShowSensitiveContent,
+                    AppearanceKeys.ExpandContentWarning,
                     AppearanceKeys.ExpandMediaSize,
                     AppearanceKeys.VideoAutoplay,
                 )
@@ -290,6 +295,7 @@ public class HomeTabSettingsPresenter :
             mediaEnabled: Boolean,
             showMedia: Boolean,
             showSensitiveContent: Boolean,
+            expandContentWarning: Boolean,
             expandMediaSize: Boolean,
             videoAutoplay: VideoAutoplay,
             themeEnabled: Boolean,
@@ -318,6 +324,7 @@ public class HomeTabSettingsPresenter :
             mediaEnabled: Boolean,
             showMedia: Boolean,
             showSensitiveContent: Boolean,
+            expandContentWarning: Boolean,
             expandMediaSize: Boolean,
             videoAutoplay: VideoAutoplay,
             themeEnabled: Boolean,
@@ -365,6 +372,7 @@ private fun buildAppearancePatch(
     mediaEnabled: Boolean,
     showMedia: Boolean,
     showSensitiveContent: Boolean,
+    expandContentWarning: Boolean,
     expandMediaSize: Boolean,
     videoAutoplay: VideoAutoplay,
     themeEnabled: Boolean,
@@ -392,6 +400,7 @@ private fun buildAppearancePatch(
             patch
                 .set(AppearanceKeys.ShowMedia, showMedia)
                 .set(AppearanceKeys.ShowSensitiveContent, showSensitiveContent)
+                .set(AppearanceKeys.ExpandContentWarning, expandContentWarning)
                 .set(AppearanceKeys.ExpandMediaSize, expandMediaSize)
                 .set(AppearanceKeys.VideoAutoplay, videoAutoplay)
     }

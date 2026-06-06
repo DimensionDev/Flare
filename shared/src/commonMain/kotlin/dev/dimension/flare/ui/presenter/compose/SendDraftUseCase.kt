@@ -1,8 +1,8 @@
 package dev.dimension.flare.ui.presenter.compose
 
 import dev.dimension.flare.data.database.app.model.DraftTargetStatus
-import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeData
+import dev.dimension.flare.data.datasource.microblog.ComposeDataSource
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.ComposeDraftBundle
 import dev.dimension.flare.data.repository.DraftMediaStore
@@ -29,8 +29,10 @@ internal class SendDraftUseCase(
         draftMediaStore = draftMediaStore,
         findAccount = { accountRepository.find(it) },
         composeDraft = { account, data, progress ->
-            (accountRepository.getOrCreateDataSource(account) as? AuthenticatedMicroblogDataSource)
-                ?.compose(data = data, progress = progress)
+            val dataSource =
+                accountRepository.getOrCreateDataSource(account) as? ComposeDataSource
+                    ?: error("Account does not support compose: ${account.accountKey}")
+            dataSource.compose(data = data, progress = progress)
         },
     )
 

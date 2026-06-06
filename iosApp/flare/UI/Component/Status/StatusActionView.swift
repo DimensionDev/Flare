@@ -324,6 +324,7 @@ extension UiIcon {
         case .x: return "fa-x-twitter"
         case .weibo: return "fa-weibo"
         case .translate: return "fa-language"
+        case .pixiv: return "fa-pixiv"
         }
     }
 }

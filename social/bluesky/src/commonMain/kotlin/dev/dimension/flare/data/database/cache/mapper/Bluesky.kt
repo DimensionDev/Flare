@@ -120,7 +120,7 @@ private fun fallbackDirectMessageUser(userKey: MicroBlogKey): UiProfile =
     UiProfile(
         key = userKey,
         handle = UiHandle(raw = userKey.id, host = userKey.host),
-        avatar = "",
+        avatar = null,
         nameInternal = userKey.id.toUiPlainText(),
         platformType = PlatformType.Bluesky,
         clickEvent = ClickEvent.Noop,

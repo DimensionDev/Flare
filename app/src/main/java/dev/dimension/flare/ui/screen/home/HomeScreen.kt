@@ -72,6 +72,7 @@ import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.presenter.HomeTabsPresenter
 import dev.dimension.flare.ui.presenter.home.AllNotificationBadgePresenter
+import dev.dimension.flare.ui.presenter.home.CanComposePresenter
 import dev.dimension.flare.ui.presenter.home.DeepLinkPresenter
 import dev.dimension.flare.ui.presenter.home.LoggedInPresenter
 import dev.dimension.flare.ui.presenter.home.SecondaryTabsPresenter
@@ -121,7 +122,7 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                     modifier = Modifier.fillMaxSize(),
                     layoutType = layoutType,
                     showFab =
-                        state.loggedInState.takeSuccess() == true &&
+                        state.canComposeState.takeSuccess() == true &&
                             state.topLevelBackStack.takeSuccess()?.currentKey is Route.Home,
                     onFabClicked = {
                         state.navigate(Route.Compose.New)
@@ -149,7 +150,7 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                             }
 
                             if (layoutType == NavigationSuiteType.NavigationRail &&
-                                state.loggedInState.takeSuccess() == true
+                                state.canComposeState.takeSuccess() == true
                             ) {
                                 SharedTransitionLayout {
                                     AnimatedContent(
@@ -516,6 +517,7 @@ private fun presenter(uriHandler: UriHandler) =
     run {
         val secondaryTabsPresenter = remember { SecondaryTabsPresenter() }.invoke()
         val loggedInState = remember { LoggedInPresenter() }.invoke()
+        val canComposeState = remember { CanComposePresenter() }.invoke()
         val wideNavigationRailState = rememberWideNavigationRailState()
         val tabs =
             remember {
@@ -583,6 +585,7 @@ private fun presenter(uriHandler: UriHandler) =
             val topLevelBackStack = topLevelBackStack
             val wideNavigationRailState = wideNavigationRailState
             val loggedInState = loggedInState.isLoggedIn
+            val canComposeState = canComposeState.canCompose
 
             fun navigate(route: Route) {
                 navigate(

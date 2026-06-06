@@ -360,6 +360,8 @@
   "settingsAppearanceExpandMediaDescription": "Hiển thị phương tiện theo tỷ lệ khung hình gốc trên dòng thời gian",
   "settingsAppearanceShowCwImg": "Hiển thị nội dung nhạy cảm",
   "settingsAppearanceShowCwImgDescription": "Luôn hiển thị phương tiện nhạy cảm trong bài đăng",
+  "settingsAppearanceExpandContentWarning": "Show content behind content warnings",
+  "settingsAppearanceExpandContentWarningDescription": "Always reveal post content hidden by content warnings",
   "settingsAppearanceVideoAutoplay": "Tự động phát video",
   "settingsAppearanceVideoAutoplayDescription": "Tự động phát các video trong bài đăng",
   "settingsAppearanceVideoAutoplayWifi": "Chỉ khi dùng Wi-Fi",

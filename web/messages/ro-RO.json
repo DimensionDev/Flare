@@ -360,6 +360,8 @@
   "settingsAppearanceExpandMediaDescription": "Arată media la raportul de aspect original în cronologii",
   "settingsAppearanceShowCwImg": "Arată conținutul sensibil",
   "settingsAppearanceShowCwImgDescription": "Dezvăluie întotdeauna media sensibilă în postări",
+  "settingsAppearanceExpandContentWarning": "Show content behind content warnings",
+  "settingsAppearanceExpandContentWarningDescription": "Always reveal post content hidden by content warnings",
   "settingsAppearanceVideoAutoplay": "Redare automată video",
   "settingsAppearanceVideoAutoplayDescription": "Redă automat videoclipurile în postări",
   "settingsAppearanceVideoAutoplayWifi": "Doar prin Wi-Fi",

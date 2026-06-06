@@ -119,8 +119,8 @@ enum Route: Hashable, Identifiable {
         case .dmConversation(let accountType, let roomKey, let title):
             DMConversationScreen(accountType: accountType, roomKey: roomKey)
                 .navigationTitle(title)
-        case .mediaImage(let url, let preview):
-            MediaScreen(url: url)
+        case .mediaImage(let url, let preview, let customHeaders):
+            MediaScreen(url: url, customHeaders: customHeaders)
         case .mediaStatusMedia(let accountType, let statusKey, let selectedIndex, let preview):
             StatusMediaScreen(accountType: accountType, statusKey: statusKey, initialIndex: Int(selectedIndex), preview: preview)
         case .appLog:
@@ -161,7 +161,7 @@ enum Route: Hashable, Identifiable {
     case composeQuote(AccountType, MicroBlogKey)
     case composeReply(AccountType, MicroBlogKey)
     case composeVVOReplyComment(AccountType, MicroBlogKey, String)
-    case mediaImage(String, String?)
+    case mediaImage(String, String?, [String: String]?)
     case mediaPodcast(AccountType, String)
     case mediaStatusMedia(AccountType, MicroBlogKey, Int32, String?)
     case profileUser(AccountType, MicroBlogKey)
@@ -235,7 +235,7 @@ enum Route: Hashable, Identifiable {
     fileprivate static func fromMedia(_ media: DeeplinkRoute.Media) -> Route? {
         switch onEnum(of: media) {
         case .image(let data):
-            return Route.mediaImage(data.uri, data.previewUrl)
+            return Route.mediaImage(data.uri, data.previewUrl, data.customHeaders)
         case .podcast(let data):
             return Route.mediaPodcast(data.accountType, data.id)
         case .statusMedia(let data):

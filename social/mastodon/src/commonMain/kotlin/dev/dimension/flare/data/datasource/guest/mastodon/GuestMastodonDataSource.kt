@@ -24,6 +24,7 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiProfile
+import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -159,8 +160,8 @@ internal class GuestMastodonDataSource(
 
     override fun profileTabs(userKey: MicroBlogKey): ImmutableList<ProfileTab> =
         persistentListOf(
-            ProfileTab.Timeline(
-                type = ProfileTab.Timeline.Type.Status,
+            ProfileTab(
+                name = UiStrings.Posts,
                 loader =
                     GuestUserTimelinePagingSource(
                         service = service,
@@ -169,8 +170,8 @@ internal class GuestMastodonDataSource(
                         withPinned = true,
                     ),
             ),
-            ProfileTab.Timeline(
-                type = ProfileTab.Timeline.Type.StatusWithReplies,
+            ProfileTab(
+                name = UiStrings.PostsWithReplies,
                 loader =
                     GuestUserTimelinePagingSource(
                         service = service,
@@ -179,6 +180,10 @@ internal class GuestMastodonDataSource(
                         withReply = true,
                     ),
             ),
-            ProfileTab.Media,
+            ProfileTab(
+                name = UiStrings.Media,
+                displayType = ProfileTab.DisplayType.Gallery,
+                loader = userTimeline(userKey, mediaOnly = true),
+            ),
         )
 }

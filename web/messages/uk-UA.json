@@ -360,6 +360,8 @@
   "settingsAppearanceExpandMediaDescription": "Показувати медіа з оригінальним співвідношенням сторін у стрічці",
   "settingsAppearanceShowCwImg": "Показувати делікатний вміст",
   "settingsAppearanceShowCwImgDescription": "Завжди показувати делікатні медіа в дописах",
+  "settingsAppearanceExpandContentWarning": "Show content behind content warnings",
+  "settingsAppearanceExpandContentWarningDescription": "Always reveal post content hidden by content warnings",
   "settingsAppearanceVideoAutoplay": "Автоматичне відтворення відео",
   "settingsAppearanceVideoAutoplayDescription": "Автоматично відтворювати відео в дописах",
   "settingsAppearanceVideoAutoplayWifi": "Тільки через Wi-Fi",

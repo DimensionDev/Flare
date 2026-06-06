@@ -9,17 +9,19 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.data.model.AvatarShape
+import dev.dimension.flare.ui.model.UiMedia
 
 @Composable
 public fun AvatarComponent(
-    data: String?,
+    data: UiMedia.Image?,
     modifier: Modifier = Modifier,
     size: Dp = AvatarComponentDefaults.size,
 ) {
     val appearanceSettings = LocalTimelineAppearance.current
     NetworkImage(
-        model = data,
+        model = data?.url,
         contentDescription = null,
+        customHeaders = data?.customHeaders,
         modifier =
             Modifier
                 .size(size)

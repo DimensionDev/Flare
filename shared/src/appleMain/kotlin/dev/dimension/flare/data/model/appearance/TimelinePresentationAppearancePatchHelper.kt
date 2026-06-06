@@ -28,6 +28,7 @@ public object TimelinePresentationAppearancePatchHelper {
     public fun mediaOverridesEnabled(patch: AppearancePatch): Boolean =
         patch.contains(AppearanceKeys.ShowMedia) ||
             patch.contains(AppearanceKeys.ShowSensitiveContent) ||
+            patch.contains(AppearanceKeys.ExpandContentWarning) ||
             patch.contains(AppearanceKeys.ExpandMediaSize) ||
             patch.contains(AppearanceKeys.VideoAutoplay)
 
@@ -74,6 +75,7 @@ public object TimelinePresentationAppearancePatchHelper {
         patch
             .set(AppearanceKeys.ShowMedia, appearance.showMedia)
             .set(AppearanceKeys.ShowSensitiveContent, appearance.showSensitiveContent)
+            .set(AppearanceKeys.ExpandContentWarning, appearance.expandContentWarning)
             .set(AppearanceKeys.ExpandMediaSize, appearance.expandMediaSize)
             .set(AppearanceKeys.VideoAutoplay, appearance.videoAutoplay)
 
@@ -81,6 +83,7 @@ public object TimelinePresentationAppearancePatchHelper {
         patch
             .clear(AppearanceKeys.ShowMedia)
             .clear(AppearanceKeys.ShowSensitiveContent)
+            .clear(AppearanceKeys.ExpandContentWarning)
             .clear(AppearanceKeys.ExpandMediaSize)
             .clear(AppearanceKeys.VideoAutoplay)
 
@@ -140,6 +143,11 @@ public object TimelinePresentationAppearancePatchHelper {
         patch: AppearancePatch,
         value: Boolean,
     ): AppearancePatch = patch.set(AppearanceKeys.ShowSensitiveContent, value)
+
+    public fun setExpandContentWarning(
+        patch: AppearancePatch,
+        value: Boolean,
+    ): AppearancePatch = patch.set(AppearanceKeys.ExpandContentWarning, value)
 
     public fun setExpandMediaSize(
         patch: AppearancePatch,

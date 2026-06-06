@@ -12,6 +12,7 @@ public enum class PlatformType {
     Mastodon,
     Misskey,
     Bluesky,
+    Pixiv,
 
     @Suppress("EnumEntryName") // nothing wrong with this name :)
     xQt,

@@ -589,7 +589,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
         if newWantsAvatar, let user = data.user {
             let avatarView = resolvedAvatarView()
             avatarView.avatarShape = appearance.avatarShape
-            avatarView.set(url: user.avatar)
+            avatarView.set(url: user.avatar?.url, customHeaders: user.avatar?.customHeaders)
             if avatarView.superview !== self { addSubview(avatarView) }
         } else if avatarViewStorage?.superview === self {
             avatarViewStorage?.removeFromSuperview()
@@ -683,18 +683,20 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
                 contentKey: Int(data.renderHash)
             )
             items.append(contentWarningText)
-            let contentWarningToggle = resolvedContentWarningToggle()
-            contentWarningToggle.setTitle(
-                expand
-                    ? String(localized: "mastodon_item_show_less")
-                    : String(localized: "mastodon_item_show_more"),
-                for: .normal
-            )
-            items.append(contentWarningToggle)
+            if !appearance.expandContentWarning {
+                let contentWarningToggle = resolvedContentWarningToggle()
+                contentWarningToggle.setTitle(
+                    expand
+                        ? String(localized: "mastodon_item_show_less")
+                        : String(localized: "mastodon_item_show_more"),
+                    for: .normal
+                )
+                items.append(contentWarningToggle)
+            }
         }
 
         // main body
-        if expand || !hasCW {
+        if expand || appearance.expandContentWarning || !hasCW {
             if !data.content.isEmpty {
                 let bodyText = resolvedBodyText()
                 let bodyLineLimit: Int?

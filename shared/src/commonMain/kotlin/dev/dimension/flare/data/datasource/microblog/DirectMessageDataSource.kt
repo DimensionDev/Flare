@@ -103,7 +103,7 @@ private fun fallbackDirectMessageUser(
     UiProfile(
         key = accountKey,
         handle = UiHandle(raw = accountKey.id, host = accountKey.host),
-        avatar = "",
+        avatar = null,
         nameInternal = accountKey.id.toUiPlainText(),
         platformType = platformType,
         clickEvent = ClickEvent.Noop,

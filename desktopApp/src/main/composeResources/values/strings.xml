@@ -40,6 +40,15 @@
     <string name="profile_tab_timeline_with_reply">Posts and replies</string>
     <string name="profile_tab_likes">Likes</string>
     <string name="profile_tab_media">Media</string>
+    <string name="illustrations_title">Illustrations</string>
+    <string name="manga_title">Manga</string>
+    <string name="pixiv_ranking_week_title">Weekly Ranking</string>
+    <string name="pixiv_ranking_month_title">Monthly Ranking</string>
+    <string name="pixiv_ranking_day_male_title">Male Ranking</string>
+    <string name="pixiv_ranking_day_female_title">Female Ranking</string>
+    <string name="pixiv_ranking_week_original_title">Original Ranking</string>
+    <string name="pixiv_ranking_week_rookie_title">Rookie Ranking</string>
+    <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
 
     <string name="report_title">Report</string>
     <string name="report_description">What's wrong with this post?</string>
@@ -254,6 +263,8 @@
     <string name="settings_appearance_show_numbers_description">Show counts below each post</string>
     <string name="settings_appearance_show_cw_img">Show sensitive content</string>
     <string name="settings_appearance_show_cw_img_description">Always reveal sensitive media in posts</string>
+    <string name="settings_appearance_expand_content_warning">Show content behind content warnings</string>
+    <string name="settings_appearance_expand_content_warning_description">Always reveal post content hidden by content warnings</string>
     <string name="settings_appearance_expand_media">Preserve media aspect ratio</string>
     <string name="settings_appearance_expand_media_description">Show media at its original aspect ratio in timelines</string>
     <string name="settings_appearance_video_autoplay">Video autoplay</string>

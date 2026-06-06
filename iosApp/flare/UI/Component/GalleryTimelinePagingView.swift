@@ -1090,7 +1090,10 @@ private final class GalleryPostTileUIView: UIView, UIGestureRecognizerDelegate {
 
         if let user = post.user {
             userRow.isHidden = false
-            avatar.set(url: loadsRemoteImages ? user.avatar : nil)
+            avatar.set(
+                url: loadsRemoteImages ? user.avatar?.url : nil,
+                customHeaders: loadsRemoteImages ? user.avatar?.customHeaders : nil
+            )
             userName.text = user.name
         } else {
             userRow.isHidden = true

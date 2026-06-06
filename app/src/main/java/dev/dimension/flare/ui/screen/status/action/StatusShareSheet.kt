@@ -433,6 +433,7 @@ private fun StatusShareCard(
                 CompositionLocalProvider(
                     LocalTimelineAppearance provides
                         LocalTimelineAppearance.current.copy(
+                            expandContentWarning = true,
                             showTranslateButton = false,
                             videoAutoplay = VideoAutoplay.NEVER,
                         ),

@@ -360,6 +360,8 @@
   "settingsAppearanceExpandMediaDescription": "Прикажи медије у оригиналном односу на временским линијама",
   "settingsAppearanceShowCwImg": "Прикажи осетљив садржај",
   "settingsAppearanceShowCwImgDescription": "Увек откриј осетљиве медије у објавама",
+  "settingsAppearanceExpandContentWarning": "Show content behind content warnings",
+  "settingsAppearanceExpandContentWarningDescription": "Always reveal post content hidden by content warnings",
   "settingsAppearanceVideoAutoplay": "Аутоматска репродукција видео записа",
   "settingsAppearanceVideoAutoplayDescription": "Аутоматски пуштај видео записе у објавама",
   "settingsAppearanceVideoAutoplayWifi": "Само Wi-Fi",

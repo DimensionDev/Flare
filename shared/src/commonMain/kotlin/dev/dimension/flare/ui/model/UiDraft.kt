@@ -20,7 +20,7 @@ public data class UiDraft(
 @Immutable
 public data class UiDraftAccount(
     val account: UiAccount,
-    val avatar: String? = null,
+    val avatar: UiMedia.Image? = null,
 )
 
 @Immutable

@@ -35,6 +35,7 @@ import dev.dimension.flare.ui.model.UiPoll
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.toUiImage
 import dev.dimension.flare.ui.render.UiRichText
 import dev.dimension.flare.ui.render.parseHtml
 import dev.dimension.flare.ui.render.toUi
@@ -830,7 +831,7 @@ internal fun Account.render(
             host = host,
         )
     return UiProfile(
-        avatar = avatar.orEmpty(),
+        avatar = avatar.toUiImage(),
         nameInternal = parseName(this),
         handle =
             UiHandle(
@@ -838,7 +839,7 @@ internal fun Account.render(
                 host = remoteHost,
             ),
         key = userKey,
-        banner = header,
+        banner = header.toUiImage(),
         description =
             parseNote(
                 this,

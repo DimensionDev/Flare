@@ -360,6 +360,8 @@
   "settingsAppearanceExpandMediaDescription": "Mostra el contingut multimèdia amb la seva relació d'aspecte original a les línies de temps",
   "settingsAppearanceShowCwImg": "Mostra contingut sensible",
   "settingsAppearanceShowCwImgDescription": "Revela sempre el contingut multimèdia sensible a les publicacions",
+  "settingsAppearanceExpandContentWarning": "Show content behind content warnings",
+  "settingsAppearanceExpandContentWarningDescription": "Always reveal post content hidden by content warnings",
   "settingsAppearanceVideoAutoplay": "Reproducció automàtica de vídeo",
   "settingsAppearanceVideoAutoplayDescription": "Reprodueix automàticament els vídeos a les publicacions",
   "settingsAppearanceVideoAutoplayWifi": "Només amb Wi-Fi",

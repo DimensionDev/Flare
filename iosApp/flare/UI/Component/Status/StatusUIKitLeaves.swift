@@ -23,11 +23,25 @@ final class AvatarUIView: UIView {
     }
     required init(coder: NSCoder) { fatalError("init(coder:) not supported") }
 
-    func set(url: String?) {
+    func set(url: String?, customHeaders: [String: String]? = nil) {
         imageView.kf.cancelDownloadTask()
         imageView.image = nil
         if let url = url.flatMap(URL.init(string:)) {
-            imageView.kf.setImage(with: url, options: [.transition(.fade(0.25)), .cacheOriginalImage, .backgroundDecode])
+            imageView.kf.setImage(
+                with: url,
+                options: [
+                    .transition(.fade(0.25)),
+                    .cacheOriginalImage,
+                    .backgroundDecode,
+                    .requestModifier(AnyModifier { request in
+                        var request = request
+                        customHeaders?.forEach { key, value in
+                            request.setValue(value, forHTTPHeaderField: key)
+                        }
+                        return request
+                    }),
+                ]
+            )
         }
     }
 
@@ -276,7 +290,7 @@ final class UserOnelineUIView: UIView, ManualLayoutMeasurable, TimelineHeightPro
     }
 
     func configure(data: UiProfile, trailing: UIView?, onClicked: (() -> Void)?) {
-        avatar.set(url: data.avatar)
+        avatar.set(url: data.avatar?.url, customHeaders: data.avatar?.customHeaders)
         name.text = data.name
         handleLabel.text = data.handle.canonical
         if trailingView !== trailing {
@@ -428,7 +442,7 @@ final class UserCompatUIView: UIStackView {
     required init(coder: NSCoder) { fatalError("init(coder:) not supported") }
 
     func configure(data: UiProfile, trailing: UIView?, onClicked: (() -> Void)?) {
-        avatar.set(url: data.avatar)
+        avatar.set(url: data.avatar?.url, customHeaders: data.avatar?.customHeaders)
         name.text = data.name
         handleLabel.text = data.handle.canonical
         if let trailing = trailing {

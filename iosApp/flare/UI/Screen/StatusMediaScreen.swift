@@ -39,16 +39,16 @@ struct StatusMediaScreen: View {
                 LazyPager(data: medias, page: pagerSelectedIndex) { media in
                     switch onEnum(of: media) {
                     case .image(let image):
-                        AdaptiveKFImage(data: image.url, placeholder: image.previewUrl)
+                        AdaptiveKFImage(data: image.url, placeholder: image.previewUrl, customHeader: image.customHeaders)
                     case .video(let video):
                         if selectedIndex == medias.firstIndex(where: { $0.url == video.url }) {
                             StatusMediaVideoView(data: video, play: $isPlaying, videoState: $videoState, time: $currentTime)
                         } else {
-                            NetworkImage(data: video.thumbnailUrl)
+                            NetworkImage(data: video.thumbnailUrl, customHeader: video.customHeaders)
                                 .scaledToFit()
                         }
                     case .gif(let gif):
-                        NetworkImage(data: gif.url, placeholder: gif.previewUrl)
+                        NetworkImage(data: gif.url, placeholder: gif.previewUrl, customHeader: gif.customHeaders)
                             .scaledToFit()
                     case .audio(let audio):
                         EmptyView()
@@ -66,7 +66,7 @@ struct StatusMediaScreen: View {
                     protectInitialPagerSelection = false
                 }
                 .zoomable { item in
-                    if case .video = onEnum(of: item) {
+                    if isVideoMedia(item) {
                         return .disabled
                     } else {
                         return .custom(min: 1, max: 5, doubleTap: .scale(2))
@@ -98,7 +98,7 @@ struct StatusMediaScreen: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .task(id: selectedImageURL) {
-            await loadShareImage(url: selectedImageURL)
+            await loadShareImage(url: selectedImageURL, customHeaders: selectedImageCustomHeaders)
         }
         .onChange(of: selectedIndex) { oldValue, newValue in
             isPlaying = true
@@ -142,7 +142,7 @@ struct StatusMediaScreen: View {
                 if let selectedMedia, case .image = onEnum(of: selectedMedia) {
                     ToolbarItem(placement: .primaryAction) {
                         Button {
-                            MediaSaver.shared.saveImage(url: selectedMedia.url)
+                            MediaSaver.shared.saveImage(url: selectedMedia.url, customHeaders: selectedMedia.customHeaders)
                         } label: {
                             Image("fa-download")
                         }
@@ -208,8 +208,22 @@ struct StatusMediaScreen: View {
         }
     }
 
+    private var selectedImageCustomHeaders: [String: String]? {
+        guard let selectedMedia else {
+            return nil
+        }
+        return selectedMedia.customHeaders
+    }
+
     private var isVideoActivelyPlaying: Bool {
         if case .playing = videoState { return true }
+        return false
+    }
+
+    private func isVideoMedia(_ media: any UiMedia) -> Bool {
+        if case .video = onEnum(of: media) {
+            return true
+        }
         return false
     }
 
@@ -230,7 +244,7 @@ struct StatusMediaScreen: View {
         return min(max(index, 0), count - 1)
     }
 
-    private func loadShareImage(url: String?) async {
+    private func loadShareImage(url: String?, customHeaders: [String: String]?) async {
         shareImage = nil
         shareImageURL = url
 
@@ -239,7 +253,7 @@ struct StatusMediaScreen: View {
         }
 
         do {
-            let result = try await KingfisherManager.shared.retrieveImage(with: imageURL)
+            let result = try await KingfisherManager.shared.retrieveImage(with: imageURL, options: kingfisherOptions(customHeaders: customHeaders))
             guard !Task.isCancelled, shareImageURL == url else {
                 return
             }
@@ -250,6 +264,19 @@ struct StatusMediaScreen: View {
             }
             shareImage = nil
         }
+    }
+
+    private func kingfisherOptions(customHeaders: [String: String]?) -> KingfisherOptionsInfo {
+        guard let customHeaders, !customHeaders.isEmpty else {
+            return []
+        }
+        return [.requestModifier(AnyModifier { request in
+            var request = request
+            for (key, value) in customHeaders {
+                request.setValue(value, forHTTPHeaderField: key)
+            }
+            return request
+        })]
     }
     
     var statusView: some View {
@@ -436,7 +463,7 @@ struct StatusMediaVideoView: View {
 //            .opacity(0.2)
             .overlay {
                 if case .idle = videoState {
-                    NetworkImage(data: data.thumbnailUrl)
+                    NetworkImage(data: data.thumbnailUrl, customHeader: data.customHeaders)
                         .scaledToFit()
                         .allowsHitTesting(false)
                 } else {
@@ -474,9 +501,16 @@ struct StatusMediaVideoView: View {
 struct AdaptiveKFImage: View {
     let data: String
     let placeholder: String?
+    let customHeader: [String: String]?
 
     @State private var shouldFill = false
     private let wideThreshold: CGFloat = 19.5 / 9.0
+
+    init(data: String, placeholder: String?, customHeader: [String: String]? = nil) {
+        self.data = data
+        self.placeholder = placeholder
+        self.customHeader = customHeader
+    }
 
     var body: some View {
         if shouldFill {
@@ -492,6 +526,13 @@ struct AdaptiveKFImage: View {
         ZStack {
             if data.hasSuffix(".gif") {
                 KFAnimatedImage(.init(string: data))
+                    .requestModifier({ request in
+                        if let customHeader {
+                            for (key, value) in customHeader {
+                                request.setValue(value, forHTTPHeaderField: key)
+                            }
+                        }
+                    })
                     .onSuccess { result in
                         let size = result.image.size
                         let ratio = size.height / size.width
@@ -503,7 +544,7 @@ struct AdaptiveKFImage: View {
                     }
                     .placeholder {
                         if let placeholder {
-                            AdaptiveKFImage(data: placeholder, placeholder: nil)
+                            AdaptiveKFImage(data: placeholder, placeholder: nil, customHeader: customHeader)
                         } else {
                             ProgressView()
                         }
@@ -511,6 +552,13 @@ struct AdaptiveKFImage: View {
                     .aspectRatio(contentMode: shouldFill ? .fill : .fit)
             } else {
                 KFImage(.init(string: data))
+                    .requestModifier({ request in
+                        if let customHeader {
+                            for (key, value) in customHeader {
+                                request.setValue(value, forHTTPHeaderField: key)
+                            }
+                        }
+                    })
                     .onSuccess { result in
                         let size = result.image.size
                         let ratio = size.height / size.width
@@ -522,7 +570,7 @@ struct AdaptiveKFImage: View {
                     }
                     .placeholder {
                         if let placeholder {
-                            AdaptiveKFImage(data: placeholder, placeholder: nil)
+                            AdaptiveKFImage(data: placeholder, placeholder: nil, customHeader: customHeader)
                         } else {
                             ProgressView()
                         }

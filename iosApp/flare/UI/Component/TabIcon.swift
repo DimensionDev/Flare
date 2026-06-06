@@ -49,6 +49,8 @@ extension UiStrings {
         case .liked: String(localized: "liked_tab_title")
         case .allRssFeeds: String(localized: "all_rss_feeds_title")
         case .posts: String(localized: "posts_title")
+        case .postsWithReplies: String(localized: "posts_with_replies_title", defaultValue: "Posts & Replies")
+        case .media: String(localized: "media_title", defaultValue: "Media")
         case .channel: String(localized: "channel_title")
         case .default: String(localized: "tab_settings_default")
         case .login: String(localized: "login_button")
@@ -65,6 +67,16 @@ extension UiStrings {
         case .externalSigner: String(localized: "nostr_login_amber_button")
         case .webCookieLogin: String(localized: "login_button")
         case .nostrLoginAccount: String(localized: "nostr_login_account_hint")
+        case .following: String(localized: "misskey_channel_tab_following")
+        case .pixivRankingWeek: String(localized: "pixiv_ranking_week_title", defaultValue: "Weekly Ranking")
+        case .pixivRankingMonth: String(localized: "pixiv_ranking_month_title", defaultValue: "Monthly Ranking")
+        case .pixivRankingDayMale: String(localized: "pixiv_ranking_day_male_title", defaultValue: "Male Ranking")
+        case .pixivRankingDayFemale: String(localized: "pixiv_ranking_day_female_title", defaultValue: "Female Ranking")
+        case .pixivRankingWeekOriginal: String(localized: "pixiv_ranking_week_original_title", defaultValue: "Original Ranking")
+        case .pixivRankingWeekRookie: String(localized: "pixiv_ranking_week_rookie_title", defaultValue: "Rookie Ranking")
+        case .pixivRankingDayManga: String(localized: "pixiv_ranking_day_manga_title", defaultValue: "Manga Ranking")
+        case .illustrations: String(localized: "illustrations_title", defaultValue: "Illustrations")
+        case .manga: String(localized: "manga_title", defaultValue: "Manga")
         }
     }
 }
@@ -150,7 +162,7 @@ struct AvatarTabIcon: View {
 
     var body: some View {
         StateView(state: presenter.state.user) { user in
-            AvatarView(data: user.avatar)
+            AvatarView(data: user.avatar?.url, customHeader: user.avatar?.customHeaders)
         } loadingContent: {
             Image("fa-globe")
                 .resizable()

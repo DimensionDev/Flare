@@ -681,8 +681,8 @@
 							{#each selectedProfiles as profile (profileKey(profile))}
 								<span class="account-avatar-button">
 									<span class="account-avatar">
-										{#if profile.avatar}
-											<img src={profile.avatar} alt="" />
+										{#if profile.avatar?.url}
+											<img src={profile.avatar?.url} alt="" />
 										{:else}
 											<span>{initials(profile)}</span>
 										{/if}

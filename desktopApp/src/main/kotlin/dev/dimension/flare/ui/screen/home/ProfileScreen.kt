@@ -36,18 +36,12 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.LocalWindowPadding
 import dev.dimension.flare.RegisterTabCallback
-import dev.dimension.flare.Res
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.isRefreshing
 import dev.dimension.flare.common.refreshSuspend
-import dev.dimension.flare.data.datasource.microblog.ProfileTab
 import dev.dimension.flare.data.model.VideoAutoplay
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.profile_tab_likes
-import dev.dimension.flare.profile_tab_media
-import dev.dimension.flare.profile_tab_timeline
-import dev.dimension.flare.profile_tab_timeline_with_reply
 import dev.dimension.flare.ui.common.items
 import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.FlareScrollBar
@@ -63,6 +57,7 @@ import dev.dimension.flare.ui.component.status.MediaItem
 import dev.dimension.flare.ui.component.status.StatusPlaceholder
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.model.UiMedia
+import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onError
@@ -82,8 +77,6 @@ import io.github.composefluent.component.Text
 import io.github.composefluent.surface.Card
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
-import org.jetbrains.compose.resources.StringResource
-import org.jetbrains.compose.resources.stringResource
 
 @Composable
 internal fun ProfileWithUserNameAndHostDeeplinkRoute(
@@ -93,7 +86,7 @@ internal fun ProfileWithUserNameAndHostDeeplinkRoute(
     onFollowListClick: (userKey: MicroBlogKey) -> Unit,
     onFansListClick: (userKey: MicroBlogKey) -> Unit,
     onMediaClick: (statusKey: MicroBlogKey, index: Int, preview: String?) -> Unit,
-    onRawMediaClick: (url: String) -> Unit,
+    onRawMediaClick: (media: UiMedia.Image) -> Unit,
     onBack: () -> Unit = {},
 ) {
     val state by producePresenter(key = "acct_${accountType}_$userName@$host") {
@@ -182,7 +175,7 @@ internal fun ProfileScreen(
     onFollowListClick: (userKey: MicroBlogKey) -> Unit = {},
     onFansListClick: (userKey: MicroBlogKey) -> Unit = {},
     onMediaClick: (statusKey: MicroBlogKey, index: Int, preview: String?) -> Unit = { _, _, _ -> },
-    onRawMediaClick: (url: String) -> Unit = {},
+    onRawMediaClick: (media: UiMedia.Image) -> Unit = {},
 ) {
     val state by producePresenter(
         key = "profile_${accountType}_$userKey",
@@ -221,14 +214,14 @@ internal fun ProfileScreen(
                                 },
                                 onAvatarClick = {
                                     state.state.userState.onSuccess {
-                                        if (it.avatar.isNotBlank()) {
-                                            onRawMediaClick(it.avatar)
+                                        it.avatar?.let { avatar ->
+                                            onRawMediaClick(avatar)
                                         }
                                     }
                                 },
                                 onBannerClick = {
                                     state.state.userState.onSuccess {
-                                        it.banner?.let(onRawMediaClick)
+                                        it.banner?.let { banner -> onRawMediaClick(banner) }
                                     }
                                 },
                                 isBigScreen = true,
@@ -274,8 +267,18 @@ internal fun ProfileScreen(
                                         )
                                     },
                                     onAvatarClick = {
+                                        state.state.userState.onSuccess {
+                                            it.avatar?.let { avatar ->
+                                                onRawMediaClick(avatar)
+                                            }
+                                        }
                                     },
                                     onBannerClick = {
+                                        state.state.userState.onSuccess {
+                                            it.banner?.let { banner ->
+                                                onRawMediaClick(banner)
+                                            }
+                                        }
                                     },
                                     isBigScreen = false,
                                     onFollowListClick = onFollowListClick,
@@ -292,7 +295,7 @@ internal fun ProfileScreen(
                                                 },
                                             ) {
                                                 Text(
-                                                    stringResource(tab.title),
+                                                    tab.title,
                                                 )
                                             }
                                         }
@@ -317,7 +320,7 @@ internal fun ProfileScreen(
                                             },
                                         ) {
                                             Text(
-                                                stringResource(tab.title),
+                                                tab.title,
                                             )
                                         }
                                     }
@@ -404,21 +407,9 @@ internal fun ProfileScreen(
     }
 }
 
-private val ProfileState.Tab.title: StringResource
+private val ProfileState.Tab.title: String
     get() =
-        when (this) {
-            is ProfileState.Tab.Media -> {
-                Res.string.profile_tab_media
-            }
-
-            is ProfileState.Tab.Timeline -> {
-                when (type) {
-                    ProfileTab.Timeline.Type.Status -> Res.string.profile_tab_timeline
-                    ProfileTab.Timeline.Type.StatusWithReplies -> Res.string.profile_tab_timeline_with_reply
-                    ProfileTab.Timeline.Type.Likes -> Res.string.profile_tab_likes
-                }
-            }
-        }
+        name.name
 
 @Composable
 private fun presenter(
@@ -437,13 +428,19 @@ private fun presenter(
     val tabs =
         state.tabs.map {
             it.map {
-                when (val tab = it) {
-                    is ProfileState.Tab.Media -> {
-                        ProfileTabItem.Media(tab.presenter.body().mediaState)
+                when (it) {
+                    is ProfileState.Tab.Timeline -> {
+                        ProfileTabItem.Timeline(
+                            name = it.name,
+                            data = it.presenter.body().listState,
+                        )
                     }
 
-                    is ProfileState.Tab.Timeline -> {
-                        ProfileTabItem.Timeline(tab.type, tab.presenter.body().listState)
+                    is ProfileState.Tab.Media -> {
+                        ProfileTabItem.Media(
+                            name = it.name,
+                            data = it.presenter.body().mediaState,
+                        )
                     }
                 }
             }
@@ -485,12 +482,17 @@ private fun presenter(
 }
 
 private sealed interface ProfileTabItem {
+    val name: UiStrings
+    val title: String
+        get() = name.name
+
     data class Timeline(
-        val type: ProfileTab.Timeline.Type,
+        override val name: UiStrings,
         val data: PagingState<UiTimelineV2>,
     ) : ProfileTabItem
 
     data class Media(
+        override val name: UiStrings,
         val data: PagingState<ProfileMedia>,
     ) : ProfileTabItem
 }

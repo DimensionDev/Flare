@@ -3,8 +3,9 @@ package dev.dimension.flare.ui.presenter
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import dev.dimension.flare.data.datasource.microblog.NotificationTimelineDataSource
 import dev.dimension.flare.data.repository.AccountRepository
-import dev.dimension.flare.data.repository.activeAccountFlow
+import dev.dimension.flare.data.repository.allAccountServicesFlow
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.web.shared.WebPresenter
@@ -31,17 +32,17 @@ public class HomeTabsPresenter :
 
     private val accountRepository by inject<AccountRepository>()
     private val tabsFlow by lazy {
-        activeAccountFlow(accountRepository)
-            .map { account ->
-                if (account == null) {
+        allAccountServicesFlow(accountRepository)
+            .map { accountServices ->
+                if (accountServices.any { it is NotificationTimelineDataSource }) {
                     persistentListOf(
                         State.HomeTabs.Home,
+                        State.HomeTabs.Notifications,
                         State.HomeTabs.Discover,
                     )
                 } else {
                     persistentListOf(
                         State.HomeTabs.Home,
-                        State.HomeTabs.Notifications,
                         State.HomeTabs.Discover,
                     )
                 }.toImmutableList()

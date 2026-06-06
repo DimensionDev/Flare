@@ -31,8 +31,8 @@
 		class:rounded-full={avatarShape === 'CIRCLE'}
 		class="avatar-frame"
 	>
-		{#if user.avatar}
-			<img src={user.avatar} alt="" loading="lazy" />
+		{#if user.avatar?.url}
+			<img src={user.avatar?.url} alt="" loading="lazy" />
 		{:else}
 			<span>{initials(user.name.innerText)}</span>
 		{/if}

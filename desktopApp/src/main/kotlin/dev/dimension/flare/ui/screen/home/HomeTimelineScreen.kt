@@ -54,8 +54,8 @@ import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.presenter.HomeTimelineWithTabsPresenter
+import dev.dimension.flare.ui.presenter.home.CanComposePresenter
 import dev.dimension.flare.ui.presenter.home.DeepLinkPresenter
-import dev.dimension.flare.ui.presenter.home.LoggedInPresenter
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.rememberTimelineItemPresenterWithLazyListState
 import dev.dimension.flare.ui.route.Route
@@ -82,7 +82,7 @@ internal fun HomeTimelineScreen(
     val state by producePresenter(key = "home_timeline_$accountType") {
         presenter(accountType)
     }
-    val loggedInState = remember { LoggedInPresenter() }.invoke()
+    val canComposeState = remember { CanComposePresenter() }.invoke()
     if (LocalGlobalAppearance.current.deckMode && isBigScreen()) {
         val lazyRowState = rememberLazyListState()
         FlareScrollBar(
@@ -220,7 +220,7 @@ internal fun HomeTimelineScreen(
                             },
                             header =
                                 if (LocalGlobalAppearance.current.showComposeInHomeTimeline &&
-                                    loggedInState.isLoggedIn.takeSuccess() == true
+                                    canComposeState.canCompose.takeSuccess() == true
                                 ) {
                                     {
                                         Box(

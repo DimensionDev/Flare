@@ -27,14 +27,15 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.model.UiHandle
+import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.render.UiRichText
 import dev.dimension.flare.ui.theme.PlatformTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 
 @Composable
 internal fun CommonProfileHeader(
-    bannerUrl: String?,
-    avatarUrl: String?,
+    banner: UiMedia.Image?,
+    avatar: UiMedia.Image?,
     displayName: UiRichText,
     userKey: MicroBlogKey,
     handle: UiHandle,
@@ -73,10 +74,11 @@ internal fun CommonProfileHeader(
 //                .background(MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp))
                 .padding(bottom = 8.dp),
     ) {
-        bannerUrl?.let {
+        banner?.let {
             NetworkImage(
-                model = it,
+                model = it.url,
                 contentDescription = null,
+                customHeaders = it.customHeaders,
                 modifier =
                     Modifier
 //                        .sharedElement(
@@ -125,7 +127,7 @@ internal fun CommonProfileHeader(
                             ),
                 ) {
                     AvatarComponent(
-                        data = avatarUrl,
+                        data = avatar,
                         size = ProfileHeaderConstants.AVATAR_SIZE.dp,
 //                        beforeModifier =
 //                            Modifier

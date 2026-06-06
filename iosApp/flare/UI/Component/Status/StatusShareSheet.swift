@@ -130,7 +130,7 @@ struct StatusShareSheet: View {
             .padding(64)
             .background(Color(.systemGroupedBackground))
             .environment(\.colorScheme, theme ?? colorScheme)
-            .environment(\.timelineAppearance, timelineAppearance.withVideoAutoplayNever())
+            .environment(\.timelineAppearance, timelineAppearance.withSharePreviewDefaults())
     }
     
     
@@ -146,11 +146,12 @@ struct StatusShareSheet: View {
 }
 
 private extension TimelineAppearance {
-    func withVideoAutoplayNever() -> TimelineAppearance {
+    func withSharePreviewDefaults() -> TimelineAppearance {
         doCopy(
             avatarShape: avatarShape,
             showMedia: showMedia,
             showSensitiveContent: showSensitiveContent,
+            expandContentWarning: true,
             expandMediaSize: expandMediaSize,
             videoAutoplay: .never,
             showLinkPreview: showLinkPreview,

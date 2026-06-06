@@ -55,6 +55,8 @@ public object AppearanceKeys {
 
     public object ShowSensitiveContent : PerTimeline<Boolean>("timeline.show_sensitive_content", false, Boolean.serializer())
 
+    public object ExpandContentWarning : PerTimeline<Boolean>("timeline.expand_content_warning", false, Boolean.serializer())
+
     public object ExpandMediaSize : PerTimeline<Boolean>("timeline.expand_media_size", true, Boolean.serializer())
 
     public object VideoAutoplay : PerTimeline<AppearanceVideoAutoplay>(
@@ -104,6 +106,7 @@ public object AppearanceKeys {
             DeckMode,
             ShowMedia,
             ShowSensitiveContent,
+            ExpandContentWarning,
             ExpandMediaSize,
             VideoAutoplay,
             ShowLinkPreview,

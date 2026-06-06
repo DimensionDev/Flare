@@ -6,9 +6,11 @@ import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
+import dev.dimension.flare.data.datasource.microblog.ComposeDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeType
 import dev.dimension.flare.data.datasource.microblog.DatabaseUpdater
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
+import dev.dimension.flare.data.datasource.microblog.NotificationTimelineDataSource
 import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
 import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
@@ -38,6 +40,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiProfile
+import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.nostrLike
@@ -59,6 +62,8 @@ internal class NostrDataSource(
     override val accountKey: MicroBlogKey,
     private val credentialFlow: Flow<NostrCredential>,
 ) : AuthenticatedMicroblogDataSource,
+    NotificationTimelineDataSource,
+    ComposeDataSource,
     UserDataSource,
     RelationDataSource,
     TimelineTabConfigurationDataSource,
@@ -351,8 +356,8 @@ internal class NostrDataSource(
 
     override fun profileTabs(userKey: MicroBlogKey): ImmutableList<ProfileTab> =
         persistentListOf(
-            ProfileTab.Timeline(
-                type = ProfileTab.Timeline.Type.Status,
+            ProfileTab(
+                name = UiStrings.Posts,
                 loader = userTimeline(userKey = userKey, mediaOnly = false),
             ),
         )

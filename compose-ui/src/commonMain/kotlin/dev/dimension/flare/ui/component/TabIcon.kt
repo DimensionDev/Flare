@@ -32,20 +32,32 @@ import dev.dimension.flare.compose.ui.home_tab_discover_title
 import dev.dimension.flare.compose.ui.home_tab_favorite_title
 import dev.dimension.flare.compose.ui.home_tab_featured_title
 import dev.dimension.flare.compose.ui.home_tab_feeds_title
+import dev.dimension.flare.compose.ui.home_tab_following_title
 import dev.dimension.flare.compose.ui.home_tab_home_title
 import dev.dimension.flare.compose.ui.home_tab_list_title
 import dev.dimension.flare.compose.ui.home_tab_me_title
 import dev.dimension.flare.compose.ui.home_tab_notifications_title
+import dev.dimension.flare.compose.ui.illustrations_title
 import dev.dimension.flare.compose.ui.liked_title
 import dev.dimension.flare.compose.ui.login_button
+import dev.dimension.flare.compose.ui.manga_title
 import dev.dimension.flare.compose.ui.mastodon_tab_local_title
 import dev.dimension.flare.compose.ui.mastodon_tab_public_title
+import dev.dimension.flare.compose.ui.media_title
 import dev.dimension.flare.compose.ui.mixed_timeline_title
 import dev.dimension.flare.compose.ui.nostr_login_account_hint
 import dev.dimension.flare.compose.ui.nostr_login_amber_button
 import dev.dimension.flare.compose.ui.nostr_login_qr_button
 import dev.dimension.flare.compose.ui.nostr_login_title
+import dev.dimension.flare.compose.ui.pixiv_ranking_day_female_title
+import dev.dimension.flare.compose.ui.pixiv_ranking_day_male_title
+import dev.dimension.flare.compose.ui.pixiv_ranking_day_manga_title
+import dev.dimension.flare.compose.ui.pixiv_ranking_month_title
+import dev.dimension.flare.compose.ui.pixiv_ranking_week_original_title
+import dev.dimension.flare.compose.ui.pixiv_ranking_week_rookie_title
+import dev.dimension.flare.compose.ui.pixiv_ranking_week_title
 import dev.dimension.flare.compose.ui.posts_title
+import dev.dimension.flare.compose.ui.posts_with_replies_title
 import dev.dimension.flare.compose.ui.rss_title
 import dev.dimension.flare.compose.ui.service_select_next_button
 import dev.dimension.flare.compose.ui.settings_title
@@ -269,6 +281,7 @@ internal val UiStrings.res: StringResource
             UiStrings.Featured -> Res.string.home_tab_featured_title
             UiStrings.Bookmark -> Res.string.home_tab_bookmarks_title
             UiStrings.Favourite -> Res.string.home_tab_favorite_title
+            UiStrings.Following -> Res.string.home_tab_following_title
             UiStrings.List -> Res.string.home_tab_list_title
             UiStrings.Feeds -> Res.string.home_tab_feeds_title
             UiStrings.DirectMessage -> Res.string.dm_list_title
@@ -279,6 +292,8 @@ internal val UiStrings.res: StringResource
             UiStrings.Liked -> Res.string.liked_title
             UiStrings.AllRssFeeds -> Res.string.all_rss_feeds_title
             UiStrings.Posts -> Res.string.posts_title
+            UiStrings.PostsWithReplies -> Res.string.posts_with_replies_title
+            UiStrings.Media -> Res.string.media_title
             UiStrings.Channel -> Res.string.channel_title
             UiStrings.Login -> Res.string.login_button
             UiStrings.Verify -> Res.string.login_button
@@ -294,4 +309,13 @@ internal val UiStrings.res: StringResource
             UiStrings.ExternalSigner -> Res.string.nostr_login_amber_button
             UiStrings.WebCookieLogin -> Res.string.login_button
             UiStrings.NostrLoginAccount -> Res.string.nostr_login_account_hint
+            UiStrings.PixivRankingWeek -> Res.string.pixiv_ranking_week_title
+            UiStrings.PixivRankingMonth -> Res.string.pixiv_ranking_month_title
+            UiStrings.PixivRankingDayMale -> Res.string.pixiv_ranking_day_male_title
+            UiStrings.PixivRankingDayFemale -> Res.string.pixiv_ranking_day_female_title
+            UiStrings.PixivRankingWeekOriginal -> Res.string.pixiv_ranking_week_original_title
+            UiStrings.PixivRankingWeekRookie -> Res.string.pixiv_ranking_week_rookie_title
+            UiStrings.PixivRankingDayManga -> Res.string.pixiv_ranking_day_manga_title
+            UiStrings.Illustrations -> Res.string.illustrations_title
+            UiStrings.Manga -> Res.string.manga_title
         }

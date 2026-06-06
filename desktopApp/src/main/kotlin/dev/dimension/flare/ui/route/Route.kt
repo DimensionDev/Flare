@@ -144,6 +144,7 @@ internal sealed interface Route : NavKey {
 
     data class RawImage(
         val rawImage: String,
+        val customHeaders: ImmutableMap<String, String>? = null,
     ) : WindowRoute
 
     data object Compose {

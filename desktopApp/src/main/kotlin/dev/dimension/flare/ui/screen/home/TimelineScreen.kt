@@ -198,13 +198,25 @@ internal fun TimelineScreen(
     onScrollToTop: (() -> Unit)? = null,
 ) {
     val state = rememberTimelineItemPresenterWithLazyListState(tabItem)
-    TimelineContent(
-        state = state,
-        modifier = modifier,
-        contentPadding = contentPadding,
-        header = header,
-        onScrollToTop = onScrollToTop,
-    )
+
+    val timelineAppearance = LocalTimelineAppearance.current
+    CompositionLocalProvider(
+        LocalTimelineAppearance provides
+            remember(
+                tabItem.appearancePatch,
+                timelineAppearance,
+            ) {
+                tabItem.resolveTimelineAppearance(timelineAppearance)
+            },
+    ) {
+        TimelineContent(
+            state = state,
+            modifier = modifier,
+            contentPadding = contentPadding,
+            header = header,
+            onScrollToTop = onScrollToTop,
+        )
+    }
 }
 
 @Composable

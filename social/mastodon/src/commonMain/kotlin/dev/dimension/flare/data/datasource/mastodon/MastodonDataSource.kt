@@ -6,9 +6,11 @@ import dev.dimension.flare.common.FileType
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
+import dev.dimension.flare.data.datasource.microblog.ComposeDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeType
 import dev.dimension.flare.data.datasource.microblog.DatabaseUpdater
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
+import dev.dimension.flare.data.datasource.microblog.NotificationTimelineDataSource
 import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
 import dev.dimension.flare.data.datasource.microblog.datasource.ListDataSource
@@ -73,6 +75,8 @@ internal open class MastodonDataSource(
     val instance: String,
     private val credentialFlow: Flow<MastodonCredential>,
 ) : AuthenticatedMicroblogDataSource,
+    NotificationTimelineDataSource,
+    ComposeDataSource,
     NotificationDataSource,
     UserDataSource,
     PostDataSource,
@@ -601,8 +605,8 @@ internal open class MastodonDataSource(
 
     override fun profileTabs(userKey: MicroBlogKey): ImmutableList<ProfileTab> =
         listOfNotNull(
-            ProfileTab.Timeline(
-                type = ProfileTab.Timeline.Type.Status,
+            ProfileTab(
+                name = UiStrings.Posts,
                 loader =
                     UserTimelineRemoteMediator(
                         service = service,
@@ -611,8 +615,8 @@ internal open class MastodonDataSource(
                         withPinned = true,
                     ),
             ),
-            ProfileTab.Timeline(
-                type = ProfileTab.Timeline.Type.StatusWithReplies,
+            ProfileTab(
+                name = UiStrings.PostsWithReplies,
                 loader =
                     UserTimelineRemoteMediator(
                         service = service,
@@ -621,7 +625,11 @@ internal open class MastodonDataSource(
                         withReplies = true,
                     ),
             ),
-            ProfileTab.Media,
+            ProfileTab(
+                name = UiStrings.Media,
+                displayType = ProfileTab.DisplayType.Gallery,
+                loader = userTimeline(userKey, mediaOnly = true),
+            ),
         ).toPersistentList()
 
     suspend fun acceptFollowRequest(

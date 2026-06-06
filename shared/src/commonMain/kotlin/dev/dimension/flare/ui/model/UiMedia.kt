@@ -75,6 +75,21 @@ public sealed interface UiMedia {
     ) : UiMedia
 }
 
+public fun String?.toUiImage(customHeaders: SerializableImmutableMap<String, String>? = null): UiMedia.Image? =
+    this
+        ?.takeIf { it.isNotBlank() }
+        ?.let {
+            UiMedia.Image(
+                url = it,
+                previewUrl = it,
+                description = null,
+                height = 0f,
+                width = 0f,
+                sensitive = false,
+                customHeaders = customHeaders,
+            )
+        }
+
 public fun UiMedia.getFileName(
     statusKey: String,
     userHandle: String,

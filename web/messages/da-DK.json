@@ -360,6 +360,8 @@
   "settingsAppearanceExpandMediaDescription": "Vis medier i deres originale aspektforhold i tidslinjer",
   "settingsAppearanceShowCwImg": "Vis følsomt indhold",
   "settingsAppearanceShowCwImgDescription": "Afslør altid følsomme medier i indlæg",
+  "settingsAppearanceExpandContentWarning": "Show content behind content warnings",
+  "settingsAppearanceExpandContentWarningDescription": "Always reveal post content hidden by content warnings",
   "settingsAppearanceVideoAutoplay": "Video-autoafspilning",
   "settingsAppearanceVideoAutoplayDescription": "Afspil automatisk videoer i indlæg",
   "settingsAppearanceVideoAutoplayWifi": "Kun Wi-Fi",

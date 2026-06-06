@@ -104,14 +104,8 @@ struct ProfileScreen: View {
             StateView(state: presenter.state.tabs) { tabsArray in
                 let tabs = tabsArray.cast(ProfileState.Tab.self)
                 let selectedTabItem = tabs[selectedTab]
-                switch onEnum(of: selectedTabItem) {
-                case .timeline(let timeline):
-                    ProfileTimelineWaterFallView(presenter: timeline.presenter)
-                        .id(timeline.type.name)
-                case .media(let media):
-                    ProfileTimelineWaterFallView(presenter: media.presenter.getMediaTimelinePresenter())
-                        .id("media")
-                }
+                ProfileTimelineWaterFallView(presenter: profileTimelinePresenter(for: selectedTabItem))
+                    .id(profileTimelineID(for: selectedTabItem))
             }
         }
     }
@@ -195,37 +189,25 @@ private struct ProfileTabPicker: View {
     }
 }
 
-private func profileTabTitle(for tab: ProfileState.Tab) -> LocalizedStringResource {
-    switch onEnum(of: tab) {
-    case .media:
-        LocalizedStringResource(stringLiteral: "profile_tab_media")
-    case .timeline(let timeline):
-        switch timeline.type {
-        case .likes:
-            LocalizedStringResource(stringLiteral: "profile_tab_likes")
-        case .status:
-            LocalizedStringResource(stringLiteral: "profile_tab_status")
-        case .statusWithReplies:
-            LocalizedStringResource(stringLiteral: "profile_tab_replies")
-        }
-    }
+private func profileTabTitle(for tab: ProfileState.Tab) -> String {
+    tab.name.name
 }
 
 private func profileTimelineID(for tab: ProfileState.Tab) -> String {
     switch onEnum(of: tab) {
-    case .timeline(let timeline):
-        timeline.type.name
+    case .timeline:
+        "Timeline_\(tab.name.name)"
     case .media:
-        "media"
+        "Media_\(tab.name.name)"
     }
 }
 
 private func profileTimelinePresenter(for tab: ProfileState.Tab) -> TimelinePresenter {
     switch onEnum(of: tab) {
-    case .timeline(let timeline):
-        timeline.presenter
-    case .media(let media):
-        media.presenter.getMediaTimelinePresenter()
+    case .timeline(let tab):
+        tab.presenter
+    case .media(let tab):
+        tab.presenter.getMediaTimelinePresenter()
     }
 }
 
@@ -515,8 +497,8 @@ private struct ProfileHeaderAccessorySignature: Equatable {
                 String(describing: success.data.key),
                 success.data.name.raw,
                 success.data.handle.canonical,
-                success.data.avatar,
-                success.data.banner ?? "",
+                success.data.avatar?.url ?? "",
+                success.data.banner?.url ?? "",
                 success.data.description_?.raw ?? "",
                 String(describing: success.data.matrices.fansCount),
                 String(describing: success.data.matrices.followsCount),

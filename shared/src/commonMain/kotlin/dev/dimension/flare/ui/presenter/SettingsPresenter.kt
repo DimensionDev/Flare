@@ -88,6 +88,8 @@ public class SettingsPresenter :
 
             override fun updateShowSensitiveContent(value: Boolean) = update(AppearanceKeys.ShowSensitiveContent, value)
 
+            override fun updateExpandContentWarning(value: Boolean) = update(AppearanceKeys.ExpandContentWarning, value)
+
             override fun updateShowBottomBarLabels(value: Boolean) = update(AppearanceKeys.ShowBottomBarLabels, value)
 
             override fun updateDeckMode(value: Boolean) = update(AppearanceKeys.DeckMode, value)
@@ -149,6 +151,8 @@ public class SettingsPresenter :
         public fun updateExpandMediaSize(value: Boolean)
 
         public fun updateShowSensitiveContent(value: Boolean)
+
+        public fun updateExpandContentWarning(value: Boolean)
 
         public fun updateShowBottomBarLabels(value: Boolean)
 

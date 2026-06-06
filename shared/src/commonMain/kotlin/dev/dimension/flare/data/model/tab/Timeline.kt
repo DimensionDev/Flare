@@ -2,7 +2,9 @@ package dev.dimension.flare.data.model.tab
 
 import androidx.compose.runtime.Immutable
 import dev.dimension.flare.data.model.IconType
+import dev.dimension.flare.data.model.TimelineDisplayMode
 import dev.dimension.flare.data.model.appearance.AppearanceBag
+import dev.dimension.flare.data.model.appearance.AppearanceKeys
 import dev.dimension.flare.data.model.appearance.AppearancePatch
 import dev.dimension.flare.data.model.appearance.TimelineAppearance
 import dev.dimension.flare.data.model.appearance.toBag
@@ -83,6 +85,12 @@ public sealed interface TimelineTabItemV2 {
 }
 
 public fun TimelineTabItemV2.resolveTimelineAppearance(base: TimelineAppearance): TimelineAppearance = base.withPatch(appearancePatch)
+
+private val galleryAppearancePatch: AppearancePatch =
+    AppearancePatch.EMPTY.set(
+        AppearanceKeys.TimelineDisplayMode,
+        TimelineDisplayMode.Gallery,
+    )
 
 @Immutable
 public class SourceTimelineTabItemV2 private constructor(
@@ -171,18 +179,24 @@ public class SourceTimelineTabItemV2 private constructor(
 
         internal fun fromSource(
             source: TimelineSourceRef,
+            appearancePatch: AppearancePatch? = null,
             presenterFactory: () -> TimelinePresenter,
-        ): SourceTimelineTabItemV2 =
-            SourceTimelineTabItemV2(
+        ): SourceTimelineTabItemV2 {
+            val presentation =
+                appearancePatch?.takeUnless { it == AppearancePatch.EMPTY }?.let {
+                    TimelinePresentation(appearanceOverride = it.toBag())
+                }
+            return SourceTimelineTabItemV2(
                 id = source.id,
                 source = source,
-                presentation = null,
+                presentation = presentation,
                 title = source.title,
                 icon = source.icon,
-                appearancePatch = null,
-                enabled = true,
+                appearancePatch = presentation?.appearance,
+                enabled = presentation?.enabled ?: true,
                 presenterFactory = presenterFactory,
             )
+        }
     }
 }
 
@@ -424,6 +438,31 @@ public data class TimelineSpec<T : TimelineSpec.Data>(
         data: T,
         title: UiText = this.title.asText(),
         icon: IconType = this.icon,
+    ): SourceTimelineTabItemV2 =
+        tabItem(
+            data = data,
+            title = title,
+            icon = icon,
+            appearancePatch = null,
+        )
+
+    public fun galleryTabItem(
+        data: T,
+        title: UiText = this.title.asText(),
+        icon: IconType = this.icon,
+    ): SourceTimelineTabItemV2 =
+        tabItem(
+            data = data,
+            title = title,
+            icon = icon,
+            appearancePatch = galleryAppearancePatch,
+        )
+
+    private fun tabItem(
+        data: T,
+        title: UiText,
+        icon: IconType,
+        appearancePatch: AppearancePatch?,
     ): SourceTimelineTabItemV2 {
         val source =
             target(
@@ -431,7 +470,10 @@ public data class TimelineSpec<T : TimelineSpec.Data>(
                 title = title,
                 icon = icon,
             )
-        return SourceTimelineTabItemV2.fromSource(source) {
+        return SourceTimelineTabItemV2.fromSource(
+            source = source,
+            appearancePatch = appearancePatch,
+        ) {
             createPresenter(source.data)
         }
     }

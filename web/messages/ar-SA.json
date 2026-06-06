@@ -360,6 +360,8 @@
   "settingsAppearanceExpandMediaDescription": "إظهار الوسائط بنسبتها الأصلية في الجداول الزمنية",
   "settingsAppearanceShowCwImg": "إظهار المحتوى الحساس",
   "settingsAppearanceShowCwImgDescription": "كشف الوسائط الحساسة دائمًا في المنشورات",
+  "settingsAppearanceExpandContentWarning": "Show content behind content warnings",
+  "settingsAppearanceExpandContentWarningDescription": "Always reveal post content hidden by content warnings",
   "settingsAppearanceVideoAutoplay": "تشغيل الفيديو تلقائيًا",
   "settingsAppearanceVideoAutoplayDescription": "تشغيل الفيديوهات تلقائيًا في المنشورات",
   "settingsAppearanceVideoAutoplayWifi": "واي فاي فقط",

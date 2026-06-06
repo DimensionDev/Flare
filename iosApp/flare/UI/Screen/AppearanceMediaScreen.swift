@@ -36,6 +36,14 @@ struct AppearanceMediaScreen: View {
                         Text("appearance_show_sensitive_content")
                         Text("appearance_show_sensitive_content_description")
                     }
+                    Toggle(isOn: Binding(get: {
+                        appearance.expandContentWarning
+                    }, set: { newValue in
+                        presenter.state.updateExpandContentWarning(value: newValue)
+                    })) {
+                        Text("appearance_expand_content_warning")
+                        Text("appearance_expand_content_warning_description")
+                    }
                     Picker(selection: Binding(get: {
                         appearance.videoAutoplay
                     }, set: { newValue in

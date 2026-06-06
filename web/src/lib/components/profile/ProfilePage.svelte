@@ -7,6 +7,7 @@
     import ProfileTimelineTabPanel from "$lib/components/profile/ProfileTimelineTabPanel.svelte";
     import TimelineLoadingPlaceholderList from "$lib/components/UiTimeline/TimelineLoadingPlaceholderList.svelte";
     import { useDeepLink } from "$lib/deeplink/deepLink.svelte";
+    import { localizedUiString } from "$lib/i18n/uiStrings";
     import { m } from "$lib/paraglide/messages.js";
     import {
         type RetainedPresenterController,
@@ -326,29 +327,11 @@
     }
 
     function profileTabId(tab: ProfileStateTab, index: number): string {
-        if (tab.type === "Media") return `media_${index}`;
-
-        switch (tab.type_) {
-            case "Status":
-                return `posts_${index}`;
-            case "StatusWithReplies":
-                return `replies_${index}`;
-            case "Likes":
-                return `likes_${index}`;
-        }
+        return `${tab.type}_${tab.name}_${index}`;
     }
 
     function profileTabTitle(tab: ProfileStateTab): string {
-        if (tab.type === "Media") return m.profileTabMedia();
-
-        switch (tab.type_) {
-            case "Status":
-                return m.profileTabTimeline();
-            case "StatusWithReplies":
-                return m.profileTabTimelineWithReply();
-            case "Likes":
-                return m.profileTabLikes();
-        }
+        return localizedUiString(tab.name);
     }
 
     function timelinePresenterForTab(tab: ProfileStateTab): TimelinePresenter {
@@ -555,8 +538,8 @@
                 aria-label={m.profileOpenBanner()}
                 onclick={performProfileClick}
             >
-                {#if displayProfile.banner}
-                    <img src={displayProfile.banner} alt="" loading="lazy" />
+                {#if displayProfile.banner?.url}
+                    <img src={displayProfile.banner?.url} alt="" loading="lazy" />
                 {/if}
             </button>
 
@@ -568,9 +551,9 @@
                     aria-label={m.profileOpenAvatar()}
                     onclick={performProfileClick}
                 >
-                    {#if displayProfile.avatar}
+                    {#if displayProfile.avatar?.url}
                         <img
-                            src={displayProfile.avatar}
+                            src={displayProfile.avatar?.url}
                             alt=""
                             loading="lazy"
                         />

@@ -373,7 +373,10 @@ private fun LoginMethodPicker(
             .map { stringResource(it.title.res) }
             .toImmutableList()
     PlatformPicker(
-        modifier = Modifier.horizontalScroll(rememberScrollState()),
+        modifier =
+            Modifier
+                .width(300.dp)
+                .horizontalScroll(rememberScrollState()),
         options = labels,
         onSelected = { index ->
             methods.getOrNull(index)?.let(onSelected)

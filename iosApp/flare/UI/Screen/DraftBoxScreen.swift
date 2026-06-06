@@ -65,7 +65,7 @@ struct DraftItemView: View {
                             HStack(spacing: 6) {
                                 ForEach(Array(draft.accounts.enumerated()), id: \.offset) { _, account in
                                     if let avatar = account.avatar {
-                                        NetworkImage(data: avatar)
+                                        NetworkImage(data: avatar.url, customHeader: avatar.customHeaders)
                                             .frame(width: 22, height: 22)
                                             .clipShape(Circle())
                                     } else {

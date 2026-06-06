@@ -87,6 +87,8 @@ import androidx.media3.ui.compose.state.rememberPlayPauseButtonState
 import androidx.window.core.layout.WindowSizeClass
 import coil3.annotation.ExperimentalCoilApi
 import coil3.imageLoader
+import coil3.network.NetworkHeaders
+import coil3.network.httpHeaders
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import coil3.size.Size
@@ -127,6 +129,7 @@ import dev.dimension.flare.ui.presenter.status.StatusPresenter
 import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -272,6 +275,7 @@ internal fun StatusMediaScreen(
                                                             .fillMaxSize(),
                                                     url = imageUrl,
                                                     previewUrl = previewUrl,
+                                                    customHeaders = media.customHeaders,
                                                     description = media.description,
                                                     onClick = {
                                                         state.setShowUi(!state.showUi)
@@ -334,6 +338,7 @@ internal fun StatusMediaScreen(
                                                 ImageItem(
                                                     url = preview,
                                                     previewUrl = preview,
+                                                    customHeaders = null,
                                                     description = null,
                                                     onClick = { /*TODO*/ },
                                                     setLockPager = {
@@ -815,6 +820,7 @@ private fun PlayerControl(
 private fun ImageItem(
     url: String,
     previewUrl: String,
+    customHeaders: ImmutableMap<String, String>?,
     description: String?,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
@@ -867,7 +873,21 @@ private fun ImageItem(
                 .placeholderMemoryCacheKey(previewUrl)
                 .crossfade(1_000)
                 .size(Size.ORIGINAL)
-                .build(),
+                .let { builder ->
+                    if (customHeaders.isNullOrEmpty()) {
+                        builder
+                    } else {
+                        builder.httpHeaders(
+                            NetworkHeaders
+                                .Builder()
+                                .apply {
+                                    customHeaders.forEach { (key, value) ->
+                                        set(key, value)
+                                    }
+                                }.build(),
+                        )
+                    }
+                }.build(),
         contentDescription = description,
         state = rememberZoomableImageState(zoomableState),
         modifier = modifier,

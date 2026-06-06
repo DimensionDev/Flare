@@ -33,6 +33,7 @@ struct StatusUIKitAppearance: Equatable {
     let showNumbers: Bool
     let showMedia: Bool
     let showSensitiveContent: Bool
+    let expandContentWarning: Bool
     let showLinkPreview: Bool
     let compatLinkPreview: Bool
     let expandMediaSize: Bool
@@ -50,6 +51,7 @@ struct StatusUIKitAppearance: Equatable {
         showNumbers = timeline.showNumbers
         showMedia = timeline.showMedia
         showSensitiveContent = timeline.showSensitiveContent
+        expandContentWarning = timeline.expandContentWarning
         showLinkPreview = timeline.showLinkPreview
         compatLinkPreview = timeline.compatLinkPreview
         expandMediaSize = timeline.expandMediaSize
@@ -65,6 +67,7 @@ struct StatusUIKitAppearance: Equatable {
             lhs.showNumbers == rhs.showNumbers &&
             lhs.showMedia == rhs.showMedia &&
             lhs.showSensitiveContent == rhs.showSensitiveContent &&
+            lhs.expandContentWarning == rhs.expandContentWarning &&
             lhs.showLinkPreview == rhs.showLinkPreview &&
             lhs.compatLinkPreview == rhs.compatLinkPreview &&
             lhs.expandMediaSize == rhs.expandMediaSize

@@ -360,6 +360,8 @@
   "settingsAppearanceExpandMediaDescription": "Mostra i media con le loro proporzioni originali",
   "settingsAppearanceShowCwImg": "Mostra contenuti sensibili",
   "settingsAppearanceShowCwImgDescription": "Rivela sempre i media sensibili nei post",
+  "settingsAppearanceExpandContentWarning": "Show content behind content warnings",
+  "settingsAppearanceExpandContentWarningDescription": "Always reveal post content hidden by content warnings",
   "settingsAppearanceVideoAutoplay": "Riproduzione automatica video",
   "settingsAppearanceVideoAutoplayDescription": "Riproduci automaticamente i video nei post",
   "settingsAppearanceVideoAutoplayWifi": "Solo Wi-Fi",

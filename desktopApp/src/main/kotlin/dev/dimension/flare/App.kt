@@ -67,6 +67,7 @@ import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.presenter.HomeTabsPresenter
 import dev.dimension.flare.ui.presenter.home.AllNotificationBadgePresenter
+import dev.dimension.flare.ui.presenter.home.CanComposePresenter
 import dev.dimension.flare.ui.presenter.home.DeepLinkPresenter
 import dev.dimension.flare.ui.presenter.home.LoggedInPresenter
 import dev.dimension.flare.ui.presenter.home.LoggedInState
@@ -281,23 +282,25 @@ internal fun WindowScope.FlareApp(backButtonState: NavigationBackButtonState) {
                             }
 
                             Spacer(modifier = Modifier.height(8.dp))
-                            Button(
-                                onClick = {
-                                    state.navigate(
-                                        Route.Compose.New,
+                            if (state.canComposeState.takeSuccess() == true) {
+                                Button(
+                                    onClick = {
+                                        state.navigate(
+                                            Route.Compose.New,
+                                        )
+                                    },
+                                    modifier =
+                                        Modifier
+                                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                                            .fillMaxWidth(),
+                                    iconOnly = true,
+                                ) {
+                                    Icon(
+                                        FontAwesomeIcons.Solid.Pen,
+                                        contentDescription = stringResource(Res.string.home_compose),
+                                        modifier = Modifier.size(16.dp),
                                     )
-                                },
-                                modifier =
-                                    Modifier
-                                        .padding(horizontal = 8.dp, vertical = 4.dp)
-                                        .fillMaxWidth(),
-                                iconOnly = true,
-                            ) {
-                                Icon(
-                                    FontAwesomeIcons.Solid.Pen,
-                                    contentDescription = stringResource(Res.string.home_compose),
-                                    modifier = Modifier.size(16.dp),
-                                )
+                                }
                             }
                         }
 //                        SubtleButton(
@@ -593,6 +596,7 @@ private fun presenter(uriHandler: UriHandler) =
             }.invoke()
         val secondaryTabsPresenter = remember { SecondaryTabsPresenter() }.invoke()
         val loginState = remember { LoggedInPresenter() }.invoke()
+        val canComposeState = remember { CanComposePresenter() }.invoke()
         val tabState = remember { HomeTabsPresenter() }.invoke()
         val allNotificationState = remember { AllNotificationBadgePresenter() }.invoke()
         val scrollToTopRegistry =
@@ -637,6 +641,7 @@ private fun presenter(uriHandler: UriHandler) =
             SecondaryTabsPresenter.State by secondaryTabsPresenter,
             UserState by activeAccountPresenter {
             val notificationState = allNotificationState
+            val canComposeState = canComposeState.canCompose
             val scrollToTopRegistry = scrollToTopRegistry
             val deeplinkPresenter = deeplinkPresenter
             val topLevelBackStack = topLevelBackStack

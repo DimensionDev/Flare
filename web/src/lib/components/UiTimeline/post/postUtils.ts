@@ -17,6 +17,7 @@ export const defaultTimelineAppearance = {
 	aiConfig: { tldr: false, translation: true },
 	avatarShape: 'CIRCLE',
 	compatLinkPreview: false,
+	expandContentWarning: false,
 	expandMediaSize: true,
 	fullWidthPost: false,
 	lineLimit: 5,

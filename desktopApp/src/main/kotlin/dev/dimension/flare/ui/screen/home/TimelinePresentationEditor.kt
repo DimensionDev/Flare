@@ -53,6 +53,8 @@ import dev.dimension.flare.settings_appearance_compat_link_previews
 import dev.dimension.flare.settings_appearance_compat_link_previews_description
 import dev.dimension.flare.settings_appearance_display_group_subtitle
 import dev.dimension.flare.settings_appearance_display_group_title
+import dev.dimension.flare.settings_appearance_expand_content_warning
+import dev.dimension.flare.settings_appearance_expand_content_warning_description
 import dev.dimension.flare.settings_appearance_expand_media
 import dev.dimension.flare.settings_appearance_expand_media_description
 import dev.dimension.flare.settings_appearance_full_width_post
@@ -159,6 +161,7 @@ internal fun TimelinePresentationEditor(
     val mediaOverridesEnabled =
         appearancePatch.contains(AppearanceKeys.ShowMedia) ||
             appearancePatch.contains(AppearanceKeys.ShowSensitiveContent) ||
+            appearancePatch.contains(AppearanceKeys.ExpandContentWarning) ||
             appearancePatch.contains(AppearanceKeys.ExpandMediaSize) ||
             appearancePatch.contains(AppearanceKeys.VideoAutoplay)
     val themeOverridesEnabled = appearancePatch.contains(AppearanceKeys.AvatarShape)
@@ -417,6 +420,9 @@ internal fun TimelinePresentationEditor(
                                         AppearanceKeys.ShowSensitiveContent,
                                         timelineAppearance.showSensitiveContent,
                                     ).set(
+                                        AppearanceKeys.ExpandContentWarning,
+                                        timelineAppearance.expandContentWarning,
+                                    ).set(
                                         AppearanceKeys.ExpandMediaSize,
                                         timelineAppearance.expandMediaSize,
                                     ).set(
@@ -427,6 +433,7 @@ internal fun TimelinePresentationEditor(
                                 appearancePatch.clearAll(
                                     AppearanceKeys.ShowMedia,
                                     AppearanceKeys.ShowSensitiveContent,
+                                    AppearanceKeys.ExpandContentWarning,
                                     AppearanceKeys.ExpandMediaSize,
                                     AppearanceKeys.VideoAutoplay,
                                 )
@@ -458,6 +465,20 @@ internal fun TimelinePresentationEditor(
                                     onAppearancePatchChange(
                                         appearancePatch.set(
                                             AppearanceKeys.ShowSensitiveContent,
+                                            it,
+                                        ),
+                                    )
+                                },
+                            )
+                            ExpanderItemSeparator()
+                            SwitchItem(
+                                title = stringResource(Res.string.settings_appearance_expand_content_warning),
+                                caption = stringResource(Res.string.settings_appearance_expand_content_warning_description),
+                                checked = timelineAppearance.expandContentWarning,
+                                onCheckedChange = {
+                                    onAppearancePatchChange(
+                                        appearancePatch.set(
+                                            AppearanceKeys.ExpandContentWarning,
                                             it,
                                         ),
                                     )

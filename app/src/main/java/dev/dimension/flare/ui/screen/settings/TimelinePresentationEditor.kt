@@ -97,6 +97,7 @@ internal fun TimelinePresentationEditor(
     val mediaOverridesEnabled =
         appearancePatch.contains(AppearanceKeys.ShowMedia) ||
             appearancePatch.contains(AppearanceKeys.ShowSensitiveContent) ||
+            appearancePatch.contains(AppearanceKeys.ExpandContentWarning) ||
             appearancePatch.contains(AppearanceKeys.ExpandMediaSize) ||
             appearancePatch.contains(AppearanceKeys.VideoAutoplay)
     val themeOverridesEnabled = appearancePatch.contains(AppearanceKeys.AvatarShape)
@@ -415,6 +416,9 @@ internal fun TimelinePresentationEditor(
                                         AppearanceKeys.ShowSensitiveContent,
                                         timelineAppearance.showSensitiveContent,
                                     ).set(
+                                        AppearanceKeys.ExpandContentWarning,
+                                        timelineAppearance.expandContentWarning,
+                                    ).set(
                                         AppearanceKeys.ExpandMediaSize,
                                         timelineAppearance.expandMediaSize,
                                     ).set(AppearanceKeys.VideoAutoplay, timelineAppearance.videoAutoplay)
@@ -422,6 +426,7 @@ internal fun TimelinePresentationEditor(
                                 appearancePatch.clearAll(
                                     AppearanceKeys.ShowMedia,
                                     AppearanceKeys.ShowSensitiveContent,
+                                    AppearanceKeys.ExpandContentWarning,
                                     AppearanceKeys.ExpandMediaSize,
                                     AppearanceKeys.VideoAutoplay,
                                 )
@@ -455,6 +460,20 @@ internal fun TimelinePresentationEditor(
                                     onAppearancePatchChange(
                                         appearancePatch.set(
                                             AppearanceKeys.ShowSensitiveContent,
+                                            it,
+                                        ),
+                                    )
+                                },
+                                shapes = ListItemDefaults.item(),
+                            )
+                            SwitchSettingsItem(
+                                title = stringResource(id = R.string.settings_appearance_expand_content_warning),
+                                description = stringResource(id = R.string.settings_appearance_expand_content_warning_description),
+                                checked = timelineAppearance.expandContentWarning,
+                                onCheckedChange = {
+                                    onAppearancePatchChange(
+                                        appearancePatch.set(
+                                            AppearanceKeys.ExpandContentWarning,
                                             it,
                                         ),
                                     )

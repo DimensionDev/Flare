@@ -360,6 +360,8 @@
   "settingsAppearanceExpandMediaDescription": "タイムライン上でメディアを元のアスペクト比で表示する",
   "settingsAppearanceShowCwImg": "閲覧注意を表示",
   "settingsAppearanceShowCwImgDescription": "投稿内の閲覧注意メディアを常に表示する",
+  "settingsAppearanceExpandContentWarning": "Show content behind content warnings",
+  "settingsAppearanceExpandContentWarningDescription": "Always reveal post content hidden by content warnings",
   "settingsAppearanceVideoAutoplay": "ビデオの自動再生",
   "settingsAppearanceVideoAutoplayDescription": "投稿内のビデオを自動的に再生する",
   "settingsAppearanceVideoAutoplayWifi": "Wi-Fi のみ",

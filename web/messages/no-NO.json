@@ -360,6 +360,8 @@
   "settingsAppearanceExpandMediaDescription": "Vis media i sitt originale format i tidslinjer",
   "settingsAppearanceShowCwImg": "Vis sensitivt innhold",
   "settingsAppearanceShowCwImgDescription": "Vis alltid sensitive media i innlegg",
+  "settingsAppearanceExpandContentWarning": "Show content behind content warnings",
+  "settingsAppearanceExpandContentWarningDescription": "Always reveal post content hidden by content warnings",
   "settingsAppearanceVideoAutoplay": "Auto-avspilling av video",
   "settingsAppearanceVideoAutoplayDescription": "Spill av videoer i innlegg automatisk",
   "settingsAppearanceVideoAutoplayWifi": "Kun på Wi-Fi",

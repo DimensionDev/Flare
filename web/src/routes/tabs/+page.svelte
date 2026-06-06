@@ -69,6 +69,7 @@
 		avatarShape: 'CIRCLE',
 		showMedia: true,
 		showSensitiveContent: false,
+		expandContentWarning: false,
 		expandMediaSize: true,
 		videoAutoplay: 'WIFI',
 		showLinkPreview: true,
@@ -107,6 +108,7 @@
 		mediaOverride: boolean;
 		showMedia: boolean;
 		showSensitiveContent: boolean;
+		expandContentWarning: boolean;
 		expandMediaSize: boolean;
 		videoAutoplay: VideoAutoplay;
 		themeOverride: boolean;
@@ -134,6 +136,7 @@
 		mediaOverride: boolean;
 		showMedia: boolean;
 		showSensitiveContent: boolean;
+		expandContentWarning: boolean;
 		expandMediaSize: boolean;
 		videoAutoplay: VideoAutoplay;
 		themeOverride: boolean;
@@ -382,6 +385,7 @@
 			mediaOverride: tabSettings.hasMediaAppearanceOverride(tab),
 			showMedia: appearance.showMedia,
 			showSensitiveContent: appearance.showSensitiveContent,
+			expandContentWarning: appearance.expandContentWarning,
 			expandMediaSize: appearance.expandMediaSize,
 			videoAutoplay: appearance.videoAutoplay,
 			themeOverride: tabSettings.hasThemeAppearanceOverride(tab),
@@ -414,6 +418,7 @@
 			mediaOverride: tab ? tabSettings.hasMediaAppearanceOverride(tab) : false,
 			showMedia: appearance.showMedia,
 			showSensitiveContent: appearance.showSensitiveContent,
+			expandContentWarning: appearance.expandContentWarning,
 			expandMediaSize: appearance.expandMediaSize,
 			videoAutoplay: appearance.videoAutoplay,
 			themeOverride: tab ? tabSettings.hasThemeAppearanceOverride(tab) : false,
@@ -452,6 +457,7 @@
 			editForm.mediaOverride,
 			editForm.showMedia,
 			editForm.showSensitiveContent,
+			editForm.expandContentWarning,
 			editForm.expandMediaSize,
 			editForm.videoAutoplay,
 			editForm.themeOverride,
@@ -495,6 +501,7 @@
 			groupForm.mediaOverride,
 			groupForm.showMedia,
 			groupForm.showSensitiveContent,
+			groupForm.expandContentWarning,
 			groupForm.expandMediaSize,
 			groupForm.videoAutoplay,
 			groupForm.themeOverride,
@@ -785,7 +792,7 @@
 							}}
 						>
 							<summary class="ios-disclosure-summary">
-								<img class="picker-avatar" src={group.profile.avatar} alt="" loading="lazy" />
+								<img class="picker-avatar" src={group.profile.avatar?.url} alt="" loading="lazy" />
 								<span class="setting-copy">
 									<span class="setting-title">{group.profile.handleWithoutAt}</span>
 									<span class="setting-description">{group.profile.host ?? group.profile.platformType}</span>
@@ -1117,6 +1124,12 @@
 									(value) => update({ ...form, showSensitiveContent: value })
 								)}
 								{@render AppearanceToggleRow(
+									m.settingsAppearanceExpandContentWarning(),
+									m.settingsAppearanceExpandContentWarningDescription(),
+									form.expandContentWarning,
+									(value) => update({ ...form, expandContentWarning: value })
+								)}
+								{@render AppearanceToggleRow(
 									m.settingsAppearanceExpandMedia(),
 									m.settingsAppearanceExpandMediaDescription(),
 									form.expandMediaSize,
@@ -1443,6 +1456,12 @@
 									m.settingsAppearanceShowCwImgDescription(),
 									form.showSensitiveContent,
 									(value) => update({ ...form, showSensitiveContent: value })
+								)}
+								{@render AppearanceToggleRow(
+									m.settingsAppearanceExpandContentWarning(),
+									m.settingsAppearanceExpandContentWarningDescription(),
+									form.expandContentWarning,
+									(value) => update({ ...form, expandContentWarning: value })
 								)}
 								{@render AppearanceToggleRow(
 									m.settingsAppearanceExpandMedia(),

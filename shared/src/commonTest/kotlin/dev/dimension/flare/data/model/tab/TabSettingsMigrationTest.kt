@@ -228,6 +228,8 @@ class TabSettingsMigrationTest {
                     TimelineSpecIds.XQT_DEVICE_FOLLOW,
                     TimelineSpecIds.VVO_FAVORITE,
                     TimelineSpecIds.VVO_LIKED,
+                    TimelineSpecIds.PIXIV_FOLLOWING,
+                    TimelineSpecIds.PIXIV_BOOKMARK,
                 )
 
         assertEquals(emptySet(), TimelineSpecIds.legacyMigrationIds - runtimeIds)

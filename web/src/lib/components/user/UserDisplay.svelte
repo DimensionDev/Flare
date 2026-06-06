@@ -64,8 +64,8 @@
 		class="user-avatar"
 		aria-hidden="true"
 	>
-		{#if user.avatar}
-			<img src={user.avatar} alt="" loading="lazy" />
+		{#if user.avatar?.url}
+			<img src={user.avatar?.url} alt="" loading="lazy" />
 		{:else}
 			<span>{initials(user.name.innerText || user.handleWithoutAtAndHost || handleText)}</span>
 		{/if}

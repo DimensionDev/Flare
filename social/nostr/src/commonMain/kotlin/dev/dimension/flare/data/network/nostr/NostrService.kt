@@ -24,6 +24,7 @@ import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.nostrLike
 import dev.dimension.flare.ui.model.mapper.nostrRepost
+import dev.dimension.flare.ui.model.toUiImage
 import dev.dimension.flare.ui.render.RenderContent
 import dev.dimension.flare.ui.render.RenderRun
 import dev.dimension.flare.ui.render.RenderTextStyle
@@ -2495,7 +2496,7 @@ internal class NostrService(
                     raw = handleRaw,
                     host = NOSTR_HOST,
                 ),
-            avatar = metadata?.picture.orEmpty(),
+            avatar = metadata?.picture.toUiImage(),
             nameInternal = bestName.ifBlank { npub.take(16) }.toUiPlainText(),
             platformType = PlatformType.Nostr,
             clickEvent =
@@ -2505,7 +2506,7 @@ internal class NostrService(
                         userKey = MicroBlogKey(pubKey, NOSTR_HOST),
                     ),
                 ),
-            banner = metadata?.banner,
+            banner = metadata?.banner.toUiImage(),
             description = metadata?.about?.takeIf { it.isNotBlank() }?.toUiPlainText(),
             matrices =
                 UiProfile.Matrices(

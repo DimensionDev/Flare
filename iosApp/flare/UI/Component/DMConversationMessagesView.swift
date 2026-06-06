@@ -697,7 +697,7 @@ private final class DMMessageUIView: UIView, TimelineHeightProviding {
         statusLabel.isHidden = item.sendState != .sending
 
         if !avatarView.isHidden {
-            avatarView.set(url: item.user.avatar)
+            avatarView.set(url: item.user.avatar?.url, customHeaders: item.user.avatar?.customHeaders)
         }
         if !senderNameView.isHidden {
             senderNameView.configure(
@@ -1062,31 +1062,50 @@ private final class DMMediaPreviewView: UIView {
         playIconView.isHidden = true
 
         let imageURL: String
+        let customHeaders: [String: String]?
         switch onEnum(of: media) {
         case .image(let image):
             imageURL = image.previewUrl
+            customHeaders = image.customHeaders
             aspectRatio = boundedAspectRatio(CGFloat(image.aspectRatio))
-            imageRouteURL = URL(string: DeeplinkRoute.Media.MediaImage(uri: image.url, previewUrl: image.previewUrl).toUri())
+            imageRouteURL = URL(string: DeeplinkRoute.Media.MediaImage(uri: image.url, previewUrl: image.previewUrl, customHeaders: image.customHeaders).toUri())
         case .gif(let gif):
             imageURL = gif.url
+            customHeaders = gif.customHeaders
             aspectRatio = boundedAspectRatio(CGFloat(gif.aspectRatio))
             playIconView.isHidden = false
             imageRouteURL = URL(string: DeeplinkRoute.OpenLinkDirectly(url: gif.url).toUri())
         case .video(let video):
             imageURL = video.thumbnailUrl
+            customHeaders = video.customHeaders
             aspectRatio = boundedAspectRatio(CGFloat(video.aspectRatio))
             playIconView.isHidden = false
             imageRouteURL = URL(string: DeeplinkRoute.OpenLinkDirectly(url: video.url).toUri())
         case .audio(let audio):
             imageURL = audio.previewUrl ?? ""
+            customHeaders = audio.customHeaders
             aspectRatio = 1.6
             imageRouteURL = URL(string: DeeplinkRoute.OpenLinkDirectly(url: audio.url).toUri())
         }
 
         if let url = URL(string: imageURL) {
-            imageView.kf.setImage(with: url, options: [.transition(.fade(0.2)), .cacheOriginalImage, .backgroundDecode])
+            imageView.kf.setImage(with: url, options: kingfisherOptions(customHeaders: customHeaders))
         }
         setNeedsLayout()
+    }
+
+    private func kingfisherOptions(customHeaders: [String: String]?) -> KingfisherOptionsInfo {
+        var options: KingfisherOptionsInfo = [.transition(.fade(0.2)), .cacheOriginalImage, .backgroundDecode]
+        if let customHeaders, !customHeaders.isEmpty {
+            options.append(.requestModifier(AnyModifier { request in
+                var request = request
+                for (key, value) in customHeaders {
+                    request.setValue(value, forHTTPHeaderField: key)
+                }
+                return request
+            }))
+        }
+        return options
     }
 
     override func layoutSubviews() {

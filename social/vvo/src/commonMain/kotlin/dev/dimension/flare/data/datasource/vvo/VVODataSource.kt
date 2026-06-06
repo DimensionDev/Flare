@@ -9,9 +9,11 @@ import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
+import dev.dimension.flare.data.datasource.microblog.ComposeDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeType
 import dev.dimension.flare.data.datasource.microblog.DatabaseUpdater
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
+import dev.dimension.flare.data.datasource.microblog.NotificationTimelineDataSource
 import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
 import dev.dimension.flare.data.datasource.microblog.datasource.NotificationDataSource
@@ -63,6 +65,8 @@ internal class VVODataSource(
     override val accountKey: MicroBlogKey,
     credentialFlow: Flow<VVoCredential>,
 ) : AuthenticatedMicroblogDataSource,
+    NotificationTimelineDataSource,
+    ComposeDataSource,
     KoinComponent,
     NotificationDataSource,
     UserDataSource,
@@ -364,8 +368,8 @@ internal class VVODataSource(
 
     override fun profileTabs(userKey: MicroBlogKey): ImmutableList<ProfileTab> =
         persistentListOf(
-            ProfileTab.Timeline(
-                type = ProfileTab.Timeline.Type.Status,
+            ProfileTab(
+                name = UiStrings.Posts,
                 loader = userTimeline(userKey, false),
             ),
         )

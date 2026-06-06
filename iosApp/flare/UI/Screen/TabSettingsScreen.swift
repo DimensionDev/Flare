@@ -413,7 +413,7 @@ struct AddTabSheet: View {
                             Label {
                                 Text(item.profile.handle.canonical)
                             } icon: {
-                                AvatarView(data: item.profile.avatar)
+                                AvatarView(data: item.profile.avatar?.url, customHeader: item.profile.avatar?.customHeaders)
                                     .frame(width: 20, height: 20)
                             }
                         }

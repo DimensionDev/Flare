@@ -544,7 +544,8 @@ internal fun Router(
                         onRawMediaClick = {
                             navigate(
                                 Route.RawImage(
-                                    rawImage = it,
+                                    rawImage = it.url,
+                                    customHeaders = it.customHeaders,
                                 ),
                             )
                         },
@@ -588,7 +589,8 @@ internal fun Router(
                         onRawMediaClick = {
                             navigate(
                                 Route.RawImage(
-                                    rawImage = it,
+                                    rawImage = it.url,
+                                    customHeaders = it.customHeaders,
                                 ),
                             )
                         },
@@ -752,7 +754,8 @@ internal fun Router(
                         onRawMediaClick = {
                             navigate(
                                 Route.RawImage(
-                                    rawImage = it,
+                                    rawImage = it.url,
+                                    customHeaders = it.customHeaders,
                                 ),
                             )
                         },
@@ -806,7 +809,10 @@ internal fun Router(
                 entry<Route.RawImage>(
                     metadata = window(isDarkTheme = true),
                 ) { args ->
-                    RawMediaScreen(url = args.rawImage)
+                    RawMediaScreen(
+                        url = args.rawImage,
+                        customHeaders = args.customHeaders,
+                    )
                 }
                 entry<Route.StatusMedia>(
                     metadata = window(isDarkTheme = true),

@@ -404,57 +404,111 @@ struct ComposeScreen: View {
     }
 
     private var accountSelectionView: some View {
-        ScrollView(.horizontal) {
-            HStack {
-                StateView(state: presenter.state.selectedUsers) { users in
-                    let items = (users as NSArray).cast(UiState<UiProfile>.self)
-                    ForEach(Array(items.enumerated()), id: \.offset) { _, userState in
-                        StateView(state: userState) { user in
-                            Label {
-                                Text(user.handle.canonical)
-                            } icon: {
-                                AvatarView(data: user.avatar?.url, customHeader: user.avatar?.customHeaders)
-                                    .scaledToFit()
-                                    .frame(width: 20, height: 20)
-                            }
-                            .padding(.horizontal)
-                            .padding(.vertical, 8)
-                            .background(Color(.secondarySystemBackground))
-                            .clipShape(.rect(cornerRadius: 16))
-                            .onTapGesture {
-                                presenter.state.selectAccount(accountKey: user.key)
-                            }
+        let selected = successProfiles(from: presenter.state.selectedUsers)
+        let accounts = successProfiles(from: presenter.state.accountUsers)
+
+        return HStack {
+            if !accounts.isEmpty {
+                accountPickerMenu(selected: selected, accounts: accounts) {
+                    HStack(spacing: 8) {
+                        if !selected.isEmpty {
+                            accountAvatarStack(users: selected)
                         }
+                        Image("fa-plus")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 14, height: 14)
+                            .padding(8)
+                            .background(Circle().fill(Color(.tertiarySystemBackground)))
                     }
-                }
-                StateView(state: presenter.state.otherUsers) { others in
-                    let items = (others as NSArray).cast(UiState<UiProfile>.self)
-                    if !items.isEmpty {
-                        Menu {
-                            ForEach(Array(items.enumerated()), id: \.offset) { _, userState in
-                                StateView(state: userState) { user in
-                                    Button {
-                                        presenter.state.selectAccount(accountKey: user.key)
-                                    } label: {
-                                        Label {
-                                            Text(user.handle.canonical)
-                                        } icon: {
-                                            AvatarView(data: user.avatar?.url, customHeader: user.avatar?.customHeaders)
-                                                .scaledToFit()
-                                                .frame(maxWidth: 20, maxHeight: 20)
-                                        }
-                                    }
-                                }
-                            }
-                        } label: {
-                            Image("fa-plus")
-                        }
-                    }
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 4)
+                    .background(Color(.secondarySystemBackground))
+                    .clipShape(Capsule())
                 }
             }
-            .padding(.horizontal)
+            Spacer()
         }
-        .scrollIndicators(.hidden)
+        .padding(.horizontal)
+    }
+
+    private func accountPickerMenu<LabelContent: View>(
+        selected: [UiProfile],
+        accounts: [UiProfile],
+        @ViewBuilder label: () -> LabelContent
+    ) -> some View {
+        Menu {
+            ForEach(accounts, id: \.accountPickerKey) { user in
+                Toggle(
+                    isOn: Binding(
+                        get: {
+                            selected.containsAccount(user)
+                        },
+                        set: { _ in
+                            presenter.state.selectAccount(accountKey: user.key)
+                        }
+                    )
+                ) {
+                    accountPickerRow(user: user)
+                }
+            }
+        } label: {
+            label()
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func successProfiles<T>(from state: UiState<T>) -> [UiProfile] {
+        guard case .success(let success) = onEnum(of: state) else {
+            return []
+        }
+        let items = (success.data as? NSArray)?.cast(UiState<UiProfile>.self) ?? []
+        return items.compactMap { userState in
+            guard case .success(let userSuccess) = onEnum(of: userState) else {
+                return nil
+            }
+            return userSuccess.data
+        }
+    }
+
+    private func accountAvatarStack(users: [UiProfile]) -> some View {
+        HStack(spacing: -8) {
+            ForEach(Array(users.enumerated()), id: \.element.accountPickerKey) { _, user in
+                accountAvatar(user: user, size: 34)
+            }
+        }
+    }
+
+    private func accountAvatar(user: UiProfile, size: CGFloat) -> some View {
+        ZStack(alignment: .bottomTrailing) {
+            AvatarView(data: user.avatar?.url, customHeader: user.avatar?.customHeaders)
+                .scaledToFit()
+                .frame(width: size, height: size)
+                .clipShape(Circle())
+                .overlay(Circle().stroke(Color(.systemBackground), lineWidth: 2))
+            Image(user.platformIcon.imageName)
+                .resizable()
+                .scaledToFit()
+                .frame(width: size * 0.34, height: size * 0.34)
+                .padding(3)
+                .background(Color(.systemBackground))
+                .clipShape(Circle())
+                .shadow(color: Color.black.opacity(0.16), radius: 1, x: 0, y: 1)
+        }
+        .frame(width: size, height: size)
+    }
+
+    private func accountPickerRow(user: UiProfile) -> some View {
+        Label {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(user.handle.canonical)
+                Text(user.key.host)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+        } icon: {
+            accountAvatar(user: user, size: 24)
+        }
     }
     
     private func applyCursorIfPossible() {
@@ -869,6 +923,39 @@ extension ComposeScreen {
         self.composeStatus = composeStatus
         self.draftGroupId = draftGroupId
         self._presenter = .init(wrappedValue: .init(presenter: ComposePresenter(accountType: accountType, status: composeStatus, draftGroupId: draftGroupId)))
+    }
+}
+
+private extension UiProfile {
+    var accountPickerKey: String {
+        "\(key.id)-\(key.host)"
+    }
+
+    var platformIcon: UiIcon {
+        switch platformType {
+        case .mastodon:
+            return .mastodon
+        case .misskey:
+            return .misskey
+        case .bluesky:
+            return .bluesky
+        case .nostr:
+            return .nostr
+        case .pixiv:
+            return .pixiv
+        case .xQt:
+            return .x
+        case .vvo:
+            return .weibo
+        }
+    }
+}
+
+private extension Array where Element == UiProfile {
+    func containsAccount(_ user: UiProfile) -> Bool {
+        contains { item in
+            item.key.id == user.key.id && item.key.host == user.key.host
+        }
     }
 }
 

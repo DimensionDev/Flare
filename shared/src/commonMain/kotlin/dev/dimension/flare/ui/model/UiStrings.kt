@@ -25,6 +25,8 @@ public enum class UiStrings {
     Liked,
     AllRssFeeds,
     Posts,
+    PostsWithReplies,
+    Media,
     Channel,
     Default,
     Login,
@@ -41,6 +43,15 @@ public enum class UiStrings {
     ExternalSigner,
     WebCookieLogin,
     NostrLoginAccount,
+    PixivRankingWeek,
+    PixivRankingMonth,
+    PixivRankingDayMale,
+    PixivRankingDayFemale,
+    PixivRankingWeekOriginal,
+    PixivRankingWeekRookie,
+    PixivRankingDayManga,
+    Illustrations,
+    Manga,
 }
 
 public fun UiStrings.asText(): UiText = UiText.Localized(this)

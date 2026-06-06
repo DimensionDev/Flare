@@ -391,6 +391,7 @@ internal sealed interface Route : NavKey {
         data class Image(
             val uri: String,
             val previewUrl: String?,
+            val customHeaders: Map<String, String>? = null,
         ) : Media
 
         @Serializable
@@ -522,6 +523,7 @@ internal sealed interface Route : NavKey {
                     Media.Image(
                         uri = deeplinkRoute.uri,
                         previewUrl = deeplinkRoute.previewUrl,
+                        customHeaders = deeplinkRoute.customHeaders,
                     )
                 }
 

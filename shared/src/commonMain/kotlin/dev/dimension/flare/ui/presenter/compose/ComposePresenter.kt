@@ -22,6 +22,7 @@ import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.DraftRepository
 import dev.dimension.flare.data.repository.accountServiceFlow
+import dev.dimension.flare.data.repository.allAccountServicesFlow
 import dev.dimension.flare.data.repository.draftFileItem
 import dev.dimension.flare.data.repository.newDraftGroupId
 import dev.dimension.flare.model.AccountType
@@ -53,7 +54,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
@@ -62,7 +62,6 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -99,35 +98,41 @@ public class ComposePresenter(
     }
 
     private val allAccountsFlow by lazy {
-        accountRepository.allAccounts
-            .distinctUntilChangedBy {
-                it.map { account -> account.accountKey }.toSet()
-            }.map {
-                it.map { account ->
-                    accountRepository.getFlow(account.accountKey).map {
-                        account.accountKey to it
+        allAccountServicesFlow(accountRepository)
+            .map { accounts ->
+                accounts
+                    .filterIsInstance<ComposeDataSource>()
+                    .map { account ->
+                        accountRepository.getFlow(account.accountKey).map {
+                            account.accountKey to it
+                        }
                     }
-                }
             }.combineLatestFlowLists()
             .map { it.toMap() }
     }
 
+    private val selectedComposeAccountKeysFlow by lazy {
+        combine(
+            allAccountsFlow,
+            selectedAccountsKeyFlow,
+        ) { allAccounts, selectedKeys ->
+            selectedKeys
+                .filter { key -> allAccounts.containsKey(key) }
+                .toImmutableList()
+        }
+    }
+
     private val allUsersFlow by lazy {
-        accountRepository.allAccounts
-            .map { accounts ->
-                accounts.map { account ->
-                    accountServiceFlow(
-                        accountType = AccountType.Specific(account.accountKey),
-                        repository = accountRepository,
-                    ).mapNotNull { service ->
-                        if (service is UserDataSource && service is ComposeDataSource) {
-                            service.userHandler.userById(service.accountKey.id).toUi().map {
-                                service.accountKey to it
-                            }
-                        } else {
-                            null
+        allAccountServicesFlow(accountRepository)
+            .map { services ->
+                services.mapNotNull { service ->
+                    if (service is UserDataSource && service is ComposeDataSource) {
+                        service.userHandler.userById(service.accountKey.id).toUi().map {
+                            service.accountKey to it
                         }
-                    }.flatMapLatest { it }
+                    } else {
+                        null
+                    }
                 }
             }.combineLatestFlowLists()
             .map { it.toMap() }
@@ -146,7 +151,7 @@ public class ComposePresenter(
     }
 
     private val enableCrossPostFlow by lazy {
-        selectedAccountsKeyFlow.map { accountKeys ->
+        selectedComposeAccountKeysFlow.map { accountKeys ->
             accountKeys.size > 1 // && status == null
         }
     }
@@ -154,7 +159,7 @@ public class ComposePresenter(
     private val selectedAccountsFlow: Flow<ImmutableList<UiAccount>> by lazy {
         combine(
             allAccountsFlow,
-            selectedAccountsKeyFlow,
+            selectedComposeAccountKeysFlow,
         ) { allAccounts, selectedKeys ->
             selectedKeys
                 .mapNotNull { key ->
@@ -164,7 +169,7 @@ public class ComposePresenter(
     }
 
     private val selectedAccountServicesFlow by lazy {
-        selectedAccountsKeyFlow
+        selectedComposeAccountKeysFlow
             .map { accountKeys ->
                 accountKeys.map { accountKey ->
                     accountServiceFlow(
@@ -204,7 +209,7 @@ public class ComposePresenter(
 
     private val selectedUsersFlow: Flow<ImmutableList<UiState<UiProfile>>> by lazy {
         combine(
-            selectedAccountsKeyFlow,
+            selectedComposeAccountKeysFlow,
             allUsersFlow,
         ) { selectedKeys, allUsers ->
             selectedKeys
@@ -216,8 +221,8 @@ public class ComposePresenter(
 
     private val otherAccountsFlow by lazy {
         combine(
-            accountRepository.allAccounts,
-            selectedAccountsKeyFlow,
+            allAccountsFlow,
+            selectedComposeAccountKeysFlow,
             statusFlow,
         ) { allAccounts, selectedAccountKeys, status ->
             val statusPlatform =
@@ -227,6 +232,8 @@ public class ComposePresenter(
                         it as? UiTimelineV2.Post
                     }?.platformType
             allAccounts
+                .values
+                .mapNotNull { it.takeSuccess() }
                 .filterNot { account ->
                     selectedAccountKeys.contains(account.accountKey) ||
                         (statusPlatform != null && account.platformType != statusPlatform)
@@ -244,6 +251,32 @@ public class ComposePresenter(
             otherAccountKeys
                 .mapNotNull { key ->
                     allUsers[key]
+                }.toImmutableList()
+        }
+    }
+
+    private val accountUsersFlow by lazy {
+        combine(
+            allAccountsFlow,
+            allUsersFlow,
+            selectedComposeAccountKeysFlow,
+            statusFlow,
+        ) { allAccounts, allUsers, selectedAccountKeys, status ->
+            val statusPlatform =
+                status
+                    .takeSuccess()
+                    ?.let {
+                        it as? UiTimelineV2.Post
+                    }?.platformType
+            allAccounts
+                .values
+                .mapNotNull { it.takeSuccess() }
+                .filter { account ->
+                    selectedAccountKeys.contains(account.accountKey) ||
+                        statusPlatform == null ||
+                        account.platformType == statusPlatform
+                }.mapNotNull { account ->
+                    allUsers[account.accountKey]
                 }.toImmutableList()
         }
     }
@@ -286,7 +319,7 @@ public class ComposePresenter(
             textFlow,
             mediaSizeFlow,
             remainingLengthFlow,
-            selectedAccountsKeyFlow,
+            selectedComposeAccountKeysFlow,
             composeConfigFlow,
         ) { text, mediaSize, remainingLength, selectedAccountKeys, composeConfig ->
             (text.isNotBlank() && text.isNotEmpty() && selectedAccountKeys.isNotEmpty() && remainingLength >= 0) ||
@@ -295,7 +328,7 @@ public class ComposePresenter(
     }
 
     private val statusFlow by lazy {
-        combine(activeStatusFlow, selectedAccountsKeyFlow) { composeStatus, accountKeys ->
+        combine(activeStatusFlow, selectedComposeAccountKeysFlow) { composeStatus, accountKeys ->
             composeStatus to accountKeys.firstOrNull()
         }.flatMapLatest { (composeStatus, selectedAccountKey) ->
             val resolvedAccountType =
@@ -365,6 +398,7 @@ public class ComposePresenter(
         val scope = rememberCoroutineScope()
         val selectedUsers by selectedUsersFlow.collectAsUiState()
         val remainingUsers by otherUsersFlow.collectAsUiState()
+        val accountUsers by accountUsersFlow.collectAsUiState()
         val emojiState by emojiFlow.flattenUiState()
         val enableCrossPost by enableCrossPostFlow.collectAsUiState()
         val composeConfig: UiState<ComposeConfig> by composeConfigFlow.collectAsUiState()
@@ -381,22 +415,39 @@ public class ComposePresenter(
             }
         } else if (accountType != null && accountType is AccountType.Specific) {
             LaunchedEffect(accountType) {
-                selectedAccountsKeyFlow.value = listOf(accountType.accountKey).toImmutableList()
+                val composeAccounts = allAccountsFlow.firstOrNull().orEmpty()
+                selectedAccountsKeyFlow.value =
+                    if (composeAccounts.containsKey(accountType.accountKey)) {
+                        listOf(accountType.accountKey).toImmutableList()
+                    } else {
+                        if (status == null) {
+                            composeAccounts
+                                .keys
+                                .firstOrNull()
+                                ?.let { persistentListOf(it) }
+                                ?: persistentListOf()
+                        } else {
+                            persistentListOf()
+                        }
+                    }
             }
         } else {
             // load last used accounts or active account
             LaunchedEffect(Unit) {
-                selectedAccountsKeyFlow.value = appDataStore
-                    .composeConfigData
-                    .data
+                val composeAccounts = allAccountsFlow.firstOrNull().orEmpty()
+                val lastAccounts =
+                    appDataStore
+                        .composeConfigData
+                        .data
+                        .firstOrNull()
+                        ?.lastAccounts
+                        .orEmpty()
+                        .filter { accountKey -> composeAccounts.containsKey(accountKey) }
+                selectedAccountsKeyFlow.value = lastAccounts
+                    .takeIf { it.isNotEmpty() }
+                    ?.toImmutableList() ?: composeAccounts
+                    .keys
                     .firstOrNull()
-                    ?.lastAccounts
-                    ?.takeIf { it.isNotEmpty() }
-                    ?.toImmutableList() ?: accountRepository
-                    .activeAccount
-                    .firstOrNull()
-                    ?.takeSuccess()
-                    ?.accountKey
                     ?.let { persistentListOf(it) }
                     ?: persistentListOf()
             }
@@ -411,7 +462,10 @@ public class ComposePresenter(
             onDispose {
                 if (shouldPersistSelectedAccounts) {
                     ioScope.launch {
-                        val accounts = selectedAccountsKeyFlow.value
+                        val composeAccounts = allAccountsFlow.firstOrNull().orEmpty()
+                        val accounts =
+                            selectedAccountsKeyFlow.value
+                                .filter { accountKey -> composeAccounts.containsKey(accountKey) }
                         if (accounts.isNotEmpty()) {
                             appDataStore.composeConfigData.updateData {
                                 it.copy(
@@ -513,6 +567,7 @@ public class ComposePresenter(
             enableCrossPost = enableCrossPost,
             selectedUsers = selectedUsers,
             otherUsers = remainingUsers,
+            accountUsers = accountUsers,
             initialTextState = initialTextState,
             loadedDraftState = loadedDraftState,
             editingDraftGroupId = editingDraftGroupId,
@@ -877,6 +932,8 @@ public abstract class ComposeState(
     public val enableCrossPost: UiState<Boolean>,
     public val otherUsers: UiState<ImmutableList<UiState<UiProfile>>>,
     public val selectedUsers: UiState<ImmutableList<UiState<UiProfile>>>,
+    @WebIgnore
+    public val accountUsers: UiState<ImmutableList<UiState<UiProfile>>>,
     @WebIgnore
     public val loadedDraftState: UiState<UiDraft>?,
     public val editingDraftGroupId: String?,

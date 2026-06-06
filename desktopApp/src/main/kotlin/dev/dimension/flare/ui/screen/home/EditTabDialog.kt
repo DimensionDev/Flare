@@ -42,13 +42,24 @@ import dev.dimension.flare.home_tab_home_title
 import dev.dimension.flare.home_tab_list_title
 import dev.dimension.flare.home_tab_me_title
 import dev.dimension.flare.home_tab_notifications_title
+import dev.dimension.flare.illustrations_title
 import dev.dimension.flare.liked_title
+import dev.dimension.flare.manga_title
 import dev.dimension.flare.mastodon_tab_local_title
 import dev.dimension.flare.mastodon_tab_public_title
 import dev.dimension.flare.misskey_channel_tab_following
 import dev.dimension.flare.mixed_timeline_title
 import dev.dimension.flare.ok
+import dev.dimension.flare.pixiv_ranking_day_female_title
+import dev.dimension.flare.pixiv_ranking_day_male_title
+import dev.dimension.flare.pixiv_ranking_day_manga_title
+import dev.dimension.flare.pixiv_ranking_month_title
+import dev.dimension.flare.pixiv_ranking_week_original_title
+import dev.dimension.flare.pixiv_ranking_week_rookie_title
+import dev.dimension.flare.pixiv_ranking_week_title
 import dev.dimension.flare.posts_title
+import dev.dimension.flare.profile_tab_media
+import dev.dimension.flare.profile_tab_timeline_with_reply
 import dev.dimension.flare.rss_title
 import dev.dimension.flare.service_select_next_button
 import dev.dimension.flare.settings_title
@@ -225,6 +236,8 @@ private val UiStrings.desktopStringResource: StringResource
             UiStrings.Liked -> Res.string.liked_title
             UiStrings.AllRssFeeds -> Res.string.all_rss_feeds_title
             UiStrings.Posts -> Res.string.posts_title
+            UiStrings.PostsWithReplies -> Res.string.profile_tab_timeline_with_reply
+            UiStrings.Media -> Res.string.profile_tab_media
             UiStrings.Channel -> Res.string.channel_title
             UiStrings.Login -> Res.string.ok
             UiStrings.Verify -> Res.string.ok
@@ -241,4 +254,13 @@ private val UiStrings.desktopStringResource: StringResource
             UiStrings.WebCookieLogin -> Res.string.ok
             UiStrings.NostrLoginAccount -> Res.string.ok
             UiStrings.Following -> Res.string.misskey_channel_tab_following
+            UiStrings.PixivRankingWeek -> Res.string.pixiv_ranking_week_title
+            UiStrings.PixivRankingMonth -> Res.string.pixiv_ranking_month_title
+            UiStrings.PixivRankingDayMale -> Res.string.pixiv_ranking_day_male_title
+            UiStrings.PixivRankingDayFemale -> Res.string.pixiv_ranking_day_female_title
+            UiStrings.PixivRankingWeekOriginal -> Res.string.pixiv_ranking_week_original_title
+            UiStrings.PixivRankingWeekRookie -> Res.string.pixiv_ranking_week_rookie_title
+            UiStrings.PixivRankingDayManga -> Res.string.pixiv_ranking_day_manga_title
+            UiStrings.Illustrations -> Res.string.illustrations_title
+            UiStrings.Manga -> Res.string.manga_title
         }

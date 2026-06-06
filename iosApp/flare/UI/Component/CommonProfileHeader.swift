@@ -43,7 +43,7 @@ struct CommonProfileHeader: View {
                     NetworkImage(data: banner.url, customHeader: banner.customHeaders)
                         .frame(height: CommonProfileHeaderConstants.headerHeight)
                         .onTapGesture {
-                            if let url = URL(string: DeeplinkRoute.Media.MediaImage(uri: banner.url, previewUrl: nil).toUri()) {
+                            if let url = URL(string: DeeplinkRoute.Media.MediaImage(uri: banner.url, previewUrl: nil, customHeaders: banner.customHeaders).toUri()) {
                                 openURL.callAsFunction(url)
                             }
                         }
@@ -68,7 +68,7 @@ struct CommonProfileHeader: View {
                             .frame(width: CommonProfileHeaderConstants.avatarSize, height: CommonProfileHeaderConstants.avatarSize)
                             .onTapGesture {
                                 if let avatar = user.avatar,
-                                   let url = URL(string: DeeplinkRoute.Media.MediaImage(uri: avatar.url, previewUrl: nil).toUri()) {
+                                   let url = URL(string: DeeplinkRoute.Media.MediaImage(uri: avatar.url, previewUrl: nil, customHeaders: avatar.customHeaders).toUri()) {
                                     openURL.callAsFunction(url)
                                 }
                             }

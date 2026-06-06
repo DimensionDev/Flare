@@ -58,6 +58,8 @@ import androidx.compose.ui.unit.toOffset
 import coil3.compose.AsyncImagePainter
 import coil3.compose.LocalPlatformContext
 import coil3.compose.rememberAsyncImagePainter
+import coil3.network.NetworkHeaders
+import coil3.network.httpHeaders
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import coil3.size.Size
@@ -103,6 +105,7 @@ import io.github.composefluent.surface.Card
 import io.github.kdroidfilter.composemediaplayer.VideoPlayerState
 import io.github.kdroidfilter.composemediaplayer.VideoPlayerSurface
 import io.github.kdroidfilter.composemediaplayer.rememberVideoPlayerState
+import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -199,6 +202,7 @@ internal fun StatusMediaScreen(
                             modifier = Modifier.fillMaxSize(),
                             url = media.url,
                             previewUrl = media.previewUrl,
+                            customHeaders = media.customHeaders,
                             description = media.description,
                             isFocused = pagerState.currentPage == it,
                             setLockPager = state::setLockPager,
@@ -220,6 +224,7 @@ internal fun StatusMediaScreen(
                                 modifier = Modifier.fillMaxSize(),
                                 url = media.thumbnailUrl,
                                 previewUrl = media.thumbnailUrl,
+                                customHeaders = media.customHeaders,
                                 description = media.description,
                                 isFocused = pagerState.currentPage == it,
                                 setLockPager = state::setLockPager,
@@ -468,6 +473,7 @@ private fun PlayerControl(
 internal fun ImageItem(
     url: String,
     previewUrl: String,
+    customHeaders: ImmutableMap<String, String>?,
     description: String?,
     setLockPager: (Boolean) -> Unit,
     isFocused: Boolean,
@@ -482,7 +488,21 @@ internal fun ImageItem(
                 .placeholderMemoryCacheKey(previewUrl)
                 .crossfade(1_000)
                 .size(Size.ORIGINAL)
-                .build(),
+                .let { builder ->
+                    if (customHeaders.isNullOrEmpty()) {
+                        builder
+                    } else {
+                        builder.httpHeaders(
+                            NetworkHeaders
+                                .Builder()
+                                .apply {
+                                    customHeaders.forEach { (key, value) ->
+                                        set(key, value)
+                                    }
+                                }.build(),
+                        )
+                    }
+                }.build(),
         )
     val focusRequester = remember { FocusRequester() }
     LaunchedEffect(isFocused) {

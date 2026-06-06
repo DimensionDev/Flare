@@ -51,14 +51,11 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
-import dev.dimension.flare.R
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.common.refreshSuspend
-import dev.dimension.flare.data.datasource.microblog.ProfileTab
 import dev.dimension.flare.data.model.VideoAutoplay
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -82,6 +79,7 @@ import dev.dimension.flare.ui.component.status.MediaItem
 import dev.dimension.flare.ui.component.status.StatusPlaceholder
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.model.UiMedia
+import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onError
@@ -429,11 +427,11 @@ internal fun ProfileScreen(
                                     HorizontalPager(
                                         state = pagerState,
                                     ) { index ->
-                                        val type = tabs[index]
-                                        when (type) {
+                                        val tab = tabs[index]
+                                        when (tab) {
                                             is ProfileTabItem.Media -> {
                                                 ProfileMediaTab(
-                                                    mediaState = type.data,
+                                                    mediaState = tab.data,
                                                     onItemClicked = { statusKey, index, preview ->
                                                         onMediaClick(statusKey, index, preview)
                                                     },
@@ -460,7 +458,7 @@ internal fun ProfileScreen(
                                                         ),
                                                     modifier = Modifier.fillMaxSize(),
                                                 ) {
-                                                    status(type.data)
+                                                    status(tab.data)
                                                 }
                                             }
                                         }
@@ -607,16 +605,17 @@ private fun profilePresenter(
         state.tabs.map {
             it.map {
                 when (it) {
-                    is ProfileState.Tab.Media -> {
-                        ProfileTabItem.Media(
-                            data = it.presenter.body().mediaState,
+                    is ProfileState.Tab.Timeline -> {
+                        ProfileTabItem.Timeline(
+                            name = it.name,
+                            data = it.presenter.body().listState,
                         )
                     }
 
-                    is ProfileState.Tab.Timeline -> {
-                        ProfileTabItem.Timeline(
-                            type = it.type,
-                            data = it.presenter.body().listState,
+                    is ProfileState.Tab.Media -> {
+                        ProfileTabItem.Media(
+                            name = it.name,
+                            data = it.presenter.body().mediaState,
                         )
                     }
                 }
@@ -663,29 +662,17 @@ private fun profilePresenter(
 }
 
 private sealed interface ProfileTabItem {
+    val name: UiStrings
+    val title: String
+        get() = name.name
+
     data class Timeline(
-        val type: ProfileTab.Timeline.Type,
+        override val name: UiStrings,
         val data: PagingState<UiTimelineV2>,
     ) : ProfileTabItem
 
     data class Media(
+        override val name: UiStrings,
         val data: PagingState<ProfileMedia>,
     ) : ProfileTabItem
 }
-
-private val ProfileTabItem.title: String
-    @Composable
-    get() =
-        when (this) {
-            is ProfileTabItem.Timeline -> {
-                when (type) {
-                    ProfileTab.Timeline.Type.Status -> stringResource(R.string.profile_tab_timeline)
-                    ProfileTab.Timeline.Type.StatusWithReplies -> stringResource(R.string.profile_tab_timeline_with_reply)
-                    ProfileTab.Timeline.Type.Likes -> stringResource(R.string.profile_tab_likes)
-                }
-            }
-
-            is ProfileTabItem.Media -> {
-                stringResource(R.string.profile_tab_media)
-            }
-        }

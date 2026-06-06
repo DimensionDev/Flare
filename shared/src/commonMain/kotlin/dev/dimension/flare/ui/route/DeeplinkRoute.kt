@@ -144,6 +144,7 @@ public sealed class DeeplinkRoute {
         public data class Image(
             val uri: String,
             val previewUrl: String?,
+            val customHeaders: Map<String, String>? = null,
         ) : Media()
 
         @Serializable

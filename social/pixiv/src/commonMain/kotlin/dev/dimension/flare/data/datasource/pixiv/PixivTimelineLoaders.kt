@@ -74,6 +74,19 @@ internal class PixivDiscoverTimelineLoader(
         )
 }
 
+internal class PixivRankingTimelineLoader(
+    service: PixivService,
+    accountKey: MicroBlogKey,
+    private val mode: PixivRankingMode,
+) : PixivTimelineLoader(service, accountKey) {
+    override val pagingKey: String = "pixiv_ranking_${mode.value}_$accountKey"
+
+    override suspend fun loadFirstPage(pageSize: Int): PixivIllustListResponse =
+        service.rankingIllusts(
+            mode = mode,
+        )
+}
+
 internal class PixivFollowingTimelineLoader(
     service: PixivService,
     accountKey: MicroBlogKey,
@@ -101,14 +114,15 @@ internal class PixivUserTimelineLoader(
     service: PixivService,
     accountKey: MicroBlogKey,
     private val userKey: MicroBlogKey,
+    private val type: PixivWorkType = PixivWorkType.Illust,
 ) : PixivTimelineLoader(service, accountKey) {
-    override val pagingKey: String = "pixiv_user_${userKey}_$accountKey"
+    override val pagingKey: String = "pixiv_user_${type.value}_${userKey}_$accountKey"
 
     override suspend fun loadFirstPage(pageSize: Int): PixivIllustListResponse {
         val userId = userKey.id.toLongOrNull() ?: return PixivIllustListResponse()
         return service.userIllusts(
             userId = userId,
-            type = PixivWorkType.Illust,
+            type = type,
         )
     }
 }

@@ -49,6 +49,8 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import coil3.annotation.ExperimentalCoilApi
 import coil3.imageLoader
+import coil3.network.NetworkHeaders
+import coil3.network.httpHeaders
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -88,6 +90,7 @@ import java.io.IOException
 internal fun MediaScreen(
     uri: String,
     previewUrl: String?,
+    customHeaders: Map<String, String>?,
     onDismiss: () -> Unit,
 ) {
     val hapticFeedback = LocalHapticFeedback.current
@@ -126,7 +129,21 @@ internal fun MediaScreen(
                             .data(uri)
                             .placeholderMemoryCacheKey(previewUrl)
                             .crossfade(1_000)
-                            .build(),
+                            .let { builder ->
+                                if (customHeaders.isNullOrEmpty()) {
+                                    builder
+                                } else {
+                                    builder.httpHeaders(
+                                        NetworkHeaders
+                                            .Builder()
+                                            .apply {
+                                                customHeaders.forEach { (key, value) ->
+                                                    set(key, value)
+                                                }
+                                            }.build(),
+                                    )
+                                }
+                            }.build(),
                     contentDescription = null,
                     contentScale = ContentScale.Fit,
                     alignment = Alignment.Center,

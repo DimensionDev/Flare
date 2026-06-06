@@ -624,8 +624,8 @@ internal class MisskeyDataSource(
 
     override fun profileTabs(userKey: MicroBlogKey): ImmutableList<ProfileTab> =
         listOfNotNull(
-            ProfileTab.Timeline(
-                type = ProfileTab.Timeline.Type.Status,
+            ProfileTab(
+                name = UiStrings.Posts,
                 loader =
                     UserTimelineRemoteMediator(
                         accountKey = accountKey,
@@ -634,8 +634,8 @@ internal class MisskeyDataSource(
                         withPinned = true,
                     ),
             ),
-            ProfileTab.Timeline(
-                type = ProfileTab.Timeline.Type.StatusWithReplies,
+            ProfileTab(
+                name = UiStrings.PostsWithReplies,
                 loader =
                     UserTimelineRemoteMediator(
                         service = service,
@@ -644,7 +644,11 @@ internal class MisskeyDataSource(
                         withReplies = true,
                     ),
             ),
-            ProfileTab.Media,
+            ProfileTab(
+                name = UiStrings.Media,
+                displayType = ProfileTab.DisplayType.Gallery,
+                loader = userTimeline(userKey, mediaOnly = true),
+            ),
         ).toPersistentList()
 
     fun favouriteTimelineLoader() =

@@ -72,12 +72,12 @@ public object TimelinePresentationAppearancePatchHelper {
         patch: AppearancePatch,
         appearance: TimelineAppearance,
     ): AppearancePatch =
-            patch
-                .set(AppearanceKeys.ShowMedia, appearance.showMedia)
-                .set(AppearanceKeys.ShowSensitiveContent, appearance.showSensitiveContent)
-                .set(AppearanceKeys.ExpandContentWarning, appearance.expandContentWarning)
-                .set(AppearanceKeys.ExpandMediaSize, appearance.expandMediaSize)
-                .set(AppearanceKeys.VideoAutoplay, appearance.videoAutoplay)
+        patch
+            .set(AppearanceKeys.ShowMedia, appearance.showMedia)
+            .set(AppearanceKeys.ShowSensitiveContent, appearance.showSensitiveContent)
+            .set(AppearanceKeys.ExpandContentWarning, appearance.expandContentWarning)
+            .set(AppearanceKeys.ExpandMediaSize, appearance.expandMediaSize)
+            .set(AppearanceKeys.VideoAutoplay, appearance.videoAutoplay)
 
     public fun disableMediaOverrides(patch: AppearancePatch): AppearancePatch =
         patch

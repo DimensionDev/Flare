@@ -5,6 +5,7 @@ import Kingfisher
 
 struct MediaScreen: View {
     let url: String
+    let customHeaders: [String: String]?
     @Environment(\.dismiss) var dismiss
     @State var opacity: CGFloat = 1 // Dismiss gesture background opacity
     @State private var shareImage: UIImage?
@@ -12,7 +13,7 @@ struct MediaScreen: View {
 
     var body: some View {
         LazyPager(data: [url]) { item in
-            AdaptiveKFImage(data: item, placeholder: nil)
+            AdaptiveKFImage(data: item, placeholder: nil, customHeader: customHeaders)
         }
         .onDismiss(backgroundOpacity: $opacity) {
             dismiss()
@@ -22,7 +23,7 @@ struct MediaScreen: View {
             config.preloadAmount = 99
         }
         .task(id: url) {
-            await loadShareImage(url: url)
+            await loadShareImage(url: url, customHeaders: customHeaders)
         }
         .background(.black.opacity(opacity))
         .background(ClearFullScreenBackground())
@@ -37,7 +38,7 @@ struct MediaScreen: View {
             }
             ToolbarItem(placement: .primaryAction) {
                 Button {
-                    MediaSaver.shared.saveImage(url: url)
+                    MediaSaver.shared.saveImage(url: url, customHeaders: customHeaders)
                 } label: {
                     Image("fa-download")
                 }
@@ -63,7 +64,7 @@ struct MediaScreen: View {
         }
     }
 
-    private func loadShareImage(url: String) async {
+    private func loadShareImage(url: String, customHeaders: [String: String]?) async {
         shareImage = nil
         shareImageURL = url
 
@@ -72,7 +73,7 @@ struct MediaScreen: View {
         }
 
         do {
-            let result = try await KingfisherManager.shared.retrieveImage(with: imageURL)
+            let result = try await KingfisherManager.shared.retrieveImage(with: imageURL, options: kingfisherOptions(customHeaders: customHeaders))
             guard !Task.isCancelled, shareImageURL == url else {
                 return
             }
@@ -83,5 +84,18 @@ struct MediaScreen: View {
             }
             shareImage = nil
         }
+    }
+
+    private func kingfisherOptions(customHeaders: [String: String]?) -> KingfisherOptionsInfo {
+        guard let customHeaders, !customHeaders.isEmpty else {
+            return []
+        }
+        return [.requestModifier(AnyModifier { request in
+            var request = request
+            for (key, value) in customHeaders {
+                request.setValue(value, forHTTPHeaderField: key)
+            }
+            return request
+        })]
     }
 }

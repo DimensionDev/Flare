@@ -266,10 +266,28 @@ private fun ProfileHeaderSuccess(
             menu.invoke(this)
         },
         onAvatarClick = {
-            user.avatar?.let { uriLauncher.openUri(DeeplinkRoute.Media.Image(it.url, null).toUri()) }
+            user.avatar?.let {
+                uriLauncher.openUri(
+                    DeeplinkRoute.Media
+                        .Image(
+                            uri = it.url,
+                            previewUrl = null,
+                            customHeaders = it.customHeaders,
+                        ).toUri(),
+                )
+            }
         },
         onBannerClick = {
-            user.banner?.let { uriLauncher.openUri(DeeplinkRoute.Media.Image(it.url, null).toUri()) }
+            user.banner?.let {
+                uriLauncher.openUri(
+                    DeeplinkRoute.Media
+                        .Image(
+                            uri = it.url,
+                            previewUrl = null,
+                            customHeaders = it.customHeaders,
+                        ).toUri(),
+                )
+            }
         },
         handleTrailing = {
             user.mark.fastForEach {

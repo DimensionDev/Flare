@@ -170,11 +170,23 @@ internal fun TimelineScreen(
             Modifier
                 .nestedScroll(topAppBarScrollBehavior.nestedScrollConnection),
     ) { contentPadding ->
-        TimelineItemContent(
-            item = tabItem,
-            contentPadding = contentPadding,
-            modifier = Modifier.fillMaxSize(),
-            lazyStaggeredGridState = listState,
-        )
+
+        val timelineAppearance = LocalTimelineAppearance.current
+        CompositionLocalProvider(
+            LocalTimelineAppearance provides
+                remember(
+                    tabItem.appearancePatch,
+                    timelineAppearance,
+                ) {
+                    tabItem.resolveTimelineAppearance(timelineAppearance)
+                },
+        ) {
+            TimelineItemContent(
+                item = tabItem,
+                contentPadding = contentPadding,
+                modifier = Modifier.fillMaxSize(),
+                lazyStaggeredGridState = listState,
+            )
+        }
     }
 }

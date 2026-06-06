@@ -26,6 +26,7 @@ internal fun EntryProviderScope<NavKey>.mediaEntryBuilder(
         MediaScreen(
             uri = args.uri,
             previewUrl = args.previewUrl,
+            customHeaders = args.customHeaders,
             onDismiss = onBack,
         )
     }

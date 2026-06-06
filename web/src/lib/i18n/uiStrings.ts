@@ -45,6 +45,10 @@ export function localizedUiString(value: UiStrings): string {
 			return m.allRssFeedsTitle();
 		case 'Posts':
 			return m.postsTitle();
+		case 'PostsWithReplies':
+			return m.profileTabTimelineWithReply();
+		case 'Media':
+			return m.profileTabMedia();
 		case 'Channel':
 			return m.homeTabChannelsTitle();
 		case 'Default':
@@ -75,6 +79,24 @@ export function localizedUiString(value: UiStrings): string {
 			return m.loginExternalSigner();
 		case 'WebCookieLogin':
 			return m.loginWebCookie();
+		case 'PixivRankingWeek':
+			return 'Weekly Ranking';
+		case 'PixivRankingMonth':
+			return 'Monthly Ranking';
+		case 'PixivRankingDayMale':
+			return 'Male Ranking';
+		case 'PixivRankingDayFemale':
+			return 'Female Ranking';
+		case 'PixivRankingWeekOriginal':
+			return 'Original Ranking';
+		case 'PixivRankingWeekRookie':
+			return 'Rookie Ranking';
+		case 'PixivRankingDayManga':
+			return 'Manga Ranking';
+		case 'Illustrations':
+			return 'Illustrations';
+		case 'Manga':
+			return 'Manga';
 		default:
 			return m.loginCredentialImport();
 	}

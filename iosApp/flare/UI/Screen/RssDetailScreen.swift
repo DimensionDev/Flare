@@ -293,7 +293,7 @@ struct HtmlWebView: UIViewRepresentable {
                let components = URLComponents(url: targetURL, resolvingAgainstBaseURL: false),
                let imageUrl =
                 components.queryItems?.first(where: { $0.name == "url" })?.value,
-               let deeplink = URL(string: DeeplinkRoute.Media.MediaImage(uri: imageUrl, previewUrl: nil).toUri()) {
+               let deeplink = URL(string: DeeplinkRoute.Media.MediaImage(uri: imageUrl, previewUrl: nil, customHeaders: nil).toUri()) {
                 parent.onOpenURL?(deeplink)
                 decisionHandler(.cancel)
                 return

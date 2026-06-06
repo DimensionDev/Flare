@@ -190,6 +190,8 @@ private val UiStrings.androidStringRes: Int
             UiStrings.Liked -> R.string.liked_title
             UiStrings.AllRssFeeds -> R.string.all_rss_feeds_title
             UiStrings.Posts -> R.string.posts_title
+            UiStrings.PostsWithReplies -> R.string.profile_tab_timeline_with_reply
+            UiStrings.Media -> R.string.profile_tab_media
             UiStrings.Channel -> R.string.channel_title
             UiStrings.Login -> R.string.login_button
             UiStrings.Verify -> R.string.login_button
@@ -206,4 +208,13 @@ private val UiStrings.androidStringRes: Int
             UiStrings.WebCookieLogin -> R.string.login_button
             UiStrings.NostrLoginAccount -> R.string.login_button
             UiStrings.Following -> R.string.following_title
+            UiStrings.PixivRankingWeek -> R.string.pixiv_ranking_week_title
+            UiStrings.PixivRankingMonth -> R.string.pixiv_ranking_month_title
+            UiStrings.PixivRankingDayMale -> R.string.pixiv_ranking_day_male_title
+            UiStrings.PixivRankingDayFemale -> R.string.pixiv_ranking_day_female_title
+            UiStrings.PixivRankingWeekOriginal -> R.string.pixiv_ranking_week_original_title
+            UiStrings.PixivRankingWeekRookie -> R.string.pixiv_ranking_week_rookie_title
+            UiStrings.PixivRankingDayManga -> R.string.pixiv_ranking_day_manga_title
+            UiStrings.Illustrations -> R.string.illustrations_title
+            UiStrings.Manga -> R.string.manga_title
         }

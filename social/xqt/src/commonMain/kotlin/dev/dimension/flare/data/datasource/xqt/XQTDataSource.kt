@@ -681,12 +681,12 @@ internal class XQTDataSource(
 
     override fun profileTabs(userKey: MicroBlogKey): ImmutableList<ProfileTab> =
         listOfNotNull(
-            ProfileTab.Timeline(
-                type = ProfileTab.Timeline.Type.Status,
+            ProfileTab(
+                name = UiStrings.Posts,
                 loader = userTimeline(userKey, false),
             ),
-            ProfileTab.Timeline(
-                type = ProfileTab.Timeline.Type.StatusWithReplies,
+            ProfileTab(
+                name = UiStrings.PostsWithReplies,
                 loader =
                     UserRepliesTimelineRemoteMediator(
                         service = service,
@@ -694,10 +694,14 @@ internal class XQTDataSource(
                         userKey = userKey,
                     ),
             ),
-            ProfileTab.Media,
+            ProfileTab(
+                name = UiStrings.Media,
+                displayType = ProfileTab.DisplayType.Gallery,
+                loader = userTimeline(userKey, mediaOnly = true),
+            ),
             if (userKey == accountKey) {
-                ProfileTab.Timeline(
-                    type = ProfileTab.Timeline.Type.Likes,
+                ProfileTab(
+                    name = UiStrings.Liked,
                     loader =
                         UserLikesTimelineRemoteMediator(
                             service = service,

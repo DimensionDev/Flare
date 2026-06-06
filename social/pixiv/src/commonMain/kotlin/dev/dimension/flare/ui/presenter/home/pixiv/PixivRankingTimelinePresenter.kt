@@ -1,0 +1,28 @@
+package dev.dimension.flare.ui.presenter.home.pixiv
+
+import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
+import dev.dimension.flare.data.datasource.pixiv.PixivDataSource
+import dev.dimension.flare.data.network.pixiv.PixivRankingMode
+import dev.dimension.flare.data.repository.AccountService
+import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.presenter.home.TimelinePresenter
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
+
+internal class PixivRankingTimelinePresenter(
+    private val accountType: AccountType,
+    private val mode: PixivRankingMode,
+) : TimelinePresenter(),
+    KoinComponent {
+    private val accountService: AccountService by inject()
+
+    override val loader: Flow<RemoteLoader<UiTimelineV2>> by lazy {
+        accountService.accountServiceFlow(accountType).map { service ->
+            require(service is PixivDataSource)
+            service.rankingTimelineLoader(mode)
+        }
+    }
+}

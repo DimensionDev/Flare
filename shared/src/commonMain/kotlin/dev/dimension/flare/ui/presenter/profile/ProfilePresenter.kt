@@ -27,6 +27,7 @@ import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
+import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.flatMap
@@ -148,26 +149,28 @@ public class ProfilePresenter(
 
             service
                 .profileTabs(actualUserKey)
-                .map {
-                    when (it) {
-                        ProfileTab.Media -> {
-                            ProfileState.Tab.Media(
-                                presenter =
-                                    ProfileMediaPresenter(
-                                        accountType = accountType,
-                                        userKey = actualUserKey,
-                                    ),
+                .map { tab ->
+                    val timelinePresenter =
+                        object : TimelinePresenter() {
+                            override val loader: Flow<RemoteLoader<UiTimelineV2>>
+                                get() = flowOf(tab.loader)
+                        }
+                    when (tab.displayType) {
+                        ProfileTab.DisplayType.Timeline -> {
+                            ProfileState.Tab.Timeline(
+                                name = tab.name,
+                                presenter = timelinePresenter,
                             )
                         }
 
-                        is ProfileTab.Timeline -> {
-                            ProfileState.Tab.Timeline(
-                                type = it.type,
+                        ProfileTab.DisplayType.Gallery -> {
+                            ProfileState.Tab.Media(
+                                name = tab.name,
                                 presenter =
-                                    object : TimelinePresenter() {
-                                        override val loader: Flow<RemoteLoader<UiTimelineV2>>
-                                            get() = flowOf(it.loader)
-                                    },
+                                    ProfileMediaPresenter(
+                                        mediaTimelinePresenter = timelinePresenter,
+                                        showAllImages = tab.showAllImagesInGallery,
+                                    ),
                             )
                         }
                     }
@@ -454,14 +457,17 @@ public abstract class ProfileState(
 
     @Immutable
     public sealed class Tab {
+        public abstract val name: UiStrings
+
         @Immutable
         public data class Timeline(
-            val type: ProfileTab.Timeline.Type,
+            override val name: UiStrings,
             val presenter: TimelinePresenter,
         ) : Tab()
 
         @Immutable
         public data class Media(
+            override val name: UiStrings,
             val presenter: ProfileMediaPresenter,
         ) : Tab()
     }

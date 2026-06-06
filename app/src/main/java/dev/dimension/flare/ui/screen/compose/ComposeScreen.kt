@@ -31,7 +31,6 @@ import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.delete
 import androidx.compose.foundation.text.input.insert
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.AssistChip
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -75,6 +74,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
@@ -104,8 +104,10 @@ import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.status.CommonStatusComponent
 import dev.dimension.flare.ui.component.status.StatusVisibilityComponent
 import dev.dimension.flare.ui.model.UiEmoji
+import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.brandIcon
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.mapNotNull
 import dev.dimension.flare.ui.model.onError
@@ -308,64 +310,65 @@ internal fun ComposeScreen(
             Row(
                 modifier =
                     Modifier
-                        .horizontalScroll(rememberScrollState())
                         .padding(horizontal = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 state.state.selectedUsers.onSuccess { selectedUsers ->
-                    selectedUsers.forEach { userState ->
-                        userState.onSuccess { user ->
-                            AssistChip(
-                                onClick = {
-                                    state.state.selectAccount(user.key)
-                                },
-                                label = {
-                                    Text(user.handle.canonical)
-                                },
-                                leadingIcon = {
-                                    AvatarComponent(user.avatar, size = 24.dp)
-                                },
-                                shape = RoundedCornerShape(100),
-                            )
-                        }
-                    }
-                    state.state.otherUsers.onSuccess { others ->
-                        if (others.isNotEmpty()) {
-                            AssistChip(
-                                shape = CircleShape,
-                                onClick = {
-                                    state.setShowAccountSelectMenu(true)
-                                },
-                                label = {
-                                    FAIcon(FontAwesomeIcons.Solid.Plus, contentDescription = null)
-                                    FlareDropdownMenu(
-                                        expanded = state.showAccountSelectMenu,
-                                        onDismissRequest = {
-                                            state.setShowAccountSelectMenu(false)
-                                        },
-                                        properties = PopupProperties(focusable = false),
-                                    ) {
-                                        others.forEach { userState ->
-                                            userState.onSuccess { user ->
-                                                DropdownMenuItem(
-                                                    text = {
-                                                        Text(text = user.handle.canonical)
-                                                    },
-                                                    onClick = {
+                    state.state.accountUsers.onSuccess { accountUsers ->
+                        val selectedProfiles = selectedUsers.mapNotNull { it.takeSuccess() }
+                        val accounts = accountUsers.mapNotNull { it.takeSuccess() }
+                        if (accounts.isNotEmpty()) {
+                            Box {
+                                Surface(
+                                    onClick = {
+                                        state.setShowAccountSelectMenu(true)
+                                    },
+                                    shape = RoundedCornerShape(100),
+                                    color = MaterialTheme.colorScheme.secondaryContainer,
+                                ) {
+                                    ComposeAccountSelector(
+                                        selectedProfiles = selectedProfiles,
+                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 4.dp),
+                                    )
+                                }
+                                FlareDropdownMenu(
+                                    expanded = state.showAccountSelectMenu,
+                                    onDismissRequest = {
+                                        state.setShowAccountSelectMenu(false)
+                                    },
+                                    properties = PopupProperties(focusable = false),
+                                ) {
+                                    accounts.forEach { user ->
+                                        val selected = selectedProfiles.any { it.key == user.key }
+                                        DropdownMenuItem(
+                                            text = {
+                                                Column {
+                                                    Text(text = user.handle.canonical)
+                                                    Text(
+                                                        text = user.key.host,
+                                                        style = MaterialTheme.typography.bodySmall,
+                                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                    )
+                                                }
+                                            },
+                                            onClick = {
+                                                state.state.selectAccount(user.key)
+                                            },
+                                            leadingIcon = {
+                                                ComposeAccountAvatar(user = user, size = 24.dp)
+                                            },
+                                            trailingIcon = {
+                                                Checkbox(
+                                                    checked = selected,
+                                                    onCheckedChange = {
                                                         state.state.selectAccount(user.key)
                                                     },
-                                                    leadingIcon = {
-                                                        AvatarComponent(
-                                                            user.avatar,
-                                                            size = 24.dp,
-                                                        )
-                                                    },
                                                 )
-                                            }
-                                        }
+                                            },
+                                        )
                                     }
-                                },
-                            )
+                                }
+                            }
                         }
                     }
                 }
@@ -935,6 +938,65 @@ internal fun ComposeScreen(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun ComposeAccountSelector(
+    selectedProfiles: List<UiProfile>,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        if (selectedProfiles.isNotEmpty()) {
+            Row(horizontalArrangement = Arrangement.spacedBy((-8).dp)) {
+                selectedProfiles.forEach { user ->
+                    ComposeAccountAvatar(user = user, size = 34.dp)
+                }
+            }
+        }
+        Box(
+            modifier =
+                Modifier
+                    .size(32.dp)
+                    .background(
+                        MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
+                        CircleShape,
+                    ),
+            contentAlignment = Alignment.Center,
+        ) {
+            FAIcon(FontAwesomeIcons.Solid.Plus, contentDescription = null)
+        }
+    }
+}
+
+@Composable
+private fun ComposeAccountAvatar(
+    user: UiProfile,
+    size: Dp,
+) {
+    Box(
+        modifier = Modifier.size(size),
+        contentAlignment = Alignment.BottomEnd,
+    ) {
+        AvatarComponent(user.avatar, size = size)
+        Box(
+            modifier =
+                Modifier
+                    .size(size * 0.4f)
+                    .background(MaterialTheme.colorScheme.surface, CircleShape)
+                    .padding(2.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            FAIcon(
+                imageVector = user.platformType.brandIcon,
+                contentDescription = null,
+                modifier = Modifier.size(size * 0.24f),
+            )
         }
     }
 }

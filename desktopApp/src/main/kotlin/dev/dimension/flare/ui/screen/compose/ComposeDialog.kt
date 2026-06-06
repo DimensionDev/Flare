@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.input.TextFieldState
@@ -47,6 +48,7 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
@@ -104,8 +106,10 @@ import dev.dimension.flare.ui.component.status.CommonStatusComponent
 import dev.dimension.flare.ui.component.status.StatusVisibilityComponent
 import dev.dimension.flare.ui.model.UiDraftMedia
 import dev.dimension.flare.ui.model.UiEmoji
+import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.brandIcon
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.mapNotNull
 import dev.dimension.flare.ui.model.onError
@@ -288,48 +292,50 @@ fun ComposeDialog(
                 verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 state.state.selectedUsers.onSuccess { users ->
-                    users.forEach { userState ->
-                        userState.onSuccess { user ->
-                            PillButton(
-//                                onClick = {
-//                                    state.state.selectAccount(account)
-//                                },
-                                selected = false,
-                                onSelectedChanged = {
-                                    state.state.selectAccount(user.key)
-                                },
-                                content = {
-                                    AvatarComponent(user.avatar, size = 24.dp)
-                                    Text(user.handle.canonical)
-                                },
-                            )
-                        }
-                    }
-                    state.state.otherUsers.onSuccess { others ->
-                        if (others.isNotEmpty()) {
+                    state.state.accountUsers.onSuccess { accountUsers ->
+                        val selectedProfiles = users.mapNotNull { it.takeSuccess() }
+                        val accounts = accountUsers.mapNotNull { it.takeSuccess() }
+                        if (accounts.isNotEmpty()) {
                             MenuFlyoutContainer(
                                 flyout = {
-                                    others.forEach { userState ->
-                                        userState.onSuccess { data ->
-                                            MenuFlyoutItem(
-                                                text = {
-                                                    Text(text = data.handle.canonical)
-                                                },
-                                                onClick = {
-                                                    state.state.selectAccount(data.key)
-                                                },
-                                                icon = {
-                                                    AvatarComponent(
-                                                        data.avatar,
-                                                        size = 24.dp,
+                                    accounts.forEach { data ->
+                                        val selected = selectedProfiles.any { it.key == data.key }
+                                        MenuFlyoutItem(
+                                            text = {
+                                                Row(
+                                                    verticalAlignment = Alignment.CenterVertically,
+                                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                                ) {
+                                                    Column(modifier = Modifier.weight(1f)) {
+                                                        Text(text = data.handle.canonical)
+                                                        Text(
+                                                            text = data.key.host,
+                                                            style = FluentTheme.typography.caption,
+                                                            color = FluentTheme.colors.text.text.secondary,
+                                                        )
+                                                    }
+                                                    CheckBox(
+                                                        checked = selected,
+                                                        onCheckStateChange = {
+                                                            state.state.selectAccount(data.key)
+                                                        },
                                                     )
-                                                },
-                                            )
-                                        }
+                                                }
+                                            },
+                                            onClick = {
+                                                state.state.selectAccount(data.key)
+                                            },
+                                            icon = {
+                                                ComposeAccountAvatar(
+                                                    user = data,
+                                                    size = 24.dp,
+                                                )
+                                            },
+                                        )
                                     }
                                 },
                                 adaptivePlacement = true,
-                                placement = FlyoutPlacement.BottomAlignedEnd,
+                                placement = FlyoutPlacement.BottomAlignedStart,
                             ) {
                                 PillButton(
                                     selected = isFlyoutVisible,
@@ -337,9 +343,8 @@ fun ComposeDialog(
                                         isFlyoutVisible = !isFlyoutVisible
                                     },
                                     content = {
-                                        FAIcon(
-                                            FontAwesomeIcons.Solid.Plus,
-                                            contentDescription = null,
+                                        ComposeAccountSelector(
+                                            selectedProfiles = selectedProfiles,
                                         )
                                     },
                                 )
@@ -911,6 +916,65 @@ fun ComposeDialog(
                 }
                 Spacer(modifier = Modifier.width(8.dp))
             }
+        }
+    }
+}
+
+@Composable
+private fun ComposeAccountSelector(
+    selectedProfiles: List<UiProfile>,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        if (selectedProfiles.isNotEmpty()) {
+            Row(horizontalArrangement = Arrangement.spacedBy((-8).dp)) {
+                selectedProfiles.forEach { user ->
+                    ComposeAccountAvatar(user = user, size = 34.dp)
+                }
+            }
+        }
+        Box(
+            modifier =
+                Modifier
+                    .size(32.dp)
+                    .background(
+                        FluentTheme.colors.background.layer.default,
+                        CircleShape,
+                    ),
+            contentAlignment = Alignment.Center,
+        ) {
+            FAIcon(FontAwesomeIcons.Solid.Plus, contentDescription = null)
+        }
+    }
+}
+
+@Composable
+private fun ComposeAccountAvatar(
+    user: UiProfile,
+    size: Dp,
+) {
+    Box(
+        modifier = Modifier.size(size),
+        contentAlignment = Alignment.BottomEnd,
+    ) {
+        AvatarComponent(user.avatar, size = size)
+        Box(
+            modifier =
+                Modifier
+                    .size(size * 0.4f)
+                    .background(FluentTheme.colors.background.layer.default, CircleShape)
+                    .padding(2.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            FAIcon(
+                imageVector = user.platformType.brandIcon,
+                contentDescription = null,
+                modifier = Modifier.size(size * 0.24f),
+            )
         }
     }
 }

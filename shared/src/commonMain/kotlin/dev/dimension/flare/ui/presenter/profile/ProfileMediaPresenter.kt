@@ -9,12 +9,6 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.flatMap
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.toPagingState
-import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
-import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
-import dev.dimension.flare.data.repository.AccountRepository
-import dev.dimension.flare.data.repository.NoActiveAccountException
-import dev.dimension.flare.data.repository.accountServiceFlow
-import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiTimelineV2
@@ -23,22 +17,20 @@ import dev.dimension.flare.ui.presenter.home.TimelinePresenter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 
 public class ProfileMediaPresenter(
-    private val accountType: AccountType,
-    private val userKey: MicroBlogKey?,
-) : PresenterBase<ProfileMediaState>(),
-    KoinComponent {
-    private val mediaTimelinePresenter = MediaTimelinePresenter(accountType, userKey)
-
+    private val mediaTimelinePresenter: TimelinePresenter,
+    private val showAllImages: Boolean,
+) : PresenterBase<ProfileMediaState>() {
     @Composable
     override fun body(): ProfileMediaState {
         val scope = rememberCoroutineScope()
         val state =
-            remember(accountType, userKey) {
-                mediaTimelinePresenter.createTransformedPager(scope)
+            remember(mediaTimelinePresenter, showAllImages) {
+                mediaTimelinePresenter.createTransformedPager(
+                    scope = scope,
+                    showAllImages = showAllImages,
+                )
             }.collectAsLazyPagingItems()
                 .toPagingState()
         return object : ProfileMediaState {
@@ -49,32 +41,14 @@ public class ProfileMediaPresenter(
     public fun getMediaTimelinePresenter(): TimelinePresenter = mediaTimelinePresenter
 }
 
-private class MediaTimelinePresenter(
-    private val accountType: AccountType,
-    private val userKey: MicroBlogKey?,
-) : TimelinePresenter(),
-    KoinComponent {
-    private val accountRepository: AccountRepository by inject()
-    override val loader: Flow<RemoteLoader<UiTimelineV2>>
-        get() =
-            accountServiceFlow(accountType, accountRepository).map { service ->
-                val actualUserKey =
-                    userKey
-                        ?: if (service is AuthenticatedMicroblogDataSource) {
-                            service.accountKey
-                        } else {
-                            null
-                        } ?: throw NoActiveAccountException
-                service.userTimeline(
-                    userKey = actualUserKey,
-                    mediaOnly = true,
-                )
-            }
-
-    fun createTransformedPager(scope: CoroutineScope): Flow<PagingData<ProfileMedia>> =
-        createPager(scope).map { data ->
-            data.flatMap { status ->
-                if (status is UiTimelineV2.Post) {
+private fun TimelinePresenter.createTransformedPager(
+    scope: CoroutineScope,
+    showAllImages: Boolean,
+): Flow<PagingData<ProfileMedia>> =
+    createPager(scope).map { data ->
+        data.flatMap { status ->
+            if (status is UiTimelineV2.Post) {
+                if (showAllImages) {
                     status.images.mapIndexed { index, it ->
                         ProfileMedia(
                             it,
@@ -84,11 +58,24 @@ private class MediaTimelinePresenter(
                         )
                     }
                 } else {
-                    emptyList()
+                    status.images
+                        .firstOrNull()
+                        ?.let {
+                            listOf(
+                                ProfileMedia(
+                                    it,
+                                    status,
+                                    status.statusKey,
+                                    0,
+                                ),
+                            )
+                        }.orEmpty()
                 }
+            } else {
+                emptyList()
             }
         }
-}
+    }
 
 @Immutable
 public interface ProfileMediaState {

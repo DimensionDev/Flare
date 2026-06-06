@@ -4,6 +4,7 @@ import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.pixiv.PixivDataSource
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.model.tab.TimelineSpecIds
+import dev.dimension.flare.data.network.pixiv.PixivRankingMode
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformDataSourceContext
@@ -16,6 +17,7 @@ import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.asType
 import dev.dimension.flare.ui.presenter.home.pixiv.PixivBookmarkTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.pixiv.PixivFollowingTimelinePresenter
+import dev.dimension.flare.ui.presenter.home.pixiv.PixivRankingTimelinePresenter
 import dev.dimension.flare.ui.presenter.login.LoginPlatformProvider
 import dev.dimension.flare.ui.presenter.login.PixivLoginProvider
 import dev.dimension.flare.ui.route.DeeplinkRoute
@@ -63,12 +65,68 @@ public data object PixivPlatformSpec :
             },
         )
 
+    internal val rankingWeekTimelineSpec =
+        pixivRankingTimelineSpec(
+            id = PIXIV_RANKING_WEEK,
+            title = UiStrings.PixivRankingWeek,
+            mode = PixivRankingMode.Week,
+        )
+
+    internal val rankingMonthTimelineSpec =
+        pixivRankingTimelineSpec(
+            id = PIXIV_RANKING_MONTH,
+            title = UiStrings.PixivRankingMonth,
+            mode = PixivRankingMode.Month,
+        )
+
+    internal val rankingDayMaleTimelineSpec =
+        pixivRankingTimelineSpec(
+            id = PIXIV_RANKING_DAY_MALE,
+            title = UiStrings.PixivRankingDayMale,
+            mode = PixivRankingMode.DayMale,
+        )
+
+    internal val rankingDayFemaleTimelineSpec =
+        pixivRankingTimelineSpec(
+            id = PIXIV_RANKING_DAY_FEMALE,
+            title = UiStrings.PixivRankingDayFemale,
+            mode = PixivRankingMode.DayFemale,
+        )
+
+    internal val rankingWeekOriginalTimelineSpec =
+        pixivRankingTimelineSpec(
+            id = PIXIV_RANKING_WEEK_ORIGINAL,
+            title = UiStrings.PixivRankingWeekOriginal,
+            mode = PixivRankingMode.WeekOriginal,
+        )
+
+    internal val rankingWeekRookieTimelineSpec =
+        pixivRankingTimelineSpec(
+            id = PIXIV_RANKING_WEEK_ROOKIE,
+            title = UiStrings.PixivRankingWeekRookie,
+            mode = PixivRankingMode.WeekRookie,
+        )
+
+    internal val rankingDayMangaTimelineSpec =
+        pixivRankingTimelineSpec(
+            id = PIXIV_RANKING_DAY_MANGA,
+            title = UiStrings.PixivRankingDayManga,
+            mode = PixivRankingMode.DayManga,
+        )
+
     override val timelineSpecs: ImmutableList<TimelineSpec<out TimelineSpec.Data>> =
         persistentListOf(
             CommonTimelineSpecs.home,
             CommonTimelineSpecs.discover,
             followingTimelineSpec,
             bookmarkTimelineSpec,
+            rankingWeekTimelineSpec,
+            rankingMonthTimelineSpec,
+            rankingDayMaleTimelineSpec,
+            rankingDayFemaleTimelineSpec,
+            rankingWeekOriginalTimelineSpec,
+            rankingWeekRookieTimelineSpec,
+            rankingDayMangaTimelineSpec,
         )
 
     override fun deepLinks(accountKey: MicroBlogKey): ImmutableList<PlatformDeepLink<*>> =
@@ -124,3 +182,30 @@ private data class PixivUserDeepLink(
 )
 
 public const val PIXIV_HOST: String = "pixiv.net"
+
+private const val PIXIV_RANKING_WEEK: String = "pixiv.ranking.week"
+private const val PIXIV_RANKING_MONTH: String = "pixiv.ranking.month"
+private const val PIXIV_RANKING_DAY_MALE: String = "pixiv.ranking.day_male"
+private const val PIXIV_RANKING_DAY_FEMALE: String = "pixiv.ranking.day_female"
+private const val PIXIV_RANKING_WEEK_ORIGINAL: String = "pixiv.ranking.week_original"
+private const val PIXIV_RANKING_WEEK_ROOKIE: String = "pixiv.ranking.week_rookie"
+private const val PIXIV_RANKING_DAY_MANGA: String = "pixiv.ranking.day_manga"
+
+private fun pixivRankingTimelineSpec(
+    id: String,
+    title: UiStrings,
+    mode: PixivRankingMode,
+): TimelineSpec<TimelineSpec.AccountBasedData> =
+    TimelineSpec(
+        id = id,
+        title = title,
+        icon = UiIcon.Featured.asType(),
+        serializer = TimelineSpec.AccountBasedData.serializer(),
+        targetId = { it.accountKey.toString() },
+        presenterFactory = {
+            PixivRankingTimelinePresenter(
+                accountType = AccountType.Specific(it.accountKey),
+                mode = mode,
+            )
+        },
+    )

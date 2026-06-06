@@ -16,6 +16,7 @@ struct HomeTimelineScreen: View {
     @StateObject private var presenter: KotlinPresenter<HomeTimelineWithTabsPresenterState>
     @StateObject private var activeAccountPresenter = KotlinPresenter(presenter: ActiveAccountPresenter())
     @StateObject private var loggedInPresenter = KotlinPresenter(presenter: LoggedInPresenter())
+    @StateObject private var canComposePresenter = KotlinPresenter(presenter: CanComposePresenter())
 
     init(
         toServiceSelect: @escaping () -> Void,
@@ -177,7 +178,7 @@ struct HomeTimelineScreen: View {
             } label: {
                 Text("Login")
             }
-        } else {
+        } else if case .success(let canCompose) = onEnum(of: canComposePresenter.state.canCompose), canCompose.data.boolValue {
             Button {
                 toCompose()
             } label: {

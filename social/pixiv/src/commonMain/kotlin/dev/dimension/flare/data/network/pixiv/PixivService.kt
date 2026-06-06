@@ -1,7 +1,8 @@
 package dev.dimension.flare.data.network.pixiv
 
+import de.jensklingenberg.ktorfit.converter.ResponseConverterFactory
+import dev.dimension.flare.common.JSON
 import dev.dimension.flare.data.network.ktorClient
-import dev.dimension.flare.data.network.ktorfit
 import dev.dimension.flare.data.network.pixiv.api.PixivAppResources
 import dev.dimension.flare.data.network.pixiv.api.PixivAuthResources
 import dev.dimension.flare.data.network.pixiv.api.createPixivAppResources
@@ -20,8 +21,10 @@ import dev.dimension.flare.model.MicroBlogKey
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.api.createClientPlugin
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
 import io.ktor.http.HttpHeaders
+import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlin.time.Clock
@@ -35,75 +38,77 @@ private val PixivHeaderPlugin =
 
 private fun pixivKtorfit(
     baseUrl: String,
-    configure: HttpClientConfigBuilder = {},
-) = ktorfit(baseUrl) {
-    expectSuccess = false
-    install(PixivHeaderPlugin)
-    configure()
+    client: HttpClient,
+) = de.jensklingenberg.ktorfit.ktorfit {
+    baseUrl(baseUrl)
+    httpClient(client)
+    converterFactories(ResponseConverterFactory())
 }
 
+private fun pixivHttpClient(configure: HttpClientConfigBuilder = {}) =
+    ktorClient {
+        expectSuccess = false
+        install(ContentNegotiation) {
+            json(JSON)
+        }
+        configure()
+        install(PixivHeaderPlugin)
+    }
+
 private typealias HttpClientConfigBuilder = io.ktor.client.HttpClientConfig<*>.() -> Unit
+
+private data class PixivServiceClients(
+    val authResources: PixivAuthResources,
+    val appResources: PixivAppResources,
+    val appClient: HttpClient,
+)
+
+private fun createPixivServiceClients(configureAppClient: HttpClientConfigBuilder = {}): PixivServiceClients {
+    val authClient = pixivHttpClient()
+    val appClient = pixivHttpClient(configureAppClient)
+    return PixivServiceClients(
+        authResources = pixivKtorfit(AUTH_BASE_URL, authClient).createPixivAuthResources(),
+        appResources = pixivKtorfit(APP_API_BASE_URL, appClient).createPixivAppResources(),
+        appClient = appClient,
+    )
+}
 
 internal class PixivService private constructor(
     private val authResources: PixivAuthResources,
     private val appResources: PixivAppResources,
-    private val nextClient: HttpClient =
-        ktorClient {
-            expectSuccess = false
-            install(PixivHeaderPlugin)
-        },
+    private val appClient: HttpClient,
 ) {
-    constructor() : this(
-        authResources = pixivKtorfit(AUTH_BASE_URL).createPixivAuthResources(),
-        appResources = pixivKtorfit(APP_API_BASE_URL).createPixivAppResources(),
-    )
+    constructor() : this(createPixivServiceClients())
 
     constructor(
         accountKey: MicroBlogKey,
         credentialFlow: Flow<PixivCredential>,
         onCredentialRefreshed: suspend (PixivCredential) -> Unit,
     ) : this(
-        authResources = pixivKtorfit(AUTH_BASE_URL).createPixivAuthResources(),
-        appResources =
-            pixivKtorfit(APP_API_BASE_URL) {
-                install(PixivAuthPlugin) {
-                    this.accountKey = accountKey
-                    this.credentialFlow = credentialFlow
-                    this.onCredentialRefreshed = onCredentialRefreshed
-                    this.refreshToken = { clientId, clientSecret, refreshToken ->
-                        pixivKtorfit(AUTH_BASE_URL)
-                            .createPixivAuthResources()
-                            .refreshToken(
-                                clientId = clientId,
-                                clientSecret = clientSecret,
-                                refreshToken = refreshToken,
-                            ).toCredentialFallback(
-                                credentialFlow = credentialFlow,
-                            )
-                    }
+        createPixivServiceClients {
+            install(PixivAuthPlugin) {
+                this.accountKey = accountKey
+                this.credentialFlow = credentialFlow
+                this.onCredentialRefreshed = onCredentialRefreshed
+                this.refreshToken = { clientId, clientSecret, refreshToken ->
+                    pixivKtorfit(AUTH_BASE_URL, pixivHttpClient())
+                        .createPixivAuthResources()
+                        .refreshToken(
+                            clientId = clientId,
+                            clientSecret = clientSecret,
+                            refreshToken = refreshToken,
+                        ).toCredentialFallback(
+                            credentialFlow = credentialFlow,
+                        )
                 }
-            }.createPixivAppResources(),
-        nextClient =
-            ktorClient {
-                expectSuccess = false
-                install(PixivHeaderPlugin)
-                install(PixivAuthPlugin) {
-                    this.accountKey = accountKey
-                    this.credentialFlow = credentialFlow
-                    this.onCredentialRefreshed = onCredentialRefreshed
-                    this.refreshToken = { clientId, clientSecret, refreshToken ->
-                        pixivKtorfit(AUTH_BASE_URL)
-                            .createPixivAuthResources()
-                            .refreshToken(
-                                clientId = clientId,
-                                clientSecret = clientSecret,
-                                refreshToken = refreshToken,
-                            ).toCredentialFallback(
-                                credentialFlow = credentialFlow,
-                            )
-                    }
-                }
-            },
+            }
+        },
+    )
+
+    private constructor(clients: PixivServiceClients) : this(
+        authResources = clients.authResources,
+        appResources = clients.appResources,
+        appClient = clients.appClient,
     )
 
     suspend fun login(
@@ -272,9 +277,9 @@ internal class PixivService private constructor(
             userId = userId,
         )
 
-    suspend fun nextIllusts(nextUrl: String): PixivIllustListResponse = nextClient.get(nextUrl).body()
+    suspend fun nextIllusts(nextUrl: String): PixivIllustListResponse = appClient.get(nextUrl).body()
 
-    suspend fun nextUsers(nextUrl: String): PixivUserListResponse = nextClient.get(nextUrl).body()
+    suspend fun nextUsers(nextUrl: String): PixivUserListResponse = appClient.get(nextUrl).body()
 }
 
 private suspend fun PixivTokenResponse.toCredentialFallback(credentialFlow: Flow<PixivCredential>): PixivCredential? {

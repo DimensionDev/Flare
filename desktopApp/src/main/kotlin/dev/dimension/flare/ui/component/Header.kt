@@ -8,10 +8,13 @@ import io.github.composefluent.FluentTheme
 import io.github.composefluent.component.Text
 
 @Composable
-fun Header(text: String) {
+fun Header(
+    text: String,
+    modifier: Modifier = Modifier,
+) {
     Text(
         text = text,
         style = FluentTheme.typography.bodyStrong,
-        modifier = Modifier.padding(top = 16.dp, bottom = 4.dp),
+        modifier = modifier.padding(top = 16.dp, bottom = 4.dp),
     )
 }

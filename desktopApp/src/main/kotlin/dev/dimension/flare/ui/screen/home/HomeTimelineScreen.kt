@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyRow
@@ -34,12 +35,15 @@ import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.ArrowsRotate
+import compose.icons.fontawesomeicons.solid.ChevronDown
 import compose.icons.fontawesomeicons.solid.Plus
 import dev.dimension.flare.LocalWindowPadding
 import dev.dimension.flare.Res
+import dev.dimension.flare.data.model.TimelineDisplayMode
 import dev.dimension.flare.data.model.tab.resolveTimelineAppearance
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.refresh
+import dev.dimension.flare.tab_settings_add_tab
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScrollBar
 import dev.dimension.flare.ui.component.LocalGlobalAppearance
@@ -63,11 +67,14 @@ import dev.dimension.flare.ui.route.Router
 import dev.dimension.flare.ui.screen.compose.ComposeDialog
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.composefluent.FluentTheme
-import io.github.composefluent.component.LiteFilter
+import io.github.composefluent.component.FlyoutPlacement
+import io.github.composefluent.component.MenuFlyoutContainer
+import io.github.composefluent.component.MenuFlyoutItem
+import io.github.composefluent.component.MenuFlyoutSeparator
 import io.github.composefluent.component.NavigationDefaults
-import io.github.composefluent.component.PillButton
 import io.github.composefluent.component.ProgressBar
 import io.github.composefluent.component.SubtleButton
+import io.github.composefluent.component.Text
 import kotlinx.collections.immutable.toImmutableList
 import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.stringResource
@@ -260,64 +267,101 @@ internal fun HomeTimelineScreen(
                                     modifier =
                                         Modifier
                                             .matchParentSize()
-                                            .background(FluentTheme.colors.background.mica.base)
-                                            .blur(32.dp),
+                                            .background(
+                                                if (LocalTimelineAppearance.current.timelineDisplayMode == TimelineDisplayMode.Plain) {
+                                                    FluentTheme.colors.background.card.secondary
+                                                } else {
+                                                    FluentTheme.colors.background.mica.base
+                                                },
+                                            ).blur(32.dp),
                                 )
-                                Row(
+                                Box(
                                     modifier =
                                         Modifier
                                             .fillMaxWidth(1f)
                                             .padding(LocalWindowPadding.current)
                                             .padding(horizontal = screenHorizontalPadding),
-                                    verticalAlignment = Alignment.CenterVertically,
                                 ) {
-                                    LiteFilter(
+                                    MenuFlyoutContainer(
                                         modifier =
                                             Modifier
-                                                .weight(1f),
-                                    ) {
-                                        tabState.forEachIndexed { index, tab ->
-                                            PillButton(
-                                                selected = tab.id == currentTab.id,
-                                                onSelectedChanged = {
-                                                    if (tab.id == currentTab.id) {
-                                                        if (currentTabTimelineState.lazyListState.firstVisibleItemIndex == 0) {
-                                                            currentTabTimelineState.refreshSync()
-                                                        } else {
-                                                            currentTabTimelineState.lazyListState.requestScrollToItem(
-                                                                0,
-                                                            )
+                                                .align(Alignment.CenterStart),
+                                        adaptivePlacement = true,
+                                        placement = FlyoutPlacement.Bottom,
+                                        flyout = {
+                                            tabState.forEachIndexed { index, tab ->
+                                                MenuFlyoutItem(
+                                                    selected = tab.id == currentTab.id,
+                                                    onSelectedChanged = {
+                                                        if (it) {
+                                                            if (tab.id == currentTab.id) {
+                                                                if (currentTabTimelineState.lazyListState.firstVisibleItemIndex == 0) {
+                                                                    currentTabTimelineState.refreshSync()
+                                                                } else {
+                                                                    currentTabTimelineState.lazyListState.requestScrollToItem(
+                                                                        0,
+                                                                    )
+                                                                }
+                                                            } else {
+                                                                state.setSelectedIndex(index)
+                                                            }
+                                                            isFlyoutVisible = false
                                                         }
-                                                    } else {
-                                                        state.setSelectedIndex(index)
-                                                    }
-                                                },
-                                            ) {
-                                                TabIcon(
-                                                    tabItem = tab,
+                                                    },
+                                                    text = {
+                                                        UiText(tab.title)
+                                                    },
+                                                    icon = {
+                                                        TabIcon(
+                                                            tabItem = tab,
+                                                        )
+                                                    },
                                                 )
-                                                UiText(tab.title)
                                             }
-                                        }
-                                        PillButton(
-                                            selected = false,
-                                            onSelectedChanged = {
-                                                onAddTab.invoke()
+                                            MenuFlyoutSeparator()
+                                            MenuFlyoutItem(
+                                                onClick = {
+                                                    isFlyoutVisible = false
+                                                    onAddTab.invoke()
+                                                },
+                                                text = {
+                                                    Text(stringResource(Res.string.tab_settings_add_tab))
+                                                },
+                                                icon = {
+                                                    FAIcon(
+                                                        FontAwesomeIcons.Solid.Plus,
+                                                        contentDescription = null,
+                                                    )
+                                                },
+                                            )
+                                        },
+                                    ) {
+                                        SubtleButton(
+                                            onClick = {
+                                                isFlyoutVisible = !isFlyoutVisible
                                             },
                                         ) {
+                                            TabIcon(currentTab, size = 20.dp)
+                                            UiText(currentTab.title)
                                             FAIcon(
-                                                FontAwesomeIcons.Solid.Plus,
+                                                FontAwesomeIcons.Solid.ChevronDown,
                                                 contentDescription = null,
+                                                modifier = Modifier.size(12.dp),
                                             )
                                         }
                                     }
-
-                                    SubtleButton(onClick = {
-                                        currentTabTimelineState.refreshSync()
-                                    }) {
+                                    SubtleButton(
+                                        modifier =
+                                            Modifier
+                                                .align(Alignment.CenterEnd),
+                                        onClick = {
+                                            currentTabTimelineState.refreshSync()
+                                        },
+                                    ) {
                                         FAIcon(
                                             imageVector = FontAwesomeIcons.Solid.ArrowsRotate,
                                             contentDescription = stringResource(Res.string.refresh),
+                                            modifier = Modifier.size(16.dp),
                                         )
                                     }
                                 }

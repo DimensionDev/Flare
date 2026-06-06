@@ -18,14 +18,17 @@ import androidx.compose.ui.unit.dp
 import dev.dimension.flare.LocalWindowPadding
 import dev.dimension.flare.RegisterTabCallback
 import dev.dimension.flare.common.isRefreshing
+import dev.dimension.flare.data.model.TimelineDisplayMode
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.AvatarComponentDefaults
 import dev.dimension.flare.ui.component.FlareScrollBar
+import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.AllNotificationPresenter
 import dev.dimension.flare.ui.presenter.invoke
+import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.composefluent.component.Badge
 import io.github.composefluent.component.BadgeStatus
 import io.github.composefluent.component.LiteFilter
@@ -58,7 +61,17 @@ internal fun NotificationScreen() {
                     item(
                         span = StaggeredGridItemSpan.FullLine,
                     ) {
-                        LiteFilter {
+                        LiteFilter(
+                            modifier =
+                                Modifier
+                                    .let {
+                                        if (LocalTimelineAppearance.current.timelineDisplayMode == TimelineDisplayMode.Plain) {
+                                            it.padding(horizontal = screenHorizontalPadding)
+                                        } else {
+                                            it
+                                        }
+                                    },
+                        ) {
                             state.notifications.forEach { item ->
                                 val profile = item.profile
                                 val badge = item.badge
@@ -102,7 +115,17 @@ internal fun NotificationScreen() {
                         item(
                             span = StaggeredGridItemSpan.FullLine,
                         ) {
-                            LiteFilter {
+                            LiteFilter(
+                                modifier =
+                                    Modifier
+                                        .let {
+                                            if (LocalTimelineAppearance.current.timelineDisplayMode == TimelineDisplayMode.Plain) {
+                                                it.padding(horizontal = screenHorizontalPadding)
+                                            } else {
+                                                it
+                                            }
+                                        },
+                            ) {
                                 types.forEach { type ->
                                     PillButton(
                                         selected = state.selectedFilter == type,

@@ -9,7 +9,7 @@ import androidx.compose.ui.graphics.Color
 public val LocalIsLightTheme: ProvidableCompositionLocal<Boolean> = staticCompositionLocalOf { false }
 
 @Composable
-internal actual fun isLightTheme(): Boolean = LocalIsLightTheme.current
+public actual fun isLightTheme(): Boolean = LocalIsLightTheme.current
 
 internal actual val PlatformContentColor: ProvidableCompositionLocal<Color>
     get() = LocalContentColor

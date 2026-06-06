@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import dev.dimension.flare.data.model.TimelineDisplayMode
 import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
+import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.theme.PlatformTheme
 import dev.dimension.flare.ui.theme.isLightTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
@@ -58,11 +59,33 @@ public fun LazyStatusVerticalStaggeredGrid(
     val displayMode = LocalTimelineAppearance.current.timelineDisplayMode
     val effectiveMode =
         when {
-            allowGalleryMode -> displayMode
-            displayMode == TimelineDisplayMode.Gallery -> TimelineDisplayMode.Card
-            else -> displayMode
+            displayMode == TimelineDisplayMode.Plain && isBigScreen() -> {
+                TimelineDisplayMode.Card
+            }
+
+            forceCardMode -> {
+                TimelineDisplayMode.Card
+            }
+
+            allowGalleryMode -> {
+                displayMode
+            }
+
+            displayMode == TimelineDisplayMode.Gallery -> {
+                TimelineDisplayMode.Card
+            }
+
+            else -> {
+                displayMode
+            }
         }
-    val paddingForColumnCalc = contentPadding + PaddingValues(horizontal = screenHorizontalPadding)
+    val paddingForColumnCalc =
+        contentPadding +
+            if (effectiveMode == TimelineDisplayMode.Plain) {
+                PaddingValues()
+            } else {
+                PaddingValues(horizontal = screenHorizontalPadding)
+            }
     val layoutDirection = LocalLayoutDirection.current
     val density = LocalDensity.current
     val viewportWidthPx by remember(state) {

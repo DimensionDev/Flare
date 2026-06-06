@@ -1,6 +1,5 @@
 package dev.dimension.flare.ui.screen.status
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,7 +26,6 @@ import dev.dimension.flare.ui.component.FlareLargeFlexibleTopAppBar
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.component.SubcomposeNetworkImage
-import dev.dimension.flare.ui.component.listCard
 import dev.dimension.flare.ui.component.placeholder
 import dev.dimension.flare.ui.model.ClickContext
 import dev.dimension.flare.ui.model.UiState
@@ -37,6 +35,7 @@ import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.xqt.TwitterArticlePresenter
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.screen.settings.AccountItem
+import dev.dimension.flare.ui.theme.isLightTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import dev.dimension.flare.ui.theme.single
 import moe.tlaster.precompose.molecule.producePresenter
@@ -55,10 +54,23 @@ internal fun TwitterArticleScreen(
     val state by producePresenter(key = "$accountType-$tweetId-$articleId") {
         TwitterArticlePresenter(accountType, tweetId, articleId).invoke()
     }
+    val color =
+        if (isLightTheme()) {
+            MaterialTheme.colorScheme.surface
+        } else {
+            MaterialTheme.colorScheme.background
+        }
     FlareScaffold(
         modifier = Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection),
+        containerColor = color,
         topBar = {
             FlareLargeFlexibleTopAppBar(
+                colors =
+                    TopAppBarDefaults.topAppBarColors(
+                        containerColor = color,
+                        scrolledContainerColor = color,
+                        actionIconContentColor = MaterialTheme.colorScheme.primary,
+                    ),
                 title = {
                     state.data
                         .onSuccess {

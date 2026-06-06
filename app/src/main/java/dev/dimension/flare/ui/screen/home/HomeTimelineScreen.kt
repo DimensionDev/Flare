@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.screen.home
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Arrangement
@@ -33,7 +34,6 @@ import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -42,6 +42,7 @@ import androidx.compose.material3.LeadingIconTab
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SecondaryScrollableTabRow
+import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
@@ -55,7 +56,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
@@ -72,6 +72,7 @@ import compose.icons.fontawesomeicons.solid.Sliders
 import dev.dimension.flare.R
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.data.model.BottomBarBehavior
+import dev.dimension.flare.data.model.TimelineDisplayMode
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.data.model.tab.resolveTimelineAppearance
 import dev.dimension.flare.ui.component.AvatarComponent
@@ -84,10 +85,10 @@ import dev.dimension.flare.ui.component.LocalGlobalAppearance
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.TabIcon
-import dev.dimension.flare.ui.component.TabRowIndicator
 import dev.dimension.flare.ui.component.platform.LocalWindowSizeClass
 import dev.dimension.flare.ui.component.platform.WindowSizeClass
 import dev.dimension.flare.ui.component.platform.isBigScreen
+import dev.dimension.flare.ui.component.platform.isCompatScreen
 import dev.dimension.flare.ui.component.status.AdaptiveCard
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.status
@@ -96,6 +97,7 @@ import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.takeSuccess
+import dev.dimension.flare.ui.model.takeSuccessOr
 import dev.dimension.flare.ui.presenter.HomeTimelineWithTabsPresenter
 import dev.dimension.flare.ui.presenter.home.DeepLinkPresenter
 import dev.dimension.flare.ui.presenter.home.LoggedInPresenter
@@ -104,6 +106,7 @@ import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.rememberTimelineItemPresenterWithLazyListState
 import dev.dimension.flare.ui.route.Route
 import dev.dimension.flare.ui.route.Router
+import dev.dimension.flare.ui.theme.isLightTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
@@ -219,9 +222,37 @@ internal fun HomeTimelineScreen(
             } else {
                 TopAppBarDefaults.enterAlwaysScrollBehavior()
             }
+        val appearance = LocalTimelineAppearance.current
+        val displayMode =
+            remember(
+                state.tabState,
+                state.pagerState.takeSuccess()?.currentPage,
+                appearance,
+            ) {
+                state.tabState
+                    .map {
+                        it
+                            .getOrNull(state.pagerState.takeSuccess()?.currentPage ?: 0)
+                            ?.resolveTimelineAppearance(appearance)
+                            ?.timelineDisplayMode ?: TimelineDisplayMode.Plain
+                    }.takeSuccessOr(TimelineDisplayMode.Plain)
+            }
+        val color by animateColorAsState(
+            when (displayMode) {
+                TimelineDisplayMode.Plain if isLightTheme() && isCompatScreen() -> MaterialTheme.colorScheme.surface
+                else -> MaterialTheme.colorScheme.background
+            },
+            label = "TopAppBarBackground",
+        )
         FlareScaffold(
             topBar = {
                 FlareTopAppBar(
+                    colors =
+                        TopAppBarDefaults.topAppBarColors(
+                            containerColor = color,
+                            scrolledContainerColor = color,
+                            actionIconContentColor = MaterialTheme.colorScheme.primary,
+                        ),
                     title = {
                         state.pagerState.onSuccess { pagerState ->
                             state.tabState.onSuccess { tabs ->
@@ -239,12 +270,14 @@ internal fun HomeTimelineScreen(
                                         edgePadding = 0.dp,
                                         divider = {},
                                         indicator = {
-                                            TabRowIndicator(
-                                                selectedIndex =
+                                            TabRowDefaults.SecondaryIndicator(
+                                                Modifier.tabIndicatorOffset(
                                                     minOf(
                                                         pagerState.currentPage,
                                                         tabs.lastIndex,
                                                     ),
+                                                    matchContentSize = false,
+                                                ),
                                             )
                                         },
                                         minTabWidth = 48.dp,
@@ -252,7 +285,7 @@ internal fun HomeTimelineScreen(
                                         state.tabState.onSuccess { tabs ->
                                             tabs.forEachIndexed { index, tab ->
                                                 LeadingIconTab(
-                                                    modifier = Modifier.clip(CircleShape),
+                                                    modifier = Modifier,
                                                     selectedContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
                                                     unselectedContentColor = LocalContentColor.current,
                                                     selected = index == pagerState.currentPage,

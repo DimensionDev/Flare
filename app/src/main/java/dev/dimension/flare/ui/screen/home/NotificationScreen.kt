@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Badge
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -16,6 +15,7 @@ import androidx.compose.material3.LeadingIconTab
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SecondaryScrollableTabRow
+import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -24,7 +24,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
@@ -33,18 +32,20 @@ import dev.dimension.flare.R
 import dev.dimension.flare.common.isRefreshing
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.data.model.BottomBarBehavior
+import dev.dimension.flare.data.model.TimelineDisplayMode
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.component.LocalGlobalAppearance
+import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.RefreshContainer
-import dev.dimension.flare.ui.component.TabRowIndicator
 import dev.dimension.flare.ui.component.platform.isCompatScreen
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.AllNotificationPresenter
 import dev.dimension.flare.ui.presenter.invoke
+import dev.dimension.flare.ui.theme.isLightTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.launch
@@ -75,6 +76,24 @@ internal fun NotificationScreen() {
     FlareScaffold(
         topBar = {
             FlareTopAppBar(
+                colors =
+                    when (LocalTimelineAppearance.current.timelineDisplayMode) {
+                        TimelineDisplayMode.Plain if isLightTheme() && isCompatScreen() -> {
+                            TopAppBarDefaults.topAppBarColors(
+                                containerColor = MaterialTheme.colorScheme.surface,
+                                scrolledContainerColor = MaterialTheme.colorScheme.surface,
+                                actionIconContentColor = MaterialTheme.colorScheme.primary,
+                            )
+                        }
+
+                        else -> {
+                            TopAppBarDefaults.topAppBarColors(
+                                containerColor = MaterialTheme.colorScheme.background,
+                                scrolledContainerColor = MaterialTheme.colorScheme.background,
+                                actionIconContentColor = MaterialTheme.colorScheme.primary,
+                            )
+                        }
+                    },
                 title = {
                     if (state.notifications.size > 1) {
                         SecondaryScrollableTabRow(
@@ -86,8 +105,11 @@ internal fun NotificationScreen() {
                             edgePadding = 0.dp,
                             divider = {},
                             indicator = {
-                                TabRowIndicator(
-                                    selectedIndex = state.selectedAccountIndex,
+                                TabRowDefaults.SecondaryIndicator(
+                                    Modifier.tabIndicatorOffset(
+                                        state.selectedAccountIndex,
+                                        matchContentSize = false,
+                                    ),
                                 )
                             },
                             minTabWidth = 48.dp,
@@ -96,7 +118,6 @@ internal fun NotificationScreen() {
                                 val account = item.profile
                                 val badge = item.badge
                                 LeadingIconTab(
-                                    modifier = Modifier.clip(CircleShape),
                                     selectedContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
                                     unselectedContentColor = LocalContentColor.current,
                                     selected = state.selectedAccount?.key == account.key,

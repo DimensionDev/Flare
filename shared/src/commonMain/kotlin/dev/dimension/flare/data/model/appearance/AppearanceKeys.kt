@@ -85,7 +85,7 @@ public object AppearanceKeys {
 
     public object TimelineDisplayMode : PerTimeline<AppearanceTimelineDisplayMode>(
         "timeline.display_mode",
-        AppearanceTimelineDisplayMode.Card,
+        AppearanceTimelineDisplayMode.Plain,
         AppearanceTimelineDisplayMode.serializer(),
     )
 

@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.screen.home
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,6 +21,7 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -40,20 +42,22 @@ import dev.dimension.flare.common.isRefreshing
 import dev.dimension.flare.common.isSuccess
 import dev.dimension.flare.common.onLoading
 import dev.dimension.flare.common.onSuccess
+import dev.dimension.flare.data.model.TimelineDisplayMode
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.common.items
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.FlareDropdownMenu
 import dev.dimension.flare.ui.component.FlareScaffold
+import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.SearchBar
 import dev.dimension.flare.ui.component.SearchBarState
+import dev.dimension.flare.ui.component.listCardContainer
 import dev.dimension.flare.ui.component.placeholder
 import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.component.searchBarPresenter
 import dev.dimension.flare.ui.component.searchContent
-import dev.dimension.flare.ui.component.status.AdaptiveCard
 import dev.dimension.flare.ui.component.status.CommonStatusHeaderComponent
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.UserPlaceholder
@@ -87,8 +91,7 @@ internal fun DiscoverScreen(onUserClick: (AccountType, MicroBlogKey) -> Unit) {
             Row(
                 modifier =
                     Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = screenHorizontalPadding),
+                        .fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -157,7 +160,6 @@ internal fun DiscoverScreen(onUserClick: (AccountType, MicroBlogKey) -> Unit) {
                 LazyStatusVerticalStaggeredGrid(
                     state = lazyListState,
                     contentPadding = contentPadding,
-                    forceCardMode = true,
                 ) {
                     if (isBigScreen) {
                         state.accounts.onSuccess { accounts ->
@@ -167,7 +169,9 @@ internal fun DiscoverScreen(onUserClick: (AccountType, MicroBlogKey) -> Unit) {
                                 ) {
                                     LazyRow(
                                         horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                        modifier = Modifier.padding(bottom = 8.dp),
+                                        modifier =
+                                            Modifier
+                                                .padding(bottom = 8.dp),
                                     ) {
                                         items(accounts) { profile ->
                                             FilterChip(
@@ -222,13 +226,26 @@ internal fun DiscoverScreen(onUserClick: (AccountType, MicroBlogKey) -> Unit) {
                             ) {
                                 LazyRow(
                                     horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    modifier =
+                                        Modifier
+                                            .let {
+                                                if (!isBigScreen &&
+                                                    LocalTimelineAppearance.current.timelineDisplayMode == TimelineDisplayMode.Plain
+                                                ) {
+                                                    it.padding(horizontal = screenHorizontalPadding)
+                                                } else {
+                                                    it
+                                                }
+                                            },
                                 ) {
                                     items(
                                         state.users,
                                         loadingContent = {
-                                            AdaptiveCard(
+                                            Box(
                                                 modifier =
                                                     Modifier
+                                                        .listCardContainer()
+                                                        .background(MaterialTheme.colorScheme.surfaceContainer)
                                                         .width(256.dp),
                                             ) {
                                                 UserPlaceholder(
@@ -237,9 +254,11 @@ internal fun DiscoverScreen(onUserClick: (AccountType, MicroBlogKey) -> Unit) {
                                             }
                                         },
                                     ) { item ->
-                                        AdaptiveCard(
+                                        Box(
                                             modifier =
                                                 Modifier
+                                                    .listCardContainer()
+                                                    .background(MaterialTheme.colorScheme.surfaceContainer)
                                                     .width(256.dp),
                                         ) {
                                             CommonStatusHeaderComponent(
@@ -281,14 +300,27 @@ internal fun DiscoverScreen(onUserClick: (AccountType, MicroBlogKey) -> Unit) {
                                 FlowRow(
                                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                                     verticalArrangement = Arrangement.spacedBy(4.dp),
+                                    modifier =
+                                        Modifier
+                                            .let {
+                                                if (!isBigScreen &&
+                                                    LocalTimelineAppearance.current.timelineDisplayMode == TimelineDisplayMode.Plain
+                                                ) {
+                                                    it.padding(horizontal = screenHorizontalPadding)
+                                                } else {
+                                                    it
+                                                }
+                                            },
                                 ) {
                                     repeat(
                                         itemCount,
                                     ) {
                                         val hashtag = get(it)
-                                        AdaptiveCard(
+                                        Box(
                                             modifier =
                                                 Modifier
+                                                    .listCardContainer()
+                                                    .background(MaterialTheme.colorScheme.surfaceContainer)
                                                     .clickable {
                                                         hashtag?.searchContent?.let { it1 ->
                                                             state.commitSearch(

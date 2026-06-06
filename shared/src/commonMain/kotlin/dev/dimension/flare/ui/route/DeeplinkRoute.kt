@@ -88,6 +88,12 @@ public sealed class DeeplinkRoute {
             val fxShareUrl: String? = null,
             val fixvxShareUrl: String? = null,
         ) : Status()
+
+        @Serializable
+        public data class Insight(
+            val accountType: AccountType,
+            val statusKey: MicroBlogKey,
+        ) : Status()
     }
 
     @Serializable

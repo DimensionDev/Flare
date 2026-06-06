@@ -26,6 +26,7 @@ dependencies {
     implementation(projects.feature.login)
     implementation(projects.feature.subscription)
     implementation(projects.feature.tab)
+    implementation(projects.feature.agent)
     implementation(projects.composeUi)
 
     implementation(compose("org.jetbrains.compose.runtime:runtime"))

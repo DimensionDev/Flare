@@ -96,6 +96,7 @@ import dev.dimension.flare.ui.screen.status.action.BlueskyReportStatusDialog
 import dev.dimension.flare.ui.screen.status.action.DeleteStatusConfirmDialog
 import dev.dimension.flare.ui.screen.status.action.MastodonReportDialog
 import dev.dimension.flare.ui.screen.status.action.MisskeyReportDialog
+import dev.dimension.flare.ui.screen.status.action.StatusInsightDialog
 import dev.dimension.flare.ui.screen.status.action.StatusShareSheet
 import dev.dimension.flare.ui.screen.xqt.TwitterArticleScreen
 import io.github.composefluent.FluentTheme
@@ -322,6 +323,16 @@ internal fun Router(
                         shareUrl = args.shareUrl,
                         fxShareUrl = args.fxShareUrl,
                         fixvxShareUrl = args.fixvxShareUrl,
+                        onBack = onBack,
+                    )
+                }
+
+                entry<Route.StatusInsight>(
+                    metadata = dialog(),
+                ) { args ->
+                    StatusInsightDialog(
+                        accountType = args.accountType,
+                        statusKey = args.statusKey,
                         onBack = onBack,
                     )
                 }

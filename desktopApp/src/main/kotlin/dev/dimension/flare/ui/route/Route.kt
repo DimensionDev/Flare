@@ -130,6 +130,11 @@ internal sealed interface Route : NavKey {
         val fixvxShareUrl: String? = null,
     ) : FloatingRoute
 
+    data class StatusInsight(
+        val accountType: AccountType,
+        val statusKey: MicroBlogKey,
+    ) : FloatingRoute
+
     data class Search(
         val accountType: AccountType,
         val keyword: String,
@@ -429,6 +434,13 @@ internal sealed interface Route : NavKey {
 
                 is DeeplinkRoute.Status.Detail -> {
                     StatusDetail(
+                        accountType = deeplinkRoute.accountType,
+                        statusKey = deeplinkRoute.statusKey,
+                    )
+                }
+
+                is DeeplinkRoute.Status.Insight -> {
+                    StatusInsight(
                         accountType = deeplinkRoute.accountType,
                         statusKey = deeplinkRoute.statusKey,
                     )

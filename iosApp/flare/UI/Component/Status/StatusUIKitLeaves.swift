@@ -466,6 +466,8 @@ final class StatusTopEndView: UIView, ManualLayoutMeasurable, TimelineHeightProv
     private let translation = TranslateStatusStateView()
     private let platformLogo = UIImageView()
     private let time = DateTimeUILabel()
+    private let insightButton = UIButton(type: .system)
+    private var onInsightTapped: (() -> Void)?
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -477,10 +479,23 @@ final class StatusTopEndView: UIView, ManualLayoutMeasurable, TimelineHeightProv
         platformLogo.setContentCompressionResistancePriority(.required, for: .horizontal)
         translation.setContentHuggingPriority(.required, for: .horizontal)
         translation.setContentCompressionResistancePriority(.required, for: .horizontal)
+        insightButton.tintColor = .secondaryLabel
+        insightButton.setImage(UIImage(named: "fa-robot"), for: .normal)
+        insightButton.imageView?.contentMode = .scaleAspectFit
+        insightButton.accessibilityLabel = String(localized: "status_insight_title")
+        insightButton.addAction(
+            UIAction { [weak self] _ in
+                self?.onInsightTapped?()
+            },
+            for: .touchUpInside
+        )
+        insightButton.setContentHuggingPriority(.required, for: .horizontal)
+        insightButton.setContentCompressionResistancePriority(.required, for: .horizontal)
         addSubview(visibility)
         addSubview(translation)
         addSubview(platformLogo)
         addSubview(time)
+        addSubview(insightButton)
     }
     required init(coder: NSCoder) { fatalError("init(coder:) not supported") }
 
@@ -518,6 +533,9 @@ final class StatusTopEndView: UIView, ManualLayoutMeasurable, TimelineHeightProv
         if !time.isHidden {
             height = max(height, time.font?.lineHeight ?? 0)
         }
+        if !insightButton.isHidden {
+            height = max(height, 16)
+        }
         return ceil(height)
     }
 
@@ -537,8 +555,11 @@ final class StatusTopEndView: UIView, ManualLayoutMeasurable, TimelineHeightProv
         post: UiTimelineV2.Post,
         showPlatformLogo: Bool,
         absoluteTimestamp: Bool,
-        isDetail: Bool
+        isDetail: Bool,
+        showAgentInsight: Bool,
+        onInsightTapped: (() -> Void)?
     ) {
+        self.onInsightTapped = onInsightTapped
         if let v = post.visibility {
             visibility.isHidden = false
             visibility.set(visibility: v)
@@ -578,6 +599,7 @@ final class StatusTopEndView: UIView, ManualLayoutMeasurable, TimelineHeightProv
             time.fullTime = false
             time.set(data: post.createdAt)
         }
+        insightButton.isHidden = !showAgentInsight
         invalidateIntrinsicContentSize()
         setNeedsLayout()
     }
@@ -622,6 +644,9 @@ final class StatusTopEndView: UIView, ManualLayoutMeasurable, TimelineHeightProv
         if !time.isHidden {
             let size = time.sizeThatFits(CGSize(width: CGFloat.greatestFiniteMagnitude, height: CGFloat.greatestFiniteMagnitude))
             items.append((time, CGSize(width: ceil(size.width), height: ceil(size.height))))
+        }
+        if !insightButton.isHidden {
+            items.append((insightButton, CGSize(width: 16, height: 16)))
         }
         return items
     }

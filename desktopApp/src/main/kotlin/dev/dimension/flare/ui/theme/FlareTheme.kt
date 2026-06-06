@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.toSize
 import androidx.compose.ui.window.FrameWindowScope
 import androidx.compose.ui.window.WindowScope
 import dev.dimension.flare.LocalWindowPadding
+import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.model.Theme
 import dev.dimension.flare.data.model.VideoAutoplay
 import dev.dimension.flare.data.model.appearance.GlobalAppearance
@@ -383,6 +384,7 @@ internal fun ProvideThemeSettings(content: @Composable () -> Unit) {
                 }
         }
     state.appSettings.onSuccess { appSettings ->
+        val openAIConfig = appSettings.aiConfig.type as? AppSettings.AiConfig.Type.OpenAI
         LaunchedEffect(appSettings.language) {
             if (appSettings.language.isNotEmpty()) {
                 val locale = Locale.forLanguageTag(appSettings.language)
@@ -393,12 +395,13 @@ internal fun ProvideThemeSettings(content: @Composable () -> Unit) {
         CompositionLocalProvider(
             LocalGlobalAppearance provides globalAppearance,
             LocalTimelineAppearance provides
-                remember(globalAppearance, timelineAppearance, appSettings.translateConfig, appSettings.aiConfig.tldr) {
+                remember(globalAppearance, timelineAppearance, appSettings.translateConfig, appSettings.aiConfig) {
                     timelineAppearance.copy(
                         aiConfig =
                             TimelineAppearance.AiConfig(
                                 translation = true,
                                 tldr = appSettings.aiConfig.tldr,
+                                agent = appSettings.aiConfig.agent && !openAIConfig?.model.isNullOrBlank(),
                             ),
                     )
                 },

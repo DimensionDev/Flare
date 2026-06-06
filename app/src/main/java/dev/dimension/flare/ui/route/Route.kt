@@ -78,6 +78,12 @@ internal sealed interface Route : NavKey {
             val fxShareUrl: String? = null,
             val fixvxShareUrl: String? = null,
         ) : Status
+
+        @Serializable
+        data class Insight(
+            val accountType: AccountType,
+            val statusKey: MicroBlogKey,
+        ) : Status
     }
 
     @Serializable
@@ -612,6 +618,13 @@ internal sealed interface Route : NavKey {
                     Status.Detail(
                         statusKey = deeplinkRoute.statusKey,
                         accountType = deeplinkRoute.accountType,
+                    )
+                }
+
+                is DeeplinkRoute.Status.Insight -> {
+                    Status.Insight(
+                        accountType = deeplinkRoute.accountType,
+                        statusKey = deeplinkRoute.statusKey,
                     )
                 }
 

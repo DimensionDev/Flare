@@ -58,17 +58,19 @@ fun FlareApp(content: @Composable () -> Unit) {
         }
 
     val appSettings = state.appSettings.takeSuccessOr(AppSettings(""))
+    val openAIConfig = appSettings.aiConfig.type as? AppSettings.AiConfig.Type.OpenAI
     CompositionLocalProvider(
         LocalUriHandler provides uriHandler,
         LocalGlobalAppearance provides globalAppearance,
         LocalTimelineAppearance provides
-            remember(globalAppearance, timelineAppearance, appSettings.translateConfig, appSettings.aiConfig.tldr) {
+            remember(globalAppearance, timelineAppearance, appSettings.translateConfig, appSettings.aiConfig) {
                 timelineAppearance.copy(
                     aiConfig =
-                        TimelineAppearance.AiConfig(
-                            translation = true,
-                            tldr = appSettings.aiConfig.tldr,
-                        ),
+                            TimelineAppearance.AiConfig(
+                                translation = true,
+                                tldr = appSettings.aiConfig.tldr,
+                                agent = appSettings.aiConfig.agent && !openAIConfig?.model.isNullOrBlank(),
+                            ),
                 )
             },
         content = content,

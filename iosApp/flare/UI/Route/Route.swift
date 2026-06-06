@@ -112,6 +112,8 @@ enum Route: Hashable, Identifiable {
             MisskeyReportSheet(accountType: accountType, userKey: userKey, statusKey: statusKey)
         case .statusAddReaction(let accountType, let statusKey):
             StatusAddReactionSheet(accountType: accountType, statusKey: statusKey)
+        case .statusInsight(let accountType, let statusKey):
+            StatusInsightSheet(accountType: accountType, statusKey: statusKey)
         case .userFans(let account, let userKey):
             UserListScreen(accountType: account, userKey: userKey, isFollowing: false)
         case .userFollowing(let account, let userKey):
@@ -174,6 +176,7 @@ enum Route: Hashable, Identifiable {
     case statusBlueskyReport(AccountType, MicroBlogKey)
     case statusDeleteConfirm(AccountType, MicroBlogKey)
     case statusDetail(AccountType, MicroBlogKey)
+    case statusInsight(AccountType, MicroBlogKey)
     case statusMastodonReport(AccountType, MicroBlogKey, MicroBlogKey?)
     case statusMisskeyReport(AccountType, MicroBlogKey, MicroBlogKey?)
     case statusVVOComment(AccountType, MicroBlogKey)
@@ -264,6 +267,8 @@ enum Route: Hashable, Identifiable {
             return Route.statusDeleteConfirm(data.accountType, data.statusKey)
         case .detail(let data):
             return Route.statusDetail(data.accountType, data.statusKey)
+        case .insight(let data):
+            return Route.statusInsight(data.accountType, data.statusKey)
         case .mastodonReport(let data):
             return Route.statusMastodonReport(data.accountType, data.userKey, data.statusKey)
         case .misskeyReport(let data):

@@ -37,6 +37,7 @@ struct StatusUIKitAppearance: Equatable {
     let showLinkPreview: Bool
     let compatLinkPreview: Bool
     let expandMediaSize: Bool
+    let aiAgentEnabled: Bool
 
     init(timeline: TimelineAppearance, fontSizeDiff: Float = 0) {
         preferredContentSizeCategory = contentSizeCategory(fontSizeDiff: fontSizeDiff)
@@ -55,6 +56,7 @@ struct StatusUIKitAppearance: Equatable {
         showLinkPreview = timeline.showLinkPreview
         compatLinkPreview = timeline.compatLinkPreview
         expandMediaSize = timeline.expandMediaSize
+        aiAgentEnabled = timeline.aiConfig.agent
     }
 
     static func == (lhs: Self, rhs: Self) -> Bool {
@@ -70,7 +72,8 @@ struct StatusUIKitAppearance: Equatable {
             lhs.expandContentWarning == rhs.expandContentWarning &&
             lhs.showLinkPreview == rhs.showLinkPreview &&
             lhs.compatLinkPreview == rhs.compatLinkPreview &&
-            lhs.expandMediaSize == rhs.expandMediaSize
+            lhs.expandMediaSize == rhs.expandMediaSize &&
+            lhs.aiAgentEnabled == rhs.aiAgentEnabled
     }
 }
 

@@ -44,13 +44,48 @@ struct FlareTheme<Content: View>: View {
             }
             .onSuccessOf(of: presenter.state.appSettings) { newValue in
                 appSettings = newValue
+                timelineAppearance = timelineAppearance.withAppSettings(newValue)
             }
             .onSuccessOf(of: presenter.state.globalAppearance) { newValue in
                 globalAppearance = newValue
             }
             .onSuccessOf(of: presenter.state.timelineAppearance) { newValue in
-                timelineAppearance = newValue
+                timelineAppearance = newValue.withAppSettings(appSettings)
             }
+    }
+}
+
+private extension TimelineAppearance {
+    func withAppSettings(_ appSettings: AppSettings) -> TimelineAppearance {
+        doCopy(
+            avatarShape: avatarShape,
+            showMedia: showMedia,
+            showSensitiveContent: showSensitiveContent,
+            expandContentWarning: expandContentWarning,
+            expandMediaSize: expandMediaSize,
+            videoAutoplay: videoAutoplay,
+            showLinkPreview: showLinkPreview,
+            compatLinkPreview: compatLinkPreview,
+            showNumbers: showNumbers,
+            postActionStyle: postActionStyle,
+            fullWidthPost: fullWidthPost,
+            absoluteTimestamp: absoluteTimestamp,
+            showPlatformLogo: showPlatformLogo,
+            timelineDisplayMode: timelineDisplayMode,
+            aiConfig: TimelineAppearance.AiConfig(
+                translation: true,
+                tldr: appSettings.aiConfig.tldr,
+                agent: appSettings.aiConfig.agent && appSettings.aiConfig.type.openAIModel?.isEmpty == false
+            ),
+            lineLimit: lineLimit,
+            showTranslateButton: showTranslateButton
+        )
+    }
+}
+
+private extension AppSettingsAiConfigType {
+    var openAIModel: String? {
+        (self as? AppSettingsAiConfigTypeOpenAI)?.model
     }
 }
 

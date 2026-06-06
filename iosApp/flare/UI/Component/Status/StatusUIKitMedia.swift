@@ -280,11 +280,14 @@ final class MediaUIView: UIView {
 // Mirrors StatusMediaView.swift: grid + sensitive blur overlay + alt-text
 // buttons. Up to 3 columns; rows arranged so items fill available width.
 final class StatusMediaUIView: UIView, TimelineHeightProviding {
+    private static let maxVisibleMediaCount = 9
+
     var onMediaClicked: ((UiMedia, Int) -> Void)?
 
     private let grid = UIView()
     private let blurView = UIVisualEffectView(effect: UIBlurEffect(style: .regular))
     private let toggleButton = UIButton(type: .system)
+    private let overflowView = MediaOverflowView()
 
     private var items: [UiMedia] = []
     private var sensitive: Bool = false
@@ -323,6 +326,8 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding {
 
         grid.translatesAutoresizingMaskIntoConstraints = false
         addSubview(grid)
+        overflowView.isHidden = true
+        grid.addSubview(overflowView)
 
         blurView.translatesAutoresizingMaskIntoConstraints = false
         blurView.isHidden = true
@@ -417,7 +422,7 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding {
     func autoplayCandidates(prefix: String) -> [TimelineVideoAutoplayCandidate] {
         guard !isHidden, window != nil, !items.isEmpty, !(sensitive && isBlurred) else { return [] }
         return cellPool
-            .prefix(items.count)
+            .prefix(visibleItemCount)
             .compactMap { cell in
                 guard !cell.isHidden else { return nil }
                 return cell.autoplayCandidate(prefix: prefix)
@@ -425,7 +430,8 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding {
     }
 
     private func rebuildGrid() {
-        while cellPool.count < items.count {
+        let visibleCount = visibleItemCount
+        while cellPool.count < visibleCount {
             let cell = MediaGridCellView()
             cell.onTap = { [weak self] index in
                 self?.handleCellTap(index: index)
@@ -433,7 +439,8 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding {
             cellPool.append(cell)
             grid.addSubview(cell)
         }
-        for (index, item) in items.enumerated() {
+        for index in 0..<visibleCount {
+            let item = items[index]
             let cell = cellPool[index]
             if cell.superview == nil {
                 grid.addSubview(cell)
@@ -441,21 +448,28 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding {
             cell.isHidden = false
             cell.configure(media: item, index: index)
         }
-        if items.count < cellPool.count {
-            for cell in cellPool[items.count..<cellPool.count] {
+        if visibleCount < cellPool.count {
+            for cell in cellPool[visibleCount..<cellPool.count] {
                 cell.isHidden = true
             }
+        }
+        if overflowCount > 0 {
+            overflowView.configure(count: overflowCount)
+            overflowView.isHidden = false
+            grid.bringSubviewToFront(overflowView)
+        } else {
+            overflowView.isHidden = true
         }
         setNeedsLayout()
         invalidateIntrinsicContentSize()
     }
 
     func performDeferredPoolCleanup() {
-        trimCellPool(activeCount: items.count)
+        trimCellPool(activeCount: visibleItemCount)
     }
 
     func performLightweightPoolCleanup() {
-        trimCellPool(activeCount: items.count)
+        trimCellPool(activeCount: visibleItemCount)
     }
 
     private func trimCellPool(activeCount: Int) {
@@ -480,14 +494,14 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding {
     }
 
     private func heightSpec() -> (multiplier: CGFloat, constant: CGFloat) {
-        switch items.count {
+        switch visibleItemCount {
         case 1:
             return (1 / singleAspectRatio(), 0)
         case 2, 3, 4:
             return (9 / 16, 0)
         default:
             let cols = 3
-            let rows = Int(ceil(Double(items.count) / Double(cols)))
+            let rows = Int(ceil(Double(visibleItemCount) / Double(cols)))
             let multiplier = CGFloat(rows) / CGFloat(cols)
             let constant = CGFloat(max(0, rows - 1)) * spacing
                 - CGFloat(rows * (cols - 1)) * spacing / CGFloat(cols)
@@ -497,21 +511,25 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding {
 
     private func layoutGrid() {
         let frames = gridFrames(for: grid.bounds.width)
-        for (view, frame) in zip(cellPool.prefix(items.count), frames) {
+        for (view, frame) in zip(cellPool.prefix(visibleItemCount), frames) {
             view.frame = frame
+        }
+        if overflowCount > 0, let lastFrame = frames.last {
+            overflowView.frame = lastFrame
+            grid.bringSubviewToFront(overflowView)
         }
     }
 
     private func gridHeight(for width: CGFloat) -> CGFloat {
         guard !items.isEmpty, width > 0 else { return 0 }
-        switch items.count {
+        switch visibleItemCount {
         case 1:
             return width / singleAspectRatio()
         case 2, 3, 4:
             return width * 9 / 16
         default:
             let cols = 3
-            let rows = Int(ceil(Double(items.count) / Double(cols)))
+            let rows = Int(ceil(Double(visibleItemCount) / Double(cols)))
             let cellWidth = (width - CGFloat(cols - 1) * spacing) / CGFloat(cols)
             return CGFloat(rows) * cellWidth + CGFloat(max(0, rows - 1)) * spacing
         }
@@ -521,7 +539,7 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding {
         guard !items.isEmpty, width > 0 else { return [] }
         let height = gridHeight(for: width)
 
-        switch items.count {
+        switch visibleItemCount {
         case 1:
             return [CGRect(x: 0, y: 0, width: width, height: height)]
 
@@ -559,10 +577,11 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding {
     private func multiRowGridFrames(width: CGFloat) -> [CGRect] {
         let cols = 3
         let cellWidth = (width - CGFloat(cols - 1) * spacing) / CGFloat(cols)
-        let fullRows = items.count / cols
-        let remainder = items.count % cols
+        let count = visibleItemCount
+        let fullRows = count / cols
+        let remainder = count % cols
         var frames: [CGRect] = []
-        frames.reserveCapacity(items.count)
+        frames.reserveCapacity(count)
         var y: CGFloat = 0
 
         for row in 0..<fullRows {
@@ -611,6 +630,14 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding {
         onMediaClicked?(items[index], index)
     }
 
+    private var visibleItemCount: Int {
+        min(items.count, Self.maxVisibleMediaCount)
+    }
+
+    private var overflowCount: Int {
+        max(0, items.count - visibleItemCount)
+    }
+
     private func updateBlurUI() {
         blurView.isHidden = !(sensitive && isBlurred)
         NSLayoutConstraint.deactivate(toggleButtonPositionConstraints)
@@ -652,6 +679,40 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding {
             self.layoutIfNeeded()
             NotificationCenter.default.post(name: .timelineVideoAutoplayNeedsUpdate, object: self)
         }
+    }
+}
+
+private final class MediaOverflowView: UIView {
+    private let label = UILabel()
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        isUserInteractionEnabled = false
+        backgroundColor = UIColor.black.withAlphaComponent(0.55)
+
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.textColor = .white
+        label.font = .preferredFont(forTextStyle: .headline)
+        label.adjustsFontForContentSizeCategory = true
+        label.textAlignment = .center
+        addSubview(label)
+
+        NSLayoutConstraint.activate([
+            label.centerXAnchor.constraint(equalTo: centerXAnchor),
+            label.centerYAnchor.constraint(equalTo: centerYAnchor),
+        ])
+    }
+
+    required init?(coder: NSCoder) { fatalError("init(coder:) not supported") }
+
+    func configure(count: Int) {
+        label.text = count.mediaOverflowDisplayText
+    }
+}
+
+private extension Int {
+    var mediaOverflowDisplayText: String {
+        self >= 100 ? "99+" : "+\(self)"
     }
 }
 

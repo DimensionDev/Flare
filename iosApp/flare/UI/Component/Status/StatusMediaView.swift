@@ -5,6 +5,8 @@ import LazyPager
 import SwiftUIBackports
 
 struct StatusMediaView: View {
+    private static let maxVisibleMediaCount = 9
+
     let data: [any UiMedia]
     let sensitive: Bool
     let onMediaClicked: (any UiMedia, Int) -> Void
@@ -14,19 +16,27 @@ struct StatusMediaView: View {
 //    @State private var selectedIndex: Int? = nil
 
     var body: some View {
+        let visibleData = Array(data.prefix(Self.maxVisibleMediaCount))
+        let overflowCount = data.count - visibleData.count
         AdaptiveGrid(
             singleFollowsImageAspect: expandMediaSize,
             singleViewAspectRatio: data.first?.aspectRatio,
             spacing: 4,
             maxColumns: 3,
         ) {
-            ForEach(0..<data.count, id: \.self) { index in
-                let item = data[index]
+            ForEach(0..<visibleData.count, id: \.self) { index in
+                let item = visibleData[index]
                 MediaView(data: item)
                     .onTapGesture {
                         if !sensitive || !isBlur {
                             onMediaClicked(item, index)
 //                            selectedIndex = index
+                        }
+                    }
+                    .overlay {
+                        if overflowCount > 0, index == visibleData.count - 1 {
+                            MediaOverflowOverlay(count: overflowCount)
+                                .allowsHitTesting(false)
                         }
                     }
                     .overlay(alignment: .bottomTrailing) {
@@ -91,6 +101,26 @@ extension StatusMediaView {
         self.onMediaClicked = onMediaClicked
         self.cornerRadius = cornerRadius
         self._isBlur = State(initialValue: sensitive)
+    }
+}
+
+private struct MediaOverflowOverlay: View {
+    let count: Int
+
+    var body: some View {
+        ZStack {
+            Color.black.opacity(0.55)
+            Text(count.mediaOverflowDisplayText)
+                .font(.headline)
+                .fontWeight(.semibold)
+                .foregroundStyle(.white)
+        }
+    }
+}
+
+private extension Int {
+    var mediaOverflowDisplayText: String {
+        self >= 100 ? "99+" : "+\(self)"
     }
 }
 

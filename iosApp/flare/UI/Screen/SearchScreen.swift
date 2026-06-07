@@ -123,12 +123,11 @@ struct SearchScreen: View {
             }
         }
         .searchable(text: $searchText, isPresented: $isSearchPresented)
-        .safeAreaInset(edge: .bottom) {
-            if agentEnabled && isSearchPresented {
-                AskAiSearchAccessory {
-                    askAi()
-                }
-            }
+        .askAiSearchOverlay(
+            agentEnabled: agentEnabled,
+            isSearchPresented: isSearchPresented
+        ) {
+            askAi()
         }
         .searchSuggestions {
             SearchHistorySuggestions(
@@ -177,6 +176,49 @@ struct SearchScreen: View {
         let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
         isSearchPresented = false
         onAskAi(query.isEmpty ? nil : query)
+    }
+}
+
+private enum SearchAccessoryMetrics {
+    static let activeSearchFieldHeight: CGFloat = 72
+}
+
+struct AskAiSearchOverlayModifier: ViewModifier {
+    let agentEnabled: Bool
+    let isSearchPresented: Bool
+    let action: () -> Void
+
+    private var isVisible: Bool {
+        agentEnabled && isSearchPresented
+    }
+
+    func body(content: Content) -> some View {
+        content
+            .overlay(alignment: .bottom) {
+                if isVisible {
+                    AskAiSearchAccessory(action: action)
+                        .padding(.bottom, SearchAccessoryMetrics.activeSearchFieldHeight)
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                        .zIndex(1)
+                }
+            }
+            .animation(.easeInOut(duration: 0.2), value: isVisible)
+    }
+}
+
+extension View {
+    func askAiSearchOverlay(
+        agentEnabled: Bool,
+        isSearchPresented: Bool,
+        action: @escaping () -> Void
+    ) -> some View {
+        modifier(
+            AskAiSearchOverlayModifier(
+                agentEnabled: agentEnabled,
+                isSearchPresented: isSearchPresented,
+                action: action
+            )
+        )
     }
 }
 

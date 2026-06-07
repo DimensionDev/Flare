@@ -58,6 +58,7 @@ import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.asText
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
@@ -294,8 +295,8 @@ internal fun ProfileScreen(
                                                     state.setSelectedTab(index)
                                                 },
                                             ) {
-                                                Text(
-                                                    tab.title,
+                                                dev.dimension.flare.ui.component.Text(
+                                                    text = tab.name.asText(),
                                                 )
                                             }
                                         }
@@ -319,8 +320,8 @@ internal fun ProfileScreen(
                                                 state.setSelectedTab(index)
                                             },
                                         ) {
-                                            Text(
-                                                tab.title,
+                                            dev.dimension.flare.ui.component.Text(
+                                                text = tab.name.asText(),
                                             )
                                         }
                                     }
@@ -407,10 +408,6 @@ internal fun ProfileScreen(
     }
 }
 
-private val ProfileState.Tab.title: String
-    get() =
-        name.name
-
 @Composable
 private fun presenter(
     accountType: AccountType,
@@ -483,8 +480,6 @@ private fun presenter(
 
 private sealed interface ProfileTabItem {
     val name: UiStrings
-    val title: String
-        get() = name.name
 
     data class Timeline(
         override val name: UiStrings,

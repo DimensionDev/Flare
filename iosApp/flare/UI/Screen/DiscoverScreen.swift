@@ -84,12 +84,11 @@ struct DiscoverScreen: View {
             }
         }
         .searchable(text: $searchText, isPresented: $isSearchPresented)
-        .safeAreaInset(edge: .bottom) {
-            if agentEnabled && isSearchPresented {
-                AskAiSearchAccessory {
-                    askAi()
-                }
-            }
+        .askAiSearchOverlay(
+            agentEnabled: agentEnabled,
+            isSearchPresented: isSearchPresented
+        ) {
+            askAi()
         }
         .searchSuggestions {
             SearchHistorySuggestions(

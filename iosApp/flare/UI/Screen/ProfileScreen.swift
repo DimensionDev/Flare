@@ -190,7 +190,7 @@ private struct ProfileTabPicker: View {
 }
 
 private func profileTabTitle(for tab: ProfileState.Tab) -> String {
-    tab.name.name
+    tab.name.text
 }
 
 private func profileTimelineID(for tab: ProfileState.Tab) -> String {

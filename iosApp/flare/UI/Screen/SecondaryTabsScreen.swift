@@ -5,6 +5,7 @@ struct SecondaryTabsScreen: View {
     @Environment(\.dismiss) private var dismiss
     let onTabSelected: (Route) -> Void
     @StateObject private var presenter = KotlinPresenter(presenter: SecondaryTabsPresenter())
+    @StateObject private var aiAgentEnabledPresenter = KotlinPresenter(presenter: AiAgentEnabledPresenter())
     var body: some View {
         Router { _ in
             List {
@@ -62,11 +63,13 @@ struct SecondaryTabsScreen: View {
                             Image("fa-clock-rotate-left")
                         }
                     }
-                    NavigationLink(value: Route.agentHistory) {
-                        Label {
-                            Text("settings_agent_history_title")
-                        } icon: {
-                            Image("fa-robot")
+                    if aiAgentEnabledPresenter.state.enabled {
+                        NavigationLink(value: Route.agentHistory) {
+                            Label {
+                                Text("settings_agent_history_title")
+                            } icon: {
+                                Image("fa-robot")
+                            }
                         }
                     }
                     NavigationLink(value: Route.settings) {

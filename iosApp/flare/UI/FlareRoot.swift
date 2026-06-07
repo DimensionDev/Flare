@@ -9,6 +9,7 @@ struct FlareRoot: View {
     @StateObject private var homeTabsPresenter = KotlinPresenter(presenter: HomeTabsPresenter())
     @StateObject private var notificationBadgePresenter = KotlinPresenter(presenter: AllNotificationBadgePresenter())
     @StateObject private var secondaryTabsPresenter = KotlinPresenter(presenter: SecondaryTabsPresenter())
+    @StateObject private var aiAgentEnabledPresenter = KotlinPresenter(presenter: AiAgentEnabledPresenter())
     @State var selectedTab: String?
     
     var body: some View {
@@ -52,7 +53,9 @@ struct FlareRoot: View {
                             .tabPlacement(.sidebarOnly)
                         }
                     }
-                    ForEach(SecondarySidebarStaticRoute.allCases, id: \.self) { route in
+                    ForEach(SecondarySidebarStaticRoute.allCases.filter { route in
+                        route != .agentHistory || aiAgentEnabledPresenter.state.enabled
+                    }, id: \.self) { route in
                         secondarySidebarStaticRoute(route)
                     }
                 }
@@ -192,6 +195,7 @@ private enum SecondarySidebarStaticRoute: CaseIterable {
     case drafts
     case rssManagement
     case localHistory
+    case agentHistory
     case settings
 
     var selectionValue: String {
@@ -202,6 +206,8 @@ private enum SecondarySidebarStaticRoute: CaseIterable {
             return "route:rssManagement"
         case .localHistory:
             return "route:localHistory"
+        case .agentHistory:
+            return "route:agentHistory"
         case .settings:
             return "route:settings"
         }
@@ -215,6 +221,8 @@ private enum SecondarySidebarStaticRoute: CaseIterable {
             return .rssManagement
         case .localHistory:
             return .localHostory
+        case .agentHistory:
+            return .agentHistory
         case .settings:
             return .settings
         }
@@ -228,6 +236,8 @@ private enum SecondarySidebarStaticRoute: CaseIterable {
             return "settings_rss_management_title"
         case .localHistory:
             return "local_history_title"
+        case .agentHistory:
+            return "settings_agent_history_title"
         case .settings:
             return "settings_title"
         }
@@ -241,6 +251,8 @@ private enum SecondarySidebarStaticRoute: CaseIterable {
             return "fa-square-rss"
         case .localHistory:
             return "fa-clock-rotate-left"
+        case .agentHistory:
+            return "fa-robot"
         case .settings:
             return "fa-gear"
         }

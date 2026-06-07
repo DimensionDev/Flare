@@ -2,7 +2,6 @@ import SwiftUI
 import KotlinSharedUI
 
 struct AgentChatHistoryScreen: View {
-    let onNewConversation: () -> Void
     @StateObject private var presenter = KotlinPresenter(presenter: AgentChatHistoryPresenter())
 
     var body: some View {
@@ -37,7 +36,7 @@ struct AgentChatHistoryScreen: View {
         .navigationTitle("agent_history_title")
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
-                Button(action: onNewConversation) {
+                NavigationLink(value: Route.agentChat(Route.newGenericChatConversationId(), nil)) {
                     Image("fa-plus")
                 }
                 .accessibilityLabel(Text("agent_chat_title"))

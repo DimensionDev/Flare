@@ -97,9 +97,7 @@ enum Route: Hashable, Identifiable {
         case .aiConfig:
             AiConfigScreen()
         case .agentHistory:
-            AgentChatHistoryScreen {
-                onNavigate(.agentChat(Self.newGenericChatConversationId(), nil))
-            }
+            AgentChatHistoryScreen()
         case .agentChat(let conversationId, let initialMessage):
             AgentChatScreen(conversationId: conversationId, initialMessage: initialMessage)
         case .translationConfig:
@@ -234,7 +232,7 @@ enum Route: Hashable, Identifiable {
     case draftBox
     case secondaryMenu
 
-    private static func newGenericChatConversationId() -> String {
+    static func newGenericChatConversationId() -> String {
         "generic-chat:\(Int64(Date().timeIntervalSince1970 * 1000))"
     }
 

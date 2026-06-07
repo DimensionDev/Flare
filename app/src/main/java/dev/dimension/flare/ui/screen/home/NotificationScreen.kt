@@ -11,6 +11,7 @@ import androidx.compose.material3.Badge
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LeadingIconTab
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
@@ -103,7 +104,7 @@ internal fun NotificationScreen() {
                                     .fillMaxWidth(),
                             selectedTabIndex = state.selectedAccountIndex,
                             edgePadding = 0.dp,
-                            divider = {},
+                            divider = { },
                             indicator = {
                                 TabRowDefaults.SecondaryIndicator(
                                     Modifier.tabIndicatorOffset(

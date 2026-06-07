@@ -268,7 +268,7 @@ internal fun HomeTimelineScreen(
                                                 tabs.lastIndex,
                                             ),
                                         edgePadding = 0.dp,
-                                        divider = {},
+                                        divider = { },
                                         indicator = {
                                             TabRowDefaults.SecondaryIndicator(
                                                 Modifier.tabIndicatorOffset(
@@ -282,34 +282,32 @@ internal fun HomeTimelineScreen(
                                         },
                                         minTabWidth = 48.dp,
                                     ) {
-                                        state.tabState.onSuccess { tabs ->
-                                            tabs.forEachIndexed { index, tab ->
-                                                LeadingIconTab(
-                                                    modifier = Modifier,
-                                                    selectedContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                                                    unselectedContentColor = LocalContentColor.current,
-                                                    selected = index == pagerState.currentPage,
-                                                    onClick = {
-                                                        scope.launch {
-                                                            pagerState.scrollToPage(index)
-                                                        }
-                                                    },
-                                                    text = {
-                                                        dev.dimension.flare.ui.component.Text(
-                                                            tab.title,
+                                        tabs.forEachIndexed { index, tab ->
+                                            LeadingIconTab(
+                                                modifier = Modifier,
+                                                selectedContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                                                unselectedContentColor = LocalContentColor.current,
+                                                selected = index == pagerState.currentPage,
+                                                onClick = {
+                                                    scope.launch {
+                                                        pagerState.scrollToPage(index)
+                                                    }
+                                                },
+                                                text = {
+                                                    dev.dimension.flare.ui.component.Text(
+                                                        tab.title,
 //                                                        modifier =
 //                                                            Modifier
 //                                                                .padding(8.dp),
-                                                        )
-                                                    },
-                                                    icon = {
-                                                        TabIcon(tab)
-                                                    },
+                                                    )
+                                                },
+                                                icon = {
+                                                    TabIcon(tab)
+                                                },
 //                                                colors = FilterChipDefaults.filterChipColors(
 //                                                    containerColor = MaterialTheme.colorScheme.surface,
 //                                                ),
-                                                )
-                                            }
+                                            )
                                         }
                                     }
                                 }

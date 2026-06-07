@@ -1,7 +1,6 @@
 package dev.dimension.flare.ui.screen.home
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,7 +20,6 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -53,11 +51,11 @@ import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.SearchBar
 import dev.dimension.flare.ui.component.SearchBarState
-import dev.dimension.flare.ui.component.listCardContainer
 import dev.dimension.flare.ui.component.placeholder
 import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.component.searchBarPresenter
 import dev.dimension.flare.ui.component.searchContent
+import dev.dimension.flare.ui.component.status.AdaptiveOutlinedCard
 import dev.dimension.flare.ui.component.status.CommonStatusHeaderComponent
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.UserPlaceholder
@@ -241,11 +239,9 @@ internal fun DiscoverScreen(onUserClick: (AccountType, MicroBlogKey) -> Unit) {
                                     items(
                                         state.users,
                                         loadingContent = {
-                                            Box(
+                                            AdaptiveOutlinedCard(
                                                 modifier =
                                                     Modifier
-                                                        .listCardContainer()
-                                                        .background(MaterialTheme.colorScheme.surfaceContainer)
                                                         .width(256.dp),
                                             ) {
                                                 UserPlaceholder(
@@ -254,11 +250,9 @@ internal fun DiscoverScreen(onUserClick: (AccountType, MicroBlogKey) -> Unit) {
                                             }
                                         },
                                     ) { item ->
-                                        Box(
+                                        AdaptiveOutlinedCard(
                                             modifier =
                                                 Modifier
-                                                    .listCardContainer()
-                                                    .background(MaterialTheme.colorScheme.surfaceContainer)
                                                     .width(256.dp),
                                         ) {
                                             CommonStatusHeaderComponent(
@@ -316,11 +310,9 @@ internal fun DiscoverScreen(onUserClick: (AccountType, MicroBlogKey) -> Unit) {
                                         itemCount,
                                     ) {
                                         val hashtag = get(it)
-                                        Box(
+                                        AdaptiveOutlinedCard(
                                             modifier =
                                                 Modifier
-                                                    .listCardContainer()
-                                                    .background(MaterialTheme.colorScheme.surfaceContainer)
                                                     .clickable {
                                                         hashtag?.searchContent?.let { it1 ->
                                                             state.commitSearch(
